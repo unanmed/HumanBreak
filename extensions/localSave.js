@@ -8,11 +8,11 @@
 
 (function () {
     // 将这一行改成 false 可以禁用本拓展
-    var __enabled = true;
+    var __enabled = false;
 
-    if (window.jsinterface || !window.fs || !__enabled) return;  
+    if (window.jsinterface || !window.fs || !__enabled) return;
 
-    function rewrite() {
+    function rewrite () {
         core.utils._setLocalForage_set = function (name, str, callback) {
             var data = LZString.compressToBase64(str);
             core.saves.cache[name] = data;
@@ -82,12 +82,12 @@
             str = LZString.compressToBase64(str);
             toExport.push(key);
             core.saves.cache[key] = str;
-            fs.writeFile('_saves/' + key, str, 'utf-8', function () {});
+            fs.writeFile('_saves/' + key, str, 'utf-8', function () { });
         }, function () {
             if (toExport.length > 0) {
                 alert('提示！本塔已开启存档本地化！原始存档已全部导出至 _saves/ 目录下。');
             }
-            fs.writeFile('_saves/.exported', '1', 'utf-8', function () {});
+            fs.writeFile('_saves/.exported', '1', 'utf-8', function () { });
             rewrite();
             core.control.getSaveIndexes(function (indexes) { core.saves.ids = indexes; });
         });
@@ -96,7 +96,7 @@
     fs.mkdir('_saves', function (err) {
         if (err) return;
 
-        fs.readFile('_saves/.exported', 'utf-8', function(err, data) {
+        fs.readFile('_saves/.exported', 'utf-8', function (err, data) {
             if (!err && data) {
                 rewrite();
                 core.control.getSaveIndexes(function (indexes) { core.saves.ids = indexes; });

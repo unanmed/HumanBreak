@@ -2971,6 +2971,30 @@ type main = {
     log(e: string | Error, error: boolean): void
 }
 
+declare class Sprite {
+
+    /** 创建一个sprite画布
+     * @param reference 参考系，游戏画面或者窗口
+     * @param name 可选，sprite的名称，方便通过core.dymCanvas获取
+     */
+    constructor(x: number, y: number, w: number, h: number, z: number, reference?: 'game' | 'window', name?: string)
+
+    /** 初始化 */
+    init(): void
+
+    /** 设置css特效 */
+    setCss(css: string): void
+
+    /** 删除 */
+    destroy(): void
+
+    /** 添加事件监听器 */
+    addEventListener: HTMLCanvasElement['addEventListener']
+
+    /** 删除事件监听器 */
+    removeEventListenr: HTMLCanvasElement['addEventListener']
+}
+
 declare let main: main
 declare let core: core
 declare let flags: { [x: string]: any }

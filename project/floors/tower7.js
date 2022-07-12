@@ -144,7 +144,7 @@ main.floors.tower7=
         },
         {
             "type": "function",
-            "function": "function(){\ncore.startWarning(7, 2, \"智慧之神\");\n}"
+            "function": "function(){\ncore.drawWarning(7, 2, \"智慧之神\");\n}"
         },
         {
             "type": "sleep",

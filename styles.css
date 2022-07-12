@@ -391,15 +391,15 @@ p#name {
 }
 
 @-webkit-keyframes selector {
-    0% { opacity: 0.95; }
-    50% { opacity: 0.55; }
-    100% { opacity: 0.95; }
+    0% { opacity: 0.55; }
+    50% { opacity: 0.35; }
+    100% { opacity: 0.55; }
 }
 
 @keyframes selector {
-    0% { opacity: 0.95; }
-    50% { opacity: 0.55; }
-    100% { opacity: 0.95; }
+    0% { opacity: 0.55; }
+    50% { opacity: 0.35; }
+    100% { opacity: 0.55; }
 }
 
 #next {
@@ -487,4 +487,45 @@ p#name {
 @keyframes startImageDivDisappear {
     0% { opacity: 1 }
     100% { opacity: 0 }
+}
+
+.fixed {
+    border: 0.1em ridge;
+    transition: opacity 0.6s linear, transform 0.2s linear, left 0.5s ease-out, top 0.5s ease-out, 
+        border 0.5s linear, background-color 0.5s linear;
+    -webkit-transition: opacity 0.6s linear, transform 0.2s linear,  left 0.5s ease-out, top 0.5s ease-out,
+        border 0.5s linear, background-color 0.5s linear;
+}
+
+.fixed:hover {
+    transform: scale(1.2) !important;
+}
+
+#fixedDBack {
+    transition: opacity 0.6s linear;
+    -webkit-transition: opacity 0.6s linear;
+}
+
+.warning {
+    transition: left cubic-bezier(0, 0.9, 1, 0.1) 2.5s;
+    -webkit-transition: left cubic-bezier(0, 0.9, 1, 0.1) 2.5s;
+    animation: warning 1s linear 0s alternate infinite;
+    -webkit-animation: warning 1s linear 0s alternate infinite;
+}
+
+@keyframes warning {
+    0% { text-shadow: 0px 0px 9px rgba(255, 0, 0, 0.5), 0px 0px 6px rgb(129, 0, 0);}
+    50% { text-shadow: 0px 0px 30px rgba(255, 0, 0, 1), 0px 0px 6px rgb(129, 0, 0);}
+    100% { text-shadow: 0px 0px 9px rgba(255, 0, 0, 0.5), 0px 0px 6px rgb(129, 0, 0);}
+}
+
+@-webkit-keyframes warning {
+    0% { text-shadow: 0px 0px 9px rgba(255, 0, 0, 0.5), 0px 0px 6px rgb(129, 0, 0);}
+    50% { text-shadow: 0px 0px 30px rgba(255, 0, 0, 1), 0px 0px 6px rgb(129, 0, 0);}
+    100% { text-shadow: 0px 0px 9px rgba(255, 0, 0, 0.5), 0px 0px 6px rgb(129, 0, 0);}
+}
+
+.gameCanvas {
+	transition: transform 1.5s ease-out;
+   -webkit-transition: transform 1.5s ease-out;
 }
