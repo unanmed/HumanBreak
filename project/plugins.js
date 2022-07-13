@@ -2243,6 +2243,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         if (main.replayChecking) return;
 
         this.mapCache = {}; // 地图缓存
+        this.drawCache = {}; // 绘制信息缓存
+        var mapCache = this.mapCache; // 供函数调用
 
         // ---- 可自定义，默认的切换地图的图块id
         var defaultChange = {
@@ -2257,6 +2259,14 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         var defaultValue = {
             font: 'Verdana', // 默认字体
             scale: 1 // 默认地图缩放比例
+        };
+
+        // ---- 不可自定义，计算数据
+        var dirData = {
+            up: [1, 0],
+            down: [-1, 0],
+            left: [0, 1],
+            right: [0, -1]
         }
 
         var allChangeEntries = Object.entries(defaultChange);
@@ -2265,21 +2275,33 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          * 获取绘制信息
          * @param {string?} center 中心地图id
          * @param {number?} depth 搜索深度
+         * @param {boolean?} noCache 是否不使用缓存
+         * @returns {{locs: {[x: string]: [number, number, number, number, boolean]}, lines: {[x: string]: number[]}}}
          */
-        this.getMapDrawInfo = function (center, depth) {
+        this.getMapDrawInfo = function (center, depth, noCache) {
             center = center || core.status.floorId;
+            var id = center + '_' + depth;
             depth = depth || 5;
-            var map = bfsSearch(center, depth);
-            return fixDislocation(map.res, center, map.order);
+            // 检查缓存
+            if (this.drawCache[id] && !noCache) return this.drawCache[id];
+            var map = bfsSearch(center, depth, noCache);
+            this.mapCache[id] = map;
+            var res = getDrawInfo(map.res, center, map.order);
+            this.drawCache[id] = res;
+            return res;
         }
 
         /** 
          * 广度优先搜索搜索地图路径
          * @param {string} center 中心地图的id
          * @param {number} depth 搜索深度
+         * @param {boolean} noCache 是否不使用缓存
          * @returns {{res: [x: string]: string, order: string[]}} 格式：floorId_x_y_dir: floorId_x_y
          */
-        function bfsSearch (center, depth) {
+        function bfsSearch (center, depth, noCache) {
+            // 检查缓存
+            var id = center + '_' + depth;
+            if (mapCache[id] && !noCache) return mapCache[id];
             var used = {}; // 搜索过的楼层
             var stack = [center]; // 当前栈
             var nowDepth = 0;
@@ -2310,7 +2332,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     }
                     // 正规传送门
                     var dir = dirEntries[0];
-                    var route = now + '_' + i + '_' + dir;
+                    var route = now + '_' + i.replace(',', '_') + '_' + dir;
                     var target = data.floorId + '_' + data.loc.join('_');
                     if (!used[data.floorId]) {
                         stack.push(data.floorId); // 没有搜索过，则加入栈中
@@ -2324,24 +2346,14 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             return { res: res, order: mapOder };
         }
 
-        // 修正前：             修正后：
-        // ┌-┬-┐    ┌-┬-┐      ┌-┬-┐    ┌-┬-┐
-        // ├-┼-┤----├-┼-┤      ├-┼-┤----├-┼-┤
-        // └-┴-┘    └-┴-┘      └-┴-┘    └-┴-┘
-        //    |      |            | ┌----┘
-        //   ┌-┬-┐               ┌-┬-┐
-        //   ├-┼-┤               ├-┼-┤
-        //   └-┴-┘               └-┴-┘
+
         /**
-         * 修正地图错位，同时提供绘制信息，用于修正物理位置非完全对齐的地图，采用坐标对齐方式，
-         * 同时可以将向左楼层转换至地图下方的形式正确地显示连线，如上图示例
-         * @param {{[x: string]: string}} map 需要被修正的地图，格式：floorId_x_y_dir: floorId_x_y
+         * 提供地图的绘制信息，会修正物理位置错位，保证不重叠，折线尽可能少
+         * @param {{[x: string]: string}} map 要绘制的地图，格式：floorId_x_y_dir: floorId_x_y
          * @param {string} center 中心地图的id
          * @param {string[]} order 遍历顺序
          */
-        function fixDislocation (map, center, order) {
-            // 难度最高的函数...
-            // 原则：尽量少地出现折线，因为折线会导致地图可读性变差
+        function getDrawInfo (map, center, order) {
             // 先根据地图id分类，从而确定每个地图连接哪些地图，同时方便处理
             var links = {};
             for (var i in map) {
@@ -2353,16 +2365,107 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             // 分类完毕，然后根据连接点先计算出各个地图的坐标，然后再进行判断
             var centerFloor = core.status.maps[center];
             var visitedCenter = core.hasVisitedFloor(centerFloor);
-            var locs = { // 格式：[中心x, 中心y, 宽, 高, 时候到达过]
+            var locs = { // 格式：[中心x, 中心y, 宽, 高, 是否到达过]
                 [center]: [0, 0, centerFloor.width, centerFloor.height, visitedCenter]
             };
-            // 有两个需要判断的地方：
-            // 1.两个地图是否重叠，重叠则分开
-            // 2.一个地图从不同的地方进入时物理位置是否相同，不同则修改坐标至最合理
+            var lines = {}; // 地图间的连线
+            // 计算相连的地图的位置
             var l = order.length;
             for (var i = 0; i < l; i++) {
+                var id = order[i];
+                var now = links[id];
+                // 遍历每一个地图的连接情况
+                for (var from in now) {
+                    var to = now[from];
+                    // 先根据from to计算物理位置
+                    var fromData = from.split('_'),
+                        toData = to.split('_');
+                    var dir = fromData[3];
+                    if (!dirData[dir]) continue;
+                    var v = dirData[dir][1], // 竖直数值
+                        h = dirData[dir][0], // 水平数值
+                        ha = Math.abs(h),
+                        va = Math.abs(v);
+                    var fx = parseInt(fromData[1]), // fromX
+                        fy = parseInt(fromData[2]), // fromY
+                        tx = parseInt(toData[1]), // toX
+                        ty = parseInt(toData[2]), // toY
+                        ff = id, // fromFloorId
+                        tf = toData[0]; // toFloorId
+                    var fromFloor = core.status.maps[ff],
+                        toFloor = core.status.maps[tf];
+                    var fhw = Math.floor(fromFloor.width / 2), // fromFloorHalfWidth
+                        fhh = Math.floor(fromFloor.height / 2),
+                        thw = Math.floor(toFloor.width / 2),
+                        thh = Math.floor(toFloor.height / 2);
+                    var fLoc = locs[id];
+                    // 计算坐标，公式可以通过画图推断出
+                    var x = fLoc[0] - ha * (fhw - fx) - ha * (tx - thw) - v * (fhw + thw + 3);
+                    var y = fLoc[1] - va * (fhh - fy) - va * (ty - thh) - h * (fhh + thh + 3);
+                    // 添加入坐标对象中，会覆盖之前的
+                    locs[tf] = [x, y, fromFloor.width, fromFloor.height, core.hasVisitedFloor(id)];
+                    // 添加连线
+                    lines[from + '_' + to] = [[fx - v * fhw, fy - h * fhh, x + tx - thw, y + ty - thh]];
+                }
+            }
+            // 修正地图错位，如果可以保证自己的地图物理位置完全对齐，可以将flag:__map_needFix__设为false
+            if (!core.hasFlag('__map_needFix__')) fixDislocation(locs, lines, center);
+
+            return { locs: locs, lines: lines };
+        }
+
+        // 修正前：             修正后：
+        // ┌-┬-┐    ┌-┬-┐      ┌-┬-┐    ┌-┬-┐
+        // ├-┼-┤----├-┼-┤      ├-┼-┤----├-┼-┤
+        // └-┴-┘    └-┴-┘      └-┴-┘    └-┴-┘
+        //    |      |            | ┌----┘
+        //   ┌-┬-┐               ┌-┬-┐
+        //   ├-┼-┤               ├-┼-┤
+        //   └-┴-┘               └-┴-┘
+        /**
+         * 修正地图错位，原则是尽可能减少折线数量，包括以下两部分
+         * 
+         * 1.两个地图是否重叠，重叠则分开
+         * 
+         * 2.根据连线将地图位置修正至最合理
+         * 
+         * 修正示例如上图
+         * @param {{[x: string]: [number, number, number, number, boolean]}} locs 要修正的地图
+         * @param {number[][]} lines 地图间的连线，既然修正地图位置了，连线位置也需要修正
+         * @param {string} center 中心地图，不会被遍历检测，尽可能减少计算量
+         */
+        function fixDislocation (locs, lines, center) {
+            // 难度最高的函数...
+            // 这里的前两个参数都是引用，所以直接修改即可，不需要返回等操作
+
+            // 开始遍历，先检测出每个楼层与哪些楼层重叠，然后再修正位置
+            for (var f1 in locs) {
+                var lapping = {}; // 与哪些地图重叠了
+                for (var f2 in locs) {
+                    if (f1 === f2 || f2 === center) continue;
+                    lapping[f2] = checkOverLapping(locs, f1, f2);
+                }
 
             }
+        }
+
+        /** 
+         * 检查两个楼层是否重叠
+         * @param {{[x: string]: [number, number, number, number, boolean]}} locs 要修正的地图
+         * @param {string} f1 第一张地图
+         * @param {string} f2 第二张地图
+         * @returns {boolean} 是否重叠
+         */
+        function checkOverLapping (locs, f1, f2) {
+            // 开始检测重叠
+            var loc1 = locs[f1],
+                loc2 = locs[f2];
+            var dx = Math.abs(loc1[0] - loc2[0]),
+                dy = Math.abs(loc1[1] - loc2[1]);
+            var tw = loc1[2] + loc2[2],
+                th = loc1[3] + loc2[3];
+            if (dx < tw + 3 || dy < th + 3) return true;
+            return false;
         }
     },
     "loopMap": function () {
