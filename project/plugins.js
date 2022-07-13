@@ -2270,19 +2270,20 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             center = center || core.status.floorId;
             depth = depth || 5;
             var map = bfsSearch(center, depth);
-            return fixDislocation(map, center);
+            return fixDislocation(map.res, center, map.order);
         }
 
         /** 
          * 广度优先搜索搜索地图路径
          * @param {string} center 中心地图的id
          * @param {number} depth 搜索深度
-         * @returns {{[x: string]: string}} 格式：floorId_x_y_dir: floorId_x_y
+         * @returns {{res: [x: string]: string, order: string[]}} 格式：floorId_x_y_dir: floorId_x_y
          */
         function bfsSearch (center, depth) {
             var used = {}; // 搜索过的楼层
             var stack = [center]; // 当前栈
             var nowDepth = 0;
+            var mapOder = [center]; // 遍历顺序，方便之后的位置修正
 
             var res = {}; // 输出结果，格式：floorId_x_y_dir: floorId_x_y
 
@@ -2313,13 +2314,14 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     var target = data.floorId + '_' + data.loc.join('_');
                     if (!used[data.floorId]) {
                         stack.push(data.floorId); // 没有搜索过，则加入栈中
+                        mapOder.push(data.floorId);
                         used[data.floorId] = true;
                     }
                     res[route] = target;
                 }
                 nowDepth -= newNums - 1;
             }
-            return res;
+            return { res: res, order: mapOder };
         }
 
         // 修正前：             修正后：
@@ -2331,12 +2333,13 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         //   ├-┼-┤               ├-┼-┤
         //   └-┴-┘               └-┴-┘
         /**
-         * 修正地图错位，用于修正物理位置非完全对齐的地图，采用坐标对齐方式，
+         * 修正地图错位，同时提供绘制信息，用于修正物理位置非完全对齐的地图，采用坐标对齐方式，
          * 同时可以将向左楼层转换至地图下方的形式正确地显示连线，如上图示例
          * @param {{[x: string]: string}} map 需要被修正的地图，格式：floorId_x_y_dir: floorId_x_y
          * @param {string} center 中心地图的id
+         * @param {string[]} order 遍历顺序
          */
-        function fixDislocation (map, center) {
+        function fixDislocation (map, center, order) {
             // 难度最高的函数...
             // 原则：尽量少地出现折线，因为折线会导致地图可读性变差
             // 先根据地图id分类，从而确定每个地图连接哪些地图，同时方便处理
@@ -2349,13 +2352,17 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             }
             // 分类完毕，然后根据连接点先计算出各个地图的坐标，然后再进行判断
             var centerFloor = core.status.maps[center];
-            var locs = { // 格式：[中心x, 中心y, 宽, 高]
-                [center]: [0, 0, centerFloor.width, centerFloor.height]
+            var visitedCenter = core.hasVisitedFloor(centerFloor);
+            var locs = { // 格式：[中心x, 中心y, 宽, 高, 时候到达过]
+                [center]: [0, 0, centerFloor.width, centerFloor.height, visitedCenter]
             };
             // 有两个需要判断的地方：
             // 1.两个地图是否重叠，重叠则分开
             // 2.一个地图从不同的地方进入时物理位置是否相同，不同则修改坐标至最合理
+            var l = order.length;
+            for (var i = 0; i < l; i++) {
 
+            }
         }
     },
     "loopMap": function () {
