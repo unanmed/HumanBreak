@@ -119,20 +119,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
                 if (currentId != null) core.getFlag("__leaveLoc__")[currentId] = core.clone(core.status.hero.loc);
             }
 
-            // 可以对currentId进行判定，比如删除某些自定义图层等
-            // if (currentId == 'MT0') {
-            //     core.deleteAllCanvas();
-            // }
-            // 播放换层音效
-            if (!flags.plot) {
-                if (fromLoad)
-                    core.playSound('读档');
-                else if (isFlying)
-                    core.playSound('飞行器');
-                else if (currentId)
-                    core.playSound('上下楼');
-            }
-
             // 根据分区信息自动砍层与恢复
             if (core.autoRemoveMaps) core.autoRemoveMaps(floorId);
 
