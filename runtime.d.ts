@@ -2973,6 +2973,17 @@ type main = {
 
 declare class Sprite {
 
+    x: number
+    y: number
+    w: number
+    h: number
+    z: number
+    reference: 'game' | 'window'
+    canvas: HTMLCanvasElement
+    context: CanvasRenderingContext2D
+    name: string
+    readonly count: number
+
     /** 创建一个sprite画布
      * @param reference 参考系，游戏画面或者窗口
      * @param name 可选，sprite的名称，方便通过core.dymCanvas获取

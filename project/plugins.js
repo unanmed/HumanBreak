@@ -2232,19 +2232,45 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         };
     },
     "changeFly": function () {
+
         // 该插件可自定义空间很大，自定义内容请看注释
+
+        // ------------------------- 安装说明 ------------------------- //
+        // 先安装基于canvas的sprite化插件
+        // 再将以下代码复制进插件中
+
+        // ------------------------- 使用说明 ------------------------- //
+        /* 
+         * 直接复制进插件中即可使用，不需额外设置
+         * 重点：该插件可以自动修正那些在物理位置上不正确的地图位置，但对性能消耗较高
+         * 但这也说明你不必拘谨地图的物理位置，该插件可以自动调整为最优状态（古祠：能用就用，为了搞这个脑子快废掉了）
+         * 如果可以保证自己的地图的物理位置不会重叠，请将变量（flag）：__map_needFix__设为false
+         * 改变了默认为false，如果有需要，请设置为true
+         */
+
         // ------------------------- 插件说明 ------------------------- //
         /* 
          * 该插件注释极其详细，可以帮助那些想要提升代码力，但实力有不足的作者
-         *
+         * 注意！！！该插件难度极大，没有代码底力的不建议研究
+         * 该插件涉及部分较为高级的算法，如bfs 二分
          */
 
         // 录像验证直接干掉这个插件
         if (main.replayChecking) return;
 
+        // ----- 杂七杂八的变量
         this.mapCache = {}; // 地图缓存
         this.drawCache = {}; // 绘制信息缓存
         var mapCache = this.mapCache; // 供函数调用
+        var status = 'none'; // 当前的绘制状态
+        var sprites = {}; // 当前所有的sprite
+        /** @type {{[x: string]: Sprite}} */
+        var canDrag = {}; // 可以拖拽的sprite
+        var clicking = false; // 是否正在点击，用于拖拽判定
+        var drawingMap = ''; // 正在绘制的中心楼层
+        var nowScale = 0; // 当前绘制的放缩比例
+        var lastTouch = {}; // 上一次的单点点击信息
+        var lastLength = 0; // 手机端缩放时上一次的两指间距离
 
         // ---- 可自定义，默认的切换地图的图块id
         var defaultChange = {
@@ -2258,7 +2284,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         // ---- 可自定义，默认数值
         var defaultValue = {
             font: 'Verdana', // 默认字体
-            scale: 1 // 默认地图缩放比例
+            scale: 3 // 默认地图缩放比例
         };
 
         // ---- 不可自定义，计算数据
@@ -2289,6 +2315,17 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             var res = getDrawInfo(map.res, center, map.order);
             this.drawCache[id] = res;
             return res;
+        }
+
+        /** 
+         * 绘制大地图，可拖动、滚轮缩放、点击对应位置可以楼传、进入特殊传送点等
+         */
+        this.drawFlyMap = function (floorId, depth, noCache, scale) {
+            var info = this.getMapDrawInfo(floorId, depth, noCache);
+            drawBack();
+            drawMap(info, scale);
+            status = 'flyMap';
+            drawingMap = floorId || core.status.floorId;
         }
 
         /** 
@@ -2352,6 +2389,12 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          * @param {{[x: string]: string}} map 要绘制的地图，格式：floorId_x_y_dir: floorId_x_y
          * @param {string} center 中心地图的id
          * @param {string[]} order 遍历顺序
+         * @returns {{
+         * locs: {[x: string]: [number, number, number, number, boolean]}
+         * lines: {[x: string]: [number, number, number, number][]}
+         * width: number
+         * height: number
+         * }} 地图的绘制信息
          */
         function getDrawInfo (map, center, order) {
             // 先根据地图id分类，从而确定每个地图连接哪些地图，同时方便处理
@@ -2364,7 +2407,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             }
             // 分类完毕，然后根据连接点先计算出各个地图的坐标，然后再进行判断
             var centerFloor = core.status.maps[center];
-            var visitedCenter = core.hasVisitedFloor(centerFloor);
+            var visitedCenter = core.hasVisitedFloor(center);
             var locs = { // 格式：[中心x, 中心y, 宽, 高, 是否到达过]
                 [center]: [0, 0, centerFloor.width, centerFloor.height, visitedCenter]
             };
@@ -2399,19 +2442,59 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                         thw = Math.floor(toFloor.width / 2),
                         thh = Math.floor(toFloor.height / 2);
                     var fLoc = locs[id];
-                    // 计算坐标，公式可以通过画图推断出
-                    var x = fLoc[0] - ha * (fhw - fx) - ha * (tx - thw) - v * (fhw + thw + 3);
-                    var y = fLoc[1] - va * (fhh - fy) - va * (ty - thh) - h * (fhh + thh + 3);
-                    // 添加入坐标对象中，会覆盖之前的
-                    locs[tf] = [x, y, fromFloor.width, fromFloor.height, core.hasVisitedFloor(id)];
+                    var x, y;
+                    if (locs[tf]) {
+                        x = locs[tf][0];
+                        y = locs[tf][1];
+                    } else {
+                        // 计算坐标，公式可以通过画图推断出
+                        x = fLoc[0] - ha * (fhw - fx) - ha * (tx - thw) - v * (fhw + thw + 5);
+                        y = fLoc[1] - va * (fhh - fy) - va * (ty - thh) - h * (fhh + thh + 5);
+                    }
+                    // 添加入坐标对象中
+                    if (!locs[tf])
+                        locs[tf] = [x, y, fromFloor.width, fromFloor.height, core.hasVisitedFloor(tf)];
                     // 添加连线
-                    lines[from + '_' + to] = [[fx - v * fhw, fy - h * fhh, x + tx - thw, y + ty - thh]];
+                    lines[from + '_' + to] = [[fx - fhw + locs[ff][0], fy - fhh + locs[ff][1], x + tx - thw, y + ty - thh]];
                 }
             }
             // 修正地图错位，如果可以保证自己的地图物理位置完全对齐，可以将flag:__map_needFix__设为false
-            if (!core.hasFlag('__map_needFix__')) fixDislocation(locs, lines, center);
+            if (core.hasFlag('__map_needFix__')) fixDislocation(locs, lines, center, order, links);
+            // 获取地图绘制需要的长宽
+            var left = 0,
+                right = 0,
+                up = 0,
+                down = 0;
+            for (var id in locs) {
+                var x = locs[id][0],
+                    y = locs[id][1],
+                    w = locs[id][2],
+                    h = locs[id][3];
+                left = Math.min(left, x - w - 1);
+                right = Math.max(right, x + w + 1);
+                up = Math.min(up, y - h - 1);
+                down = Math.max(down, y + h + 1);
+            }
+            var w = right - left,
+                h = down - up;
+            // 所有地图和连线向右下移动，避免绘制出现问题
+            for (var id in locs) {
+                locs[id][0] -= left;
+                locs[id][1] -= up;
+            }
+            for (var route in lines) {
+                var line = lines[route];
+                var l = line.length;
+                for (var i = 0; i < l; i++) {
+                    var node = line[i];
+                    node[0] -= left;
+                    node[1] -= up;
+                    node[2] -= left;
+                    node[3] -= up;
+                }
+            }
 
-            return { locs: locs, lines: lines };
+            return { locs: locs, lines: lines, width: w, height: h };
         }
 
         // 修正前：             修正后：
@@ -2423,49 +2506,228 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         //   ├-┼-┤               ├-┼-┤
         //   └-┴-┘               └-┴-┘
         /**
-         * 修正地图错位，原则是尽可能减少折线数量，包括以下两部分
-         * 
-         * 1.两个地图是否重叠，重叠则分开
-         * 
-         * 2.根据连线将地图位置修正至最合理
+         * 修正地图错位，原则是尽可能减少折线数量，需要根据连线将地图位置修正至最合理
          * 
          * 修正示例如上图
          * @param {{[x: string]: [number, number, number, number, boolean]}} locs 要修正的地图
          * @param {number[][]} lines 地图间的连线，既然修正地图位置了，连线位置也需要修正
          * @param {string} center 中心地图，不会被遍历检测，尽可能减少计算量
+         * @param {string[]} order 遍历顺序
+         * @param {{[x: string]: {[x: string]: string}}} links 分类后的连接信息
          */
-        function fixDislocation (locs, lines, center) {
+        function fixDislocation (locs, lines, center, order, links) {
             // 难度最高的函数...
-            // 这里的前两个参数都是引用，所以直接修改即可，不需要返回等操作
+            // 这里的参数都是引用，所以直接修改即可，不需要返回等操作
 
-            // 开始遍历，先检测出每个楼层与哪些楼层重叠，然后再修正位置
-            for (var f1 in locs) {
-                var lapping = {}; // 与哪些地图重叠了
-                for (var f2 in locs) {
-                    if (f1 === f2 || f2 === center) continue;
-                    lapping[f2] = checkOverLapping(locs, f1, f2);
+            /*
+             * 算法说明：
+             * 1.遍历楼层，尝试调整为水平或竖直，有重叠则微调
+             * 2.对于已为水平或竖直的，尽可能保证之后的调整中连线仍为水平或竖直
+             */
+
+            var fixed = {}; // 已经定位完毕的地图，尽可能保证连线为水平或竖直
+
+            // 根据order来遍历，因为这样可以保证地图是从内向外的
+            var l = order.length;
+            for (var i = 0; i < l; i++) {
+                var id = order[i];
+                var link = links[id];
+                // 直接遍历检测，并调整为水平或竖直
+                for (var from in link) {
+                    var to = link[from];
+                    var line = lines[from + '_' + to];
+                    var fromData = from.split('_'),
+                        toData = to.split('_');
+                    var ff = fromData[0],
+                        tf = toData[0];
+                    var fromFloor = core.status.maps[ff],
+                        toFloor = core.status.maps[tf];
+                    if (!fixed[to] && !(line[0][0] === line[0][2] || line[0][1] === line[0][3])) {
+                        // 不是水平或竖直的尝试调整为水平或竖直
+                        var dx = line[0][0] - line[0][2],
+                            dy = line[0][1] - line[0][3];
+                        var adx = Math.abs(dx),
+                            ady = Math.abs(dy);
+                        var v = 0,
+                            h = 0;
+                        // 夹角小于15度者调整，否则不调整
+                        var divided = adx / ady; // 商，用于判定夹角
+                        if (divided < 0.2679491924311227 || divided > 3.7320508075688776) {
+                            if (adx > ady) v = 1;
+                            else h = 1;
+                            locs[tf][0] += dx * h;
+                            locs[tf][1] += dy * v;
+                        }
+                    }
+                    // 检查重叠，进行微调
+                    var ol = hasOverLappingWith(locs, tf);
+                    if (ol.length === 0) continue;
+                    // 先计算与from之间的坐标差
+                    var ftdx = locs[ff][0] - locs[tf][0],
+                        ftdy = locs[ff][1] - locs[tf][1];
                 }
-
             }
         }
 
         /** 
-         * 检查两个楼层是否重叠
+         * 判断某一楼层与那些楼层有重叠，重叠长宽为多少
+         * @param {{[x: string]: [number, number, number, number, boolean]}} locs 要修正的地图
+         * @param {string} floor 要检测的楼层
+         * @returns {[string, number, number, number, number][]} 与哪些楼层重叠，及重叠长宽、坐标差
+         */
+        function hasOverLappingWith (locs, floor) {
+            var res = [];
+            for (var id in locs) {
+                var lapping = checkOverLapping(locs, id, floor);
+                lapping.unshift(id);
+                if (lapping[0] !== 0 && lapping[1] !== 0) res.push(lapping);
+            }
+            return res;
+        }
+
+        /** 
+         * 检查两个楼层是否重叠，重叠长宽为多少
          * @param {{[x: string]: [number, number, number, number, boolean]}} locs 要修正的地图
          * @param {string} f1 第一张地图
          * @param {string} f2 第二张地图
-         * @returns {boolean} 是否重叠
+         * @returns {[number, number, number, number]} 重叠长宽，及第一张地图与第二张地图的坐标差
          */
         function checkOverLapping (locs, f1, f2) {
             // 开始检测重叠
             var loc1 = locs[f1],
                 loc2 = locs[f2];
-            var dx = Math.abs(loc1[0] - loc2[0]),
-                dy = Math.abs(loc1[1] - loc2[1]);
+            var dx = loc1[0] - loc2[0],
+                dy = loc1[1] - loc2[1];
+            var adx = Math.abs(loc1[0] - loc2[0]),
+                ady = Math.abs(loc1[1] - loc2[1]);
             var tw = loc1[2] + loc2[2],
                 th = loc1[3] + loc2[3];
-            if (dx < tw + 3 || dy < th + 3) return true;
-            return false;
+            var ox = Math.abs(Math.max(adx - tw - 5), 0), // 重叠长宽
+                oy = Math.abs(Math.max(ady - th - 5), 0);
+            return [ox, oy, dx, dy];
+        }
+
+        /** 绘制背景 */
+        function drawBack () {
+            if (status !== 'none') return;
+            var back = new Sprite(0, 0, core.__PIXELS__, core.__PIXELS__, 175, 'game', '__map_back__');
+            addDrag(back);
+            back.setCss(
+                'transition: all 0.6s linear;'
+            );
+            setTimeout(function () { back.setCss('background-color: rgba(0, 0, 0, 0.9);'); }, 50);
+        }
+
+        /** 
+         * 绘制大地图
+         * @param {{
+         * locs: {[x: string]: [number, number, number, number, boolean]}
+         * lines: {[x: string]: [number, number, number, number][]}
+         * width: number
+         * height: number
+         * }} info 地图绘制信息
+         * @param {number} scale 地图的绘制比例
+         * @param {number} layer 绘制的层，用于3D绘图
+         */
+        function drawMap (info, scale, layer) {
+            if (status === 'flyMap') return;
+            scale = scale || defaultValue.scale;
+            layer = layer || 0; // 为3D绘图做准备
+            var size = core.__PIXELS__;
+            var w = info.width * scale,
+                h = info.height * scale;
+            var id = '__flyMap_' + layer + '__';
+            var map = new Sprite(size / 2 - w / 2, size / 2 - h / 2, w, h, 179, 'game', '__flyMap_' + layer + '__');
+            canDrag[id] = map;
+            addDrag(map);
+            map.canvas.className = 'fly-map';
+            var ctx = map.context;
+            var drawed = {}; // 绘制过的线
+            // 先绘制楼层
+            var locs = info.locs;
+            for (var id in locs) {
+                var loc = locs[id];
+                var color = '#000';
+                if (!loc[4]) color = '#f0f';
+                console.log(id, loc[4]);
+                var x = loc[0] * scale,
+                    y = loc[1] * scale,
+                    w = loc[2] * scale,
+                    h = loc[3] * scale;
+                core.fillRect(ctx, x - w / 2, y - h / 2, w, h, color);
+                core.strokeRect(ctx, x - w / 2, y - h / 2, w, h, '#fff', scale);
+            }
+            // 再绘制连线
+            var lines = info.lines;
+            for (var route in lines) {
+                var line = lines[route];
+                var l = line.length;
+                for (var i = 0; i < l; i++) {
+                    var node = line[i];
+                    var from = node[0] + ',' + node[1],
+                        to = node[2] + ',' + node[3];
+                    if (drawed[from + '-' + to] || drawed[to + '-' + from]) continue;
+                    drawed[from + '-' + to] = true;
+                    core.drawLine(ctx, node[0] * scale, node[1] * scale, node[2] * scale, node[3] * scale, '#fff', scale);
+                }
+            }
+        }
+
+        /** 
+         * 拖拽事件
+         * @param {MouseEvent} e
+         */
+        function drag (e) {
+            if (!clicking) return;
+            var scale = core.domStyle.scale
+            moveEle(e.movementX / scale, e.movementY / scale);
+        }
+
+        /**
+         * 手机端点击拖动事件
+         * @param {TouchEvent} e
+         * @this {HTMLCanvasElement}
+         */
+        function touchDrag (e) {
+            if (e.touches.length === 1) { // 拖拽
+                var info = e.touches[0];
+                if (!lastTouch[this.id]) {
+                    lastTouch[this.id] = [info.clientX, info.clientY];
+                    return;
+                }
+                var x = info.clientX,
+                    y = info.clientY;
+                var dx = x - lastTouch[this.id][0],
+                    dy = y - lastTouch[this.id][1];
+                var scale = core.domStyle.scale;
+                moveEle(dx / scale, dy / scale);
+                lastTouch[this.id] = [info.clientX, info.clientY];
+            }
+        }
+
+        /** 
+         * 拖拽时移动需要元素
+         * @param {string} dx
+         * @param {string} dy
+         */
+        function moveEle (dx, dy) {
+            for (var id in canDrag) {
+                var sprite = canDrag[id];
+                var ctx = sprite.context;
+                core.relocateCanvas(ctx, dx, dy, true);
+            }
+        }
+
+        /**
+         * 给需要的元素添加拖拽等事件
+         * @param {HTMLCanvasElement} ele
+         */
+        function addDrag (ele) {
+            ele.addEventListener('mousemove', drag);
+            ele.addEventListener('touchmove', touchDrag);
+            ele.addEventListener('mousedown', function () { clicking = true; });
+            ele.addEventListener('mouseup', function () { clicking = false; });
+            ele.addEventListener('touchend', function () { lastTouch = {}; lastLength = 0; })
         }
     },
     "loopMap": function () {
