@@ -2271,6 +2271,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         var nowScale = 0; // 当前绘制的放缩比例
         var lastTouch = {}; // 上一次的单点点击信息
         var lastLength = 0; // 手机端缩放时上一次的两指间距离
+        var is3D = false; // 当前绘制是否是3D绘制
+        var nowDepth = 0; // 当前的遍历深度
 
         // ---- 可自定义，默认的切换地图的图块id
         var defaultChange = {
@@ -2284,7 +2286,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         // ---- 可自定义，默认数值
         var defaultValue = {
             font: 'Verdana', // 默认字体
-            scale: 3 // 默认地图缩放比例
+            scale: 3, // 默认地图缩放比例
+            depth: 5 // 默认的遍历深度
         };
 
         // ---- 不可自定义，计算数据
@@ -2307,7 +2310,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         this.getMapDrawInfo = function (center, depth, noCache) {
             center = center || core.status.floorId;
             var id = center + '_' + depth;
-            depth = depth || 5;
+            depth = depth || defaultValue.depth;
             // 检查缓存
             if (this.drawCache[id] && !noCache) return this.drawCache[id];
             var map = bfsSearch(center, depth, noCache);
@@ -2326,7 +2329,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             drawMap(info, scale);
             status = 'flyMap';
             drawingMap = floorId || core.status.floorId;
+            nowDepth = depth || defaultValue.depth;
         }
+
 
         /** 
          * 广度优先搜索搜索地图路径
@@ -2611,11 +2616,12 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         function drawBack () {
             if (status !== 'none') return;
             var back = new Sprite(0, 0, core.__PIXELS__, core.__PIXELS__, 175, 'game', '__map_back__');
-            addDrag(back);
             back.setCss(
                 'transition: all 0.6s linear;'
             );
             setTimeout(function () { back.setCss('background-color: rgba(0, 0, 0, 0.9);'); }, 50);
+            var listen = new Sprite(0, 0, core.__PIXELS__, core.__PIXELS__, 300, 'game', '__map_listen__');
+            addDrag(listen);
         }
 
         /** 
@@ -2632,16 +2638,17 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         function drawMap (info, scale, layer) {
             if (status === 'flyMap') return;
             scale = scale || defaultValue.scale;
+            nowScale = scale;
             layer = layer || 0; // 为3D绘图做准备
             var size = core.__PIXELS__;
             var w = info.width * scale,
                 h = info.height * scale;
             var id = '__flyMap_' + layer + '__';
-            var map = new Sprite(size / 2 - w / 2, size / 2 - h / 2, w, h, 179, 'game', '__flyMap_' + layer + '__');
+            var map = new Sprite(size / 2 - w / 2, size / 2 - h / 2, w, h, 250 + layer, 'game', '__flyMap_' + layer + '__');
             canDrag[id] = map;
-            addDrag(map);
             map.canvas.className = 'fly-map';
             var ctx = map.context;
+            core.clearMap(ctx);
             var drawed = {}; // 绘制过的线
             // 先绘制楼层
             var locs = info.locs;
@@ -2649,7 +2656,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 var loc = locs[id];
                 var color = '#000';
                 if (!loc[4]) color = '#f0f';
-                console.log(id, loc[4]);
                 var x = loc[0] * scale,
                     y = loc[1] * scale,
                     w = loc[2] * scale,
@@ -2689,6 +2695,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          * @this {HTMLCanvasElement}
          */
         function touchDrag (e) {
+            var scale = core.domStyle.scale;
             if (e.touches.length === 1) { // 拖拽
                 var info = e.touches[0];
                 if (!lastTouch[this.id]) {
@@ -2699,10 +2706,57 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     y = info.clientY;
                 var dx = x - lastTouch[this.id][0],
                     dy = y - lastTouch[this.id][1];
-                var scale = core.domStyle.scale;
                 moveEle(dx / scale, dy / scale);
                 lastTouch[this.id] = [info.clientX, info.clientY];
+            } else if (e.touches.length === 2) { // 双指放缩
+                var first = e.touches[0],
+                    second = e.touches[1];
+                var dx = first.clientX - second.clientX,
+                    dy = first.clientY - second.clientY;
+                if (!lastLength) {
+                    lastLength = Math.sqrt(dx * dx + dy * dy);
+                    return;
+                }
+                var cx = (first.clientX + second.clientX) / 2,
+                    cy = (first.clientY + second.clientY) / 2;
+                var loc = core.actions._getClickLoc(cx, cy);
+                cx = loc.x / scale;
+                cy = loc.y / scale;
+                var length = Math.sqrt(dx * dx + dy * dy);
+                var delta = length / lastLength;
+                var info = {};
+                for (var id in canDrag) {
+                    var sprite = canDrag[id];
+                    var sx = sprite.x + sprite.width / 2,
+                        sy = sprite.y + sprite.height / 2;
+                    var dx = sx - mx,
+                        dy = sy - my;
+                    info[id] = [cx + dx * delta, cy + dy * delta];
+                }
+                scaleMap(delta * nowScale, info);
             }
+        }
+
+        /** 
+         * 滚轮缩放
+         * @param {WheelEvent} e
+         */
+        function wheel (e) {
+            var delta = 1 - Math.sign(e.deltaY) / 10;
+            var loc = core.actions._getClickLoc(e.clientX, e.clientY);
+            var scale = core.domStyle.scale
+            var mx = loc.x / scale,
+                my = loc.y / scale;
+            var info = {};
+            for (var id in canDrag) {
+                var sprite = canDrag[id];
+                var cx = sprite.x + sprite.width / 2,
+                    cy = sprite.y + sprite.height / 2;
+                var dx = cx - mx,
+                    dy = cy - my;
+                info[id] = [mx + dx * delta, my + dy * delta];
+            }
+            scaleMap(delta * nowScale, info);
         }
 
         /** 
@@ -2714,7 +2768,28 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             for (var id in canDrag) {
                 var sprite = canDrag[id];
                 var ctx = sprite.context;
+                sprite.x += dx;
+                sprite.y += dy;
                 core.relocateCanvas(ctx, dx, dy, true);
+            }
+        }
+
+        /** 
+         * 缩放绘制地图
+         * @param {number} target 目标缩放比例
+         * @param {number} info 缩放后的sprite位置数据
+         */
+        function scaleMap (target, info) {
+            status = 'scale';
+            core.drawFlyMap(drawingMap, nowDepth, false, target);
+            status = 'flyMap';
+            // 更正sprite位置
+            for (var id in canDrag) {
+                var sprite = canDrag[id];
+                var ctx = sprite.context;
+                sprite.x = info[id][0] - sprite.width / 2;
+                sprite.y = info[id][1] - sprite.height / 2;
+                core.relocateCanvas(ctx, info[id][0] - sprite.width / 2, info[id][1] - sprite.height / 2);
             }
         }
 
@@ -2723,11 +2798,12 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          * @param {HTMLCanvasElement} ele
          */
         function addDrag (ele) {
+            ele.addEventListener('wheel', wheel);
             ele.addEventListener('mousemove', drag);
             ele.addEventListener('touchmove', touchDrag);
             ele.addEventListener('mousedown', function () { clicking = true; });
             ele.addEventListener('mouseup', function () { clicking = false; });
-            ele.addEventListener('touchend', function () { lastTouch = {}; lastLength = 0; })
+            ele.addEventListener('touchend', function () { lastTouch = {}; lastLength = 0; });
         }
     },
     "loopMap": function () {

@@ -2975,9 +2975,9 @@ declare class Sprite {
 
     x: number
     y: number
-    w: number
-    h: number
-    z: number
+    width: number
+    height: number
+    zIndex: number
     reference: 'game' | 'window'
     canvas: HTMLCanvasElement
     context: CanvasRenderingContext2D
