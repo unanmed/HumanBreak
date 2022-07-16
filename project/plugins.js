@@ -2259,9 +2259,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         if (main.replayChecking) return;
 
         // ----- 杂七杂八的变量
-        this.mapCache = {}; // 地图缓存
-        this.drawCache = {}; // 绘制信息缓存
-        var mapCache = this.mapCache; // 供函数调用
+        var mapCache = {}; // 地图缓存
+        var drawCache = {}; // 绘制信息缓存
         var status = 'none'; // 当前的绘制状态
         var sprites = {}; // 当前所有的sprite
         /** @type {{[x: string]: Sprite}} */
@@ -2273,6 +2272,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         var lastLength = 0; // 手机端缩放时上一次的两指间距离
         var is3D = false; // 当前绘制是否是3D绘制
         var nowDepth = 0; // 当前的遍历深度
+        var drawedThumbnail = {}; // 已经绘制过的缩略图
 
         // ---- 可自定义，默认的切换地图的图块id
         var defaultChange = {
@@ -2316,14 +2316,14 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          */
         this.getMapDrawInfo = function (center, depth, noCache) {
             center = center || core.status.floorId;
-            var id = center + '_' + depth;
             depth = depth || defaultValue.depth;
+            var id = center + '_' + depth + '_' + is3D;
             // 检查缓存
-            if (this.drawCache[id] && !noCache) return this.drawCache[id];
+            if (drawCache[id] && !noCache) return drawCache[id];
             var map = bfsSearch(center, depth, noCache);
-            this.mapCache[id] = map;
+            mapCache[id] = map;
             var res = getDrawInfo(map.res, center, map.order);
-            this.drawCache[id] = res;
+            drawCache[id] = res;
             return res;
         }
 
@@ -2507,14 +2507,14 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                         y = locs[layers[tf]][tf][1];
                     } else {
                         // 计算坐标，公式可以通过画图推断出
-                        x = fLoc[0] - ha * (fhw - fx) - ha * (tx - thw) - v * (fhw + thw + 5);
-                        y = fLoc[1] - va * (fhh - fy) - va * (ty - thh) - h * (fhh + thh + 5);
+                        x = fLoc[0] - ha * (fhw - fx + tx - thw) - v * (fhw + thw + 5);
+                        y = fLoc[1] - va * (fhh - fy + ty - thh) - h * (fhh + thh + 5);
                     }
                     // 添加入坐标对象中
                     if (!locs[layers[tf]])
                         locs[layers[tf]] = {};
                     if (!locs[layers[tf]][tf])
-                        locs[layers[tf]][tf] = [x, y, fromFloor.width, fromFloor.height, core.hasVisitedFloor(tf)];
+                        locs[layers[tf]][tf] = [x, y, toFloor.width, toFloor.height, core.hasVisitedFloor(tf)];
                     // 添加连线
                     if (!lines[layers[tf]]) lines[layers[tf]] = {};
                     lines[layers[tf]][from + '_' + to] = [[
@@ -2587,117 +2587,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         function extract3D (locs, map3D, layers, floorLoc) {
             // 根据map3D获取不同高度楼层间的连线
 
-        }
-
-        // 修正前：             修正后：
-        // ┌-┬-┐    ┌-┬-┐      ┌-┬-┐    ┌-┬-┐
-        // ├-┼-┤----├-┼-┤      ├-┼-┤----├-┼-┤
-        // └-┴-┘    └-┴-┘      └-┴-┘    └-┴-┘
-        //    |      |            | ┌----┘
-        //   ┌-┬-┐               ┌-┬-┐
-        //   ├-┼-┤               ├-┼-┤
-        //   └-┴-┘               └-┴-┘
-        /**
-         * 修正地图错位，原则是尽可能减少折线数量，需要根据连线将地图位置修正至最合理
-         * 
-         * 修正示例如上图
-         * @param {{[x: string]: [number, number, number, number, boolean]}} locs 要修正的地图
-         * @param {number[][]} lines 地图间的连线，既然修正地图位置了，连线位置也需要修正
-         * @param {string} center 中心地图，不会被遍历检测，尽可能减少计算量
-         * @param {string[]} order 遍历顺序
-         * @param {{[x: string]: {[x: string]: string}}} links 分类后的连接信息
-         */
-        function fixDislocation (locs, lines, center, order, links) {
-            return;
-            // 难度最高的函数...
-            // 这里的参数都是引用，所以直接修改即可，不需要返回等操作
-
-            /*
-             * 算法说明：
-             * 1.遍历楼层，尝试调整为水平或竖直，有重叠则微调
-             * 2.对于已为水平或竖直的，尽可能保证之后的调整中连线仍为水平或竖直
-             */
-
-            var fixed = {}; // 已经定位完毕的地图，尽可能保证连线为水平或竖直
-
-            // 根据order来遍历，因为这样可以保证地图是从内向外的
-            var l = order.length;
-            for (var i = 0; i < l; i++) {
-                var id = order[i];
-                var link = links[id];
-                // 直接遍历检测，并调整为水平或竖直
-                for (var from in link) {
-                    var to = link[from];
-                    var line = lines[from + '_' + to];
-                    var fromData = from.split('_'),
-                        toData = to.split('_');
-                    var ff = fromData[0],
-                        tf = toData[0];
-                    var fromFloor = core.status.maps[ff],
-                        toFloor = core.status.maps[tf];
-                    if (!fixed[to] && !(line[0][0] === line[0][2] || line[0][1] === line[0][3])) {
-                        // 不是水平或竖直的尝试调整为水平或竖直
-                        var dx = line[0][0] - line[0][2],
-                            dy = line[0][1] - line[0][3];
-                        var adx = Math.abs(dx),
-                            ady = Math.abs(dy);
-                        var v = 0,
-                            h = 0;
-                        // 夹角小于15度者调整，否则不调整
-                        var divided = adx / ady; // 商，用于判定夹角
-                        if (divided < 0.2679491924311227 || divided > 3.7320508075688776) {
-                            if (adx > ady) v = 1;
-                            else h = 1;
-                            locs[tf][0] += dx * h;
-                            locs[tf][1] += dy * v;
-                        }
-                    }
-                    // 检查重叠，进行微调
-                    var ol = hasOverLappingWith(locs, tf);
-                    if (ol.length === 0) continue;
-                    // 先计算与from之间的坐标差
-                    var ftdx = locs[ff][0] - locs[tf][0],
-                        ftdy = locs[ff][1] - locs[tf][1];
-                }
-            }
-        }
-
-        /** 
-         * 判断某一楼层与那些楼层有重叠，重叠长宽为多少
-         * @param {{[x: string]: [number, number, number, number, boolean]}} locs 要修正的地图
-         * @param {string} floor 要检测的楼层
-         * @returns {[string, number, number, number, number][]} 与哪些楼层重叠，及重叠长宽、坐标差
-         */
-        function hasOverLappingWith (locs, floor) {
-            var res = [];
-            for (var id in locs) {
-                var lapping = checkOverLapping(locs, id, floor);
-                lapping.unshift(id);
-                if (lapping[0] !== 0 && lapping[1] !== 0) res.push(lapping);
-            }
-            return res;
-        }
-
-        /** 
-         * 检查两个楼层是否重叠，重叠长宽为多少
-         * @param {{[x: string]: [number, number, number, number, boolean]}} locs 要修正的地图
-         * @param {string} f1 第一张地图
-         * @param {string} f2 第二张地图
-         * @returns {[number, number, number, number]} 重叠长宽，及第一张地图与第二张地图的坐标差
-         */
-        function checkOverLapping (locs, f1, f2) {
-            // 开始检测重叠
-            var loc1 = locs[f1],
-                loc2 = locs[f2];
-            var dx = loc1[0] - loc2[0],
-                dy = loc1[1] - loc2[1];
-            var adx = Math.abs(loc1[0] - loc2[0]),
-                ady = Math.abs(loc1[1] - loc2[1]);
-            var tw = loc1[2] + loc2[2],
-                th = loc1[3] + loc2[3];
-            var ox = Math.abs(Math.max(adx - tw - 5), 0), // 重叠长宽
-                oy = Math.abs(Math.max(ady - th - 5), 0);
-            return [ox, oy, dx, dy];
         }
 
         /** 绘制背景 */
@@ -2773,16 +2662,55 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     y = loc[1] * scale,
                     w = loc[2] * scale,
                     h = loc[3] * scale;
-                if (scale < 4 || !core.hasVisitedFloor(id)) {
-                    core.fillRect(ctx, x - w / 2, y - h / 2, w, h, color);
-                } else {
-                    // 绘制缩略图
-                    var size = w > h ? w : h
-                    core.drawThumbnail(id, void 0, {
-                        damage: true, ctx: ctx, x: x - w / 2, y: y - h / 2, all: true, size: size
-                    });
+                var dx = 0, dy = 0; // 避免绘图误差
+                if (loc[2] % 2 === 0) dx = 0.5 * scale;
+                if (loc[3] % 2 === 0) dy = 0.5 * scale;
+                core.fillRect(ctx, x - w / 2 - dx, y - h / 2 - dy, w, h, color);
+                core.strokeRect(ctx, x - w / 2 - dx, y - h / 2 - dy, w, h, '#fff', scale / 2);
+            }
+        }
+
+        /** 
+         * 重新绘制缩略图
+         * @param {Sprite} sprite
+         * @param {number} layer
+         * @param {string} floor
+         */
+        function drawThumbnail (sprite, floor, x, y, w, h) {
+            var ctx = sprite.context;
+            var scale = nowScale;
+            var size = w > h ? w : h;
+            core.drawThumbnail(floor, void 0, {
+                ctx: ctx, x: x - w / 2, y: y - h / 2, damage: true, all: true, size: size, fromMap: true
+            });
+            core.strokeRect(ctx, x - w / 2, y - h / 2, w, h, '#fff', scale / 2);
+        }
+
+        /** 
+         * 检查是否需要绘制缩略图
+         */
+        function checkThumbnail () {
+            var id = drawingMap + '_' + nowDepth + '_' + is3D;
+            var locs = drawCache[id].locs;
+            for (var layer in locs) {
+                var info = locs[layer];
+                var map = canDrag['__flyMap_' + layer + '__'];
+                for (var id in info) {
+                    var loc = info[id];
+                    var scale = nowScale;
+                    var x = loc[0] * scale,
+                        y = loc[1] * scale,
+                        w = loc[2] * scale,
+                        h = loc[3] * scale;
+                    var dx = 0, dy = 0; // 避免绘图误差
+                    if (loc[2] % 2 === 0) dx = 0.5 * scale;
+                    if (loc[3] % 2 === 0) dy = 0.5 * scale;
+                    if (!drawedThumbnail[id] && x + map.x > 0 && x + map.x < core.__PIXELS__ &&
+                        y + map.y > 0 && y + map.y < core.__PIXELS__ && nowScale > 5) {
+                        drawThumbnail(map, id, x - dx, y - dy, w, h);
+                        drawedThumbnail[id] = true;
+                    }
                 }
-                core.strokeRect(ctx, x - w / 2, y - h / 2, w, h, '#fff', scale / 2);
             }
         }
 
@@ -2879,6 +2807,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 sprite.y += dy;
                 core.relocateCanvas(ctx, dx, dy, true);
             }
+            checkThumbnail();
         }
 
         /** 
@@ -2887,6 +2816,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          * @param {number} info 缩放后的sprite位置数据
          */
         function scaleMap (target, info) {
+            drawedThumbnail = {};
             status = 'scale';
             core.drawFlyMap(drawingMap, nowDepth, false, target);
             status = 'flyMap';
@@ -2898,6 +2828,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 sprite.y = info[id][1] - sprite.height / 2;
                 core.relocateCanvas(ctx, info[id][0] - sprite.width / 2, info[id][1] - sprite.height / 2);
             }
+            checkThumbnail();
         }
 
         /**
@@ -2911,6 +2842,58 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             ele.addEventListener('mousedown', function () { clicking = true; });
             ele.addEventListener('mouseup', function () { clicking = false; });
             ele.addEventListener('touchend', function () { lastTouch = {}; lastLength = 0; });
+        }
+
+        // rewrite
+        maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
+            var ctx = core.getContextByName(options.ctx);
+            if (ctx == null) return;
+            var x = options.x || 0, y = options.y || 0, size = options.size || core.__PIXELS__;
+            var width = core.floors[floorId].width, height = core.floors[floorId].height;
+            var centerX = options.centerX, centerY = options.centerY;
+            if (centerX == null) centerX = Math.floor(width / 2);
+            if (centerY == null) centerY = Math.floor(height / 2);
+            var tempCanvas = core.bigmap.tempCanvas;
+
+            if (options.all) {
+                var tempWidth = tempCanvas.canvas.width, tempHeight = tempCanvas.canvas.height;
+                // 绘制全景图
+                if (tempWidth <= tempHeight) {
+                    var realHeight = size, realWidth = realHeight * tempWidth / tempHeight;
+                    var side = (size - realWidth) / 2;
+                    if (options.fromMap) {
+                        core.drawImage(ctx, tempCanvas.canvas, 0, 0, tempWidth, tempHeight, x, y, realWidth, realHeight);
+                    } else {
+                        core.fillRect(ctx, x, y, side, realHeight, '#000000');
+                        core.fillRect(ctx, x + size - side, y, side, realHeight);
+                        core.drawImage(ctx, tempCanvas.canvas, 0, 0, tempWidth, tempHeight, x + side, y, realWidth, realHeight);
+                    }
+                }
+                else {
+                    var realWidth = size, realHeight = realWidth * tempHeight / tempWidth;
+                    var side = (size - realHeight) / 2;
+                    if (options.fromMap) {
+                        core.drawImage(ctx, tempCanvas.canvas, 0, 0, tempWidth, tempHeight, x, y, realWidth, realHeight);
+                    } else {
+                        core.fillRect(ctx, x, y, realWidth, side, '#000000');
+                        core.fillRect(ctx, x, y + size - side, realWidth, side);
+                        core.drawImage(ctx, tempCanvas.canvas, 0, 0, tempWidth, tempHeight, x, y + side, realWidth, realHeight);
+                    }
+                }
+            }
+            else {
+                // 只绘制可见窗口
+                if (options.v2) {
+                    core.drawImage(ctx, tempCanvas.canvas, 0, 0, core.__PIXELS__, core.__PIXELS__, x, y, size, size);
+                } else {
+                    var offsetX = core.clamp(centerX - core.__HALF_SIZE__, 0, width - core.__SIZE__),
+                        offsetY = core.clamp(centerY - core.__HALF_SIZE__, 0, height - core.__SIZE__);
+                    var scale = core.domStyle.scale;
+                    if (options.noHD) scale = 1;
+                    core.drawImage(ctx, tempCanvas.canvas, offsetX * 32 * scale, offsetY * 32 * scale, core.__PIXELS__ * scale, core.__PIXELS__ * scale, x, y, size, size);
+                }
+
+            }
         }
     },
     "loopMap": function () {
