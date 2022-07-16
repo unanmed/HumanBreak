@@ -2287,7 +2287,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         var defaultValue = {
             font: 'Verdana', // 默认字体
             scale: 3, // 默认地图缩放比例
-            depth: 5 // 默认的遍历深度
+            depth: 5, // 默认的遍历深度
+            interval3D: 50 // 3D绘图时不同高度的楼层间的间距
         };
 
         // ---- 不可自定义，计算数据
@@ -2305,7 +2306,13 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          * @param {string?} center 中心地图id
          * @param {number?} depth 搜索深度
          * @param {boolean?} noCache 是否不使用缓存
-         * @returns {{locs: {[x: string]: [number, number, number, number, boolean]}, lines: {[x: string]: number[]}}}
+         * @returns {{
+         * locs: {[x: number]: {[x: string]: [number, number, number, number, boolean]}}
+         * lines: {[x: number]: {[x: string]: [number, number, number, number][]}}
+         * floorLoc: {[x: number]: [number, number]}
+         * width: {[x: number]: number}
+         * height: {[x: number]: number}
+         * }}
          */
         this.getMapDrawInfo = function (center, depth, noCache) {
             center = center || core.status.floorId;
@@ -2322,11 +2329,23 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
 
         /** 
          * 绘制大地图，可拖动、滚轮缩放、点击对应位置可以楼传、进入特殊传送点等
+         * @param {string} floorId 中心地图的id
+         * @param {number} depth 遍历深度
+         * @param {boolean} noCache 是否不使用缓存
+         * @param {number} scale 绘制的缩放比例
+         * @param {boolean} use3D 是否使用3D绘图
          */
-        this.drawFlyMap = function (floorId, depth, noCache, scale) {
+        this.drawFlyMap = function (floorId, depth, noCache, scale, use3D) {
+            is3D = use3D || false;
             var info = this.getMapDrawInfo(floorId, depth, noCache);
             drawBack();
-            drawMap(info, scale);
+            if (!use3D)
+                drawMap({
+                    locs: info.locs[0],
+                    lines: info.lines[0],
+                    width: info.width[0],
+                    height: info.height[0]
+                }, scale);
             status = 'flyMap';
             drawingMap = floorId || core.status.floorId;
             nowDepth = depth || defaultValue.depth;
@@ -2395,10 +2414,12 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          * @param {string} center 中心地图的id
          * @param {string[]} order 遍历顺序
          * @returns {{
-         * locs: {[x: string]: [number, number, number, number, boolean]}
-         * lines: {[x: string]: [number, number, number, number][]}
-         * width: number
-         * height: number
+         * locs: {[x: number]: {[x: string]: [number, number, number, number, boolean]}}
+         * lines: {[x: number]: {[x: string]: [number, number, number, number][]}}
+         * floorLoc: {[x: number]: [number, number]}
+         * width: {[x: number]: number}
+         * height: {[x: number]: number}
+         * line3D?: {[x: number]: [number, number, number, number][]}
          * }} 地图的绘制信息
          */
         function getDrawInfo (map, center, order) {
@@ -2414,11 +2435,18 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             var centerFloor = core.status.maps[center];
             var visitedCenter = core.hasVisitedFloor(center);
             var locs = { // 格式：[中心x, 中心y, 宽, 高, 是否到达过]
-                [center]: [0, 0, centerFloor.width, centerFloor.height, visitedCenter]
+                0: {
+                    [center]: [0, 0, centerFloor.width, centerFloor.height, visitedCenter]
+                }
             };
             var lines = {}; // 地图间的连线
+            var map3D = {}; // 3D信息
             // 计算相连的地图的位置
             var l = order.length;
+            var layers = {
+                [center]: 0
+            };
+            var tempFloor = {}; // 在3D绘图下的临时存储地，防止出现位置不正确的问题
             for (var i = 0; i < l; i++) {
                 var id = order[i];
                 var now = links[id];
@@ -2429,7 +2457,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     var fromData = from.split('_'),
                         toData = to.split('_');
                     var dir = fromData[3];
-                    if (!dirData[dir]) continue;
+                    if (!defaultChange[dir]) continue;
                     var v = dirData[dir][1], // 竖直数值
                         h = dirData[dir][0], // 水平数值
                         ha = Math.abs(h),
@@ -2446,21 +2474,54 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                         fhh = Math.floor(fromFloor.height / 2),
                         thw = Math.floor(toFloor.width / 2),
                         thh = Math.floor(toFloor.height / 2);
-                    var fLoc = locs[id];
+                    var fLoc = locs[layers[id]][id];
+                    if (dir === 'upFloor' || dir === 'downFloor') {
+                        // 如果是上下楼的话，存入3D信息
+                        if (dir === 'upFloor') layers[tf] = layers[ff] + 1;
+                        else layers[tf] = layers[ff] - 1;
+                        var isFirst = false; // 是否是第一个被遍历到的不同高度的楼层
+                        if (!locs[layers[tf]]) {
+                            locs[layers[tf]] = {};
+                            isFirst = true;
+                        }
+                        if (!locs[layers[tf][tf]]) {
+                            if (isFirst) {
+                                // 第一个被遍历的是中心楼层
+                                locs[layers[tf]][tf] = [fx + fLoc[0], fy + fLoc[1], toFloor.width, toFloor.height, core.hasVisitedFloor(tf)];
+                            } else {
+                                if (!tempFloor[layers[tf]]) tempFloor[layers[tf]] = {};
+                                if (!tempFloor[layers[tf]][tf])
+                                    tempFloor[layers[tf]][tf] = [fx + fLoc[0], fy + fLoc[1], toFloor.width, toFloor.height, core.hasVisitedFloor(tf)];
+                            }
+                        }
+                        map3D[ff + '_' + dir + '_' + tf] = {
+                            from: [fx, fy, fromFloor.width, fromFloor.height, layers[ff]],
+                            to: [tx, ty, toFloor.width, toFloor.height, layers[tf]]
+                        };
+                        continue;
+                    }
+                    layers[tf] = layers[ff];
                     var x, y;
-                    if (locs[tf]) {
-                        x = locs[tf][0];
-                        y = locs[tf][1];
+                    if (locs[layers[tf]] && locs[layers[tf]][tf]) {
+                        x = locs[layers[tf]][tf][0];
+                        y = locs[layers[tf]][tf][1];
                     } else {
                         // 计算坐标，公式可以通过画图推断出
                         x = fLoc[0] - ha * (fhw - fx) - ha * (tx - thw) - v * (fhw + thw + 5);
                         y = fLoc[1] - va * (fhh - fy) - va * (ty - thh) - h * (fhh + thh + 5);
                     }
                     // 添加入坐标对象中
-                    if (!locs[tf])
-                        locs[tf] = [x, y, fromFloor.width, fromFloor.height, core.hasVisitedFloor(tf)];
+                    if (!locs[layers[tf]])
+                        locs[layers[tf]] = {};
+                    if (!locs[layers[tf]][tf])
+                        locs[layers[tf]][tf] = [x, y, fromFloor.width, fromFloor.height, core.hasVisitedFloor(tf)];
                     // 添加连线
-                    lines[from + '_' + to] = [[fx - fhw + locs[ff][0], fy - fhh + locs[ff][1], x + tx - thw, y + ty - thh]];
+                    if (!lines[layers[tf]]) lines[layers[tf]] = {};
+                    lines[layers[tf]][from + '_' + to] = [[
+                        fx - fhw + locs[layers[ff]][ff][0],
+                        fy - fhh + locs[layers[ff]][ff][1],
+                        x + tx - thw, y + ty - thh
+                    ]];
                 }
             }
             // 修正地图错位，如果可以保证自己的地图物理位置完全对齐，可以将flag:__map_needFix__设为false
@@ -2470,36 +2531,62 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 right = 0,
                 up = 0,
                 down = 0;
-            for (var id in locs) {
-                var x = locs[id][0],
-                    y = locs[id][1],
-                    w = locs[id][2],
-                    h = locs[id][3];
-                left = Math.min(left, x - w - 1);
-                right = Math.max(right, x + w + 1);
-                up = Math.min(up, y - h - 1);
-                down = Math.max(down, y + h + 1);
-            }
-            var w = right - left,
-                h = down - up;
-            // 所有地图和连线向右下移动，避免绘制出现问题
-            for (var id in locs) {
-                locs[id][0] -= left;
-                locs[id][1] -= up;
-            }
-            for (var route in lines) {
-                var line = lines[route];
-                var l = line.length;
-                for (var i = 0; i < l; i++) {
-                    var node = line[i];
-                    node[0] -= left;
-                    node[1] -= up;
-                    node[2] -= left;
-                    node[3] -= up;
+            var width = {},
+                height = {};
+            for (var layer in locs) {
+                if (!is3D && layer !== '0') continue;
+                var loc = locs[layer];
+                for (var id in loc) {
+                    var x = loc[id][0],
+                        y = loc[id][1],
+                        w = loc[id][2],
+                        h = loc[id][3];
+                    left = Math.min(left, x - w - 1);
+                    right = Math.max(right, x + w + 1);
+                    up = Math.min(up, y - h - 1);
+                    down = Math.max(down, y + h + 1);
+                }
+                width[layer] = right - left;
+                height[layer] = down - up;
+                // 所有地图和连线向右下移动，避免绘制出现问题
+                for (var id in locs[layer]) {
+                    locs[layer][id][0] -= left;
+                    locs[layer][id][1] -= up;
+                }
+                for (var route in lines[layer]) {
+                    var line = lines[layer][route];
+                    var l = line.length;
+                    for (var i = 0; i < l; i++) {
+                        var node = line[i];
+                        node[0] -= left;
+                        node[1] -= up;
+                        node[2] -= left;
+                        node[3] -= up;
+                    }
                 }
             }
+            // 3D绘图下每个地图的中心位置
+            var floorLoc = {
+                0: [0, 0]
+            };
+            if (is3D) return extract3D(locs, map3D, layers, floorLoc);
 
-            return { locs: locs, lines: lines, width: w, height: h };
+            return { locs: locs, lines: lines, floorLoc: floorLoc, width: width, height: height };
+        }
+
+        /** 
+         * 解析3D地图绘制信息
+         * @param {{[x: number]: {[x: string]: [number, number, number, number, boolean]}}} locs 要解析的地图
+         * @param {{[x: string]: {
+         * from: [number, number, number, number, number]
+         * to: [number, number, number, number, number]
+         * }}} map3D 地图的3D信息
+         * @param {{[x: string]: number}} layers 楼层的高度信息
+         * @param {{[x: number]: [number, number]}} floorLoc 每一高度楼层的中心位置
+         */
+        function extract3D (locs, map3D, layers, floorLoc) {
+            // 根据map3D获取不同高度楼层间的连线
+
         }
 
         // 修正前：             修正后：
@@ -2521,6 +2608,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          * @param {{[x: string]: {[x: string]: string}}} links 分类后的连接信息
          */
         function fixDislocation (locs, lines, center, order, links) {
+            return;
             // 难度最高的函数...
             // 这里的参数都是引用，所以直接修改即可，不需要返回等操作
 
@@ -2620,7 +2708,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 'transition: all 0.6s linear;'
             );
             setTimeout(function () { back.setCss('background-color: rgba(0, 0, 0, 0.9);'); }, 50);
-            var listen = new Sprite(0, 0, core.__PIXELS__, core.__PIXELS__, 300, 'game', '__map_listen__');
+            var listen = new Sprite(0, 0, core.__PIXELS__, core.__PIXELS__, 1000, 'game', '__map_listen__');
             addDrag(listen);
         }
 
@@ -2634,36 +2722,34 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          * }} info 地图绘制信息
          * @param {number} scale 地图的绘制比例
          * @param {number} layer 绘制的层，用于3D绘图
+         * @param {number} interval3D 3D绘图时不同高度楼层间的间距
+         * @param {number} x 3D绘图时的中心坐标
+         * @param {number} y
          */
-        function drawMap (info, scale, layer) {
+        function drawMap (info, scale, layer, interval3D, x, y) {
             if (status === 'flyMap') return;
             scale = scale || defaultValue.scale;
             nowScale = scale;
             layer = layer || 0; // 为3D绘图做准备
+            interval3D = interval3D || defaultValue.interval3D;
             var size = core.__PIXELS__;
             var w = info.width * scale,
                 h = info.height * scale;
             var id = '__flyMap_' + layer + '__';
-            var map = new Sprite(size / 2 - w / 2, size / 2 - h / 2, w, h, 250 + layer, 'game', '__flyMap_' + layer + '__');
+            var cx = x === void 0 ? size / 2 - w / 2 : x,
+                cy = y === void 0 ? size / 2 - h / 2 : y
+            var map = new Sprite(cx, cy, w, h, 500 + layer * 2, 'game', '__flyMap_' + layer + '__');
+            var rate = core.__PIXELS__ / interval3D / 2;
+            if (is3D) map.setCss(
+                'transform: scaleY(0.7071067811865476)skewX(-45deg);' +
+                'opacity: ' + (1 - Math.abs(layer) / rate) + ';'
+            );
             canDrag[id] = map;
             map.canvas.className = 'fly-map';
             var ctx = map.context;
             core.clearMap(ctx);
             var drawed = {}; // 绘制过的线
-            // 先绘制楼层
-            var locs = info.locs;
-            for (var id in locs) {
-                var loc = locs[id];
-                var color = '#000';
-                if (!loc[4]) color = '#f0f';
-                var x = loc[0] * scale,
-                    y = loc[1] * scale,
-                    w = loc[2] * scale,
-                    h = loc[3] * scale;
-                core.fillRect(ctx, x - w / 2, y - h / 2, w, h, color);
-                core.strokeRect(ctx, x - w / 2, y - h / 2, w, h, '#fff', scale);
-            }
-            // 再绘制连线
+            // 先绘制连线
             var lines = info.lines;
             for (var route in lines) {
                 var line = lines[route];
@@ -2674,8 +2760,29 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                         to = node[2] + ',' + node[3];
                     if (drawed[from + '-' + to] || drawed[to + '-' + from]) continue;
                     drawed[from + '-' + to] = true;
-                    core.drawLine(ctx, node[0] * scale, node[1] * scale, node[2] * scale, node[3] * scale, '#fff', scale);
+                    core.drawLine(ctx, node[0] * scale, node[1] * scale, node[2] * scale, node[3] * scale, '#fff', scale / 2);
                 }
+            }
+            // 再绘制楼层
+            var locs = info.locs;
+            for (var id in locs) {
+                var loc = locs[id];
+                var color = '#000';
+                if (!loc[4]) color = '#f0f';
+                var x = loc[0] * scale,
+                    y = loc[1] * scale,
+                    w = loc[2] * scale,
+                    h = loc[3] * scale;
+                if (scale < 4 || !core.hasVisitedFloor(id)) {
+                    core.fillRect(ctx, x - w / 2, y - h / 2, w, h, color);
+                } else {
+                    // 绘制缩略图
+                    var size = w > h ? w : h
+                    core.drawThumbnail(id, void 0, {
+                        damage: true, ctx: ctx, x: x - w / 2, y: y - h / 2, all: true, size: size
+                    });
+                }
+                core.strokeRect(ctx, x - w / 2, y - h / 2, w, h, '#fff', scale / 2);
             }
         }
 
@@ -2713,7 +2820,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     second = e.touches[1];
                 var dx = first.clientX - second.clientX,
                     dy = first.clientY - second.clientY;
-                if (!lastLength) {
+                if (lastLength === 0) {
                     lastLength = Math.sqrt(dx * dx + dy * dy);
                     return;
                 }
