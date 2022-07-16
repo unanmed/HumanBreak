@@ -2349,6 +2349,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             status = 'flyMap';
             drawingMap = floorId || core.status.floorId;
             nowDepth = depth || defaultValue.depth;
+            core.lockControl();
         }
 
 
@@ -2599,6 +2600,23 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             setTimeout(function () { back.setCss('background-color: rgba(0, 0, 0, 0.9);'); }, 50);
             var listen = new Sprite(0, 0, core.__PIXELS__, core.__PIXELS__, 1000, 'game', '__map_listen__');
             addDrag(listen);
+            var exit = new Sprite(0, 0, 60, 22, 1050, 'game', '__map_exit__');
+            exit.setCss(
+                'transition: opacity 0.6s linear, transform 0.2s linear;' +
+                'background-color: #aaa;' +
+                'border: 0.2em outset #ccc;' +
+                'box-shadow: 0px 0px 0px black;' +
+                'opacity: 0;'
+            );
+            setTimeout(function () { exit.setCss('opacity: 1;'); }, 50);
+            core.setTextAlign(exit.context, 'center');
+            core.fillText(exit.context, '退出', 30, 20, '#fff', '24px normal');
+            exit.addEventListener('click', close);
+            exit.addEventListener('mouseenter', function () { exit.setCss('transform: scale(1.1);'); });
+            exit.addEventListener('mouseleave', function () { exit.setCss('transform: scale(1);'); })
+            sprites.back = back;
+            sprites.listen = listen;
+            sprites.exit = exit;
         }
 
         /** 
@@ -2627,7 +2645,11 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             var id = '__flyMap_' + layer + '__';
             var cx = x === void 0 ? size / 2 - w / 2 : x,
                 cy = y === void 0 ? size / 2 - h / 2 : y
-            var map = new Sprite(cx, cy, w, h, 500 + layer * 2, 'game', '__flyMap_' + layer + '__');
+            var map = new Sprite(cx, cy, w, h, 500 + layer * 2, 'game', id);
+            map.setCss(
+                'transition: opacity 0.6s linear;'
+            );
+            sprites[id] = map;
             var rate = core.__PIXELS__ / interval3D / 2;
             if (is3D) map.setCss(
                 'transform: scaleY(0.7071067811865476)skewX(-45deg);' +
@@ -2712,6 +2734,23 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     }
                 }
             }
+        }
+
+        /** 关闭事件 */
+        function close () {
+            Object.values(sprites).forEach(function (v) {
+                v.setCss('opacity: 0;');
+            });
+            setTimeout(function () {
+                core.unlockControl();
+                Object.values(sprites).forEach(function (v) {
+                    v.destroy();
+                });
+                drawedThumbnail = {};
+                sprites = {};
+                canDrag = {};
+                status = 'none';
+            }, 600);
         }
 
         /** 
