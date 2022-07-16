@@ -2273,6 +2273,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         var is3D = false; // 当前绘制是否是3D绘制
         var nowDepth = 0; // 当前的遍历深度
         var drawedThumbnail = {}; // 已经绘制过的缩略图
+        var moved = false; // 鼠标按下后是否移动了
 
         // ---- 可自定义，默认的切换地图的图块id
         var defaultChange = {
@@ -2350,6 +2351,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             drawingMap = floorId || core.status.floorId;
             nowDepth = depth || defaultValue.depth;
             core.lockControl();
+            core.canvas.data.canvas.style.zIndex = '990';
         }
 
 
@@ -2600,7 +2602,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             setTimeout(function () { back.setCss('background-color: rgba(0, 0, 0, 0.9);'); }, 50);
             var listen = new Sprite(0, 0, core.__PIXELS__, core.__PIXELS__, 1000, 'game', '__map_listen__');
             addDrag(listen);
-            var exit = new Sprite(0, 0, 60, 22, 1050, 'game', '__map_exit__');
+            var exit = new Sprite(core.__PIXELS__ - 60, 0, 60, 22, 1050, 'game', '__map_exit__');
             exit.setCss(
                 'transition: opacity 0.6s linear, transform 0.2s linear;' +
                 'background-color: #aaa;' +
@@ -2736,6 +2738,15 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             }
         }
 
+        /** 
+         * 检查点击点是否在某一矩形中
+         */
+        function inRect (x, y, w, h, px, py) {
+            x -= w / 2;
+            y -= h / 2;
+            return px > x && px < x + w && py > y && py < y + h;
+        }
+
         /** 关闭事件 */
         function close () {
             Object.values(sprites).forEach(function (v) {
@@ -2750,7 +2761,38 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 sprites = {};
                 canDrag = {};
                 status = 'none';
+                core.canvas.data.canvas.style.zIndex = '170';
             }, 600);
+        }
+
+        /** 
+         * 点击地图事件，尝试楼层传送
+         * @param {MouseEvent} e
+         */
+        function clickMap (e) {
+            if (moved) return moved = false;
+            var click = core.actions._getClickLoc(e.clientX, e.clientY);
+            var px = click.x / core.domStyle.scale,
+                py = click.y / core.domStyle.scale;
+            var scale = nowScale;
+            var id = drawingMap + '_' + nowDepth + '_' + is3D;
+            if (!is3D) {
+                var locs = drawCache[id].locs[0];
+                var sprite = canDrag.__flyMap_0__;
+                px -= sprite.x;
+                py -= sprite.y;
+                for (var id in locs) {
+                    var loc = locs[id];
+                    var x = loc[0] * scale,
+                        y = loc[1] * scale,
+                        w = loc[2] * scale,
+                        h = loc[3] * scale;
+                    if (inRect(x, y, w, h, px, py)) {
+                        sprites.back.setCss('opacity: 0.2;');
+                        return core.flyTo(id);
+                    }
+                }
+            }
         }
 
         /** 
@@ -2769,6 +2811,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          * @this {HTMLCanvasElement}
          */
         function touchDrag (e) {
+            moved = true;
             var scale = core.domStyle.scale;
             if (e.touches.length === 1) { // 拖拽
                 var info = e.touches[0];
@@ -2839,6 +2882,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          * @param {string} dy
          */
         function moveEle (dx, dy) {
+            moved = true;
             for (var id in canDrag) {
                 var sprite = canDrag[id];
                 var ctx = sprite.context;
@@ -2878,6 +2922,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             ele.addEventListener('wheel', wheel);
             ele.addEventListener('mousemove', drag);
             ele.addEventListener('touchmove', touchDrag);
+            ele.addEventListener('click', clickMap);
             ele.addEventListener('mousedown', function () { clicking = true; });
             ele.addEventListener('mouseup', function () { clicking = false; });
             ele.addEventListener('touchend', function () { lastTouch = {}; lastLength = 0; });
