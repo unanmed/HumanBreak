@@ -3006,6 +3006,29 @@ declare class Sprite {
     removeEventListenr: HTMLCanvasElement['addEventListener']
 }
 
+type DrawInfo = {
+    locs: { [x: number]: { [x: string]: [number, number, number, number, boolean] } }
+    lines: { [x: number]: { [x: string]: [number, number, number, number][] } }
+    floorLoc: { [x: number]: [number, number] }
+    width: { [x: number]: number }
+    height: { [x: number]: number }
+    translate: {
+        [x: number]: {
+            x: number
+            y: number
+        }
+    }
+    map3D: {
+        [x: number]: {
+            [x: string]: {
+                from: [number, number, number, number, number]
+                to: [number, number, number, number, number]
+            }
+        }
+    }
+}
+
+
 declare let main: main
 declare let core: core
 declare let flags: { [x: string]: any }
