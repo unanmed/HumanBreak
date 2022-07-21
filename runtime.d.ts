@@ -3013,10 +3013,7 @@ type DrawInfo = {
     width: { [x: number]: number }
     height: { [x: number]: number }
     translate: {
-        [x: number]: {
-            x: number
-            y: number
-        }
+        [x: number]: [number, number]
     }
     map3D: {
         [x: number]: {

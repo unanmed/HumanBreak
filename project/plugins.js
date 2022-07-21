@@ -1363,6 +1363,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         }
     },
     "itemDetail": function () {
+        core.bigmap.threshold = 256;
+
         core.control.updateDamage = function (floorId, ctx) {
             floorId = floorId || core.status.floorId;
             if (!floorId || core.status.gameOver || main.mode != 'play') return;
@@ -1411,34 +1413,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 core.fillBoldText(ctx, one.text, px, py, one.color);
             });
         };
-        ////// 更改地图画布的尺寸 //////
-        maps.prototype.resizeMap = function (floorId) {
-            floorId = floorId || core.status.floorId;
-            if (!floorId) return;
-            core.bigmap.width = core.floors[floorId].width;
-            core.bigmap.height = core.floors[floorId].height;
-            core.bigmap.posX = core.bigmap.posY = 0;
-
-            core.bigmap.v2 = core.bigmap.width * core.bigmap.height > core.bigmap.threshold / 4;
-            var width = core.bigmap.v2 ? core.__PIXELS__ + 64 : core.bigmap.width * 32;
-            var height = core.bigmap.v2 ? core.__PIXELS__ + 64 : core.bigmap.height * 32;
-
-            core.bigmap.canvas.forEach(function (cn) {
-                if (core.domStyle.hdCanvas.indexOf(cn) >= 0)
-                    core.maps._setHDCanvasSize(core.canvas[cn], width, height);
-                else {
-                    core.canvas[cn].canvas.width = width;
-                    core.canvas[cn].canvas.height = height;
-                }
-                core.canvas[cn].canvas.style.width = width * core.domStyle.scale + "px";
-                core.canvas[cn].canvas.style.height = height * core.domStyle.scale + "px";
-                core.canvas[cn].translate(core.bigmap.v2 ? 32 : 0, core.bigmap.v2 ? 32 : 0);
-                if (main.mode === 'editor' && editor.isMobile) {
-                    core.canvas[cn].canvas.style.width = width / core.__PIXELS__ * 96 + "vw";
-                    core.canvas[cn].canvas.style.height = height / core.__PIXELS__ * 96 + "vw";
-                }
-            });
-        };
         core.formatBigNumber = function (x, onMap, onCritical) {
             x = Math.floor(parseFloat(x));
             if (!core.isset(x) || !Number.isFinite(x)) return '???';
@@ -1475,6 +1449,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             if (!core.getFlag("itemDetail")) return;
             floorId = floorId || core.status.thisMap.floorId;
             core.status.maps[floorId].blocks.forEach(function (block) {
+                if (block.event.cls !== 'items') return;
                 var x = block.x,
                     y = block.y;
                 // v2优化，只绘制范围内的部分
@@ -1484,40 +1459,43 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                         return;
                     }
                 }
-                if (block.event.cls == "items" && block.event.id != "superPotion") {
-                    var before = core.clone(core.status.hero),
-                        id = block.event.id;
-                    // 跟数据统计原理一样 执行效果 前后比较
-                    core.setFlag("__statistics__", true);
-                    try {
-                        eval(core.material.items[id].itemEffect);
-                    } catch (error) { }
-                    var diff = core.compareObject(before, core.status.hero);
-                    core.status.hero = before;
-                    window.hero = core.status.hero;
-                    window.flags = core.status.hero.flags;
-                    core.drawItemDetail(diff, block.x, block.y, floorId, id);
+                var id = block.event.id;
+                var item = core.material.items[id];
+                if (item.cls === 'equips') {
+                    // 装备也显示
+                    var diff = item.equip.value || {};
+                    var per = item.equip.percentage;
+                    for (var name in per) {
+                        diff[name + 'per'] = per[name].toString() + '%';
+                    }
+                    drawItemDetail(diff, x, y);
+                    return;
                 }
+                var before = core.clone(core.status.hero);
+                // 跟数据统计原理一样 执行效果 前后比较
+                core.setFlag("__statistics__", true);
+                try {
+                    eval(item.itemEffect);
+                } catch (error) { }
+                var diff = compareObject(before, core.status.hero);
+                core.status.hero = hero = before;
+                flags = core.status.hero.flags;
+                drawItemDetail(diff, x, y);
             });
         };
         // 比较两个对象之间每一项的数值差异（弱等于） 返回数值差异
-        this.compareObject = function (a, b) {
+        function compareObject (a, b) {
             a = a || {};
             b = b || {};
             var diff = {}; // 差异
             for (var name in a) {
-                if (a[name] != b[name]) { // a != b
-                    try {
-                        diff[name] = b[name] - (a[name] || 0);
-                    } catch (error) { }
-                    if (isNaN(diff[name])) delete diff[name];
-                    if (diff[name] == 0) delete diff[name];
-                }
+                diff[name] = b[name] - (a[name] || 0);
+                if (!diff[name]) diff[name] = void 0;
             }
             return diff;
         };
         // 绘制
-        this.drawItemDetail = function (diff, x, y, floorId, id) {
+        function drawItemDetail (diff, x, y) {
             if (core.same(diff, {}) || !diff) return;
             var px = 32 * x + 2,
                 py = 32 * y + 30;
@@ -1525,22 +1503,28 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             // 获得数据和颜色
             var i = 0;
             for (var name in diff) {
-                var color = "#ffffff"
-                diff[name] = core.formatBigNumber(diff[name], true);
+                if (!diff[name]) continue;
+                var color = "#ffffff";
+                if (typeof diff[name] === 'number')
+                    diff[name] = core.formatBigNumber(diff[name], true);
                 switch (name) {
                     case 'atk':
+                    case 'atkper':
                         color = "#FF7A7A";
                         break;
                     case 'def':
+                    case 'defper':
                         color = "#00E6F1";
                         break;
                     case 'mdef':
+                    case 'mdefper':
                         color = "#6EFF83";
                         break;
                     case 'hp':
                         color = "#A4FF00";
                         break;
                     case 'hpmax':
+                    case 'hpmaxper':
                         color = "#F9FF00";
                         break;
                     case 'mana':
@@ -2242,6 +2226,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         // ------------------------- 使用说明 ------------------------- //
         /*
          * 直接复制进插件中，然后添加一个快捷键或道具效果为core.drawFlyMap()即可使用，不需额外设置
+         * 楼层id中不要出现下划线
          * 该插件具体功能有：
          * 1.绘制区域内的地图
          * 2.可以拖动地图
@@ -2338,7 +2323,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             font: 'Verdana', // 默认字体
             scale: 3, // 默认地图缩放比例
             depth: 5, // 默认的遍历深度
-            interval3D: 50 // 3D绘图时不同高度的楼层间的间距
+            interval3D: 15 // 3D绘图时不同高度的楼层间的间距
         };
 
         // ---- 不可自定义，计算数据
@@ -2383,6 +2368,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          */
         this.drawFlyMap = function (floorId, depth, noCache, scale, use3D) {
             is3D = use3D || false;
+            scale = scale || defaultValue.scale;
             var info = this.getMapDrawInfo(floorId, depth, noCache);
             drawBack();
             if (!use3D)
@@ -2536,7 +2522,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                                 // 第一个被遍历的是中心楼层
                                 locs[layers[tf]][tf] = [fx - fhw + fLoc[0] - tx + thw, fy - fhh + fLoc[1] - ty + thh, toFloor.width, toFloor.height, core.hasVisitedFloor(tf)];
                                 floorLoc[layers[tf]] = [0, - defaultValue.interval3D * layers[tf]];
-                            } else {
+                            } else { // 否则临时储存
                                 if (!tempFloor[layers[tf]]) tempFloor[layers[tf]] = {};
                                 if (!tempFloor[layers[tf]][tf])
                                     tempFloor[layers[tf]][tf] = [fx - fhw + fLoc[0] - tx + thw, fy - fhh + fLoc[1] - ty + thh, toFloor.width, toFloor.height, core.hasVisitedFloor(tf)];
@@ -2574,12 +2560,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     ]];
                 }
             }
-            // 修正地图错位，如果可以保证自己的地图物理位置完全对齐，可以将flag:__map_needFix__设为false
-            // if (core.hasFlag('__map_needFix__')) fixDislocation(locs, lines, center, order, links);
             // 获取地图绘制需要的长宽
             var width = {},
                 height = {};
-            var delta = {}; // 每一层的移动信息
             for (var layer in locs) {
                 var left = void 0,
                     right = void 0,
@@ -2602,7 +2585,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 }
                 width[layer] = right - left;
                 height[layer] = down - up;
-                delta[layer] = { x: -left, y: -up };
                 // 所有地图和连线向右下移动，避免绘制出现问题
                 for (var id in locs[layer]) {
                     locs[layer][id][0] -= left;
@@ -2626,48 +2608,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     locs[layer][id] = loc;
                 }
             }
-            var translate = {}; // 为了使地图绘制位置正确，每层应当移动的距离
-            var dx = delta[0].x,
-                dy = delta[0].y;
-            for (var layer in delta) {
-                var loc3D = map3D[layer];
-                var one = Object.keys(loc3D || {})[0];
-                if (!one) continue;
-                // 还要考虑斜二测画法引起的位置偏差
-                var from = loc3D[one].from,
-                    to = loc3D[one].to;
-                var next = parseInt(layer) + 1;
-                if (to[4] !== next) continue;
-                var s = one.split('_');
-                var ff = s[0],
-                    tf = s[2];
-                var fl = locs[layer][ff],
-                    tl = locs[next][tf];
-                var fc = [width[layer] / 2, height[layer] / 2],
-                    tc = [width[next] / 2, height[next] / 2];
-                var fd = (from[1] + fl[1] - fl[3] / 2 - fc[1]) * 0.3535533905932738,
-                    td = (to[1] + tl[1] - tl[3] / 2 - tc[1]) * 0.3535533905932738;
-                console.log(layer, fd);
-                var x = delta[layer].x,
-                    y = delta[layer].y;
-                var nx = delta[next].x,
-                    ny = delta[next].y;
-                if (next >= 1)
-                    translate[next] = { x: dx - nx + fd - td, y: dy - ny + fd - td };
-                else
-                    translate[layer] = { x: dx - x - fd + td, y: dy - y - fd + td };
-            }
 
-            return { locs: locs, lines: lines, floorLoc: floorLoc, width: width, height: height, map3D: map3D, translate: translate };
-        }
-
-        /** 计算经斜二测画法转换后的某点位置 */
-        function calLocIn3D (x, y, cx, cy) {
-            var dx = x - cx,
-                dy = y - cy;
-            dy *= 0.3535533905932738;
-            dx += dy;
-            return [cx + dx, cy + dy];
+            return calTranslate({ locs: locs, lines: lines, floorLoc: floorLoc, width: width, height: height, map3D: map3D });
         }
 
         /** 
@@ -2677,47 +2619,112 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          */
         function extract3D (info) {
             // 根据绘制信息获取不同高度楼层间的连线
-            var min = Math.min.apply(this, Object.keys(info.locs));
+            // 既然已经计算过translate了，那么直接加上就可以了，以及斜二测引起的误差
             var line3D = {};
-            var locs = info.locs;
-            for (var layer = min; locs[layer]; layer++) {
+            for (var layer in info.map3D) {
+                var map3D = info.map3D[layer];
+                var l = parseInt(layer);
                 line3D[layer] = [];
-                // 遍历求每条连线的位置
-                var map = info.map3D[layer];
-                var loc = locs[layer];
-                for (var route in map) {
-                    var data = map[route];
+                for (var route in map3D) {
+                    var data = map3D[route];
                     var from = data.from,
                         to = data.to;
-                    if (to[4] !== layer + 1) continue;
-                    var splitted = route.split('_');
-                    var ff = splitted[0], // fromFloor
-                        tf = splitted[2];
-                    var fLoc = loc[ff] + from[0] - from[2] / 2, // fromLoc
-                        tLoc = loc[tf] + to[1] - to[3] / 2;
-                    var fc = info.floorLoc[layer], // fromCenter
-                        tc = info.floorLoc[layer + 1];
-                    // 计算倾斜过后的传送点位置
-                    var caledFrom = calLocIn3D(fLoc[0], fLoc[1], fc[0], fc[1]),
-                        caledTo = calLocIn3D(tLoc[0], tLoc[1], tc[0], tc[1]);
-                    var fx = caledFrom[0],
-                        fy = caledFrom[1],
-                        tx = caledTo[0],
-                        ty = caledTo[1];
-                    if (fy === ty) continue;
+                    // 只处理由下至上的连线即可，因为遍历地图的过程中不可能出现只能下不能上的情况
+                    if (to[4] !== from[4] + 1) continue;
+                    var s = route.split('_');
+                    var ff = s[0],
+                        tf = s[2];
+                    var fLoc = info.locs[layer][ff], // fromLoc
+                        tLoc = info.locs[l + 1][tf];
+                    var ffl = info.floorLoc[layer], // fromFloorLoc
+                        tfl = info.floorLoc[l + 1];
+                    var fw = info.width[layer], // fromWidth
+                        fh = info.height[layer],
+                        tw = info.width[l + 1],
+                        th = info.height[l + 1];
+                    // 先计算from层和to层相对中心位置的坐标，然后再加上translate
+                    var fromPixel = [fLoc[0] + ffl[0] - fw / 2 + from[0], fLoc[1] + ffl[1] - fh / 2 + from[1]],
+                        toPixel = [tLoc[0] + tfl[0] - tw / 2 + to[0], tLoc[1] + tfl[1] - th / 2 + to[1]];
+                    var ft = info.translate[layer] || [0, 0],
+                        tt = info.translate[l + 1] || [0, 0];
+                    // 然后是斜二测引起的误差，仅有目标传送点与当前楼层中心之间的误差
+                    var fd = (from[1] - from[3] / 2) * 0.3535533905932738,
+                        td = (to[1] - to[3] / 2) * 0.3535533905932738;
+                    var fx = fromPixel[0] + ft[0] + fd,
+                        fy = fromPixel[1] + ft[1] + fd,
+                        tx = toPixel[0] + tt[0] + td,
+                        ty = toPixel[1] + tt[1] + td;
+                    var half = (fy + ty) / 2;
                     if (fx === tx) line3D[layer].push([fx, fy, tx, ty]);
-                    else {
-                        // 计算转折点
-                        var turn = (fy + ty) / 2;
-                        line3D[layer].push(
-                            [fx, fy, fx, turn],
-                            [fx, turn, tx, turn],
-                            [tx, turn, tx, ty]
-                        );
-                    }
+                    else line3D[layer].push(
+                        [fx, fy, fx, half],
+                        [fx, half, tx, half],
+                        [tx, half, tx, ty]
+                    );
                 }
             }
             return line3D;
+        }
+
+        /** 
+         * 计算楼层偏移
+         * @param {DrawInfo} info 地图绘制信息
+         * @returns {DrawInfo}
+         */
+        function calTranslate (info) {
+            // 计算方式：计算相连楼层相对于地图中心的位置，然后直接把地图移过去，再计算由于斜二测画法引起的误差
+
+            var translate = {};
+            var locs = info.locs;
+            var width = info.width,
+                height = info.height;
+
+            /** 
+             * 获取3D连线中为上楼或下楼的
+             * @param {DrawInfo['map3D']}
+             * @returns {[string, {
+             * from: [number, number, number, number, number]
+             * to: [number, number, number, number, number]
+             * }]}
+             */
+            var getUp = function (map3D, layer) {
+                var delta = layer > 0 ? 1 : -1;
+                return Object.entries(map3D).find(function (v) { return v[1].to[4] === v[1].from[4] + delta; });
+            }
+            // 遍历locs的layer，依次修改
+            for (var layer in locs) {
+                var map3D = info.map3D[layer];
+                var l = parseInt(layer);
+                if (!map3D) continue;
+                var data = getUp(map3D, l);
+                if (!data) continue;
+                // 获取from楼层及to楼层的传送位置
+                var from = data[1].from,
+                    to = data[1].to;
+                var s = data[0].split('_');
+                var fLoc = locs[from[4]][s[0]], // fromLoc
+                    tLoc = locs[to[4]][s[2]];
+                var fc = [width[from[4]] / 2, height[from[4]] / 2], // fromCenter
+                    tc = [width[to[4]] / 2, height[to[4]] / 2];
+                var fl = info.floorLoc[layer], // fromFloorLoc
+                    tl = info.floorLoc[layer];
+                var delta = l > 0 ? 1 : -1;
+                // from层在绘制时相对于正中心的位置
+                var fromPixel = [fLoc[0] - fc[0] + fl[0], fLoc[1] - fc[1] + fl[1]],
+                    toPixel = [tLoc[0] - tc[0] + tl[0], tLoc[1] - tc[1] + tl[1]];
+                var dx = (toPixel[0] - fromPixel[0]) * delta,
+                    dy = (toPixel[1] - fromPixel[1]) * delta;
+                // 然后是斜二测画法引起的误差
+                var fy = (fLoc[1] - fc[1]) * 0.3535533905932738,
+                    ty = (tLoc[1] - tc[1]) * 0.3535533905932738;
+                dx += (fy - ty) * delta;
+                dy += (fy - ty) * delta;
+                var target = l > 0 ? l : l - 1;
+                translate[target] = [dx, dy];
+            }
+
+            info.translate = translate;
+            return info;
         }
 
         /** 
@@ -2726,7 +2733,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          */
         function draw3D (info, scale) {
             var info3D = extract3D(info);
-            var t = info.translate;
             // 先绘制所有地图，再绘制不同高度间的楼层连线
             for (var layer in info.locs) {
                 var map = info.locs[layer];
@@ -2734,13 +2740,15 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 var height = info.height[layer];
                 var lines = info.lines[layer];
                 var center = info.floorLoc[layer];
-                var delta = t[layer] || { x: 0, y: 0 };
+                var t = info.translate[layer] || [0, 0];
                 drawMap({
                     locs: map,
                     lines: lines,
                     width: width,
                     height: height
-                }, scale, parseInt(layer), center[0] + delta.x, center[1] + delta.y);
+                }, scale, parseInt(layer),
+                    center[0] + t[0],
+                    center[1] + t[1]);
             }
             // 绘制连线
             for (var layer in info3D) {
@@ -2787,7 +2795,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          * }} info 地图绘制信息
          * @param {number} scale 地图的绘制比例
          * @param {number} layer 绘制的层，用于3D绘图
-         * @param {number} x 3D绘图时的中心坐标
+         * @param {number} x 3D绘图时的偏移坐标
          * @param {number} y
          */
         function drawMap (info, scale, layer, x, y) {
@@ -2801,8 +2809,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             var w = info.width * scale,
                 h = info.height * scale;
             var id = '__flyMap_' + layer + '__';
-            var cx = size / 2 - w / 2 + x,
-                cy = size / 2 - h / 2 + y;
+            var cx = size / 2 - w / 2 + x * scale,
+                cy = size / 2 - h / 2 + y * scale;
             var map = new Sprite(cx, cy, w, h, 500 + layer * 2, 'game', id);
             var opacity = 1 - Math.abs(cy + h / 2 - size / 2) / size * 2;
             sprites[id] = map;
@@ -2869,23 +2877,30 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             var allX = info.map(function (v) { return [v[0], v[2]]; }).flat();
             var allY = info.map(function (v) { return [v[1], v[3]]; }).flat();
             var size = core.__PIXELS__;
-            var left = Math.min.apply(this, allX) + size / 2 - 1,
-                right = Math.max.apply(this, allX) + size / 2 + 1,
-                up = Math.min.apply(this, allY) + size / 2 - 1,
-                down = Math.max.apply(this, allY) + size / 2 + 1;
-            var cx = (left + right) / 2 * nowScale,
-                cy = (up + down) / 2 * nowScale;
-            var w = (right - left) * nowScale,
-                h = (down - up) * nowScale;
+            var s = nowScale;
+            var left = Math.min.apply(this, allX) - 1,
+                right = Math.max.apply(this, allX) + 1,
+                up = Math.min.apply(this, allY) - 1,
+                down = Math.max.apply(this, allY) + 1;
+            var w = (right - left) * s,
+                h = (down - up) * s;
             // 开始绘制
             var id = '__flyLine_' + layer + '__';
-            var line = new Sprite(cx - w / 2, cy - h / 2, w, h, 501 + layer * 2, 'game', id);
-            canDrag[id] = line;
+            var line = new Sprite(
+                (left + right) / 2 * s + size / 2 - w / 2,
+                (up + down) / 2 * s + size / 2 - h / 2,
+                w, h, 501 + layer * 2, 'game', id
+            );
+            sprites[id] = canDrag[id] = line;
             var ctx = line.context;
             var l = info.length;
             for (var i = 0; i < l; i++) {
                 var data = info[i];
-                core.drawLine(ctx, data[0], data[1], data[2], data[3], '#fff', nowScale / 2);
+                data[0] -= left;
+                data[1] -= up;
+                data[2] -= left;
+                data[3] -= up;
+                core.drawLine(ctx, data[0] * s, data[1] * s, data[2] * s, data[3] * s, '#fff', s / 2);
             }
         }
 
@@ -2909,6 +2924,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          * 检查是否需要绘制缩略图
          */
         function checkThumbnail () {
+            if (is3D) return;
             var id = drawingMap + '_' + nowDepth;
             var locs = drawCache[id].locs;
             for (var layer in locs) {
@@ -2982,8 +2998,13 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         /** 关闭事件 */
         function close () {
             Object.values(sprites).forEach(function (v) {
-                v.setCss('opacity: 0;');
+                v.setCss('transition: opacity 0.6s linear;');
             });
+            setTimeout(function () {
+                Object.values(sprites).forEach(function (v) {
+                    v.setCss('opacity: 0;');
+                });
+            }, 50);
             setTimeout(function () {
                 core.unlockControl();
                 Object.values(sprites).forEach(function (v) {
@@ -2994,7 +3015,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 canDrag = {};
                 status = 'none';
                 core.canvas.data.canvas.style.zIndex = '170';
-            }, 600);
+            }, 650);
         }
 
         /** 
@@ -3122,7 +3143,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 sprite.x += dx;
                 sprite.y += dy;
                 core.relocateCanvas(ctx, dx, dy, true);
-                if (is3D && /__flyMap_-?[0-9]+__/.test(id)) {
+                if (is3D && /__fly(Map|Line)_-?[0-9]+__/.test(id)) {
                     var size = core.__PIXELS__;
                     var opacity = 1 - Math.abs(sprite.y + sprite.height / 2 - size / 2) / size * 2;
                     sprite.setCss('opacity:' + opacity + ';');
@@ -3141,7 +3162,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             if (!checkMaximum(nowScale, target)) return;
             drawedThumbnail = {};
             status = 'scale';
-            core.drawFlyMap(drawingMap, nowDepth, false, target);
+            core.drawFlyMap(drawingMap, nowDepth, false, target, is3D);
             status = 'flyMap';
             // 更正sprite位置
             for (var id in canDrag) {
@@ -3150,6 +3171,11 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 sprite.x = info[id][0] - sprite.width / 2;
                 sprite.y = info[id][1] - sprite.height / 2;
                 core.relocateCanvas(ctx, info[id][0] - sprite.width / 2, info[id][1] - sprite.height / 2);
+                if (is3D && /__fly(Map|Line)_-?[0-9]+__/.test(id)) {
+                    var size = core.__PIXELS__;
+                    var opacity = 1 - Math.abs(sprite.y + sprite.height / 2 - size / 2) / size * 2;
+                    sprite.setCss('opacity:' + opacity + ';');
+                }
             }
             checkThumbnail();
         }
