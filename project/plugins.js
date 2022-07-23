@@ -6,15 +6,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
     "sprite": function () {
         var count = 0;
 
-        /** 创建一个sprite画布
-         * @param {number} x
-         * @param {number} y
-         * @param {number} w
-         * @param {number} h
-         * @param {number} z
-         * @param {'game' | 'window'} reference 参考系，游戏画面或者窗口
-         * @param {string} name 可选，sprite的名称，方便通过core.dymCanvas获取
-         */
         function Sprite (x, y, w, h, z, reference, name) {
             this.x = x;
             this.y = y;
@@ -26,7 +17,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             this.context = null;
             this.count = 0;
             this.name = name;
-            /** 初始化 */
             this.init = function () {
                 if (reference === 'window') {
                     var canvas = document.createElement('canvas');
@@ -51,9 +41,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             }
             this.init();
 
-            /** 设置css特效
-             * @param {string} css
-             */
             this.setCss = function (css) {
                 css = css.replace('\n', ';').replace(';;', ';');
                 var effects = css.split(';');
@@ -70,9 +57,35 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     var canvas = self.canvas;
                     if (name in canvas.style) canvas.style[name] = value;
                 });
+                return this;
             }
 
-            /** 删除 */
+            this.move = function (x, y, isDelta) {
+                if (x !== undefined && x !== null) this.x = x;
+                if (y !== undefined && y !== null) this.y = y;
+                if (this.reference === 'window') {
+                    var ele = this.canvas;
+                    ele.style.left = x + (isDelta ? parseFloat(ele.style.left) : 0) + 'px';
+                    ele.style.top = y + (isDelta ? parseFloat(ele.style.top) : 0) + 'px';
+                } else core.relocateCanvas(this.context, x, y, isDelta);
+                return this;
+            }
+
+            this.resize = function (w, h, styleOnly) {
+                if (w !== undefined && w !== null) this.w = w;
+                if (h !== undefined && h !== null) this.h = h;
+                if (reference === 'window') {
+                    var ele = this.canvas;
+                    ele.style.width = w + 'px';
+                    ele.style.height = h + 'px';
+                    if (!styleOnly) {
+                        ele.width = w;
+                        ele.height = h;
+                    }
+                } else core.resizeCanvas(this.context, x, y, styleOnly);
+                return this;
+            }
+
             this.destroy = function () {
                 if (this.reference === 'window') {
                     if (this.canvas) document.body.removeChild(this.canvas);
@@ -81,14 +94,12 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 }
             }
 
-            /** 添加事件监听器 */
             this.addEventListener = function () {
-                return document.addEventListener.apply(this.canvas, arguments);
+                this.canvas.addEventListener.apply(this.canvas, arguments);
             }
 
-            /** 移除事件监听器 */
             this.removeEventListener = function () {
-                return document.removeEventListener.apply(this.canvas, arguments);
+                this.canvas.removeEventListener.apply(this.canvas, arguments);
             }
         }
 
@@ -2643,16 +2654,16 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                         tw = info.width[l + 1],
                         th = info.height[l + 1];
                     // 先计算from层和to层相对中心位置的坐标，然后再加上translate
-                    var fromPixel = [fLoc[0] + ffl[0] - fw / 2 + from[0], fLoc[1] + ffl[1] - fh / 2 + from[1]],
-                        toPixel = [tLoc[0] + tfl[0] - tw / 2 + to[0], tLoc[1] + tfl[1] - th / 2 + to[1]];
+                    var fromPixel = [fLoc[0] + ffl[0] - fw, fLoc[1] + ffl[1] - fh / 2],
+                        toPixel = [tLoc[0] + tfl[0] - tw, tLoc[1] + tfl[1] - th / 2];
                     var ft = info.translate[layer] || [0, 0],
                         tt = info.translate[l + 1] || [0, 0];
                     // 然后是斜二测引起的误差，仅有目标传送点与当前楼层中心之间的误差
                     var fd = (from[1] - from[3] / 2) * 0.3535533905932738,
                         td = (to[1] - to[3] / 2) * 0.3535533905932738;
-                    var fx = fromPixel[0] + ft[0] + fd,
+                    var fx = fromPixel[0] + ft[0] + from[0] + fd,
                         fy = fromPixel[1] + ft[1] + fd,
-                        tx = toPixel[0] + tt[0] + td,
+                        tx = toPixel[0] + tt[0] + to[0] + td,
                         ty = toPixel[1] + tt[1] + td;
                     var half = (fy + ty) / 2;
                     if (fx === tx) line3D[layer].push([fx, fy, tx, ty]);
@@ -2681,7 +2692,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
 
             /** 
              * 获取3D连线中为上楼或下楼的
-             * @param {DrawInfo['map3D']}
+             * @param {DrawInfo['map3D']} map3D
              * @returns {[string, {
              * from: [number, number, number, number, number]
              * to: [number, number, number, number, number]
@@ -2709,18 +2720,22 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 var fl = info.floorLoc[layer], // fromFloorLoc
                     tl = info.floorLoc[layer];
                 var delta = l > 0 ? 1 : -1;
-                // from层在绘制时相对于正中心的位置
+                // from层在绘制时相对于正中心的位置，画图得公式
                 var fromPixel = [fLoc[0] - fc[0] + fl[0], fLoc[1] - fc[1] + fl[1]],
                     toPixel = [tLoc[0] - tc[0] + tl[0], tLoc[1] - tc[1] + tl[1]];
                 var dx = (toPixel[0] - fromPixel[0]) * delta,
                     dy = (toPixel[1] - fromPixel[1]) * delta;
-                // 然后是斜二测画法引起的误差
+                // 然后是斜二测画法引起的误差，画图得公式
                 var fy = (fLoc[1] - fc[1]) * 0.3535533905932738,
                     ty = (tLoc[1] - tc[1]) * 0.3535533905932738;
                 dx += (fy - ty) * delta;
-                dy += (fy - ty) * delta;
-                var target = l > 0 ? l : l - 1;
-                translate[target] = [dx, dy];
+                dy += (fy - ty + (tc[1] - fc[1]) * 0.3535533905932738) * delta;
+                // 楼层中心已对齐，还差具体位置
+                var fd = (from[1] - from[3] / 2) * 0.3535533905932738 * delta,
+                    td = (to[1] - to[3] / 2) * 0.3535533905932738 * delta;
+                dy -= fd - td;
+                dx += fd - td - (from[0] - from[2] / 2 - to[0] + to[2] / 2) * delta;
+                translate[l + delta] = [dx, dy];
             }
 
             info.translate = translate;
@@ -2884,13 +2899,13 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 down = Math.max.apply(this, allY) + 1;
             var w = (right - left) * s,
                 h = (down - up) * s;
+            var cx = (left + right) / 2 * s + size / 2 - w / 2,
+                cy = (up + down) / 2 * s + size / 2 - h / 2;
             // 开始绘制
             var id = '__flyLine_' + layer + '__';
-            var line = new Sprite(
-                (left + right) / 2 * s + size / 2 - w / 2,
-                (up + down) / 2 * s + size / 2 - h / 2,
-                w, h, 501 + layer * 2, 'game', id
-            );
+            var opacity = 1 - Math.abs(cy + h / 2 - size / 2) / size * 2;
+            var line = new Sprite(cx, cy, w, h, 501 + layer * 2, 'game', id);
+            line.setCss('opacity: ' + opacity + ';');
             sprites[id] = canDrag[id] = line;
             var ctx = line.context;
             var l = info.length;

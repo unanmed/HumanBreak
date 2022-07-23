@@ -2984,7 +2984,8 @@ declare class Sprite {
     name: string
     readonly count: number
 
-    /** 创建一个sprite画布
+    /** 
+     * 创建一个sprite画布
      * @param reference 参考系，游戏画面或者窗口
      * @param name 可选，sprite的名称，方便通过core.dymCanvas获取
      */
@@ -2994,7 +2995,19 @@ declare class Sprite {
     init(): void
 
     /** 设置css特效 */
-    setCss(css: string): void
+    setCss(css: string): Sprite
+
+    /** 
+     * 移动sprite
+     * @param isDelta 是否是相对位置，如果是，那么sprite会相对于原先的位置进行移动
+     */
+    move(x: number, y: number, isDelta?: boolean): Sprite
+
+    /**
+     * 重新设置sprite的大小
+     * @param {boolean} styleOnly 是否只修改css效果，如果是，那么将会不高清，如果不是，那么会清空画布
+     */
+    resize(w: number, h: number, styleOnly?: boolean): Sprite
 
     /** 删除 */
     destroy(): void

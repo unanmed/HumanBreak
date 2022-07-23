@@ -54,14 +54,18 @@ main.floors.tower2=
     "fgmap": [
 
 ],
-    "bg2map": [],
-    "fg2map": [],
+    "bg2map": [
+
+],
+    "fg2map": [
+
+],
     "cannotMoveIn": {},
     "changeFloor": {
         "7,1": {
             "floorId": "tower1",
             "loc": [
-                7,
+                1,
                 1
             ]
         },
