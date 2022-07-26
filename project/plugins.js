@@ -1,3 +1,4 @@
+///<reference path='../runtime.d.ts'/>
 var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
     "init": function () {
         console.log("插件编写测试");
@@ -2354,7 +2355,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          * @param {string?} center 中心地图id
          * @param {number?} depth 搜索深度
          * @param {boolean?} noCache 是否不使用缓存
-         * @returns {DrawInfo}
+         * @returns {MapDrawInfo}
          */
         this.getMapDrawInfo = function (center, depth, noCache) {
             center = center || core.status.floorId;
@@ -2458,7 +2459,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          * @param {{[x: string]: string}} map 要绘制的地图，格式：floorId_x_y_dir: floorId_x_y
          * @param {string} center 中心地图的id
          * @param {string[]} order 遍历顺序
-         * @returns {DrawInfo} 地图的绘制信息
+         * @returns {MapDrawInfo} 地图的绘制信息
          */
         function getDrawInfo (map, center, order) {
             // 先根据地图id分类，从而确定每个地图连接哪些地图，同时方便处理
@@ -2625,7 +2626,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
 
         /** 
          * 解析3D地图绘制信息
-         * @param {DrawInfo} info 地图绘制信息
+         * @param {MapDrawInfo} info 地图绘制信息
          * @returns {{[x: number]: [number, number, number, number][]}} 3D连线信息
          */
         function extract3D (info) {
@@ -2679,8 +2680,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
 
         /** 
          * 计算楼层偏移
-         * @param {DrawInfo} info 地图绘制信息
-         * @returns {DrawInfo}
+         * @param {MapDrawInfo} info 地图绘制信息
+         * @returns {MapDrawInfo}
          */
         function calTranslate (info) {
             // 计算方式：计算相连楼层相对于地图中心的位置，然后直接把地图移过去，再计算由于斜二测画法引起的误差
@@ -2744,7 +2745,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
 
         /** 
          * 绘制3D地图
-         * @param {DrawInfo} info 地图绘制信息
+         * @param {MapDrawInfo} info 地图绘制信息
          */
         function draw3D (info, scale) {
             var info3D = extract3D(info);
@@ -3007,6 +3008,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 var valid = canvasTest([w, h]);
                 if (!valid) return false;
             }
+            core.drawTip('画布大小超过浏览器限制！请勿继续放大！');
             return true;
         }
 
@@ -3209,7 +3211,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             ele.addEventListener('touchend', function () { lastTouch = {}; lastLength = 0; });
         }
 
-        // rewrite
+        // rewrite，可以绘制长方形的缩略图，去掉四周的黑边
         maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
             var ctx = core.getContextByName(options.ctx);
             if (ctx == null) return;
@@ -6985,6 +6987,22 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     flags.finishChase = true;
                 }
             });
+        }
+    },
+    'xxx': function () {
+        this.showText = function (text) {
+            var width = core.calWidth(core.canvas.ui, text, '40px Verdana');
+            var t = new Sprite(208 - width / 2 - 10, 168, width + 20, 80, 200, 'game', '_text');
+            var ctx = t.context;
+            ctx.textBaseline = 'middle';
+            ctx.textAlign = 'center';
+            t.setCss(
+                'transition: left 1.2s ease-in, opacity 0.8s linear;' +
+                'opacity: 0;'
+            );
+            core.fillBoldText(ctx, text, width / 2, 40, '#fff', '#000', '40px Verdana');
+            setTimeout(function () { t.setCss('opacity: 1;'); }, 50);
+            setTimeout(function () { t.move(416, 168); }, 2000);
         }
     }
 }
