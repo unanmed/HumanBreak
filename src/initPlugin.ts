@@ -1,9 +1,10 @@
 // 需要引入所有的插件
-import pop from './plugin/template';
+import pop from './plugin/pop';
+import ui from './plugin/uiController';
 
 window.addEventListener('load', () => {
     // 每个引入的插件都要在这里执行，否则不会被转发
-    const toForward = [pop()];
+    const toForward: any[] = [pop(), ui()];
 
     // 初始化所有插件，并转发到core上
     (async function () {

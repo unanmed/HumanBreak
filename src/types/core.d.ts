@@ -1,4 +1,4 @@
-type core = {
+type Core = {
     /** 地图的格子宽度 */
     readonly _WIDTH_: number;
     /** 地图的格子高度 */
@@ -186,10 +186,10 @@ type core = {
     actions &
     Forward<PluginDeclaration>;
 
-type main = {
+type Main = {
     /** 是否在录像验证中 */
     readonly replayChecking: boolean;
-    readonly core: core;
+    readonly core: Core;
     readonly dom: { [key: string]: HTMLElement };
     /** 游戏版本，发布后会被随机，请勿使用该属性 */
     readonly version: string;
@@ -313,7 +313,7 @@ declare class Sprite {
     removeEventListenr: HTMLCanvasElement['addEventListener'];
 }
 
-declare let main: main;
-declare let core: core;
-declare let flags: { [x: string]: any };
-declare let hero: HeroStatus;
+declare const main: main;
+declare const core: Core;
+declare const flags: { [x: string]: any };
+declare const hero: HeroStatus;
