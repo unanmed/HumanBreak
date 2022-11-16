@@ -131,7 +131,7 @@ declare class enemys {
      * @param floorId 地图id，可选
      * @returns 敌人集合，按伤害升序排列，支持多朝向怪合并
      */
-    getCurrentEnemys(floorId?: string): Enemy[];
+    getCurrentEnemys(floorId?: string): (Enemy & DetailedEnemy)[];
 
     /**
      * 检查某些楼层是否还有漏打的（某种）敌人

@@ -374,7 +374,7 @@ main.prototype.loadFloors = function (callback) {
     // 高层塔优化
     var script = document.createElement('script');
     script.src =
-        '__all_floors__.js?v=' +
+        '/all/__all_floors__.js?v=' +
         this.version +
         '&id=' +
         main.floorIds.join(',');

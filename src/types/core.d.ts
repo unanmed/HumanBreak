@@ -161,6 +161,10 @@ type Core = {
         readonly icons: { [x: string]: HTMLImageElement };
     };
 
+    readonly values: {
+        animateSpeed: number;
+    };
+
     readonly materials: string[];
 
     readonly control: control;
@@ -317,3 +321,7 @@ declare const main: main;
 declare const core: Core;
 declare const flags: { [x: string]: any };
 declare const hero: HeroStatus;
+
+interface Window {
+    readonly core: Core;
+}

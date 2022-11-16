@@ -1,5 +1,5 @@
 export default function init() {
-    return { useDrag, useWheel };
+    return { useDrag, useWheel, isMobile };
 }
 
 /**
@@ -55,3 +55,8 @@ export function useWheel(
         fn(e.deltaX, e.deltaY, e.deltaZ, e);
     });
 }
+
+/**
+ * 是否是移动设备
+ */
+export const isMobile = matchMedia('(max-width: 600px)').matches;

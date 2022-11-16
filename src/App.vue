@@ -19,4 +19,11 @@ import { uiStack } from './plugin/uiController';
     justify-content: center;
     overflow: hidden;
 }
+
+@media screen and(max-width:600px) {
+    #ui {
+        width: 100%;
+        height: 100%;
+    }
+}
 </style>

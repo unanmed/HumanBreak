@@ -263,7 +263,7 @@ async function extract(...dirs) {
                 });
             } else if (/\/\*.\w+$/.test(v)) {
                 // 匹配文件夹中的后缀名
-                const suffix = /.\w+$/.exec(v)[0];
+                const suffix = /\.\w+$/.exec(v)[0];
                 const d = v.split(`/*${suffix}`)[0];
                 const dir = path.resolve(__dirname, d);
                 fs.readdir(dir).then(files => {
@@ -314,14 +314,12 @@ async function watch() {
     });
 
     // 楼层，热重载
-    const floors = await extract('project/floors/');
-    floors.forEach(v => {
-        const dir = path.resolve(__dirname, v);
-        fss.watchFile(dir, option, () => {
-            const floorId = /\/\w+.js$/.exec(v)[0].slice(1, -3);
-            hotReloadData += `@@floor:${floorId}`;
-            console.log(`floor hot reload: ${floorId}`);
-        });
+    fss.watch(path.resolve(__dirname, 'project/floors/'), (a, b) => {
+        if (!/^\w+\.js$/.test(b)) return;
+        const floorId = b.slice(0, -3);
+        if (hotReloadData.includes(`@@floor:${floorId}`)) return;
+        hotReloadData += `@@floor:${floorId}`;
+        console.log(`floor hot reload: ${floorId}`);
     });
 
     // 脚本编辑 及 插件 热重载

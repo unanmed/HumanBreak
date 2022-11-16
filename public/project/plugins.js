@@ -9016,11 +9016,13 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 core.status.maps[data] = floor;
                 delete core.status.mapBlockObjs[data];
                 core.extractBlocks(data);
-                core.drawMap(data);
-                core.setWeather(
-                    core.animateFrame.weather.type,
-                    core.animateFrame.weather.level
-                );
+                if (data === core.status.floorId) {
+                    core.drawMap(data);
+                    core.setWeather(
+                        core.animateFrame.weather.type,
+                        core.animateFrame.weather.level
+                    );
+                }
                 core.updateStatusBar(true, true);
             }
             console.log(`hot reload floor: ${data}`);
@@ -9187,5 +9189,127 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 }, 1000);
             }
         })();
+    },
+    hide: function () {
+        if (main.mode === 'editor' || main.replayChecking) return;
+        /**
+         * 所有的会被视为房间的墙
+         */
+        const WALLS = [
+            'yellowWall',
+            'yellowDoor',
+            'blueDoor',
+            'redDoor',
+            'greenDoor'
+        ];
+        /**
+         * 房间的最大大小
+         */
+        const MAX_AREA = 25;
+        /**
+         * 要隐藏的点
+         */
+        const HIDE_POS = [
+            ['MT1', 2, 3],
+            ['MT2', 4, 5],
+            ['MT3', 7, 1]
+        ];
+
+        let showed = {};
+
+        /// 初始化游戏
+        events.prototype.resetGame = function (
+            hero,
+            hard,
+            floorId,
+            maps,
+            values
+        ) {
+            this.eventdata.resetGame(hero, hard, floorId, maps, values);
+            showed = core.getFlag('__showed__', {});
+            flags.__showed__ = flags.__showed__ ?? {};
+            hide();
+        };
+
+        /**
+         * 显示一个区域
+         * @param {string} floor
+         * @param {number} x
+         * @param {number} y
+         */
+        this.showHidden = function (floor, x, y) {
+            const pos = bfs(floor, x, y);
+            for (const [x, y] of pos) {
+                core.setBgFgBlock('fg', 0, x, y, floor);
+                const id = `${floor}_${x}_${y}`;
+                showed[id] = true;
+                flags.__showed__[id] = true;
+            }
+        };
+
+        /**
+         * 隐藏
+         */
+        function hide() {
+            for (const pos of HIDE_POS) {
+                const id = pos.join('_');
+                if (showed[id]) continue;
+                const p = bfs(...pos);
+                if (p.length >= MAX_AREA) continue;
+                for (const [x, y] of p) {
+                    core.setBgFgBlock('fg', 4, x, y, pos[0]);
+                    const id = `${pos[0]}_${x}_${y}`;
+                    showed[id] = true;
+                    flags.__showed__[id] = false;
+                }
+            }
+        }
+
+        /**
+         * @returns {[number, number][]}
+         */
+        function bfs(floorId, x, y) {
+            core.extractBlocks(floorId);
+            const blocks = core.getMapBlocksObj(floorId);
+            const mapped = {
+                [`${x},${y}`]: true
+            };
+            const queue = [[x, y]];
+            /** @type {[direction, number, number][]} */
+            const dir = Object.entries(core.utils.scan).map(v => [
+                v[0],
+                v[1].x,
+                v[1].y
+            ]);
+            const res = [[x, y]];
+
+            while (queue.length > 0) {
+                const [nx, ny] = queue.shift();
+                dir.forEach(v => {
+                    const [tx, ty] = [nx + v[1], ny + v[2]];
+                    const floor = core.status.maps[floorId];
+                    if (
+                        tx < 0 ||
+                        ty < 0 ||
+                        tx >= floor.width ||
+                        ty >= floor.height
+                    )
+                        return;
+                    const loc = `${tx},${ty}`;
+                    if (mapped[loc]) return;
+                    const block = blocks[loc];
+                    mapped[loc] = true;
+                    if (!block) {
+                        queue.push([tx, ty]);
+                        res.push([tx, ty]);
+                        return;
+                    }
+                    if (WALLS.includes(block.event.id)) return;
+                    queue.push([tx, ty]);
+                    res.push([tx, ty]);
+                });
+            }
+            return res;
+        }
     }
 };

@@ -4,7 +4,7 @@ type Ref<T> = {
     value: T;
 };
 
-interface PluginDeclaration {
+interface PluginDeclaration extends PluginUtils {
     /**
      * 添加函数  例：添加弹出文字，像这个就可以使用core.addPop或core.plugin.addPop调用
      * @param px 弹出的横坐标
@@ -24,6 +24,9 @@ interface PluginDeclaration {
 
     /** ui栈 */
     readonly uiStack: Ref<Component[]>;
+
+    /** 是否是移动设备 */
+    readonly isMobile: boolean;
 
     /**
      * 向一个元素添加拖拽事件
@@ -48,6 +51,32 @@ interface PluginDeclaration {
         ele: HTMLElement,
         fn: (x: number, y: number, z: number, e: WheelEvent) => void
     ): void;
+
+    /**
+     * 添加一个动画
+     * @param fn 要添加的函数
+     */
+    addAnimate(fn: (time: number) => void);
+
+    /**
+     * 移除一个动画
+     * @param fn 要移除的函数
+     */
+    removeAnimate(fn: (time: number) => void);
+}
+
+interface PluginUtils {
+    /**
+     * 判定一个值是否不是undefined或null
+     * @param value 要判断的值
+     */
+    has<T>(value: T): value is NonNullable<T>;
+
+    /**
+     * 根据伤害大小获取颜色
+     * @param damage 伤害大小
+     */
+    getDamageColor(damage: number): string;
 }
 
 type Forward<T> = {

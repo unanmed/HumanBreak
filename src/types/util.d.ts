@@ -100,7 +100,7 @@ declare class utils {
      * @param onMap 可选，true表示用于地图显伤，结果总字符数最多为5，否则最多为6
      * @returns 格式化结果
      */
-    formatBigNumber(x: number, onMap?: boolean): string;
+    formatBigNumber(x: number, onMap?: boolean, onCritical?: boolean): string;
 
     /** 变速移动 */
     applyEasing(mode?: string): (number) => number;
@@ -402,6 +402,16 @@ type direction = 'up' | 'down' | 'left' | 'right';
 type move = 'forward' | direction;
 type loc = { direction: direction; x: number; y: number };
 type rgbarray = [number, number, number, number];
+type BlockCls =
+    | 'terrain'
+    | 'animate'
+    | 'enemy'
+    | 'item'
+    | 'enemy48'
+    | 'npcs'
+    | 'npc48'
+    | 'autotile'
+    | 'tilesets';
 
 type Events = MotaAction[] | string;
 
@@ -515,7 +525,7 @@ type Enemy = {
     id: string;
     name: string;
     displayIdInBook: string;
-    special: number | number[];
+    special: number[];
     hp: number;
     atk: number;
     def: number;
@@ -523,6 +533,19 @@ type Enemy = {
     exp: number;
     point: number;
     [key: string]: any;
+};
+
+type DetailedEnemy = {
+    name: string;
+    specialText: string[];
+    specialColor: (string | rgbarray)[];
+    damage: number;
+    critical: number;
+    criticalDamage: number;
+    defDamage: number;
+    toShowSpecial?: string[];
+    toShowColor?: any[];
+    damageColor?: string;
 };
 
 type Item = {
