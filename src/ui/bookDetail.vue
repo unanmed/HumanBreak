@@ -53,6 +53,7 @@ import { LeftOutlined, RightOutlined } from '@ant-design/icons-vue';
 import EnemyCritical from '../panel/enemyCritical.vue';
 import { KeyCode } from '../plugin/keyCodes';
 import { keycode } from '../plugin/utils';
+import { sleep } from 'mutate-animate';
 
 const enemy = core.plugin.bookDetailEnemy;
 const top = ref(core.plugin.bookDetailPos);
@@ -81,7 +82,7 @@ function key(e: KeyboardEvent) {
     }
 }
 
-onMounted(() => {
+onMounted(async () => {
     top.value = 0;
     detail = document.getElementById('detail') as HTMLDivElement;
     detail.style.opacity = '1';
@@ -90,6 +91,8 @@ onMounted(() => {
 
     let moved = false;
     let pos = [0, 0];
+
+    await sleep(600);
 
     useDrag(
         detail,
@@ -182,7 +185,7 @@ onUnmounted(() => {
     opacity: 0;
 }
 
-@media screen and(max-width:600px) {
+@media screen and (max-width: 600px) {
     #detail {
         width: 95%;
         height: 100%;

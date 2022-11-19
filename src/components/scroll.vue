@@ -35,6 +35,7 @@ const canvasAttr = props.type === 'horizontal' ? 'width' : 'height';
 
 let ctx: CanvasRenderingContext2D;
 let content: HTMLDivElement;
+let fromSelf = false;
 
 const resize = () => {
     calHeight();
@@ -89,6 +90,7 @@ function scroll() {
 }
 
 onUpdated(() => {
+    if (fromSelf) return;
     now = props.now ?? now;
     content.style.transition = `${cssTarget} 0.2s ease-out`;
     calHeight();
@@ -105,7 +107,6 @@ function canvasDrag(x: number, y: number) {
     last = d;
     if (ctx.canvas[canvasAttr] < total * scale)
         now += ((dy * total) / ctx.canvas[canvasAttr]) * scale;
-    content.style.transition = '';
     scroll();
 }
 
@@ -115,7 +116,6 @@ function contentDrag(x: number, y: number) {
     const dy = d - contentLast;
     contentLast = d;
     if (ctx.canvas[canvasAttr] < total * scale) now -= dy;
-    content.style.transition = '';
     scroll();
 }
 
@@ -149,10 +149,13 @@ onMounted(() => {
         canvas,
         canvasDrag,
         (x, y) => {
+            fromSelf = true;
             last = props.type === 'horizontal' ? x : y;
+            content.style.transition = '';
         },
         () => {
             setTimeout(() => emits('update:drag', false));
+            fromSelf = false;
         },
         true
     );
@@ -162,15 +165,19 @@ onMounted(() => {
         content,
         contentDrag,
         (x, y) => {
+            fromSelf = true;
             contentLast = props.type === 'horizontal' ? x : y;
+            content.style.transition = '';
         },
         () => {
             setTimeout(() => emits('update:drag', false));
+            fromSelf = false;
         },
         true
     );
 
     useWheel(content, (x, y) => {
+        fromSelf = true;
         const d = x !== 0 ? x : y;
         if (Math.abs(d) > 50) {
             content.style.transition = `${cssTarget} 0.2s ease-out`;
@@ -179,6 +186,7 @@ onMounted(() => {
         }
         now += d;
         scroll();
+        fromSelf = false;
     });
 });
 
