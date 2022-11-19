@@ -56,7 +56,9 @@ export function getDefDamage(
     let origin: number | undefined;
     let last = 0;
 
-    for (let i = 0; i <= 100; i++) {
+    const max = 100 - Math.floor(addDef / ratio);
+
+    for (let i = 0; i <= max; i++) {
         const dam = core.getDamageInfo(enemy, {
             def: core.status.hero.def + ratio * i + addDef,
             atk: core.status.hero.atk + addAtk
@@ -77,6 +79,11 @@ export function getDefDamage(
         last = dam.damage;
         res.push([ratio * i + addDef, dam.damage]);
     }
+
+    if ((res.at(-1)?.[1] ?? 1) <= 0) {
+        res.push([res.at(-1)![0] + 1, 0]);
+    }
+
     return res;
 }
 
@@ -95,16 +102,18 @@ export function getCriticalDamage(
     let origin: number | undefined;
     let last = 0;
 
-    for (let i = 0; i <= 100; i++) {
+    const max = 100 - Math.floor(addAtk / ratio);
+
+    for (let i = 0; i <= max; i++) {
         const dam = core.getDamageInfo(enemy, {
             atk: core.status.hero.atk + ratio * i + addAtk,
             def: core.status.hero.def + addDef
         });
 
-        if (i === 0) {
+        if (res.length === 0) {
             origin = dam?.damage;
             if (has(origin)) {
-                res.push([addAtk, origin]);
+                res.push([addAtk + i * ratio, origin]);
                 last = origin;
             }
             continue;
@@ -112,9 +121,13 @@ export function getCriticalDamage(
         if (!has(dam)) continue;
         if (dam.damage === origin) continue;
         if (dam.damage === res.at(-1)?.[1]) continue;
-        if (dam.damage <= 0) break;
+        if (last <= 0) break;
         last = dam.damage;
         res.push([ratio * i + addAtk, dam.damage]);
+    }
+
+    if ((res.at(-1)?.[1] ?? 1) <= 0) {
+        res.push([res.at(-1)![0] + 1, 0]);
     }
 
     return res;

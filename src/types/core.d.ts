@@ -1,3 +1,16 @@
+/// <reference path="./action.d.ts" />
+/// <reference path="./control.d.ts" />
+/// <reference path="./enemy.d.ts" />
+/// <reference path="./event.d.ts" />
+/// <reference path="./icon.d.ts" />
+/// <reference path="./item.d.ts" />
+/// <reference path="./loader.d.ts" />
+/// <reference path="./map.d.ts" />
+/// <reference path="./plugin.d.ts" />
+/// <reference path="./status.d.ts" />
+/// <reference path="./ui.d.ts" />
+/// <reference path="./util.d.ts" />
+
 type Core = {
     /** 地图的格子宽度 */
     readonly _WIDTH_: number;

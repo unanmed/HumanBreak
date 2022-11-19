@@ -1,2 +1,2 @@
 vite.config.ts
-public/project/*.js
+public/project/data.js

@@ -1,3 +1,5 @@
+///<reference path="../../src/types/core.d.ts" />
+
 var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
     init: function () {
         this._afterLoadResources = function () {};
@@ -1367,6 +1369,1332 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 return step == 16;
             }
             return false;
+        };
+    },
+    minimap: function () {
+        // 该插件可自定义空间很大，自定义内容请看注释
+
+        // ------------------------- 安装说明 ------------------------- //
+        // 先安装基于canvas的sprite化插件（2.10.0以上自带）
+        // 确保自己的编辑器已安装造塔群内的编辑器升级压缩包（在HTML5魔塔样板文件夹内，2.10.1以上样板自带）
+        // 再将以下代码复制进插件中
+        // 提供的api请看以this.xxx = function开头的函数，函数前会有函数说明及参数说明，调用时只需core.plugin.xxx(参数)即可
+
+        // ------------------------- 使用说明 ------------------------- //
+        /*
+         * 直接复制进插件中，然后添加一个快捷键或道具效果为core.plugin.drawFlyMap()即可使用，不需额外设置
+         * 楼层id中不要出现下划线
+         * 该插件具体功能有：
+         * 1.绘制区域内的地图
+         * 2.可以拖动地图
+         * 3.点击地图可直接传送至目标地图，同时降低背景的不透明度，方便观察
+         * 4.滚轮或双指可以放缩绘制内容
+         * 5.放缩较大时，绘制地图的缩略图，可能会比较卡，但移动不会卡
+         * 6.整合漏怪检测，如果想忽略怪物，请在下方改动或用脚本修改core.plugin.ignoreEnemies，类型为数组
+         * 7.整合区域显示，所有单独或连在一起的地图会被视为一个区域
+         * 8.键盘操作，上下左右移动
+         */
+
+        // ------------------------- 插件说明 ------------------------- //
+        /*
+         * 该插件注释极其详细，可以帮助那些想要提升代码力，但实力有不足的作者
+         * 注意！！！该插件难度极大，没有代码底力的不建议研究
+         * 该插件涉及部分较为高级的算法，如bfs
+         */
+
+        // 录像验证直接干掉这个插件
+        if (main.replayChecking || main.mode === 'editor') return;
+
+        // ----- 不可自定义 杂七杂八的变量
+        /** @type {{[x: string]: BFSResult}} */
+        let mapCache = {}; // 地图缓存
+        let drawCache = {}; // 绘制信息缓存
+        let status = 'none'; // 当前的绘制状态
+        /** @type {{[x: string]: Sprite}} */
+        let sprites = {}; // 当前所有的sprite
+        /** @type {{[x: string]: Sprite}} */
+        let canDrag = {}; // 可以拖拽的sprite
+        /** @type {{[x: string]: Button}} */
+        let areaSprite = {}; // 区域列表对应的sprite
+        let clicking = false; // 是否正在点击，用于拖拽判定
+        let drawingMap = ''; // 正在绘制的中心楼层
+        let nowScale = 0; // 当前绘制的放缩比例
+        let lastTouch = {}; // 上一次的单点点击信息
+        let lastLength = 0; // 手机端缩放时上一次的两指间距离
+        let nowDepth = 0; // 当前的遍历深度
+        let drawedThumbnail = {}; // 已经绘制过的缩略图
+        let moved = false; // 鼠标按下后是否移动了
+        let noBorder = false; // 是否是无边框拼接模式
+        let lastScale = 0; // 上一次缩放，用于优化缩略图绘制
+        let showEnemy = false; // 是否显示漏怪
+        let areaPage = 0; // 区域显示的当前页数
+        let nowArea = 0; // 当前区域index
+        let selecting = ''; // 选择时当前正在选择的地图
+
+        // ---- 不可自定义，常量
+        /** @type {Area} */
+        let areas = []; // 区域信息
+        const perPage = Math.floor((core._PY_ - 60) / 30); // 区域的每页显示数量
+
+        // ---- 可自定义，默认的切换地图的图块id
+        const defaultChange = {
+            left: 'leftPortal', // 左箭头
+            up: 'upPortal', // 上箭头
+            right: 'rightPortal', // 右箭头
+            down: 'downPortal', // 下箭头
+            upFloor: 'upFloor', // 上楼
+            downFloor: 'downFloor' // 下楼
+        };
+        // ---- 可自定义，默认数值
+        const defaultValue = {
+            font: 'Verdana', // 默认字体
+            scale: 3, // 默认地图缩放比例
+            depth: Infinity // 默认的遍历深度
+        };
+
+        // ---- 不可自定义，计算数据
+        const dirData = {
+            up: [1, 0],
+            down: [-1, 0],
+            left: [0, 1],
+            right: [0, -1],
+            upFloor: [0, 0],
+            downFloor: [0, 0]
+        };
+
+        let ignoreEnemies = (this.ignoreEnemies = []);
+
+        let allChangeEntries = Object.entries(defaultChange);
+
+        const reset = core.events.resetGame;
+        core.events.resetGame = function () {
+            reset.apply(core.events, arguments);
+            areas = [];
+            // 获取所有分区，使用异步函数，保证不会卡顿
+            // 原理是用bfs扫，将所有连在一起的地图合并成一个区域
+            (async function () {
+                let all = core.floorIds.slice();
+                const scanned = { [all[0]]: true };
+                while (all.length > 0) {
+                    let now = all.shift();
+                    if (core.status.maps[now].deleted) continue;
+                    if (!now) return;
+                    await new Promise(res => {
+                        const result = bfsSearch(now, Infinity, true);
+                        mapCache[`${now}_Infinity_false`] = result;
+                        areas.push({
+                            name: core.floors[now].title,
+                            maps: result.order
+                        });
+                        for (const map of result.order) {
+                            scanned[map] = true;
+                            all = all.filter(v => !result.order.includes(v));
+                        }
+                        res('success');
+                    });
+                }
+            })();
+        };
+
+        /** 工具按钮 */
+        class Button extends Sprite {
+            constructor(
+                name,
+                x,
+                y,
+                w,
+                h,
+                text,
+                fontSize = '20px',
+                transition = true
+            ) {
+                const btn = super(x, y, w, h, 1050, 'game', name);
+                this.css(transition);
+                setTimeout(() => btn.setCss(`opacity: 1;`), 50);
+                const ctx = btn.context;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                core.fillText(
+                    ctx,
+                    text,
+                    w / 2,
+                    h / 2,
+                    '#fff',
+                    `${fontSize} normal`,
+                    w - 10
+                );
+                sprites[name] = btn;
+            }
+
+            css(transition) {
+                this.setCss(
+                    'transition: opacity 0.6s linear, transform 0.2s linear;' +
+                        'background-color: #aaa;' +
+                        'box-shadow: 0px 0px 0px black;' +
+                        (transition ? 'opacity: 0;' : '') +
+                        'filter: drop-shadow(1px 1px 2px black);' +
+                        'box-shadow: 0px 0px 4px black;' +
+                        'cursor: pointer;'
+                );
+            }
+        }
+
+        /** 背景 */
+        class Back extends Sprite {
+            constructor(name, x, y, w, h, z, color) {
+                const sprite = super(x, y, w, h, z, 'game', name);
+                sprites[name] = sprite;
+                this.setCss(`transition: all 0.6s linear;`);
+                setTimeout(() => {
+                    this.setCss(`background-color: ${color};`);
+                }, 50);
+            }
+        }
+
+        /**
+         * 获取绘制信息
+         * @param {string?} center 中心地图id
+         * @param {number?} depth 搜索深度
+         * @param {boolean?} noCache 是否不使用缓存
+         * @returns {MapDrawInfo}
+         */
+        this.getMapDrawInfo = function (
+            center = core.status.floorId,
+            depth = defaultValue.depth,
+            noCache = false
+        ) {
+            nowDepth = depth;
+            drawingMap = center;
+            const id = `${center}_${depth}_${noBorder}`;
+            // 检查缓存
+            if (drawCache[id] && !noCache) return drawCache[id];
+            const map = bfsSearch(center, depth, noCache);
+            mapCache[id] = map;
+            const res = getDrawInfo(map.res, center, map.order);
+            res.upOrDown = map.upOrDown;
+            drawCache[id] = res;
+            return res;
+        };
+
+        /**
+         * 绘制大地图，可拖动、滚轮缩放、点击对应位置可以楼传等
+         * @param {string} floorId 中心地图的id
+         * @param {number} depth 遍历深度
+         * @param {boolean} noCache 是否不使用缓存
+         * @param {number} scale 绘制的缩放比例
+         */
+        this.drawFlyMap = function (
+            floorId = core.status.floorId,
+            depth = defaultValue.depth,
+            noCache = false,
+            scale = defaultValue.scale
+        ) {
+            if (core.isReplaying()) return;
+
+            // 把区域页码归零
+            nowArea = areas.findIndex(v =>
+                v.maps.includes(core.status.floorId)
+            );
+            areaPage = 0;
+            nowScale = scale;
+            selecting = floorId;
+            const info = this.getMapDrawInfo(floorId, depth, noCache);
+            if (status !== 'scale' && status !== 'border') {
+                drawBack();
+                drawTools();
+            }
+            drawMap(info, scale);
+            status = 'flyMap';
+            core.lockControl();
+            core.canvas.data.canvas.style.zIndex = '990';
+        };
+
+        /**
+         * 获得某个区域的剩余怪物
+         * @param {string} floorId 区域包含的地图或要扫描的地图
+         * @param {boolean} area 是否扫描整个区域
+         * @returns {RemainEnemy} 怪物总数、所在地图、位置
+         * 返回值格式：{
+         *  rough: 每种怪物的数量及所有怪物的总数，为字符串，每个怪物独占一行
+         *  detail: 每个怪物的所在位置，每个怪物独占一行，以每20个整合成字符串，为字符串数组形式
+         *  data: 怪物数量的原始信息，格式为{ 楼层id: { 'x,y': 怪物id } }
+         * }
+         */
+        this.getRemainEnemy = function (
+            floorId = core.status.floorId,
+            area = false
+        ) {
+            const res = bfsSearch(floorId, Infinity, true);
+            // 整合怪物总数
+            /** @type {{[x: string]: number}} */
+            const category = {};
+            const toShow = area ? res.order : [floorId];
+            const strArr = [];
+            const add = (...num) => num.reduce((pre, cur) => pre + cur, 0);
+            const name = id => core.material.enemys[id].name;
+            const title = id => core.status.maps[id].title;
+            for (const id of toShow) {
+                const enemies = res.enemies[id];
+                Object.values(enemies).forEach(v => {
+                    // 编辑器不支持 ??=，悲
+                    category[v] = category[v] ?? 0;
+                    category[v]++;
+                });
+                // 每个怪物的信息
+                strArr.push(
+                    ...Object.entries(enemies).map(
+                        v =>
+                            `${name(v[1])}    楼层:${title(
+                                id
+                            )},楼层id:${id},坐标:${v[0]}`
+                    )
+                );
+            }
+            // 输出字符串
+            const all = `当前${area ? '区域' : '地图'}中剩余怪物数量：${add(
+                ...Object.values(category)
+            )}`;
+            const classified = Object.entries(category).map(
+                v => `${name(v[0])} × ${v[1]}`
+            ).join`\n`;
+            const detail = [];
+            while (strArr.length > 0) {
+                detail.push(strArr.splice(0, 20).join`\n`);
+            }
+            return {
+                rough: `${all}\n${classified}`,
+                detail,
+                data: res.enemies
+            };
+        };
+
+        /**
+         * 广度优先搜索搜索地图路径
+         * @param {string} center 中心地图的id
+         * @param {number} depth 搜索深度
+         * @param {boolean} noCache 是否不使用缓存
+         * @returns {BFSResult} 格式：floorId_x_y_dir: floorId_x_y
+         */
+        function bfsSearch(center, depth, noCache) {
+            // 检查缓存
+            const id = `${center}_${depth}_${noBorder}`;
+            if (mapCache[id] && !noCache) return mapCache[id];
+            const used = { [center]: true }; // 搜索过的楼层
+            let queue = [];
+            let stack = [center]; // 当前栈
+            let nowDepth = -1;
+            const mapOrder = [center]; // 遍历顺序，顺便还能记录遍历了哪些楼层
+
+            const res = {}; // 输出结果，格式：floorId_x_y_dir: floorId_x_y
+            const enemies = {};
+            const upOrDown = {};
+
+            // 开始循环搜索
+            while (nowDepth < depth && stack.length > 0) {
+                const now = stack.shift(); // 当前id
+                if (core.status.maps[now].deleted) continue;
+                const blocks = core.getMapBlocksObj(now); // 获取当前地图的每点的事件
+                enemies[now] = {};
+                // 遍历，获取可以传送的点，只检测绿点事件，因此可用红点事件进行传送来实现分区功能
+                for (const i in blocks) {
+                    const block = blocks[i];
+                    // 整合漏怪检测，所以要检测怪物
+                    if (block.event.trigger === 'battle') {
+                        const id = block.event.id;
+                        if (ignoreEnemies.includes(id)) continue;
+                        else enemies[now][i] = block.event.id;
+                        continue;
+                    }
+                    // 检测触发器是否为切换楼层，不是则直接跳过
+                    if (block.event.trigger !== 'changeFloor') continue;
+                    const dirEntries = allChangeEntries.find(
+                        v => v[1] === block.event.id
+                    );
+                    // 如果不是那六种传送门，直接忽略
+                    if (!dirEntries) continue;
+                    const data = block.event.data;
+                    const dir = dirEntries[0];
+                    const route = `${now}_${i.replace(',', '_')}_${dir}`;
+                    const target = `${data.floorId}_${data.loc.join('_')}`;
+                    if (!used[data.floorId]) {
+                        if (dir === 'upFloor' || dir === 'downFloor') {
+                            upOrDown[now] = upOrDown[id] ?? [];
+                            upOrDown[now].push(dir);
+                        }
+                        queue.push(data.floorId); // 没有搜索过，则加入栈中
+                        mapOrder.push(data.floorId);
+                        used[data.floorId] = true;
+                    }
+                    res[route] = target;
+                }
+                if (stack.length === 0) {
+                    stack = queue;
+                    queue = [];
+                    nowDepth++;
+                }
+                if (stack.length === 0 && queue.length === 0) break;
+            }
+            return { res, order: mapOrder, enemies, upOrDown };
+        }
+
+        /**
+         * 提供地图的绘制信息
+         * @param {{[x: string]: string}} map 要绘制的地图，格式：floorId_x_y_dir: floorId_x_y
+         * @param {string} center 中心地图的id
+         * @param {string[]} order 遍历顺序
+         * @returns {MapDrawInfo} 地图的绘制信息
+         */
+        function getDrawInfo(map, center, order) {
+            // 先根据地图id分类，从而确定每个地图连接哪些地图，同时方便处理
+            const links = {};
+            for (const i in map) {
+                const splitted = i.split('_');
+                const id = splitted[0];
+                if (!links[id]) links[id] = {};
+                links[id][i] = map[i];
+            }
+            // 分类完毕，然后根据连接点先计算出各个地图的坐标，然后再进行判断
+            const centerFloor = core.status.maps[center];
+            const visitedCenter = core.hasVisitedFloor(center);
+            const locs = {
+                // 格式：[中心x, 中心y, 宽, 高, 是否到达过]
+                [center]: [
+                    0,
+                    0,
+                    centerFloor.width,
+                    centerFloor.height,
+                    visitedCenter
+                ]
+            };
+            const lines = {}; // 地图间的连线
+            // 可以上楼下楼的地图
+            const upOrDown = {};
+            for (const id of order) {
+                const now = links[id];
+                // 遍历每一个地图的连接情况
+                for (const from in now) {
+                    const to = now[from];
+                    // 先根据from to计算物理位置
+                    const fromData = from.split('_'),
+                        toData = to.split('_');
+                    const dir = fromData[3];
+                    if (dir === 'upFloor' || dir === 'downFloor') continue;
+                    if (!defaultChange[dir]) continue;
+                    const v = dirData[dir][1], // 竖直数值
+                        h = dirData[dir][0], // 水平数值
+                        ha = Math.abs(h),
+                        va = Math.abs(v);
+                    const fx = parseInt(fromData[1]), // fromX
+                        fy = parseInt(fromData[2]), // fromY
+                        tx = parseInt(toData[1]), // toX
+                        ty = parseInt(toData[2]), // toY
+                        ff = id, // fromFloorId
+                        tf = toData[0]; // toFloorId
+                    const fromFloor = core.status.maps[ff],
+                        toFloor = core.status.maps[tf];
+                    const fhw = Math.floor(fromFloor.width / 2), // fromFloorHalfWidth
+                        fhh = Math.floor(fromFloor.height / 2),
+                        thw = Math.floor(toFloor.width / 2),
+                        thh = Math.floor(toFloor.height / 2);
+                    const fLoc = locs[id] ?? [0, 0];
+                    if (!locs[ff]) continue;
+                    let x, y;
+                    const dis = noBorder ? 1 : 5;
+                    if (locs && locs[tf]) {
+                        x = locs[tf][0];
+                        y = locs[tf][1];
+                    } else {
+                        // 计算坐标，公式可以通过画图推断出
+                        x =
+                            fLoc[0] -
+                            ha * (fhw - fx + tx - thw) -
+                            v * (fhw + thw + dis);
+                        y =
+                            fLoc[1] -
+                            va * (fhh - fy + ty - thh) -
+                            h * (fhh + thh + dis);
+                    }
+                    locs[tf] = locs[tf] ?? [
+                        x,
+                        y,
+                        toFloor.width,
+                        toFloor.height,
+                        core.hasVisitedFloor(tf)
+                    ];
+                    // 添加连线
+                    lines[`${from}_${to}`] = [
+                        [
+                            fx - fhw + locs[ff][0],
+                            fy - fhh + locs[ff][1],
+                            x + tx - thw,
+                            y + ty - thh
+                        ]
+                    ];
+                }
+            }
+            // 获取地图绘制需要的长宽
+            let width = 0,
+                height = 0;
+            let left, right, up, down;
+            for (const id in locs) {
+                const [x, y, w, h] = locs[id];
+                if (left === void 0) {
+                    left = right = x;
+                    up = down = y;
+                }
+                left = Math.min(x - w / 2 - 1, left);
+                right = Math.max(x + w / 2 + 1, right);
+                up = Math.min(y - h / 2 - 1, up);
+                down = Math.max(y + h / 2 + 1, down);
+            }
+            width = right - left;
+            height = down - up;
+            // 所有地图和连线向右下移动，避免绘制出现问题
+            for (const id in locs) {
+                const loc = locs[id];
+                loc[0] -= left; // 这时候left和up是负值，所以要减
+                loc[1] -= up;
+            }
+            for (const route in lines) {
+                const line = lines[route];
+                for (const node of line) {
+                    node[0] -= left;
+                    node[1] -= up;
+                    node[2] -= left;
+                    node[3] -= up;
+                }
+            }
+
+            return { locs, lines, width, height, layer: upOrDown };
+        }
+
+        /** 绘制背景 */
+        function drawBack() {
+            if (status !== 'none') return;
+            new Back(
+                '__map_back__',
+                0,
+                0,
+                core._PX_,
+                core._PY_,
+                175,
+                'rgba(0, 0, 0, 0.9)'
+            );
+            const listen = new Sprite(
+                0,
+                0,
+                core._PX_,
+                core._PY_,
+                1000,
+                'game',
+                '__map_listen__'
+            );
+            addDrag(listen);
+            const exit = new Button(
+                '__map_exit__',
+                core._PX_ - 64,
+                core._PY_ - 26,
+                60,
+                22,
+                '退出'
+            );
+            exit.addEventListener('click', close);
+            sprites.listen = listen;
+        }
+
+        /** 绘制工具栏 */
+        function drawTools() {
+            new Back(
+                '__map_toolback__',
+                0,
+                core._PY_ - 30,
+                core._PX_,
+                30,
+                600,
+                'rgba(200, 200, 200, 0.9)'
+            );
+            // 无边框
+            const border = new Button(
+                '__map_border__',
+                core._PX_ - 150,
+                core._PY_ - 26,
+                60,
+                22,
+                '边框'
+            );
+            border.addEventListener('click', changeBorder);
+            // 怪物数量
+            const enemy = new Button(
+                '__map_enemy__',
+                core._PX_ - 240,
+                core._PY_ - 26,
+                60,
+                22,
+                '怪物'
+            );
+            enemy.addEventListener('click', triggerEnemy);
+            // 区域显示
+            const area = new Back(
+                '__map_areasback__',
+                core._PX_ - 80,
+                0,
+                80,
+                core._PY_ - 30,
+                550,
+                'rgba(200, 200, 200, 0.9)'
+            );
+            drawAreaList();
+            core.drawLine(
+                area.context,
+                0,
+                core._PY_ - 30,
+                80,
+                core._PY_ - 30,
+                '#222',
+                2
+            );
+        }
+
+        /** 绘制区域列表 */
+        function drawAreaList(transition = true) {
+            const start = perPage * areaPage;
+            Object.values(areaSprite).forEach(v => v.destroy());
+            areaSprite = {};
+            for (let i = start; i < start + perPage && areas[i]; i++) {
+                const n = i % perPage;
+                const { name, maps } = areas[i];
+                const btn = new Button(
+                    `_area_${maps[0]}`,
+                    core._PX_ - 75,
+                    4 + 30 * n,
+                    70,
+                    22,
+                    name,
+                    '16px',
+                    transition
+                );
+                areaSprite[maps[0]] = btn;
+                if (i === nowArea) btn.setCss(`border: 2px solid gold;`);
+                btn.addEventListener('click', e => {
+                    if (i === nowArea) return;
+                    changeArea(i);
+                });
+            }
+            // 上一页下一页
+            if (areaPage > 0) {
+                const last = new Button(
+                    '_area_last_',
+                    core._PX_ - 75,
+                    core._PY_ - 50,
+                    30,
+                    16,
+                    '上一页',
+                    '14px',
+                    transition
+                );
+                areaSprite._area_last_ = last;
+                last.addEventListener('click', e => {
+                    areaPage--;
+                    drawAreaList(false);
+                });
+            }
+            if (areaPage < Math.floor(areas.length / perPage)) {
+                const next = new Button(
+                    '_area_next_',
+                    core._PX_ - 35,
+                    core._PY_ - 50,
+                    30,
+                    16,
+                    '下一页',
+                    '14px',
+                    transition
+                );
+                areaSprite._area_next_ = next;
+                next.addEventListener('click', e => {
+                    areaPage++;
+                    drawAreaList(false);
+                });
+            }
+        }
+
+        /**
+         * 绘制大地图
+         * @param {MapDrawInfo} info 地图绘制信息
+         * @param {number} scale 地图的绘制比例
+         */
+        function drawMap(info, scale = defaultValue.scale) {
+            if (status === 'flyMap') return;
+            const PX = core._PX_,
+                PY = core._PY_;
+            const w = info.width * scale,
+                h = info.height * scale;
+            const id = `__flyMap__`;
+            const cx = PX / 2 - w / 2,
+                cy = PY / 2 - h / 2;
+            const map = new Sprite(cx, cy, w, h, 500, 'game', id);
+            sprites[id] = map;
+            canDrag[id] = map;
+            map.canvas.className = 'fly-map';
+            const ctx = map.context;
+            core.clearMap(ctx);
+            if (!noBorder) {
+                const drawed = {}; // 绘制过的线
+                // 先绘制连线
+                const lines = info.lines;
+                for (const route in lines) {
+                    const line = lines[route];
+                    for (const node of line) {
+                        const from = `${node[0]},${node[1]}`,
+                            to = `${node[2]},${node[3]}`;
+                        if (drawed[`${from}-${to}`] || drawed[`${to}-${from}`])
+                            continue;
+                        drawed[`${from}-${to}`] = true;
+                        let lineWidth = scale / 2;
+                        core.drawLine(
+                            ctx,
+                            node[0] * scale,
+                            node[1] * scale,
+                            node[2] * scale,
+                            node[3] * scale,
+                            '#fff',
+                            lineWidth
+                        );
+                    }
+                }
+                // 再绘制楼层
+                const locs = info.locs;
+                for (const id in locs) {
+                    const loc = locs[id];
+                    let color = '#000';
+                    if (!loc[4]) color = '#f0f';
+                    const [x, y, w, h] = loc.map(
+                        v => typeof v === 'number' && v * scale
+                    );
+                    let dx = 0,
+                        dy = 0; // 避免绘图误差
+                    if (loc[2] % 2 === 0) dx = 0.5 * scale;
+                    if (loc[3] % 2 === 0) dy = 0.5 * scale;
+                    const fx = x - w / 2 - dx,
+                        fy = y - h / 2 - dy;
+                    core.fillRect(ctx, fx, fy, w, h, color);
+                    if (id === selecting)
+                        core.strokeRect(ctx, fx, fy, w, h, 'gold', scale / 2);
+                    else core.strokeRect(ctx, fx, fy, w, h, '#fff', scale / 2);
+                    const layer = info.upOrDown[id];
+                    const min = Math.min(w, h);
+                    if (layer?.includes('upFloor'))
+                        core.drawIcon(
+                            ctx,
+                            defaultChange.upFloor,
+                            fx,
+                            fy,
+                            min / 3,
+                            min / 3
+                        );
+                    if (layer?.includes('downFloor'))
+                        core.drawIcon(
+                            ctx,
+                            defaultChange.downFloor,
+                            fx + w - min / 3,
+                            fy + h - min / 3,
+                            min / 3,
+                            min / 3
+                        );
+                    // 显示漏怪数量
+                    if (showEnemy) {
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        const c = `${drawingMap}_${nowDepth}_${noBorder}`;
+                        const n = Object.keys(mapCache[c].enemies[id]).length;
+                        color = '#3f3';
+                        if (n > 0) color = '#fff';
+                        if (n > 10) color = '#fc3';
+                        if (n > 20) color = '#f22';
+                        ctx.shadowBlur = 0.6 * nowScale;
+                        ctx.shadowColor = '#000';
+                        core.fillText(
+                            ctx,
+                            `怪物数量：${n}`,
+                            x,
+                            y,
+                            color,
+                            `${2 * nowScale}px normal`
+                        );
+                        ctx.shadowBlur = 0;
+                    }
+                }
+            }
+            checkThumbnail();
+        }
+
+        /**
+         * 重新绘制缩略图
+         * @param {Sprite} sprite
+         * @param {string} floor
+         */
+        function drawThumbnail(sprite, floor, x, y, w, h) {
+            const ctx = sprite.context;
+            const scale = nowScale;
+            core.drawThumbnail(floor, void 0, {
+                ctx: ctx,
+                x: x - w / 2,
+                y: y - h / 2,
+                damage: true,
+                all: true,
+                size: Math.max(w, h) / Math.max(core._PX_, core._PY_),
+                fromMap: true
+            });
+            const color = floor === core.status.floorId ? 'gold' : '#fff';
+            if (!noBorder)
+                core.strokeRect(
+                    ctx,
+                    x - w / 2,
+                    y - h / 2,
+                    w,
+                    h,
+                    color,
+                    scale / 2
+                );
+        }
+
+        /** 检查是否需要绘制缩略图 */
+        function checkThumbnail() {
+            const id = `${drawingMap}_${nowDepth}_${noBorder}`;
+            const locs = drawCache[id].locs;
+            const map = canDrag[`__flyMap__`];
+            for (const id in locs) {
+                const loc = locs[id];
+                const scale = nowScale;
+                const [x, y, w, h] = loc.map(
+                    v => typeof v === 'number' && v * scale
+                );
+                let dx = 0,
+                    dy = 0; // 避免绘图误差
+                if (loc[2] % 2 === 0) dx = 0.5 * scale;
+                if (loc[3] % 2 === 0) dy = 0.5 * scale;
+                if (
+                    !drawedThumbnail[id] &&
+                    x + map.x > 0 &&
+                    x + map.x < core._PX_ &&
+                    y + map.y > 0 &&
+                    y + map.y < core._PY_
+                ) {
+                    if (!noBorder && core.hasVisitedFloor(id) && scale > 5) {
+                        drawThumbnail(map, id, x - dx, y - dy, w, h);
+                        drawedThumbnail[id] = true;
+                    }
+                    if (noBorder) {
+                        drawThumbnail(map, id, x - dx, y - dy, w, h);
+                        drawedThumbnail[id] = true;
+                        if (!core.hasVisitedFloor(id))
+                            core.fillRect(
+                                map.context,
+                                x - dx - w / 2,
+                                y - dy - h / 2,
+                                w,
+                                h,
+                                'rgba(255,0,255,0.2)'
+                            );
+                    }
+                }
+            }
+            // 如果是无边框模式，那就只绘制当前地图的边框
+            if (noBorder) {
+                const loc = locs[selecting];
+                const scale = nowScale;
+                if (loc) {
+                    const [x, y, w, h] = loc.map(
+                        v => typeof v === 'number' && v * scale
+                    );
+                    core.strokeRect(
+                        map.context,
+                        x - w / 2,
+                        y - h / 2,
+                        w,
+                        h,
+                        'gold',
+                        scale / 2
+                    );
+                }
+            }
+        }
+
+        /** 检查点击点是否在以x,y为中心的某一矩形中 */
+        function inRect(x, y, w, h, px, py) {
+            x -= w / 2;
+            y -= h / 2;
+            return px > x && px < x + w && py > y && py < y + h;
+        }
+
+        /** 测试画布是否超过上限，摘自https://github.com/jhildenbiddle/canvas-size */
+        function canvasTest(size) {
+            const width = Math.max(Math.ceil(size[0]), 1);
+            const height = Math.max(Math.ceil(size[1]), 1);
+            if (width === 0 || height === 0) return true;
+            const fill = [width - 1, height - 1, 1, 1];
+            let cropCvs, testCvs;
+            cropCvs = document.createElement('canvas');
+            cropCvs.width = 1;
+            cropCvs.height = 1;
+            testCvs = document.createElement('canvas');
+            testCvs.width = width;
+            testCvs.height = height;
+            const cropCtx = cropCvs.getContext('2d');
+            const testCtx = testCvs.getContext('2d');
+            if (testCtx) {
+                testCtx.fillRect.apply(testCtx, fill);
+                cropCtx.drawImage(
+                    testCvs,
+                    width - 1,
+                    height - 1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    1,
+                    1
+                );
+            }
+            const isTestPass =
+                cropCtx && cropCtx.getImageData(0, 0, 1, 1).data[3] !== 0;
+            return isTestPass;
+        }
+
+        /** 检查浏览器限制 */
+        function checkMaximum(before, scale) {
+            for (const id in canDrag) {
+                const sprite = canDrag[id];
+                const rate = scale / before;
+                const w = sprite.width * rate * core.domStyle.scale,
+                    h = sprite.height * rate * core.domStyle.scale;
+                const valid = canvasTest([w, h]);
+                if (!valid) {
+                    core.drawTip('画布大小将超过浏览器限制！请勿继续放大！');
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /** 关闭事件 */
+        function close() {
+            document.body.removeEventListener('keyup', keyboard);
+            Object.values(sprites).forEach(v => {
+                v.setCss('transition: opacity 0.6s linear;');
+            });
+            setTimeout(() => {
+                Object.values(sprites).forEach(v => {
+                    v.setCss('opacity: 0;');
+                });
+            }, 50);
+            setTimeout(() => {
+                core.unlockControl();
+                Object.values(sprites).forEach(v => {
+                    v.destroy();
+                });
+                drawedThumbnail = {};
+                sprites = {};
+                canDrag = {};
+                status = 'none';
+                core.canvas.data.canvas.style.zIndex = '170';
+            }, 650);
+        }
+
+        /**
+         * 点击地图事件，尝试楼层传送
+         * @param {MouseEvent} e
+         */
+        function clickMap(e) {
+            if (moved) return (moved = false);
+            const { x, y } = core.actions._getClickLoc(e.clientX, e.clientY);
+            let px = x / core.domStyle.scale,
+                py = y / core.domStyle.scale;
+            const scale = nowScale;
+            const id = `${drawingMap}_${nowDepth}_${noBorder}`;
+            const locs = drawCache[id].locs;
+            const sprite = canDrag.__flyMap__;
+            px -= sprite.x;
+            py -= sprite.y;
+            for (const id in locs) {
+                const loc = locs[id];
+                const [x, y, w, h] = loc.map(
+                    v => typeof v === 'number' && v * scale
+                );
+                if (inRect(x, y, w, h, px, py)) {
+                    return flyTo(id);
+                }
+            }
+        }
+
+        /** 飞向某个楼层 */
+        function flyTo(id) {
+            if (!core.hasItem('fly')) return core.drawTip('你没有楼层传送器');
+            sprites.__map_back__.setCss('opacity: 0.2;');
+            return core.flyTo(id, () =>
+                setTimeout(() => {
+                    if (sprites.__map_back__) core.lockControl();
+                }, 100)
+            );
+        }
+
+        /**
+         * 拖拽事件
+         * @param {MouseEvent} e
+         */
+        function drag(e) {
+            if (!clicking) return;
+            const scale = core.domStyle.scale;
+            moveEle(e.movementX / scale, e.movementY / scale);
+        }
+
+        /**
+         * 手机端点击拖动事件
+         * @param {TouchEvent} e
+         * @this {HTMLCanvasElement}
+         */
+        function touchDrag(e) {
+            moved = true;
+            const scale = core.domStyle.scale;
+            if (e.touches.length === 1) {
+                // 拖拽
+                const info = e.touches[0];
+                if (!lastTouch[this.id]) {
+                    lastTouch[this.id] = [info.clientX, info.clientY];
+                    return;
+                }
+                const { clientX: x, clientY: y } = info;
+                const dx = x - lastTouch[this.id][0],
+                    dy = y - lastTouch[this.id][1];
+                moveEle(dx / scale, dy / scale);
+                lastTouch[this.id] = [info.clientX, info.clientY];
+            } else if (e.touches.length >= 2) {
+                // 双指放缩
+                const first = e.touches[0],
+                    second = e.touches[1];
+                const dx = first.clientX - second.clientX,
+                    dy = first.clientY - second.clientY;
+                if (lastLength === 0) {
+                    lastLength = Math.sqrt(dx * dx + dy * dy);
+                    return;
+                }
+                let cx = (first.clientX + second.clientX) / 2,
+                    cy = (first.clientY + second.clientY) / 2;
+                const { x, y } = core.actions._getClickLoc(cx, cy);
+                const mx = x / scale;
+                const my = y / scale;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const delta = (lastLength / length) ** (1 / 3);
+                const info = {};
+                for (const id in canDrag) {
+                    const sprite = canDrag[id];
+                    const sx = sprite.x + sprite.width / 2,
+                        sy = sprite.y + sprite.height / 2;
+                    const dx = sx - mx,
+                        dy = sy - my;
+                    info[id] = [mx + dx * delta, my + dy * delta];
+                }
+                scaleMap(delta * nowScale, info);
+            }
+        }
+
+        /**
+         * 滚轮缩放
+         * @param {WheelEvent} e
+         */
+        function wheel(e) {
+            const delta = 1 - Math.sign(e.deltaY) / 10;
+            const { x, y } = core.actions._getClickLoc(e.clientX, e.clientY);
+            const scale = core.domStyle.scale;
+            const mx = x / scale,
+                my = y / scale;
+            const info = {};
+            for (const id in canDrag) {
+                const sprite = canDrag[id];
+                const cx = sprite.x + sprite.width / 2,
+                    cy = sprite.y + sprite.height / 2;
+                const dx = cx - mx,
+                    dy = cy - my;
+                info[id] = [mx + dx * delta, my + dy * delta];
+            }
+            scaleMap(delta * nowScale, info);
+        }
+
+        /** 切换边框 */
+        function changeBorder() {
+            noBorder = !noBorder;
+            redraw('border');
+        }
+
+        /** 切换是否显示漏怪数量 */
+        function triggerEnemy() {
+            showEnemy = !showEnemy;
+            redraw('enemy');
+        }
+
+        /** 改变区域 */
+        function changeArea(index) {
+            nowArea = index;
+            drawAreaList(false);
+            drawedThumbnail = {};
+            status = 'area';
+            nowScale = defaultValue.scale;
+            drawMap(core.plugin.getMapDrawInfo(areas[index].maps[0]));
+        }
+
+        /** 重绘 */
+        function redraw(id, px, py, move = true) {
+            const { x, y } = canDrag.__flyMap__;
+            status = id;
+            drawedThumbnail = {};
+            drawMap(
+                core.plugin.getMapDrawInfo(drawingMap, nowDepth, true),
+                nowScale
+            );
+            if (move) canDrag.__flyMap__.move(px ?? x, py ?? y);
+            checkThumbnail();
+        }
+
+        /**
+         * 拖拽时移动需要元素
+         * @param {string} dx
+         * @param {string} dy
+         */
+        function moveEle(dx, dy) {
+            moved = true;
+            for (const id in canDrag) {
+                const sprite = canDrag[id];
+                const ctx = sprite.context;
+                sprite.x += dx;
+                sprite.y += dy;
+                core.relocateCanvas(ctx, dx, dy, true);
+            }
+            checkThumbnail();
+        }
+
+        /**
+         * 缩放绘制地图
+         * @param {number} target 目标缩放比例
+         * @param {{[x: string]: [number, number]}} info 缩放后的sprite位置数据
+         */
+        function scaleMap(target, info) {
+            // 检查浏览器限制
+            if (checkMaximum(nowScale, target)) return;
+            clearTimeout(lastScale);
+            const [x, y] = info.__flyMap__;
+            // 先直接修改style，延迟200ms再绘制，进行性能优化
+            const sprite = canDrag.__flyMap__;
+            const rate = target / nowScale;
+            nowScale = target;
+            sprite.resize(sprite.width * rate, sprite.height * rate, true);
+            sprite.move(x - sprite.width / 2, y - sprite.height / 2);
+            lastScale = setTimeout(() => {
+                redraw('scale', x - sprite.width / 2, y - sprite.height / 2);
+            }, 200);
+        }
+
+        /** 键盘操作
+         * @param {KeyboardEvent} e
+         */
+        function keyboard(e) {
+            if (
+                e.key === 'Enter' ||
+                e.key === 'C' ||
+                e.key === 'c' ||
+                e.key === ' '
+            ) {
+                return flyTo(selecting);
+            } else if (e.key === 'Escape' || e.key === 'x' || e.key === 'X') {
+                return close();
+            } else if (e.key.startsWith('Arrow')) {
+                const dir = e.key.slice(5).toLowerCase();
+                // 获取目标楼层
+                const res =
+                    mapCache[`${drawingMap}_${nowDepth}_${noBorder}`].res;
+                const key = Object.keys(res).find(v => {
+                    const [floorId, x, y, d] = v.split('_');
+                    return floorId === selecting && d === dir;
+                });
+                if (!key) return;
+                const target = res[key].split('_')[0];
+                selecting = target;
+                redraw('key');
+            }
+        }
+
+        /**
+         * 给需要的元素添加拖拽等事件
+         * @param {HTMLCanvasElement} ele
+         */
+        function addDrag(ele) {
+            ele.addEventListener('wheel', wheel);
+            ele.addEventListener('mousemove', drag);
+            ele.addEventListener('touchmove', touchDrag);
+            ele.addEventListener('click', clickMap);
+            ele.addEventListener('mousedown', () => {
+                clicking = true;
+            });
+            ele.addEventListener('mouseup', () => {
+                clicking = false;
+            });
+            ele.addEventListener('touchend', () => {
+                lastTouch = {};
+                lastLength = 0;
+            });
+            document.body.addEventListener('keyup', keyboard);
+        }
+
+        maps.prototype._drawThumbnail_drawToTarget = function (
+            floorId,
+            options
+        ) {
+            const ctx = core.getContextByName(options.ctx);
+            if (ctx == null) return;
+            const x = options.x || 0,
+                y = options.y || 0,
+                size = options.size || 1;
+            // size的含义改为(0,1]范围的系数以适配长方形，默认为1，楼传为3/4，SL界面为0.3
+            let w = Math.ceil(size * core._PX_),
+                h = Math.ceil(size * core._PY_);
+            // 特判是否为编辑器，编辑器中长宽均采用core.js的遗留正方形像素边长，以保证下面的绘制正常
+            if (main.mode == 'editor') w = h = size * core.__PIXELS__;
+            const width = core.floors[floorId].width,
+                height = core.floors[floorId].height;
+            let centerX = options.centerX,
+                centerY = options.centerY;
+            if (centerX == null) centerX = Math.floor(width / 2);
+            if (centerY == null) centerY = Math.floor(height / 2);
+            const tempCanvas = core.bigmap.tempCanvas;
+
+            if (options.all) {
+                const tempWidth = tempCanvas.canvas.width,
+                    tempHeight = tempCanvas.canvas.height;
+                // 绘制全景图
+                if (tempWidth <= tempHeight) {
+                    const realHeight = h,
+                        realWidth = (realHeight * tempWidth) / tempHeight;
+                    const side = (w - realWidth) / 2;
+                    if (options.fromMap) {
+                        return core.drawImage(
+                            ctx,
+                            tempCanvas.canvas,
+                            0,
+                            0,
+                            tempWidth,
+                            tempHeight,
+                            x,
+                            y,
+                            realWidth,
+                            realHeight
+                        );
+                    }
+                    core.fillRect(ctx, x, y, side, realHeight, '#000000');
+                    core.fillRect(ctx, x + w - side, y, side, realHeight);
+                    core.drawImage(
+                        ctx,
+                        tempCanvas.canvas,
+                        0,
+                        0,
+                        tempWidth,
+                        tempHeight,
+                        x + side,
+                        y,
+                        realWidth,
+                        realHeight
+                    );
+                } else {
+                    const realWidth = w,
+                        realHeight = (realWidth * tempHeight) / tempWidth;
+                    const side = (h - realHeight) / 2;
+                    if (options.fromMap) {
+                        return core.drawImage(
+                            ctx,
+                            tempCanvas.canvas,
+                            0,
+                            0,
+                            tempWidth,
+                            tempHeight,
+                            x,
+                            y,
+                            realWidth,
+                            realHeight
+                        );
+                    }
+                    core.fillRect(ctx, x, y, realWidth, side, '#000000');
+                    core.fillRect(ctx, x, y + h - side, realWidth, side);
+                    core.drawImage(
+                        ctx,
+                        tempCanvas.canvas,
+                        0,
+                        0,
+                        tempWidth,
+                        tempHeight,
+                        x,
+                        y + side,
+                        realWidth,
+                        realHeight
+                    );
+                }
+            } else {
+                // 只绘制可见窗口
+                let pw = core._PX_,
+                    ph = core._PY_,
+                    hw = core._HALF_WIDTH_,
+                    hh = core._HALF_HEIGHT_,
+                    W = core._WIDTH_,
+                    H = core._HEIGHT_;
+                const ratio = core.domStyle.isVertical
+                    ? core.domStyle.ratio
+                    : core.domStyle.scale;
+                if (main.mode == 'editor') {
+                    pw = ph = core.__PIXELS__;
+                    hw = hh = core.__HALF_SIZE__;
+                    W = H = core.__SIZE__;
+                }
+                if (options.v2) {
+                    core.drawImage(
+                        ctx,
+                        tempCanvas.canvas,
+                        0,
+                        0,
+                        pw * ratio,
+                        ph * ratio,
+                        x,
+                        y,
+                        w,
+                        h
+                    );
+                } else {
+                    const offsetX = core.clamp(centerX - hw, 0, width - W),
+                        offsetY = core.clamp(centerY - hh, 0, height - H);
+                    if (options.noHD) {
+                        core.drawImage(
+                            ctx,
+                            tempCanvas.canvas,
+                            offsetX * 32,
+                            offsetY * 32,
+                            pw,
+                            ph,
+                            x,
+                            y,
+                            w,
+                            h
+                        );
+                        return;
+                    }
+                    core.drawImage(
+                        ctx,
+                        tempCanvas.canvas,
+                        offsetX * 32 * ratio,
+                        offsetY * 32 * ratio,
+                        pw * ratio,
+                        ph * ratio,
+                        x,
+                        y,
+                        w,
+                        h
+                    );
+                }
+            }
         };
     },
     fixed: function () {
@@ -9312,9 +10640,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             return res;
         }
     },
-    "uiChange": function () {
+    uiChange: function () {
         ui.prototype.drawBook = function () {
-            return core.plugin.bookOpened.value = true;
-        }
+            return (core.plugin.bookOpened.value = true);
+        };
     }
 };

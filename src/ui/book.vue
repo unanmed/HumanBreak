@@ -1,12 +1,17 @@
 <!-- 怪物手册ui -->
 <template>
     <div id="book">
+        <div id="tools">
+            <span id="back" class="tools" @click="exit"
+                ><left-outlined />返回游戏</span
+            >
+        </div>
         <div v-if="enemy.length === 0" id="none">
             <div>本层无怪物</div>
         </div>
         <Scroll
             v-else
-            style="width: 100%; height: 100%; font-family: normal"
+            style="width: 100%; height: 95%; font-family: normal"
             v-model:now="scroll"
             v-model:drag="drag"
         >
@@ -30,6 +35,7 @@ import EnemyOne from '../components/enemyOne.vue';
 import Scroll from '../components/scroll.vue';
 import { getDamageColor } from '../plugin/utils';
 import BookDetail from './bookDetail.vue';
+import { LeftOutlined } from '@ant-design/icons-vue';
 
 const floorId = core.floorIds[core.status.event?.ui] ?? core.status.floorId;
 const enemy = core.getCurrentEnemys(floorId);
@@ -89,9 +95,14 @@ async function closeDetail() {
 
 async function show() {
     const div = document.getElementById('book') as HTMLDivElement;
-    div.style.display = 'block';
+    div.style.display = 'flex';
     await sleep(50);
     div.style.opacity = '1';
+}
+
+function exit() {
+    core.closePanel();
+    core.plugin.bookOpened.value = false;
 }
 </script>
 
@@ -104,13 +115,30 @@ async function show() {
     font-family: 'normal';
     overflow: hidden;
     transition: opacity 0.6s linear;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
-@media screen and (max-width: 600px) {
-    #book {
-        width: 100%;
-        padding: 5% 0 5% 5%;
-    }
+#back {
+    font-size: 2em;
+}
+
+#tools {
+    height: 5%;
+}
+
+.tools {
+    cursor: pointer;
+    transition: color 0.2s linear;
+}
+
+.tools:hover {
+    color: aqua;
+}
+
+.tools:active {
+    color: aquamarine;
 }
 
 #none {
@@ -129,5 +157,12 @@ async function show() {
     height: 20vh;
     width: 100%;
     padding: 0 1% 0 1%;
+}
+
+@media screen and (max-width: 600px) {
+    #book {
+        width: 100%;
+        padding: 5% 0 5% 5%;
+    }
 }
 </style>

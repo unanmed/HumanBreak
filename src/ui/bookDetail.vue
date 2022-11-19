@@ -19,9 +19,7 @@
                     class="detial-more"
                     v-if="panel === 'special'"
                 >
-                    <span id="enemy-pos" class="more"
-                        ><left-outlined /> 怪物分布情况</span
-                    >
+                    <span></span>
                     <span
                         id="critical-more"
                         class="more"
@@ -75,12 +73,15 @@ onMounted(() => {
     const style = getComputedStyle(div);
 
     let moved = false;
+    let pos = [0, 0];
+
     useDrag(
         div,
-        () => {
-            moved = true;
+        (x, y) => {
+            if ((x - pos[0]) ** 2 + (y - pos[1]) ** 2 >= 100) moved = true;
         },
         (x, y) => {
+            pos = [x, y];
             if (y > (parseFloat(style.height) * 4) / 5) moved = true;
         },
         () => {

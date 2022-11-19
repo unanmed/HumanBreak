@@ -68,14 +68,15 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { getCriticalDamage, getDefDamage } from '../plugin/book';
 import Chart, { ChartConfiguration } from 'chart.js/auto';
 import { has, setCanvasSize } from '../plugin/utils';
+import { debounce } from 'lodash';
 
 const critical = ref<HTMLCanvasElement>();
 const def = ref<HTMLCanvasElement>();
 
 const enemy = core.plugin.bookDetailEnemy;
 
-const originCri = getCriticalDamage(enemy);
-const originDef = getDefDamage(enemy);
+let originCri = getCriticalDamage(enemy);
+let originDef = getDefDamage(enemy);
 
 // 当前数据
 const allCri = ref(originCri);
@@ -93,8 +94,8 @@ const ratio = core.status.thisMap.ratio;
 
 const nowDamage = computed(() => {
     const dam = core.getDamageInfo(enemy, {
-        atk: core.status.hero.atk + addAtk.value,
-        def: core.status.hero.def + addDef.value
+        atk: core.status.hero.atk + addAtk.value * ratio,
+        def: core.status.hero.def + addDef.value * ratio
     });
     if (!has(dam)) return ['???', '???'];
     if (!has(originDamage)) return [-dam.damage, dam.damage];
@@ -104,11 +105,30 @@ const nowDamage = computed(() => {
 function generateChart(ele: HTMLCanvasElement, data: [number, number][]) {
     const config: ChartConfiguration = {
         type: 'line',
-        data: generateData(data)
+        data: generateData(data),
+        options: {
+            elements: {
+                point: {
+                    radius: 5,
+                    hoverRadius: 7
+                }
+            },
+            scales: {
+                y: {
+                    grid: {
+                        color: '#ddd3'
+                    }
+                }
+            }
+        }
     };
     return new Chart(ele, config);
 }
 
+/**
+ * 生成图表数据
+ * @param data 数据
+ */
 function generateData(data: [number, number][]) {
     return {
         datasets: [
@@ -117,19 +137,29 @@ function generateData(data: [number, number][]) {
                 data: data.map(v => v[1])
             }
         ],
-        labels: data.map(v => v[0])
+        labels: data.map(v => Math.round(v[0] / ratio))
     };
 }
 
-function update(atk: Chart, def: Chart) {
-    allCri.value = getCriticalDamage(enemy, addAtk.value, addDef.value);
-    allDef.value = getDefDamage(enemy, addDef.value, addAtk.value);
+const update = debounce((atk: Chart, def: Chart) => {
+    allCri.value = getCriticalDamage(
+        enemy,
+        addAtk.value * ratio,
+        addDef.value * ratio
+    );
+    allDef.value = getDefDamage(
+        enemy,
+        addDef.value * ratio,
+        addAtk.value * ratio
+    );
+    if (allCri.value.length > originCri.length) originCri = allCri.value;
+    if (allDef.value.length > originDef.length) originDef = allDef.value;
 
     atk.data = generateData(allCri.value);
     def.data = generateData(allDef.value);
     atk.update('resize');
     def.update('resize');
-}
+}, 200);
 
 onMounted(() => {
     const div = document.getElementById('critical-main') as HTMLDivElement;

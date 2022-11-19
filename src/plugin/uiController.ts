@@ -21,9 +21,8 @@ export default function init() {
                 showApp();
             } else {
                 const index = uiStack.value.findIndex(v => v === com);
-                uiStack.value.splice(index);
-                if (uiStack.value.length === 0) {
-                    hideApp();
+                if (uiStack.value.length === 1) {
+                    hideApp(index);
                 }
             }
         });
@@ -38,9 +37,10 @@ async function showApp() {
     core.lockControl();
 }
 
-async function hideApp() {
+async function hideApp(index: number) {
     app.style.opacity = '0';
     await sleep(600);
+    uiStack.value.splice(index, 1);
     app.style.display = 'none';
     core.unlockControl();
 }
