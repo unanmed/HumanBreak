@@ -45,16 +45,20 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import EnemyOne from '../components/enemyOne.vue';
 import { useDrag } from '../plugin/use';
 import EnemySpecial from '../panel/enemySpecial.vue';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons-vue';
 import EnemyCritical from '../panel/enemyCritical.vue';
+import { KeyCode } from '../plugin/keyCodes';
+import { keycode } from '../plugin/utils';
 
 const enemy = core.plugin.bookDetailEnemy;
 const top = ref(core.plugin.bookDetailPos);
 const panel = ref('special');
+
+let detail: HTMLDivElement;
 
 const emits = defineEmits<{
     (e: 'close'): void;
@@ -65,18 +69,30 @@ function changePanel(e: MouseEvent, to: string) {
     panel.value = to;
 }
 
+function close() {
+    top.value = core.plugin.bookDetailPos;
+    detail.style.opacity = '0';
+    emits('close');
+}
+
+function key(e: KeyboardEvent) {
+    if (keycode(e.keyCode) === KeyCode.Enter) {
+        close();
+    }
+}
+
 onMounted(() => {
     top.value = 0;
-    const div = document.getElementById('detail') as HTMLDivElement;
-    div.style.opacity = '1';
+    detail = document.getElementById('detail') as HTMLDivElement;
+    detail.style.opacity = '1';
 
-    const style = getComputedStyle(div);
+    const style = getComputedStyle(detail);
 
     let moved = false;
     let pos = [0, 0];
 
     useDrag(
-        div,
+        detail,
         (x, y) => {
             if ((x - pos[0]) ** 2 + (y - pos[1]) ** 2 >= 100) moved = true;
         },
@@ -85,14 +101,18 @@ onMounted(() => {
             if (y > (parseFloat(style.height) * 4) / 5) moved = true;
         },
         () => {
-            if (moved === false) {
-                top.value = core.plugin.bookDetailPos;
-                div.style.opacity = '0';
-                emits('close');
+            if (moved === false && panel.value !== 'critical') {
+                close();
             }
             moved = false;
         }
     );
+
+    document.addEventListener('keyup', key);
+});
+
+onUnmounted(() => {
+    document.removeEventListener('keyup', key);
 });
 </script>
 
@@ -118,6 +138,7 @@ onMounted(() => {
     width: 72%;
     height: 90%;
     transition: all 0.6s ease;
+    user-select: none;
 }
 
 #detail-more {
@@ -171,6 +192,7 @@ onMounted(() => {
 
     #detail-more {
         font-size: 4vw;
+        bottom: 5%;
     }
 }
 </style>

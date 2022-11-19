@@ -90,8 +90,9 @@ function scroll() {
 
 onUpdated(() => {
     now = props.now ?? now;
+    content.style.transition = `${cssTarget} 0.2s ease-out`;
     calHeight();
-    draw();
+    scroll();
 });
 
 let last: number;

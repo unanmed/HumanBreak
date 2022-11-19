@@ -16,7 +16,13 @@
             v-model:drag="drag"
         >
             <div v-for="(e, i) of enemy" class="enemy">
-                <EnemyOne :enemy="e" @select="select(e, i)"></EnemyOne>
+                <EnemyOne
+                    :selected="i === selected"
+                    :enemy="e"
+                    :key="i"
+                    @select="select(e, i)"
+                    @hover="selected = i"
+                ></EnemyOne>
                 <a-divider
                     dashed
                     style="width: 100%; border-color: #ddd4"
@@ -30,12 +36,13 @@
 <script setup lang="tsx">
 import { cloneDeep } from 'lodash';
 import { sleep } from 'mutate-animate';
-import { onMounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import EnemyOne from '../components/enemyOne.vue';
 import Scroll from '../components/scroll.vue';
-import { getDamageColor } from '../plugin/utils';
+import { getDamageColor, keycode } from '../plugin/utils';
 import BookDetail from './bookDetail.vue';
 import { LeftOutlined } from '@ant-design/icons-vue';
+import { KeyCode } from '../plugin/keyCodes';
 
 const floorId = core.floorIds[core.status.event?.ui] ?? core.status.floorId;
 const enemy = core.getCurrentEnemys(floorId);
@@ -43,6 +50,7 @@ const enemy = core.getCurrentEnemys(floorId);
 const scroll = ref(0);
 const drag = ref(false);
 const detail = ref(false);
+const selected = ref(0);
 
 // 解析
 enemy.forEach(v => {
@@ -60,11 +68,6 @@ enemy.forEach(v => {
     v.damageColor = getDamageColor(v.damage);
 });
 
-onMounted(() => {
-    const div = document.getElementById('book') as HTMLDivElement;
-    div.style.opacity = '1';
-});
-
 /**
  * 选择怪物，展示详细信息
  * @param enemy 选择的怪物
@@ -80,6 +83,9 @@ function select(enemy: Enemy & DetailedEnemy, index: number) {
     hide();
 }
 
+/**
+ * 隐藏怪物手册
+ */
 async function hide() {
     const div = document.getElementById('book') as HTMLDivElement;
     div.style.opacity = '0';
@@ -87,12 +93,18 @@ async function hide() {
     div.style.display = 'none';
 }
 
+/**
+ * 关闭详细信息
+ */
 async function closeDetail() {
     show();
     await sleep(600);
     detail.value = false;
 }
 
+/**
+ * 显示怪物手册
+ */
 async function show() {
     const div = document.getElementById('book') as HTMLDivElement;
     div.style.display = 'flex';
@@ -100,10 +112,88 @@ async function show() {
     div.style.opacity = '1';
 }
 
+/**
+ * 退出怪物手册
+ */
 function exit() {
     core.closePanel();
     core.plugin.bookOpened.value = false;
 }
+
+function checkScroll() {
+    const h = window.innerHeight;
+    const y = selected.value * h * 0.2 - scroll.value;
+    if (y < 0) {
+        scroll.value += y - 20;
+    }
+    if (y > h * 0.655) {
+        scroll.value += y - h * 0.655 + 20;
+    }
+}
+
+/**
+ * 键盘松开时
+ */
+function keyup(e: KeyboardEvent) {
+    const c = keycode(e.keyCode);
+    if (c === KeyCode.KeyX || c === KeyCode.Escape) {
+        exit();
+    }
+    if (c === KeyCode.Enter && !detail.value) {
+        select(enemy[selected.value], selected.value);
+    }
+}
+
+/**
+ * 键盘按下时
+ */
+function keydown(e: KeyboardEvent) {
+    const c = keycode(e.keyCode);
+    if (!detail.value) {
+        if (c === KeyCode.DownArrow) {
+            if (selected.value < enemy.length - 1) {
+                selected.value++;
+            }
+            checkScroll();
+        }
+        if (c === KeyCode.UpArrow) {
+            if (selected.value > 0) {
+                selected.value--;
+            }
+            checkScroll();
+        }
+        // 一次移动5个怪物
+        if (c === KeyCode.LeftArrow || c === KeyCode.PageUp) {
+            if (selected.value <= 4) {
+                selected.value = 0;
+            } else {
+                selected.value -= 5;
+            }
+            checkScroll();
+        }
+        if (c === KeyCode.RightArrow || c === KeyCode.PageDown) {
+            if (selected.value >= enemy.length - 5) {
+                selected.value = enemy.length - 1;
+            } else {
+                selected.value += 5;
+            }
+            checkScroll();
+        }
+    }
+}
+
+onMounted(async () => {
+    const div = document.getElementById('book') as HTMLDivElement;
+    div.style.opacity = '1';
+    await sleep(600);
+    document.addEventListener('keyup', keyup);
+    document.addEventListener('keydown', keydown);
+});
+
+onUnmounted(() => {
+    document.removeEventListener('keyup', keyup);
+    document.removeEventListener('keydown', keydown);
+});
 </script>
 
 <style lang="less" scoped>

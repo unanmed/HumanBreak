@@ -39,26 +39,38 @@
             </div>
         </div>
         <div id="now-damage">
-            <span
-                >当前加攻&nbsp;&nbsp;&nbsp;&nbsp;{{
-                    format(addAtk * ratio)
-                }}</span
-            >
-            <span
-                >当前加防&nbsp;&nbsp;&nbsp;&nbsp;{{
-                    format(addDef * ratio)
-                }}</span
-            >
-            <span
-                >当前减伤&nbsp;&nbsp;&nbsp;&nbsp;{{
-                    format(nowDamage[0], false, nowDamage[0] < 0)
-                }}</span
-            >
-            <span
-                >当前伤害&nbsp;&nbsp;&nbsp;&nbsp;{{
-                    format(nowDamage[1])
-                }}</span
-            >
+            <div>
+                <span
+                    >当前加攻{{
+                        isMobile ? '' : '&nbsp;&nbsp;&nbsp;&nbsp;'
+                    }}</span
+                >
+                <span>{{ format(addAtk * ratio) }}</span>
+            </div>
+            <div>
+                <span
+                    >当前加防{{
+                        isMobile ? '' : '&nbsp;&nbsp;&nbsp;&nbsp;'
+                    }}</span
+                >
+                <span>{{ format(addDef * ratio) }}</span>
+            </div>
+            <div>
+                <span
+                    >当前减伤{{
+                        isMobile ? '' : '&nbsp;&nbsp;&nbsp;&nbsp;'
+                    }}</span
+                >
+                <span>{{ format(nowDamage[0], false, nowDamage[0] < 0) }}</span>
+            </div>
+            <div>
+                <span
+                    >当前伤害{{
+                        isMobile ? '' : '&nbsp;&nbsp;&nbsp;&nbsp;'
+                    }}</span
+                >
+                <span>{{ format(nowDamage[1]) }}</span>
+            </div>
         </div>
     </div>
 </template>
@@ -69,6 +81,7 @@ import { getCriticalDamage, getDefDamage } from '../plugin/book';
 import Chart, { ChartConfiguration } from 'chart.js/auto';
 import { has, setCanvasSize } from '../plugin/utils';
 import { debounce } from 'lodash';
+import { isMobile } from '../plugin/use';
 
 const critical = ref<HTMLCanvasElement>();
 const def = ref<HTMLCanvasElement>();
@@ -119,6 +132,11 @@ function generateChart(ele: HTMLCanvasElement, data: [number, number][]) {
                         color: '#ddd3'
                     }
                 }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
             }
         }
     };
@@ -133,7 +151,6 @@ function generateData(data: [number, number][]) {
     return {
         datasets: [
             {
-                label: '怪物伤害',
                 data: data.map(v => v[1])
             }
         ],
@@ -219,5 +236,21 @@ onMounted(() => {
     flex-direction: row;
     justify-content: space-around;
     font-size: 3vh;
+}
+
+@media screen and (max-width: 600px) {
+    #now-damage {
+        font-size: 3vw;
+
+        div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+
+    .slider {
+        width: 60%;
+    }
 }
 </style>

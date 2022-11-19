@@ -1,4 +1,5 @@
 import { isNil } from 'lodash';
+import { EVENT_KEY_CODE_MAP } from './keyCodes';
 
 export default function init() {
     return { has, getDamageColor };
@@ -41,4 +42,12 @@ export function setCanvasSize(
     canvas.height = h;
     canvas.style.width = `${w}px`;
     canvas.style.height = `${h}px`;
+}
+
+/**
+ * 获取事件中的keycode对应的键
+ * @param key 要获取的键
+ */
+export function keycode(key: number) {
+    return EVENT_KEY_CODE_MAP[key];
 }

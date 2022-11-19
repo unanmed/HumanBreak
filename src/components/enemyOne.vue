@@ -1,5 +1,10 @@
 <template>
-    <div class="enemy-container" @click="select">
+    <div
+        class="enemy-container"
+        @click="select"
+        @mouseenter="enter"
+        :selected="selected"
+    >
         <div class="info">
             <div class="leftbar">
                 <span class="name">{{ enemy.name }}</span>
@@ -16,7 +21,7 @@
                     <span
                         v-for="(text, i) in enemy.toShowSpecial"
                         :style="{ color: enemy.toShowColor![i] }"
-                        >{{ text }}</span
+                        >&nbsp;{{ text }}&nbsp;</span
                     >
                 </div>
                 <div class="special-text" v-else>无属性</div>
@@ -118,10 +123,12 @@ import { isMobile } from '../plugin/use';
 
 const props = defineProps<{
     enemy: Enemy & DetailedEnemy;
+    selected?: boolean;
 }>();
 
 const emits = defineEmits<{
     (e: 'select'): void;
+    (e: 'hover'): void;
 }>();
 
 const core = window.core;
@@ -131,6 +138,10 @@ const core = window.core;
  */
 function select(e: MouseEvent) {
     emits('select');
+}
+
+function enter() {
+    emits('hover');
 }
 </script>
 
@@ -151,7 +162,8 @@ function select(e: MouseEvent) {
     }
 }
 
-.enemy-container:hover {
+.enemy-container:hover,
+.enemy-container[selected='true'] {
     border: 1.5px solid gold;
     border-radius: 20px;
 }
