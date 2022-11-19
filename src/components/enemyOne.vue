@@ -1,5 +1,5 @@
 <template>
-    <div class="enemy-container">
+    <div class="enemy-container" @click="select">
         <div class="info">
             <div class="leftbar">
                 <span class="name">{{ enemy.name }}</span>
@@ -24,7 +24,7 @@
             <a-divider
                 type="vertical"
                 dashed
-                style="height: 100%; margin: 0 3% 0 3%; border-color: #ddd4"
+                style="height: 100%; margin: 0 3% 0 1%; border-color: #ddd4"
             ></a-divider>
             <div class="rightbar">
                 <div class="detail">
@@ -66,9 +66,9 @@
                     <div class="detail-info">
                         <span style="color: cyan"
                             >{{
-                                core.status.thisMap.ratio
+                                core.formatBigNumber(core.status.thisMap.ratio)
                             }}防&nbsp;&nbsp;&nbsp;&nbsp;{{
-                                core.formatBigNumber(enemy.money)
+                                core.formatBigNumber(enemy.defDamage)
                             }}</span
                         >
                     </div>
@@ -120,7 +120,18 @@ const props = defineProps<{
     enemy: Enemy & DetailedEnemy;
 }>();
 
+const emits = defineEmits<{
+    (e: 'select'): void;
+}>();
+
 const core = window.core;
+
+/**
+ * 选择这个怪物时
+ */
+function select(e: MouseEvent) {
+    emits('select');
+}
 </script>
 
 <style lang="less" scoped>
@@ -146,13 +157,14 @@ const core = window.core;
 }
 
 .leftbar {
-    width: 10%;
+    width: 15%;
     height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 1.3vw;
+    font-size: 2vh;
+    padding-left: 1%;
 }
 
 .name {
@@ -168,11 +180,14 @@ const core = window.core;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    display: block;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-items: space-between;
 }
 
 .rightbar {
-    font-size: 1.3vw;
+    font-size: 2.5vh;
     width: 100%;
     height: 100%;
     padding: 1.5vh 0 1.5vh 0;
@@ -184,12 +199,22 @@ const core = window.core;
         height: 100%;
 
         .detail-info {
-            flex-basis: 33%;
+            flex-basis: 33.3%;
             line-height: 0;
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .rightbar {
+        font-size: 4vw;
+    }
+
+    .leftbar {
+        font-size: 2vw;
     }
 }
 </style>

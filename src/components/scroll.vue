@@ -11,10 +11,17 @@
 
 <script lang="ts" setup>
 import { onMounted, onUnmounted, onUpdated } from 'vue';
-import { useDrag, useWheel } from '../plugin/use';
+import { cancelGlobalDrag, isMobile, useDrag, useWheel } from '../plugin/use';
 
 const props = defineProps<{
+    now?: number;
     type?: 'vertical' | 'horizontal';
+    drag?: boolean;
+}>();
+
+const emits = defineEmits<{
+    (e: 'update:now', value: number): void;
+    (e: 'update:drag', value: boolean): void;
 }>();
 
 let now = 0;
@@ -44,6 +51,7 @@ function draw() {
     } else if (now < 0) {
         now = 0;
     }
+    emits('update:now', now);
     const length =
         Math.min(ctx.canvas[canvasAttr] / total / scale, 1) *
         ctx.canvas[canvasAttr];
@@ -52,12 +60,12 @@ function draw() {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.beginPath();
     if (props.type === 'horizontal') {
-        ctx.moveTo(Math.max(py + 5, 5), 20 * scale);
-        ctx.lineTo(Math.min(py + length - 5, ctx.canvas.width - 5), 20 * scale);
+        ctx.moveTo(Math.max(py + 5, 5), 10 * scale);
+        ctx.lineTo(Math.min(py + length - 5, ctx.canvas.width - 5), 10 * scale);
     } else {
-        ctx.moveTo(20 * scale, Math.max(py + 5, 5));
+        ctx.moveTo(10 * scale, Math.max(py + 5, 5));
         ctx.lineTo(
-            20 * scale,
+            10 * scale,
             Math.min(py + length - 5, ctx.canvas.height - 5)
         );
     }
@@ -81,9 +89,34 @@ function scroll() {
 }
 
 onUpdated(() => {
+    now = props.now ?? now;
     calHeight();
     draw();
 });
+
+let last: number;
+let contentLast: number;
+
+function canvasDrag(x: number, y: number) {
+    emits('update:drag', true);
+    const d = props.type === 'horizontal' ? x : y;
+    const dy = d - last;
+    last = d;
+    if (ctx.canvas[canvasAttr] < total * scale)
+        now += ((dy * total) / ctx.canvas[canvasAttr]) * scale;
+    content.style.transition = '';
+    scroll();
+}
+
+function contentDrag(x: number, y: number) {
+    emits('update:drag', true);
+    const d = props.type === 'horizontal' ? x : y;
+    const dy = d - contentLast;
+    contentLast = d;
+    if (ctx.canvas[canvasAttr] < total * scale) now -= dy;
+    content.style.transition = '';
+    scroll();
+}
 
 onMounted(() => {
     const div = document.getElementById(`scroll-div-${id}`) as HTMLDivElement;
@@ -96,7 +129,7 @@ onMounted(() => {
     content.addEventListener('resize', resize);
 
     const style = getComputedStyle(canvas);
-    canvas.width = 40 * scale;
+    canvas.width = 20 * scale;
     canvas.height = parseFloat(style.height) * scale;
 
     if (props.type === 'horizontal') {
@@ -105,28 +138,20 @@ onMounted(() => {
         canvas.style.width = '98%';
         canvas.style.margin = '0 1% 0 1%';
         canvas.width = parseFloat(style.width) * scale;
-        canvas.height = 40 * scale;
+        canvas.height = 20 * scale;
     }
 
     draw();
 
-    let last: number;
-    let contentLast: number;
-
     // 绑定滚动条拖拽事件
     useDrag(
         canvas,
-        (x, y) => {
-            const d = props.type === 'horizontal' ? x : y;
-            const dy = d - last;
-            last = d;
-            if (canvas[canvasAttr] < total * scale)
-                now += ((dy * total) / canvas[canvasAttr]) * scale;
-            content.style.transition = '';
-            scroll();
-        },
+        canvasDrag,
         (x, y) => {
             last = props.type === 'horizontal' ? x : y;
+        },
+        () => {
+            setTimeout(() => emits('update:drag', false));
         },
         true
     );
@@ -134,30 +159,23 @@ onMounted(() => {
     // 绑定文本拖拽事件
     useDrag(
         content,
-        (x, y) => {
-            const d = props.type === 'horizontal' ? x : y;
-            const dy = d - contentLast;
-            contentLast = d;
-            if (canvas[canvasAttr] < total * scale) now -= dy;
-            content.style.transition = '';
-            scroll();
-        },
+        contentDrag,
         (x, y) => {
             contentLast = props.type === 'horizontal' ? x : y;
+        },
+        () => {
+            setTimeout(() => emits('update:drag', false));
         },
         true
     );
 
     useWheel(content, (x, y) => {
         const d = x !== 0 ? x : y;
-        if (!core.domStyle.isVertical) {
-            if (Math.abs(d) > 50) {
-                content.style.transition = `${cssTarget} 0.2s ease-out`;
-            }
+        if (Math.abs(d) > 50) {
+            content.style.transition = `${cssTarget} 0.2s ease-out`;
         } else {
             content.style.transition = '';
         }
-
         now += d;
         scroll();
     });
@@ -165,16 +183,15 @@ onMounted(() => {
 
 onUnmounted(() => {
     content.removeEventListener('resize', resize);
+    cancelGlobalDrag(canvasDrag);
+    cancelGlobalDrag(contentDrag);
 });
 </script>
 
 <style lang="less" scoped>
 .scroll {
     opacity: 0.2;
-    width: 40px;
-    height: 98%;
-    margin-top: 1%;
-    margin-bottom: 1%;
+    width: 20px;
     transition: opacity 0.2s linear;
 }
 

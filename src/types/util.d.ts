@@ -100,7 +100,11 @@ declare class utils {
      * @param onMap 可选，true表示用于地图显伤，结果总字符数最多为5，否则最多为6
      * @returns 格式化结果
      */
-    formatBigNumber(x: number, onMap?: boolean, onCritical?: boolean): string;
+    formatBigNumber(
+        x: number | string,
+        onMap?: boolean,
+        onCritical?: boolean
+    ): string;
 
     /** 变速移动 */
     applyEasing(mode?: string): (number) => number;
@@ -119,7 +123,7 @@ declare class utils {
      * @param color 一行三列或一行四列的数组，前三个元素必须为不大于255的自然数。第四个元素（如果有）必须为0或不大于1的数字，第四个元素不填视为1
      * @returns 该颜色的字符串表示
      */
-    arrayToRGBA(color: [number, number, number, number]): string;
+    arrayToRGBA(color: [number, number, number, number?] | string): string;
 
     /**
      * 录像一压，其结果会被再次base64压缩

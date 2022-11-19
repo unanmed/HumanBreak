@@ -105,7 +105,7 @@ declare class enemys {
         x?: number,
         y?: number,
         floorId?: string
-    ): number[][];
+    ): [atk: number, dam: number][];
 
     /**
      * 计算再加若干点防御能使某只敌人对主角的总伤害降低多少
@@ -198,5 +198,5 @@ declare class enemys {
         turn: number;
         damage: number;
         [x: string]: any;
-    };
+    } | null;
 }

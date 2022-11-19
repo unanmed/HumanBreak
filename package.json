@@ -14,6 +14,7 @@
     "@ant-design/icons-vue": "^6.1.0",
     "ant-design-vue": "^3.2.13",
     "axios": "^1.1.3",
+    "chart.js": "^4.0.1",
     "lodash": "^4.17.21",
     "lz-string": "^1.4.4",
     "mutate-animate": "^0.1.0",

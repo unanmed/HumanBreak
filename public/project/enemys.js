@@ -5,7 +5,7 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"blackSlime": {"name":"青头怪","hp":170,"atk":20,"def":8,"money":0,"exp":3,"point":0,"special":[]},
 	"slimelord": {"name":"粘液王","hp":200,"atk":58,"def":24,"money":0,"exp":8,"point":0,"special":[]},
 	"bat": {"name":"小蝙蝠","hp":60,"atk":15,"def":0,"money":0,"exp":2,"point":0,"special":[4]},
-	"bigBat": {"name":"大蝙蝠","hp":150,"atk":17,"def":5,"money":0,"exp":4,"point":0,"special":[4]},
+	"bigBat": {"name":"大蝙蝠","hp":150,"atk":17,"def":5,"money":0,"exp":4,"point":0,"special":[4,5,6],"crit":0,"charge":0,"courage":0,"together":0,"hungry":0,"value":100,"n":1000},
 	"redBat": {"name":"恐怖蝙蝠","hp":1200,"atk":260,"def":110,"money":1,"exp":32,"point":0,"special":[5]},
 	"vampire": {"name":"冥灵魔王","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"skeleton": {"name":"骷髅人","hp":300,"atk":80,"def":10,"money":0,"exp":9,"point":0,"special":[1],"crit":300},

@@ -4,6 +4,8 @@ type Ref<T> = {
     value: T;
 };
 
+type DragFn = (x: number, y: number, e: MouseEvent | TouchEvent) => void;
+
 interface PluginDeclaration extends PluginUtils {
     /**
      * 添加函数  例：添加弹出文字，像这个就可以使用core.addPop或core.plugin.addPop调用
@@ -16,11 +18,14 @@ interface PluginDeclaration extends PluginUtils {
     /** 添加变量  例：所有的正在弹出的文字，像这个就可以使用core.plugin.pop获取 */
     pop: any[];
 
+    /** 怪物手册的怪物详细信息的初始位置 */
+    bookDetailPos: number;
+
+    /** 怪物手册详细信息展示的怪物 */
+    bookDetailEnemy: Enemy & DetailedEnemy;
+
     /** 手册是否打开 */
     readonly bookOpened: Ref<boolean>;
-
-    /** 手册详细信息 */
-    readonly bookDetail: Ref<boolean>;
 
     /** ui栈 */
     readonly uiStack: Ref<Component[]>;
@@ -37,10 +42,17 @@ interface PluginDeclaration extends PluginUtils {
      */
     useDrag(
         ele: HTMLElement,
-        fn: (x: number, y: number, e: MouseEvent | TouchEvent) => void,
-        ondown?: (x: number, y: number, e: MouseEvent | TouchEvent) => void,
+        fn: DragFn,
+        ondown?: DragFn,
+        onUp?: (e: MouseEvent | TouchEvent) => void,
         global: boolean = false
     ): void;
+
+    /**
+     * 去除一个全局拖拽函数
+     * @param fn 要去除的函数
+     */
+    cancelGlobalDrag(fn: DragFn): void;
 
     /**
      * 当触发滚轮时执行函数
@@ -51,6 +63,13 @@ interface PluginDeclaration extends PluginUtils {
         ele: HTMLElement,
         fn: (x: number, y: number, z: number, e: WheelEvent) => void
     ): void;
+
+    /**
+     * 当鼠标或手指松开时执行函数
+     * @param ele 目标元素
+     * @param fn 当鼠标或手指松开时执行的函数
+     */
+    useUp(ele: HTMLElement, fn: DragFn): void;
 
     /**
      * 添加一个动画

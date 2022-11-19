@@ -8,7 +8,7 @@ export {}
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     ADivider: typeof import('ant-design-vue/es')['Divider']
-    BookOne: typeof import('./src/components/bookOne.vue')['default']
+    ASlider: typeof import('ant-design-vue/es')['Slider']
     BoxAnimate: typeof import('./src/components/boxAnimate.vue')['default']
     EnemyOne: typeof import('./src/components/enemyOne.vue')['default']
     Scroll: typeof import('./src/components/scroll.vue')['default']

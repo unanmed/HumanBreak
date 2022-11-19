@@ -25,3 +25,20 @@ export function getDamageColor(damage: number): string {
     if (damage < core.status.hero.hp) return '#f22';
     return '#f00';
 }
+
+/**
+ * 设置画布的长宽
+ * @param canvas 画布
+ * @param w 宽度
+ * @param h 高度
+ */
+export function setCanvasSize(
+    canvas: HTMLCanvasElement,
+    w: number,
+    h: number
+): void {
+    canvas.width = w;
+    canvas.height = h;
+    canvas.style.width = `${w}px`;
+    canvas.style.height = `${h}px`;
+}

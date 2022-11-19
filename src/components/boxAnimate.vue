@@ -33,12 +33,13 @@ onMounted(() => {
     c.height *= scale;
     ctx.scale(scale, scale);
 
-    const fn = (time: number) => {
+    const fn = () => {
         core.clearMap(ctx);
         const frame = core.status.globalAnimateStatus % frames;
         core.drawIcon(ctx, props.id, 0, 0, props.width, props.height, frame);
     };
 
+    fn();
     addAnimate(fn);
 
     onUnmounted(() => {
