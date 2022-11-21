@@ -218,6 +218,7 @@ onUnmounted(async () => {
 }
 
 .tools {
+    border-bottom: 1px solid #ddd4;
     cursor: pointer;
     transition: color 0.2s linear;
 }

@@ -1,99 +1,109 @@
 <template>
-    <span id="back" class="item-type-mobile" @click="exit"
-        ><left-outlined />返回游戏</span
-    >
     <div id="toolbox">
-        <div v-for="cls of toShow" class="item-main">
-            <div class="item-info">
-                <div class="item-type" v-if="!isMobile">
-                    {{ getClsName(cls) }}
-                </div>
-                <div v-else id="item-type-mobile">
-                    <span
-                        class="item-type-mobile"
-                        @click="mode = 'tools'"
-                        :selected="mode === 'tools'"
-                        >消耗道具</span
-                    >
+        <div id="tools">
+            <span class="item-type-mobile tools" @click="exit"
+                ><left-outlined /> 返回游戏</span
+            >
+            <span class="item-type-mobile tools" @click="exit"
+                >装备栏 <right-outlined
+            /></span>
+        </div>
+        <div id="toolbox-main">
+            <div v-for="cls of toShow" class="item-main">
+                <div class="item-info">
+                    <div class="item-type" v-if="!isMobile">
+                        {{ getClsName(cls) }}
+                    </div>
+                    <div v-else id="item-type-mobile">
+                        <span
+                            class="item-type-mobile"
+                            @click="mode = 'tools'"
+                            :selected="mode === 'tools'"
+                            >消耗道具</span
+                        >
+                        <a-divider
+                            dashed
+                            style="border-color: #ddd4; height: 100%"
+                            type="vertical"
+                        ></a-divider>
+                        <span
+                            class="item-type-mobile"
+                            @click="mode = 'constants'"
+                            :selected="mode === 'constants'"
+                            >永久道具</span
+                        >
+                    </div>
                     <a-divider
                         dashed
-                        style="border-color: #ddd4; height: 100%"
-                        type="vertical"
+                        style="margin: 1vh 0 1vh 0; border-color: #ddd4"
                     ></a-divider>
-                    <span
-                        class="item-type-mobile"
-                        @click="mode = 'constants'"
-                        :selected="mode === 'constants'"
-                        >永久道具</span
-                    >
+                    <Scroll class="item-list" :width="10">
+                        <div
+                            class="item"
+                            v-for="[id, num] of items[cls]"
+                            :selected="selected === id"
+                            @click="
+                                mode = cls;
+                                select(id);
+                            "
+                        >
+                            <div class="item-icon">
+                                <BoxAnimate
+                                    :id="id"
+                                    :width="32"
+                                    :height="32"
+                                    :noborder="true"
+                                ></BoxAnimate>
+                                <span class="item-name">{{
+                                    all[id].name
+                                }}</span>
+                            </div>
+                            <span>×&nbsp;{{ num }}</span>
+                        </div>
+                    </Scroll>
                 </div>
                 <a-divider
                     dashed
-                    style="margin: 1vh 0 1vh 0; border-color: #ddd4"
+                    :type="isMobile ? 'horizontal' : 'vertical'"
+                    class="divider"
+                    style="border-color: #ddd4; margin: 1%"
                 ></a-divider>
-                <Scroll class="item-list" :width="10">
-                    <div
-                        class="item"
-                        v-for="[id, num] of items[cls]"
-                        :selected="selected === id"
-                        @click="
-                            mode = cls;
-                            select(id);
-                        "
-                    >
-                        <div class="item-icon">
-                            <BoxAnimate
-                                :id="id"
-                                :width="32"
-                                :height="32"
-                                :noborder="true"
-                            ></BoxAnimate>
-                            <span class="item-name">{{ all[id].name }}</span>
-                        </div>
-                        <span>×&nbsp;{{ num }}</span>
-                    </div>
-                </Scroll>
             </div>
-            <a-divider
-                dashed
-                :type="isMobile ? 'horizontal' : 'vertical'"
-                class="divider"
-                style="border-color: #ddd4; margin: 1%"
-            ></a-divider>
-        </div>
-        <div id="detail">
-            <div id="info">
-                <BoxAnimate
-                    :id="selected"
-                    :width="32"
-                    :height="32"
-                ></BoxAnimate>
-                <div id="basic-info">
-                    <span style="border-bottom: 1px solid #ddd4">{{
-                        all[selected]?.name ?? '没有道具'
-                    }}</span>
-                    <span>{{
-                        getClsName(all[selected]?.cls as ItemMode) ?? '永久道具'
-                    }}</span>
+            <div id="detail">
+                <div id="info">
+                    <BoxAnimate
+                        :id="selected"
+                        :width="32"
+                        :height="32"
+                    ></BoxAnimate>
+                    <div id="basic-info">
+                        <span style="border-bottom: 1px solid #ddd4">{{
+                            all[selected]?.name ?? '没有道具'
+                        }}</span>
+                        <span>{{
+                            getClsName(all[selected]?.cls as ItemMode) ??
+                            '永久道具'
+                        }}</span>
+                    </div>
                 </div>
-            </div>
-            <span style="margin-top: 2vh">点击该物品以使用</span>
-            <a-divider dashed style="border-color: #ddd4"></a-divider>
-            <div id="desc">
-                <span style="border-bottom: 1px solid #ddd4">道具描述</span>
-                <Scroll id="desc-text">
-                    <div v-if="!descText.value.startsWith('!!html')">
-                        {{ descText.value }}
-                    </div>
-                    <div v-else v-html="descText.value.slice(6)"></div>
-                </Scroll>
+                <span style="margin-top: 2vh">点击该物品以使用</span>
+                <a-divider dashed style="border-color: #ddd4"></a-divider>
+                <div id="desc">
+                    <span style="border-bottom: 1px solid #ddd4">道具描述</span>
+                    <Scroll id="desc-text">
+                        <div v-if="!descText.value.startsWith('!!html')">
+                            {{ descText.value }}
+                        </div>
+                        <div v-else v-html="descText.value.slice(6)"></div>
+                    </Scroll>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { LeftOutlined } from '@ant-design/icons-vue';
+import { LeftOutlined, RightOutlined } from '@ant-design/icons-vue';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import Scroll from '../components/scroll.vue';
 import BoxAnimate from '../components/boxAnimate.vue';
@@ -227,8 +237,15 @@ onUnmounted(() => {
 
 <style lang="less" scoped>
 #toolbox {
+    display: flex;
+    flex-direction: column;
     width: 100%;
     height: 100%;
+}
+
+#toolbox-main {
+    width: 100%;
+    height: 85vh;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -237,11 +254,19 @@ onUnmounted(() => {
     user-select: none;
 }
 
-#back {
-    position: absolute;
-    left: 2%;
-    font-size: 2em;
+#tools {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
     font-family: 'normal';
+    font-size: 2em;
+    height: 5vh;
+    justify-content: space-between;
+
+    .tools {
+        white-space: nowrap;
+        border-bottom: 1px solid #ddd4;
+    }
 }
 
 .item-main {
@@ -379,8 +404,19 @@ onUnmounted(() => {
 
 @media screen and (max-width: 600px) {
     #toolbox {
-        flex-direction: column-reverse;
         padding: 5%;
+    }
+
+    #tools {
+        span {
+            margin: 0;
+        }
+    }
+
+    #toolbox-main {
+        flex-direction: column-reverse;
+        height: 100%;
+        border-top: 1px solid #ddd4;
     }
 
     .item-list {
