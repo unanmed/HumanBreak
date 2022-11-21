@@ -77,7 +77,7 @@
 
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from 'vue';
-import { getCriticalDamage, getDefDamage } from '../plugin/book';
+import { getCriticalDamage, getDefDamage } from '../plugin/ui/book';
 import Chart, { ChartConfiguration } from 'chart.js/auto';
 import { has, setCanvasSize } from '../plugin/utils';
 import { debounce } from 'lodash';
@@ -147,11 +147,12 @@ function generateChart(ele: HTMLCanvasElement, data: [number, number][]) {
  * 生成图表数据
  * @param data 数据
  */
-function generateData(data: [number, number][]) {
+function generateData(data: [number, number][]): ChartConfiguration['data'] {
     return {
         datasets: [
             {
-                data: data.map(v => v[1])
+                data: data.map(v => v[1]),
+                label: '怪物伤害'
             }
         ],
         labels: data.map(v => Math.round(v[0] / ratio))

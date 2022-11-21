@@ -27,6 +27,6 @@ export function addAnimate(fn: (time: number) => void) {
  */
 export function removeAnimate(fn: (time: number) => void) {
     const index = animation.findIndex(v => v === fn);
-    if (index === -1)
-        throw new ReferenceError('No such function in animation.');
+    if (index === -1) return;
+    animation.splice(index, 1);
 }

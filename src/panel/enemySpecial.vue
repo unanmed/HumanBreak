@@ -31,7 +31,7 @@
 
 <script lang="ts" setup>
 import { isMobile } from '../plugin/use';
-import { getSpecialHint } from '../plugin/book';
+import { getSpecialHint } from '../plugin/ui/book';
 
 const enemy = core.plugin.bookDetailEnemy;
 

@@ -1,10 +1,20 @@
-﻿html, body {
+﻿html,
+body {
     margin: 0;
     padding: 0;
     width: 100%;
     height: 100%;
     background-color: #000;
     overflow: hidden;
+}
+
+#game {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #gameGroup {
@@ -80,7 +90,7 @@
 }
 
 #startTopHint {
-    color: #66CCFF;
+    color: #66ccff;
     position: absolute;
     bottom: 0;
     left: 5%;
@@ -89,12 +99,12 @@
 }
 
 #startBackground {
-    position:absolute;
-    top:50%;
-    left:50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
     height: 100%;
     width: auto;
-    transform:translate(-50%,-50%);
+    transform: translate(-50%, -50%);
     z-index: 260;
 }
 
@@ -132,11 +142,11 @@
     padding: 15px 25px;
     min-width: 20%;
     /* default value */
-    background-color: #32369F;
+    background-color: #32369f;
     opacity: 0.85;
-    color: #FFFFFF;
-    border: #FFFFFF 2px solid;
-    caret-color: #FFD700;
+    color: #ffffff;
+    border: #ffffff 2px solid;
+    caret-color: #ffd700;
     border-radius: 10px;
 }
 
@@ -207,20 +217,20 @@
     left: 0;
     padding: 3px;
 }
-#statusBar .status{
+#statusBar .status {
     user-select: none;
     position: relative;
     display: block;
     float: left;
     width: 100%;
 }
-.status img{
+.status img {
     vertical-align: middle;
     width: auto;
     height: 100%;
     max-height: 1.6em;
 }
-#statusBar span{
+#statusBar span {
     user-select: none;
     font: bold italic 1.1em Verdana;
     display: inline;
@@ -245,7 +255,7 @@
     display: none;
     padding: 3px;
 }
-#toolBar .tools{
+#toolBar .tools {
     position: relative;
     display: block;
     float: left;
@@ -257,13 +267,18 @@ p#hard {
     vertical-align: middle;
     display: inline-block;
     color: red;
-    font: bold normal 1.1em "Arial Black";
+    font: bold normal 1.1em 'Arial Black';
     text-align: center;
     margin: 0 6px 6px 0;
     word-break: keep-all;
 }
 
-span#poison, span#weak, span#curse, span#pickaxe, span#bomb, span#fly {
+span#poison,
+span#weak,
+span#curse,
+span#pickaxe,
+span#bomb,
+span#fly {
     user-select: none;
     font-style: normal;
     font-size: 1em;
@@ -346,8 +361,8 @@ p#name {
     position: fixed;
     top: 0;
     left: 0;
-    background: rgba(127,127,127,0.6);
-    z-index: 2000
+    background: rgba(127, 127, 127, 0.6);
+    z-index: 2000;
 }
 
 #inputDialog {
@@ -373,7 +388,7 @@ p#name {
     margin-bottom: 10px;
     padding: 5px 3px;
     border: 1px solid;
-    background: #F0F0F0;
+    background: #f0f0f0;
 }
 
 #inputYes {
@@ -382,24 +397,37 @@ p#name {
 }
 
 #inputNo {
-    float:right;
+    float: right;
     margin-right: 10%;
 }
 
-#_selector, ._uievent_selector {
+#_selector,
+._uievent_selector {
     animation: selector 2s ease-in-out 0s infinite normal none running;
 }
 
 @-webkit-keyframes selector {
-    0% { opacity: 0.95; }
-    50% { opacity: 0.55; }
-    100% { opacity: 0.95; }
+    0% {
+        opacity: 0.95;
+    }
+    50% {
+        opacity: 0.55;
+    }
+    100% {
+        opacity: 0.95;
+    }
 }
 
 @keyframes selector {
-    0% { opacity: 0.95; }
-    50% { opacity: 0.55; }
-    100% { opacity: 0.95; }
+    0% {
+        opacity: 0.95;
+    }
+    50% {
+        opacity: 0.55;
+    }
+    100% {
+        opacity: 0.95;
+    }
 }
 
 #next {
@@ -412,8 +440,8 @@ p#name {
     border-bottom-style: solid;
     border-right-width: 4px;
     border-right-style: solid;
-    -webkit-animation: next .5s ease-in-out alternate infinite;
-    animation: next .5s ease-in-out alternate infinite;
+    -webkit-animation: next 0.5s ease-in-out alternate infinite;
+    animation: next 0.5s ease-in-out alternate infinite;
     left: 0;
     top: 0;
     opacity: 0.7;
@@ -463,15 +491,27 @@ p#name {
 }
 
 @-webkit-keyframes startImage {
-    0% { opacity: 0; }
-    60% { opacity: 1; }
-    100% { opacity: 0; }
+    0% {
+        opacity: 0;
+    }
+    60% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
 }
 
 @keyframes startImage {
-    0% { opacity: 0; }
-    60% { opacity: 1; }
-    100% { opacity: 0; }
+    0% {
+        opacity: 0;
+    }
+    60% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
 }
 
 .startImageDivAnimation {
@@ -480,13 +520,21 @@ p#name {
 }
 
 @-webkit-keyframes startImageDivDisappear {
-    0% { opacity: 1 }
-    100% { opacity: 0 }
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
 }
 
 @keyframes startImageDivDisappear {
-    0% { opacity: 1 }
-    100% { opacity: 0 }
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
 }
 
 #ui-editor {

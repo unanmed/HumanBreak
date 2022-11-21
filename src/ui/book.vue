@@ -116,7 +116,6 @@ async function show() {
  * 退出怪物手册
  */
 function exit() {
-    core.closePanel();
     core.plugin.bookOpened.value = false;
 }
 
@@ -190,7 +189,7 @@ onMounted(async () => {
     document.addEventListener('keydown', keydown);
 });
 
-onUnmounted(() => {
+onUnmounted(async () => {
     document.removeEventListener('keyup', keyup);
     document.removeEventListener('keydown', keydown);
 });

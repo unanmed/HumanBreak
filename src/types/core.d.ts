@@ -330,7 +330,7 @@ declare class Sprite {
     removeEventListenr: HTMLCanvasElement['addEventListener'];
 }
 
-declare const main: main;
+declare const main: Main;
 declare const core: Core;
 declare const flags: { [x: string]: any };
 declare const hero: HeroStatus;

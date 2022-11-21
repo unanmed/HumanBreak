@@ -6,6 +6,14 @@ type Ref<T> = {
 
 type DragFn = (x: number, y: number, e: MouseEvent | TouchEvent) => void;
 
+type CanParseCss = keyof {
+    [P in keyof CSSStyleDeclaration as CSSStyleDeclaration[P] extends string
+        ? P extends string
+            ? P
+            : never
+        : never]: CSSStyleDeclaration[P];
+};
+
 interface PluginDeclaration extends PluginUtils {
     /**
      * 添加函数  例：添加弹出文字，像这个就可以使用core.addPop或core.plugin.addPop调用
@@ -24,8 +32,14 @@ interface PluginDeclaration extends PluginUtils {
     /** 怪物手册详细信息展示的怪物 */
     bookDetailEnemy: Enemy & DetailedEnemy;
 
+    /** ui是否使用渐变 */
+    readonly transition: Ref<boolean>;
+
     /** 手册是否打开 */
     readonly bookOpened: Ref<boolean>;
+
+    /** 道具栏是否打开 */
+    readonly toolOpened: Ref<boolean>;
 
     /** ui栈 */
     readonly uiStack: Ref<Component[]>;
@@ -96,6 +110,12 @@ interface PluginUtils {
      * @param damage 伤害大小
      */
     getDamageColor(damage: number): string;
+
+    /**
+     * 解析css字符串为CSSStyleDeclaration对象
+     * @param css 要解析的css字符串
+     */
+    parseCss(css: string): Partial<Record<CanParseCss, string>>;
 }
 
 type Forward<T> = {

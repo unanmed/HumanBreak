@@ -11,12 +11,13 @@
 
 <script lang="ts" setup>
 import { onMounted, onUnmounted, onUpdated } from 'vue';
-import { cancelGlobalDrag, isMobile, useDrag, useWheel } from '../plugin/use';
+import { cancelGlobalDrag, useDrag, useWheel } from '../plugin/use';
 
 const props = defineProps<{
     now?: number;
     type?: 'vertical' | 'horizontal';
     drag?: boolean;
+    width?: number;
 }>();
 
 const emits = defineEmits<{
@@ -29,6 +30,7 @@ let total = 0;
 
 const id = (1e8 * Math.random()).toFixed(0);
 const scale = window.devicePixelRatio;
+const width = props.width ?? 20;
 
 const cssTarget = props.type === 'horizontal' ? 'left' : 'top';
 const canvasAttr = props.type === 'horizontal' ? 'width' : 'height';
@@ -52,6 +54,8 @@ function draw() {
     } else if (now < 0) {
         now = 0;
     }
+    const w = ctx.canvas.width;
+    const h = ctx.canvas.height;
     emits('update:now', now);
     const length =
         Math.min(ctx.canvas[canvasAttr] / total / scale, 1) *
@@ -61,14 +65,11 @@ function draw() {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.beginPath();
     if (props.type === 'horizontal') {
-        ctx.moveTo(Math.max(py + 5, 5), 10 * scale);
-        ctx.lineTo(Math.min(py + length - 5, ctx.canvas.width - 5), 10 * scale);
+        ctx.moveTo(Math.max(py + 5, 5), h / 2);
+        ctx.lineTo(Math.min(py + length - 5, ctx.canvas.width - 5), h / 2);
     } else {
-        ctx.moveTo(10 * scale, Math.max(py + 5, 5));
-        ctx.lineTo(
-            10 * scale,
-            Math.min(py + length - 5, ctx.canvas.height - 5)
-        );
+        ctx.moveTo(w / 2, Math.max(py + 5, 5));
+        ctx.lineTo(w / 2, Math.min(py + length - 5, ctx.canvas.height - 5));
     }
     ctx.lineCap = 'round';
     ctx.lineWidth = 6;
@@ -130,16 +131,17 @@ onMounted(() => {
     content.addEventListener('resize', resize);
 
     const style = getComputedStyle(canvas);
-    canvas.width = 20 * scale;
+    canvas.style.width = `${width}px`;
+    canvas.width = width * scale;
     canvas.height = parseFloat(style.height) * scale;
 
     if (props.type === 'horizontal') {
         div.style.flexDirection = 'column';
-        canvas.style.height = '40px';
+        canvas.style.height = `${width}px`;
         canvas.style.width = '98%';
         canvas.style.margin = '0 1% 0 1%';
         canvas.width = parseFloat(style.width) * scale;
-        canvas.height = 20 * scale;
+        canvas.height = width * scale;
     }
 
     draw();
@@ -200,7 +202,6 @@ onUnmounted(() => {
 <style lang="less" scoped>
 .scroll {
     opacity: 0.2;
-    width: 20px;
     transition: opacity 0.2s linear;
 }
 

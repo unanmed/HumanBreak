@@ -1,4 +1,4 @@
-import { has } from './utils';
+import { has } from '../utils';
 
 /**
  * 获取怪物的特殊技能描述
@@ -64,10 +64,10 @@ export function getDefDamage(
             atk: core.status.hero.atk + addAtk
         });
 
-        if (i === 0) {
+        if (res.length === 0) {
             origin = dam?.damage;
             if (has(origin)) {
-                res.push([addDef, origin]);
+                res.push([addDef + i * ratio, origin]);
                 last = origin;
             }
             continue;

@@ -1,8 +1,18 @@
 import { isNil } from 'lodash';
+import { Animation, TimingFn } from 'mutate-animate';
+import { ComputedRef, ref } from 'vue';
 import { EVENT_KEY_CODE_MAP } from './keyCodes';
 
+type CanParseCss = keyof {
+    [P in keyof CSSStyleDeclaration as CSSStyleDeclaration[P] extends string
+        ? P extends string
+            ? P
+            : never
+        : never]: CSSStyleDeclaration[P];
+};
+
 export default function init() {
-    return { has, getDamageColor };
+    return { has, getDamageColor, parseCss };
 }
 
 /**
@@ -50,4 +60,56 @@ export function setCanvasSize(
  */
 export function keycode(key: number) {
     return EVENT_KEY_CODE_MAP[key];
+}
+
+/**
+ * 解析css字符串为CSSStyleDeclaration对象
+ * @param css 要解析的css字符串
+ */
+export function parseCss(css: string): Partial<Record<CanParseCss, string>> {
+    const str = css.replace(/[\n\s\t]*/g, '').replace(/[;,]*/g, ';');
+    const styles = str.split(';');
+    const res: Partial<Record<CanParseCss, string>> = {};
+
+    for (const one of styles) {
+        const [key, data] = one.split(':');
+        const cssKey = key.replace(/\-([a-z])/g, $1 =>
+            $1.toUpperCase()
+        ) as CanParseCss;
+        res[cssKey] = data;
+    }
+    return res;
+}
+
+/**
+ * 使用打字机效果显示一段文字
+ * @param str 要打出的字符串
+ * @param time 打出总用时，默认1秒
+ * @param timing 打出时的速率曲线，默认为线性变化
+ * @returns 文字的响应式变量
+ */
+export function type(
+    str: string,
+    time: number = 1000,
+    timing: TimingFn = n => n
+): Ref<string> {
+    const toShow = eval('`' + str + '`') as string;
+    const ani = new Animation();
+    const content = ref('');
+    const all = toShow.length;
+
+    const fn = (time: number) => {
+        if (!has(time)) return;
+        const now = ani.x;
+        content.value = toShow.slice(0, Math.floor(now));
+        if (Math.floor(now) === all) {
+            ani.ticker.destroy();
+        }
+    };
+
+    ani.ticker.add(fn);
+
+    ani.mode(timing).time(time).move(all, 0);
+
+    return content;
 }

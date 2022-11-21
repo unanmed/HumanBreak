@@ -479,7 +479,10 @@ declare class maps {
     resizeMap(floorId?: string): void;
 
     /** 以x,y的形式返回每个点的事件 */
-    getMapBlocksObj(floorId?: string, noCache?: boolean): object;
+    getMapBlocksObj(
+        floorId?: string,
+        noCache?: boolean
+    ): Record<`${number},${number}`, Block>;
 
     /** 获得某些点可否通行的信息 */
     canMoveDirectlyArray(locs?: any): object;

@@ -307,7 +307,7 @@ actions.prototype._sys_onkeyUp_replay = function (e) {
             // T
             core.control._replay_toolbox();
         else if (e.keyCode == 81)
-            // Q
+            // Q_sys_onkeyUp
             core.control._replay_equipbox();
         else if (e.keyCode == 66)
             // B
@@ -489,9 +489,6 @@ actions.prototype._sys_keyUp_lockControl = function (keyCode, altKey) {
             break;
         case 'selectShop':
             this._keyUpQuickShop(keyCode);
-            break;
-        case 'toolbox':
-            this._keyUpToolbox(keyCode);
             break;
         case 'equipbox':
             this._keyUpEquipbox(keyCode, altKey);
@@ -2012,33 +2009,6 @@ actions.prototype._keyDownToolbox = function (keycode) {
         if (nextIndex != null) {
             this._clickToolboxIndex(nextIndex);
         }
-        return;
-    }
-};
-
-////// 工具栏界面时，放开某个键的操作 //////
-actions.prototype._keyUpToolbox = function (keycode) {
-    if (keycode == 81) {
-        core.playSound('确定');
-        core.ui.closePanel();
-        if (core.isReplaying()) core.control._replay_equipbox();
-        else core.openEquipbox();
-        return;
-    }
-    if (keycode == 84 || keycode == 27 || keycode == 88) {
-        core.playSound('取消');
-        core.ui.closePanel();
-        var last = core.status.route[core.status.route.length - 1] || '';
-        if (last.startsWith('equip:') || last.startsWith('unEquip:')) {
-            core.status.route.push('no');
-        }
-        core.checkAutoEvents();
-        return;
-    }
-    if (core.status.event.data == null) return;
-
-    if (keycode == 13 || keycode == 32 || keycode == 67) {
-        this._clickToolboxIndex(core.status.event.selection);
         return;
     }
 };

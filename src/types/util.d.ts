@@ -553,7 +553,12 @@ type DetailedEnemy = {
 };
 
 type Item = {
-    cls: string;
+    name: string;
+    cls: 'items' | 'constants' | 'tools' | 'equips';
+    text: string;
+    hideInToolbox?: boolean;
+    color?: string;
+    css?: string;
     [key: string]: any;
 };
 
