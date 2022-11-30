@@ -2,7 +2,7 @@
 <template>
     <div id="book">
         <div id="tools">
-            <span id="back" class="tools" @click="exit"
+            <span id="back" class="button-text tools" @click="exit"
                 ><left-outlined />返回游戏</span
             >
         </div>
@@ -11,7 +11,7 @@
         </div>
         <Scroll
             v-else
-            style="width: 100%; height: 95%; font-family: normal"
+            style="width: 100%; height: 94%; font-family: normal"
             v-model:now="scroll"
             v-model:drag="drag"
         >
@@ -214,21 +214,11 @@ onUnmounted(async () => {
 }
 
 #tools {
-    height: 5%;
+    height: 6%;
 }
 
 .tools {
     border-bottom: 1px solid #ddd4;
-    cursor: pointer;
-    transition: color 0.2s linear;
-}
-
-.tools:hover {
-    color: aqua;
-}
-
-.tools:active {
-    color: aquamarine;
 }
 
 #none {

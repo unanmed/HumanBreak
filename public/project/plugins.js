@@ -3361,12 +3361,29 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         }
     },
     itemDetail: function () {
+        /* 宝石血瓶左下角显示数值
+         * 需要将 变量：itemDetail改为true才可正常运行
+         * 请尽量减少勇士的属性数量，否则可能会出现严重卡顿
+         * 注意：这里的属性必须是core.status.hero里面的，flag无法显示
+         * 如果不想显示，可以core.setFlag("itemDetail", false);
+         * 然后再core.getItemDetail();
+         * 如有bug在大群或造塔群@古祠
+         */
+
+        // 谁tm在即捡即用效果里面调用带有含刷新状态栏的函数
+        var origin = core.control.updateStatusBar;
+        core.updateStatusBar = core.control.updateStatusBar = function () {
+            if (core.getFlag('__statistics__')) return;
+            else return origin.apply(core.control, arguments);
+        };
+
         core.bigmap.threshold = 256;
 
         core.control.updateDamage = function (floorId, ctx) {
             floorId = floorId || core.status.floorId;
             if (!floorId || core.status.gameOver || main.mode != 'play') return;
             var onMap = ctx == null;
+
             // 没有怪物手册
             if (!core.hasItem('book')) return;
             core.status.damage.posX = core.bigmap.posX;
@@ -3385,9 +3402,11 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         // 绘制地图显示
         control.prototype._drawDamage_draw = function (ctx, onMap) {
             if (!core.hasItem('book')) return;
-            core.setFont(ctx, '15px normal');
+            // *** 下一句话可以更改你想要的显示字体
+            core.setFont(ctx, '14px normal');
+            // ***
             core.setTextAlign(ctx, 'left');
-            core.status.damage.data.forEach(one => {
+            core.status.damage.data.forEach(function (one) {
                 var px = one.px,
                     py = one.py;
                 if (onMap && core.bigmap.v2) {
@@ -3395,16 +3414,16 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     py -= core.bigmap.posY * 32;
                     if (
                         px < -32 * 2 ||
-                        px > core.__PIXELS__ + 32 ||
+                        px > core.__PX__ + 32 ||
                         py < -32 ||
-                        py > core.__PIXELS__ + 32
+                        py > core.__PY__ + 32
                     )
                         return;
                 }
                 core.fillBoldText(ctx, one.text, px, py, one.color);
             });
             core.setTextAlign(ctx, 'center');
-            core.status.damage.extraData.forEach(one => {
+            core.status.damage.extraData.forEach(function (one) {
                 var px = one.px,
                     py = one.py;
                 if (onMap && core.bigmap.v2) {
@@ -3412,69 +3431,25 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     py -= core.bigmap.posY * 32;
                     if (
                         px < -32 ||
-                        px > core.__PIXELS__ + 32 ||
+                        px > core.__PX__ + 32 ||
                         py < -32 ||
-                        py > core.__PIXELS__ + 32
+                        py > core.__PY__ + 32
                     )
                         return;
                 }
                 core.fillBoldText(ctx, one.text, px, py, one.color);
             });
         };
-        core.formatBigNumber = function (x, onMap, onCritical) {
-            x = Math.floor(parseFloat(x));
-            if (!core.isset(x) || !Number.isFinite(x)) return '???';
-            if (x > 1e24 || x < -1e24) return x.toExponential(2);
-            var c = x < 0 ? '-' : '';
-            if (onCritical) c = '-> ';
-            x = Math.abs(x);
-            if (x <= 9999 || (!onMap && x <= 999999)) return c + x;
-            var all = [
-                { val: 1e20, c: 'g' },
-                { val: 1e16, c: 'j' },
-                { val: 1e12, c: 'z' },
-                { val: 1e8, c: 'e' },
-                { val: 1e4, c: 'w' }
-            ];
-            for (var i = 0; i < all.length; i++) {
-                var one = all[i];
-                if (onMap) {
-                    if (x >= one.val) {
-                        var v = x / one.val;
-                        return (
-                            c +
-                            v.toFixed(
-                                Math.max(
-                                    0,
-                                    Math.floor(
-                                        (c == '-' ? 2 : 3) - Math.log10(v + 1)
-                                    )
-                                )
-                            ) +
-                            one.c
-                        );
-                    }
-                } else {
-                    if (x >= 10 * one.val) {
-                        var v = x / one.val;
-                        return (
-                            c +
-                            v.toFixed(
-                                Math.max(0, Math.floor(4 - Math.log10(v + 1)))
-                            ) +
-                            one.c
-                        );
-                    }
-                }
-            }
-            return c + x;
-        };
         // 获取宝石信息 并绘制
         this.getItemDetail = function (floorId) {
             if (!core.getFlag('itemDetail')) return;
             floorId = floorId || core.status.thisMap.floorId;
-            core.status.maps[floorId].blocks.forEach(block => {
-                if (block.event.cls !== 'items') return;
+            core.status.maps[floorId].blocks.forEach(function (block) {
+                if (
+                    block.event.cls !== 'items' ||
+                    block.event.id === 'superPotion'
+                )
+                    return;
                 var x = block.x,
                     y = block.y;
                 // v2优化，只绘制范围内的部分
@@ -3498,7 +3473,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 var item = core.material.items[id];
                 if (item.cls === 'equips') {
                     // 装备也显示
-                    var diff = item.equip.value || {};
+                    var diff = core.clone(item.equip.value || {});
                     var per = item.equip.percentage;
                     for (var name in per) {
                         diff[name + 'per'] = per[name].toString() + '%';
@@ -3531,7 +3506,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         }
         // 绘制
         function drawItemDetail(diff, x, y) {
-            if (core.same(diff, {}) || !diff) return;
             var px = 32 * x + 2,
                 py = 32 * y + 30;
             var content = '';
@@ -9291,14 +9265,17 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
     },
     uiChange: function () {
         if (main.replayChecking) return;
+
         ui.prototype.drawBook = function () {
-            if (main.replayChecking) return;
             return (core.plugin.bookOpened.value = true);
         };
 
         ui.prototype._drawToolbox = function () {
-            if (main.replayChecking) return;
             return (core.plugin.toolOpened.value = true);
+        };
+
+        ui.prototype._drawEquipbox = function () {
+            return (core.plugin.equipOpened.value = true);
         };
     }
 };

@@ -552,6 +552,13 @@ type DetailedEnemy = {
     damageColor?: string;
 };
 
+type Equip = {
+    type: number | string;
+    animate: string;
+    value: Record<string, number>;
+    percentage: Record<string, number>;
+};
+
 type Item = {
     name: string;
     cls: 'items' | 'constants' | 'tools' | 'equips';
@@ -559,6 +566,7 @@ type Item = {
     hideInToolbox?: boolean;
     color?: string;
     css?: string;
+    equip?: Equip;
     [key: string]: any;
 };
 

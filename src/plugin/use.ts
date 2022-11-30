@@ -20,27 +20,38 @@ export const isMobile = matchMedia('(max-width: 600px)').matches;
 
 /**
  * 向一个元素添加拖拽事件
- * @param ele 目标元素
+ * @param ele 目标元素，当为全局拖拽时，传入数组表示所有元素共用一个全局拖拽函数
  * @param fn 推拽时触发的函数，传入x y和鼠标事件或点击事件
  * @param ondown 鼠标按下时执行的函数
  * @param global 是否全局拖拽，即拖拽后鼠标或手指离开元素后是否依然视为正在拖拽
  */
 export function useDrag(
-    ele: HTMLElement,
+    ele: HTMLElement | HTMLElement[],
     fn: DragFn,
     ondown?: DragFn,
-    onUp?: (e: MouseEvent | TouchEvent) => void,
+    onup?: (e: MouseEvent | TouchEvent) => void,
     global: boolean = false
 ) {
     let down = false;
-    ele.addEventListener('mousedown', e => {
+
+    const md = (e: MouseEvent) => {
         down = true;
         if (ondown) ondown(e.clientX, e.clientY, e);
-    });
-    ele.addEventListener('touchstart', e => {
+    };
+    const td = (e: TouchEvent) => {
         down = true;
         if (ondown) ondown(e.touches[0].clientX, e.touches[0].clientY, e);
-    });
+    };
+
+    if (ele instanceof Array) {
+        ele.forEach(v => {
+            v.addEventListener('mousedown', md);
+            v.addEventListener('touchstart', td);
+        });
+    } else {
+        ele.addEventListener('mousedown', md);
+        ele.addEventListener('touchstart', td);
+    }
 
     const target = global ? document : ele;
 
@@ -56,35 +67,30 @@ export function useDrag(
 
     const mouseUp = (e: MouseEvent) => {
         if (!down) return;
-        onUp && onUp(e);
+        onup && onup(e);
         down = false;
     };
 
     const touchUp = (e: TouchEvent) => {
         if (!down) return;
-        onUp && onUp(e);
+        onup && onup(e);
         down = false;
     };
 
-    target.addEventListener(
-        'mouseup',
-        mouseUp as EventListenerOrEventListenerObject
-    );
-    target.addEventListener(
-        'touchend',
-        touchUp as EventListenerOrEventListenerObject
-    );
-
+    if (target instanceof Array) {
+        target.forEach(v => {
+            v.addEventListener('mouseup', mouseUp);
+            v.addEventListener('touchend', touchUp);
+            v.addEventListener('mousemove', mouseFn);
+            v.addEventListener('touchmove', touchFn);
+        });
+    } else {
+        target.addEventListener('mouseup', mouseUp as EventListener);
+        target.addEventListener('touchend', touchUp as EventListener);
+        target.addEventListener('mousemove', mouseFn as EventListener);
+        target.addEventListener('touchmove', touchFn as EventListener);
+    }
     dragFnMap.set(fn, [mouseFn, touchFn, mouseUp, touchUp]);
-
-    target.addEventListener(
-        'mousemove',
-        mouseFn as EventListenerOrEventListenerObject
-    );
-    target.addEventListener(
-        'touchmove',
-        touchFn as EventListenerOrEventListenerObject
-    );
 }
 
 /**
@@ -128,6 +134,20 @@ export function useUp(ele: HTMLElement, fn: DragFn): void {
         fn(e.clientX, e.clientY, e);
     });
     ele.addEventListener('touchend', e => {
+        fn(e.touches[0].clientX, e.touches[0].clientY, e);
+    });
+}
+
+/**
+ * 当鼠标或手指按下时执行函数
+ * @param ele 目标元素
+ * @param fn 当鼠标或手指按下时执行的函数
+ */
+export function useDown(ele: HTMLElement, fn: DragFn): void {
+    ele.addEventListener('mousedown', e => {
+        fn(e.clientX, e.clientY, e);
+    });
+    ele.addEventListener('touchstart', e => {
         fn(e.touches[0].clientX, e.touches[0].clientY, e);
     });
 }

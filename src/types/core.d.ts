@@ -42,6 +42,7 @@ type Core = {
             npcs: HTMLImageElement;
             npc48: HTMLImageElement;
             terrains: HTMLImageElement;
+            hero: HTMLImageElement;
             autotile: { [x: string]: HTMLImageElement };
             images: { [x: string]: HTMLImageElement };
             tilesets: { [x: string]: HTMLImageElement };

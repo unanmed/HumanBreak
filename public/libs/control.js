@@ -4163,7 +4163,7 @@ control.prototype.resize = function () {
         clientHeight = main.dom.body.clientHeight;
     var BORDER = 3;
     var extendToolbar = core.flags.extendToolbar;
-    var BAR_WIDTH = extendToolbar ? 0 : Math.round(core._PY_ * 0.3);
+    var BAR_WIDTH = extendToolbar ? 0 : Math.round(core._PY_ * 0.31);
 
     var horizontalMaxRatio =
         (clientHeight - 2 * BORDER - (extendToolbar ? BORDER : 0)) /
@@ -4321,6 +4321,7 @@ control.prototype._resize_canvas = function (obj) {
     core.dom.gameDraw.style.top = obj.statusBarHeightInVertical + 'px';
     core.dom.gameDraw.style.right = 0;
     core.dom.gameDraw.style.border = obj.border;
+    core.dom.gameDraw.style.boxSizing = 'content-box';
     // resize bigmap
     core.bigmap.canvas.forEach(function (cn) {
         var ratio = core.canvas[cn].canvas.hasAttribute('isHD')

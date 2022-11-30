@@ -1389,7 +1389,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 floorId: core.status.floorId,
                 hero: core.clone(core.status.hero),
                 hard: core.status.hard,
-                maps: core.maps.saveMap(),
+                maps: core.clone(core.maps.saveMap()),
                 route: core.encodeRoute(core.status.route),
                 values: values,
                 version: core.firstData.version,
@@ -1484,7 +1484,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     money: '金币',
                     exp: '经验',
                     point: '加点',
-                    steps: '步数'
+                    steps: '步数',
+                    up: '升级',
+                    none: '无'
                 }[name] || name
             );
         },

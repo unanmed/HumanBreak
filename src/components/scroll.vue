@@ -39,8 +39,8 @@ let ctx: CanvasRenderingContext2D;
 let content: HTMLDivElement;
 let fromSelf = false;
 
-const resize = () => {
-    calHeight();
+const resize = async () => {
+    await calHeight();
     draw();
 };
 
@@ -80,9 +80,14 @@ function draw() {
 /**
  * 计算元素总长度
  */
-function calHeight() {
-    const style = getComputedStyle(content);
-    total = parseFloat(style[canvasAttr]);
+async function calHeight() {
+    await new Promise(res => {
+        requestAnimationFrame(() => {
+            const style = getComputedStyle(content);
+            total = parseFloat(style[canvasAttr]);
+            res('');
+        });
+    });
 }
 
 function scroll() {
@@ -90,11 +95,11 @@ function scroll() {
     content.style[cssTarget] = `${-now}px`;
 }
 
-onUpdated(() => {
+onUpdated(async () => {
     if (fromSelf) return;
     now = props.now ?? now;
     content.style.transition = `${cssTarget} 0.2s ease-out`;
-    calHeight();
+    await calHeight();
     scroll();
 });
 
@@ -120,15 +125,12 @@ function contentDrag(x: number, y: number) {
     scroll();
 }
 
-onMounted(() => {
+onMounted(async () => {
     const div = document.getElementById(`scroll-div-${id}`) as HTMLDivElement;
     const canvas = document.getElementById(`scroll-${id}`) as HTMLCanvasElement;
     const d = document.getElementById(`content-${id}`) as HTMLDivElement;
     ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
     content = d;
-    calHeight();
-
-    content.addEventListener('resize', resize);
 
     const style = getComputedStyle(canvas);
     canvas.style.width = `${width}px`;
@@ -143,8 +145,6 @@ onMounted(() => {
         canvas.width = parseFloat(style.width) * scale;
         canvas.height = width * scale;
     }
-
-    draw();
 
     // 绑定滚动条拖拽事件
     useDrag(
@@ -190,10 +190,14 @@ onMounted(() => {
         scroll();
         fromSelf = false;
     });
+
+    window.addEventListener('resize', resize);
+    await calHeight();
+    draw();
 });
 
 onUnmounted(() => {
-    content.removeEventListener('resize', resize);
+    window.removeEventListener('resize', resize);
     cancelGlobalDrag(canvasDrag);
     cancelGlobalDrag(contentDrag);
 });

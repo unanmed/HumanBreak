@@ -22,7 +22,7 @@
                     <span></span>
                     <span
                         id="critical-more"
-                        class="more"
+                        class="button-text more"
                         @click="changePanel($event, 'critical')"
                         >详细临界信息 <right-outlined
                     /></span>
@@ -34,7 +34,7 @@
                 >
                     <span
                         id="enemy-pos"
-                        class="more"
+                        class="button-text more"
                         @click="changePanel($event, 'special')"
                         ><left-outlined /> 怪物特殊属性</span
                     >
@@ -163,16 +163,6 @@ onUnmounted(() => {
 
 .more {
     user-select: none;
-    cursor: pointer;
-    transition: color 0.2s linear;
-}
-
-.more:hover {
-    color: aqua;
-}
-
-.more:active {
-    color: aquamarine;
 }
 
 .detail-enter-active,

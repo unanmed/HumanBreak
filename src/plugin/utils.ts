@@ -73,7 +73,7 @@ export function parseCss(css: string): Partial<Record<CanParseCss, string>> {
 
     for (const one of styles) {
         const [key, data] = one.split(':');
-        const cssKey = key.replace(/\-([a-z])/g, $1 =>
+        const cssKey = key.replace(/\-([a-z])/g, (str, $1) =>
             $1.toUpperCase()
         ) as CanParseCss;
         res[cssKey] = data;
@@ -84,16 +84,22 @@ export function parseCss(css: string): Partial<Record<CanParseCss, string>> {
 /**
  * 使用打字机效果显示一段文字
  * @param str 要打出的字符串
- * @param time 打出总用时，默认1秒
+ * @param time 打出总用时，默认1秒，当第四个参数是true时，该项为每个字的平均时间
  * @param timing 打出时的速率曲线，默认为线性变化
+ * @param avr 是否将第二个参数视为每个字的平均时间
  * @returns 文字的响应式变量
  */
 export function type(
     str: string,
     time: number = 1000,
-    timing: TimingFn = n => n
+    timing: TimingFn = n => n,
+    avr: boolean = false
 ): Ref<string> {
     const toShow = eval('`' + str + '`') as string;
+    if (typeof toShow !== 'string') {
+        throw new TypeError('Error str type in typing!');
+    }
+    if (avr) time *= toShow.length;
     const ani = new Animation();
     const content = ref('');
     const all = toShow.length;
@@ -104,6 +110,7 @@ export function type(
         content.value = toShow.slice(0, Math.floor(now));
         if (Math.floor(now) === all) {
             ani.ticker.destroy();
+            content.value = toShow;
         }
     };
 

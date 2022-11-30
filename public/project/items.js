@@ -151,8 +151,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"type": "武器",
 			"animate": "jianji",
 			"value": {
-				"mana": 10,
-				"atk": 15
+				"atk": 15,
+				"mana": 10
 			},
 			"percentage": {}
 		},

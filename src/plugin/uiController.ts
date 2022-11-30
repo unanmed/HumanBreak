@@ -2,9 +2,11 @@ import { sleep } from 'mutate-animate';
 import { Component, markRaw, ref, Ref, watch } from 'vue';
 import Book from '../ui/book.vue';
 import Toolbox from '../ui/toolbox.vue';
+import Equipbox from '../ui/equipbox.vue';
 
 export const bookOpened = ref(false);
 export const toolOpened = ref(false);
+export const equipOpened = ref(false);
 
 export const transition = ref(true);
 
@@ -13,7 +15,8 @@ let app: HTMLDivElement;
 /** ui声明列表 */
 const UI_LIST: [Ref<boolean>, Component][] = [
     [bookOpened, Book],
-    [toolOpened, Toolbox]
+    [toolOpened, Toolbox],
+    [equipOpened, Equipbox]
 ];
 
 /** ui栈 */
@@ -36,7 +39,7 @@ export default function init() {
             }
         });
     });
-    return { uiStack, bookOpened, toolOpened, transition };
+    return { uiStack, transition, bookOpened, toolOpened, equipOpened };
 }
 
 async function showApp() {

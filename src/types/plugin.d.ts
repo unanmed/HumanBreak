@@ -41,6 +41,9 @@ interface PluginDeclaration extends PluginUtils {
     /** 道具栏是否打开 */
     readonly toolOpened: Ref<boolean>;
 
+    /** 装备栏是否打开 */
+    readonly equipOpened: Ref<boolean>;
+
     /** ui栈 */
     readonly uiStack: Ref<Component[]>;
 

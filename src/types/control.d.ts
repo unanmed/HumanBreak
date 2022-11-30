@@ -274,7 +274,7 @@ declare class control {
      * @param lv 级别的数字，不填则视为主角当前的级别
      * @returns 级别的名称，如果不存在就还是返回数字
      */
-    getLvName(lv?: number): string | number;
+    getLvName(lv?: number): string;
 
     /**
      * 获得下次升级需要的经验值。

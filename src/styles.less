@@ -1,3 +1,5 @@
+// 部分全局css特效
+
 #root {
     position: absolute;
     display: none;
@@ -15,4 +17,36 @@
 .antdv-message {
     font-family: 'normal';
     font-size: 1.6em;
+}
+
+.button-text {
+    cursor: pointer;
+    transition: color 0.2s linear;
+}
+
+.button-text:hover {
+    color: aqua;
+}
+
+.button-text:active {
+    color: aquamarine;
+}
+
+.selectable[selected='true'] {
+    animation: selected alternate 5s infinite ease-in-out;
+}
+
+@keyframes selected {
+    0% {
+        border: #0ff7 0.5px solid;
+        background-color: rgba(39, 251, 209, 0.143);
+    }
+    50% {
+        border: #0ffa 0.5px solid;
+        background-color: rgba(39, 251, 209, 0.284);
+    }
+    100% {
+        border: #0ff7 0.5px solid;
+        background-color: rgba(39, 251, 209, 0.143);
+    }
 }

@@ -26,6 +26,7 @@ let ctx: CanvasRenderingContext2D;
 let drawFn: () => void;
 
 function draw() {
+    if (id === 'none') return;
     if (has(drawFn)) removeAnimate(drawFn);
 
     const cls = core.getClsFromId(props.id);
@@ -46,7 +47,10 @@ function draw() {
     c.height = scale * h;
     ctx.scale(scale, scale);
 
-    if (frames === 1) {
+    if (props.id === 'hero') {
+        const img = core.material.images.hero;
+        ctx.drawImage(img, 0, 0, img.width / 4, img.height / 4, 0, 0, w, h);
+    } else if (frames === 1) {
         core.drawIcon(ctx, props.id, 0, 0, props.width, props.height);
     } else {
         drawFn = () => {

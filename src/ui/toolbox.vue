@@ -1,10 +1,10 @@
 <template>
     <div id="toolbox">
         <div id="tools">
-            <span class="item-type-mobile tools" @click="exit"
+            <span class="button-text tools" @click="exit"
                 ><left-outlined /> 返回游戏</span
             >
-            <span class="item-type-mobile tools" @click="exit"
+            <span class="button-text tools" @click="exit"
                 >装备栏 <right-outlined
             /></span>
         </div>
@@ -16,7 +16,7 @@
                     </div>
                     <div v-else id="item-type-mobile">
                         <span
-                            class="item-type-mobile"
+                            class="button-text"
                             @click="mode = 'tools'"
                             :selected="mode === 'tools'"
                             >消耗道具</span
@@ -27,7 +27,7 @@
                             type="vertical"
                         ></a-divider>
                         <span
-                            class="item-type-mobile"
+                            class="button-text"
                             @click="mode = 'constants'"
                             :selected="mode === 'constants'"
                             >永久道具</span
@@ -39,7 +39,7 @@
                     ></a-divider>
                     <Scroll class="item-list" :width="10">
                         <div
-                            class="item"
+                            class="item selectable"
                             v-for="[id, num] of items[cls]"
                             :selected="selected === id"
                             @click="
@@ -145,7 +145,7 @@ const descText = computed(() => {
     const s = selected.value;
     if (s === 'none') return ref('没有选择道具');
     if (all[s].text.startsWith('!!html')) return ref(all[s].text);
-    return type(all[s].text, 600, hyper('sin', 'out'));
+    return type(all[s].text, 25, hyper('sin', 'out'), true);
 });
 
 /**
@@ -302,18 +302,8 @@ onUnmounted(() => {
     align-items: center;
 }
 
-.item-type-mobile {
-    cursor: pointer;
-    transition: color 0.2s linear;
-}
-
-.item-type-mobile:hover,
-.item-type-mobile[selected='true'] {
+.button-text[selected='true'] {
     color: aqua;
-}
-
-.item-type-mobile:active {
-    color: aquamarine;
 }
 
 .item {
@@ -337,10 +327,6 @@ onUnmounted(() => {
             margin-left: 5%;
         }
     }
-}
-
-.item[selected='true'] {
-    animation: selected alternate 5s infinite ease-in-out;
 }
 
 .divider {
@@ -384,21 +370,6 @@ onUnmounted(() => {
             width: 100%;
             height: 100%;
         }
-    }
-}
-
-@keyframes selected {
-    0% {
-        border: #0ff7 0.5px solid;
-        background-color: rgba(39, 251, 209, 0.143);
-    }
-    50% {
-        border: #0ffa 0.5px solid;
-        background-color: rgba(39, 251, 209, 0.284);
-    }
-    100% {
-        border: #0ff7 0.5px solid;
-        background-color: rgba(39, 251, 209, 0.143);
     }
 }
 
