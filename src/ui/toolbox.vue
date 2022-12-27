@@ -4,7 +4,7 @@
             <span class="button-text tools" @click="exit"
                 ><left-outlined /> 返回游戏</span
             >
-            <span class="button-text tools" @click="exit"
+            <span class="button-text tools" @click="toEquip"
                 >装备栏 <right-outlined
             /></span>
         </div>
@@ -173,17 +173,27 @@ async function use(id: ShowItemIds) {
     if (id === 'none') return;
     if (core.canUseItem(id)) {
         // 应该暂时把动画去掉
+        const before = core.plugin.transition.value;
         core.plugin.transition.value = false;
         exit();
         await sleep(50);
         core.useItem(id);
-        core.plugin.transition.value = true;
+        core.plugin.transition.value = before;
     } else {
         message.warn({
             content: '当前无法使用该道具！',
             class: 'antdv-message'
         });
     }
+}
+
+async function toEquip() {
+    const before = core.plugin.transition.value;
+    core.plugin.transition.value = false;
+    exit();
+    await sleep(50);
+    core.plugin.equipOpened.value = true;
+    core.plugin.transition.value = before;
 }
 
 function keyup(e: KeyboardEvent) {

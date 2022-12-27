@@ -4,7 +4,9 @@
             <span class="button-text tools" @click="exit"
                 ><left-outlined /> 返回游戏</span
             >
-            <span class="button-text tools">道具栏 <right-outlined /></span>
+            <span class="button-text tools" @click="toTool"
+                >道具栏 <right-outlined
+            /></span>
         </div>
         <div id="equipbox-main">
             <div id="equip-list">
@@ -69,8 +71,9 @@
                 <div id="equip-status-main">
                     <div id="equip-now">
                         <Scroll
-                            style="width: 100%; height: 30vh"
-                            :type="isMobile ? 'horizontal' : 'vertical'"
+                            :style="{
+                                height: isMobile ? '10vh' : '30vh'
+                            }"
                         >
                             <div id="equip-now-div" @touchmove="dragout">
                                 <div
@@ -80,7 +83,6 @@
                                     :access="canDragin(i)"
                                     :selected="isCol && selected === i"
                                     @mouseenter="dragin($event, i)"
-                                    @touchmove="dragin($event, i)"
                                     @mouseleave="dragout"
                                     @click="select(i, true)"
                                 >
@@ -183,7 +185,7 @@ import { getAddStatus, getEquips, getNowStatus } from '../plugin/ui/equipbox';
 import BoxAnimate from '../components/boxAnimate.vue';
 import { has, type } from '../plugin/utils';
 import { cancelGlobalDrag, isMobile, useDrag } from '../plugin/use';
-import { hyper } from 'mutate-animate';
+import { hyper, sleep } from 'mutate-animate';
 import { message } from 'ant-design-vue';
 
 const equips = ref(getEquips());
@@ -392,7 +394,6 @@ function bind() {
             if (draged.value) {
                 draged.value = false;
                 loadEquip();
-                console.log(toEquipType.value);
             }
         },
         true
@@ -420,6 +421,15 @@ function dragin(e: Event, type: number) {
 function dragout(e: Event) {
     e.stopPropagation();
     toEquipType.value = -1;
+}
+
+async function toTool() {
+    const before = core.plugin.transition.value;
+    core.plugin.transition.value = false;
+    exit();
+    await sleep(50);
+    core.plugin.toolOpened.value = true;
+    core.plugin.transition.value = before;
 }
 
 watch(toShow, n => {
@@ -672,12 +682,25 @@ onUnmounted(() => {
     }
 
     #equipbox-main {
-        height: 100%;
+        height: 90vh;
         flex-direction: column-reverse;
     }
 
     #equip-now-div {
         flex-wrap: nowrap;
+    }
+
+    #equip-status {
+        flex-direction: column;
+        flex-basis: auto;
+    }
+
+    #equip-list {
+        flex-basis: 50%;
+    }
+
+    .divider {
+        margin: 1% 0 1% 0;
     }
 }
 </style>
