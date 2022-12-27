@@ -41,9 +41,10 @@
                     ><div
                         class="equip selectable"
                         v-for="([id, num], i) of toShow"
-                        :selected="selected === i"
-                        @mousedown="selected = i"
-                        @touchstart="selected = i"
+                        :selected="selected === i && !isCol"
+                        @mousedown="select(i)"
+                        @touchstart="select(i)"
+                        @click="clickList(i)"
                     >
                         <div class="equip-icon">
                             <BoxAnimate
@@ -71,10 +72,17 @@
                             style="width: 100%; height: 30vh"
                             :type="isMobile ? 'horizontal' : 'vertical'"
                         >
-                            <div id="equip-now-div">
+                            <div id="equip-now-div" @touchmove="dragout">
                                 <div
                                     v-for="(name, i) of equipCol"
-                                    class="equip-now-one"
+                                    class="equip-now-one draginable selectable"
+                                    :draged="draged"
+                                    :access="canDragin(i)"
+                                    :selected="isCol && selected === i"
+                                    @mouseenter="dragin($event, i)"
+                                    @touchmove="dragin($event, i)"
+                                    @mouseleave="dragout"
+                                    @click="select(i, true)"
                                 >
                                     <BoxAnimate
                                         :id="equiped[i] ?? 'none'"
@@ -112,7 +120,13 @@
             </div>
             <div id="equip-desc">
                 <div id="equip-icon">
-                    <BoxAnimate :id="toShow[selected]?.[0]"></BoxAnimate>
+                    <BoxAnimate
+                        :id="
+                            isCol
+                                ? equiped[selected] ?? 'none'
+                                : toShow[selected]?.[0] ?? 'none'
+                        "
+                    ></BoxAnimate>
                     <span>{{ equip.name }}</span>
                 </div>
                 <div id="equip-type">
@@ -135,14 +149,24 @@
                 <div id="equip-desc-text">
                     <span style="font-size: 3vh" id="title">装备介绍</span>
                     <Scroll id="desc-text" style="height: 100%; width: 100%">
-                        <div v-if="!descText.value.startsWith('!!html')">
+                        <div v-if="!descText.value!.startsWith('!!html')">
                             {{ descText.value }}
                         </div>
-                        <div v-else v-html="descText.value.slice(6)"></div>
+                        <div v-else v-html="descText.value!.slice(6)"></div>
                     </Scroll>
                 </div>
             </div>
         </div>
+    </div>
+    <div id="icon-drag">
+        <BoxAnimate
+            class="drag-icon"
+            v-if="draged"
+            :id="toShow[selected]?.[0] ?? 'none'"
+            :width="48"
+            :height="48"
+            noborder
+        ></BoxAnimate>
     </div>
 </template>
 
@@ -153,26 +177,30 @@ import {
     SortAscendingOutlined,
     SortDescendingOutlined
 } from '@ant-design/icons-vue';
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import Scroll from '../components/scroll.vue';
 import { getAddStatus, getEquips, getNowStatus } from '../plugin/ui/equipbox';
 import BoxAnimate from '../components/boxAnimate.vue';
 import { has, type } from '../plugin/utils';
 import { cancelGlobalDrag, isMobile, useDrag } from '../plugin/use';
 import { hyper } from 'mutate-animate';
+import { message } from 'ant-design-vue';
 
-const equips = getEquips();
+const equips = ref(getEquips());
 const col = ref('all');
 const all = core.material.items;
 const selected = ref(0);
+const isCol = ref(false); // 是否是选中的已装备的装备
 const equipCol = core.status.globalAttribute.equipName;
-const equiped = core.status.hero.equipment;
+const equiped = ref(core.status.hero.equipment);
+const listClicked = ref(false);
 
 const draged = ref(false);
+const toEquipType = ref(-1); // 要穿至的装备孔，-1表示不穿
 
 /** 排序方式，down表示下面大上面小 */
 const sort = ref<'up' | 'down'>('down');
-const norm = ref('none');
+const norm = ref<keyof SelectType<HeroStatus, number> | 'none'>('none');
 const sType = ref<'value' | 'percentage'>('value');
 
 // 攻击 防御 回血 额外攻击
@@ -197,38 +225,46 @@ watch(sType, n => {
  */
 const equip = computed(() => {
     const index = toShow.value[selected.value];
-    if (!has(index))
-        return {
-            name: '没有选择装备',
-            cls: 'equip',
-            text: '没有选择装备',
-            equip: { type: '无', value: {}, percentage: {}, animate: '' }
-        };
+    const none = {
+        name: '没有选择装备',
+        cls: 'equip',
+        text: '没有选择装备',
+        equip: { type: '无', value: {}, percentage: {}, animate: '' }
+    };
+    if (isCol.value) {
+        const id = equiped.value[selected.value];
+        const e = core.material.items[id];
+        if (!has(e)) return none;
+        return e;
+    }
+    if (!has(index)) return none;
     return all[index[0]];
 });
 
 const addStatus = computed(() => {
-    return getAddStatus(equip.value.equip!);
+    // @ts-ignore
+    return getAddStatus(equip.value.equip!, isCol.value);
 });
 
 const descText = computed(() => {
-    if (equip.value.text.startsWith('!!html')) return ref(equip.value.text);
-    return type(equip.value.text, 25, hyper('sin', 'out'), true);
+    if (equip.value.text!.startsWith('!!html')) return ref(equip.value.text);
+    return type(equip.value.text!, 25, hyper('sin', 'out'), true);
 });
 
 const nowStatus = computed(() => {
-    return getNowStatus(equip.value.equip);
+    // @ts-ignore
+    return getNowStatus(equip.value.equip, isCol.value);
 });
 
 /**
- * 需要展示的装备，需要排序等操作
+ * 需要展示的装备，已进行排序等操作
  */
 const toShow = computed(() => {
     const sortType = sort.value;
     const sortNorm = norm.value;
     const sortBy = sType.value;
 
-    const res = equips.filter(v => {
+    const res = equips.value.filter(v => {
         const e = all[v[0]].equip!;
         const t = e.type;
         if (sortNorm !== 'none') {
@@ -268,15 +304,78 @@ function exit() {
     core.plugin.equipOpened.value = false;
 }
 
-// ----- 交互函数
-let [fx, fy] = [0, 0];
-function dragEquip(x: number, y: number) {
-    if ((x - fx) ** 2 + (y - fy) ** 2 > 10 ** 2) {
-        draged.value = true;
+function clickList(i: number) {
+    if (i === selected.value && listClicked.value) {
+        const id = toShow.value[selected.value]?.[0];
+        if (!core.canEquip(id)) {
+            message.warn({
+                content: '无法装备！',
+                class: 'antdv-message'
+            });
+            return;
+        }
+        core.loadEquip(id);
+        update();
+        listClicked.value = false;
     }
+    listClicked.value = true;
 }
 
-onMounted(() => {
+/**
+ * 选择某个装备
+ */
+function select(i: number, col: boolean = false) {
+    if (i !== selected.value && !col) {
+        listClicked.value = false;
+    }
+    if (col) listClicked.value = false;
+    if (col && isCol.value === col && selected.value === i) {
+        core.unloadEquip(i);
+        update();
+    }
+    isCol.value = col;
+    selected.value = i;
+}
+
+/**
+ * 是否可以将当前装备拖入该栏
+ * @param type 装备栏
+ */
+function canDragin(type: number) {
+    if (type < 0) return false;
+    const et = equip.value.equip?.type;
+    if (!core.canEquip(toShow.value[selected.value]?.[0])) return false;
+    if (!has(et)) return false;
+    if (typeof et === 'number') return type === et;
+    return equipCol[type] === et;
+}
+
+/**
+ * 穿上某个装备
+ */
+function loadEquip() {
+    const num = toEquipType.value;
+    if (num < 0) return;
+    if (!canDragin(num)) {
+        message.warn({
+            content: '无法装备！',
+            class: 'antdv-message'
+        });
+        return;
+    }
+    const now = equiped.value[num];
+    const to = toShow.value[selected.value]?.[0];
+    core.items._realLoadEquip(num, to, now);
+    update();
+}
+
+function update() {
+    equiped.value = core.status.hero.equipment;
+    equips.value = getEquips();
+}
+
+// ----- 绑定函数
+function bind() {
     const equips = Array.from(
         document.querySelectorAll('.equip')
     ) as HTMLDivElement[];
@@ -289,9 +388,46 @@ onMounted(() => {
             fx = x;
             fy = y;
         },
-        void 0,
+        () => {
+            if (draged.value) {
+                draged.value = false;
+                loadEquip();
+                console.log(toEquipType.value);
+            }
+        },
         true
     );
+}
+
+// ----- 交互函数
+let [fx, fy] = [0, 0];
+function dragEquip(x: number, y: number, e: TouchEvent | MouseEvent) {
+    if ((x - fx) ** 2 + (y - fy) ** 2 > 10 ** 2 && !draged.value) {
+        draged.value = true;
+    }
+    if (draged.value) {
+        const target = document.getElementById('icon-drag') as HTMLDivElement;
+        target.style.left = `${x - 24}px`;
+        target.style.top = `${y - 24}px`;
+    }
+}
+
+function dragin(e: Event, type: number) {
+    e.stopPropagation();
+    toEquipType.value = type;
+}
+
+function dragout(e: Event) {
+    e.stopPropagation();
+    toEquipType.value = -1;
+}
+
+watch(toShow, n => {
+    bind();
+});
+
+onMounted(() => {
+    bind();
 });
 
 onUnmounted(() => {
@@ -442,11 +578,12 @@ onUnmounted(() => {
         padding-left: 5%;
 
         .equip-now-one {
-            flex-basis: 33.3%;
+            flex-basis: 30%;
             display: flex;
             flex-direction: row;
             align-items: center;
-            margin: 3% 0 3% 0;
+            margin: 3% 3.3% 3% 0;
+            padding-left: 0.5%;
 
             span {
                 margin-left: 10%;
@@ -518,6 +655,15 @@ onUnmounted(() => {
             margin-left: 5%;
         }
     }
+}
+
+#icon-drag {
+    position: fixed;
+    width: 32px;
+    height: 32px;
+    margin: 0;
+    padding: 0;
+    pointer-events: none;
 }
 
 @media screen and (max-width: 600px) {

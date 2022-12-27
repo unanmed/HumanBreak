@@ -44,7 +44,8 @@ import BookDetail from './bookDetail.vue';
 import { LeftOutlined } from '@ant-design/icons-vue';
 import { KeyCode } from '../plugin/keyCodes';
 
-const floorId = core.floorIds[core.status.event?.ui] ?? core.status.floorId;
+const floorId =
+    core.floorIds[core.status.event?.ui as number] ?? core.status.floorId;
 const enemy = core.getCurrentEnemys(floorId);
 
 const scroll = ref(0);
@@ -65,7 +66,7 @@ enemy.forEach(v => {
         if (typeof v === 'string') return v;
         else return core.arrayToRGBA(v);
     });
-    v.damageColor = getDamageColor(v.damage);
+    v.damageColor = getDamageColor(v.damage!);
 });
 
 /**

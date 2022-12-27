@@ -43,6 +43,8 @@ next();
 
 let repStart;
 
+const listenedFloors = [];
+
 // ----- GET file
 
 /**
@@ -169,6 +171,11 @@ async function writeFile(req, res) {
         const type = /^type=(utf8|base64)/.exec(data)[0].slice(5);
         const value = /&value=[^]+/.exec(data)[0].slice(7);
         await fs.writeFile(dir, value, { encoding: type });
+        testWatchFloor(name);
+        if (name.endsWith('project/events.js')) doDeclaration('events', value);
+        if (name.endsWith('project/items.js')) doDeclaration('items', value);
+        if (name.endsWith('project/maps.js')) doDeclaration('maps', value);
+        if (name.endsWith('project/data.js')) doDeclaration('data', value);
     } catch (e) {
         console.error(e);
         res.end(
@@ -226,9 +233,14 @@ async function writeMultiFiles(req, res) {
     const tasks = names.map((v, i) => {
         try {
             return new Promise(res => {
-                fs.writeFile(path.resolve(__dirname, v), value[i]).then(v =>
-                    res(`write ${v} success.`)
-                );
+                fs.writeFile(
+                    path.resolve(__dirname, v),
+                    value[i],
+                    'base64' // 多文件是base64写入的
+                ).then(v => {
+                    testWatchFloor(v);
+                    res(`write ${v} success.`);
+                });
             });
         } catch {
             console.error(e);
@@ -313,13 +325,11 @@ async function watch() {
         });
     });
 
-    // 楼层，热重载
-    fss.watch(path.resolve(__dirname, 'project/floors/'), (a, b) => {
-        if (!/^\w+\.js$/.test(b)) return;
-        const floorId = b.slice(0, -3);
-        if (hotReloadData.includes(`@@floor:${floorId}`)) return;
-        hotReloadData += `@@floor:${floorId}`;
-        console.log(`floor hot reload: ${floorId}`);
+    // 楼层 热重载
+    // 注意这里要逐个监听，并通过创建文件来监听文件改变
+    const floors = await extract('project/floors/*.js');
+    floors.forEach(v => {
+        watchOneFloor(v.slice(15));
     });
 
     // 脚本编辑 及 插件 热重载
@@ -344,6 +354,35 @@ async function watch() {
             hotReloadData += `@@data:${type}`;
             console.log(`data hot reload: ${type}`);
         });
+    });
+}
+
+/**
+ * 检测是否是楼层文件并进行监听
+ * @param {string} url 要测试的路径
+ */
+function testWatchFloor(url) {
+    if (/project(\/|\\)floors(\/|\\).*\.js/.test(url)) {
+        const f = url.slice(15);
+        if (!listenedFloors.includes(f.slice(0, -3))) {
+            watchOneFloor(f);
+        }
+    }
+}
+
+/**
+ * 监听一个楼层文件
+ * @param {string} file 要监听的文件
+ */
+function watchOneFloor(file) {
+    if (!/.*\.js/.test(file)) return;
+    const f = file.slice(0, -3);
+    listenedFloors.push(file.slice(0, -3));
+    fss.watchFile(`project/floors/${file}`, { interval: 100 }, () => {
+        const floorId = f;
+        if (hotReloadData.includes(`@@floor:${floorId}`)) return;
+        hotReloadData += `@@floor:${floorId}`;
+        console.log(`floor hot reload: ${floorId}`);
     });
 }
 
@@ -553,6 +592,96 @@ async function replaySave(req, res) {
     );
 
     res.end('success');
+}
+
+// ----- declaration
+
+/**
+ * 声明某种类型
+ * @param {string} type 类型
+ * @param {string} data 信息
+ */
+async function doDeclaration(type, data) {
+    const buf = Buffer.from(data, 'base64');
+    data = buf.toString('utf-8');
+    if (type === 'events') {
+        // 事件
+        const eventData = JSON.parse(data.split('\n').slice(1).join(''));
+
+        let eventDec = 'type EventDeclaration = \n';
+        for (const id in eventData.commonEvent) {
+            eventDec += `    | '${id}'\n`;
+        }
+        await fs.writeFile('../src/source/events.d.ts', eventDec, 'utf-8');
+    } else if (type === 'items') {
+        // 道具
+        const itemData = JSON.parse(data.split('\n').slice(1).join(''));
+
+        let itemDec = 'interface ItemDeclaration {\n';
+        for (const id in itemData) {
+            itemDec += `    ${id}: '${itemData[id].cls}';\n`;
+        }
+        itemDec += '}';
+        await fs.writeFile('../src/source/items.d.ts', itemDec, 'utf-8');
+    } else if (type === 'maps') {
+        // 映射
+        const d = JSON.parse(data.split('\n').slice(1).join(''));
+
+        let id2num = 'interface IdToNumber {\n';
+        let num2id = 'interface NumberToId {\n';
+        let id2cls = 'interface IdToCls {\n';
+        for (const num in d) {
+            const { id, cls } = d[num];
+            id2num += `    ${id}: ${num};\n`;
+            num2id += `    ${num}: '${id}';\n`;
+            id2cls += `    ${id}: '${cls}';\n`;
+        }
+        id2cls += '}';
+        id2num += '}';
+        num2id += '}';
+        await fs.writeFile('../src/source/cls.d.ts', id2cls, 'utf-8');
+        await fs.writeFile(
+            '../src/source/maps.d.ts',
+            `${id2num}\n${num2id}`,
+            'utf-8'
+        );
+    } else if (type === 'data') {
+        // 全塔属性的注册信息
+        const d = JSON.parse(data.split('\n').slice(1).join('')).main;
+
+        let floorId = 'type FloorIds =\n';
+        let imgs = 'type ImageIds =\n';
+        let anis = 'type AnimationIds =\n';
+        let sounds = 'type SoundIds =\n';
+        let names = 'interface NameMap {\n';
+        let bgms = 'type BgmIds =\n';
+        let fonts = 'type FontIds =\n';
+
+        floorId += d.floorIds.map(v => `    | '${v}'\n`).join('');
+        imgs += d.images.map(v => `    | '${v}'\n`).join('');
+        anis += d.animates.map(v => `    | '${v}'\n`).join('');
+        sounds += d.sounds.map(v => `    | '${v}'\n`).join('');
+        bgms += d.bgms.map(v => `    | '${v}'\n`).join('');
+        fonts += d.fonts.map(v => `    | '${v}'\n`).join('');
+        for (const name in d.nameMap) {
+            names += `    '${name}': '${d.nameMap[name]}';\n`;
+        }
+        names += '}';
+
+        await fs.writeFile(
+            '../src/source/data.d.ts',
+            `
+${floorId}
+${d.images.length > 0 ? imgs : 'type ImageIds = never\n'}
+${d.animates.length > 0 ? anis : 'type AnimationIds = never\n'}
+${d.sounds.length > 0 ? sounds : 'type SoundIds = never\n'}
+${d.bgms.length > 0 ? bgms : 'type BgmIds = never\n'}
+${d.fonts.length > 0 ? fonts : 'type FontIds = never\n'}
+${names}
+`,
+            'utf-8'
+        );
+    }
 }
 
 // ----- server

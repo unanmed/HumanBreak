@@ -1,7 +1,6 @@
+'use strict';
 
-"use strict";
-
-function items () {
+function items() {
     this._init();
 }
 
@@ -11,7 +10,7 @@ items.prototype._init = function () {
     for (var itemId in this.items) {
         this.items[itemId].id = itemId;
     }
-}
+};
 
 ////// 获得所有道具 //////
 items.prototype.getItems = function () {
@@ -23,7 +22,7 @@ items.prototype.getItems = function () {
         }
     }
     return items;
-}
+};
 
 ////// “即捡即用类”道具的使用效果 //////
 items.prototype.getItemEffect = function (itemId, itemNum) {
@@ -34,10 +33,8 @@ items.prototype.getItemEffect = function (itemId, itemNum) {
         var itemEffect = core.material.items[itemId].itemEffect;
         if (itemEffect) {
             try {
-                for (var i = 0; i < itemNum; ++i)
-                    eval(itemEffect);
-            }
-            catch (e) {
+                for (var i = 0; i < itemNum; ++i) eval(itemEffect);
+            } catch (e) {
                 console.error(e);
             }
         }
@@ -47,17 +44,15 @@ items.prototype.getItemEffect = function (itemId, itemNum) {
         if (useItemEvent) {
             try {
                 core.insertAction(useItemEvent);
-            }
-            catch (e) {
+            } catch (e) {
                 console.error(e);
             }
         }
         core.updateStatusBar(false, true);
-    }
-    else {
+    } else {
         core.addItem(itemId, itemNum);
     }
-}
+};
 
 ////// “即捡即用类”道具的文字提示 //////
 items.prototype.getItemEffectTip = function (itemId) {
@@ -67,15 +62,15 @@ items.prototype.getItemEffectTip = function (itemId) {
         var itemEffectTip = core.material.items[itemId].itemEffectTip;
         if (itemEffectTip) {
             try {
-                return core.replaceText(itemEffectTip) || "";
+                return core.replaceText(itemEffectTip) || '';
             } catch (e) {
                 console.error(e);
-                return "";
+                return '';
             }
         }
     }
-    return "";
-}
+    return '';
+};
 
 ////// 使用道具 //////
 items.prototype.useItem = function (itemId, noRoute, callback) {
@@ -88,17 +83,16 @@ items.prototype.useItem = function (itemId, noRoute, callback) {
     // 执行完毕
     this._afterUseItem(itemId);
     // 记录路线
-    if (!noRoute) core.status.route.push("item:" + itemId);
+    if (!noRoute) core.status.route.push('item:' + itemId);
     if (callback) callback();
-}
+};
 
 items.prototype._useItemEffect = function (itemId) {
     var useItemEffect = core.material.items[itemId].useItemEffect;
     if (useItemEffect) {
         try {
             eval(useItemEffect);
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
     }
@@ -106,22 +100,20 @@ items.prototype._useItemEffect = function (itemId) {
     if (useItemEvent) {
         try {
             core.insertAction(useItemEvent);
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
     }
-}
+};
 
 items.prototype._afterUseItem = function (itemId) {
     // 道具使用完毕：删除
     var itemCls = core.material.items[itemId].cls;
-    if (itemCls == 'tools')
-        core.status.hero.items[itemCls][itemId]--;
+    if (itemCls == 'tools') core.status.hero.items[itemCls][itemId]--;
     if (core.status.hero.items[itemCls][itemId] <= 0)
         delete core.status.hero.items[itemCls][itemId];
     core.updateStatusBar(false, true);
-}
+};
 
 ////// 当前能否使用道具 //////
 items.prototype.canUseItem = function (itemId) {
@@ -132,41 +124,40 @@ items.prototype.canUseItem = function (itemId) {
     if (canUseItemEffect) {
         try {
             return eval(canUseItemEffect);
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
             return false;
         }
     }
-}
+};
 
 ////// 获得某个物品的个数 //////
 items.prototype.itemCount = function (itemId) {
     if (!core.material.items[itemId] || !core.isPlaying()) return 0;
     var itemCls = core.material.items[itemId].cls;
-    if (itemCls == "items") return 0;
+    if (itemCls == 'items') return 0;
     return core.status.hero.items[itemCls][itemId] || 0;
-}
+};
 
 ////// 是否存在某个物品 //////
 items.prototype.hasItem = function (itemId) {
     return this.itemCount(itemId) > 0;
-}
+};
 
 ////// 是否装备某件装备 //////
 items.prototype.hasEquip = function (itemId) {
-    if (!(core.material.items[itemId] || {}).equip || !core.isPlaying()) return null;
+    if (!(core.material.items[itemId] || {}).equip || !core.isPlaying())
+        return null;
 
     for (var i in core.status.hero.equipment)
-        if (core.status.hero.equipment[i] == itemId)
-            return true;
-    return false
-}
+        if (core.status.hero.equipment[i] == itemId) return true;
+    return false;
+};
 
 ////// 获得某个装备类型的当前装备 //////
 items.prototype.getEquip = function (equipType) {
     return core.status.hero.equipment[equipType] || null;
-}
+};
 
 ////// 设置某个物品的个数 //////
 items.prototype.setItem = function (itemId, itemNum) {
@@ -179,7 +170,7 @@ items.prototype.setItem = function (itemId, itemNum) {
         delete core.status.hero.items[itemCls][itemId];
     }
     core.updateStatusBar();
-}
+};
 
 ////// 增加某个物品的个数 //////
 items.prototype.addItem = function (itemId, itemNum) {
@@ -198,7 +189,7 @@ items.prototype.addItem = function (itemId, itemNum) {
     if (itemCls == 'constants' && core.status.hero.items[itemCls][itemId] > 1)
         core.status.hero.items[itemCls][itemId] = 1;
     core.updateStatusBar();
-}
+};
 
 ////// 删除某个物品 //////
 items.prototype.removeItem = function (itemId, itemNum) {
@@ -211,7 +202,7 @@ items.prototype.removeItem = function (itemId, itemNum) {
     }
     core.updateStatusBar();
     return true;
-}
+};
 
 // ---------- 装备相关 ------------ //
 
@@ -225,14 +216,13 @@ items.prototype.getEquipTypeByName = function (name) {
         }
     }
     return types.length == 1 ? types[0] : -1;
-}
+};
 
 items.prototype.getEquipTypeById = function (equipId) {
     var type = core.material.items[equipId].equip.type;
-    if (typeof type == 'string')
-        type = this.getEquipTypeByName(type);
+    if (typeof type == 'string') type = this.getEquipTypeByName(type);
     return type;
-}
+};
 
 // 当前能否撞上某装备
 items.prototype.canEquip = function (equipId, hint) {
@@ -241,7 +231,7 @@ items.prototype.canEquip = function (equipId, hint) {
     if (!equip.equip) {
         if (hint) {
             core.playSound('操作失败');
-            core.drawTip("不合法的装备！");
+            core.drawTip('不合法的装备！');
         }
         return false;
     }
@@ -250,7 +240,7 @@ items.prototype.canEquip = function (equipId, hint) {
     if (!core.hasItem(equipId) && !core.hasEquip(equipId)) {
         if (hint) {
             core.playSound('操作失败');
-            core.drawTip("你当前没有" + equip.name + "，无法换装");
+            core.drawTip('你当前没有' + equip.name + '，无法换装');
         }
         return false;
     }
@@ -262,18 +252,17 @@ items.prototype.canEquip = function (equipId, hint) {
             if (!eval(canUseItemEffect)) {
                 if (hint) {
                     core.playSound('操作失败');
-                    core.drawTip("当前不可换上" + equip.name);
+                    core.drawTip('当前不可换上' + equip.name);
                 }
                 return false;
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
             return false;
         }
     }
     return true;
-}
+};
 
 ////// 换上 //////
 items.prototype.loadEquip = function (equipId, callback) {
@@ -286,13 +275,18 @@ items.prototype.loadEquip = function (equipId, callback) {
     var type = this.getEquipTypeById(equipId);
     if (type < 0) {
         core.playSound('操作失败');
-        core.drawTip("当前没有" + loadEquip.equip.type + "的空位！");
+        core.drawTip('当前没有' + loadEquip.equip.type + '的空位！');
         if (callback) callback();
         return;
     }
 
-    this._realLoadEquip(type, equipId, core.status.hero.equipment[type], callback);
-}
+    this._realLoadEquip(
+        type,
+        equipId,
+        core.status.hero.equipment[type],
+        callback
+    );
+};
 
 ////// 卸下 //////
 items.prototype.unloadEquip = function (equipType, callback) {
@@ -303,11 +297,15 @@ items.prototype.unloadEquip = function (equipType, callback) {
     }
 
     this._realLoadEquip(equipType, null, unloadEquipId, callback);
-}
+};
 
-items.prototype.compareEquipment = function (compareEquipId, beComparedEquipId) {
-    var result = { "value": {}, "percentage": {} };
-    var first = core.material.items[compareEquipId], second = core.material.items[beComparedEquipId];
+items.prototype.compareEquipment = function (
+    compareEquipId,
+    beComparedEquipId
+) {
+    var result = { value: {}, percentage: {} };
+    var first = core.material.items[compareEquipId],
+        second = core.material.items[beComparedEquipId];
     for (var one in result) {
         for (var name in core.status.hero) {
             if (typeof core.status.hero[name] == 'number') {
@@ -319,7 +317,7 @@ items.prototype.compareEquipment = function (compareEquipId, beComparedEquipId) 
         }
     }
     return result;
-}
+};
 
 ////// 实际换装的效果 //////
 items.prototype._loadEquipEffect = function (equipId, unloadEquipId) {
@@ -329,12 +327,12 @@ items.prototype._loadEquipEffect = function (equipId, unloadEquipId) {
     for (var name in result.percentage)
         core.addBuff(name, result.percentage[name] / 100);
 
-    for (var name in result.value)
-        core.status.hero[name] += result.value[name];
-}
+    for (var name in result.value) core.status.hero[name] += result.value[name];
+};
 
 items.prototype._realLoadEquip = function (type, loadId, unloadId, callback) {
-    var loadEquip = core.material.items[loadId] || {}, unloadEquip = core.material.items[unloadId] || {};
+    var loadEquip = core.material.items[loadId] || {},
+        unloadEquip = core.material.items[unloadId] || {};
 
     // --- 音效
     this._realLoadEquip_playSound();
@@ -348,44 +346,43 @@ items.prototype._realLoadEquip = function (type, loadId, unloadId, callback) {
     core.status.hero.equipment[type] = loadId || null;
 
     // --- 提示
-    if (loadId) core.drawTip("已装备上" + loadEquip.name, loadId);
-    else if (unloadId) core.drawTip("已卸下" + unloadEquip.name, unloadId);
+    if (loadId) core.drawTip('已装备上' + loadEquip.name, loadId);
+    else if (unloadId) core.drawTip('已卸下' + unloadEquip.name, unloadId);
 
     if (callback) callback();
-}
+};
 
 items.prototype._realLoadEquip_playSound = function () {
-    if (core.hasFlag("__quickLoadEquip__")) return;
+    if (core.hasFlag('__quickLoadEquip__')) return;
     core.stopSound();
     core.playSound('穿脱装备');
-}
+};
 
 ////// 保存装备 //////
 items.prototype.quickSaveEquip = function (index) {
-    var saveEquips = core.getFlag("saveEquips", []);
+    var saveEquips = core.getFlag('saveEquips', []);
     saveEquips[index] = core.clone(core.status.hero.equipment);
-    core.setFlag("saveEquips", saveEquips);
-    core.status.route.push("saveEquip:" + index);
-    core.drawTip("已保存" + index + "号套装");
-}
+    core.setFlag('saveEquips', saveEquips);
+    core.status.route.push('saveEquip:' + index);
+    core.drawTip('已保存' + index + '号套装');
+};
 
 ////// 读取装备 //////
 items.prototype.quickLoadEquip = function (index) {
-    var current = core.getFlag("saveEquips", [])[index];
+    var current = core.getFlag('saveEquips', [])[index];
     if (!current) {
         core.playSound('操作失败');
-        core.drawTip(index + "号套装不存在");
+        core.drawTip(index + '号套装不存在');
         return;
     }
     // 检查所有的装备
     var equipSize = core.status.globalAttribute.equipName.length;
     for (var i = 0; i < equipSize; i++) {
         var v = current[i];
-        if (v && !this.canEquip(v, true))
-            return;
+        if (v && !this.canEquip(v, true)) return;
     }
-    core.status.route.push("loadEquip:" + index);
-    core.setFlag("__quickLoadEquip__", true);
+    core.status.route.push('loadEquip:' + index);
+    core.setFlag('__quickLoadEquip__', true);
     // 快速换装
     var toEquip = [];
     for (var i = 0; i < equipSize; i++) {
@@ -405,25 +402,39 @@ items.prototype.quickLoadEquip = function (index) {
             this.loadEquip(to);
         }
     }
-    core.removeFlag("__quickLoadEquip__");
+    core.removeFlag('__quickLoadEquip__');
     this._realLoadEquip_playSound();
 
-    core.drawTip("成功换上" + index + "号套装");
-}
+    core.drawTip('成功换上' + index + '号套装');
+};
 
 ////// 设置装备属性 //////
-items.prototype.setEquip = function (equipId, valueType, name, value, operator, prefix) {
+items.prototype.setEquip = function (
+    equipId,
+    valueType,
+    name,
+    value,
+    operator,
+    prefix
+) {
     var equip = core.material.items[equipId];
     if (!equip || equip.cls != 'equips') return;
     var equipInfo = equip.equip || {};
     if (!equipInfo[valueType]) equipInfo[valueType] = {};
     var toEquipInfo = core.clone(equipInfo);
-    toEquipInfo[valueType][name] = core.events._updateValueByOperator(core.calValue(value, prefix), equipInfo[valueType][name], operator);
+    toEquipInfo[valueType][name] = core.events._updateValueByOperator(
+        core.calValue(value, prefix),
+        equipInfo[valueType][name],
+        operator
+    );
     // 如果是穿上状态，则还需要直接修改当前数值
     if (core.hasEquip(equipId)) {
         // 设置一个临时装备，然后模拟换装操作
         var tempId = 'temp:' + equipId;
-        core.material.items[tempId] = { 'cls': 'equips', 'equip': core.clone(toEquipInfo) };
+        core.material.items[tempId] = {
+            cls: 'equips',
+            equip: core.clone(toEquipInfo)
+        };
         this._loadEquipEffect(tempId, equipId);
         delete core.material.items[tempId];
         core.updateStatusBar();
@@ -431,4 +442,4 @@ items.prototype.setEquip = function (equipId, valueType, name, value, operator, 
     equip.equip = core.clone(toEquipInfo);
     flags.equipInfo = flags.equipInfo || {};
     flags.equipInfo[equipId] = core.clone(toEquipInfo);
-}
+};

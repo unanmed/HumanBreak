@@ -7,8 +7,8 @@ interface ClsMap {
 }
 
 interface AllItem {
-    tools: [string, number][];
-    constants: [string, number][];
+    tools: [ItemIdOf<'tools'>, number][];
+    constants: [ItemIdOf<'constants'>, number][];
 }
 
 const clsMap: ClsMap = {

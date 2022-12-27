@@ -3,8 +3,11 @@ import { has } from '../utils';
 /**
  * 获取所有装备
  */
-export function getEquips() {
-    return Object.entries(core.status.hero.items.equips);
+export function getEquips(): [ItemIdOf<'equips'>, number][] {
+    return Object.entries(core.status.hero.items.equips) as [
+        ItemIdOf<'equips'>,
+        number
+    ][];
 }
 
 /**
@@ -13,7 +16,7 @@ export function getEquips() {
  */
 export function getAddStatus(equip: Equip) {
     const toGet = Object.assign({}, equip.value, equip.percentage);
-    const keys = Object.keys(toGet);
+    const keys = Object.keys(toGet) as (keyof typeof toGet)[];
 
     return (
         <div class="equip-add-detail">
@@ -46,15 +49,23 @@ export function getAddStatus(equip: Equip) {
  * 获取当前勇士属性，如果有选中的装备，会在后面追加显示增加量
  * @param nowEquip 当前选中的装备
  */
-export function getNowStatus(nowEquip?: Equip) {
-    const toShow = ['hp', 'lv', 'atk', 'def', 'mdef', 'mana', 'hpmax', 'money'];
+export function getNowStatus(nowEquip?: Equip, onCol: boolean = false) {
+    const toShow = [
+        'hp',
+        'lv',
+        'atk',
+        'def',
+        'mdef',
+        'mana',
+        'hpmax',
+        'money'
+    ] as (keyof SelectType<HeroStatus, number>)[];
 
     return (
         <div id="hero-status">
             {toShow.map(v => {
                 let status: string;
-                if (v === 'up') status = core.getNextLvUpNeed()?.toString();
-                else if (v === 'lv') status = core.getLvName() ?? '';
+                if (v === 'lv') status = core.getLvName() ?? '';
                 else status = core.getRealStatus(v)?.toString();
 
                 let add = 0;
@@ -63,6 +74,7 @@ export function getNowStatus(nowEquip?: Equip) {
                     const per = nowEquip.percentage[v] * core.getStatus(v);
                     add += isNaN(per) ? 0 : per;
                 }
+                if (onCol) add = -add;
 
                 return (
                     <div class="hero-status-one">

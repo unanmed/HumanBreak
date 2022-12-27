@@ -78,11 +78,15 @@
                     ></BoxAnimate>
                     <div id="basic-info">
                         <span style="border-bottom: 1px solid #ddd4">{{
-                            all[selected]?.name ?? '没有道具'
+                            selected === 'none'
+                                ? '没有道具'
+                                : all[selected].name
                         }}</span>
                         <span>{{
-                            getClsName(all[selected]?.cls as ItemMode) ??
-                            '永久道具'
+                            selected === 'none'
+                                ? '永久道具'
+                                : getClsName(all[selected].cls as ItemMode) ??
+                                  '永久道具'
                         }}</span>
                     </div>
                 </div>
@@ -91,10 +95,10 @@
                 <div id="desc">
                     <span style="border-bottom: 1px solid #ddd4">道具描述</span>
                     <Scroll id="desc-text">
-                        <div v-if="!descText.value.startsWith('!!html')">
+                        <div v-if="!descText.value!.startsWith('!!html')">
                             {{ descText.value }}
                         </div>
-                        <div v-else v-html="descText.value.slice(6)"></div>
+                        <div v-else v-html="descText.value!.slice(6)"></div>
                     </Scroll>
                 </div>
             </div>
@@ -115,6 +119,7 @@ import { message } from 'ant-design-vue';
 import { KeyCode } from '../plugin/keyCodes';
 
 type ItemMode = 'tools' | 'constants';
+type ShowItemIds = ItemIdOf<'constants' | 'tools'> | 'none';
 
 const mode = ref<ItemMode>('tools');
 
@@ -126,7 +131,7 @@ const toShow = computed<ItemMode[]>(() => {
 
 const all = core.material.items;
 
-const selected = ref(items[toShow.value[0]][0]?.[0] ?? 'none');
+const selected = ref<ShowItemIds>(items[toShow.value[0]][0]?.[0] ?? 'none');
 const index = ref(0);
 
 watch(index, n => {
@@ -144,15 +149,15 @@ watch(mode, n => {
 const descText = computed(() => {
     const s = selected.value;
     if (s === 'none') return ref('没有选择道具');
-    if (all[s].text.startsWith('!!html')) return ref(all[s].text);
-    return type(all[s].text, 25, hyper('sin', 'out'), true);
+    if (all[s].text!.startsWith('!!html')) return ref(all[s].text);
+    return type(all[s].text!, 25, hyper('sin', 'out'), true);
 });
 
 /**
  * 选择一个道具时
  * @param id 道具id
  */
-async function select(id: string, nouse: boolean = false) {
+async function select(id: ShowItemIds, nouse: boolean = false) {
     if (selected.value === id && !nouse) {
         use(id);
     }
@@ -164,7 +169,8 @@ function exit() {
     core.plugin.toolOpened.value = false;
 }
 
-async function use(id: string) {
+async function use(id: ShowItemIds) {
+    if (id === 'none') return;
     if (core.canUseItem(id)) {
         // 应该暂时把动画去掉
         core.plugin.transition.value = false;

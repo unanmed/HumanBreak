@@ -19,6 +19,7 @@
     font-size: 1.6em;
 }
 
+// 文字按钮
 .button-text {
     cursor: pointer;
     transition: color 0.2s linear;
@@ -30,6 +31,10 @@
 
 .button-text:active {
     color: aquamarine;
+}
+
+.selectable {
+    border: #0000 0.5px solid;
 }
 
 .selectable[selected='true'] {
@@ -49,4 +54,18 @@
         border: #0ff7 0.5px solid;
         background-color: rgba(39, 251, 209, 0.143);
     }
+}
+
+// 拖拽类
+.draginable {
+    transition: background-color 0.2s linear;
+}
+
+.draginable[draged='true'][access='true']:hover {
+    background-color: rgba(0, 255, 187, 0.31);
+}
+
+.draginable[draged='true'][access='false']:hover {
+    background-color: rgba(255, 0, 0, 0.319);
+    cursor: not-allowed;
 }
