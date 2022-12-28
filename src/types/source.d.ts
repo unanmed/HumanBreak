@@ -10,12 +10,12 @@ type Cls =
     | 'terrains'
     | 'enemy48'
     | 'npc48'
-    | 'tilesets';
+    | 'tileset';
 
 /**
  * 所有的可动画图块类型
  */
-type AnimatableCls = Exclude<Cls, 'items' | 'terrains' | 'tilesets'>;
+type AnimatableCls = Exclude<Cls, 'items' | 'terrains' | 'tileset'>;
 
 /**
  * 道具类型
@@ -85,6 +85,7 @@ interface FrameNumbers {
     terrains: 1;
     enemy48: 4;
     npc48: 4;
+    tileset: 1;
 }
 
 /**

@@ -9277,5 +9277,17 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         ui.prototype._drawEquipbox = function () {
             return (core.plugin.equipOpened.value = true);
         };
+
+        control.prototype.updateStatusBar_update = function () {
+            if (!core.isPlaying() || core.hasFlag('__statistics__')) return;
+            core.control.controldata.updateStatusBar();
+            if (!core.control.noAutoEvents) core.checkAutoEvents();
+            core.control._updateStatusBar_setToolboxIcon();
+            core.clearRouteFolding();
+            core.control.noAutoEvents = true;
+            // 更新vue状态栏
+            core.plugin.statusBarStatus.value =
+                !core.plugin.statusBarStatus.value;
+        };
     }
 };

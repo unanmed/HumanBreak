@@ -592,7 +592,7 @@ interface Ui {
      */
     drawIcon(
         name: CtxRefer,
-        id: AllIds,
+        id: AllIds | 'hero',
         x: number,
         y: number,
         w?: number,

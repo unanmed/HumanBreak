@@ -249,7 +249,7 @@ interface Utils {
      * @param onMap 显示的字符数
      * @returns 格式化结果
      */
-    formatBigNumber(x: number, onMap?: number): string;
+    formatBigNumber(x: number | string, onMap?: number): string;
 
     /**
      * @deprecated

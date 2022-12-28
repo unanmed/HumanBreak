@@ -97,6 +97,8 @@ type MaterialImages = {
      * 额外素材
      */
     tilesets: Record<string, HTMLImageElement>;
+
+    hero: HTMLImageElement;
 };
 
 interface Material {
@@ -1448,3 +1450,7 @@ declare const maps_90f36752_8815_4be8_b32b_d7fad1d0542e: {
  * 插件信息
  */
 declare const plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1: PluginDeclaration;
+
+interface Window {
+    core: CoreMixin;
+}

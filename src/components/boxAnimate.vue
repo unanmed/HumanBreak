@@ -14,7 +14,7 @@ import { has } from '../plugin/utils';
 const id = (Math.random() * 1e8).toFixed(0);
 
 const props = defineProps<{
-    id: string;
+    id: AllIds | 'hero';
     noborder?: boolean;
     width?: number;
     height?: number;
@@ -29,7 +29,7 @@ function draw() {
     if (id === 'none') return;
     if (has(drawFn)) removeAnimate(drawFn);
 
-    const cls = core.getClsFromId(props.id);
+    const cls = core.getClsFromId(props.id as AllIds);
     const frames = core.getAnimateFrames(cls);
     const w = props.width ?? 32;
     const h = props.height ?? 32;

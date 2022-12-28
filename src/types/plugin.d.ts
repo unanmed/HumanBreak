@@ -44,6 +44,9 @@ interface PluginDeclaration extends PluginUtils {
     /** 装备栏是否打开 */
     readonly equipOpened: Ref<boolean>;
 
+    /** 状态栏信息，取反后刷新状态栏 */
+    readonly statusBarStatus: Ref<boolean>;
+
     /** ui栈 */
     readonly uiStack: Ref<Component[]>;
 

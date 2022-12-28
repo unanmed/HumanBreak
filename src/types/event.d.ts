@@ -299,7 +299,7 @@ interface Events extends EventData {
      * 恢复一个事件
      * @param data 事件信息
      */
-    recoverEvents(data?: any): void;
+    recoverEvents(data?: any): boolean;
 
     /**
      * 检测自动事件

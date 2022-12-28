@@ -20,9 +20,12 @@
                 </div>
                 <div v-for="[atk, dam] of criticals" class="critical">
                     <span class="critical-atk">{{ format(atk) }}</span>
-                    <span>{{
-                        dam < 0 ? `->&nbsp;${format(-dam)}` : format(dam)
-                    }}</span>
+                    <span
+                        ><span style="font-family: 'Fira Code'">{{
+                            dam < 0 ? '=>' : ''
+                        }}</span
+                        >{{ dam < 0 ? `${format(-dam)}` : format(dam) }}</span
+                    >
                 </div>
             </div>
         </div>

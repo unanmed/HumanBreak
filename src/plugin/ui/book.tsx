@@ -75,7 +75,6 @@ export function getDefDamage(
         if (!has(dam)) continue;
         if (dam.damage === origin) continue;
         if (dam.damage === res.at(-1)?.[1]) continue;
-        if (last === dam.damage) break;
         last = dam.damage;
         res.push([ratio * i + addDef, dam.damage]);
     }
@@ -121,7 +120,6 @@ export function getCriticalDamage(
         if (!has(dam)) continue;
         if (dam.damage === origin) continue;
         if (dam.damage === res.at(-1)?.[1]) continue;
-        if (last === dam.damage) break;
         last = dam.damage;
         res.push([ratio * i + addAtk, dam.damage]);
     }

@@ -66,6 +66,12 @@ interface Icons {
      * @param id 图块数字或id
      */
     getTilesetOffset(id: string | number): IconOffsetInfo | null;
+
+    /**
+     * 获取动画帧数
+     * @param cls 类型
+     */
+    getAnimateFrames<T extends Cls>(cls: T): FrameOf<T>;
 }
 
 declare const icons: new () => Icons;

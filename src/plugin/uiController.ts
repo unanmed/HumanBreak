@@ -9,6 +9,7 @@ export const toolOpened = ref(false);
 export const equipOpened = ref(false);
 
 export const transition = ref(true);
+export const noClosePanel = ref(false);
 
 let app: HTMLDivElement;
 
@@ -61,12 +62,14 @@ async function hideApp(index: number) {
         await sleep(600);
         uiStack.value.splice(index, 1);
         app.style.display = 'none';
-        core.closePanel();
+        if (!noClosePanel.value) core.closePanel();
+        noClosePanel.value = false;
     } else {
         app.style.transition = '';
         app.style.opacity = '0';
         uiStack.value.splice(index, 1);
         app.style.display = 'none';
-        core.closePanel();
+        if (!noClosePanel.value) core.closePanel();
+        noClosePanel.value = false;
     }
 }

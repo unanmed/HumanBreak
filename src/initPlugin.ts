@@ -4,10 +4,11 @@ import ui from './plugin/uiController';
 import use from './plugin/use';
 import animate from './plugin/animateController';
 import utils from './plugin/utils';
+import status from './plugin/ui/statusBar';
 
 window.addEventListener('load', () => {
     // 每个引入的插件都要在这里执行，否则不会被转发
-    const toForward: any[] = [pop(), ui(), use(), animate(), utils()];
+    const toForward: any[] = [pop(), ui(), use(), animate(), utils(), status()];
 
     // 初始化所有插件，并转发到core上
     (async function () {

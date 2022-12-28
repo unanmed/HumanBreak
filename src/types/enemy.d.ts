@@ -30,6 +30,9 @@ type DetailedEnemy<I extends EnemyIds = EnemyIds> = {
     toShowColor: Color[];
     specialColor: Color[];
     damageColor: Color;
+    criticalDamage: number;
+    critical: number;
+    defDamage: number;
 } & Enemy<I>;
 
 type Enemy<I extends EnemyIds = EnemyIds> = {

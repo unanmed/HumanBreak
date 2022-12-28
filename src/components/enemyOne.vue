@@ -20,7 +20,7 @@
                 >
                     <span
                         v-for="(text, i) in enemy.toShowSpecial"
-                        :style="{ color: enemy.toShowColor![i] }"
+                        :style="{ color: enemy.toShowColor![i] as string }"
                         >&nbsp;{{ text }}&nbsp;</span
                     >
                 </div>
@@ -93,20 +93,23 @@
                                             ? 'gold'
                                             : 'lightpink'
                                 }"
+                                ><span style="font-family: 'Fira Code'">{{
+                                    enemy.criticalDamage < 0 ? '=>' : ''
+                                }}</span
                                 >{{
                                     core.formatBigNumber(
-                                        enemy.criticalDamage,
-                                        false,
                                         enemy.criticalDamage < 0
+                                            ? -enemy.criticalDamage
+                                            : enemy.criticalDamage
                                     )
                                 }}</span
                             ></span
                         >
                     </div>
                     <div class="detail-info">
-                        <span :style="{color: enemy.damageColor!}"
+                        <span :style="{color: enemy.damageColor! as string}"
                             >伤害&nbsp;&nbsp;&nbsp;&nbsp;{{
-                                core.formatBigNumber(enemy.damage)
+                                core.formatBigNumber(enemy.damage!)
                             }}</span
                         >
                     </div>
@@ -122,7 +125,7 @@ import BoxAnimate from '../components/boxAnimate.vue';
 import { isMobile } from '../plugin/use';
 
 const props = defineProps<{
-    enemy: Enemy & DetailedEnemy;
+    enemy: DetailedEnemy;
     selected?: boolean;
 }>();
 

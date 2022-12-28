@@ -39,13 +39,21 @@ import { sleep } from 'mutate-animate';
 import { onMounted, onUnmounted, ref } from 'vue';
 import EnemyOne from '../components/enemyOne.vue';
 import Scroll from '../components/scroll.vue';
-import { getDamageColor, keycode } from '../plugin/utils';
+import { getDamageColor, has, keycode } from '../plugin/utils';
 import BookDetail from './bookDetail.vue';
 import { LeftOutlined } from '@ant-design/icons-vue';
 import { KeyCode } from '../plugin/keyCodes';
+import { noClosePanel } from '../plugin/uiController';
 
 const floorId =
-    core.floorIds[core.status.event?.ui as number] ?? core.status.floorId;
+    // @ts-ignore
+    core.floorIds[core.status.event?.ui?.index] ?? core.status.floorId;
+// 清除浏览地图时的光环缓存
+if (floorId !== core.status.floorId && core.status.checkBlock) {
+    // @ts-ignore
+    core.status.checkBlock.cache = {};
+}
+
 const enemy = core.getCurrentEnemys(floorId);
 
 const scroll = ref(0);
@@ -116,8 +124,17 @@ async function show() {
 /**
  * 退出怪物手册
  */
-function exit() {
+async function exit() {
+    noClosePanel.value = true;
     core.plugin.bookOpened.value = false;
+    if (core.events.recoverEvents(core.status.event.interval)) {
+        return;
+    } else if (has(core.status.event.ui)) {
+        core.status.boxAnimateObjs = [];
+        // @ts-ignore
+        core.ui._drawViewMaps(core.status.event.ui);
+    } else core.ui.closePanel();
+    await sleep(650);
 }
 
 function checkScroll() {

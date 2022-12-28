@@ -61,7 +61,16 @@
                         isMobile ? '' : '&nbsp;&nbsp;&nbsp;&nbsp;'
                     }}</span
                 >
-                <span>{{ format(nowDamage[0], false, nowDamage[0] < 0) }}</span>
+                <span
+                    ><span style="font-family: 'Fira Code'">{{
+                        nowDamage[0] < 0 ? '=>' : ''
+                    }}</span
+                    >{{
+                        nowDamage[0] < 0
+                            ? format(-nowDamage[0])
+                            : format(nowDamage[0])
+                    }}</span
+                >
             </div>
             <div>
                 <span
