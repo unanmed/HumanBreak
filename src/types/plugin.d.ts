@@ -47,6 +47,9 @@ interface PluginDeclaration extends PluginUtils {
     /** 状态栏信息，取反后刷新状态栏 */
     readonly statusBarStatus: Ref<boolean>;
 
+    /** 是否显示状态栏 */
+    readonly showStatusBar: Ref<boolean>;
+
     /** ui栈 */
     readonly uiStack: Ref<Component[]>;
 

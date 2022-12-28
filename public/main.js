@@ -616,7 +616,6 @@ main.prototype.listen = function () {
     ////// 鼠标移动时 //////
     main.dom.data.onmousemove = function (e) {
         try {
-            e.stopPropagation();
             var loc = main.core.actions._getClickLoc(e.clientX, e.clientY);
             if (loc == null) return;
             main.core.onmove(loc);
@@ -628,7 +627,6 @@ main.prototype.listen = function () {
     ////// 鼠标放开时 //////
     main.dom.data.onmouseup = function (e) {
         try {
-            e.stopPropagation();
             var loc = main.core.actions._getClickLoc(e.clientX, e.clientY);
             if (loc == null) return;
             main.core.onup(loc);

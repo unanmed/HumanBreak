@@ -888,7 +888,11 @@ actions.prototype._getClickLoc = function (x, y) {
 
     if (core.domStyle.isVertical) {
         statusBar.x = 3;
-        statusBar.y = core.dom.statusBar.offsetHeight + 3;
+        statusBar.y =
+            core.dom.statusBar.offsetHeight +
+            3 +
+            32 * core.values.statusCanvasRowsOnMobile +
+            9;
     } else {
         statusBar.x = core.dom.statusBar.offsetWidth + 3;
         statusBar.y = 3;

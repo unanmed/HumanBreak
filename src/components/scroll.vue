@@ -13,16 +13,21 @@
 import { onMounted, onUnmounted, onUpdated } from 'vue';
 import { cancelGlobalDrag, useDrag, useWheel } from '../plugin/use';
 
+let main: HTMLDivElement;
+
 const props = defineProps<{
     now?: number;
     type?: 'vertical' | 'horizontal';
     drag?: boolean;
     width?: number;
+    update?: boolean;
+    noScroll?: boolean;
 }>();
 
 const emits = defineEmits<{
     (e: 'update:now', value: number): void;
     (e: 'update:drag', value: boolean): void;
+    (e: 'update:update'): void;
 }>();
 
 let now = 0;
@@ -54,6 +59,7 @@ function draw() {
     } else if (now < 0) {
         now = 0;
     }
+    if (props.noScroll) return;
     const w = ctx.canvas.width;
     const h = ctx.canvas.height;
     emits('update:now', now);
@@ -86,6 +92,23 @@ async function calHeight() {
             const style = getComputedStyle(content);
             total = parseFloat(style[canvasAttr]);
             res('');
+
+            const canvas = ctx.canvas;
+            const style2 = getComputedStyle(canvas);
+            canvas.style.width = `${width}px`;
+            canvas.width = width * scale;
+            canvas.height = parseFloat(style2.height) * scale;
+            if (props.noScroll) canvas.style.width = `0px`;
+
+            if (props.type === 'horizontal') {
+                main.style.flexDirection = 'column';
+                canvas.style.height = `${width}px`;
+                canvas.style.width = '98%';
+                canvas.style.margin = '0 1% 0 1%';
+                canvas.width = parseFloat(style2.width) * scale;
+                canvas.height = width * scale;
+                if (props.noScroll) canvas.style.height = `0px`;
+            }
         });
     });
 }
@@ -126,41 +149,29 @@ function contentDrag(x: number, y: number) {
 }
 
 onMounted(async () => {
-    const div = document.getElementById(`scroll-div-${id}`) as HTMLDivElement;
-    const canvas = document.getElementById(`scroll-${id}`) as HTMLCanvasElement;
+    main = document.getElementById(`scroll-div-${id}`) as HTMLDivElement;
     const d = document.getElementById(`content-${id}`) as HTMLDivElement;
-    ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
     content = d;
+    const canvas = document.getElementById(`scroll-${id}`) as HTMLCanvasElement;
+    ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
 
-    const style = getComputedStyle(canvas);
-    canvas.style.width = `${width}px`;
-    canvas.width = width * scale;
-    canvas.height = parseFloat(style.height) * scale;
-
-    if (props.type === 'horizontal') {
-        div.style.flexDirection = 'column';
-        canvas.style.height = `${width}px`;
-        canvas.style.width = '98%';
-        canvas.style.margin = '0 1% 0 1%';
-        canvas.width = parseFloat(style.width) * scale;
-        canvas.height = width * scale;
+    if (!props.noScroll) {
+        // 绑定滚动条拖拽事件
+        useDrag(
+            canvas,
+            canvasDrag,
+            (x, y) => {
+                fromSelf = true;
+                last = props.type === 'horizontal' ? x : y;
+                content.style.transition = '';
+            },
+            () => {
+                setTimeout(() => emits('update:drag', false));
+                fromSelf = false;
+            },
+            true
+        );
     }
-
-    // 绑定滚动条拖拽事件
-    useDrag(
-        canvas,
-        canvasDrag,
-        (x, y) => {
-            fromSelf = true;
-            last = props.type === 'horizontal' ? x : y;
-            content.style.transition = '';
-        },
-        () => {
-            setTimeout(() => emits('update:drag', false));
-            fromSelf = false;
-        },
-        true
-    );
 
     // 绑定文本拖拽事件
     useDrag(

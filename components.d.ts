@@ -7,10 +7,12 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    AButton: typeof import('ant-design-vue/es')['Button']
     ADivider: typeof import('ant-design-vue/es')['Divider']
     ASelect: typeof import('ant-design-vue/es')['Select']
     ASelectOption: typeof import('ant-design-vue/es')['SelectOption']
     ASlider: typeof import('ant-design-vue/es')['Slider']
+    Box: typeof import('./src/components/box.vue')['default']
     BoxAnimate: typeof import('./src/components/boxAnimate.vue')['default']
     EnemyOne: typeof import('./src/components/enemyOne.vue')['default']
     Scroll: typeof import('./src/components/scroll.vue')['default']

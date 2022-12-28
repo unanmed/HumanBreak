@@ -51,6 +51,7 @@ type ImageIds =
     | 'money.png'
     | 'mount.jpg'
     | 'plot1.jpg'
+    | 'skill.png'
     | 'skill0.png'
     | 'skill1.png'
     | 'skill2.png'

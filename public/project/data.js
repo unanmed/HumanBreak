@@ -62,6 +62,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"money.png",
 			"mount.jpg",
 			"plot1.jpg",
+			"skill.png",
 			"skill0.png",
 			"skill1.png",
 			"skill2.png",
@@ -684,7 +685,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"enableRouteFolding": false,
 		"disableShopOnDamage": false,
 		"blurFg": true,
-		"extendToolbar": false,
+		"extendToolbar": true,
 		"enableEnemyPoint": null
 	}
 }

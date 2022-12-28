@@ -4274,7 +4274,10 @@ control.prototype._resize_gameGroup = function (obj) {
     gameGroup.style.width = totalWidth + 'px';
     gameGroup.style.height = totalHeight + 'px';
     gameGroup.style.left = (obj.clientWidth - totalWidth) / 2 + 'px';
-    gameGroup.style.top = (obj.clientHeight - totalHeight) / 2 + 'px';
+    gameGroup.style.top =
+        (obj.clientHeight - totalHeight) / 2 +
+        (core.domStyle.isVertical ? totalHeight / 8 : 0) +
+        'px';
     // floorMsgGroup
     var floorMsgGroup = core.dom.floorMsgGroup;
     floorMsgGroup.style = obj.globalAttribute.floorChangingStyle;
@@ -4437,8 +4440,8 @@ control.prototype._resize_statusBar = function (obj) {
                 (obj.extendToolbar ? obj.TOOLBAR_HEIGHT + obj.BORDER : 0)
         );
     }
-    core.dom.statusCanvas.style.display =
-        core.flags.statusCanvas && !obj.extendToolbar ? 'block' : 'none';
+    core.dom.statusCanvas.style.display = 'none';
+    statusBar.style.display = 'none';
 };
 
 control.prototype._resize_status = function (obj) {

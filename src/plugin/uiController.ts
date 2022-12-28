@@ -3,10 +3,12 @@ import { Component, markRaw, ref, Ref, watch } from 'vue';
 import Book from '../ui/book.vue';
 import Toolbox from '../ui/toolbox.vue';
 import Equipbox from '../ui/equipbox.vue';
+import StatusBar from '../ui/statusBar.vue';
 
 export const bookOpened = ref(false);
 export const toolOpened = ref(false);
 export const equipOpened = ref(false);
+export const showStatusBar = ref(false);
 
 export const transition = ref(true);
 export const noClosePanel = ref(false);
@@ -40,7 +42,14 @@ export default function init() {
             }
         });
     });
-    return { uiStack, transition, bookOpened, toolOpened, equipOpened };
+    return {
+        uiStack,
+        transition,
+        bookOpened,
+        toolOpened,
+        equipOpened,
+        showStatusBar
+    };
 }
 
 async function showApp() {

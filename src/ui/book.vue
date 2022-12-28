@@ -242,7 +242,7 @@ onUnmounted(async () => {
 #none {
     width: 100%;
     height: 100%;
-    font-size: 10vw;
+    font-size: 6vw;
     display: flex;
     justify-content: center;
     align-items: center;
