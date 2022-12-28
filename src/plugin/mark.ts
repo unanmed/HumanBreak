@@ -85,7 +85,14 @@ export function checkMarkedEnemy(noMessage: boolean = false) {
         if (damage === -1) return;
         const info = enemyDamageInfo[v]!;
         const name = core.material.enemys[v].name;
-        if (damage < hp / 3) {
+        if (damage < 0) {
+            if (!noMessage) {
+                message.success({
+                    content: `${name}已经负伤了！`,
+                    class: 'antdv-message'
+                });
+            }
+        } else if (damage < hp / 3) {
             if (!info[3] && !noMessage) {
                 message.success({
                     content: `${name}的伤害已降至勇士生命值的1/3！`,
@@ -113,6 +120,10 @@ export function checkMarkedEnemy(noMessage: boolean = false) {
                 });
             }
             info[1] = true;
+            info[2] = false;
+            info[3] = false;
+        } else {
+            info[1] = false;
             info[2] = false;
             info[3] = false;
         }
