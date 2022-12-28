@@ -24,8 +24,8 @@ export function markEnemy(id: EnemyIds) {
     };
     criticalReached[id] = { 0: true };
     enemyDamageInfo[id] = { 1: false, 2: false, 3: false };
-    getMarkInfo(id);
-    checkMarkedEnemy();
+    getMarkInfo(id, true);
+    checkMarkedEnemy(true);
 }
 
 /**
@@ -56,11 +56,11 @@ export function getMarkedEnemy() {
  * 获取怪物的临界信息
  * @param id 怪物id
  */
-export function getMarkInfo(id: EnemyIds) {
+export function getMarkInfo(id: EnemyIds, noMessage: boolean = false) {
     const reached = criticalReached[id]!;
     const info = markInfo[id]!;
     if (core.status.hero.atk >= info.nextCritical) {
-        if (!reached[info.nextCritical]) {
+        if (!reached[info.nextCritical] && !noMessage) {
             message.success({
                 content: `踩到了${core.material.enemys[id].name}的临界！`,
                 class: 'antdv-message'
@@ -76,9 +76,8 @@ export function getMarkInfo(id: EnemyIds) {
 /**
  * 检查被标记怪物的状态
  */
-export function checkMarkedEnemy() {
+export function checkMarkedEnemy(noMessage: boolean = false) {
     checkMarkedStatus.value = !checkMarkedStatus.value;
-    const toDelete: EnemyIds[] = [];
     const hp = core.status.hero.hp;
     getMarkedEnemy().forEach(v => {
         getMarkInfo(v);
@@ -87,7 +86,7 @@ export function checkMarkedEnemy() {
         const info = enemyDamageInfo[v]!;
         const name = core.material.enemys[v].name;
         if (damage < hp / 3) {
-            if (!info[3]) {
+            if (!info[3] && !noMessage) {
                 message.success({
                     content: `${name}的伤害已降至勇士生命值的1/3！`,
                     class: 'antdv-message'
@@ -97,7 +96,7 @@ export function checkMarkedEnemy() {
             info[2] = true;
             info[3] = true;
         } else if (damage < (hp / 3) * 2) {
-            if (!info[2]) {
+            if (!info[2] && !noMessage) {
                 message.success({
                     content: `${name}的伤害已降至勇士生命值的2/3！`,
                     class: 'antdv-message'
@@ -107,9 +106,9 @@ export function checkMarkedEnemy() {
             info[2] = true;
             info[3] = false;
         } else if (damage < hp) {
-            if (!info[1]) {
+            if (!info[1] && !noMessage) {
                 message.success({
-                    content: `${name}的伤害已降至勇士生命值的2/3！`,
+                    content: `你已经能打过${name}了！`,
                     class: 'antdv-message'
                 });
             }
