@@ -179,4 +179,6 @@ interface ItemDeclaration {
     I490: 'items';
     I491: 'items';
     I558: 'constants';
+    I559: 'constants';
+    I560: 'constants';
 }

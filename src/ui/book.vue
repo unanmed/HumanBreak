@@ -127,6 +127,8 @@ async function show() {
 async function exit() {
     noClosePanel.value = true;
     core.plugin.bookOpened.value = false;
+    if (core.plugin.transition.value) await sleep(650);
+    else await sleep(100);
     if (core.events.recoverEvents(core.status.event.interval)) {
         return;
     } else if (has(core.status.event.ui)) {
@@ -134,7 +136,6 @@ async function exit() {
         // @ts-ignore
         core.ui._drawViewMaps(core.status.event.ui);
     } else core.ui.closePanel();
-    await sleep(650);
 }
 
 function checkScroll() {
@@ -202,7 +203,8 @@ function keydown(e: KeyboardEvent) {
 onMounted(async () => {
     const div = document.getElementById('book') as HTMLDivElement;
     div.style.opacity = '1';
-    await sleep(600);
+    if (core.plugin.transition.value) await sleep(600);
+    else await sleep(100);
     document.addEventListener('keyup', keyup);
     document.addEventListener('keydown', keydown);
 });

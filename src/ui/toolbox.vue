@@ -149,7 +149,6 @@ watch(mode, n => {
 const descText = computed(() => {
     const s = selected.value;
     if (s === 'none') return ref('没有选择道具');
-    if (all[s].text!.startsWith('!!html')) return ref(all[s].text);
     return type(all[s].text!, 25, hyper('sin', 'out'), true);
 });
 

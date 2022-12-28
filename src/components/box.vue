@@ -38,6 +38,7 @@ import { onMounted, onUnmounted, onUpdated, ref, watch } from 'vue';
 import { DragOutlined } from '@ant-design/icons-vue';
 import { isMobile, useDrag, cancelGlobalDrag } from '../plugin/use';
 import { has } from '../plugin/utils';
+import { sleep } from 'mutate-animate';
 
 const props = defineProps<{
     resizable?: boolean;
@@ -143,15 +144,16 @@ function resize() {
     if (has(props.width)) width.value = props.width;
     if (has(props.height)) height.value = props.height;
 
-    main.style.left = `${left}px`;
-    main.style.top = `${top}px`;
-    main.style.width = `${width}px`;
-    main.style.height = `${height}px`;
+    main.style.left = `${left.value}px`;
+    main.style.top = `${top.value}px`;
+    main.style.width = `${width.value}px`;
+    main.style.height = `${height.value}px`;
 }
 
 onUpdated(resize);
 
-onMounted(() => {
+onMounted(async () => {
+    await sleep(50);
     resize();
 
     useDrag(

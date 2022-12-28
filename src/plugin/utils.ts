@@ -99,6 +99,7 @@ export function type(
     if (typeof toShow !== 'string') {
         throw new TypeError('Error str type in typing!');
     }
+    if (toShow.startsWith('!!html')) return ref(toShow);
     if (avr) time *= toShow.length;
     const ani = new Animation();
     const content = ref('');

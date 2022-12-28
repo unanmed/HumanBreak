@@ -11,6 +11,7 @@
         <Transition name="detail">
             <EnemySpecial v-if="panel === 'special'"></EnemySpecial>
             <EnemyCritical v-else-if="panel === 'critical'"></EnemyCritical>
+            <EnemyTarget v-else-if="panel === 'target'"></EnemyTarget>
         </Transition>
         <div id="detail-more">
             <Transition name="detail">
@@ -19,7 +20,12 @@
                     class="detial-more"
                     v-if="panel === 'special'"
                 >
-                    <span></span>
+                    <span
+                        id="enemy-target"
+                        class="button-text more"
+                        @click="changePanel($event, 'target')"
+                        ><LeftOutlined /> 怪物更多信息</span
+                    >
                     <span
                         id="critical-more"
                         class="button-text more"
@@ -39,6 +45,19 @@
                         ><left-outlined /> 怪物特殊属性</span
                     >
                 </div>
+                <div
+                    id="special-more"
+                    class="detial-more"
+                    v-else-if="panel === 'target'"
+                >
+                    <span></span>
+                    <span
+                        id="enemy-pos"
+                        class="button-text more"
+                        @click="changePanel($event, 'special')"
+                        >怪物特殊属性 <RightOutlined
+                    /></span>
+                </div>
             </Transition>
         </div>
     </div>
@@ -54,6 +73,7 @@ import EnemyCritical from '../panel/enemyCritical.vue';
 import { KeyCode } from '../plugin/keyCodes';
 import { keycode } from '../plugin/utils';
 import { sleep } from 'mutate-animate';
+import EnemyTarget from '../panel/enemyTarget.vue';
 
 const enemy = core.plugin.bookDetailEnemy;
 const top = ref(core.plugin.bookDetailPos);
@@ -104,7 +124,7 @@ onMounted(async () => {
             if (y > (parseFloat(style.height) * 4) / 5) moved = true;
         },
         () => {
-            if (moved === false && panel.value !== 'critical') {
+            if (moved === false && panel.value === 'special') {
                 close();
             }
             moved = false;

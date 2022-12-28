@@ -1242,5 +1242,18 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"canUseItemEffect": "true",
 		"text": "可以查看游戏内你已经听过的bgm，歌曲名格式：歌手——歌曲名",
 		"useItemEffect": "core.openBgms();"
+	},
+	"I559": {
+		"cls": "constants",
+		"name": "系统设置",
+		"canUseItemEffect": "true",
+		"text": "内含所有系统设置项",
+		"useItemEffect": "if (!main.replayChecking) {\n\tcore.plugin.settingsOpened.value = true;\n}"
+	},
+	"I560": {
+		"cls": "constants",
+		"name": "百科全书",
+		"canUseItemEffect": "true",
+		"text": "一个包含游戏中所有功能详细说明的百科全书，可以查看游戏中所有的功能"
 	}
 }

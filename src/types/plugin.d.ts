@@ -30,7 +30,7 @@ interface PluginDeclaration extends PluginUtils {
     bookDetailPos: number;
 
     /** 怪物手册详细信息展示的怪物 */
-    bookDetailEnemy: Enemy & DetailedEnemy;
+    bookDetailEnemy: DetailedEnemy;
 
     /** ui是否使用渐变 */
     readonly transition: Ref<boolean>;
@@ -44,17 +44,23 @@ interface PluginDeclaration extends PluginUtils {
     /** 装备栏是否打开 */
     readonly equipOpened: Ref<boolean>;
 
-    /** 状态栏信息，取反后刷新状态栏 */
-    readonly statusBarStatus: Ref<boolean>;
-
     /** 是否显示状态栏 */
     readonly showStatusBar: Ref<boolean>;
+
+    /** 设置界面是否打开 */
+    readonly settingsOpened: Ref<boolean>;
 
     /** ui栈 */
     readonly uiStack: Ref<Component[]>;
 
     /** 是否是移动设备 */
     readonly isMobile: boolean;
+
+    /** 状态栏信息，取反后刷新状态栏 */
+    readonly statusBarStatus: Ref<boolean>;
+
+    /** 检查标记的怪物，取反后更新显示信息 */
+    readonly checkMarkedStatus: Ref<boolean>;
 
     /**
      * 向一个元素添加拖拽事件
@@ -105,6 +111,11 @@ interface PluginDeclaration extends PluginUtils {
      * @param fn 要移除的函数
      */
     removeAnimate(fn: (time: number) => void);
+
+    /**
+     * 检查被标记怪物的状态，是否需要更新
+     */
+    checkMarkedEnemy();
 }
 
 interface PluginUtils {

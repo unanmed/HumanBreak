@@ -3,12 +3,15 @@ import { Component, markRaw, ref, Ref, watch } from 'vue';
 import Book from '../ui/book.vue';
 import Toolbox from '../ui/toolbox.vue';
 import Equipbox from '../ui/equipbox.vue';
-import StatusBar from '../ui/statusBar.vue';
+import Settings from '../ui/settings.vue';
+import Desc from '../ui/desc.vue';
 
 export const bookOpened = ref(false);
 export const toolOpened = ref(false);
 export const equipOpened = ref(false);
 export const showStatusBar = ref(false);
+export const settingsOpened = ref(false);
+export const descOpened = ref(false);
 
 export const transition = ref(true);
 export const noClosePanel = ref(false);
@@ -19,7 +22,9 @@ let app: HTMLDivElement;
 const UI_LIST: [Ref<boolean>, Component][] = [
     [bookOpened, Book],
     [toolOpened, Toolbox],
-    [equipOpened, Equipbox]
+    [equipOpened, Equipbox],
+    [settingsOpened, Settings],
+    [descOpened, Desc]
 ];
 
 /** ui栈 */
@@ -48,7 +53,8 @@ export default function init() {
         bookOpened,
         toolOpened,
         equipOpened,
-        showStatusBar
+        showStatusBar,
+        settingsOpened
     };
 }
 
@@ -57,7 +63,7 @@ async function showApp() {
     if (transition.value) {
         app.style.transition = 'all 0.6s linear';
     } else {
-        app.style.transition = '';
+        app.style.transition = 'none';
     }
     app.style.display = 'flex';
     await sleep(50);

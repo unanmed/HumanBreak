@@ -1,6 +1,6 @@
 var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 = 
 {
-	"greenSlime": {"name":"绿头怪","hp":100,"atk":11,"def":3,"money":0,"exp":1,"point":0,"special":[]},
+	"greenSlime": {"name":"绿头怪","hp":100,"atk":11,"def":3,"money":0,"exp":1,"point":0,"special":[],"description":"一种极其低级的怪物，低级到普通人用手都可以打死。"},
 	"redSlime": {"name":"红头怪","hp":120,"atk":16,"def":6,"money":0,"exp":2,"point":0,"special":[],"value":10},
 	"blackSlime": {"name":"青头怪","hp":170,"atk":20,"def":8,"money":0,"exp":3,"point":0,"special":[]},
 	"slimelord": {"name":"粘液王","hp":200,"atk":58,"def":24,"money":0,"exp":8,"point":0,"special":[]},

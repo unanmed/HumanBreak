@@ -388,9 +388,6 @@ actions.prototype._sys_keyDown_lockControl = function (keyCode) {
         case 'viewMaps':
             this._keyDownViewMaps(keyCode);
             break;
-        case 'toolbox':
-            this._keyDownToolbox(keyCode);
-            break;
         case 'save':
         case 'load':
         case 'replayLoad':

@@ -3370,13 +3370,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          * 如有bug在大群或造塔群@古祠
          */
 
-        // 谁tm在即捡即用效果里面调用带有含刷新状态栏的函数
-        var origin = core.control.updateStatusBar;
-        core.updateStatusBar = core.control.updateStatusBar = function () {
-            if (core.getFlag('__statistics__')) return;
-            else return origin.apply(core.control, arguments);
-        };
-
         core.bigmap.threshold = 256;
 
         core.control.updateDamage = function (floorId, ctx) {
@@ -8008,268 +8001,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             }
         };
     },
-    weatherSuperimpose: function () {
-        // 天气叠加功能
-        ////// 更改天气效果 //////
-        control.prototype.setWeather = function (type, level) {
-            // 非雨雪
-            if (type == null) {
-                Object.keys(core.control.weathers).forEach(one => {
-                    core.deleteCanvas('weather' + one);
-                });
-                core.animateFrame.weather.type = [];
-                core.animateFrame.weather.nodes = {};
-                core.animateFrame.weather.level = {};
-                core.animateFrame.weather.time = {};
-                return;
-            }
-            if (!core.animateFrame.weather.level || level == null)
-                core.animateFrame.weather.level = {};
-            if (!core.animateFrame.weather.type)
-                core.animateFrame.weather.type = [];
-            level = core.clamp(parseInt(level) || 5, 1, 10);
-            // 当前天气：则忽略
-            if (
-                core.animateFrame.weather.type.includes(type) &&
-                level == core.animateFrame.weather.level[type]
-            )
-                return;
-            if (core.animateFrame.weather.nodes[type]) return;
-            // 计算当前的宽高
-            core.createCanvas(
-                'weather' + type,
-                0,
-                0,
-                core.__PIXELS__,
-                core.__PIXELS__,
-                80
-            );
-            core.animateFrame.weather.type.push(type);
-            core.animateFrame.weather.level[type] = level;
-            this._setWeather_createNodes(type, level);
-        };
-        control.prototype._setWeather_createNodes = function (type, level) {
-            var number =
-                level *
-                parseInt(
-                    (20 * core.bigmap.width * core.bigmap.height) /
-                        (core.__SIZE__ * core.__SIZE__)
-                );
-            if (!core.animateFrame.weather.nodes[type])
-                core.animateFrame.weather.nodes[type] = [];
-            switch (type) {
-                case 'rain':
-                    for (var a = 0; a < number; a++) {
-                        core.animateFrame.weather.nodes.rain.push({
-                            x: Math.random() * core.bigmap.width * 32,
-                            y: Math.random() * core.bigmap.height * 32,
-                            l: Math.random() * 2.5,
-                            xs: -4 + Math.random() * 4 + 2,
-                            ys: Math.random() * 10 + 10
-                        });
-                    }
-                    break;
-                case 'snow':
-                    for (var a = 0; a < number; a++) {
-                        core.animateFrame.weather.nodes.snow.push({
-                            x: Math.random() * core.bigmap.width * 32,
-                            y: Math.random() * core.bigmap.height * 32,
-                            r: Math.random() * 5 + 1,
-                            d: Math.random() * Math.min(level, 200)
-                        });
-                    }
-                    break;
-                case 'fog':
-                    if (core.animateFrame.weather.fog) {
-                        core.animateFrame.weather.nodes[type] = [
-                            {
-                                level: number,
-                                x: 0,
-                                y: -core.__PIXELS__ / 2,
-                                dx: -Math.random() * 1.5,
-                                dy: Math.random(),
-                                delta: 0.001
-                            }
-                        ];
-                    }
-                    break;
-                case 'cloud':
-                    if (core.animateFrame.weather.cloud) {
-                        core.animateFrame.weather.nodes[type] = [
-                            {
-                                level: number,
-                                x: 0,
-                                y: -core.__PIXELS__ / 2,
-                                dx: -Math.random() * 1.5,
-                                dy: Math.random(),
-                                delta: 0.001
-                            }
-                        ];
-                    }
-                    break;
-                case 'sun':
-                    if (core.animateFrame.weather.sun) {
-                        // 直接绘制
-                        core.clearMap('weather' + type);
-                        core.setAlpha('weather' + type, level / 10);
-                        core.drawImage(
-                            'weather' + type,
-                            core.animateFrame.weather.sun,
-                            0,
-                            0,
-                            core.animateFrame.weather.sun.width,
-                            core.animateFrame.weather.sun.height,
-                            0,
-                            0,
-                            core.__PIXELS__,
-                            core.__PIXELS__
-                        );
-                        core.setAlpha('weather' + type, 1);
-                    }
-                    break;
-            }
-        };
-        core.registerAnimationFrame('weather', true, timestamp => {
-            var weather = core.animateFrame.weather;
-            if (!weather.type) return;
-            weather.type.forEach(one => {
-                if (
-                    timestamp - weather.time[one] <= 30 ||
-                    !core.dymCanvas['weather' + one]
-                )
-                    return;
-                core.control['_animationFrame_weather_' + one]();
-                weather.time[one] = timestamp;
-            });
-        });
-        // 雨
-        control.prototype._animationFrame_weather_rain = function () {
-            var ctx = core.dymCanvas.weatherrain,
-                ox = core.bigmap.offsetX,
-                oy = core.bigmap.offsetY;
-            core.clearMap('weatherrain');
-            ctx.strokeStyle = 'rgba(174,194,224,0.8)';
-            ctx.lineWidth = 1;
-            ctx.lineCap = 'round';
-            core.animateFrame.weather.nodes.rain.forEach(p => {
-                ctx.beginPath();
-                ctx.moveTo(p.x - ox, p.y - oy);
-                ctx.lineTo(p.x + p.l * p.xs - ox, p.y + p.l * p.ys - oy);
-                ctx.stroke();
-                p.x += p.xs;
-                p.y += p.ys;
-                if (
-                    p.x > core.bigmap.width * 32 ||
-                    p.y > core.bigmap.height * 32
-                ) {
-                    p.x = Math.random() * core.bigmap.width * 32;
-                    p.y = -10;
-                }
-            });
-            ctx.fill();
-        };
-        // 雪
-        control.prototype._animationFrame_weather_snow = function () {
-            var ctx = core.dymCanvas.weathersnow,
-                ox = core.bigmap.offsetX,
-                oy = core.bigmap.offsetY;
-            core.clearMap('weathersnow');
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-            ctx.beginPath();
-            if (!core.animateFrame.weather.data)
-                core.animateFrame.weather.data = {};
-            core.animateFrame.weather.data.snow =
-                core.animateFrame.weather.data.snow || 0;
-            core.animateFrame.weather.data.snow += 0.01;
-            var angle = core.animateFrame.weather.data.snow;
-            core.animateFrame.weather.nodes.snow.forEach(p => {
-                ctx.moveTo(p.x - ox, p.y - oy);
-                ctx.arc(p.x - ox, p.y - oy, p.r, 0, Math.PI * 2, true);
-                // update
-                p.x += Math.sin(angle) * core.animateFrame.weather.level.snow;
-                p.y += Math.cos(angle + p.d) + 1 + p.r / 2;
-                if (
-                    p.x > core.bigmap.width * 32 + 5 ||
-                    p.x < -5 ||
-                    p.y > core.bigmap.height * 32
-                ) {
-                    if (Math.random() > 1 / 3) {
-                        p.x = Math.random() * core.bigmap.width * 32;
-                        p.y = -10;
-                    } else {
-                        if (Math.sin(angle) > 0) p.x = -5;
-                        else p.x = core.bigmap.width * 32 + 5;
-                        p.y = Math.random() * core.bigmap.height * 32;
-                    }
-                }
-            });
-            ctx.fill();
-        };
-        // 图片天气
-        control.prototype.__animateFrame_weather_image = function (
-            image,
-            type
-        ) {
-            if (!image) return;
-            var node = core.animateFrame.weather.nodes[type][0];
-            core.setAlpha('weather' + type, node.level / 500);
-            var wind = 1.5;
-            var width = image.width,
-                height = image.height;
-            node.x += node.dx * wind;
-            node.y += (2 * node.dy - 1) * wind;
-            if (node.x + 3 * width <= core.__PIXELS__) {
-                node.x += 4 * width;
-                while (node.x > 0) node.x -= width;
-            }
-            node.dy += node.delta;
-            if (node.dy >= 1) {
-                node.delta = -0.001;
-            } else if (node.dy <= 0) {
-                node.delta = 0.001;
-            }
-            if (node.y + 3 * height <= core.__PIXELS__) {
-                node.y += 4 * height;
-                while (node.y > 0) node.y -= height;
-            } else if (node.y >= 0) {
-                node.y -= height;
-            }
-            for (var i = 0; i < 3; ++i) {
-                for (var j = 0; j < 3; ++j) {
-                    if (
-                        node.x + (i + 1) * width <= 0 ||
-                        node.x + i * width >= core.__PIXELS__ ||
-                        node.y + (j + 1) * height <= 0 ||
-                        node.y + j * height >= core.__PIXELS__
-                    )
-                        continue;
-                    core.drawImage(
-                        'weather' + type,
-                        image,
-                        node.x + i * width,
-                        node.y + j * height
-                    );
-                }
-            }
-            core.setAlpha('weather' + type, 1);
-        };
-        // 雾
-        control.prototype._animationFrame_weather_fog = function () {
-            core.clearMap('weatherfog');
-            this.__animateFrame_weather_image(
-                core.animateFrame.weather.fog,
-                'fog'
-            );
-        };
-        // 云
-        control.prototype._animationFrame_weather_cloud = function () {
-            core.clearMap('weathercloud');
-            this.__animateFrame_weather_image(
-                core.animateFrame.weather.cloud,
-                'cloud'
-            );
-        };
-    },
+    weatherSuperimpose: function () {},
     popupDamage: function () {
         // 伤害弹出
         // 复写阻激夹域检测
@@ -9266,6 +8998,13 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
     uiChange: function () {
         if (main.replayChecking) return;
 
+        function updateVueStatusBar() {
+            if (main.replayChecking) return;
+            core.plugin.statusBarStatus.value =
+                !core.plugin.statusBarStatus.value;
+            core.checkMarkedEnemy();
+        }
+
         ui.prototype.drawBook = function () {
             return (core.plugin.bookOpened.value = true);
         };
@@ -9286,8 +9025,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             core.clearRouteFolding();
             core.control.noAutoEvents = true;
             // 更新vue状态栏
-            core.plugin.statusBarStatus.value =
-                !core.plugin.statusBarStatus.value;
+            updateVueStatusBar();
         };
 
         control.prototype.showStatusBar = function () {

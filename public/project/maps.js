@@ -483,6 +483,8 @@ var maps_90f36752_8815_4be8_b32b_d7fad1d0542e =
 	"556": {"cls":"enemys","id":"E556"},
 	"557": {"cls":"enemys","id":"E557"},
 	"558": {"cls":"items","id":"I558"},
+	"559": {"cls":"items","id":"I559"},
+	"560": {"cls":"items","id":"I560"},
 	"20037": {"cls":"tileset","id":"X20037","cannotOut":["up","left"],"cannotIn":["up","left"]},
 	"20038": {"cls":"tileset","id":"X20038","cannotOut":["up"],"cannotIn":["up"]},
 	"20039": {"cls":"tileset","id":"X20039","cannotOut":["up","right"],"cannotIn":["up","right"]},

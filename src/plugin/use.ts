@@ -100,10 +100,7 @@ export function useDrag(
 export function cancelGlobalDrag(fn: DragFn): void {
     const fns = dragFnMap.get(fn);
     dragFnMap.delete(fn);
-    if (!fns)
-        throw new ReferenceError(
-            'The drag function to be canceled does not exist.'
-        );
+    if (!fns) return;
     document.removeEventListener('mousemove', fns[0]);
     document.removeEventListener('touchmove', fns[1]);
     document.removeEventListener('mouseup', fns[0]);

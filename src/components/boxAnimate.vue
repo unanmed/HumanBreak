@@ -14,7 +14,7 @@ import { has } from '../plugin/utils';
 const id = (Math.random() * 1e8).toFixed(0);
 
 const props = defineProps<{
-    id: AllIds | 'hero';
+    id: AllIds | 'hero' | 'none';
     noborder?: boolean;
     width?: number;
     height?: number;
@@ -47,6 +47,8 @@ function draw() {
     c.height = scale * h;
     ctx.scale(scale, scale);
 
+    if (props.id === 'none') return;
+
     if (props.id === 'hero') {
         const img = core.material.images.hero;
         ctx.drawImage(img, 0, 0, img.width / 4, img.height / 4, 0, 0, w, h);
@@ -56,7 +58,7 @@ function draw() {
         drawFn = () => {
             core.clearMap(ctx);
             const frame = core.status.globalAnimateStatus % frames;
-            core.drawIcon(ctx, props.id, 0, 0, w, h, frame);
+            core.drawIcon(ctx, props.id as AllIds, 0, 0, w, h, frame);
         };
 
         drawFn();

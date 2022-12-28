@@ -47,6 +47,11 @@ type Enemy<I extends EnemyIds = EnemyIds> = {
     name: string;
 
     /**
+     * 怪物说明
+     */
+    description: string;
+
+    /**
      * 在怪物手册中映射到的怪物ID。如果此项不为null，则在怪物手册中，将用目标ID来替换该怪物原本的ID。
      * 常被运用在同一个怪物的多朝向上
      */
