@@ -1,3 +1,5 @@
+///<reference path="../../src/types/core.d.ts" />
+
 'use strict';
 
 function maps() {

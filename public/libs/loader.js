@@ -1,3 +1,5 @@
+///<reference path="../../src/types/core.d.ts" />
+
 /*
 loader.js：负责对资源的加载
 

@@ -1,22 +1,25 @@
+///<reference path="../../src/types/core.d.ts" />
 
 /*
 extensions.js：负责拓展插件
  */
 
-"use strict";
+'use strict';
 
-function extensions () {
-
-}
+function extensions() {}
 
 extensions.prototype._load = function (callback) {
     if (main.replayChecking) return callback();
     if (!window.fs) {
-        this._loadJs('_server/fs.js', function () {
-            core.extensions._listExtensions(callback);
-        }, callback);
+        this._loadJs(
+            '_server/fs.js',
+            function () {
+                core.extensions._listExtensions(callback);
+            },
+            callback
+        );
     } else this._listExtensions(callback);
-}
+};
 
 extensions.prototype._loadJs = function (file, callback, onerror) {
     var script = document.createElement('script');
@@ -24,7 +27,7 @@ extensions.prototype._loadJs = function (file, callback, onerror) {
     script.onload = callback;
     script.onerror = onerror;
     main.dom.body.appendChild(script);
-}
+};
 
 extensions.prototype._listExtensions = function (callback) {
     if (!window.fs) return callback();
@@ -39,13 +42,13 @@ extensions.prototype._listExtensions = function (callback) {
         list.sort();
         core.extensions._loadExtensions(list, callback);
     });
-}
+};
 
 extensions.prototype._loadExtensions = function (list, callback) {
     var i = 0;
     var load = function () {
         if (i == list.length) return callback();
         core.extensions._loadJs('extensions/' + list[i++], load, load);
-    }
+    };
     load();
-}
+};

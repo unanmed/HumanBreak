@@ -1,3 +1,5 @@
+///<reference path="../../src/types/core.d.ts" />
+
 /*
 utils.js 工具类
 

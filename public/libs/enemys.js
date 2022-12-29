@@ -1,7 +1,8 @@
+///<reference path="../../src/types/core.d.ts" />
 
-"use strict";
+'use strict';
 
-function enemys () {
+function enemys() {
     this._init();
 }
 
@@ -14,10 +15,10 @@ enemys.prototype._init = function () {
     }
     if (main.mode == 'play') {
         this.enemydata.hasSpecial = function (a, b) {
-            return core.enemys.hasSpecial(a, b)
+            return core.enemys.hasSpecial(a, b);
         };
     }
-}
+};
 
 enemys.prototype.getEnemys = function () {
     var enemys = core.clone(this.enemys);
@@ -36,13 +37,20 @@ enemys.prototype.getEnemys = function () {
             if (downId != null && downId != id && enemys[downId]) {
                 enemys[id] = { id: id };
                 for (var property in enemys[downId]) {
-                    if (property != 'id' && enemys[downId].hasOwnProperty(property)) {
+                    if (
+                        property != 'id' &&
+                        enemys[downId].hasOwnProperty(property)
+                    ) {
                         (function (id, downId, property) {
                             Object.defineProperty(enemys[id], property, {
-                                get: function () { return enemys[downId][property] },
-                                set: function (v) { enemys[downId][property] = v },
+                                get: function () {
+                                    return enemys[downId][property];
+                                },
+                                set: function (v) {
+                                    enemys[downId][property] = v;
+                                },
                                 enumerable: true
-                            })
+                            });
                         })(id, downId, property);
                     }
                 }
@@ -50,7 +58,7 @@ enemys.prototype.getEnemys = function () {
         }
     }
     return enemys;
-}
+};
 
 ////// 判断是否含有某特殊属性 //////
 enemys.prototype.hasSpecial = function (special, test) {
@@ -73,11 +81,11 @@ enemys.prototype.hasSpecial = function (special, test) {
     }
 
     return false;
-}
+};
 
 enemys.prototype.getSpecials = function () {
     return this.enemydata.getSpecials();
-}
+};
 
 ////// 获得所有特殊属性的名称 //////
 enemys.prototype.getSpecialText = function (enemy) {
@@ -94,7 +102,7 @@ enemys.prototype.getSpecialText = function (enemy) {
         }
     }
     return text;
-}
+};
 
 ////// 获得所有特殊属性的颜色 //////
 enemys.prototype.getSpecialColor = function (enemy) {
@@ -111,8 +119,7 @@ enemys.prototype.getSpecialColor = function (enemy) {
         }
     }
     return colors;
-
-}
+};
 
 ////// 获得所有特殊属性的额外标记 //////
 enemys.prototype.getSpecialFlag = function (enemy) {
@@ -125,11 +132,11 @@ enemys.prototype.getSpecialFlag = function (enemy) {
     if (specials) {
         for (var i = 0; i < specials.length; i++) {
             if (this.hasSpecial(special, specials[i][0]))
-                flag |= (specials[i][4] || 0);
+                flag |= specials[i][4] || 0;
         }
     }
     return flag;
-}
+};
 
 ////// 获得每个特殊属性的说明 //////
 enemys.prototype.getSpecialHint = function (enemy, special) {
@@ -140,19 +147,30 @@ enemys.prototype.getSpecialHint = function (enemy, special) {
         var hints = [];
         for (var i = 0; i < specials.length; i++) {
             if (this.hasSpecial(enemy, specials[i][0]))
-                hints.push("\r[" + core.arrayToRGBA(specials[i][3] || "#FF6A6A") + "]\\d" + this._calSpecialContent(enemy, specials[i][1]) +
-                    "：\\d\r[]" + this._calSpecialContent(enemy, specials[i][2]));
+                hints.push(
+                    '\r[' +
+                        core.arrayToRGBA(specials[i][3] || '#FF6A6A') +
+                        ']\\d' +
+                        this._calSpecialContent(enemy, specials[i][1]) +
+                        '：\\d\r[]' +
+                        this._calSpecialContent(enemy, specials[i][2])
+                );
         }
         return hints;
     }
 
-    if (specials == null) return "";
+    if (specials == null) return '';
     for (var i = 0; i < specials.length; i++) {
         if (special == specials[i][0])
-            return "\r[#FF6A6A]\\d" + this._calSpecialContent(enemy, specials[i][1]) + "：\\d\r[]" + this._calSpecialContent(enemy, specials[i][2]);
+            return (
+                '\r[#FF6A6A]\\d' +
+                this._calSpecialContent(enemy, specials[i][1]) +
+                '：\\d\r[]' +
+                this._calSpecialContent(enemy, specials[i][2])
+            );
     }
-    return "";
-}
+    return '';
+};
 
 enemys.prototype._calSpecialContent = function (enemy, content) {
     if (typeof content == 'string') return content;
@@ -160,14 +178,18 @@ enemys.prototype._calSpecialContent = function (enemy, content) {
     if (content instanceof Function) {
         return content(enemy);
     }
-    return "";
-}
+    return '';
+};
 
 ////// 获得某个点上某个怪物的某项属性 //////
 enemys.prototype.getEnemyValue = function (enemy, name, x, y, floorId) {
     floorId = floorId || core.status.floorId;
-    if ((((flags.enemyOnPoint || {})[floorId] || {})[x + "," + y] || {})[name] != null) {
-        return flags.enemyOnPoint[floorId][x + "," + y][name];
+    if (
+        (((flags.enemyOnPoint || {})[floorId] || {})[x + ',' + y] || {})[
+            name
+        ] != null
+    ) {
+        return flags.enemyOnPoint[floorId][x + ',' + y][name];
     }
     if (enemy == null) {
         var block = core.getBlock(x, y, floorId);
@@ -177,14 +199,14 @@ enemys.prototype.getEnemyValue = function (enemy, name, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     if (enemy == null) return null;
     return enemy[name];
-}
+};
 
 ////// 能否获胜 //////
 enemys.prototype.canBattle = function (enemy, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     var damage = this.getDamage(enemy, x, y, floorId);
     return damage != null && damage < core.status.hero.hp;
-}
+};
 
 enemys.prototype.getDamageString = function (enemy, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
@@ -193,40 +215,43 @@ enemys.prototype.getDamageString = function (enemy, x, y, floorId) {
     var color = '#000000';
 
     if (damage == null) {
-        damage = "???";
+        damage = '???';
         color = '#FF2222';
-    }
-    else {
+    } else {
         if (damage <= 0) color = '#11FF11';
         else if (damage < core.status.hero.hp / 3) color = '#FFFFFF';
-        else if (damage < core.status.hero.hp * 2 / 3) color = '#FFFF00';
+        else if (damage < (core.status.hero.hp * 2) / 3) color = '#FFFF00';
         else if (damage < core.status.hero.hp) color = '#FF9933';
         else color = '#FF2222';
 
         damage = core.formatBigNumber(damage, true);
-        if (core.enemys.hasSpecial(enemy, 19))
-            damage += "+";
-        if (core.enemys.hasSpecial(enemy, 21))
-            damage += "-";
-        if (core.enemys.hasSpecial(enemy, 11))
-            damage += "^";
+        if (core.enemys.hasSpecial(enemy, 19)) damage += '+';
+        if (core.enemys.hasSpecial(enemy, 21)) damage += '-';
+        if (core.enemys.hasSpecial(enemy, 11)) damage += '^';
     }
 
     return {
-        "damage": damage,
-        "color": color
+        damage: damage,
+        color: color
     };
-}
+};
 
 ////// 接下来N个临界值和临界减伤计算 //////
 enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     number = number || 1;
 
-    var specialCriticals = this._nextCriticals_special(enemy, number, x, y, floorId);
+    var specialCriticals = this._nextCriticals_special(
+        enemy,
+        number,
+        x,
+        y,
+        floorId
+    );
     if (specialCriticals != null) return specialCriticals;
     var info = this.getDamageInfo(enemy, null, x, y, floorId);
-    if (info == null) { // 如果未破防...
+    if (info == null) {
+        // 如果未破防...
         var overAtk = this._nextCriticals_overAtk(enemy, x, y, floorId);
         if (overAtk == null) return [];
         if (typeof overAtk[1] == 'number') return [[overAtk[0], -overAtk[1]]];
@@ -242,45 +267,91 @@ enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
 
     if (core.flags.useLoop) {
         if (core.status.hero.atk <= (main.criticalUseLoop || 1)) {
-            return this._nextCriticals_useLoop(enemy, info, number, x, y, floorId);
+            return this._nextCriticals_useLoop(
+                enemy,
+                info,
+                number,
+                x,
+                y,
+                floorId
+            );
+        } else {
+            return this._nextCriticals_useBinarySearch(
+                enemy,
+                info,
+                number,
+                x,
+                y,
+                floorId
+            );
         }
-        else {
-            return this._nextCriticals_useBinarySearch(enemy, info, number, x, y, floorId);
-        }
-    }
-    else {
+    } else {
         return this._nextCriticals_useTurn(enemy, info, number, x, y, floorId);
     }
-}
+};
 
 /// 未破防临界采用二分计算
 enemys.prototype._nextCriticals_overAtk = function (enemy, x, y, floorId) {
     var calNext = function (currAtk, maxAtk) {
-        var start = currAtk, end = maxAtk;
+        var start = currAtk,
+            end = maxAtk;
         if (start > end) return null;
 
         while (start < end) {
             var mid = Math.floor((start + end) / 2);
             if (mid - start > end - mid) mid--;
-            var nextInfo = core.enemys.getDamageInfo(enemy, { "atk": mid }, x, y, floorId);
+            var nextInfo = core.enemys.getDamageInfo(
+                enemy,
+                { atk: mid },
+                x,
+                y,
+                floorId
+            );
             if (nextInfo != null) end = mid;
             else start = mid + 1;
         }
-        var nextInfo = core.enemys.getDamageInfo(enemy, { "atk": start }, x, y, floorId);
-        return nextInfo == null ? null : [start - core.status.hero.atk, nextInfo];
-    }
-    return calNext(core.status.hero.atk + 1,
-        core.getEnemyValue(enemy, 'hp', x, y, floorId) + core.getEnemyValue(enemy, 'def', x, y, floorId));
-}
+        var nextInfo = core.enemys.getDamageInfo(
+            enemy,
+            { atk: start },
+            x,
+            y,
+            floorId
+        );
+        return nextInfo == null
+            ? null
+            : [start - core.status.hero.atk, nextInfo];
+    };
+    return calNext(
+        core.status.hero.atk + 1,
+        core.getEnemyValue(enemy, 'hp', x, y, floorId) +
+            core.getEnemyValue(enemy, 'def', x, y, floorId)
+    );
+};
 
-enemys.prototype._nextCriticals_special = function (enemy, number, x, y, floorId) {
+enemys.prototype._nextCriticals_special = function (
+    enemy,
+    number,
+    x,
+    y,
+    floorId
+) {
     if (this.hasSpecial(enemy.special, 10) || this.hasSpecial(enemy.special, 3))
         return []; // 模仿or坚固临界
     return null;
-}
+};
 
-enemys.prototype._nextCriticals_useLoop = function (enemy, info, number, x, y, floorId) {
-    var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = info.mon_def, pre = info.damage;
+enemys.prototype._nextCriticals_useLoop = function (
+    enemy,
+    info,
+    number,
+    x,
+    y,
+    floorId
+) {
+    var mon_hp = info.mon_hp,
+        hero_atk = core.status.hero.atk,
+        mon_def = info.mon_def,
+        pre = info.damage;
     var list = [];
     var start_atk = hero_atk;
     if (info.__over__) {
@@ -288,8 +359,8 @@ enemys.prototype._nextCriticals_useLoop = function (enemy, info, number, x, y, f
         list.push([info.__overAtk__, -info.damage]);
     }
     for (var atk = start_atk + 1; atk <= mon_hp + mon_def; atk++) {
-        var nextInfo = this.getDamageInfo(enemy, { "atk": atk }, x, y, floorId);
-        if (nextInfo == null || (typeof nextInfo == 'number')) break;
+        var nextInfo = this.getDamageInfo(enemy, { atk: atk }, x, y, floorId);
+        if (nextInfo == null || typeof nextInfo == 'number') break;
         if (pre > nextInfo.damage) {
             pre = nextInfo.damage;
             list.push([atk - hero_atk, info.damage - nextInfo.damage]);
@@ -299,10 +370,20 @@ enemys.prototype._nextCriticals_useLoop = function (enemy, info, number, x, y, f
     }
     if (list.length == 0) list.push([0, 0]);
     return list;
-}
+};
 
-enemys.prototype._nextCriticals_useBinarySearch = function (enemy, info, number, x, y, floorId) {
-    var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = info.mon_def, pre = info.damage;
+enemys.prototype._nextCriticals_useBinarySearch = function (
+    enemy,
+    info,
+    number,
+    x,
+    y,
+    floorId
+) {
+    var mon_hp = info.mon_hp,
+        hero_atk = core.status.hero.atk,
+        mon_def = info.mon_def,
+        pre = info.damage;
     var list = [];
     var start_atk = hero_atk;
     if (info.__over__) {
@@ -310,20 +391,37 @@ enemys.prototype._nextCriticals_useBinarySearch = function (enemy, info, number,
         list.push([info.__overAtk__, -info.damage]);
     }
     var calNext = function (currAtk, maxAtk) {
-        var start = Math.floor(currAtk), end = Math.floor(maxAtk);
+        var start = Math.floor(currAtk),
+            end = Math.floor(maxAtk);
         if (start > end) return null;
 
         while (start < end) {
             var mid = Math.floor((start + end) / 2);
             if (mid - start > end - mid) mid--;
-            var nextInfo = core.enemys.getDamageInfo(enemy, { "atk": mid }, x, y, floorId);
-            if (nextInfo == null || (typeof nextInfo == 'number')) return null;
+            var nextInfo = core.enemys.getDamageInfo(
+                enemy,
+                { atk: mid },
+                x,
+                y,
+                floorId
+            );
+            if (nextInfo == null || typeof nextInfo == 'number') return null;
             if (pre > nextInfo.damage) end = mid;
             else start = mid + 1;
         }
-        var nextInfo = core.enemys.getDamageInfo(enemy, { "atk": start }, x, y, floorId);
-        return nextInfo == null || (typeof nextInfo == 'number') || nextInfo.damage >= pre ? null : [start, nextInfo.damage];
-    }
+        var nextInfo = core.enemys.getDamageInfo(
+            enemy,
+            { atk: start },
+            x,
+            y,
+            floorId
+        );
+        return nextInfo == null ||
+            typeof nextInfo == 'number' ||
+            nextInfo.damage >= pre
+            ? null
+            : [start, nextInfo.damage];
+    };
     var currAtk = start_atk;
     while (true) {
         var next = calNext(currAtk + 1, mon_hp + mon_def, pre);
@@ -336,16 +434,35 @@ enemys.prototype._nextCriticals_useBinarySearch = function (enemy, info, number,
     }
     if (list.length == 0) list.push([0, 0]);
     return list;
-}
+};
 
-enemys.prototype._nextCriticals_useTurn = function (enemy, info, number, x, y, floorId) {
-    var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = info.mon_def, turn = info.turn;
+enemys.prototype._nextCriticals_useTurn = function (
+    enemy,
+    info,
+    number,
+    x,
+    y,
+    floorId
+) {
+    var mon_hp = info.mon_hp,
+        hero_atk = core.status.hero.atk,
+        mon_def = info.mon_def,
+        turn = info.turn;
     // ------ 超大回合数强制使用二分算临界
     // 以避免1攻10e回合，2攻5e回合导致下述循环卡死问题
-    if (turn >= 1e6) { // 100w回合以上强制二分计算临界
-        return this._nextCriticals_useBinarySearch(enemy, info, number, x, y, floorId);
+    if (turn >= 1e6) {
+        // 100w回合以上强制二分计算临界
+        return this._nextCriticals_useBinarySearch(
+            enemy,
+            info,
+            number,
+            x,
+            y,
+            floorId
+        );
     }
-    var list = [], pre = null;
+    var list = [],
+        pre = null;
     var start_atk = hero_atk;
     if (info.__over__) {
         start_atk += info.__overAtk__;
@@ -357,34 +474,48 @@ enemys.prototype._nextCriticals_useTurn = function (enemy, info, number, x, y, f
         nextAtk = Math.ceil(nextAtk / core.getBuff('atk'));
         if (nextAtk <= start_atk) break;
         if (nextAtk != pre) {
-            var nextInfo = this.getDamageInfo(enemy, { "atk": nextAtk }, x, y, floorId);
-            if (nextInfo == null || (typeof nextInfo == 'number')) break;
-            list.push([nextAtk - hero_atk, Math.floor(info.damage - nextInfo.damage)]);
+            var nextInfo = this.getDamageInfo(
+                enemy,
+                { atk: nextAtk },
+                x,
+                y,
+                floorId
+            );
+            if (nextInfo == null || typeof nextInfo == 'number') break;
+            list.push([
+                nextAtk - hero_atk,
+                Math.floor(info.damage - nextInfo.damage)
+            ]);
             if (nextInfo.damage <= 0 && !core.flags.enableNegativeDamage) break;
             pre = nextAtk;
         }
-        if (list.length >= number)
-            break;
+        if (list.length >= number) break;
     }
     if (list.length == 0) list.push([0, 0]);
     return list;
-}
+};
 
 ////// N防减伤计算 //////
 enemys.prototype.getDefDamage = function (enemy, k, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     k = k || 1;
     var nowDamage = this._getDamage(enemy, null, x, y, floorId);
-    var nextDamage = this._getDamage(enemy, { "def": core.status.hero.def + k }, x, y, floorId);
-    if (nowDamage == null || nextDamage == null) return "???";
+    var nextDamage = this._getDamage(
+        enemy,
+        { def: core.status.hero.def + k },
+        x,
+        y,
+        floorId
+    );
+    if (nowDamage == null || nextDamage == null) return '???';
     return nowDamage - nextDamage;
-}
+};
 
 enemys.prototype.getEnemyInfo = function (enemy, hero, x, y, floorId) {
     if (enemy == null) return null;
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
-    return this.enemydata.getEnemyInfo(enemy, hero, x, y, floorId)
-}
+    return this.enemydata.getEnemyInfo(enemy, hero, x, y, floorId);
+};
 
 ////// 获得战斗伤害信息（实际伤害计算函数） //////
 enemys.prototype.getDamageInfo = function (enemy, hero, x, y, floorId) {
@@ -392,12 +523,12 @@ enemys.prototype.getDamageInfo = function (enemy, hero, x, y, floorId) {
     // 移动到了脚本编辑 - getDamageInfo中
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     return this.enemydata.getDamageInfo(enemy, hero, x, y, floorId);
-}
+};
 
 ////// 获得在某个勇士属性下怪物伤害 //////
 enemys.prototype.getDamage = function (enemy, x, y, floorId) {
     return this._getDamage(enemy, null, x, y, floorId);
-}
+};
 
 enemys.prototype._getDamage = function (enemy, hero, x, y, floorId) {
     if (enemy == null) enemy = core.getBlockId(x, y, floorId);
@@ -408,30 +539,49 @@ enemys.prototype._getDamage = function (enemy, hero, x, y, floorId) {
     if (info == null) return null;
     if (typeof info == 'number') return info;
     return info.damage;
-}
+};
 
 ////// 获得当前楼层的怪物列表 //////
 enemys.prototype.getCurrentEnemys = function (floorId) {
     floorId = floorId || core.status.floorId;
-    var enemys = [], used = {};
+    var enemys = [],
+        used = {};
     core.extractBlocks(floorId);
     core.status.maps[floorId].blocks.forEach(function (block) {
         if (!block.disable && block.event.cls.indexOf('enemy') == 0) {
-            this._getCurrentEnemys_addEnemy(block.event.id, enemys, used, block.x, block.y, floorId);
+            this._getCurrentEnemys_addEnemy(
+                block.event.id,
+                enemys,
+                used,
+                block.x,
+                block.y,
+                floorId
+            );
         }
     }, this);
     return this._getCurrentEnemys_sort(enemys);
-}
+};
 
 enemys.prototype._getCurrentEnemys_getEnemy = function (enemyId) {
     var enemy = core.material.enemys[enemyId];
     if (!enemy) return null;
 
     // 检查朝向；displayIdInBook
-    return core.material.enemys[enemy.displayIdInBook] || core.material.enemys[(enemy.faceIds || {}).down] || enemy;
-}
+    return (
+        core.material.enemys[enemy.displayIdInBook] ||
+        core.material.enemys[(enemy.faceIds || {}).down] ||
+        enemy
+    );
+};
 
-enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId, enemys, used, x, y, floorId) {
+enemys.prototype._getCurrentEnemys_addEnemy = function (
+    enemyId,
+    enemys,
+    used,
+    x,
+    y,
+    floorId
+) {
     var enemy = this._getCurrentEnemys_getEnemy(enemyId);
     if (enemy == null) return;
 
@@ -440,23 +590,32 @@ enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId, enemys, used, x
     var enemyInfo = this.getEnemyInfo(enemy, null, null, null, floorId);
     var locEnemyInfo = this.getEnemyInfo(enemy, null, x, y, floorId);
 
-    if (!core.flags.enableEnemyPoint ||
-        (locEnemyInfo.atk == enemyInfo.atk && locEnemyInfo.def == enemyInfo.def && locEnemyInfo.hp == enemyInfo.hp)) {
+    if (
+        !core.flags.enableEnemyPoint ||
+        (locEnemyInfo.atk == enemyInfo.atk &&
+            locEnemyInfo.def == enemyInfo.def &&
+            locEnemyInfo.hp == enemyInfo.hp)
+    ) {
         x = null;
         y = null;
     } else {
         // 检查enemys里面是否使用了存在的内容
         for (var i = 0; i < enemys.length; ++i) {
             var one = enemys[i];
-            if (id == one.id && one.locs != null &&
-                locEnemyInfo.atk == one.atk && locEnemyInfo.def == one.def && locEnemyInfo.hp == one.hp) {
+            if (
+                id == one.id &&
+                one.locs != null &&
+                locEnemyInfo.atk == one.atk &&
+                locEnemyInfo.def == one.def &&
+                locEnemyInfo.hp == one.hp
+            ) {
                 one.locs.push([x, y]);
                 return;
             }
         }
         enemyInfo = locEnemyInfo;
     }
-    var id = enemy.id + ":" + x + ":" + y;
+    var id = enemy.id + ':' + x + ':' + y;
     if (used[id]) return;
     used[id] = true;
 
@@ -479,14 +638,24 @@ enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId, enemys, used, x
     e.damage = this.getDamage(enemy, x, y, floorId);
     e.critical = critical[0];
     e.criticalDamage = critical[1];
-    e.defDamage = this._getCurrentEnemys_addEnemy_defDamage(enemy, x, y, floorId);
+    e.defDamage = this._getCurrentEnemys_addEnemy_defDamage(
+        enemy,
+        x,
+        y,
+        floorId
+    );
     enemys.push(e);
-}
+};
 
-enemys.prototype._getCurrentEnemys_addEnemy_defDamage = function (enemy, x, y, floorId) {
+enemys.prototype._getCurrentEnemys_addEnemy_defDamage = function (
+    enemy,
+    x,
+    y,
+    floorId
+) {
     var ratio = core.status.maps[floorId || core.status.floorId].ratio || 1;
     return this.getDefDamage(enemy, ratio, x, y, floorId);
-}
+};
 
 enemys.prototype._getCurrentEnemys_sort = function (enemys) {
     return enemys.sort(function (a, b) {
@@ -501,23 +670,33 @@ enemys.prototype._getCurrentEnemys_sort = function (enemys) {
         }
         return a.damage - b.damage;
     });
-}
+};
 
 enemys.prototype.hasEnemyLeft = function (enemyId, floorId) {
     if (floorId == null) floorId = core.status.floorId;
     if (!(floorId instanceof Array)) floorId = [floorId];
     var enemyMap = {};
-    if (enemyId instanceof Array) enemyId.forEach(function (v) { enemyMap[v] = true; });
+    if (enemyId instanceof Array)
+        enemyId.forEach(function (v) {
+            enemyMap[v] = true;
+        });
     else if (enemyId) enemyMap[enemyId] = true;
     else enemyMap = null;
     for (var i = 0; i < floorId.length; i++) {
         core.extractBlocks(floorId[i]);
         var mapBlocks = core.status.maps[floorId[i]].blocks;
         for (var b = 0; b < mapBlocks.length; b++) {
-            if (!mapBlocks[b].disable && mapBlocks[b].event.cls.indexOf('enemy') === 0) {
-                if (enemyMap === null || enemyMap[core.getFaceDownId(mapBlocks[b])]) return true;
+            if (
+                !mapBlocks[b].disable &&
+                mapBlocks[b].event.cls.indexOf('enemy') === 0
+            ) {
+                if (
+                    enemyMap === null ||
+                    enemyMap[core.getFaceDownId(mapBlocks[b])]
+                )
+                    return true;
             }
         }
     }
     return false;
-}
+};

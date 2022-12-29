@@ -1,16 +1,17 @@
+///<reference path="../../src/types/core.d.ts" />
 
 /**
  * 初始化 start
  */
 
-"use strict";
+'use strict';
 
 // /**
 //  * @type {CoreMixin}
 //  */
 // const core = (() => {
 
-function core () {
+function core() {
     this._WIDTH_ = 15;
     this._HEIGHT_ = 15;
     this._PX_ = this._WIDTH_ * 32;
@@ -22,99 +23,99 @@ function core () {
     this.__PIXELS__ = this.__SIZE__ * 32;
     this.__HALF_SIZE__ = Math.floor(this.__SIZE__ / 2);
     this.material = {
-        'animates': {},
-        'images': {},
-        'bgms': {},
-        'sounds': {},
-        'items': {},
-        'enemys': {},
-        'icons': {},
-        'ground': null,
-        'grundCanvas': null,
-        'groundPattern': null,
-        'autotileEdges': {},
-    }
+        animates: {},
+        images: {},
+        bgms: {},
+        sounds: {},
+        items: {},
+        enemys: {},
+        icons: {},
+        ground: null,
+        grundCanvas: null,
+        groundPattern: null,
+        autotileEdges: {}
+    };
     this.timeout = {
-        'turnHeroTimeout': null,
-        'onDownTimeout': null,
-        'sleepTimeout': null,
-    }
+        turnHeroTimeout: null,
+        onDownTimeout: null,
+        sleepTimeout: null
+    };
     this.interval = {
-        'heroMoveInterval': null,
-        'onDownInterval': null,
-    }
+        heroMoveInterval: null,
+        onDownInterval: null
+    };
     this.animateFrame = {
-        'totalTime': 0,
-        'totalTimeStart': 0,
-        'globalAnimate': false,
-        'globalTime': 0,
-        'selectorTime': 0,
-        'selectorUp': true,
-        'animateTime': 0,
-        'moveTime': 0,
-        'lastLegTime': 0,
-        'leftLeg': true,
-        'weather': {
-            'time': 0,
-            'type': null,
-            'level': 1,
-            'nodes': [],
-            'data': null,
-            'fog': null,
-            'cloud': null,
-            'sun': null
+        totalTime: 0,
+        totalTimeStart: 0,
+        globalAnimate: false,
+        globalTime: 0,
+        selectorTime: 0,
+        selectorUp: true,
+        animateTime: 0,
+        moveTime: 0,
+        lastLegTime: 0,
+        leftLeg: true,
+        weather: {
+            time: 0,
+            type: null,
+            level: 1,
+            nodes: [],
+            data: null,
+            fog: null,
+            cloud: null,
+            sun: null
         },
-        "tip": null,
-        "asyncId": {},
-        "lastAsyncId": null
-    }
+        tip: null,
+        asyncId: {},
+        lastAsyncId: null
+    };
     this.musicStatus = {
-        'audioContext': null, // WebAudioContext
-        'bgmStatus': false, // 是否播放BGM
-        'soundStatus': true, // 是否播放SE
-        'playingBgm': null, // 正在播放的BGM
-        'pauseTime': 0, // 上次暂停的时间
-        'lastBgm': null, // 上次播放的bgm
-        'gainNode': null,
-        'playingSounds': {}, // 正在播放的SE
-        'userVolume': 1.0, // 用户音量
-        'designVolume': 1.0, //设计音量
-        'bgmSpeed': 100, // 背景音乐速度
-        'bgmUsePitch': null, // 是否同时修改音调
-        'cachedBgms': [], // 缓存BGM内容
-        'cachedBgmCount': 8, // 缓存的bgm数量
-    }
+        audioContext: null, // WebAudioContext
+        bgmStatus: false, // 是否播放BGM
+        soundStatus: true, // 是否播放SE
+        playingBgm: null, // 正在播放的BGM
+        pauseTime: 0, // 上次暂停的时间
+        lastBgm: null, // 上次播放的bgm
+        gainNode: null,
+        playingSounds: {}, // 正在播放的SE
+        userVolume: 1.0, // 用户音量
+        designVolume: 1.0, //设计音量
+        bgmSpeed: 100, // 背景音乐速度
+        bgmUsePitch: null, // 是否同时修改音调
+        cachedBgms: [], // 缓存BGM内容
+        cachedBgmCount: 8 // 缓存的bgm数量
+    };
     this.platform = {
-        'isOnline': true, // 是否http
-        'isPC': true, // 是否是PC
-        'isAndroid': false, // 是否是Android
-        'isIOS': false, // 是否是iOS
-        'string': 'PC',
-        'isWeChat': false, // 是否是微信
-        'isQQ': false, // 是否是QQ
-        'isChrome': false, // 是否是Chrome
-        'supportCopy': false, // 是否支持复制到剪切板
+        isOnline: true, // 是否http
+        isPC: true, // 是否是PC
+        isAndroid: false, // 是否是Android
+        isIOS: false, // 是否是iOS
+        string: 'PC',
+        isWeChat: false, // 是否是微信
+        isQQ: false, // 是否是QQ
+        isChrome: false, // 是否是Chrome
+        supportCopy: false, // 是否支持复制到剪切板
 
-        'fileInput': null, // FileInput
-        'fileReader': null, // 是否支持FileReader
-        'successCallback': null, // 读取成功
-        'errorCallback': null, // 读取失败
-    }
+        fileInput: null, // FileInput
+        fileReader: null, // 是否支持FileReader
+        successCallback: null, // 读取成功
+        errorCallback: null // 读取失败
+    };
     // 样式
     this.domStyle = {
         scale: 1.0,
         ratio: 1.0,
-        hdCanvas: ["damage", "ui", "data"],
+        hdCanvas: ['damage', 'ui', 'data'],
         availableScale: [],
         isVertical: false,
         showStatusBar: true,
-        toolbarBtn: false,
-    }
+        toolbarBtn: false
+    };
     this.bigmap = {
-        canvas: ["bg", "event", "event2", "fg", "damage"],
+        canvas: ['bg', 'event', 'event2', 'fg', 'damage'],
         offsetX: 0, // in pixel
         offsetY: 0,
-        posX: 0, // 
+        posX: 0, //
         posY: 0,
         width: main.mode == 'editor' ? this.__SIZE__ : this._WIDTH_, // map width and height
         height: main.mode == 'editor' ? this.__SIZE__ : this._HEIGHT_,
@@ -123,140 +124,149 @@ function core () {
         extend: 10,
         scale: 1.0,
         tempCanvas: null, // A temp canvas for drawing
-        cacheCanvas: null, // A cache canvas
-    }
+        cacheCanvas: null // A cache canvas
+    };
     this.saves = {
-        "saveIndex": null,
-        "ids": {},
-        "autosave": {
-            "data": null,
-            "time": 0,
-            "updated": false,
-            "storage": true, // 是否把自动存档写入文件a
-            "max": 20, // 自动存档最大回退数
-            "now": 0,
+        saveIndex: null,
+        ids: {},
+        autosave: {
+            data: null,
+            time: 0,
+            updated: false,
+            storage: true, // 是否把自动存档写入文件a
+            max: 20, // 自动存档最大回退数
+            now: 0
         },
-        "favorite": [],
-        "favoriteName": {},
-        "cache": {}
-    }
+        favorite: [],
+        favoriteName: {},
+        cache: {}
+    };
     this.initStatus = {
-        'played': false,
-        'gameOver': false,
+        played: false,
+        gameOver: false,
 
         // 勇士属性
-        'hero': {},
-        'heroCenter': { 'px': null, 'py': null },
+        hero: {},
+        heroCenter: { px: null, py: null },
 
         // 当前地图
-        'floorId': null,
-        'thisMap': null,
-        'maps': null,
-        'bgmaps': {},
-        'fgmaps': {},
-        'mapBlockObjs': {},
-        'checkBlock': {}, // 每个点的阻激夹域信息
-        'damage': {  // 每个点的显伤绘制
-            'posX': 0,
-            'posY': 0,
-            'data': [],
-            'extraData': [],
+        floorId: null,
+        thisMap: null,
+        maps: null,
+        bgmaps: {},
+        fgmaps: {},
+        mapBlockObjs: {},
+        checkBlock: {}, // 每个点的阻激夹域信息
+        damage: {
+            // 每个点的显伤绘制
+            posX: 0,
+            posY: 0,
+            data: [],
+            extraData: []
         },
 
-        'lockControl': false,
+        lockControl: false,
 
         // 勇士移动状态
-        'heroMoving': 0,
-        'heroStop': true,
+        heroMoving: 0,
+        heroStop: true,
 
         // 自动寻路相关
-        'automaticRoute': {
-            'autoHeroMove': false,
-            'autoStep': 0,
-            'movedStep': 0,
-            'destStep': 0,
-            'destX': null,
-            'destY': null,
-            'offsetX': null,
-            'offsetY': null,
-            'autoStepRoutes': [],
-            'moveStepBeforeStop': [],
-            'lastDirection': null,
-            'cursorX': 0,
-            'cursorY': 0,
-            "moveDirectly": false,
+        automaticRoute: {
+            autoHeroMove: false,
+            autoStep: 0,
+            movedStep: 0,
+            destStep: 0,
+            destX: null,
+            destY: null,
+            offsetX: null,
+            offsetY: null,
+            autoStepRoutes: [],
+            moveStepBeforeStop: [],
+            lastDirection: null,
+            cursorX: 0,
+            cursorY: 0,
+            moveDirectly: false
         },
 
         // 按下键的时间：为了判定双击
-        'downTime': null,
-        'ctrlDown': false,
-        'preview': {
-            'enabled': false,
-            'prepareDragging': false,
-            'dragging': false,
-            'px': 0,
-            'py': 0,
+        downTime: null,
+        ctrlDown: false,
+        preview: {
+            enabled: false,
+            prepareDragging: false,
+            dragging: false,
+            px: 0,
+            py: 0
         },
 
         // 路线&回放
-        'route': [],
-        'replay': {
-            'replaying': false,
-            'pausing': false,
-            'animate': false, // 正在某段动画中
-            'failed': false,
-            'toReplay': [],
-            'totalList': [],
-            'speed': 1.0,
-            'steps': 0,
-            'save': [],
+        route: [],
+        replay: {
+            replaying: false,
+            pausing: false,
+            animate: false, // 正在某段动画中
+            failed: false,
+            toReplay: [],
+            totalList: [],
+            speed: 1.0,
+            steps: 0,
+            save: []
         },
         // 录像折叠
-        'routeFolding': {},
+        routeFolding: {},
 
         // event事件
-        'shops': {},
-        'event': {
-            'id': null,
-            'data': null,
-            'selection': null,
-            'ui': null,
-            'interval': null,
+        shops: {},
+        event: {
+            id: null,
+            data: null,
+            selection: null,
+            ui: null,
+            interval: null
         },
-        'autoEvents': [],
-        'textAttribute': {
-            'position': "center",
-            "offset": 0,
-            "title": [255, 215, 0, 1],
-            "background": [0, 0, 0, 0.85],
-            "text": [255, 255, 255, 1],
-            "titlefont": 22,
-            "textfont": 16,
-            "bold": false,
-            "time": 0,
-            "letterSpacing": 0,
-            "animateTime": 0,
+        autoEvents: [],
+        textAttribute: {
+            position: 'center',
+            offset: 0,
+            title: [255, 215, 0, 1],
+            background: [0, 0, 0, 0.85],
+            text: [255, 255, 255, 1],
+            titlefont: 22,
+            textfont: 16,
+            bold: false,
+            time: 0,
+            letterSpacing: 0,
+            animateTime: 0
         },
-        "globalAttribute": {
-            'equipName': main.equipName || [],
-            "statusLeftBackground": main.styles.statusLeftBackground || "url(project/materials/ground.png) repeat",
-            "statusTopBackground": main.styles.statusTopBackground || "url(project/materials/ground.png) repeat",
-            "toolsBackground": main.styles.toolsBackground || "url(project/materials/ground.png) repeat",
-            "borderColor": main.styles.borderColor || [204, 204, 204, 1],
-            "statusBarColor": main.styles.statusBarColor || [255, 255, 255, 1],
-            "floorChangingStyle": main.styles.floorChangingStyle || "background-color: black; color: white",
-            "selectColor": main.styles.selectColor || [255, 215, 0, 1],
-            "font": main.styles.font || "Verdana"
+        globalAttribute: {
+            equipName: main.equipName || [],
+            statusLeftBackground:
+                main.styles.statusLeftBackground ||
+                'url(project/materials/ground.png) repeat',
+            statusTopBackground:
+                main.styles.statusTopBackground ||
+                'url(project/materials/ground.png) repeat',
+            toolsBackground:
+                main.styles.toolsBackground ||
+                'url(project/materials/ground.png) repeat',
+            borderColor: main.styles.borderColor || [204, 204, 204, 1],
+            statusBarColor: main.styles.statusBarColor || [255, 255, 255, 1],
+            floorChangingStyle:
+                main.styles.floorChangingStyle ||
+                'background-color: black; color: white',
+            selectColor: main.styles.selectColor || [255, 215, 0, 1],
+            font: main.styles.font || 'Verdana'
         },
-        'curtainColor': null,
+        curtainColor: null,
 
         // 动画
-        'globalAnimateObjs': [],
-        'floorAnimateObjs': [],
-        'boxAnimateObjs': [],
-        'autotileAnimateObjs': [],
-        "globalAnimateStatus": 0,
-        'animateObjs': [],
+        globalAnimateObjs: [],
+        floorAnimateObjs: [],
+        boxAnimateObjs: [],
+        autotileAnimateObjs: [],
+        globalAnimateStatus: 0,
+        animateObjs: []
     };
     // 标记的楼层列表，用于数据统计
     this.markedFloorIds = {};
@@ -265,7 +275,10 @@ function core () {
 
     if (main.mode == 'editor') {
         document.documentElement.style.setProperty('--size', this.__SIZE__);
-        document.documentElement.style.setProperty('--pixel', this.__PIXELS__ + 'px');
+        document.documentElement.style.setProperty(
+            '--pixel',
+            this.__PIXELS__ + 'px'
+        );
     }
 }
 
@@ -274,8 +287,7 @@ function core () {
 ////// 初始化 //////
 core.prototype.init = function (coreData, callback) {
     this._forwardFuncs();
-    for (var key in coreData)
-        core[key] = coreData[key];
+    for (var key in coreData) core[key] = coreData[key];
     this._init_flags();
     this._init_platform();
     this._init_others();
@@ -284,10 +296,14 @@ core.prototype.init = function (coreData, callback) {
     // 初始化画布
     for (var name in core.canvas) {
         if (core.domStyle.hdCanvas.indexOf(name) >= 0)
-            core.maps._setHDCanvasSize(core.canvas[name], b ? core.__PIXELS__ : core._PX_, b ? core.__PIXELS__ : core._PY_);
+            core.maps._setHDCanvasSize(
+                core.canvas[name],
+                b ? core.__PIXELS__ : core._PX_,
+                b ? core.__PIXELS__ : core._PY_
+            );
         else {
-            core.canvas[name].canvas.width = (b ? core.__PIXELS__ : core._PX_);
-            core.canvas[name].canvas.height = (b ? core.__PIXELS__ : core._PY_);
+            core.canvas[name].canvas.width = b ? core.__PIXELS__ : core._PX_;
+            core.canvas[name].canvas.height = b ? core.__PIXELS__ : core._PY_;
         }
     }
 
@@ -298,7 +314,7 @@ core.prototype.init = function (coreData, callback) {
     });
     core.dom.musicBtn.style.display = 'block';
     core.setMusicBtn();
-}
+};
 
 core.prototype._init_flags = function () {
     core.flags = core.clone(core.data.flags);
@@ -314,9 +330,11 @@ core.prototype._init_flags = function () {
 
     core.dom.versionLabel.innerText = core.firstData.version;
     core.dom.logoLabel.innerText = core.firstData.title;
-    document.title = core.firstData.title + " - HTML5魔塔";
-    document.getElementById("startLogo").innerText = core.firstData.title;
-    (core.firstData.shops || []).forEach(function (t) { core.initStatus.shops[t.id] = t; });
+    document.title = core.firstData.title + ' - HTML5魔塔';
+    document.getElementById('startLogo').innerText = core.firstData.title;
+    (core.firstData.shops || []).forEach(function (t) {
+        core.initStatus.shops[t.id] = t;
+    });
 
     core.maps._initFloors();
     // 初始化怪物、道具等
@@ -328,7 +346,9 @@ core.prototype._init_flags = function () {
     for (var floorId in core.floors) {
         var autoEvents = core.floors[floorId].autoEvent || {};
         for (var loc in autoEvents) {
-            var locs = loc.split(","), x = parseInt(locs[0]), y = parseInt(locs[1]);
+            var locs = loc.split(','),
+                x = parseInt(locs[0]),
+                y = parseInt(locs[1]);
             for (var index in autoEvents[loc]) {
                 var autoEvent = core.clone(autoEvents[loc][index]);
                 if (autoEvent && autoEvent.condition && autoEvent.data) {
@@ -336,8 +356,11 @@ core.prototype._init_flags = function () {
                     autoEvent.x = x;
                     autoEvent.y = y;
                     autoEvent.index = index;
-                    autoEvent.symbol = floorId + "@" + x + "@" + y + "@" + index;
-                    autoEvent.condition = core.replaceValue(autoEvent.condition);
+                    autoEvent.symbol =
+                        floorId + '@' + x + '@' + y + '@' + index;
+                    autoEvent.condition = core.replaceValue(
+                        autoEvent.condition
+                    );
                     autoEvent.data = core.precompile(autoEvent.data);
                     core.initStatus.autoEvents.push(autoEvent);
                 }
@@ -351,18 +374,44 @@ core.prototype._init_flags = function () {
         if (!equip.equip.equipEvent && !equip.equip.unequipEvent) continue;
         var equipFlag = '_equipEvent_' + equipId;
         var autoEvent1 = {
-            symbol: "_equipEvent_" + equipId,
+            symbol: '_equipEvent_' + equipId,
             currentFloor: false,
             multiExecute: true,
-            condition: "core.hasEquip('" + equipId + "') && !core.hasFlag('" + equipFlag + "')",
-            data: core.precompile([{ "type": "setValue", "name": "flag:" + equipFlag, "value": "true" }].concat(equip.equip.equipEvent || [])),
+            condition:
+                "core.hasEquip('" +
+                equipId +
+                "') && !core.hasFlag('" +
+                equipFlag +
+                "')",
+            data: core.precompile(
+                [
+                    {
+                        type: 'setValue',
+                        name: 'flag:' + equipFlag,
+                        value: 'true'
+                    }
+                ].concat(equip.equip.equipEvent || [])
+            )
         };
         var autoEvent2 = {
-            symbol: "_unequipEvent_" + equipId,
+            symbol: '_unequipEvent_' + equipId,
             currentFloor: false,
             multiExecute: true,
-            condition: "!core.hasEquip('" + equipId + "') && core.hasFlag('" + equipFlag + "')",
-            data: core.precompile([{ "type": "setValue", "name": "flag:" + equipFlag, "value": "null" }].concat(equip.equip.unequipEvent || [])),
+            condition:
+                "!core.hasEquip('" +
+                equipId +
+                "') && core.hasFlag('" +
+                equipFlag +
+                "')",
+            data: core.precompile(
+                [
+                    {
+                        type: 'setValue',
+                        name: 'flag:' + equipFlag,
+                        value: 'null'
+                    }
+                ].concat(equip.equip.unequipEvent || [])
+            )
         };
         core.initStatus.autoEvents.push(autoEvent1);
         core.initStatus.autoEvents.push(autoEvent2);
@@ -372,33 +421,53 @@ core.prototype._init_flags = function () {
         if (e1.floorId == null) return 1;
         if (e2.floorId == null) return -1;
         if (e1.priority != e2.priority) return e2.priority - e1.priority;
-        if (e1.floorId != e2.floorId) return core.floorIds.indexOf(e1.floorId) - core.floorIds.indexOf(e2.floorId);
+        if (e1.floorId != e2.floorId)
+            return (
+                core.floorIds.indexOf(e1.floorId) -
+                core.floorIds.indexOf(e2.floorId)
+            );
         if (e1.x != e2.x) return e1.x - e2.x;
         if (e1.y != e2.y) return e1.y - e2.y;
         return e1.index - e2.index;
-    })
-
-}
+    });
+};
 
 core.prototype._init_sys_flags = function () {
     if (core.flags.equipboxButton) core.flags.equipment = true;
     core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', true);
     core.flags.displayCritical = core.getLocalStorage('critical', true);
     core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', true);
-    core.flags.enableEnemyPoint = core.getLocalStorage('enableEnemyPoint', core.flags.enableEnemyPoint);
+    core.flags.enableEnemyPoint = core.getLocalStorage(
+        'enableEnemyPoint',
+        core.flags.enableEnemyPoint
+    );
     core.flags.leftHandPrefer = core.getLocalStorage('leftHandPrefer', false);
     core.flags.extraDamageType = core.getLocalStorage('extraDamageType', 2);
     // 行走速度
-    core.values.moveSpeed = core.getLocalStorage('moveSpeed', core.values.moveSpeed || 100);
-    core.values.floorChangeTime = core.getLocalStorage('floorChangeTime', core.values.floorChangeTime);
+    core.values.moveSpeed = core.getLocalStorage(
+        'moveSpeed',
+        core.values.moveSpeed || 100
+    );
+    core.values.floorChangeTime = core.getLocalStorage(
+        'floorChangeTime',
+        core.values.floorChangeTime
+    );
     if (core.values.floorChangeTime == null) core.values.floorChangeTime = 500;
-    core.flags.enableHDCanvas = core.getLocalStorage('enableHDCanvas', !core.platform.isIOS);
-}
+    core.flags.enableHDCanvas = core.getLocalStorage(
+        'enableHDCanvas',
+        !core.platform.isIOS
+    );
+};
 
 core.prototype._init_platform = function () {
-    core.platform.isOnline = location.protocol.indexOf("http") == 0;
-    if (!core.platform.isOnline) alert("请勿直接打开html文件！使用启动服务或者APP进行离线游戏。");
-    window.AudioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.msAudioContext;
+    core.platform.isOnline = location.protocol.indexOf('http') == 0;
+    if (!core.platform.isOnline)
+        alert('请勿直接打开html文件！使用启动服务或者APP进行离线游戏。');
+    window.AudioContext =
+        window.AudioContext ||
+        window.webkitAudioContext ||
+        window.mozAudioContext ||
+        window.msAudioContext;
     core.musicStatus.bgmStatus = core.getLocalStorage('bgmStatus', true);
     core.musicStatus.soundStatus = core.getLocalStorage('soundStatus', true);
     //新增 userVolume 默认值0.7
@@ -407,23 +476,38 @@ core.prototype._init_platform = function () {
         core.musicStatus.audioContext = new window.AudioContext();
         core.musicStatus.gainNode = core.musicStatus.audioContext.createGain();
         core.musicStatus.gainNode.gain.value = core.musicStatus.userVolume;
-        core.musicStatus.gainNode.connect(core.musicStatus.audioContext.destination);
+        core.musicStatus.gainNode.connect(
+            core.musicStatus.audioContext.destination
+        );
     } catch (e) {
-        console.log("该浏览器不支持AudioContext");
+        console.log('该浏览器不支持AudioContext');
         core.musicStatus.audioContext = null;
     }
-    ["Android", "iPhone", "SymbianOS", "Windows Phone", "iPad", "iPod"].forEach(function (t) {
-        if (navigator.userAgent.indexOf(t) >= 0) {
-            if (t == 'iPhone' || t == 'iPad' || t == 'iPod') core.platform.isIOS = true;
-            if (t == 'Android') core.platform.isAndroid = true;
-            core.platform.isPC = false;
+    ['Android', 'iPhone', 'SymbianOS', 'Windows Phone', 'iPad', 'iPod'].forEach(
+        function (t) {
+            if (navigator.userAgent.indexOf(t) >= 0) {
+                if (t == 'iPhone' || t == 'iPad' || t == 'iPod')
+                    core.platform.isIOS = true;
+                if (t == 'Android') core.platform.isAndroid = true;
+                core.platform.isPC = false;
+            }
         }
-    });
-    core.platform.string = core.platform.isPC ? "PC" : core.platform.isAndroid ? "Android" : core.platform.isIOS ? "iOS" : "";
-    core.platform.supportCopy = document.queryCommandSupported && document.queryCommandSupported("copy");
+    );
+    core.platform.string = core.platform.isPC
+        ? 'PC'
+        : core.platform.isAndroid
+        ? 'Android'
+        : core.platform.isIOS
+        ? 'iOS'
+        : '';
+    core.platform.supportCopy =
+        document.queryCommandSupported &&
+        document.queryCommandSupported('copy');
     var chrome = /Chrome\/(\d+)\./i.exec(navigator.userAgent);
     if (chrome && parseInt(chrome[1]) >= 50) core.platform.isChrome = true;
-    core.platform.isSafari = /Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent);
+    core.platform.isSafari =
+        /Safari/i.test(navigator.userAgent) &&
+        !/Chrome/i.test(navigator.userAgent);
     core.platform.isQQ = /QQ/i.test(navigator.userAgent);
     core.platform.isWeChat = /MicroMessenger/i.test(navigator.userAgent);
     if (window.FileReader) {
@@ -432,33 +516,55 @@ core.prototype._init_platform = function () {
             core.readFileContent(core.platform.fileReader.result);
         };
         core.platform.fileReader.onerror = function () {
-            if (core.platform.errorCallback)
-                core.platform.errorCallback();
-        }
+            if (core.platform.errorCallback) core.platform.errorCallback();
+        };
     }
 
-    core.flags.enableHDCanvas = core.getLocalStorage('enableHDCanvas', !core.platform.isIOS);
+    core.flags.enableHDCanvas = core.getLocalStorage(
+        'enableHDCanvas',
+        !core.platform.isIOS
+    );
     if (main.mode != 'editor') {
         core.domStyle.scale = core.getLocalStorage('scale', 1);
-        if (core.flags.enableHDCanvas) core.domStyle.ratio = Math.max(window.devicePixelRatio || 1, core.domStyle.scale);
+        if (core.flags.enableHDCanvas)
+            core.domStyle.ratio = Math.max(
+                window.devicePixelRatio || 1,
+                core.domStyle.scale
+            );
     }
-}
+};
 
 core.prototype._init_others = function () {
     // 一些额外的东西
-    core.material.groundCanvas = document.createElement('canvas').getContext('2d');
-    core.material.groundCanvas.canvas.width = core.material.groundCanvas.canvas.height = 32;
-    core.material.groundPattern = core.material.groundCanvas.createPattern(core.material.groundCanvas.canvas, 'repeat');
+    core.material.groundCanvas = document
+        .createElement('canvas')
+        .getContext('2d');
+    core.material.groundCanvas.canvas.width =
+        core.material.groundCanvas.canvas.height = 32;
+    core.material.groundPattern = core.material.groundCanvas.createPattern(
+        core.material.groundCanvas.canvas,
+        'repeat'
+    );
     core.bigmap.tempCanvas = document.createElement('canvas').getContext('2d');
     core.bigmap.cacheCanvas = document.createElement('canvas').getContext('2d');
-    core.loadImage("materials", 'fog', function (name, img) { core.animateFrame.weather.fog = img; });
-    core.loadImage("materials", "cloud", function (name, img) { core.animateFrame.weather.cloud = img; })
-    core.loadImage("materials", "sun", function (name, img) { core.animateFrame.weather.sun = img; })
-    core.loadImage("materials", 'keyboard', function (name, img) { core.material.images.keyboard = img; });
+    core.loadImage('materials', 'fog', function (name, img) {
+        core.animateFrame.weather.fog = img;
+    });
+    core.loadImage('materials', 'cloud', function (name, img) {
+        core.animateFrame.weather.cloud = img;
+    });
+    core.loadImage('materials', 'sun', function (name, img) {
+        core.animateFrame.weather.sun = img;
+    });
+    core.loadImage('materials', 'keyboard', function (name, img) {
+        core.material.images.keyboard = img;
+    });
     // 记录存档编号
     core.saves.saveIndex = core.getLocalStorage('saveIndex', 1);
-    core.control.getSaveIndexes(function (indexes) { core.saves.ids = indexes; });
-}
+    core.control.getSaveIndexes(function (indexes) {
+        core.saves.ids = indexes;
+    });
+};
 
 core.prototype._afterLoadResources = function (callback) {
     // 初始化地图
@@ -475,35 +581,43 @@ core.prototype._afterLoadResources = function (callback) {
             console.warn('无法裁剪非png格式图片：' + name);
             return;
         }
-        var arr = core.splitImage(core.material.images.images[name], one.width, one.height);
+        var arr = core.splitImage(
+            core.material.images.images[name],
+            one.width,
+            one.height
+        );
         for (var i = 0; i < arr.length; ++i) {
-            core.material.images.images[(one.prefix || "") + i + '.png'] = arr[i];
+            core.material.images.images[(one.prefix || '') + i + '.png'] =
+                arr[i];
         }
     });
 
-    if (core.plugin._afterLoadResources)
-        core.plugin._afterLoadResources();
+    if (core.plugin._afterLoadResources) core.plugin._afterLoadResources();
     core.showStartAnimate();
     if (callback) callback();
-}
+};
 
 core.prototype._init_plugins = function () {
-    core.plugin = new function () { };
+    core.plugin = new (function () {})();
 
     for (var name in plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1) {
-        if (plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1[name] instanceof Function) {
+        if (
+            plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1[name] instanceof
+            Function
+        ) {
             try {
-                plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1[name].apply(core.plugin);
-            }
-            catch (e) {
+                plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1[name].apply(
+                    core.plugin
+                );
+            } catch (e) {
                 console.error(e);
-                console.error("无法初始化插件" + name);
+                console.error('无法初始化插件' + name);
             }
         }
     }
 
-    core._forwardFunc("plugin");
-}
+    core._forwardFunc('plugin');
+};
 
 core.prototype._forwardFuncs = function () {
     for (var i = 0; i < main.loadList.length; ++i) {
@@ -511,12 +625,15 @@ core.prototype._forwardFuncs = function () {
         if (name == 'core') continue;
         this._forwardFunc(name);
     }
-}
+};
 
 core.prototype._forwardFunc = function (name, funcname) {
     if (funcname == null) {
         for (funcname in core[name]) {
-            if (funcname.charAt(0) != "_" && core[name][funcname] instanceof Function) {
+            if (
+                funcname.charAt(0) != '_' &&
+                core[name][funcname] instanceof Function
+            ) {
                 this._forwardFunc(name, funcname);
             }
         }
@@ -524,14 +641,36 @@ core.prototype._forwardFunc = function (name, funcname) {
     }
 
     if (core[funcname]) {
-        console.error("ERROR: 无法转发 " + name + " 中的函数 " + funcname + " 到 core 中！同名函数已存在。");
+        console.error(
+            'ERROR: 无法转发 ' +
+                name +
+                ' 中的函数 ' +
+                funcname +
+                ' 到 core 中！同名函数已存在。'
+        );
         return;
     }
-    var parameterInfo = /^\s*function\s*[\w_$]*\(([\w_,$\s]*)\)\s*\{/.exec(core[name][funcname].toString());
-    var parameters = (parameterInfo == null ? "" : parameterInfo[1]).replace(/\s*/g, '').replace(/,/g, ', ');
+    var parameterInfo = /^\s*function\s*[\w_$]*\(([\w_,$\s]*)\)\s*\{/.exec(
+        core[name][funcname].toString()
+    );
+    var parameters = (parameterInfo == null ? '' : parameterInfo[1])
+        .replace(/\s*/g, '')
+        .replace(/,/g, ', ');
     // core[funcname] = new Function(parameters, "return core."+name+"."+funcname+"("+parameters+");");
-    eval("core." + funcname + " = function (" + parameters + ") {\n\treturn core." + name + "." + funcname + ".apply(core." + name + ", arguments);\n}");
-}
+    eval(
+        'core.' +
+            funcname +
+            ' = function (' +
+            parameters +
+            ') {\n\treturn core.' +
+            name +
+            '.' +
+            funcname +
+            '.apply(core.' +
+            name +
+            ', arguments);\n}'
+    );
+};
 
 core.prototype.doFunc = function (func, _this) {
     if (typeof func == 'string') {
@@ -539,7 +678,7 @@ core.prototype.doFunc = function (func, _this) {
         _this = core.plugin;
     }
     return func.apply(_this, Array.prototype.slice.call(arguments, 2));
-}
+};
 
 // return new Core();
 
