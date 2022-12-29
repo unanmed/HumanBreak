@@ -1455,7 +1455,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             core.status.maps[floorId].blocks.forEach(function (block) {
                 if (
                     block.event.cls !== 'items' ||
-                    block.event.id === 'superPotion'
+                    block.event.id === 'superPotion' ||
+                    block.disable
                 )
                     return;
                 var x = block.x,
@@ -6268,8 +6269,64 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
     remainEnemy: function () {
         /**
          * 检查漏怪
-         * @param {FloorIds[]} floorIds 
+         * @param {FloorIds[]} floorIds
          */
-        this.checkRemainEnemy = function(floorIds) {}
+        this.checkRemainEnemy = function (floorIds) {
+            /**
+             * @type {Record<FloorIds, {loc: LocArr, id: EnemyIds}[]>}
+             */
+            const enemy = {};
+            floorIds.forEach(v => {
+                core.extractBlocks(v);
+                const blocks = core.status.maps[v].blocks;
+                blocks.forEach(block => {
+                    if (!block.event.cls.startsWith('enemy')) return;
+                    /**
+                     * @type {EnemyIds}
+                     */
+                    const id = block.event.id;
+                    enemy[v] ??= [];
+                    const info = enemy[v];
+                    info.push({ loc: [block.x, block.y], id });
+                });
+            });
+            return enemy;
+        };
+
+        /**
+         * 获取剩余怪物字符串
+         * @param {FloorIds[]} floorIds
+         */
+        this.getRemainEnemyString = function (floorIds) {
+            const enemy = this.checkRemainEnemy(floorIds);
+            const str = [];
+            let now = [];
+            for (const floor in enemy) {
+                /**
+                 * @type {{loc: LocArr, id: EnemyIds}[]}
+                 */
+                const all = enemy[floor];
+                /**
+                 * @type {Record<EnemyIds, number>}
+                 */
+                const remain = {};
+                all.forEach(v => {
+                    const id = v.id;
+                    remain[id] ??= 0;
+                    remain[id]++;
+                });
+                const title = core.status.maps[floor].title;
+                for (const id in remain) {
+                    const name = core.material.enemys[id].name;
+                    now.push(`${title}(${floor}): ${name} * ${remain[id]}`);
+                    if (now.length === 20) {
+                        str.push(now.join('\n'));
+                        now = [];
+                    }
+                }
+            }
+            if (now.length > 0) str.push(now.join('\n'));
+            return str;
+        };
     }
 };

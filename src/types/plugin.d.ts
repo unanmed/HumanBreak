@@ -45,7 +45,7 @@ interface PluginDeclaration extends PluginUtils, PluginUis, PluginUse {
     removeAnimate(fn: (time: number) => void);
 
     /**
-     * 检查被标记怪物的状态，是否需要更新
+     * 检查被标记怪物的状态
      */
     checkMarkedEnemy(): void;
 
