@@ -1,3 +1,5 @@
+import { message } from 'ant-design-vue';
+import { MessageApi } from 'ant-design-vue/lib/message';
 import { isNil } from 'lodash';
 import { Animation, TimingFn } from 'mutate-animate';
 import { ComputedRef, ref } from 'vue';
@@ -120,4 +122,14 @@ export function type(
     ani.mode(timing).time(time).move(all, 0);
 
     return content;
+}
+
+export function tip(
+    type: Exclude<keyof MessageApi, 'open' | 'config' | 'destroy'>,
+    text: string
+) {
+    message[type]({
+        content: text,
+        class: 'antdv-message'
+    });
 }

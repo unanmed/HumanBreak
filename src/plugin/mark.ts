@@ -1,5 +1,5 @@
 import { reactive, ref } from 'vue';
-import { message } from 'ant-design-vue';
+import { tip } from './utils';
 
 const markedEnemy = reactive<EnemyIds[]>([]);
 
@@ -61,10 +61,7 @@ export function getMarkInfo(id: EnemyIds, noMessage: boolean = false) {
     const info = markInfo[id]!;
     if (core.status.hero.atk >= info.nextCritical) {
         if (!reached[info.nextCritical] && !noMessage) {
-            message.success({
-                content: `踩到了${core.material.enemys[id].name}的临界！`,
-                class: 'antdv-message'
-            });
+            tip('success', `踩到了${core.material.enemys[id].name}的临界！`);
         }
         reached[info.nextCritical] = true;
         const n = core.nextCriticals(id, 1)[0]?.[0];
@@ -85,39 +82,25 @@ export function checkMarkedEnemy(noMessage: boolean = false) {
         if (damage === -1) return;
         const info = enemyDamageInfo[v]!;
         const name = core.material.enemys[v].name;
-        if (damage < 0) {
-            if (!noMessage) {
-                message.success({
-                    content: `${name}已经负伤了！`,
-                    class: 'antdv-message'
-                });
-            }
+        if (damage <= 0) {
+            if (!noMessage) tip('success', `${name}已经零伤了！`);
         } else if (damage < hp / 3) {
             if (!info[3] && !noMessage) {
-                message.success({
-                    content: `${name}的伤害已降至勇士生命值的1/3！`,
-                    class: 'antdv-message'
-                });
+                tip('success', `${name}的伤害已降至勇士生命值的1/3！`);
             }
             info[1] = true;
             info[2] = true;
             info[3] = true;
         } else if (damage < (hp / 3) * 2) {
             if (!info[2] && !noMessage) {
-                message.success({
-                    content: `${name}的伤害已降至勇士生命值的2/3！`,
-                    class: 'antdv-message'
-                });
+                tip('success', `${name}的伤害已降至勇士生命值的2/3！`);
             }
             info[1] = true;
             info[2] = true;
             info[3] = false;
         } else if (damage < hp) {
             if (!info[1] && !noMessage) {
-                message.success({
-                    content: `你已经能打过${name}了！`,
-                    class: 'antdv-message'
-                });
+                tip('success', `你已经能打过${name}了！`);
             }
             info[1] = true;
             info[2] = false;

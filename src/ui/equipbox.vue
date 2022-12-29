@@ -183,10 +183,9 @@ import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import Scroll from '../components/scroll.vue';
 import { getAddStatus, getEquips, getNowStatus } from '../plugin/ui/equipbox';
 import BoxAnimate from '../components/boxAnimate.vue';
-import { has, type } from '../plugin/utils';
+import { has, tip, type } from '../plugin/utils';
 import { cancelGlobalDrag, isMobile, useDrag } from '../plugin/use';
 import { hyper, sleep } from 'mutate-animate';
-import { message } from 'ant-design-vue';
 
 const equips = ref(getEquips());
 const col = ref('all');
@@ -310,10 +309,7 @@ function clickList(i: number) {
     if (i === selected.value && listClicked.value) {
         const id = toShow.value[selected.value]?.[0];
         if (!core.canEquip(id)) {
-            message.warn({
-                content: '无法装备！',
-                class: 'antdv-message'
-            });
+            tip('warn', '无法装备！');
             return;
         }
         core.loadEquip(id);
@@ -359,10 +355,7 @@ function loadEquip() {
     const num = toEquipType.value;
     if (num < 0) return;
     if (!canDragin(num)) {
-        message.warn({
-            content: '无法装备！',
-            class: 'antdv-message'
-        });
+        tip('warn', '无法装备！');
         return;
     }
     const now = equiped.value[num];
