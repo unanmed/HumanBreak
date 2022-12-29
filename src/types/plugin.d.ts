@@ -106,6 +106,9 @@ interface PluginUis {
     /** 章节显示的内容 */
     readonly chapterContent: Ref<boolean>;
 
+    /** 百科全书是否打开了 */
+    readonly descOpened: Ref<boolean>;
+
     /** ui栈 */
     readonly uiStack: Ref<Component[]>;
 

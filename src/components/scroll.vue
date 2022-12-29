@@ -10,6 +10,7 @@
 </template>
 
 <script lang="ts" setup>
+import { sleep } from 'mutate-animate';
 import { onMounted, onUnmounted, onUpdated } from 'vue';
 import { cancelGlobalDrag, useDrag, useWheel } from '../plugin/use';
 
@@ -88,27 +89,27 @@ function draw() {
  */
 async function calHeight() {
     await new Promise(res => {
+        const canvas = ctx.canvas;
+        const style2 = getComputedStyle(canvas);
+        canvas.style.width = `${width}px`;
+        canvas.width = width * scale;
+        canvas.height = parseFloat(style2.height) * scale;
+        if (props.noScroll) canvas.style.width = `0px`;
+
+        if (props.type === 'horizontal') {
+            main.style.flexDirection = 'column';
+            canvas.style.height = `${width}px`;
+            canvas.style.width = '98%';
+            canvas.style.margin = '0 1% 0 1%';
+            canvas.width = parseFloat(style2.width) * scale;
+            canvas.height = width * scale;
+            if (props.noScroll) canvas.style.height = `0px`;
+        }
         requestAnimationFrame(() => {
             const style = getComputedStyle(content);
             total = parseFloat(style[canvasAttr]);
+
             res('');
-
-            const canvas = ctx.canvas;
-            const style2 = getComputedStyle(canvas);
-            canvas.style.width = `${width}px`;
-            canvas.width = width * scale;
-            canvas.height = parseFloat(style2.height) * scale;
-            if (props.noScroll) canvas.style.width = `0px`;
-
-            if (props.type === 'horizontal') {
-                main.style.flexDirection = 'column';
-                canvas.style.height = `${width}px`;
-                canvas.style.width = '98%';
-                canvas.style.margin = '0 1% 0 1%';
-                canvas.width = parseFloat(style2.width) * scale;
-                canvas.height = width * scale;
-                if (props.noScroll) canvas.style.height = `0px`;
-            }
         });
     });
 }

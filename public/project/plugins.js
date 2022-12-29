@@ -415,7 +415,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         };
 
         /// 能否使用快捷商店
-        this.canUseQuickShop = function (id) {
+        this.canUseQuickShop = function () {
             // 如果返回一个字符串，表示不能，字符串为不能使用的提示
             // 返回null代表可以使用
 
@@ -492,7 +492,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         core.registerAction(
             'longClick',
             'shops',
-            (x, y, px, py) => {
+            (x, y) => {
                 if (
                     !core.status.lockControl ||
                     !core.hasFlag('@temp@shop') ||
@@ -2906,7 +2906,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 );
                 areaSprite[maps[0]] = btn;
                 if (i === nowArea) btn.setCss(`border: 2px solid gold;`);
-                btn.addEventListener('click', e => {
+                btn.addEventListener('click', () => {
                     if (i === nowArea) return;
                     changeArea(i);
                 });
@@ -2924,7 +2924,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     transition
                 );
                 areaSprite._area_last_ = last;
-                last.addEventListener('click', e => {
+                last.addEventListener('click', () => {
                     areaPage--;
                     drawAreaList(false);
                 });
@@ -2941,7 +2941,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     transition
                 );
                 areaSprite._area_next_ = next;
-                next.addEventListener('click', e => {
+                next.addEventListener('click', () => {
                     areaPage++;
                     drawAreaList(false);
                 });
@@ -5967,13 +5967,13 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             xhr.open(type, url);
             xhr.send(data);
             const res = await new Promise(res => {
-                xhr.onload = e => {
+                xhr.onload = () => {
                     if (xhr.status !== 200) {
                         console.error(`hot reload: http ${xhr.status}`);
                         res('@error');
                     } else res('success');
                 };
-                xhr.onerror = e => {
+                xhr.onerror = () => {
                     res('@error');
                     console.error(`hot reload: error on connection`);
                 };
@@ -6245,8 +6245,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             if (core.isReplaying()) showToolbox = true;
             core.plugin.showStatusBar.value = false;
 
-            var statusItems = core.dom.status,
-                toolItems = core.dom.tools;
+            var toolItems = core.dom.tools;
             core.setFlag('hideStatusBar', true);
             core.setFlag('showToolbox', showToolbox || null);
             if (

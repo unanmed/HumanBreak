@@ -54,7 +54,8 @@ export default function init() {
         toolOpened,
         equipOpened,
         showStatusBar,
-        settingsOpened
+        settingsOpened,
+        descOpened
     };
 }
 
