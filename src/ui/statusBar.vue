@@ -18,8 +18,12 @@
                     </div>
                     <div id="status-hp" class="status-item">
                         <img src="/project/images/hp.png" class="status-icon" />
-                        <span>{{ format(hero.hp!) }}</span>
-                        <span id="status-hpmax" class="status-extra"
+                        <span class="status-item-bold">{{
+                            format(hero.hp!)
+                        }}</span>
+                        <span
+                            id="status-hpmax"
+                            class="status-extra status-item-bold"
                             >+{{ format(hero.hpmax!) }}/t</span
                         >
                         <span
@@ -34,37 +38,41 @@
                             src="/project/images/atk.png"
                             class="status-icon"
                         />
-                        <span>{{ format(hero.atk!) }}</span>
-                        <span id="status-mana" class="status-extra"
+                        <span class="status-item-bold">{{
+                            format(hero.atk!)
+                        }}</span>
+                        <span
+                            id="status-mana"
+                            class="status-extra status-item-bold"
                             >+{{ format(hero.mana!) }}</span
                         >
                     </div>
-                    <div id="status-def" class="status-item">
+                    <div id="status-def" class="status-item status-item-bold">
                         <img
                             src="/project/images/def.png"
                             class="status-icon"
                         />
                         <span>{{ format(hero.def!) }}</span>
                     </div>
-                    <div id="status-mdef" class="status-item">
+                    <div id="status-mdef" class="status-item status-item-bold">
                         <img src="/project/images/IQ.png" class="status-icon" />
                         <span>{{ format(hero.mdef!) }}</span>
                     </div>
-                    <div id="status-money" class="status-item">
+                    <div id="status-money" class="status-item status-item-bold">
                         <img
                             src="/project/images/money.png"
                             class="status-icon"
                         />
                         <span>{{ format(hero.money!) }}</span>
                     </div>
-                    <div id="status-exp" class="status-item">
+                    <div id="status-exp" class="status-item status-item-bold">
                         <img
                             src="/project/images/exp.png"
                             class="status-icon"
                         />
                         <span>{{ format(up) }}</span>
                     </div>
-                    <div id="status-key" class="status-item">
+                    <div id="status-key" class="status-item status-item-bold">
                         <span style="color: #fca; padding-left: 10%">{{
                             keys[0]?.toString().padStart(2, '0')
                         }}</span>
@@ -97,7 +105,9 @@ import { status } from '../plugin/ui/statusBar';
 import { isMobile } from '../plugin/use';
 import { has } from '../plugin/utils';
 
-const width = ref(isMobile ? window.innerWidth - 100 : 300);
+const width = ref(
+    isMobile ? window.innerWidth - 100 : window.innerWidth * 0.175
+);
 const height = ref(isMobile ? 250 : window.innerHeight - 100);
 const updateStatus = ref(false);
 const format = core.formatBigNumber;
@@ -163,8 +173,8 @@ function update() {
 
 .status-item {
     position: relative;
-    max-width: 300px;
-    font-size: 32px;
+    max-width: 17.5vw;
+    font-size: 1.9vw;
     width: 100%;
     margin-bottom: 1vh;
     text-shadow: 3px 2px 3px #000, 0px 0px 3px #111;
@@ -173,9 +183,13 @@ function update() {
     align-items: center;
 }
 
+.status-item-bold {
+    font-weight: bold;
+}
+
 .status-icon {
-    width: 48px;
-    height: 48px;
+    width: 2.8vw;
+    height: 2.8vw;
     margin-right: 10%;
     margin-left: 10%;
 }
@@ -195,15 +209,15 @@ function update() {
 }
 
 #status-floor {
-    max-width: 300px;
-    font-size: 28px;
+    max-width: 17.5vw;
+    font-size: 1.9vw;
     width: 100%;
     text-align: center;
 }
 
 #status-lv {
-    max-width: 300px;
-    font-size: 28px;
+    max-width: 17.5vw;
+    font-size: 1.9vw;
     width: 100%;
     text-align: center;
 }
@@ -212,22 +226,22 @@ function update() {
     position: absolute;
     right: 15%;
     bottom: 0;
-    font-size: 24px;
+    font-size: 1.6vw;
 }
 
 #status-mana {
     line-height: 1;
-    text-shadow: 1px 0 0 #c66, 0 1px 0 #c66, -1px 0 0 #c66, 0 -1px 0 #c66;
+    color: rgb(255, 211, 211);
 }
 
 #status-hpmax {
     line-height: 1;
-    text-shadow: 1px 0 0 #0c0, 0 1px 0 #0c0, -1px 0 0 #0c0, 0 -1px 0 #0c0;
+    color: rgb(167, 255, 167);
 }
 
 #status-spring {
     line-height: 0;
-    text-shadow: 1px 0 0 #0c0, 0 1px 0 #0c0, -1px 0 0 #0c0, 0 -1px 0 #0c0;
+    color: rgb(167, 255, 167);
 }
 
 #status-key {

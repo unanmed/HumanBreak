@@ -67,7 +67,9 @@ let topB: HTMLDivElement;
 let bottomB: HTMLDivElement;
 let drag: HTMLElement;
 
-const width = ref(isMobile ? window.innerWidth - 100 : 300);
+const width = ref(
+    isMobile ? window.innerWidth - 100 : window.innerWidth * 0.175
+);
 const height = ref(isMobile ? 250 : window.innerHeight - 100);
 const left = ref(50);
 const top = ref(50);
