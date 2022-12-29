@@ -10,6 +10,13 @@ watch(transition, n => {
     core.setLocalStorage('transition', n);
 });
 
-window.addEventListener('load', () => {
+/**
+ * 重置设置信息，从localStorage读取即可
+ */
+function reset() {
     transition.value = core.getLocalStorage('transition');
-});
+}
+
+export default function init() {
+    return { resetSettings: reset };
+}

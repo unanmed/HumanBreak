@@ -202,9 +202,8 @@ function keydown(e: KeyboardEvent) {
 
 onMounted(async () => {
     const div = document.getElementById('book') as HTMLDivElement;
-    div.style.opacity = '1';
     if (core.plugin.transition.value) await sleep(600);
-    else await sleep(100);
+    else await sleep(50);
     document.addEventListener('keyup', keyup);
     document.addEventListener('keydown', keydown);
 });
@@ -217,7 +216,6 @@ onUnmounted(async () => {
 
 <style lang="less" scoped>
 #book {
-    opacity: 0;
     user-select: none;
     width: 80%;
     height: 100%;

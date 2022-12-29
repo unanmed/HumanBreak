@@ -64,7 +64,7 @@
                     <div class="detail-info">
                         <span style="color: lawngreen"
                             >经验&nbsp;&nbsp;&nbsp;&nbsp;{{
-                                core.formatBigNumber(enemy.money)
+                                core.formatBigNumber(enemy.exp)
                             }}</span
                         >
                     </div>

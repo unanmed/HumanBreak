@@ -570,12 +570,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			{
 				"need": "0",
 				"title": "原始人",
-				"action": [
-					{
-						"type": "comment",
-						"text": "此处是初始等级，只需填写称号"
-					}
-				]
+				"action": []
 			},
 			{
 				"need": "3000",
@@ -610,7 +605,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			},
 			{
 				"need": "10000",
-				"title": "智人",
+				"title": "低级智人",
 				"clear": true,
 				"action": [
 					{
@@ -624,7 +619,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			},
 			{
 				"need": "50000",
-				"title": "领导者",
+				"title": "古人",
 				"clear": true,
 				"action": []
 			}

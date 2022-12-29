@@ -75,10 +75,10 @@
                             keys[2]?.toString().padStart(2, '0')
                         }}</span>
                     </div>
-                    <div class="status-item">
+                    <div v-if="skillOpened" class="status-item">
                         <span id="skill-tree" class="button-text">技能树</span>
                     </div>
-                    <div class="status-item">
+                    <div v-if="skillOpened" class="status-item">
                         <span id="status-skill" class="button-text"
                             >查看技能</span
                         >
@@ -112,6 +112,7 @@ const lvName = ref<string>();
 const skill = ref<string>('无');
 const up = ref(0);
 const spring = ref<number>();
+const skillOpened = ref(core.getFlag('chapter', 0) > 0);
 /**
  * 要展示的勇士属性
  */
@@ -148,6 +149,7 @@ function update() {
     if (core.hasFlag('spring')) {
         spring.value = 50 - flags.springCount;
     }
+    skillOpened.value = core.getFlag('chapter', 0) > 0;
 }
 </script>
 

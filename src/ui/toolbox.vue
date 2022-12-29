@@ -197,7 +197,7 @@ async function toEquip() {
 
 function keyup(e: KeyboardEvent) {
     const c = keycode(e.keyCode);
-    if (c === KeyCode.Escape || c === KeyCode.KeyX) {
+    if (c === KeyCode.Escape || c === KeyCode.KeyX || c === KeyCode.KeyT) {
         exit();
     }
     if (c === KeyCode.Enter || c === KeyCode.KeyC) {
@@ -239,7 +239,8 @@ function keydown(e: KeyboardEvent) {
 }
 
 onMounted(async () => {
-    await sleep(600);
+    if (core.plugin.transition.value) await sleep(600);
+    else await sleep(50);
     document.addEventListener('keyup', keyup);
     document.addEventListener('keydown', keydown);
 });

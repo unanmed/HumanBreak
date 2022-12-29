@@ -115,7 +115,12 @@ interface PluginDeclaration extends PluginUtils {
     /**
      * 检查被标记怪物的状态，是否需要更新
      */
-    checkMarkedEnemy();
+    checkMarkedEnemy(): void;
+
+    /**
+     * 重置设置信息
+     */
+    resetSettings(): void;
 }
 
 interface PluginUtils {

@@ -6,6 +6,7 @@ import animate from './plugin/animateController';
 import utils from './plugin/utils';
 import status from './plugin/ui/statusBar';
 import mark from './plugin/mark';
+import setting from './plugin/settings';
 
 window.addEventListener('load', () => {
     // 每个引入的插件都要在这里执行，否则不会被转发
@@ -16,7 +17,8 @@ window.addEventListener('load', () => {
         animate(),
         utils(),
         status(),
-        mark()
+        mark(),
+        setting()
     ];
 
     // 初始化所有插件，并转发到core上

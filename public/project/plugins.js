@@ -2,7 +2,9 @@
 
 var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
     init: function () {
-        this._afterLoadResources = function () {};
+        this._afterLoadResources = function () {
+            core.resetSettings();
+        };
     },
     sprite: function () {
         const sprites = {};

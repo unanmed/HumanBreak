@@ -75,16 +75,12 @@ async function hideApp(index: number) {
         app.style.transition = 'all 0.6s linear';
         app.style.opacity = '0';
         await sleep(600);
-        uiStack.value.splice(index, 1);
-        app.style.display = 'none';
-        if (!noClosePanel.value) core.closePanel();
-        noClosePanel.value = false;
     } else {
         app.style.transition = '';
         app.style.opacity = '0';
-        uiStack.value.splice(index, 1);
-        app.style.display = 'none';
-        if (!noClosePanel.value) core.closePanel();
-        noClosePanel.value = false;
     }
+    uiStack.value.splice(index, 1);
+    app.style.display = 'none';
+    if (!noClosePanel.value) core.closePanel();
+    noClosePanel.value = false;
 }

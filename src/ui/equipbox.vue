@@ -183,9 +183,10 @@ import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import Scroll from '../components/scroll.vue';
 import { getAddStatus, getEquips, getNowStatus } from '../plugin/ui/equipbox';
 import BoxAnimate from '../components/boxAnimate.vue';
-import { has, tip, type } from '../plugin/utils';
+import { has, keycode, tip, type } from '../plugin/utils';
 import { cancelGlobalDrag, isMobile, useDrag } from '../plugin/use';
 import { hyper, sleep } from 'mutate-animate';
+import { KeyCode } from '../plugin/keyCodes';
 
 const equips = ref(getEquips());
 const col = ref('all');
@@ -425,16 +426,27 @@ async function toTool() {
     core.plugin.transition.value = before;
 }
 
+function keyup(e: KeyboardEvent) {
+    const c = keycode(e.keyCode);
+    if (c === KeyCode.KeyQ || c === KeyCode.KeyX || c === KeyCode.Escape) {
+        exit();
+    }
+}
+
 watch(toShow, n => {
     bind();
 });
 
-onMounted(() => {
+onMounted(async () => {
     bind();
+    if (core.plugin.transition.value) await sleep(600);
+    else await sleep(50);
+    document.addEventListener('keyup', keyup);
 });
 
 onUnmounted(() => {
     cancelGlobalDrag(dragEquip);
+    document.removeEventListener('keyup', keyup);
 });
 </script>
 
