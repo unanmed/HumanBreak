@@ -3547,236 +3547,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             }
         }
     },
-    chapter: function () {
-        // 章节显示
-        var chapter = '',
-            description = '';
-        // 显示章节
-        this.displayChapter = function (index) {
-            if (core.isReplaying()) return;
-            var number = core.replaceNumberWithChinese(index);
-            // 获取第几章
-            chapter = '第' + number + '章';
-            if (index == 0) chapter = '序章';
-            // 获取描述
-            switch (index) {
-                case 0:
-                    description = '起源';
-                    break;
-                case 1:
-                    description = '勇气';
-                    break;
-                case 2:
-                    description = '智慧';
-                    break;
-            }
-            core.coreChapterAnimate(chapter, description);
-        };
-        // 替换数字大小写
-        this.replaceNumberWithChinese = function (number) {
-            if (number == 0) return '零';
-            if (number == 1) return '一';
-            if (number == 2) return '二';
-            if (number == 3) return '三';
-            if (number == 4) return '四';
-            if (number == 5) return '五';
-            if (number == 6) return '六';
-            if (number == 7) return '七';
-            if (number == 8) return '八';
-            if (number == 9) return '九';
-            if (number == 10) return '十';
-        };
-        // 核心动画运算
-        this.coreChapterAnimate = function (chapter, description) {
-            // 先建画布
-            if (core.isReplaying()) return;
-            core.createCanvas('chapter', 0, 0, 480, 480, 100);
-            var frame = 0,
-                speed = 0,
-                left = -480,
-                down = 240;
-            // 一秒50帧
-            core.lockControl();
-            var interval = setInterval(() => {
-                core.clearMap('chapter');
-                speed = core.hyperbolicCosine((frame - 84) * 0.05);
-                left += speed / 2;
-                // 背景
-                if (frame <= 110) {
-                    core.fillRect(
-                        'chapter',
-                        0,
-                        -240 - left,
-                        480,
-                        left + 480,
-                        '#000000'
-                    );
-                    core.fillRect(
-                        'chapter',
-                        0,
-                        240,
-                        480,
-                        left + 480,
-                        '#000000'
-                    );
-                } else {
-                    core.fillRect('chapter', 0, 0, 480, down, '#000000');
-                    core.fillRect(
-                        'chapter',
-                        0,
-                        480 - down,
-                        480,
-                        down,
-                        '#000000'
-                    );
-                    down -= speed / 2;
-                }
-                // 中间矩形
-                if (frame <= 100) {
-                    core.fillRect(
-                        'chapter',
-                        0,
-                        240 - frame / 5,
-                        480,
-                        frame / 2.5,
-                        [255, 255, 255, 0.5 + frame / 200]
-                    );
-                } else {
-                    core.fillRect(
-                        'chapter',
-                        0,
-                        240 - 2100 / (205 - frame),
-                        480,
-                        4200 / (205 - frame),
-                        [255, 255, 255, (175 - frame) / 75]
-                    );
-                }
-                // 上下方线
-                core.fillRect('chapter', left, 210, 300, 10, '#FF4D00');
-                core.fillRect('chapter', 180 - left, 260, 300, 10, '#2DFFFC');
-                core.fillRect('chapter', left + 310, 210, 10, 10, '#FF4D00');
-                core.fillRect('chapter', 160 - left, 260, 10, 10, '#2DFFFC');
-                core.fillPolygon(
-                    'chapter',
-                    [
-                        [left + 330, 210],
-                        [left + 330, 220],
-                        [left + 340, 220]
-                    ],
-                    '#FF4D00'
-                );
-                core.fillPolygon(
-                    'chapter',
-                    [
-                        [150 - left, 260],
-                        [140 - left, 260],
-                        [150 - left, 270]
-                    ],
-                    '#2DFFFC'
-                );
-                // 闪光条
-                for (var i = 5; i > 0; i--) {
-                    if (frame <= 150) {
-                        core.drawLine(
-                            'chapter',
-                            0,
-                            220,
-                            left + 320,
-                            220,
-                            [255, 255, 255, 0.4],
-                            i
-                        );
-                        core.drawLine(
-                            'chapter',
-                            480,
-                            260,
-                            160 - left,
-                            260,
-                            [255, 255, 255, 0.4],
-                            i
-                        );
-                    } else {
-                        core.drawLine(
-                            'chapter',
-                            0,
-                            220,
-                            left + 320,
-                            220,
-                            [255, 255, 255, 0.4 - (frame - 150) / 125],
-                            i
-                        );
-                        core.drawLine(
-                            'chapter',
-                            480,
-                            260,
-                            160 - left,
-                            260,
-                            [255, 255, 255, 0.4 - (frame - 150) / 125],
-                            i
-                        );
-                    }
-                }
-                core.fillEllipse(
-                    'chapter',
-                    left + 320,
-                    220,
-                    7,
-                    3,
-                    0,
-                    [255, 255, 255, 0.8]
-                );
-                core.fillEllipse(
-                    'chapter',
-                    left + 320,
-                    220,
-                    2,
-                    10,
-                    0,
-                    [255, 255, 255, 0.8]
-                );
-                core.fillEllipse(
-                    'chapter',
-                    160 - left,
-                    260,
-                    7,
-                    3,
-                    0,
-                    [255, 255, 255, 0.8]
-                );
-                core.fillEllipse(
-                    'chapter',
-                    160 - left,
-                    260,
-                    2,
-                    10,
-                    0,
-                    [255, 255, 255, 0.8]
-                );
-                // 字
-                core.setTextAlign('chapter', 'center');
-                core.fillBoldText(
-                    'chapter',
-                    chapter + ' ' + description,
-                    left + 360,
-                    250,
-                    '#ffffff',
-                    '#000000',
-                    '28px scroll'
-                );
-                if (frame >= 200) {
-                    clearInterval(interval);
-                    core.deleteCanvas('chapter');
-                    core.unlockControl();
-                }
-                if (frame == 80) core.playSound('chapter.mp3');
-                frame++;
-            }, 20);
-        };
-        // 返回双曲余弦值
-        this.hyperbolicCosine = function (number) {
-            return 0.5 * (Math.pow(Math.E, number) + Math.pow(Math.E, -number));
-        };
-    },
     intelligenceTree: function () {
         // 智慧加点
         var list;
@@ -9046,6 +8816,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             if (core.isReplaying()) showToolbox = true;
             core.plugin.showStatusBar.value = false;
 
+            var statusItems = core.dom.status,
+                toolItems = core.dom.tools;
             core.setFlag('hideStatusBar', true);
             core.setFlag('showToolbox', showToolbox || null);
             if (
@@ -9058,6 +8830,11 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             if (!core.domStyle.isVertical && !core.flags.extendToolbar) {
                 core.dom.toolBar.style.display = 'none';
             }
+        };
+
+        this.showChapter = function (chapter) {
+            core.plugin.chapterContent.value = chapter;
+            core.plugin.chapterShowed.value = true;
         };
     }
 };

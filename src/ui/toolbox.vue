@@ -275,7 +275,7 @@ onUnmounted(() => {
     display: flex;
     flex-direction: row;
     font-family: 'normal';
-    font-size: 2em;
+    font-size: 3.2vh;
     height: 5vh;
     justify-content: space-between;
 
@@ -403,12 +403,11 @@ onUnmounted(() => {
     #toolbox-main {
         flex-direction: column-reverse;
         height: 100%;
-        border-top: 1px solid #ddd4;
     }
 
     .item-list {
         width: 100%;
-        height: 100%;
+        height: 40vh;
     }
 
     .divider {

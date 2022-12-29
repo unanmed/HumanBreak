@@ -37,7 +37,7 @@ main.floors.MT0=
         "请耐心等待字体加载完成，否则很多地方显示会很奇怪，大概需要十秒，过一段时间打开任意界面再关闭即可",
         {
             "type": "function",
-            "function": "function(){\ncore.displayChapter(0);\n}"
+            "function": "function(){\ncore.showChapter('序章  起源');\n}"
         }
     ],
     "parallelDo": "",

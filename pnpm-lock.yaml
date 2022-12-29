@@ -20,7 +20,7 @@ specifiers:
   less: ^4.1.3
   lodash: ^4.17.21
   lz-string: ^1.4.4
-  mutate-animate: ^0.1.0
+  mutate-animate: ^1.0.0
   terser: ^5.15.1
   ts-node: ^10.9.1
   typescript: ^4.6.4
@@ -36,7 +36,7 @@ dependencies:
   chart.js: 4.0.1
   lodash: 4.17.21
   lz-string: 1.4.4
-  mutate-animate: 0.1.0
+  mutate-animate: 1.0.0
   vue: 3.2.45
 
 devDependencies:
@@ -2468,8 +2468,8 @@ packages:
     resolution: {integrity: sha512-Tr1knR3d2mKvvWthlk7202rywKbiOm4rVFLsfAaSIhJ6dt9o47W4S+JMtWhd/PW9Wrdew2/S2fSvhz3E2gkfEg==}
     dev: true
 
-  /mutate-animate/0.1.0:
-    resolution: {integrity: sha512-XOdyX/PDFYZDpUpaqPeLOfdeDYXQcThWsuLUQpp3z6FbReDV23jIN0Vzv5QLUy+6CDMHEBZHfsumODrlKJva+g==}
+  /mutate-animate/1.0.0:
+    resolution: {integrity: sha512-Vt6zDunYjunQAJQ8mXTnamjbubWOM/hM0W+umvJKOvFP6klRAJPHO5R1XUKqEe2/mM9QM+aUfKb2q8Z0Ybwj/A==}
     dev: false
 
   /nan/2.17.0:

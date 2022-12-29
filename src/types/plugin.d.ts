@@ -14,7 +14,7 @@ type CanParseCss = keyof {
         : never]: CSSStyleDeclaration[P];
 };
 
-interface PluginDeclaration extends PluginUtils {
+interface PluginDeclaration extends PluginUtils, PluginUis, PluginUse {
     /**
      * 添加函数  例：添加弹出文字，像这个就可以使用core.addPop或core.plugin.addPop调用
      * @param px 弹出的横坐标
@@ -26,79 +26,11 @@ interface PluginDeclaration extends PluginUtils {
     /** 添加变量  例：所有的正在弹出的文字，像这个就可以使用core.plugin.pop获取 */
     pop: any[];
 
-    /** 怪物手册的怪物详细信息的初始位置 */
-    bookDetailPos: number;
-
-    /** 怪物手册详细信息展示的怪物 */
-    bookDetailEnemy: DetailedEnemy;
-
-    /** ui是否使用渐变 */
-    readonly transition: Ref<boolean>;
-
-    /** 手册是否打开 */
-    readonly bookOpened: Ref<boolean>;
-
-    /** 道具栏是否打开 */
-    readonly toolOpened: Ref<boolean>;
-
-    /** 装备栏是否打开 */
-    readonly equipOpened: Ref<boolean>;
-
-    /** 是否显示状态栏 */
-    readonly showStatusBar: Ref<boolean>;
-
-    /** 设置界面是否打开 */
-    readonly settingsOpened: Ref<boolean>;
-
-    /** ui栈 */
-    readonly uiStack: Ref<Component[]>;
-
-    /** 是否是移动设备 */
-    readonly isMobile: boolean;
-
     /** 状态栏信息，取反后刷新状态栏 */
     readonly statusBarStatus: Ref<boolean>;
 
     /** 检查标记的怪物，取反后更新显示信息 */
     readonly checkMarkedStatus: Ref<boolean>;
-
-    /**
-     * 向一个元素添加拖拽事件
-     * @param ele 目标元素
-     * @param fn 推拽时触发的函数，传入x y和鼠标事件或点击事件
-     * @param ondown 鼠标按下时执行的函数
-     * @param global 是否全局拖拽，即拖拽后鼠标或手指离开元素后是否依然视为正在拖拽
-     */
-    useDrag(
-        ele: HTMLElement,
-        fn: DragFn,
-        ondown?: DragFn,
-        onUp?: (e: MouseEvent | TouchEvent) => void,
-        global: boolean = false
-    ): void;
-
-    /**
-     * 去除一个全局拖拽函数
-     * @param fn 要去除的函数
-     */
-    cancelGlobalDrag(fn: DragFn): void;
-
-    /**
-     * 当触发滚轮时执行函数
-     * @param ele 目标元素
-     * @param fn 当滚轮触发时执行的函数
-     */
-    useWheel(
-        ele: HTMLElement,
-        fn: (x: number, y: number, z: number, e: WheelEvent) => void
-    ): void;
-
-    /**
-     * 当鼠标或手指松开时执行函数
-     * @param ele 目标元素
-     * @param fn 当鼠标或手指松开时执行的函数
-     */
-    useUp(ele: HTMLElement, fn: DragFn): void;
 
     /**
      * 添加一个动画
@@ -141,6 +73,90 @@ interface PluginUtils {
      * @param css 要解析的css字符串
      */
     parseCss(css: string): Partial<Record<CanParseCss, string>>;
+}
+
+interface PluginUis {
+    /** 怪物手册的怪物详细信息的初始位置 */
+    bookDetailPos: number;
+
+    /** 怪物手册详细信息展示的怪物 */
+    bookDetailEnemy: DetailedEnemy;
+
+    /** ui是否使用渐变 */
+    readonly transition: Ref<boolean>;
+
+    /** 手册是否打开 */
+    readonly bookOpened: Ref<boolean>;
+
+    /** 道具栏是否打开 */
+    readonly toolOpened: Ref<boolean>;
+
+    /** 装备栏是否打开 */
+    readonly equipOpened: Ref<boolean>;
+
+    /** 是否显示状态栏 */
+    readonly showStatusBar: Ref<boolean>;
+
+    /** 设置界面是否打开 */
+    readonly settingsOpened: Ref<boolean>;
+
+    /** 是否正在进行章节显示 */
+    readonly chapterShowed: Ref<boolean>;
+
+    /** 章节显示的内容 */
+    readonly chapterContent: Ref<boolean>;
+
+    /** ui栈 */
+    readonly uiStack: Ref<Component[]>;
+
+    /**
+     * 显示章节
+     * @param chapter 显示的文字
+     */
+    showChapter(chapter: string): void;
+}
+
+interface PluginUse {
+    /** 是否是移动设备 */
+    readonly isMobile: boolean;
+
+    /**
+     * 向一个元素添加拖拽事件
+     * @param ele 目标元素
+     * @param fn 推拽时触发的函数，传入x y和鼠标事件或点击事件
+     * @param ondown 鼠标按下时执行的函数
+     * @param global 是否全局拖拽，即拖拽后鼠标或手指离开元素后是否依然视为正在拖拽
+     */
+    useDrag(
+        ele: HTMLElement,
+        fn: DragFn,
+        ondown?: DragFn,
+        onUp?: (e: MouseEvent | TouchEvent) => void,
+        global: boolean = false
+    ): void;
+
+    /**
+     * 去除一个全局拖拽函数
+     * @param fn 要去除的函数
+     */
+    cancelGlobalDrag(fn: DragFn): void;
+
+    /**
+     * 当触发滚轮时执行函数
+     * @param ele 目标元素
+     * @param fn 当滚轮触发时执行的函数
+     */
+    useWheel(
+        ele: HTMLElement,
+        fn: (x: number, y: number, z: number, e: WheelEvent) => void
+    ): void;
+
+    /**
+     * 当鼠标或手指松开时执行函数
+     * @param ele 目标元素
+     * @param fn 当鼠标或手指松开时执行的函数
+     */
+    useUp(ele: HTMLElement, fn: DragFn): void;
 }
 
 type Forward<T> = {

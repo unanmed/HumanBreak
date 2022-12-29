@@ -10,8 +10,8 @@
                 <span class="name">{{ enemy.name }}</span>
                 <BoxAnimate
                     :id="enemy.id"
-                    :width="isMobile ? 32 : 50"
-                    :height="isMobile ? 32 : 50"
+                    :width="isMobile ? 32 : w"
+                    :height="isMobile ? 32 : w"
                     style="margin: 5%"
                 ></BoxAnimate>
                 <div
@@ -135,6 +135,8 @@ const emits = defineEmits<{
 }>();
 
 const core = window.core;
+
+const w = window.innerWidth * 0.032;
 
 /**
  * 选择这个怪物时

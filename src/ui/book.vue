@@ -227,12 +227,9 @@ onUnmounted(async () => {
     justify-content: space-between;
 }
 
-#back {
-    font-size: 2em;
-}
-
 #tools {
     height: 6%;
+    font-size: 3.2vh;
 }
 
 .tools {
