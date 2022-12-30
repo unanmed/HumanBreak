@@ -203,7 +203,7 @@ function draw() {
 function click(e: MouseEvent) {
     const px = e.offsetX;
     const py = e.offsetY;
-    const w = canvas.width / devicePixelRatio;
+    const w = canvas.width;
     const per = w / 11;
     const x = Math.floor(px / per);
     const y = Math.floor(py / per);

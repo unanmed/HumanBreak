@@ -1248,13 +1248,13 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"name": "系统设置",
 		"canUseItemEffect": "true",
 		"text": "内含所有系统设置项",
-		"useItemEffect": "if (!main.replayChecking) {\n\tcore.plugin.settingsOpened.value = true;\n}"
+		"useItemEffect": "if (!core.isReplaying()) core.plugin.settingsOpened.value = true;"
 	},
 	"I560": {
 		"cls": "constants",
 		"name": "百科全书",
 		"canUseItemEffect": "true",
 		"text": "一个包含游戏中所有功能详细说明的百科全书，可以查看游戏中所有的功能",
-		"useItemEffect": "core.plugin.descOpened.value = true;"
+		"useItemEffect": "if (!core.isPlaying()) core.plugin.descOpened.value = true;"
 	}
 }

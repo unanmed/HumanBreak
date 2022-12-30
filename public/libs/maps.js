@@ -44,7 +44,7 @@ maps.prototype._setHDCanvasSize = function (ctx, width, height, isTempCanvas) {
     if (isTempCanvas) ratio = core.domStyle.ratio;
     if (width != null) ctx.canvas.width = width * ratio * devicePixelRatio;
     if (height != null) ctx.canvas.height = height * ratio * devicePixelRatio;
-    ctx.scale(ratio, ratio);
+    ctx.scale(ratio * devicePixelRatio, ratio * devicePixelRatio);
     ctx.canvas.setAttribute('isHD', 1);
 };
 
@@ -640,8 +640,8 @@ maps.prototype.resizeMap = function (floorId) {
         core.canvas[cn].canvas.style.height =
             height * core.domStyle.scale + 'px';
         core.canvas[cn].translate(
-            core.bigmap.v2 ? 32 * devicePixelRatio : 0,
-            core.bigmap.v2 ? 32 * devicePixelRatio : 0
+            core.bigmap.v2 ? 32 : 0,
+            core.bigmap.v2 ? 32 : 0
         );
         if (main.mode === 'editor' && editor.isMobile) {
             core.canvas[cn].canvas.style.width =
@@ -2578,20 +2578,13 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (
 
     // 如果是大地图模式？
     if (options.all) {
-        // 计算比例
-        var scale = Math.max(core._WIDTH_ / width, core._HEIGHT_ / height);
         if (options.noHD) {
-            tempCanvas.canvas.width = width * 32 * scale;
-            tempCanvas.canvas.height = height * 32 * scale;
+            tempCanvas.canvas.width = width * 32;
+            tempCanvas.canvas.height = height * 32;
             tempCanvas.canvas.removeAttribute('isHD');
-        } else
-            core.resizeCanvas(
-                tempCanvas,
-                width * 32 * scale,
-                height * 32 * scale,
-                false,
-                true
-            );
+        } else {
+            core.resizeCanvas(tempCanvas, width * 32, height * 32, false, true);
+        }
     } else if (width * height > core.bigmap.threshold) {
         options.v2 = true;
         if (options.noHD) {
@@ -2704,6 +2697,7 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
     if (centerY == null) centerY = Math.floor(height / 2);
     var tempCanvas = core.bigmap.tempCanvas;
 
+    const scale = core.domStyle.scale * devicePixelRatio;
     if (options.all) {
         var tempWidth = tempCanvas.canvas.width,
             tempHeight = tempCanvas.canvas.height;
@@ -2758,7 +2752,6 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
             hw = hh = core.__HALF_SIZE__;
             W = H = core.__SIZE__;
         }
-        const scale = devicePixelRatio * core.domStyle.scale;
         if (options.v2) {
             if (options.noHD) {
                 core.drawImage(

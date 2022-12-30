@@ -60,12 +60,6 @@ ui.prototype.clearMap = function (name, x, y, width, height) {
         var ctx = this.getContextByName(name);
         if (ctx) {
             if (x != null && y != null && width != null && height != null) {
-                if (ctx.canvas.getAttribute('isHD') === '1') {
-                    x *= devicePixelRatio;
-                    y *= devicePixelRatio;
-                    width *= devicePixelRatio;
-                    height *= devicePixelRatio;
-                }
                 ctx.clearRect(x, y, width, height);
             } else {
                 ctx.clearRect(
@@ -106,10 +100,6 @@ ui.prototype.fillText = function (name, text, x, y, style, font, maxWidth) {
     if (font) core.setFont(name, font);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
-    if (ctx.canvas.getAttribute('isHD') === '1') {
-        x *= devicePixelRatio;
-        y *= devicePixelRatio;
-    }
     text = (text + '').replace(/\\r/g, '\r');
     var originText = text.replace(/\r(\[.*\])?/g, '');
     var index = text.indexOf('\r');
@@ -182,10 +172,6 @@ ui.prototype.fillBoldText = function (
     if (!ctx) return;
     if (font) ctx.font = font;
     if (!style) style = ctx.fillStyle;
-    if (ctx.canvas.getAttribute('isHD') === '1') {
-        x *= devicePixelRatio;
-        y *= devicePixelRatio;
-    }
     style = core.arrayToRGBA(style);
     strokeStyle ??= '#000';
     strokeStyle = core.arrayToRGBA(strokeStyle);
@@ -195,8 +181,7 @@ ui.prototype.fillBoldText = function (
     ctx.strokeStyle = strokeStyle;
     ctx.lineWidth =
         1 *
-        (core.domStyle.isVertical ? core.domStyle.ratio : core.domStyle.scale) *
-        devicePixelRatio;
+        (core.domStyle.isVertical ? core.domStyle.ratio : core.domStyle.scale);
     ctx.fillStyle = style;
     ctx.strokeText(text, x, y);
     ctx.fillText(text, x, y);
@@ -220,12 +205,6 @@ ui.prototype.fillRect = function (name, x, y, width, height, style, angle) {
     if (style) core.setFillStyle(name, style);
     var ctx = this.getContextByName(name);
     if (ctx) {
-        if (ctx.canvas.getAttribute('isHD') === '1') {
-            x *= devicePixelRatio;
-            y *= devicePixelRatio;
-            width *= devicePixelRatio;
-            height *= devicePixelRatio;
-        }
         if (angle) {
             ctx.save();
             ctx.translate(x + width / 2, y + height / 2);
@@ -280,12 +259,6 @@ ui.prototype.strokeRect = function (
     if (lineWidth) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
     if (ctx) {
-        if (ctx.canvas.getAttribute('isHD') === '1') {
-            x *= devicePixelRatio;
-            y *= devicePixelRatio;
-            width *= devicePixelRatio;
-            height *= devicePixelRatio;
-        }
         if (angle) {
             ctx.save();
             ctx.translate(x + width / 2, y + height / 2);
@@ -341,13 +314,6 @@ ui.prototype.fillRoundRect = function (
     if (style) core.setFillStyle(name, style);
     var ctx = this.getContextByName(name);
     if (ctx) {
-        if (ctx.canvas.getAttribute('isHD') === '1') {
-            x *= devicePixelRatio;
-            y *= devicePixelRatio;
-            width *= devicePixelRatio;
-            height *= devicePixelRatio;
-            radius *= devicePixelRatio;
-        }
         if (angle) {
             ctx.save();
             ctx.translate(x + width / 2, y + height / 2);
@@ -378,13 +344,6 @@ ui.prototype.strokeRoundRect = function (
     if (lineWidth) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
     if (ctx) {
-        if (ctx.canvas.getAttribute('isHD') === '1') {
-            x *= devicePixelRatio;
-            y *= devicePixelRatio;
-            width *= devicePixelRatio;
-            height *= devicePixelRatio;
-            radius *= devicePixelRatio;
-        }
         if (angle) {
             ctx.save();
             ctx.translate(x + width / 2, y + height / 2);
@@ -425,12 +384,6 @@ ui.prototype.fillPolygon = function (name, nodes, style) {
     if (style) core.setFillStyle(name, style);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
-    if (ctx.canvas.getAttribute('isHD') === '1') {
-        nodes = nodes.map(([x, y]) => [
-            x * devicePixelRatio,
-            y * devicePixelRatio
-        ]);
-    }
     if (!nodes || nodes.length < 3) return;
     ctx.beginPath();
     for (var i = 0; i < nodes.length; ++i) {
@@ -454,12 +407,6 @@ ui.prototype.strokePolygon = function (name, nodes, style, lineWidth) {
     if (lineWidth) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
-    if (ctx.canvas.getAttribute('isHD') === '1') {
-        nodes = nodes.map(([x, y]) => [
-            x * devicePixelRatio,
-            y * devicePixelRatio
-        ]);
-    }
     if (!nodes || nodes.length < 3) return;
     ctx.beginPath();
     for (var i = 0; i < nodes.length; ++i) {
@@ -482,12 +429,6 @@ ui.prototype.fillEllipse = function (name, x, y, a, b, angle, style) {
     if (style) core.setFillStyle(name, style);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
-    if (ctx.canvas.getAttribute('isHD') === '1') {
-        x *= devicePixelRatio;
-        y *= devicePixelRatio;
-        a *= devicePixelRatio;
-        b *= devicePixelRatio;
-    }
     ctx.beginPath();
     ctx.ellipse(x, y, a, b, angle, 0, 2 * Math.PI);
     ctx.fill();
@@ -525,12 +466,6 @@ ui.prototype.strokeEllipse = function (
     if (lineWidth) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
-    if (ctx.canvas.getAttribute('isHD') === '1') {
-        x *= devicePixelRatio;
-        y *= devicePixelRatio;
-        a *= devicePixelRatio;
-        b *= devicePixelRatio;
-    }
     ctx.beginPath();
     ctx.ellipse(x, y, a, b, angle, 0, 2 * Math.PI);
     ctx.stroke();
@@ -558,11 +493,6 @@ ui.prototype.fillArc = function (name, x, y, r, start, end, style) {
     if (style) core.setFillStyle(name, style);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
-    if (ctx.canvas.getAttribute('isHD') === '1') {
-        x *= devicePixelRatio;
-        y *= devicePixelRatio;
-        r *= devicePixelRatio;
-    }
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.arc(x, y, r, start, end);
@@ -597,11 +527,6 @@ ui.prototype.strokeArc = function (
     if (lineWidth) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
-    if (ctx.canvas.getAttribute('isHD') === '1') {
-        x *= devicePixelRatio;
-        y *= devicePixelRatio;
-        r *= devicePixelRatio;
-    }
     ctx.beginPath();
     ctx.arc(x, y, r, start, end);
     ctx.stroke();
@@ -627,12 +552,6 @@ ui.prototype.drawLine = function (name, x1, y1, x2, y2, style, lineWidth) {
     if (lineWidth != null) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
-    if (ctx.canvas.getAttribute('isHD') === '1') {
-        x1 *= devicePixelRatio;
-        y1 *= devicePixelRatio;
-        x2 *= devicePixelRatio;
-        y2 *= devicePixelRatio;
-    }
     ctx.beginPath();
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
@@ -659,12 +578,6 @@ ui.prototype.drawArrow = function (name, x1, y1, x2, y2, style, lineWidth) {
     if (lineWidth != null) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
-    if (ctx.canvas.getAttribute('isHD') === '1') {
-        x1 *= devicePixelRatio;
-        y1 *= devicePixelRatio;
-        x2 *= devicePixelRatio;
-        y2 *= devicePixelRatio;
-    }
     var head = 10;
     var dx = x2 - x1,
         dy = y2 - y1;
@@ -705,11 +618,6 @@ ui.prototype._uievent_drawArrow = function (data) {
 ui.prototype.setFont = function (name, font) {
     var ctx = this.getContextByName(name);
     if (ctx) {
-        if (ctx.canvas.getAttribute('isHD') === '1') {
-            font = font.replace(/(\d+)(px|em|vh|vw)/, (str, $1, $2) => {
-                return `${parseFloat($1) * devicePixelRatio}${$2}`;
-            });
-        }
         ctx.font = font;
     }
 };
@@ -718,9 +626,6 @@ ui.prototype.setFont = function (name, font) {
 ui.prototype.setLineWidth = function (name, lineWidth) {
     var ctx = this.getContextByName(name);
     if (ctx) {
-        if (ctx.canvas.getAttribute('isHD') === '1') {
-            lineWidth *= devicePixelRatio;
-        }
         ctx.lineWidth = lineWidth;
     }
 };
@@ -904,12 +809,6 @@ ui.prototype.drawImage = function (
         }
 
         if (x1 != null && y1 != null && w1 != null && h1 != null) {
-            if (ctx.canvas.getAttribute('isHD') === '1') {
-                x1 *= devicePixelRatio;
-                y1 *= devicePixelRatio;
-                w1 *= devicePixelRatio;
-                h1 *= devicePixelRatio;
-            }
             if (!reverse && !angle) {
                 ctx.drawImage(image, x, y, w, h, x1, y1, w1, h1);
             } else {
@@ -921,12 +820,6 @@ ui.prototype.drawImage = function (
                 ctx.restore();
             }
             return;
-        }
-        if (ctx.canvas.getAttribute('isHD') === '1') {
-            x *= devicePixelRatio;
-            y *= devicePixelRatio;
-            w *= devicePixelRatio;
-            h *= devicePixelRatio;
         }
         if (!reverse && !angle) {
             ctx.drawImage(image, x, y, w, h);
@@ -1054,9 +947,7 @@ ui.prototype.drawTip = function (text, id, frame) {
     var one = {
         text: text,
         textX: 21,
-        width:
-            26 +
-            core.calWidth('data', realText, '16px Arial') / devicePixelRatio,
+        width: 26 + core.calWidth('data', realText, '16px Arial'),
         opacity: 0.1,
         stage: 1,
         frame: frame || 0,
@@ -1748,7 +1639,7 @@ ui.prototype._buildFont = function (fontSize, bold, italic, font, isHD) {
     return (
         (bold ? 'bold ' : '') +
         (italic ? 'italic ' : '') +
-        (fontSize || textAttribute.textfont) * (isHD ? devicePixelRatio : 1) +
+        (fontSize || textAttribute.textfont) +
         'px ' +
         (font || globalAttribute.font)
     );
@@ -1817,8 +1708,7 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
         config.fontSize,
         config.bold,
         config.italic,
-        config.font,
-        config.isHD
+        config.font
     );
     tempCtx.fillStyle = config.color;
     config = this._drawTextContent_draw(ctx, tempCtx, content, config);
@@ -1848,14 +1738,16 @@ ui.prototype._drawTextContent_draw = function (ctx, tempCtx, content, config) {
         if (config.index >= config.blocks.length) return false;
         var block = config.blocks[config.index++];
         if (block != null) {
-            var ratio = config.isHD ? core.domStyle.ratio : 1;
+            const scale = config.isHD
+                ? devicePixelRatio * core.domStyle.scale
+                : 1;
             core.drawImage(
                 ctx,
                 tempCtx.canvas,
-                block.left * ratio * devicePixelRatio,
-                block.top * ratio * devicePixelRatio,
-                block.width * ratio * devicePixelRatio,
-                block.height * ratio * devicePixelRatio,
+                block.left * scale,
+                block.top * scale,
+                block.width * scale,
+                block.height * scale,
                 config.left + block.left + block.marginLeft,
                 config.top + block.top + block.marginTop,
                 block.width,
@@ -1937,8 +1829,7 @@ ui.prototype._drawTextContent_drawChar = function (
                 config.currfont,
                 config.bold,
                 config.italic,
-                config.font,
-                config.isHD
+                config.font
             );
             return true;
         }
@@ -1948,9 +1839,7 @@ ui.prototype._drawTextContent_drawChar = function (
             return this._drawTextContent_emptyChar(tempCtx, content, config);
     }
     // 检查是不是自动换行
-    var charwidth =
-        core.calWidth(tempCtx, ch) / (config.isHD ? devicePixelRatio : 1) +
-        config.letterSpacing;
+    var charwidth = core.calWidth(tempCtx, ch) + config.letterSpacing;
     if (config.maxWidth != null) {
         if (config.offsetX + charwidth > config.maxWidth) {
             // --- 当前应当换行，然而还是检查一下是否是forbidStart
@@ -2763,9 +2652,10 @@ ui.prototype._drawChoices_getHorizontalPosition = function (
     for (var i = 0; i < choices.length; i++) {
         if (typeof choices[i] === 'string') choices[i] = { text: choices[i] };
         choices[i].text = core.replaceText(choices[i].text);
-        choices[i].width =
-            core.calWidth(ctx, core.replaceText(choices[i].text)) /
-            devicePixelRatio;
+        choices[i].width = core.calWidth(
+            ctx,
+            core.replaceText(choices[i].text)
+        );
         if (choices[i].icon != null) choices[i].width += 28;
         width = Math.max(width, choices[i].width + 30);
     }
@@ -3035,7 +2925,7 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback, ctx) {
     );
     core.fillText(ctx, '取消', core._PX_ / 2 + 38, rect.bottom - 35);
     if (core.status.event.selection != 'none') {
-        var len = core.calWidth(ctx, '确定') / devicePixelRatio;
+        var len = core.calWidth(ctx, '确定');
         var strokeLeft =
             core._PX_ / 2 +
             (76 * core.status.event.selection - 38) -
@@ -3530,7 +3420,7 @@ ui.prototype._drawViewMaps = function (index, x, y) {
     if (core.markedFloorIds[data.floorId]) text += ' （已标记）';
     var textX = 16,
         textY = 18,
-        width = textX + core.calWidth('data', text) / devicePixelRatio + 16,
+        width = textX + core.calWidth('data', text) + 16,
         height = 42;
     core.fillRect('data', 5, 5, width, height, 'rgba(0,0,0,0.4)');
     core.fillText('data', text, textX + 5, textY + 15, 'rgba(255,255,255,0.6)');
