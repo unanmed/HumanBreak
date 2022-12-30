@@ -5680,7 +5680,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     desc: [
                         '<span style="color: #dd4">第一章终极技能</span>，战斗时智慧会充当等量护盾'
                     ],
-                    consume: '50 + level * 50',
+                    consume: '2500',
                     front: [
                         [6, 10],
                         [5, 1],

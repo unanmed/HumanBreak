@@ -203,7 +203,7 @@ function draw() {
 function click(e: MouseEvent) {
     const px = e.offsetX;
     const py = e.offsetY;
-    const w = canvas.width;
+    const w = canvas.width / devicePixelRatio;
     const per = w / 11;
     const x = Math.floor(px / per);
     const y = Math.floor(py / per);
@@ -330,5 +330,51 @@ function selectChapter(delta: number) {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+@media screen and (max-width: 600px) {
+    #skill-tree {
+        width: 100%;
+        height: 100%;
+        font-size: 3.3vw;
+        padding: 5%;
+    }
+
+    #skill-title {
+        width: 100%;
+        font-size: 4vw;
+        height: 5vw;
+    }
+
+    #divider-vertical {
+        height: auto;
+    }
+
+    #skill-bottom {
+        height: auto;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #skill-canvas {
+        height: 40vh;
+        width: 40vh;
+    }
+
+    #front-scroll {
+        height: 18vh;
+    }
+
+    #skill-consume {
+        font-size: 2.4vh;
+    }
+
+    #front-scroll {
+        font-size: 2.4vh;
+    }
+
+    #skill-chapter {
+        font-size: 2.4vh;
+    }
 }
 </style>
