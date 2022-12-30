@@ -2583,6 +2583,7 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (
         if (options.noHD) {
             tempCanvas.canvas.width = width * 32 * scale;
             tempCanvas.canvas.height = height * 32 * scale;
+            tempCanvas.canvas.removeAttribute('isHD');
         } else
             core.resizeCanvas(
                 tempCanvas,
@@ -2591,12 +2592,12 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (
                 false,
                 true
             );
-        tempCanvas.scale(scale, scale);
     } else if (width * height > core.bigmap.threshold) {
         options.v2 = true;
         if (options.noHD) {
             tempCanvas.canvas.width = core._PX_;
             tempCanvas.canvas.height = core._PY_;
+            tempCanvas.canvas.removeAttribute('isHD');
         } else core.resizeCanvas(tempCanvas, core._PX_, core._PY_);
         var centerX = options.centerX,
             centerY = options.centerY;
@@ -2618,6 +2619,7 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (
         if (options.noHD) {
             tempCanvas.canvas.width = width * 32;
             tempCanvas.canvas.height = height * 32;
+            tempCanvas.canvas.removeAttribute('isHD');
         } else
             core.resizeCanvas(tempCanvas, width * 32, height * 32, false, true);
     }
@@ -2756,6 +2758,7 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
             hw = hh = core.__HALF_SIZE__;
             W = H = core.__SIZE__;
         }
+        const scale = devicePixelRatio * core.domStyle.scale;
         if (options.v2) {
             if (options.noHD) {
                 core.drawImage(
@@ -2771,7 +2774,6 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
                     h
                 );
             } else {
-                const scale = devicePixelRatio * core.domStyle.scale;
                 core.drawImage(
                     ctx,
                     tempCanvas.canvas,
@@ -2808,8 +2810,8 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
                 tempCanvas.canvas,
                 offsetX * 32,
                 offsetY * 32,
-                pw,
-                ph,
+                pw * scale,
+                ph * scale,
                 x,
                 y,
                 w,

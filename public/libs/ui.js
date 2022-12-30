@@ -2763,10 +2763,9 @@ ui.prototype._drawChoices_getHorizontalPosition = function (
     for (var i = 0; i < choices.length; i++) {
         if (typeof choices[i] === 'string') choices[i] = { text: choices[i] };
         choices[i].text = core.replaceText(choices[i].text);
-        choices[i].width = core.calWidth(
-            ctx,
-            core.replaceText(choices[i].text)
-        );
+        choices[i].width =
+            core.calWidth(ctx, core.replaceText(choices[i].text)) /
+            devicePixelRatio;
         if (choices[i].icon != null) choices[i].width += 28;
         width = Math.max(width, choices[i].width + 30);
     }
@@ -3036,7 +3035,7 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback, ctx) {
     );
     core.fillText(ctx, '取消', core._PX_ / 2 + 38, rect.bottom - 35);
     if (core.status.event.selection != 'none') {
-        var len = core.calWidth(ctx, '确定');
+        var len = core.calWidth(ctx, '确定') / devicePixelRatio;
         var strokeLeft =
             core._PX_ / 2 +
             (76 * core.status.event.selection - 38) -
@@ -3519,7 +3518,7 @@ ui.prototype._drawViewMaps = function (index, x, y) {
     });
     core.clearMap('data');
     core.setTextAlign('data', 'left');
-    core.setFont('data', '16px Arial');
+    core.setFont('data', '20px normal');
     var text = core.status.maps[data.floorId].title;
     if (!data.all && (data.mw > core._WIDTH_ || data.mh > core._HEIGHT_))
         text +=
@@ -3531,7 +3530,7 @@ ui.prototype._drawViewMaps = function (index, x, y) {
     if (core.markedFloorIds[data.floorId]) text += ' （已标记）';
     var textX = 16,
         textY = 18,
-        width = textX + core.calWidth('data', text) + 16,
+        width = textX + core.calWidth('data', text) / devicePixelRatio + 16,
         height = 42;
     core.fillRect('data', 5, 5, width, height, 'rgba(0,0,0,0.4)');
     core.fillText('data', text, textX + 5, textY + 15, 'rgba(255,255,255,0.6)');
