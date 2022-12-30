@@ -76,7 +76,8 @@ items.prototype.getItemEffectTip = function (itemId) {
 
 ////// 使用道具 //////
 items.prototype.useItem = function (itemId, noRoute, callback) {
-    if (!this.canUseItem(itemId)) {
+    const ignore = ['I560', 'I559'];
+    if (!this.canUseItem(itemId) || ignore.includes(itemId)) {
         if (callback) callback();
         return;
     }

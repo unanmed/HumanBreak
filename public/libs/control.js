@@ -1833,6 +1833,7 @@ control.prototype.startReplay = function (list) {
 
 ////// 更改播放状态 //////
 control.prototype.triggerReplay = function () {
+    console.log(core.dymCanvas.replay.canvas.style.width);
     if (core.status.replay.pausing) this.resumeReplay();
     else this.pauseReplay();
 };
@@ -4362,7 +4363,9 @@ control.prototype._resize_canvas = function (obj) {
         for (var name in core.dymCanvas) {
             var ctx = core.dymCanvas[name],
                 canvas = ctx.canvas;
-            var ratio = canvas.hasAttribute('isHD') ? core.domStyle.ratio : 1;
+            var ratio = canvas.hasAttribute('isHD')
+                ? core.domStyle.ratio * devicePixelRatio
+                : 1;
             canvas.style.width =
                 (canvas.width / ratio) * core.domStyle.scale + 'px';
             canvas.style.height =

@@ -3547,6 +3547,15 @@ ui.prototype._drawViewMaps_buildData = function (index, x, y) {
 ////// 绘制道具栏 //////
 ui.prototype._drawToolbox = function (index) {};
 
+////// 获得所有应该在道具栏显示的某个类型道具 //////
+ui.prototype.getToolboxItems = function (cls) {
+    return Object.keys(core.status.hero.items[cls] || {})
+        .filter(function (id) {
+            return !core.material.items[id].hideInToolbox;
+        })
+        .sort();
+};
+
 ////// 绘制装备界面 //////
 ui.prototype._drawEquipbox = function (index) {};
 

@@ -55,7 +55,7 @@ onMounted(async () => {
             return;
         }
 
-        if (time >= 4000) {
+        if (time >= 4050) {
             chapterShowed.value = false;
             ani.ticker.destroy();
         }
