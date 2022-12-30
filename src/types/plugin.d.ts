@@ -69,6 +69,11 @@ interface PluginDeclaration extends PluginUtils, PluginUis, PluginUse {
      * 重置设置信息
      */
     resetSettings(): void;
+
+    /**
+     * 重置变量的设置信息
+     */
+    resetFlagSettings(): void;
 }
 
 interface PluginUtils {

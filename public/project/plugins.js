@@ -5988,19 +5988,15 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          * @param {string} data
          */
         function reloadCss(data) {
-            const all = Array.from(document.getElementsByTagName('link'));
-            all.forEach(v => {
-                if (v.rel !== 'stylesheet') return;
-                if (v.href === `http://127.0.0.1:3000/${data}`) {
-                    v.remove();
-                    const link = document.createElement('link');
-                    link.rel = 'stylesheet';
-                    link.type = 'text/css';
-                    link.href = data;
-                    document.head.appendChild(link);
-                    console.log(`css hot reload: ${data}`);
-                }
-            });
+            const css = document.getElementById('mota-css');
+            css.remove();
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = data;
+            link.id = 'mota-css';
+            document.head.appendChild(link);
+            console.log(`css hot reload: ${data}`);
         }
 
         /**
@@ -6262,6 +6258,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         };
 
         this.showChapter = function (chapter) {
+            if (main.replayChecking) return;
             core.plugin.chapterContent.value = chapter;
             core.plugin.chapterShowed.value = true;
         };
@@ -6319,14 +6316,32 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 for (const id in remain) {
                     const name = core.material.enemys[id].name;
                     now.push(`${title}(${floor}): ${name} * ${remain[id]}`);
-                    if (now.length === 20) {
+                    if (now.length === 10) {
                         str.push(now.join('\n'));
                         now = [];
                     }
                 }
             }
-            if (now.length > 0) str.push(now.join('\n'));
+            if (now.length > 0) {
+                str.push(now.join('\n'));
+                str[0] = `当前剩余怪物：\n${str[0]}`;
+            }
+
             return str;
         };
+    },
+    replay: function () {
+        const replayableSettings = ['autoSkill'];
+
+        // 注册修改设置的录像操作
+        core.registerReplayAction('settings', name => {
+            if (!name.startsWith('set:')) return false;
+            const [, setting, value] = name.split(':');
+            const v = eval(value);
+            if (typeof v !== 'boolean') return false;
+            if (!replayableSettings.includes(setting)) return false;
+            flags[setting] = v;
+            return true;
+        });
     }
 };

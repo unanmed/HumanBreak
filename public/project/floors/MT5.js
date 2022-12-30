@@ -66,61 +66,27 @@ main.floors.MT5=
                         "textfont": 20,
                         "time": 25
                     },
-                    "他们走出了洞穴！！！！！",
+                    "人类简史——起源篇",
                     {
                         "type": "playSound",
                         "name": "paper.mp3"
                     },
-                    "他们终于摆脱了那种远古的生活方式！",
+                    "走出山洞，看似一个不起眼的举动，却是一个让残酷的真相永远地消失在了历史中的举动。",
                     {
                         "type": "playSound",
                         "name": "paper.mp3"
                     },
-                    "此时此刻，他们站在了明亮的草地之上",
+                    "但是，这个举动，也是人类至今都能与自然和谐共处的根本。",
                     {
                         "type": "playSound",
                         "name": "paper.mp3"
                     },
-                    "身向高山，背临江水",
+                    "那些残酷的历史将无人知晓，那些人类的残忍杀戮将不会出现。",
                     {
                         "type": "playSound",
                         "name": "paper.mp3"
                     },
-                    "此时此刻，他们站在了历史的转折处",
-                    {
-                        "type": "playSound",
-                        "name": "paper.mp3"
-                    },
-                    "前进之力，无法阻挡",
-                    {
-                        "type": "playSound",
-                        "name": "paper.mp3"
-                    },
-                    "此时此刻，星空闪耀着文明的曙光",
-                    {
-                        "type": "playSound",
-                        "name": "paper.mp3"
-                    },
-                    "普照世间，闪耀一世",
-                    {
-                        "type": "playSound",
-                        "name": "paper.mp3"
-                    },
-                    "点破苍穹，斩断寰宇",
-                    {
-                        "type": "playSound",
-                        "name": "paper.mp3"
-                    },
-                    "星星之火，可以燎原",
-                    {
-                        "type": "playSound",
-                        "name": "paper.mp3"
-                    },
-                    "文明之光，就在眼前！",
-                    {
-                        "type": "playSound",
-                        "name": "paper.mp3"
-                    },
+                    "而这些源头便是这看似无足轻重的一个举动。",
                     {
                         "type": "setText",
                         "text": [

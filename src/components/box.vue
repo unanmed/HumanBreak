@@ -133,13 +133,15 @@ function bottomDrag(x: number, y: number) {
 }
 
 function resize() {
-    move = document.getElementById(`box-move-${id}`) as HTMLDivElement;
     main = document.getElementById(`box-${id}`) as HTMLDivElement;
+    move = document.getElementById(`box-move-${id}`) as HTMLDivElement;
     leftB = document.getElementById(`border-left-${id}`) as HTMLDivElement;
     topB = document.getElementById(`border-top-${id}`) as HTMLDivElement;
     rightB = document.getElementById(`border-right-${id}`) as HTMLDivElement;
     bottomB = document.getElementById(`border-bottom-${id}`) as HTMLDivElement;
     drag = document.getElementById(`box-drag-${id}`) as HTMLElement;
+
+    if (!main) return;
 
     if (has(props.left)) left.value = props.left;
     if (has(props.top)) top.value = props.top;
@@ -157,6 +159,8 @@ onUpdated(resize);
 onMounted(async () => {
     await sleep(50);
     resize();
+
+    if (!main) return;
 
     useDrag(
         drag,

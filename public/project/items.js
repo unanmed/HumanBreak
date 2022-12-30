@@ -343,7 +343,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 	"cross": {
 		"cls": "constants",
 		"name": "查看技能",
-		"text": "技能查看器",
+		"text": "查看勇士的技能",
 		"canUseItemEffect": true,
 		"useItemEffect": "core.openSkills();"
 	},

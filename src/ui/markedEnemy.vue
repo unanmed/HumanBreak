@@ -25,13 +25,13 @@
                             >伤害：{{ getDamage(v) }}</span
                         >
                         <span class="marked-critical marked-item"
-                            >临界: {{ getCritical(v)[0] }}</span
+                            >临界：{{ getCritical(v)[0] }}</span
                         >
                         <span class="marked-critical-damage marked-item"
-                            >减伤： {{ getCritical(v)[1] }}</span
+                            >减伤：{{ getCritical(v)[1] }}</span
                         >
                         <span class="marked-def marked-item"
-                            >{{ ratio }}防: {{ getDefDamage(v) }}</span
+                            >{{ ratio }}防：{{ getDefDamage(v) }}</span
                         >
                         <div class="marked-button">
                             <span

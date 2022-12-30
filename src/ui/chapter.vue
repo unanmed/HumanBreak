@@ -15,13 +15,13 @@ const props = defineProps<{
     chapter: string;
 }>();
 
-let canvas: HTMLCanvasElement;
+let can: HTMLCanvasElement;
 let ctx: CanvasRenderingContext2D;
 let text: HTMLSpanElement;
 
 onMounted(async () => {
-    canvas = document.getElementById('chapter-back') as HTMLCanvasElement;
-    ctx = canvas.getContext('2d')!;
+    can = document.getElementById('chapter-back') as HTMLCanvasElement;
+    ctx = can.getContext('2d')!;
     text = document.getElementById('chapter-text') as HTMLSpanElement;
 
     const ani = new Animation();
@@ -36,10 +36,10 @@ onMounted(async () => {
     ani.register('rect2', h / 2);
     ani.register('text', window.innerWidth + 10 + textWidth);
 
-    canvas.width = w;
-    canvas.height = h;
-    canvas.style.width = `${window.innerWidth}px`;
-    canvas.style.height = `${window.innerHeight}px`;
+    can.width = w;
+    can.height = h;
+    can.style.width = `${window.innerWidth}px`;
+    can.style.height = `${window.innerHeight}px`;
     text.style.left = `${w + 10}px`;
     text.style.top = `${window.innerHeight / 2 - h * 0.025}px`;
     text.style.height = `${h * 0.05}px`;
@@ -55,7 +55,10 @@ onMounted(async () => {
             return;
         }
 
-        if (time >= 4000) chapterShowed.value = false;
+        if (time >= 4000) {
+            chapterShowed.value = false;
+            ani.ticker.destroy();
+        }
 
         if (!soundPlayed && time >= 1500) {
             soundPlayed = true;
@@ -114,9 +117,6 @@ onMounted(async () => {
     ani.mode(hyper('sin', 'in')).time(1000).apply('rect2', 0);
     await sleep(1000);
     ani.mode(hyper('sin', 'out')).time(1000).apply('lineOpacity', 0);
-
-    await sleep(1000);
-    ani.ticker.destroy();
 });
 </script>
 

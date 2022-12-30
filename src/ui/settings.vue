@@ -11,9 +11,25 @@
                     <span
                         class="selectable setting-item"
                         :selected="selected === 'transition'"
-                        @click="transition = !transition"
+                        @click="click('transition')"
                         >界面动画:&nbsp;&nbsp;&nbsp;{{
                             transition ? 'ON' : 'OFF'
+                        }}</span
+                    >
+                    <span
+                        class="selectable setting-item"
+                        :selected="selected === 'itemDetail'"
+                        @click="click('itemDetail')"
+                        >宝石血瓶显伤:&nbsp;&nbsp;&nbsp;{{
+                            itemDetail ? 'ON' : 'OFF'
+                        }}</span
+                    >
+                    <span
+                        class="selectable setting-item"
+                        :selected="selected === 'autoSkill'"
+                        @click="click('autoSkill')"
+                        >自动切换技能:&nbsp;&nbsp;&nbsp;{{
+                            autoSkill ? 'ON' : 'OFF'
                         }}</span
                     >
                 </div>
@@ -24,11 +40,7 @@
             ></a-divider>
             <div id="setting-right">
                 <Scroll style="height: 100%">
-                    <span
-                        v-if="descText.value.startsWith('!!html')"
-                        v-html="descText.value"
-                    ></span>
-                    <span v-else>{{ descText.value }}</span>
+                    <span v-html="descText"></span>
                 </Scroll>
             </div>
         </div>
@@ -36,10 +48,10 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue';
-import { transition } from '../plugin/settings';
+import { computed, ref } from 'vue';
+import { transition, itemDetail, autoSkill } from '../plugin/settings';
 import settingInfo from '../data/settings.json';
-import { type } from '../plugin/utils';
+import { has } from '../plugin/utils';
 import Scroll from '../components/scroll.vue';
 import { LeftOutlined } from '@ant-design/icons-vue';
 import { isMobile } from '../plugin/use';
@@ -49,11 +61,35 @@ type Settings = typeof settingInfo;
 const selected = ref<keyof Settings>('transition');
 
 const descText = computed(() => {
-    return type(settingInfo[selected.value].desc);
+    return settingInfo[selected.value].desc
+        .map((v, i, a) => {
+            if (/^\d+\./.test(v)) return `${'&nbsp;'.repeat(12)}${v}`;
+            else if (
+                (has(a[i - 1]) && v !== '<br>' && a[i - 1] === '<br>') ||
+                i === 0
+            ) {
+                return `${'&nbsp;'.repeat(8)}${v}`;
+            } else return v;
+        })
+        .join('');
 });
 
 function exit() {
     core.plugin.settingsOpened.value = false;
+}
+
+function click(id: keyof Settings) {
+    if (selected.value !== id) {
+        selected.value = id;
+        return;
+    }
+    if (id === 'transition') {
+        transition.value = !transition.value;
+    } else if (id === 'itemDetail') {
+        itemDetail.value = !itemDetail.value;
+    } else if (id === 'autoSkill') {
+        autoSkill.value = !autoSkill.value;
+    }
 }
 </script>
 

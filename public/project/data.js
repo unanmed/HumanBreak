@@ -199,7 +199,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"levelChoose": [
 			{
 				"title": "简单",
-				"name": "Easy",
+				"name": "easy",
 				"hard": 1,
 				"color": [
 					0,
@@ -442,38 +442,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"startText": [
 			{
 				"type": "setValue",
-				"name": "flag:usePlatFly",
-				"value": "true"
-			},
-			{
-				"type": "setValue",
-				"name": "flag:__useMinimap__",
-				"value": "true"
-			},
-			{
-				"type": "setValue",
-				"name": "flag:fixToBook",
-				"value": "false"
-			},
-			{
-				"type": "setValue",
 				"name": "flag:itemDetail",
 				"value": "true"
-			},
-			{
-				"type": "setValue",
-				"name": "item:book",
-				"value": "1"
-			},
-			{
-				"type": "setValue",
-				"name": "item:wand",
-				"value": "1"
-			},
-			{
-				"type": "setValue",
-				"name": "item:I330",
-				"value": "1"
 			},
 			{
 				"type": "hideStatusBar"
@@ -504,37 +474,62 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				"type": "playSound",
 				"name": "paper.mp3"
 			},
-			"这是人类史上的一大进展",
+			"在万物的发展中，任何物体都有它自己的发光点。",
 			{
 				"type": "playSound",
 				"name": "paper.mp3"
 			},
-			"人类开始使用工具",
+			"人类，这个起初完全不起眼的种族，",
 			{
 				"type": "playSound",
 				"name": "paper.mp3"
 			},
-			"人类开始使用武器",
+			"却在那一天发生了惊天的变动。",
 			{
 				"type": "playSound",
 				"name": "paper.mp3"
 			},
-			"人类开始狩猎",
+			"那曾是一个不起眼的日子。",
 			{
 				"type": "playSound",
 				"name": "paper.mp3"
 			},
-			"人类终于摆脱了四肢行走",
+			"直到一记闪电劈在了山上。",
 			{
 				"type": "playSound",
 				"name": "paper.mp3"
 			},
-			"它让人类创造无限可能",
+			"山火蔓延，霎时间，茂密的树林已然变为了焦炭。",
 			{
 				"type": "playSound",
 				"name": "paper.mp3"
 			},
-			"这是人类史上最辉煌的时刻",
+			"山火的发生让野兽饥不择食，",
+			{
+				"type": "playSound",
+				"name": "paper.mp3"
+			},
+			"无数的人类被野兽硬生生拖走。",
+			{
+				"type": "playSound",
+				"name": "paper.mp3"
+			},
+			"那又是一个不起眼的日子，",
+			{
+				"type": "playSound",
+				"name": "paper.mp3"
+			},
+			"却让人类又一次发生了翻天地覆的变化。",
+			{
+				"type": "playSound",
+				"name": "paper.mp3"
+			},
+			"一位野蛮人，也是我们的主角，",
+			{
+				"type": "playSound",
+				"name": "paper.mp3"
+			},
+			"踏上了属于他的旅途。",
 			{
 				"type": "sleep",
 				"time": 1000

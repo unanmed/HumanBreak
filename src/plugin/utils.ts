@@ -35,8 +35,8 @@ export function getDamageColor(damage: number): Color {
     if (damage < 0) return '#7f7';
     if (damage < core.status.hero.hp / 3) return '#fff';
     if (damage < (core.status.hero.hp * 2) / 3) return '#ff4';
-    if (damage < core.status.hero.hp) return '#f22';
-    return '#f00';
+    if (damage < core.status.hero.hp) return '#f93';
+    return '#f22';
 }
 
 /**

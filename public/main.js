@@ -237,6 +237,7 @@ main.prototype.init = function (mode, callback) {
             var span = document.createElement('span');
             span.setAttribute('class', 'startButton');
             span.innerText = value.title || '';
+            span.id = value.name;
             (function (span, str_) {
                 span.onclick = function () {
                     core.events.startGame(str_);

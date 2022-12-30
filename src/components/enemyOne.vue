@@ -69,14 +69,13 @@
                         >
                     </div>
                     <div class="detail-info">
-                        <span style="color: cyan"
-                            >{{
-                                core.formatBigNumber(core.status.thisMap.ratio)
-                            }}防&nbsp;&nbsp;&nbsp;&nbsp;{{
-                                core.formatBigNumber(enemy.defDamage)
+                        <span :style="{color: enemy.damageColor! as string}"
+                            >伤害&nbsp;&nbsp;&nbsp;&nbsp;{{
+                                core.formatBigNumber(enemy.damage!)
                             }}</span
                         >
                     </div>
+
                     <div class="detail-info">
                         <span style="color: lightsalmon"
                             >临界&nbsp;&nbsp;&nbsp;&nbsp;{{
@@ -107,9 +106,11 @@
                         >
                     </div>
                     <div class="detail-info">
-                        <span :style="{color: enemy.damageColor! as string}"
-                            >伤害&nbsp;&nbsp;&nbsp;&nbsp;{{
-                                core.formatBigNumber(enemy.damage!)
+                        <span style="color: cyan"
+                            >{{
+                                core.formatBigNumber(core.status.thisMap.ratio)
+                            }}防&nbsp;&nbsp;&nbsp;&nbsp;{{
+                                core.formatBigNumber(enemy.defDamage)
                             }}</span
                         >
                     </div>
@@ -211,7 +212,7 @@ function enter() {
 
     .detail {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         flex-wrap: wrap;
         height: 100%;
 

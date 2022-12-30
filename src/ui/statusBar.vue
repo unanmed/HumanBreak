@@ -84,10 +84,18 @@
                         }}</span>
                     </div>
                     <div v-if="skillOpened" class="status-item">
-                        <span id="skill-tree" class="button-text">技能树</span>
+                        <span
+                            id="skill-tree"
+                            class="button-text"
+                            @click="openSkillTree"
+                            >技能树</span
+                        >
                     </div>
                     <div v-if="skillOpened" class="status-item">
-                        <span id="status-skill" class="button-text"
+                        <span
+                            id="status-skill"
+                            class="button-text"
+                            @click="openSkill"
                             >查看技能</span
                         >
                     </div>
@@ -161,6 +169,16 @@ function update() {
     }
     skillOpened.value = core.getFlag('chapter', 0) > 0;
 }
+
+function openSkillTree(e: MouseEvent) {
+    e.stopPropagation();
+    core.useItem('skill1');
+}
+
+function openSkill(e: MouseEvent) {
+    e.stopPropagation();
+    core.useItem('cross');
+}
 </script>
 
 <style lang="less" scoped>
@@ -213,6 +231,7 @@ function update() {
     font-size: 1.9vw;
     width: 100%;
     text-align: center;
+    text-shadow: 3px 2px 3px #000, 0px 0px 3px #111;
 }
 
 #status-lv {
@@ -220,6 +239,7 @@ function update() {
     font-size: 1.9vw;
     width: 100%;
     text-align: center;
+    text-shadow: 3px 2px 3px #000, 0px 0px 3px #111;
 }
 
 .status-extra {
