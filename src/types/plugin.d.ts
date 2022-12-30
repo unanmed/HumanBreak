@@ -50,6 +50,22 @@ interface PluginDeclaration extends PluginUtils, PluginUis, PluginUse {
     checkMarkedEnemy(): void;
 
     /**
+     * 标记怪物
+     * @param id 怪物id
+     */
+    markEnemy(id: EnemyIds): void;
+
+    /**
+     * 是否标记过某个怪物
+     */
+    hasMarkedEnemy(id: EnemyIds): void;
+
+    /**
+     * 取消标记过某个怪物
+     */
+    unmarkEnemy(id: EnemyIds): void;
+
+    /**
      * 重置设置信息
      */
     resetSettings(): void;
@@ -73,6 +89,15 @@ interface PluginUtils {
      * @param css 要解析的css字符串
      */
     parseCss(css: string): Partial<Record<CanParseCss, string>>;
+
+    /**
+     * 弹出一段提示
+     * @param text 提示信息
+     */
+    tip(
+        type: 'warn' | 'info' | 'success' | 'error' | 'warning' | 'loading',
+        text: string
+    ): void;
 }
 
 interface PluginUis {

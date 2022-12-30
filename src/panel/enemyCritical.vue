@@ -4,7 +4,7 @@
             <div class="des">加攻伤害</div>
             <canvas ref="critical" class="chart"></canvas>
             <div class="slider-div">
-                <span>加攻数值&nbsp;&nbsp;&nbsp;&nbsp;{{ addAtk }}</span>
+                <span>加攻次数&nbsp;&nbsp;&nbsp;&nbsp;{{ addAtk }}</span>
                 <a-slider
                     class="slider"
                     v-model:value="addAtk"
@@ -25,7 +25,7 @@
             <div class="des">加防伤害</div>
             <canvas ref="def" class="chart"></canvas>
             <div class="slider-div">
-                <span>加防数值&nbsp;&nbsp;&nbsp;&nbsp;{{ addDef }}</span>
+                <span>加防次数&nbsp;&nbsp;&nbsp;&nbsp;{{ addDef }}</span>
                 <a-slider
                     class="slider"
                     v-model:value="addDef"

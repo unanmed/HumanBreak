@@ -1224,8 +1224,22 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 case 72: // H：打开帮助页面
                     core.ui._drawHelp();
                     break;
-                case 77: // M：打开存档笔记
-                    core.actions._clickNotes_show();
+                case 77: // M：快速标记
+                    const [x, y] = flags.mouseLoc;
+                    const mx = Math.round(x + core.bigmap.offsetX / 32);
+                    const my = Math.round(y + core.bigmap.offsetY / 32);
+                    const blocks = core.getMapBlocksObj();
+                    const block = blocks[`${mx},${my}`];
+                    if (block.event.cls.startsWith('enemy')) {
+                        const name = core.material.enemys[block.event.id].name;
+                        if (core.hasMarkedEnemy(block.event.id)) {
+                            core.tip('success', `已取消标记${name}！`);
+                            core.unmarkEnemy(block.event.id);
+                        } else {
+                            core.tip('success', `已标记${name}！`);
+                            core.markEnemy(block.event.id);
+                        }
+                    }
                     break;
                 case 78: // N：重新开始
                     core.confirmRestart();

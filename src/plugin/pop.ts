@@ -15,7 +15,7 @@ export default function init() {
  * 弹出文字
  */
 function popValue() {
-    let ctx = core.getContextByName('pop');
+    let ctx = core.getContextByName('pop')!;
     if (!ctx) ctx = core.createCanvas('pop', 0, 0, core._PX_, core._PY_, 90);
     core.clearMap(ctx);
     let count = 0;

@@ -14,7 +14,7 @@ type CanParseCss = keyof {
 };
 
 export default function init() {
-    return { has, getDamageColor, parseCss };
+    return { has, getDamageColor, parseCss, tip };
 }
 
 /**

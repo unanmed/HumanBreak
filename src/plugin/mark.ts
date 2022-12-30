@@ -116,5 +116,23 @@ export function checkMarkedEnemy(noMessage: boolean = false) {
 export const checkMarkedStatus = ref(false);
 
 export default function init() {
-    return { checkMarkedEnemy, checkStatus: checkMarkedStatus };
+    // 鼠标移动时进行监听，按下M时进行快速标记
+    core.registerAction(
+        'onmove',
+        'mark',
+        (x, y) => {
+            if (core.isPlaying()) {
+                flags.mouseLoc = [x, y];
+            }
+            return false;
+        },
+        150
+    );
+    return {
+        checkMarkedEnemy,
+        checkStatus: checkMarkedStatus,
+        markEnemy,
+        hasMarkedEnemy,
+        unmarkEnemy
+    };
 }

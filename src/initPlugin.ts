@@ -9,7 +9,7 @@ import mark from './plugin/mark';
 import setting from './plugin/settings';
 import chapter from './plugin/ui/chapter';
 
-window.addEventListener('load', () => {
+function forward() {
     // 每个引入的插件都要在这里执行，否则不会被转发
     const toForward: any[] = [
         pop(),
@@ -42,4 +42,6 @@ window.addEventListener('load', () => {
 
         console.log('插件转发完成！');
     })();
-});
+}
+
+main.forward = forward;

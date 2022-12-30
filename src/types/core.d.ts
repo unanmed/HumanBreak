@@ -1324,6 +1324,11 @@ interface Main extends MainData {
      * 执行样板的所有监听
      */
     listen(): void;
+
+    /**
+     * 执行ts的插件转发
+     */
+    forward(): void;
 }
 
 interface Flags {
@@ -1361,6 +1366,11 @@ interface Flags {
      * 楼层是否到达过
      */
     readonly __visited__: Record<FloorIds, boolean>;
+
+    /**
+     * 鼠标位置
+     */
+    mouseLoc: LocArr;
 
     [key: string]: any;
 }
@@ -1453,4 +1463,6 @@ declare const plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1: PluginDeclaration;
 
 interface Window {
     core: CoreMixin;
+    flags: Flags;
+    hero: HeroStatus;
 }
