@@ -666,7 +666,13 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "checkbox",
 					"_docs": "虚化前景层",
 					"_data": "是否虚化前景层；如果此项开启，则在游戏中事件层有东西（如宝石等）时虚化前景层。"
-				}
+				},
+				"autoScale": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_docs": "自动缩放最大化",
+					"_data": "是否自动缩放最大化，关闭后不再最大化"
+				},
 			}
 		}
 	}

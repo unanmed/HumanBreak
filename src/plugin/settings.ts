@@ -15,6 +15,11 @@ export const itemDetail = ref(true);
  */
 export const autoSkill = ref(true);
 
+/**
+ * 自动放缩
+ */
+export const autoScale = ref(true);
+
 watch(transition, n => {
     core.plugin.transition.value = n;
     core.setLocalStorage('transition', n);
@@ -31,11 +36,16 @@ watch(autoSkill, n => {
     core.status.route.push(`set:autoSkill:${n}`);
 });
 
+watch(autoScale, n => {
+    core.setLocalStorage('autoScale', n);
+});
+
 /**
  * 重置设置信息，从localStorage读取即可
  */
 function reset() {
     transition.value = core.getLocalStorage('transition');
+    autoScale.value = core.getLocalStorage('autoScale');
 }
 
 function resetFlag() {

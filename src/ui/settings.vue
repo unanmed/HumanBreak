@@ -26,6 +26,14 @@
                         autoSkill ? 'ON' : 'OFF'
                     }}</span
                 >
+                <span
+                    class="selectable setting-item"
+                    :selected="selected === 'autoScale'"
+                    @click="click('autoScale')"
+                    >自动放缩:&nbsp;&nbsp;&nbsp;{{
+                        autoScale ? 'ON' : 'OFF'
+                    }}</span
+                >
             </div></template
         >
         <template #right><span v-html="descText"></span></template
@@ -34,7 +42,12 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue';
-import { transition, itemDetail, autoSkill } from '../plugin/settings';
+import {
+    transition,
+    itemDetail,
+    autoSkill,
+    autoScale
+} from '../plugin/settings';
 import settingInfo from '../data/settings.json';
 import { has } from '../plugin/utils';
 import Column from '../components/colomn.vue';
@@ -72,6 +85,8 @@ function click(id: keyof Settings) {
         itemDetail.value = !itemDetail.value;
     } else if (id === 'autoSkill') {
         autoSkill.value = !autoSkill.value;
+    } else if (id === 'autoScale') {
+        autoScale.value = !autoScale.value;
     }
 }
 </script>
