@@ -1,14 +1,334 @@
 <template>
-    <div id="skill-tree"></div>
+    <div id="skill-tree">
+        <div id="tools">
+            <span id="back" class="button-text tools" @click="exit"
+                ><left-outlined />返回游戏</span
+            >
+        </div>
+        <span id="skill-title">{{ skill.title }}</span>
+        <a-divider dashed style="border-color: #ddd4" id="divider"></a-divider>
+        <div id="skill-info">
+            <Scroll id="skill-desc" :no-scroll="true">
+                <span v-html="desc"></span>
+            </Scroll>
+            <div id="skill-effect">
+                <span v-if="level > 0" v-html="effect[0]"></span>
+                <span v-if="level < skill.max" v-html="effect[1]"></span>
+            </div>
+        </div>
+        <a-divider
+            dashed
+            style="border-color: #ddd4"
+            id="divider-split"
+        ></a-divider>
+        <div id="skill-bottom">
+            <canvas id="skill-canvas"></canvas>
+            <a-divider
+                dashed
+                style="border-color: #ddd4"
+                :type="isMobile ? 'horizontal' : 'vertical'"
+                id="divider-vertical"
+            ></a-divider>
+            <div id="skill-upgrade-info">
+                <span
+                    id="skill-consume"
+                    :style="{ color: consume <= mdef ? '#fff' : '#f44' }"
+                    >升级花费：{{ consume }}</span
+                >
+                <a-divider dashed class="upgrade-divider"></a-divider>
+                <Scroll id="front-scroll" :no-scroll="true"
+                    ><div id="skill-front">
+                        <span>前置技能</span>
+                        <span
+                            v-for="str of front"
+                            :style="{
+                                color: str.startsWith('a') ? '#fff' : '#f44'
+                            }"
+                            >{{ str.slice(1) }}</span
+                        >
+                    </div></Scroll
+                >
+                <a-divider dashed class="upgrade-divider"></a-divider>
+                <div id="skill-chapter">
+                    <span class="button-text" @click="selectChapter(-1)"
+                        ><LeftOutlined
+                    /></span>
+                    &nbsp;&nbsp;
+                    <span>{{ chapterDict[chapter] }}</span>
+                    &nbsp;&nbsp;
+                    <span class="button-text" @click="selectChapter(1)"
+                        ><RightOutlined
+                    /></span>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
+import { LeftOutlined, RightOutlined } from '@ant-design/icons-vue';
+import Scroll from '../components/scroll.vue';
+import { has, splitText, tip } from '../plugin/utils';
+import { isMobile } from '../plugin/use';
+
+let canvas: HTMLCanvasElement;
+let ctx: CanvasRenderingContext2D;
+
+const selected = ref(0);
+const chapter = ref<Chapter>('chapter1');
+const update = ref(false);
+
+const chapterDict = {
+    chapter1: '第一章'
+};
+
+const chapterList = Object.keys(core.plugin.skills) as Chapter[];
+
+watch(selected, draw);
+watch(update, () => (mdef.value = core.status.hero.mdef));
+
+const mdef = ref(core.status.hero.mdef);
+
+const skill = computed(() => {
+    update.value;
+    return core.getSkillFromIndex(selected.value);
+});
+
+const skills = computed(() => {
+    return core.plugin.skills[chapter.value];
+});
+
+const desc = computed(() => {
+    return eval(
+        '`' +
+            splitText(skill.value.desc).replace(/level(:\d+)?/g, (str, $1) => {
+                if ($1) return `core.getSkillLevel(${$1})`;
+                else return `core.getSkillLevel(${skill.value.index})`;
+            }) +
+            '`'
+    );
+});
+
+const effect = computed(() => {
+    return [0, 1].map(v => {
+        return eval(
+            '`' +
+                `${v === 0 ? '当前效果：' : '下一级效果：'}` +
+                skill.value.effect
+                    .join('')
+                    .replace(/level(:\d+)?/g, (str, $1) => {
+                        if ($1) return `(core.getSkillLevel(${$1}) + ${v})`;
+                        else
+                            return `(core.getSkillLevel(${skill.value.index}) + ${v})`;
+                    }) +
+                '`'
+        );
+    }) as [string, string];
+});
+
+const dict = computed(() => {
+    const dict: Record<number, number> = {};
+    const all = skills.value;
+    all.forEach((v, i) => {
+        dict[v.index] = i;
+    });
+    return dict;
+});
+
+const front = computed(() => {
+    return skill.value.front.map(v => {
+        return `${core.getSkillLevel(v[0]) >= v[1] ? 'a' : 'b'}${v[1]}级  ${
+            skills.value[dict.value[v[0]]].title
+        }`;
+    });
+});
+
+const consume = computed(() => {
+    update.value;
+    return core.getSkillConsume(selected.value);
+});
+
+const level = computed(() => {
+    update.value;
+    return core.getSkillLevel(selected.value);
+});
+
+function exit() {
+    core.plugin.skillTreeOpened.value = false;
+}
+
+function resize() {
+    const style = getComputedStyle(canvas);
+    canvas.width = parseFloat(style.width) * devicePixelRatio;
+    canvas.height = parseFloat(style.height) * devicePixelRatio;
+}
+
+function draw() {
+    const d = dict.value;
+    const w = canvas.width;
+    const per = w / 11;
+    skills.value.forEach(v => {
+        const [x, y] = v.loc.map(v => v * 2 - 1);
+        // 技能连线
+        v.front.forEach(([skill]) => {
+            const s = skills.value[d[skill]];
+            ctx.beginPath();
+            ctx.moveTo(x * per + per / 2, y * per + per / 2);
+            ctx.lineTo(
+                ...(s.loc.map(v => (v * 2 - 1) * per + per / 2) as LocArr)
+            );
+            if (core.getSkillLevel(s.index) === 0) ctx.strokeStyle = '#aaa';
+            else ctx.strokeStyle = '#0f8';
+            ctx.lineWidth = devicePixelRatio;
+            ctx.stroke();
+        });
+    });
+    skills.value.forEach(v => {
+        const [x, y] = v.loc.map(v => v * 2 - 1);
+        const level = core.getSkillLevel(v.index);
+        // 技能图标
+        if (selected.value === v.index) ctx.strokeStyle = '#ff0';
+        else if (level === 0) ctx.strokeStyle = '#888';
+        else if (level === v.max) ctx.strokeStyle = '#F7FF68';
+        else ctx.strokeStyle = '#00FF69';
+        ctx.lineWidth = per * 0.03;
+        ctx.strokeRect(x * per, y * per, per, per);
+        const img =
+            core.material.images.images[`skill${v.index}.png` as ImageIds];
+        ctx.drawImage(img, x * per, y * per, per, per);
+    });
+}
+
+function click(e: MouseEvent) {
+    const px = e.offsetX;
+    const py = e.offsetY;
+    const w = canvas.width / devicePixelRatio;
+    const per = w / 11;
+    const x = Math.floor(px / per);
+    const y = Math.floor(py / per);
+    if (x % 2 !== 1 || y % 2 !== 1) return;
+    const sx = Math.floor(x / 2) + 1;
+    const sy = Math.floor(y / 2) + 1;
+    const skill = skills.value.find(v => v.loc[0] === sx && v.loc[1] === sy);
+    if (!skill) return;
+    if (selected.value !== skill.index) selected.value = skill.index;
+    else {
+        const success = core.upgradeSkill(skill.index);
+        if (!success) tip('error', '升级失败！');
+        else {
+            tip('success', '升级成功！');
+            update.value = !update.value;
+            core.status.route.push(`skill:${selected.value}`);
+        }
+    }
+}
+
+onMounted(() => {
+    canvas = document.getElementById('skill-canvas') as HTMLCanvasElement;
+    ctx = canvas.getContext('2d')!;
+    resize();
+    draw();
+    canvas.addEventListener('click', click);
+});
+
+function selectChapter(delta: number) {
+    const now = chapterList.indexOf(chapter.value);
+    const to = now + delta;
+    if (has(chapterList[to])) {
+        chapter.value = chapterList[to];
+    }
+}
 </script>
 
 <style lang="less" scoped>
 #skill-tree {
+    width: 90vh;
+    height: 90vh;
+    font-family: 'normal';
+    font-size: 2.8vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#skill-title {
     width: 100%;
+    text-align: center;
+    font-size: 4vh;
+    height: 5vh;
+    line-height: 1;
+}
+
+#tools {
+    height: 5vh;
+    font-size: 3.2vh;
+}
+
+#skill-info {
+    height: 24vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+#divider {
+    width: 100%;
+    margin: 1vh 0 1vh 0;
+}
+
+#divider-split {
+    margin: 1vh 0 0 0;
+}
+
+#divider-vertical {
     height: 100%;
+    margin: 0;
+}
+
+#skill-bottom {
+    height: 53vh;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+#skill-canvas {
+    height: 53vh;
+    width: 53vh;
+}
+
+#skill-effect {
+    display: flex;
+    flex-direction: column;
+}
+
+#skill-consume {
+    width: 100%;
+    text-align: center;
+    height: 4vh;
+}
+
+#skill-upgrade-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding-top: 1vh;
+}
+
+.upgrade-divider {
+    margin: 1vh 0 1vh 0;
+    border-color: #ddd4;
+}
+
+#front-scroll {
+    width: 100%;
+    height: 39vh;
+}
+
+#skill-front {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 </style>

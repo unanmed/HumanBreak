@@ -1408,7 +1408,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 values: values,
                 version: core.firstData.version,
                 guid: core.getGuid(),
-                time: new Date().getTime()
+                time: new Date().getTime(),
+                skills: core.saveSkillTree()
             };
 
             return data;
@@ -1454,6 +1455,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             core.setFlag('__fromLoad__', true);
 
             // TODO：增加自己的一些读档处理
+            core.loadSkillTree(data.skills);
 
             // 切换到对应的楼层
             core.changeFloor(data.floorId, null, data.hero.loc, 0, function () {

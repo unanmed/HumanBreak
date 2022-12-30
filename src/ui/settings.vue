@@ -49,7 +49,7 @@ import {
     autoScale
 } from '../plugin/settings';
 import settingInfo from '../data/settings.json';
-import { has } from '../plugin/utils';
+import { has, splitText } from '../plugin/utils';
 import Column from '../components/colomn.vue';
 
 type Settings = typeof settingInfo;
@@ -57,17 +57,7 @@ type Settings = typeof settingInfo;
 const selected = ref<keyof Settings>('transition');
 
 const descText = computed(() => {
-    return settingInfo[selected.value].desc
-        .map((v, i, a) => {
-            if (/^\d+\./.test(v)) return `${'&nbsp;'.repeat(12)}${v}`;
-            else if (
-                (has(a[i - 1]) && v !== '<br>' && a[i - 1] === '<br>') ||
-                i === 0
-            ) {
-                return `${'&nbsp;'.repeat(8)}${v}`;
-            } else return v;
-        })
-        .join('');
+    return splitText(settingInfo[selected.value].desc);
 });
 
 function exit() {

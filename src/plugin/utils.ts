@@ -133,3 +133,21 @@ export function tip(
         class: 'antdv-message'
     });
 }
+
+/**
+ * 设置文字分段换行等
+ * @param str 文字
+ */
+export function splitText(str: string[]) {
+    return str
+        .map((v, i, a) => {
+            if (/^\d+\./.test(v)) return `${'&nbsp;'.repeat(12)}${v}`;
+            else if (
+                (has(a[i - 1]) && v !== '<br>' && a[i - 1] === '<br>') ||
+                i === 0
+            ) {
+                return `${'&nbsp;'.repeat(8)}${v}`;
+            } else return v;
+        })
+        .join('');
+}

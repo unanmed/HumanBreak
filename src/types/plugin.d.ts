@@ -14,7 +14,11 @@ type CanParseCss = keyof {
         : never]: CSSStyleDeclaration[P];
 };
 
-interface PluginDeclaration extends PluginUtils, PluginUis, PluginUse {
+interface PluginDeclaration
+    extends PluginUtils,
+        PluginUis,
+        PluginUse,
+        SkillTree {
     /**
      * 添加函数  例：添加弹出文字，像这个就可以使用core.addPop或core.plugin.addPop调用
      * @param px 弹出的横坐标
@@ -142,6 +146,9 @@ interface PluginUis {
     /** 技能查看界面是否打开 */
     readonly skillOpened: Ref<boolean>;
 
+    /** 技能树界面是否打开 */
+    readonly skillTreeOpened: Ref<boolean>;
+
     /** ui栈 */
     readonly uiStack: Ref<Component[]>;
 
@@ -201,11 +208,55 @@ interface PluginUse {
 }
 
 interface SkillTree {
+    skills: Record<Chapter, Skill[]>;
+
     /**
      * 获取技能等级
      * @param skill 技能索引
      */
     getSkillLevel(skill: number): number;
+
+    /**
+     * 根据索引获取技能
+     * @param index 索引
+     */
+    getSkillFromIndex(index: number): Skill;
+
+    /**
+     * 获取技能的消耗
+     * @param skill 技能
+     */
+    getSkillConsume(skill: number): number;
+
+    /**
+     * 升级技能
+     * @param skill 技能索引
+     */
+    upgradeSkill(skill: number): boolean;
+
+    /**
+     * 保存技能树等级
+     */
+    saveSkillTree(): number[];
+
+    /**
+     * 加载技能树等级
+     * @param data 等级信息
+     */
+    loadSkillTree(data: number[]): void;
+}
+
+type Chapter = 'chapter1';
+
+interface Skill {
+    index: number;
+    title: string;
+    desc: string[];
+    consume: string;
+    front: LocArr[];
+    loc: LocArr;
+    max: number;
+    effect: string[];
 }
 
 type Forward<T> = {

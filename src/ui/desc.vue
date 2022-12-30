@@ -18,7 +18,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue';
 import desc from '../data/desc.json';
-import { has } from '../plugin/utils';
+import { has, splitText } from '../plugin/utils';
 import Colomn from '../components/colomn.vue';
 
 type DescKey = keyof typeof desc;
@@ -30,17 +30,7 @@ function exit() {
 }
 
 const content = computed(() => {
-    return desc[selected.value].desc
-        .map((v, i, a) => {
-            if (/^\d+\./.test(v)) return `${'&nbsp;'.repeat(12)}${v}`;
-            else if (
-                (has(a[i - 1]) && v !== '<br>' && a[i - 1] === '<br>') ||
-                i === 0
-            ) {
-                return `${'&nbsp;'.repeat(8)}${v}`;
-            } else return v;
-        })
-        .join('');
+    return splitText(desc[selected.value].desc);
 });
 </script>
 

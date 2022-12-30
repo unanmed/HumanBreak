@@ -1513,572 +1513,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             }
         }
     },
-    intelligenceTree: function () {
-        // 智慧加点
-        var list;
-        var levels;
-        var currPage = 1,
-            selector = [1, 1];
-        // 获取技能等级
-        this.getSkillLevel = function () {
-            if (!flags.levels) flags.levels = [];
-            for (var i = 0; i < 10; i++) {
-                if (flags.levels[i] == null) flags.levels[i] = 0;
-            }
-            return flags.levels;
-        };
-        // 初始化
-        this.initializeList = function (changePage) {
-            // 初始化等级
-            levels = core.clone(core.getSkillLevel());
-            // 技能定义 0索引 1名称 2描述 3等级 4消耗 5前置技能[索引,等级,索引,等级] 6位置(5×5) 7最大等级 8页码数 9效果
-            list = [
-                [
-                    0,
-                    '力量',
-                    '力量就是根本！可以通过智慧增加力量',
-                    0,
-                    10 * levels[0] + 10,
-                    null,
-                    [1, 2],
-                    10,
-                    1,
-                    '攻击＋' + levels[0] * 2
-                ],
-                [
-                    1,
-                    '致命一击',
-                    '爆发出全部力量攻击敌人',
-                    0,
-                    30 * levels[1] + 30,
-                    [0, 5],
-                    [2, 1],
-                    10,
-                    1,
-                    '每回合额外伤害＋' + levels[1] * 5
-                ],
-                [
-                    2,
-                    '断灭之刃',
-                    '\\r[#dddd44]主动技能\\r[]，开启后会在战斗时会额外增加一定量的攻击， 但同时减少一定量的防御，快捷键1',
-                    0,
-                    200 * levels[2] + 400,
-                    [1, 5],
-                    [4, 1],
-                    5,
-                    1,
-                    levels[2] * 10 +
-                        '%攻击加成，减少' +
-                        levels[2] * 10 +
-                        '%的防御'
-                ],
-                [
-                    3,
-                    '坚韧',
-                    '由智慧转化出坚韧！',
-                    0,
-                    10 * levels[3] + 10,
-                    null,
-                    [1, 4],
-                    10,
-                    1,
-                    '防御+' + levels[3] * 2
-                ],
-                [
-                    4,
-                    '回春',
-                    '让智慧化为治愈之泉水！',
-                    0,
-                    20 + levels[4] * 20,
-                    [3, 5],
-                    [2, 5],
-                    25,
-                    1,
-                    '每回合回复' + 1 * levels[4] + '生命'
-                ],
-                [
-                    5,
-                    '治愈之泉',
-                    '让生命变得更多一些吧！每吃50瓶血瓶就增加当前生命回复10%的生命回复',
-                    0,
-                    1500,
-                    [4, 25],
-                    [4, 5],
-                    1,
-                    1,
-                    '50瓶血10%生命回复'
-                ],
-                [
-                    6,
-                    '坚固之盾',
-                    '让护甲更加坚硬一些吧！',
-                    0,
-                    50 + levels[6] * 50,
-                    [3, 5],
-                    [2, 3],
-                    10,
-                    1,
-                    '防御+' + 10 * levels[6]
-                ],
-                [
-                    7,
-                    '无上之盾',
-                    '\\r[#dddd44]第一章终极技能\\r[]，战斗时智慧会充当等量护盾',
-                    0,
-                    2500,
-                    [6, 10, 5, 1, 2, 2],
-                    [5, 3],
-                    1,
-                    1,
-                    '战斗时智慧会充当护盾'
-                ]
-            ];
-            // 深拷贝list
-            list = core.clone(list);
-            var acted = false;
-            for (var i in list) {
-                list[i][3] = levels[i];
-                if (!list[i][5]) list[i][5] = [];
-                // 根据页码获取光标应该在的位置
-                if (changePage && !acted) {
-                    if (list[i][8] == currPage) {
-                        selector = list[i][6];
-                        acted = true;
-                    }
-                }
-            }
-        };
-        // 升级效果
-        this.treeEffect = function (index) {
-            index = parseInt(index);
-            switch (index) {
-                case 0: // 力量 +2攻击
-                    core.status.hero.atk += 2;
-                    break;
-                case 1: // 致命一击 +5额外攻击
-                    core.status.hero.mana += 5;
-                    break;
-                case 2: // 断灭之刃
-                    core.setFlag('bladeOn', true);
-                    break;
-                case 3: // 坚韧 +2防御
-                    core.status.hero.def += 2;
-                    break;
-                case 4: // 回春 +1回复
-                    core.status.hero.hpmax += 1;
-                    break;
-                case 5: // 治愈之泉
-                    core.setFlag('spring', true);
-                    break;
-                case 6: // 坚固之盾 +10防御
-                    core.status.hero.def += 10;
-                    break;
-                case 7: // 无上之盾
-                    core.setFlag('superSheild', true);
-                    break;
-            }
-            core.status.hero.mdef -= list[index][4];
-        };
-        // 由光标位置获得索引
-        this.getIdBySelector = function (x, y, page) {
-            for (var i in list) {
-                if (
-                    list[i][8] == page &&
-                    x == list[i][6][0] &&
-                    y == list[i][6][1]
-                ) {
-                    return i;
-                }
-            }
-        };
-        // 绘制技能树界面
-        this.drawTree = function (changePage) {
-            // 初始化
-            if (!changePage) changePage = false;
-            core.initializeList(changePage);
-            var id = core.getIdBySelector(selector[0], selector[1], currPage);
-            var name = list[id][1],
-                description = list[id][2],
-                level = levels[id],
-                cost = list[id][4],
-                foreSkill = list[id][5],
-                max = list[id][7],
-                effect = list[id][9];
-            // 先建画布
-            core.createCanvas('tree', 0, 0, 480, 480, 130);
-            // 背景
-            core.fillRect('tree', 0, 0, 480, 480, [0, 0, 0, 0.95]);
-            core.drawLine('tree', 0, 172, 480, 172, [200, 200, 200, 0.95], 1);
-            core.drawLine('tree', 308, 172, 308, 480, [200, 200, 200, 0.95], 1);
-            core.drawLine('tree', 308, 450, 480, 450, [200, 200, 200, 0.95], 1);
-            core.drawLine('tree', 308, 220, 480, 220, [200, 200, 200, 0.95], 1);
-            core.drawLine('tree', 308, 413, 480, 413, [200, 200, 200, 0.95], 1);
-            for (var i = 0; i <= 239; i++) {
-                core.drawLine(
-                    'tree',
-                    i,
-                    40,
-                    480 - i,
-                    40,
-                    [0, 255, 107, 0.002],
-                    2
-                );
-            }
-            // 每一项技能图标
-            for (var i in list) {
-                if (list[i][8] != currPage) continue;
-                // 技能间的线
-                for (var j = 0; j < list[i][5].length; j += 2) {
-                    if (!list[i][5]) break;
-                    if (levels[list[i][5][j]] < list[i][5][j + 1])
-                        core.drawLine(
-                            'tree',
-                            list[list[i][5][j]][6][0] * 56 - 14,
-                            list[list[i][5][j]][6][1] * 56 + 158,
-                            list[i][6][0] * 56 - 14,
-                            list[i][6][1] * 56 + 158,
-                            '#aaaaaa',
-                            1
-                        );
-                    else
-                        core.drawLine(
-                            'tree',
-                            list[list[i][5][j]][6][0] * 56 - 14,
-                            list[list[i][5][j]][6][1] * 56 + 158,
-                            list[i][6][0] * 56 - 14,
-                            list[i][6][1] * 56 + 158,
-                            '#00FF88',
-                            1
-                        );
-                }
-            }
-            // 图标
-            for (var i in list) {
-                // 图标
-                core.drawImage(
-                    'tree',
-                    'skill' + i + '.png',
-                    0,
-                    0,
-                    114,
-                    114,
-                    list[i][6][0] * 56 - 28,
-                    list[i][6][1] * 56 + 144,
-                    28,
-                    28
-                );
-                // 方框
-                if (levels[i] == 0)
-                    core.strokeRect(
-                        'tree',
-                        list[i][6][0] * 56 - 28,
-                        list[i][6][1] * 56 + 144,
-                        28,
-                        28,
-                        '#888888',
-                        1
-                    );
-                else if (levels[i] == list[i][7])
-                    core.strokeRect(
-                        'tree',
-                        list[i][6][0] * 56 - 28,
-                        list[i][6][1] * 56 + 144,
-                        28,
-                        28,
-                        '#F7FF68',
-                        1
-                    );
-                else
-                    core.strokeRect(
-                        'tree',
-                        list[i][6][0] * 56 - 28,
-                        list[i][6][1] * 56 + 144,
-                        28,
-                        28,
-                        '#00FF69',
-                        1
-                    );
-                // 光标
-                core.strokeRect(
-                    'tree',
-                    selector[0] * 56 - 28,
-                    selector[1] * 56 + 144,
-                    28,
-                    28,
-                    '#ffff00',
-                    1
-                );
-            }
-            // 说明
-            core.setTextAlign('tree', 'center');
-            core.fillText('tree', name, 240, 30, '#00FFD5', '28px normal');
-            core.setTextAlign('tree', 'left');
-            core.drawTextContent('tree', '     ' + description, {
-                left: 10,
-                top: 42,
-                maxWidth: 460,
-                font: 'normal',
-                fontSize: 18
-            });
-            // 效果
-            if (level != 0)
-                core.drawTextContent('tree', '当前效果：' + effect, {
-                    left: 10,
-                    top: 122,
-                    maxWidth: 460,
-                    font: 'normal',
-                    fontSize: 18
-                });
-            if (level != max) {
-                flags.levels[id] += 1;
-                core.initializeList(false);
-                effect = list[id][9];
-                core.drawTextContent('tree', '下一级效果：' + effect, {
-                    left: 10,
-                    top: 147,
-                    maxWidth: 460,
-                    font: 'normal',
-                    fontSize: 18
-                });
-                flags.levels[id]--;
-                core.initializeList(false);
-                effect = list[id][9];
-            }
-            core.setTextAlign('tree', 'center');
-            // 等级
-            core.fillText(
-                'tree',
-                '等级：' + level + '/' + max,
-                394,
-                190,
-                '#ffffff',
-                '18px normal'
-            );
-            // 升级
-            if (level != max)
-                core.fillText(
-                    'tree',
-                    '升级花费：' + cost,
-                    394,
-                    210,
-                    '#ffffff',
-                    '18px normal'
-                );
-            // 退出
-            core.fillText('tree', '退出', 394, 470, '#ffffff', '18px normal');
-            // 页码数
-            var text = core.replaceNumberWithChinese(currPage);
-            core.fillText(
-                'tree',
-                '第' + text + '章',
-                394,
-                440,
-                '#ffffff',
-                '24px normal'
-            );
-            if (currPage != 1)
-                core.fillText('tree', '<', 334, 440, '#ffffff', '24px normal');
-            if (currPage != flags.chapter)
-                core.fillText('tree', '>', 454, 440, '#ffffff', '24px normal');
-            // 前置技能
-            core.fillText(
-                'tree',
-                '前置技能',
-                394,
-                245,
-                '#ffffff',
-                '20px normal'
-            );
-            if (foreSkill.length > 0) {
-                for (var i = 0; i < foreSkill.length; i += 2) {
-                    core.fillText(
-                        'tree',
-                        foreSkill[i + 1] + '级  ' + list[foreSkill[i]][1],
-                        394,
-                        270 + 10 * i
-                    );
-                }
-            }
-        };
-        // 升级操作
-        this.upgradeTree = function (index) {
-            // 执行操作
-            if (levels[index] == list[index][7]) {
-                core.playSound('操作失败');
-                core.insertAction(['该技能已满级！']);
-                return;
-            }
-            // 判断前置技能
-            var fore = list[index][5];
-            for (var i = 0; i < fore.length; i += 2) {
-                if (levels[fore[i]] < fore[i + 1]) {
-                    core.playSound('操作失败');
-                    core.insertAction(['前置技能未满足！']);
-                    return;
-                }
-            }
-            if (core.status.hero.mdef < list[index][4]) {
-                core.playSound('操作失败');
-                core.insertAction(['智慧点不足！']);
-                return;
-            }
-            flags.levels[index]++;
-            core.treeEffect(index);
-            // 刷新
-            core.drawTree(false);
-            core.updateStatusBar();
-            core.updateDamage();
-            // 音效
-            core.playSound('tree.mp3');
-            core.insertAction([{ type: 'sleep', time: 100, noSkip: true }]);
-        };
-        // 上下左右
-        this.moveSelector = function (keycode, times) {
-            times = times || 0;
-            core.playSound('光标移动');
-            if (keycode == 37 || keycode == 39) {
-                // left right
-                if (times > 3) {
-                    // 正左右没有东西 移动至下一列
-                    selector[0] -= 3 * (keycode - 38);
-                    for (var i in list) {
-                        if (list[i][8] != currPage) continue;
-                        if (list[i][6][0] == selector[0]) {
-                            selector = list[i][6];
-                            return;
-                        }
-                    }
-                    selector[0] -= keycode - 38;
-                    return;
-                }
-                selector[0] += keycode - 38;
-                for (var i in list) {
-                    // 正左右有技能 移动至最近的技能
-                    if (list[i][8] != currPage) continue;
-                    if (
-                        list[i][6][0] == selector[0] &&
-                        list[i][6][1] == selector[1]
-                    ) {
-                        selector = list[i][6];
-                        return;
-                    }
-                }
-                return core.moveSelector(keycode, times + 1);
-            } else {
-                // up down
-                if (times > 3) {
-                    selector[1] -= 3 * (keycode - 39);
-                    for (var i in list) {
-                        if (list[i][8] != currPage) continue;
-                        if (list[i][6][1] == selector[1]) {
-                            selector = list[i][6];
-                            return;
-                        }
-                    }
-                    selector[1] -= keycode - 39;
-                    return;
-                }
-                selector[1] += keycode - 39;
-                for (var i in list) {
-                    if (list[i][8] != currPage) continue;
-                    if (
-                        list[i][6][1] == selector[1] &&
-                        list[i][6][0] == selector[0]
-                    ) {
-                        selector = list[i][6];
-                        return;
-                    }
-                }
-                return core.moveSelector(keycode, times + 1);
-            }
-        };
-        // 由点击位置获取光标位置
-        this.getSelectorByLoc = function (px, py) {
-            if (px % 56 < 28 || (py - 172) % 56 < 28) return;
-            var x = Math.ceil(px / 56),
-                y = Math.ceil((py - 172) / 56);
-            if (selector[0] == x && selector[1] == y) {
-                var id = core.getIdBySelector(
-                    selector[0],
-                    selector[1],
-                    currPage
-                );
-                core.upgradeTree(id);
-            } else {
-                for (var i in list) {
-                    if (list[i][8] != currPage) continue;
-                    if (list[i][6][0] == x && list[i][6][1] == y) {
-                        selector = [x, y];
-                        core.playSound('光标移动');
-                        return;
-                    }
-                }
-            }
-        };
-        // 键盘操作
-        this.treeKeyboard = function (keycode) {
-            var id = core.getIdBySelector(selector[0], selector[1], currPage);
-            switch (keycode) {
-                case 13:
-                case 32: // 确认升级
-                    core.upgradeTree(id);
-                    break;
-                case 27:
-                case 88: // 退出
-                    core.playSound('取消');
-                    core.insertAction({ type: 'break' });
-                    break;
-                case 37:
-                case 38:
-                case 39:
-                case 40: // 移动光标
-                    core.moveSelector(keycode);
-                    break;
-            }
-        };
-        // 点击操作
-        this.treeClick = function (px, py) {
-            if (px >= 308 && py >= 450) {
-                core.playSound('取消');
-                core.insertAction({ type: 'break' });
-            }
-            if (px <= 308 && py >= 172) {
-                core.getSelectorByLoc(px, py);
-            }
-        };
-        // 操作
-        this.actTree = function () {
-            if (flags.type == 0) return this.treeKeyboard(flags.keycode);
-            else return this.treeClick(flags.px, flags.py);
-        };
-        // 开启
-        this.openTree = function () {
-            // 插入事件
-            core.initializeList(true);
-            core.playSound('打开界面');
-            core.insertAction([
-                {
-                    type: 'while',
-                    condition: 'true',
-                    data: [
-                        {
-                            type: 'function',
-                            function: '() => { core.plugin.drawTree(false); }'
-                        },
-                        { type: 'wait' },
-                        {
-                            type: 'function',
-                            function: '() => { core.plugin.actTree(); }'
-                        }
-                    ]
-                },
-                {
-                    type: 'function',
-                    function: "() => { core.deleteCanvas('tree');}"
-                }
-            ]);
-        };
-    },
     skills: function () {
         // 所有的主动技能效果
         var ignoreInJump = {
@@ -6145,12 +5579,128 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             flags[setting] = v;
             return true;
         });
+
+        core.registerReplayAction('upgradeSkill', name => {
+            if (!name.startsWith('skill:')) return false;
+            const skill = parseInt(name.slice(6));
+            core.upgradeSkill(skill);
+        });
     },
     skillTree: function () {
         /**
          * @type {number[]}
          */
-        const levels = [];
+        let levels = [];
+
+        /**
+         * @type {Record<Chapter, Skill[]>}
+         */
+        const skills = {
+            chapter1: [
+                {
+                    index: 0,
+                    title: '力量',
+                    desc: [
+                        '力量就是根本！可以通过智慧增加力量，每级增加2点攻击。'
+                    ],
+                    consume: '10 * level + 10',
+                    front: [],
+                    loc: [1, 2],
+                    max: 10,
+                    effect: ['攻击 + ${level * 2}']
+                },
+                {
+                    index: 1,
+                    title: '致命一击',
+                    desc: ['爆发出全部力量攻击敌人，每级增加5点额外攻击。'],
+                    consume: '30 * level + 30',
+                    front: [[0, 5]],
+                    loc: [2, 1],
+                    max: 10,
+                    effect: ['额外攻击 + ${level * 5}']
+                },
+                {
+                    index: 2,
+                    title: '断灭之刃',
+                    desc: [
+                        '<span style="color: gold">主动技能，快捷键1</span>，',
+                        '开启后会在战斗时会额外增加一定量的攻击，但同时减少一定量的防御。'
+                    ],
+                    consume: '200 * level + 400',
+                    front: [[1, 5]],
+                    loc: [4, 1],
+                    max: 5,
+                    effect: ['增加${level * 10}%攻击，减少${level * 10}%防御']
+                },
+                {
+                    index: 3,
+                    title: '坚韧',
+                    desc: ['由智慧转化出坚韧！每级增加2点防御'],
+                    consume: '10 * level + 10',
+                    front: [],
+                    loc: [1, 4],
+                    max: 10,
+                    effect: ['防御 + ${level * 2}']
+                },
+                {
+                    index: 4,
+                    title: '回春',
+                    desc: ['让智慧化为治愈之泉水！每级增加1点生命回复'],
+                    consume: '20 * level + 20',
+                    front: [[3, 5]],
+                    loc: [2, 5],
+                    max: 25,
+                    effect: ['生命回复 + ${level}']
+                },
+                {
+                    index: 5,
+                    title: '治愈之泉',
+                    desc: [
+                        '让生命变得更多一些吧！每吃50瓶血瓶就增加当前生命回复10%的生命回复'
+                    ],
+                    consume: '1500',
+                    front: [[4, 25]],
+                    loc: [4, 5],
+                    max: 1,
+                    effect: ['50瓶血10%生命回复']
+                },
+                {
+                    index: 6,
+                    title: '坚固之盾',
+                    desc: ['让护甲更加坚硬一些吧！每级增加10点防御'],
+                    consume: '50 + level * 50',
+                    front: [[3, 5]],
+                    loc: [2, 3],
+                    max: 10,
+                    effect: ['防御 + ${level * 10}']
+                },
+                {
+                    index: 7,
+                    title: '无上之盾',
+                    desc: [
+                        '<span style="color: #dd4">第一章终极技能</span>，战斗时智慧会充当等量护盾'
+                    ],
+                    consume: '50 + level * 50',
+                    front: [
+                        [6, 10],
+                        [5, 1],
+                        [2, 2]
+                    ],
+                    loc: [5, 3],
+                    max: 1,
+                    effect: ['战斗时智慧会充当护盾']
+                }
+            ]
+        };
+
+        core.plugin.skills = skills;
+
+        this.getSkillFromIndex = function (index) {
+            for (const [, skill] of Object.entries(skills)) {
+                const s = skill.find(v => v.index === index);
+                if (s) return s;
+            }
+        };
 
         /**
          * 获取技能等级
@@ -6158,6 +5708,87 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          */
         this.getSkillLevel = function (skill) {
             return (levels[skill] ??= 0);
+        };
+
+        this.getSkillConsume = function (skill) {
+            return eval(
+                this.getSkillFromIndex(skill).consume.replace(
+                    /level(:\d+)?/g,
+                    (str, $1) => {
+                        if ($1) return `core.getSkillLevel(${$1})`;
+                        else return `core.getSkillLevel(${skill})`;
+                    }
+                )
+            );
+        };
+
+        this.openTree = function () {
+            if (main.replayChecking) return;
+            core.plugin.skillTreeOpened.value = true;
+        };
+
+        /**
+         * 能否升级某个技能
+         * @param {number} skill
+         */
+        function canUpgrade(skill) {
+            const consume = core.getSkillConsume(skill);
+            if (consume > core.status.hero.mdef) return false;
+            const level = core.getSkillLevel(skill);
+            const s = core.getSkillFromIndex(skill);
+            if (level === s.max) return false;
+            const front = s.front;
+            for (const [skill, level] of front) {
+                if (core.getSkillLevel(skill) < level) return false;
+            }
+            return true;
+        }
+
+        /**
+         * 实际升级效果
+         * @param {number} skill
+         */
+        this.upgradeSkill = function (skill) {
+            if (!canUpgrade(skill)) return false;
+            switch (skill) {
+                case 0: // 力量 +2攻击
+                    core.status.hero.atk += 2;
+                    break;
+                case 1: // 致命一击 +5额外攻击
+                    core.status.hero.mana += 5;
+                    break;
+                case 2: // 断灭之刃
+                    core.setFlag('bladeOn', true);
+                    break;
+                case 3: // 坚韧 +2防御
+                    core.status.hero.def += 2;
+                    break;
+                case 4: // 回春 +1回复
+                    core.status.hero.hpmax += 1;
+                    break;
+                case 5: // 治愈之泉
+                    core.setFlag('spring', true);
+                    break;
+                case 6: // 坚固之盾 +10防御
+                    core.status.hero.def += 10;
+                    break;
+                case 7: // 无上之盾
+                    core.setFlag('superSheild', true);
+                    break;
+            }
+            const consume = core.getSkillConsume(skill);
+            core.status.hero.mdef -= consume;
+            levels[skill]++;
+            core.updateStatusBar();
+            return true;
+        };
+
+        this.saveSkillTree = function () {
+            return levels.slice();
+        };
+
+        this.loadSkillTree = function (data) {
+            levels = data ?? [];
         };
     }
 };

@@ -11,6 +11,8 @@
             </Scroll>
             <a-divider
                 class="divider"
+                dashed
+                style="border-color: #ddd4"
                 :type="isMobile ? 'horizontal' : 'vertical'"
             ></a-divider>
             <Scroll class="column-right" :id="`column-right-${id}`"
