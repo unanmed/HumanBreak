@@ -1741,7 +1741,7 @@ control.prototype.drawDamage = function (ctx) {
 control.prototype._drawDamage_draw = function (ctx, onMap) {
     if (!core.hasItem('book')) return;
 
-    core.setFont(ctx, 'bold 11px Arial');
+    core.setFont(ctx, "14px 'normal'");
     core.setTextAlign(ctx, 'left');
     core.status.damage.data.forEach(function (one) {
         var px = one.px,

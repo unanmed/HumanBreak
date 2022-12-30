@@ -187,15 +187,15 @@ ui.prototype.fillBoldText = function (
         y *= devicePixelRatio;
     }
     style = core.arrayToRGBA(style);
-    if (!strokeStyle) strokeStyle = '#000000';
+    strokeStyle ??= '#000';
     strokeStyle = core.arrayToRGBA(strokeStyle);
     if (maxWidth != null) {
         this.setFontForMaxWidth(ctx, text, maxWidth);
     }
     ctx.strokeStyle = strokeStyle;
-    ctx.lineWidth = 2;
-    ctx.strokeText(text, x, y);
+    ctx.lineWidth = 1 * core.domStyle.scale * devicePixelRatio;
     ctx.fillStyle = style;
+    ctx.strokeText(text, x, y);
     ctx.fillText(text, x, y);
 };
 
@@ -818,7 +818,7 @@ ui.prototype._uievent_setFilter = function (data) {
 ui.prototype.calWidth = function (name, text, font) {
     var ctx = this.getContextByName(name);
     if (ctx) {
-        if (font) ctx.font = font;
+        if (font) core.setFont(name, font);
         return ctx.measureText(text).width;
     }
     return 0;
@@ -1098,7 +1098,7 @@ ui.prototype._drawTip_drawOne = function (tip) {
             32,
             32
         );
-    core.fillText('data', tip.text, tip.textX, 33, '#FFFFFF');
+    core.fillText('data', tip.text, tip.textX, 33, '#FFF', '16px normal');
     core.setAlpha('data', 1);
 };
 
@@ -1734,7 +1734,7 @@ ui.prototype._getDrawableIconInfo = function (id) {
     return [image, icon];
 };
 
-ui.prototype._buildFont = function (fontSize, bold, italic, font) {
+ui.prototype._buildFont = function (fontSize, bold, italic, font, isHD) {
     var textAttribute =
             core.status.textAttribute || core.initStatus.textAttribute,
         globalAttribute =
@@ -1743,7 +1743,7 @@ ui.prototype._buildFont = function (fontSize, bold, italic, font) {
     return (
         (bold ? 'bold ' : '') +
         (italic ? 'italic ' : '') +
-        (fontSize || textAttribute.textfont) +
+        (fontSize || textAttribute.textfont) * (isHD ? devicePixelRatio : 1) +
         'px ' +
         (font || globalAttribute.font)
     );
@@ -1793,11 +1793,11 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
     config.offsetY = 0;
     config.line = 0;
     config.blocks = [];
-    config.isHD = ctx != null && ctx.canvas.hasAttribute('isHD');
+    config.isHD = ctx == null || ctx.canvas.hasAttribute('isHD');
 
     // 创建一个新的临时画布
     var tempCtx = document.createElement('canvas').getContext('2d');
-    if (config.isHD) {
+    if (config.isHD && ctx) {
         core.maps._setHDCanvasSize(
             tempCtx,
             ctx.canvas.width,
@@ -1812,7 +1812,8 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
         config.fontSize,
         config.bold,
         config.italic,
-        config.font
+        config.font,
+        config.isHD
     );
     tempCtx.fillStyle = config.color;
     config = this._drawTextContent_draw(ctx, tempCtx, content, config);
@@ -1846,10 +1847,10 @@ ui.prototype._drawTextContent_draw = function (ctx, tempCtx, content, config) {
             core.drawImage(
                 ctx,
                 tempCtx.canvas,
-                block.left * ratio,
-                block.top * ratio,
-                block.width * ratio,
-                block.height * ratio,
+                block.left * ratio * devicePixelRatio,
+                block.top * ratio * devicePixelRatio,
+                block.width * ratio * devicePixelRatio,
+                block.height * ratio * devicePixelRatio,
                 config.left + block.left + block.marginLeft,
                 config.top + block.top + block.marginTop,
                 block.width,
@@ -1931,7 +1932,8 @@ ui.prototype._drawTextContent_drawChar = function (
                 config.currfont,
                 config.bold,
                 config.italic,
-                config.font
+                config.font,
+                config.isHD
             );
             return true;
         }
@@ -1941,7 +1943,9 @@ ui.prototype._drawTextContent_drawChar = function (
             return this._drawTextContent_emptyChar(tempCtx, content, config);
     }
     // 检查是不是自动换行
-    var charwidth = core.calWidth(tempCtx, ch) + config.letterSpacing;
+    var charwidth =
+        core.calWidth(tempCtx, ch) / (config.isHD ? devicePixelRatio : 1) +
+        config.letterSpacing;
     if (config.maxWidth != null) {
         if (config.offsetX + charwidth > config.maxWidth) {
             // --- 当前应当换行，然而还是检查一下是否是forbidStart
@@ -2067,7 +2071,8 @@ ui.prototype._drawTextContent_changeFontSize = function (
         config.currfont,
         config.bold,
         config.italic,
-        config.font
+        config.font,
+        config.isHD
     );
     return this._drawTextContent_next(tempCtx, content, config);
 };
@@ -2090,7 +2095,8 @@ ui.prototype._drawTextContent_changeFont = function (tempCtx, content, config) {
         config.currfont,
         config.bold,
         config.italic,
-        config.font
+        config.font,
+        config.isHD
     );
     return this._drawTextContent_next(tempCtx, content, config);
 };

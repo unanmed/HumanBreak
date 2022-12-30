@@ -458,7 +458,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				],
 				"background": "winskin3.png",
 				"textfont": 20,
-				"time": 25
+				"time": 25,
+				"letterSpacing": 1
 			},
 			{
 				"type": "setGlobalAttribute",

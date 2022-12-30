@@ -1400,47 +1400,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             core.getItemDetail(floorId); // 宝石血瓶详细信息
             this.drawDamage(ctx);
         };
-        // 绘制地图显示
-        control.prototype._drawDamage_draw = function (ctx, onMap) {
-            if (!core.hasItem('book')) return;
-            // *** 下一句话可以更改你想要的显示字体
-            core.setFont(ctx, '14px normal');
-            // ***
-            core.setTextAlign(ctx, 'left');
-            core.status.damage.data.forEach(function (one) {
-                var px = one.px,
-                    py = one.py;
-                if (onMap && core.bigmap.v2) {
-                    px -= core.bigmap.posX * 32;
-                    py -= core.bigmap.posY * 32;
-                    if (
-                        px < -32 * 2 ||
-                        px > core.__PX__ + 32 ||
-                        py < -32 ||
-                        py > core.__PY__ + 32
-                    )
-                        return;
-                }
-                core.fillBoldText(ctx, one.text, px, py, one.color);
-            });
-            core.setTextAlign(ctx, 'center');
-            core.status.damage.extraData.forEach(function (one) {
-                var px = one.px,
-                    py = one.py;
-                if (onMap && core.bigmap.v2) {
-                    px -= core.bigmap.posX * 32;
-                    py -= core.bigmap.posY * 32;
-                    if (
-                        px < -32 ||
-                        px > core.__PX__ + 32 ||
-                        py < -32 ||
-                        py > core.__PY__ + 32
-                    )
-                        return;
-                }
-                core.fillBoldText(ctx, one.text, px, py, one.color);
-            });
-        };
         // 获取宝石信息 并绘制
         this.getItemDetail = function (floorId) {
             if (!core.getFlag('itemDetail')) return;
