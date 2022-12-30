@@ -1051,7 +1051,9 @@ ui.prototype.drawTip = function (text, id, frame) {
     var one = {
         text: text,
         textX: 21,
-        width: 26 + core.calWidth('data', realText, '16px Arial'),
+        width:
+            26 +
+            core.calWidth('data', realText, '16px Arial') / devicePixelRatio,
         opacity: 0.1,
         stage: 1,
         frame: frame || 0,

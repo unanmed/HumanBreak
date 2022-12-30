@@ -754,10 +754,11 @@ control.prototype._setAutomaticRoute_drawRoute = function (moveStep) {
     );
     ctx.fillStyle = '#bfbfbf';
     ctx.strokeStyle = '#bfbfbf';
-    ctx.lineWidth = 8;
+    ctx.lineWidth = 8 * devicePixelRatio;
     for (var m = 0; m < moveStep.length; m++) {
         if (m == moveStep.length - 1) {
-            ctx.fillRect(
+            core.fillRect(
+                ctx,
                 moveStep[m].x * 32 + 10 - sx,
                 moveStep[m].y * 32 + 10 - sy,
                 12,
@@ -770,13 +771,13 @@ control.prototype._setAutomaticRoute_drawRoute = function (moveStep) {
             var currDir = moveStep[m].direction,
                 nextDir = moveStep[m + 1].direction;
             ctx.moveTo(
-                cx - core.utils.scan[currDir].x * 11,
-                cy - core.utils.scan[currDir].y * 11
+                (cx - core.utils.scan[currDir].x * 11) * devicePixelRatio,
+                (cy - core.utils.scan[currDir].y * 11) * devicePixelRatio
             );
-            ctx.lineTo(cx, cy);
+            ctx.lineTo(cx * devicePixelRatio, cy * devicePixelRatio);
             ctx.lineTo(
-                cx + core.utils.scan[nextDir].x * 11,
-                cy + core.utils.scan[nextDir].y * 11
+                (cx + core.utils.scan[nextDir].x * 11) * devicePixelRatio,
+                (cy + core.utils.scan[nextDir].y * 11) * devicePixelRatio
             );
             ctx.stroke();
         }
