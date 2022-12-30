@@ -640,8 +640,8 @@ maps.prototype.resizeMap = function (floorId) {
         core.canvas[cn].canvas.style.height =
             height * core.domStyle.scale + 'px';
         core.canvas[cn].translate(
-            core.bigmap.v2 ? 32 : 0,
-            core.bigmap.v2 ? 32 : 0
+            core.bigmap.v2 ? 32 * devicePixelRatio : 0,
+            core.bigmap.v2 ? 32 * devicePixelRatio : 0
         );
         if (main.mode === 'editor' && editor.isMobile) {
             core.canvas[cn].canvas.style.width =
@@ -2751,31 +2751,43 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
             hh = core._HALF_HEIGHT_,
             W = core._WIDTH_,
             H = core._HEIGHT_;
-        var ratio = core.domStyle.isVertical
-            ? core.domStyle.ratio
-            : core.domStyle.scale;
         if (main.mode == 'editor') {
             pw = ph = core.__PIXELS__;
             hw = hh = core.__HALF_SIZE__;
             W = H = core.__SIZE__;
         }
         if (options.v2) {
-            core.drawImage(
-                ctx,
-                tempCanvas.canvas,
-                0,
-                0,
-                pw * ratio,
-                ph * ratio,
-                x,
-                y,
-                w,
-                h
-            );
+            if (options.noHD) {
+                core.drawImage(
+                    ctx,
+                    tempCanvas.canvas,
+                    0,
+                    0,
+                    pw,
+                    ph,
+                    x,
+                    y,
+                    w,
+                    h
+                );
+            } else {
+                const scale = devicePixelRatio * core.domStyle.scale;
+                core.drawImage(
+                    ctx,
+                    tempCanvas.canvas,
+                    0,
+                    0,
+                    pw * scale,
+                    ph * scale,
+                    x,
+                    y,
+                    w,
+                    h
+                );
+            }
         } else {
             var offsetX = core.clamp(centerX - hw, 0, width - W),
-                offsetY = core.clamp(centerY - hh, 0, height - H),
-                c = options.noHD ? 1 : core.domStyle.scale;
+                offsetY = core.clamp(centerY - hh, 0, height - H);
             if (options.noHD) {
                 core.drawImage(
                     ctx,
@@ -2794,10 +2806,10 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
             core.drawImage(
                 ctx,
                 tempCanvas.canvas,
-                offsetX * 32 * ratio,
-                offsetY * 32 * ratio,
-                pw * ratio,
-                ph * ratio,
+                offsetX * 32,
+                offsetY * 32,
+                pw,
+                ph,
                 x,
                 y,
                 w,

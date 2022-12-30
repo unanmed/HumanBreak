@@ -193,7 +193,10 @@ ui.prototype.fillBoldText = function (
         this.setFontForMaxWidth(ctx, text, maxWidth);
     }
     ctx.strokeStyle = strokeStyle;
-    ctx.lineWidth = 1 * core.domStyle.scale * devicePixelRatio;
+    ctx.lineWidth =
+        1 *
+        (core.domStyle.isVertical ? core.domStyle.ratio : core.domStyle.scale) *
+        devicePixelRatio;
     ctx.fillStyle = style;
     ctx.strokeText(text, x, y);
     ctx.fillText(text, x, y);
