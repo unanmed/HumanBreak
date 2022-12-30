@@ -6262,6 +6262,11 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             core.plugin.chapterContent.value = chapter;
             core.plugin.chapterShowed.value = true;
         };
+
+        this.openSkill = function () {
+            if (main.replayChecking) return;
+            core.plugin.skillOpened.value = true;
+        };
     },
     remainEnemy: function () {
         /**
@@ -6343,5 +6348,19 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             flags[setting] = v;
             return true;
         });
+    },
+    skillTree: function () {
+        /**
+         * @type {number[]}
+         */
+        const levels = [];
+
+        /**
+         * 获取技能等级
+         * @param {number} skill
+         */
+        this.getSkillLevel = function (skill) {
+            return (levels[skill] ??= 0);
+        };
     }
 };

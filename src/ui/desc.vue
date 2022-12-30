@@ -1,40 +1,25 @@
 <template>
-    <div id="desc">
-        <div id="tools">
-            <span class="button-text" @click="exit"
-                ><left-outlined /> 返回游戏</span
-            >
-        </div>
-        <div id="desc-main">
-            <Scroll id="desc-left">
-                <div id="desc-list">
-                    <span
-                        v-for="(data, k) in desc"
-                        class="selectable desc-item"
-                        :selected="selected === k"
-                        @click="selected = k"
-                        >{{ data.text }}</span
-                    >
-                </div>
-            </Scroll>
-            <a-divider
-                id="divider"
-                :type="isMobile ? 'horizontal' : 'vertical'"
-            ></a-divider>
-            <div id="desc-right">
-                <Scroll><span v-html="content"></span></Scroll>
-            </div>
-        </div>
-    </div>
+    <Colomn @close="exit" :width="80" :height="80" :left="30" :right="70"
+        ><template #left
+            ><div id="desc-list">
+                <span
+                    v-for="(data, k) in desc"
+                    class="selectable desc-item"
+                    :selected="selected === k"
+                    @click="selected = k"
+                    >{{ data.text }}</span
+                >
+            </div></template
+        >
+        <template #right><span v-html="content"></span></template
+    ></Colomn>
 </template>
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue';
 import desc from '../data/desc.json';
-import { LeftOutlined } from '@ant-design/icons-vue';
-import Scroll from '../components/scroll.vue';
 import { has } from '../plugin/utils';
-import { isMobile } from '../plugin/use';
+import Colomn from '../components/colomn.vue';
 
 type DescKey = keyof typeof desc;
 
@@ -60,25 +45,6 @@ const content = computed(() => {
 </script>
 
 <style lang="less" scoped>
-#desc {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    font-size: 2.7vh;
-    font-family: 'normal';
-    user-select: none;
-}
-
-#desc-main {
-    width: 80%;
-    height: 80%;
-    display: flex;
-    justify-content: center;
-}
-
 #desc-left {
     flex-basis: 30%;
 }
@@ -88,47 +54,7 @@ const content = computed(() => {
     flex-direction: column;
 }
 
-#desc-right {
-    flex-basis: 70%;
-}
-
-#divider {
-    height: 100%;
-}
-
 .desc-item {
     padding: 1% 3% 1% 3%;
-}
-
-#tools {
-    width: 100%;
-    font-family: 'normal';
-    font-size: 3.2vh;
-    height: 5vh;
-    position: fixed;
-    left: 10vw;
-    top: 5vh;
-}
-
-@media screen and (max-width: 600px) {
-    #desc-main {
-        flex-direction: column;
-        width: 90%;
-        height: 75%;
-    }
-
-    #divider {
-        height: auto;
-        width: 100%;
-        margin: 5% 0 5% 0;
-    }
-
-    #desc-left {
-        height: 40%;
-    }
-
-    #desc-right {
-        height: 50%;
-    }
 }
 </style>

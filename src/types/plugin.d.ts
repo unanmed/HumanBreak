@@ -139,6 +139,9 @@ interface PluginUis {
     /** 百科全书是否打开了 */
     readonly descOpened: Ref<boolean>;
 
+    /** 技能查看界面是否打开 */
+    readonly skillOpened: Ref<boolean>;
+
     /** ui栈 */
     readonly uiStack: Ref<Component[]>;
 
@@ -147,6 +150,11 @@ interface PluginUis {
      * @param chapter 显示的文字
      */
     showChapter(chapter: string): void;
+
+    /**
+     * 打开技能查看界面
+     */
+    openSkill(): void;
 }
 
 interface PluginUse {
@@ -190,6 +198,14 @@ interface PluginUse {
      * @param fn 当鼠标或手指松开时执行的函数
      */
     useUp(ele: HTMLElement, fn: DragFn): void;
+}
+
+interface SkillTree {
+    /**
+     * 获取技能等级
+     * @param skill 技能索引
+     */
+    getSkillLevel(skill: number): number;
 }
 
 type Forward<T> = {

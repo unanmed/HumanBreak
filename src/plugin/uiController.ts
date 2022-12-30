@@ -5,6 +5,7 @@ import Toolbox from '../ui/toolbox.vue';
 import Equipbox from '../ui/equipbox.vue';
 import Settings from '../ui/settings.vue';
 import Desc from '../ui/desc.vue';
+import Skill from '../ui/skill.vue';
 
 export const bookOpened = ref(false);
 export const toolOpened = ref(false);
@@ -12,6 +13,7 @@ export const equipOpened = ref(false);
 export const showStatusBar = ref(false);
 export const settingsOpened = ref(false);
 export const descOpened = ref(false);
+export const skillOpened = ref(false);
 
 export const transition = ref(true);
 export const noClosePanel = ref(false);
@@ -24,7 +26,8 @@ const UI_LIST: [Ref<boolean>, Component][] = [
     [toolOpened, Toolbox],
     [equipOpened, Equipbox],
     [settingsOpened, Settings],
-    [descOpened, Desc]
+    [descOpened, Desc],
+    [skillOpened, Skill]
 ];
 
 /** ui栈 */
@@ -55,7 +58,8 @@ export default function init() {
         equipOpened,
         showStatusBar,
         settingsOpened,
-        descOpened
+        descOpened,
+        skillOpened
     };
 }
 
