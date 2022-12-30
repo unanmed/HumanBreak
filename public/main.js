@@ -278,9 +278,14 @@ main.prototype.init = function (mode, callback) {
                 main.core.init(coreData, callback);
                 main.core.resize();
                 // 自动放缩最大化
-                if (!data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.flags.autoScale)
-                    core.setLocalStorage('autoScale', false);
-                else core.setLocalStorage('autoScale', true);
+                if (core.getLocalStorage('autoScale') == null) {
+                    if (
+                        !data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.flags
+                            .autoScale
+                    )
+                        core.setLocalStorage('autoScale', false);
+                    else core.setLocalStorage('autoScale', true);
+                }
                 if (
                     core.getLocalStorage('autoScale') &&
                     !core.domStyle.isVertical
@@ -306,6 +311,25 @@ main.prototype.init = function (mode, callback) {
                                 );
                                 main.core.resize();
                             }
+                            requestAnimationFrame(function () {
+                                var style = getComputedStyle(
+                                    main.dom.gameGroup
+                                );
+                                var height = parseFloat(style.height);
+                                if (height > window.innerHeight * 0.95) {
+                                    main.core.control.setDisplayScale(-1);
+                                    if (
+                                        !main.core.isPlaying() &&
+                                        main.core.flags.enableHDCanvas
+                                    ) {
+                                        main.core.domStyle.ratio = Math.max(
+                                            window.devicePixelRatio || 1,
+                                            main.core.domStyle.scale
+                                        );
+                                        main.core.resize();
+                                    }
+                                }
+                            });
                         }
                     } catch (e) {
                         console.error(e);
