@@ -60,6 +60,12 @@ ui.prototype.clearMap = function (name, x, y, width, height) {
         var ctx = this.getContextByName(name);
         if (ctx) {
             if (x != null && y != null && width != null && height != null) {
+                if (ctx.canvas.getAttribute('isHD') === '1') {
+                    x *= devicePixelRatio;
+                    y *= devicePixelRatio;
+                    width *= devicePixelRatio;
+                    height *= devicePixelRatio;
+                }
                 ctx.clearRect(x, y, width, height);
             } else {
                 ctx.clearRect(
@@ -100,6 +106,10 @@ ui.prototype.fillText = function (name, text, x, y, style, font, maxWidth) {
     if (font) core.setFont(name, font);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
+    if (ctx.canvas.getAttribute('isHD') === '1') {
+        x *= devicePixelRatio;
+        y *= devicePixelRatio;
+    }
     text = (text + '').replace(/\\r/g, '\r');
     var originText = text.replace(/\r(\[.*\])?/g, '');
     var index = text.indexOf('\r');
@@ -172,6 +182,10 @@ ui.prototype.fillBoldText = function (
     if (!ctx) return;
     if (font) ctx.font = font;
     if (!style) style = ctx.fillStyle;
+    if (ctx.canvas.getAttribute('isHD') === '1') {
+        x *= devicePixelRatio;
+        y *= devicePixelRatio;
+    }
     style = core.arrayToRGBA(style);
     if (!strokeStyle) strokeStyle = '#000000';
     strokeStyle = core.arrayToRGBA(strokeStyle);
@@ -203,6 +217,12 @@ ui.prototype.fillRect = function (name, x, y, width, height, style, angle) {
     if (style) core.setFillStyle(name, style);
     var ctx = this.getContextByName(name);
     if (ctx) {
+        if (ctx.canvas.getAttribute('isHD') === '1') {
+            x *= devicePixelRatio;
+            y *= devicePixelRatio;
+            width *= devicePixelRatio;
+            height *= devicePixelRatio;
+        }
         if (angle) {
             ctx.save();
             ctx.translate(x + width / 2, y + height / 2);
@@ -257,6 +277,12 @@ ui.prototype.strokeRect = function (
     if (lineWidth) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
     if (ctx) {
+        if (ctx.canvas.getAttribute('isHD') === '1') {
+            x *= devicePixelRatio;
+            y *= devicePixelRatio;
+            width *= devicePixelRatio;
+            height *= devicePixelRatio;
+        }
         if (angle) {
             ctx.save();
             ctx.translate(x + width / 2, y + height / 2);
@@ -312,6 +338,13 @@ ui.prototype.fillRoundRect = function (
     if (style) core.setFillStyle(name, style);
     var ctx = this.getContextByName(name);
     if (ctx) {
+        if (ctx.canvas.getAttribute('isHD') === '1') {
+            x *= devicePixelRatio;
+            y *= devicePixelRatio;
+            width *= devicePixelRatio;
+            height *= devicePixelRatio;
+            radius *= devicePixelRatio;
+        }
         if (angle) {
             ctx.save();
             ctx.translate(x + width / 2, y + height / 2);
@@ -342,6 +375,13 @@ ui.prototype.strokeRoundRect = function (
     if (lineWidth) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
     if (ctx) {
+        if (ctx.canvas.getAttribute('isHD') === '1') {
+            x *= devicePixelRatio;
+            y *= devicePixelRatio;
+            width *= devicePixelRatio;
+            height *= devicePixelRatio;
+            radius *= devicePixelRatio;
+        }
         if (angle) {
             ctx.save();
             ctx.translate(x + width / 2, y + height / 2);
@@ -382,6 +422,12 @@ ui.prototype.fillPolygon = function (name, nodes, style) {
     if (style) core.setFillStyle(name, style);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
+    if (ctx.canvas.getAttribute('isHD') === '1') {
+        nodes = nodes.map(([x, y]) => [
+            x * devicePixelRatio,
+            y * devicePixelRatio
+        ]);
+    }
     if (!nodes || nodes.length < 3) return;
     ctx.beginPath();
     for (var i = 0; i < nodes.length; ++i) {
@@ -405,6 +451,12 @@ ui.prototype.strokePolygon = function (name, nodes, style, lineWidth) {
     if (lineWidth) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
+    if (ctx.canvas.getAttribute('isHD') === '1') {
+        nodes = nodes.map(([x, y]) => [
+            x * devicePixelRatio,
+            y * devicePixelRatio
+        ]);
+    }
     if (!nodes || nodes.length < 3) return;
     ctx.beginPath();
     for (var i = 0; i < nodes.length; ++i) {
@@ -427,6 +479,12 @@ ui.prototype.fillEllipse = function (name, x, y, a, b, angle, style) {
     if (style) core.setFillStyle(name, style);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
+    if (ctx.canvas.getAttribute('isHD') === '1') {
+        x *= devicePixelRatio;
+        y *= devicePixelRatio;
+        a *= devicePixelRatio;
+        b *= devicePixelRatio;
+    }
     ctx.beginPath();
     ctx.ellipse(x, y, a, b, angle, 0, 2 * Math.PI);
     ctx.fill();
@@ -464,6 +522,12 @@ ui.prototype.strokeEllipse = function (
     if (lineWidth) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
+    if (ctx.canvas.getAttribute('isHD') === '1') {
+        x *= devicePixelRatio;
+        y *= devicePixelRatio;
+        a *= devicePixelRatio;
+        b *= devicePixelRatio;
+    }
     ctx.beginPath();
     ctx.ellipse(x, y, a, b, angle, 0, 2 * Math.PI);
     ctx.stroke();
@@ -491,6 +555,11 @@ ui.prototype.fillArc = function (name, x, y, r, start, end, style) {
     if (style) core.setFillStyle(name, style);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
+    if (ctx.canvas.getAttribute('isHD') === '1') {
+        x *= devicePixelRatio;
+        y *= devicePixelRatio;
+        r *= devicePixelRatio;
+    }
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.arc(x, y, r, start, end);
@@ -525,6 +594,11 @@ ui.prototype.strokeArc = function (
     if (lineWidth) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
+    if (ctx.canvas.getAttribute('isHD') === '1') {
+        x *= devicePixelRatio;
+        y *= devicePixelRatio;
+        r *= devicePixelRatio;
+    }
     ctx.beginPath();
     ctx.arc(x, y, r, start, end);
     ctx.stroke();
@@ -550,6 +624,12 @@ ui.prototype.drawLine = function (name, x1, y1, x2, y2, style, lineWidth) {
     if (lineWidth != null) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
+    if (ctx.canvas.getAttribute('isHD') === '1') {
+        x1 *= devicePixelRatio;
+        y1 *= devicePixelRatio;
+        x2 *= devicePixelRatio;
+        y2 *= devicePixelRatio;
+    }
     ctx.beginPath();
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
@@ -576,6 +656,12 @@ ui.prototype.drawArrow = function (name, x1, y1, x2, y2, style, lineWidth) {
     if (lineWidth != null) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
+    if (ctx.canvas.getAttribute('isHD') === '1') {
+        x1 *= devicePixelRatio;
+        y1 *= devicePixelRatio;
+        x2 *= devicePixelRatio;
+        y2 *= devicePixelRatio;
+    }
     var head = 10;
     var dx = x2 - x1,
         dy = y2 - y1;
@@ -609,15 +695,31 @@ ui.prototype._uievent_drawArrow = function (data) {
 };
 
 ////// 设置某个canvas的文字字体 //////
+/**
+ * @param {CtxRefer} name
+ * @param {string} font
+ */
 ui.prototype.setFont = function (name, font) {
     var ctx = this.getContextByName(name);
-    if (ctx) ctx.font = font;
+    if (ctx) {
+        if (ctx.canvas.getAttribute('isHD') === '1') {
+            font = font.replace(/(\d+)(px|em|vh|vw)/, (str, $1, $2) => {
+                return `${parseFloat($1) * devicePixelRatio}${$2}`;
+            });
+        }
+        ctx.font = font;
+    }
 };
 
 ////// 设置某个canvas的线宽度 //////
 ui.prototype.setLineWidth = function (name, lineWidth) {
     var ctx = this.getContextByName(name);
-    if (ctx) ctx.lineWidth = lineWidth;
+    if (ctx) {
+        if (ctx.canvas.getAttribute('isHD') === '1') {
+            lineWidth *= devicePixelRatio;
+        }
+        ctx.lineWidth = lineWidth;
+    }
 };
 
 ////// 保存某个canvas状态 //////
@@ -768,6 +870,7 @@ ui.prototype.drawImage = function (
     // 检测文件名以 :x, :y, :o 结尾，表示左右翻转，上下翻转和中心翻转
     var ctx = this.getContextByName(name);
     if (!ctx) return;
+
     // var reverse = null;
     if (typeof image == 'string') {
         if (
@@ -796,7 +899,14 @@ ui.prototype.drawImage = function (
             w = image.width;
             h = image.height;
         }
+
         if (x1 != null && y1 != null && w1 != null && h1 != null) {
+            if (ctx.canvas.getAttribute('isHD') === '1') {
+                x1 *= devicePixelRatio;
+                y1 *= devicePixelRatio;
+                w1 *= devicePixelRatio;
+                h1 *= devicePixelRatio;
+            }
             if (!reverse && !angle) {
                 ctx.drawImage(image, x, y, w, h, x1, y1, w1, h1);
             } else {
@@ -808,6 +918,12 @@ ui.prototype.drawImage = function (
                 ctx.restore();
             }
             return;
+        }
+        if (ctx.canvas.getAttribute('isHD') === '1') {
+            x *= devicePixelRatio;
+            y *= devicePixelRatio;
+            w *= devicePixelRatio;
+            h *= devicePixelRatio;
         }
         if (!reverse && !angle) {
             ctx.drawImage(image, x, y, w, h);
@@ -844,6 +960,7 @@ ui.prototype.drawIcon = function (name, id, x, y, w, h, frame) {
     frame = frame || 0;
     var ctx = this.getContextByName(name);
     if (!ctx) return;
+
     var info = core.getBlockInfo(id);
     if (!info) {
         // 检查状态栏图标

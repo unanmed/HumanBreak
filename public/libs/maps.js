@@ -42,8 +42,8 @@ maps.prototype._setHDCanvasSize = function (ctx, width, height, isTempCanvas) {
     var ratio = core.domStyle.ratio;
     if (ctx === core.bigmap.tempCanvas) ratio = core.domStyle.scale;
     if (isTempCanvas) ratio = core.domStyle.ratio;
-    if (width != null) ctx.canvas.width = width * ratio;
-    if (height != null) ctx.canvas.height = height * ratio;
+    if (width != null) ctx.canvas.width = width * ratio * devicePixelRatio;
+    if (height != null) ctx.canvas.height = height * ratio * devicePixelRatio;
     ctx.scale(ratio, ratio);
     ctx.canvas.setAttribute('isHD', 1);
 };
@@ -634,12 +634,8 @@ maps.prototype.resizeMap = function (floorId) {
     var height = core.bigmap.v2 ? core._PY_ + 64 : core.bigmap.height * 32;
 
     core.bigmap.canvas.forEach(function (cn) {
-        if (core.domStyle.hdCanvas.indexOf(cn) >= 0)
-            core.maps._setHDCanvasSize(core.canvas[cn], width, height);
-        else {
-            core.canvas[cn].canvas.width = width;
-            core.canvas[cn].canvas.height = height;
-        }
+        core.maps._setHDCanvasSize(core.canvas[cn], width, height);
+
         core.canvas[cn].canvas.style.width = width * core.domStyle.scale + 'px';
         core.canvas[cn].canvas.style.height =
             height * core.domStyle.scale + 'px';
@@ -2445,7 +2441,8 @@ maps.prototype._drawAutotileAnimate = function (block, animate) {
     }
 
     var cv = block.name ? core.canvas[block.name] : core.canvas.event;
-    cv.clearRect(
+    core.clearMap(
+        cv,
         32 * x - 32 * core.bigmap.posX,
         32 * y - 32 * core.bigmap.posY,
         32,

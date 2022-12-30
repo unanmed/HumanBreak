@@ -7,7 +7,12 @@
                 :no-scroll="true"
             >
                 <div id="status-div">
-                    <span id="status-floor">{{ floor }}</span>
+                    <span
+                        id="status-floor"
+                        @click="viewMap"
+                        class="button-text"
+                        >{{ floor }}</span
+                    >
                     <span id="status-lv">{{ lvName }}</span>
                     <div id="status-skill" class="status-item">
                         <img
@@ -178,6 +183,11 @@ function openSkillTree(e: MouseEvent) {
 function openSkill(e: MouseEvent) {
     e.stopPropagation();
     core.useItem('cross');
+}
+
+function viewMap(e: MouseEvent) {
+    e.stopPropagation();
+    core.ui._drawViewMaps();
 }
 </script>
 

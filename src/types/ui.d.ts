@@ -822,6 +822,11 @@ interface Ui {
      * 清空所有的自定义画布
      */
     deleteAllCanvas(): void;
+
+    /**
+     * 绘制浏览地图
+     */
+    _drawViewMaps();
 }
 
 declare const ui: new () => Ui;
