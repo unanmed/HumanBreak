@@ -181,6 +181,8 @@ function draw() {
             );
             if (core.getSkillLevel(s.index) < v.front[i][1])
                 ctx.strokeStyle = '#aaa';
+            else if (core.getSkillLevel(s.index) === s.max)
+                ctx.strokeStyle = '#ff0';
             else ctx.strokeStyle = '#0f8';
             ctx.lineWidth = devicePixelRatio;
             ctx.stroke();
@@ -190,15 +192,23 @@ function draw() {
         const [x, y] = v.loc.map(v => v * 2 - 1);
         const level = core.getSkillLevel(v.index);
         // 技能图标
-        if (selected.value === v.index) ctx.strokeStyle = '#ff0';
-        else if (level === 0) ctx.strokeStyle = '#888';
+        ctx.save();
+        ctx.lineWidth = per * 0.06;
+        if (selected.value === v.index) {
+            ctx.strokeStyle = '#ff0';
+            ctx.lineWidth *= 2;
+        } else if (level === 0) ctx.strokeStyle = '#888';
         else if (level === v.max) ctx.strokeStyle = '#F7FF68';
         else ctx.strokeStyle = '#00FF69';
-        ctx.lineWidth = per * 0.03;
         ctx.strokeRect(x * per, y * per, per, per);
         const img =
             core.material.images.images[`skill${v.index}.png` as ImageIds];
         ctx.drawImage(img, x * per, y * per, per, per);
+        if (selected.value === v.index) {
+            ctx.fillStyle = '#ff04';
+            ctx.fillRect(x * per, y * per, per, per);
+        }
+        ctx.restore();
     });
 }
 
