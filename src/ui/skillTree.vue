@@ -30,6 +30,8 @@
                 id="divider-vertical"
             ></a-divider>
             <div id="skill-upgrade-info">
+                <span id="skill-level">当前等级：{{ level }}</span>
+                <a-divider dashed class="upgrade-divider"></a-divider>
                 <span
                     id="skill-consume"
                     :style="{ color: consume <= mdef ? '#fff' : '#f44' }"
@@ -370,8 +372,8 @@ function selectChapter(delta: number) {
     }
 
     #skill-canvas {
-        height: 40vh;
-        width: 40vh;
+        height: 35vh;
+        width: 35vh;
     }
 
     #front-scroll {
@@ -379,15 +381,19 @@ function selectChapter(delta: number) {
     }
 
     #skill-consume {
-        font-size: 2.4vh;
+        font-size: 2.2vh;
     }
 
     #front-scroll {
-        font-size: 2.4vh;
+        font-size: 2.2vh;
     }
 
     #skill-chapter {
-        font-size: 2.4vh;
+        font-size: 2.2vh;
+    }
+
+    #skill-level {
+        font-size: 2.2vh;
     }
 }
 </style>
