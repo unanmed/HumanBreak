@@ -168,17 +168,19 @@ function draw() {
     const d = dict.value;
     const w = canvas.width;
     const per = w / 11;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     skills.value.forEach(v => {
         const [x, y] = v.loc.map(v => v * 2 - 1);
         // 技能连线
-        v.front.forEach(([skill]) => {
+        v.front.forEach(([skill], i) => {
             const s = skills.value[d[skill]];
             ctx.beginPath();
             ctx.moveTo(x * per + per / 2, y * per + per / 2);
             ctx.lineTo(
                 ...(s.loc.map(v => (v * 2 - 1) * per + per / 2) as LocArr)
             );
-            if (core.getSkillLevel(s.index) === 0) ctx.strokeStyle = '#aaa';
+            if (core.getSkillLevel(s.index) < v.front[i][1])
+                ctx.strokeStyle = '#aaa';
             else ctx.strokeStyle = '#0f8';
             ctx.lineWidth = devicePixelRatio;
             ctx.stroke();
@@ -249,6 +251,7 @@ function selectChapter(delta: number) {
     font-size: 2.8vh;
     display: flex;
     flex-direction: column;
+    user-select: none;
 }
 
 #skill-title {

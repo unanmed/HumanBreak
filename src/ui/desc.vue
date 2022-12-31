@@ -2,13 +2,14 @@
     <Colomn @close="exit" :width="80" :height="80" :left="30" :right="70"
         ><template #left
             ><div id="desc-list">
-                <span
+                <div
                     v-for="(data, k) in desc"
                     class="selectable desc-item"
                     :selected="selected === k"
-                    @click="selected = k"
-                    >{{ data.text }}</span
+                    @click="click(k)"
                 >
+                    <span v-if="show(data.condition)">{{ data.text }}</span>
+                </div>
             </div></template
         >
         <template #right><span v-html="content"></span></template
@@ -32,6 +33,15 @@ function exit() {
 const content = computed(() => {
     return splitText(desc[selected.value].desc);
 });
+
+function click(key: DescKey) {
+    if (!eval(desc[key].condition)) return;
+    selected.value = key;
+}
+
+function show(condition: string) {
+    return eval(condition);
+}
 </script>
 
 <style lang="less" scoped>
@@ -46,5 +56,6 @@ const content = computed(() => {
 
 .desc-item {
     padding: 1% 3% 1% 3%;
+    width: 100%;
 }
 </style>

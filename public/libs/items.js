@@ -77,7 +77,10 @@ items.prototype.getItemEffectTip = function (itemId) {
 ////// 使用道具 //////
 items.prototype.useItem = function (itemId, noRoute, callback) {
     const ignore = ['I560', 'I559'];
-    if (!this.canUseItem(itemId) || ignore.includes(itemId)) {
+    if (
+        !this.canUseItem(itemId) ||
+        (ignore.includes(itemId) && core.isReplaying())
+    ) {
         if (callback) callback();
         return;
     }
@@ -86,7 +89,8 @@ items.prototype.useItem = function (itemId, noRoute, callback) {
     // 执行完毕
     this._afterUseItem(itemId);
     // 记录路线
-    if (!noRoute) core.status.route.push('item:' + itemId);
+    if (!noRoute && !ignore.includes(itemId))
+        core.status.route.push('item:' + itemId);
     if (callback) callback();
 };
 

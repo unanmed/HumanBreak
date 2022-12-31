@@ -29,7 +29,15 @@ function popValue() {
         // 绘制
         if (one.frame >= 60) core.setAlpha(ctx, 3 - one.frame / 30);
         else core.setAlpha(ctx, 1);
-        core.fillBoldText(ctx, one.value, one.px, one.py);
+        core.fillBoldText(
+            ctx,
+            one.value,
+            one.px,
+            one.py,
+            '#f22',
+            '#000',
+            '24px normal'
+        );
         if (one.frame >= 90) count++;
     });
     if (count > 0) pop.splice(0, count);
