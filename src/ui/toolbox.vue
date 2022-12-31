@@ -93,7 +93,7 @@
                 <span style="margin-top: 2vh">点击该物品以使用</span>
                 <a-divider dashed style="border-color: #ddd4"></a-divider>
                 <div id="desc">
-                    <span style="border-bottom: 1px solid #ddd4">道具描述</span>
+                    <span>道具描述</span>
                     <Scroll id="desc-text">
                         <div v-if="!descText.value!.startsWith('!!html')">
                             {{ descText.value }}
@@ -403,6 +403,7 @@ onUnmounted(() => {
     #toolbox-main {
         flex-direction: column-reverse;
         height: 100%;
+        font-size: 3.8vw;
     }
 
     .item-list {
@@ -418,10 +419,6 @@ onUnmounted(() => {
     .item-main {
         display: flex;
         flex-direction: column-reverse;
-    }
-
-    #back {
-        font-size: 1.5em;
     }
 }
 </style>

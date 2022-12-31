@@ -93,7 +93,11 @@
                                             : 'lightpink'
                                 }"
                                 ><span style="font-family: 'Fira Code'">{{
-                                    enemy.criticalDamage < 0 ? '=>' : ''
+                                    enemy.criticalDamage < 0
+                                        ? isMobile
+                                            ? '-'
+                                            : '=>'
+                                        : ''
                                 }}</span
                                 >{{
                                     core.formatBigNumber(
@@ -154,7 +158,7 @@ function enter() {
 <style lang="less" scoped>
 .enemy-container {
     border: 1.5px solid transparent;
-    border-radius: 20px;
+    border-radius: 1.1vw;
     transition: all 0.2s linear;
     height: 100%;
 
@@ -171,7 +175,6 @@ function enter() {
 .enemy-container:hover,
 .enemy-container[selected='true'] {
     border: 1.5px solid gold;
-    border-radius: 20px;
 }
 
 .leftbar {
@@ -228,11 +231,15 @@ function enter() {
 
 @media screen and (max-width: 600px) {
     .rightbar {
-        font-size: 4vw;
+        font-size: 3.2vw;
     }
 
     .leftbar {
         font-size: 2vw;
+    }
+
+    .enemy-container {
+        border-radius: 1.6vh;
     }
 }
 </style>

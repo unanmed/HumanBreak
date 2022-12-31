@@ -75,7 +75,7 @@
                                 height: isMobile ? '10vh' : '30vh'
                             }"
                         >
-                            <div id="equip-now-div" @touchmove="dragout">
+                            <div id="equip-now-div">
                                 <div
                                     v-for="(name, i) of equipCol"
                                     class="equip-now-one draginable selectable"
@@ -139,7 +139,11 @@
                     style="border-color: #ddd4; margin: 1vh 0 1vh 0"
                 ></a-divider>
                 <div id="equip-add">
-                    <span style="font-size: 3vh" id="title">增减属性</span>
+                    <span
+                        :style="{ 'font-size': isMobile ? '3.8vw' : '3vh' }"
+                        id="title"
+                        >增减属性</span
+                    >
                     <Scroll style="width: 100%; height: 100%">
                         <component :is="addStatus"></component>
                     </Scroll>
@@ -149,7 +153,11 @@
                     style="border-color: #ddd4; margin: 1vh 0 1vh 0"
                 ></a-divider>
                 <div id="equip-desc-text">
-                    <span style="font-size: 3vh" id="title">装备介绍</span>
+                    <span
+                        :style="{ 'font-size': isMobile ? '3.8vw' : '3vh' }"
+                        id="title"
+                        >装备介绍</span
+                    >
                     <Scroll id="desc-text" style="height: 100%; width: 100%">
                         <div v-if="!descText.value!.startsWith('!!html')">
                             {{ descText.value }}
@@ -689,6 +697,7 @@ onUnmounted(() => {
     #equipbox-main {
         height: 90vh;
         flex-direction: column-reverse;
+        font-size: 3.8vw;
     }
 
     #equip-now-div {

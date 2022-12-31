@@ -197,15 +197,17 @@ onUnmounted(() => {
 
 @media screen and (max-width: 600px) {
     #detail {
-        width: 95%;
+        width: 100%;
         height: 100%;
-        padding: 5% 0 5% 5%;
+        padding: 5%;
         left: 0%;
     }
 
     #detail-more {
         font-size: 4vw;
         bottom: 5%;
+        left: 5vw;
+        width: 90vw;
     }
 }
 </style>

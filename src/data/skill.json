@@ -7,7 +7,7 @@
         ]
     },
     "blade": {
-        "text": "断灭之刃",
+        "text": "1: 断灭之刃",
         "opened": "core.getSkillLevel(2) > 0",
         "desc": [
             "<span style=\"color: gold\">快捷键1</span>，开启后勇士攻击增加${level:2 * 10}%，",
@@ -18,7 +18,7 @@
         ]
     },
     "jump": {
-        "text": "跳跃",
+        "text": "2: 跳跃",
         "opened": "flags.skill2 === true",
         "desc": [
             "<span style=\"color: gold\">快捷键2</span>，消耗200点生命值，困难消耗400点，一个地图只能使用3次，",

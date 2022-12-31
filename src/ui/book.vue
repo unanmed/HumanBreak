@@ -257,7 +257,7 @@ onUnmounted(async () => {
 @media screen and (max-width: 600px) {
     #book {
         width: 100%;
-        padding: 5% 0 5% 5%;
+        padding: 5%;
     }
 }
 </style>

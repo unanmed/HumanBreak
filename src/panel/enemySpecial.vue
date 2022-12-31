@@ -82,7 +82,7 @@ const format = core.formatBigNumber;
 
 @media screen and (max-width: 600px) {
     #detail-main {
-        font-size: 1.2em;
+        font-size: 3.8vw;
     }
 
     #special-scroll {
@@ -92,6 +92,15 @@ const format = core.formatBigNumber;
     #critical-des,
     .critical {
         font-size: 3.6vw;
+    }
+
+    #special {
+        font-size: 3.8vw;
+    }
+
+    #special-main {
+        top: 25vh;
+        width: 90vw;
     }
 }
 </style>

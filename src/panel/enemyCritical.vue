@@ -218,6 +218,8 @@ onMounted(() => {
     width: 100%;
     height: 50vh;
     user-select: none;
+    position: absolute;
+    top: 20vh;
 }
 
 .des {
@@ -261,6 +263,12 @@ onMounted(() => {
 
     .slider {
         width: 60%;
+    }
+
+    #critical-main {
+        position: absolute;
+        top: 25vh;
+        width: 90vw;
     }
 }
 </style>

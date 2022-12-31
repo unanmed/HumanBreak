@@ -51,7 +51,7 @@ function resize() {
     left = document.getElementById(`column-left-${id}`) as HTMLDivElement;
     right = document.getElementById(`column-right-${id}`) as HTMLDivElement;
 
-    if (has(props.width)) main.style.width = `${props.width}%`;
+    if (has(props.width) && !isMobile) main.style.width = `${props.width}%`;
     if (has(props.height)) main.style.height = `${props.height}%`;
     if (has(props.left)) left.style.flexBasis = `${props.left}%`;
     if (has(props.right)) right.style.flexBasis = `${props.right}%`;
@@ -134,6 +134,7 @@ onUpdated(resize);
         flex-direction: column;
         width: 90%;
         height: 75%;
+        font-size: 3.8vw;
     }
 
     .divider {

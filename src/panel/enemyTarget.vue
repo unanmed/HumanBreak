@@ -71,7 +71,11 @@ function mark() {
 
 @media screen and (max-width: 600px) {
     #enemy-target {
-        font-size: 3vw;
+        font-size: 3.8vw;
+    }
+
+    #mark-target {
+        font-size: 4vw;
     }
 }
 </style>

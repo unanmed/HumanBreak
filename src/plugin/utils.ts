@@ -121,6 +121,8 @@ export function type(
 
     ani.mode(timing).time(time).move(all, 0);
 
+    setTimeout(() => ani.ticker.destroy(), time + 100);
+
     return content;
 }
 
