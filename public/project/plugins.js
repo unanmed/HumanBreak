@@ -4560,13 +4560,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             var damage = core.status.checkBlock.damage[loc];
             if (damage) {
                 if (!main.replayChecking)
-                    core.addPop(
-                        x * 32 + 12,
-                        y * 32 + 20,
-                        damage,
-                        '#f00',
-                        '#000'
-                    );
+                    core.addPop(x * 32 + 12, y * 32 + 20, damage);
                 core.status.hero.hp -= damage;
                 var text =
                     Object.keys(core.status.checkBlock.type[loc] || {}).join(
@@ -5246,10 +5240,11 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 core.extractBlocks(data);
                 if (data === core.status.floorId) {
                     core.drawMap(data);
-                    core.setWeather(
-                        core.animateFrame.weather.type,
-                        core.animateFrame.weather.level
-                    );
+                    let weather = core.getFlag('__weather__', null);
+                    if (!weather && core.status.thisMap.weather)
+                        weather = core.status.thisMap.weather;
+                    if (weather) core.setWeather(weather[0], weather[1]);
+                    else core.setWeather();
                 }
                 core.updateStatusBar(true, true);
             }
@@ -5435,15 +5430,18 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         }
 
         ui.prototype.drawBook = function () {
-            return (core.plugin.bookOpened.value = true);
+            if (!main.replayChecking)
+                return (core.plugin.bookOpened.value = true);
         };
 
         ui.prototype._drawToolbox = function () {
-            return (core.plugin.toolOpened.value = true);
+            if (!core.isReplaying())
+                return (core.plugin.toolOpened.value = true);
         };
 
         ui.prototype._drawEquipbox = function () {
-            return (core.plugin.equipOpened.value = true);
+            if (!core.isReplaying())
+                return (core.plugin.equipOpened.value = true);
         };
 
         control.prototype.updateStatusBar_update = function () {
@@ -5489,13 +5487,13 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         };
 
         this.showChapter = function (chapter) {
-            if (main.replayChecking) return;
+            if (core.isReplaying()) return;
             core.plugin.chapterContent.value = chapter;
             core.plugin.chapterShowed.value = true;
         };
 
         this.openSkill = function () {
-            if (main.replayChecking) return;
+            if (core.isReplaying()) return;
             core.plugin.skillOpened.value = true;
         };
     },

@@ -3,7 +3,7 @@ const animation: ((time: number) => void)[] = [];
 let animateTime = 0;
 
 export default function init() {
-    core.registerAnimationFrame('animate', true, time => {
+    core.registerAnimationFrame('animateController', true, time => {
         if (time - animateTime <= core.values.animateSpeed) return;
         for (const fn of animation) {
             fn(time);

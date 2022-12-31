@@ -2,6 +2,8 @@
 
 let pop: any[] = [];
 
+let time = 0;
+
 // 插件必须有默认导出，并返回所有外部会用到的函数，所有返回的函数会被转发到core上
 // 并且在这里面完成所有的初始化，函数外部也可以进行初始化，但完全不能涉及到样板相关内容
 export default function init() {
@@ -14,7 +16,8 @@ export default function init() {
 /**
  * 弹出文字
  */
-function popValue() {
+function popValue(t: number) {
+    if (t - time < 15) return;
     let ctx = core.getContextByName('pop')!;
     if (!ctx) ctx = core.createCanvas('pop', 0, 0, core._PX_, core._PY_, 90);
     core.clearMap(ctx);
@@ -41,6 +44,7 @@ function popValue() {
         if (one.frame >= 90) count++;
     });
     if (count > 0) pop.splice(0, count);
+    time = t;
 }
 
 /**
