@@ -23,7 +23,7 @@ type CompressedMap<T extends FloorIds = FloorIds> = Omit<
     NotCopyPropertyInCompressedMap
 >;
 
-interface Block<N extends AllNumbers = AllNumbers> {
+interface Block<N extends Exclude<AllNumbers, 0> = Exclude<AllNumbers, 0>> {
     /**
      * 横坐标
      */
