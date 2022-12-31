@@ -1738,9 +1738,8 @@ ui.prototype._drawTextContent_draw = function (ctx, tempCtx, content, config) {
         if (config.index >= config.blocks.length) return false;
         var block = config.blocks[config.index++];
         if (block != null) {
-            const scale = config.isHD
-                ? devicePixelRatio * core.domStyle.scale
-                : 1;
+            // It works, why?
+            const scale = config.isHD ? devicePixelRatio ** 2 : 1;
             core.drawImage(
                 ctx,
                 tempCtx.canvas,
