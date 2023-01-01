@@ -68,11 +68,13 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons-vue';
 import Scroll from '../components/scroll.vue';
-import { has, splitText, tip } from '../plugin/utils';
+import { has, keycode, splitText, tip } from '../plugin/utils';
 import { isMobile } from '../plugin/use';
+import { sleep } from 'mutate-animate';
+import { KeyCode } from '../plugin/keyCodes';
 
 let canvas: HTMLCanvasElement;
 let ctx: CanvasRenderingContext2D;
@@ -228,22 +230,42 @@ function click(e: MouseEvent) {
     if (!skill) return;
     if (selected.value !== skill.index) selected.value = skill.index;
     else {
-        const success = core.upgradeSkill(skill.index);
-        if (!success) tip('error', '升级失败！');
-        else {
-            tip('success', '升级成功！');
-            update.value = !update.value;
-            core.status.route.push(`skill:${selected.value}`);
-        }
+        upgrade(skill.index);
     }
 }
 
-onMounted(() => {
+function upgrade(index: number) {
+    const success = core.upgradeSkill(index);
+    if (!success) tip('error', '升级失败！');
+    else {
+        tip('success', '升级成功！');
+        update.value = !update.value;
+        core.status.route.push(`skill:${selected.value}`);
+    }
+}
+
+function key(e: KeyboardEvent) {
+    const c = keycode(e.keyCode);
+    if (c === KeyCode.Escape || c === KeyCode.KeyX) exit();
+    if (c === KeyCode.Space || c === KeyCode.Enter || c === KeyCode.KeyC) {
+        upgrade(selected.value);
+    }
+}
+
+onMounted(async () => {
     canvas = document.getElementById('skill-canvas') as HTMLCanvasElement;
     ctx = canvas.getContext('2d')!;
     resize();
     draw();
+
+    await sleep(50);
+    if (core.plugin.transition.value) await sleep(600);
     canvas.addEventListener('click', click);
+    document.addEventListener('keyup', key);
+});
+
+onUnmounted(() => {
+    document.removeEventListener('keyup', key);
 });
 
 function selectChapter(delta: number) {

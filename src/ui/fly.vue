@@ -105,6 +105,9 @@ let oy = 0;
 let drawedThumbnail: Partial<Record<FloorIds, boolean>> = {};
 let thumbnailLoc: Partial<Record<FloorIds, Loc2>> = {};
 
+noBorder.value = core.getLocalStorage('noBorder') ?? false;
+tradition.value = core.getLocalStorage('flyTradition') ?? false;
+
 const floor = computed(() => {
     return core.status.maps[nowFloor.value];
 });
@@ -120,8 +123,12 @@ watch(nowArea, n => {
             area[n].find(v => v === core.status.floorId) ?? area[n][0];
 });
 watch(noBorder, n => {
+    core.setLocalStorage('noBorder', n);
     drawedThumbnail = {};
     drawMap();
+});
+watch(tradition, n => {
+    core.setLocalStorage('flyTradition', n);
 });
 
 const temp = document.createElement('canvas');
