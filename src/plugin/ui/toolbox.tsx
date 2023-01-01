@@ -33,10 +33,13 @@ export function getItems(cls: 'all'): AllItem;
 export function getItems(cls: keyof ClsMap): [string, number][];
 export function getItems(cls: keyof ClsMap | 'all') {
     const i = core.status.hero.items;
+    const ignore = ['book'];
     if (cls === 'all') {
         return {
-            tools: Object.entries(i.tools),
-            constants: Object.entries(i.constants)
+            tools: Object.entries(i.tools).filter(v => !ignore.includes(v[0])),
+            constants: Object.entries(i.constants).filter(
+                v => !ignore.includes(v[0])
+            )
         };
     }
     const items = i[cls];

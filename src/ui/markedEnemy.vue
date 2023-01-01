@@ -2,6 +2,7 @@
     <div id="marked-enemy">
         <div v-for="v of all">
             <Box
+                :key="v"
                 v-if="!getBoxPos(v).hidden"
                 v-model:left="getBoxPos(v).left"
                 v-model:top="getBoxPos(v).top"
@@ -36,12 +37,12 @@
                         <div class="marked-button">
                             <span
                                 class="marked-hide button-text"
-                                @click="getBoxPos(v).hidden = true"
+                                @click.stop="getBoxPos(v).hidden = true"
                                 >隐藏盒子</span
                             >
                             <span
                                 class="marked-cancel button-text"
-                                @click="unmarkEnemy(v)"
+                                @click.stop="unmarkEnemy(v)"
                                 >取消标记</span
                             >
                         </div>

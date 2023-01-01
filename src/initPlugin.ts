@@ -8,6 +8,7 @@ import status from './plugin/ui/statusBar';
 import mark from './plugin/mark';
 import setting from './plugin/settings';
 import chapter from './plugin/ui/chapter';
+import fly from './plugin/ui/fly';
 
 function forward() {
     // 每个引入的插件都要在这里执行，否则不会被转发
@@ -20,7 +21,8 @@ function forward() {
         status(),
         mark(),
         setting(),
-        chapter()
+        chapter(),
+        fly()
     ];
 
     // 初始化所有插件，并转发到core上
