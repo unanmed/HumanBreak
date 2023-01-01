@@ -325,7 +325,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"text": "可以自由往来去过的楼层",
 		"hideInReplay": true,
 		"hideInToolbox": true,
-		"useItemEffect": "core.ui.drawFly(core.floorIds.indexOf(core.status.floorId));",
+		"useItemEffect": "core.ui.drawFly();",
 		"canUseItemEffect": "(function () {\n\treturn core.status.maps[core.status.floorId].canFlyFrom;\n})();"
 	},
 	"coin": {

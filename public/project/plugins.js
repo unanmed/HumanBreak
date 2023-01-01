@@ -5445,6 +5445,11 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 return (core.plugin.equipOpened.value = true);
         };
 
+        ui.prototype.drawFly = function () {
+            if (!core.isReplaying())
+                return (core.plugin.flyOpened.value = true);
+        };
+
         control.prototype.updateStatusBar_update = function () {
             if (!core.isPlaying() || core.hasFlag('__statistics__')) return;
             core.control.controldata.updateStatusBar();

@@ -132,6 +132,8 @@ interface Actions extends VoidedActionFuncs {
      * @param x 要判断的横坐标
      */
     _out(x: number): boolean;
+
+    _getNextFlyFloor(delta: number, index: number): number;
 }
 
 declare const actions: new () => Actions;

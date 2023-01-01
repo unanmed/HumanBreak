@@ -2685,8 +2685,8 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
         y = options.y || 0,
         size = options.size || 1;
     // size的含义改为(0,1]范围的系数以适配长方形，默认为1，楼传为3/4，SL界面为0.3
-    var w = Math.ceil(size * core._PX_),
-        h = Math.ceil(size * core._PY_);
+    var w = size * core._PX_,
+        h = size * core._PY_;
     // 特判是否为编辑器，编辑器中长宽均采用core.js的遗留正方形像素边长，以保证下面的绘制正常
     if (main.mode == 'editor') w = h = size * core.__PIXELS__;
     var width = core.floors[floorId].width,
@@ -2696,6 +2696,21 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
     if (centerX == null) centerX = Math.floor(width / 2);
     if (centerY == null) centerY = Math.floor(height / 2);
     var tempCanvas = core.bigmap.tempCanvas;
+
+    if (options.inFlyMap) {
+        ctx.drawImage(
+            tempCanvas.canvas,
+            0,
+            0,
+            tempCanvas.canvas.width,
+            tempCanvas.canvas.height,
+            options.x,
+            options.y,
+            options.w,
+            options.h
+        );
+        return;
+    }
 
     const scale = core.domStyle.scale * devicePixelRatio;
     if (options.all) {

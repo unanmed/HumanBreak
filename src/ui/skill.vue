@@ -67,11 +67,6 @@ function exit() {
     flex-direction: column;
 }
 
-.skill-item {
-    width: 100%;
-    padding: 1% 3% 1% 3%;
-}
-
 .skill-item[selectable='false'] {
     color: gray;
 }

@@ -7,6 +7,7 @@ import Settings from '../ui/settings.vue';
 import Desc from '../ui/desc.vue';
 import Skill from '../ui/skill.vue';
 import SkillTree from '../ui/skillTree.vue';
+import Fly from '../ui/fly.vue';
 
 export const bookOpened = ref(false);
 export const toolOpened = ref(false);
@@ -16,6 +17,7 @@ export const settingsOpened = ref(false);
 export const descOpened = ref(false);
 export const skillOpened = ref(false);
 export const skillTreeOpened = ref(false);
+export const flyOpened = ref(false);
 
 export const transition = ref(true);
 export const noClosePanel = ref(false);
@@ -30,7 +32,8 @@ const UI_LIST: [Ref<boolean>, Component][] = [
     [settingsOpened, Settings],
     [descOpened, Desc],
     [skillOpened, Skill],
-    [skillTreeOpened, SkillTree]
+    [skillTreeOpened, SkillTree],
+    [flyOpened, Fly]
 ];
 
 /** ui栈 */
@@ -63,7 +66,8 @@ export default function init() {
         settingsOpened,
         descOpened,
         skillOpened,
-        skillTreeOpened
+        skillTreeOpened,
+        flyOpened
     };
 }
 

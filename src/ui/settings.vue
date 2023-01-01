@@ -3,7 +3,7 @@
         ><template #left
             ><div id="setting-list">
                 <span
-                    class="selectable setting-item"
+                    class="selectable"
                     :selected="selected === 'transition'"
                     @click="click('transition')"
                     >界面动画:&nbsp;&nbsp;&nbsp;{{
@@ -11,7 +11,7 @@
                     }}</span
                 >
                 <span
-                    class="selectable setting-item"
+                    class="selectable"
                     :selected="selected === 'itemDetail'"
                     @click="click('itemDetail')"
                     >宝石血瓶显伤:&nbsp;&nbsp;&nbsp;{{
@@ -19,7 +19,7 @@
                     }}</span
                 >
                 <span
-                    class="selectable setting-item"
+                    class="selectable"
                     :selected="selected === 'autoSkill'"
                     @click="click('autoSkill')"
                     >自动切换技能:&nbsp;&nbsp;&nbsp;{{
@@ -27,7 +27,7 @@
                     }}</span
                 >
                 <span
-                    class="selectable setting-item"
+                    class="selectable"
                     :selected="selected === 'autoScale'"
                     @click="click('autoScale')"
                     >自动放缩:&nbsp;&nbsp;&nbsp;{{

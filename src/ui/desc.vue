@@ -4,7 +4,7 @@
             ><div id="desc-list">
                 <div
                     v-for="(data, k) in desc"
-                    class="selectable desc-item"
+                    class="selectable"
                     :selected="selected === k"
                     @click="click(k)"
                 >
@@ -52,10 +52,5 @@ function show(condition: string) {
 #desc-list {
     display: flex;
     flex-direction: column;
-}
-
-.desc-item {
-    padding: 1% 3% 1% 3%;
-    width: 100%;
 }
 </style>

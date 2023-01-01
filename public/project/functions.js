@@ -52,6 +52,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 隐藏右下角的音乐按钮
             core.dom.musicBtn.style.display = 'none';
             core.dom.enlargeBtn.style.display = 'none';
+            core.splitArea();
         },
         win: function (reason, norank, noexit) {
             // 游戏获胜事件

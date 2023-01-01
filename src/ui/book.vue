@@ -201,7 +201,6 @@ function keydown(e: KeyboardEvent) {
 }
 
 onMounted(async () => {
-    const div = document.getElementById('book') as HTMLDivElement;
     if (core.plugin.transition.value) await sleep(600);
     else await sleep(50);
     document.addEventListener('keyup', keyup);

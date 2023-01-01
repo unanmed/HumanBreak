@@ -196,7 +196,7 @@ interface EventData {
      * @param toId 目标楼层
      * @param callback 飞到后的回调函数
      */
-    flyTo(toId: FloorIds, callback: () => void): void;
+    flyTo(toId: FloorIds, callback?: () => void): boolean;
 
     /**
      * 与怪物战斗前

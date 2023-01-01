@@ -18,7 +18,8 @@ interface PluginDeclaration
     extends PluginUtils,
         PluginUis,
         PluginUse,
-        SkillTree {
+        SkillTree,
+        MiniMap {
     /**
      * 添加函数  例：添加弹出文字，像这个就可以使用core.addPop或core.plugin.addPop调用
      * @param px 弹出的横坐标
@@ -149,6 +150,9 @@ interface PluginUis {
     /** 技能树界面是否打开 */
     readonly skillTreeOpened: Ref<boolean>;
 
+    /** 楼传界面是否打开 */
+    readonly flyOpened: Ref<boolean>;
+
     /** ui栈 */
     readonly uiStack: Ref<Component[]>;
 
@@ -244,6 +248,13 @@ interface SkillTree {
      * @param data 等级信息
      */
     loadSkillTree(data: number[]): void;
+}
+
+interface MiniMap {
+    /**
+     * 切分区域
+     */
+    splitArea(): void;
 }
 
 type Chapter = 'chapter1';

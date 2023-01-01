@@ -187,6 +187,11 @@ interface Floor<T extends FloorIds = FloorIds> extends FloorBase<T> {
      * 图块信息
      */
     blocks: Block[];
+
+    /**
+     * 是否被砍层
+     */
+    deleted?: boolean;
 }
 
 interface ResolvedFloor<T extends FloorIds = FloorIds> extends FloorBase<T> {
@@ -400,6 +405,31 @@ interface DrawThumbnailConfig {
      * 是否使用v2优化
      */
     v2: boolean;
+
+    /**
+     * 是否在小地图中出现
+     */
+    inFlyMap: boolean;
+
+    /**
+     * 小地图模式下的横坐标
+     */
+    x: number;
+
+    /**
+     * 小地图模式下的纵坐标
+     */
+    y: number;
+
+    /**
+     * 小地图模式下的宽度
+     */
+    w: number;
+
+    /**
+     * 小地图模式下的高度
+     */
+    h: number;
 }
 
 interface BlockFilter {
