@@ -4557,7 +4557,11 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             var damage = core.status.checkBlock.damage[loc];
             if (damage) {
                 if (!main.replayChecking)
-                    core.addPop(x * 32 + 12, y * 32 + 20, damage);
+                    core.addPop(
+                        (x - core.bigmap.offsetX / 32) * 32 + 12,
+                        (y - core.bigmap.offsetY / 32) * 32 + 20,
+                        damage
+                    );
                 core.status.hero.hp -= damage;
                 var text =
                     Object.keys(core.status.checkBlock.type[loc] || {}).join(
