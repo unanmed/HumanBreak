@@ -553,6 +553,7 @@ onMounted(async () => {
         v.addEventListener('click', e => (v as HTMLElement).blur());
     });
 
+    locateMap(nowFloor.value);
     draw();
 
     useDrag(

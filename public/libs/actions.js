@@ -384,9 +384,6 @@ actions.prototype._sys_keyDown_lockControl = function (keyCode) {
         case 'action':
             this._keyDownAction(keyCode);
             break;
-        case 'fly':
-            this._keyDownFly(keyCode);
-            break;
         case 'viewMaps':
             this._keyDownViewMaps(keyCode);
             break;
@@ -477,9 +474,6 @@ actions.prototype._sys_keyUp_lockControl = function (keyCode, altKey) {
         case 'help':
             ok() && core.closePanel();
             break;
-        case 'fly':
-            this._keyUpFly(keyCode);
-            break;
         case 'viewMaps':
             this._keyUpViewMaps(keyCode);
             break;
@@ -567,9 +561,6 @@ actions.prototype._sys_ondown_lockControl = function (x, y, px, py) {
     switch (core.status.event.id) {
         case 'centerFly':
             this._clickCenterFly(x, y, px, py);
-            break;
-        case 'fly':
-            this._clickFly(x, y, px, py);
             break;
         case 'viewMaps':
             this._clickViewMaps(x, y, px, py);
@@ -918,13 +909,6 @@ actions.prototype._sys_onmousewheel = function (direct) {
         return;
     }
 
-    // 楼层飞行器
-    if (core.status.lockControl && core.status.event.id == 'fly') {
-        if (direct == 1) core.ui.drawFly(this._getNextFlyFloor(1));
-        if (direct == -1) core.ui.drawFly(this._getNextFlyFloor(-1));
-        return;
-    }
-
     // 存读档
     if (
         core.status.lockControl &&
@@ -1030,16 +1014,6 @@ actions.prototype._sys_longClick_lockControl = function (x, y, px, py) {
     ) {
         core.doAction();
         return true;
-    }
-    // 长按楼传器的箭头可以快速翻页
-    if (core.status.event.id == 'fly') {
-        if (
-            (x == core._WIDTH_ - 2 || x == core._WIDTH_ - 3) &&
-            (y == this._HY_ - 1 || y == this._HY_ + 3)
-        ) {
-            this._clickFly(x, y);
-            return true;
-        }
     }
     // 长按SL上下页快速翻页
     if (
@@ -1465,96 +1439,6 @@ actions.prototype._keyUpAction = function (keycode) {
         core.doAction();
         return;
     }
-};
-
-////// 楼层传送器界面时的点击操作 //////
-actions.prototype._clickFly = function (x, y) {
-    if (
-        (x == core._WIDTH_ - 2 || x == core._WIDTH_ - 3) &&
-        y == this._HY_ + 3
-    ) {
-        core.playSound('光标移动');
-        core.ui.drawFly(this._getNextFlyFloor(-1));
-    }
-    if (
-        (x == core._WIDTH_ - 2 || x == core._WIDTH_ - 3) &&
-        y == this._HY_ - 1
-    ) {
-        core.playSound('光标移动');
-        core.ui.drawFly(this._getNextFlyFloor(1));
-    }
-    if (
-        (x == core._WIDTH_ - 2 || x == core._WIDTH_ - 3) &&
-        y == this._HY_ + 4
-    ) {
-        core.playSound('光标移动');
-        core.ui.drawFly(this._getNextFlyFloor(-10));
-    }
-    if (
-        (x == core._WIDTH_ - 2 || x == core._WIDTH_ - 3) &&
-        y == this._HY_ - 2
-    ) {
-        core.playSound('光标移动');
-        core.ui.drawFly(this._getNextFlyFloor(10));
-    }
-    if (x >= this._HX_ - 1 && x <= this._HX_ + 1 && y === core._HEIGHT_ - 1) {
-        core.playSound('取消');
-        core.ui.closePanel();
-    }
-    if (x >= 0 && x <= this._HX_ + 3 && y >= 3 && y <= core._HEIGHT_ - 1 - 1)
-        core.flyTo(core.floorIds[core.status.event.data]);
-    return;
-};
-
-////// 楼层传送器界面时，按下某个键的操作 //////
-actions.prototype._keyDownFly = function (keycode) {
-    if (keycode == 37) {
-        core.playSound('光标移动');
-        core.ui.drawFly(this._getNextFlyFloor(-10));
-    } else if (keycode == 38) {
-        core.playSound('光标移动');
-        core.ui.drawFly(this._getNextFlyFloor(1));
-    } else if (keycode == 39) {
-        core.playSound('光标移动');
-        core.ui.drawFly(this._getNextFlyFloor(10));
-    } else if (keycode == 40) {
-        core.playSound('光标移动');
-        core.ui.drawFly(this._getNextFlyFloor(-1));
-    }
-    return;
-};
-
-actions.prototype._getNextFlyFloor = function (delta, index) {
-    if (index == null) index = core.status.event.data;
-    if (delta == 0) return index;
-    var sign = Math.sign(delta);
-    delta = Math.abs(delta);
-    var ans = index;
-    while (true) {
-        index += sign;
-        if (index < 0 || index >= core.floorIds.length) break;
-        var floorId = core.floorIds[index];
-        if (
-            core.status.maps[floorId].canFlyTo &&
-            core.hasVisitedFloor(floorId)
-        ) {
-            delta--;
-            ans = index;
-        }
-        if (delta == 0) break;
-    }
-    return ans;
-};
-
-////// 楼层传送器界面时，放开某个键的操作 //////
-actions.prototype._keyUpFly = function (keycode) {
-    if (keycode == 71 || keycode == 27 || keycode == 88) {
-        core.playSound('取消');
-        core.ui.closePanel();
-    }
-    if (keycode == 13 || keycode == 32 || keycode == 67)
-        this._clickFly(this._HX_ - 1, this._HY_ - 1);
-    return;
 };
 
 ////// 查看地图界面时的点击操作 //////
