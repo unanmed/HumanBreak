@@ -4312,12 +4312,12 @@ control.prototype._resize_canvas = function (obj) {
             core.dom.gameCanvas[i].style.height = innerHeight;
         }
     } else {
-        requestAnimationFrame(function () {
-            for (var i = 0; i < core.dom.gameCanvas.length; ++i) {
-                core.dom.gameCanvas[i].style.width = innerWidth;
-                core.dom.gameCanvas[i].style.height = innerHeight;
-            }
-        });
+        // requestAnimationFrame(function () {
+        for (var i = 0; i < core.dom.gameCanvas.length; ++i) {
+            core.dom.gameCanvas[i].style.width = innerWidth;
+            core.dom.gameCanvas[i].style.height = innerHeight;
+        }
+        // });
     }
     core.dom.gif.style.width = innerWidth;
     core.dom.gif.style.height = innerHeight;
@@ -4335,9 +4335,16 @@ control.prototype._resize_canvas = function (obj) {
             ? core.domStyle.ratio
             : 1;
         core.canvas[cn].canvas.style.width =
-            (core.canvas[cn].canvas.width / ratio) * core.domStyle.scale + 'px';
+            (core.canvas[cn].canvas.width /
+                devicePixelRatio /
+                core.domStyle.ratio) *
+                core.domStyle.scale +
+            'px';
         core.canvas[cn].canvas.style.height =
-            (core.canvas[cn].canvas.height / ratio) * core.domStyle.scale +
+            (core.canvas[cn].canvas.height /
+                devicePixelRatio /
+                core.domStyle.ratio) *
+                core.domStyle.scale +
             'px';
     });
     // resize dynamic canvas

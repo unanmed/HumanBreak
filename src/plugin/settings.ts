@@ -3,7 +3,7 @@ import { ref, watch } from 'vue';
 /**
  * 打开和关闭ui时是否展示动画
  */
-export const transition = ref(true);
+export const transition = ref(false);
 
 /**
  * 道具详细信息
@@ -44,13 +44,14 @@ watch(autoScale, n => {
  * 重置设置信息，从localStorage读取即可
  */
 function reset() {
-    transition.value = core.getLocalStorage('transition');
-    autoScale.value = core.getLocalStorage('autoScale');
+    transition.value = core.getLocalStorage('transition') ? true : false;
+    core.plugin.transition.value = transition.value;
+    autoScale.value = core.getLocalStorage('autoScale') ? true : false;
 }
 
 function resetFlag() {
-    itemDetail.value = flags.itemDetail;
-    autoSkill.value = flags.autoSkill;
+    itemDetail.value = flags.itemDetail ? true : false;
+    autoSkill.value = flags.autoSkill ? true : false;
 }
 
 export default function init() {

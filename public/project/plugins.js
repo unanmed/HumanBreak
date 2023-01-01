@@ -1378,19 +1378,19 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          * 如有bug在大群或造塔群@古祠
          */
 
-        core.bigmap.threshold = 256;
+        // core.bigmap.threshold = 256;
 
         core.control.updateDamage = function (floorId, ctx) {
             floorId = floorId || core.status.floorId;
             if (!floorId || core.status.gameOver || main.mode != 'play') return;
-            var onMap = ctx == null;
+            const onMap = ctx == null;
 
             // 没有怪物手册
             if (!core.hasItem('book')) return;
             core.status.damage.posX = core.bigmap.posX;
             core.status.damage.posY = core.bigmap.posY;
             if (!onMap) {
-                var width = core.floors[floorId].width,
+                const width = core.floors[floorId].width,
                     height = core.floors[floorId].height;
                 // 地图过大的缩略图不绘制显伤
                 if (width * height > core.bigmap.threshold) return;
@@ -1400,10 +1400,22 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             core.getItemDetail(floorId); // 宝石血瓶详细信息
             this.drawDamage(ctx);
         };
+
         // 获取宝石信息 并绘制
         this.getItemDetail = function (floorId) {
             if (!core.getFlag('itemDetail')) return;
-            floorId = floorId || core.status.thisMap.floorId;
+            floorId = floorId ?? core.status.thisMap.floorId;
+            let diff = {};
+            const before = core.status.hero;
+            const hero = core.clone(core.status.hero);
+            const handler = {
+                set(target, key, v) {
+                    diff[key] = v - (target[key] || 0);
+                    if (!diff[key]) diff[key] = void 0;
+                    return true;
+                }
+            };
+            core.status.hero = new Proxy(hero, handler);
             core.status.maps[floorId].blocks.forEach(function (block) {
                 if (
                     block.event.cls !== 'items' ||
@@ -1411,72 +1423,57 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     block.disable
                 )
                     return;
-                var x = block.x,
+                const x = block.x,
                     y = block.y;
                 // v2优化，只绘制范围内的部分
                 if (core.bigmap.v2) {
                     if (
                         x < core.bigmap.posX - core.bigmap.extend ||
-                        x >
-                            core.bigmap.posX +
-                                core.__SIZE__ +
-                                core.bigmap.extend ||
+                        x > core.bigmap.posX + core._PX_ + core.bigmap.extend ||
                         y < core.bigmap.posY - core.bigmap.extend ||
-                        y >
-                            core.bigmap.posY +
-                                core.__SIZE__ +
-                                core.bigmap.extend
+                        y > core.bigmap.posY + core._PY_ + core.bigmap.extend
                     ) {
                         return;
                     }
                 }
-                var id = block.event.id;
-                var item = core.material.items[id];
+                diff = {};
+                const id = block.event.id;
+                const item = core.material.items[id];
                 if (item.cls === 'equips') {
                     // 装备也显示
-                    var diff = core.clone(item.equip.value || {});
-                    var per = item.equip.percentage;
-                    for (var name in per) {
+                    const diff = item.equip.value ?? {};
+                    const per = item.equip.percentage ?? {};
+                    for (const name in per) {
                         diff[name + 'per'] = per[name].toString() + '%';
                     }
                     drawItemDetail(diff, x, y);
                     return;
                 }
-                var before = core.clone(core.status.hero);
                 // 跟数据统计原理一样 执行效果 前后比较
                 core.setFlag('__statistics__', true);
                 try {
                     eval(item.itemEffect);
                 } catch (error) {}
-                var diff = compareObject(before, core.status.hero);
-                core.status.hero = hero = before;
-                flags = core.status.hero.flags;
                 drawItemDetail(diff, x, y);
             });
+            core.status.hero = before;
+            window.hero = before;
+            window.flags = before.flags;
         };
-        // 比较两个对象之间每一项的数值差异（弱等于） 返回数值差异
-        function compareObject(a, b) {
-            a = a || {};
-            b = b || {};
-            var diff = {}; // 差异
-            for (var name in a) {
-                diff[name] = b[name] - (a[name] || 0);
-                if (!diff[name]) diff[name] = void 0;
-            }
-            return diff;
-        }
+
         // 绘制
         function drawItemDetail(diff, x, y) {
-            var px = 32 * x + 2,
+            const px = 32 * x + 2,
                 py = 32 * y + 30;
-            var content = '';
+            let content = '';
             // 获得数据和颜色
-            var i = 0;
-            for (var name in diff) {
+            let i = 0;
+            for (const name in diff) {
                 if (!diff[name]) continue;
-                var color = '#ffffff';
+                let color = '#fff';
+
                 if (typeof diff[name] === 'number')
-                    diff[name] = core.formatBigNumber(diff[name], true);
+                    content = core.formatBigNumber(diff[name], true);
                 switch (name) {
                     case 'atk':
                     case 'atkper':
@@ -1498,7 +1495,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                         color = '#F9FF00';
                         break;
                     case 'mana':
-                        color = '#cc6666';
+                        color = '#c66';
                         break;
                 }
                 content = diff[name];

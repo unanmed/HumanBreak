@@ -1,7 +1,7 @@
 import { has } from '../utils';
 
 export default function init() {
-    return { splitArea };
+    return { splitArea, getMapData };
 }
 
 type BFSFromString = `${FloorIds},${number},${number},${Dir}`;
@@ -23,8 +23,6 @@ const arrow: Partial<Record<AllIds, Dir>> = {
 
 export function splitArea() {}
 
-export function getMapData(floorId: FloorIds) {}
-
 export function getMapDrawData(floorId: FloorIds) {}
 
 /**
@@ -32,7 +30,10 @@ export function getMapDrawData(floorId: FloorIds) {}
  * @param floorId 中心楼层id
  * @param noCache 是否不使用缓存
  */
-function bfs(floorId: FloorIds, noCache: boolean = false): MapBFSResult {
+export function getMapData(
+    floorId: FloorIds,
+    noCache: boolean = false
+): MapBFSResult {
     if (has(bfsCache[floorId]) && !noCache) return bfsCache[floorId]!;
 
     const queue = [floorId];
