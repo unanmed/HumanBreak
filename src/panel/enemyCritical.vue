@@ -133,6 +133,9 @@ function generateChart(ele: HTMLCanvasElement, data: [number, number][]) {
                 point: {
                     radius: 5,
                     hoverRadius: 7
+                },
+                line: {
+                    borderJoinStyle: 'round'
                 }
             },
             scales: {

@@ -4344,7 +4344,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 core.extractBlocks(v);
                 const blocks = core.status.maps[v].blocks;
                 blocks.forEach(block => {
-                    if (!block.event.cls.startsWith('enemy')) return;
+                    if (!block.event.cls.startsWith('enemy') || block.disable)
+                        return;
                     /**
                      * @type {EnemyIds}
                      */

@@ -33,9 +33,13 @@
                 <span id="skill-level">当前等级：{{ level }}</span>
                 <a-divider dashed class="upgrade-divider"></a-divider>
                 <span
+                    v-if="level < skill.max"
                     id="skill-consume"
                     :style="{ color: consume <= mdef ? '#fff' : '#f44' }"
                     >升级花费：{{ consume }}</span
+                >
+                <span v-else id="skill-consume" style="color: gold"
+                    >已满级</span
                 >
                 <a-divider dashed class="upgrade-divider"></a-divider>
                 <Scroll id="front-scroll" :no-scroll="true"
@@ -246,7 +250,8 @@ function upgrade(index: number) {
 
 function key(e: KeyboardEvent) {
     const c = keycode(e.keyCode);
-    if (c === KeyCode.Escape || c === KeyCode.KeyX) exit();
+    if (c === KeyCode.Escape || c === KeyCode.KeyX || c === KeyCode.KeyJ)
+        exit();
     if (c === KeyCode.Space || c === KeyCode.Enter || c === KeyCode.KeyC) {
         upgrade(selected.value);
     }

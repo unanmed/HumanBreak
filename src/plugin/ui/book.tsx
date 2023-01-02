@@ -78,10 +78,6 @@ export function getDefDamage(
         res.push([ratio * i + addDef, dam.damage]);
     }
 
-    if ((res.at(-1)?.[1] ?? 1) <= 0) {
-        res.push([res.at(-1)![0] + 1, 0]);
-    }
-
     return res;
 }
 
@@ -120,10 +116,6 @@ export function getCriticalDamage(
         if (dam.damage === res.at(-1)?.[1]) continue;
         last = dam.damage;
         res.push([ratio * i + addAtk, dam.damage]);
-    }
-
-    if ((res.at(-1)?.[1] ?? 1) <= 0) {
-        res.push([res.at(-1)![0] + 1, 0]);
     }
 
     return res;

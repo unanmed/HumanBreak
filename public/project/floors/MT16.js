@@ -371,14 +371,7 @@ main.floors.MT16=
             "这里是漏怪检测，将会检测\r[gold]洞穴、山路、山脚、平原\r[white]地区的怪物是否清完",
             {
                 "type": "function",
-                "function": "function(){\ncore.checkEnemy([0, \"MT0\", \"MT1\", \"MT2\", \"MT3\", \"MT4\", \"MT5\", \"MT6\", \"MT7\", \"MT8\", \"MT9\", \"MT10\", \"MT11\", \"MT12\", \"MT13\", \"MT14\", \"MT15\"]);\n}"
-            },
-            {
-                "type": "if",
-                "condition": "(flag:enemyNumber===0)",
-                "true": [
-                    "请搜刮地上物资，之后此区域无法返回"
-                ]
+                "function": "function(){\nconst enemy = core.getRemainEnemyString(core.floorIds.slice(5, 17));\nif (enemy.length === 0) {\n\tcore.insertAction(['当前无剩余怪物！', { \"type\": \"hide\", \"remove\": true }, ]);\n} else {\n\tcore.insertAction(enemy);\n}\n}"
             }
         ],
         "3,23": [
