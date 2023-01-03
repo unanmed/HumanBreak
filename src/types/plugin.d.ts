@@ -108,6 +108,12 @@ interface PluginUtils {
         type: 'warn' | 'info' | 'success' | 'error' | 'warning' | 'loading',
         text: string
     ): void;
+
+    /**
+     * 开始一个追逐战
+     * @param index 追逐战索引
+     */
+    startChase(index: number): Promise<void>;
 }
 
 interface PluginUis {

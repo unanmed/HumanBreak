@@ -121,6 +121,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 正在切换楼层过程中执行的操作；此函数的执行时间是“屏幕完全变黑“的那一刻
             // floorId为要切换到的楼层ID；heroLoc表示勇士切换到的位置
 
+            flags.floorChanging = true;
+
             // ---------- 此时还没有进行切换，当前floorId还是原来的 ---------- //
             var currentId = core.status.floorId || null; // 获得当前的floorId，可能为null
             var fromLoad = core.hasFlag('__fromLoad__'); // 是否是读档造成的切换
@@ -211,6 +213,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
         afterChangeFloor: function (floorId) {
             // 转换楼层结束的事件；此函数会在整个楼层切换完全结束后再执行
             // floorId是切换到的楼层
+
+            if (flags.onChase) {
+                flags.chaseTime ??= {};
+                flags.chaseTime[floorId] = Date.now();
+            }
+
+            flags.floorChanging = false;
 
             // 如果是读档，则进行检查（是否需要恢复事件）
             if (core.hasFlag('__fromLoad__')) {
@@ -1417,7 +1426,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
         },
         loadData: function (data, callback) {
             // 读档操作；从存储中读取了内容后的行为
-
+            if (window.flags && flags.onChase) {
+                flags.chase.end();
+                flags.onChase = true;
+            }
             // 重置游戏和路线
             core.resetGame(
                 data.hero,
@@ -1468,6 +1480,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
 
                 core.removeFlag('__fromLoad__');
                 if (callback) callback();
+
+                if (flags.onChase) {
+                    core.startChase(flags.chaseIndex);
+                    if (flags.chaseIndex === 1) {
+                        core.playBgm('escape.mp3', 43.5);
+                    }
+                }
             });
         },
         getStatusLabel: function (name) {

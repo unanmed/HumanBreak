@@ -147,6 +147,11 @@ interface FloorBase<T extends FloorIds = FloorIds> {
     cannotViewMap?: boolean;
 
     /**
+     * 是否不能瞬移
+     */
+    cannotMoveDirectly?: boolean;
+
+    /**
      * 是否是地下层
      */
     underGround?: boolean;
@@ -1347,7 +1352,7 @@ interface Maps {
         name: AnimationIds | NameMapIn<AnimationIds>,
         x: number,
         y: number,
-        alignWindow: boolean,
+        alignWindow?: boolean,
         callback?: () => void
     ): number;
 

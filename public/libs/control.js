@@ -3677,7 +3677,8 @@ control.prototype._playBgm_play = function (bgm, startTime) {
     // 如果当前正在播放，且和本BGM相同，直接忽略
     if (
         core.musicStatus.playingBgm == bgm &&
-        !core.material.bgms[core.musicStatus.playingBgm].paused
+        !core.material.bgms[core.musicStatus.playingBgm].paused &&
+        !startTime
     ) {
         return;
     }

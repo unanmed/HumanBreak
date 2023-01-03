@@ -31,7 +31,7 @@ main.floors.MT15=
         "\t[野蛮人]\b[up,hero]山路开始崎岖多变了，要更小心一些"
     ],
     "eachArrive": [],
-    "parallelDo": "if (flags.chase) {\n\tcore.changeChaseView(true);\n}",
+    "parallelDo": "",
     "events": {
         "44,0": [
             "不愧是你！！！"

@@ -20,7 +20,7 @@ main.floors.MT14=
             "name": "plot1.mp3"
         }
     ],
-    "parallelDo": "if (flags.chase) {\n\tcore.changeChaseView(true);\n}",
+    "parallelDo": "",
     "events": {
         "24,7": {
             "trigger": "action",
@@ -101,7 +101,7 @@ main.floors.MT14=
             "data": [
                 {
                     "type": "if",
-                    "condition": "flag:finishChase",
+                    "condition": "flag:finishChase1",
                     "true": [
                         {
                             "type": "function",

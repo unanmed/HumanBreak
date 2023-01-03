@@ -12,7 +12,7 @@ main.floors.MT16=
     "images": [],
     "ratio": 1,
     "defaultGround": "T331",
-    "bgm": null,
+    "bgm": "mount.mp3",
     "color": null,
     "weather": [
         "cloud",
@@ -37,7 +37,7 @@ main.floors.MT16=
             "type": "pauseBgm"
         }
     ],
-    "parallelDo": "if (flags.chase) {\n\tcore.changeChaseView(true);\n}",
+    "parallelDo": "",
     "events": {
         "23,19": [
             {
@@ -88,6 +88,9 @@ main.floors.MT16=
                 ],
                 "no": [
                     "追逐战后录像会进行自动修复，不用担心录像问题",
+                    {
+                        "type": "hideStatusBar"
+                    },
                     {
                         "type": "function",
                         "function": "function(){\ncore.status.maps.MT15.canFlyFrom = false\n}"
@@ -360,11 +363,11 @@ main.floors.MT16=
                 "time": 3000
             },
             {
-                "type": "autoSave"
+                "type": "function",
+                "function": "function(){\ncore.startChase(1);\n}"
             },
             {
-                "type": "function",
-                "function": "function(){\ncore.startChase();\n}"
+                "type": "autoSave"
             }
         ],
         "2,23": [
@@ -378,18 +381,11 @@ main.floors.MT16=
             "即将开始追逐战，最好打开背景音乐，有耳机尽量佩戴耳机，这样游戏体验更佳",
             "为了防止你撞上不该开的门，现在会将所有门打开，并删除所有物品",
             "追逐的时候不能用2技能，不能用楼传，逃跑后要原路返回山洞",
-            "逃跑方式：哪里爆炸走哪里",
-            "注意，如果失败了必须要刷新页面才能重新开始，否则会出问题",
-            "请认真跑，虽然开始追逐的时候有一个自动存档，但不能保证该存档不会出问题",
-            "逃跑时的路线基本固定，但可能有一定难度，过不去就直接跳就行了",
-            "注意！！！再说一遍！！！重新跑需要刷新页面！！！",
+            "追逐战分为两个难度，简单难度会显示逃跑路径，困难模式不显示，困难模式逃跑成功可以获得成就",
+            "前方会有大约40秒的剧情，之后开始追逐战并自动存档，如果逃跑失败需要重打，可以直接读自动存档",
             {
                 "type": "hide",
                 "remove": true
-            },
-            {
-                "type": "function",
-                "function": "function(){\ncore.initChase();\n}"
             }
         ]
     },

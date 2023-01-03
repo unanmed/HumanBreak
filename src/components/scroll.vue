@@ -88,27 +88,27 @@ function draw() {
  * 计算元素总长度
  */
 async function calHeight() {
-    await new Promise(res => {
-        const canvas = ctx.canvas;
-        const style2 = getComputedStyle(canvas);
-        canvas.style.width = `${width}px`;
-        canvas.width = width * scale;
-        canvas.height = parseFloat(style2.height) * scale;
-        if (props.noScroll) canvas.style.width = `0px`;
+    await sleep(20);
+    const canvas = ctx.canvas;
+    const style2 = getComputedStyle(canvas);
+    canvas.style.width = `${width}px`;
+    canvas.width = width * scale;
+    canvas.height = parseFloat(style2.height) * scale;
+    if (props.noScroll) canvas.style.width = `0px`;
 
-        if (props.type === 'horizontal') {
-            main.style.flexDirection = 'column';
-            canvas.style.height = `${width}px`;
-            canvas.style.width = '98%';
-            canvas.style.margin = '0 1% 0 1%';
-            canvas.width = parseFloat(style2.width) * scale;
-            canvas.height = width * scale;
-            if (props.noScroll) canvas.style.height = `0px`;
-        }
+    if (props.type === 'horizontal') {
+        main.style.flexDirection = 'column';
+        canvas.style.height = `${width}px`;
+        canvas.style.width = '98%';
+        canvas.style.margin = '0 1% 0 1%';
+        canvas.width = parseFloat(style2.width) * scale;
+        canvas.height = width * scale;
+        if (props.noScroll) canvas.style.height = `0px`;
+    }
+    await new Promise(res => {
         requestAnimationFrame(() => {
             const style = getComputedStyle(content);
             total = parseFloat(style[canvasAttr]);
-
             res('');
         });
     });
@@ -193,7 +193,7 @@ onMounted(async () => {
     useWheel(content, (x, y) => {
         fromSelf = true;
         const d = x !== 0 ? x : y;
-        if (Math.abs(d) > 50) {
+        if (Math.abs(d) > 30) {
             content.style.transition = `${cssTarget} 0.2s ease-out`;
         } else {
             content.style.transition = '';

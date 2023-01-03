@@ -784,7 +784,7 @@ interface Ui {
      * 重新定位一个自定义画布
      */
     relocateCanvas(
-        name: string,
+        name: CtxRefer,
         x: number,
         y: number,
         useDelta?: boolean
@@ -806,7 +806,7 @@ interface Ui {
      * @param isTempCanvas 是否是临时画布，如果填true，会将临时画布修改为高清画布
      */
     resizeCanvas(
-        name: string,
+        name: CtxRefer,
         x?: number,
         y?: number,
         styleOnly?: boolean,
