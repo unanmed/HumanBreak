@@ -114,6 +114,12 @@ interface PluginUtils {
      * @param index 追逐战索引
      */
     startChase(index: number): Promise<void>;
+
+    /**
+     * 自动修复特殊boss战的录像
+     * @param isStart 是否要开始修剪录像
+     */
+    autoFixRouteBoss(isStart?: boolean);
 }
 
 interface PluginUis {

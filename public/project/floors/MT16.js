@@ -87,9 +87,48 @@ main.floors.MT16=
                     }
                 ],
                 "no": [
+                    {
+                        "type": "choices",
+                        "text": "请选择难度",
+                        "choices": [
+                            {
+                                "text": "简单（显示逃跑路线）",
+                                "color": [
+                                    0,
+                                    255,
+                                    93,
+                                    1
+                                ],
+                                "action": [
+                                    {
+                                        "type": "setValue",
+                                        "name": "flag:chaseHard",
+                                        "value": "0"
+                                    }
+                                ]
+                            },
+                            {
+                                "text": "困难（不显示逃跑路线）",
+                                "color": [
+                                    255,
+                                    0,
+                                    0,
+                                    1
+                                ],
+                                "action": [
+                                    {
+                                        "type": "setValue",
+                                        "name": "flag:chaseHard",
+                                        "value": "1"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
                     "追逐战后录像会进行自动修复，不用担心录像问题",
                     {
-                        "type": "hideStatusBar"
+                        "type": "hideStatusBar",
+                        "toolbox": true
                     },
                     {
                         "type": "function",

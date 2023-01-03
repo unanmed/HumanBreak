@@ -220,5 +220,10 @@ export async function startChase(index: number) {
     flags.chaseIndex = index;
     flags.onChase = true;
     await sleep(20);
-    flags.chase = new Chase(data.path, data.fns, data.camera);
+    flags.chase = new Chase(
+        data.path,
+        data.fns,
+        data.camera,
+        flags.chaseHard === 0
+    );
 }
