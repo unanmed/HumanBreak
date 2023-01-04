@@ -38,6 +38,7 @@ const arrow: Partial<Record<AllIds, Dir>> = {
  * 切分地图区域
  */
 export function splitArea() {
+    area = {};
     const used: FloorIds[] = [];
     for (const id of core.floorIds) {
         if (used.includes(id) || core.status.maps[id].deleted) continue;

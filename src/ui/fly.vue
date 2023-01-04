@@ -475,13 +475,14 @@ function changeFloorByDir(dir: Dir) {
 function locateMap(id: FloorIds) {
     const data = getMapDrawData(
         id,
-        noBorder.value ? 5 : 0,
+        noBorder.value ? 0 : 5, // 可恶的0和5，写反了找一个多小时
         noBorder.value ? 0.5 : 1
     );
     if (!data.locs[id]) return;
+
     const [x, y] = data.locs[id]!;
-    ox = (-x + data.width / 2) * scale;
-    oy = (-y + data.height / 2) * scale;
+    ox = (-x + data.width / 2 - 5) * scale;
+    oy = (-y + data.height / 2 - 5) * scale;
 }
 
 // -------------------- 键盘事件

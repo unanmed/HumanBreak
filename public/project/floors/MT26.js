@@ -1,6 +1,6 @@
-main.floors.MT25=
+main.floors.MT26=
 {
-"floorId": "MT25",
+"floorId": "MT26",
 "title": "智慧小径",
 "name": "智慧小径",
 "width": 15,

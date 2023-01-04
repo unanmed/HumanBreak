@@ -279,7 +279,7 @@ interface MiniMap {
     splitArea(): void;
 }
 
-type Chapter = 'chapter1';
+type Chapter = 'chapter1' | 'chapter2';
 
 interface Skill {
     index: number;

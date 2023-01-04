@@ -30,7 +30,9 @@
                 id="divider-vertical"
             ></a-divider>
             <div id="skill-upgrade-info">
-                <span id="skill-level">当前等级：{{ level }}</span>
+                <span id="skill-level"
+                    >当前等级：{{ level }} / {{ skill.max }}</span
+                >
                 <a-divider dashed class="upgrade-divider"></a-divider>
                 <span
                     v-if="level < skill.max"
@@ -88,10 +90,16 @@ const chapter = ref<Chapter>('chapter1');
 const update = ref(false);
 
 const chapterDict = {
-    chapter1: '第一章'
+    chapter1: '第一章',
+    chapter2: '第二章'
 };
 
+flags.skillTree ??= 0;
+
 const chapterList = Object.keys(core.plugin.skills) as Chapter[];
+
+selected.value = core.plugin.skills[chapterList[flags.skillTree]][0].index;
+chapter.value = chapterList[flags.skillTree];
 
 watch(selected, draw);
 watch(update, () => (mdef.value = core.status.hero.mdef));
@@ -276,8 +284,13 @@ onUnmounted(() => {
 function selectChapter(delta: number) {
     const now = chapterList.indexOf(chapter.value);
     const to = now + delta;
-    if (has(chapterList[to])) {
+
+    if (has(chapterList[to]) && flags.chapter > to) {
+        selected.value = core.plugin.skills[chapterList[to]][0].index;
         chapter.value = chapterList[to];
+        update.value = !update.value;
+        flags.skillTree = to;
+        draw();
     }
 }
 </script>

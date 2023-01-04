@@ -3931,6 +3931,105 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     max: 1,
                     effect: ['战斗时智慧会充当护盾']
                 }
+            ],
+            chapter2: [
+                {
+                    index: 8,
+                    title: '锋利',
+                    desc: ['让剑变得更加锋利！每级使攻击增加1%（buff式增加）'],
+                    consume: 'level > 5 ? 50 * level ** 2 : 250 * level + 250',
+                    front: [],
+                    loc: [1, 2],
+                    max: 15,
+                    effect: ['攻击增加${level}%']
+                },
+                {
+                    index: 9,
+                    title: '坚硬',
+                    desc: [
+                        '让盾牌变得更加坚固！每级使防御增加1%（buff式增加）'
+                    ],
+                    consume: 'level > 5 ? 50 * level ** 2 : 250 * level + 250',
+                    front: [],
+                    loc: [1, 4],
+                    max: 15,
+                    effect: ['防御增加${level}%']
+                },
+                {
+                    index: 10,
+                    title: '铸剑为盾',
+                    desc: [
+                        '<span style="color: gold">主动技能，快捷键3</span>，',
+                        '减少一定的攻击，增加一定的防御'
+                    ],
+                    consume: '500 * level + 1000',
+                    front: [[9, 5]],
+                    loc: [2, 5],
+                    max: 5,
+                    effect: [
+                        '增加${level * 10}%的防御，减少${level * 10}%的攻击'
+                    ]
+                },
+                {
+                    index: 11,
+                    title: '学习',
+                    desc: [
+                        '<span style="color: gold">主动技能</span>，可以消耗500智慧学习一个怪物的技能，',
+                        '持续5场战斗，每学习一次消耗的智慧点增加200，每次升级使持续的战斗次数增加3次。更多信息可在学习后在百科全书查看。'
+                    ],
+                    consume: '2500 * level ** 2 + 2500',
+                    front: [
+                        [8, 10],
+                        [12, 5]
+                    ],
+                    loc: [4, 1],
+                    max: 6,
+                    effect: ['学习怪物技能，持续${level * 3 + 2}场战斗']
+                },
+                {
+                    index: 12,
+                    title: '聪慧',
+                    desc: [
+                        '使主角变得更加聪明，每级使绿宝石增加的智慧点上升5%'
+                    ],
+                    consume:
+                        'level > 5 ? 100 * level ** 2 : 250 * level + 1250',
+                    front: [
+                        [8, 10],
+                        [9, 10]
+                    ],
+                    loc: [3, 3],
+                    max: 20,
+                    effect: ['增加${level * 5}%绿宝石效果']
+                },
+                {
+                    index: 13,
+                    title: '治愈',
+                    desc: ['每级使血瓶的加血量增加2%'],
+                    consume:
+                        'level > 5 ? 100 * level ** 2 : 250 * level + 1250',
+                    front: [[10, 3]],
+                    loc: [4, 5],
+                    max: 20,
+                    effect: ['增加${level * 2}%的血瓶回血量']
+                },
+                {
+                    index: 14,
+                    title: '胜利之号',
+                    desc: [
+                        '<span style="color: #dd4">第二章终极技能</span>，',
+                        '每打一个怪物，勇士在本楼层对怪物造成的伤害便增加1%'
+                    ],
+                    consume: '15000',
+                    front: [
+                        [13, 10],
+                        [12, 10],
+                        [11, 3]
+                    ],
+                    loc: [5, 3],
+                    max: 1,
+                    effect: ['每打一个怪，勇士造成的伤害增加1%']
+                }
             ]
         };
 
@@ -4015,6 +4114,15 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     break;
                 case 7: // 无上之盾
                     core.setFlag('superSheild', true);
+                    break;
+                case 8: // 锋利 +1%攻击
+                    core.addBuff('atk', 0.01);
+                    break;
+                case 9: // 锋利 +1%防御
+                    core.addBuff('def', 0.01);
+                    break;
+                case 10: // 铸剑为盾
+                    core.setFlag('shieldOn', true);
                     break;
             }
             const consume = core.getSkillConsume(skill);

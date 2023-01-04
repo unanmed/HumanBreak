@@ -167,6 +167,12 @@ function update() {
     lvName.value = core.getLvName(hero.lv);
     if (flags.blade && flags.bladeOn) {
         skill.value = '断灭之刃';
+        hero.atk! *= 1 + core.getSkillLevel(2) / 10;
+        hero.def! *= 1 - core.getSkillLevel(2) / 10;
+    } else if (flags.shield && flags.shieldOn) {
+        skill.value = '铸剑为盾';
+        hero.def! *= 1 + core.getSkillLevel(10) / 10;
+        hero.atk! *= 1 - core.getSkillLevel(10) / 10;
     } else {
         skill.value = '无';
     }

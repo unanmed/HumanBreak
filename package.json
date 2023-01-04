@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vue-tsc && vite build && ts-node-esm script/compress.ts",
     "build-gh": "vue-tsc && vite build --base=/HumanBreak/ && ts-node-esm script/compress.ts",
+    "build-local": "vue-tsc && vite build --base=/ && ts-node-esm script/compress.ts",
     "preview": "vite preview",
     "preview-node": "cd dist && node server.cjs",
     "update": "ts-node-esm script/update.ts",

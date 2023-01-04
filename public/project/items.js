@@ -40,8 +40,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "items",
 		"name": "小绿宝石",
 		"text": "，护盾+${core.values.greenGem}",
-		"itemEffect": "core.status.hero.mdef += 20 * core.status.thisMap.ratio / core.getFlag(\"hard\")",
-		"itemEffectTip": "，智慧+${20 * core.status.thisMap.ratio / core.getFlag(\"hard\")}",
+		"itemEffect": "core.status.hero.mdef += 20 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.getSkillLevel(11) / 20 + 1)",
+		"itemEffectTip": "，智慧+${20 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.getSkillLevel(11) / 20 + 1)}",
 		"useItemEffect": "core.status.hero.mdef += core.values.greenGem",
 		"canUseItemEffect": "true"
 	},
@@ -751,8 +751,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "items",
 		"name": "中绿宝石",
 		"text": "，护盾+${core.values.greenGem}",
-		"itemEffect": "core.status.hero.mdef += 40 * core.status.thisMap.ratio / core.getFlag(\"hard\")",
-		"itemEffectTip": "，智慧+${40 * core.status.thisMap.ratio / core.getFlag(\"hard\")}",
+		"itemEffect": "core.status.hero.mdef += 40 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.getSkillLevel(11) / 20 + 1)",
+		"itemEffectTip": "，智慧+${40 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.getSkillLevel(11) / 20 + 1)}",
 		"useItemEffect": "core.status.hero.mdef += core.values.greenGem",
 		"canUseItemEffect": "true"
 	},
@@ -854,8 +854,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "items",
 		"name": "大绿宝石",
 		"text": "，护盾+${core.values.greenGem}",
-		"itemEffect": "core.status.hero.mdef += 80 * core.status.thisMap.ratio / core.getFlag(\"hard\")",
-		"itemEffectTip": "，智慧+${80 * core.status.thisMap.ratio / core.getFlag(\"hard\")}",
+		"itemEffect": "core.status.hero.mdef += 80 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.getSkillLevel(11) / 20 + 1)",
+		"itemEffectTip": "，智慧+${80 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.getSkillLevel(11) / 20 + 1)",
 		"useItemEffect": "core.status.hero.mdef += core.values.greenGem",
 		"canUseItemEffect": "true"
 	},
@@ -1011,8 +1011,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "items",
 		"name": "超大绿宝石",
 		"text": "，护盾+${core.values.greenGem}",
-		"itemEffect": "core.status.hero.mdef += 160 * core.status.thisMap.ratio / core.getFlag(\"hard\")",
-		"itemEffectTip": "，智慧+${160 * core.status.thisMap.ratio / core.getFlag(\"hard\")}",
+		"itemEffect": "core.status.hero.mdef += 160 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.getSkillLevel(11) / 20 + 1)",
+		"itemEffectTip": "，智慧+${160 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.getSkillLevel(11) / 20 + 1)}",
 		"useItemEffect": "core.status.hero.mdef += core.values.greenGem",
 		"canUseItemEffect": "true"
 	},
