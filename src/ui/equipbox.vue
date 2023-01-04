@@ -39,7 +39,7 @@
                     dashed
                     style="border-color: #ddd4; margin: 1vh 0 1vh 0"
                 ></a-divider>
-                <Scroll :width="10" id="equip-scroll"
+                <Scroll id="equip-scroll"
                     ><div
                         class="equip selectable"
                         v-for="([id, num], i) of toShow"
@@ -662,7 +662,6 @@ onUnmounted(() => {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin: 1vh 1vw 0 0.5vw;
     padding: 0.5vh 0.5vw 0.5vh 0.5vw;
     border: #0000 0.5px solid;
     white-space: nowrap;

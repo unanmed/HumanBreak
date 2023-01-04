@@ -63,10 +63,10 @@
                 >
                 <span
                     ><span style="font-family: 'Fira Code'">{{
-                        nowDamage[0] < 0 ? '=>' : ''
+                        nowDamage[0] < 0 && nowDamage[1] === '???' ? '=>' : ''
                     }}</span
                     >{{
-                        nowDamage[0] < 0
+                        nowDamage[0] < 0 && nowDamage[1] === '???'
                             ? format(-nowDamage[0])
                             : format(nowDamage[0])
                     }}</span

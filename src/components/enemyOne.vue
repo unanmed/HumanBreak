@@ -88,12 +88,14 @@
                             >减伤&nbsp;&nbsp;&nbsp;&nbsp;<span
                                 :style="{
                                     color:
-                                        enemy.criticalDamage < 0
+                                        enemy.criticalDamage < 0 &&
+                                        !has(enemy.damage)
                                             ? 'gold'
                                             : 'lightpink'
                                 }"
                                 ><span style="font-family: 'Fira Code'">{{
-                                    enemy.criticalDamage < 0
+                                    enemy.criticalDamage < 0 &&
+                                    !has(enemy.damage)
                                         ? isMobile
                                             ? '-'
                                             : '=>'
