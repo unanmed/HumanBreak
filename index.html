@@ -2,6 +2,8 @@
 <html>
 
 <head>
+  <script type="module" crossorigin src="/games/HumanBreak/assets/polyfills.24a28418.js"></script>
+
     <meta http-equiv='content-type' content='text/html' charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=Edge, chrome=1'>
     <meta name='author' content='ckcz123'>
@@ -15,7 +17,13 @@
     <meta name="x5-orientation" content="portrait">
     <meta name="x5-fullscreen" content="true">
     <meta name="x5-page-mode" content="app">
-    <link id="mota-css" type='text/css' href='/styles.css' rel='stylesheet'>
+    <link id="mota-css" type='text/css' href='/games/HumanBreak/styles.css' rel='stylesheet'>
+  <script type="module" crossorigin src="/games/HumanBreak/assets/index.0c3090cd.js"></script>
+  <link rel="modulepreload" crossorigin href="/games/HumanBreak/assets/antdv.e0a750df.js">
+  <link rel="modulepreload" crossorigin href="/games/HumanBreak/assets/common.f94eef39.js">
+  <link rel="stylesheet" href="/games/HumanBreak/assets/index.e41b9955.css">
+  <script type="module">try{import.meta.url;import("_").catch(()=>1);}catch(e){}window.__vite_is_modern_browser=true;</script>
+  <script type="module">!function(){if(window.__vite_is_modern_browser)return;console.warn("vite: loading legacy build because dynamic import or import.meta.url is unsupported, syntax error above should be ignored");var e=document.getElementById("vite-legacy-polyfill"),n=document.createElement("script");n.src=e.src,n.onload=function(){System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))},document.body.appendChild(n)}();</script>
 </head>
 
 <body>
@@ -201,10 +209,13 @@
     <script src='libs/thirdparty/zip.min.js'></script>
     <script src="libs/thirdparty/lodash.min.js"></script>
     <script id='mainScript' src='main.js'></script>
-    <script src="/src/initPlugin.ts" type="module"></script>
-    <script src="/src/main.ts" type="module"></script>
+    
+    
     <script>main.init('play'); main.listen();</script>
 
+  <script nomodule>!function(){var e=document,t=e.createElement("script");if(!("noModule"in t)&&"onbeforeload"in t){var n=!1;e.addEventListener("beforeload",(function(e){if(e.target===t)n=!0;else if(!e.target.hasAttribute("nomodule")||!n)return;e.preventDefault()}),!0),t.type="module",t.src=".",e.head.appendChild(t),t.remove()}}();</script>
+  <script nomodule crossorigin id="vite-legacy-polyfill" src="/games/HumanBreak/assets/polyfills-legacy.852057b5.js"></script>
+  <script nomodule crossorigin id="vite-legacy-entry" data-src="/games/HumanBreak/assets/index-legacy.81e68bf6.js">System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))</script>
 </body>
 
 </html>
