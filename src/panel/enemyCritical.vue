@@ -8,11 +8,11 @@
                 <a-slider
                     class="slider"
                     v-model:value="addAtk"
-                    :max="(originCri.at(-1)?.[0] ?? 2) - 1"
+                    :max="ceil((originCri.at(-1)?.[0] ?? 2) / ratio) - 1"
                 ></a-slider>
                 <span
                     >最大值&nbsp;&nbsp;&nbsp;&nbsp;{{
-                        (originCri.at(-1)?.[0] ?? 2) - 1
+                        ceil((originCri.at(-1)?.[0] ?? 2) / ratio) - 1
                     }}</span
                 >
             </div>
@@ -29,11 +29,11 @@
                 <a-slider
                     class="slider"
                     v-model:value="addDef"
-                    :max="(originDef.at(-1)?.[0] ?? 2) - 1"
+                    :max="ceil((originDef.at(-1)?.[0] ?? 2) / ratio) - 1"
                 ></a-slider>
                 <span
                     >最大值&nbsp;&nbsp;&nbsp;&nbsp;{{
-                        (originDef.at(-1)?.[0] ?? 2) - 1
+                        ceil((originDef.at(-1)?.[0] ?? 2) / ratio) - 1
                     }}</span
                 >
             </div>
@@ -96,6 +96,7 @@ const critical = ref<HTMLCanvasElement>();
 const def = ref<HTMLCanvasElement>();
 
 const enemy = core.plugin.bookDetailEnemy;
+const ceil = Math.ceil;
 
 let originCri = getCriticalDamage(enemy);
 let originDef = getDefDamage(enemy);

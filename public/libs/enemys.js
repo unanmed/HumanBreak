@@ -225,9 +225,6 @@ enemys.prototype.getDamageString = function (enemy, x, y, floorId) {
         else color = '#FF2222';
 
         damage = core.formatBigNumber(damage, true);
-        if (core.enemys.hasSpecial(enemy, 19)) damage += '+';
-        if (core.enemys.hasSpecial(enemy, 21)) damage += '-';
-        if (core.enemys.hasSpecial(enemy, 11)) damage += '^';
     }
 
     return {

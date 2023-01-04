@@ -122,15 +122,14 @@ main.floors.MT14=
                                 }
                             ],
                             "no": [
-                                "注意：如果剧情过程中卡死，请刷新页面（不会修，根本找不到问题在哪）",
                                 {
                                     "type": "pauseBgm"
                                 },
-                                "\t[野蛮人,hero]\b[down,hero]终于逃出来了！",
-                                "\t[野蛮人,hero]\b[down,hero]太吓人了！！！",
-                                "\t[野蛮人,hero]\b[down,hero]这下应该不会有魔物再出现了吧",
-                                "\t[野蛮人,hero]\b[down,hero]这山都快塌了",
-                                "\t[野蛮人,hero]\b[down,hero]天也快黑了，回家休息休息吧",
+                                "\t[野蛮人,hero]\b[down,hero]呼！",
+                                "\t[野蛮人,hero]\b[down,hero]总算逃出来了。",
+                                "\t[野蛮人,hero]\b[down,hero]没想到柴火没砍成，还碰到了狼。",
+                                "\t[野蛮人,hero]\b[down,hero]真是倒了血霉了。",
+                                "\t[野蛮人,hero]\b[down,hero]算了，明天再砍柴吧。",
                                 {
                                     "type": "setCurtain",
                                     "color": [
@@ -141,161 +140,66 @@ main.floors.MT14=
                                     ],
                                     "time": 1500,
                                     "keep": true
-                                },
-                                {
-                                    "type": "changeFloor",
-                                    "floorId": "MT0",
-                                    "loc": [
-                                        7,
-                                        12
-                                    ],
-                                    "direction": "up"
-                                },
-                                {
-                                    "type": "pauseBgm"
-                                },
-                                {
-                                    "type": "setCurtain",
-                                    "time": 1500
-                                },
-                                "\t[野蛮人,hero]\b[up,hero]看来，我也需要鼓起勇气向未知的区域前进了",
-                                "\t[野蛮人,hero]\b[up,hero]只在这附近无法再让我提升了啊",
-                                {
-                                    "type": "setCurtain",
-                                    "color": [
-                                        0,
-                                        0,
-                                        0,
-                                        1
-                                    ],
-                                    "time": 1500,
-                                    "keep": true
-                                },
-                                {
-                                    "type": "hideHero"
-                                },
-                                {
-                                    "type": "setValue",
-                                    "name": "flag:plot",
-                                    "value": "true"
-                                },
-                                {
-                                    "type": "function",
-                                    "function": "function(){\ncore.values.floorChangeTime = 0;\n}"
-                                },
-                                {
-                                    "type": "changeFloor",
-                                    "floorId": "MT14",
-                                    "loc": [
-                                        24,
-                                        7
-                                    ]
-                                },
-                                {
-                                    "type": "playBgm",
-                                    "name": "plot1.mp3",
-                                    "keep": true
-                                },
-                                {
-                                    "type": "setCurtain",
-                                    "time": 2000,
-                                    "async": true
-                                },
-                                {
-                                    "type": "setViewport",
-                                    "dxy": [
-                                        20,
-                                        0
-                                    ],
-                                    "time": 10000
-                                },
-                                {
-                                    "type": "setCurtain",
-                                    "color": [
-                                        0,
-                                        0,
-                                        0,
-                                        1
-                                    ],
-                                    "time": 500,
-                                    "keep": true
-                                },
-                                {
-                                    "type": "changeFloor",
-                                    "floorId": "MT14",
-                                    "loc": [
-                                        93,
-                                        7
-                                    ]
-                                },
-                                {
-                                    "type": "setCurtain",
-                                    "time": 500,
-                                    "async": true
-                                },
-                                {
-                                    "type": "setViewport",
-                                    "dxy": [
-                                        20,
-                                        0
-                                    ],
-                                    "time": 10000
-                                },
-                                {
-                                    "type": "setCurtain",
-                                    "color": [
-                                        0,
-                                        0,
-                                        0,
-                                        1
-                                    ],
-                                    "time": 500,
-                                    "keep": true
-                                },
-                                {
-                                    "type": "changeFloor",
-                                    "floorId": "MT15",
-                                    "loc": [
-                                        31,
-                                        7
-                                    ]
-                                },
-                                {
-                                    "type": "setCurtain",
-                                    "time": 500,
-                                    "async": true
-                                },
-                                {
-                                    "type": "setViewport",
-                                    "dxy": [
-                                        20,
-                                        0
-                                    ],
-                                    "time": 10000
-                                },
-                                {
-                                    "type": "setCurtain",
-                                    "color": [
-                                        0,
-                                        0,
-                                        0,
-                                        1
-                                    ],
-                                    "time": 500,
-                                    "keep": true
-                                },
-                                {
-                                    "type": "waitAsync"
                                 },
                                 {
                                     "type": "setText",
-                                    "align": "center"
+                                    "text": [
+                                        0,
+                                        0,
+                                        0,
+                                        1
+                                    ],
+                                    "background": "winskin3.png"
                                 },
                                 {
-                                    "type": "scrollText",
-                                    "text": "就这样，野蛮人踏上了寻求智慧的旅途\n在那片绿色结晶的驱使下，他发现了智慧的强大\n而人类历史由此转向快速发展期\n智慧终将战胜一切\n而野蛮将会挫败永世\n\n一刀一剑斩天歌，随风来者是稀客\n一点智慧破苍穹，万里征途犹坎坷\n回首却看山前树，挥手不忘前时乐\n一鼓作气寻征途，留下芳香艳人色\n\n回首处望苍穹，千里共当时明月终\n\n人类，正在开天辟地",
-                                    "time": 30000,
-                                    "lineHeight": 2
+                                    "type": "setGlobalAttribute",
+                                    "name": "font",
+                                    "value": "scroll"
+                                },
+                                "人类简史——起源篇",
+                                {
+                                    "type": "playSound",
+                                    "name": "paper.mp3"
+                                },
+                                "但他已经抑制不了自己的好奇心。",
+                                {
+                                    "type": "playSound",
+                                    "name": "paper.mp3"
+                                },
+                                "人类嘛，总会在好奇心的驱使下前进。",
+                                {
+                                    "type": "playSound",
+                                    "name": "paper.mp3"
+                                },
+                                "但是，他们却用好奇心给自己带来了灾难，",
+                                {
+                                    "type": "playSound",
+                                    "name": "paper.mp3"
+                                },
+                                "只得利用历史中的野蛮人的好奇心来拯救自己。",
+                                {
+                                    "type": "playSound",
+                                    "name": "paper.mp3"
+                                },
+                                "不出所料，这个野蛮人走上了勇气之路。",
+                                {
+                                    "type": "playSound",
+                                    "name": "paper.mp3"
+                                },
+                                {
+                                    "type": "setText",
+                                    "text": [
+                                        255,
+                                        255,
+                                        255,
+                                        1
+                                    ],
+                                    "background": "winskin2.png"
+                                },
+                                {
+                                    "type": "setGlobalAttribute",
+                                    "name": "font",
+                                    "value": "normal"
                                 },
                                 {
                                     "type": "changeFloor",
@@ -305,29 +209,8 @@ main.floors.MT14=
                                         7
                                     ],
                                     "direction": "right"
-                                },
-                                {
-                                    "type": "function",
-                                    "function": "function(){\ncore.values.floorChangeTime = 200;\n}"
-                                },
-                                {
-                                    "type": "showHero"
-                                },
-                                {
-                                    "type": "setCurtain",
-                                    "time": 500
-                                },
-                                {
-                                    "type": "setText",
-                                    "align": "left"
                                 }
                             ]
-                        },
-                        "\t[野蛮人]\b[up,hero]勇气之路，我来了！",
-                        {
-                            "type": "setValue",
-                            "name": "flag:plot",
-                            "value": "false"
                         }
                     ]
                 }

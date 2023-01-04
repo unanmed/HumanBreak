@@ -17,9 +17,10 @@ main.floors.MT17=
     "weather": null,
     "firstArrive": [
         {
-            "type": "function",
-            "function": "function(){\ncore.resetMap(\"tower6\");\n}"
+            "type": "setCurtain",
+            "time": 1000
         },
+        "\t[野蛮人]\b[up,hero]勇气之路，智慧之塔，我来了！",
         "血瓶宝石效果已变成两倍",
         {
             "type": "setGlobalValue",

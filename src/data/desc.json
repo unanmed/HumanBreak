@@ -6,7 +6,7 @@
             "这里显示本塔中需要注意的事项。",
             "<br>",
             "<br>",
-            "1. 本百科全书字数很多，可以选择性地阅读。",
+            "1. <span style=\"color: yellow\">本百科全书字数很多，可以选择性地阅读。</span>",
             "<br>",
             "<br>",
             "2. 本塔中<span style=\"color: gold\">几乎所有 ui </span>都可以纵向滚动，如果发现显示不全，",
@@ -155,7 +155,9 @@
             "<br>",
             "下面是本塔中新增的快捷键：",
             "<br>",
-            "<span style=\"color: gold\">M</span>：快速标记怪物"
+            "<span style=\"color: gold\">M</span>：快速标记怪物",
+            "<br>",
+            "<span style=\"color: gold\">J</span>：打开技能树"
         ]
     },
     "extraAttr": {

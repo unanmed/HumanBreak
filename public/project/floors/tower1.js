@@ -14,13 +14,7 @@ main.floors.tower1=
     "defaultGround": "T526",
     "bgm": "tower.mp3",
     "firstArrive": [
-        "\t[原始人]\b[up,hero]智慧之塔...",
-        "\t[原始人]\b[up,hero]看来它认为我是拥有智慧之人啊",
-        "\t[原始人]\b[up,hero]那我就只好爬塔咯",
-        {
-            "type": "function",
-            "function": "function(){\ncore.resetMap('tower6');\n}"
-        }
+        "\t[野蛮人]\b[up,hero]这里，便是智慧之塔了"
     ],
     "eachArrive": [],
     "parallelDo": "",

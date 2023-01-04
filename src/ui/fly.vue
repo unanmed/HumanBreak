@@ -118,7 +118,7 @@ watch(nowArea, n => {
     oy = 0;
     scale = 3;
     lastScale = 3;
-    if (!area[n].includes(nowFloor.value))
+    if (area[n] && !area[n].includes(nowFloor.value))
         nowFloor.value =
             area[n].find(v => v === core.status.floorId) ?? area[n][0];
 });
@@ -342,7 +342,7 @@ function drawRight() {
         y = thumb.height / 2 - h / 2;
     }
     if (ratio < 1) {
-        w = h / ratio;
+        w = h * ratio;
         x = thumb.width / 2 - w / 2;
     }
     thumbCtx.fillStyle = '#000';
@@ -478,6 +478,7 @@ function locateMap(id: FloorIds) {
         noBorder.value ? 5 : 0,
         noBorder.value ? 0.5 : 1
     );
+    if (!data.locs[id]) return;
     const [x, y] = data.locs[id]!;
     ox = (-x + data.width / 2) * scale;
     oy = (-y + data.height / 2) * scale;

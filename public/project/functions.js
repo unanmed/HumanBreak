@@ -52,7 +52,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 隐藏右下角的音乐按钮
             core.dom.musicBtn.style.display = 'none';
             core.dom.enlargeBtn.style.display = 'none';
-            if (main.mode === 'play' && !main.replayChecking) core.splitArea();
+            if (main.mode === 'play' && !main.replayChecking) {
+                core.splitArea();
+                core.resetFlagSettings();
+            }
         },
         win: function (reason, norank, noexit) {
             // 游戏获胜事件
@@ -838,8 +841,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 var hp_buff = 0,
                     atk_buff = 0,
                     def_buff = 0;
-                // 已经计算过的光环怪ID列表，用于判定叠加
-                var usedEnemyIds = {};
                 // 检查光环和支援的缓存
                 var index =
                     x != null && y != null ? x + ',' + y : 'floor' + enemy.id;
@@ -856,35 +857,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                                 enemy = core.material.enemys[id];
                             var dx = Math.abs(block.x - x),
                                 dy = Math.abs(block.y - y);
-                            // 检查【光环】技能，数字25
-                            if (enemy && core.hasSpecial(enemy.special, 25)) {
-                                // 检查是否是范围光环
-                                var inRange = enemy.range == null;
-                                if (
-                                    enemy.range != null &&
-                                    x != null &&
-                                    y != null
-                                ) {
-                                    // 检查十字和九宫格光环
-                                    if (dx + dy <= enemy.range) inRange = true;
-                                    if (
-                                        enemy.zoneSquare &&
-                                        dx <= enemy.range &&
-                                        dy <= enemy.range
-                                    )
-                                        inRange = true;
-                                }
-                                // 检查是否可叠加
-                                if (
-                                    inRange &&
-                                    (enemy.add || !usedEnemyIds[enemy.id])
-                                ) {
-                                    hp_buff += enemy.value || 0;
-                                    atk_buff += enemy.atkValue || 0;
-                                    def_buff += enemy.defValue || 0;
-                                    usedEnemyIds[enemy.id] = true;
-                                }
-                            }
                             // 检查【支援】技能，数字26
                             if (
                                 enemy &&
@@ -966,169 +938,192 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 后面三个参数主要是可以在光环等效果上可以适用
             floorId = floorId || core.status.floorId;
 
-            var hero_hp = core.getRealStatusOrDefault(hero, 'hp'),
-                hero_atk = core.getRealStatusOrDefault(hero, 'atk'),
-                hero_def = core.getRealStatusOrDefault(hero, 'def'),
-                hero_IQ = core.getRealStatusOrDefault(hero, 'mdef'),
-                hero_recovery = core.getRealStatusOrDefault(hero, 'hpmax'),
-                hero_extraAtk = core.getRealStatusOrDefault(hero, 'mana'),
-                origin_hero_hp = core.getStatusOrDefault(hero, 'hp'),
-                origin_hero_atk = core.getStatusOrDefault(hero, 'atk'),
-                origin_hero_def = core.getStatusOrDefault(hero, 'def');
-
-            // 勇士的负属性都按0计算
-            hero_hp = Math.max(0, hero_hp);
-            hero_atk = Math.max(0, hero_atk);
-            hero_def = Math.max(0, hero_def);
-
             // 怪物的各项数据
             // 对坚固模仿等处理扔到了脚本编辑-getEnemyInfo之中
-            var enemyInfo = core.enemys.getEnemyInfo(
+            const enemyInfo = core.enemys.getEnemyInfo(
                 enemy,
                 hero,
                 x,
                 y,
                 floorId
             );
-            var mon_hp = enemyInfo.hp,
-                mon_atk = enemyInfo.atk,
-                mon_def = enemyInfo.def,
-                mon_special = enemyInfo.special;
-            var damage = 0;
 
-            // 断灭之刃技能
-            if (core.getFlag('bladeOn') && core.getFlag('blade')) {
-                var level = core.getSkillLevel()[2];
-                hero_atk *= 1 + 0.1 * level;
-                hero_def *= 1 - 0.1 * level;
-            }
-            // 饥渴
-            if (core.hasSpecial(mon_special, 7)) {
-                hero_atk *= 1 - (enemy.hungry || 0) / 100;
-            }
+            function getDamage() {
+                let hero_hp = core.getRealStatusOrDefault(hero, 'hp'),
+                    hero_atk = core.getRealStatusOrDefault(hero, 'atk'),
+                    hero_def = core.getRealStatusOrDefault(hero, 'def'),
+                    hero_IQ = core.getRealStatusOrDefault(hero, 'mdef'),
+                    hero_recovery = core.getRealStatusOrDefault(hero, 'hpmax'),
+                    hero_extraAtk = core.getRealStatusOrDefault(hero, 'mana'),
+                    origin_hero_hp = core.getStatusOrDefault(hero, 'hp'),
+                    origin_hero_atk = core.getStatusOrDefault(hero, 'atk'),
+                    origin_hero_def = core.getStatusOrDefault(hero, 'def');
 
-            // 如果是无敌属性，且勇士未持有十字架
-            if (core.hasSpecial(mon_special, 20) && !core.hasItem('cross'))
-                return null; // 不可战斗
+                let mon_hp = enemyInfo.hp,
+                    mon_atk = enemyInfo.atk,
+                    mon_def = enemyInfo.def,
+                    mon_special = enemyInfo.special;
 
-            // 战前造成的额外伤害（可被护盾抵消）
-            var init_damage = 0;
+                let damage = 0;
 
-            // 每回合怪物对勇士造成的战斗伤害
-            var per_damage = mon_atk - hero_def;
-            // 魔攻：战斗伤害就是怪物攻击力
-            if (
-                core.hasSpecial(mon_special, 2) ||
-                core.hasSpecial(mon_special, 13)
-            )
-                per_damage = mon_atk;
-            // 战斗伤害不能为负值
-            if (per_damage < 0) per_damage = 0;
-
-            // 2连击 & 3连击 & N连击
-            if (core.hasSpecial(mon_special, 4)) per_damage *= 2;
-            if (core.hasSpecial(mon_special, 5)) per_damage *= 3;
-            if (core.hasSpecial(mon_special, 6)) per_damage *= enemy.n || 4;
-            // 勇士每回合对怪物造成的伤害
-            if (!core.hasSpecial(mon_special, 9)) {
-                var hero_per_damage = Math.max(hero_atk - mon_def, 0);
-                if (hero_per_damage > 0) hero_per_damage += hero_extraAtk;
-            }
-            if (core.hasSpecial(mon_special, 9)) {
-                var hero_per_damage = Math.max(
-                    hero_atk + hero_extraAtk - mon_def,
-                    0
-                );
-            }
-
-            // 如果没有破防，则不可战斗
-            if (hero_per_damage <= 0) return null;
-
-            // 勇士的攻击回合数；为怪物生命除以每回合伤害向上取整
-            var turn = Math.ceil(mon_hp / hero_per_damage);
-
-            // 致命一击
-            if (core.hasSpecial(mon_special, 1)) {
-                var times = Math.floor(turn / 5);
-                damage +=
-                    ((times * ((enemy.crit || 100) - 100)) / 100) * per_damage;
-            }
-            // 勇气之刃
-            if (turn > 1 && core.hasSpecial(mon_special, 10)) {
-                damage += ((enemy.courage || 100) / 100 - 1) * per_damage;
-            }
-            // 勇气冲锋
-            if (core.hasSpecial(mon_special, 11)) {
-                damage += ((enemy.charge || 100) / 100) * per_damage;
-                turn += 5;
-            }
-
-            // ------ 支援 ----- //
-            // 这个递归最好想明白为什么，flag:__extraTurn__是怎么用的
-            var guards = core.getFlag(
-                '__guards__' + x + '_' + y,
-                enemyInfo.guards
-            );
-            var guard_before_current_enemy = true; // ------ 支援怪是先打(true)还是后打(false)？
-            turn += core.getFlag('__extraTurn__', 0);
-            if (guards.length > 0) {
-                if (!guard_before_current_enemy) {
-                    // --- 先打当前怪物，记录当前回合数
-                    core.setFlag('__extraTurn__', turn);
+                // 断灭之刃技能
+                if (core.getFlag('bladeOn') && core.getFlag('blade')) {
+                    var level = core.getSkillLevel(2);
+                    hero_atk *= 1 + 0.1 * level;
+                    hero_def *= 1 - 0.1 * level;
                 }
-                // 获得那些怪物组成小队战斗
-                for (var i = 0; i < guards.length; i++) {
-                    var gx = guards[i][0],
-                        gy = guards[i][1],
-                        gid = guards[i][2];
-                    // 递归计算支援怪伤害信息，这里不传x,y保证不会重复调用
-                    // 这里的mdef传0，因为护盾应该只会被计算一次
-                    var info = core.enemys.getDamageInfo(
-                        core.material.enemys[gid],
-                        {
-                            hp: origin_hero_hp,
-                            atk: origin_hero_atk,
-                            def: origin_hero_def,
-                            mdef: 0
-                        }
+                // 饥渴
+                if (core.hasSpecial(mon_special, 7)) {
+                    hero_atk *= 1 - (enemy.hungry || 0) / 100;
+                }
+
+                // 战前造成的额外伤害（可被护盾抵消）
+                var init_damage = 0;
+
+                // 每回合怪物对勇士造成的战斗伤害
+                var per_damage = mon_atk - hero_def;
+                // 魔攻：战斗伤害就是怪物攻击力
+                if (
+                    core.hasSpecial(mon_special, 2) ||
+                    core.hasSpecial(mon_special, 13)
+                )
+                    per_damage = mon_atk;
+                // 战斗伤害不能为负值
+                if (per_damage < 0) per_damage = 0;
+
+                // 2连击 & 3连击 & N连击
+                if (core.hasSpecial(mon_special, 4)) per_damage *= 2;
+                if (core.hasSpecial(mon_special, 5)) per_damage *= 3;
+                if (core.hasSpecial(mon_special, 6)) per_damage *= enemy.n || 4;
+                // 勇士每回合对怪物造成的伤害
+                if (!core.hasSpecial(mon_special, 9)) {
+                    var hero_per_damage = Math.max(hero_atk - mon_def, 0);
+                    if (hero_per_damage > 0) hero_per_damage += hero_extraAtk;
+                }
+                if (core.hasSpecial(mon_special, 9)) {
+                    var hero_per_damage = Math.max(
+                        hero_atk + hero_extraAtk - mon_def,
+                        0
                     );
-                    if (info == null) {
-                        // 小队中任何一个怪物不可战斗，直接返回null
-                        core.removeFlag('__extraTurn__');
-                        return null;
+                }
+
+                // 如果没有破防，则不可战斗
+                if (hero_per_damage <= 0) return null;
+
+                // 勇士的攻击回合数；为怪物生命除以每回合伤害向上取整
+                let turn = Math.ceil(mon_hp / hero_per_damage);
+
+                // 致命一击
+                if (core.hasSpecial(mon_special, 1)) {
+                    var times = Math.floor(turn / 5);
+                    damage +=
+                        ((times * ((enemy.crit || 100) - 100)) / 100) *
+                        per_damage;
+                }
+                // 勇气之刃
+                if (turn > 1 && core.hasSpecial(mon_special, 10)) {
+                    damage += ((enemy.courage || 100) / 100 - 1) * per_damage;
+                }
+                // 勇气冲锋
+                if (core.hasSpecial(mon_special, 11)) {
+                    damage += ((enemy.charge || 100) / 100) * per_damage;
+                    turn += 5;
+                }
+
+                // ------ 支援 ----- //
+                // 这个递归最好想明白为什么，flag:__extraTurn__是怎么用的
+                const guards = core.getFlag(
+                    '__guards__' + x + '_' + y,
+                    enemyInfo.guards
+                );
+                const guard_before_current_enemy = true; // ------ 支援怪是先打(true)还是后打(false)？
+                turn += core.getFlag('__extraTurn__', 0);
+                if (guards.length > 0) {
+                    if (!guard_before_current_enemy) {
+                        // --- 先打当前怪物，记录当前回合数
+                        core.setFlag('__extraTurn__', turn);
                     }
-                    // 已经进行的回合数
-                    core.setFlag('__extraTurn__', info.turn);
-                    init_damage += info.damage;
+                    // 获得那些怪物组成小队战斗
+                    for (var i = 0; i < guards.length; i++) {
+                        var gx = guards[i][0],
+                            gy = guards[i][1],
+                            gid = guards[i][2];
+                        // 递归计算支援怪伤害信息，这里不传x,y保证不会重复调用
+                        // 这里的mdef传0，因为护盾应该只会被计算一次
+                        var info = core.enemys.getDamageInfo(
+                            core.material.enemys[gid],
+                            {
+                                hp: origin_hero_hp,
+                                atk: origin_hero_atk,
+                                def: origin_hero_def,
+                                mdef: 0
+                            }
+                        );
+                        if (info == null) {
+                            // 小队中任何一个怪物不可战斗，直接返回null
+                            core.removeFlag('__extraTurn__');
+                            return null;
+                        }
+                        // 已经进行的回合数
+                        core.setFlag('__extraTurn__', info.turn);
+                        init_damage += info.damage;
+                    }
+                    if (guard_before_current_enemy) {
+                        // --- 先打支援怪物，增加当前回合数
+                        turn += core.getFlag('__extraTurn__', 0);
+                    }
                 }
-                if (guard_before_current_enemy) {
-                    // --- 先打支援怪物，增加当前回合数
-                    turn += core.getFlag('__extraTurn__', 0);
+                core.removeFlag('__extraTurn__');
+                // ------ 支援END ------ //
+
+                // 最终伤害：初始伤害 + 怪物对勇士造成的伤害 + 反击伤害
+                damage += init_damage + (turn - 1) * per_damage;
+                // 无上之盾
+                if (core.hasFlag('superSheild')) {
+                    damage -= hero_IQ;
                 }
-            }
-            core.removeFlag('__extraTurn__');
-            // ------ 支援END ------ //
+                // 生命回复
+                damage -= hero_recovery * turn;
+                if (core.getFlag('hard') === 1) damage *= 0.9;
 
-            // 最终伤害：初始伤害 + 怪物对勇士造成的伤害 + 反击伤害
-            damage += init_damage + (turn - 1) * per_damage;
-            // 无上之盾
-            if (core.hasFlag('superSheild')) {
-                damage -= hero_IQ;
+                return {
+                    mon_hp: Math.floor(mon_hp),
+                    mon_atk: Math.floor(mon_atk),
+                    mon_def: Math.floor(mon_def),
+                    init_damage: Math.floor(init_damage),
+                    per_damage: Math.floor(per_damage),
+                    hero_per_damage: Math.floor(hero_per_damage),
+                    turn: Math.floor(turn),
+                    damage: Math.floor(damage)
+                };
             }
-            // 生命回复
-            damage -= hero_recovery * turn;
-            if (core.getFlag('hard') == 1) damage *= 0.9;
 
-            return {
-                mon_hp: Math.floor(mon_hp),
-                mon_atk: Math.floor(mon_atk),
-                mon_def: Math.floor(mon_def),
-                init_damage: Math.floor(init_damage),
-                per_damage: Math.floor(per_damage),
-                hero_per_damage: Math.floor(hero_per_damage),
-                turn: Math.floor(turn),
-                damage: Math.floor(damage)
-            };
+            let damageInfo = null;
+            let damage = Infinity;
+
+            const skills = [['bladeOn', 'blade']];
+            damageInfo = getDamage();
+            if (damageInfo) damage = damageInfo.damage;
+
+            if (flags.autoSkill) {
+                for (const [unlock, condition] of skills) {
+                    if (flags[unlock]) {
+                        flags[condition] = true;
+                        const info = getDamage();
+                        const d = info?.damage;
+                        if (d !== null && d !== void 0) {
+                            if (d < damage) {
+                                damage = d;
+                                damageInfo = info;
+                            }
+                        }
+                        flags[condition] = false;
+                    }
+                }
+                return damageInfo;
+            } else {
+                return getDamage();
+            }
         }
     },
     actions: {
@@ -1261,12 +1256,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     core.actions._clickGameInfo_openComments();
                     break;
                 case 49: // 1: 断灭之刃
-                    if (!flags.bladeOn) break;
+                    if (!flags.bladeOn || flags.autoSkill) break;
                     core.status.route.push('key:49'); // 将按键记在录像中
                     core.playSound('光标移动');
                     if (flags.blade) flags.blade = false;
                     else flags.blade = true;
-                    core.updateStatusBar(false, true);
+                    core.updateStatusBar();
                     break;
                 case 50: // 快捷键2: 跳跃技能 || 破
                     if (

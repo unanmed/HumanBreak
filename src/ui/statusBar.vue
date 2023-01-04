@@ -167,6 +167,8 @@ function update() {
     lvName.value = core.getLvName(hero.lv);
     if (flags.blade && flags.bladeOn) {
         skill.value = '断灭之刃';
+    } else {
+        skill.value = '无';
     }
     up.value = core.getNextLvUpNeed() ?? 0;
     if (core.hasFlag('spring')) {
