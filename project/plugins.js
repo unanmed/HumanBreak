@@ -2001,11 +2001,13 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             var interval = window.setInterval(() => {
                 if (stage == 1) {
                     if (seconds == 8)
-                        core.skipWord('智慧之神：你和之前来的人不一样');
+                        core.skipWord('智慧之神：果然，你和别人不一样。');
                     if (seconds == 12)
-                        core.skipWord('智慧之神：他们只会一股脑地向前冲');
+                        core.skipWord('智慧之神：你知道去躲避那些攻击。');
                     if (seconds == 16)
-                        core.skipWord('智慧之神：而你却会躲避这些攻击');
+                        core.skipWord(
+                            '智慧之神：之前的那些人总会一头撞上我的攻击，悲剧收场。'
+                        );
                     if (seconds == 20)
                         core.skipWord('提示：踩在红圈上可以对智慧之神造成伤害');
                     if (seconds > 10) core.attackBoss();
@@ -2021,9 +2023,10 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     core.pauseBgm();
                 }
                 if (stage == 2) {
-                    if (seconds == 4) core.skipWord('智慧之神：你很有潜力');
+                    if (seconds == 4)
+                        core.skipWord('智慧之神：你的确拥有智慧。');
                     if (seconds == 8)
-                        core.skipWord('智慧之神：看来你很可能成为改变历史的人');
+                        core.skipWord('智慧之神：或许你就是那个未来的救星。');
                     if (seconds == 12)
                         core.skipWord('智慧之神：不过，这场战斗才刚刚开始');
                     if (seconds == 25)
@@ -2045,7 +2048,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 }
                 if (stage >= 3) {
                     if (seconds == 4)
-                        core.skipWord('智慧之神：我越来越欣赏你了');
+                        core.skipWord('智慧之神：拥有智慧就是不一样。');
                     if (seconds == 8)
                         core.skipWord('智慧之神：不过，你还得再过我一关！');
                     if (seconds == 12) core.startStage3();
@@ -2084,19 +2087,21 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     delete flags.__bgm__;
                     core.pauseBgm();
                     core.insertAction([
-                        '\t[智慧之神,E557]\b[down,7,4]不错不错，你确实可以成为改变历史的人',
-                        '\t[智慧之神,E557]\b[down,7,4]我的职责就到此结束了',
-                        '\t[智慧之神,E557]\b[down,7,4]之后还是要看你自己了，千万不要让我失望！',
-                        '\t[智慧之神,E557]\b[down,7,4]东边的机关门我已经替你打开了',
+                        '\t[智慧之神,E557]\b[down,7,4]看来你真的会成为那个拯救未来的人。',
+                        '\t[智慧之神,E557]\b[down,7,4]记住，拥有智慧便可以掌控万物。',
+                        '\t[低级智人]\b[up,hero]智慧？智慧到底是什么？',
+                        '\t[智慧之神,E557]\b[down,7,4]最终，你会知道答案的。',
+                        '\t[智慧之神,E557]\b[down,7,4]继续向东前进吧，那里能找到你想要的答案。',
                         { type: 'openDoor', loc: [13, 6], floorId: 'MT19' },
-                        '\t[智慧之神,E557]\b[down,7,4]我这就把你传送出去',
+                        '\t[智慧之神,E557]\b[down,7,4]我这就把你送出去',
                         { type: 'setValue', name: 'flag:boss1', value: 'true' },
                         { type: 'changeFloor', floorId: 'MT20', loc: [7, 9] },
+                        { type: 'forbidSave' },
+                        { type: 'showStatusBar' },
                         {
                             type: 'function',
                             function: '() => {\ncore.deleteAllCanvas();\n}'
-                        },
-                        { type: 'forbidSave' }
+                        }
                     ]);
                 }
                 seconds++;
@@ -2222,7 +2227,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                                 damaged[loc + direction] = true;
                                 core.drawHeroAnimate('hand');
                                 core.status.hero.hp -= 1000;
-                                core.popupDamage(1000, x, y, false);
+                                core.addPop(x * 32 + 16, y * 32 + 16, 1000);
                                 core.updateStatusBar();
                                 if (core.status.hero.hp < 0) {
                                     clearInterval(skill1);
@@ -2240,7 +2245,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                                 damaged[loc + direction] = true;
                                 core.drawHeroAnimate('hand');
                                 core.status.hero.hp -= 1000;
-                                core.popupDamage(1000, x, y, false);
+                                core.addPop(x * 32 + 16, y * 32 + 16, 1000);
                                 core.updateStatusBar();
                                 if (core.status.hero.hp < 0) {
                                     clearInterval(skill1);
@@ -2371,7 +2376,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     if (x == locs[index][0] && y == locs[index][1]) {
                         core.drawHeroAnimate('hand');
                         core.status.hero.hp -= 5000;
-                        core.popupDamage(5000, x, y, false);
+                        core.addPop(x * 32 + 16, y * 32 + 16, 5000);
                         core.updateStatusBar();
                         if (core.status.hero.hp < 0) {
                             core.status.hero.hp = 0;
@@ -2547,7 +2552,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 hy = core.status.hero.loc.y;
             if (Math.abs(hx - x) <= 1 && Math.abs(hy - y) <= 1) {
                 core.status.hero.hp -= 3000 * power;
-                core.popupDamage(3000 * power, x, y, false);
+                core.addPop(x * 32 + 16, y * 32 + 16, 3000 * power);
                 core.updateStatusBar();
                 if (core.status.hero.hp < 0) {
                     core.status.hero.hp = 0;
@@ -2715,7 +2720,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                                 ) {
                                     damaged[i] = true;
                                     core.status.hero.hp -= 3000;
-                                    core.popupDamage(3000, x, y, false);
+                                    core.addPop(x * 32 + 16, y * 32 + 16, 3000);
                                     core.updateStatusBar();
                                     core.playSound('electron.mp3');
                                     if (core.status.hero.hp < 0) {
@@ -3286,7 +3291,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                             hy = core.status.hero.loc.y;
                         if (loc[0] == hx && loc[1] == hy) {
                             core.status.hero.hp -= 3000;
-                            core.popupDamage(3000, hx, hy, false);
+                            core.addPop(x * 32 + 16, y * 32 + 16, 3000);
                             core.updateStatusBar();
                             if (core.status.hero.hp < 0) {
                                 core.status.hero.hp = 0;
@@ -3331,7 +3336,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                             loc2[1];
                     if (n1 * n2 <= 0) {
                         core.status.hero.hp -= damage;
-                        core.popupDamage(damage, x, y, false);
+                        core.addPop(x * 32 + 16, y * 32 + 16, damage);
                         core.updateStatusBar();
                         core.playSound('electron.mp3');
                         if (core.status.hero.hp < 0) {
@@ -3357,7 +3362,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                             loc2[1];
                     if (n1 * n2 <= 0) {
                         core.status.hero.hp -= damage;
-                        core.popupDamage(damage, x, y, false);
+                        core.addPop(x * 32 + 16, y * 32 + 16, damage);
                         core.updateStatusBar();
                         core.playSound('electron.mp3');
                         if (core.status.hero.hp < 0) {

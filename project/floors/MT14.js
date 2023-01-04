@@ -151,11 +151,6 @@ main.floors.MT14=
                                     ],
                                     "background": "winskin3.png"
                                 },
-                                {
-                                    "type": "setGlobalAttribute",
-                                    "name": "font",
-                                    "value": "scroll"
-                                },
                                 "人类简史——起源篇",
                                 {
                                     "type": "playSound",
@@ -195,11 +190,6 @@ main.floors.MT14=
                                         1
                                     ],
                                     "background": "winskin2.png"
-                                },
-                                {
-                                    "type": "setGlobalAttribute",
-                                    "name": "font",
-                                    "value": "normal"
                                 },
                                 {
                                     "type": "changeFloor",

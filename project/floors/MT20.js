@@ -19,6 +19,10 @@ main.floors.MT20=
             "type": "setGlobalValue",
             "name": "animateSpeed",
             "value": 333.3333
+        },
+        {
+            "type": "function",
+            "function": "function(){\ncore.deleteAllCanvas()\n}"
         }
     ],
     "parallelDo": "",
