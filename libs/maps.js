@@ -1077,8 +1077,7 @@ maps.prototype._canMoveDirectly_checkNextPoint = function (blocksObj, x, y) {
     // 是否存在阻激夹域伤害
     if (core.status.checkBlock.damage[index]) return false;
     if (core.status.checkBlock.repulse[index]) return false;
-    // 是否存在捕捉
-    if (core.status.checkBlock.ambush[index]) return false;
+    if (core.status.checkBlock.mockery[index]) return false;
 
     return true;
 };
@@ -1175,8 +1174,7 @@ maps.prototype._automaticRoute_deepAdd = function (x, y, blocks) {
     }
     // 绕过存在伤害的地方
     deepAdd += (core.status.checkBlock.damage[x + ',' + y] || 0) * 100;
-    // 绕过捕捉
-    if (core.status.checkBlock.ambush[x + ',' + y]) deepAdd += 1000;
+    deepAdd += core.status.checkBlock.mockery[`${x},${y}`] ? 1000 : 0;
     return deepAdd;
 };
 

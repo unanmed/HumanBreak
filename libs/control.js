@@ -1502,7 +1502,6 @@ control.prototype.checkBlock = function () {
             core.updateStatusBar(false, true);
         }
     }
-    this._checkBlock_ambush(core.status.checkBlock.ambush[loc]);
     this._checkBlock_repulse(core.status.checkBlock.repulse[loc]);
 };
 
@@ -1530,42 +1529,6 @@ control.prototype._checkBlock_repulse = function (repulse) {
         });
     });
     actions.push({ type: 'waitAsync' });
-    core.insertAction(actions);
-};
-
-////// 捕捉 //////
-control.prototype._checkBlock_ambush = function (ambush) {
-    if (!ambush || ambush.length == 0) return;
-    // 捕捉效果
-    var actions = [];
-    ambush.forEach(function (t) {
-        actions.push({
-            type: 'move',
-            loc: [t[0], t[1]],
-            steps: [t[3]],
-            time: 250,
-            keep: false,
-            async: true
-        });
-    });
-    actions.push({ type: 'waitAsync' });
-    // 强制战斗
-    ambush.forEach(function (t) {
-        actions.push({
-            type: 'function',
-            function:
-                'function() { ' +
-                "core.battle('" +
-                t[2] +
-                "', " +
-                t[0] +
-                ',' +
-                t[1] +
-                ', true, core.doAction); ' +
-                '}',
-            async: true
-        });
-    });
     core.insertAction(actions);
 };
 
@@ -1701,9 +1664,9 @@ control.prototype._updateDamage_extraDamage = function (floorId, onMap) {
                 });
             } else {
                 // 检查捕捉
-                if (core.status.checkBlock.ambush[x + ',' + y]) {
+                if (core.status.checkBlock.mockery[x + ',' + y]) {
                     core.status.damage.extraData.push({
-                        text: '!',
+                        text: '嘲',
                         px: 32 * x + 16,
                         py: 32 * (y + 1) - 14,
                         color: '#ffaa33',
