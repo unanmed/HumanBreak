@@ -966,6 +966,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     hero_atk *= 1 + 0.1 * level;
                     hero_def *= 1 - 0.1 * level;
                 }
+                if (flags.shield && flags.shieldOn) {
+                    const level = core.getSkillLevel(10);
+                    hero_def *= 1 + 0.1 * level;
+                    hero_atk *= 1 - 0.1 * level;
+                }
                 // 饥渴
                 if (core.hasSpecial(mon_special, 7)) {
                     hero_atk *= 1 - (enemy.hungry || 0) / 100;
@@ -1243,6 +1248,15 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                             core.useItem('pickaxe', true); // 第二个参数true代表该次使用道具是被按键触发的，使用过程不计入录像
                         }
                     }
+                    break;
+                case 51: // 3: 铸剑为盾
+                    if (!flags.shieldOn || flags.autoSkill) break;
+                    console.log(1);
+                    core.status.route.push('key:51'); // 将按键记在录像中
+                    core.playSound('光标移动');
+                    if (flags.shield) flags.shield = false;
+                    else flags.shield = true;
+                    core.updateStatusBar();
                     break;
                 case 53: // 5：读取自动存档（回退），方便手机版操作
                     core.doSL('autoSave', 'load');

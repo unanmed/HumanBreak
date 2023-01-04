@@ -133,7 +133,11 @@ main.floors.MT21=
                     "\t[初级智人]\b[up,hero]智慧又是什么呢？",
                     "\t[初级智人]\b[up,hero]智慧之神说它可以掌控万物，真的这么神奇吗...",
                     "\t[初级智人]\b[up,hero]完全摸不到头脑。",
-                    "\t[初级智人]\b[up,hero]或许智慧结晶会告诉我答案吧。"
+                    "\t[初级智人]\b[up,hero]或许智慧结晶会告诉我答案吧。",
+                    {
+                        "type": "function",
+                        "function": "function(){\ncore.showChapter('第二章  智慧')\n}"
+                    }
                 ],
                 "false": [
                     {
