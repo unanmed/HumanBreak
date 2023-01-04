@@ -715,15 +715,6 @@ main.prototype.listen = function () {
         }
     };
 
-    main.dom.statusCanvas.onclick = function (e) {
-        try {
-            e.preventDefault();
-            main.core.onStatusBarClick(e);
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
     ////// 点击状态栏中的怪物手册时 //////
     main.statusBar.image.book.onclick = function (e) {
         e.stopPropagation();

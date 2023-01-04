@@ -2471,20 +2471,6 @@ control.prototype._replayAction_key = function (action) {
     return true;
 };
 
-control.prototype._replayAction_click = function (action) {
-    if (action.indexOf('click:') != 0) return false;
-    var p = action.split(':');
-    if (p.length != 4) return false;
-    core.actions.doRegisteredAction(
-        'onStatusBarClick',
-        parseInt(p[2]),
-        parseInt(p[3]),
-        parseInt(p[1])
-    );
-    core.replay();
-    return true;
-};
-
 control.prototype._replayAction_ignoreInput = function (action) {
     if (
         action.indexOf('input:') == 0 ||
@@ -3202,7 +3188,6 @@ control.prototype.setHeroLoc = function (name, value, noGather) {
     if ((name == 'x' || name == 'y') && !noGather) {
         this.gatherFollowers();
     }
-    core.ui.drawStatusBar();
 };
 
 ////// 获得勇士的位置 //////

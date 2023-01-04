@@ -5,14 +5,6 @@ interface ActionData {
      * @param altKey 当前是否按下了alt键
      */
     onKeyUp(keyCode: number, altKey: boolean): boolean;
-
-    /**
-     * 当点击状态栏时
-     * @param px 点击的横坐标
-     * @param py 点击的纵坐标
-     * @param vertical 当前是否是竖屏
-     */
-    onClickStatusBar(px: number, py: number, vertical: boolean): boolean;
 }
 
 interface ControlData {
@@ -126,25 +118,9 @@ interface EnemyData {
 
 interface UiData {
     /**
-     * 获取道具栏要显示的道具
-     * @param cls 要获取的类型
-     */
-    getToolboxItems<T extends Exclude<ItemCls, 'items'>>(cls: T): ItemIdOf<T>[];
-
-    /**
-     * 绘制状态栏
-     */
-    drawStatusBar(): void;
-
-    /**
      * 数据统计界面统计的道具数量
      */
     drawStatistics(): AllIdsOf<'items'>[];
-
-    /**
-     * 绘制关于界面
-     */
-    drawAbout(): void;
 }
 
 interface EventData {

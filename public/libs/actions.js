@@ -125,13 +125,6 @@ actions.prototype._init = function () {
         this._sys_longClick_lockControl,
         50
     );
-    // --- onStatusBarClick注册
-    this.registerAction(
-        'onStatusBarClick',
-        '_sys_onStatusBarClick',
-        this._sys_onStatusBarClick,
-        0
-    );
 };
 
 //////  注册一个用户交互行为 //////
@@ -1048,24 +1041,6 @@ actions.prototype._sys_longClick_lockControl = function (x, y, px, py) {
         }
     }
     return false;
-};
-
-actions.prototype.onStatusBarClick = function (e) {
-    if (!core.isPlaying()) return false;
-    var left = core.dom.gameGroup.offsetLeft + 3;
-    var top = core.dom.gameGroup.offsetTop + 3;
-    var px = parseInt((e.clientX - left) / core.domStyle.scale),
-        py = parseInt((e.clientY - top) / core.domStyle.scale);
-    return this.doRegisteredAction(
-        'onStatusBarClick',
-        Math.max(px, 0),
-        Math.max(py, 0)
-    );
-};
-
-actions.prototype._sys_onStatusBarClick = function (px, py, vertical) {
-    if (this.actionsdata.onStatusBarClick)
-        return this.actionsdata.onStatusBarClick(px, py, vertical);
 };
 
 /////////////////// 在某个界面时的按键点击效果 ///////////////////
@@ -2992,10 +2967,8 @@ actions.prototype._clickGameInfo = function (x, y) {
             case 3:
                 return core.ui._drawHelp();
             case 4:
-                return core.ui._drawAbout();
-            case 5:
                 return this._clickGameInfo_download();
-            case 6:
+            case 5:
                 core.status.event.selection = 5;
                 core.playSound('取消');
                 core.ui._drawSettings();

@@ -1149,48 +1149,20 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 case 74: // J:打开技能树
                     core.useItem('skill1');
                     break;
-                case 56: // 8
-                    core.useItem('wand');
-                    break;
                 case 27: // ESC：打开菜单栏
                     core.openSettings(true);
                     break;
                 case 88: // X：使用怪物手册
-                    if (!core.getFlag('fixToBook')) core.openBook(true);
-                    else core.useItem('wand');
+                    core.openBook(true);
                     break;
                 case 71: // G：使用楼传器
                     core.useFly(true);
                     break;
                 case 65: // A：读取自动存档（回退）
-                    if (core.status.floorId != 'tower6') {
-                        core.doSL('autoSave', 'load');
-                    } else {
-                        core.myconfirm(
-                            '确定要读取自动存档吗？读取后无法通过按W回退至现在',
-                            function () {
-                                core.doSL('autoSave', 'load');
-                            },
-                            function () {
-                                return;
-                            }
-                        );
-                    }
+                    core.doSL('autoSave', 'load');
                     break;
                 case 87: // W：撤销回退
-                    if (core.status.floorId != 'tower6') {
-                        core.doSL('autoSave', 'reload');
-                    } else {
-                        core.myconfirm(
-                            '确定要撤销回退吗？撤销后后无法通过按A回退至现在',
-                            function () {
-                                core.doSL('autoSave', 'reload');
-                            },
-                            function () {
-                                return;
-                            }
-                        );
-                    }
+                    core.doSL('autoSave', 'reload');
                     break;
                 case 83: // S：存档
                     core.save(true);
@@ -1278,62 +1250,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                         }
                     }
                     break;
-                case 51: // 快捷键3: 飞
-                    break;
-                case 52: // 快捷键4：破冰/冰冻/地震/上下楼器/... 其他道具依次判断
-                    {
-                        var list = [
-                            'icePickaxe',
-                            'freezeBadge',
-                            'earthquake',
-                            'upFly',
-                            'downFly',
-                            'jumpShoes',
-                            'lifeWand',
-                            'poisonWine',
-                            'weakWine',
-                            'curseWine',
-                            'superWine'
-                        ];
-                        for (var i = 0; i < list.length; i++) {
-                            var itemId = list[i];
-                            if (core.canUseItem(itemId)) {
-                                core.status.route.push('key:52');
-                                core.useItem(itemId, true);
-                                break;
-                            }
-                        }
-                    }
-                    break;
                 case 53: // 5：读取自动存档（回退），方便手机版操作
-                    if (core.status.floorId != 'tower6') {
-                        core.doSL('autoSave', 'load');
-                    } else {
-                        core.myconfirm(
-                            '确定要读取自动存档吗？读取后无法通过按6回退至现在',
-                            function () {
-                                core.doSL('autoSave', 'load');
-                            },
-                            function () {
-                                return;
-                            }
-                        );
-                    }
+                    core.doSL('autoSave', 'load');
                     break;
                 case 54: // 6：撤销回退，方便手机版操作
-                    if (core.status.floorId != 'tower6') {
-                        core.doSL('autoSave', 'reload');
-                    } else {
-                        core.myconfirm(
-                            '确定要撤销回退吗？撤销后后无法通过按5回退至现在',
-                            function () {
-                                core.doSL('autoSave', 'reload');
-                            },
-                            function () {
-                                return;
-                            }
-                        );
-                    }
+                    core.doSL('autoSave', 'reload');
                     break;
                 case 55: // 快捷键7：绑定为轻按，方便手机版操作
                     core.getNextItem();
@@ -1341,55 +1262,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 case 118: // F7：开启debug模式
                     core.debug();
                     break;
-                case 70: // F：开启技能“二倍斩”
-                    break;
-                // 在这里可以任意新增或编辑已有的快捷键内容
-                /*
-                case 0: // 使用该按键的keyCode
-                    // 还可以再判定altKey是否被按下，即 if (altKey) { ...
-
-                    // ... 在这里写你要执行脚本
-                    // **强烈建议所有新增的自定义快捷键均能给个对应的道具可点击，以方便手机端的行为**
-                    if (core.hasItem('...')) {
-                        core.status.route.push("key:0");
-                        core.useItem('...', true); // 增加true代表该使用道具不计入录像
-                    }
-
-                    break;
-                */
             }
-        },
-        onStatusBarClick: function (px, py) {
-            // 点击状态栏时触发的事件，仅在自绘状态栏开启时生效
-            // px和py为点击的像素坐标
-            //
-            // 横屏模式下状态栏的画布大小是 149*480
-            // 竖屏模式下状态栏的画布大小是 480*(32*rows+9) 其中rows为状态栏行数，即全塔属性中statusCanvasRowsOnMobile值
-            // 可以使用 core.domStyle.isVertical 来判定当前是否是竖屏模式
-
-            // 如果正在执行事件，则忽略
-            if (core.status.lockControl) return;
-            // 如果当前正在行走，则忽略；也可以使用 core.waitHeroToStop(callback) 来停止行走再回调执行脚本
-            if (core.isMoving()) return;
-
-            if (!core.domStyle.isVertical) {
-                if (px >= 20 && px <= 129 && py >= 320 && py <= 350) {
-                    core.useItem('skill1');
-                }
-                if (px >= 20 && px <= 129 && py >= 280 && py <= 310) {
-                    core.useItem('cross');
-                }
-            } else {
-                if (px >= 400 && px <= 430 && py >= 10 && py <= 95) {
-                    core.useItem('skill1');
-                }
-                if (px >= 440 && px <= 470 && py >= 10 && py <= 95) {
-                    core.useItem('cross');
-                }
-            }
-            // 判定px和py来执行自己的脚本内容.... 注意横竖屏
-            // 这里是直接打出点击坐标的例子。
-            // console.log("onStatusBarClick:", px, py);
         }
     },
     control: {
@@ -1514,52 +1387,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // action：获得还是解除；'get'表示获得，'remove'表示解除
             // type：一个数组表示获得了哪些毒衰咒效果；poison, weak，curse
             if (!(type instanceof Array)) type = [type];
-
-            if (action == 'get') {
-                if (core.inArray(type, 'poison') && !core.hasFlag('poison')) {
-                    // 获得毒效果
-                    core.setFlag('poison', true);
-                }
-                if (core.inArray(type, 'weak') && !core.hasFlag('weak')) {
-                    // 获得衰效果
-                    core.setFlag('weak', true);
-                    if (core.values.weakValue >= 1) {
-                        // >=1，直接扣数值
-                        core.addStatus('atk', -core.values.weakValue);
-                        core.addStatus('def', -core.values.weakValue);
-                    } else {
-                        // <1，扣比例
-                        core.addBuff('atk', -core.values.weakValue);
-                        core.addBuff('def', -core.values.weakValue);
-                    }
-                }
-                if (core.inArray(type, 'curse') && !core.hasFlag('curse')) {
-                    // 获得咒效果
-                    core.setFlag('curse', true);
-                }
-            } else if (action == 'remove') {
-                if (core.inArray(type, 'poison') && core.hasFlag('poison')) {
-                    // 移除毒效果
-                    core.setFlag('poison', false);
-                }
-                if (core.inArray(type, 'weak') && core.hasFlag('weak')) {
-                    // 移除衰效果
-                    core.setFlag('weak', false);
-                    if (core.values.weakValue >= 1) {
-                        // >=1，直接扣数值
-                        core.addStatus('atk', core.values.weakValue);
-                        core.addStatus('def', core.values.weakValue);
-                    } else {
-                        // <1，扣比例
-                        core.addBuff('atk', core.values.weakValue);
-                        core.addBuff('def', core.values.weakValue);
-                    }
-                }
-                if (core.inArray(type, 'curse') && core.hasFlag('curse')) {
-                    // 移除咒效果
-                    core.setFlag('curse', false);
-                }
-            }
         },
         updateStatusBar: function () {
             // 更新状态栏
@@ -1567,124 +1394,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 检查等级
             core.events.checkLvUp();
 
-            // 检查HP上限
-            if (core.flags.statusBarItems.indexOf('enableHPMax') >= 0) {
-                core.setStatus(
-                    'hp',
-                    Math.min(core.getStatus('hpmax'), core.getStatus('hp'))
-                );
-            }
-
-            // 设置楼层名
-            if (core.status.floorId) {
-                core.setStatusBarInnerHTML(
-                    'floor',
-                    core.status.maps[core.status.floorId].name
-                );
-            }
-
-            // 设置勇士名字和图标
-            core.setStatusBarInnerHTML('name', core.getStatus('name'));
-            // 设置等级名称
-            core.setStatusBarInnerHTML('lv', core.getLvName());
-
-            // 设置生命上限、生命值、攻防护盾金币和经验值
-            var statusList = [
-                'hpmax',
-                'hp',
-                'mana',
-                'atk',
-                'def',
-                'mdef',
-                'money',
-                'exp'
-            ];
-            statusList.forEach(function (item) {
-                // 向下取整
-                core.status.hero[item] = Math.floor(core.status.hero[item]);
-                // 大数据格式化
-                core.setStatusBarInnerHTML(item, core.getRealStatus(item));
-            });
-
-            // 设置魔力值; status:manamax 只有在非负时才生效。
-            if (
-                core.status.hero.manamax != null &&
-                core.getRealStatus('manamax') >= 0
-            ) {
-                core.status.hero.mana = Math.min(
-                    core.status.hero.mana,
-                    core.getRealStatus('manamax')
-                );
-                core.setStatusBarInnerHTML(
-                    'mana',
-                    core.status.hero.mana + '/' + core.getRealStatus('manamax')
-                );
-            } else {
-                core.setStatusBarInnerHTML('mana', core.status.hero.mana);
-            }
-            // 设置技能栏
-            // 可以用flag:skill表示当前开启的技能类型，flag:skillName显示技能名；详见文档-个性化-技能塔的支持
-            core.setStatusBarInnerHTML(
-                'skill',
-                core.getFlag('skillName', '无')
-            );
-
-            // 可以在这里添加自己额外的状态栏信息，比如想攻击显示 +0.5 可以这么写：
-            // if (core.hasFlag('halfAtk')) core.setStatusBarInnerHTML('atk', core.statusBar.atk.innerText + "+0.5");
-
             // 如果是自定义添加的状态栏，也需要在这里进行设置显示的数值
-
-            // 进阶
-            if (
-                core.flags.statusBarItems.indexOf('enableLevelUp') >= 0 &&
-                core.status.hero.lv < core.firstData.levelUp.length
-            ) {
-                var need = core.calValue(
-                    core.firstData.levelUp[core.status.hero.lv].need
-                );
-                if (core.flags.statusBarItems.indexOf('levelUpLeftMode') >= 0)
-                    core.setStatusBarInnerHTML(
-                        'up',
-                        core.formatBigNumber(need - core.getStatus('exp')) || ''
-                    );
-                else
-                    core.setStatusBarInnerHTML(
-                        'up',
-                        core.formatBigNumber(need) || ''
-                    );
-            } else core.setStatusBarInnerHTML('up', '');
-
-            // 钥匙
-            var keys = ['yellowKey', 'blueKey', 'redKey', 'greenKey'];
-            keys.forEach(function (key) {
-                core.setStatusBarInnerHTML(
-                    key,
-                    core.setTwoDigits(core.itemCount(key))
-                );
-            });
-            // 毒衰咒
-            core.setStatusBarInnerHTML(
-                'poison',
-                core.hasFlag('poison') ? '毒' : ''
-            );
-            core.setStatusBarInnerHTML(
-                'weak',
-                core.hasFlag('weak') ? '衰' : ''
-            );
-            core.setStatusBarInnerHTML(
-                'curse',
-                core.hasFlag('curse') ? '咒' : ''
-            );
-            // 破炸飞
-            core.setStatusBarInnerHTML(
-                'pickaxe',
-                '破' + core.itemCount('pickaxe')
-            );
-            core.setStatusBarInnerHTML('bomb', '炸' + core.itemCount('bomb'));
-            core.setStatusBarInnerHTML(
-                'fly',
-                '飞' + core.itemCount('centerFly')
-            );
 
             // 难度
             if (core.statusBar.hard.innerText != core.status.hard) {
@@ -1695,8 +1405,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 core.statusBar.hard.style.color = hardColor;
                 core.statusBar.hard.setAttribute('_style', hardColor);
             }
-            // 自定义状态栏绘制
-            core.drawStatusBar();
 
             // 更新阻激夹域的伤害值
             core.updateCheckBlock();
@@ -1902,32 +1610,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     }
                 }
 
-                // 捕捉
-                // 如果要防止捕捉效果，可以直接简单的将 flag:no_ambush 设为true
-                if (
-                    enemy &&
-                    core.enemys.hasSpecial(enemy.special, 27) &&
-                    !core.hasFlag('no_ambush')
-                ) {
-                    // 给周围格子加上【捕捉】记号
-                    for (var dir in core.utils.scan) {
-                        var nx = x + core.utils.scan[dir].x,
-                            ny = y + core.utils.scan[dir].y,
-                            currloc = nx + ',' + ny;
-                        if (
-                            nx < 0 ||
-                            nx >= width ||
-                            ny < 0 ||
-                            ny >= height ||
-                            !core.canMoveHero(x, y, dir, floorId)
-                        )
-                            continue;
-                        ambush[currloc] = (ambush[currloc] || []).concat([
-                            [x, y, id, dir]
-                        ]);
-                    }
-                }
-
                 // 夹击；在这里提前计算所有可能的夹击点，具体计算逻辑在下面
                 // 如果要防止夹击伤害，可以简单的将 flag:no_betweenAttack 设为true
                 if (
@@ -2026,13 +1708,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 }
             }
 
-            // 取消注释下面这一段可以让护盾抵御阻激夹域伤害
-            /*
-            for (var loc in damage) {
-                damage[loc] = Math.max(0, damage[loc] - core.getRealStatus('mdef'));
-            }
-            */
-
             core.flags.canGoDeadZone = canGoDeadZone;
             core.status.checkBlock = {
                 damage: damage,
@@ -2084,9 +1759,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 执行目标点的阻激夹域事件
             core.checkBlock();
 
-            // 执行目标点的script和事件
-            if (core.status.floorId == 'tower6')
-                core.setMapBlockDisabled('tower6', nowx, nowy, false);
             if (!hasTrigger) core.trigger(nowx, nowy, callback);
 
             // 检查该点是否是滑冰
@@ -2234,14 +1906,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             if (ignoreSteps == null) ignoreSteps = core.canMoveDirectly(x, y);
             if (core.status.checkBlock.haveHunt) return false;
             if (ignoreSteps >= 0) {
-                // 中毒也允许瞬移
-                if (core.hasFlag('poison')) {
-                    var damage = ignoreSteps * core.values.poisonDamage;
-                    if (damage >= core.status.hero.hp) return false;
-                    core.status.hero.statistics.poisonDamage += damage;
-                    core.status.hero.hp -= damage;
-                }
-
                 core.clearMap('hero');
                 // 获得勇士最后的朝向
                 var lastDirection =
@@ -2284,25 +1948,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
         }
     },
     ui: {
-        getToolboxItems: function (cls) {
-            // 获得道具栏中当前某类型道具的显示项和显示顺序
-            // cls为道具类型，只可能是 tools, constants 和 equips
-            // 返回一个数组，代表当前某类型道具的显示内容和顺序
-            // 默认按id升序排列，您可以取消下面的注释改为按名称排列
-            //
-            // 用不到这个东西
-        },
-        drawStatusBar: function () {
-            // 自定义绘制状态栏，需要开启状态栏canvas化
-            // 作为样板，只绘制楼层、生命、攻击、防御、护盾、金币、钥匙这七个内容
-            // 需要其他的请自行进行修改；横竖屏都需要进行适配绘制。
-            // （可以使用Chrome浏览器开控制台来模拟手机上的竖屏模式的显示效果，具体方式自行百度）
-            // 横屏模式下的画布大小是 149*480
-            // 竖屏模式下的画布大小是 480*(32*rows+9) 其中rows为状态栏行数，即全塔属性中statusCanvasRowsOnMobile值
-            // 可以使用 core.domStyle.isVertical 来判定当前是否是竖屏模式
-            //
-            // 这里不需要写任何东西，状态栏全在vue里面
-        },
         drawStatistics: function () {
             // 浏览地图时参与的统计项目
 
@@ -2352,62 +1997,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 'shield5'
                 // 在这里可以增加新的ID来进行统计个数，只能增加道具ID
             ];
-        },
-        drawAbout: function () {
-            // 绘制“关于”界面
-            core.ui.closePanel();
-            core.lockControl();
-            core.status.event.id = 'about';
-
-            var left = 52,
-                top = 68,
-                right = core.__PIXELS__ - 2 * left,
-                bottom = core.__PIXELS__ - 2 * top;
-
-            core.setAlpha('ui', 0.85);
-            core.fillRect('ui', left, top, right, bottom, '#000000');
-            core.setAlpha('ui', 1);
-            core.strokeRect(
-                'ui',
-                left - 1,
-                top - 1,
-                right + 1,
-                bottom + 1,
-                '#FFFFFF',
-                2
-            );
-
-            var text_start = left + 24;
-
-            // 名称
-            core.setTextAlign('ui', 'left');
-            var globalAttribute =
-                core.status.globalAttribute || core.initStatus.globalAttribute;
-            core.fillText(
-                'ui',
-                'HTML5 魔塔样板',
-                text_start,
-                top + 35,
-                globalAttribute.selectColor,
-                'bold 22px ' + globalAttribute.font
-            );
-            core.fillText(
-                'ui',
-                '版本： ' + main.__VERSION__,
-                text_start,
-                top + 80,
-                '#FFFFFF',
-                'bold 17px ' + globalAttribute.font
-            );
-            core.fillText('ui', '作者： 艾之葵', text_start, top + 112);
-            core.fillText(
-                'ui',
-                'HTML5魔塔交流群：539113091',
-                text_start,
-                top + 112 + 32
-            );
-            // TODO: 写自己的“关于”页面，每次增加32像素即可
-            core.playSound('打开界面');
         }
     }
 };

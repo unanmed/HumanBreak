@@ -756,11 +756,6 @@ interface Ui {
     getToolboxItems<T extends Exclude<ItemCls, 'items'>>(cls: T): ItemIdOf<T>[];
 
     /**
-     * 绘制状态栏
-     */
-    drawStatusBar(): void;
-
-    /**
      * 动态创建一个画布
      * @param name 画布名称，如果已存在则会直接取用当前存在的
      * @param x 横坐标

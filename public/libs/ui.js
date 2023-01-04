@@ -3176,7 +3176,6 @@ ui.prototype._drawGameInfo = function () {
         '查看工程',
         '游戏主页',
         '操作帮助',
-        '关于游戏',
         '下载离线版本',
         '返回主菜单'
     ]);
@@ -3836,11 +3835,6 @@ ui.prototype._drawKeyBoard = function () {
         );
 };
 
-////// 绘制状态栏 /////
-ui.prototype.drawStatusBar = function () {
-    this.uidata.drawStatusBar();
-};
-
 ////// 绘制“数据统计”界面 //////
 ui.prototype._drawStatistics = function (floorIds) {
     core.playSound('打开界面');
@@ -4077,11 +4071,6 @@ ui.prototype._drawStatistics_generateText = function (obj, type, data) {
         core.formatBigNumber(data.add.mdef) +
         '点。';
     return text;
-};
-
-////// 绘制“关于”界面 //////
-ui.prototype._drawAbout = function () {
-    return this.uidata.drawAbout();
 };
 
 ////// 绘制帮助页面 //////
