@@ -1,6 +1,8 @@
 import { reactive, ref } from 'vue';
 import { tip } from './utils';
 
+export const showMarkedEnemy = ref(false);
+
 const markedEnemy = reactive<EnemyIds[]>([]);
 
 interface MarkInfo {
@@ -133,6 +135,7 @@ export default function init() {
         checkStatus: checkMarkedStatus,
         markEnemy,
         hasMarkedEnemy,
-        unmarkEnemy
+        unmarkEnemy,
+        showMarkedEnemy
     };
 }
