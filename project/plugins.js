@@ -1718,9 +1718,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         };
         // 血条
         this.healthBar = function (now, total) {
-            // 关闭小地图
-            flags.__useMinimap__ = false;
-            core.drawMinimap();
             var nowLength = (now / total) * 476; // 当前血量下绘制长度
             var color = [
                 255 * 2 - (now / total) * 2 * 255,

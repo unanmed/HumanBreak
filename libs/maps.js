@@ -3349,8 +3349,8 @@ maps.prototype.setBlock = function (number, x, y, floorId, noredraw) {
                 if (!noredraw) {
                     core.drawBlock(block);
                     core.addGlobalAnimate(block);
+                    core.updateStatusBar();
                 }
-                core.updateStatusBar();
             }
         }
     }
