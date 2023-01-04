@@ -4119,7 +4119,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 let tx = data.loc[0] + flags[`loop_${data.floorId}`];
                 tx %= floor.width;
                 if (tx < 0) tx += floor.width;
-                console.log(data.loc[0], tx);
                 heroLoc = {
                     x: tx,
                     y: data.loc[1]
@@ -4173,7 +4172,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             let block = core.getBlock(x, y);
             const id = core.status.floorId;
             const loop = isLoopMap(id);
-            if (loop) {
+            if (loop && flags[`loop_${id}`] !== 0) {
                 if (block && block.event.trigger === 'changeFloor') {
                     delete block.event.trigger;
                     core.maps._addInfo(block);
