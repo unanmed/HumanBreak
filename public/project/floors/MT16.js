@@ -414,6 +414,10 @@ main.floors.MT16=
             {
                 "type": "function",
                 "function": "function(){\nconst enemy = core.getRemainEnemyString(core.floorIds.slice(5, 17));\nif (enemy.length === 0) {\n\tcore.insertAction(['当前无剩余怪物！', { \"type\": \"hide\", \"remove\": true }, ]);\n} else {\n\tcore.insertAction(enemy);\n}\n}"
+            },
+            {
+                "type": "loadBgm",
+                "name": "escape.mp3"
             }
         ],
         "3,23": [

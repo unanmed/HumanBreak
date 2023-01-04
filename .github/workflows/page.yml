@@ -27,7 +27,7 @@ jobs:
               run: |
                   npm i -g pnpm
                   pnpm i
-                  pnpm build
+                  pnpm build-gh
 
             # 执行部署
             - name: 部署
