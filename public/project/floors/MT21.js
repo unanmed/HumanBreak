@@ -18,11 +18,133 @@ main.floors.MT21=
     "parallelDo": "",
     "events": {
         "14,8": [
-            "感谢游玩该塔，目前塔只完成了40%，请期待后续更新",
-            "分数计算公式：血量+5000*黄钥匙+15000+蓝钥匙",
             {
-                "type": "win",
-                "reason": "智慧之始"
+                "type": "if",
+                "condition": "(flag:chapter===1)",
+                "true": [
+                    {
+                        "type": "setCurtain",
+                        "color": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "time": 1500,
+                        "keep": true
+                    },
+                    {
+                        "type": "setText",
+                        "text": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "background": "winskin3.png"
+                    },
+                    "人类简史——起源篇",
+                    {
+                        "type": "playSound",
+                        "name": "paper.mp3"
+                    },
+                    "他踏出了寻找智慧的第一步。",
+                    {
+                        "type": "playSound",
+                        "name": "paper.mp3"
+                    },
+                    "他所练就的勇气，也成为他寻找智慧路上的一大利器。",
+                    {
+                        "type": "playSound",
+                        "name": "paper.mp3"
+                    },
+                    "人类简史——起源篇，完。",
+                    {
+                        "type": "playSound",
+                        "name": "paper.mp3"
+                    },
+                    {
+                        "type": "setValue",
+                        "name": "flag:chapter",
+                        "value": "2"
+                    },
+                    {
+                        "type": "sleep",
+                        "time": 1000
+                    },
+                    "人类简史——进化篇",
+                    {
+                        "type": "playSound",
+                        "name": "paper.mp3"
+                    },
+                    "或许，他真的不理解智慧。",
+                    {
+                        "type": "playSound",
+                        "name": "paper.mp3"
+                    },
+                    "或许，他已经理解了一些。",
+                    {
+                        "type": "playSound",
+                        "name": "paper.mp3"
+                    },
+                    "但这不重要。",
+                    {
+                        "type": "playSound",
+                        "name": "paper.mp3"
+                    },
+                    "他的轨迹已经注定了他对未来的影响。",
+                    {
+                        "type": "playSound",
+                        "name": "paper.mp3"
+                    },
+                    {
+                        "type": "playSound",
+                        "name": "paper.mp3"
+                    },
+                    "这个世界，甚至这个宇宙，都因为他的存在而改变。",
+                    {
+                        "type": "playSound",
+                        "name": "paper.mp3"
+                    },
+                    "在这里，智慧小径，将是他智慧的飞跃点。",
+                    {
+                        "type": "changeFloor",
+                        "floorId": "MT22",
+                        "loc": [
+                            0,
+                            8
+                        ]
+                    },
+                    {
+                        "type": "setCurtain",
+                        "time": 1000
+                    },
+                    {
+                        "type": "setText",
+                        "text": [
+                            255,
+                            255,
+                            255,
+                            1
+                        ],
+                        "background": "winskin2.png"
+                    },
+                    "\t[初级智人]\b[up,hero]智慧吗...",
+                    "\t[初级智人]\b[up,hero]智慧又是什么呢？",
+                    "\t[初级智人]\b[up,hero]智慧之神说它可以掌控万物，真的这么神奇吗...",
+                    "\t[初级智人]\b[up,hero]完全摸不到头脑。",
+                    "\t[初级智人]\b[up,hero]或许智慧结晶会告诉我答案吧。"
+                ],
+                "false": [
+                    {
+                        "type": "changeFloor",
+                        "floorId": "MT22",
+                        "loc": [
+                            0,
+                            8
+                        ]
+                    }
+                ]
             }
         ]
     },

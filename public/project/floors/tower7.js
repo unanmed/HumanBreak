@@ -15,6 +15,10 @@ main.floors.tower7=
     "bgm": "tower.mp3",
     "firstArrive": [
         {
+            "type": "hideStatusBar",
+            "toolbox": true
+        },
+        {
             "type": "loadBgm",
             "name": "beforeBoss.mp3"
         },

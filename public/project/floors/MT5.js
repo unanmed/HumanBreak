@@ -39,11 +39,6 @@ main.floors.MT5=
                 ],
                 "false": [
                     {
-                        "type": "setGlobalAttribute",
-                        "name": "font",
-                        "value": "scroll"
-                    },
-                    {
                         "type": "setCurtain",
                         "color": [
                             0,
@@ -98,11 +93,6 @@ main.floors.MT5=
                         "background": "winskin2.png",
                         "textfont": 20,
                         "time": 25
-                    },
-                    {
-                        "type": "setGlobalAttribute",
-                        "name": "font",
-                        "value": "normal"
                     },
                     {
                         "type": "changeFloor",

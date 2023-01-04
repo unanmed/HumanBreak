@@ -30,7 +30,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"tower4",
 			"tower5",
 			"tower6",
-			"tower7"
+			"tower7",
+			"MT22"
 		],
 		"floorPartitions": [
 			[
@@ -45,23 +46,16 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"IQ.png",
 			"arrow.png",
 			"atk.png",
-			"beforeBoss.jpg",
 			"bg.jpg",
 			"boom.png",
 			"botton.png",
-			"cave.jpg",
-			"cave1.jpg",
 			"cave2.jpg",
 			"def.png",
-			"escape.jpg",
 			"exp.png",
-			"grass.jpg",
 			"hero1.png",
 			"hero2.png",
 			"hp.png",
 			"money.png",
-			"mount.jpg",
-			"plot1.jpg",
 			"skill.png",
 			"skill0.png",
 			"skill1.png",
@@ -73,11 +67,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"skill7.png",
 			"title.jpg",
 			"tower.jpg",
-			"tower6.jpeg",
 			"tower7.jpeg",
-			"towerBoss.jpg",
-			"towerBoss2.jpg",
-			"towerBoss3.jpg",
 			"winskin.png",
 			"winskin2.png",
 			"winskin3.png"
@@ -116,16 +106,21 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		],
 		"bgms": [
 			"beforeBoss.mp3",
+			"beforeNight.mp3",
 			"cave.mp3",
 			"escape.mp3",
 			"grass.mp3",
 			"mount.mp3",
+			"night.mp3",
+			"palace.mp3",
 			"plot1.mp3",
+			"road.mp3",
 			"title.mp3",
 			"tower.mp3",
 			"towerBoss.mp3",
 			"towerBoss2.mp3",
-			"towerBoss3.mp3"
+			"towerBoss3.mp3",
+			"winter.mp3"
 		],
 		"sounds": [
 			"008-System08.ogg",
@@ -167,8 +162,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"zone.mp3"
 		],
 		"fonts": [
-			"normal",
-			"scroll"
+			"normal"
 		],
 		"nameMap": {
 			"确定": "confirm.mp3",
@@ -464,7 +458,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			{
 				"type": "setGlobalAttribute",
 				"name": "font",
-				"value": "scroll"
+				"value": "normal"
 			},
 			{
 				"type": "playSound",
@@ -554,11 +548,6 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			},
 			{
 				"type": "showStatusBar"
-			},
-			{
-				"type": "setGlobalAttribute",
-				"name": "font",
-				"value": "normal"
 			}
 		],
 		"shops": [],
