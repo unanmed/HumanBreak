@@ -148,9 +148,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             heroLoc.direction = core.turnDirection(heroLoc.direction);
             core.status.hero.loc = heroLoc;
             // tower6
-            if (floorId == 'tower6') {
-                core.relocateLoopMap(floorId, heroLoc);
-            }
+            // if (floorId == 'tower6') {
+            //     core.relocateLoopMap(floorId, heroLoc);
+            // }
             // 检查重生怪并重置
             if (!fromLoad) {
                 core.extractBlocks(floorId);
@@ -174,11 +174,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
 
             // ---------- 重绘新地图；这一步将会设置core.status.floorId ---------- //
             core.drawMap(floorId);
-            if (floorId == 'tower6') core.backgroundImage('tower6.jpeg');
-            else {
-                core.deleteCanvas('bImage');
-                core.deleteCanvas('eImage');
-            }
 
             // 切换楼层BGM
             if (core.status.maps[floorId].bgm) {
@@ -186,9 +181,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 if (bgm instanceof Array) bgm = bgm[0];
                 if (!core.hasFlag('__bgm__')) core.playBgm(bgm);
             }
-            // if (flags.chase && fromLoad) {
-            //     core.startChase();
-            // }
             // 更改画面色调
             var color = core.getFlag('__color__', null);
             if (!color && core.status.maps[floorId].color)
@@ -200,8 +192,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     'curtain',
                     0,
                     0,
-                    core.__PIXELS__,
-                    core.__PIXELS__,
+                    core._PX_,
+                    core._PY_,
                     core.arrayToRGBA(color)
                 );
             // 更改天气
@@ -1772,6 +1764,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     true
                 );
             }
+
+            core.checkLoopMap();
 
             // 追猎
             if (core.status.checkBlock.haveHunt) {

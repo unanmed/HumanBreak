@@ -139,6 +139,12 @@ main.floors.tower1=
                 ],
                 "time": 500
             }
+        ],
+        "13,1": [
+            {
+                "type": "function",
+                "function": "function(){\nconsole.trace()\n}"
+            }
         ]
     },
     "afterBattle": {},
@@ -220,14 +226,14 @@ main.floors.tower1=
         "0,7": {
             "floorId": "tower6",
             "loc": [
-                18,
+                24,
                 58
             ]
         },
         "14,7": {
             "floorId": "tower6",
             "loc": [
-                6,
+                12,
                 58
             ]
         },

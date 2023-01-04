@@ -19,6 +19,7 @@ control.prototype._init = function () {
     this.weathers = {};
     this.resizes = [];
     this.noAutoEvents = true;
+    this.updateNextFrame = false;
     // --- 注册系统的animationFrame
     this.registerAnimationFrame(
         'totalTime',
@@ -3862,16 +3863,23 @@ control.prototype.clearStatusBar = function () {
 
 ////// 更新状态栏 //////
 control.prototype.updateStatusBar = function (doNotCheckAutoEvents, immediate) {
+    if (!core.isPlaying()) return;
     if (immediate) {
         return this.updateStatusBar_update();
     }
     if (!doNotCheckAutoEvents) this.noAutoEvents = false;
     if (core.isReplaying()) return this.updateStatusBar_update();
-    requestAnimationFrame(this.updateStatusBar_update);
+    if (!core.control.updateNextFrame) {
+        core.control.updateNextFrame = true;
+        requestAnimationFrame(this.updateStatusBar_update);
+    }
 };
 
 control.prototype.updateStatusBar_update = function () {
-    if (!core.isPlaying() || core.hasFlag('__statistics__')) return;
+    core.control.updateNextFrame = false;
+    if (!core.isPlaying() || core.hasFlag('__statistics__')) {
+        return;
+    }
     core.control.controldata.updateStatusBar();
     if (!core.control.noAutoEvents) core.checkAutoEvents();
     core.control._updateStatusBar_setToolboxIcon();
