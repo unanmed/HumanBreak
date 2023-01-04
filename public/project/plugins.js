@@ -2227,7 +2227,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                                 damaged[loc + direction] = true;
                                 core.drawHeroAnimate('hand');
                                 core.status.hero.hp -= 1000;
-                                core.addPop(x * 32 + 16, y * 32 + 16, 1000);
+                                core.addPop(x * 32 + 16, y * 32 + 16, -1000);
                                 core.updateStatusBar();
                                 if (core.status.hero.hp < 0) {
                                     clearInterval(skill1);
@@ -2245,7 +2245,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                                 damaged[loc + direction] = true;
                                 core.drawHeroAnimate('hand');
                                 core.status.hero.hp -= 1000;
-                                core.addPop(x * 32 + 16, y * 32 + 16, 1000);
+                                core.addPop(x * 32 + 16, y * 32 + 16, -1000);
                                 core.updateStatusBar();
                                 if (core.status.hero.hp < 0) {
                                     clearInterval(skill1);
@@ -2376,7 +2376,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     if (x == locs[index][0] && y == locs[index][1]) {
                         core.drawHeroAnimate('hand');
                         core.status.hero.hp -= 5000;
-                        core.addPop(x * 32 + 16, y * 32 + 16, 5000);
+                        core.addPop(x * 32 + 16, y * 32 + 16, -5000);
                         core.updateStatusBar();
                         if (core.status.hero.hp < 0) {
                             core.status.hero.hp = 0;
@@ -2552,7 +2552,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 hy = core.status.hero.loc.y;
             if (Math.abs(hx - x) <= 1 && Math.abs(hy - y) <= 1) {
                 core.status.hero.hp -= 3000 * power;
-                core.addPop(x * 32 + 16, y * 32 + 16, 3000 * power);
+                core.addPop(x * 32 + 16, y * 32 + 16, -3000 * power);
                 core.updateStatusBar();
                 if (core.status.hero.hp < 0) {
                     core.status.hero.hp = 0;
@@ -2720,7 +2720,11 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                                 ) {
                                     damaged[i] = true;
                                     core.status.hero.hp -= 3000;
-                                    core.addPop(x * 32 + 16, y * 32 + 16, 3000);
+                                    core.addPop(
+                                        x * 32 + 16,
+                                        y * 32 + 16,
+                                        -3000
+                                    );
                                     core.updateStatusBar();
                                     core.playSound('electron.mp3');
                                     if (core.status.hero.hp < 0) {
@@ -3291,7 +3295,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                             hy = core.status.hero.loc.y;
                         if (loc[0] == hx && loc[1] == hy) {
                             core.status.hero.hp -= 3000;
-                            core.addPop(x * 32 + 16, y * 32 + 16, 3000);
+                            core.addPop(x * 32 + 16, y * 32 + 16, -3000);
                             core.updateStatusBar();
                             if (core.status.hero.hp < 0) {
                                 core.status.hero.hp = 0;
@@ -3336,7 +3340,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                             loc2[1];
                     if (n1 * n2 <= 0) {
                         core.status.hero.hp -= damage;
-                        core.addPop(x * 32 + 16, y * 32 + 16, damage);
+                        core.addPop(x * 32 + 16, y * 32 + 16, -damage);
                         core.updateStatusBar();
                         core.playSound('electron.mp3');
                         if (core.status.hero.hp < 0) {
@@ -3362,7 +3366,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                             loc2[1];
                     if (n1 * n2 <= 0) {
                         core.status.hero.hp -= damage;
-                        core.addPop(x * 32 + 16, y * 32 + 16, damage);
+                        core.addPop(x * 32 + 16, y * 32 + 16, -damage);
                         core.updateStatusBar();
                         core.playSound('electron.mp3');
                         if (core.status.hero.hp < 0) {
@@ -3380,7 +3384,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
     popupDamage: function () {
         // 伤害弹出
         // 复写阻激夹域检测
-        control.prototype.checkBlock = function () {
+        control.prototype.checkBlock = function (forceMockery) {
             var x = core.getHeroLoc('x'),
                 y = core.getHeroLoc('y'),
                 loc = x + ',' + y;
@@ -3410,9 +3414,86 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     core.updateStatusBar();
                 }
             }
-            this._checkBlock_ambush(core.status.checkBlock.ambush[loc]);
             this._checkBlock_repulse(core.status.checkBlock.repulse[loc]);
+            checkMockery(loc, forceMockery);
         };
+
+        control.prototype.moveHero = function (direction, callback) {
+            // 如果正在移动，直接return
+            if (core.status.heroMoving != 0) return;
+            if (core.isset(direction)) core.setHeroLoc('direction', direction);
+
+            const nx = core.nextX();
+            const ny = core.nextY();
+            if (core.status.checkBlock.mockery[`${nx},${ny}`]) {
+                core.autosave();
+            }
+
+            if (callback) return this.moveAction(callback);
+            this._moveHero_moving();
+        };
+
+        function checkMockery(loc, force) {
+            if (core.status.lockControl && !force) return;
+            const mockery = core.status.checkBlock.mockery[loc];
+            if (mockery) {
+                mockery.sort((a, b) =>
+                    a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]
+                );
+                const action = [];
+                const [tx, ty] = mockery[0];
+                let { x, y } = core.status.hero.loc;
+                const dir =
+                    x > tx ? 'left' : x < tx ? 'right' : y > ty ? 'up' : 'down';
+                const { x: dx, y: dy } = core.utils.scan[dir];
+
+                action.push({ type: 'changePos', direction: dir });
+                const blocks = core.getMapBlocksObj();
+                while (1) {
+                    x += dx;
+                    y += dy;
+                    const block = blocks[`${x},${y}`];
+                    if (block) {
+                        block.event.cls === '';
+                        if (
+                            [
+                                'animates',
+                                'autotile',
+                                'tileset',
+                                'npcs',
+                                'npc48'
+                            ].includes(block.event.cls)
+                        ) {
+                            action.push(
+                                {
+                                    type: 'hide',
+                                    loc: [[x, y]],
+                                    remove: true,
+                                    time: 0
+                                },
+                                {
+                                    type: 'animate',
+                                    name: 'hand',
+                                    loc: [x, y],
+                                    async: true
+                                }
+                            );
+                        }
+                        if (block.event.cls.startsWith('enemy')) {
+                            action.push({ type: 'moveAction' });
+                        }
+                    }
+                    action.push({ type: 'moveAction' });
+                    if (x === tx && y === ty) break;
+                }
+                action.push({
+                    type: 'function',
+                    function: `function() { core.checkBlock(true); }`
+                });
+                action.push({ type: 'stopAsync' });
+                core.insertAction(action);
+            }
+        }
     },
     hotReload: function () {
         if (main.mode !== 'play' || main.replayChecking) return;

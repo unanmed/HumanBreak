@@ -33,6 +33,28 @@
             "同时，几乎所有 ui 的退出按钮都在左上角。"
         ]
     },
+    "about": {
+        "text": "关于游戏",
+        "condition": "true",
+        "desc": [
+            "使用样板：Vite 魔塔样板",
+            "<br>",
+            "样板版本：V2.10.0",
+            "<br>",
+            "游戏开源地址：<a href=\"https://github.com/unanmed/HumanBreak\" target=\"_blank\">",
+            "https://github.com/unanmed/HumanBreak</a>",
+            "<br>",
+            "游戏作者：古祠",
+            "<br>",
+            "BGM来源：网易云音乐",
+            "<br>",
+            "素材来源：大素材库、爱给网、网站素材库",
+            "<br>",
+            "特别鸣谢：无名甲烷菌",
+            "<br>",
+            "测试："
+        ]
+    },
     "tutorial": {
         "text": "新手教程",
         "condition": "true",

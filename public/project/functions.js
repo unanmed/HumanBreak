@@ -424,6 +424,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             if (core.getFlag('bladeOn') && core.getFlag('blade')) {
                 core.setFlag('blade', false);
             }
+            if (core.getFlag('shieldOn') && core.getFlag('shield')) {
+                core.setFlag('shield', false);
+            }
 
             // 事件的处理
             var todo = [];
@@ -447,11 +450,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 );
             }
             core.push(todo, enemy.afterBattle);
-            if (
-                core.status.hero.loc.direction == 'up' ||
-                core.status.hero.loc.direction == 'down'
-            )
-                core.insertAction([{ type: 'moveAction' }]);
+
             // 在这里增加其他的自定义事件需求
             /*
             if (enemyId=='xxx') {
@@ -694,14 +693,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     '经过两只相同的怪物中间，勇士生命值变成一半',
                     '#bb99ee'
                 ],
-                [
-                    17,
-                    '仇恨',
-                    '战斗前，怪物附加之前积累的仇恨值作为伤害；战斗后，释放一半的仇恨值。（每杀死一个怪物获得' +
-                        (core.values.hatred || 0) +
-                        '点仇恨值）',
-                    '#b0b666'
-                ],
+                [17, '先攻', '战斗时怪物首先攻击', '#b0b666'],
                 [
                     18,
                     '阻击',
@@ -714,7 +706,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     },
                     '#8888e6'
                 ],
-                [19, '自爆', '战斗后勇士的生命值变成1', '#ff6666'],
+                [
+                    19,
+                    '电摇嘲讽',
+                    '当勇士移动到怪物同行或同列时，勇士会直接冲向怪物，撞碎路上的所有地形和门，拾取路上的道具，与路上的怪物以及该怪物战斗',
+                    '#ff6666'
+                ],
                 [20, '无敌', '勇士无法打败怪物，除非拥有十字架', '#aaaaaa'],
                 [
                     21,
@@ -989,6 +986,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     per_damage = mon_atk;
                 // 战斗伤害不能为负值
                 if (per_damage < 0) per_damage = 0;
+
+                // 先攻
+                if (core.hasSpecial(mon_special, 17)) damage += per_damage;
 
                 // 2连击 & 3连击 & N连击
                 if (core.hasSpecial(mon_special, 4)) per_damage *= 2;
@@ -1431,7 +1431,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             var damage = {}, // 每个点的伤害值
                 type = {}, // 每个点的伤害类型
                 repulse = {}, // 每个点的阻击怪信息
-                ambush = {}; // 每个点的捕捉信息
+                mockery = {}; // 电摇嘲讽
             var betweenAttackLocs = {}; // 所有可能的夹击点
             var needCache = false;
             var canGoDeadZone = core.flags.canGoDeadZone;
@@ -1528,7 +1528,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     }
                 }
                 // 射击
-                // 如果要防止激光伤害，可以直接简单的将 flag:no_laser 设为true
                 if (enemy && core.hasSpecial(enemy.special, 24)) {
                     var beyondVisual = false;
                     for (var nx = 0; nx < width; nx++) {
@@ -1614,6 +1613,22 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                             if (damage < 0) damage = 0;
                             type[currloc] = type[currloc] || {};
                             type[currloc]['射击伤害'] = true;
+                        }
+                    }
+                }
+
+                // 电摇嘲讽
+                if (enemy && core.hasSpecial(enemy.special, 19)) {
+                    for (let nx = 0; nx < width; nx++) {
+                        if (!core.noPass(nx, y)) {
+                            mockery[`${nx},${y}`] ??= [];
+                            mockery[`${nx},${y}`].push([x, y]);
+                        }
+                    }
+                    for (let ny = 0; ny < height; ny++) {
+                        if (!core.noPass(x, ny)) {
+                            mockery[`${x},${ny}`] ??= [];
+                            mockery[`${x},${ny}`].push([x, y]);
                         }
                     }
                 }
@@ -1721,7 +1736,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 damage: damage,
                 type: type,
                 repulse: repulse,
-                ambush: ambush,
+                mockery,
                 needCache: needCache,
                 cache: {}, // clear cache
                 haveHunt: haveHunt

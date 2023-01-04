@@ -1,10 +1,10 @@
 var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 = 
 {
 	"greenSlime": {"name":"绿头怪","hp":100,"atk":11,"def":3,"money":0,"exp":1,"point":0,"special":[],"description":"一种极其低级的怪物，低级到普通人用手都可以打死。"},
-	"redSlime": {"name":"红头怪","hp":120,"atk":16,"def":6,"money":0,"exp":2,"point":0,"special":[],"value":10},
-	"blackSlime": {"name":"青头怪","hp":170,"atk":20,"def":8,"money":0,"exp":3,"point":0,"special":[]},
-	"slimelord": {"name":"粘液王","hp":200,"atk":58,"def":24,"money":0,"exp":8,"point":0,"special":[]},
-	"bat": {"name":"小蝙蝠","hp":60,"atk":15,"def":0,"money":0,"exp":2,"point":0,"special":[4]},
+	"redSlime": {"name":"红头怪","hp":120,"atk":16,"def":6,"money":0,"exp":2,"point":0,"special":[],"value":10,"description":"即使是最弱的怪物，也有进化的时候，对吧？"},
+	"blackSlime": {"name":"青头怪","hp":170,"atk":20,"def":8,"money":0,"exp":3,"point":0,"special":[],"description":"看，这就是最弱的怪物进化出的最强的怪物之一了"},
+	"slimelord": {"name":"粘液王","hp":200,"atk":58,"def":24,"money":0,"exp":8,"point":0,"special":[],"description":"看上去黏糊糊的，实际也确实黏糊糊的，据说是史莱姆族的长老级人物"},
+	"bat": {"name":"小蝙蝠","hp":60,"atk":15,"def":0,"money":0,"exp":2,"point":0,"special":[4],"description":"经常出现在山洞中，再平常不过了。但是这次它却有了攻击性。"},
 	"bigBat": {"name":"大蝙蝠","hp":150,"atk":17,"def":5,"money":0,"exp":4,"point":0,"special":[4],"crit":0,"charge":0,"courage":0,"together":0,"hungry":0,"value":100,"n":1000},
 	"redBat": {"name":"恐怖蝙蝠","hp":1200,"atk":260,"def":110,"money":1,"exp":32,"point":0,"special":[5]},
 	"vampire": {"name":"冥灵魔王","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
@@ -32,7 +32,7 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"demonPriest": {"name":"魔神法师","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"goldHornSlime": {"name":"尖角怪","hp":1500,"atk":366,"def":166,"money":1,"exp":35,"point":0,"special":[]},
 	"silverSlime": {"name":"银头怪","hp":250,"atk":50,"def":20,"money":0,"exp":11,"point":0,"special":[2]},
-	"whiteHornSlime": {"name":"尖角怪","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"whiteHornSlime": {"name":"恐怖尖角怪","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"redSwordsman": {"name":"山间盗贼","hp":1000,"atk":175,"def":40,"money":1,"exp":24,"point":0,"special":[4],"n":8},
 	"poisonZombie": {"name":"绿兽人","hp":100,"atk":120,"def":0,"money":13,"exp":0,"point":0,"special":[12]},
 	"octopus": {"name":"血影","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
@@ -68,7 +68,7 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"bowman": {"name":"猎人","hp":500,"atk":100,"def":50,"money":0,"exp":16,"point":0,"special":[24],"value":75},
 	"liteBowman": {"name":"山间猎手","hp":1200,"atk":200,"def":60,"money":1,"exp":27,"point":0,"special":[24]},
 	"crimsonZombie": {"name":"勇气之兽","hp":1800,"atk":2000,"def":-100,"money":1,"exp":35,"point":0,"special":[]},
-	"watcherSlime": {"name":"邪眼怪","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"watcherSlime": {"name":"邪眼史莱姆","hp":5000,"atk":900,"def":600,"money":1,"exp":50,"point":0,"special":[17]},
 	"mutantSlimeman": {"name":"变异史莱姆人","hp":350,"atk":70,"def":27,"money":0,"exp":13,"point":0,"special":[]},
 	"devilKnight": {"name":"恶灵骑士","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"grayPriest": {"name":"智慧法王","hp":3000,"atk":600,"def":250,"money":1,"exp":40,"point":0,"special":[13]},
@@ -122,5 +122,9 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"E549": {"name":"智慧之史","hp":1000,"atk":1000,"def":100,"money":1,"exp":35,"point":0,"special":[1],"crit":10000},
 	"E550": {"name":"智慧之兔","hp":1500,"atk":600,"def":200,"money":1,"exp":35,"point":0,"special":[8],"together":20},
 	"E556": {"name":"智慧之姆","hp":3000,"atk":800,"def":200,"money":1,"exp":45,"point":0,"special":[8],"together":20},
-	"E557": {"name":"智慧之神","hp":10000,"atk":2000,"def":800,"money":10,"exp":500,"point":0,"special":[]}
+	"E557": {"name":"智慧之神","hp":10000,"atk":2000,"def":800,"money":10,"exp":500,"point":0,"special":[]},
+	"E561": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E562": {"name":"嘲讽剑客","hp":2000,"atk":1500,"def":600,"money":1,"exp":50,"point":0,"special":[19]},
+	"E563": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E564": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]}
 }
