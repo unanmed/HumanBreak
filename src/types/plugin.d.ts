@@ -120,6 +120,13 @@ interface PluginUtils {
      * @param isStart 是否要开始修剪录像
      */
     autoFixRouteBoss(isStart?: boolean);
+
+    /**
+     * 滑动数组
+     * @param arr 数组
+     * @param delta 偏移量，正数表示向右滑动，负数表示向左滑动
+     */
+    slide<T>(arr: T[], delta: number): T[];
 }
 
 interface PluginUis {
@@ -164,6 +171,9 @@ interface PluginUis {
 
     /** 楼传界面是否打开 */
     readonly flyOpened: Ref<boolean>;
+
+    /** 是否展示标记的怪物 */
+    readonly showMarkedEnemy: Ref<boolean>;
 
     /** ui栈 */
     readonly uiStack: Ref<Component[]>;

@@ -72,7 +72,7 @@ main.floors.tower2=
         "7,14": {
             "floorId": "tower6",
             "loc": [
-                12,
+                18,
                 42
             ]
         },

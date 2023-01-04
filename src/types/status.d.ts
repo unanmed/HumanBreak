@@ -618,17 +618,17 @@ interface InitGameStatus {
     /**
      * 背景图块
      */
-    bgmaps: Record<string, number[][]>;
+    bgmaps: Record<FloorIds, number[][]>;
 
     /**
      * 前景图块
      */
-    fgmaps: Record<string, number[][]>;
+    fgmaps: Record<FloorIds, number[][]>;
 
     /**
      * 以坐标列举的图块
      */
-    mapBlockObjs: Record<string, Record<LocString, Block>>;
+    mapBlockObjs: Record<FloorIds, Record<LocString, Block>>;
 
     /**
      * 地图伤害

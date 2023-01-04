@@ -14,7 +14,7 @@
                     :style="{ color: marked ? 'lightgreen' : 'lightcoral' }"
                     >{{ marked ? '已标记该怪物' : '未标记该怪物' }}</span
                 >
-                <span class="button-text" @click="mark">{{
+                <span class="button-text" @click.stop="mark">{{
                     marked ? '取消标记该怪物' : '标记该怪物为目标'
                 }}</span>
             </div>

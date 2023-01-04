@@ -1,4 +1,5 @@
 import { ref, watch } from 'vue';
+import { has } from './utils';
 
 /**
  * 打开和关闭ui时是否展示动画
@@ -44,12 +45,16 @@ watch(autoScale, n => {
  * 重置设置信息，从localStorage读取即可
  */
 function reset() {
-    transition.value = core.getLocalStorage('transition') ? true : false;
+    const t = core.getLocalStorage('transition', false);
+    transition.value = t;
     core.plugin.transition.value = transition.value;
-    autoScale.value = core.getLocalStorage('autoScale') ? true : false;
+    autoScale.value = core.getLocalStorage('autoScale', true);
 }
 
 function resetFlag() {
+    flags.autoSkill ??= true;
+    flags.itemDetail ??= true;
+
     itemDetail.value = flags.itemDetail ? true : false;
     autoSkill.value = flags.autoSkill ? true : false;
 }

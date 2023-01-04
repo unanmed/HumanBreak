@@ -1170,12 +1170,14 @@ interface Maps {
      * @param x 横坐标
      * @param y 纵坐标
      * @param floorId 地图id，不填视为当前地图
+     * @param noredraw 是否不重绘地图
      */
     setBlock(
         number: AllIds | AllNumbers | `${AllNumbers}`,
         x: number,
         y: number,
-        floorId?: FloorIds
+        floorId?: FloorIds,
+        noredraw?: boolean
     ): void;
 
     /**
