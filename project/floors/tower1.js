@@ -14,7 +14,8 @@ main.floors.tower1=
     "defaultGround": "T526",
     "bgm": "tower.mp3",
     "firstArrive": [
-        "\t[野蛮人]\b[up,hero]这里，便是智慧之塔了"
+        "\t[野蛮人]\b[up,hero]这里，便是智慧之塔了",
+        "注意破墙镐在本区结束后会全部删除，请在本区域全部用完"
     ],
     "eachArrive": [],
     "parallelDo": "",
@@ -145,6 +146,16 @@ main.floors.tower1=
                 "type": "function",
                 "function": "function(){\nconsole.trace()\n}"
             }
+        ],
+        "7,14": [
+            {
+                "type": "changeFloor",
+                "floorId": "MT20",
+                "loc": [
+                    7,
+                    8
+                ]
+            }
         ]
     },
     "afterBattle": {},
@@ -216,13 +227,6 @@ main.floors.tower1=
 ],
     "cannotMoveIn": {},
     "changeFloor": {
-        "7,14": {
-            "floorId": "MT20",
-            "loc": [
-                7,
-                8
-            ]
-        },
         "0,7": {
             "floorId": "tower6",
             "loc": [

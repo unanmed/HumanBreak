@@ -531,7 +531,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         // 删除楼层
         // core.removeMaps("MT1", "MT300") 删除MT1~MT300之间的全部层
         // core.removeMaps("MT10") 只删除MT10层
-        this.removeMaps = function (fromId, toId) {
+        this.removeMaps = function (fromId, toId, force) {
             toId = toId || fromId;
             var fromIndex = core.floorIds.indexOf(fromId),
                 toIndex = core.floorIds.indexOf(toId);
@@ -540,6 +540,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             flags.__removed__ = flags.__removed__ || [];
             flags.__disabled__ = flags.__disabled__ || {};
             flags.__leaveLoc__ = flags.__leaveLoc__ || {};
+            flags.__forceDelete__ ??= {};
             for (var i = fromIndex; i <= toIndex; ++i) {
                 var floorId = core.floorIds[i];
                 if (core.status.maps[floorId].deleted) continue;
@@ -557,6 +558,10 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 core.status.maps[floorId].canFlyTo = false;
                 core.status.maps[floorId].canFlyFrom = false;
                 core.status.maps[floorId].cannotViewMap = true;
+                if (force) {
+                    core.status.maps[floorId].forceDelete = true;
+                    flags.__forceDelete__[floorId] = true;
+                }
             }
         };
 
@@ -572,6 +577,11 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             for (var i = fromIndex; i <= toIndex; ++i) {
                 var floorId = core.floorIds[i];
                 if (!core.status.maps[floorId].deleted) continue;
+                if (
+                    core.status.maps[floorId].forceDelete ||
+                    flags.__forceDelete__[floorId]
+                )
+                    continue;
                 flags.__removed__ = flags.__removed__.filter(f => {
                     return f != floorId;
                 });
@@ -1442,7 +1452,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 const item = core.material.items[id];
                 if (item.cls === 'equips') {
                     // 装备也显示
-                    const diff = item.equip.value ?? {};
+                    const diff = core.clone(item.equip.value ?? {});
                     const per = item.equip.percentage ?? {};
                     for (const name in per) {
                         diff[name + 'per'] = per[name].toString() + '%';
@@ -1530,10 +1540,18 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 'X20076'
             ]
         };
+
+        const jumpIgnoreFloor = ['MT31'];
         // 跳跃
         this.jumpSkill = function () {
             if (core.status.floorId.startsWith('tower'))
                 return core.drawTip('当无法使用该技能');
+            if (
+                jumpIgnoreFloor.includes(core.status.floorId) ||
+                flags.onChase
+            ) {
+                return core.drawTip('当前楼层无法使用该技能');
+            }
             if (!flags.skill2) return;
             if (!flags['jump_' + core.status.floorId])
                 flags['jump_' + core.status.floorId] = 0;
@@ -1600,7 +1618,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     true
                 );
                 if (!toLoc) return;
-                core.status.hero.hp -= 200 * flags.hard;
+                if (flags.chapter <= 1) core.status.hero.hp -= 200 * flags.hard;
                 core.updateStatusBar();
                 flags['jump_' + core.status.floorId]++;
                 if (core.status.hero.hp <= 0) {
@@ -3433,6 +3451,11 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             this._moveHero_moving();
         };
 
+        /**
+         * 电摇嘲讽
+         * @param {LocString} loc
+         * @param {boolean} force
+         */
         function checkMockery(loc, force) {
             if (core.status.lockControl && !force) return;
             const mockery = core.status.checkBlock.mockery[loc];
@@ -3470,6 +3493,10 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                                     loc: [[x, y]],
                                     remove: true,
                                     time: 0
+                                },
+                                {
+                                    type: 'function',
+                                    function: `function() { core.removeGlobalAnimate(${x}, ${y}) }`
                                 },
                                 {
                                     type: 'animate',
@@ -3546,6 +3573,12 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          * @param {string} data
          */
         async function reloadFloor(data) {
+            // 如果被砍层了直接忽略
+            if (
+                core.status.maps[data].deleted ||
+                core.status.maps[data].forceDelete
+            )
+                return;
             // 首先重新加载main.floors对应的楼层
             await import(`/project/floors/${data}.js?v=${Date.now()}`);
             // 然后写入core.floors并解析
@@ -3907,6 +3940,20 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             const skill = parseInt(name.slice(6));
             core.upgradeSkill(skill);
         });
+
+        core.registerReplayAction('study', name => {
+            if (!name.startsWith('study:')) return false;
+            const [num, x, y] = name
+                .slice(6)
+                .split(',')
+                .map(v => parseInt(v));
+            if (!core.canStudySkill(num)) return false;
+            const id = core.getBlockId(x, y);
+            const enemy = core.getEnemyInfo(id, void 0, x, y);
+            if (!enemy.special.includes(num)) return false;
+            core.studySkill(enemy, num);
+            return true;
+        });
     },
     skillTree: function () {
         /**
@@ -4086,7 +4133,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 {
                     index: 13,
                     title: '治愈',
-                    desc: ['每级使血瓶的加血量增加2%'],
+                    desc: [
+                        '使主角能够更好地回复生命，每级使血瓶的加血量增加2%'
+                    ],
                     consume:
                         'level > 5 ? 100 * level ** 2 : 250 * level + 1250',
                     front: [[10, 3]],
@@ -4204,6 +4253,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     break;
                 case 10: // 铸剑为盾
                     core.setFlag('shieldOn', true);
+                    break;
+                case 11: // 学习
+                    core.setItem('I565', 1);
                     break;
             }
             const consume = core.getSkillConsume(skill);
@@ -4468,6 +4520,75 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             if (core.status[name + 'maps'])
                 core.status[name + 'maps'][floorId] = arr;
             return arr;
+        };
+    },
+    study: function () {
+        // 负责勇士技能：学习
+        const values = {
+            1: ['crit'],
+            6: ['n'],
+            7: ['hungry'],
+            8: ['togrther'],
+            10: ['courage'],
+            11: ['charge']
+        };
+
+        const cannotStudy = [9, 12, 14, 15, 24];
+
+        this.canStudySkill = function (number) {
+            core.status.hero.special ??= { num: [] };
+            if (core.status.hero.special.num.length >= 1) {
+                return false;
+            }
+            if (cannotStudy.includes(number)) return false;
+            return true;
+        };
+
+        this.studySkill = function (enemy, number) {
+            core.status.hero.special ??= { num: [], last: [] };
+            const s = core.status.hero.special;
+            const specials = core.getSpecials();
+            let special = specials[number - 1][1];
+            if (special instanceof Function) special = special(enemy);
+            if (!this.canStudySkill(number)) {
+                if (!main.replayChecking) {
+                    core.tip('error', `无法学习${special}`);
+                }
+                return;
+            }
+            s.num.push(number);
+            s.last.push(core.getSkillLevel(11) * 3 + 2);
+            const value = values[number] ?? [];
+            for (const key of value) {
+                s[key] = enemy[key];
+            }
+        };
+
+        this.forgetStudiedSkill = function (num, i) {
+            const s = core.status.hero.special;
+            const index = i !== void 0 && i !== null ? i : s.num.indexOf(num);
+            if (index === -1) return;
+            s.num.splice(index, 1);
+            s.last.splice(index, 1);
+            const value = values[number] ?? [];
+            for (const key of value) {
+                delete s[key];
+            }
+        };
+
+        this.declineStudiedSkill = function () {
+            const s = core.status.hero.special;
+            s.last = s.last.map(v => v - 1);
+        };
+
+        this.checkStudiedSkill = function () {
+            const s = core.status.hero.special;
+            for (let i = 0; i < s.last.length; i++) {
+                if (s.last[i] <= 0) {
+                    this.forgetStudiedSkill(void 0, i);
+                    i--;
+                }
+            }
         };
     }
 };

@@ -709,10 +709,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 [
                     19,
                     '电摇嘲讽',
-                    '当勇士移动到怪物同行或同列时，勇士会直接冲向怪物，撞碎路上的所有地形和门，拾取路上的道具，与路上的怪物以及该怪物战斗',
+                    '当勇士移动到怪物同行或同列时，勇士会直接冲向怪物，撞碎路上的所有地形和门，拾取路上的道具，与路上的怪物战斗' +
+                        '，最后与该怪物战斗',
                     '#ff6666'
                 ],
-                [20, '无敌', '勇士无法打败怪物，除非拥有十字架', '#aaaaaa'],
+                [20, '荆棘', '勇士无法打败怪物，除非拥有十字架', '#aaaaaa'],
                 [
                     21,
                     '退化',
@@ -809,10 +810,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             var mon_money = core.getEnemyValue(enemy, 'money', x, y, floorId),
                 mon_exp = core.getEnemyValue(enemy, 'exp', x, y, floorId),
                 mon_point = core.getEnemyValue(enemy, 'point', x, y, floorId);
-            // 坚固
-            if (core.hasSpecial(mon_special, 3) && mon_def < hero_atk - 1) {
-                mon_def = hero_atk - 1;
-            }
+
+            if (typeof enemy === 'number')
+                core.getBlockByNumber(enemy).event.id;
+            if (typeof enemy === 'string') enemy = core.material.enemys[enemy];
+
             // 饥渴
             if (core.hasSpecial(mon_special, 7))
                 mon_atk += (hero_atk * (enemy.hungry || 0)) / 100;
@@ -820,6 +822,20 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 智慧之源
             if (core.hasSpecial(mon_special, 14) && flags.hard == 2) {
                 mon_atk += core.getFlag('inte_' + floorId, 0);
+            }
+
+            if (flags.blade && flags.bladeOn) {
+                hero_atk *= 1 + core.getSkillLevel(2) / 10;
+                hero_def *= 1 - core.getSkillLevel(2) / 10;
+            }
+            if (flags.shield && flags.shieldOn) {
+                hero_atk *= 1 - core.getSkillLevel(10) / 10;
+                hero_def *= 1 + core.getSkillLevel(10) / 10;
+            }
+
+            // 坚固
+            if (core.hasSpecial(mon_special, 3) && mon_def < hero_atk - 1) {
+                mon_def = hero_atk - 1;
             }
 
             var guards = [];
@@ -845,13 +861,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                         if (!block.disable) {
                             // 获得该图块的ID
                             var id = block.event.id,
-                                enemy = core.material.enemys[id];
+                                e = core.material.enemys[id];
                             var dx = Math.abs(block.x - x),
                                 dy = Math.abs(block.y - y);
                             // 检查【支援】技能，数字26
                             if (
-                                enemy &&
-                                core.hasSpecial(enemy.special, 26) &&
+                                e &&
+                                core.hasSpecial(e.special, 26) &&
                                 // 检查支援条件，坐标存在，距离为1，且不能是自己
                                 // 其他类型的支援怪，比如十字之类的话.... 看着做是一样的
                                 x != null &&
@@ -865,9 +881,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                             }
                             // 抱团
                             if (
-                                enemy &&
+                                e &&
                                 core.hasSpecial(mon_special, 8) &&
-                                core.hasSpecial(enemy.special, 8) &&
+                                core.hasSpecial(e.special, 8) &&
                                 !(dx == 0 && dy == 0) &&
                                 dx < 3 &&
                                 dy < 3
@@ -929,16 +945,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 后面三个参数主要是可以在光环等效果上可以适用
             floorId = floorId || core.status.floorId;
 
-            // 怪物的各项数据
-            // 对坚固模仿等处理扔到了脚本编辑-getEnemyInfo之中
-            const enemyInfo = core.enemys.getEnemyInfo(
-                enemy,
-                hero,
-                x,
-                y,
-                floorId
-            );
-
             function getDamage() {
                 let hero_hp = core.getRealStatusOrDefault(hero, 'hp'),
                     hero_atk = core.getRealStatusOrDefault(hero, 'atk'),
@@ -949,6 +955,16 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     origin_hero_hp = core.getStatusOrDefault(hero, 'hp'),
                     origin_hero_atk = core.getStatusOrDefault(hero, 'atk'),
                     origin_hero_def = core.getStatusOrDefault(hero, 'def');
+
+                // 怪物的各项数据
+                // 对坚固模仿等处理扔到了脚本编辑-getEnemyInfo之中
+                const enemyInfo = core.enemys.getEnemyInfo(
+                    enemy,
+                    hero,
+                    x,
+                    y,
+                    floorId
+                );
 
                 let mon_hp = enemyInfo.hp,
                     mon_atk = enemyInfo.atk,
@@ -1100,7 +1116,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             let damageInfo = null;
             let damage = Infinity;
 
-            const skills = [['bladeOn', 'blade']];
+            const skills = [
+                ['bladeOn', 'blade'],
+                ['shieldOn', 'shield']
+            ];
             damageInfo = getDamage();
             if (damageInfo) damage = damageInfo.damage;
 
@@ -1198,7 +1217,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     core.ui._drawStatistics();
                     break;
                 case 72: // H：打开帮助页面
-                    core.ui._drawHelp();
+                    core.useItem('I560', true);
                     break;
                 case 77: // M：快速标记
                     const [x, y] = flags.mouseLoc;
@@ -1287,7 +1306,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 要存档的内容
             var data = {
                 floorId: core.status.floorId,
-                hero: core.clone(core.status.hero),
+                hero: core.clone(core.status.hero, name => name !== 'chase'),
                 hard: core.status.hard,
                 maps: core.clone(core.maps.saveMap()),
                 route: core.encodeRoute(core.status.route),
@@ -1620,13 +1639,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 // 电摇嘲讽
                 if (enemy && core.hasSpecial(enemy.special, 19)) {
                     for (let nx = 0; nx < width; nx++) {
-                        if (!core.noPass(nx, y)) {
+                        if (!core.noPass(nx, y, floorId)) {
                             mockery[`${nx},${y}`] ??= [];
                             mockery[`${nx},${y}`].push([x, y]);
                         }
                     }
                     for (let ny = 0; ny < height; ny++) {
-                        if (!core.noPass(x, ny)) {
+                        if (!core.noPass(x, ny, floorId)) {
                             mockery[`${x},${ny}`] ??= [];
                             mockery[`${x},${ny}`].push([x, y]);
                         }

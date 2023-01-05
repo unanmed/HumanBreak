@@ -39,7 +39,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"MT27",
 			"MT28",
 			"MT29",
-			"MT30"
+			"MT30",
+			"MT31"
 		],
 		"floorPartitions": [
 			[
@@ -618,8 +619,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				]
 			},
 			{
-				"need": "50000",
-				"title": "古人",
+				"need": "25000",
+				"title": "中级智人",
 				"clear": true,
 				"action": []
 			}

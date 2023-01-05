@@ -1659,17 +1659,17 @@ control.prototype._updateDamage_extraDamage = function (floorId, onMap) {
                     text: damage,
                     px: 32 * x + 16,
                     py: 32 * (y + 1) - 14,
-                    color: '#ffaa33',
+                    color: '#fa3',
                     alpha: alpha
                 });
             } else {
-                // 检查捕捉
+                // 电摇嘲讽
                 if (core.status.checkBlock.mockery[x + ',' + y]) {
                     core.status.damage.extraData.push({
                         text: '嘲',
                         px: 32 * x + 16,
                         py: 32 * (y + 1) - 14,
-                        color: '#ffaa33',
+                        color: '#fd4',
                         alpha: alpha
                     });
                 }
