@@ -440,11 +440,12 @@ function changeFloorByDelta(delta: number) {
     if (to < 0) to = 0;
     if (to >= core.floorIds.length) to = core.floorIds.length - 1;
     const floor = core.status.maps[core.floorIds[to]];
-    if (floor.deleted) {
+    if (floor.deleted || floor.forceDelete) {
         while (to !== now) {
-            to -= Math.sign(delta);
+            to += Math.sign(delta);
             const floor = core.status.maps[core.floorIds[to]];
-            if (!floor.deleted) break;
+            if (!floor.deleted && !floor.forceDelete) break;
+            if (to < 0 || to >= core.floorIds.length) break;
         }
     }
     nowFloor.value = core.floorIds[to];

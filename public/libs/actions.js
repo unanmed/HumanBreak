@@ -1495,7 +1495,8 @@ actions.prototype._clickViewMaps = function (x, y, px, py) {
         while (
             index < core.floorIds.length &&
             index != now &&
-            core.status.maps[core.floorIds[index]].cannotViewMap
+            (core.status.maps[core.floorIds[index]].cannotViewMap ||
+                core.status.maps[core.floorIds[index]].deleted)
         )
             index++;
         if (index < core.floorIds.length) core.ui._drawViewMaps(index);
@@ -1510,7 +1511,8 @@ actions.prototype._clickViewMaps = function (x, y, px, py) {
         while (
             index >= 0 &&
             index != now &&
-            core.status.maps[core.floorIds[index]].cannotViewMap
+            (core.status.maps[core.floorIds[index]].cannotViewMap ||
+                core.status.maps[core.floorIds[index]].deleted)
         )
             index--;
         if (index >= 0) core.ui._drawViewMaps(index);

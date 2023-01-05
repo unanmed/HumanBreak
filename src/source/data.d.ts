@@ -38,6 +38,7 @@ type FloorIds =
     | 'MT28'
     | 'MT29'
     | 'MT30'
+    | 'MT31'
 
 type ImageIds =
     | 'IQ.png'

@@ -23,7 +23,9 @@ export function getAddStatus(equip: Equip) {
             {keys.map(v => {
                 const value =
                     (equip.value[v] ?? 0) +
-                    core.status.hero[v] * (equip.percentage[v] ?? 0);
+                    Math.floor(
+                        (core.status.hero[v] * (equip.percentage[v] ?? 0)) / 100
+                    );
 
                 return (
                     <span style="display: flex">
@@ -71,7 +73,9 @@ export function getNowStatus(nowEquip?: Equip, onCol: boolean = false) {
                 let add = 0;
                 if (has(nowEquip)) {
                     add += nowEquip.value[v] ?? 0;
-                    const per = nowEquip.percentage[v] * core.getStatus(v);
+                    const per = Math.floor(
+                        (nowEquip.percentage[v] * core.getStatus(v)) / 100
+                    );
                     add += isNaN(per) ? 0 : per;
                 }
                 if (onCol) add = -add;

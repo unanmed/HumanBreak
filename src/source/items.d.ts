@@ -181,4 +181,7 @@ interface ItemDeclaration {
     I558: 'constants';
     I559: 'constants';
     I560: 'constants';
+    I565: 'constants';
+    I574: 'items';
+    I575: 'equips';
 }

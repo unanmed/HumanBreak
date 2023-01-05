@@ -92,7 +92,7 @@
                         <span
                             id="skill-tree"
                             class="button-text"
-                            @click="openSkillTree"
+                            @click.stop="openSkillTree"
                             >技能树</span
                         >
                     </div>
@@ -100,7 +100,15 @@
                         <span
                             id="status-skill"
                             class="button-text"
-                            @click="openSkill"
+                            @click.stop="openSkill"
+                            >查看技能</span
+                        >
+                    </div>
+                    <div v-if="studyOpened" class="status-item">
+                        <span
+                            id="status-skill"
+                            class="button-text"
+                            @click.stop="openStudy"
                             >查看技能</span
                         >
                     </div>
@@ -136,6 +144,7 @@ const skill = ref<string>('无');
 const up = ref(0);
 const spring = ref<number>();
 const skillOpened = ref(core.getFlag('chapter', 0) > 0);
+const studyOpened = ref(core.getSkillLevel(11) > 0);
 /**
  * 要展示的勇士属性
  */
@@ -181,22 +190,22 @@ function update() {
         spring.value = 50 - flags.springCount;
     }
     skillOpened.value = core.getFlag('chapter', 0) > 0;
+    studyOpened.value = core.getSkillLevel(11) > 0;
 }
 
-function openSkillTree(e: MouseEvent) {
-    e.stopPropagation();
+function openSkillTree() {
     core.useItem('skill1');
 }
 
-function openSkill(e: MouseEvent) {
-    e.stopPropagation();
+function openSkill() {
     core.useItem('cross');
 }
 
-function viewMap(e: MouseEvent) {
-    e.stopPropagation();
+function viewMap() {
     core.ui._drawViewMaps();
 }
+
+function openStudy() {}
 </script>
 
 <style lang="less" scoped>

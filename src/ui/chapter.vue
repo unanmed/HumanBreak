@@ -106,7 +106,7 @@ onMounted(async () => {
         .time(3000)
         .absolute()
         .apply('line', w + 10)
-        .mode(hyper('sin', 'in'))
+        .mode(hyper('sin', 'out'))
         .time(1000)
         .apply('rect', h / 2)
         .mode(hyper('tan', 'center'))

@@ -197,6 +197,11 @@ interface Floor<T extends FloorIds = FloorIds> extends FloorBase<T> {
      * 是否被砍层
      */
     deleted?: boolean;
+
+    /**
+     * 是否被强制砍层
+     */
+    forceDelete?: boolean;
 }
 
 interface ResolvedFloor<T extends FloorIds = FloorIds> extends FloorBase<T> {

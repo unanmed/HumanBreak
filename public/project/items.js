@@ -855,7 +855,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"name": "大绿宝石",
 		"text": "，护盾+${core.values.greenGem}",
 		"itemEffect": "core.status.hero.mdef += 80 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.getSkillLevel(11) / 20 + 1)",
-		"itemEffectTip": "，智慧+${80 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.getSkillLevel(11) / 20 + 1)",
+		"itemEffectTip": "，智慧+${80 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.getSkillLevel(11) / 20 + 1)}",
 		"useItemEffect": "core.status.hero.mdef += core.values.greenGem",
 		"canUseItemEffect": "true"
 	},
@@ -925,7 +925,12 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 	},
 	"I420": {
 		"cls": "items",
-		"name": "新物品"
+		"name": "超大红宝石",
+		"text": "攻击+${core.values.redGem}",
+		"itemEffect": "core.status.hero.atk += 8 * core.status.thisMap.ratio",
+		"itemEffectTip": "，攻击+${8 * core.status.thisMap.ratio}",
+		"useItemEffect": "core.status.hero.atk += core.values.redGem",
+		"canUseItemEffect": "true"
 	},
 	"I421": {
 		"cls": "items",
@@ -965,7 +970,12 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 	},
 	"I430": {
 		"cls": "items",
-		"name": "新物品"
+		"name": "超大蓝宝石",
+		"text": "，防御+${core.values.blueGem}",
+		"itemEffect": "core.status.hero.def += 8 * core.status.thisMap.ratio",
+		"itemEffectTip": "，防御+${8 * core.status.thisMap.ratio}",
+		"useItemEffect": "core.status.hero.def += core.values.blueGem",
+		"canUseItemEffect": "true"
 	},
 	"I431": {
 		"cls": "items",
@@ -1114,15 +1124,30 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 	},
 	"I466": {
 		"cls": "items",
-		"name": "新物品"
+		"name": "璀璨红宝石",
+		"text": "攻击+${core.values.redGem}",
+		"itemEffect": "core.status.hero.atk += 16 * core.status.thisMap.ratio",
+		"itemEffectTip": "，攻击+${16 * core.status.thisMap.ratio}",
+		"useItemEffect": "core.status.hero.atk += core.values.redGem",
+		"canUseItemEffect": "true"
 	},
 	"I467": {
 		"cls": "items",
-		"name": "新物品"
+		"name": "璀璨蓝宝石",
+		"text": "，防御+${core.values.blueGem}",
+		"itemEffect": "core.status.hero.def += 16 * core.status.thisMap.ratio",
+		"itemEffectTip": "，防御+${16 * core.status.thisMap.ratio}",
+		"useItemEffect": "core.status.hero.def += core.values.blueGem",
+		"canUseItemEffect": "true"
 	},
 	"I468": {
 		"cls": "items",
-		"name": "新物品"
+		"name": "璀璨绿宝石",
+		"text": "，护盾+${core.values.greenGem}",
+		"itemEffect": "core.status.hero.mdef += 320 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.getSkillLevel(11) / 20 + 1)",
+		"itemEffectTip": "，智慧+${320 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.getSkillLevel(11) / 20 + 1)}",
+		"useItemEffect": "core.status.hero.mdef += core.values.greenGem",
+		"canUseItemEffect": "true"
 	},
 	"I469": {
 		"cls": "items",
@@ -1130,15 +1155,30 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 	},
 	"I470": {
 		"cls": "items",
-		"name": "新物品"
+		"name": "新物品",
+		"text": "攻击+${core.values.redGem}",
+		"itemEffect": "core.status.hero.atk += 32 * core.status.thisMap.ratio",
+		"itemEffectTip": "，攻击+${32 * core.status.thisMap.ratio}",
+		"useItemEffect": "core.status.hero.atk += core.values.redGem",
+		"canUseItemEffect": "true"
 	},
 	"I471": {
 		"cls": "items",
-		"name": "新物品"
+		"name": "新物品",
+		"text": "，防御+${core.values.blueGem}",
+		"itemEffect": "core.status.hero.def += 32 * core.status.thisMap.ratio",
+		"itemEffectTip": "，防御+${32 * core.status.thisMap.ratio}",
+		"useItemEffect": "core.status.hero.def += core.values.blueGem",
+		"canUseItemEffect": "true"
 	},
 	"I472": {
 		"cls": "items",
-		"name": "新物品"
+		"name": "新物品",
+		"text": "，防御+${core.values.blueGem}",
+		"itemEffect": "core.status.hero.def += 8 * core.status.thisMap.ratio",
+		"itemEffectTip": "，防御+${8 * core.status.thisMap.ratio}",
+		"useItemEffect": "core.status.hero.def += core.values.blueGem",
+		"canUseItemEffect": "true"
 	},
 	"I473": {
 		"cls": "items",
@@ -1154,7 +1194,12 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 	},
 	"I476": {
 		"cls": "items",
-		"name": "新物品"
+		"name": "史诗绿宝石",
+		"text": "，护盾+${core.values.greenGem}",
+		"itemEffect": "core.status.hero.mdef += 1280 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.getSkillLevel(11) / 20 + 1)",
+		"itemEffectTip": "，智慧+${1280 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.getSkillLevel(11) / 20 + 1)}",
+		"useItemEffect": "core.status.hero.mdef += core.values.greenGem",
+		"canUseItemEffect": "true"
 	},
 	"I477": {
 		"cls": "items",
@@ -1256,5 +1301,30 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"canUseItemEffect": "true",
 		"text": "一个包含游戏中所有功能详细说明的百科全书，可以查看游戏中所有的功能",
 		"useItemEffect": "if (!core.isReplaying()) core.plugin.descOpened.value = true;"
+	},
+	"I565": {
+		"cls": "constants",
+		"name": "学习",
+		"canUseItemEffect": "true",
+		"text": "可以学习怪物的技能，学习后持续${core.getSkillLevel(11) * 3 + 2}场战斗"
+	},
+	"I574": {
+		"cls": "items",
+		"name": "新物品",
+		"canUseItemEffect": "true"
+	},
+	"I575": {
+		"cls": "equips",
+		"name": "智慧之靴",
+		"canUseItemEffect": "true",
+		"text": "用智慧制作出的靴子，穿上后增加10%的攻击力和10%的防御",
+		"equip": {
+			"type": "鞋子",
+			"value": {},
+			"percentage": {
+				"def": 10,
+				"atk": 10
+			}
+		}
 	}
 }

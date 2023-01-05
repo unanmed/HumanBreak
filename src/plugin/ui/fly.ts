@@ -44,7 +44,7 @@ export function splitArea() {
         if (used.includes(id) || core.status.maps[id].deleted) continue;
         const data = getMapData(id, true);
         used.push(...data.maps);
-        if (data.maps.length > 0) {
+        if (data.maps.length > 1) {
             const title = core.status.maps[id].title;
             area[title] = data.maps;
         }

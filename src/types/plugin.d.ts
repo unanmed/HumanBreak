@@ -279,6 +279,15 @@ interface MiniMap {
     splitArea(): void;
 }
 
+interface Study {
+    /**
+     * 学习一个怪物技能
+     * @param enemy 被学习的怪物
+     * @param num 技能的索引
+     */
+    studySkill(enemy: Enemy, num: number): void;
+}
+
 type Chapter = 'chapter1' | 'chapter2';
 
 interface Skill {

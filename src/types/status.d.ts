@@ -960,4 +960,13 @@ interface HeroStatus {
     items: {
         [P in Exclude<ItemCls, 'items'>]: Record<ItemIdOf<P>, number>;
     };
+
+    /**
+     * 勇士学习的特技
+     */
+    special: {
+        num: [];
+        last: [];
+        [k: string]: any;
+    };
 }
