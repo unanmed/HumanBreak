@@ -1247,6 +1247,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 case 72: // H：打开帮助页面
                     core.useItem('I560', true);
                     break;
+                case 75: // J：定点查看
+                    if (
+                        core.getBlockCls(...flags.mouseLoc)?.startsWith('enemy')
+                    ) {
+                        core.plugin.showFixed.value = false;
+                        core.plugin.fixedDetailOpened.value = true;
+                    }
+                    break;
                 case 77: // M：快速标记
                     const [x, y] = flags.mouseLoc;
                     const mx = Math.round(x + core.bigmap.offsetX / 32);

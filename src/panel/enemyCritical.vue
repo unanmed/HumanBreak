@@ -92,6 +92,10 @@ import { has, setCanvasSize } from '../plugin/utils';
 import { debounce } from 'lodash';
 import { isMobile } from '../plugin/use';
 
+const props = defineProps<{
+    fromBook?: boolean;
+}>();
+
 const critical = ref<HTMLCanvasElement>();
 const def = ref<HTMLCanvasElement>();
 
@@ -173,15 +177,20 @@ function generateData(data: [number, number][]): ChartConfiguration['data'] {
 }
 
 const update = debounce((atk: Chart, def: Chart) => {
+    const [x, y] = props.fromBook ? [void 0, void 0] : flags.mouseLoc;
     allCri.value = getCriticalDamage(
         enemy,
         addAtk.value * ratio,
-        addDef.value * ratio
+        addDef.value * ratio,
+        x,
+        y
     );
     allDef.value = getDefDamage(
         enemy,
         addDef.value * ratio,
-        addAtk.value * ratio
+        addAtk.value * ratio,
+        x,
+        y
     );
     if (allCri.value.length > originCri.length) originCri = allCri.value;
     if (allDef.value.length > originDef.length) originDef = allDef.value;

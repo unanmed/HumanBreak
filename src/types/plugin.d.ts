@@ -178,6 +178,12 @@ interface PluginUis {
     /** 是否展示已学习的技能 */
     readonly showStudiedSkill: Ref<boolean>;
 
+    /** 定点查看是否打开 */
+    readonly fixedDetailOpened: Ref<boolean>;
+
+    /** 是否展示移动鼠标显示怪物信息的盒子 */
+    readonly showFixed: Ref<boolean>;
+
     /** ui栈 */
     readonly uiStack: Ref<Component[]>;
 

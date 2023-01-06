@@ -8,6 +8,7 @@ import Desc from '../ui/desc.vue';
 import Skill from '../ui/skill.vue';
 import SkillTree from '../ui/skillTree.vue';
 import Fly from '../ui/fly.vue';
+import FixedDetail from '../ui/fixedDetail.vue';
 
 export const bookOpened = ref(false);
 export const toolOpened = ref(false);
@@ -19,6 +20,7 @@ export const skillOpened = ref(false);
 export const skillTreeOpened = ref(false);
 export const flyOpened = ref(false);
 export const showStudiedSkill = ref(false);
+export const fixedDetailOpened = ref(false);
 
 export const transition = ref(true);
 export const noClosePanel = ref(false);
@@ -34,7 +36,8 @@ const UI_LIST: [Ref<boolean>, Component][] = [
     [descOpened, Desc],
     [skillOpened, Skill],
     [skillTreeOpened, SkillTree],
-    [flyOpened, Fly]
+    [flyOpened, Fly],
+    [fixedDetailOpened, FixedDetail]
 ];
 
 /** ui栈 */
@@ -69,7 +72,8 @@ export default function init() {
         skillOpened,
         skillTreeOpened,
         flyOpened,
-        showStudiedSkill
+        showStudiedSkill,
+        fixedDetailOpened
     };
 }
 

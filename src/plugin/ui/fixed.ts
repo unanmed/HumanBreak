@@ -23,6 +23,10 @@ export default function init() {
         showFixed.value = false;
         show(ev);
     });
+
+    return {
+        showFixed
+    };
 }
 
 export function getDetailedEnemy<I extends EnemyIds>(

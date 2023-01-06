@@ -30,7 +30,11 @@
             </div>
         </Scroll>
     </div>
-    <BookDetail v-if="detail" @close="closeDetail()"></BookDetail>
+    <BookDetail
+        v-if="detail"
+        :from-book="true"
+        @close="closeDetail()"
+    ></BookDetail>
 </template>
 
 <script setup lang="tsx">

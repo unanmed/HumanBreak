@@ -80,6 +80,7 @@ async function calHeight() {
     vw = window.innerWidth;
     width.value = vh * 0.28;
     await new Promise(res => requestAnimationFrame(res));
+    if (!main) return;
     main = document.getElementById('enemy-fixed') as HTMLDivElement;
     const style = getComputedStyle(main);
     const h = parseFloat(style.height);

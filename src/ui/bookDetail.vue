@@ -10,7 +10,10 @@
         </div>
         <Transition name="detail">
             <EnemySpecial v-if="panel === 'special'"></EnemySpecial>
-            <EnemyCritical v-else-if="panel === 'critical'"></EnemyCritical>
+            <EnemyCritical
+                :from-book="fromBook"
+                v-else-if="panel === 'critical'"
+            ></EnemyCritical>
             <EnemyTarget v-else-if="panel === 'target'"></EnemyTarget>
         </Transition>
         <div id="detail-more">
@@ -81,6 +84,10 @@ const panel = ref('special');
 
 let detail: HTMLDivElement;
 
+const props = defineProps<{
+    fromBook?: boolean;
+}>();
+
 const emits = defineEmits<{
     (e: 'close'): void;
 }>();
@@ -97,8 +104,14 @@ function close() {
 }
 
 function key(e: KeyboardEvent) {
-    if (keycode(e.keyCode) === KeyCode.Enter) {
+    const c = keycode(e.keyCode);
+    if (c === KeyCode.Enter || c === KeyCode.Space || c === KeyCode.KeyC) {
         close();
+    }
+    if (!props.fromBook) {
+        if (c === KeyCode.KeyX || c === KeyCode.Escape) {
+            close();
+        }
     }
 }
 

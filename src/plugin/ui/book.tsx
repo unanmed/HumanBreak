@@ -48,7 +48,10 @@ export function getSpecialHint(enemy: Enemy & DetailedEnemy) {
 export function getDefDamage(
     enemy: DetailedEnemy,
     addDef: number = 0,
-    addAtk: number = 0
+    addAtk: number = 0,
+    x?: number,
+    y?: number,
+    floorId?: FloorIds
 ) {
     const ratio = core.status.thisMap.ratio;
     const res: [number, number][] = [];
@@ -59,10 +62,16 @@ export function getDefDamage(
     const max = 100 - Math.floor(addDef / ratio);
 
     for (let i = 0; i <= max; i++) {
-        const dam = core.getDamageInfo(enemy.id, {
-            def: core.getStatus('def') + ratio * i + addDef,
-            atk: core.getStatus('atk') + addAtk
-        });
+        const dam = core.getDamageInfo(
+            enemy.id,
+            {
+                def: core.getStatus('def') + ratio * i + addDef,
+                atk: core.getStatus('atk') + addAtk
+            },
+            x,
+            y,
+            floorId
+        );
 
         if (res.length === 0) {
             origin = dam?.damage;
@@ -88,7 +97,10 @@ export function getDefDamage(
 export function getCriticalDamage(
     enemy: DetailedEnemy,
     addAtk: number = 0,
-    addDef: number = 0
+    addDef: number = 0,
+    x?: number,
+    y?: number,
+    floorId?: FloorIds
 ): [number, number][] {
     const ratio = core.status.thisMap.ratio;
     const res: [number, number][] = [];
@@ -99,10 +111,16 @@ export function getCriticalDamage(
     const max = 100 - Math.floor(addAtk / ratio);
 
     for (let i = 0; i <= max; i++) {
-        const dam = core.getDamageInfo(enemy.id, {
-            atk: core.getStatus('atk') + ratio * i + addAtk,
-            def: core.getStatus('def') + addDef
-        });
+        const dam = core.getDamageInfo(
+            enemy.id,
+            {
+                atk: core.getStatus('atk') + ratio * i + addAtk,
+                def: core.getStatus('def') + addDef
+            },
+            x,
+            y,
+            floorId
+        );
 
         if (res.length === 0) {
             origin = dam?.damage;
