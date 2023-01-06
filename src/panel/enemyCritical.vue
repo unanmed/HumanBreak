@@ -102,8 +102,11 @@ const def = ref<HTMLCanvasElement>();
 const enemy = core.plugin.bookDetailEnemy;
 const ceil = Math.ceil;
 
-let originCri = getCriticalDamage(enemy);
-let originDef = getDefDamage(enemy);
+const x = ref(props.fromBook ? void 0 : flags.mouseLoc[0]);
+const y = ref(props.fromBook ? void 0 : flags.mouseLoc[1]);
+
+let originCri = getCriticalDamage(enemy, 0, 0, x.value, y.value);
+let originDef = getDefDamage(enemy, 0, 0, x.value, y.value);
 
 // 当前数据
 const allCri = ref(originCri);
@@ -113,17 +116,22 @@ const allDef = ref(originDef);
 const addAtk = ref(0);
 const addDef = ref(0);
 
-const originDamage = core.getDamageInfo(enemy);
+const originDamage = core.getDamageInfo(enemy, void 0, x.value, y.value);
 
 // 转发core上的内容至当前作用域
 const format = core.formatBigNumber;
 const ratio = core.status.thisMap.ratio;
 
 const nowDamage = computed(() => {
-    const dam = core.getDamageInfo(enemy, {
-        atk: core.getStatus('atk') + addAtk.value * ratio,
-        def: core.getStatus('def') + addDef.value * ratio
-    });
+    const dam = core.getDamageInfo(
+        enemy,
+        {
+            atk: core.getStatus('atk') + addAtk.value * ratio,
+            def: core.getStatus('def') + addDef.value * ratio
+        },
+        x.value,
+        y.value
+    );
     if (!has(dam)) return ['???', '???'];
     if (!has(originDamage)) return [-dam.damage, dam.damage];
     return [originDamage.damage - dam.damage, dam.damage];
@@ -177,20 +185,21 @@ function generateData(data: [number, number][]): ChartConfiguration['data'] {
 }
 
 const update = debounce((atk: Chart, def: Chart) => {
-    const [x, y] = props.fromBook ? [void 0, void 0] : flags.mouseLoc;
+    x.value = props.fromBook ? void 0 : flags.mouseLoc[0];
+    y.value = props.fromBook ? void 0 : flags.mouseLoc[1];
     allCri.value = getCriticalDamage(
         enemy,
         addAtk.value * ratio,
         addDef.value * ratio,
-        x,
-        y
+        x.value,
+        y.value
     );
     allDef.value = getDefDamage(
         enemy,
         addDef.value * ratio,
         addAtk.value * ratio,
-        x,
-        y
+        x.value,
+        y.value
     );
     if (allCri.value.length > originCri.length) originCri = allCri.value;
     if (allDef.value.length > originDef.length) originDef = allDef.value;
