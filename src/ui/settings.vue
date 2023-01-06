@@ -34,6 +34,23 @@
                         autoScale ? 'ON' : 'OFF'
                     }}</span
                 >
+                <span
+                    class="selectable"
+                    :selected="selected === 'showHalo'"
+                    @click="click('showHalo')"
+                    >展示范围光环:&nbsp;&nbsp;&nbsp;{{
+                        showHalo ? 'ON' : 'OFF'
+                    }}</span
+                >
+                <span
+                    class="selectable"
+                    :selected="selected === 'showStudied'"
+                    v-if="core.getSkillLevel(11) > 0"
+                    @click="click('showStudied')"
+                    >展示已学习技能:&nbsp;&nbsp;&nbsp;{{
+                        showStudied ? 'ON' : 'OFF'
+                    }}</span
+                >
             </div></template
         >
         <template #right><span v-html="descText"></span></template
@@ -46,13 +63,17 @@ import {
     transition,
     itemDetail,
     autoSkill,
-    autoScale
+    autoScale,
+    showStudied,
+    showHalo
 } from '../plugin/settings';
 import settingInfo from '../data/settings.json';
 import { has, splitText } from '../plugin/utils';
 import Column from '../components/colomn.vue';
 
 type Settings = typeof settingInfo;
+
+const core = window.core;
 
 const selected = ref<keyof Settings>('transition');
 
@@ -77,6 +98,8 @@ function click(id: keyof Settings) {
         autoSkill.value = !autoSkill.value;
     } else if (id === 'autoScale') {
         autoScale.value = !autoScale.value;
+    } else if (id === 'showHalo') {
+        showHalo.value = !showHalo.value;
     }
 }
 </script>

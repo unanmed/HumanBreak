@@ -47,7 +47,101 @@ main.floors.MT31=
     ],
     "eachArrive": [],
     "parallelDo": "",
-    "events": {},
+    "events": {
+        "14,7": [
+            {
+                "type": "if",
+                "condition": "(!flag:inWinter)",
+                "true": [
+                    {
+                        "type": "setCurtain",
+                        "color": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "time": 1500,
+                        "keep": true
+                    },
+                    {
+                        "type": "setText",
+                        "text": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "background": "winskin3.png"
+                    },
+                    "人类简史——进化篇",
+                    {
+                        "type": "playSound",
+                        "name": "paper.mp3"
+                    },
+                    "经过了漫长的行走，他感到真相越来越接近。",
+                    {
+                        "type": "playSound",
+                        "name": "paper.mp3"
+                    },
+                    "前方，是会将凛冽渗入骨髓的冰封雪原。",
+                    {
+                        "type": "playSound",
+                        "name": "paper.mp3"
+                    },
+                    "这里，他将寻找到所谓的真相。",
+                    {
+                        "type": "changeFloor",
+                        "floorId": "MT32",
+                        "loc": [
+                            0,
+                            7
+                        ]
+                    },
+                    {
+                        "type": "setCurtain",
+                        "time": 1000
+                    },
+                    {
+                        "type": "setText",
+                        "text": [
+                            255,
+                            255,
+                            255,
+                            1
+                        ],
+                        "background": "winskin2.png"
+                    },
+                    "\t[初级智人]\b[up,hero]呼，好冷。",
+                    "\t[初级智人]\b[up,hero]嗯？",
+                    {
+                        "type": "moveHero",
+                        "time": 250,
+                        "steps": [
+                            "right:1"
+                        ]
+                    },
+                    "\t[初级智人]\b[up,hero]这是杰克给我留下的衣服吗？",
+                    "\t[初级智人]\b[up,hero]先穿上吧，这里太冷了。",
+                    {
+                        "type": "setValue",
+                        "name": "flag:inWinter",
+                        "value": "true"
+                    }
+                ],
+                "false": [
+                    {
+                        "type": "changeFloor",
+                        "floorId": "MT32",
+                        "loc": [
+                            0,
+                            7
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
     "changeFloor": {
         "0,7": {
             "floorId": "MT29",
@@ -153,7 +247,7 @@ main.floors.MT31=
     [143,143,  0,  0,  0,  0,143,491,491,468,468,466,466,143,143],
     [143,143,  0,491,491,  0,143, 85,143,143,143,143,143,143,143],
     [143,143,  0,  0,  0,  0,143,  0,  0,  0,  0,  0,  0,143,143],
-    [ 92,  0,  0, 23,123,  0,497,  0,  0,  0,577,  0,  0,  0,  0],
+    [ 92,  0,  0, 23,123,  0,497,  0,  0,  0,577,  0,  0,  0, 94],
     [143,143,  0,  0,  0,  0,143,  0,  0,  0,  0,  0,  0,143,143],
     [143,143,  0,491,491,  0,143, 85,143,143,143,143,143,143,143],
     [143,143,  0,  0,  0,  0,143,491,491,468,468,467,467,143,143],

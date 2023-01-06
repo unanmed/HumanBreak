@@ -3,7 +3,12 @@
         <div :id="`box-main-${id}`" class="box-main" @click="click">
             <slot></slot>
         </div>
-        <div :id="`box-move-${id}`" class="box-move" :selected="moveSelected">
+        <div
+            v-if="dragable"
+            :id="`box-move-${id}`"
+            class="box-move"
+            :selected="moveSelected"
+        >
             <drag-outlined
                 :id="`box-drag-${id}`"
                 class="box-drag"
@@ -14,21 +19,25 @@
             class="border border-vertical border-left"
             :id="`border-left-${id}`"
             :selected="moveSelected && resizable"
+            :selectable="resizable"
         ></div>
         <div
             class="border border-horizontal border-top"
             :id="`border-top-${id}`"
             :selected="moveSelected && resizable"
+            :selectable="resizable"
         ></div>
         <div
             class="border border-vertical border-right"
             :id="`border-right-${id}`"
             :selected="moveSelected && resizable"
+            :selectable="resizable"
         ></div>
         <div
             class="border border-horizontal border-bottom"
             :id="`border-bottom-${id}`"
             :selected="moveSelected && resizable"
+            :selectable="resizable"
         ></div>
     </div>
 </template>
@@ -41,6 +50,7 @@ import { has } from '../plugin/utils';
 import { sleep } from 'mutate-animate';
 
 const props = defineProps<{
+    dragable?: boolean;
     resizable?: boolean;
     left?: number;
     top?: number;
@@ -162,18 +172,20 @@ onMounted(async () => {
 
     if (!main) return;
 
-    useDrag(
-        drag,
-        dragFn,
-        (x, y) => {
-            lastX = x;
-            lastY = y;
-        },
-        () => {
-            moveSelected.value = false;
-        },
-        true
-    );
+    if (props.dragable) {
+        useDrag(
+            drag,
+            dragFn,
+            (x, y) => {
+                lastX = x;
+                lastY = y;
+            },
+            () => {
+                moveSelected.value = false;
+            },
+            true
+        );
+    }
 
     if (props.resizable) {
         useDrag(
@@ -202,7 +214,7 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-    cancelGlobalDrag(dragFn);
+    if (props.dragable) cancelGlobalDrag(dragFn);
     if (props.resizable) {
         cancelGlobalDrag(leftDrag);
         cancelGlobalDrag(topDrag);
@@ -264,13 +276,13 @@ onUnmounted(() => {
     left: 0px;
 }
 
-.border-horizontal[selected='true'] {
+.border-horizontal[selected='true'][selectable='true'] {
     transform: scaleY(300%);
     cursor: ns-resize;
 }
 
-.border-horizontal:hover,
-.border-horizontal:active {
+.border-horizontal:hover[selectable='true'],
+.border-horizontal:active[selectable='true'] {
     transform: scaleY(500%);
     cursor: ns-resize;
 }
@@ -281,13 +293,13 @@ onUnmounted(() => {
     top: 0px;
 }
 
-.border-vertical[selected='true'] {
+.border-vertical[selected='true'][selectable='true'] {
     transform: scaleX(300%);
     cursor: ew-resize;
 }
 
-.border-vertical:hover,
-.border-vertical:active {
+.border-vertical:hover[selectable='true'],
+.border-vertical:active[selectable='true'] {
     transform: scaleX(500%);
     cursor: ew-resize;
 }

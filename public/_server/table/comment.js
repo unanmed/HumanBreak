@@ -237,6 +237,30 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "饥渴",
 					"_data": "饥渴"
 				},
+				"ice": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "霜冻",
+					"_data": "霜冻"
+				},
+				"iceHalo": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "冰封光环",
+					"_data": "冰封光环"
+				},
+				"night": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "永夜",
+					"_data": "永夜"
+				},
+				"day": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "极昼",
+					"_data": "极昼"
+				},
 				"value": {
 					"_leaf": true,
 					"_type": "textarea",

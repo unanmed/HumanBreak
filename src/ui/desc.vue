@@ -4,8 +4,9 @@
             ><div id="desc-list">
                 <div
                     v-for="(data, k) in desc"
-                    class="selectable"
+                    class="selectable desc-item"
                     :selected="selected === k"
+                    :show="show(data.condition)"
                     @click="click(k)"
                 >
                     <span v-if="show(data.condition)">{{ data.text }}</span>
@@ -31,7 +32,7 @@ function exit() {
 }
 
 const content = computed(() => {
-    return splitText(desc[selected.value].desc);
+    return eval('`' + splitText(desc[selected.value].desc) + '`');
 });
 
 function click(key: DescKey) {
@@ -52,5 +53,10 @@ function show(condition: string) {
 #desc-list {
     display: flex;
     flex-direction: column;
+}
+
+.desc-item[show='false'] {
+    margin: 0;
+    padding: 0;
 }
 </style>

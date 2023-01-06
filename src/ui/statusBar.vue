@@ -1,6 +1,11 @@
 <template>
     <div id="status-bar">
-        <Box :resizable="true" v-model:width="width" v-model:height="height">
+        <Box
+            :resizable="true"
+            :dragable="true"
+            v-model:width="width"
+            v-model:height="height"
+        >
             <Scroll
                 id="status-main"
                 v-model:update="updateStatus"
@@ -9,7 +14,7 @@
                 <div id="status-div">
                     <span
                         id="status-floor"
-                        @click="viewMap"
+                        @click.stop="viewMap"
                         class="button-text"
                         >{{ floor }}</span
                     >
@@ -271,7 +276,7 @@ function openStudy() {}
 
 .status-extra {
     position: absolute;
-    right: 15%;
+    right: 10%;
     bottom: 0;
     font-size: 1.6vw;
 }

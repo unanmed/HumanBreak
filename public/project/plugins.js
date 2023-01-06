@@ -1640,7 +1640,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     false
                 );
                 if (!firstNoPass) return;
-                core.status.hero.hp -= 200 * flags.hard;
+                if (flags.chapter <= 1) core.status.hero.hp -= 200 * flags.hard;
                 core.updateStatusBar();
                 flags['jump_' + core.status.floorId]++;
                 if (core.status.hero.hp <= 0) {
@@ -4103,7 +4103,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     title: '学习',
                     desc: [
                         '<span style="color: gold">主动技能</span>，可以消耗500智慧学习一个怪物的技能，',
-                        '持续5场战斗，每学习一次消耗的智慧点增加200，每次升级使持续的战斗次数增加3次。更多信息可在学习后在百科全书查看。'
+                        '持续5场战斗，每学习一次消耗的智慧点增加250，每次升级使持续的战斗次数增加3次。更多信息可在学习后在百科全书查看。'
                     ],
                     consume: '2500 * level ** 2 + 2500',
                     front: [
@@ -4528,7 +4528,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             1: ['crit'],
             6: ['n'],
             7: ['hungry'],
-            8: ['togrther'],
+            8: ['together'],
             10: ['courage'],
             11: ['charge']
         };
@@ -4536,10 +4536,10 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         const cannotStudy = [9, 12, 14, 15, 24];
 
         this.canStudySkill = function (number) {
-            core.status.hero.special ??= { num: [] };
-            if (core.status.hero.special.num.length >= 1) {
-                return false;
-            }
+            const s = (core.status.hero.special ??= { num: [], last: [] });
+            if (core.getSkillLevel(11) === 0) return false;
+            if (s.num.length >= 1) return false;
+            if (s.num.includes(number)) return false;
             if (cannotStudy.includes(number)) return false;
             return true;
         };
@@ -4577,7 +4577,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         };
 
         this.declineStudiedSkill = function () {
-            const s = core.status.hero.special;
+            const s = (core.status.hero.special ??= { num: [], last: [] });
             s.last = s.last.map(v => v - 1);
         };
 
@@ -4589,6 +4589,59 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     i--;
                 }
             }
+        };
+    },
+    haloRange: function () {
+        /**
+         * 绘制光环范围
+         * @param {CanvasRenderingContext2D} ctx
+         * @param {boolean} onMap
+         */
+        this.drawHalo = function (ctx, onMap) {
+            if (main.replayChecking) return;
+            if (!core.getLocalStorage('showHalo', true)) return;
+            const halo = core.status.checkBlock.halo;
+            ctx.save();
+            core.clearMap(ctx);
+            ctx.globalAlpha = 0.1;
+            ctx.globalCompositeOperation = 'source-over';
+            for (const [loc, range] of Object.entries(halo)) {
+                const [x, y] = loc.split(',').map(v => parseInt(v));
+                for (const r of range) {
+                    const [type, value, color, border] = r.split(':');
+                    if (type === 'square') {
+                        // 正方形光环
+                        const n = parseInt(value);
+                        const r = Math.floor(n / 2);
+                        let left = x - r,
+                            right = x + r,
+                            top = y - r,
+                            bottom = y + r;
+                        if (onMap && core.bigmap.v2) {
+                            left -= core.bigmap.posX;
+                            top -= core.bigmap.posY;
+                            right -= core.bigmap.posX;
+                            bottom -= core.bigmap.posY;
+                            if (
+                                right < -1 ||
+                                left > core._PX_ / 32 + 1 ||
+                                top < -1 ||
+                                bottom > core._PY_ / 32 + 1
+                            ) {
+                                continue;
+                            }
+                        }
+                        ctx.fillStyle = color;
+                        ctx.strokeStyle = border ?? color;
+                        ctx.lineWidth = 1;
+                        ctx.fillRect(left * 32, top * 32, n * 32, n * 32);
+                        ctx.globalAlpha = 0.6;
+                        ctx.strokeRect(left * 32, top * 32, n * 32, n * 32);
+                        ctx.globalAlpha = 0.1;
+                    }
+                }
+            }
+            ctx.restore();
         };
     }
 };

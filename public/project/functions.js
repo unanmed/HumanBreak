@@ -378,6 +378,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     Math.ceil((core.status.hero.mdef / 10) * 0.3) * 10;
             }
 
+            if (core.getSkillLevel(11) > 0) {
+                core.declineStudiedSkill();
+            }
+
             // 计算当前怪物的支援怪物
             var guards = [];
             if (x != null && y != null) {
@@ -409,18 +413,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 hint += '，经验+' + exp;
             core.drawTip(hint, enemy.id);
 
-            // 战后的技能处理，比如扣除魔力值
-            if (core.flags.statusBarItems.indexOf('enableSkill') >= 0) {
-                // 检测当前开启的技能类型
-                var skill = core.getFlag('skill', 0);
-                if (skill == 1) {
-                    // 技能1：二倍斩
-                    core.status.hero.mana -= 5; // 扣除5点魔力值
-                }
-                // 关闭技能
-                core.setFlag('skill', 0);
-                core.setFlag('skillName', '无');
-            }
             if (core.getFlag('bladeOn') && core.getFlag('blade')) {
                 core.setFlag('blade', false);
             }
@@ -575,7 +567,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                             '%的伤害'
                         );
                     },
-                    '#ffcc33'
+                    '#fc3'
                 ],
                 [2, '恶毒', '怪物攻击无视勇士的防御', '#bbb0ff'],
                 [3, '坚固', '怪物防御不小于勇士攻击-1', '#c0b088'],
@@ -713,37 +705,34 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                         '，最后与该怪物战斗',
                     '#ff6666'
                 ],
-                [20, '荆棘', '勇士无法打败怪物，除非拥有十字架', '#aaaaaa'],
+                [
+                    20,
+                    '霜冻',
+                    enemy =>
+                        `怪物寒冷的攻击使勇士动作变慢，勇士每回合对怪物造成的伤害减少${enemy.ice}%。装备杰克的衣服后可以免疫。`,
+                    'cyan'
+                ],
                 [
                     21,
-                    '退化',
-                    function (enemy) {
-                        return (
-                            '战斗后勇士永久下降' +
-                            (enemy.atkValue || 0) +
-                            '点攻击和' +
-                            (enemy.defValue || 0) +
-                            '点防御'
-                        );
-                    }
+                    '冰封光环',
+                    enemy =>
+                        `寒气逼人，使勇士对该怪物周围7*7范围内的怪物伤害减少${enemy.iceHalo}%（线性叠加）`,
+                    'cyan',
+                    1
                 ],
                 [
                     22,
-                    '固伤',
-                    function (enemy) {
-                        return (
-                            '战斗前，怪物对勇士造成' +
-                            (enemy.damage || 0) +
-                            '点固定伤害，未开启负伤时无视勇士护盾。'
-                        );
-                    },
-                    '#ff9977'
+                    '永夜',
+                    enemy =>
+                        `战斗后，减少勇士${enemy.night}点攻防，加到本层所有怪物身上`,
+                    '#d8a'
                 ],
                 [
                     23,
-                    '重生',
-                    '怪物被击败后，角色转换楼层则怪物将再次出现',
-                    '#a0e0ff'
+                    '极昼',
+                    enemy =>
+                        `战斗后，减少本层所有怪物${enemy.day}点攻防，加到勇士身上`,
+                    '#ffd'
                 ],
                 [
                     24,
@@ -811,6 +800,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 mon_exp = core.getEnemyValue(enemy, 'exp', x, y, floorId),
                 mon_point = core.getEnemyValue(enemy, 'point', x, y, floorId);
 
+            let iceDecline = 0;
+
             if (typeof enemy === 'number')
                 core.getBlockByNumber(enemy).event.id;
             if (typeof enemy === 'string') enemy = core.material.enemys[enemy];
@@ -851,56 +842,68 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 // 检查光环和支援的缓存
                 var index =
                     x != null && y != null ? x + ',' + y : 'floor' + enemy.id;
-                if (!core.status.checkBlock.cache)
-                    core.status.checkBlock.cache = {};
+                core.status.checkBlock.cache ??= {};
                 var cache = core.status.checkBlock.cache[index];
                 if (!cache) {
                     // 没有该点的缓存，则遍历每个图块
                     core.extractBlocks(floorId);
                     core.status.maps[floorId].blocks.forEach(function (block) {
-                        if (!block.disable) {
-                            // 获得该图块的ID
-                            var id = block.event.id,
-                                e = core.material.enemys[id];
-                            var dx = Math.abs(block.x - x),
-                                dy = Math.abs(block.y - y);
-                            // 检查【支援】技能，数字26
-                            if (
-                                e &&
-                                core.hasSpecial(e.special, 26) &&
-                                // 检查支援条件，坐标存在，距离为1，且不能是自己
-                                // 其他类型的支援怪，比如十字之类的话.... 看着做是一样的
-                                x != null &&
-                                y != null &&
-                                Math.abs(block.x - x) <= 1 &&
-                                Math.abs(block.y - y) <= 1 &&
-                                !(x == block.x && y == block.y)
-                            ) {
-                                // 记录怪物的x,y，ID
-                                guards.push([block.x, block.y, id]);
-                            }
-                            // 抱团
-                            if (
-                                e &&
-                                core.hasSpecial(mon_special, 8) &&
-                                core.hasSpecial(e.special, 8) &&
-                                !(dx == 0 && dy == 0) &&
-                                dx < 3 &&
-                                dy < 3
-                            ) {
-                                atk_buff += enemy.together || 0;
-                                def_buff += enemy.together || 0;
-                            }
-
-                            // TODO：如果有其他类型光环怪物在这里仿照添加检查
-                            // 注：新增新的类光环属性（需要遍历全图的）需要在特殊属性定义那里的第五项写1，参见光环和支援的特殊属性定义。
+                        if (block.disable) return;
+                        // 获得该图块的ID
+                        var id = block.event.id,
+                            e = core.material.enemys[id];
+                        var dx = Math.abs(block.x - x),
+                            dy = Math.abs(block.y - y);
+                        // 检查【支援】技能，数字26
+                        if (
+                            e &&
+                            core.hasSpecial(e.special, 26) &&
+                            // 检查支援条件，坐标存在，距离为1，且不能是自己
+                            // 其他类型的支援怪，比如十字之类的话.... 看着做是一样的
+                            x != null &&
+                            y != null &&
+                            Math.abs(block.x - x) <= 1 &&
+                            Math.abs(block.y - y) <= 1 &&
+                            !(x == block.x && y == block.y)
+                        ) {
+                            // 记录怪物的x,y，ID
+                            guards.push([block.x, block.y, id]);
                         }
+
+                        // 抱团
+                        if (
+                            e &&
+                            core.hasSpecial(mon_special, 8) &&
+                            core.hasSpecial(e.special, 8) &&
+                            !(dx == 0 && dy == 0) &&
+                            dx < 3 &&
+                            dy < 3
+                        ) {
+                            atk_buff += enemy.together || 0;
+                            def_buff += enemy.together || 0;
+                        }
+
+                        // 冰封光环
+                        if (
+                            e &&
+                            core.hasSpecial(e.special, 21) &&
+                            x != null &&
+                            y != null &&
+                            dx < 4 &&
+                            dy < 4
+                        ) {
+                            iceDecline += e.iceHalo;
+                        }
+
+                        // TODO：如果有其他类型光环怪物在这里仿照添加检查
+                        // 注：新增新的类光环属性（需要遍历全图的）需要在特殊属性定义那里的第五项写1，参见光环和支援的特殊属性定义。
                     });
                     core.status.checkBlock.cache[index] = {
                         hp_buff: hp_buff,
                         atk_buff: atk_buff,
                         def_buff: def_buff,
-                        guards: guards
+                        guards: guards,
+                        iceHalo: iceDecline
                     };
                 } else {
                     // 直接使用缓存数据
@@ -908,6 +911,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     atk_buff = cache.atk_buff;
                     def_buff = cache.def_buff;
                     guards = cache.guards;
+                    iceDecline = cache.iceHalo;
                 }
 
                 // 增加比例；如果要增加数值可以直接在这里修改
@@ -931,7 +935,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 exp: Math.floor(mon_exp),
                 point: Math.floor(mon_point),
                 special: mon_special,
-                guards: guards // 返回支援情况
+                guards: guards, // 返回支援情况
+                iceDecline
             };
         },
         getDamageInfo: function (enemy, hero, x, y, floorId) {
@@ -1011,12 +1016,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 if (core.hasSpecial(mon_special, 5)) per_damage *= 3;
                 if (core.hasSpecial(mon_special, 6)) per_damage *= enemy.n || 4;
                 // 勇士每回合对怪物造成的伤害
+                let hero_per_damage = Math.max(hero_atk - mon_def, 0);
                 if (!core.hasSpecial(mon_special, 9)) {
-                    var hero_per_damage = Math.max(hero_atk - mon_def, 0);
+                    hero_per_damage = Math.max(hero_atk - mon_def, 0);
                     if (hero_per_damage > 0) hero_per_damage += hero_extraAtk;
-                }
-                if (core.hasSpecial(mon_special, 9)) {
-                    var hero_per_damage = Math.max(
+                } else {
+                    hero_per_damage = Math.max(
                         hero_atk + hero_extraAtk - mon_def,
                         0
                     );
@@ -1024,6 +1029,15 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
 
                 // 如果没有破防，则不可战斗
                 if (hero_per_damage <= 0) return null;
+
+                if (
+                    core.hasSpecial(mon_special, 20) &&
+                    !core.hasEquip('I589')
+                ) {
+                    hero_per_damage *= 1 - enemy.ice / 100;
+                }
+
+                hero_per_damage *= 1 - enemyInfo.iceDecline / 100;
 
                 // 勇士的攻击回合数；为怪物生命除以每回合伤害向上取整
                 let turn = Math.ceil(mon_hp / hero_per_damage);
@@ -1437,20 +1451,36 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             core.updateCheckBlock();
             // 更新全地图显伤
             core.updateDamage();
+
+            // 已学习的技能
+            if (
+                core.getSkillLevel(11) > 0 &&
+                (core.status.hero.special?.num ?? []).length > 0
+            ) {
+                core.plugin.showStudiedSkill.value = true;
+            } else {
+                core.plugin.showStudiedSkill.value = false;
+            }
         },
         updateCheckBlock: function (floorId) {
             // 领域、夹击、阻击等的伤害值计算
             floorId = floorId || core.status.floorId;
             if (!floorId || !core.status.maps) return;
 
+            const haloMap = {
+                21: 'square:7:cyan'
+            };
+            const haloEntry = Object.entries(haloMap);
+
             var width = core.floors[floorId].width,
                 height = core.floors[floorId].height;
             var blocks = core.getMapBlocksObj(floorId);
 
-            var damage = {}, // 每个点的伤害值
+            const damage = {}, // 每个点的伤害值
                 type = {}, // 每个点的伤害类型
                 repulse = {}, // 每个点的阻击怪信息
-                mockery = {}; // 电摇嘲讽
+                mockery = {}, // 电摇嘲讽
+                halo = {}; // 光环
             var betweenAttackLocs = {}; // 所有可能的夹击点
             var needCache = false;
             var canGoDeadZone = core.flags.canGoDeadZone;
@@ -1680,6 +1710,16 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 )
                     needCache = true;
                 if (specialFlag & 2) haveHunt = true;
+
+                if (enemy) {
+                    for (const [num, range] of haloEntry) {
+                        const n = parseInt(num);
+                        if (core.hasSpecial(enemy.special, n)) {
+                            halo[loc] ??= [];
+                            halo[loc].push(range);
+                        }
+                    }
+                }
             }
 
             // 对每个可能的夹击点计算夹击伤害
@@ -1758,7 +1798,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 mockery,
                 needCache: needCache,
                 cache: {}, // clear cache
-                haveHunt: haveHunt
+                haveHunt: haveHunt,
+                halo
             };
         },
         moveOneStep: function (callback) {

@@ -1326,5 +1326,18 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 				"atk": 10
 			}
 		}
+	},
+	"I589": {
+		"cls": "equips",
+		"name": "杰克的衣服",
+		"canUseItemEffect": "true",
+		"text": "杰克为主角留下的衣服，可以抵御寒冷。防御+25，免疫怪物的霜冻属性。",
+		"equip": {
+			"type": "衣服",
+			"value": {
+				"def": 25
+			},
+			"percentage": {}
+		}
 	}
 }

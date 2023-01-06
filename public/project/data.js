@@ -40,7 +40,21 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"MT28",
 			"MT29",
 			"MT30",
-			"MT31"
+			"MT31",
+			"MT32",
+			"MT33",
+			"MT34",
+			"MT35",
+			"MT36",
+			"MT37",
+			"MT38",
+			"MT39",
+			"MT40",
+			"MT41",
+			"MT42",
+			"MT43",
+			"MT44",
+			"MT45"
 		],
 		"floorPartitions": [
 			[
@@ -94,7 +108,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"004-Mountain01.png",
 			"Map-Tower01.png",
 			"Caverna1.png",
-			"map-tower.png"
+			"map-tower.png",
+			"winter1.png"
 		],
 		"animates": [
 			"amazed",
@@ -128,7 +143,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"grass.mp3",
 			"mount.mp3",
 			"night.mp3",
-			"palace.mp3",
+			"palaceNorth.mp3",
+			"palaceSouth.mp3",
 			"plot1.mp3",
 			"road.mp3",
 			"title.mp3",
@@ -136,7 +152,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"towerBoss.mp3",
 			"towerBoss2.mp3",
 			"towerBoss3.mp3",
-			"winter.mp3"
+			"winter.mp3",
+			"winterTown.mp3"
 		],
 		"sounds": [
 			"008-System08.ogg",

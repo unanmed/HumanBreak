@@ -18,6 +18,7 @@ export const descOpened = ref(false);
 export const skillOpened = ref(false);
 export const skillTreeOpened = ref(false);
 export const flyOpened = ref(false);
+export const showStudiedSkill = ref(false);
 
 export const transition = ref(true);
 export const noClosePanel = ref(false);
@@ -67,7 +68,8 @@ export default function init() {
         descOpened,
         skillOpened,
         skillTreeOpened,
-        flyOpened
+        flyOpened,
+        showStudiedSkill
     };
 }
 

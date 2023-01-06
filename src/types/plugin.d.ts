@@ -175,6 +175,9 @@ interface PluginUis {
     /** 是否展示标记的怪物 */
     readonly showMarkedEnemy: Ref<boolean>;
 
+    /** 是否展示已学习的技能 */
+    readonly showStudiedSkill: Ref<boolean>;
+
     /** ui栈 */
     readonly uiStack: Ref<Component[]>;
 

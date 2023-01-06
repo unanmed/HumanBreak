@@ -53,6 +53,11 @@ interface CheckBlockStatus {
      * 缓存信息，是每个怪物受到的光环加成
      */
     cache: Record<string, DeepReadonly<EnemyBuffCache>>;
+
+    /**
+     * 光环信息
+     */
+    halo: Record<LocString, string[]>;
 }
 
 interface DamageStatus {

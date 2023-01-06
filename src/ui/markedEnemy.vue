@@ -9,6 +9,7 @@
                 v-model:width="getBoxPos(v).width"
                 v-model:height="getBoxPos(v).height"
                 :resizable="true"
+                :dragable="true"
             >
                 <Scroll class="box-scroll" :no-scroll="true">
                     <div class="marked-main">

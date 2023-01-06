@@ -77,8 +77,8 @@ type Enemy<I extends EnemyIds = EnemyIds> = {
  */
 type EnemySpecialDeclaration = [
     id: number,
-    name: string | ((enemy: Enemy) => string),
-    desc: string | ((enemy: Enemy) => string),
+    name: string | ((enemy: EnemySpecialBase) => string),
+    desc: string | ((enemy: EnemySpecialBase) => string),
     color: Color,
     extra?: number
 ];
@@ -95,7 +95,14 @@ interface DamageString {
     color: Color;
 }
 
-interface EnemyInfoBase {
+interface EnemySpecialBase {
+    /**
+     * 怪物特殊属性
+     */
+    special: number[];
+}
+
+interface EnemyInfoBase extends EnemySpecialBase {
     /**
      * 生命值
      */
@@ -125,11 +132,6 @@ interface EnemyInfoBase {
      * 加点量
      */
     point: number;
-
-    /**
-     * 特殊属性列表
-     */
-    special: number[];
 }
 
 interface EnemyInfo extends EnemyInfoBase {

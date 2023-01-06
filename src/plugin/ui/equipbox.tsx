@@ -21,11 +21,10 @@ export function getAddStatus(equip: Equip) {
     return (
         <div class="equip-add-detail">
             {keys.map(v => {
-                const value =
-                    (equip.value[v] ?? 0) +
-                    Math.floor(
+                const value = Math.floor(
+                    (equip.value[v] ?? 0) * core.getBuff(v) +
                         (core.status.hero[v] * (equip.percentage[v] ?? 0)) / 100
-                    );
+                );
 
                 return (
                     <span style="display: flex">
@@ -72,7 +71,9 @@ export function getNowStatus(nowEquip?: Equip, onCol: boolean = false) {
 
                 let add = 0;
                 if (has(nowEquip)) {
-                    add += nowEquip.value[v] ?? 0;
+                    add += Math.floor(
+                        (nowEquip.value[v] ?? 0) * core.getBuff(v)
+                    );
                     const per = Math.floor(
                         (nowEquip.percentage[v] * core.getStatus(v)) / 100
                     );
