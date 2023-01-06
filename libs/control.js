@@ -1705,6 +1705,7 @@ control.prototype.drawDamage = function (ctx) {
 
 control.prototype._drawDamage_draw = function (ctx, onMap) {
     if (!core.hasItem('book')) return;
+    core.drawHalo(ctx, onMap);
 
     core.setFont(ctx, "14px 'normal'");
     core.setTextAlign(ctx, 'left');
