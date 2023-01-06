@@ -1190,6 +1190,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 return;
             }
 
+            const [x, y] = flags.mouseLoc;
+            const mx = Math.round(x + core.bigmap.offsetX / 32);
+            const my = Math.round(y + core.bigmap.offsetY / 32);
+
             // 根据keyCode值来执行对应操作
             switch (keyCode) {
                 case 74: // J:打开技能树
@@ -1248,17 +1252,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     core.useItem('I560', true);
                     break;
                 case 75: // J：定点查看
-                    if (
-                        core.getBlockCls(...flags.mouseLoc)?.startsWith('enemy')
-                    ) {
+                    if (core.getBlockCls(mx, my)?.startsWith('enemy')) {
                         core.plugin.showFixed.value = false;
                         core.plugin.fixedDetailOpened.value = true;
                     }
                     break;
                 case 77: // M：快速标记
-                    const [x, y] = flags.mouseLoc;
-                    const mx = Math.round(x + core.bigmap.offsetX / 32);
-                    const my = Math.round(y + core.bigmap.offsetY / 32);
                     const blocks = core.getMapBlocksObj();
                     const block = blocks[`${mx},${my}`];
                     if (block.event.cls.startsWith('enemy')) {
