@@ -541,6 +541,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             flags.__disabled__ = flags.__disabled__ || {};
             flags.__leaveLoc__ = flags.__leaveLoc__ || {};
             flags.__forceDelete__ ??= {};
+            let deleted = false;
             for (var i = fromIndex; i <= toIndex; ++i) {
                 var floorId = core.floorIds[i];
                 if (core.status.maps[floorId].deleted) continue;
@@ -562,6 +563,10 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     core.status.maps[floorId].forceDelete = true;
                     flags.__forceDelete__[floorId] = true;
                 }
+                deleted = true;
+            }
+            if (deleted && !main.replayChecking) {
+                core.splitArea();
             }
         };
 
@@ -4602,9 +4607,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             if (!core.getLocalStorage('showHalo', true)) return;
             const halo = core.status.checkBlock.halo;
             ctx.save();
-            core.clearMap(ctx);
             ctx.globalAlpha = 0.1;
-            ctx.globalCompositeOperation = 'source-over';
             for (const [loc, range] of Object.entries(halo)) {
                 const [x, y] = loc.split(',').map(v => parseInt(v));
                 for (const r of range) {

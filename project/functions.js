@@ -326,6 +326,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
         },
         afterBattle: function (enemyId, x, y) {
             // 战斗结束后触发的事件
+            const floorId = core.status.floorId;
 
             var enemy = core.material.enemys[enemyId];
             var special = enemy.special;
@@ -369,13 +370,22 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
 
             // 智慧之源
             if (core.hasSpecial(special, 14) && flags.hard == 2) {
-                var floorId = core.status.floorId;
                 core.addFlag(
                     'inte_' + floorId,
                     Math.ceil((core.status.hero.mdef / 10) * 0.3) * 10
                 );
                 core.status.hero.mdef -=
                     Math.ceil((core.status.hero.mdef / 10) * 0.3) * 10;
+            }
+
+            // 极昼永夜
+            if (core.hasSpecial(special, 22)) {
+                flags[`night_${floorId}`] ??= 0;
+                flags[`night_${floorId}`] -= enemy.night;
+            }
+            if (core.hasSpecial(special, 23)) {
+                flags[`night_${floorId}`] ??= 0;
+                flags[`night_${floorId}`] += enemy.day;
             }
 
             if (core.getSkillLevel(11) > 0) {
@@ -593,7 +603,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                             '%加在自己身上（勇士攻击也会降低）'
                         );
                     },
-                    '#b30000'
+                    '#b67'
                 ],
                 [
                     8,
@@ -724,14 +734,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     22,
                     '永夜',
                     enemy =>
-                        `战斗后，减少勇士${enemy.night}点攻防，加到本层所有怪物身上`,
+                        `战斗后，减少勇士${enemy.night}点攻防，增加本层所有怪物${enemy.night}点攻防，仅在本层有效`,
                     '#d8a'
                 ],
                 [
                     23,
                     '极昼',
                     enemy =>
-                        `战斗后，减少本层所有怪物${enemy.day}点攻防，加到勇士身上`,
+                        `战斗后，减少本层所有怪物${enemy.day}点攻防，增加勇士${enemy.day}点攻防，仅在本层有效`,
                     '#ffd'
                 ],
                 [
@@ -814,6 +824,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             if (core.hasSpecial(mon_special, 14) && flags.hard == 2) {
                 mon_atk += core.getFlag('inte_' + floorId, 0);
             }
+
+            // 极昼永夜
+            mon_atk -= flags[`night_${floorId}`] ?? 0;
+            mon_def -= flags[`night_${floorId}`] ?? 0;
 
             if (flags.blade && flags.bladeOn) {
                 hero_atk *= 1 + core.getSkillLevel(2) / 10;
@@ -1470,7 +1484,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             const haloMap = {
                 21: 'square:7:cyan'
             };
-            const haloEntry = Object.entries(haloMap);
 
             var width = core.floors[floorId].width,
                 height = core.floors[floorId].height;
@@ -1711,12 +1724,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     needCache = true;
                 if (specialFlag & 2) haveHunt = true;
 
+                // 检查范围光环
                 if (enemy) {
-                    for (const [num, range] of haloEntry) {
-                        const n = parseInt(num);
-                        if (core.hasSpecial(enemy.special, n)) {
+                    if (!(enemy.special instanceof Array)) continue;
+                    for (const num of enemy.special) {
+                        if (num in haloMap) {
                             halo[loc] ??= [];
-                            halo[loc].push(range);
+                            halo[loc].push(haloMap[num]);
                         }
                     }
                 }
