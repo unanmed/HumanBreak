@@ -55,6 +55,10 @@ export function getDetailedEnemy<I extends EnemyIds>(
     if (toShowColor.length > 2) {
         toShowColor = toShowColor.slice(0, 2).concat(['#fff']);
     }
+    if (toShowSpecial.length === 0) {
+        toShowSpecial = ['无属性'];
+        toShowColor = ['#fff'];
+    }
     const damageColor = getDamageColor(enemyInfo.damage);
     const detail: DetailedEnemy<I> = Object.assign(enemyInfo, {
         critical: critical[0][0],
