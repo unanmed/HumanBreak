@@ -104,6 +104,12 @@ const ceil = Math.ceil;
 
 const x = ref(props.fromBook ? void 0 : flags.mouseLoc[0]);
 const y = ref(props.fromBook ? void 0 : flags.mouseLoc[1]);
+x.value = has(x.value)
+    ? Math.round(x.value + core.bigmap.offsetX / 32)
+    : void 0;
+y.value = has(y.value)
+    ? Math.round(y.value + core.bigmap.offsetY / 32)
+    : void 0;
 
 let originCri = getCriticalDamage(enemy, 0, 0, x.value, y.value);
 let originDef = getDefDamage(enemy, 0, 0, x.value, y.value);
@@ -185,8 +191,6 @@ function generateData(data: [number, number][]): ChartConfiguration['data'] {
 }
 
 const update = debounce((atk: Chart, def: Chart) => {
-    x.value = props.fromBook ? void 0 : flags.mouseLoc[0];
-    y.value = props.fromBook ? void 0 : flags.mouseLoc[1];
     allCri.value = getCriticalDamage(
         enemy,
         addAtk.value * ratio,

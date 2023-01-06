@@ -9,7 +9,10 @@
             ></a-divider>
         </div>
         <Transition name="detail">
-            <EnemySpecial v-if="panel === 'special'"></EnemySpecial>
+            <EnemySpecial
+                :from-book="fromBook"
+                v-if="panel === 'special'"
+            ></EnemySpecial>
             <EnemyCritical
                 :from-book="fromBook"
                 v-else-if="panel === 'critical'"

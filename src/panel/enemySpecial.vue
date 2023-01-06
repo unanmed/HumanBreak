@@ -35,12 +35,21 @@
 <script lang="ts" setup>
 import { isMobile } from '../plugin/use';
 import { getSpecialHint } from '../plugin/ui/book';
+import { has } from '../plugin/utils';
+
+const props = defineProps<{
+    fromBook?: boolean;
+}>();
+
+const [x, y] = props.fromBook ? [void 0, void 0] : flags.mouseLoc;
+const mx = has(x) ? Math.round(x + core.bigmap.offsetX / 32) : void 0;
+const my = has(y) ? Math.round(y + core.bigmap.offsetY / 32) : void 0;
 
 const enemy = core.plugin.bookDetailEnemy;
 
 const info = getSpecialHint(enemy);
 
-const criticals = core.nextCriticals(enemy, isMobile ? 4 : 8);
+const criticals = core.nextCriticals(enemy, isMobile ? 4 : 8, mx, my);
 
 const format = core.formatBigNumber;
 </script>
