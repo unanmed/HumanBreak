@@ -30,6 +30,11 @@ export const showHalo = ref(true);
  */
 export const showStudied = ref(true);
 
+/**
+ * 是否使用定点查看功能
+ */
+export const useFixed = ref(true);
+
 watch(transition, n => {
     core.plugin.transition.value = n;
     core.setLocalStorage('transition', n);
@@ -56,6 +61,10 @@ watch(showStudied, n => {
 
 watch(showHalo, n => {
     core.setLocalStorage('showHalo', n);
+});
+
+watch(useFixed, n => {
+    core.setLocalStorage('useFixed', n);
 });
 
 /**

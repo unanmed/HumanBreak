@@ -44,6 +44,14 @@
                 >
                 <span
                     class="selectable"
+                    :selected="selected === 'useFixed'"
+                    @click="click('useFixed')"
+                    >移动鼠标显示怪物信息:&nbsp;&nbsp;&nbsp;{{
+                        useFixed ? 'ON' : 'OFF'
+                    }}</span
+                >
+                <span
+                    class="selectable"
                     :selected="selected === 'showStudied'"
                     v-if="core.getSkillLevel(11) > 0"
                     @click="click('showStudied')"
@@ -65,7 +73,8 @@ import {
     autoSkill,
     autoScale,
     showStudied,
-    showHalo
+    showHalo,
+    useFixed
 } from '../plugin/settings';
 import settingInfo from '../data/settings.json';
 import { has, splitText } from '../plugin/utils';
@@ -100,6 +109,10 @@ function click(id: keyof Settings) {
         autoScale.value = !autoScale.value;
     } else if (id === 'showHalo') {
         showHalo.value = !showHalo.value;
+    } else if (id === 'showStudied') {
+        showStudied.value = !showStudied.value;
+    } else if (id === 'useFixed') {
+        useFixed.value = !useFixed.value;
     }
 }
 </script>

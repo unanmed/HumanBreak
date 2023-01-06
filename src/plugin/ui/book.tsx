@@ -60,8 +60,8 @@ export function getDefDamage(
 
     for (let i = 0; i <= max; i++) {
         const dam = core.getDamageInfo(enemy.id, {
-            def: core.status.hero.def + ratio * i + addDef,
-            atk: core.status.hero.atk + addAtk
+            def: core.getStatus('def') + ratio * i + addDef,
+            atk: core.getStatus('atk') + addAtk
         });
 
         if (res.length === 0) {
@@ -100,8 +100,8 @@ export function getCriticalDamage(
 
     for (let i = 0; i <= max; i++) {
         const dam = core.getDamageInfo(enemy.id, {
-            atk: core.status.hero.atk + ratio * i + addAtk,
-            def: core.status.hero.def + addDef
+            atk: core.getStatus('atk') + ratio * i + addAtk,
+            def: core.getStatus('def') + addDef
         });
 
         if (res.length === 0) {

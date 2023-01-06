@@ -1372,6 +1372,11 @@ interface Flags {
      */
     mouseLoc: LocArr;
 
+    /**
+     * 鼠标的像素位置
+     */
+    clientLoc: LocArr;
+
     [key: string]: any;
 }
 

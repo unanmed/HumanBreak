@@ -262,29 +262,14 @@ enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
         return [[info.__overAtk__ || 0, 0]];
     }
 
-    if (core.flags.useLoop) {
-        if (core.status.hero.atk <= (main.criticalUseLoop || 1)) {
-            return this._nextCriticals_useLoop(
-                enemy,
-                info,
-                number,
-                x,
-                y,
-                floorId
-            );
-        } else {
-            return this._nextCriticals_useBinarySearch(
-                enemy,
-                info,
-                number,
-                x,
-                y,
-                floorId
-            );
-        }
-    } else {
-        return this._nextCriticals_useTurn(enemy, info, number, x, y, floorId);
-    }
+    return this._nextCriticals_useBinarySearch(
+        enemy,
+        info,
+        number,
+        x,
+        y,
+        floorId
+    );
 };
 
 /// 未破防临界采用二分计算
@@ -316,10 +301,10 @@ enemys.prototype._nextCriticals_overAtk = function (enemy, x, y, floorId) {
         );
         return nextInfo == null
             ? null
-            : [start - core.status.hero.atk, nextInfo];
+            : [start - core.getStatus('atk'), nextInfo];
     };
     return calNext(
-        core.status.hero.atk + 1,
+        core.getStatus('atk') + 1,
         core.getEnemyValue(enemy, 'hp', x, y, floorId) +
             core.getEnemyValue(enemy, 'def', x, y, floorId)
     );
@@ -346,7 +331,7 @@ enemys.prototype._nextCriticals_useLoop = function (
     floorId
 ) {
     var mon_hp = info.mon_hp,
-        hero_atk = core.status.hero.atk,
+        hero_atk = core.getStatus('atk'),
         mon_def = info.mon_def,
         pre = info.damage;
     var list = [];
@@ -378,7 +363,7 @@ enemys.prototype._nextCriticals_useBinarySearch = function (
     floorId
 ) {
     var mon_hp = info.mon_hp,
-        hero_atk = core.status.hero.atk,
+        hero_atk = core.getStatus('atk'),
         mon_def = info.mon_def,
         pre = info.damage;
     var list = [];
@@ -442,7 +427,7 @@ enemys.prototype._nextCriticals_useTurn = function (
     floorId
 ) {
     var mon_hp = info.mon_hp,
-        hero_atk = core.status.hero.atk,
+        hero_atk = core.getStatus('atk'),
         mon_def = info.mon_def,
         turn = info.turn;
     // ------ 超大回合数强制使用二分算临界
@@ -499,7 +484,7 @@ enemys.prototype.getDefDamage = function (enemy, k, x, y, floorId) {
     var nowDamage = this._getDamage(enemy, null, x, y, floorId);
     var nextDamage = this._getDamage(
         enemy,
-        { def: core.status.hero.def + k },
+        { def: core.getStatus('def') + k },
         x,
         y,
         floorId

@@ -117,8 +117,8 @@ const ratio = core.status.thisMap.ratio;
 
 const nowDamage = computed(() => {
     const dam = core.getDamageInfo(enemy, {
-        atk: core.status.hero.atk + addAtk.value * ratio,
-        def: core.status.hero.def + addDef.value * ratio
+        atk: core.getStatus('atk') + addAtk.value * ratio,
+        def: core.getStatus('def') + addDef.value * ratio
     });
     if (!has(dam)) return ['???', '???'];
     if (!has(originDamage)) return [-dam.damage, dam.damage];

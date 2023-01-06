@@ -5,6 +5,7 @@
         <Studied
             v-if="showStudiedSkill && showStatusBar && showStudied"
         ></Studied>
+        <Fixed v-if="showStatusBar && useFixed"></Fixed>
         <Chapter v-if="chapterShowed" :chapter="chapterContent"></Chapter>
     </div>
 </template>
@@ -18,7 +19,8 @@ import Chapter from './ui/chapter.vue';
 import { chapterContent, chapterShowed } from './plugin/ui/chapter';
 import { showMarkedEnemy } from './plugin/mark';
 import Studied from './ui/studied.vue';
-import { showStudied } from './plugin/settings';
+import { showStudied, useFixed } from './plugin/settings';
+import Fixed from './ui/fixed.vue';
 </script>
 
 <style lang="less" scoped>

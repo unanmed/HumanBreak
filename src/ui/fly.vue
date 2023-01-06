@@ -97,7 +97,7 @@ const nowArea = ref(
     Object.keys(area).find(v => area[v].includes(core.status.floorId))!
 );
 const nowFloor = ref(core.status.floorId);
-const noBorder = ref(false);
+const noBorder = ref(true);
 const tradition = ref(false);
 let scale = isMobile ? 1.5 : 3;
 let ox = 0;
@@ -105,8 +105,8 @@ let oy = 0;
 let drawedThumbnail: Partial<Record<FloorIds, boolean>> = {};
 let thumbnailLoc: Partial<Record<FloorIds, Loc2>> = {};
 
-noBorder.value = core.getLocalStorage('noBorder') ?? false;
-tradition.value = core.getLocalStorage('flyTradition') ?? false;
+noBorder.value = core.getLocalStorage('noBorder', true);
+tradition.value = core.getLocalStorage('flyTradition', false);
 
 const floor = computed(() => {
     return core.status.maps[nowFloor.value];
