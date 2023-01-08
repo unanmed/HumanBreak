@@ -141,7 +141,7 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"E579": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E590": {"name":"冰封史莱姆","hp":7500,"atk":1750,"def":1000,"money":2,"exp":75,"point":0,"special":[20],"ice":25},
 	"E591": {"name":"新敌人","hp":10000,"atk":2000,"def":1000,"money":0,"exp":0,"point":0,"special":[]},
-	"E592": {"name":"冰封巨兽","hp":6000,"atk":1750,"def":1000,"money":2,"exp":85,"point":0,"special":[20,21],"iceHalo":20,"ice":50},
+	"E592": {"name":"冰封巨兽","hp":10000,"atk":2000,"def":1000,"money":2,"exp":85,"point":0,"special":[20,21],"iceHalo":20,"ice":50},
 	"E593": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E594": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E595": {"name":"寒冰兽人","hp":12500,"atk":1800,"def":800,"money":2,"exp":100,"point":0,"special":[7],"hungry":25},

@@ -1220,9 +1220,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 case 68: // D：读档
                     core.load(true);
                     break;
-                case 69: // E：打开光标
-                    core.ui._drawCursor();
-                    break;
                 case 84: // T：打开道具栏
                     core.openToolbox(true);
                     break;
@@ -1251,8 +1248,16 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 case 72: // H：打开帮助页面
                     core.useItem('I560', true);
                     break;
-                case 75: // J：定点查看
+                case 67: // C：怪物临界
                     if (core.getBlockCls(mx, my)?.startsWith('enemy')) {
+                        core.plugin.fixedDetailPanel = 'critical';
+                        core.plugin.showFixed.value = false;
+                        core.plugin.fixedDetailOpened.value = true;
+                    }
+                    break;
+                case 69: // E：怪物属性
+                    if (core.getBlockCls(mx, my)?.startsWith('enemy')) {
+                        core.plugin.fixedDetailPanel = 'special';
                         core.plugin.showFixed.value = false;
                         core.plugin.fixedDetailOpened.value = true;
                     }
@@ -1489,7 +1494,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             if (!floorId || !core.status.maps) return;
 
             const haloMap = {
-                21: 'square:7:cyan'
+                21: ['square:7:cyan']
             };
 
             var width = core.floors[floorId].width,
@@ -1737,7 +1742,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     for (const num of enemy.special) {
                         if (num in haloMap) {
                             halo[loc] ??= [];
-                            halo[loc].push(haloMap[num]);
+                            halo[loc].push(...haloMap[num]);
                         }
                     }
                 }

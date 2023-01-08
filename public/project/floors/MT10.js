@@ -34,24 +34,8 @@ main.floors.MT10=
         }
     },
     "afterBattle": {},
-    "afterGetItem": {
-        "4,6": [
-            "\t[原始人]\b[up,hero]这是什么？",
-            "\t[原始人]\b[up,hero]好像有什么形状",
-            "\t[原始人]\b[up,hero]难道是什么钥匙吗",
-            "\t[原始人]\b[up,hero]黄色的，好像和家里面的那些巨石有些关系"
-        ]
-    },
-    "afterOpenDoor": {
-        "1,4": [
-            {
-                "type": "animate",
-                "name": "emm",
-                "loc": "hero"
-            },
-            "\t[原始人]\b[down,hero]原来如此"
-        ]
-    },
+    "afterGetItem": {},
+    "afterOpenDoor": {},
     "autoEvent": {},
     "cannotMove": {},
     "map": [

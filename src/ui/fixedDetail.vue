@@ -1,6 +1,10 @@
 <template>
     <div id="fixed-detail">
-        <BookDetail :from-book="false" @close="close"></BookDetail>
+        <BookDetail
+            :from-book="false"
+            :default-panel="panel"
+            @close="close"
+        ></BookDetail>
     </div>
 </template>
 
@@ -8,6 +12,8 @@
 import { onMounted, ref } from 'vue';
 import { getDetailedEnemy } from '../plugin/ui/fixed';
 import BookDetail from './bookDetail.vue';
+
+const panel = core.plugin.fixedDetailPanel ?? 'special';
 
 core.plugin.bookDetailPos = 0;
 

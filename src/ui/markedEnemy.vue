@@ -102,19 +102,25 @@ function getName(id: EnemyIds) {
 }
 
 function getDamage(id: EnemyIds) {
-    return core.formatBigNumber(core.getDamageInfo(id)?.damage) ?? '???';
+    return (
+        core.formatBigNumber(
+            core.getDamageInfo(id, void 0, void 0, void 0, 'empty')?.damage
+        ) ?? '???'
+    );
 }
 
 function getCritical(id: EnemyIds) {
     return (
-        core.nextCriticals(id, 1)[0]?.map(v => core.formatBigNumber(v)) ?? [
-            0, 0
-        ]
+        core
+            .nextCriticals(id, 1, void 0, void 0, 'empty')[0]
+            ?.map(v => core.formatBigNumber(v)) ?? [0, 0]
     );
 }
 
 function getDefDamage(id: EnemyIds) {
-    return core.formatBigNumber(core.getDefDamage(id, ratio));
+    return core.formatBigNumber(
+        core.getDefDamage(id, ratio, void 0, void 0, 'empty')
+    );
 }
 </script>
 

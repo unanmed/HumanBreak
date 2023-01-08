@@ -1,5 +1,6 @@
 
 type FloorIds =
+    | 'empty'
     | 'MT0'
     | 'MT1'
     | 'MT2'

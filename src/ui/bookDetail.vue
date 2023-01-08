@@ -81,15 +81,16 @@ import { keycode } from '../plugin/utils';
 import { sleep } from 'mutate-animate';
 import EnemyTarget from '../panel/enemyTarget.vue';
 
-const enemy = core.plugin.bookDetailEnemy;
-const top = ref(core.plugin.bookDetailPos);
-const panel = ref('special');
-
-let detail: HTMLDivElement;
-
 const props = defineProps<{
     fromBook?: boolean;
+    defaultPanel?: 'special' | 'critical' | 'target';
 }>();
+
+const enemy = core.plugin.bookDetailEnemy;
+const top = ref(core.plugin.bookDetailPos);
+const panel = ref<string>(props.defaultPanel ?? 'special');
+
+let detail: HTMLDivElement;
 
 const emits = defineEmits<{
     (e: 'close'): void;

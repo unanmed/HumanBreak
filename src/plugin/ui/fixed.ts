@@ -4,15 +4,15 @@ import { getDamageColor } from '../utils';
 
 export const showFixed = ref(false);
 
-const show = debounce((ev: MouseEvent) => {
+let lastId: EnemyIds;
+
+const show = debounce((ev: MouseEvent, mx: number, my: number, e: AllIds) => {
     if (!window.flags) return;
     if (!flags.mouseLoc) return;
     flags.clientLoc = [ev.clientX, ev.clientY];
-    const [x, y] = flags.mouseLoc;
-    const mx = Math.round(x + core.bigmap.offsetX / 32);
-    const my = Math.round(y + core.bigmap.offsetY / 32);
-    const e = core.getBlockId(mx, my);
+    if (e !== lastId) showFixed.value = false;
     if (!e || !core.getClsFromId(e)?.startsWith('enemy')) return;
+    lastId = e as EnemyIds;
     const enemy = core.material.enemys[e as EnemyIds];
     const detail = getDetailedEnemy(enemy, mx, my);
     core.plugin.bookDetailEnemy = detail;
@@ -22,8 +22,14 @@ const show = debounce((ev: MouseEvent) => {
 export default function init() {
     const data = core.canvas.data.canvas;
     data.addEventListener('mousemove', ev => {
-        showFixed.value = false;
-        show(ev);
+        if (!core.isPlaying()) return;
+        const [x, y] = flags.mouseLoc;
+        const mx = Math.round(x + core.bigmap.offsetX / 32);
+        const my = Math.round(y + core.bigmap.offsetY / 32);
+        const e = core.getBlockId(mx, my);
+        if (e !== lastId) showFixed.value = false;
+        if (!e) return;
+        show(ev, mx, my, e);
     });
 
     return {

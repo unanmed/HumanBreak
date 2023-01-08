@@ -136,6 +136,9 @@ interface PluginUis {
     /** 怪物手册详细信息展示的怪物 */
     bookDetailEnemy: DetailedEnemy;
 
+    /** 定点查看的界面，特殊属性还是临界 */
+    fixedDetailPanel: 'special' | 'critical';
+
     /** ui是否使用渐变 */
     readonly transition: Ref<boolean>;
 
