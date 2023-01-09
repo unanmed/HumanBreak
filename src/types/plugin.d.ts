@@ -19,7 +19,8 @@ interface PluginDeclaration
         PluginUis,
         PluginUse,
         SkillTree,
-        MiniMap {
+        MiniMap,
+        HeroRealStatus {
     /**
      * 添加函数  例：添加弹出文字，像这个就可以使用core.addPop或core.plugin.addPop调用
      * @param px 弹出的横坐标
@@ -127,6 +128,12 @@ interface PluginUtils {
      * @param delta 偏移量，正数表示向右滑动，负数表示向左滑动
      */
     slide<T>(arr: T[], delta: number): T[];
+
+    /**
+     * 获取方向的反方向
+     * @param dir 方向
+     */
+    backDir(dir: Dir): Dir;
 }
 
 interface PluginUis {
@@ -298,6 +305,64 @@ interface Study {
      * @param num 技能的索引
      */
     studySkill(enemy: Enemy, num: number): void;
+}
+
+interface HeroRealStatus {
+    /**
+     * 获取勇士在某一点的属性
+     * @param name 要获取的勇士属性
+     * @param x 勇士所在横坐标
+     * @param y 勇士所在纵坐标
+     * @param floorId 勇士所在楼层
+     */
+    getHeroStatusOn(
+        name: 'all',
+        x?: number,
+        y?: number,
+        floorId?: FloorIds
+    ): HeroStatus;
+    getHeroStatusOn(
+        name: (keyof HeroStatus)[],
+        x?: number,
+        y?: number,
+        floorId?: FloorIds
+    ): Partial<HeroStatus>;
+    getHeroStatusOn<K extends keyof HeroStatus>(
+        name: K,
+        x?: number,
+        y?: number,
+        floorId?: FloorIds
+    ): HeroStatus[K];
+
+    /**
+     * 获取一定状态下的勇士在某一点的属性
+     * @param status 勇士的状态
+     * @param name 要获取的勇士属性
+     * @param x 勇士所在横坐标
+     * @param y 勇士所在纵坐标
+     * @param floorId 勇士所在楼层
+     */
+    getHeroStatusOf(
+        status: Partial<HeroStatus>,
+        name: 'all',
+        x?: number,
+        y?: number,
+        floorId?: FloorIds
+    ): HeroStatus;
+    getHeroStatusOf(
+        status: Partial<HeroStatus>,
+        name: (keyof HeroStatus)[],
+        x?: number,
+        y?: number,
+        floorId?: FloorIds
+    ): Partial<HeroStatus>;
+    getHeroStatusOf<K extends keyof HeroStatus>(
+        status: Partial<HeroStatus>,
+        name: K,
+        x?: number,
+        y?: number,
+        floorId?: FloorIds
+    ): HeroStatus[K];
 }
 
 type Chapter = 'chapter1' | 'chapter2';

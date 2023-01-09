@@ -35,6 +35,11 @@ export const showStudied = ref(true);
  */
 export const useFixed = ref(true);
 
+/**
+ * 是否使用勇士自动定位功能
+ */
+export const autoLocate = ref(true);
+
 watch(transition, n => {
     core.plugin.transition.value = n;
     core.setLocalStorage('transition', n);
@@ -67,6 +72,12 @@ watch(useFixed, n => {
     core.setLocalStorage('useFixed', n);
 });
 
+watch(autoSkill, n => {
+    flags.autoLocate = n;
+    core.updateStatusBar();
+    core.status.route.push(`set:autoLocate:${n}`);
+});
+
 /**
  * 重置设置信息，从localStorage读取即可
  */
@@ -82,9 +93,11 @@ function reset() {
 function resetFlag() {
     flags.autoSkill ??= true;
     flags.itemDetail ??= true;
+    flags.autoLocate ??= true;
 
     itemDetail.value = flags.itemDetail ? true : false;
     autoSkill.value = flags.autoSkill ? true : false;
+    autoLocate.value = flags.autoLocate ? true : false;
 }
 
 export default function init() {

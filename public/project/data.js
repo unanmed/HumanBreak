@@ -282,7 +282,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"statusLeftBackground": "url(project/images/cave1.jpg)",
 			"statusTopBackground": "url(project/images/cave2.jpg) no-repeat",
 			"toolsBackground": "url(project/images/cave2.jpg) no-repeat",
-			"floorChangingStyle": "background-color: #000000;color:#000000",
+			"floorChangingStyle": " ",
 			"statusBarColor": [
 				255,
 				255,

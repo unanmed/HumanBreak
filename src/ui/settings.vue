@@ -52,6 +52,14 @@
                 >
                 <span
                     class="selectable"
+                    :selected="selected === 'autoLocate'"
+                    @click="click('autoLocate')"
+                    >勇士自动定位:&nbsp;&nbsp;&nbsp;{{
+                        autoLocate ? 'ON' : 'OFF'
+                    }}</span
+                >
+                <span
+                    class="selectable"
                     :selected="selected === 'showStudied'"
                     v-if="core.getSkillLevel(11) > 0"
                     @click="click('showStudied')"
@@ -74,7 +82,8 @@ import {
     autoScale,
     showStudied,
     showHalo,
-    useFixed
+    useFixed,
+    autoLocate
 } from '../plugin/settings';
 import settingInfo from '../data/settings.json';
 import { has, splitText } from '../plugin/utils';
@@ -113,6 +122,8 @@ function click(id: keyof Settings) {
         showStudied.value = !showStudied.value;
     } else if (id === 'useFixed') {
         useFixed.value = !useFixed.value;
+    } else if (id === 'autoLocate') {
+        autoLocate.value = !autoLocate.value;
     }
 }
 </script>

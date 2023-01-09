@@ -261,7 +261,7 @@ span#hard {
     position: absolute;
     text-align: center;
     display: none;
-    color: #fff;
+    color: transparent;
     background-color: #000;
     z-index: 230;
     user-select: none;

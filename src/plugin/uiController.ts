@@ -1,5 +1,5 @@
 import { sleep } from 'mutate-animate';
-import { Component, markRaw, ref, Ref, watch } from 'vue';
+import { Component, markRaw, ref, Ref, shallowReactive, watch } from 'vue';
 import Book from '../ui/book.vue';
 import Toolbox from '../ui/toolbox.vue';
 import Equipbox from '../ui/equipbox.vue';
@@ -41,21 +41,22 @@ const UI_LIST: [Ref<boolean>, Component][] = [
 ];
 
 /** ui栈 */
-export const uiStack = ref<Component[]>([]);
+export const uiStack = shallowReactive<Component[]>([]);
 
 export default function init() {
     app = document.getElementById('root') as HTMLDivElement;
     UI_LIST.forEach(([ref, com]) => {
         watch(ref, n => {
             if (n === true) {
-                uiStack.value.push(markRaw(com));
+                uiStack.push(markRaw(com));
                 showApp();
             } else {
-                const index = uiStack.value.findIndex(v => v === com);
-                if (uiStack.value.length === 1) {
+                const index = uiStack.findIndex(v => v === com);
+                if (index === -1) return;
+                if (uiStack.length === 1) {
                     hideApp(index);
                 } else {
-                    uiStack.value.splice(index, 1);
+                    uiStack.splice(index, 1);
                 }
             }
         });
@@ -98,7 +99,7 @@ async function hideApp(index: number) {
         app.style.transition = '';
         app.style.opacity = '0';
     }
-    uiStack.value.splice(index, 1);
+    uiStack.splice(index, 1);
     app.style.display = 'none';
     if (!noClosePanel.value) core.closePanel();
     noClosePanel.value = false;

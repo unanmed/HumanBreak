@@ -61,7 +61,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 游戏获胜事件
             // 请注意，成绩统计时是按照hp进行上传并排名
             // 可以先在这里对最终分数进行计算，比如将2倍攻击和5倍黄钥匙数量加到分数上
-            // core.status.hero.hp += 2 * core.getRealStatus('atk') + 5 * core.itemCount('yellowKey');
 
             // 如果不退出，则临时存储数据
             if (noexit) {
@@ -648,11 +647,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                             core.formatBigNumber(
                                 Math.max(
                                     (enemy.value || 0) -
-                                        core.getRealStatusOrDefault(
-                                            null,
-                                            'def'
-                                        ),
-                                    0
+                                        core.getHeroStatusOn('def')
                                 )
                             ) +
                             '点伤害'
@@ -762,10 +757,19 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // floorId：该怪物所在的楼层
             // 后面三个参数主要是可以在光环等效果上可以适用（也可以按需制作部分范围光环效果）
             floorId = floorId || core.status.floorId;
-            var hero_hp = core.getRealStatusOrDefault(hero, 'hp'),
-                hero_atk = core.getRealStatusOrDefault(hero, 'atk'),
-                hero_def = core.getRealStatusOrDefault(hero, 'def'),
-                hero_mdef = core.getRealStatusOrDefault(hero, 'mdef');
+
+            let {
+                atk: hero_atk,
+                def: hero_def,
+                mdef: hero_mdef,
+                hp: hero_hp
+            } = core.getHeroStatusOf(
+                hero,
+                ['atk', 'def', 'mdef', 'hp'],
+                hero?.x,
+                hero?.y,
+                floorId
+            );
 
             var mon_hp = core.getEnemyValue(enemy, 'hp', x, y, floorId),
                 mon_atk = core.getEnemyValue(enemy, 'atk', x, y, floorId),
@@ -793,7 +797,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             }
 
             // 智慧之源
-            if (core.hasSpecial(mon_special, 14) && flags.hard == 2) {
+            if (core.hasSpecial(mon_special, 14) && flags.hard === 2) {
                 mon_atk += core.getFlag('inte_' + floorId, 0);
             }
 
@@ -906,13 +910,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 mon_def *= 1 + def_buff / 100;
             }
 
-            // TODO：可以在这里新增其他的怪物数据变化
-            // 比如仿攻（怪物攻击不低于勇士攻击）：
-            // if (core.hasSpecial(mon_special, 27) && mon_atk < hero_atk) {
-            //     mon_atk = hero_atk;
-            // }
-            // 也可以按需增加各种自定义内容
-
             return {
                 hp: Math.floor(mon_hp),
                 atk: Math.floor(mon_atk),
@@ -936,19 +933,62 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 后面三个参数主要是可以在光环等效果上可以适用
             floorId = floorId || core.status.floorId;
 
-            function getDamage() {
-                let hero_hp = core.getRealStatusOrDefault(hero, 'hp'),
-                    hero_atk = core.getRealStatusOrDefault(hero, 'atk'),
-                    hero_def = core.getRealStatusOrDefault(hero, 'def'),
-                    hero_IQ = core.getRealStatusOrDefault(hero, 'mdef'),
-                    hero_recovery = core.getRealStatusOrDefault(hero, 'hpmax'),
-                    hero_extraAtk = core.getRealStatusOrDefault(hero, 'mana'),
-                    origin_hero_hp = core.getStatusOrDefault(hero, 'hp'),
-                    origin_hero_atk = core.getStatusOrDefault(hero, 'atk'),
-                    origin_hero_def = core.getStatusOrDefault(hero, 'def');
+            // 勇士位置应该在这里进行计算，四个位置依次遍历，去重
+            let toMap = [];
+            if (
+                x !== null &&
+                x !== void 0 &&
+                y !== null &&
+                y !== void 0 &&
+                floorId !== null &&
+                floorId !== void 0 &&
+                flags.autoLocate &&
+                flags.chapter >= 2
+            ) {
+                const floor = core.status.maps[floorId];
+                // 存在坐标，进行遍历
+                for (const [dir, { x: dx, y: dy }] of Object.entries(
+                    core.utils.scan
+                )) {
+                    // 只有攻击和防御和特殊光环需要注意，其他的一般都不会随楼层与坐标变化
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (
+                        nx < 0 ||
+                        nx >= floor.width ||
+                        ny < 0 ||
+                        ny >= floor.height
+                    ) {
+                        continue;
+                    }
+                    if (
+                        core.noPass(nx, ny) ||
+                        !core.canMoveHero(nx, ny, core.backDir(dir), floorId)
+                    ) {
+                        continue;
+                    }
+                    const toGet = ['atk', 'def'];
+                    const status = core.getHeroStatusOf(
+                        hero,
+                        toGet,
+                        x,
+                        y,
+                        floorId
+                    );
+                    if (
+                        toMap.some(v =>
+                            toGet.every(vv => v[1][vv] === status[vv])
+                        )
+                    ) {
+                        continue;
+                    }
+                    toMap.push([dir, Object.assign({}, status, { x, y })]);
+                }
+            } else {
+                toMap = [['none', core.getHeroStatusOf(hero, ['atk', 'def'])]];
+            }
 
-                // 怪物的各项数据
-                // 对坚固模仿等处理扔到了脚本编辑-getEnemyInfo之中
+            function getDamage(h) {
                 const enemyInfo = core.enemys.getEnemyInfo(
                     enemy,
                     hero,
@@ -957,10 +997,18 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     floorId
                 );
 
-                let mon_hp = enemyInfo.hp,
-                    mon_atk = enemyInfo.atk,
-                    mon_def = enemyInfo.def,
-                    mon_special = enemyInfo.special;
+                let {
+                    hp: mon_hp,
+                    atk: mon_atk,
+                    def: mon_def,
+                    special: mon_special
+                } = enemyInfo;
+                let { atk: hero_atk, def: hero_def } = h;
+
+                let hero_hp = core.getRealStatusOrDefault(hero, 'hp'),
+                    hero_IQ = core.getRealStatusOrDefault(hero, 'mdef'),
+                    hero_recovery = core.getRealStatusOrDefault(hero, 'hpmax'),
+                    hero_extraAtk = core.getRealStatusOrDefault(hero, 'mana');
 
                 let damage = 0;
 
@@ -1045,52 +1093,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     turn += 5;
                 }
 
-                // ------ 支援 ----- //
-                // 这个递归最好想明白为什么，flag:__extraTurn__是怎么用的
-                const guards = core.getFlag(
-                    '__guards__' + x + '_' + y,
-                    enemyInfo.guards
-                );
-                const guard_before_current_enemy = true; // ------ 支援怪是先打(true)还是后打(false)？
-                turn += core.getFlag('__extraTurn__', 0);
-                if (guards.length > 0) {
-                    if (!guard_before_current_enemy) {
-                        // --- 先打当前怪物，记录当前回合数
-                        core.setFlag('__extraTurn__', turn);
-                    }
-                    // 获得那些怪物组成小队战斗
-                    for (var i = 0; i < guards.length; i++) {
-                        var gx = guards[i][0],
-                            gy = guards[i][1],
-                            gid = guards[i][2];
-                        // 递归计算支援怪伤害信息，这里不传x,y保证不会重复调用
-                        // 这里的mdef传0，因为护盾应该只会被计算一次
-                        var info = core.enemys.getDamageInfo(
-                            core.material.enemys[gid],
-                            {
-                                hp: origin_hero_hp,
-                                atk: origin_hero_atk,
-                                def: origin_hero_def,
-                                mdef: 0
-                            }
-                        );
-                        if (info == null) {
-                            // 小队中任何一个怪物不可战斗，直接返回null
-                            core.removeFlag('__extraTurn__');
-                            return null;
-                        }
-                        // 已经进行的回合数
-                        core.setFlag('__extraTurn__', info.turn);
-                        init_damage += info.damage;
-                    }
-                    if (guard_before_current_enemy) {
-                        // --- 先打支援怪物，增加当前回合数
-                        turn += core.getFlag('__extraTurn__', 0);
-                    }
-                }
-                core.removeFlag('__extraTurn__');
-                // ------ 支援END ------ //
-
                 // 最终伤害：初始伤害 + 怪物对勇士造成的伤害 + 反击伤害
                 damage += init_damage + (turn - 1) * per_damage;
                 // 无上之盾
@@ -1113,34 +1115,55 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 };
             }
 
-            let damageInfo = null;
-            let damage = Infinity;
-
             const skills = [
                 ['bladeOn', 'blade'],
                 ['shieldOn', 'shield']
             ];
-            damageInfo = getDamage();
-            if (damageInfo) damage = damageInfo.damage;
 
-            if (flags.autoSkill) {
-                for (const [unlock, condition] of skills) {
-                    if (flags[unlock]) {
-                        flags[condition] = true;
-                        const info = getDamage();
-                        const d = info?.damage;
-                        if (d !== null && d !== void 0) {
-                            if (d < damage) {
-                                damage = d;
-                                damageInfo = info;
+            function autoSkillOf(h) {
+                if (flags.autoSkill) {
+                    for (const [unlock, condition] of skills) {
+                        if (flags[unlock]) {
+                            flags[condition] = true;
+                            const info = getDamage(h);
+                            const d = info?.damage;
+                            if (d !== null && d !== void 0) {
+                                if (d < damage) {
+                                    damage = d;
+                                    damageInfo = info;
+                                }
                             }
+                            flags[condition] = false;
                         }
-                        flags[condition] = false;
                     }
+                } else {
+                    damageInfo = getDamage(h);
+                    if (damageInfo) damage = damageInfo.damage;
                 }
+            }
+
+            let damageInfo = null;
+            let damage = Infinity;
+
+            if (!flags.autoLocate) {
+                autoSkillOf(toMap[0][1]);
                 return damageInfo;
+            }
+
+            if (toMap.length === 1) {
+                // 单个与多个分开计算，有助于提高性能表现
+                const h = toMap[0][1];
+                autoSkillOf(h);
+                if (damageInfo) {
+                    return Object.assign(damageInfo, { dir: toMap[0][0] });
+                } else return null;
             } else {
-                return getDamage();
+                for (const [dir, h] of toMap) {
+                    autoSkillOf(h);
+                    if (damageInfo) {
+                        return Object.assign(damageInfo, { dir });
+                    } else return null;
+                }
             }
         }
     },
