@@ -563,12 +563,19 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     core.status.maps[floorId].forceDelete = true;
                     flags.__forceDelete__[floorId] = true;
                 }
+                deleteFlags(floorId);
                 deleted = true;
             }
             if (deleted && !main.replayChecking) {
                 core.splitArea();
             }
         };
+
+        function deleteFlags(floorId) {
+            delete flags[`jump_${floorId}`];
+            delete flags[`inte_${floorId}`];
+            delete flags[`loop_${floorId}`];
+        }
 
         // 恢复楼层
         // core.resumeMaps("MT1", "MT300") 恢复MT1~MT300之间的全部层
@@ -4306,6 +4313,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
          */
         this.slide = function (arr, delta) {
             if (delta === 0) return arr;
+            delta %= arr.length;
             if (delta > 0) {
                 arr.unshift(...arr.splice(arr.length - delta, delta));
                 return arr;
@@ -4596,7 +4604,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             if (!core.getLocalStorage('showHalo', true)) return;
             const halo = core.status.checkBlock.halo;
             ctx.save();
-            ctx.globalAlpha = 0.1;
             for (const [loc, range] of Object.entries(halo)) {
                 const [x, y] = loc.split(',').map(v => parseInt(v));
                 for (const r of range) {
@@ -4626,10 +4633,10 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                         ctx.fillStyle = color;
                         ctx.strokeStyle = border ?? color;
                         ctx.lineWidth = 1;
+                        ctx.globalAlpha = 0.1;
                         ctx.fillRect(left * 32, top * 32, n * 32, n * 32);
                         ctx.globalAlpha = 0.6;
                         ctx.strokeRect(left * 32, top * 32, n * 32, n * 32);
-                        ctx.globalAlpha = 0.1;
                     }
                 }
             }

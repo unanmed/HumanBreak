@@ -24,11 +24,20 @@ main.floors.MT32=
     "events": {
         "0,7": [
             {
-                "type": "changeFloor",
-                "floorId": "MT31",
-                "loc": [
-                    14,
-                    7
+                "type": "if",
+                "condition": "(flag:inWinter2===true)",
+                "true": [
+                    "\t[初级智人]\b[up,hero]没必要回去了"
+                ],
+                "false": [
+                    {
+                        "type": "changeFloor",
+                        "floorId": "MT31",
+                        "loc": [
+                            14,
+                            7
+                        ]
+                    }
                 ]
             }
         ],

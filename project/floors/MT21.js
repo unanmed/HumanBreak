@@ -136,7 +136,7 @@ main.floors.MT21=
                     "\t[初级智人]\b[up,hero]或许智慧结晶会告诉我答案吧。",
                     {
                         "type": "function",
-                        "function": "function(){\ncore.showChapter('第二章  智慧');\ncore.removeMaps('tower1', 'tower7', true);\n}"
+                        "function": "function(){\ncore.showChapter('第二章  智慧');\ncore.removeMaps('tower1', 'tower7', true);\ndelete flags.tower1;\ndelete flags.wordsTimeOut;\ndelete flags.boom;\ndelete flags.booming;\n}"
                     },
                     {
                         "type": "setValue",
