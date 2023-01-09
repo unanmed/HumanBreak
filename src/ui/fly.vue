@@ -293,7 +293,7 @@ function drawThumbnail(
         w: floor.width,
         h: floor.height,
         ctx,
-        damage: true
+        damage: scale > 7
     });
     if (!core.hasVisitedFloor(floorId)) {
         ctx.fillStyle = '#d0d6';

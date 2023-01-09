@@ -1385,17 +1385,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         };
     },
     itemDetail: function () {
-        /* 宝石血瓶左下角显示数值
-         * 需要将 变量：itemDetail改为true才可正常运行
-         * 请尽量减少勇士的属性数量，否则可能会出现严重卡顿
-         * 注意：这里的属性必须是core.status.hero里面的，flag无法显示
-         * 如果不想显示，可以core.setFlag("itemDetail", false);
-         * 然后再core.getItemDetail();
-         * 如有bug在大群或造塔群@古祠
-         */
-
-        // core.bigmap.threshold = 256;
-
         core.control.updateDamage = function (floorId, ctx) {
             floorId = floorId || core.status.floorId;
             if (!floorId || core.status.gameOver || main.mode != 'play') return;
@@ -1480,7 +1469,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         // 绘制
         function drawItemDetail(diff, x, y) {
             const px = 32 * x + 2,
-                py = 32 * y + 30;
+                py = 32 * y + 31;
             let content = '';
             // 获得数据和颜色
             let i = 0;
