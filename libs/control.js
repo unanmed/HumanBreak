@@ -3056,14 +3056,7 @@ control.prototype.getStatus = function (name) {
     if (main.mode == 'editor' && !core.hasFlag('__statistics__')) {
         return data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.hero[name];
     }
-    if (name === 'atk' || name === 'def') {
-        return (
-            core.status.hero[name] +
-            (window.flags?.[`night_${core.status.floorId}`] ?? 0)
-        );
-    } else {
-        return core.status.hero[name];
-    }
+    return core.status.hero[name];
 };
 
 ////// 从status中获得属性，如果不存在则从勇士属性中获取 //////
@@ -3079,9 +3072,7 @@ control.prototype.getRealStatus = function (name) {
 
 ////// 从status中获得实际属性（增幅后的），如果不存在则从勇士属性中获取 //////
 control.prototype.getRealStatusOrDefault = function (status, name) {
-    return Math.floor(
-        this.getStatusOrDefault(status, name) * this.getBuff(name)
-    );
+    return core.getHeroStatusOf(status, name);
 };
 
 ////// 获得勇士原始属性（无装备和衰弱影响） //////

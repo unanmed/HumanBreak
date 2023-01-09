@@ -1416,7 +1416,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         // 获取宝石信息 并绘制
         this.getItemDetail = function (floorId) {
             if (!core.getFlag('itemDetail')) return;
-            floorId = floorId ?? core.status.thisMap.floorId;
+            floorId ??= core.status.thisMap.floorId;
             let diff = {};
             const before = core.status.hero;
             const hero = core.clone(core.status.hero);
@@ -4307,24 +4307,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         };
 
         /**
-         * 滑动数组
-         * @param {any[]} arr
-         * @param {number} delta
-         */
-        this.slide = function (arr, delta) {
-            if (delta === 0) return arr;
-            delta %= arr.length;
-            if (delta > 0) {
-                arr.unshift(...arr.splice(arr.length - delta, delta));
-                return arr;
-            }
-            if (delta < 0) {
-                arr.push(...arr.splice(0, -delta));
-                return arr;
-            }
-        };
-
-        /**
          * 移动地图
          * @param {number} delta
          * @param {FloorIds} floorId
@@ -4641,6 +4623,93 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 }
             }
             ctx.restore();
+        };
+    },
+    hero: function () {
+        /**
+         * 获取勇士在某一点的属性
+         * @param {keyof HeroStatus | 'all'} name
+         * @param {number} x
+         * @param {number} y
+         * @param {FloorIds} floorId
+         */
+        this.getHeroStatusOn = function (name, x, y, floorId) {
+            return this.getRealStatusOf(core.status.hero, name, x, y, floorId);
+        };
+
+        this.getHeroStatusOf = function (status, name, x, y, floorId) {
+            return getRealStatus(status, name, x, y, floorId);
+        };
+
+        function getRealStatus(status, name, x, y, floorId) {
+            if (name instanceof Array) {
+                return Object.fromEntries(
+                    name.map(v => [
+                        v,
+                        v !== 'all' && getRealStatus(status, v, x, y, floorId)
+                    ])
+                );
+            }
+
+            if (name === 'all') {
+                return Object.fromEntries(
+                    Object.keys(core.status.hero).map(v => [
+                        v,
+                        v !== 'all' && getRealStatus(status, v, x, y, floorId)
+                    ])
+                );
+            }
+
+            let s = status?.[name] ?? core.status.hero[name];
+            if (s === null || s === void 0) {
+                throw new ReferenceError(
+                    `Wrong hero status property name is delivered: ${name}`
+                );
+            }
+
+            x ??= core.status.hero.loc.x;
+            y ??= core.status.hero.loc.y;
+            floorId ??= core.status.floorId;
+
+            // 永夜、极昼
+            if (name === 'atk' || name === 'def') {
+                s += window.flags?.[`night_${floorId}`] ?? 0;
+            }
+
+            // buff
+            if (typeof s === 'number') s *= core.getBuff(name);
+
+            // 取整
+            if (typeof s === 'number') s = Math.floor(s);
+            return s;
+        }
+    },
+    pluginUtils: function () {
+        /**
+         * 滑动数组
+         * @param {any[]} arr
+         * @param {number} delta
+         */
+        this.slide = function (arr, delta) {
+            if (delta === 0) return arr;
+            delta %= arr.length;
+            if (delta > 0) {
+                arr.unshift(...arr.splice(arr.length - delta, delta));
+                return arr;
+            }
+            if (delta < 0) {
+                arr.push(...arr.splice(0, -delta));
+                return arr;
+            }
+        };
+
+        this.backDir = function (dir) {
+            return {
+                up: 'down',
+                down: 'up',
+                left: 'right',
+                right: 'left'
+            }[dir];
         };
     }
 };

@@ -517,6 +517,7 @@ enemys.prototype._getDamage = function (enemy, hero, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     if (enemy == null) return null;
 
+    if (x === 9 && y === 3) debugger;
     var info = this.getDamageInfo(enemy, hero, x, y, floorId);
     if (info == null) return null;
     if (typeof info == 'number') return info;
