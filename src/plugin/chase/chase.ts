@@ -210,6 +210,9 @@ export class Chase {
         this.ani.ticker.destroy();
         delete flags.onChase;
         delete flags.chase;
+        delete flags.chaseTime;
+        delete flags.chaseHard;
+        delete flags.chaseIndex;
         flags.__lockViewport__ = false;
         core.deleteCanvas('chasePath');
     }

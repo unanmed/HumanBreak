@@ -561,5 +561,12 @@ var maps_90f36752_8815_4be8_b32b_d7fad1d0542e =
 	"30113": {"cls":"tileset","id":"X30113","canPass":true},
 	"30121": {"cls":"tileset","id":"X30121","canPass":true},
 	"30196": {"cls":"tileset","id":"X30196","canPass":true},
-	"30204": {"cls":"tileset","id":"X30204","canPass":true}
+	"30204": {"cls":"tileset","id":"X30204","canPass":true},
+	"70065": {"cls":"tileset","id":"X70065","cannotIn":["down"],"cannotOut":["down"]},
+	"70112": {"cls":"tileset","id":"X70112","cannotIn":["down"],"cannotOut":["down"]},
+	"70114": {"cls":"tileset","id":"X70114","cannotIn":["down"],"cannotOut":["down"]},
+	"70120": {"cls":"tileset","id":"X70120","cannotIn":["up","down","left","right"]},
+	"70122": {"cls":"tileset","id":"X70122","cannotIn":["up","down","left","right"]},
+	"70128": {"cls":"tileset","id":"X70128","cannotIn":["up","down","left","right"]},
+	"70130": {"cls":"tileset","id":"X70130","cannotIn":["up","down","left","right"]}
 }

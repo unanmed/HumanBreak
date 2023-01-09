@@ -122,7 +122,7 @@ const allDef = ref(originDef);
 const addAtk = ref(0);
 const addDef = ref(0);
 
-const originDamage = core.getDamageInfo(enemy, void 0, x.value, y.value);
+const originDamage = core.getDamageInfo(enemy.id, void 0, x.value, y.value);
 
 // 转发core上的内容至当前作用域
 const format = core.formatBigNumber;
@@ -130,7 +130,7 @@ const ratio = core.status.thisMap.ratio;
 
 const nowDamage = computed(() => {
     const dam = core.getDamageInfo(
-        enemy,
+        enemy.id,
         {
             atk: core.getStatus('atk') + addAtk.value * ratio,
             def: core.getStatus('def') + addDef.value * ratio

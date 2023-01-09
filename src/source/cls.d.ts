@@ -561,4 +561,11 @@ interface IdToCls {
     X30121: 'tileset';
     X30196: 'tileset';
     X30204: 'tileset';
+    X70065: 'tileset';
+    X70112: 'tileset';
+    X70114: 'tileset';
+    X70120: 'tileset';
+    X70122: 'tileset';
+    X70128: 'tileset';
+    X70130: 'tileset';
 }

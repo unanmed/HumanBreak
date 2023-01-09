@@ -232,7 +232,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     core.visitFloor(floorId);
                 }
             }
-            if (floorId.startsWith('tower')) flags.layer = 0;
         },
         flyTo: function (toId, callback) {
             // 楼层传送器的使用，从当前楼层飞往toId
@@ -403,8 +402,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             var money = guards.reduce(function (curr, g) {
                 return curr + core.material.enemys[g[2]].money;
             }, enemy.money);
-            if (core.hasItem('coin')) money *= 2; // 幸运金币：双倍
-            if (core.hasFlag('curse')) money = 0; // 诅咒效果
             core.status.hero.money += money;
             core.status.hero.statistics.money += money;
 
@@ -412,7 +409,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             var exp = guards.reduce(function (curr, g) {
                 return curr + core.material.enemys[g[2]].exp;
             }, enemy.exp);
-            if (core.hasFlag('curse')) exp = 0;
             core.status.hero.exp += exp;
             core.status.hero.statistics.exp += exp;
 
@@ -433,17 +429,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 事件的处理
             var todo = [];
 
-            // 加点事件
-            var point =
-                guards.reduce(function (curr, g) {
-                    return curr + core.material.enemys[g[2]].point;
-                }, enemy.point) || 0;
-            if (core.flags.enableAddPoint && point > 0) {
-                core.push(todo, [
-                    { type: 'insert', name: '加点事件', args: [point] }
-                ]);
-            }
-
             // 战后事件
             if (core.status.floorId != null) {
                 core.push(
@@ -453,26 +438,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             }
             core.push(todo, enemy.afterBattle);
 
-            // 在这里增加其他的自定义事件需求
-            /*
-            if (enemyId=='xxx') {
-                core.push(todo, [
-                    {"type": "...", ...},
-                ]);
-            }
-            */
-
             // 如果事件不为空，将其插入
             if (todo.length > 0) core.insertAction(todo, x, y);
 
             // 因为removeBlock和hideBlock都会刷新状态栏，因此将删除部分移动到这里并保证刷新只执行一次，以提升效率
             if (core.getBlock(x, y) != null) {
-                // 检查是否是重生怪物；如果是则仅隐藏不删除
-                if (core.hasSpecial(enemy.special, 23)) {
-                    core.hideBlock(x, y);
-                } else {
-                    core.removeBlock(x, y);
-                }
+                core.removeBlock(x, y);
             } else {
                 core.updateStatusBar();
             }
@@ -817,8 +788,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             if (typeof enemy === 'string') enemy = core.material.enemys[enemy];
 
             // 饥渴
-            if (core.hasSpecial(mon_special, 7))
+            if (core.hasSpecial(mon_special, 7)) {
                 mon_atk += (hero_atk * (enemy.hungry || 0)) / 100;
+            }
 
             // 智慧之源
             if (core.hasSpecial(mon_special, 14) && flags.hard == 2) {

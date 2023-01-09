@@ -364,6 +364,7 @@ function drawRight() {
  */
 function draw() {
     drawedThumbnail = {};
+    thumbnailLoc = {};
     drawMap();
     drawRight();
 }

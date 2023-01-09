@@ -105,7 +105,7 @@ main.floors.MT14=
                     "true": [
                         {
                             "type": "function",
-                            "function": "function(){\ndelete flags.__bgm__;\n}"
+                            "function": "function(){\ndelete flags.__bgm__;\ndelete flags.MT14Jump;\ndelete flags['MT14@24@7@A'];\ndelete flags.finishChase1;\ndelete flags.cave;\n}"
                         },
                         {
                             "type": "confirm",
@@ -359,6 +359,11 @@ main.floors.MT14=
                     }
                 ]
             }
+        },
+        "7,1": {
+            "0": null,
+            "1": null,
+            "2": null
         }
     },
     "cannotMove": {},

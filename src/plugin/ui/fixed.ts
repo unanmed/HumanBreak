@@ -6,12 +6,15 @@ export const showFixed = ref(false);
 
 let lastId: EnemyIds;
 
-const show = debounce((ev: MouseEvent, mx: number, my: number, e: AllIds) => {
+const show = debounce((ev: MouseEvent) => {
     if (!window.flags) return;
     if (!flags.mouseLoc) return;
     flags.clientLoc = [ev.clientX, ev.clientY];
+    const [mx, my] = getLocFromMouseLoc(...flags.mouseLoc);
+    const e = core.getBlockId(mx, my);
     if (e !== lastId) showFixed.value = false;
     if (!e || !core.getClsFromId(e)?.startsWith('enemy')) return;
+
     lastId = e as EnemyIds;
     const enemy = core.material.enemys[e as EnemyIds];
     const detail = getDetailedEnemy(enemy, mx, my);
@@ -22,19 +25,23 @@ const show = debounce((ev: MouseEvent, mx: number, my: number, e: AllIds) => {
 export default function init() {
     const data = core.canvas.data.canvas;
     data.addEventListener('mousemove', ev => {
-        if (!core.isPlaying()) return;
-        const [x, y] = flags.mouseLoc;
-        const mx = Math.round(x + core.bigmap.offsetX / 32);
-        const my = Math.round(y + core.bigmap.offsetY / 32);
+        if (!core.isPlaying() || core.status.lockControl) return;
+        const [mx, my] = getLocFromMouseLoc(...flags.mouseLoc);
         const e = core.getBlockId(mx, my);
         if (e !== lastId) showFixed.value = false;
         if (!e) return;
-        show(ev, mx, my, e);
+        show(ev);
     });
 
     return {
         showFixed
     };
+}
+
+export function getLocFromMouseLoc(x: number, y: number): LocArr {
+    const mx = Math.round(x + core.bigmap.offsetX / 32);
+    const my = Math.round(y + core.bigmap.offsetY / 32);
+    return [mx, my];
 }
 
 export function getDetailedEnemy<I extends EnemyIds>(
@@ -45,12 +52,13 @@ export function getDetailedEnemy<I extends EnemyIds>(
 ): DetailedEnemy<I> {
     const ratio = core.status.maps[floorId].ratio;
     const enemyInfo = Object.assign(
-        core.getEnemyInfo(enemy, void 0, x, y),
-        core.getDamageInfo(enemy, void 0, x, y) ?? {},
-        enemy
+        {},
+        enemy,
+        core.getEnemyInfo(enemy, void 0, x, y, floorId),
+        core.getDamageInfo(enemy, void 0, x, y, floorId) ?? {}
     );
-    const critical = core.nextCriticals(enemy, 1, x, y);
-    const defDamage = core.getDefDamage(enemy, ratio, x, y);
+    const critical = core.nextCriticals(enemy, 1, x, y, floorId);
+    const defDamage = core.getDefDamage(enemy, ratio, x, y, floorId);
     const specialText = core.getSpecialText(enemyInfo);
     let toShowSpecial = cloneDeep(specialText);
     if (toShowSpecial.length > 2) {

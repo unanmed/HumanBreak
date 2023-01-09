@@ -5,10 +5,10 @@ main.floors.empty=
     "name": "13",
     "width": 15,
     "height": 15,
-    "canFlyTo": true,
-    "canFlyFrom": true,
-    "canUseQuickShop": true,
-    "cannotViewMap": false,
+    "canFlyTo": false,
+    "canFlyFrom": false,
+    "canUseQuickShop": false,
+    "cannotViewMap": true,
     "images": [],
     "ratio": 1,
     "defaultGround": "grass",
@@ -57,5 +57,6 @@ main.floors.empty=
 ],
     "fg2map": [
 
-]
+],
+    "cannotMoveDirectly": false
 }

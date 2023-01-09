@@ -249,6 +249,7 @@ interface Utils {
      * @param onMap 显示的字符数
      * @returns 格式化结果
      */
+    formatBigNumber<T extends string>(x: T, onMap?: number): T;
     formatBigNumber(x: number | string, onMap?: number): string;
 
     /**
