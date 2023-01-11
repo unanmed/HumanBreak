@@ -267,6 +267,18 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "融化",
 					"_data": "融化"
 				},
+				"iceCore": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "冰封之核",
+					"_data": "冰封之核"
+				},
+				"fireCore": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "火焰之核",
+					"_data": "火焰之核"
+				},
 				"value": {
 					"_leaf": true,
 					"_type": "textarea",
