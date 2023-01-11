@@ -435,6 +435,10 @@ p#name {
     z-index: 170;
 }
 
+.no-anti-aliasing {
+    image-rendering: pixelated;
+}
+
 #inputDiv {
     display: none;
     width: 100%;

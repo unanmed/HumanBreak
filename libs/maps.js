@@ -634,7 +634,12 @@ maps.prototype.resizeMap = function (floorId) {
     var height = core.bigmap.v2 ? core._PY_ + 64 : core.bigmap.height * 32;
 
     core.bigmap.canvas.forEach(function (cn) {
-        core.maps._setHDCanvasSize(core.canvas[cn], width, height);
+        if (core.domStyle.hdCanvas.includes(cn))
+            core.maps._setHDCanvasSize(core.canvas[cn], width, height);
+        else {
+            core.canvas[cn].canvas.width = width;
+            core.canvas[cn].canvas.height = height;
+        }
 
         core.canvas[cn].canvas.style.width = width * core.domStyle.scale + 'px';
         core.canvas[cn].canvas.style.height =
@@ -2581,7 +2586,7 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (
             tempCanvas.canvas.height = height * 32;
             tempCanvas.canvas.removeAttribute('isHD');
         } else {
-            core.resizeCanvas(tempCanvas, width * 32, height * 32, false, true);
+            core.maps._setHDCanvasSize(tempCanvas, width * 32, height * 32);
         }
     } else if (width * height > core.bigmap.threshold) {
         options.v2 = true;
@@ -2589,7 +2594,7 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (
             tempCanvas.canvas.width = core._PX_;
             tempCanvas.canvas.height = core._PY_;
             tempCanvas.canvas.removeAttribute('isHD');
-        } else core.resizeCanvas(tempCanvas, core._PX_, core._PY_);
+        } else core.maps._setHDCanvasSize(tempCanvas, width * 32, height * 32);
         var centerX = options.centerX,
             centerY = options.centerY;
         if (centerX == null) centerX = Math.floor(width / 2);
@@ -2611,8 +2616,7 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (
             tempCanvas.canvas.width = width * 32;
             tempCanvas.canvas.height = height * 32;
             tempCanvas.canvas.removeAttribute('isHD');
-        } else
-            core.resizeCanvas(tempCanvas, width * 32, height * 32, false, true);
+        } else core.maps._setHDCanvasSize(tempCanvas, width * 32, height * 32);
     }
     options.ctx = tempCanvas;
 
@@ -2695,6 +2699,10 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
     if (centerY == null) centerY = Math.floor(height / 2);
     var tempCanvas = core.bigmap.tempCanvas;
 
+    if (!core.getLocalStorage('antiAliasing')) {
+        ctx.imageSmoothingEnabled = false;
+    }
+
     if (options.inFlyMap) {
         ctx.drawImage(
             tempCanvas.canvas,
@@ -2707,6 +2715,7 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
             options.w,
             options.h
         );
+        ctx.imageSmoothingEnabled = true;
         return;
     }
 
@@ -2752,6 +2761,7 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
                 realHeight
             );
         }
+        ctx.imageSmoothingEnabled = true;
     } else {
         // 只绘制可见窗口
         var pw = core._PX_,
@@ -2793,6 +2803,7 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
                     h
                 );
             }
+            ctx.imageSmoothingEnabled = true;
         } else {
             var offsetX = core.clamp(centerX - hw, 0, width - W),
                 offsetY = core.clamp(centerY - hh, 0, height - H);
@@ -2809,6 +2820,7 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
                     w,
                     h
                 );
+                ctx.imageSmoothingEnabled = true;
                 return;
             }
             core.drawImage(
@@ -2823,6 +2835,7 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
                 w,
                 h
             );
+            ctx.imageSmoothingEnabled = true;
         }
     }
 };

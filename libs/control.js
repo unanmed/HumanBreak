@@ -1030,7 +1030,10 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
         if (dir && !core.inArray(canMoveArray[dx][dy], dir)) continue;
         if (canMoveDirectlyArray[i] < 0) continue;
         if (core.control.moveDirectly(dx, dy, canMoveDirectlyArray[i])) {
-            if (dir) core.moveHero(dir, function () {});
+            if (dir) {
+                console.log(dir);
+                core.moveHero(dir, function () {});
+            }
             return true;
         }
     }
@@ -4288,19 +4291,12 @@ control.prototype._resize_canvas = function (obj) {
     // resize bigmap
     core.bigmap.canvas.forEach(function (cn) {
         var ratio = core.canvas[cn].canvas.hasAttribute('isHD')
-            ? core.domStyle.ratio
+            ? core.domStyle.scale * devicePixelRatio
             : 1;
         core.canvas[cn].canvas.style.width =
-            (core.canvas[cn].canvas.width /
-                devicePixelRatio /
-                core.domStyle.ratio) *
-                core.domStyle.scale +
-            'px';
+            (core.canvas[cn].canvas.width / ratio) * core.domStyle.scale + 'px';
         core.canvas[cn].canvas.style.height =
-            (core.canvas[cn].canvas.height /
-                devicePixelRatio /
-                core.domStyle.ratio) *
-                core.domStyle.scale +
+            (core.canvas[cn].canvas.height / ratio) * core.domStyle.scale +
             'px';
     });
     // resize dynamic canvas

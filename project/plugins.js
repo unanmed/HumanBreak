@@ -659,7 +659,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             document.getElementById('gameDraw').appendChild(canvas);
             var ctx = canvas.getContext('2d');
             core.canvas[name] = ctx;
-            core.maps._setHDCanvasSize(ctx, core.__PIXELS__, core.__PIXELS__);
 
             return canvas;
         }

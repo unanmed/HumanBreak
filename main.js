@@ -220,6 +220,15 @@ function main() {
 }
 
 main.prototype.init = function (mode, callback) {
+    try {
+        var a = {};
+        var b = {};
+        new Proxy(a, b);
+    } catch (e) {
+        alert('浏览器版本过低，无法游玩本塔！');
+        return;
+    }
+
     for (var i = 0; i < main.dom.gameCanvas.length; i++) {
         main.canvas[main.dom.gameCanvas[i].id] =
             main.dom.gameCanvas[i].getContext('2d');

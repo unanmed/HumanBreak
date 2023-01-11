@@ -336,8 +336,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             var equipId = core.getEquip(0);
             if (equipId && (core.material.items[equipId].equip || {}).animate)
                 animate = core.material.items[equipId].equip.animate;
-            // 你也可以在这里根据自己的需要，比如enemyId或special或flag来修改播放的动画效果
-            // if (enemyId == '...') animate = '...';
 
             // 检查该动画是否存在SE，如果不存在则使用默认音效
             if (!(core.material.animates[animate] || {}).se)
@@ -348,11 +346,16 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             else core.drawHeroAnimate(animate);
 
             // 获得战斗伤害信息
-            var damageInfo = core.getDamageInfo(enemyId, null, x, y) || {};
+            // 注意这里勇士坐标要传入当前勇士坐标，不然会默认取伤害最低的地方打怪
+            const damageInfo =
+                core.getDamageInfo(
+                    enemyId,
+                    { x: core.status.hero.loc.x, y: core.status.hero.loc.y },
+                    x,
+                    y
+                ) ?? {};
             // 战斗伤害
-            var damage = damageInfo.damage;
-            // 当前战斗回合数，可用于战后所需的判定
-            var turn = damageInfo.turn;
+            const damage = damageInfo.damage;
             // 判定是否致死
             if (damage == null || damage >= core.status.hero.hp) {
                 core.status.hero.hp = 0;
@@ -367,7 +370,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             core.status.hero.statistics.battle++;
 
             // 智慧之源
-            if (core.hasSpecial(special, 14) && flags.hard == 2) {
+            if (core.hasSpecial(special, 14) && flags.hard === 2) {
                 core.addFlag(
                     'inte_' + floorId,
                     Math.ceil((core.status.hero.mdef / 10) * 0.3) * 10
@@ -390,32 +393,18 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 core.declineStudiedSkill();
             }
 
-            // 计算当前怪物的支援怪物
-            var guards = [];
-            if (x != null && y != null) {
-                guards = core.getFlag('__guards__' + x + '_' + y, []);
-                core.removeFlag('__guards__' + x + '_' + y);
-            }
-
             // 获得金币
-            var money = guards.reduce(function (curr, g) {
-                return curr + core.material.enemys[g[2]].money;
-            }, enemy.money);
+            const money = enemy.money;
             core.status.hero.money += money;
             core.status.hero.statistics.money += money;
 
             // 获得经验
-            var exp = guards.reduce(function (curr, g) {
-                return curr + core.material.enemys[g[2]].exp;
-            }, enemy.exp);
+            const exp = enemy.exp;
             core.status.hero.exp += exp;
             core.status.hero.statistics.exp += exp;
 
-            var hint = '打败 ' + enemy.name;
-            if (core.flags.statusBarItems.indexOf('enableMoney') >= 0)
-                hint += '，金币+' + money;
-            if (core.flags.statusBarItems.indexOf('enableExp') >= 0)
-                hint += '，经验+' + exp;
+            const hint =
+                '打败 ' + enemy.name + '，金币+' + money + '，经验+' + exp;
             core.drawTip(hint, enemy.id);
 
             if (core.getFlag('bladeOn') && core.getFlag('blade')) {
@@ -940,6 +929,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 x !== void 0 &&
                 y !== null &&
                 y !== void 0 &&
+                (hero?.x === null || hero?.x === void 0) &&
+                (hero?.y === null || hero?.y === void 0) &&
                 floorId !== null &&
                 floorId !== void 0 &&
                 flags.autoLocate &&
@@ -950,7 +941,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 for (const [dir, { x: dx, y: dy }] of Object.entries(
                     core.utils.scan
                 )) {
-                    // 只有攻击和防御和特殊光环需要注意，其他的一般都不会随楼层与坐标变化
+                    // 只有攻击和防御和特殊光环需要注意，其他的都不会随楼层与坐标变化
                     const nx = x + dx;
                     const ny = y + dy;
                     if (
@@ -971,8 +962,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     const status = core.getHeroStatusOf(
                         hero,
                         toGet,
-                        x,
-                        y,
+                        nx,
+                        ny,
                         floorId
                     );
                     if (
@@ -982,20 +973,28 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     ) {
                         continue;
                     }
-                    toMap.push([dir, Object.assign({}, status, { x, y })]);
+                    toMap.push([
+                        dir,
+                        Object.assign({}, status, { x: nx, y: ny })
+                    ]);
                 }
             } else {
-                toMap = [['none', core.getHeroStatusOf(hero, ['atk', 'def'])]];
+                // 指定了勇士坐标或者没有怪物坐标时
+                toMap = [
+                    [
+                        'none',
+                        core.getHeroStatusOf(
+                            hero,
+                            ['atk', 'def'],
+                            hero?.x,
+                            hero?.y
+                        )
+                    ]
+                ];
             }
 
             function getDamage(h) {
-                const enemyInfo = core.enemys.getEnemyInfo(
-                    enemy,
-                    hero,
-                    x,
-                    y,
-                    floorId
-                );
+                const enemyInfo = core.getEnemyInfo(enemy, hero, x, y, floorId);
 
                 let {
                     hp: mon_hp,
@@ -1033,12 +1032,15 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
 
                 // 每回合怪物对勇士造成的战斗伤害
                 var per_damage = mon_atk - hero_def;
+
                 // 魔攻：战斗伤害就是怪物攻击力
                 if (
                     core.hasSpecial(mon_special, 2) ||
                     core.hasSpecial(mon_special, 13)
-                )
+                ) {
                     per_damage = mon_atk;
+                }
+
                 // 战斗伤害不能为负值
                 if (per_damage < 0) per_damage = 0;
 
@@ -1121,20 +1123,21 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             ];
 
             function autoSkillOf(h) {
+                damageInfo = getDamage(h);
+                damage = damageInfo?.damage ?? Infinity;
                 if (flags.autoSkill) {
                     for (const [unlock, condition] of skills) {
-                        if (flags[unlock]) {
-                            flags[condition] = true;
-                            const info = getDamage(h);
-                            const d = info?.damage;
-                            if (d !== null && d !== void 0) {
-                                if (d < damage) {
-                                    damage = d;
-                                    damageInfo = info;
-                                }
+                        if (!flags[unlock]) continue;
+                        flags[condition] = true;
+                        const info = getDamage(h);
+                        const d = info?.damage;
+                        if (d !== null && d !== void 0) {
+                            if (d < damage) {
+                                damage = d;
+                                damageInfo = info;
                             }
-                            flags[condition] = false;
                         }
+                        flags[condition] = false;
                     }
                 } else {
                     damageInfo = getDamage(h);
@@ -1142,6 +1145,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 }
             }
 
+            let dirDamageInfo = null;
+            let dirMinDamage = Infinity;
             let damageInfo = null;
             let damage = Infinity;
 
@@ -1150,18 +1155,29 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 return damageInfo;
             }
 
-            if (toMap.length === 1) {
+            if (toMap.length <= 1) {
                 // 单个与多个分开计算，有助于提高性能表现
-                const h = toMap[0][1];
+                const h =
+                    toMap[0]?.[1] ?? core.getHeroStatusOf(hero, ['atk', 'def']);
                 autoSkillOf(h);
                 if (damageInfo) {
-                    return Object.assign(damageInfo, { dir: toMap[0][0] });
+                    return Object.assign(damageInfo, {
+                        dir: [toMap[0]?.[0] ?? 'none', damage]
+                    });
                 } else return null;
             } else {
+                const dirDamage = [];
                 for (const [dir, h] of toMap) {
+                    damage = Infinity;
+                    damageInfo = null;
                     autoSkillOf(h);
-                    if (damageInfo) {
-                        return Object.assign(damageInfo, { dir });
+                    dirDamage.push([dir, damage]);
+                    if (damage < dirMinDamage) {
+                        dirMinDamage = damage;
+                        dirDamageInfo = damageInfo;
+                    }
+                    if (dirDamageInfo) {
+                        return Object.assign(dirDamageInfo, { dir: dirDamage });
                     } else return null;
                 }
             }
@@ -1501,7 +1517,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 repulse = {}, // 每个点的阻击怪信息
                 mockery = {}, // 电摇嘲讽
                 halo = {}; // 光环
-            var betweenAttackLocs = {}; // 所有可能的夹击点
             var needCache = false;
             var canGoDeadZone = core.flags.canGoDeadZone;
             var haveHunt = false;
@@ -1702,23 +1717,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     }
                 }
 
-                // 夹击；在这里提前计算所有可能的夹击点，具体计算逻辑在下面
-                // 如果要防止夹击伤害，可以简单的将 flag:no_betweenAttack 设为true
-                if (
-                    enemy &&
-                    core.enemys.hasSpecial(enemy.special, 16) &&
-                    !core.hasFlag('no_betweenAttack')
-                ) {
-                    for (var dir in core.utils.scan) {
-                        var nx = x + core.utils.scan[dir].x,
-                            ny = y + core.utils.scan[dir].y,
-                            currloc = nx + ',' + ny;
-                        if (nx < 0 || nx >= width || ny < 0 || ny >= height)
-                            continue;
-                        betweenAttackLocs[currloc] = true;
-                    }
-                }
-
                 // 检查地图范围类技能
                 var specialFlag = core.getSpecialFlag(enemy);
                 if (specialFlag & 1) needCache = true;
@@ -1738,74 +1736,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                         if (num in haloMap) {
                             halo[loc] ??= [];
                             halo[loc].push(...haloMap[num]);
-                        }
-                    }
-                }
-            }
-
-            // 对每个可能的夹击点计算夹击伤害
-            for (var loc in betweenAttackLocs) {
-                var xy = loc.split(','),
-                    x = parseInt(xy[0]),
-                    y = parseInt(xy[1]);
-                // 夹击怪物的ID
-                var enemyId1 = null,
-                    enemyId2 = null;
-                // 检查左右夹击
-                var leftBlock = blocks[x - 1 + ',' + y],
-                    rightBlock = blocks[x + 1 + ',' + y];
-                if (
-                    leftBlock &&
-                    !leftBlock.disable &&
-                    rightBlock &&
-                    !rightBlock.disable &&
-                    leftBlock.id == rightBlock.id
-                ) {
-                    if (core.hasSpecial(leftBlock.event.id, 16))
-                        enemyId1 = leftBlock.event.id;
-                }
-                // 检查上下夹击
-                var topBlock = blocks[x + ',' + (y - 1)],
-                    bottomBlock = blocks[x + ',' + (y + 1)];
-                if (
-                    topBlock &&
-                    !topBlock.disable &&
-                    bottomBlock &&
-                    !bottomBlock.disable &&
-                    topBlock.id == bottomBlock.id
-                ) {
-                    if (core.hasSpecial(topBlock.event.id, 16))
-                        enemyId2 = topBlock.event.id;
-                }
-
-                if (enemyId1 != null || enemyId2 != null) {
-                    var leftHp = core.status.hero.hp - (damage[loc] || 0);
-                    if (leftHp > 1) {
-                        // 夹击伤害值
-                        var value = Math.floor(leftHp / 2);
-                        // 是否不超过怪物伤害值
-                        if (core.flags.betweenAttackMax) {
-                            var enemyDamage1 = core.getDamage(
-                                enemyId1,
-                                x,
-                                y,
-                                floorId
-                            );
-                            if (enemyDamage1 != null && enemyDamage1 < value)
-                                value = enemyDamage1;
-                            var enemyDamage2 = core.getDamage(
-                                enemyId2,
-                                x,
-                                y,
-                                floorId
-                            );
-                            if (enemyDamage2 != null && enemyDamage2 < value)
-                                value = enemyDamage2;
-                        }
-                        if (value > 0) {
-                            damage[loc] = (damage[loc] || 0) + value;
-                            type[loc] = type[loc] || {};
-                            type[loc]['夹击伤害'] = true;
                         }
                     }
                 }

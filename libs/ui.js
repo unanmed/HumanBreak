@@ -4203,12 +4203,12 @@ ui.prototype.resizeCanvas = function (
     var ctx = core.getContextByName(name);
     if (!ctx) return null;
     if (width != null) {
-        if (!styleOnly)
+        if (!styleOnly && ctx.canvas.hasAttribute('isHD'))
             core.maps._setHDCanvasSize(ctx, width, null, isTempCanvas);
         ctx.canvas.style.width = width * core.domStyle.scale + 'px';
     }
     if (height != null) {
-        if (!styleOnly)
+        if (!styleOnly && ctx.canvas.hasAttribute('isHD'))
             core.maps._setHDCanvasSize(ctx, null, height, isTempCanvas);
         ctx.canvas.style.height = height * core.domStyle.scale + 'px';
     }
