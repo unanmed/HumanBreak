@@ -60,6 +60,14 @@
                 >
                 <span
                     class="selectable"
+                    :selected="selected === 'antiAliasing'"
+                    @click="click('antiAliasing')"
+                    >抗锯齿:&nbsp;&nbsp;&nbsp;{{
+                        antiAliasing ? 'ON' : 'OFF'
+                    }}</span
+                >
+                <span
+                    class="selectable"
                     :selected="selected === 'showStudied'"
                     v-if="core.getSkillLevel(11) > 0"
                     @click="click('showStudied')"
@@ -83,7 +91,8 @@ import {
     showStudied,
     showHalo,
     useFixed,
-    autoLocate
+    autoLocate,
+    antiAliasing
 } from '../plugin/settings';
 import settingInfo from '../data/settings.json';
 import { has, splitText } from '../plugin/utils';
@@ -124,6 +133,8 @@ function click(id: keyof Settings) {
         useFixed.value = !useFixed.value;
     } else if (id === 'autoLocate') {
         autoLocate.value = !autoLocate.value;
+    } else if (id === 'antiAliasing') {
+        antiAliasing.value = !antiAliasing.value;
     }
 }
 </script>

@@ -34,7 +34,7 @@ main.floors.MT35=
                 "你来这干什么",
                 {
                     "type": "if",
-                    "condition": "core.getBlock(10,1)",
+                    "condition": "(core.getBlockId(10,1)!=='none')",
                     "true": [
                         "把怪踢到这了，想打？",
                         "没门！",
@@ -60,7 +60,7 @@ main.floors.MT35=
                 "你来这干什么",
                 {
                     "type": "if",
-                    "condition": "core.getBlock(4,1)",
+                    "condition": "(core.getBlockId(4,1)!=='none')",
                     "true": [
                         "把怪踢到这了，想打？",
                         "没门！",
@@ -82,7 +82,7 @@ main.floors.MT35=
         "7,0": [
             {
                 "type": "if",
-                "condition": "flag:inWinter2===true",
+                "condition": "(flag:inWinter2===true)",
                 "true": [
                     {
                         "type": "changeFloor",

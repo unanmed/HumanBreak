@@ -530,6 +530,7 @@ interface IdToCls {
     E601: 'enemys';
     E602: 'enemys';
     E603: 'enemys';
+    T604: 'terrains';
     X20037: 'tileset';
     X20038: 'tileset';
     X20039: 'tileset';
@@ -561,11 +562,24 @@ interface IdToCls {
     X30121: 'tileset';
     X30196: 'tileset';
     X30204: 'tileset';
+    X70048: 'tileset';
+    X70049: 'tileset';
+    X70050: 'tileset';
+    X70056: 'tileset';
+    X70058: 'tileset';
+    X70064: 'tileset';
     X70065: 'tileset';
+    X70066: 'tileset';
     X70112: 'tileset';
     X70114: 'tileset';
     X70120: 'tileset';
     X70122: 'tileset';
     X70128: 'tileset';
     X70130: 'tileset';
+    X70184: 'tileset';
+    X70185: 'tileset';
+    X70186: 'tileset';
+    X70200: 'tileset';
+    X70201: 'tileset';
+    X70202: 'tileset';
 }

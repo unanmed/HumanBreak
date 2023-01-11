@@ -98,7 +98,7 @@ async function calHeight() {
 function getLabel(attr: keyof DetailedEnemy) {
     if (attr === 'critical') return '临界';
     if (attr === 'criticalDamage') return '临界减伤';
-    if (attr === 'defDamage') return `${core.status.thisMap.ratio}防`;
+    if (attr === 'defDamage') return `${core.status?.thisMap?.ratio ?? 1}防`;
     return core.getStatusLabel(attr);
 }
 

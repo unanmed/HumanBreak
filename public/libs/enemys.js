@@ -208,9 +208,9 @@ enemys.prototype.canBattle = function (enemy, x, y, floorId) {
     return damage != null && damage < core.status.hero.hp;
 };
 
-enemys.prototype.getDamageString = function (enemy, x, y, floorId) {
+enemys.prototype.getDamageString = function (enemy, x, y, floorId, hero) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
-    var damage = this.getDamage(enemy, x, y, floorId);
+    var damage = this.getDamage(enemy, x, y, floorId, hero);
 
     var color = '#000000';
 
@@ -234,7 +234,7 @@ enemys.prototype.getDamageString = function (enemy, x, y, floorId) {
 };
 
 ////// 接下来N个临界值和临界减伤计算 //////
-enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
+enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId, hero) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     number = number || 1;
 
@@ -246,7 +246,7 @@ enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
         floorId
     );
     if (specialCriticals != null) return specialCriticals;
-    var info = this.getDamageInfo(enemy, null, x, y, floorId);
+    var info = this.getDamageInfo(enemy, hero, x, y, floorId);
     if (info == null) {
         // 如果未破防...
         var overAtk = this._nextCriticals_overAtk(enemy, x, y, floorId);
@@ -268,12 +268,19 @@ enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
         number,
         x,
         y,
-        floorId
+        floorId,
+        hero
     );
 };
 
 /// 未破防临界采用二分计算
-enemys.prototype._nextCriticals_overAtk = function (enemy, x, y, floorId) {
+enemys.prototype._nextCriticals_overAtk = function (
+    enemy,
+    x,
+    y,
+    floorId,
+    hero
+) {
     var calNext = function (currAtk, maxAtk) {
         var start = currAtk,
             end = maxAtk;
@@ -284,7 +291,7 @@ enemys.prototype._nextCriticals_overAtk = function (enemy, x, y, floorId) {
             if (mid - start > end - mid) mid--;
             var nextInfo = core.enemys.getDamageInfo(
                 enemy,
-                { atk: mid },
+                { atk: mid, x: hero?.x, y: hero?.y },
                 x,
                 y,
                 floorId
@@ -294,17 +301,17 @@ enemys.prototype._nextCriticals_overAtk = function (enemy, x, y, floorId) {
         }
         var nextInfo = core.enemys.getDamageInfo(
             enemy,
-            { atk: start },
+            { atk: start, x: hero?.x, y: hero?.y },
             x,
             y,
             floorId
         );
         return nextInfo == null
             ? null
-            : [start - core.getStatus('atk'), nextInfo];
+            : [start - core.getStatusOrDefault(hero, 'atk'), nextInfo];
     };
     return calNext(
-        core.getStatus('atk') + 1,
+        core.getStatusOrDefault(hero, 'atk') + 1,
         core.getEnemyValue(enemy, 'hp', x, y, floorId) +
             core.getEnemyValue(enemy, 'def', x, y, floorId)
     );
@@ -322,48 +329,17 @@ enemys.prototype._nextCriticals_special = function (
     return null;
 };
 
-enemys.prototype._nextCriticals_useLoop = function (
-    enemy,
-    info,
-    number,
-    x,
-    y,
-    floorId
-) {
-    var mon_hp = info.mon_hp,
-        hero_atk = core.getStatus('atk'),
-        mon_def = info.mon_def,
-        pre = info.damage;
-    var list = [];
-    var start_atk = hero_atk;
-    if (info.__over__) {
-        start_atk += info.__overAtk__;
-        list.push([info.__overAtk__, -info.damage]);
-    }
-    for (var atk = start_atk + 1; atk <= mon_hp + mon_def; atk++) {
-        var nextInfo = this.getDamageInfo(enemy, { atk: atk }, x, y, floorId);
-        if (nextInfo == null || typeof nextInfo == 'number') break;
-        if (pre > nextInfo.damage) {
-            pre = nextInfo.damage;
-            list.push([atk - hero_atk, info.damage - nextInfo.damage]);
-            if (nextInfo.damage <= 0 && !core.flags.enableNegativeDamage) break;
-            if (list.length >= number) break;
-        }
-    }
-    if (list.length == 0) list.push([0, 0]);
-    return list;
-};
-
 enemys.prototype._nextCriticals_useBinarySearch = function (
     enemy,
     info,
     number,
     x,
     y,
-    floorId
+    floorId,
+    hero
 ) {
     var mon_hp = info.mon_hp,
-        hero_atk = core.getStatus('atk'),
+        hero_atk = core.getStatusOrDefault(hero, 'atk'),
         mon_def = info.mon_def,
         pre = info.damage;
     var list = [];
@@ -382,7 +358,7 @@ enemys.prototype._nextCriticals_useBinarySearch = function (
             if (mid - start > end - mid) mid--;
             var nextInfo = core.enemys.getDamageInfo(
                 enemy,
-                { atk: mid },
+                { atk: mid, x: hero?.x, y: hero?.y },
                 x,
                 y,
                 floorId
@@ -393,7 +369,7 @@ enemys.prototype._nextCriticals_useBinarySearch = function (
         }
         var nextInfo = core.enemys.getDamageInfo(
             enemy,
-            { atk: start },
+            { atk: start, x: hero?.x, y: hero?.y },
             x,
             y,
             floorId
@@ -418,73 +394,14 @@ enemys.prototype._nextCriticals_useBinarySearch = function (
     return list;
 };
 
-enemys.prototype._nextCriticals_useTurn = function (
-    enemy,
-    info,
-    number,
-    x,
-    y,
-    floorId
-) {
-    var mon_hp = info.mon_hp,
-        hero_atk = core.getStatus('atk'),
-        mon_def = info.mon_def,
-        turn = info.turn;
-    // ------ 超大回合数强制使用二分算临界
-    // 以避免1攻10e回合，2攻5e回合导致下述循环卡死问题
-    if (turn >= 1e6) {
-        // 100w回合以上强制二分计算临界
-        return this._nextCriticals_useBinarySearch(
-            enemy,
-            info,
-            number,
-            x,
-            y,
-            floorId
-        );
-    }
-    var list = [],
-        pre = null;
-    var start_atk = hero_atk;
-    if (info.__over__) {
-        start_atk += info.__overAtk__;
-        list.push([info.__overAtk__, -info.damage]);
-    }
-    for (var t = turn - 1; t >= 1; t--) {
-        var nextAtk = Math.ceil(mon_hp / t) + mon_def;
-        // 装备提升比例的计算临界
-        nextAtk = Math.ceil(nextAtk / core.getBuff('atk'));
-        if (nextAtk <= start_atk) break;
-        if (nextAtk != pre) {
-            var nextInfo = this.getDamageInfo(
-                enemy,
-                { atk: nextAtk },
-                x,
-                y,
-                floorId
-            );
-            if (nextInfo == null || typeof nextInfo == 'number') break;
-            list.push([
-                nextAtk - hero_atk,
-                Math.floor(info.damage - nextInfo.damage)
-            ]);
-            if (nextInfo.damage <= 0 && !core.flags.enableNegativeDamage) break;
-            pre = nextAtk;
-        }
-        if (list.length >= number) break;
-    }
-    if (list.length == 0) list.push([0, 0]);
-    return list;
-};
-
 ////// N防减伤计算 //////
-enemys.prototype.getDefDamage = function (enemy, k, x, y, floorId) {
+enemys.prototype.getDefDamage = function (enemy, k, x, y, floorId, hero) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     k = k || 1;
-    var nowDamage = this._getDamage(enemy, null, x, y, floorId);
+    var nowDamage = this._getDamage(enemy, hero, x, y, floorId);
     var nextDamage = this._getDamage(
         enemy,
-        { def: core.getStatus('def') + k },
+        Object.assign({}, hero ?? {}, { def: core.getStatus('def') + k }),
         x,
         y,
         floorId
@@ -508,8 +425,8 @@ enemys.prototype.getDamageInfo = function (enemy, hero, x, y, floorId) {
 };
 
 ////// 获得在某个勇士属性下怪物伤害 //////
-enemys.prototype.getDamage = function (enemy, x, y, floorId) {
-    return this._getDamage(enemy, null, x, y, floorId);
+enemys.prototype.getDamage = function (enemy, x, y, floorId, hero) {
+    return this._getDamage(enemy, hero, x, y, floorId);
 };
 
 enemys.prototype._getDamage = function (enemy, hero, x, y, floorId) {
@@ -517,7 +434,6 @@ enemys.prototype._getDamage = function (enemy, hero, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     if (enemy == null) return null;
 
-    if (x === 9 && y === 3) debugger;
     var info = this.getDamageInfo(enemy, hero, x, y, floorId);
     if (info == null) return null;
     if (typeof info == 'number') return info;

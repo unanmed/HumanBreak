@@ -40,6 +40,11 @@ export const useFixed = ref(true);
  */
 export const autoLocate = ref(true);
 
+/**
+ * 是否开启抗锯齿
+ */
+export const antiAliasing = ref(true);
+
 watch(transition, n => {
     core.plugin.transition.value = n;
     core.setLocalStorage('transition', n);
@@ -78,6 +83,17 @@ watch(autoSkill, n => {
     core.status.route.push(`set:autoLocate:${n}`);
 });
 
+watch(antiAliasing, n => {
+    core.setLocalStorage('antiAliasing', n);
+    for (const canvas of core.dom.gameCanvas) {
+        if (n) {
+            canvas.classList.remove('no-anti-aliasing');
+        } else {
+            canvas.classList.add('no-anti-aliasing');
+        }
+    }
+});
+
 /**
  * 重置设置信息，从localStorage读取即可
  */
@@ -88,6 +104,7 @@ function reset() {
     autoScale.value = core.getLocalStorage('autoScale', true);
     showStudied.value = core.getLocalStorage('showStudied', true);
     showHalo.value = core.getLocalStorage('showHalo', true);
+    antiAliasing.value = core.getLocalStorage('antiAliasing', false);
 }
 
 function resetFlag() {

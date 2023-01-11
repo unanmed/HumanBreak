@@ -546,12 +546,21 @@ onMounted(async () => {
     thumb = document.getElementById('fly-thumbnail') as HTMLCanvasElement;
     thumbCtx = thumb.getContext('2d')!;
 
+    const antiAliasing = core.getLocalStorage('antiAliasing', true);
+
     const mapStyle = getComputedStyle(map);
     const thumbStyle = getComputedStyle(thumb);
     map.width = parseFloat(mapStyle.width) * devicePixelRatio;
     map.height = parseFloat(mapStyle.height) * devicePixelRatio;
     thumb.width = parseFloat(thumbStyle.width) * devicePixelRatio;
     thumb.height = parseFloat(thumbStyle.width) * devicePixelRatio;
+
+    if (!antiAliasing) {
+        requestAnimationFrame(() => {
+            thumb.classList.add('no-anti-aliasing');
+            thumbCtx.imageSmoothingEnabled = false;
+        });
+    }
 
     Array.from(document.getElementsByClassName('fly-settings')).forEach(v => {
         v.addEventListener('click', e => (v as HTMLElement).blur());

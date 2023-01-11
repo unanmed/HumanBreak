@@ -108,7 +108,8 @@ function core() {
         availableScale: [],
         isVertical: false,
         showStatusBar: true,
-        toolbarBtn: false
+        toolbarBtn: false,
+        hdCanvas: ['damage', 'ui', 'data']
     };
     this.bigmap = {
         canvas: ['bg', 'event', 'event2', 'fg', 'damage'],
@@ -294,11 +295,16 @@ core.prototype.init = function (coreData, callback) {
     var b = main.mode == 'editor';
     // 初始化画布
     for (var name in core.canvas) {
-        core.maps._setHDCanvasSize(
-            core.canvas[name],
-            b ? core.__PIXELS__ : core._PX_,
-            b ? core.__PIXELS__ : core._PY_
-        );
+        if (core.domStyle.hdCanvas.includes(name))
+            core.maps._setHDCanvasSize(
+                core.canvas[name],
+                b ? core.__PIXELS__ : core._PX_,
+                b ? core.__PIXELS__ : core._PY_
+            );
+        else {
+            core.canvas[name].canvas.width = b ? core.__PIXELS__ : core._PX_;
+            core.canvas[name].canvas.height = b ? core.__PIXELS__ : core._PY_;
+        }
     }
 
     core.loader._load(function () {

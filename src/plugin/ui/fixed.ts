@@ -75,8 +75,8 @@ export function getDetailedEnemy<I extends EnemyIds>(
     }
     const damageColor = getDamageColor(enemyInfo.damage);
     const detail: DetailedEnemy<I> = Object.assign(enemyInfo, {
-        critical: critical[0][0],
-        criticalDamage: critical[0][1],
+        critical: critical[0]?.[0] ?? '???',
+        criticalDamage: critical[0]?.[1] ?? '???',
         defDamage,
         specialColor,
         specialText,
