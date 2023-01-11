@@ -723,12 +723,20 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 ],
                 [
                     26,
-                    '支援',
-                    '当周围一圈的怪物受到攻击时将上前支援，并组成小队战斗。',
-                    '#77c0b6',
+                    '冰封之核',
+                    enemy =>
+                        `怪物拥有逼人的寒气，使周围5*5范围内的怪物防御增加${enemy.iceCore}%`,
+                    '#70ffd1',
                     1
                 ],
-                [27, '捕捉', '当走到怪物周围十字时会强制进行战斗。', '#c0ddbb']
+                [
+                    27,
+                    '火焰之核',
+                    enemy =>
+                        `怪物拥有灼热的火焰，使周围5*5范围内的怪物攻击增加${enemy.fireCore}%`,
+                    '#ff6f0a',
+                    1
+                ]
             ];
         },
         getEnemyInfo: function (enemy, hero, x, y, floorId) {
@@ -806,7 +814,114 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
 
             var guards = [];
 
-            const info = {
+            // 光环和支援检查
+            core.status.checkBlock ??= {};
+
+            if (
+                core.status.checkBlock.needCache &&
+                core.has(x) &&
+                core.has(y)
+            ) {
+                // 从V2.5.4开始，对光环效果增加缓存，以解决多次重复计算的问题，从而大幅提升运行效率。
+                var hp_buff = 0,
+                    atk_buff = 0,
+                    def_buff = 0;
+                // 检查光环和支援的缓存
+                var index = `${x},${y}`;
+                core.status.checkBlock.cache ??= {};
+                var cache = core.status.checkBlock.cache[index];
+                if (!cache) {
+                    // 没有该点的缓存，则遍历每个图块
+                    core.extractBlocks(floorId);
+                    core.status.maps[floorId].blocks.forEach(function (block) {
+                        if (block.disable) return;
+                        // 获得该图块的ID
+                        var id = block.event.id,
+                            e = core.material.enemys[id];
+                        if (!e) return;
+                        var dx = Math.abs(block.x - x),
+                            dy = Math.abs(block.y - y);
+
+                        // 抱团
+                        if (
+                            core.hasSpecial(mon_special, 8) &&
+                            core.hasSpecial(e.special, 8) &&
+                            !(dx == 0 && dy == 0) &&
+                            dx < 3 &&
+                            dy < 3
+                        ) {
+                            atk_buff += enemy.together || 0;
+                            def_buff += enemy.together || 0;
+                        }
+
+                        // 冰封光环
+                        if (
+                            core.hasSpecial(e.special, 21) &&
+                            dx < 4 &&
+                            dy < 4
+                        ) {
+                            iceDecline += e.iceHalo;
+                        }
+
+                        // 5*5光环
+                        if (dx <= 2 && dy <= 2) {
+                            // 冰封之核
+                            if (core.hasSpecial(e.special, 26)) {
+                                def_buff += e.iceCore;
+                            }
+
+                            // 火焰之核
+                            if (core.hasSpecial(e.special, 27)) {
+                                atk_buff += e.fireCore;
+                            }
+                        }
+                    });
+
+                    // 融化怪要在这里判断
+                    if (
+                        core.has(flags[`melt_${floorId}`]) &&
+                        core.has(x) &&
+                        core.has(y)
+                    ) {
+                        for (const [loc, per] of Object.entries(
+                            flags[`melt_${floorId}`]
+                        )) {
+                            const [mx, my] = loc
+                                .split(',')
+                                .map(v => parseInt(v));
+                            if (
+                                Math.abs(mx - x) <= 1 &&
+                                Math.abs(my - y) <= 1
+                            ) {
+                                atk_buff += per;
+                                def_buff += per;
+                            }
+                        }
+                    }
+
+                    core.status.checkBlock.cache[index] = {
+                        hp_buff: hp_buff,
+                        atk_buff: atk_buff,
+                        def_buff: def_buff,
+                        guards: guards,
+                        iceHalo: iceDecline
+                    };
+                } else {
+                    // 直接使用缓存数据
+                    hp_buff = cache.hp_buff;
+                    atk_buff = cache.atk_buff;
+                    def_buff = cache.def_buff;
+                    guards = cache.guards;
+                    iceDecline = cache.iceHalo;
+                }
+
+                // 增加比例；如果要增加数值可以直接在这里修改
+                mon_hp *= 1 + hp_buff / 100;
+                mon_atk *= 1 + atk_buff / 100;
+                mon_def *= 1 + def_buff / 100;
+            }
+
+            return {
                 hp: Math.floor(mon_hp),
                 atk: Math.floor(mon_atk),
                 def: Math.floor(mon_def),
@@ -817,114 +932,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 guards: guards, // 返回支援情况
                 iceDecline
             };
-
-            // 光环和支援检查
-            core.status.checkBlock ??= {};
-
-            if (!core.status.checkBlock.needCache) return info;
-
-            var hp_buff = 0,
-                atk_buff = 0,
-                def_buff = 0;
-            // 检查光环和支援的缓存
-            var index =
-                x != null && y != null ? x + ',' + y : 'floor' + enemy.id;
-            core.status.checkBlock.cache ??= {};
-            var cache = core.status.checkBlock.cache[index];
-            if (!cache) {
-                // 没有该点的缓存，则遍历每个图块
-                core.extractBlocks(floorId);
-                core.status.maps[floorId].blocks.forEach(function (block) {
-                    if (block.disable) return;
-                    // 获得该图块的ID
-                    var id = block.event.id,
-                        e = core.material.enemys[id];
-                    var dx = Math.abs(block.x - x),
-                        dy = Math.abs(block.y - y);
-                    // 检查【支援】技能，数字26
-                    if (
-                        e &&
-                        core.hasSpecial(e.special, 26) &&
-                        // 检查支援条件，坐标存在，距离为1，且不能是自己
-                        // 其他类型的支援怪，比如十字之类的话.... 看着做是一样的
-                        x != null &&
-                        y != null &&
-                        Math.abs(block.x - x) <= 1 &&
-                        Math.abs(block.y - y) <= 1 &&
-                        !(x == block.x && y == block.y)
-                    ) {
-                        // 记录怪物的x,y，ID
-                        guards.push([block.x, block.y, id]);
-                    }
-
-                    // 抱团
-                    if (
-                        e &&
-                        core.hasSpecial(mon_special, 8) &&
-                        core.hasSpecial(e.special, 8) &&
-                        !(dx == 0 && dy == 0) &&
-                        dx < 3 &&
-                        dy < 3
-                    ) {
-                        atk_buff += enemy.together || 0;
-                        def_buff += enemy.together || 0;
-                    }
-
-                    // 冰封光环
-                    if (
-                        e &&
-                        core.hasSpecial(e.special, 21) &&
-                        x != null &&
-                        y != null &&
-                        dx < 4 &&
-                        dy < 4
-                    ) {
-                        iceDecline += e.iceHalo;
-                    }
-
-                    // TODO：如果有其他类型光环怪物在这里仿照添加检查
-                    // 注：新增新的类光环属性（需要遍历全图的）需要在特殊属性定义那里的第五项写1，参见光环和支援的特殊属性定义。
-                });
-
-                // 融化怪要在这里判断
-                if (
-                    core.has(flags[`melt_${floorId}`]) &&
-                    core.has(x) &&
-                    core.has(y)
-                ) {
-                    for (const [loc, per] of Object.entries(
-                        flags[`melt_${floorId}`]
-                    )) {
-                        const [mx, my] = loc.split(',').map(v => parseInt(v));
-                        if (Math.abs(mx - x) <= 1 && Math.abs(my - y) <= 1) {
-                            atk_buff += per;
-                            def_buff += per;
-                        }
-                    }
-                }
-
-                core.status.checkBlock.cache[index] = {
-                    hp_buff: hp_buff,
-                    atk_buff: atk_buff,
-                    def_buff: def_buff,
-                    guards: guards,
-                    iceHalo: iceDecline
-                };
-            } else {
-                // 直接使用缓存数据
-                hp_buff = cache.hp_buff;
-                atk_buff = cache.atk_buff;
-                def_buff = cache.def_buff;
-                guards = cache.guards;
-                iceDecline = cache.iceHalo;
-            }
-
-            // 增加比例；如果要增加数值可以直接在这里修改
-            mon_hp *= 1 + hp_buff / 100;
-            mon_atk *= 1 + atk_buff / 100;
-            mon_def *= 1 + def_buff / 100;
-
-            return info;
         },
         getDamageInfo: function (enemy, hero, x, y, floorId) {
             // 获得战斗伤害信息（实际伤害计算函数）
@@ -1516,7 +1523,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             if (!floorId || !core.status.maps) return;
 
             const haloMap = {
-                21: ['square:7:cyan']
+                21: ['square:7:cyan'],
+                26: ['square:5:blue'],
+                27: ['square:5:red']
             };
 
             var width = core.floors[floorId].width,
@@ -1757,7 +1766,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 Object.keys(flags[`melt_${floorId}`]).forEach(v => {
                     needCache = true;
                     halo[v] ??= [];
-                    halo[v].push('square:3:#d9a8ff');
+                    halo[v].push('square:3:purple');
                 });
             }
 

@@ -1574,7 +1574,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             }
             if (flags['jump_' + core.status.floorId] >= 3)
                 return core.drawTip('当前地图使用次数已用完');
-            core.autosave();
             var direction = core.status.hero.loc.direction;
             var loc = core.status.hero.loc;
             var checkLoc = {};
@@ -1620,6 +1619,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     true
                 );
                 if (!toLoc) return;
+                core.autosave();
                 if (flags.chapter <= 1) core.status.hero.hp -= 200 * flags.hard;
                 core.updateStatusBar();
                 flags['jump_' + core.status.floorId]++;
@@ -1642,6 +1642,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     false
                 );
                 if (!firstNoPass) return;
+                core.autosave();
                 if (flags.chapter <= 1) core.status.hero.hp -= 200 * flags.hard;
                 core.updateStatusBar();
                 flags['jump_' + core.status.floorId]++;
