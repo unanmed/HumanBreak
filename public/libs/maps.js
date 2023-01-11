@@ -2620,6 +2620,11 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (
     }
     options.ctx = tempCanvas;
 
+    tempCanvas.imageSmoothingEnabled = core.getLocalStorage(
+        'antiAliasing',
+        true
+    );
+
     // 地图过大的缩略图不绘制显伤
     if (width * height > core.bigmap.threshold) options.damage = false;
 

@@ -575,6 +575,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             delete flags[`jump_${floorId}`];
             delete flags[`inte_${floorId}`];
             delete flags[`loop_${floorId}`];
+            delete flags[`melt_${floorId}`];
+            delete flags[`night_${floorId}`];
         }
 
         // 恢复楼层
@@ -4709,6 +4711,10 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 left: 'right',
                 right: 'left'
             }[dir];
+        };
+
+        this.has = function (v) {
+            return v !== null && v !== void 0;
         };
     }
 };

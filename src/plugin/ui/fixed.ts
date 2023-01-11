@@ -32,6 +32,9 @@ export default function init() {
         if (!e) return;
         show(ev);
     });
+    data.addEventListener('mousedown', ev => {
+        showFixed.value = false;
+    });
 
     return {
         showFixed

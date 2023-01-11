@@ -134,6 +134,12 @@ interface PluginUtils {
      * @param dir 方向
      */
     backDir(dir: Dir): Dir;
+
+    /**
+     * 判断一个值是否不是undefined和null
+     * @param value 要判断的值
+     */
+    has<T>(value: T): value is NonNullable<T>;
 }
 
 interface PluginUis {

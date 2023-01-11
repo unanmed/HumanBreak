@@ -144,6 +144,7 @@ const nowDamage = computed(() => {
 });
 
 function generateChart(ele: HTMLCanvasElement, data: [number, number][]) {
+    Chart.defaults.color = '#aaa';
     const config: ChartConfiguration = {
         type: 'line',
         data: generateData(data),

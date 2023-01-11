@@ -261,6 +261,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "极昼",
 					"_data": "极昼"
 				},
+				"melt": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "融化",
+					"_data": "融化"
+				},
 				"value": {
 					"_leaf": true,
 					"_type": "textarea",

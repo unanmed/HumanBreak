@@ -149,8 +149,18 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"E597": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E598": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E599": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
-	"E600": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E600": {"name":"寒冰巨石","hp":3000,"atk":2250,"def":0,"money":2,"exp":100,"point":0,"special":[3]},
 	"E601": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E602": {"name":"永夜蝙","hp":6000,"atk":2000,"def":800,"money":1,"exp":65,"point":0,"special":[22],"night":100},
-	"E603": {"name":"极昼蝠","hp":8000,"atk":1750,"def":1000,"money":1,"exp":65,"point":0,"special":[23],"day":100}
+	"E603": {"name":"极昼蝠","hp":8000,"atk":1750,"def":1000,"money":1,"exp":65,"point":0,"special":[23],"day":100},
+	"E605": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E606": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E607": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E608": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E609": {"name":"具形雪人","hp":7500,"atk":2250,"def":1000,"money":2,"exp":90,"point":0,"special":[25],"melt":15},
+	"E610": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E611": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E612": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E613": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E614": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]}
 }

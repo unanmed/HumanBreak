@@ -86,6 +86,7 @@ watch(autoSkill, n => {
 watch(antiAliasing, n => {
     core.setLocalStorage('antiAliasing', n);
     for (const canvas of core.dom.gameCanvas) {
+        if (core.domStyle.hdCanvas.includes(canvas.id)) continue;
         if (n) {
             canvas.classList.remove('no-anti-aliasing');
         } else {

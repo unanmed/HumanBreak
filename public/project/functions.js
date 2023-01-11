@@ -393,6 +393,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 core.declineStudiedSkill();
             }
 
+            // 如果是融化怪，需要特殊标记一下
+            if (core.hasSpecial(special, 25) && core.has(x) && core.has(y)) {
+                flags[`melt_${floorId}`] ??= {};
+                flags[`melt_${floorId}`][`${x},${y}`] = enemy.melt;
+            }
+
             // 获得金币
             const money = enemy.money;
             core.status.hero.money += money;
@@ -709,19 +715,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 ],
                 [
                     25,
-                    '光环',
-                    function (enemy) {
-                        return (
-                            '同楼层所有怪物生命提升' +
-                            (enemy.value || 0) +
-                            '%，攻击提升' +
-                            (enemy.atkValue || 0) +
-                            '%，防御提升' +
-                            (enemy.defValue || 0) +
-                            '%，' +
-                            (enemy.add ? '可叠加' : '不可叠加')
-                        );
-                    },
+                    '融化',
+                    enemy =>
+                        `战斗后该怪物会融化，在怪物位置产生一个3*3的范围光环，光环内怪物的攻防增加${enemy.melt}%`,
                     '#e6e099',
                     1
                 ],
@@ -810,96 +806,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
 
             var guards = [];
 
-            // 光环和支援检查
-            if (!core.status.checkBlock) core.status.checkBlock = {};
-
-            if (core.status.checkBlock.needCache) {
-                // 从V2.5.4开始，对光环效果增加缓存，以解决多次重复计算的问题，从而大幅提升运行效率。
-                var hp_buff = 0,
-                    atk_buff = 0,
-                    def_buff = 0;
-                // 检查光环和支援的缓存
-                var index =
-                    x != null && y != null ? x + ',' + y : 'floor' + enemy.id;
-                core.status.checkBlock.cache ??= {};
-                var cache = core.status.checkBlock.cache[index];
-                if (!cache) {
-                    // 没有该点的缓存，则遍历每个图块
-                    core.extractBlocks(floorId);
-                    core.status.maps[floorId].blocks.forEach(function (block) {
-                        if (block.disable) return;
-                        // 获得该图块的ID
-                        var id = block.event.id,
-                            e = core.material.enemys[id];
-                        var dx = Math.abs(block.x - x),
-                            dy = Math.abs(block.y - y);
-                        // 检查【支援】技能，数字26
-                        if (
-                            e &&
-                            core.hasSpecial(e.special, 26) &&
-                            // 检查支援条件，坐标存在，距离为1，且不能是自己
-                            // 其他类型的支援怪，比如十字之类的话.... 看着做是一样的
-                            x != null &&
-                            y != null &&
-                            Math.abs(block.x - x) <= 1 &&
-                            Math.abs(block.y - y) <= 1 &&
-                            !(x == block.x && y == block.y)
-                        ) {
-                            // 记录怪物的x,y，ID
-                            guards.push([block.x, block.y, id]);
-                        }
-
-                        // 抱团
-                        if (
-                            e &&
-                            core.hasSpecial(mon_special, 8) &&
-                            core.hasSpecial(e.special, 8) &&
-                            !(dx == 0 && dy == 0) &&
-                            dx < 3 &&
-                            dy < 3
-                        ) {
-                            atk_buff += enemy.together || 0;
-                            def_buff += enemy.together || 0;
-                        }
-
-                        // 冰封光环
-                        if (
-                            e &&
-                            core.hasSpecial(e.special, 21) &&
-                            x != null &&
-                            y != null &&
-                            dx < 4 &&
-                            dy < 4
-                        ) {
-                            iceDecline += e.iceHalo;
-                        }
-
-                        // TODO：如果有其他类型光环怪物在这里仿照添加检查
-                        // 注：新增新的类光环属性（需要遍历全图的）需要在特殊属性定义那里的第五项写1，参见光环和支援的特殊属性定义。
-                    });
-                    core.status.checkBlock.cache[index] = {
-                        hp_buff: hp_buff,
-                        atk_buff: atk_buff,
-                        def_buff: def_buff,
-                        guards: guards,
-                        iceHalo: iceDecline
-                    };
-                } else {
-                    // 直接使用缓存数据
-                    hp_buff = cache.hp_buff;
-                    atk_buff = cache.atk_buff;
-                    def_buff = cache.def_buff;
-                    guards = cache.guards;
-                    iceDecline = cache.iceHalo;
-                }
-
-                // 增加比例；如果要增加数值可以直接在这里修改
-                mon_hp *= 1 + hp_buff / 100;
-                mon_atk *= 1 + atk_buff / 100;
-                mon_def *= 1 + def_buff / 100;
-            }
-
-            return {
+            const info = {
                 hp: Math.floor(mon_hp),
                 atk: Math.floor(mon_atk),
                 def: Math.floor(mon_def),
@@ -910,6 +817,114 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 guards: guards, // 返回支援情况
                 iceDecline
             };
+
+            // 光环和支援检查
+            core.status.checkBlock ??= {};
+
+            if (!core.status.checkBlock.needCache) return info;
+
+            var hp_buff = 0,
+                atk_buff = 0,
+                def_buff = 0;
+            // 检查光环和支援的缓存
+            var index =
+                x != null && y != null ? x + ',' + y : 'floor' + enemy.id;
+            core.status.checkBlock.cache ??= {};
+            var cache = core.status.checkBlock.cache[index];
+            if (!cache) {
+                // 没有该点的缓存，则遍历每个图块
+                core.extractBlocks(floorId);
+                core.status.maps[floorId].blocks.forEach(function (block) {
+                    if (block.disable) return;
+                    // 获得该图块的ID
+                    var id = block.event.id,
+                        e = core.material.enemys[id];
+                    var dx = Math.abs(block.x - x),
+                        dy = Math.abs(block.y - y);
+                    // 检查【支援】技能，数字26
+                    if (
+                        e &&
+                        core.hasSpecial(e.special, 26) &&
+                        // 检查支援条件，坐标存在，距离为1，且不能是自己
+                        // 其他类型的支援怪，比如十字之类的话.... 看着做是一样的
+                        x != null &&
+                        y != null &&
+                        Math.abs(block.x - x) <= 1 &&
+                        Math.abs(block.y - y) <= 1 &&
+                        !(x == block.x && y == block.y)
+                    ) {
+                        // 记录怪物的x,y，ID
+                        guards.push([block.x, block.y, id]);
+                    }
+
+                    // 抱团
+                    if (
+                        e &&
+                        core.hasSpecial(mon_special, 8) &&
+                        core.hasSpecial(e.special, 8) &&
+                        !(dx == 0 && dy == 0) &&
+                        dx < 3 &&
+                        dy < 3
+                    ) {
+                        atk_buff += enemy.together || 0;
+                        def_buff += enemy.together || 0;
+                    }
+
+                    // 冰封光环
+                    if (
+                        e &&
+                        core.hasSpecial(e.special, 21) &&
+                        x != null &&
+                        y != null &&
+                        dx < 4 &&
+                        dy < 4
+                    ) {
+                        iceDecline += e.iceHalo;
+                    }
+
+                    // TODO：如果有其他类型光环怪物在这里仿照添加检查
+                    // 注：新增新的类光环属性（需要遍历全图的）需要在特殊属性定义那里的第五项写1，参见光环和支援的特殊属性定义。
+                });
+
+                // 融化怪要在这里判断
+                if (
+                    core.has(flags[`melt_${floorId}`]) &&
+                    core.has(x) &&
+                    core.has(y)
+                ) {
+                    for (const [loc, per] of Object.entries(
+                        flags[`melt_${floorId}`]
+                    )) {
+                        const [mx, my] = loc.split(',').map(v => parseInt(v));
+                        if (Math.abs(mx - x) <= 1 && Math.abs(my - y) <= 1) {
+                            atk_buff += per;
+                            def_buff += per;
+                        }
+                    }
+                }
+
+                core.status.checkBlock.cache[index] = {
+                    hp_buff: hp_buff,
+                    atk_buff: atk_buff,
+                    def_buff: def_buff,
+                    guards: guards,
+                    iceHalo: iceDecline
+                };
+            } else {
+                // 直接使用缓存数据
+                hp_buff = cache.hp_buff;
+                atk_buff = cache.atk_buff;
+                def_buff = cache.def_buff;
+                guards = cache.guards;
+                iceDecline = cache.iceHalo;
+            }
+
+            // 增加比例；如果要增加数值可以直接在这里修改
+            mon_hp *= 1 + hp_buff / 100;
+            mon_atk *= 1 + atk_buff / 100;
+            mon_def *= 1 + def_buff / 100;
+
+            return info;
         },
         getDamageInfo: function (enemy, hero, x, y, floorId) {
             // 获得战斗伤害信息（实际伤害计算函数）
@@ -925,14 +940,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 勇士位置应该在这里进行计算，四个位置依次遍历，去重
             let toMap = [];
             if (
-                x !== null &&
-                x !== void 0 &&
-                y !== null &&
-                y !== void 0 &&
-                (hero?.x === null || hero?.x === void 0) &&
-                (hero?.y === null || hero?.y === void 0) &&
-                floorId !== null &&
-                floorId !== void 0 &&
+                core.has(x) &&
+                core.has(y) &&
+                !(core.has(hero?.x) && core.has(hero?.y)) &&
+                core.has(floorId) &&
                 flags.autoLocate &&
                 flags.chapter >= 2
             ) {
@@ -1739,6 +1750,15 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                         }
                     }
                 }
+            }
+
+            // 融化怪
+            if (core.has(flags[`melt_${floorId}`])) {
+                Object.keys(flags[`melt_${floorId}`]).forEach(v => {
+                    needCache = true;
+                    halo[v] ??= [];
+                    halo[v].push('square:3:#d9a8ff');
+                });
             }
 
             core.flags.canGoDeadZone = canGoDeadZone;
