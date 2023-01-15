@@ -55,7 +55,14 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"MT42",
 			"MT43",
 			"MT44",
-			"MT45"
+			"MT45",
+			"snowTown",
+			"snowShop",
+			"MT46",
+			"MT47",
+			"MT48",
+			"MT49",
+			"MT50"
 		],
 		"floorPartitions": [
 			[
@@ -110,7 +117,9 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"Map-Tower01.png",
 			"Caverna1.png",
 			"map-tower.png",
-			"winter1.png"
+			"winter1.png",
+			"snowTown.png",
+			"room.png"
 		],
 		"animates": [
 			"amazed",
@@ -176,6 +185,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"cursor.mp3",
 			"danger.mp3",
 			"door.mp3",
+			"drink.mp3",
 			"electron.mp3",
 			"equip.mp3",
 			"error.mp3",
@@ -584,7 +594,35 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				"type": "showStatusBar"
 			}
 		],
-		"shops": [],
+		"shops": [
+			{
+				"id": "snowShop",
+				"item": true,
+				"textInList": "道具商店",
+				"use": "money",
+				"mustEnable": true,
+				"choices": [
+					{
+						"id": "sword2",
+						"number": 1,
+						"money": "600",
+						"sell": "300"
+					},
+					{
+						"id": "shield2",
+						"number": 1,
+						"money": "500",
+						"sell": "250"
+					},
+					{
+						"id": "I641",
+						"number": 1,
+						"money": "400",
+						"sell": "200"
+					}
+				]
+			}
+		],
 		"levelUp": [
 			{
 				"need": "0",

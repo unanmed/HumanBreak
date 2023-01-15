@@ -156,11 +156,15 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"E605": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E606": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E607": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
-	"E608": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E608": {"name":"寒冰护卫","hp":25000,"atk":3500,"def":2250,"money":3,"exp":225,"point":0,"special":[]},
 	"E609": {"name":"具形雪人","hp":7500,"atk":2250,"def":1000,"money":2,"exp":90,"point":0,"special":[25],"melt":15},
 	"E610": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E611": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E612": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E613": {"name":"寒冰核心","hp":20000,"atk":3000,"def":1500,"money":3,"exp":150,"point":0,"special":[26],"iceCore":20},
-	"E614": {"name":"火焰核心","hp":15000,"atk":2750,"def":1750,"money":3,"exp":140,"point":0,"special":[27],"fireCore":20}
+	"E614": {"name":"火焰核心","hp":15000,"atk":2750,"def":1750,"money":3,"exp":140,"point":0,"special":[27],"fireCore":20},
+	"E615": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E616": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E617": {"name":"冰封雕像","hp":12500,"atk":2500,"def":2000,"money":2,"exp":150,"point":0,"special":[]},
+	"E618": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]}
 }

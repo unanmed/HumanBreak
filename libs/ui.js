@@ -180,7 +180,7 @@ ui.prototype.fillBoldText = function (
     }
     ctx.strokeStyle = strokeStyle;
     ctx.lineWidth =
-        1 *
+        1.5 *
         (core.domStyle.isVertical ? core.domStyle.ratio : core.domStyle.scale);
     ctx.fillStyle = style;
     ctx.strokeText(text, x, y);
@@ -1739,7 +1739,9 @@ ui.prototype._drawTextContent_draw = function (ctx, tempCtx, content, config) {
         var block = config.blocks[config.index++];
         if (block != null) {
             // It works, why?
-            const scale = config.isHD ? devicePixelRatio ** 2 : 1;
+            const scale = config.isHD
+                ? devicePixelRatio * core.domStyle.scale
+                : 1;
             core.drawImage(
                 ctx,
                 tempCtx.canvas,
@@ -4193,23 +4195,17 @@ ui.prototype.rotateCanvas = function (name, angle, centerX, centerY) {
 };
 
 ////// canvas重置 //////
-ui.prototype.resizeCanvas = function (
-    name,
-    width,
-    height,
-    styleOnly,
-    isTempCanvas
-) {
+ui.prototype.resizeCanvas = function (name, width, height, styleOnly) {
     var ctx = core.getContextByName(name);
     if (!ctx) return null;
     if (width != null) {
         if (!styleOnly && ctx.canvas.hasAttribute('isHD'))
-            core.maps._setHDCanvasSize(ctx, width, null, isTempCanvas);
+            core.maps._setHDCanvasSize(ctx, width, null);
         ctx.canvas.style.width = width * core.domStyle.scale + 'px';
     }
     if (height != null) {
         if (!styleOnly && ctx.canvas.hasAttribute('isHD'))
-            core.maps._setHDCanvasSize(ctx, null, height, isTempCanvas);
+            core.maps._setHDCanvasSize(ctx, null, height);
         ctx.canvas.style.height = height * core.domStyle.scale + 'px';
     }
     return ctx;

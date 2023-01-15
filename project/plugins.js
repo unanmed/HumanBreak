@@ -888,37 +888,30 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
 
             // Step 1: 背景和固定的几个文字
             core.ui._createUIEvent();
-            core.clearMap('uievent');
+            core.clearMap('ui');
             core.ui.clearUIEventSelector();
-            core.setTextAlign('uievent', 'left');
-            core.setTextBaseline('uievent', 'top');
-            core.fillRect('uievent', 0, 0, 480, 480, 'black');
-            core.drawWindowSkin('winskin.png', 'uievent', 0, 0, 480, 64);
-            core.drawWindowSkin('winskin.png', 'uievent', 0, 64, 360, 64);
-            core.drawWindowSkin('winskin.png', 'uievent', 0, 128, 360, 352);
-            core.drawWindowSkin('winskin.png', 'uievent', 360, 64, 120, 64);
-            core.drawWindowSkin('winskin.png', 'uievent', 360, 128, 120, 352);
-            core.setFillStyle('uievent', 'white');
-            core.setStrokeStyle('uievent', 'white');
-            core.fillText('uievent', '购买', 32, 84, 'white', bigFont);
-            core.fillText('uievent', '卖出', 152, 84);
-            core.fillText('uievent', '离开', 272, 84);
+            core.setTextAlign('ui', 'left');
+            core.setTextBaseline('ui', 'top');
+            core.fillRect('ui', 0, 0, 480, 480, 'black');
+            core.drawWindowSkin('winskin.png', 'ui', 0, 0, 480, 64);
+            core.drawWindowSkin('winskin.png', 'ui', 0, 64, 360, 64);
+            core.drawWindowSkin('winskin.png', 'ui', 0, 128, 360, 352);
+            core.drawWindowSkin('winskin.png', 'ui', 360, 64, 120, 64);
+            core.drawWindowSkin('winskin.png', 'ui', 360, 128, 120, 352);
+            core.setFillStyle('ui', 'white');
+            core.setStrokeStyle('ui', 'white');
+            core.fillText('ui', '购买', 32, 84, 'white', bigFont);
+            core.fillText('ui', '卖出', 152, 84);
+            core.fillText('ui', '离开', 272, 84);
+            core.fillText('ui', '当前' + useText, 374, 75, null, middleFont);
+            core.setTextAlign('ui', 'right');
             core.fillText(
-                'uievent',
-                '当前' + useText,
-                374,
-                75,
-                null,
-                middleFont
-            );
-            core.setTextAlign('uievent', 'right');
-            core.fillText(
-                'uievent',
+                'ui',
                 core.formatBigNumber(core.status.hero.money),
                 466,
                 100
             );
-            core.setTextAlign('uievent', 'left');
+            core.setTextAlign('ui', 'left');
             core.ui.drawUIEventSelector(
                 1,
                 'winskin.png',
@@ -928,22 +921,17 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 33
             );
             if (selectItem != null) {
-                core.setTextAlign('uievent', 'center');
+                core.setTextAlign('ui', 'center');
                 core.fillText(
-                    'uievent',
+                    'ui',
                     type == 0 ? '买入个数' : '卖出个数',
                     420,
                     360,
                     null,
                     bigFont
                 );
-                core.fillText(
-                    'uievent',
-                    '<   ' + selectCount + '   >',
-                    420,
-                    390
-                );
-                core.fillText('uievent', '确定', 420, 420);
+                core.fillText('ui', '<   ' + selectCount + '   >', 420, 390);
+                core.fillText('ui', '确定', 420, 420);
             }
 
             // Step 2：获得列表并展示
@@ -965,21 +953,20 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             // 绘制分页
             if (totalPage > 1) {
                 var half = 180;
-                core.setTextAlign('uievent', 'center');
+                core.setTextAlign('ui', 'center');
                 core.fillText(
-                    'uievent',
+                    'ui',
                     page + ' / ' + totalPage,
                     half,
                     450,
                     null,
                     middleFont
                 );
-                if (page > 1)
-                    core.fillText('uievent', '上一页', half - 80, 450);
+                if (page > 1) core.fillText('ui', '上一页', half - 80, 450);
                 if (page < totalPage)
-                    core.fillText('uievent', '下一页', half + 80, 450);
+                    core.fillText('ui', '下一页', half + 80, 450);
             }
-            core.setTextAlign('uievent', 'left');
+            core.setTextAlign('ui', 'left');
 
             // 绘制每一项
             var start = (page - 1) * per_page;
@@ -987,19 +974,19 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 var curr = start + i;
                 if (curr >= list.length) break;
                 var item = list[curr];
-                core.drawIcon('uievent', item.id, 10, 141 + i * 40);
-                core.setTextAlign('uievent', 'left');
+                core.drawIcon('ui', item.id, 10, 141 + i * 40);
+                core.setTextAlign('ui', 'left');
                 core.fillText(
-                    'uievent',
+                    'ui',
                     core.material.items[item.id].name,
                     50,
                     148 + i * 40,
                     null,
                     bigFont
                 );
-                core.setTextAlign('uievent', 'right');
+                core.setTextAlign('ui', 'right');
                 core.fillText(
-                    'uievent',
+                    'ui',
                     (type == 0
                         ? core.calValue(item.money)
                         : core.calValue(item.sell)) +
@@ -1010,7 +997,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                     null,
                     middleFont
                 );
-                core.setTextAlign('uievent', 'left');
+                core.setTextAlign('ui', 'left');
                 if (curr == selectItem) {
                     // 绘制描述，文字自动放缩
                     var text =
@@ -1027,7 +1014,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                         var height = core.getTextContentHeight(text, config);
                         if (height <= 60) {
                             config.top = (64 - height) / 2;
-                            core.drawTextContent('uievent', text, config);
+                            core.drawTextContent('ui', text, config);
                             break;
                         }
                     }
@@ -1040,17 +1027,10 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                         40
                     );
                     if (type == 0 && item.number != null) {
+                        core.fillText('ui', '存货', 370, 152, null, bigFont);
+                        core.setTextAlign('ui', 'right');
                         core.fillText(
-                            'uievent',
-                            '存货',
-                            370,
-                            152,
-                            null,
-                            bigFont
-                        );
-                        core.setTextAlign('uievent', 'right');
-                        core.fillText(
-                            'uievent',
+                            'ui',
                             item.number,
                             470,
                             152,
@@ -1059,17 +1039,10 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                             60
                         );
                     } else if (type == 1) {
+                        core.fillText('ui', '数量', 370, 152, null, bigFont);
+                        core.setTextAlign('ui', 'right');
                         core.fillText(
-                            'uievent',
-                            '数量',
-                            370,
-                            152,
-                            null,
-                            bigFont
-                        );
-                        core.setTextAlign('uievent', 'right');
-                        core.fillText(
-                            'uievent',
+                            'ui',
                             core.itemCount(item.id),
                             470,
                             152,
@@ -1078,31 +1051,31 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                             40
                         );
                     }
-                    core.setTextAlign('uievent', 'left');
-                    core.fillText('uievent', '预计' + useText, 370, 280);
-                    core.setTextAlign('uievent', 'right');
+                    core.setTextAlign('ui', 'left');
+                    core.fillText('ui', '预计' + useText, 370, 280);
+                    core.setTextAlign('ui', 'right');
                     totalMoney =
                         selectCount *
                         (type == 0
                             ? core.calValue(item.money)
                             : core.calValue(item.sell));
                     core.fillText(
-                        'uievent',
+                        'ui',
                         core.formatBigNumber(totalMoney),
                         470,
                         310
                     );
 
-                    core.setTextAlign('uievent', 'left');
+                    core.setTextAlign('ui', 'left');
                     core.fillText(
-                        'uievent',
+                        'ui',
                         type == 0 ? '已购次数' : '已卖次数',
                         370,
                         190
                     );
-                    core.setTextAlign('uievent', 'right');
+                    core.setTextAlign('ui', 'right');
                     core.fillText(
-                        'uievent',
+                        'ui',
                         (type == 0 ? item.money_count : item.sell_count) || 0,
                         470,
                         220
@@ -1110,8 +1083,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 }
             }
 
-            core.setTextAlign('uievent', 'left');
-            core.setTextBaseline('uievent', 'alphabetic');
+            core.setTextAlign('ui', 'left');
+            core.setTextBaseline('ui', 'alphabetic');
         };
 
         var _add = (item, delta) => {
@@ -1313,7 +1286,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 {
                     type: 'function',
                     function:
-                        "() => { core.deleteCanvas('uievent'); core.ui.clearUIEventSelector(); }"
+                        "() => { core.deleteCanvas('ui'); core.ui.clearUIEventSelector(); }"
                 }
             ]);
         };
@@ -1429,6 +1402,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 }
             };
             core.status.hero = new Proxy(hero, handler);
+
             core.status.maps[floorId].blocks.forEach(function (block) {
                 if (
                     block.event.cls !== 'items' ||
@@ -1487,6 +1461,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
 
                 if (typeof diff[name] === 'number')
                     content = core.formatBigNumber(diff[name], true);
+                else content = diff[name];
                 switch (name) {
                     case 'atk':
                     case 'atkper':
@@ -1511,7 +1486,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                         color = '#c66';
                         break;
                 }
-                content = diff[name];
                 // 绘制
                 core.status.damage.data.push({
                     text: content,
@@ -1543,7 +1517,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             ]
         };
 
-        const jumpIgnoreFloor = ['MT31'];
+        /** @type {FloorIds[]} */
+        const jumpIgnoreFloor = ['MT31', 'snowTown'];
         // 跳跃
         this.jumpSkill = function () {
             if (core.status.floorId.startsWith('tower'))
@@ -1564,9 +1539,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             ) {
                 if (
                     !(
-                        core.status.hero.loc.x == 77 &&
-                        core.status.hero.loc.y == 5 &&
-                        core.status.hero.loc.direction == 'right'
+                        core.status.hero.loc.x === 77 &&
+                        core.status.hero.loc.y === 5 &&
+                        core.status.hero.loc.direction === 'right'
                     )
                 ) {
                     return core.drawTip('该地图还有一个必跳的地方，你还没有跳');
@@ -3783,7 +3758,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         }
 
         ui.prototype.drawBook = function () {
-            if (!main.replayChecking)
+            if (!core.isReplaying())
                 return (core.plugin.bookOpened.value = true);
         };
 
@@ -4676,6 +4651,26 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             // 永夜、极昼
             if (name === 'atk' || name === 'def') {
                 s += window.flags?.[`night_${floorId}`] ?? 0;
+            }
+
+            // 技能
+            if (flags.bladeOn && flags.blade) {
+                const level = core.getSkillLevel(2);
+                if (name === 'atk') {
+                    s *= 1 + 0.1 * level;
+                }
+                if (name === 'def') {
+                    s *= 1 - 0.1 * level;
+                }
+            }
+            if (flags.shield && flags.shieldOn) {
+                const level = core.getSkillLevel(10);
+                if (name === 'atk') {
+                    s *= 1 - 0.1 * level;
+                }
+                if (name === 'def') {
+                    s *= 1 + 0.1 * level;
+                }
             }
 
             // buff
