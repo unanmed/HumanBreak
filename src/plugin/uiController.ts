@@ -80,6 +80,7 @@ export default function init() {
 
 async function showApp() {
     core.lockControl();
+
     if (transition.value) {
         app.style.transition = 'all 0.6s linear';
     } else {

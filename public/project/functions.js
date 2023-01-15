@@ -146,30 +146,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 设置勇士的位置
             heroLoc.direction = core.turnDirection(heroLoc.direction);
             core.status.hero.loc = heroLoc;
-            // tower6
-            // if (floorId == 'tower6') {
-            //     core.relocateLoopMap(floorId, heroLoc);
-            // }
-            // 检查重生怪并重置
-            if (!fromLoad) {
-                core.extractBlocks(floorId);
-                core.status.maps[floorId].blocks.forEach(function (block) {
-                    if (
-                        block.disable &&
-                        core.enemys.hasSpecial(block.event.id, 23)
-                    ) {
-                        block.disable = false;
-                        core.setMapBlockDisabled(
-                            floorId,
-                            block.x,
-                            block.y,
-                            false
-                        );
-                        core.maps._updateMapArray(floorId, block.x, block.y);
-                    }
-                });
-                core.control.gatherFollowers();
-            }
 
             // ---------- 重绘新地图；这一步将会设置core.status.floorId ---------- //
             core.drawMap(floorId);
@@ -798,15 +774,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             mon_atk -= flags[`night_${floorId}`] ?? 0;
             mon_def -= flags[`night_${floorId}`] ?? 0;
 
-            if (flags.blade && flags.bladeOn) {
-                hero_atk *= 1 + core.getSkillLevel(2) / 10;
-                hero_def *= 1 - core.getSkillLevel(2) / 10;
-            }
-            if (flags.shield && flags.shieldOn) {
-                hero_atk *= 1 - core.getSkillLevel(10) / 10;
-                hero_def *= 1 + core.getSkillLevel(10) / 10;
-            }
-
             // 坚固
             if (core.hasSpecial(mon_special, 3) && mon_def < hero_atk - 1) {
                 mon_def = hero_atk - 1;
@@ -991,24 +958,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     ) {
                         continue;
                     }
-                    toMap.push([
-                        dir,
-                        Object.assign({}, status, { x: nx, y: ny })
-                    ]);
+                    toMap.push(dir);
                 }
             } else {
                 // 指定了勇士坐标或者没有怪物坐标时
-                toMap = [
-                    [
-                        'none',
-                        core.getHeroStatusOf(
-                            hero,
-                            ['atk', 'def'],
-                            hero?.x,
-                            hero?.y
-                        )
-                    ]
-                ];
+                toMap = ['none'];
             }
 
             function getDamage(h) {
@@ -1020,7 +974,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     def: mon_def,
                     special: mon_special
                 } = enemyInfo;
-                let { atk: hero_atk, def: hero_def } = h;
+                let { atk: hero_atk, def: hero_def } = core.getHeroStatusOf(
+                    hero,
+                    ['atk', 'def'],
+                    x,
+                    y,
+                    floorId
+                );
 
                 let hero_hp = core.getRealStatusOrDefault(hero, 'hp'),
                     hero_IQ = core.getRealStatusOrDefault(hero, 'mdef'),
@@ -1029,17 +989,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
 
                 let damage = 0;
 
-                // 断灭之刃技能
-                if (core.getFlag('bladeOn') && core.getFlag('blade')) {
-                    var level = core.getSkillLevel(2);
-                    hero_atk *= 1 + 0.1 * level;
-                    hero_def *= 1 - 0.1 * level;
-                }
-                if (flags.shield && flags.shieldOn) {
-                    const level = core.getSkillLevel(10);
-                    hero_def *= 1 + 0.1 * level;
-                    hero_atk *= 1 - 0.1 * level;
-                }
                 // 饥渴
                 if (core.hasSpecial(mon_special, 7)) {
                     hero_atk *= 1 - (enemy.hungry || 0) / 100;
@@ -1140,7 +1089,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 ['shieldOn', 'shield']
             ];
 
-            function autoSkillOf(h) {
+            function autoSkill(h) {
                 damageInfo = getDamage(h);
                 damage = damageInfo?.damage ?? Infinity;
                 if (flags.autoSkill) {
@@ -1169,15 +1118,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             let damage = Infinity;
 
             if (!flags.autoLocate) {
-                autoSkillOf(toMap[0][1]);
+                autoSkill(toMap[0][1]);
                 return damageInfo;
             }
 
             if (toMap.length <= 1) {
                 // 单个与多个分开计算，有助于提高性能表现
-                const h =
-                    toMap[0]?.[1] ?? core.getHeroStatusOf(hero, ['atk', 'def']);
-                autoSkillOf(h);
+                autoSkill();
                 if (damageInfo) {
                     return Object.assign(damageInfo, {
                         dir: [toMap[0]?.[0] ?? 'none', damage]
@@ -1185,10 +1132,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 } else return null;
             } else {
                 const dirDamage = [];
-                for (const [dir, h] of toMap) {
+                for (const dir of toMap) {
                     damage = Infinity;
                     damageInfo = null;
-                    autoSkillOf(h);
+                    autoSkill();
                     dirDamage.push([dir, damage]);
                     if (damage < dirMinDamage) {
                         dirMinDamage = damage;

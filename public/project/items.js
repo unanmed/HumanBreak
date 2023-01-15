@@ -161,14 +161,16 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 	},
 	"sword2": {
 		"cls": "items",
-		"name": "银剑",
-		"text": "一把很普通的银剑",
+		"name": "铁剑",
+		"text": "真的是一把很普通的银剑，哦不，铁剑",
 		"equip": {
 			"type": 0,
 			"animate": "sword",
 			"value": {
-				"atk": 20
-			}
+				"mana": 50,
+				"atk": 180
+			},
+			"percentage": {}
 		},
 		"itemEffect": "core.status.hero.atk += 20",
 		"itemEffectTip": "，攻击+20"
@@ -246,11 +248,14 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 	"shield2": {
 		"cls": "items",
 		"name": "银盾",
-		"text": "一个很普通的银盾",
+		"text": "一个真的很普通的铁盾，这次没错了，就是铁盾！",
 		"equip": {
 			"type": 1,
 			"value": {
-				"def": 20
+				"def": 120
+			},
+			"percentage": {
+				"hpmax": 30
 			}
 		},
 		"itemEffect": "core.status.hero.def += 20",
@@ -1338,6 +1343,20 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 				"def": 25
 			},
 			"percentage": {}
+		}
+	},
+	"I641": {
+		"cls": "equips",
+		"name": "寒冰护符",
+		"canUseItemEffect": "true",
+		"text": "与寒冰没有任何关系，但是为什么叫寒冰护符呢？攻击和额外攻击各增加5%",
+		"equip": {
+			"type": 0,
+			"value": {},
+			"percentage": {
+				"atk": 5,
+				"mana": 5
+			}
 		}
 	}
 }

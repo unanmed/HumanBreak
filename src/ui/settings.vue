@@ -108,6 +108,18 @@ const descText = computed(() => {
     return splitText(settingInfo[selected.value].desc);
 });
 
+const settings: Record<keyof Settings, Ref<boolean>> = {
+    transition,
+    itemDetail,
+    autoSkill,
+    autoScale,
+    showHalo,
+    showStudied,
+    useFixed,
+    autoLocate,
+    antiAliasing
+};
+
 function exit() {
     core.plugin.settingsOpened.value = false;
 }
@@ -117,25 +129,7 @@ function click(id: keyof Settings) {
         selected.value = id;
         return;
     }
-    if (id === 'transition') {
-        transition.value = !transition.value;
-    } else if (id === 'itemDetail') {
-        itemDetail.value = !itemDetail.value;
-    } else if (id === 'autoSkill') {
-        autoSkill.value = !autoSkill.value;
-    } else if (id === 'autoScale') {
-        autoScale.value = !autoScale.value;
-    } else if (id === 'showHalo') {
-        showHalo.value = !showHalo.value;
-    } else if (id === 'showStudied') {
-        showStudied.value = !showStudied.value;
-    } else if (id === 'useFixed') {
-        useFixed.value = !useFixed.value;
-    } else if (id === 'autoLocate') {
-        autoLocate.value = !autoLocate.value;
-    } else if (id === 'antiAliasing') {
-        antiAliasing.value = !antiAliasing.value;
-    }
+    settings[id].value = !settings[id].value;
 }
 </script>
 

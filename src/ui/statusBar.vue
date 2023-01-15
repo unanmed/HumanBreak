@@ -111,10 +111,10 @@
                     </div>
                     <div v-if="studyOpened" class="status-item">
                         <span
-                            id="status-skill"
+                            id="status-study"
                             class="button-text"
                             @click.stop="openStudy"
-                            >查看技能</span
+                            >学习</span
                         >
                     </div>
                 </div>
@@ -181,12 +181,8 @@ function update() {
     lvName.value = core.getLvName(hero.lv);
     if (flags.blade && flags.bladeOn) {
         skill.value = '断灭之刃';
-        hero.atk! *= 1 + core.getSkillLevel(2) / 10;
-        hero.def! *= 1 - core.getSkillLevel(2) / 10;
     } else if (flags.shield && flags.shieldOn) {
         skill.value = '铸剑为盾';
-        hero.def! *= 1 + core.getSkillLevel(10) / 10;
-        hero.atk! *= 1 - core.getSkillLevel(10) / 10;
     } else {
         skill.value = '无';
     }
@@ -282,12 +278,12 @@ function openStudy() {}
 }
 
 #status-mana {
-    line-height: 1;
+    line-height: 0;
     color: rgb(255, 211, 211);
 }
 
 #status-hpmax {
-    line-height: 1;
+    line-height: 0;
     color: rgb(167, 255, 167);
 }
 

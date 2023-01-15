@@ -1031,7 +1031,6 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
         if (canMoveDirectlyArray[i] < 0) continue;
         if (core.control.moveDirectly(dx, dy, canMoveDirectlyArray[i])) {
             if (dir) {
-                console.log(dir);
                 core.moveHero(dir, function () {});
             }
             return true;
@@ -3271,6 +3270,9 @@ control.prototype.removeSwitch = function (x, y, floorId, name) {
 ////// 锁定状态栏，常常用于事件处理 //////
 control.prototype.lockControl = function () {
     core.status.lockControl = true;
+    if (!main.replayChecking) {
+        core.plugin.showFixed.value = false;
+    }
 };
 
 ////// 解锁状态栏 //////

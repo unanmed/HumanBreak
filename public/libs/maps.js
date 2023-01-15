@@ -37,14 +37,13 @@ maps.prototype._resetFloorImages = function () {
     }
 };
 
-maps.prototype._setHDCanvasSize = function (ctx, width, height, isTempCanvas) {
+maps.prototype._setHDCanvasSize = function (ctx, width, height) {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    var ratio = core.domStyle.ratio;
-    if (ctx === core.bigmap.tempCanvas) ratio = core.domStyle.scale;
-    if (isTempCanvas) ratio = core.domStyle.ratio;
-    if (width != null) ctx.canvas.width = width * ratio * devicePixelRatio;
-    if (height != null) ctx.canvas.height = height * ratio * devicePixelRatio;
-    ctx.scale(ratio * devicePixelRatio, ratio * devicePixelRatio);
+    var ratio = core.domStyle.scale;
+    ratio *= devicePixelRatio;
+    if (width != null) ctx.canvas.width = width * ratio;
+    if (height != null) ctx.canvas.height = height * ratio;
+    ctx.scale(ratio, ratio);
     ctx.canvas.setAttribute('isHD', 1);
 };
 
@@ -2620,11 +2619,6 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (
     }
     options.ctx = tempCanvas;
 
-    tempCanvas.imageSmoothingEnabled = core.getLocalStorage(
-        'antiAliasing',
-        true
-    );
-
     // 地图过大的缩略图不绘制显伤
     if (width * height > core.bigmap.threshold) options.damage = false;
 
@@ -2650,6 +2644,10 @@ maps.prototype._drawThumbnail_realDrawTempCanvas = function (
     blocks,
     options
 ) {
+    options.ctx.imageSmoothingEnabled = core.getLocalStorage(
+        'antiAliasing',
+        true
+    );
     // 缩略图：背景
     this.drawBg(floorId, options);
     // 缩略图：事件
@@ -2678,6 +2676,7 @@ maps.prototype._drawThumbnail_realDrawTempCanvas = function (
     }
     // 缩略图：前景
     this.drawFg(floorId, options);
+    options.ctx.imageSmoothingEnabled = true;
     // 缩略图：显伤
     if (options.damage && core.hasItem('book')) {
         core.updateCheckBlock(floorId);
@@ -2704,10 +2703,6 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
     if (centerY == null) centerY = Math.floor(height / 2);
     var tempCanvas = core.bigmap.tempCanvas;
 
-    if (!core.getLocalStorage('antiAliasing')) {
-        ctx.imageSmoothingEnabled = false;
-    }
-
     if (options.inFlyMap) {
         ctx.drawImage(
             tempCanvas.canvas,
@@ -2720,7 +2715,6 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
             options.w,
             options.h
         );
-        ctx.imageSmoothingEnabled = true;
         return;
     }
 

@@ -153,3 +153,13 @@ export function splitText(str: string[]) {
         })
         .join('');
 }
+
+/**
+ * 在下一帧执行某个函数
+ * @param cb 执行的函数
+ */
+export function nextFrame(cb: (time: number) => void) {
+    requestAnimationFrame(() => {
+        requestAnimationFrame(cb);
+    });
+}

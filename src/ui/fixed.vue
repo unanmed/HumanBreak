@@ -26,7 +26,7 @@
                         <span
                             class="attr-value"
                             :style="{ color: attrColor[i] }"
-                            >{{ enemy[a] }}</span
+                            >{{ format(enemy[a] as number) }}</span
                         >
                     </div>
                 </div>
@@ -40,9 +40,13 @@ import { onMounted, onUpdated, ref, watch } from 'vue';
 import Box from '../components/box.vue';
 import { showFixed } from '../plugin/ui/fixed';
 
-watch(showFixed, calHeight);
+watch(showFixed, n => {
+    if (n) calHeight();
+});
 
 let main: HTMLDivElement;
+
+const format = core.formatBigNumber;
 
 const toShowAttrs: (keyof DetailedEnemy)[] = [
     'hp',

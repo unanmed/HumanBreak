@@ -54,6 +54,13 @@ type FloorIds =
     | 'MT43'
     | 'MT44'
     | 'MT45'
+    | 'snowTown'
+    | 'snowShop'
+    | 'MT46'
+    | 'MT47'
+    | 'MT48'
+    | 'MT49'
+    | 'MT50'
 
 type ImageIds =
     | 'IQ.png'
@@ -136,6 +143,7 @@ type SoundIds =
     | 'cursor.mp3'
     | 'danger.mp3'
     | 'door.mp3'
+    | 'drink.mp3'
     | 'electron.mp3'
     | 'equip.mp3'
     | 'error.mp3'
