@@ -160,9 +160,9 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"itemEffectTip": "，攻击+10"
 	},
 	"sword2": {
-		"cls": "items",
+		"cls": "equips",
 		"name": "铁剑",
-		"text": "真的是一把很普通的银剑，哦不，铁剑",
+		"text": "真的是一把很普通的银剑，哦不，铁剑。攻击+180，额外攻击+50",
 		"equip": {
 			"type": 0,
 			"animate": "sword",
@@ -246,17 +246,16 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"itemEffectTip": "，防御+10"
 	},
 	"shield2": {
-		"cls": "items",
-		"name": "银盾",
-		"text": "一个真的很普通的铁盾，这次没错了，就是铁盾！",
+		"cls": "equips",
+		"name": "铁盾",
+		"text": "一个真的很普通的铁盾，这次没错了，就是铁盾！防御+120，生命回复+30",
 		"equip": {
 			"type": 1,
 			"value": {
+				"hpmax": 30,
 				"def": 120
 			},
-			"percentage": {
-				"hpmax": 30
-			}
+			"percentage": {}
 		},
 		"itemEffect": "core.status.hero.def += 20",
 		"itemEffectTip": "，防御+20"
@@ -1349,7 +1348,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "equips",
 		"name": "寒冰护符",
 		"canUseItemEffect": "true",
-		"text": "与寒冰没有任何关系，但是为什么叫寒冰护符呢？攻击和额外攻击各增加5%",
+		"text": "!!html<span style=\"color: gold\">饰品</span>。与寒冰没有任何关系，但是为什么叫寒冰护符呢？攻击和额外攻击各增加5%",
 		"equip": {
 			"type": 0,
 			"value": {},
