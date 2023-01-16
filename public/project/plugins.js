@@ -248,11 +248,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 return false;
             }
 
-            // Step 2: （如有必要）记录打开商店的脚本事件
-            if (!noRoute) {
-                core.status.route.push('shop:' + shopId);
-            }
-
             // Step 3: 检查道具商店 or 公共事件
             if (shop.item) {
                 if (core.openItemShop) {
@@ -265,121 +260,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 }
                 return;
             }
-            if (shop.commonEvent) {
-                core.insertCommonEvent(shop.commonEvent, shop.args);
-                return;
-            }
-
-            // Step 4: 执行标准公共商店
-            core.insertAction(this._convertShop(shop));
             return true;
-        };
-
-        ////// 将一个全局商店转变成可预览的公共事件 //////
-        this._convertShop = function (shop) {
-            return [
-                {
-                    type: 'function',
-                    function: "() => {core.setFlag('@temp@shop', true);}"
-                },
-                {
-                    type: 'while',
-                    condition: 'true',
-                    data: [
-                        // 检测能否访问该商店
-                        {
-                            type: 'if',
-                            condition: "core.isShopVisited('" + shop.id + "')",
-                            true: [
-                                // 可以访问，直接插入执行效果
-                                {
-                                    type: 'function',
-                                    function:
-                                        "() => { core.plugin._convertShop_replaceChoices('" +
-                                        shop.id +
-                                        "', false) }"
-                                }
-                            ],
-                            false: [
-                                // 不能访问的情况下：检测能否预览
-                                {
-                                    type: 'if',
-                                    condition: shop.disablePreview,
-                                    true: [
-                                        // 不可预览，提示并退出
-                                        { type: 'playSound', name: '操作失败' },
-                                        '当前无法访问该商店！',
-                                        { type: 'break' }
-                                    ],
-                                    false: [
-                                        // 可以预览：将商店全部内容进行替换
-                                        {
-                                            type: 'tip',
-                                            text: '当前处于预览模式，不可购买'
-                                        },
-                                        {
-                                            type: 'function',
-                                            function:
-                                                "() => { core.plugin._convertShop_replaceChoices('" +
-                                                shop.id +
-                                                "', true) }"
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    type: 'function',
-                    function: "() => {core.removeFlag('@temp@shop');}"
-                }
-            ];
-        };
-
-        this._convertShop_replaceChoices = function (shopId, previewMode) {
-            var shop = core.status.shops[shopId];
-            var choices = (shop.choices || [])
-                .filter(choice => {
-                    if (choice.condition == null || choice.condition == '')
-                        return true;
-                    try {
-                        return core.calValue(choice.condition);
-                    } catch (e) {
-                        return true;
-                    }
-                })
-                .map(choice => {
-                    var ableToBuy = core.calValue(choice.need);
-                    return {
-                        text: choice.text,
-                        icon: choice.icon,
-                        color:
-                            ableToBuy && !previewMode
-                                ? choice.color
-                                : [153, 153, 153, 1],
-                        action:
-                            ableToBuy && !previewMode
-                                ? [{ type: 'playSound', name: '确定' }].concat(
-                                      choice.action
-                                  )
-                                : [
-                                      { type: 'playSound', name: '操作失败' },
-                                      {
-                                          type: 'tip',
-                                          text: previewMode
-                                              ? '预览模式下不可购买'
-                                              : '购买条件不足'
-                                      }
-                                  ]
-                    };
-                })
-                .concat({ text: '离开', action: [{ type: 'break' }] });
-            core.insertAction({
-                type: 'choices',
-                text: shop.text,
-                choices: choices
-            });
         };
 
         /// 是否访问过某个快捷商店
@@ -426,101 +307,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 return '当前楼层不能使用快捷商店。';
             return null;
         };
-
-        /// 允许商店X键退出
-        core.registerAction(
-            'keyUp',
-            'shops',
-            keycode => {
-                if (
-                    !core.status.lockControl ||
-                    !core.hasFlag('@temp@shop') ||
-                    core.status.event.id != 'action'
-                )
-                    return false;
-                if (core.status.event.data.type != 'choices') return false;
-                var data = core.status.event.data.current;
-                var choices = data.choices;
-                var topIndex =
-                    core.actions.HSIZE -
-                    parseInt((choices.length - 1) / 2) +
-                    (core.status.event.ui.offset || 0);
-                if (keycode == 88 || keycode == 27) {
-                    // X, ESC
-                    core.actions._clickAction(
-                        core.actions.HSIZE,
-                        topIndex + choices.length - 1
-                    );
-                    return true;
-                }
-                if (keycode == 13 || keycode == 32) return true;
-                return false;
-            },
-            60
-        );
-
-        /// 允许长按空格或回车连续执行操作
-        core.registerAction(
-            'keyDown',
-            'shops',
-            keycode => {
-                if (
-                    !core.status.lockControl ||
-                    !core.hasFlag('@temp@shop') ||
-                    core.status.event.id != 'action'
-                )
-                    return false;
-                if (core.status.event.data.type != 'choices') return false;
-                var data = core.status.event.data.current;
-                var choices = data.choices;
-                var topIndex =
-                    core.actions.HSIZE -
-                    parseInt((choices.length - 1) / 2) +
-                    (core.status.event.ui.offset || 0);
-                if (keycode == 13 || keycode == 32) {
-                    // Space, Enter
-                    core.actions._clickAction(
-                        core.actions.HSIZE,
-                        topIndex + core.status.event.selection
-                    );
-                    return true;
-                }
-                return false;
-            },
-            60
-        );
-
-        // 允许长按屏幕连续执行操作
-        core.registerAction(
-            'longClick',
-            'shops',
-            (x, y) => {
-                if (
-                    !core.status.lockControl ||
-                    !core.hasFlag('@temp@shop') ||
-                    core.status.event.id != 'action'
-                )
-                    return false;
-                if (core.status.event.data.type != 'choices') return false;
-                var data = core.status.event.data.current;
-                var choices = data.choices;
-                var topIndex =
-                    core.actions.HSIZE -
-                    parseInt((choices.length - 1) / 2) +
-                    (core.status.event.ui.offset || 0);
-                if (
-                    x >= core.actions.CHOICES_LEFT &&
-                    x <= core.actions.CHOICES_RIGHT &&
-                    y >= topIndex &&
-                    y < topIndex + choices.length
-                ) {
-                    core.actions._clickAction(x, y);
-                    return true;
-                }
-                return false;
-            },
-            60
-        );
     },
     removeMap: function () {
         // 高层塔砍层插件，删除后不会存入存档，不可浏览地图也不可飞到。
@@ -3490,6 +3276,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             if (typeof v !== 'boolean') return false;
             if (!replayableSettings.includes(setting)) return false;
             flags[setting] = v;
+            core.replay();
             return true;
         });
 
@@ -3497,6 +3284,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             if (!name.startsWith('skill:')) return false;
             const skill = parseInt(name.slice(6));
             core.upgradeSkill(skill);
+            core.replay();
+            return true;
         });
 
         core.registerReplayAction('study', name => {
@@ -3510,6 +3299,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             const enemy = core.getEnemyInfo(id, void 0, x, y);
             if (!enemy.special.includes(num)) return false;
             core.studySkill(enemy, num);
+            core.replay();
             return true;
         });
 
@@ -3520,6 +3310,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             if (!name.startsWith('openShop:')) return false;
             openedShopId = name.slice(9);
             shopOpened = true;
+            core.replay();
             return true;
         });
 
@@ -3549,6 +3340,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             if (cost > core.status.hero.money) return false;
             core.status.hero.money -= cost;
             flags.itemShop[openedShopId][id] += type === 'buy' ? num : -num;
+            core.replay();
             return true;
         });
 
@@ -3557,6 +3349,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             if (!shopOpened) return false;
             shopOpened = false;
             openedShopId = '';
+            core.replay();
             return true;
         });
     },

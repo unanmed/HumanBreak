@@ -83,7 +83,6 @@ control.prototype._init = function () {
     this.registerReplayAction('saveEquip', this._replayAction_saveEquip);
     this.registerReplayAction('loadEquip', this._replayAction_loadEquip);
     this.registerReplayAction('fly', this._replayAction_fly);
-    this.registerReplayAction('shop', this._replayAction_shop);
     this.registerReplayAction('turn', this._replayAction_turn);
     this.registerReplayAction('getNext', this._replayAction_getNext);
     this.registerReplayAction('moveDirectly', this._replayAction_moveDirectly);
@@ -2354,18 +2353,6 @@ control.prototype._replayAction_fly = function (action) {
         if (!core.flyTo(floorId, core.replay))
             core.control._replay_error(action);
     }, core.control.__replay_getTimeout());
-    return true;
-};
-
-control.prototype._replayAction_shop = function (action) {
-    if (action.indexOf('shop:') != 0) return false;
-    var shopId = action.substring(5);
-    if (core.canUseQuickShop(shopId) != null || !core.canOpenShop(shopId)) {
-        this._replay_error(shopId);
-        return true;
-    }
-    core.openShop(shopId, false);
-    core.replay();
     return true;
 };
 
