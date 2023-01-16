@@ -12,13 +12,13 @@ interface ItemDeclaration {
     greenPotion: 'items';
     sword0: 'items';
     sword1: 'equips';
-    sword2: 'items';
+    sword2: 'equips';
     sword3: 'items';
     sword4: 'items';
     sword5: 'items';
     shield0: 'items';
     shield1: 'equips';
-    shield2: 'items';
+    shield2: 'equips';
     shield3: 'items';
     shield4: 'items';
     shield5: 'items';

@@ -66,7 +66,7 @@ export function getMarkInfo(id: EnemyIds, noMessage: boolean = false) {
             tip('success', `踩到了${core.material.enemys[id].name}的临界！`);
         }
         reached[info.nextCritical] = true;
-        const n = core.nextCriticals(id, 1)[0]?.[0];
+        const n = core.nextCriticals(id, 1, void 0, void 0, 'empty')[0]?.[0];
         const next = (n ?? 0) + core.status.hero.atk;
         info.nextCritical = next;
     }
@@ -80,37 +80,40 @@ export function checkMarkedEnemy(noMessage: boolean = false) {
     const hp = core.status.hero.hp;
     getMarkedEnemy().forEach(v => {
         getMarkInfo(v);
-        const damage = core.getDamageInfo(v)?.damage ?? -1;
+        const damage =
+            core.getDamageInfo(v, void 0, void 0, void 0, 'empty')?.damage ??
+            -1;
         if (damage === -1) return;
         const info = enemyDamageInfo[v]!;
         const name = core.material.enemys[v].name;
+        let res = 0;
         if (damage <= 0) {
             if (!noMessage) tip('success', `${name}已经零伤了！`);
         } else if (damage < hp / 3) {
             if (!info[3] && !noMessage) {
                 tip('success', `${name}的伤害已降至勇士生命值的1/3！`);
             }
-            info[1] = true;
-            info[2] = true;
-            info[3] = true;
+            res = 0b111;
         } else if (damage < (hp / 3) * 2) {
             if (!info[2] && !noMessage) {
                 tip('success', `${name}的伤害已降至勇士生命值的2/3！`);
             }
-            info[1] = true;
-            info[2] = true;
-            info[3] = false;
+            res = 0b110;
         } else if (damage < hp) {
             if (!info[1] && !noMessage) {
                 tip('success', `你已经能打过${name}了！`);
             }
+            res = 0b100;
+        }
+        info[1] = info[2] = info[3] = false;
+        if (res & 0b100) {
             info[1] = true;
-            info[2] = false;
-            info[3] = false;
-        } else {
-            info[1] = false;
-            info[2] = false;
-            info[3] = false;
+        }
+        if (res & 0b010) {
+            info[2] = true;
+        }
+        if (res & 0b001) {
+            info[3] = true;
         }
     });
 }

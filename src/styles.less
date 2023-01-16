@@ -25,12 +25,26 @@
     transition: color 0.2s linear;
 }
 
+.button-text[active='true'],
 .button-text:hover {
     color: aqua;
 }
 
 .button-text:active {
     color: aquamarine;
+}
+
+.button-text[danger='true'][danger-display='true'] {
+    color: rgb(255, 47, 47);
+}
+
+.button-text[danger='true']:hover,
+.button-text[danger='true'][active='true'] {
+    color: rgb(255, 120, 120);
+}
+
+.button-text[danger='true']:active {
+    color: rgb(255, 182, 182);
 }
 
 .selectable {

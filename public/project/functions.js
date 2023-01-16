@@ -1122,29 +1122,19 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 return damageInfo;
             }
 
-            if (toMap.length <= 1) {
-                // 单个与多个分开计算，有助于提高性能表现
+            const dirDamage = [];
+            for (const dir of toMap) {
+                damage = Infinity;
+                damageInfo = null;
                 autoSkill();
-                if (damageInfo) {
-                    return Object.assign(damageInfo, {
-                        dir: [toMap[0]?.[0] ?? 'none', damage]
-                    });
-                } else return null;
-            } else {
-                const dirDamage = [];
-                for (const dir of toMap) {
-                    damage = Infinity;
-                    damageInfo = null;
-                    autoSkill();
-                    dirDamage.push([dir, damage]);
-                    if (damage < dirMinDamage) {
-                        dirMinDamage = damage;
-                        dirDamageInfo = damageInfo;
-                    }
-                    if (dirDamageInfo) {
-                        return Object.assign(dirDamageInfo, { dir: dirDamage });
-                    } else return null;
+                dirDamage.push([dir, damage]);
+                if (damage < dirMinDamage) {
+                    dirMinDamage = damage;
+                    dirDamageInfo = damageInfo;
                 }
+                if (dirDamageInfo) {
+                    return Object.assign(dirDamageInfo, { dir: dirDamage });
+                } else return null;
             }
         }
     },

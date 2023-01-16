@@ -152,6 +152,9 @@ interface PluginUis {
     /** 定点查看的界面，特殊属性还是临界 */
     fixedDetailPanel: 'special' | 'critical';
 
+    /** 打开的商店id */
+    openedShopId: string;
+
     /** ui是否使用渐变 */
     readonly transition: Ref<boolean>;
 
@@ -199,6 +202,9 @@ interface PluginUis {
 
     /** 是否展示移动鼠标显示怪物信息的盒子 */
     readonly showFixed: Ref<boolean>;
+
+    /** 商店是否打开 */
+    readonly shopOpened: Ref<boolean>;
 
     /** ui栈 */
     readonly uiStack: Ref<Component[]>;
