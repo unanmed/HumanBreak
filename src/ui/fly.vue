@@ -381,7 +381,7 @@ function draw() {
 
 function download() {
     if (nowArea.value === '') {
-        tip('error', '当前地图不再任意一个区域内！');
+        tip('error', '当前地图不在任意一个区域内！');
         return;
     }
     downloadMode = true;
