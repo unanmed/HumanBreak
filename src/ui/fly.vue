@@ -24,6 +24,13 @@
                     un-checked-children="OFF"
                 ></a-switch>
             </div>
+            <span
+                v-if="!isMobile"
+                class="button-text"
+                id="fly-download"
+                @click="download"
+                >下载地图图片</span
+            >
         </div>
         <div id="fly-main">
             <div id="fly-left">
@@ -86,7 +93,7 @@ import {
     DoubleRightOutlined
 } from '@ant-design/icons-vue';
 import { debounce } from 'lodash';
-import { keycode, tip } from '../plugin/utils';
+import { downloadCanvasImage, keycode, tip } from '../plugin/utils';
 import { sleep } from 'mutate-animate';
 import { KeyCode } from '../plugin/keyCodes';
 
@@ -94,7 +101,7 @@ type Loc2 = [number, number, number, number];
 
 const area = getArea();
 const nowArea = ref(
-    Object.keys(area).find(v => area[v].includes(core.status.floorId))!
+    Object.keys(area).find(v => area[v].includes(core.status.floorId)) ?? ''
 );
 const nowFloor = ref(core.status.floorId);
 const noBorder = ref(true);
@@ -137,6 +144,7 @@ let map: HTMLCanvasElement;
 let mapCtx: CanvasRenderingContext2D;
 let thumb: HTMLCanvasElement;
 let thumbCtx: CanvasRenderingContext2D;
+let downloadMode = false;
 
 function exit() {
     core.plugin.flyOpened.value = false;
@@ -279,7 +287,7 @@ function drawThumbnail(
     y: number,
     noCheck: boolean = false
 ) {
-    if (!noCheck && !checkThumbnail(floorId, x, y)) return;
+    if (!downloadMode && !noCheck && !checkThumbnail(floorId, x, y)) return;
     const floor = core.status.maps[floorId];
     drawedThumbnail[floorId] = true;
 
@@ -295,25 +303,27 @@ function drawThumbnail(
         ctx,
         damage: scale > 7
     });
-    if (!core.hasVisitedFloor(floorId)) {
-        ctx.fillStyle = '#d0d6';
-        ctx.fillRect(
-            x - floor.width / 2,
-            y - floor.height / 2,
-            floor.width,
-            floor.height
-        );
-        ctx.fillStyle = '#000';
-    }
-    if (nowFloor.value === floorId) {
-        ctx.fillStyle = '#ff04';
-        ctx.fillRect(
-            x - floor.width / 2,
-            y - floor.height / 2,
-            floor.width,
-            floor.height
-        );
-        ctx.fillStyle = '#000';
+    if (!downloadMode) {
+        if (!core.hasVisitedFloor(floorId)) {
+            ctx.fillStyle = '#d0d6';
+            ctx.fillRect(
+                x - floor.width / 2,
+                y - floor.height / 2,
+                floor.width,
+                floor.height
+            );
+            ctx.fillStyle = '#000';
+        }
+        if (nowFloor.value === floorId) {
+            ctx.fillStyle = '#ff04';
+            ctx.fillRect(
+                x - floor.width / 2,
+                y - floor.height / 2,
+                floor.width,
+                floor.height
+            );
+            ctx.fillStyle = '#000';
+        }
     }
 }
 
@@ -367,6 +377,22 @@ function draw() {
     thumbnailLoc = {};
     drawMap();
     drawRight();
+}
+
+function download() {
+    if (nowArea.value === '') {
+        tip('error', '当前地图不再任意一个区域内！');
+        return;
+    }
+    downloadMode = true;
+    const before = scale;
+    scale = 32;
+    drawMap();
+    downloadCanvasImage(temp, nowArea.value);
+    scale = before;
+    downloadMode = false;
+    draw();
+    tip('success', '图片下载成功！');
 }
 
 function fly() {

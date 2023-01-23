@@ -163,3 +163,30 @@ export function nextFrame(cb: (time: number) => void) {
         requestAnimationFrame(cb);
     });
 }
+
+/**
+ * 下载一个画布对应的图片
+ * @param canvas 画布
+ * @param name 图片名称
+ */
+export function downloadCanvasImage(
+    canvas: HTMLCanvasElement,
+    name: string
+): void {
+    const data = canvas.toDataURL('image/png');
+    download(data, name);
+}
+
+/**
+ * 下载一个文件
+ * @param content 下载的内容
+ * @param name 文件名称
+ */
+export function download(content: string, name: string) {
+    const a = document.createElement('a');
+    a.download = `${name}.png`;
+    a.href = content;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}

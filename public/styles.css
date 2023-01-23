@@ -439,6 +439,10 @@ p#name {
     image-rendering: pixelated;
 }
 
+/* .draw-canvas {
+    filter: contrast(120%) brightness(80%);
+} */
+
 #inputDiv {
     display: none;
     width: 100%;
