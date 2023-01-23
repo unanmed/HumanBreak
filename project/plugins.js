@@ -749,12 +749,12 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             }
             this._updateDamage_damage(floorId, onMap);
             this._updateDamage_extraDamage(floorId, onMap);
-            core.getItemDetail(floorId); // 宝石血瓶详细信息
+            core.getItemDetail(floorId, onMap); // 宝石血瓶详细信息
             this.drawDamage(ctx);
         };
 
         // 获取宝石信息 并绘制
-        this.getItemDetail = function (floorId) {
+        this.getItemDetail = function (floorId, onMap) {
             if (!core.getFlag('itemDetail')) return;
             floorId ??= core.status.thisMap.floorId;
             let diff = {};
@@ -779,7 +779,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 const x = block.x,
                     y = block.y;
                 // v2优化，只绘制范围内的部分
-                if (core.bigmap.v2) {
+                if (onMap && core.bigmap.v2) {
                     if (
                         x < core.bigmap.posX - core.bigmap.extend ||
                         x > core.bigmap.posX + core._PX_ + core.bigmap.extend ||
