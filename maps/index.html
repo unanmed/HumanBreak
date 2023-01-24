@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人类：开天辟地 缩略图集</title>
+    <style>
+        html {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            background-color: black;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        #map-group {
+            display: flex;
+            width: 50%;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #map-group span {
+            font-size: 32px;
+        }
+
+        a {
+            color: aqua;
+            text-decoration: none;
+            transition: color 0.2s linear;
+            width: 100%;
+        }
+
+        a:hover {
+            color: aquamarine;
+        }
+
+        img {
+            width: 90%;
+            border: 1px solid #ddd4;
+            border-style: dashed;
+            cursor: pointer;
+        }
+
+        .map-one {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map-group">
+        <span>人类：开天辟地 缩略图集</span>
+    </div>
+    <script>
+        const list = ['草原', '洞穴', '勇气之路', '智慧小径'];
+        let html = '';
+        list.forEach(v => {
+            html += `
+        <div class="map-one">
+            <a href="${v}.png" class="map-a" target="_blank">${v}</a>
+            <img src="${v}.png" class="map-img" onclick="window.open('${v}.png')"></img>
+        </div>
+`
+        });
+
+        const div = document.getElementById('map-group');
+        div.innerHTML += html;
+    </script>
+</body>
+
+</html>
