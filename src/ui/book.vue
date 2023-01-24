@@ -235,10 +235,6 @@ onUnmounted(async () => {
     font-size: 3.2vh;
 }
 
-.tools {
-    border-bottom: 1px solid #ddd4;
-}
-
 #none {
     width: 100%;
     height: 100%;

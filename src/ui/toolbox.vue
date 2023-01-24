@@ -281,7 +281,6 @@ onUnmounted(() => {
 
     .tools {
         white-space: nowrap;
-        border-bottom: 1px solid #ddd4;
     }
 }
 
