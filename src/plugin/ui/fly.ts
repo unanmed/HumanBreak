@@ -176,7 +176,7 @@ export function getMapData(
     while (queue.length > 0) {
         const now = queue.shift()!;
         const change = core.floors[now].changeFloor;
-        const blocks = core.getMapBlocksObj(now);
+        const blocks = core.getMapBlocksObj(now, noCache);
         for (const [loc, ev] of Object.entries(change)) {
             const target = ev.floorId as FloorIds;
             if (target.startsWith(':')) continue;
