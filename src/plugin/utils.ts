@@ -1,3 +1,4 @@
+/// <reference path="../types/core.d.ts" />
 import { message } from 'ant-design-vue';
 import { MessageApi } from 'ant-design-vue/lib/message';
 import { isNil } from 'lodash';
@@ -69,7 +70,7 @@ export function keycode(key: number) {
  * @param css 要解析的css字符串
  */
 export function parseCss(css: string): Partial<Record<CanParseCss, string>> {
-    const str = css.replace(/[\n\s\t]*/g, '').replace(/[;,]*/g, ';');
+    const str = css.replace(/[\n\s\t]*/g, '').replace(/;*/g, ';');
     const styles = str.split(';');
     const res: Partial<Record<CanParseCss, string>> = {};
 

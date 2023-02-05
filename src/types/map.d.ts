@@ -61,7 +61,7 @@ interface Block<N extends Exclude<AllNumbers, 0> = Exclude<AllNumbers, 0>> {
         /**
          * 图块是否不可通行
          */
-        nopass: boolean;
+        noPass: boolean;
 
         /**
          * 图块高度

@@ -863,6 +863,11 @@ type SelectType<R, T> = {
 };
 
 /**
+ * 从一个对象中选择类型是目标属性的键名
+ */
+type SelectKey<R, T> = keyof SelectType<R, T>;
+
+/**
  * 获取一段字符串的第一个字符
  */
 type FirstCharOf<T extends string> = T extends `${infer F}${infer A}`
@@ -883,3 +888,5 @@ type NonObjectOf<T> = SelectType<T, NonObject>;
  * 以一个字符串结尾
  */
 type EndsWith<T extends string> = `${string}${T}`;
+
+type KeyExcludesUnderline<T> = Excluede<keyof T, `_${string}`>;

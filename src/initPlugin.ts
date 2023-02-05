@@ -11,6 +11,9 @@ import chapter from './plugin/ui/chapter';
 import fly from './plugin/ui/fly';
 import chase from './plugin/chase/chase';
 import fixed from './plugin/ui/fixed';
+import webglUtils from './plugin/webgl/utils';
+import shadow from './plugin/webgl/shadow';
+import gameShadow from './plugin/webgl/gameShadow';
 
 function forward() {
     // 每个引入的插件都要在这里执行，否则不会被转发
@@ -26,7 +29,10 @@ function forward() {
         chapter(),
         fly(),
         chase(),
-        fixed()
+        fixed(),
+        webglUtils(),
+        shadow(),
+        gameShadow()
     ];
 
     // 初始化所有插件，并转发到core上
