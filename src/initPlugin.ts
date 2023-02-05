@@ -12,8 +12,8 @@ import fly from './plugin/ui/fly';
 import chase from './plugin/chase/chase';
 import fixed from './plugin/ui/fixed';
 import webglUtils from './plugin/webgl/utils';
-import shadow from './plugin/webgl/shadow';
-import gameShadow from './plugin/webgl/gameShadow';
+import shadow from './plugin/shadow/shadow';
+import gameShadow from './plugin/shadow/gameShadow';
 
 function forward() {
     // 每个引入的插件都要在这里执行，否则不会被转发
