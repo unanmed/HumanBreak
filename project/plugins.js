@@ -2,6 +2,7 @@
 
 var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
     init: function () {
+        // 只看插件没用，插件是与vite样板高度融合的，所以要看的话就在游戏内的百科全书-关于游戏内点那个开源地址吧
         this._afterLoadResources = function () {
             if (!main.replayChecking && main.mode === 'play') {
                 main.forward();
@@ -770,12 +771,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             core.status.hero = new Proxy(hero, handler);
 
             core.status.maps[floorId].blocks.forEach(function (block) {
-                if (
-                    block.event.cls !== 'items' ||
-                    block.event.id === 'superPotion' ||
-                    block.disable
-                )
-                    return;
+                if (block.event.cls !== 'items' || block.disable) return;
                 const x = block.x,
                     y = block.y;
                 // v2优化，只绘制范围内的部分

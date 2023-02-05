@@ -4226,7 +4226,8 @@ ui.prototype.deleteCanvas = function (name) {
 
 ////// 删除所有动态canvas //////
 ui.prototype.deleteAllCanvas = function () {
-    return this.deleteCanvas(function () {
+    this.deleteCanvas(function () {
         return true;
     });
+    if (main.mode === 'play' && !core.isReplaying()) core.initShadowCanvas();
 };

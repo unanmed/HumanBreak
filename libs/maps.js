@@ -3202,6 +3202,7 @@ maps.prototype.removeBlock = function (x, y, floorId) {
         const block = blocks[i];
         this.removeBlockByIndex(i, floorId);
         this._removeBlockFromMap(floorId, block);
+        core.updateShadow(true);
         return true;
     }
     return false;
@@ -3364,6 +3365,7 @@ maps.prototype.setBlock = function (number, x, y, floorId, noredraw) {
             }
         }
     }
+    core.updateShadow(true);
 };
 
 maps.prototype.animateSetBlock = function (
