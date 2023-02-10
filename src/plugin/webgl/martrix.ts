@@ -72,7 +72,7 @@ export class Matrix4 extends Matrix {
      * @param y 平移纵坐标
      * @param z 平移竖坐标
      */
-    translation(x: number, y: number, z: number) {
+    translate(x: number, y: number, z: number) {
         this.multipy([
             [1, 0, 0, x],
             [0, 1, 0, y],

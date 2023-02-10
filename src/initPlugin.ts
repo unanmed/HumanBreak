@@ -1,4 +1,3 @@
-// 需要引入所有的插件
 import pop from './plugin/pop';
 import ui from './plugin/uiController';
 import use from './plugin/use';
@@ -16,7 +15,6 @@ import shadow from './plugin/shadow/shadow';
 import gameShadow from './plugin/shadow/gameShadow';
 
 function forward() {
-    // 每个引入的插件都要在这里执行，否则不会被转发
     const toForward: any[] = [
         pop(),
         ui(),
