@@ -49,6 +49,10 @@ export class Particle {
 
     /** 需要渲染的粒子列表 */
     list: ParticleOne[] = [];
+    /** 是否需要更新缓冲区数据 */
+    needUpdateBuffer: boolean = false;
+    /** 当前缓存信息 */
+    cache?: Float32Array;
 
     /** 是否需要更新 */
     private needUpdate: boolean = false;
@@ -176,6 +180,27 @@ export class Particle {
     }
 
     /**
+     * 获取粒子的Float32Array信息
+     */
+    getArrayInfo() {
+        if (!this.cache || this.needUpdateBuffer) {
+            const array = this.list;
+            const particleArray = new Float32Array(
+                array
+                    .map(v => {
+                        const [r, g, b, a] = v.color;
+                        return [v.x, v.y, v.z, r, g, b, a, v.r, 0];
+                    })
+                    .flat()
+            );
+            this.cache = particleArray;
+            return particleArray;
+        } else {
+            return this.cache;
+        }
+    }
+
+    /**
      * 每帧执行的粒子更新器
      */
     private updateParticleData() {
@@ -185,10 +210,12 @@ export class Particle {
         // check number
         if (this.list.length > this.density) {
             this.list.splice(this.density);
+            this.needUpdateBuffer = true;
         } else if (this.list.length < this.density) {
             this.list.push(
                 ...this.generateNewParticles(this.density - this.list.length)
             );
+            this.needUpdateBuffer = true;
         }
 
         // check radius
@@ -198,6 +225,7 @@ export class Particle {
                 this.list.forEach(v => {
                     v.r += delta;
                 });
+                this.needUpdateBuffer = true;
             }
         }
 
@@ -214,6 +242,7 @@ export class Particle {
                     v.color[2] += b;
                     v.color[3] += a;
                 });
+                this.needUpdateBuffer = true;
             }
         }
 
@@ -228,6 +257,7 @@ export class Particle {
                     v.y += y;
                     v.z += z;
                 });
+                this.needUpdateBuffer = true;
             }
         }
 
@@ -266,6 +296,7 @@ export class Particle {
                         }) as ParticleColor;
                     });
                 }
+                this.needUpdateBuffer = true;
             }
         }
 
@@ -298,6 +329,6 @@ export class Particle {
      * 渲染这个粒子
      */
     private render() {
-        this.renderer?.render(this);
+        this.renderer?.render();
     }
 }

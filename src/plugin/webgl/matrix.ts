@@ -1,4 +1,3 @@
-import { cloneDeep } from 'lodash';
 import { has } from '../utils';
 
 export class Matrix extends Array<number[]> {

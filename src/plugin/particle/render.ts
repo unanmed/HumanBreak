@@ -202,15 +202,8 @@ export class Renderer {
      * 更新一个粒子的缓冲区数据
      * @param array 粒子的粒子元素数组
      */
-    private updateOneParticleBufferData(array: ParticleOne[]) {
-        const particleArray = new Float32Array(
-            array
-                .map(v => {
-                    const [r, g, b, a] = v.color;
-                    return [v.x, v.y, v.z, r, g, b, a, v.r, 0];
-                })
-                .flat()
-        );
+    private updateOneParticleBufferData(particle: Particle) {
+        const particleArray = particle.getArrayInfo();
         this.gl.bufferData(
             this.gl.ARRAY_BUFFER,
             particleArray,
@@ -240,7 +233,7 @@ export class Renderer {
      * @param particle 要渲染的粒子
      */
     private renderOne(particle: Particle) {
-        const arr = this.updateOneParticleBufferData(particle.list);
+        const arr = this.updateOneParticleBufferData(particle);
         const size = arr.BYTES_PER_ELEMENT;
 
         const { position, color, radius } = this.attribLocation;
@@ -307,11 +300,9 @@ window.addEventListener('load', async () => {
     camera.lookAt([1, 1, 5], [0, 0, 0], [0, 1, 0]);
     camera.setPerspective(20, 1, 1, 100);
 
-    console.log(camera.view, camera.projection);
-
-    particle.setColor([0.3, 0.6, 0.7, 0.7]);
-    particle.setRadius(3);
-    particle.setDensity(1000);
+    particle.setColor([0.3, 0.6, 0.7, 1.0]);
+    particle.setRadius(2);
+    particle.setDensity(5000);
     particle.setThreshold({
         posX: 0.2,
         posY: 0.2,
