@@ -822,12 +822,12 @@ type DeepReadonly<T> = {
 };
 
 /**
- * 深度可选一个对象，使其所有属性都
+ * 深度可选一个对象，使其所有属性都可选
  */
 type DeepPartial<T> = {
     [P in keyof T]?: T[P] extends number | string | boolean
         ? T[P]
-        : DeepReadonly<T[P]>;
+        : DeepPartial<T[P]>;
 };
 
 /**
@@ -836,7 +836,7 @@ type DeepPartial<T> = {
 type DeepRequired<T> = {
     [P in keyof T]-?: T[P] extends number | string | boolean
         ? T[P]
-        : DeepReadonly<T[P]>;
+        : DeepRequired<T[P]>;
 };
 
 /**
@@ -852,7 +852,7 @@ type Writable<T> = {
 type DeepWritable<T> = {
     -readonly [P in keyof T]: T[P] extends number | string | boolean
         ? T[P]
-        : DeepReadonly<T[P]>;
+        : DeepWritable<T[P]>;
 };
 
 /**

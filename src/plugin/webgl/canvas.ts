@@ -87,6 +87,8 @@ export function createProgram(
         throw new Error(`Program link fail: ${err}`);
     }
 
+    gl.useProgram(program);
+
     return program;
 }
 
@@ -113,7 +115,7 @@ export function loadShader(
     gl.compileShader(shader);
 
     // 检查是否编译成功
-    const compiled = gl.getShaderParameter(gl, gl.COMPILE_STATUS);
+    const compiled = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
     if (!compiled) {
         const err = gl.getShaderInfoLog(shader);
         throw new Error(`Shader compile fail: ${err}`);

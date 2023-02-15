@@ -1,3 +1,4 @@
+import { cloneDeep } from 'lodash';
 import { has } from '../utils';
 
 export class Matrix extends Array<number[]> {
@@ -40,26 +41,31 @@ export class Matrix extends Array<number[]> {
             );
         }
         const n = this.length;
-        const arr = this.map(v => v.slice());
+        const arr = Array.from(this).map(v => v.slice());
         for (let i = 0; i < n; i++) {
             for (let j = 0; j < n; j++) {
+                this[i][j] = 0;
                 for (let k = 0; k < n; k++) {
-                    this[i][j] = arr[i][k] * matrix[k][j];
+                    this[i][j] += arr[i][k] * matrix[k][j];
                 }
             }
         }
+
         return this;
     }
 }
 
 export class Matrix4 extends Matrix {
     constructor(...n: number[][]) {
-        n ??= [
-            [1, 0, 0, 0],
-            [0, 1, 0, 0],
-            [0, 0, 1, 0],
-            [0, 0, 0, 1]
-        ];
+        if (n.length === 0) {
+            n = [
+                [1, 0, 0, 0],
+                [0, 1, 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 0, 1]
+            ];
+        }
+
         if (n.length !== 4) {
             throw new TypeError(`The length of delivered array must be 4.`);
         }
@@ -142,7 +148,7 @@ export class Matrix4 extends Matrix {
      */
     transpose(target: 'this' | 'new' = 'new'): Matrix4 {
         const t = target === 'this' ? this : new Matrix4();
-        const arr = this.map(v => v.slice());
+        const arr = Array.from(this).map(v => v.slice());
         for (let i = 0; i < 4; i++) {
             for (let j = 0; j < 4; j++) {
                 t[i][j] = arr[j][i];
@@ -155,6 +161,6 @@ export class Matrix4 extends Matrix {
      * 转换成列主序的Float32Array，用于webgl
      */
     toWebGLFloat32Array(): Float32Array {
-        return new Float32Array(this.transpose().flat());
+        return new Float32Array(Array.from(this.transpose()).flat());
     }
 }
