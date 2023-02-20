@@ -7,7 +7,7 @@ interface MainData {
     /**
      * 分区指定
      */
-    readonly floorPatitions: [FloorIds, FloorIds?][];
+    readonly floorPartitions: [FloorIds, FloorIds?][];
 
     /**
      * 所有的额外素材

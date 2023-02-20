@@ -596,17 +596,7 @@ interface InitGameStatus {
     /**
      * 游戏是否结束
      */
-    gameOver: false;
-
-    /**
-     * 当前勇士状态信息。例如core.status.hero.atk就是当前勇士的攻击力数值
-     */
-    hero: {};
-
-    /**
-     * 当前层的floorId
-     */
-    floorId: null;
+    gameOver: boolean;
 
     /**
      * 所有楼层的地图信息
@@ -614,11 +604,6 @@ interface InitGameStatus {
     maps: {
         [P in FloorIds]: Floor<P>;
     };
-
-    /**
-     * 获得当前楼层信息，等价于core.status.maps[core.status.floorId]
-     */
-    thisMap: null;
 
     /**
      * 背景图块
@@ -634,11 +619,6 @@ interface InitGameStatus {
      * 以坐标列举的图块
      */
     mapBlockObjs: Record<FloorIds, Record<LocString, Block>>;
-
-    /**
-     * 地图伤害
-     */
-    checkBlock: {};
 
     /**
      * 伤害显示信息
@@ -789,12 +769,24 @@ interface InitGameStatus {
  * 运行时的游戏状态
  */
 interface GameStatus extends InitGameStatus {
-    played: boolean;
-    gameOver: boolean;
+    /**
+     * 当前层的floorId
+     */
     floorId: FloorIds;
+
+    /**
+     * 获得当前楼层信息，等价于core.status.maps[core.status.floorId]
+     */
     thisMap: ResolvedFloor;
+
+    /**
+     * 地图伤害
+     */
     checkBlock: Readonly<CheckBlockStatus>;
-    lockControl: boolean;
+
+    /**
+     * 当前勇士状态信息。例如core.status.hero.atk就是当前勇士的攻击力数值
+     */
     hero: HeroStatus;
 }
 
