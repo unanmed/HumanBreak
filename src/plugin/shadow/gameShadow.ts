@@ -13,11 +13,11 @@ export default function init() {
 }
 
 const shadowInfo: Partial<Record<FloorIds, Light[]>> = {
-    MT46: [
+    MT43: [
         {
             id: 'mt42_1',
-            x: 85,
-            y: 85,
+            x: 280,
+            y: 220,
             decay: 100,
             r: 300,
             color: '#0000'
@@ -25,13 +25,13 @@ const shadowInfo: Partial<Record<FloorIds, Light[]>> = {
     ]
 };
 const backgroundInfo: Partial<Record<FloorIds, Color>> = {
-    MT46: '#0008'
+    MT43: '#0008'
 };
 const blurInfo: Partial<Record<FloorIds, number>> = {
-    MT46: 4
+    MT43: 4
 };
 const immersionInfo: Partial<Record<FloorIds, number>> = {
-    MT46: 8
+    MT43: 8
 };
 const shadowCache: Partial<Record<FloorIds, Polygon[]>> = {};
 

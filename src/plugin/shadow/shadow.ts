@@ -76,15 +76,15 @@ const transitionList: Record<string, Transition> = {};
 export function initShadowCanvas() {
     const w = core._PX_ ?? core.__PIXELS__;
     const h = core._PY_ ?? core.__PIXELS__;
-    ctx = core.createCanvas('shadow', 0, 0, w, h, 55);
+    ctx = core.createCanvas('shadow', -32, -32, w + 64, h + 64, 55);
     canvas = ctx.canvas;
     const s = core.domStyle.scale * devicePixelRatio;
-    temp1.width = w * s;
-    temp1.height = h * s;
-    temp2.width = w * s;
-    temp2.height = h * s;
-    temp3.width = w * s;
-    temp3.height = h * s;
+    temp1.width = (w + 64) * s;
+    temp1.height = (h + 64) * s;
+    temp2.width = (w + 64) * s;
+    temp2.height = (h + 64) * s;
+    temp3.width = (w + 64) * s;
+    temp3.height = (h + 64) * s;
     ct1.scale(s, s);
     ct2.scale(s, s);
     ct3.scale(s, s);
@@ -401,8 +401,8 @@ export function setBlur(n: number) {
  * 绘制阴影
  */
 export function drawShadow() {
-    const w = core._PX_ ?? core.__PIXELS__;
-    const h = core._PY_ ?? core.__PIXELS__;
+    const w = (core._PX_ ?? core.__PIXELS__) + 64;
+    const h = (core._PY_ ?? core.__PIXELS__) + 64;
     needRefresh = false;
     ctx.clearRect(0, 0, w, h);
     ct1.clearRect(0, 0, w, h);
@@ -421,7 +421,7 @@ export function drawShadow() {
         ct2.clearRect(0, 0, w, h);
         if (!noShelter) {
             for (const polygon of shadowNodes) {
-                const area = polygon.shadowArea(x, y, r);
+                const area = polygon.shadowArea(x + 32, y + 32, r);
                 area.forEach(v => {
                     ct1.beginPath();
                     ct1.moveTo(v[0][0], v[0][1]);

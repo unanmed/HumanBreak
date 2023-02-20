@@ -14,7 +14,7 @@ export class Polygon {
         if (nodes.length < 3) {
             throw new Error(`Nodes number delivered is less than 3!`);
         }
-        this.nodes = nodes;
+        this.nodes = nodes.map(v => [v[0] + 32, v[1] + 32]);
     }
 
     /**
@@ -24,12 +24,14 @@ export class Polygon {
         const id = `${x},${y}`;
         if (this.cache[id]) return this.cache[id];
         const res: LocArr[][] = [];
-        const w = core._PX_ ?? core.__PIXELS__;
-        const h = core._PY_ ?? core.__PIXELS__;
+        const w = (core._PX_ ?? core.__PIXELS__) + 64;
+        const h = (core._PY_ ?? core.__PIXELS__) + 64;
+
+        const aspect = h / w;
 
         const intersect = (nx: number, ny: number): LocArr => {
             const k = (ny - y) / (nx - x);
-            if (k > 1 || k < -1) {
+            if (k > aspect || k < -aspect) {
                 if (ny < y) {
                     const ix = x + y / k;
                     return [2 * x - ix, 0];

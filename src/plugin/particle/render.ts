@@ -4,7 +4,7 @@ import { createProgram } from '../webgl/canvas';
 import { Matrix4 } from '../webgl/matrix';
 import { isWebGLSupported } from '../webgl/utils';
 import { Camera, Position3D } from './camera';
-import { Particle, ParticleColor, ParticleOne } from './particle';
+import { Particle, ParticleColor } from './particle';
 
 // 顶点着色器与片元着色器
 // 很像C对吧（但这不是C，是glsl
@@ -286,47 +286,3 @@ export class Renderer {
         throw new Error(`Your service or browser does not support webgl!`);
     }
 }
-
-window.addEventListener('load', async () => {
-    const renderer = new Renderer(
-        480 * core.domStyle.scale,
-        480 * core.domStyle.scale
-    );
-    const particle = new Particle();
-    const camera = new Camera();
-    renderer.bindCamera(camera);
-    particle.appendTo(renderer);
-    renderer.append(core.dom.gameDraw);
-    camera.lookAt([1, 1, 5], [0, 0, 0], [0, 1, 0]);
-    camera.setPerspective(20, 1, 1, 100);
-
-    particle.setColor([0.3, 0.6, 0.7, 1.0]);
-    particle.setRadius(2);
-    particle.setDensity(5000);
-    particle.setThreshold({
-        posX: 0.2,
-        posY: 0.2,
-        posZ: 10,
-        radius: 0,
-        color: 0
-    });
-    particle.generate();
-
-    renderer.canvas.style.position = 'absolute';
-    renderer.canvas.style.zIndex = '160';
-
-    renderer.render();
-
-    await sleep(5000);
-    const now: Position3D = [1, 1, 5];
-    const path = circle(1, 1000, [0, 0]);
-    let f = 0;
-    new Ticker().add(() => {
-        camera.lookAt(now, [0, 0, 0], [0, 1, 0]);
-        const [x, y] = path(f / 1000 / 2000);
-        f++;
-        now[0] = x;
-        now[1] = y;
-        renderer.render();
-    });
-});
