@@ -528,7 +528,7 @@ type MainDom = {
      * 自绘状态栏画布的context
      */
     statusCanvasCtx: CanvasRenderingContext2D;
-
+} & {
     [key: string]: HTMLElement;
 };
 
@@ -806,7 +806,7 @@ type CoreStatusBarElements = {
      * 状态栏的图标元素
      */
     readonly image: Record<string, HTMLImageElement>;
-
+} & {
     readonly [key: string]: HTMLElement;
 };
 
@@ -1079,7 +1079,7 @@ interface Core extends Pick<Main, CoreDataFromMain> {
      * @param _this 执行函数的上下文
      * @param params 函数的参数
      */
-    doFunc<F extends Function>(
+    doFunc<F extends (...args: any) => any>(
         func: F,
         _this: any,
         ...params: Parameters<F>
@@ -1210,7 +1210,16 @@ interface Main extends MainData {
     /**
      * 所有的素材图片名称
      */
-    readonly materials: Materials;
+    readonly materials: [
+        'animates',
+        'enemys',
+        'items',
+        'npcs',
+        'terrains',
+        'enemy48',
+        'npc48',
+        'icons'
+    ];
 
     /**
      * 要加载的project目录下的文件

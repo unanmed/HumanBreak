@@ -309,7 +309,7 @@ interface ActionStatusData {
     /**
      * 当前的事件类型
      */
-    type: EventType;
+    type: string;
 
     /**
      * 当前事件

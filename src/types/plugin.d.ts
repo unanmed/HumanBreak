@@ -207,7 +207,7 @@ interface PluginUis {
     readonly shopOpened: Ref<boolean>;
 
     /** ui栈 */
-    readonly uiStack: Ref<Component[]>;
+    readonly uiStack: Ref<any[]>;
 
     /**
      * 显示章节
@@ -237,7 +237,7 @@ interface PluginUse {
         fn: DragFn,
         ondown?: DragFn,
         onUp?: (e: MouseEvent | TouchEvent) => void,
-        global: boolean = false
+        global?: boolean
     ): void;
 
     /**

@@ -591,7 +591,7 @@ interface InitGameStatus {
     /**
      * 是否开始了游戏
      */
-    played: false;
+    played: boolean;
 
     /**
      * 游戏是否结束
@@ -648,7 +648,7 @@ interface InitGameStatus {
     /**
      * 是否锁定了用户控制
      */
-    lockControl: false;
+    lockControl: boolean;
 
     /**
      * 勇士移动状态，每个数字干啥的自己去libs翻，这东西太复杂了，不过应该不会有人用这个东西吧（
@@ -718,7 +718,9 @@ interface InitGameStatus {
     /**
      * 全局动画对象
      */
-    globalAnimateObjs: Block<AllIdsOf<Exclude<AnimatableCls, 'autotile'>>>[];
+    globalAnimateObjs: Block<
+        IdToNumber[AllIdsOf<Exclude<AnimatableCls, 'autotile'>>]
+    >[];
 
     /**
      * 楼层贴图
@@ -733,7 +735,7 @@ interface InitGameStatus {
     /**
      * 所有的自动元件动画
      */
-    autotileAnimateObjs: Block<AllIdsOf<'autotile'>>[];
+    autotileAnimateObjs: Block<IdToNumber[AllIdsOf<'autotile'>]>[];
 
     /**
      * 全局动画状态，每经过一个全局动画时间便加一
@@ -769,7 +771,7 @@ interface InitGameStatus {
      * 数字转图块
      */
     number2block: {
-        [P in AllNumbers]: Block<P>;
+        [P in keyof NumberToId]: Block<P>;
     };
 
     /**

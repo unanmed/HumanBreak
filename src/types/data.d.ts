@@ -25,6 +25,11 @@ interface MainData {
     readonly bgms: BgmIds[];
 
     /**
+     * 所有的图片
+     */
+    readonly images: ImageIds[];
+
+    /**
      * 所有的音效
      */
     readonly sounds: SoundIds[];

@@ -266,7 +266,7 @@ interface ResolvedFloor<T extends FloorIds = FloorIds> extends FloorBase<T> {
     eachArrive?: MotaEvent;
 }
 
-interface BlockInfo<T extends AllNumbers = AllNumbers> {
+interface BlockInfo<T extends keyof NumberToId = keyof NumberToId> {
     /**
      * 图块数字
      */
@@ -422,16 +422,6 @@ interface DrawThumbnailConfig {
     inFlyMap: boolean;
 
     /**
-     * 小地图模式下的横坐标
-     */
-    x: number;
-
-    /**
-     * 小地图模式下的纵坐标
-     */
-    y: number;
-
-    /**
      * 小地图模式下的宽度
      */
     w: number;
@@ -537,7 +527,7 @@ interface Maps {
      * 根据数字获得图块
      * @param number 图块数字
      */
-    getBlockByNumber<T extends AllNumbers>(number: T): Block<T>;
+    getBlockByNumber<T extends keyof NumberToId>(number: T): Block<T>;
 
     /**
      * 根据ID获得图块
@@ -634,7 +624,7 @@ interface Maps {
      * @param mapArr 地图信息
      * @param floorId 地图id
      */
-    decompressMap(mapArr?: number[][], floorId: FloorIds): number[][];
+    decompressMap(mapArr?: number[][], floorId?: FloorIds): number[][];
 
     /**
      * 将所有地图重新变成数字，以便于存档
@@ -1021,7 +1011,7 @@ interface Maps {
      * 获得某个图块或素材的信息
      * @param block 图块信息，可以填图块，数字，id
      */
-    getBlockInfo<T extends AllNumbers>(
+    getBlockInfo<T extends keyof NumberToId>(
         block?: Block<T> | NumberToId[T] | T
     ): BlockInfo<T>;
 

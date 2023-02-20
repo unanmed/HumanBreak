@@ -843,7 +843,7 @@ type DeepRequired<T> = {
  * 使一个对象的所有属性可写
  */
 type Writable<T> = {
-    -readonly [P in keyof T]: P[T];
+    -readonly [P in keyof T]: T[P];
 };
 
 /**
@@ -889,4 +889,4 @@ type NonObjectOf<T> = SelectType<T, NonObject>;
  */
 type EndsWith<T extends string> = `${string}${T}`;
 
-type KeyExcludesUnderline<T> = Excluede<keyof T, `_${string}`>;
+type KeyExcludesUnderline<T> = Exclude<keyof T, `_${string}`>;
