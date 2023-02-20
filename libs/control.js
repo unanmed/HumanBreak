@@ -502,18 +502,11 @@ control.prototype.showStartAnimate = function (noAnimate, callback) {
 };
 
 control.prototype._showStartAnimate_resetDom = function () {
-    core.dom.startPanel.style.opacity = 1;
-    core.dom.startPanel.style.display = 'block';
-    core.dom.startTop.style.opacity = 1;
-    core.dom.startTop.style.display = 'block';
-    core.dom.startButtonGroup.style.display = 'none';
-    core.dom.startButtons.style.display = 'block';
-    core.dom.levelChooseButtons.style.display = 'none';
+    core.plugin.loaded.value = true;
     core.status.played = false;
+    core.dom.gameGroup.style.display = 'none';
     core.clearStatus();
     core.clearMap('all');
-    core.dom.musicBtn.style.display = 'block';
-    core.setMusicBtn();
     // 重置音量
     core.events.setVolume(1, 0);
     core.updateStatusBar();
@@ -521,9 +514,7 @@ control.prototype._showStartAnimate_resetDom = function () {
 
 control.prototype._showStartAnimate_finished = function (start, callback) {
     core.dom.startTop.style.display = 'none';
-    core.dom.startButtonGroup.style.display = 'block';
     main.selectedButton = null;
-    main.selectButton(0);
     if (start) core.startGame();
     if (callback) callback();
 };
@@ -2561,6 +2552,10 @@ control.prototype._doSL_load = function (id, callback) {
             core.saves.autosave.now,
             1
         )[0];
+        if (!main.replayChecking) {
+            core.plugin.startOpened.value = false;
+            core.plugin.loaded.value = false;
+        }
         if (core.isPlaying() && !core.status.gameOver) {
             core.control.autosave(0);
             core.saves.autosave.now -= 1;
@@ -2575,6 +2570,10 @@ control.prototype._doSL_load = function (id, callback) {
             id == 'autoSave' ? id : 'save' + id,
             null,
             function (data) {
+                if (!main.replayChecking) {
+                    core.plugin.startOpened.value = false;
+                    core.plugin.loaded.value = false;
+                }
                 if (id == 'autoSave' && data != null) {
                     core.saves.autosave.data = data;
                     if (!(core.saves.autosave.data instanceof Array)) {
@@ -3696,14 +3695,7 @@ control.prototype.resumeBgm = function (resumeTime) {
     this.setMusicBtn();
 };
 
-control.prototype.setMusicBtn = function () {
-    if (core.musicStatus.bgmStatus)
-        core.dom.musicBtn.src =
-            'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAMAAADzN3VRAAABWVBMVEX///9iYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmL///8AAAC5ubn+/v6xsbEtLS0MDAxmZmZoaGhvb2/c3Nzd3d38/Pz9/f0oKCgpKSl0dHR1dXW6urrb29v7+/v09PTv7+/39/cgICACAgImJibh4eGFhYWGhoaHh4eOjo5paWm7u7vDw8PMzMwyMjI7OztAQEDe3t5FRUVMTEzj4+Pl5eXm5ubp6enr6+tcXFzi4uL19fVeXl74+PgjIyNkZGQGBgaSkpKYmJiampqenp4DAwMwMDBnZ2cICAivr68eHh63t7cLCwsSEhLw8PBhYWEUFBQVFRXNzc3Pz8/Z2dna2toaGhqkpKSlpaWpqamrq6tFOUNAAAAAc3RSTlMAAwQFBhUWGxwkJSYyO0dISVBRUmpvj5CSk5SVoaOlpqiysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyA0IuUgAAAVdJREFUeF5NkVVbw0AQRTcQrLR4IIEGcidJoaUuQHF3d3d3+P/CkuxCzss8nG++mbnDBJXhNt2CpbeFK1kQpSEKidlc8S9qdATRa6UIdQMoxEpDA0Ov3wUAPfW+qLWACydNv9zMrzkJwPK6FB3oHyOfXfuNxvoBQ+GmBYinhHB77TmiVBxoYUw1AYcEq332AS8OYKosAuTT0nza9uU2USYPRJgGxEiSOFywJ3mNARozgBJJzkfLvfu8JgGDWcC9FEsjWzR+y80gYDEAA8QZ3N6kmP1Fs3fEASB7pob7Hh+Wz5L0ci17Or05J7bH6B6dZv05XWK3rG+myV05Ert592Qo55sPuoIr7hEZHHtieIPWy0RU9DLwc3Mnck/vi8/E8XNrDWQtEVnL/ySKMrv0jPwPp870fprcyYifmiEmqGpHkI5q9ofSFIUk2qiwIGpEMyxYhhZRRcMPz89RJ2s9W8wAAAAASUVORK5CYII=';
-    else
-        core.dom.musicBtn.src =
-            'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAMAAADzN3VRAAABYlBMVEX///9iYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmL////8/PwAAABmZmZoaGihoaGioqKxsbG5ubnb29vc3Nzd3d3h4eHi4uL9/f3+/v4tLS1nZ2d0dHSUlJSenp66uroMDAz7+/spKSkoKCgUFBRpaWkVFRVvb291dXU7OzuVlZWYmJhkZGQgICAjIyOkpKQCAgK3t7cGBgbv7++pqamrq6seHh4mJiZhYWGamprp6enr6+saGhpeXl7j4+Pl5eXm5uZKSkrw8PD09PT19fW7u7vDw8PMzMwICAgwMDAyMjILCwtAQECGhoaHh4eBgYGFhYUSEhJXV1dZWVlcXFyOjo6SkpLNzc339/fPz8/Z2dna2tqTk5OlpaWxOPeTAAAAdnRSTlMAAwQFBhUWGxwkJSYyO0dISVBRUmpvj5CSk5SVoaOlpqiysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyNuo+uwAAAWJJREFUeF5NkmV34zAQReUm7WbTuJBNunY3bvXGDjNTkZkZlpn5/9eR5FPfbzr3jGb0RkwRiMQMDm7EIgHmRxtLwMOaHHoQjwz4MUKeCM8AWMrmd7u7f/aXAMyOShHiQD1n04DtN5e5FMBFlSauIsm585dKi4CpuSYKJIv1tBDVmvOSqJgEoowFLSBHaQh10XHWiCgHWEGmAw2blPrvOK/KRJUGoLM4kCVSKrWz7HwgoiwQZyaQJ0+9PvxV23BNATAZB25IqX9b3+jTW9fcApwB6NLgUD5NY3mPXnwmFwBezff1ztzRFzTp94FXMy36HDuCa2RafdnnmZqtL818Gl9/qNnEeyrUk2aTPiKj3qMyWBVi/YSuWq5qiwxkbtX3vYWzdz/l8M0k8ERlvViiB1Ygslb7SbVtJezncj+Cx5bYaeGuonZqhZlieAp+no74/s5EAh6JcY35Cepxk4ObcT3IJPe/1lKsDpFCFQAAAABJRU5ErkJggg==';
-};
+control.prototype.setMusicBtn = function () {};
 
 ////// 更改背景音乐的播放 //////
 control.prototype.triggerBgm = function () {
@@ -4199,10 +4191,6 @@ control.prototype._resize_gameGroup = function (obj) {
     var startBackground = core.domStyle.isVertical
         ? main.styles.startVerticalBackground || main.styles.startBackground
         : main.styles.startBackground;
-    if (main.dom.startBackground.getAttribute('__src__') != startBackground) {
-        main.dom.startBackground.setAttribute('__src__', startBackground);
-        main.dom.startBackground.src = startBackground;
-    }
 
     var gameGroup = core.dom.gameGroup;
     var totalWidth, totalHeight;
@@ -4238,15 +4226,6 @@ control.prototype._resize_gameGroup = function (obj) {
     floorMsgGroup.style.fontSize = 16 * core.domStyle.scale + 'px';
     // startPanel
     core.dom.startPanel.style.fontSize = 16 * core.domStyle.scale + 'px';
-    // musicBtn
-    if (core.domStyle.isVertical || core.domStyle.scale < 1) {
-        core.dom.musicBtn.style.right = core.dom.musicBtn.style.bottom = '3px';
-    } else {
-        core.dom.musicBtn.style.right =
-            (obj.clientWidth - totalWidth) / 2 + 'px';
-        core.dom.musicBtn.style.bottom =
-            (obj.clientHeight - totalHeight) / 2 - 27 + 'px';
-    }
 };
 
 control.prototype._resize_canvas = function (obj) {

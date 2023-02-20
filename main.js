@@ -29,9 +29,6 @@ function main() {
         startTopProgressBar: document.getElementById('startTopProgressBar'),
         startTopProgress: document.getElementById('startTopProgress'),
         startTopLoadTips: document.getElementById('startTopLoadTips'),
-        startBackground: document.getElementById('startBackground'),
-        startLogo: document.getElementById('startLogo'),
-        startButtonGroup: document.getElementById('startButtonGroup'),
         floorMsgGroup: document.getElementById('floorMsgGroup'),
         logoLabel: document.getElementById('logoLabel'),
         versionLabel: document.getElementById('versionLabel'),
@@ -239,22 +236,20 @@ main.prototype.init = function (mode, callback) {
         var mainData = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main;
         for (var ii in mainData) main[ii] = mainData[ii];
 
-        main.dom.startLogo.style = main.styles.startLogoStyle;
-        main.dom.startButtonGroup.style = main.styles.startButtonsStyle;
-        main.levelChoose = main.levelChoose || [];
-        main.levelChoose.forEach(function (value) {
-            var span = document.createElement('span');
-            span.setAttribute('class', 'startButton');
-            span.innerText = value.title || '';
-            span.id = value.name;
-            (function (span, str_) {
-                span.onclick = function () {
-                    core.events.startGame(str_);
-                };
-            })(span, value.name || '');
-            main.dom.levelChooseButtons.appendChild(span);
-        });
-        main.createOnChoiceAnimation();
+        // main.levelChoose = main.levelChoose || [];
+        // main.levelChoose.forEach(function (value) {
+        //     var span = document.createElement('span');
+        //     span.setAttribute('class', 'startButton');
+        //     span.innerText = value.title || '';
+        //     span.id = value.name;
+        //     (function (span, str_) {
+        //         span.onclick = function () {
+        //             core.events.startGame(str_);
+        //         };
+        //     })(span, value.name || '');
+        //     main.dom.levelChooseButtons.appendChild(span);
+        // });
+
         main.importFonts(main.fonts);
 
         main.loadJs('libs', main.loadList, function () {
@@ -491,30 +486,6 @@ main.prototype.createOnChoiceAnimation = function () {
     }
 };
 
-////// 选项 //////
-main.prototype.selectButton = function (index) {
-    var select = function (children) {
-        index = (index + children.length) % children.length;
-        for (var i = 0; i < children.length; ++i) {
-            children[i].classList.remove('onChoiceAnimate');
-        }
-        children[index].classList.add('onChoiceAnimate');
-        if (main.selectedButton == index) {
-            children[index].click();
-        } else {
-            main.selectedButton = index;
-        }
-    };
-
-    if (core.dom.startPanel.style.display != 'block') return;
-
-    if (main.dom.startButtons.style.display == 'block') {
-        select(main.dom.startButtons.children);
-    } else if (main.dom.levelChooseButtons.style.display == 'block') {
-        select(main.dom.levelChooseButtons.children);
-    }
-};
-
 ////// 创建字体 //////
 main.prototype.importFonts = function (fonts) {
     if (!(fonts instanceof Array) || fonts.length == 0) return;
@@ -609,21 +580,6 @@ main.prototype.listen = function () {
             console.error(ee);
         }
     };
-
-    [main.dom.startButtons, main.dom.levelChooseButtons].forEach(function (
-        dom
-    ) {
-        dom.onmousemove = function (e) {
-            for (var i = 0; i < dom.children.length; ++i) {
-                if (
-                    dom.children[i] == e.target &&
-                    i != (main.selectedButton || 0)
-                ) {
-                    main.selectButton(i);
-                }
-            }
-        };
-    });
 
     ////// 开始选择时 //////
     main.dom.body.onselectstart = function () {
@@ -932,38 +888,38 @@ main.prototype.listen = function () {
     };
 
     ////// 点击“开始游戏”时 //////
-    main.dom.playGame.onclick = function () {
-        main.dom.startButtons.style.display = 'none';
-        main.core.control.checkBgm();
+    // main.dom.playGame.onclick = function () {
+    //     main.dom.startButtons.style.display = 'none';
+    //     main.core.control.checkBgm();
 
-        if (main.levelChoose.length == 0) {
-            core.events.startGame('');
-        } else {
-            main.dom.levelChooseButtons.style.display = 'block';
-            main.selectedButton = null;
-            main.selectButton(0);
-        }
-    };
+    //     if (main.levelChoose.length == 0) {
+    //         core.events.startGame('');
+    //     } else {
+    //         main.dom.levelChooseButtons.style.display = 'block';
+    //         main.selectedButton = null;
+    //         main.selectButton(0);
+    //     }
+    // };
 
-    ////// 点击“载入游戏”时 //////
-    main.dom.loadGame.onclick = function () {
-        main.core.control.checkBgm();
-        main.core.load();
-    };
+    // ////// 点击“载入游戏”时 //////
+    // main.dom.loadGame.onclick = function () {
+    //     main.core.control.checkBgm();
+    //     main.core.load();
+    // };
 
-    ////// 点击“录像回放”时 //////
-    main.dom.replayGame.onclick = function () {
-        main.core.control.checkBgm();
-        main.core.chooseReplayFile();
-    };
+    // ////// 点击“录像回放”时 //////
+    // main.dom.replayGame.onclick = function () {
+    //     main.core.control.checkBgm();
+    //     main.core.chooseReplayFile();
+    // };
 
-    main.dom.musicBtn.onclick = function () {
-        try {
-            if (main.core) main.core.triggerBgm();
-        } catch (ee) {
-            console.error(ee);
-        }
-    };
+    // main.dom.musicBtn.onclick = function () {
+    //     try {
+    //         if (main.core) main.core.triggerBgm();
+    //     } catch (ee) {
+    //         console.error(ee);
+    //     }
+    // };
 
     window.onblur = function () {
         if (main.core && main.core.control) {
