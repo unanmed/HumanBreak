@@ -206,6 +206,9 @@ interface PluginUis {
     /** 商店是否打开 */
     readonly shopOpened: Ref<boolean>;
 
+    /** 开始界面是否打开 */
+    readonly startOpened: Ref<boolean>;
+
     /** ui栈 */
     readonly uiStack: Ref<any[]>;
 

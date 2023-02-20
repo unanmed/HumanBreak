@@ -1695,7 +1695,7 @@ actions.prototype._clickSL = function (x, y) {
         if (core.events.recoverEvents(core.status.event.interval)) return;
         core.ui.closePanel();
         delete core.status.tempRoute;
-        if (!core.isPlaying()) core.showStartAnimate(true);
+        if (!core.isPlaying()) document.getElementById('start').style.top = '0';
         return;
     }
     // 删除

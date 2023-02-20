@@ -47,6 +47,11 @@ export function unmarkEnemy(id: EnemyIds) {
     checkMarkedEnemy();
 }
 
+export function unmarkAll() {
+    markedEnemy.splice(0);
+    checkMarkedEnemy();
+}
+
 /**
  * 获得所有被标记的怪物
  */
@@ -139,6 +144,7 @@ export default function init() {
         markEnemy,
         hasMarkedEnemy,
         unmarkEnemy,
-        showMarkedEnemy
+        showMarkedEnemy,
+        unmarkAll
     };
 }

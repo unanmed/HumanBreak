@@ -35,9 +35,9 @@ body {
 }
 
 #musicBtn {
-    position: fixed;
+    position: absolute;
     bottom: 3px;
-    right: 3px;
+    right: -20%;
     cursor: pointer;
     z-index: 400;
     display: none;
@@ -107,6 +107,7 @@ body {
     transform: translate(-50%, -50%);
     z-index: 260;
     object-fit: cover;
+    filter: sepia(30%) contrast(70%);
 }
 
 #startLogo {
@@ -152,24 +153,17 @@ body {
     display: none;
     z-index: 310;
     bottom: 0;
-    margin-bottom: 5%;
-    left: 50%;
+    margin-bottom: 7%;
+    left: 30%;
     transform: translateX(-50%);
     padding: 15px 25px;
-    /* default value */
-    background-image: linear-gradient(
-        to bottom,
-        rgba(76, 73, 255, 0.7),
-        rgba(106, 40, 145, 0.7)
-    );
-    border: #ffffff 1px solid;
-    caret-color: #ffd700;
-    border-radius: 10px;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4),
         0px 0px 1px rgba(255, 255, 255, 0.3);
 }
 
 #playGame {
+    position: relative;
+    left: 10%;
     color: transparent;
     background-image: linear-gradient(
         to bottom,
@@ -181,6 +175,8 @@ body {
 }
 
 #loadGame {
+    position: relative;
+    left: 5%;
     color: transparent;
     background-image: linear-gradient(
         to bottom,
@@ -192,6 +188,8 @@ body {
 }
 
 #replayGame {
+    position: relative;
+
     color: transparent;
     background-image: linear-gradient(
         to bottom,
@@ -208,14 +206,6 @@ body {
 
 #levelChooseButtons {
     display: none;
-}
-
-#easy {
-    background-image: linear-gradient(
-        to bottom,
-        rgb(255, 255, 255),
-        rgb(87, 255, 72)
-    );
 }
 
 span#hard {
@@ -245,10 +235,6 @@ span#hard {
     transition: box-shadow 0.3s linear, transform 0.2s ease-out;
     box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.4);
     transform: scale(1);
-}
-
-.startButton:hover {
-    transform: scale(1.2);
 }
 
 .onChoiceAnimate {
@@ -604,8 +590,8 @@ p#name {
 }
 
 .startImageDivAnimation {
-    -webkit-animation: startImageDivDisappear 2s ease-in-out 5s alternate 1;
-    animation: startImageDivDisappear 2s ease-in-out 5s alternate 1;
+    -webkit-animation: startImageDivDisappear 2s ease-in-out 3s alternate 1;
+    animation: startImageDivDisappear 2s ease-in-out 3s alternate 1;
 }
 
 @-webkit-keyframes startImageDivDisappear {

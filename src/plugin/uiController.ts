@@ -23,9 +23,20 @@ export const flyOpened = ref(false);
 export const showStudiedSkill = ref(false);
 export const fixedDetailOpened = ref(false);
 export const shopOpened = ref(false);
+export const startOpened = ref(false);
 
 export const transition = ref(true);
 export const noClosePanel = ref(false);
+
+export const loaded = ref(false);
+export const startAnimationEnded = ref(false);
+
+watch(loaded, n => {
+    if (n && startAnimationEnded.value) startOpened.value = true;
+});
+watch(startAnimationEnded, n => {
+    if (n && loaded.value) startOpened.value = true;
+});
 
 let app: HTMLDivElement;
 
@@ -78,7 +89,10 @@ export default function init() {
         flyOpened,
         showStudiedSkill,
         fixedDetailOpened,
-        shopOpened
+        shopOpened,
+        startOpened,
+        startAnimationEnded,
+        loaded
     };
 }
 

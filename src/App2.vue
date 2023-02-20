@@ -1,5 +1,6 @@
 <template>
     <div id="non-ui">
+        <Start v-if="startOpened"></Start>
         <StatusBar v-if="showStatusBar"></StatusBar>
         <MarkedEnemy v-if="showMarkedEnemy && showStatusBar"></MarkedEnemy>
         <Studied
@@ -12,15 +13,20 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue';
-import StatusBar from './ui/statusBar.vue';
-import { showStatusBar, showStudiedSkill } from './plugin/uiController';
-import MarkedEnemy from './ui/markedEnemy.vue';
-import Chapter from './ui/chapter.vue';
+import {
+    showStatusBar,
+    showStudiedSkill,
+    startOpened
+} from './plugin/uiController';
 import { chapterContent, chapterShowed } from './plugin/ui/chapter';
 import { showMarkedEnemy } from './plugin/mark';
-import Studied from './ui/studied.vue';
 import { showStudied, useFixed } from './plugin/settings';
+import MarkedEnemy from './ui/markedEnemy.vue';
+import StatusBar from './ui/statusBar.vue';
+import Chapter from './ui/chapter.vue';
+import Studied from './ui/studied.vue';
 import Fixed from './ui/fixed.vue';
+import Start from './ui/start.vue';
 </script>
 
 <style lang="less" scoped>

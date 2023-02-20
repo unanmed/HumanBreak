@@ -23,9 +23,10 @@ events.prototype.resetGame = function (hero, hard, floorId, maps, values) {
 
 ////// 游戏开始事件 //////
 events.prototype.startGame = function (hard, seed, route, callback) {
-    main.dom.levelChooseButtons.style.display = 'none';
-    main.dom.startButtonGroup.style.display = 'none';
     hard = hard || '';
+    core.dom.gameGroup.style.display = 'block';
+    core.plugin.startOpened.value = false;
+    core.plugin.loaded.value = false;
 
     if (main.mode != 'play') return;
 
@@ -310,6 +311,7 @@ events.prototype._gameOver_askRate = function (ending) {
 
 ////// 重新开始游戏；此函数将回到标题页面 //////
 events.prototype.restart = function () {
+    core.hideStatusBar();
     core.showStartAnimate();
     core.playBgm(main.startBgm);
 };

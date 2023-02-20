@@ -31,9 +31,12 @@
             startImageLogo.onload = function () {
                 startImageBackgroundDiv.style.display = 'block';
                 var onAnimationEnd = function () {
-                    startImageBackgroundDiv.style.display = 'none';
-                    startImageLogo.classList.remove("startImageAnimation");
-                    startImageDiv.classList.remove("startImageDivAnimation");
+                    if (window.core && core.plugin && core.plugin.startAnimationEnded) {
+                        core.plugin.startAnimationEnded.value = true;
+                        startImageBackgroundDiv.style.display = 'none';
+                        startImageLogo.classList.remove("startImageAnimation");
+                        startImageDiv.classList.remove("startImageDivAnimation");
+                    }
                 }
                 startImageDiv.addEventListener("webkitAnimationEnd", onAnimationEnd);
                 startImageDiv.addEventListener("animationend", onAnimationEnd);
@@ -50,7 +53,6 @@
         <!-- injection -->
         <div id='gameGroup'>
             <p id='mainTips'>请稍候...</p>
-            <img id='musicBtn'>
             <div id='startPanel'>
                 <div id='startTop'>
                     <div id='startTopProgressBar'>
@@ -58,16 +60,6 @@
                     </div>
                     <p id='startTopLoadTips'>资源即将开始加载</p>
                     <p id='startTopHint'>HTML5魔塔游戏平台，享受更多魔塔游戏：<br />https://h5mota.com/</p>
-                </div>
-                <img id='startBackground'>
-                <p id='startLogo'></p>
-                <div id='startButtonGroup'>
-                    <div id='startButtons'>
-                        <span class='startButton' id='playGame'>开始游戏</span>
-                        <span class='startButton' id='loadGame'>载入游戏</span>
-                        <span class='startButton' id='replayGame'>录像回放</span>
-                    </div>
-                    <div id='levelChooseButtons'></div>
                 </div>
             </div>
             <div id='floorMsgGroup'>
