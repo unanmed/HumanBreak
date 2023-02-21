@@ -2,7 +2,7 @@
 import { message } from 'ant-design-vue';
 import { MessageApi } from 'ant-design-vue/lib/message';
 import { isNil } from 'lodash';
-import { Animation, TimingFn } from 'mutate-animate';
+import { Animation, sleep, TimingFn } from 'mutate-animate';
 import { ComputedRef, ref } from 'vue';
 import { EVENT_KEY_CODE_MAP } from './keyCodes';
 
@@ -190,4 +190,16 @@ export function download(content: string, name: string) {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+}
+
+/**
+ * 间隔一段时间调用一个函数
+ * @param funcs 函数列表
+ * @param interval 调用间隔
+ */
+export async function doByInterval(funcs: (() => void)[], interval: number) {
+    for await (const fn of funcs) {
+        await sleep(interval);
+        fn();
+    }
 }
