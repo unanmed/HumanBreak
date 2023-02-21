@@ -21,6 +21,7 @@
     "lodash": "^4.17.21",
     "lz-string": "^1.4.4",
     "mutate-animate": "^1.0.2",
+    "three": "^0.149.0",
     "vue": "^3.2.45"
   },
   "devDependencies": {

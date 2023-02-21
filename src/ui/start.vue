@@ -4,6 +4,18 @@
             <img id="background" src="/project/images/bg.jpg" />
             <div id="start-main">
                 <div id="title">人类：开天辟地</div>
+                <div id="settings">
+                    <div
+                        id="sound"
+                        class="setting-buttons"
+                        :checked="soundChecked"
+                        @click="bgm"
+                    >
+                        <sound-outlined />
+                        <span v-if="!soundChecked" id="sound-del"></span>
+                    </div>
+                </div>
+                <div id="background-gradient"></div>
                 <div id="buttons">
                     <right-outlined id="cursor" />
                     <TransitionGroup name="start">
@@ -15,28 +27,40 @@
                             :selected="selected === v"
                             :showed="showed"
                             @click="clickStartButton(v)"
+                            @mouseenter="
+                                movein(
+                                    $event.target as HTMLElement,
+                                    toshow.length - i - 1
+                                )
+                            "
                             >{{ text[i] }}</span
                         >
                     </TransitionGroup>
                 </div>
             </div>
+            <div id="listen" @mousemove="onmove"></div>
         </div>
     </div>
 </template>
 
 <script lang="ts" setup>
 import { nextTick, onMounted, onUnmounted, reactive, ref } from 'vue';
-import { RightOutlined } from '@ant-design/icons-vue';
+import { RightOutlined, SoundOutlined } from '@ant-design/icons-vue';
 import { sleep } from 'mutate-animate';
+import { Matrix4 } from '../plugin/webgl/matrix';
+import { keycode } from '../plugin/utils';
+import { KeyCode } from '../plugin/keyCodes';
 
 let startdiv: HTMLDivElement;
 let start: HTMLDivElement;
 let main: HTMLDivElement;
 let cursor: HTMLElement;
+let background: HTMLImageElement;
 
 let buttons: HTMLSpanElement[] = [];
 
 let played: boolean;
+const soundChecked = ref(false);
 
 const showed = ref(false);
 
@@ -78,11 +102,13 @@ function setCursor(ele: HTMLSpanElement, i: number) {
     cursor.style.left = `${parseFloat(style.left) - 30}px`;
 }
 
-function clickStartButton(id: string) {
+async function clickStartButton(id: string) {
     core.checkBgm();
     if (id === 'start-game') showHard();
     if (id === 'back') setButtonAnimate();
     if (id === 'easy' || id === 'hard-hard') {
+        start.style.opacity = '0';
+        await sleep(600);
         core.startGame(id);
     }
     if (id === 'load-game') {
@@ -91,6 +117,61 @@ function clickStartButton(id: string) {
         core.load();
     }
     if (id === 'replay') core.chooseReplayFile();
+}
+
+function onmove(e: MouseEvent) {
+    const { offsetX, offsetY } = e;
+    const ele = e.target as HTMLDivElement;
+    const style = getComputedStyle(ele);
+    const width = parseFloat(style.width);
+    const height = parseFloat(style.height);
+    const cx = width / 2;
+    const cy = height / 2;
+    const dx = (offsetX - cx) / cx;
+    const dy = (offsetY - cy) / cy;
+
+    const matrix = new Matrix4();
+
+    matrix.scale(1.2, 1.2, 1);
+    matrix.rotate((dy * 10 * Math.PI) / 180, -(dx * 10 * Math.PI) / 180);
+    const end = Array.from(matrix.transpose()).flat().join(',');
+    background.style.transform = `perspective(${
+        1000 * core.domStyle.scale
+    }px)matrix3d(${end})`;
+}
+
+function movein(button: HTMLElement, i: number) {
+    setCursor(button, i);
+    selected.value = button.id;
+}
+
+function keydown(e: KeyboardEvent) {
+    const c = keycode(e.keyCode);
+    const i = toshow.indexOf(selected.value);
+    if (c === KeyCode.DownArrow) {
+        const next = toshow[i - 1];
+        if (!next) return;
+        selected.value = next;
+        setCursor(buttons[toshow.length - i], toshow.length - i);
+    }
+    if (c === KeyCode.UpArrow) {
+        const next = toshow[i + 1];
+        if (!next) return;
+        selected.value = next;
+        setCursor(buttons[toshow.length - i - 2], toshow.length - i - 2);
+    }
+}
+
+function keyup(e: KeyboardEvent) {
+    const c = keycode(e.keyCode);
+    if (c === KeyCode.Enter || c === KeyCode.Space || c === KeyCode.KeyC) {
+        clickStartButton(selected.value);
+    }
+}
+
+function bgm() {
+    core.triggerBgm();
+    soundChecked.value = !soundChecked.value;
 }
 
 /**
@@ -122,15 +203,9 @@ async function showHard() {
             .reverse();
         cursor.style.opacity = '1';
         setCursor(buttons[0], 0);
-        buttons.forEach((v, i) => {
-            v.addEventListener('mouseenter', e => {
-                setCursor(v, i);
-                selected.value = v.id;
-            });
-        });
     });
     await sleep(600);
-    buttons.forEach(v => (v.style.transition = 'color 0.3s ease-out'));
+    buttons.forEach(v => (v.style.transition = 'all 0.3s ease-out'));
 }
 
 /**
@@ -167,17 +242,12 @@ async function setButtonAnimate() {
             .reverse();
         cursor.style.opacity = '1';
         setCursor(buttons[0], 0);
-        buttons.forEach((v, i) => {
-            v.addEventListener('mouseenter', e => {
-                setCursor(v, i);
-                selected.value = v.id;
-            });
-        });
+        buttons.forEach((v, i) => {});
     });
     if (!showed.value) await sleep(1200);
     else await sleep(600);
 
-    buttons.forEach(v => (v.style.transition = 'color 0.3s ease-out'));
+    buttons.forEach(v => (v.style.transition = 'all 0.3s ease-out'));
 }
 
 onMounted(async () => {
@@ -186,8 +256,15 @@ onMounted(async () => {
     startdiv = document.getElementById('start-div') as HTMLDivElement;
     main = document.getElementById('start-main') as HTMLDivElement;
     start = document.getElementById('start') as HTMLDivElement;
+    background = document.getElementById('background') as HTMLImageElement;
+
     core.registerResize('start', resize);
+    document.addEventListener('keydown', keydown);
+    document.addEventListener('keyup', keyup);
     resize();
+
+    soundChecked.value = core.musicStatus.bgmStatus;
+
     await sleep(50);
     start.style.opacity = '1';
     if (played) {
@@ -202,6 +279,8 @@ onMounted(async () => {
 
 onUnmounted(() => {
     core.unregisterResize('start');
+    document.removeEventListener('keydown', keydown);
+    document.removeEventListener('keyup', keyup);
 });
 </script>
 
@@ -214,12 +293,13 @@ onUnmounted(() => {
     justify-content: center;
     align-items: center;
     opacity: 0;
-    transition: opacity 1.2s ease-out;
+    transition: opacity 0.6s ease-out;
     background-color: black;
 }
 
 #start-div {
     position: relative;
+    overflow: hidden;
 }
 
 #background {
@@ -228,6 +308,30 @@ onUnmounted(() => {
     height: 100%;
     pointer-events: none;
     filter: sepia(30%) contrast(115%);
+    transform: scale(120%);
+}
+
+#background-gradient {
+    z-index: 2;
+    position: absolute;
+    width: 200%;
+    height: 100%;
+    left: -100%;
+    background-image: linear-gradient(
+        45deg,
+        transparent 0%,
+        transparent 30%,
+        #000 60%,
+        #000 100%
+    );
+    animation: gradient 4s ease-out 0.5s 1 normal forwards;
+}
+
+#listen {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: auto;
 }
 
 #start-main {
@@ -270,6 +374,7 @@ onUnmounted(() => {
         left: 18%;
         bottom: 10%;
         filter: brightness(120%) contrast(110%);
+        z-index: 1;
 
         #cursor {
             text-shadow: 2px 2px 3px black;
@@ -357,6 +462,44 @@ onUnmounted(() => {
             margin-bottom: 16%;
         }
     }
+
+    #settings {
+        position: absolute;
+        display: flex;
+        flex-direction: row-reverse;
+        right: 5%;
+        bottom: 10%;
+        font-size: 1.3em;
+        z-index: 1;
+
+        .setting-buttons {
+            margin-left: 40%;
+            color: white;
+            transition: color 0.2s linear;
+            cursor: pointer;
+        }
+
+        #sound[checked='false'] {
+            color: rgb(255, 43, 43);
+        }
+
+        #sound:hover {
+            color: aqua;
+        }
+
+        #sound[checked='false']:hover {
+            color: rgb(253, 139, 139);
+        }
+
+        #sound-del {
+            left: 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-bottom: 2px solid #aaa;
+            transform: translate(-85%, -50%) rotate(-45deg) scale(1.5);
+        }
+    }
 }
 
 .start-button {
@@ -365,6 +508,7 @@ onUnmounted(() => {
 
 .start-button[selected='true'] {
     color: transparent;
+    transform: scale(115%) translate(7.5%);
 }
 
 @keyframes cursor {
@@ -373,6 +517,15 @@ onUnmounted(() => {
     }
     to {
         transform: rotateX(360deg) scaleY(0.7);
+    }
+}
+
+@keyframes gradient {
+    from {
+        left: -100%;
+    }
+    to {
+        left: 100%;
     }
 }
 
