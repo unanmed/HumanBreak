@@ -26,6 +26,8 @@
                             :key="v"
                             :selected="selected === v"
                             :showed="showed"
+                            :index="i"
+                            :length="text[i].length"
                             @click="clickStartButton(v)"
                             @mouseenter="
                                 movein(
@@ -269,6 +271,7 @@ onMounted(async () => {
     start.style.opacity = '1';
     if (played) {
         text.value = text2;
+        hard.splice(1, 0, '挑战');
     }
     setButtonAnimate().then(() => (showed.value = true));
     await sleep(1000);
@@ -394,8 +397,31 @@ onUnmounted(() => {
             -webkit-background-clip: text;
         }
 
-        #start-game {
+        .start-button[index='1'][length='4'] {
+            left: 7.5%;
+        }
+
+        .start-button[index='2'][length='4'] {
+            left: 15%;
+        }
+
+        .start-button[index='3'][length='4'] {
             left: 22.5%;
+        }
+
+        .start-button[index='1'][length='2'] {
+            left: 15%;
+        }
+
+        .start-button[index='2'][length='2'] {
+            left: 30%;
+        }
+
+        .start-button[index='3'][length='2'] {
+            left: 45%;
+        }
+
+        #start-game {
             background-image: linear-gradient(
                 to bottom,
                 rgb(255, 255, 255),
@@ -405,7 +431,6 @@ onUnmounted(() => {
         }
 
         #load-game {
-            left: 15%;
             background-image: linear-gradient(
                 to bottom,
                 rgb(255, 255, 255),
@@ -420,7 +445,6 @@ onUnmounted(() => {
                 rgb(255, 255, 255),
                 rgb(255, 251, 0)
             );
-            left: 7.5%;
             margin-bottom: 8%;
         }
 
@@ -434,7 +458,6 @@ onUnmounted(() => {
         }
 
         #easy {
-            left: 30%;
             background-image: linear-gradient(
                 to bottom,
                 rgb(255, 255, 255),
@@ -444,7 +467,6 @@ onUnmounted(() => {
         }
 
         #hard-hard {
-            left: 15%;
             background-image: linear-gradient(
                 to bottom,
                 rgb(255, 255, 255),
