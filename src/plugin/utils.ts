@@ -197,9 +197,18 @@ export function download(content: string, name: string) {
  * @param funcs 函数列表
  * @param interval 调用间隔
  */
-export async function doByInterval(funcs: (() => void)[], interval: number) {
+export async function doByInterval(
+    funcs: (() => void)[],
+    interval: number,
+    awaitFirst: boolean = false
+) {
     for await (const fn of funcs) {
-        await sleep(interval);
+        if (awaitFirst) {
+            await sleep(interval);
+        }
         fn();
+        if (!awaitFirst) {
+            await sleep(interval);
+        }
     }
 }

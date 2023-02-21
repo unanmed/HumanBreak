@@ -50,7 +50,7 @@ import { nextTick, onMounted, onUnmounted, reactive, ref } from 'vue';
 import { RightOutlined, SoundOutlined } from '@ant-design/icons-vue';
 import { sleep } from 'mutate-animate';
 import { Matrix4 } from '../plugin/webgl/matrix';
-import { keycode } from '../plugin/utils';
+import { doByInterval, keycode } from '../plugin/utils';
 import { KeyCode } from '../plugin/keyCodes';
 
 let startdiv: HTMLDivElement;
@@ -184,20 +184,18 @@ async function showHard() {
         'left 0.4s ease-out, top 0.4s ease-out, opacity 0.4s linear';
     cursor.style.opacity = '0';
     buttons.forEach(v => (v.style.transition = ''));
-    ids.unshift(toshow.pop()!);
-    await sleep(150);
-    ids.unshift(toshow.pop()!);
-    await sleep(150);
-    ids.unshift(toshow.pop()!);
-    await sleep(150);
-    ids.unshift(toshow.pop()!);
-    await sleep(400);
+
+    await doByInterval(
+        Array(4).fill(() => ids.unshift(toshow.pop()!)),
+        150
+    );
+    await sleep(250);
     text.value = hard;
-    toshow.push(hardIds.shift()!);
-    await sleep(150);
-    toshow.push(hardIds.shift()!);
-    await sleep(150);
-    toshow.push(hardIds.shift()!);
+
+    await doByInterval(
+        Array(3).fill(() => toshow.push(hardIds.shift()!)),
+        150
+    );
     selected.value = 'easy';
     nextTick(() => {
         buttons = toshow
@@ -219,24 +217,22 @@ async function setButtonAnimate() {
             'left 0.4s ease-out, top 0.4s ease-out, opacity 0.4s linear';
         cursor.style.opacity = '0';
         buttons.forEach(v => (v.style.transition = ''));
-        hardIds.unshift(toshow.pop()!);
-        await sleep(150);
-        hardIds.unshift(toshow.pop()!);
-        await sleep(150);
-        hardIds.unshift(toshow.pop()!);
+        await doByInterval(
+            Array(3).fill(() => hardIds.unshift(toshow.pop()!)),
+            150
+        );
     }
     text.value = text1;
     if (played) {
         text.value = text2;
     }
-    await sleep(400);
-    toshow.push(ids.shift()!);
-    await sleep(150);
-    toshow.push(ids.shift()!);
-    await sleep(150);
-    toshow.push(ids.shift()!);
-    await sleep(150);
-    toshow.push(ids.shift()!);
+    await sleep(250);
+
+    await doByInterval(
+        Array(4).fill(() => toshow.push(ids.shift()!)),
+        150
+    );
+
     selected.value = 'start-game';
     nextTick(() => {
         buttons = toshow
