@@ -101,18 +101,12 @@ import { computed, ref } from 'vue';
 import { achievementOpened, noClosePanel } from '../plugin/uiController';
 import { LeftOutlined } from '@ant-design/icons-vue';
 import list from '../data/achievement.json';
-import { hasCompletedAchievement } from '../plugin/ui/achievement';
+import {
+    Achievement,
+    getNowPoint,
+    hasCompletedAchievement
+} from '../plugin/ui/achievement';
 import Scroll from '../components/scroll.vue';
-import { has } from '../plugin/utils';
-
-interface Achievement {
-    name: string;
-    text: string[];
-    point: number;
-    hide?: string;
-    progress?: string;
-    percent?: boolean;
-}
 
 type AchievementList = typeof list;
 type AchievementType = keyof AchievementList;
@@ -151,17 +145,7 @@ const totalPoint = Object.values(list)
         }, 0)
     )
     .reduce((prev, curr) => prev + curr);
-const nowPoint = (function () {
-    let res = 0;
-    for (const [type, achi] of Object.entries(list)) {
-        achi.forEach((v, i) => {
-            if (hasCompletedAchievement(type as AchievementType, i)) {
-                res += v.point;
-            }
-        });
-    }
-    return res;
-})();
+const nowPoint = getNowPoint();
 
 /**
  * 获取一个类型的所有成就

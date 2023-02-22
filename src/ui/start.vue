@@ -89,8 +89,8 @@ const text2 = ['轮回', '分支', '观测', '回忆'].reverse();
 
 const ids = ['start-game', 'load-game', 'replay', 'achievement'].reverse();
 const hardIds = ['easy', 'hard-hard', 'back'].reverse();
-const text = ref(text1);
 const hard = ['简单', '困难', '返回'].reverse();
+const text = ref(text1);
 const toshow = reactive<string[]>([]);
 
 const selected = ref('start-game');
