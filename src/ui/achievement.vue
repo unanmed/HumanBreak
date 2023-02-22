@@ -19,7 +19,7 @@
         <div id="list">
             <div id="achievement-list" :style="{ left: `-${offset}%` }">
                 <div v-for="t of column" class="achievement-one">
-                    <Scroll class="list-scroll">
+                    <Scroll class="list-scroll" :width="10">
                         <div class="list-div">
                             <div
                                 v-for="a of getAllAchievements(t)"
@@ -314,6 +314,37 @@ function exit() {
         font-size: 2vh;
         margin-left: 2vh;
         white-space: nowrap;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    #achievement {
+        width: 90vw;
+        height: 90vh;
+        font-size: 4.2vw;
+    }
+
+    #column {
+        font-size: 4.3vw;
+    }
+
+    .list-one {
+        width: 90%;
+
+        .list-content {
+            height: 15vh;
+        }
+
+        .list-text {
+            font-size: 3.2vw;
+        }
+
+        .list-end {
+            margin-bottom: 0.8vh;
+            .end-info {
+                font-size: 3.2vw;
+            }
+        }
     }
 }
 </style>

@@ -104,4 +104,11 @@ onMounted(async () => {
         top: -30vh;
     }
 }
+
+@media screen and (max-width: 600px) {
+    #complete-box {
+        width: 90vw;
+        left: 5%;
+    }
+}
 </style>

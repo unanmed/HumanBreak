@@ -527,20 +527,24 @@ onUnmounted(() => {
         display: flex;
         align-items: center;
         flex-direction: row-reverse;
+        justify-content: flex-start;
         right: 5%;
         bottom: 10%;
         font-size: 1.3em;
         z-index: 1;
+        width: 50%;
 
         .setting-buttons {
-            margin-left: 40%;
+            margin-left: 4%;
             color: white;
             transition: color 0.2s linear;
             cursor: pointer;
         }
 
         .setting-buttons2 {
-            margin-left: 40%;
+            margin-left: 4%;
+            position: relative;
+            top: 1px;
         }
 
         #sound {
