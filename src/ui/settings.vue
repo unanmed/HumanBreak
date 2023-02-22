@@ -4,6 +4,14 @@
             ><div id="setting-list">
                 <span
                     class="selectable"
+                    :selected="selected === 'fullscreen'"
+                    @click="click('fullscreen')"
+                    >全屏游戏:&nbsp;&nbsp;&nbsp;{{
+                        fullscreen ? 'ON' : 'OFF'
+                    }}</span
+                >
+                <span
+                    class="selectable"
                     :selected="selected === 'transition'"
                     @click="click('transition')"
                     >界面动画:&nbsp;&nbsp;&nbsp;{{
@@ -92,7 +100,9 @@ import {
     showHalo,
     useFixed,
     autoLocate,
-    antiAliasing
+    antiAliasing,
+    fullscreen,
+    triggerFullscreen
 } from '../plugin/settings';
 import settingInfo from '../data/settings.json';
 import { has, splitText } from '../plugin/utils';
@@ -117,8 +127,11 @@ const settings: Record<keyof Settings, Ref<boolean>> = {
     showStudied,
     useFixed,
     autoLocate,
-    antiAliasing
+    antiAliasing,
+    fullscreen
 };
+
+const ignore: (keyof Settings)[] = ['fullscreen'];
 
 function exit() {
     core.plugin.settingsOpened.value = false;
@@ -129,7 +142,13 @@ function click(id: keyof Settings) {
         selected.value = id;
         return;
     }
-    settings[id].value = !settings[id].value;
+    if (!ignore.includes(id)) {
+        settings[id].value = !settings[id].value;
+    } else {
+        if (id === 'fullscreen') {
+            triggerFullscreen();
+        }
+    }
 }
 </script>
 

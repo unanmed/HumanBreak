@@ -1,49 +1,34 @@
 import { ref, watch } from 'vue';
 
-/**
- * 打开和关闭ui时是否展示动画
- */
+/** 打开和关闭ui时是否展示动画 */
 export const transition = ref(false);
 
-/**
- * 道具详细信息
- */
+/** 道具详细信息 */
 export const itemDetail = ref(true);
 
-/**
- * 自动切换技能
- */
+/** 自动切换技能 */
 export const autoSkill = ref(true);
 
-/**
- * 自动放缩
- */
+/** 自动放缩 */
 export const autoScale = ref(true);
 
-/**
- * 是否在地图上展示范围光环
- */
+/** 是否在地图上展示范围光环 */
 export const showHalo = ref(true);
 
-/**
- * 是否展示已学习的技能
- */
+/** 是否展示已学习的技能 */
 export const showStudied = ref(true);
 
-/**
- * 是否使用定点查看功能
- */
+/** 是否使用定点查看功能 */
 export const useFixed = ref(true);
 
-/**
- * 是否使用勇士自动定位功能
- */
+/** 是否使用勇士自动定位功能 */
 export const autoLocate = ref(true);
 
-/**
- * 是否开启抗锯齿
- */
+/** 是否开启抗锯齿 */
 export const antiAliasing = ref(true);
+
+/** 是否开启全屏 */
+export const fullscreen = ref(false);
 
 watch(transition, n => {
     core.plugin.transition.value = n;
@@ -106,6 +91,7 @@ function reset() {
     showStudied.value = core.getLocalStorage('showStudied', true);
     showHalo.value = core.getLocalStorage('showHalo', true);
     antiAliasing.value = core.getLocalStorage('antiAliasing', false);
+    fullscreen.value = !!document.fullscreenElement;
 }
 
 function resetFlag() {
@@ -116,6 +102,22 @@ function resetFlag() {
     itemDetail.value = flags.itemDetail ? true : false;
     autoSkill.value = flags.autoSkill ? true : false;
     autoLocate.value = flags.autoLocate ? true : false;
+}
+
+export async function triggerFullscreen() {
+    if (document.fullscreenElement) {
+        await document.exitFullscreen();
+        requestAnimationFrame(() => {
+            core.maxGameScale(1);
+        });
+        fullscreen.value = false;
+    } else {
+        await document.body.requestFullscreen();
+        requestAnimationFrame(() => {
+            core.maxGameScale();
+        });
+        fullscreen.value = true;
+    }
 }
 
 export default function init() {

@@ -140,6 +140,12 @@ interface PluginUtils {
      * @param value 要判断的值
      */
     has<T>(value: T): value is NonNullable<T>;
+
+    /**
+     * 最大化游戏缩放
+     * @param n 最大缩放再少多少个缩放
+     */
+    maxGameScale(n?: number): void;
 }
 
 interface PluginUis {

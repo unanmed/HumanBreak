@@ -1,4 +1,8 @@
 {
+    "fullscreen": {
+        "text": "全屏游戏",
+        "desc": ["是否全屏进行游戏"]
+    },
     "transition": {
         "text": "界面动画",
         "desc": [

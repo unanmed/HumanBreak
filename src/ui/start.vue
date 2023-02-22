@@ -14,6 +14,16 @@
                         <sound-outlined />
                         <span v-if="!soundChecked" id="sound-del"></span>
                     </div>
+                    <fullscreen-outlined
+                        v-if="!fullscreen"
+                        class="button-text setting-buttons2"
+                        @click="setFullscreen"
+                    />
+                    <fullscreen-exit-outlined
+                        v-else
+                        class="button-text setting-buttons2"
+                        @click="setFullscreen"
+                    />
                 </div>
                 <div id="background-gradient"></div>
                 <div id="buttons">
@@ -47,12 +57,18 @@
 
 <script lang="ts" setup>
 import { nextTick, onMounted, onUnmounted, reactive, ref } from 'vue';
-import { RightOutlined, SoundOutlined } from '@ant-design/icons-vue';
+import {
+    RightOutlined,
+    SoundOutlined,
+    FullscreenOutlined,
+    FullscreenExitOutlined
+} from '@ant-design/icons-vue';
 import { sleep } from 'mutate-animate';
 import { Matrix4 } from '../plugin/webgl/matrix';
 import { doByInterval, keycode } from '../plugin/utils';
 import { KeyCode } from '../plugin/keyCodes';
 import { achievementOpened } from '../plugin/uiController';
+import { triggerFullscreen } from '../plugin/settings';
 
 let startdiv: HTMLDivElement;
 let start: HTMLDivElement;
@@ -64,6 +80,7 @@ let buttons: HTMLSpanElement[] = [];
 
 let played: boolean;
 const soundChecked = ref(false);
+const fullscreen = ref(!!document.fullscreenElement);
 
 const showed = ref(false);
 
@@ -102,7 +119,9 @@ function setCursor(ele: HTMLSpanElement, i: number) {
         parseFloat(style.height) * (i + 0.5) -
         parseFloat(style.marginBottom) * (1 - i)
     }px`;
-    cursor.style.left = `${parseFloat(style.left) - 30}px`;
+    cursor.style.left = `${
+        parseFloat(style.left) - 20 * core.domStyle.scale
+    }px`;
 }
 
 async function clickStartButton(id: string) {
@@ -180,6 +199,15 @@ function bgm() {
     soundChecked.value = !soundChecked.value;
 }
 
+async function setFullscreen() {
+    const index = toshow.length - toshow.indexOf(selected.value) - 1;
+    await triggerFullscreen();
+    requestAnimationFrame(() => {
+        fullscreen.value = !!document.fullscreenElement;
+        setCursor(buttons[index], index);
+    });
+}
+
 /**
  * 初始 -> 难度
  */
@@ -209,7 +237,11 @@ async function showHard() {
         setCursor(buttons[0], 0);
     });
     await sleep(600);
-    buttons.forEach(v => (v.style.transition = 'all 0.3s ease-out'));
+    buttons.forEach(
+        v =>
+            (v.style.transition =
+                'transform 0.3s ease-out, color 0.3s ease-out')
+    );
 }
 
 /**
@@ -249,7 +281,11 @@ async function setButtonAnimate() {
     if (!showed.value) await sleep(1200);
     else await sleep(600);
 
-    buttons.forEach(v => (v.style.transition = 'all 0.3s ease-out'));
+    buttons.forEach(
+        v =>
+            (v.style.transition =
+                'transform 0.3s ease-out, color 0.3s ease-out')
+    );
 }
 
 onMounted(async () => {
@@ -261,13 +297,13 @@ onMounted(async () => {
     background = document.getElementById('background') as HTMLImageElement;
 
     core.registerResize('start', resize);
-    document.addEventListener('keydown', keydown);
-    document.addEventListener('keyup', keyup);
     resize();
 
     soundChecked.value = core.musicStatus.bgmStatus;
 
     await sleep(50);
+    document.addEventListener('keydown', keydown);
+    document.addEventListener('keyup', keyup);
     start.style.opacity = '1';
     if (played) {
         text.value = text2;
@@ -489,6 +525,7 @@ onUnmounted(() => {
     #settings {
         position: absolute;
         display: flex;
+        align-items: center;
         flex-direction: row-reverse;
         right: 5%;
         bottom: 10%;
@@ -500,6 +537,14 @@ onUnmounted(() => {
             color: white;
             transition: color 0.2s linear;
             cursor: pointer;
+        }
+
+        .setting-buttons2 {
+            margin-left: 40%;
+        }
+
+        #sound {
+            position: relative;
         }
 
         #sound[checked='false'] {

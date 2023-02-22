@@ -4231,21 +4231,14 @@ control.prototype._resize_gameGroup = function (obj) {
 control.prototype._resize_canvas = function (obj) {
     var innerWidth = core._PX_ * core.domStyle.scale + 'px',
         innerHeight = core._PY_ * core.domStyle.scale + 'px';
-    if (!core.isPlaying()) {
-        for (var i = 0; i < core.dom.gameCanvas.length; ++i) {
-            var ctx = core.dom.gameCanvas[i].getContext('2d');
-            core.resizeCanvas(ctx, core._PX_, core._PY_);
-            core.dom.gameCanvas[i].style.width = innerWidth;
-            core.dom.gameCanvas[i].style.height = innerHeight;
-        }
-    } else {
-        // requestAnimationFrame(function () {
-        for (var i = 0; i < core.dom.gameCanvas.length; ++i) {
-            core.dom.gameCanvas[i].style.width = innerWidth;
-            core.dom.gameCanvas[i].style.height = innerHeight;
-        }
-        // });
+
+    for (var i = 0; i < core.dom.gameCanvas.length; ++i) {
+        core.dom.gameCanvas[i].style.width = innerWidth;
+        core.dom.gameCanvas[i].style.height = innerHeight;
+        var ctx = core.dom.gameCanvas[i].getContext('2d');
+        core.resizeCanvas(ctx, core._PX_, core._PY_);
     }
+
     core.dom.gif.style.width = innerWidth;
     core.dom.gif.style.height = innerHeight;
     core.dom.gif2.style.width = innerWidth;
