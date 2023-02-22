@@ -209,6 +209,9 @@ interface PluginUis {
     /** 开始界面是否打开 */
     readonly startOpened: Ref<boolean>;
 
+    /** 成就界面是否打开 */
+    readonly achievementOpened: Ref<boolean>;
+
     /** ui栈 */
     readonly uiStack: Ref<any[]>;
 

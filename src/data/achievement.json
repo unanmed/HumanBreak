@@ -1,5 +1,5 @@
 {
-    "challenge": [
+    "normal": [
         {
             "name": "虚惊一场",
             "text": [
@@ -8,18 +8,20 @@
             "point": 30
         },
         {
+            "name": "真能刷",
+            "text": [
+                "勇气之路的刷血怪刷到 <span style=\"color: gold\">15w</span> 以上的血"
+            ],
+            "point": 30
+        }
+    ],
+    "challenge": [
+        {
             "name": "逃出生天",
             "text": [
                 "通过山路追逐战的困难难度"
             ],
             "point": 20
-        },
-        {
-            "name": "真能刷",
-            "text": [
-                "勇气之路的刷血怪刷到 <span style=\"color: gold\">15w<span> 以上的血"
-            ],
-            "point": 30
         },
         {
             "name": "冰与火之舞",
@@ -35,7 +37,8 @@
             "text": [
                 "第一章完成度达到100%"
             ],
-            "progress": "",
+            "progress": "100 / 100",
+            "percent": true,
             "point": 50
         },
         {
@@ -43,6 +46,7 @@
             "text": [
                 "与山路上的若干个神秘木牌对话"
             ],
+            "progress": "5 / 5",
             "hide": "该探索成就需要你自己探索如何达成",
             "point": 25
         },
@@ -51,7 +55,8 @@
             "text": [
                 "第二章完成度达到100%"
             ],
-            "progress": "",
+            "progress": "100 / 100",
+            "percent": true,
             "point": 50
         },
         {
@@ -59,6 +64,7 @@
             "text": [
                 "学习电摇嘲讽技能"
             ],
+            "hide": "该探索成就需要你自己探索如何达成",
             "point": 20
         },
         {

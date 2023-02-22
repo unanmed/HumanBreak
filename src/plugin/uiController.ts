@@ -10,6 +10,7 @@ import SkillTree from '../ui/skillTree.vue';
 import Fly from '../ui/fly.vue';
 import FixedDetail from '../ui/fixedDetail.vue';
 import Shop from '../ui/shop.vue';
+import Achievement from '../ui/achievement.vue';
 
 export const bookOpened = ref(false);
 export const toolOpened = ref(false);
@@ -24,6 +25,7 @@ export const showStudiedSkill = ref(false);
 export const fixedDetailOpened = ref(false);
 export const shopOpened = ref(false);
 export const startOpened = ref(false);
+export const achievementOpened = ref(false);
 
 export const transition = ref(true);
 export const noClosePanel = ref(false);
@@ -51,7 +53,8 @@ const UI_LIST: [Ref<boolean>, Component][] = [
     [skillTreeOpened, SkillTree],
     [flyOpened, Fly],
     [fixedDetailOpened, FixedDetail],
-    [shopOpened, Shop]
+    [shopOpened, Shop],
+    [achievementOpened, Achievement]
 ];
 
 /** ui栈 */

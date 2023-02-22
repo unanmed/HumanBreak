@@ -52,6 +52,7 @@ import { sleep } from 'mutate-animate';
 import { Matrix4 } from '../plugin/webgl/matrix';
 import { doByInterval, keycode } from '../plugin/utils';
 import { KeyCode } from '../plugin/keyCodes';
+import { achievementOpened } from '../plugin/uiController';
 
 let startdiv: HTMLDivElement;
 let start: HTMLDivElement;
@@ -119,6 +120,9 @@ async function clickStartButton(id: string) {
         core.load();
     }
     if (id === 'replay') core.chooseReplayFile();
+    if (id === 'achievement') {
+        achievementOpened.value = true;
+    }
 }
 
 function onmove(e: MouseEvent) {
@@ -324,6 +328,7 @@ onUnmounted(() => {
         #000 100%
     );
     animation: gradient 4s ease-out 0.5s 1 normal forwards;
+    pointer-events: none;
 }
 
 #listen {
@@ -345,7 +350,6 @@ onUnmounted(() => {
     #title {
         margin-top: 7%;
         text-align: center;
-        color: transparent;
         font: 4em 'normal';
         font-weight: 200;
         background-image: linear-gradient(
@@ -363,6 +367,7 @@ onUnmounted(() => {
             5px 5px 5px rgba(0, 0, 0, 0.4);
         filter: brightness(1.8);
         user-select: none;
+        animation: opacity 3s ease-out 0.5s 1 normal forwards;
     }
 
     #buttons {
@@ -544,6 +549,15 @@ onUnmounted(() => {
     }
     to {
         left: 100%;
+    }
+}
+
+@keyframes opacity {
+    from {
+        color: #bbb;
+    }
+    to {
+        color: transparent;
     }
 }
 

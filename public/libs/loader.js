@@ -245,7 +245,6 @@ loader.prototype._loadTilesets_sync = function (callback) {
         core.tilesets,
         core.material.images.tilesets,
         function () {
-            core.loader._loadTilesets_afterLoad();
             callback();
         }
     );
@@ -259,23 +258,9 @@ loader.prototype._loadTilesets_async = function (onprogress, onfinished) {
         core.material.images.tilesets,
         onprogress,
         function () {
-            core.loader._loadTilesets_afterLoad();
             onfinished();
         }
     );
-};
-
-loader.prototype._loadTilesets_afterLoad = function () {
-    // 检查宽高是32倍数，如果出错在控制台报错
-    for (var imgName in core.material.images.tilesets) {
-        var img = core.material.images.tilesets[imgName];
-        if (img.width % 32 != 0 || img.height % 32 != 0) {
-            console.warn('警告！' + imgName + '的宽或高不是32的倍数！');
-        }
-        if (img.width * img.height > 32 * 32 * 3000) {
-            console.warn('警告！' + imgName + '上的图块素材个数大于3000！');
-        }
-    }
 };
 
 // ------ 实际加载一系列图片 ------ //
