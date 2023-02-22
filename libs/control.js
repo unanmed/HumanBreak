@@ -502,7 +502,7 @@ control.prototype.showStartAnimate = function (noAnimate, callback) {
 };
 
 control.prototype._showStartAnimate_resetDom = function () {
-    core.plugin.loaded.value = true;
+    if (main.mode === 'play') core.plugin.loaded.value = true;
     core.status.played = false;
     core.dom.gameGroup.style.display = 'none';
     core.clearStatus();
