@@ -221,6 +221,8 @@ main.prototype.init = function (mode, callback) {
         var a = {};
         var b = {};
         new Proxy(a, b);
+        const aa = `${123}`;
+        aa;
     } catch (e) {
         alert('浏览器版本过低，无法游玩本塔！');
         return;
@@ -279,8 +281,8 @@ main.prototype.init = function (mode, callback) {
                 ].forEach(function (t) {
                     coreData[t] = main[t];
                 });
-                main.core.init(coreData, callback);
-                main.core.resize();
+                core.init(coreData, callback);
+                core.resize();
                 // 自动放缩最大化
                 if (core.getLocalStorage('autoScale') == null) {
                     core.setLocalStorage('autoScale', true);
@@ -290,45 +292,29 @@ main.prototype.init = function (mode, callback) {
                     !core.domStyle.isVertical
                 ) {
                     try {
-                        if (main.core) {
-                            var index =
-                                main.core.domStyle.availableScale.indexOf(
-                                    core.domStyle.scale
-                                );
-                            main.core.control.setDisplayScale(
-                                main.core.domStyle.availableScale.length -
-                                    1 -
-                                    index
-                            );
-                            if (
-                                !main.core.isPlaying() &&
-                                main.core.flags.enableHDCanvas
-                            ) {
-                                main.core.domStyle.ratio = Math.max(
-                                    window.devicePixelRatio || 1,
-                                    main.core.domStyle.scale
-                                );
-                                main.core.resize();
-                            }
-                            requestAnimationFrame(function () {
-                                var style = getComputedStyle(
-                                    main.dom.gameGroup
-                                );
-                                var height = parseFloat(style.height);
-                                if (height > window.innerHeight * 0.95) {
-                                    main.core.control.setDisplayScale(-1);
-                                    if (
-                                        !main.core.isPlaying() &&
-                                        main.core.flags.enableHDCanvas
-                                    ) {
-                                        main.core.domStyle.ratio = Math.max(
-                                            window.devicePixelRatio || 1,
-                                            main.core.domStyle.scale
-                                        );
-                                        main.core.resize();
+                        if (core) {
+                            core.plugin.maxGameScale();
+                            if (!core.getLocalStorage('fullscreen', false)) {
+                                requestAnimationFrame(function () {
+                                    var style = getComputedStyle(
+                                        main.dom.gameGroup
+                                    );
+                                    var height = parseFloat(style.height);
+                                    if (height > window.innerHeight * 0.95) {
+                                        core.control.setDisplayScale(-1);
+                                        if (
+                                            !core.isPlaying() &&
+                                            core.flags.enableHDCanvas
+                                        ) {
+                                            core.domStyle.ratio = Math.max(
+                                                window.devicePixelRatio || 1,
+                                                core.domStyle.scale
+                                            );
+                                            core.resize();
+                                        }
                                     }
-                                }
-                            });
+                                });
+                            }
                         }
                     } catch (e) {
                         console.error(e);

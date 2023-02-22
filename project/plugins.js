@@ -4128,5 +4128,21 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         this.has = function (v) {
             return v !== null && v !== void 0;
         };
+
+        this.maxGameScale = function (n = 0) {
+            const index = core.domStyle.availableScale.indexOf(
+                core.domStyle.scale
+            );
+            core.control.setDisplayScale(
+                core.domStyle.availableScale.length - 1 - index - n
+            );
+            if (!core.isPlaying() && core.flags.enableHDCanvas) {
+                core.domStyle.ratio = Math.max(
+                    window.devicePixelRatio || 1,
+                    core.domStyle.scale
+                );
+                core.resize();
+            }
+        };
     }
 };
