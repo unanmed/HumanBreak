@@ -1,4 +1,5 @@
 import { Animation, sleep, TimingFn } from 'mutate-animate';
+import { completeAchievement } from '../ui/achievement';
 import { has } from '../utils';
 import { ChaseCameraData, ChasePath, getChaseDataByIndex } from './data';
 
@@ -29,6 +30,8 @@ export class Chase {
      * 是否展示路径
      */
     showPath: boolean = false;
+
+    endFn?: () => void;
 
     /**
      * 开始一个追逐战
@@ -204,6 +207,14 @@ export class Chase {
     }
 
     /**
+     * 当追逐战结束后执行函数
+     * @param fn 执行的函数
+     */
+    onEnd(fn: () => void) {
+        this.endFn = fn;
+    }
+
+    /**
      * 结束这个追逐战
      */
     end() {
@@ -215,6 +226,7 @@ export class Chase {
         delete flags.chaseIndex;
         flags.__lockViewport__ = false;
         core.deleteCanvas('chasePath');
+        if (this.endFn) this.endFn();
     }
 }
 
@@ -223,10 +235,20 @@ export async function startChase(index: number) {
     flags.chaseIndex = index;
     flags.onChase = true;
     await sleep(20);
-    flags.chase = new Chase(
+    const chase = new Chase(
         data.path,
         data.fns,
         data.camera,
         flags.chaseHard === 0
     );
+    flags.chase = chase;
+
+    // 成就
+    chase.onEnd(() => {
+        if (flags.chaseHard === 1) {
+            if (index === 1) {
+                completeAchievement('challenge', 0);
+            }
+        }
+    });
 }

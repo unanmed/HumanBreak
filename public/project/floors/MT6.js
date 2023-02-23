@@ -120,7 +120,14 @@ main.floors.MT6=
             ]
         }
     },
-    "afterBattle": {},
+    "afterBattle": {
+        "4,12": [
+            {
+                "type": "function",
+                "function": "function(){\nif (core.status.hero.hp === 1) {\n\tcore.completeAchievement('normal', 0);\n}\n}"
+            }
+        ]
+    },
     "afterGetItem": {
         "4,4": [
             {
