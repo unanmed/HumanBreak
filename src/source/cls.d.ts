@@ -569,6 +569,7 @@ interface IdToCls {
     N639: 'npc48';
     T640: 'terrains';
     I641: 'items';
+    I642: 'items';
     X20032: 'tileset';
     X20033: 'tileset';
     X20034: 'tileset';

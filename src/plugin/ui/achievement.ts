@@ -1,6 +1,7 @@
 import { ref } from 'vue';
 import list from '../../data/achievement.json';
-import { has } from '../utils';
+import { achiDict, checkCompletionAchievement } from '../completion';
+import { changeLocalStorage, has } from '../utils';
 
 type AchievementList = typeof list;
 export type AchievementType = keyof AchievementList;
@@ -17,7 +18,7 @@ export interface Achievement {
 }
 
 export default function init() {
-    return {};
+    return { completeAchievement, hasCompletedAchievement, addMountSign };
 }
 
 export const showComplete = ref(false);
@@ -37,13 +38,22 @@ export const totalPoint = Object.values(list)
  * @param index 成就索引
  */
 export function completeAchievement(type: AchievementType, index: number) {
-    const now = core.getLocalStorage<AchievementData>('achievement', {
-        normal: [],
-        challenge: [],
-        explore: []
-    });
-    now[type][index] = true;
-    core.setLocalStorage('achievement', now);
+    if (flags.debug) return;
+    changeLocalStorage<AchievementData>(
+        'achievement',
+        data => {
+            data[type][index] = true;
+            return data;
+        },
+        {
+            normal: [],
+            challenge: [],
+            explore: []
+        }
+    );
+    if (type === 'explore' && !Object.values(achiDict).includes(index)) {
+        checkCompletionAchievement();
+    }
     completeAchi.value = `${type},${index}`;
     showComplete.value = true;
 }
@@ -80,4 +90,33 @@ export function getNowPoint() {
         });
     }
     return res;
+}
+
+// ----- 各个成就相关的函数
+
+/**
+ * 山路木牌
+ * @param id 木牌id
+ */
+export function addMountSign(id: number) {
+    if (flags.debug) return;
+    if (
+        !core.getLocalStorage(`mountSign_${id}`, false) &&
+        !hasCompletedAchievement('explore', 1)
+    ) {
+        changeLocalStorage(
+            'mountSign',
+            n => {
+                if (n + 1 >= 5) {
+                    completeAchievement('explore', 1);
+                    for (const i of [1, 2, 3, 4, 5]) {
+                        core.removeLocalStorage(`mountSign_${i}`);
+                    }
+                }
+                return n + 1;
+            },
+            0
+        );
+        core.setLocalStorage(`mountSign_${id}`, true);
+    }
 }

@@ -1357,5 +1357,11 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 				"mana": 5
 			}
 		}
+	},
+	"I642": {
+		"cls": "constants",
+		"name": "成就",
+		"canUseItemEffect": "true",
+		"useItemEffect": "core.plugin.achievementOpened.value = true;"
 	}
 }

@@ -186,4 +186,5 @@ interface ItemDeclaration {
     I575: 'equips';
     I589: 'equips';
     I641: 'equips';
+    I642: 'constants';
 }

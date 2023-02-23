@@ -15,7 +15,7 @@ type CanParseCss = keyof {
 };
 
 export default function init() {
-    return { has, getDamageColor, parseCss, tip };
+    return { has, getDamageColor, parseCss, tip, changeLocalStorage };
 }
 
 /**
@@ -211,4 +211,20 @@ export async function doByInterval(
             await sleep(interval);
         }
     }
+}
+
+/**
+ * 更改一个本地存储
+ * @param name 要更改的信息
+ * @param fn 更改时执行的函数
+ * @param defaultValue 如果不存在时获取的默认值
+ */
+export function changeLocalStorage<T>(
+    name: string,
+    fn: (data: T) => T,
+    defaultValue?: T
+) {
+    const now = core.getLocalStorage(name, defaultValue);
+    const to = fn(now);
+    core.setLocalStorage(name, to);
 }

@@ -19,7 +19,7 @@
         <div id="list">
             <div id="achievement-list" :style="{ left: `-${offset}%` }">
                 <div v-for="t of column" class="achievement-one">
-                    <Scroll class="list-scroll" :width="10">
+                    <Scroll class="list-scroll" :width="isMobile ? 10 : 20">
                         <div class="list-div">
                             <div
                                 v-for="a of getAllAchievements(t)"
@@ -107,6 +107,7 @@ import {
     hasCompletedAchievement
 } from '../plugin/ui/achievement';
 import Scroll from '../components/scroll.vue';
+import { isMobile } from '../plugin/use';
 
 type AchievementList = typeof list;
 type AchievementType = keyof AchievementList;
@@ -172,7 +173,11 @@ function getAllAchievements(type: AchievementType): ResolvedAchievement[] {
 }
 
 function exit() {
-    noClosePanel.value = true;
+    try {
+        core.closePanel();
+    } catch {
+        noClosePanel.value = true;
+    }
     achievementOpened.value = false;
 }
 </script>

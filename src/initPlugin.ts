@@ -13,6 +13,8 @@ import fixed from './plugin/ui/fixed';
 import webglUtils from './plugin/webgl/utils';
 import shadow from './plugin/shadow/shadow';
 import gameShadow from './plugin/shadow/gameShadow';
+import achievement from './plugin/ui/achievement';
+import completion, { floors } from './plugin/completion';
 
 function forward() {
     const toForward: any[] = [
@@ -30,7 +32,9 @@ function forward() {
         fixed(),
         webglUtils(),
         shadow(),
-        gameShadow()
+        gameShadow(),
+        achievement(),
+        completion()
     ];
 
     // 初始化所有插件，并转发到core上
@@ -52,6 +56,13 @@ function forward() {
 
         console.log('插件转发完成！');
     })();
+
+    Object.values(floors).forEach((v, i) => {
+        const from = core.floorIds.indexOf(v[0]);
+        const to = core.floorIds.indexOf(v[1]);
+        const all = core.floorIds.slice(from, to + 1);
+        floors[i + 1] = all;
+    });
 }
 
 main.forward = forward;

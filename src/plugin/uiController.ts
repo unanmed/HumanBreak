@@ -95,7 +95,8 @@ export default function init() {
         shopOpened,
         startOpened,
         startAnimationEnded,
-        loaded
+        loaded,
+        achievementOpened
     };
 }
 

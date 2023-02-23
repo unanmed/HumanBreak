@@ -112,7 +112,9 @@ type Settings = typeof settingInfo;
 
 const core = window.core;
 
-const selected = ref<keyof Settings>('transition');
+const selected = ref<keyof Settings>('fullscreen');
+
+fullscreen.value = !!document.fullscreenElement;
 
 const descText = computed(() => {
     return splitText(settingInfo[selected.value].desc);

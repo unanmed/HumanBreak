@@ -20,7 +20,8 @@ interface PluginDeclaration
         PluginUse,
         SkillTree,
         MiniMap,
-        HeroRealStatus {
+        HeroRealStatus,
+        PluginAchievement {
     /**
      * 添加函数  例：添加弹出文字，像这个就可以使用core.addPop或core.plugin.addPop调用
      * @param px 弹出的横坐标
@@ -387,6 +388,32 @@ interface HeroRealStatus {
         y?: number,
         floorId?: FloorIds
     ): HeroStatus[K];
+}
+
+interface PluginAchievement {
+    /**
+     * 完成一个成就
+     * @param type 成就类型
+     * @param index 成就索引
+     */
+    completeAchievement(type: AchievementType, index: number): void;
+
+    /**
+     * 是否完成了某个成就
+     * @param type 成就类型
+     * @param index 成就索引
+     */
+    hasCompletedAchievement(type: AchievementType, index: number): boolean;
+
+    /**
+     * 获取当前成就点数
+     */
+    getNowPoint(): number;
+
+    /**
+     * 检查所有到达过的楼层，用于成就的计算
+     */
+    checkVisitedFloor(): void;
 }
 
 type Chapter = 'chapter1' | 'chapter2';

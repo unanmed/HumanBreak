@@ -212,10 +212,18 @@ main.floors.MT14=
             }
         ],
         "127,1": [
-            "你是怎么办到的？！"
+            "你是怎么办到的？！",
+            {
+                "type": "function",
+                "function": "function(){\nif (!core.isReplaying()) {\n\tcore.addMountSign(2);\n}\n}"
+            }
         ],
         "26,14": [
-            "不作死就不会死"
+            "不作死就不会死",
+            {
+                "type": "function",
+                "function": "function(){\nif (!core.isReplaying()) {\n\tcore.addMountSign(1);\n}\n}"
+            }
         ],
         "8,2": [
             "这一层有一个必须使用跳跃的地方，需要1个跳跃次数，你一共有3个跳跃次数，请规划好",
