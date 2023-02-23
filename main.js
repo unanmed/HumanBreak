@@ -504,6 +504,7 @@ main.prototype.listen = function () {
     main.dom.body.onkeydown = function (e) {
         if (main.editorOpened) return;
         try {
+            if (e.keyCode === 27) e.preventDefault();
             if (main.dom.inputDiv.style.display == 'block') return;
             if (
                 main.core &&
@@ -539,6 +540,7 @@ main.prototype.listen = function () {
                 ) {
                     // ESC
                     main.core.showStartAnimate(true);
+                    e.preventDefault();
                 }
                 e.stopPropagation();
                 return;
@@ -872,40 +874,6 @@ main.prototype.listen = function () {
             main.statusBar.image.btn8.style.filter = 'sepia(1) contrast(1.5)';
         }
     };
-
-    ////// 点击“开始游戏”时 //////
-    // main.dom.playGame.onclick = function () {
-    //     main.dom.startButtons.style.display = 'none';
-    //     main.core.control.checkBgm();
-
-    //     if (main.levelChoose.length == 0) {
-    //         core.events.startGame('');
-    //     } else {
-    //         main.dom.levelChooseButtons.style.display = 'block';
-    //         main.selectedButton = null;
-    //         main.selectButton(0);
-    //     }
-    // };
-
-    // ////// 点击“载入游戏”时 //////
-    // main.dom.loadGame.onclick = function () {
-    //     main.core.control.checkBgm();
-    //     main.core.load();
-    // };
-
-    // ////// 点击“录像回放”时 //////
-    // main.dom.replayGame.onclick = function () {
-    //     main.core.control.checkBgm();
-    //     main.core.chooseReplayFile();
-    // };
-
-    // main.dom.musicBtn.onclick = function () {
-    //     try {
-    //         if (main.core) main.core.triggerBgm();
-    //     } catch (ee) {
-    //         console.error(ee);
-    //     }
-    // };
 
     window.onblur = function () {
         if (main.core && main.core.control) {
