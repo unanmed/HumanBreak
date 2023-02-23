@@ -52,7 +52,14 @@ main.floors.MT17=
             ]
         }
     },
-    "afterBattle": {},
+    "afterBattle": {
+        "12,6": [
+            {
+                "type": "function",
+                "function": "function(){\nif (core.status.hero.hp - flags.hphphp >= 150000) {\n\tcore.completeAchievement('normal', 1);\n\tdelete flags.hphphp;\n}\n}"
+            }
+        ]
+    },
     "afterGetItem": {},
     "afterOpenDoor": {},
     "autoEvent": {},
@@ -94,7 +101,15 @@ main.floors.MT17=
     "fgmap": [
 
 ],
-    "beforeBattle": {},
+    "beforeBattle": {
+        "12,6": [
+            {
+                "type": "setValue",
+                "name": "flag:hphphp",
+                "value": "core.status.hero.hp"
+            }
+        ]
+    },
     "bg2map": [
 
 ],
