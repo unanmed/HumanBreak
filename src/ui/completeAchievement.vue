@@ -73,6 +73,7 @@ onMounted(async () => {
     position: fixed;
     background-color: #000d;
     animation: ani 5s ease 0s 1 forwards running;
+    z-index: 10000;
 }
 
 #complete {

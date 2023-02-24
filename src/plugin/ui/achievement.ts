@@ -38,7 +38,7 @@ export const totalPoint = Object.values(list)
  * @param index 成就索引
  */
 export function completeAchievement(type: AchievementType, index: number) {
-    if (flags.debug) return;
+    if (flags.debug || hasCompletedAchievement(type, index)) return;
     changeLocalStorage<AchievementData>(
         'achievement',
         data => {
