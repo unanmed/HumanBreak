@@ -376,6 +376,9 @@ function loadEquip() {
 function update() {
     equiped.value = core.status.hero.equipment;
     equips.value = getEquips();
+    requestAnimationFrame(() => {
+        bind();
+    });
 }
 
 // ----- 绑定函数
