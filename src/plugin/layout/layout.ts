@@ -64,7 +64,13 @@ export class Layout {
             if (img instanceof Path2D) {
                 this.ctx.fill(img);
             } else {
-                this.ctx.drawImage(img, sx, sy, sw!, sh!, dx!, dy!, dw!, dh!);
+                if (!has(sw)) {
+                    this.ctx.drawImage(img, sx, sy);
+                } else if (!has(dx)) {
+                    this.ctx.drawImage(img, sx, sy, sw, sh!);
+                } else {
+                    this.ctx.drawImage(img, sx, sy, sw, sh!, dx, dy!, dw!, dh!);
+                }
             }
         };
         if (type & Layout.IMAGE) {
