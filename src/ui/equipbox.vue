@@ -442,6 +442,11 @@ function keyup(e: KeyboardEvent) {
     if (c === KeyCode.KeyQ || c === KeyCode.KeyX || c === KeyCode.Escape) {
         exit();
     }
+    if (e.altKey) {
+        const n = e.keyCode - 48;
+        core.quickSaveEquip(n);
+        tip('success', `已保存至${n}号套装`);
+    }
 }
 
 watch(toShow, n => {
