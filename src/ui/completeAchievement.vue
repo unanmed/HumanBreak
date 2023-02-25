@@ -18,7 +18,6 @@
 </template>
 
 <script lang="ts" setup>
-import { now } from 'lodash';
 import { sleep, Ticker } from 'mutate-animate';
 import { computed, onMounted, ref } from 'vue';
 import Box from '../components/box.vue';

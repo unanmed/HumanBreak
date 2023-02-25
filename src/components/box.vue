@@ -69,7 +69,6 @@ const id = (1e8 * Math.random()).toFixed(0);
 
 const moveSelected = ref(false);
 let moveTimeout = 0;
-let move: HTMLDivElement;
 let main: HTMLDivElement;
 let leftB: HTMLDivElement;
 let rightB: HTMLDivElement;
@@ -144,7 +143,6 @@ function bottomDrag(x: number, y: number) {
 
 function resize() {
     main = document.getElementById(`box-${id}`) as HTMLDivElement;
-    move = document.getElementById(`box-move-${id}`) as HTMLDivElement;
     leftB = document.getElementById(`border-left-${id}`) as HTMLDivElement;
     topB = document.getElementById(`border-top-${id}`) as HTMLDivElement;
     rightB = document.getElementById(`border-right-${id}`) as HTMLDivElement;
