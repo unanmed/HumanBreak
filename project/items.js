@@ -439,28 +439,28 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "tools",
 		"name": "解毒药水",
 		"text": "可以解除中毒状态",
-		"useItemEffect": "core.triggerDebuff('remove', 'poison');",
+		"useItemEffect": "",
 		"canUseItemEffect": "core.hasFlag('poison');"
 	},
 	"weakWine": {
 		"cls": "tools",
 		"name": "解衰药水",
 		"text": "可以解除衰弱状态",
-		"useItemEffect": "core.triggerDebuff('remove', 'weak');",
+		"useItemEffect": "",
 		"canUseItemEffect": "core.hasFlag('weak');"
 	},
 	"curseWine": {
 		"cls": "tools",
 		"name": "解咒药水",
 		"text": "可以解除诅咒状态",
-		"useItemEffect": "core.triggerDebuff('remove', 'curse');",
+		"useItemEffect": "",
 		"canUseItemEffect": "core.hasFlag('curse');"
 	},
 	"superWine": {
 		"cls": "tools",
 		"name": "万能药水",
 		"text": "可以解除所有不良状态",
-		"useItemEffect": "core.triggerDebuff('remove', ['poison', 'weak', 'curse']);",
+		"useItemEffect": "",
 		"canUseItemEffect": "(function() {\n\treturn core.hasFlag('poison') || core.hasFlag('weak') || core.hasFlag('curse');\n})();"
 	},
 	"hammer": {
