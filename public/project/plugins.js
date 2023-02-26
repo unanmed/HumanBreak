@@ -3,13 +3,7 @@
 var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
     init: function () {
         // 只看插件没用，插件是与vite样板高度融合的，所以要看的话就在游戏内的百科全书-关于游戏内点那个开源地址吧
-        this._afterLoadResources = function () {
-            if (!main.replayChecking && main.mode === 'play') {
-                main.forward();
-                core.resetSettings();
-                core.plugin.showMarkedEnemy.value = true;
-            }
-        };
+        this._afterLoadResources = function () {};
     },
     sprite: function () {
         const sprites = {};
