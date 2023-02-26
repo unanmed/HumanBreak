@@ -622,10 +622,6 @@ actions.prototype._sys_ondown_lockControl = function (x, y, px, py) {
         case 'gameInfo':
             this._clickGameInfo(x, y, px, py);
             break;
-        case 'about':
-        case 'help':
-            core.ui.closePanel();
-            break;
     }
 
     // --- 长按判定
