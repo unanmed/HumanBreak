@@ -285,8 +285,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		],
 		"startBgm": "title.mp3",
 		"styles": {
-			"startBackground": "project/images/bg.jpg",
-			"startVerticalBackground": "project/images/bg.jpg",
+			"startBackground": " ",
+			"startVerticalBackground": " ",
 			"startLogoStyle": " ",
 			"startButtonsStyle": " ",
 			"statusLeftBackground": " ",
@@ -300,10 +300,10 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				1
 			],
 			"borderColor": [
-				204,
-				204,
-				204,
-				1
+				5,
+				0,
+				0,
+				0
 			],
 			"selectColor": [
 				255,

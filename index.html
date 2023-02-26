@@ -31,6 +31,7 @@
             startImageLogo.onload = function () {
                 startImageBackgroundDiv.style.display = 'block';
                 var onAnimationEnd = function () {
+                    console.log(1);
                     if (window.core && core.plugin && core.plugin.startAnimationEnded) {
                         core.plugin.startAnimationEnded.value = true;
                         startImageBackgroundDiv.style.display = 'none';
