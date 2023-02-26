@@ -4183,10 +4183,6 @@ control.prototype.resize = function () {
 };
 
 control.prototype._resize_gameGroup = function (obj) {
-    var startBackground = core.domStyle.isVertical
-        ? main.styles.startVerticalBackground || main.styles.startBackground
-        : main.styles.startBackground;
-
     var gameGroup = core.dom.gameGroup;
     var totalWidth, totalHeight;
     if (core.domStyle.isVertical) {
@@ -4242,7 +4238,6 @@ control.prototype._resize_canvas = function (obj) {
     core.dom.gameDraw.style.height = innerHeight;
     core.dom.gameDraw.style.top = obj.statusBarHeightInVertical + 'px';
     core.dom.gameDraw.style.right = 0;
-    core.dom.gameDraw.style.border = obj.border;
     core.dom.gameDraw.style.boxSizing = 'content-box';
     // resize bigmap
     core.bigmap.canvas.forEach(function (cn) {
@@ -4428,16 +4423,16 @@ control.prototype._resize_toolBar = function (obj) {
         toolBar.style.top =
             obj.statusBarHeightInVertical + obj.outerHeight + 'px';
         toolBar.style.height = obj.toolbarHeightInVertical + 'px';
-        toolBar.style.background = obj.globalAttribute.toolsBackground;
+        toolBar.style.background = 'none';
     } else {
         if (obj.extendToolbar) {
             toolBar.style.left = '';
             toolBar.style.right = 0;
-            toolBar.style.width = obj.outerWidth + 'px';
-            toolBar.style.top = obj.outerHeight + 'px';
+            toolBar.style.width = obj.outerWidth - 6 + 'px';
+            toolBar.style.top = obj.outerHeight - 6 + 'px';
             toolBar.style.height =
                 obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER + 'px';
-            toolBar.style.background = obj.globalAttribute.toolsBackground;
+            toolBar.style.background = 'none';
         } else {
             toolBar.style.left = 0;
             toolBar.style.right = '';
@@ -4448,9 +4443,6 @@ control.prototype._resize_toolBar = function (obj) {
             toolBar.style.background = 'transparent';
         }
     }
-    toolBar.style.borderLeft = obj.border;
-    toolBar.style.borderRight = toolBar.style.borderBottom =
-        core.domStyle.isVertical || obj.extendToolbar ? obj.border : '';
     toolBar.style.fontSize = 16 * core.domStyle.scale + 'px';
 
     if (
