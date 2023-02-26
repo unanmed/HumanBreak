@@ -1415,12 +1415,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 }[name] || name
             );
         },
-        triggerDebuff: function (action, type) {
-            // 毒衰咒效果的获得与解除
-            // action：获得还是解除；'get'表示获得，'remove'表示解除
-            // type：一个数组表示获得了哪些毒衰咒效果；poison, weak，curse
-            if (!(type instanceof Array)) type = [type];
-        },
         updateStatusBar: function () {
             // 更新状态栏
 

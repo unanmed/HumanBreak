@@ -735,13 +735,6 @@ interface Control {
     getBuff(name: keyof NumbericHeroStatus): number;
 
     /**
-     * 变更勇士的debuff
-     * @param action 触发的类型，get表示获得debuff，remove表示移除debuff
-     * @param type 获取的debuff列表
-     */
-    triggerDebuff(action: string, type: string | string[]): void;
-
-    /**
      * 设置勇士位置
      * 值得注意的是，这句话虽然会使勇士改变位置，但并不会使界面重新绘制；
      * 如需立刻重新绘制地图还需调用：core.clearMap('hero'); core.drawHero(); 来对界面进行更新。

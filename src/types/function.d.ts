@@ -27,13 +27,6 @@ interface ControlData {
     getStatusLabel(name: string): string;
 
     /**
-     * 变更勇士的debuff
-     * @param action 触发的类型，get表示获得debuff，remove表示移除debuff
-     * @param type 获取的debuff列表
-     */
-    triggerDebuff(action: 'get' | 'remove', type: string | string[]): void;
-
-    /**
      * 立即仅更新状态栏
      */
     updateStatusBar(): void;
