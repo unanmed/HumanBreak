@@ -614,7 +614,11 @@ core.prototype._init_plugins = function () {
     }
 
     core._forwardFunc('plugin');
-    if (!main.replayChecking) main.forward();
+    if (!main.replayChecking && main.mode === 'play') {
+        main.forward();
+        core.resetSettings();
+        core.plugin.showMarkedEnemy.value = true;
+    }
 };
 
 core.prototype._forwardFuncs = function () {

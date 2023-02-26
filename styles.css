@@ -561,8 +561,8 @@ p#name {
 }
 
 .startImageAnimation {
-    -webkit-animation: startImage 4s ease-in-out 1s alternate 1;
-    animation: startImage 4s ease-in-out 1s alternate 1;
+    -webkit-animation: startImage 4s ease-in-out 1s forwards 1;
+    animation: startImage 4s ease-in-out 1s forwards 1;
 }
 
 @-webkit-keyframes startImage {
@@ -590,8 +590,8 @@ p#name {
 }
 
 .startImageDivAnimation {
-    -webkit-animation: startImageDivDisappear 2s ease-in-out 3s alternate 1;
-    animation: startImageDivDisappear 2s ease-in-out 3s alternate 1;
+    -webkit-animation: startImageDivDisappear 2s ease-in-out 5s forwards 1;
+    animation: startImageDivDisappear 2s ease-in-out 5s forwards 1;
 }
 
 @-webkit-keyframes startImageDivDisappear {
