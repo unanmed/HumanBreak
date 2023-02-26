@@ -4598,7 +4598,6 @@ events.prototype.setHeroIcon = function (name, noDraw) {
     core.material.images.hero = img;
     core.material.icons.hero.width = img.width / 4;
     core.material.icons.hero.height = img.height / 4;
-    core.control.updateHeroIcon(name);
     if (!noDraw) core.drawHero();
 };
 

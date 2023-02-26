@@ -1066,11 +1066,6 @@ interface Control {
     hideStatusBar(showToolbox?: boolean): void;
 
     /**
-     * 更新状态栏的勇士图标
-     */
-    updateHeroIcon(name: ImageIds): void;
-
-    /**
      * 改变工具栏为按钮1-8
      * @param useButton 是否显示为按钮1-8
      */

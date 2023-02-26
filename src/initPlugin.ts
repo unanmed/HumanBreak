@@ -66,3 +66,5 @@ function forward() {
 }
 
 main.forward = forward;
+main.init('play');
+main.listen();

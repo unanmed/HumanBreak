@@ -1261,7 +1261,7 @@ interface Main extends MainData {
      * @param mode 初始化游戏的模式，游玩还是编辑器
      * @param callback 初始化完成后的回调函数
      */
-    init(mode: 'play' | 'editor', callback: () => void): void;
+    init(mode: 'play' | 'editor', callback?: () => void): void;
 
     /**
      * 动态加载js文件
