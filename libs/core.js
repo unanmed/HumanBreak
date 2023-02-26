@@ -614,6 +614,7 @@ core.prototype._init_plugins = function () {
     }
 
     core._forwardFunc('plugin');
+    if (!main.replayChecking) main.forward();
 };
 
 core.prototype._forwardFuncs = function () {
