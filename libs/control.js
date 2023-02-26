@@ -93,8 +93,6 @@ control.prototype._init = function () {
     // --- 注册系统的resize
     this.registerResize('gameGroup', this._resize_gameGroup);
     this.registerResize('canvas', this._resize_canvas);
-    this.registerResize('statusBar', this._resize_statusBar);
-    this.registerResize('status', this._resize_status);
     this.registerResize('toolBar', this._resize_toolBar);
     this.registerResize('tools', this._resize_tools);
 };
@@ -3596,7 +3594,6 @@ control.prototype.playBgm = function (bgm, startTime) {
         }
         return;
     }
-    this.setMusicBtn();
 
     try {
         this._playBgm_play(bgm, startTime);
@@ -3665,7 +3662,6 @@ control.prototype.pauseBgm = function () {
         console.log('无法暂停BGM');
         console.error(e);
     }
-    this.setMusicBtn();
 };
 
 ////// 恢复背景音乐的播放 //////
@@ -3687,10 +3683,7 @@ control.prototype.resumeBgm = function (resumeTime) {
         console.log('无法恢复BGM');
         console.error(e);
     }
-    this.setMusicBtn();
 };
-
-control.prototype.setMusicBtn = function () {};
 
 ////// 更改背景音乐的播放 //////
 control.prototype.triggerBgm = function () {
@@ -3910,29 +3903,6 @@ control.prototype.hideStatusBar = function (showToolbox) {
     }
 };
 
-////// 更新状态栏的勇士图标 //////
-control.prototype.updateHeroIcon = function (name) {
-    name = name || 'hero.png';
-    if (core.statusBar.icons.name == name) return;
-    core.statusBar.icons.name = name;
-
-    var image = core.material.images.hero;
-    // 全身图
-    var w = core.material.icons.hero.width || 32;
-    var h = core.material.icons.hero.height || 48;
-    var ratio = Math.min(w / h, 1),
-        width = 32 * ratio,
-        left = 16 - width / 2;
-
-    var canvas = document.createElement('canvas');
-    var ctx = canvas.getContext('2d');
-    canvas.width = 32;
-    canvas.height = 32;
-    core.drawImage(ctx, image, 0, 0, w, h, left, 0, width, 32);
-
-    core.statusBar.image.name.src = canvas.toDataURL('image/png');
-};
-
 ////// 改变工具栏为按钮1-8 //////
 control.prototype.setToolbarButton = function (useButton) {
     if (!core.domStyle.showStatusBar) {
@@ -4007,62 +3977,6 @@ control.prototype.setToolbarButton = function (useButton) {
 
 ////// ------ resize处理 ------ //
 
-control.prototype._shouldDisplayStatus = function (id) {
-    if (id == null) {
-        var toDraw = [],
-            status = core.dom.status;
-        for (var i = 0; i < status.length; ++i) {
-            var dom = core.dom.status[i],
-                idCol = dom.id;
-            if (idCol.indexOf('Col') != idCol.length - 3) continue;
-            var id = idCol.substring(0, idCol.length - 3);
-            if (!this._shouldDisplayStatus(id)) continue;
-            toDraw.push(id);
-        }
-        return toDraw;
-    }
-    var obj = {};
-    core.flags.statusBarItems.forEach(function (v) {
-        obj[v] = true;
-    });
-    switch (id) {
-        case 'floor':
-            return obj.enableFloor;
-        case 'name':
-            return obj.enableName;
-        case 'lv':
-            return obj.enableLv;
-        case 'hp':
-            return obj.enableHP;
-        case 'hpmax':
-            return obj.enableHPMax;
-        case 'mana':
-            return obj.enableMana;
-        case 'atk':
-            return obj.enableAtk;
-        case 'def':
-            return obj.enableDef;
-        case 'mdef':
-            return obj.enableMDef;
-        case 'money':
-            return obj.enableMoney;
-        case 'exp':
-            return obj.enableExp && !obj.levelUpLeftMode;
-        case 'up':
-            return obj.enableLevelUp;
-        case 'skill':
-            return obj.enableSkill;
-        case 'key':
-            return obj.enableKeys;
-        case 'pzf':
-            return obj.enablePZF;
-        case 'debuff':
-            return obj.enableDebuff;
-        default:
-            return true;
-    }
-};
-
 ////// 注册一个resize函数 //////
 // name为名称，可供注销使用
 // func可以是一个函数，或者是插件中的函数名；可以接受obj参数，详见resize函数。
@@ -4136,20 +4050,10 @@ control.prototype.resize = function () {
         BAR_WIDTH = Math.round(core._PX_ * 0.3);
     }
 
-    var statusDisplayArr = this._shouldDisplayStatus(),
-        count = statusDisplayArr.length;
     var statusCanvas = core.flags.statusCanvas,
         statusCanvasRows = core.values.statusCanvasRowsOnMobile || 3;
-    var col = statusCanvas ? statusCanvasRows : Math.ceil(count / 3);
-    if (col > 5) {
-        if (statusCanvas) alert('自绘状态栏的在竖屏下的行数应不超过5！');
-        else
-            alert(
-                '当前状态栏数目(' +
-                    count +
-                    ')大于15，请调整到不超过15以避免手机端出现显示问题。'
-            );
-    }
+    var col = statusCanvas ? statusCanvasRows : Math.ceil(5 / 3);
+
     var globalAttribute =
         core.status.globalAttribute || core.initStatus.globalAttribute;
 
@@ -4164,8 +4068,6 @@ control.prototype.resize = function () {
         globalAttribute: globalAttribute,
         border:
             '3px ' + core.arrayToRGBA(globalAttribute.borderColor) + ' solid',
-        statusDisplayArr: statusDisplayArr,
-        count: count,
         col: col,
         statusBarHeightInVertical: core.domStyle.isVertical
             ? (32 * col + 6) * core.domStyle.scale + 2 * BORDER
@@ -4295,153 +4197,25 @@ control.prototype._resize_canvas = function (obj) {
         main.dom.next.style.borderRightWidth = 4 * core.domStyle.scale + 'px';
 };
 
-control.prototype._resize_statusBar = function (obj) {
-    // statusBar
-    var statusBar = core.dom.statusBar;
-    if (core.domStyle.isVertical) {
-        statusBar.style.width = obj.outerWidth + 'px';
-        statusBar.style.height = obj.statusBarHeightInVertical + 'px';
-        statusBar.style.background = obj.globalAttribute.statusTopBackground;
-        statusBar.style.fontSize = 16 * core.domStyle.scale + 'px';
-    } else {
-        statusBar.style.width =
-            obj.BAR_WIDTH * core.domStyle.scale + obj.BORDER + 'px';
-        statusBar.style.height =
-            obj.outerHeight +
-            (obj.extendToolbar
-                ? obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER
-                : 0) +
-            'px';
-        statusBar.style.background = obj.globalAttribute.statusLeftBackground;
-        // --- 计算文字大小
-        if (obj.extendToolbar) {
-            statusBar.style.fontSize = 16 * core.domStyle.scale + 'px';
-        } else {
-            statusBar.style.fontSize =
-                16 *
-                    Math.min(1, (core._HEIGHT_ - 4) / obj.count) *
-                    core.domStyle.scale +
-                'px';
-        }
-    }
-    statusBar.style.display = obj.extendToolbar ? 'none' : 'block';
-    statusBar.style.borderTop = statusBar.style.borderLeft = obj.border;
-    statusBar.style.borderRight = core.domStyle.isVertical ? obj.border : '';
-    statusBar.style.borderBottom = core.domStyle.isVertical ? '' : obj.border;
-    // 自绘状态栏
-    if (core.domStyle.isVertical) {
-        core.dom.statusCanvas.style.width =
-            core._PX_ * core.domStyle.scale + 'px';
-        core.dom.statusCanvas.style.height =
-            obj.statusBarHeightInVertical - 3 + 'px';
-        core.maps._setHDCanvasSize(
-            core.dom.statusCanvasCtx,
-            core._PX_,
-            obj.col * 32 + 9
-        );
-    } else {
-        core.dom.statusCanvas.style.width =
-            obj.BAR_WIDTH * core.domStyle.scale + 'px';
-        core.dom.statusCanvas.style.height =
-            obj.outerHeight -
-            2 * obj.BORDER +
-            (obj.extendToolbar
-                ? obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER
-                : 0) +
-            'px';
-        core.maps._setHDCanvasSize(
-            core.dom.statusCanvasCtx,
-            obj.BAR_WIDTH,
-            core._PY_ +
-                (obj.extendToolbar ? obj.TOOLBAR_HEIGHT + obj.BORDER : 0)
-        );
-    }
-    core.dom.statusCanvas.style.display = 'none';
-    statusBar.style.display = 'none';
-};
-
-control.prototype._resize_status = function (obj) {
-    var statusHeight;
-    if (core.domStyle.isVertical) {
-        statusHeight = 32 * core.domStyle.scale * 0.8;
-    } else {
-        statusHeight =
-            ((obj.extendToolbar ? core._HEIGHT_ : core._HEIGHT_ - 4) /
-                obj.count) *
-            32 *
-            core.domStyle.scale *
-            0.8;
-    }
-    // status
-    for (var i = 0; i < core.dom.status.length; ++i) {
-        var id = core.dom.status[i].id,
-            style = core.dom.status[i].style;
-        if (id.endsWith('Col')) id = id.substring(0, id.length - 3);
-        style.display =
-            core.flags.statusCanvas || obj.statusDisplayArr.indexOf(id) < 0
-                ? 'none'
-                : 'block';
-        style.margin = 3 * core.domStyle.scale + 'px';
-        style.height = statusHeight + 'px';
-        style.maxWidth =
-            obj.BAR_WIDTH *
-                core.domStyle.scale *
-                (core.domStyle.isVertical ? 0.95 : 1) +
-            obj.BORDER +
-            'px';
-        if (obj.is15x15 && !core.domStyle.isVertical)
-            style.marginLeft = 11 * core.domStyle.scale + 'px';
-    }
-    // statusLabels, statusTexts
-    for (var i = 0; i < core.dom.statusLabels.length; ++i) {
-        core.dom.statusLabels[i].style.lineHeight = statusHeight + 'px';
-        core.dom.statusLabels[i].style.marginLeft =
-            6 * core.domStyle.scale + 'px';
-    }
-    for (var i = 0; i < core.dom.statusTexts.length; ++i) {
-        core.dom.statusTexts[i].style.color = core.arrayToRGBA(
-            obj.globalAttribute.statusBarColor
-        );
-    }
-    // keys
-    if (core.flags.statusBarItems.indexOf('enableGreenKey') >= 0) {
-        core.dom.keyCol.style.fontSize = '0.75em';
-        core.statusBar.greenKey.style.display = '';
-    } else {
-        core.dom.keyCol.style.fontSize = '';
-        core.statusBar.greenKey.style.display = 'none';
-    }
-};
-
 control.prototype._resize_toolBar = function (obj) {
     // toolBar
     var toolBar = core.dom.toolBar;
     if (core.domStyle.isVertical) {
         toolBar.style.left = 0;
         toolBar.style.right = '';
-        toolBar.style.width = obj.outerWidth + 'px';
+        toolBar.style.width = obj.outerWidth - 6 + 'px';
         toolBar.style.top =
-            obj.statusBarHeightInVertical + obj.outerHeight + 'px';
+            obj.statusBarHeightInVertical + obj.outerHeight - 3 + 'px';
         toolBar.style.height = obj.toolbarHeightInVertical + 'px';
         toolBar.style.background = 'none';
     } else {
-        if (obj.extendToolbar) {
-            toolBar.style.left = '';
-            toolBar.style.right = 0;
-            toolBar.style.width = obj.outerWidth - 6 + 'px';
-            toolBar.style.top = obj.outerHeight - 6 + 'px';
-            toolBar.style.height =
-                obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER + 'px';
-            toolBar.style.background = 'none';
-        } else {
-            toolBar.style.left = 0;
-            toolBar.style.right = '';
-            toolBar.style.width =
-                obj.BAR_WIDTH * core.domStyle.scale + obj.BORDER + 'px';
-            toolBar.style.top = 0.75 * obj.outerHeight + 'px';
-            toolBar.style.height = 0.25 * obj.outerHeight + 'px';
-            toolBar.style.background = 'transparent';
-        }
+        toolBar.style.left = '';
+        toolBar.style.right = 0;
+        toolBar.style.width = obj.outerWidth - 6 + 'px';
+        toolBar.style.top = obj.outerHeight - 3 + 'px';
+        toolBar.style.height =
+            obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER + 'px';
+        toolBar.style.background = 'none';
     }
     toolBar.style.fontSize = 16 * core.domStyle.scale + 'px';
 
@@ -4457,18 +4231,10 @@ control.prototype._resize_toolBar = function (obj) {
 };
 
 control.prototype._resize_tools = function (obj) {
-    var toolsHeight =
-        32 *
-        core.domStyle.scale *
-        ((core.domStyle.isVertical || obj.extendToolbar) && !obj.is15x15
-            ? 0.95
-            : 1);
+    var toolsHeight = 32 * core.domStyle.scale;
     var toolsMarginLeft;
-    if (core.domStyle.isVertical || obj.extendToolbar)
-        toolsMarginLeft = (core._HALF_WIDTH_ - 3) * 3 * core.domStyle.scale;
-    else
-        toolsMarginLeft =
-            (obj.BAR_WIDTH * core.domStyle.scale - 9 - toolsHeight * 3) / 4;
+
+    toolsMarginLeft = (core._HALF_WIDTH_ - 3) * 3 * core.domStyle.scale;
     for (var i = 0; i < core.dom.tools.length; ++i) {
         var style = core.dom.tools[i].style;
         style.height = toolsHeight + 'px';
@@ -4476,19 +4242,7 @@ control.prototype._resize_tools = function (obj) {
         style.marginTop = 3 * core.domStyle.scale + 'px';
     }
     core.dom.hard.style.lineHeight = toolsHeight + 'px';
-    if (core.domStyle.isVertical || obj.extendToolbar) {
-        core.dom.hard.style.width =
-            obj.outerWidth -
-            9 * toolsMarginLeft -
-            8.5 * toolsHeight -
-            12 +
-            'px';
-    } else {
-        core.dom.hard.style.width =
-            obj.BAR_WIDTH * core.domStyle.scale -
-            9 -
-            2 * toolsMarginLeft +
-            'px';
-        if (!obj.is15x15) core.dom.hard.style.marginTop = 0;
-    }
+
+    core.dom.hard.style.width =
+        obj.outerWidth - 9 * toolsMarginLeft - 8.5 * toolsHeight - 12 + 'px';
 };
