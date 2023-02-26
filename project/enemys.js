@@ -158,7 +158,7 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"E607": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E608": {"name":"寒冰护卫","hp":25000,"atk":3500,"def":2250,"money":3,"exp":225,"point":0,"special":[]},
 	"E609": {"name":"具形雪人","hp":7500,"atk":2250,"def":1000,"money":2,"exp":90,"point":0,"special":[25],"melt":15},
-	"E610": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E610": {"name":"高冷雪人","hp":10000,"atk":2750,"def":1500,"money":0,"exp":0,"point":0,"special":[25],"melt":25},
 	"E611": {"name":"具形雪人法师","hp":12500,"atk":2750,"def":1750,"money":2,"exp":175,"point":0,"special":[13,25],"melt":30},
 	"E612": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E613": {"name":"寒冰核心","hp":20000,"atk":3000,"def":1500,"money":3,"exp":150,"point":0,"special":[26],"iceCore":20},

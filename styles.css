@@ -314,13 +314,14 @@ span#hard {
 }
 #toolBar {
     position: absolute;
-    background: url(project/materials/ground.png) repeat;
     z-index: 210;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     display: none;
     padding: 3px;
+    border-top: 2px solid #ddd9;
+    margin-right: 3px;
 }
 #toolBar .tools {
     position: relative;
@@ -379,6 +380,7 @@ p#name {
     background: #000000;
     overflow: hidden;
     z-index: 185;
+    margin: 3px;
 }
 
 #bg {
