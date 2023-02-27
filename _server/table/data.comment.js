@@ -18,6 +18,13 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "楼层列表",
 					"_data": "在这里按顺序放所有的楼层；其顺序直接影响到楼层传送器、浏览地图和上/下楼器的顺序"
 				},
+				"plugin": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_range": "thiseval instanceof Array",
+					"_docs": "插件列表",
+					"_data": "在这里按顺序放所有的插件，顺序会影响到插件的加载，越靠前越早加载"
+				},
 				"floorPartitions": {
 					"_leaf": true,
 					"_type": "event",
