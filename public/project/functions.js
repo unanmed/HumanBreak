@@ -712,6 +712,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                         `怪物拥有灼热的火焰，使周围5*5范围内的怪物攻击增加${enemy.fireCore}%`,
                     '#ff6f0a',
                     1
+                ],
+                [
+                    28,
+                    '苍蓝刻',
+                    enemy =>
+                        `怪物使用苍蓝之灵的力量，使自身受到的伤害减少${enemy.paleShield}%`,
+                    '#ff6f0a',
+                    1
                 ]
             ];
         },
@@ -1041,6 +1049,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 }
 
                 hero_per_damage *= 1 - enemyInfo.iceDecline / 100;
+
+                if (core.hasSpecial(mon_special, 28)) {
+                    hero_per_damage *= 1 - enemy.paleShield / 100;
+                }
 
                 // 勇士的攻击回合数；为怪物生命除以每回合伤害向上取整
                 let turn = Math.ceil(mon_hp / hero_per_damage);

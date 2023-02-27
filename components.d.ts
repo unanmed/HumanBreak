@@ -18,6 +18,5 @@ declare module '@vue/runtime-core' {
     Colomn: typeof import('./src/components/colomn.vue')['default']
     EnemyOne: typeof import('./src/components/enemyOne.vue')['default']
     Scroll: typeof import('./src/components/scroll.vue')['default']
-    TextedProgress: typeof import('./src/components/textedProgress.vue')['default']
   }
 }

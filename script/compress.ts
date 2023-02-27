@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import fss from 'fs';
 import fse from 'fs-extra';
 import Fontmin from 'fontmin';
+import { exec } from 'child_process';
 
 (async function () {
     // 1. 去除未使用的文件
@@ -37,6 +38,8 @@ import Fontmin from 'fontmin';
                 });
             })
         );
+        await fse.remove('./dist/maps/');
+        await fse.remove('./dist/extensions/');
     } catch {}
 
     // 2. 压缩字体
@@ -90,5 +93,24 @@ import Fontmin from 'fontmin';
         ]);
     } catch (e) {
         await fse.copy('./public/project/fonts', './dist/project/fonts');
+    }
+
+    // 3. 压缩js插件
+    try {
+        exec(
+            'babel ./dist/project/plugin --out-file ./dist/project/plugin.min.js'
+        ).on('close', async () => {
+            const main = await fs.readFile('./dist/main.js', 'utf-8');
+            await fs.writeFile(
+                './dist/main.js',
+                main.replace(
+                    /this.pluginUseCompress\s*=\s*false\;/,
+                    'this.pluginUseCompress = true;'
+                )
+            );
+            await fse.remove('./dist/project/plugin/');
+        });
+    } catch {
+        console.log('压缩插件失败');
     }
 })();

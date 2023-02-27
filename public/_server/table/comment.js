@@ -279,6 +279,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "火焰之核",
 					"_data": "火焰之核"
 				},
+				"paleShield": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "苍蓝刻",
+					"_data": "苍蓝刻"
+				},
 				"value": {
 					"_leaf": true,
 					"_type": "textarea",

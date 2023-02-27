@@ -571,6 +571,7 @@ var maps_90f36752_8815_4be8_b32b_d7fad1d0542e =
 	"640": {"cls":"terrains","id":"T640","canPass":true},
 	"641": {"cls":"items","id":"I641"},
 	"642": {"cls":"items","id":"I642"},
+	"643": {"cls":"enemys","id":"E643"},
 	"20032": {"cls":"tileset","id":"X20032","cannotOut":["up","left"],"cannotIn":["up","left"]},
 	"20033": {"cls":"tileset","id":"X20033","cannotOut":["up"],"cannotIn":["up"]},
 	"20034": {"cls":"tileset","id":"X20034","cannotOut":["up","right"],"cannotIn":["up","right"]},
