@@ -115,4 +115,29 @@ import { exec } from 'child_process';
     } catch {
         console.log('压缩插件失败');
     }
+
+    // 4. 压缩main.js
+    try {
+        // 先获取不能压缩的部分
+        const main = await fs.readFile('./dist/main.js', 'utf-8');
+        const endIndex = main.indexOf('// >>>> body end');
+        const nonCompress = main.slice(0, endIndex);
+        const needCompress = main.slice(endIndex + 17);
+        await fs.writeFile('./dist/temp.js', needCompress, 'utf-8');
+        await fs.rm('./dist/main.js');
+        exec('babel ./dist/temp.js --out-file ./dist/main.js').on(
+            'close',
+            async () => {
+                const nowMain = await fs.readFile('./dist/main.js', 'utf-8');
+                await fs.writeFile(
+                    './dist/main.js',
+                    nonCompress + nowMain,
+                    'utf-8'
+                );
+                await fs.rm('./dist/temp.js');
+            }
+        );
+    } catch {
+        console.log('main.js压缩失败');
+    }
 })();

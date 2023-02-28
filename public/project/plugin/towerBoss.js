@@ -1,3 +1,4 @@
+///<reference path="../../../src/types/core.d.ts" />
 'use strict';
 
 // 1000多行，改不动了

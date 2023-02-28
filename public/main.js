@@ -216,12 +216,14 @@ function main() {
     this.__VERSION__ = '2.10.0';
     this.__VERSION_CODE__ = 510;
 }
+// >>>> body end
 
 main.prototype.init = function (mode, callback) {
     try {
         var a = {};
         var b = {};
         new Proxy(a, b);
+        new Promise(res => res());
         const aa = `${123}`;
         aa;
     } catch (e) {
@@ -235,23 +237,11 @@ main.prototype.init = function (mode, callback) {
     }
     main.mode = mode;
 
+    Promise.all();
+
     main.loadJs('project', main.pureData, function () {
         var mainData = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main;
         for (var ii in mainData) main[ii] = mainData[ii];
-
-        // main.levelChoose = main.levelChoose || [];
-        // main.levelChoose.forEach(function (value) {
-        //     var span = document.createElement('span');
-        //     span.setAttribute('class', 'startButton');
-        //     span.innerText = value.title || '';
-        //     span.id = value.name;
-        //     (function (span, str_) {
-        //         span.onclick = function () {
-        //             core.events.startGame(str_);
-        //         };
-        //     })(span, value.name || '');
-        //     main.dom.levelChooseButtons.appendChild(span);
-        // });
 
         main.importFonts(main.fonts);
 
