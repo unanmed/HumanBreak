@@ -1264,6 +1264,12 @@ interface Main extends MainData {
     init(mode: 'play' | 'editor', callback?: () => void): void;
 
     /**
+     * 加载一个脚本
+     * @param src 脚本路径
+     */
+    loadScript(src: string): Promise<void>;
+
+    /**
      * 动态加载js文件
      * @param dir 加载的js文件的目录
      * @param loadList 加载的js文件的文件名数组，不带后缀

@@ -286,7 +286,6 @@ core.prototype.init = function (coreData, callback) {
     this._init_flags();
     this._init_platform();
     this._init_others();
-    this._init_plugins();
     var b = main.mode == 'editor';
     // 初始化画布
     for (var name in core.canvas) {
@@ -587,51 +586,6 @@ core.prototype._afterLoadResources = function (callback) {
     if (core.plugin._afterLoadResources) core.plugin._afterLoadResources();
     core.showStartAnimate();
     if (callback) callback();
-};
-
-core.prototype._init_plugins = function () {
-    core.plugin = new (function () {})();
-
-    for (var name in plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1) {
-        if (
-            plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1[name] instanceof
-            Function
-        ) {
-            try {
-                plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1[name].apply(
-                    core.plugin
-                );
-            } catch (e) {
-                console.error(e);
-                console.error('无法初始化插件' + name);
-            }
-        }
-    }
-
-    if (!main.pluginUseCompress) {
-        (async function () {
-            const pluginList = main.plugin;
-            for await (const one of pluginList) {
-                const script = document.createElement('script');
-                script.src = `project/plugin/${one}.js`;
-                document.body.appendChild(script);
-                await new Promise(res => {
-                    script.addEventListener('load', res);
-                });
-            }
-        })();
-    } else {
-        const script = document.createElement('script');
-        script.src = `project/plugin.min.js`;
-        document.body.appendChild(script);
-    }
-
-    core._forwardFunc('plugin');
-    if (!main.replayChecking && main.mode === 'play') {
-        main.forward();
-        core.resetSettings();
-        core.plugin.showMarkedEnemy.value = true;
-    }
 };
 
 core.prototype._forwardFuncs = function () {

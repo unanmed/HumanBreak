@@ -1,7 +1,8 @@
+///<reference path="../src/types/core.d.ts" />
 function main() {
     //------------------------ 用户修改内容 ------------------------//
 
-    this.version = '2.10.0'; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
+    this.version = '1.0.0'; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
 
     this.useCompress = false; // 是否使用压缩文件
     this.pluginUseCompress = false; // 仅限于gh-pages使用
@@ -218,15 +219,23 @@ function main() {
 }
 // >>>> body end
 
-main.prototype.init = function (mode, callback) {
+main.prototype.loadScript = async function (src) {
+    const script = document.createElement('script');
+    script.src = src;
+    document.body.appendChild(script);
+    await new Promise(res => {
+        script.addEventListener('load', res);
+    });
+};
+
+main.prototype.init = async function (mode, callback) {
     try {
         var a = {};
         var b = {};
         new Proxy(a, b);
         new Promise(res => res());
-        const aa = `${123}`;
-        aa;
-    } catch (e) {
+        eval('`${123}`');
+    } catch {
         alert('浏览器版本过低，无法游玩本塔！');
         return;
     }
@@ -237,200 +246,129 @@ main.prototype.init = function (mode, callback) {
     }
     main.mode = mode;
 
-    Promise.all();
-
-    main.loadJs('project', main.pureData, function () {
-        var mainData = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main;
-        for (var ii in mainData) main[ii] = mainData[ii];
-
-        main.importFonts(main.fonts);
-
-        main.loadJs('libs', main.loadList, function () {
-            main.core = core;
-
-            for (i = 0; i < main.loadList.length; i++) {
-                var name = main.loadList[i];
-                if (name === 'core') continue;
-                main.core[name] = new window[name]();
-            }
-
-            main.loadFloors(function () {
-                var coreData = {};
-                [
-                    'dom',
-                    'statusBar',
-                    'canvas',
-                    'images',
-                    'tilesets',
-                    'materials',
-                    'animates',
-                    'bgms',
-                    'sounds',
-                    'floorIds',
-                    'floors',
-                    'floorPartitions'
-                ].forEach(function (t) {
-                    coreData[t] = main[t];
-                });
-                core.init(coreData, callback);
-                core.resize();
-                // 自动放缩最大化
-                if (core.getLocalStorage('autoScale') == null) {
-                    core.setLocalStorage('autoScale', true);
-                }
-                if (
-                    core.getLocalStorage('autoScale') &&
-                    !core.domStyle.isVertical
-                ) {
-                    try {
-                        if (core) {
-                            core.plugin.maxGameScale();
-                            if (!core.getLocalStorage('fullscreen', false)) {
-                                requestAnimationFrame(function () {
-                                    var style = getComputedStyle(
-                                        main.dom.gameGroup
-                                    );
-                                    var height = parseFloat(style.height);
-                                    if (height > window.innerHeight * 0.95) {
-                                        core.control.setDisplayScale(-1);
-                                        if (
-                                            !core.isPlaying() &&
-                                            core.flags.enableHDCanvas
-                                        ) {
-                                            core.domStyle.ratio = Math.max(
-                                                window.devicePixelRatio || 1,
-                                                core.domStyle.scale
-                                            );
-                                            core.resize();
-                                        }
-                                    }
-                                });
-                            }
-                        }
-                    } catch (e) {
-                        console.error(e);
-                    }
-                }
-            });
-        });
-    });
-};
-
-////// 动态加载所有核心JS文件 //////
-main.prototype.loadJs = function (dir, loadList, callback) {
-    // 加载js
-    main.setMainTipsText('正在加载核心js文件...');
-
-    if (this.useCompress) {
-        main.loadMod(dir, dir, function () {
-            callback();
-        });
+    // 加载全塔属性代码
+    if (main.useCompress) {
+        await main.loadScript(`project/project.min.js?v=${main.version}`);
     } else {
-        var instanceNum = 0;
-        for (var i = 0; i < loadList.length; i++) {
-            main.loadMod(dir, loadList[i], function (modName) {
-                main.setMainTipsText(modName + '.js 加载完毕');
-                instanceNum++;
-                if (instanceNum === loadList.length) {
-                    callback();
-                }
-            });
+        await Promise.all(
+            main.pureData.map(v =>
+                main.loadScript(`project/${v}.js?v=${main.version}`)
+            )
+        );
+    }
+    const mainData = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main;
+    Object.assign(main, mainData);
+
+    main.importFonts(main.fonts);
+
+    // 加载核心js代码
+    if (main.useCompress) {
+        await main.loadScript(`libs/libs.min.js?v=${main.version}`);
+    } else {
+        await Promise.all(
+            main.loadList.map(v =>
+                main.loadScript(`libs/${v}.js?v=${main.version}`)
+            )
+        );
+    }
+
+    for (const name of main.loadList) {
+        if (name === 'core') continue;
+        core[name] = new window[name]();
+    }
+
+    // 加载楼层
+    main.setMainTipsText('正在加载楼层文件...');
+    if (main.useCompress) {
+        await main.loadScript(`project/floors.min.js?v=${main.version}`);
+        main.dom.mainTips.style.display = 'none';
+    } else {
+        try {
+            await main.loadScript(
+                `/all/__all_floors__.js?v=${
+                    main.version
+                }&id=${main.floorIds.join(',')}`
+            );
+            main.dom.mainTips.style.display = 'none';
+            main.supportBunch = true;
+        } catch {
+            await Promise.all(
+                mainData.floorIds.map(v =>
+                    main.loadScript(`project/floors/${v}.js`)
+                )
+            );
         }
     }
-};
 
-////// 加载某一个JS文件 //////
-main.prototype.loadMod = function (dir, modName, callback, onerror) {
-    var script = document.createElement('script');
-    var name = modName;
-    script.src =
-        dir +
-        '/' +
-        modName +
-        (this.useCompress ? '.min' : '') +
-        '.js?v=' +
-        this.version;
-    script.onload = function () {
-        callback(name);
-    };
-    main.dom.body.appendChild(script);
-};
+    // 初始化core
+    const coreData = {};
+    [
+        'dom',
+        'statusBar',
+        'canvas',
+        'images',
+        'tilesets',
+        'materials',
+        'animates',
+        'bgms',
+        'sounds',
+        'floorIds',
+        'floors',
+        'floorPartitions'
+    ].forEach(function (t) {
+        coreData[t] = main[t];
+    });
+    core.init(coreData, callback);
+    core.resize();
 
-////// 动态加载所有楼层（剧本） //////
-main.prototype.loadFloors = function (callback) {
-    // 加载js
-    main.setMainTipsText('正在加载楼层文件...');
-    if (this.useCompress) {
-        // 读取压缩文件
-        var script = document.createElement('script');
-        script.src = 'project/floors.min.js?v=' + this.version;
-        main.dom.body.appendChild(script);
-        script.onload = function () {
-            main.dom.mainTips.style.display = 'none';
-            callback();
-        };
-        return;
+    core.plugin = {};
+    // 加载插件
+    if (!main.replayChecking && main.mode === 'play') {
+        main.forward();
+        core.resetSettings();
+        core.plugin.showMarkedEnemy.value = true;
+    }
+    if (main.useCompress) {
+        await main.loadScript(`project/plugin.min.js?v=${main.version}`);
+    } else {
+        for await (const plugin of mainData.plugin) {
+            await main.loadScript(
+                `project/plugin/${plugin}.js?v=${main.version}`
+            );
+        }
     }
 
-    // 高层塔优化
-    var script = document.createElement('script');
-    script.src =
-        '/all/__all_floors__.js?v=' +
-        this.version +
-        '&id=' +
-        main.floorIds.join(',');
-    script.onload = function () {
-        main.dom.mainTips.style.display = 'none';
-        main.supportBunch = true;
-        callback();
-    };
-    script.onerror =
-        script.onabort =
-        script.ontimeout =
-            function (e) {
-                // console.clear();
-                for (var i = 0; i < main.floorIds.length; i++) {
-                    main.loadFloor(main.floorIds[i], function (modName) {
-                        main.setMainTipsText(
-                            '楼层 ' + modName + '.js 加载完毕'
-                        );
-                        if (
-                            Object.keys(main.floors).length ===
-                            main.floorIds.length
-                        ) {
-                            main.dom.mainTips.style.display = 'none';
-                            callback();
+    // 自动放缩最大化
+    const auto = core.getLocalStorage('autoScale');
+    if (auto == null) {
+        core.setLocalStorage('autoScale', true);
+    }
+    if (auto && !core.domStyle.isVertical) {
+        try {
+            core.plugin.utils.maxGameScale();
+            if (!core.getLocalStorage('fullscreen', false)) {
+                requestAnimationFrame(() => {
+                    var style = getComputedStyle(main.dom.gameGroup);
+                    var height = parseFloat(style.height);
+                    if (height > window.innerHeight * 0.95) {
+                        core.control.setDisplayScale(-1);
+                        if (!core.isPlaying() && core.flags.enableHDCanvas) {
+                            core.domStyle.ratio = Math.max(
+                                window.devicePixelRatio || 1,
+                                core.domStyle.scale
+                            );
+                            core.resize();
                         }
-                    });
-                }
-            };
-    main.dom.body.appendChild(script);
-};
-
-////// 加载某一个楼层 //////
-main.prototype.loadFloor = function (floorId, callback) {
-    var script = document.createElement('script');
-    script.src = 'project/floors/' + floorId + '.js?v=' + this.version;
-    main.dom.body.appendChild(script);
-    script.onload = function () {
-        callback(floorId);
-    };
+                    }
+                });
+            }
+        } catch {}
+    }
 };
 
 ////// 加载过程提示 //////
 main.prototype.setMainTipsText = function (text) {
     main.dom.mainTips.innerHTML = text;
-};
-
-main.prototype.log = function (e, error) {
-    if (e) {
-        if (error) return console.error(e);
-        if (main.core && main.core.platform && !main.core.platform.isPC) {
-            console.log(e.stack || e.toString());
-        } else {
-            console.log(e);
-        }
-    }
 };
 
 main.prototype.createOnChoiceAnimation = function () {
@@ -485,7 +423,7 @@ main.prototype.listen = function () {
     ////// 窗口大小变化时 //////
     window.onresize = function () {
         try {
-            main.core.resize();
+            core.resize();
         } catch (ee) {
             console.error(ee);
         }
@@ -497,11 +435,8 @@ main.prototype.listen = function () {
         try {
             if (e.keyCode === 27) e.preventDefault();
             if (main.dom.inputDiv.style.display == 'block') return;
-            if (
-                main.core &&
-                (main.core.isPlaying() || main.core.status.lockControl)
-            )
-                main.core.onkeyDown(e);
+            if (core && (core.isPlaying() || core.status.lockControl))
+                core.onkeyDown(e);
         } catch (ee) {
             console.error(ee);
         }
@@ -530,7 +465,7 @@ main.prototype.listen = function () {
                     main.dom.levelChooseButtons.style.display == 'block'
                 ) {
                     // ESC
-                    main.core.showStartAnimate(true);
+                    core.showStartAnimate(true);
                     e.preventDefault();
                 }
                 e.stopPropagation();
@@ -549,12 +484,12 @@ main.prototype.listen = function () {
                 return;
             }
             if (
-                main.core &&
-                main.core.isPlaying &&
-                main.core.status &&
-                (main.core.isPlaying() || main.core.status.lockControl)
+                core &&
+                core.isPlaying &&
+                core.status &&
+                (core.isPlaying() || core.status.lockControl)
             )
-                main.core.onkeyUp(e);
+                core.onkeyUp(e);
         } catch (ee) {
             console.error(ee);
         }
@@ -569,9 +504,9 @@ main.prototype.listen = function () {
     main.dom.data.onmousedown = function (e) {
         try {
             e.stopPropagation();
-            var loc = main.core.actions._getClickLoc(e.clientX, e.clientY);
+            var loc = core.actions._getClickLoc(e.clientX, e.clientY);
             if (loc == null) return;
-            main.core.ondown(loc);
+            core.ondown(loc);
         } catch (ee) {
             console.error(ee);
         }
@@ -580,9 +515,9 @@ main.prototype.listen = function () {
     ////// 鼠标移动时 //////
     main.dom.data.onmousemove = function (e) {
         try {
-            var loc = main.core.actions._getClickLoc(e.clientX, e.clientY);
+            var loc = core.actions._getClickLoc(e.clientX, e.clientY);
             if (loc == null) return;
-            main.core.onmove(loc);
+            core.onmove(loc);
         } catch (ee) {
             console.error(ee);
         }
@@ -591,9 +526,9 @@ main.prototype.listen = function () {
     ////// 鼠标放开时 //////
     main.dom.data.onmouseup = function (e) {
         try {
-            var loc = main.core.actions._getClickLoc(e.clientX, e.clientY);
+            var loc = core.actions._getClickLoc(e.clientX, e.clientY);
             if (loc == null) return;
-            main.core.onup(loc);
+            core.onup(loc);
         } catch (ee) {
             console.error(ee);
         }
@@ -602,8 +537,8 @@ main.prototype.listen = function () {
     ////// 鼠标滑轮滚动时 //////
     main.dom.data.onmousewheel = function (e) {
         try {
-            if (e.wheelDelta) main.core.onmousewheel(Math.sign(e.wheelDelta));
-            else if (e.detail) main.core.onmousewheel(Math.sign(e.detail));
+            if (e.wheelDelta) core.onmousewheel(Math.sign(e.wheelDelta));
+            else if (e.detail) core.onmousewheel(Math.sign(e.detail));
         } catch (ee) {
             console.error(ee);
         }
@@ -613,13 +548,13 @@ main.prototype.listen = function () {
     main.dom.data.ontouchstart = function (e) {
         try {
             e.preventDefault();
-            var loc = main.core.actions._getClickLoc(
+            var loc = core.actions._getClickLoc(
                 e.targetTouches[0].clientX,
                 e.targetTouches[0].clientY
             );
             if (loc == null) return;
             main.lastTouchLoc = loc;
-            main.core.ondown(loc);
+            core.ondown(loc);
         } catch (ee) {
             console.error(ee);
         }
@@ -629,13 +564,13 @@ main.prototype.listen = function () {
     main.dom.data.ontouchmove = function (e) {
         try {
             e.preventDefault();
-            var loc = main.core.actions._getClickLoc(
+            var loc = core.actions._getClickLoc(
                 e.targetTouches[0].clientX,
                 e.targetTouches[0].clientY
             );
             if (loc == null) return;
             main.lastTouchLoc = loc;
-            main.core.onmove(loc);
+            core.onmove(loc);
         } catch (ee) {
             console.error(ee);
         }
@@ -648,7 +583,7 @@ main.prototype.listen = function () {
             if (main.lastTouchLoc == null) return;
             var loc = main.lastTouchLoc;
             delete main.lastTouchLoc;
-            main.core.onup(loc);
+            core.onup(loc);
         } catch (e) {
             console.error(e);
         }
@@ -663,7 +598,7 @@ main.prototype.listen = function () {
             return;
         }
 
-        if (main.core.isPlaying()) main.core.openBook(true);
+        if (core.isPlaying()) core.openBook(true);
     };
 
     ////// 点击状态栏中的楼层传送器/装备栏时 //////
@@ -676,11 +611,11 @@ main.prototype.listen = function () {
             return;
         }
 
-        if (main.core.isPlaying()) {
-            if (!main.core.flags.equipboxButton) {
-                main.core.useFly(true);
+        if (core.isPlaying()) {
+            if (!core.flags.equipboxButton) {
+                core.useFly(true);
             } else {
-                main.core.openEquipbox(true);
+                core.openEquipbox(true);
             }
         }
     };
@@ -694,8 +629,8 @@ main.prototype.listen = function () {
             return;
         }
 
-        if (main.core.isPlaying()) {
-            main.core.openToolbox(core.status.event.id != 'equipbox');
+        if (core.isPlaying()) {
+            core.openToolbox(core.status.event.id != 'equipbox');
         }
     };
 
@@ -707,7 +642,7 @@ main.prototype.listen = function () {
             return;
         }
 
-        if (main.core.isPlaying()) main.core.openEquipbox(true);
+        if (core.isPlaying()) core.openEquipbox(true);
     };
 
     ////// 点击状态栏中的虚拟键盘时 //////
@@ -719,7 +654,7 @@ main.prototype.listen = function () {
             return;
         }
 
-        if (main.core.isPlaying()) main.core.openKeyBoard(true);
+        if (core.isPlaying()) core.openKeyBoard(true);
     };
 
     ////// 点击状态栏中的快捷商店时 //////
@@ -731,14 +666,14 @@ main.prototype.listen = function () {
             return;
         }
 
-        if (main.core.isPlaying()) main.core.openQuickShop(true);
+        if (core.isPlaying()) core.openQuickShop(true);
     };
 
     ////// 点击金币时也可以开启快捷商店 //////
     main.statusBar.image.money.onclick = function (e) {
         e.stopPropagation();
 
-        if (main.core.isPlaying()) main.core.openQuickShop(true);
+        if (core.isPlaying()) core.openQuickShop(true);
     };
 
     ////// 点击楼梯图标也可以浏览地图 //////
@@ -746,8 +681,8 @@ main.prototype.listen = function () {
         e.stopPropagation();
 
         if (
-            main.core &&
-            main.core.isPlaying() &&
+            core &&
+            core.isPlaying() &&
             !core.isMoving() &&
             !core.status.lockControl
         ) {
@@ -764,7 +699,7 @@ main.prototype.listen = function () {
             return;
         }
 
-        if (main.core.isPlaying()) main.core.save(true);
+        if (core.isPlaying()) core.save(true);
     };
 
     ////// 点击状态栏中的读档按钮时 //////
@@ -776,7 +711,7 @@ main.prototype.listen = function () {
             return;
         }
 
-        if (main.core.isPlaying()) main.core.load(true);
+        if (core.isPlaying()) core.load(true);
     };
 
     ////// 点击状态栏中的系统菜单时 //////
@@ -788,18 +723,18 @@ main.prototype.listen = function () {
             return;
         }
 
-        if (main.core.isPlaying()) main.core.openSettings(true);
+        if (core.isPlaying()) core.openSettings(true);
     };
 
     ////// 点击工具栏时 //////
     main.dom.hard.onclick = function () {
-        main.core.control.setToolbarButton(!core.domStyle.toolbarBtn);
+        core.control.setToolbarButton(!core.domStyle.toolbarBtn);
     };
 
     ////// 手机端的按钮1-7 //////
     main.statusBar.image.btn1.onclick = function (e) {
         e.stopPropagation();
-        main.core.onkeyUp({
+        core.onkeyUp({
             keyCode: 49,
             altKey: core.getLocalStorage('altKey')
         });
@@ -807,7 +742,7 @@ main.prototype.listen = function () {
 
     main.statusBar.image.btn2.onclick = function (e) {
         e.stopPropagation();
-        main.core.onkeyUp({
+        core.onkeyUp({
             keyCode: 50,
             altKey: core.getLocalStorage('altKey')
         });
@@ -815,7 +750,7 @@ main.prototype.listen = function () {
 
     main.statusBar.image.btn3.onclick = function (e) {
         e.stopPropagation();
-        main.core.onkeyUp({
+        core.onkeyUp({
             keyCode: 51,
             altKey: core.getLocalStorage('altKey')
         });
@@ -823,7 +758,7 @@ main.prototype.listen = function () {
 
     main.statusBar.image.btn4.onclick = function (e) {
         e.stopPropagation();
-        main.core.onkeyUp({
+        core.onkeyUp({
             keyCode: 52,
             altKey: core.getLocalStorage('altKey')
         });
@@ -831,7 +766,7 @@ main.prototype.listen = function () {
 
     main.statusBar.image.btn5.onclick = function (e) {
         e.stopPropagation();
-        main.core.onkeyUp({
+        core.onkeyUp({
             keyCode: 53,
             altKey: core.getLocalStorage('altKey')
         });
@@ -839,7 +774,7 @@ main.prototype.listen = function () {
 
     main.statusBar.image.btn6.onclick = function (e) {
         e.stopPropagation();
-        main.core.onkeyUp({
+        core.onkeyUp({
             keyCode: 54,
             altKey: core.getLocalStorage('altKey')
         });
@@ -847,7 +782,7 @@ main.prototype.listen = function () {
 
     main.statusBar.image.btn7.onclick = function (e) {
         e.stopPropagation();
-        main.core.onkeyUp({
+        core.onkeyUp({
             keyCode: 55,
             altKey: core.getLocalStorage('altKey')
         });
@@ -867,9 +802,9 @@ main.prototype.listen = function () {
     };
 
     window.onblur = function () {
-        if (main.core && main.core.control) {
+        if (core && core.control) {
             try {
-                main.core.control.checkAutosave();
+                core.control.checkAutosave();
             } catch (e) {}
         }
     };
