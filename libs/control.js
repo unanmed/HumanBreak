@@ -1499,7 +1499,7 @@ control.prototype._checkBlock_disableQuickShop = function () {
     // 禁用快捷商店
     if (core.flags.disableShopOnDamage) {
         Object.keys(core.status.shops).forEach(function (shopId) {
-            core.setShopVisited(shopId, false);
+            core.plugin.shop.setShopVisited(shopId, false);
         });
     }
 };
@@ -1695,7 +1695,7 @@ control.prototype.drawDamage = function (ctx) {
 
 control.prototype._drawDamage_draw = function (ctx, onMap) {
     if (!core.hasItem('book')) return;
-    core.drawHalo(ctx, onMap);
+    core.plugin.halo.drawHalo(ctx, onMap);
 
     core.setFont(ctx, "14px 'normal'");
     core.setTextAlign(ctx, 'left');
@@ -3058,7 +3058,7 @@ control.prototype.getRealStatus = function (name) {
 
 ////// 从status中获得实际属性（增幅后的），如果不存在则从勇士属性中获取 //////
 control.prototype.getRealStatusOrDefault = function (status, name) {
-    return core.getHeroStatusOf(status, name);
+    return core.plugin.hero.getHeroStatusOf(status, name);
 };
 
 ////// 获得勇士原始属性（无装备和衰弱影响） //////

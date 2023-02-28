@@ -6,11 +6,6 @@
 
 'use strict';
 
-// /**
-//  * @type {CoreMixin}
-//  */
-// const core = (() => {
-
 function core() {
     this._WIDTH_ = 15;
     this._HEIGHT_ = 15;
@@ -613,6 +608,24 @@ core.prototype._init_plugins = function () {
         }
     }
 
+    if (!main.pluginUseCompress) {
+        (async function () {
+            const pluginList = main.plugin;
+            for await (const one of pluginList) {
+                const script = document.createElement('script');
+                script.src = `project/plugin/${one}.js`;
+                document.body.appendChild(script);
+                await new Promise(res => {
+                    script.addEventListener('load', res);
+                });
+            }
+        })();
+    } else {
+        const script = document.createElement('script');
+        script.src = `project/plugin.min.js`;
+        document.body.appendChild(script);
+    }
+
     core._forwardFunc('plugin');
     if (!main.replayChecking && main.mode === 'play') {
         main.forward();
@@ -682,7 +695,4 @@ core.prototype.doFunc = function (func, _this) {
     return func.apply(_this, Array.prototype.slice.call(arguments, 2));
 };
 
-// return new Core();
-
-// })();
 var core = new core();

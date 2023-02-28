@@ -157,7 +157,7 @@ main.floors.tower7=
         },
         {
             "type": "function",
-            "function": "function(){\ncore.initTowerBoss();\n}"
+            "function": "function(){\ncore.plugin.towerBoss.initTowerBoss();\n}"
         }
     ],
     "eachArrive": [],

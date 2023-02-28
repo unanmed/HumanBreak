@@ -13,74 +13,8 @@ var plugins_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"_leaf": true,
 				"_type": "textarea",
 				"_range": "typeof(thiseval)=='string'",
-				"_data": "自定义插件"
+				"_data": "双击查看插件详情"
 			},
-			"shop": {
-				"_leaf": true,
-				"_type": "textarea",
-				"_range": "typeof(thiseval)=='string'",
-				"_data": "全局商店"
-			},
-			"drawLight": {
-				"_leaf": true,
-				"_type": "textarea",
-				"_range": "typeof(thiseval)=='string' || thiseval==null",
-				"_data": "灯光效果"
-			},
-			"removeMap": {
-				"_leaf": true,
-				"_type": "textarea",
-				"_range": "typeof(thiseval)=='string' || thiseval==null",
-				"_data": "砍层插件"
-			},
-			"fiveLayers": {
-				"_leaf": true,
-				"_type": "textarea",
-				"_range": "typeof(thiseval)=='string' || thiseval==null",
-				"_data": "五图层(背景前景2)"
-			},
-			"itemShop": {
-				"_leaf": true,
-				"_type": "textarea",
-				"_range": "typeof(thiseval)=='string' || thiseval==null",
-				"_data": "道具商店"
-			},
-			"enemyLevel": {
-				"_leaf": true,
-				"_type": "textarea",
-				"_range": "typeof(thiseval)=='string' || thiseval==null",
-				"_data": "手册显示怪物境界"
-			},
-			"dynamicHp": {
-				"_leaf": true,
-				"_type": "textarea",
-				"_range": "typeof(thiseval)=='string' || thiseval==null",
-				"_data": "动态血量变化"
-			},
-			"multiHeros": {
-				"_leaf": true,
-				"_type": "textarea",
-				"_range": "typeof(thiseval)=='string' || thiseval==null",
-				"_data": "多角色"
-			},
-			"itemCategory": {
-				"_leaf": true,
-				"_type": "textarea",
-				"_range": "typeof(thiseval)=='string' || thiseval==null",
-				"_data": "物品分类插件"
-			},
-			"heroFourFrames": {
-				"_leaf": true,
-				"_type": "textarea",
-				"_range": "typeof(thiseval)=='string' || thiseval==null",
-				"_data": "勇士四帧行走动画"
-			},
-			"startCanvas": {
-				"_leaf": true,
-				"_type": "textarea",
-				"_range": "typeof(thiseval)=='string' || thiseval==null",
-				"_data": "自绘标题界面居中"
-			}
 		}
 		if (obj[key]) return obj[key];
 		return {

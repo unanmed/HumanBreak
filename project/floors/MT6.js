@@ -63,7 +63,7 @@ main.floors.MT6=
         "\t[原始人]\b[down,hero]感觉好像可以学习一些简单的东西了。",
         {
             "type": "function",
-            "function": "function(){\ncore.showChapter('第一章  勇气');\n}"
+            "function": "function(){\ncore.plugin.gameUi.showChapter('第一章  勇气');\n}"
         },
         {
             "type": "setValue",

@@ -120,7 +120,7 @@ main.floors.MT5=
             "这里是漏怪检测，会检测\r[gold]山洞\r[]区域的怪物是否清空",
             {
                 "type": "function",
-                "function": "function(){\nconst enemy = core.getRemainEnemyString(core.floorIds.slice(0, 5));\nif (enemy.length === 0) {\n\tcore.insertAction(['当前无剩余怪物！', { \"type\": \"hide\", \"remove\": true }, ]);\n} else {\n\tcore.insertAction(enemy);\n}\n}"
+                "function": "function(){\nconst enemy = core.plugin.remainEnemy.getRemainEnemyString(core.floorIds.slice(0, 5));\nif (enemy.length === 0) {\n\tcore.insertAction(['当前无剩余怪物！', { \"type\": \"hide\", \"remove\": true }, ]);\n} else {\n\tcore.insertAction(enemy);\n}\n}"
             }
         ]
     },
