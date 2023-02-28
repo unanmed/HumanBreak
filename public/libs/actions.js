@@ -731,7 +731,7 @@ actions.prototype._sys_onmove_choices = function (x, y, px, py) {
 actions.prototype._sys_onmove = function (x, y, px, py) {
     if (core.status.lockControl) return false;
 
-    if (core.status.preview.dragging) {
+    if (core.status.preview?.dragging) {
         core.setViewport(
             core.bigmap.offsetX - px + core.status.preview.px,
             core.bigmap.offsetY - py + core.status.preview.py
@@ -740,7 +740,7 @@ actions.prototype._sys_onmove = function (x, y, px, py) {
         core.status.preview.py = py;
         return true;
     }
-    if (core.status.preview.prepareDragging) {
+    if (core.status.preview?.prepareDragging) {
         if (
             Math.abs(px - core.status.preview.px) <= 20 &&
             Math.abs(py - core.status.preview.py) <= 20

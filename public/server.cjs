@@ -26,9 +26,6 @@ let hotReloadData = '';
 /** 是否已经启动了热重载模块 */
 let watched = false;
 
-/** 是否已经启动了录像调试模块 */
-let replayed = false;
-
 /** 监听端口 */
 let port = 3000;
 const next = () => {
@@ -41,10 +38,17 @@ const next = () => {
 };
 next();
 
-let repStart;
-
 const listenedFloors = [];
 const listenedPlugins = [];
+
+const hasPlugin = (function () {
+    try {
+        fss.readdirSync('./project/plugin');
+        return true;
+    } catch {
+        return false;
+    }
+})();
 
 // ----- GET file
 
@@ -346,10 +350,12 @@ async function watch() {
     });
 
     // 插件热重载
-    const plugins = await extract('project/plugin/*.js');
-    plugins.forEach(v => {
-        watchOnePlugin(v.slice(15));
-    });
+    if (hasPlugin) {
+        const plugins = await extract('project/plugin/*.js');
+        plugins.forEach(v => {
+            watchOnePlugin(v.slice(15));
+        });
+    }
 
     // 数据热重载
     const datas = (await extract('project/*.js')).filter(
@@ -383,6 +389,7 @@ function testWatchFloor(url) {
  * @param {string} url 要测试的路径
  */
 function testWatchPlugin(url) {
+    if (!hasPlugin) return;
     if (/project(\/|\\)plugin(\/|\\).*\.js/.test(url)) {
         const f = url.slice(15);
         if (!listenedFloors.includes(f.slice(0, -3))) {
@@ -414,7 +421,7 @@ function watchOneFloor(file) {
 function watchOnePlugin(file) {
     if (!/.*\.js/.test(file)) return;
     const f = file.slice(0, -3);
-    listenedFloors.push(file.slice(0, -3));
+    listenedPlugins.push(file.slice(0, -3));
     fss.watchFile(`project/plugin/${file}`, { interval: 500 }, () => {
         const plugin = f;
         if (hotReloadData.includes(`@@plugin:${plugin}`)) return;

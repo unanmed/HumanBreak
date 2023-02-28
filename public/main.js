@@ -328,7 +328,7 @@ main.prototype.init = async function (mode, callback) {
         core.resetSettings();
         core.plugin.showMarkedEnemy.value = true;
     }
-    if (main.useCompress) {
+    if (main.pluginUseCompress) {
         await main.loadScript(`project/plugin.min.js?v=${main.version}`);
     } else {
         for await (const plugin of mainData.plugin) {

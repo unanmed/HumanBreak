@@ -39,7 +39,6 @@ import { exec } from 'child_process';
             })
         );
         await fse.remove('./dist/maps/');
-        await fse.remove('./dist/extensions/');
     } catch {}
 
     // 2. 压缩字体
