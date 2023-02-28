@@ -1623,7 +1623,7 @@ actions.prototype._keyUpViewMaps = function (keycode) {
 
 ////// 快捷商店界面时的点击操作 //////
 actions.prototype._clickQuickShop = function (x, y) {
-    var shopIds = core.listShopIds();
+    var shopIds = core.plugin.shop.listShopIds();
     if (this._out(x)) return;
     var topIndex =
         this._HY_ -
@@ -1631,15 +1631,15 @@ actions.prototype._clickQuickShop = function (x, y) {
         (core.status.event.ui.offset || 0);
     if (y >= topIndex && y < topIndex + shopIds.length) {
         var shopId = shopIds[y - topIndex];
-        if (!core.canOpenShop(shopId)) {
+        if (!core.plugin.shop.canOpenShop(shopId)) {
             core.playSound('操作失败');
             core.drawTip('当前项尚未开启');
             return;
         }
-        var message = core.canUseQuickShop(shopId);
+        var message = core.plugin.shop.canUseQuickShop(shopId);
         if (message == null) {
             // core.ui.closePanel();
-            core.openShop(shopIds[y - topIndex], false);
+            core.plugin.shop.openShop(shopIds[y - topIndex], false);
         } else {
             core.playSound('操作失败');
             core.drawTip(message);
@@ -1660,7 +1660,7 @@ actions.prototype._keyUpQuickShop = function (keycode) {
         return;
     }
     this._selectChoices(
-        core.listShopIds().length + 1,
+        core.plugin.shop.listShopIds().length + 1,
         keycode,
         this._clickQuickShop
     );

@@ -108,7 +108,7 @@ const mdef = ref(core.status.hero.mdef);
 
 const skill = computed(() => {
     update.value;
-    return core.getSkillFromIndex(selected.value);
+    return core.plugin.skillTree.getSkillFromIndex(selected.value);
 });
 
 const skills = computed(() => {
@@ -119,8 +119,9 @@ const desc = computed(() => {
     return eval(
         '`' +
             splitText(skill.value.desc).replace(/level(:\d+)?/g, (str, $1) => {
-                if ($1) return `core.getSkillLevel(${$1})`;
-                else return `core.getSkillLevel(${skill.value.index})`;
+                if ($1) return `core.plugin.skillTree.getSkillLevel(${$1})`;
+                else
+                    return `core.plugin.skillTree.getSkillLevel(${skill.value.index})`;
             }) +
             '`'
     );
@@ -134,9 +135,10 @@ const effect = computed(() => {
                 skill.value.effect
                     .join('')
                     .replace(/level(:\d+)?/g, (str, $1) => {
-                        if ($1) return `(core.getSkillLevel(${$1}) + ${v})`;
+                        if ($1)
+                            return `(core.plugin.skillTree.getSkillLevel(${$1}) + ${v})`;
                         else
-                            return `(core.getSkillLevel(${skill.value.index}) + ${v})`;
+                            return `(core.plugin.skillTree.getSkillLevel(${skill.value.index}) + ${v})`;
                     }) +
                 '`'
         );
@@ -154,20 +156,20 @@ const dict = computed(() => {
 
 const front = computed(() => {
     return skill.value.front.map(v => {
-        return `${core.getSkillLevel(v[0]) >= v[1] ? 'a' : 'b'}${v[1]}级  ${
-            skills.value[dict.value[v[0]]].title
-        }`;
+        return `${
+            core.plugin.skillTree.getSkillLevel(v[0]) >= v[1] ? 'a' : 'b'
+        }${v[1]}级  ${skills.value[dict.value[v[0]]].title}`;
     });
 });
 
 const consume = computed(() => {
     update.value;
-    return core.getSkillConsume(selected.value);
+    return core.plugin.skillTree.getSkillConsume(selected.value);
 });
 
 const level = computed(() => {
     update.value;
-    return core.getSkillLevel(selected.value);
+    return core.plugin.skillTree.getSkillLevel(selected.value);
 });
 
 function exit() {
@@ -195,9 +197,9 @@ function draw() {
             ctx.lineTo(
                 ...(s.loc.map(v => (v * 2 - 1) * per + per / 2) as LocArr)
             );
-            if (core.getSkillLevel(s.index) < v.front[i][1])
+            if (core.plugin.skillTree.getSkillLevel(s.index) < v.front[i][1])
                 ctx.strokeStyle = '#aaa';
-            else if (core.getSkillLevel(s.index) === s.max)
+            else if (core.plugin.skillTree.getSkillLevel(s.index) === s.max)
                 ctx.strokeStyle = '#ff0';
             else ctx.strokeStyle = '#0f8';
             ctx.lineWidth = devicePixelRatio;
@@ -206,7 +208,7 @@ function draw() {
     });
     skills.value.forEach(v => {
         const [x, y] = v.loc.map(v => v * 2 - 1);
-        const level = core.getSkillLevel(v.index);
+        const level = core.plugin.skillTree.getSkillLevel(v.index);
         // 技能图标
         ctx.save();
         ctx.lineWidth = per * 0.06;
@@ -247,7 +249,7 @@ function click(e: MouseEvent) {
 }
 
 function upgrade(index: number) {
-    const success = core.upgradeSkill(index);
+    const success = core.plugin.skillTree.upgradeSkill(index);
     if (!success) tip('error', '升级失败！');
     else {
         tip('success', '升级成功！');

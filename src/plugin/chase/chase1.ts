@@ -576,7 +576,7 @@ export function para3(chase: Chase) {
         'MT14',
         async () => {
             flags.finishChase1 = true;
-            core.autoFixRouteBoss();
+            core.plugin.towerBoss.autoFixRouteBoss();
             core.showStatusBar();
             ani.time(750).apply('rect', 0);
             chase.end();

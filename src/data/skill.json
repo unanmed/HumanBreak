@@ -8,7 +8,7 @@
     },
     "blade": {
         "text": "1：断灭之刃",
-        "opened": "core.getSkillLevel(2) > 0",
+        "opened": "core.plugin.skillTree.getSkillLevel(2) > 0",
         "desc": [
             "<span style=\"color: gold\">快捷键1</span>，开启后勇士攻击增加${level:2 * 10}%，",
             "同时防御减少${level:2 * 10}%。",
@@ -31,7 +31,7 @@
     },
     "shield": {
         "text": "3：铸剑为盾",
-        "opened": "core.getSkillLevel(10) > 0",
+        "opened": "core.plugin.skillTree.getSkillLevel(10) > 0",
         "desc": [
             "<span style=\"color: gold\">快捷键3</span>，开启后勇士防御增加${level:10 * 10}%，",
             "同时攻击减少${level:10 * 10}%。",

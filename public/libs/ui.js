@@ -3101,11 +3101,11 @@ ui.prototype._drawNotes = function () {
 ui.prototype._drawQuickShop = function () {
     core.status.event.id = 'selectShop';
     var shopList = core.status.shops,
-        keys = core.listShopIds();
+        keys = core.plugin.shop.listShopIds();
     var choices = keys.map(function (shopId) {
         return {
             text: shopList[shopId].textInList,
-            color: core.isShopVisited(shopId) ? null : '#999999'
+            color: core.plugin.shop.isShopVisited(shopId) ? null : '#999999'
         };
     });
     choices.push('返回游戏');

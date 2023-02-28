@@ -105,16 +105,17 @@ function resetFlag() {
 }
 
 export async function triggerFullscreen() {
+    const { maxGameScale } = core.plugin.utils;
     if (document.fullscreenElement) {
         await document.exitFullscreen();
         requestAnimationFrame(() => {
-            core.maxGameScale(1);
+            maxGameScale(1);
         });
         fullscreen.value = false;
     } else {
         await document.body.requestFullscreen();
         requestAnimationFrame(() => {
-            core.maxGameScale();
+            maxGameScale();
         });
         fullscreen.value = true;
     }

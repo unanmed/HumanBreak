@@ -149,7 +149,7 @@ const skill = ref<string>('无');
 const up = ref(0);
 const spring = ref<number>();
 const skillOpened = ref(core.getFlag('chapter', 0) > 0);
-const studyOpened = ref(core.getSkillLevel(11) > 0);
+const studyOpened = ref(core.plugin.skillTree.getSkillLevel(11) > 0);
 /**
  * 要展示的勇士属性
  */
@@ -191,7 +191,7 @@ function update() {
         spring.value = 50 - flags.springCount;
     }
     skillOpened.value = core.getFlag('chapter', 0) > 0;
-    studyOpened.value = core.getSkillLevel(11) > 0;
+    studyOpened.value = core.plugin.skillTree.getSkillLevel(11) > 0;
 }
 
 function openSkillTree() {

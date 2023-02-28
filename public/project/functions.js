@@ -120,6 +120,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 正在切换楼层过程中执行的操作；此函数的执行时间是“屏幕完全变黑“的那一刻
             // floorId为要切换到的楼层ID；heroLoc表示勇士切换到的位置
 
+            const { checkLoopMap } = core.plugin.loopMap;
+
             flags.floorChanging = true;
 
             // ---------- 此时还没有进行切换，当前floorId还是原来的 ---------- //
@@ -136,7 +138,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             }
 
             // 根据分区信息自动砍层与恢复
-            if (core.autoRemoveMaps) core.autoRemoveMaps(floorId);
+            if (core.plugin.removeMap.autoRemoveMaps)
+                core.plugin.removeMap.autoRemoveMaps(floorId);
 
             // 重置画布尺寸
             core.maps.resizeMap(floorId);
@@ -177,7 +180,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             if (weather) core.setWeather(weather[0], weather[1]);
             else core.setWeather();
 
-            core.checkLoopMap();
+            checkLoopMap();
 
             // ...可以新增一些其他内容，比如创建个画布在右上角显示什么内容等等
         },
@@ -365,8 +368,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 flags[`night_${floorId}`] += enemy.day;
             }
 
-            if (core.getSkillLevel(11) > 0) {
-                core.declineStudiedSkill();
+            if (core.plugin.skillTree.getSkillLevel(11) > 0) {
+                core.plugin.study.declineStudiedSkill();
             }
 
             // 如果是融化怪，需要特殊标记一下
@@ -618,7 +621,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                             core.formatBigNumber(
                                 Math.max(
                                     (enemy.value || 0) -
-                                        core.getHeroStatusOn('def')
+                                        core.plugin.hero.getHeroStatusOn('def')
                                 )
                             ) +
                             '点伤害'
@@ -740,7 +743,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 def: hero_def,
                 mdef: hero_mdef,
                 hp: hero_hp
-            } = core.getHeroStatusOf(
+            } = core.plugin.hero.getHeroStatusOf(
                 hero,
                 ['atk', 'def', 'mdef', 'hp'],
                 hero?.x,
@@ -919,6 +922,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 后面三个参数主要是可以在光环等效果上可以适用
             floorId = floorId || core.status.floorId;
 
+            const { backDir } = core.plugin.utils;
+
             // 勇士位置应该在这里进行计算，四个位置依次遍历，去重
             let toMap = [];
             if (
@@ -947,12 +952,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     }
                     if (
                         core.noPass(nx, ny) ||
-                        !core.canMoveHero(nx, ny, core.backDir(dir), floorId)
+                        !core.canMoveHero(nx, ny, backDir(dir), floorId)
                     ) {
                         continue;
                     }
                     const toGet = ['atk', 'def'];
-                    const status = core.getHeroStatusOf(
+                    const status = core.plugin.hero.getHeroStatusOf(
                         hero,
                         toGet,
                         nx,
@@ -982,13 +987,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     def: mon_def,
                     special: mon_special
                 } = enemyInfo;
-                let { atk: hero_atk, def: hero_def } = core.getHeroStatusOf(
-                    hero,
-                    ['atk', 'def'],
-                    x,
-                    y,
-                    floorId
-                );
+                let { atk: hero_atk, def: hero_def } =
+                    core.plugin.hero.getHeroStatusOf(
+                        hero,
+                        ['atk', 'def'],
+                        x,
+                        y,
+                        floorId
+                    );
 
                 let hero_hp = core.getRealStatusOrDefault(hero, 'hp'),
                     hero_IQ = core.getRealStatusOrDefault(hero, 'mdef'),
@@ -1277,7 +1283,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                         !core.status.floorId.startsWith('tower') &&
                         flags.skill2
                     ) {
-                        core.jumpSkill();
+                        core.plugin.skillEffects.jumpSkill();
                         core.status.route.push('key:50'); // 将按键记在录像中
                     } else {
                         if (core.hasItem('pickaxe')) {
@@ -1332,7 +1338,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 version: core.firstData.version,
                 guid: core.getGuid(),
                 time: new Date().getTime(),
-                skills: core.saveSkillTree()
+                skills: core.plugin.skillTree.saveSkillTree()
             };
 
             return data;
@@ -1381,7 +1387,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             core.setFlag('__fromLoad__', true);
 
             // TODO：增加自己的一些读档处理
-            core.loadSkillTree(data.skills);
+            core.plugin.skillTree.loadSkillTree(data.skills);
 
             // 切换到对应的楼层
             core.changeFloor(data.floorId, null, data.hero.loc, 0, function () {
@@ -1452,7 +1458,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
 
             // 已学习的技能
             if (
-                core.getSkillLevel(11) > 0 &&
+                core.plugin.skillTree.getSkillLevel(11) > 0 &&
                 (core.status.hero.special?.num ?? []).length > 0
             ) {
                 core.plugin.showStudiedSkill.value = true;
@@ -1733,6 +1739,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 2, 将楼层属性中的cannotMoveDirectly这个开关勾上，即禁止在该层楼使用瞬移。
             // 3. 将flag:cannotMoveDirectly置为true，即可使用flag控制在某段剧情范围内禁止瞬移。
 
+            const { checkLoopMap } = core.plugin.loopMap;
+
             // 增加步数
             core.status.hero.steps++;
             // 更新跟随者状态，并绘制
@@ -1779,7 +1787,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 );
             }
 
-            core.checkLoopMap();
+            checkLoopMap();
 
             // 追猎
             if (core.status.checkBlock.haveHunt) {

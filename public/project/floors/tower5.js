@@ -21,7 +21,7 @@ main.floors.tower5=
             "这里是漏怪检测，会检测\r[gold]智慧之塔\r[]区域是否有遗漏怪物",
             {
                 "type": "function",
-                "function": "function(){\nconst enemy = core.getRemainEnemyString([\"tower1\", \"tower2\", \"tower3\", \"tower4\", \"tower5\", \"tower6\"]);\nif (enemy.length === 0) {\n\tcore.insertAction(['当前无剩余怪物！', { \"type\": \"hide\", \"remove\": true }, ]);\n} else {\n\tcore.insertAction(enemy);\n}\n}"
+                "function": "function(){\nconst enemy = core.plugin.remainEnemy.getRemainEnemyString([\"tower1\", \"tower2\", \"tower3\", \"tower4\", \"tower5\", \"tower6\"]);\nif (enemy.length === 0) {\n\tcore.insertAction(['当前无剩余怪物！', { \"type\": \"hide\", \"remove\": true }, ]);\n} else {\n\tcore.insertAction(enemy);\n}\n}"
             }
         ]
     },

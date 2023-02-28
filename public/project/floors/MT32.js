@@ -16,7 +16,7 @@ main.floors.MT32=
     "firstArrive": [
         {
             "type": "function",
-            "function": "function(){\ncore.removeMaps('MT17', 'MT21', true)\n}"
+            "function": "function(){\ncore.plugin.removeMap.removeMaps('MT17', 'MT21', true)\n}"
         }
     ],
     "eachArrive": [],

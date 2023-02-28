@@ -51,7 +51,10 @@ const content = computed(() => {
                     } else return v;
                 })
                 .join('')
-                .replace(/level:(\d+)/g, 'core.getSkillLevel($1)') +
+                .replace(
+                    /level:(\d+)/g,
+                    'core.plugin.skillTree.getSkillLevel($1)'
+                ) +
             '`'
     );
 });

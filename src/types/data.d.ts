@@ -68,6 +68,8 @@ interface MainData {
      * 图片切分信息
      */
     readonly splitImages: SplitImageData;
+
+    readonly plugin: string[];
 }
 
 interface FirstData {

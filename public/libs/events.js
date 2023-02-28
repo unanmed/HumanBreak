@@ -2206,13 +2206,13 @@ events.prototype._action_unloadEquip = function (data, x, y, prefix) {
 };
 
 events.prototype._action_openShop = function (data, x, y, prefix) {
-    core.setShopVisited(data.id, true);
-    if (data.open) core.openShop(data.id, true);
+    core.plugin.shop.setShopVisited(data.id, true);
+    if (data.open) core.plugin.shop.openShop(data.id, true);
     core.doAction();
 };
 
 events.prototype._action_disableShop = function (data, x, y, prefix) {
-    core.setShopVisited(data.id, false);
+    core.plugin.shop.setShopVisited(data.id, false);
     core.doAction();
 };
 
@@ -3436,18 +3436,18 @@ events.prototype.openQuickShop = function (fromUserAction) {
     if (Object.keys(core.status.shops).length == 1) {
         var shopId = Object.keys(core.status.shops)[0];
         if (core.status.event.id != null) return;
-        if (!core.canOpenShop(shopId)) {
+        if (!core.plugin.shop.canOpenShop(shopId)) {
             core.playSound('操作失败');
             core.drawTip('当前无法打开快捷商店！');
             return;
         }
-        var message = core.canUseQuickShop(shopId);
+        var message = core.plugin.shop.canUseQuickShop(shopId);
         if (message != null) {
             core.playSound('操作失败');
             core.drawTip(message);
             return;
         }
-        core.openShop(shopId, false);
+        core.plugin.shop.openShop(shopId, false);
         return;
     }
 

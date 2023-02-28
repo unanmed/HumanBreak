@@ -18,10 +18,20 @@ interface PluginDeclaration
     extends PluginUtils,
         PluginUis,
         PluginUse,
-        SkillTree,
         MiniMap,
-        HeroRealStatus,
         PluginAchievement {
+    /**
+     *
+     */
+    utils: GamePluginUtils;
+    loopMap: GamePluginLoopMap;
+    towerBoss: GamePluginBoss;
+    skillTree: GamePluginSkillTree;
+    study: GamePluginStudy;
+    hero: GamePluginHeroRealStatus;
+
+    skills: Record<Chapter, Skill[]>;
+
     /**
      * 添加函数  例：添加弹出文字，像这个就可以使用core.addPop或core.plugin.addPop调用
      * @param px 弹出的横坐标
@@ -83,6 +93,45 @@ interface PluginDeclaration
     resetFlagSettings(): void;
 }
 
+interface GamePluginUtils {
+    /**
+     * 判定一个值是否不是undefined或null
+     * @param value 要判断的值
+     */
+    has<T>(value: T): value is NonNullable<T>;
+
+    /**
+     * 滑动数组
+     * @param arr 数组
+     * @param delta 偏移量，正数表示向右滑动，负数表示向左滑动
+     */
+    slide<T>(arr: T[], delta: number): T[];
+
+    /**
+     * 获取方向的反方向
+     * @param dir 方向
+     */
+    backDir(dir: Dir): Dir;
+
+    /**
+     * 最大化游戏缩放
+     * @param n 最大缩放再少多少个缩放
+     */
+    maxGameScale(n?: number): void;
+}
+
+interface GamePluginLoopMap {
+    checkLoopMap(): void;
+}
+
+interface GamePluginBoss {
+    /**
+     * 自动修复特殊boss战的录像
+     * @param isStart 是否要开始修剪录像
+     */
+    autoFixRouteBoss(isStart?: boolean);
+}
+
 interface PluginUtils {
     /**
      * 判定一个值是否不是undefined或null
@@ -116,37 +165,6 @@ interface PluginUtils {
      * @param index 追逐战索引
      */
     startChase(index: number): Promise<void>;
-
-    /**
-     * 自动修复特殊boss战的录像
-     * @param isStart 是否要开始修剪录像
-     */
-    autoFixRouteBoss(isStart?: boolean);
-
-    /**
-     * 滑动数组
-     * @param arr 数组
-     * @param delta 偏移量，正数表示向右滑动，负数表示向左滑动
-     */
-    slide<T>(arr: T[], delta: number): T[];
-
-    /**
-     * 获取方向的反方向
-     * @param dir 方向
-     */
-    backDir(dir: Dir): Dir;
-
-    /**
-     * 判断一个值是否不是undefined和null
-     * @param value 要判断的值
-     */
-    has<T>(value: T): value is NonNullable<T>;
-
-    /**
-     * 最大化游戏缩放
-     * @param n 最大缩放再少多少个缩放
-     */
-    maxGameScale(n?: number): void;
 }
 
 interface PluginUis {
@@ -277,9 +295,7 @@ interface PluginUse {
     useUp(ele: HTMLElement, fn: DragFn): void;
 }
 
-interface SkillTree {
-    skills: Record<Chapter, Skill[]>;
-
+interface GamePluginSkillTree {
     /**
      * 获取技能等级
      * @param skill 技能索引
@@ -323,7 +339,7 @@ interface MiniMap {
     splitArea(): void;
 }
 
-interface Study {
+interface GamePluginStudy {
     /**
      * 学习一个怪物技能
      * @param enemy 被学习的怪物
@@ -332,7 +348,7 @@ interface Study {
     studySkill(enemy: Enemy, num: number): void;
 }
 
-interface HeroRealStatus {
+interface GamePluginHeroRealStatus {
     /**
      * 获取勇士在某一点的属性
      * @param name 要获取的勇士属性

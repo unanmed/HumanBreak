@@ -98,7 +98,9 @@ import { exec } from 'child_process';
     // 3. 压缩js插件
     try {
         exec(
-            'babel ./dist/project/plugin --out-file ./dist/project/plugin.min.js'
+            `babel ${data.main.plugin
+                .map(v => `./dist/project/plugin/${v}.js`)
+                .join(' ')} --out-file ./dist/project/plugin.min.js`
         ).on('close', async () => {
             const main = await fs.readFile('./dist/main.js', 'utf-8');
             await fs.writeFile(
