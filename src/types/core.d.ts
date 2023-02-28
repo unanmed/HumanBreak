@@ -1427,12 +1427,6 @@ declare let flags: Flags;
  */
 declare let hero: HeroStatus;
 
-// 让你总是拼错！（不过现在有ts了应该拼不错了
-declare const ture: true;
-declare const flase: false;
-declare const on: true;
-declare const off: false;
-
 /**
  * 全塔属性
  */

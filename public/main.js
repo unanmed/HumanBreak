@@ -321,6 +321,8 @@ main.prototype.init = async function (mode, callback) {
     core.init(coreData, callback);
     core.resize();
 
+    main.core = core;
+
     core.plugin = {};
     // 加载插件
     if (!main.replayChecking && main.mode === 'play') {
