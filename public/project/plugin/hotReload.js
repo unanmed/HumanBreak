@@ -81,77 +81,54 @@
     }
 
     /**
-     * 热重载脚本编辑及插件编写
+     * 热重载脚本编辑
      * @param {string} data
      */
-    async function reloadScript(data) {
-        if (data === 'plugins') {
-            // 插件编写比较好办
-            const before = plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1;
-            // 这里不能用动态导入，因为动态导入会变成模块，变量就不是全局的了
-            const script = document.createElement('script');
-            script.src = `/project/plugins.js?v=${Date.now()}`;
-            document.body.appendChild(script);
-            await new Promise(res => {
-                script.onload = () => res('success');
-            });
-            const after = plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1;
-            // 找到差异的函数
-            for (const id in before) {
-                const fn = before[id];
-                if (typeof fn !== 'function') continue;
-                if (fn.toString() !== after[id]?.toString()) {
+    async function reloadScript() {
+        // 脚本编辑略微麻烦点
+        const before = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a;
+        // 这里不能用动态导入，因为动态导入会变成模块，变量就不是全局的了
+        const script = document.createElement('script');
+        script.src = `/project/functions.js?v=${Date.now()}`;
+        document.body.appendChild(script);
+        await new Promise(res => {
+            script.onload = () => res('success');
+        });
+        const after = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a;
+        // 找到差异的函数
+        for (const mod in before) {
+            const fns = before[mod];
+            for (const id in fns) {
+                const fn = fns[id];
+                if (typeof fn !== 'function' || id === 'hasSpecial') continue;
+                const now = after[mod][id];
+                if (fn.toString() !== now.toString()) {
                     try {
-                        core.plugin[id] = after[id];
-                        core.plugin[id].call(core.plugin);
+                        if (mod === 'events') {
+                            core.events.eventdata[id] = now;
+                        } else if (mod === 'enemys') {
+                            core.enemys.enemydata[id] = now;
+                        } else if (mod === 'actions') {
+                            core.actions.actionsdata[id] = now;
+                        } else if (mod === 'control') {
+                            core.control.controldata[id] = now;
+                        } else if (mod === 'ui') {
+                            core.ui.uidata[id] = now;
+                        }
                         core.updateStatusBar(true, true);
-                        console.log(`plugin hot reload: ${id}`);
+                        console.log(`function hot reload: ${mod}.${id}`);
                     } catch (e) {
                         console.error(e);
                     }
                 }
             }
-        } else if (data === 'functions') {
-            // 脚本编辑略微麻烦点
-            const before = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a;
-            // 这里不能用动态导入，因为动态导入会变成模块，变量就不是全局的了
-            const script = document.createElement('script');
-            script.src = `/project/functions.js?v=${Date.now()}`;
-            document.body.appendChild(script);
-            await new Promise(res => {
-                script.onload = () => res('success');
-            });
-            const after = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a;
-            // 找到差异的函数
-            for (const mod in before) {
-                const fns = before[mod];
-                for (const id in fns) {
-                    const fn = fns[id];
-                    if (typeof fn !== 'function' || id === 'hasSpecial')
-                        continue;
-                    const now = after[mod][id];
-                    if (fn.toString() !== now.toString()) {
-                        try {
-                            if (mod === 'events') {
-                                core.events.eventdata[id] = now;
-                            } else if (mod === 'enemys') {
-                                core.enemys.enemydata[id] = now;
-                            } else if (mod === 'actions') {
-                                core.actions.actionsdata[id] = now;
-                            } else if (mod === 'control') {
-                                core.control.controldata[id] = now;
-                            } else if (mod === 'ui') {
-                                core.ui.uidata[id] = now;
-                            }
-                            core.updateStatusBar(true, true);
-                            console.log(`function hot reload: ${mod}.${id}`);
-                        } catch (e) {
-                            console.error(e);
-                        }
-                    }
-                }
-            }
         }
+    }
+
+    async function reloadPlugin(data) {
+        // 直接import就完事了
+        await import(`/project/plugin/${data}.js?v=${Date.now()}`);
+        console.log(`plugin hot reload: ${data}.js`);
     }
 
     /**
@@ -239,6 +216,7 @@
                     if (type === 'data') reloadData(file);
                     if (type === 'floor') reloadFloor(file);
                     if (type === 'script') reloadScript(file);
+                    if (type === 'plugin') reloadPlugin(file);
                 });
             }, 1000);
         }
