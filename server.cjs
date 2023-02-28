@@ -44,6 +44,7 @@ next();
 let repStart;
 
 const listenedFloors = [];
+const listenedPlugins = [];
 
 // ----- GET file
 
@@ -172,6 +173,7 @@ async function writeFile(req, res) {
         const value = /&value=[^]+/.exec(data)[0].slice(7);
         await fs.writeFile(dir, value, { encoding: type });
         testWatchFloor(name);
+        testWatchPlugin(name);
         if (name.endsWith('project/events.js')) doDeclaration('events', value);
         if (name.endsWith('project/items.js')) doDeclaration('items', value);
         if (name.endsWith('project/maps.js')) doDeclaration('maps', value);
@@ -332,7 +334,7 @@ async function watch() {
         watchOneFloor(v.slice(15));
     });
 
-    // 脚本编辑 及 插件 热重载
+    // 脚本编辑 热重载
     const scripts = await extract('project/functions.js', 'project/plugins.js');
     scripts.forEach(v => {
         const dir = path.resolve(__dirname, v);
@@ -341,6 +343,12 @@ async function watch() {
             hotReloadData += `@@script:${type}`;
             console.log(`script hot reload: ${type}.js`);
         });
+    });
+
+    // 插件热重载
+    const plugins = await extract('project/plugin/*.js');
+    plugins.forEach(v => {
+        watchOnePlugin(v.slice(15));
     });
 
     // 数据热重载
@@ -371,6 +379,19 @@ function testWatchFloor(url) {
 }
 
 /**
+ * 检测是否是楼层文件并进行监听
+ * @param {string} url 要测试的路径
+ */
+function testWatchPlugin(url) {
+    if (/project(\/|\\)plugin(\/|\\).*\.js/.test(url)) {
+        const f = url.slice(15);
+        if (!listenedFloors.includes(f.slice(0, -3))) {
+            watchOnePlugin(f);
+        }
+    }
+}
+
+/**
  * 监听一个楼层文件
  * @param {string} file 要监听的文件
  */
@@ -383,6 +404,22 @@ function watchOneFloor(file) {
         if (hotReloadData.includes(`@@floor:${floorId}`)) return;
         hotReloadData += `@@floor:${floorId}`;
         console.log(`floor hot reload: ${floorId}`);
+    });
+}
+
+/**
+ * 监听一个楼层文件
+ * @param {string} file 要监听的文件
+ */
+function watchOnePlugin(file) {
+    if (!/.*\.js/.test(file)) return;
+    const f = file.slice(0, -3);
+    listenedFloors.push(file.slice(0, -3));
+    fss.watchFile(`project/plugin/${file}`, { interval: 500 }, () => {
+        const plugin = f;
+        if (hotReloadData.includes(`@@plugin:${plugin}`)) return;
+        hotReloadData += `@@plugin:${plugin}`;
+        console.log(`plugin hot reload: ${plugin}`);
     });
 }
 
@@ -409,189 +446,6 @@ function reload(req, res, hot = false) {
             hotReloadData = '';
         }
     });
-}
-
-// ----- replay debugger
-
-/**
- * 录像调试
- * @param {http.IncomingMessage} req
- * @param {http.ServerResponse<http.IncomingMessage> & {req: http.IncomingMessage;}} res
- */
-function replay(req, res) {
-    req.on('data', async chunk => {
-        if (chunk.toString() === 'test' && !replayed) {
-            replayed = true;
-            try {
-                await fs.mkdir(path.resolve(__dirname, '_replay'));
-                await fs.mkdir(path.resolve(__dirname, '_replay/status'));
-                await fs.mkdir(path.resolve(__dirname, '_replay/save'));
-            } catch {}
-
-            try {
-                await fs.readFile(
-                    path.resolve(__dirname, '_replay/.info'),
-                    'utf-8'
-                );
-            } catch {
-                await fs.writeFile(
-                    path.resolve(__dirname, '_replay/.info'),
-                    `{
-    "cnt": 0
-}`,
-                    'utf-8'
-                );
-            }
-            const data = fss.readFileSync(
-                path.resolve(__dirname, '_replay/.info'),
-                'utf-8'
-            );
-            repStart = Number(JSON.parse(data).cnt);
-            console.log(`服务器录像调试模块已开始服务`);
-        }
-    });
-
-    req.on('end', () => {
-        res.end();
-    });
-}
-
-/**
- * 获取未占用的状态栏位
- * @param {http.IncomingMessage} req
- * @param {http.ServerResponse<http.IncomingMessage> & {req: http.IncomingMessage;}} res
- */
-async function replayCnt() {
-    const data = `{
-    "cnt": ${++repStart}
-}`;
-    fss.writeFileSync(path.resolve(__dirname, '_replay/.info'), data, 'utf-8');
-
-    return repStart;
-}
-
-/**
- * 写入
- * @param {http.IncomingMessage} req
- * @param {http.ServerResponse<http.IncomingMessage> & {req: http.IncomingMessage;}} res
- */
-async function replayWrite(req, res) {
-    const data = await getPostData(req);
-    const n = await replayCnt();
-
-    if (isNaN(n)) res.end('@error');
-
-    await Promise.all([
-        fs.writeFile(
-            path.resolve(__dirname, '_replay/.info'),
-            `{
-    "cnt": ${n + 1}
-}`,
-            'utf-8'
-        ),
-        fs.writeFile(
-            path.resolve(__dirname, `_replay/status/${n}.rep`),
-            data,
-            'utf-8'
-        )
-    ]);
-
-    res.end(n.toString());
-}
-
-/**
- * 比对录像与本地数据
- * @param {http.IncomingMessage} req
- * @param {http.ServerResponse<http.IncomingMessage> & {req: http.IncomingMessage;}} res
- */
-async function replayCheck(req, res) {
-    const ans = await getPostData(req);
-    const [n, data] = ans.split('@-|-@');
-
-    const local = (
-        await fs.readFile(
-            path.resolve(__dirname, `_replay/status/${n}.rep`),
-            'utf-8'
-        )
-    )
-        .split('@---@')
-        .map(v => JSON.parse(v));
-    const rep = data.split('@---@').map(v => JSON.parse(v));
-
-    if (local.length !== rep.length) return res.end('false');
-
-    const check = (a, b) => {
-        if (a === b) return true;
-        if (typeof a !== typeof b) return false;
-        if (typeof a === 'object' && a !== null) {
-            for (const j in a) {
-                if (j === 'statistics' || j === 'timeout') continue; // 忽略统计信息
-                const aa = a[j];
-                const bb = b[j];
-                if (!check(aa, bb)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        if (
-            typeof a === 'boolean' ||
-            typeof a === 'number' ||
-            typeof a === 'string' ||
-            typeof a === 'symbol' ||
-            typeof a === 'undefined' ||
-            typeof a === 'bigint' ||
-            a === null
-        ) {
-            return a === b;
-        }
-        return true;
-    };
-
-    for (let i = 0; i < local.length; i++) {
-        const a = local[i];
-        const b = rep[i];
-        if (!check(a, b)) return res.end('false');
-    }
-
-    res.end('true');
-}
-
-/**
- * 获取本地属性
- * @param {http.IncomingMessage} req
- * @param {http.ServerResponse<http.IncomingMessage> & {req: http.IncomingMessage;}} res
- */
-async function replayGet(req, res, dir) {
-    const ans = Number(await getPostData(req));
-
-    const data = await fs.readFile(
-        path.resolve(__dirname, `_replay/${dir}/${ans}.rep`)
-    );
-    res.end(data);
-}
-
-/**
- * 录像回放存档
- * @param {http.IncomingMessage} req
- * @param {http.ServerResponse<http.IncomingMessage> & {req: http.IncomingMessage;}} res
- */
-async function replaySave(req, res) {
-    const data = await getPostData(req);
-    const [cnt, save] = data.split('@-|-@');
-
-    if (isNaN(Number(cnt))) {
-        console.log('Invalid input of save cnt');
-        res.end('@error: 不合法的录像存档信息');
-    }
-
-    await fs.writeFile(
-        path.resolve(__dirname, `_replay/save/${cnt}.rep`),
-        save,
-        'utf-8'
-    );
-
-    res.end('success');
 }
 
 // ----- declaration
