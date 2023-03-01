@@ -39,6 +39,7 @@ import { exec } from 'child_process';
             })
         );
         await fse.remove('./dist/maps/');
+        // 编辑器需要留着吗？
     } catch {}
 
     // 2. 压缩字体

@@ -10,7 +10,7 @@
      * @param {FloorIds} floorId
      */
     function getHeroStatusOn(name, x, y, floorId) {
-        return this.getRealStatusOf(core.status.hero, name, x, y, floorId);
+        return getRealStatusOf(core.status.hero, name, x, y, floorId);
     }
 
     function getHeroStatusOf(status, name, x, y, floorId) {

@@ -237,6 +237,9 @@ interface PluginUis {
     /** 成就界面是否打开 */
     readonly achievementOpened: Ref<boolean>;
 
+    /** bgm界面是否打开 */
+    readonly bgmOpened: Ref<boolean>;
+
     /** ui栈 */
     readonly uiStack: Ref<any[]>;
 

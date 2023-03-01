@@ -46,10 +46,6 @@ function show(condition: string) {
 </script>
 
 <style lang="less" scoped>
-#desc-left {
-    flex-basis: 30%;
-}
-
 #desc-list {
     display: flex;
     flex-direction: column;
