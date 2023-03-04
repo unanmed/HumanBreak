@@ -280,12 +280,14 @@ function core() {
 /////////// 系统事件相关 ///////////
 
 ////// 初始化 //////
-core.prototype.init = function (coreData, callback) {
+core.prototype.init = async function (coreData, callback) {
     this._forwardFuncs();
     for (var key in coreData) core[key] = coreData[key];
     this._init_flags();
     this._init_platform();
     this._init_others();
+    await this._loadPlugin();
+
     var b = main.mode == 'editor';
     // 初始化画布
     for (var name in core.canvas) {
@@ -306,6 +308,26 @@ core.prototype.init = function (coreData, callback) {
             core._afterLoadResources(callback);
         });
     });
+};
+
+core.prototype._loadPlugin = async function () {
+    const mainData = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main;
+    core.plugin = {};
+    // 加载插件
+    if (!main.replayChecking && main.mode === 'play') {
+        main.forward();
+        core.resetSettings();
+        core.plugin.showMarkedEnemy.value = true;
+    }
+    if (main.pluginUseCompress) {
+        await main.loadScript(`project/plugin.min.js?v=${main.version}`);
+    } else {
+        for await (const plugin of mainData.plugin) {
+            await main.loadScript(
+                `project/plugin/${plugin}.js?v=${main.version}`
+            );
+        }
+    }
 };
 
 core.prototype._init_flags = function () {
