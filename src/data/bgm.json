@@ -1,9 +1,54 @@
-[
-    {
+{
+    "title.mp3": {
         "area": "标题",
         "name": "川井宪次 - 破裂足音",
         "from": "《永远的七日之都》",
         "img": "/project/images/bg.jpg",
         "desc": []
+    },
+    "cave.mp3": {
+        "area": "山洞",
+        "name": "Faodail - Wren",
+        "img": "",
+        "desc": []
+    },
+    "grass.mp3": {
+        "area": "草地",
+        "name": "大树 & 朱晨阳 - 大树与鹿",
+        "img": "",
+        "desc": []
+    },
+    "mount.mp3": {
+        "area": "山路",
+        "name": "Epistra - Dream Of A Dream",
+        "img": "",
+        "desc": []
+    },
+    "escape.mp3": {
+        "area": "山路追逐",
+        "name": "Gareth Coker - Escaping a Foul Presence",
+        "from": "《奥日与精灵意志》",
+        "img": "",
+        "desc": []
+    },
+    "plot1.mp3": {
+        "area": "勇气之路",
+        "name": "Mark Petrie & Danny McCarthy - Rags To Rings",
+        "img": "",
+        "desc": []
+    },
+    "tower.mp3": {
+        "area": "智慧之塔",
+        "name": "Falcom Sound Team J.D.K. - A Light Illuminating The Depth",
+        "from": "《英雄传说：零之轨迹》",
+        "img": "",
+        "desc": []
+    },
+    "beforeBoss.mp3": {
+        "area": "战前独白",
+        "name": "Evan LE NY - Some Calm",
+        "from": "《太空化学》",
+        "img": "",
+        "desc": []
     }
-]
+}

@@ -6,20 +6,20 @@
                     v-for="(bgm, i) of list"
                     class="selectable"
                     :selected="selected === i"
-                    @click="selected = i"
+                    @click="select(i)"
                 >
-                    {{ bgm.area }}
+                    {{ bgm!.area }}
                 </span>
             </div></template
         >
         <template #right
             ><div>
                 <div id="bgm-name">
-                    <img id="bgm-image" :src="list[selected].img" />
+                    <img id="bgm-image" :src="list[selected]!.img" />
                     <span>{{ name }}</span>
-                    <span v-if="list[selected].from"
+                    <span v-if="list[selected]!.from"
                         >出自&nbsp;&nbsp;&nbsp;&nbsp;{{
-                            list[selected].from
+                            list[selected]!.from
                         }}</span
                     >
                 </div>
@@ -41,17 +41,21 @@ interface Bgm {
     from?: string;
 }
 
-const list = bgm as Bgm[];
+const list = bgm as Partial<Record<BgmIds, Bgm>>;
 
-const selected = ref(0);
+const selected = ref<BgmIds>('title.mp3');
 
 const content = computed(() => {
-    return eval('`' + splitText(list[selected.value].desc) + '`');
+    return eval('`' + splitText(list[selected.value]!.desc) + '`');
 });
-const name = computed(() => list[selected.value].name);
+const name = computed(() => list[selected.value]!.name);
 
 function exit() {
     core.plugin.bgmOpened.value = false;
+}
+
+function select(id: BgmIds) {
+    selected.value = id;
 }
 </script>
 

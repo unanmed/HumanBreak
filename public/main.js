@@ -237,6 +237,7 @@ main.prototype.init = async function (mode, callback) {
         eval('`${123}`');
     } catch {
         alert('浏览器版本过低，无法游玩本塔！');
+        alert('建议使用Edge浏览器或Chrome浏览器游玩！');
         return;
     }
 
@@ -322,23 +323,6 @@ main.prototype.init = async function (mode, callback) {
     core.resize();
 
     main.core = core;
-
-    core.plugin = {};
-    // 加载插件
-    if (!main.replayChecking && main.mode === 'play') {
-        main.forward();
-        core.resetSettings();
-        core.plugin.showMarkedEnemy.value = true;
-    }
-    if (main.pluginUseCompress) {
-        await main.loadScript(`project/plugin.min.js?v=${main.version}`);
-    } else {
-        for await (const plugin of mainData.plugin) {
-            await main.loadScript(
-                `project/plugin/${plugin}.js?v=${main.version}`
-            );
-        }
-    }
 
     // 自动放缩最大化
     const auto = core.getLocalStorage('autoScale');
