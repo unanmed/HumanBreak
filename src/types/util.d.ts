@@ -890,3 +890,5 @@ type NonObjectOf<T> = SelectType<T, NonObject>;
 type EndsWith<T extends string> = `${string}${T}`;
 
 type KeyExcludesUnderline<T> = Exclude<keyof T, `_${string}`>;
+
+type ValueOf<T> = T[keyof T];

@@ -59,6 +59,13 @@ main.floors.MT42=
                 0,
                 13
             ]
+        },
+        "8,12": {
+            "floorId": "MT48",
+            "loc": [
+                3,
+                7
+            ]
         }
     },
     "beforeBattle": {},

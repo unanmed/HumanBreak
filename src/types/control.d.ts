@@ -751,8 +751,8 @@ interface Control {
      * @example core.getHeroLoc(); // 获取主角的位置和朝向
      * @param name 要读取横坐标还是纵坐标还是朝向还是都读取
      */
-    getHeroLoc(): Loc;
-    getHeroLoc<K extends keyof Loc>(name: K): Loc[K];
+    getHeroLoc(): DiredLoc;
+    getHeroLoc<K extends keyof DiredLoc>(name: K): DiredLoc[K];
 
     /**
      * 根据级别的数字获取对应的名称，后者定义在全塔属性

@@ -1,4 +1,4 @@
-import { Animation, sleep, TimingFn } from 'mutate-animate';
+import { Animation, circle, hyper, sleep, TimingFn } from 'mutate-animate';
 import { completeAchievement } from '../ui/achievement';
 import { has } from '../utils';
 import { ChaseCameraData, ChasePath, getChaseDataByIndex } from './data';

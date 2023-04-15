@@ -24,12 +24,16 @@ export interface Light {
     color: Color;
     /** 是否可以被物体遮挡 */
     noShelter?: boolean;
+    /** 是否跟随勇士 */
+    followHero?: boolean;
     /** 正在动画的属性 */
     _animating?: Record<string, boolean>;
     /** 执行渐变的属性 */
     _transition?: Record<string, TransitionInfo>;
     /** 表示是否是代理，只有设置渐变后才会变为true */
     _isProxy?: boolean;
+    /** 跟随勇士的时候的偏移量 */
+    _offset?: Loc;
 }
 
 export default function init() {
@@ -49,7 +53,8 @@ export default function init() {
         animateLight,
         transitionLight,
         moveLightAs,
-        getAllLights
+        getAllLights,
+        refreshLight
     };
 }
 
@@ -168,6 +173,13 @@ export function getAllLights() {
  */
 export function setBackground(color: Color) {
     background = color;
+    needRefresh = true;
+}
+
+/**
+ * 刷新灯光信息并重绘
+ */
+export function refreshLight() {
     needRefresh = true;
 }
 
@@ -416,12 +428,14 @@ export function drawShadow() {
     // 绘制阴影，一个光源一个光源地绘制，然后source-out获得光，然后把光叠加，再source-out获得最终阴影
     for (let i = 0; i < lights.length; i++) {
         const { x, y, r, decay, color, noShelter } = lights[i];
+        const rx = x + 32;
+        const ry = y + 32;
         // 绘制阴影
         ct1.clearRect(0, 0, w, h);
         ct2.clearRect(0, 0, w, h);
         if (!noShelter) {
             for (const polygon of shadowNodes) {
-                const area = polygon.shadowArea(x + 32, y + 32, r);
+                const area = polygon.shadowArea(rx, ry, r);
                 area.forEach(v => {
                     ct1.beginPath();
                     ct1.moveTo(v[0][0], v[0][1]);
@@ -439,21 +453,21 @@ export function drawShadow() {
         ct2.globalCompositeOperation = 'source-over';
         ct2.drawImage(temp1, 0, 0, w, h);
         ct2.globalCompositeOperation = 'source-out';
-        const gra = ct2.createRadialGradient(x, y, decay, x, y, r);
+        const gra = ct2.createRadialGradient(rx, ry, decay, rx, ry, r);
         gra.addColorStop(0, core.arrayToRGBA(color));
         gra.addColorStop(1, 'transparent');
         ct2.fillStyle = gra;
         ct2.beginPath();
-        ct2.arc(x, y, r, 0, Math.PI * 2);
+        ct2.arc(rx, ry, r, 0, Math.PI * 2);
         ct2.fill();
         ctx.drawImage(temp2, 0, 0, w, h);
         // 再绘制ct1的阴影，然后绘制到ct3叠加
         ct1.globalCompositeOperation = 'source-out';
-        const gra2 = ct1.createRadialGradient(x, y, decay, x, y, r);
+        const gra2 = ct1.createRadialGradient(rx, ry, decay, rx, ry, r);
         gra2.addColorStop(0, '#fff');
         gra2.addColorStop(1, '#fff0');
         ct1.beginPath();
-        ct1.arc(x, y, r, 0, Math.PI * 2);
+        ct1.arc(rx, ry, r, 0, Math.PI * 2);
         ct1.fillStyle = gra2;
         ct1.fill();
         // 绘制到ct3上

@@ -1,6 +1,8 @@
 import { Polygon } from './polygon';
 import {
     Light,
+    getAllLights,
+    refreshLight,
     removeAllLights,
     setBackground,
     setBlur,
@@ -9,29 +11,44 @@ import {
 } from './shadow';
 
 export default function init() {
+    const origin4 = control.prototype.drawHero;
+    control.prototype.drawHero = function () {
+        origin4.apply(core.control, arguments);
+        if (core.getFlag('__heroOpacity__') !== 0) {
+            getAllLights().forEach(v => {
+                if (!v.followHero) return;
+                v._offset ??= { x: v.x, y: v.y };
+                v.x = core.status.heroCenter.px + v._offset.x;
+                v.y = core.status.heroCenter.py + v._offset.y;
+                refreshLight();
+            });
+        }
+    };
+
     return { updateShadow, clearShadowCache, setCalShadow };
 }
 
 const shadowInfo: Partial<Record<FloorIds, Light[]>> = {
-    MT43: [
+    MT48: [
         {
-            id: 'mt42_1',
-            x: 280,
-            y: 220,
-            decay: 100,
-            r: 300,
-            color: '#0000'
+            id: 'mt48_1',
+            x: 0,
+            y: 0,
+            decay: 1000,
+            r: 2000,
+            color: '#0000',
+            followHero: true
         }
     ]
 };
 const backgroundInfo: Partial<Record<FloorIds, Color>> = {
-    MT43: '#0008'
+    MT48: '#0008'
 };
 const blurInfo: Partial<Record<FloorIds, number>> = {
-    MT43: 4
+    MT48: 4
 };
 const immersionInfo: Partial<Record<FloorIds, number>> = {
-    MT43: 8
+    MT48: 4
 };
 const shadowCache: Partial<Record<FloorIds, Polygon[]>> = {};
 

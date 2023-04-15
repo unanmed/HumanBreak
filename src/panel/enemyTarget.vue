@@ -3,7 +3,7 @@
         <div id="enemy-desc">
             <span>怪物描述</span>
             <Scroll id="enemy-desc-scroll">
-                <span>{{ enemy.description }}</span>
+                <span>&nbsp;&nbsp;&nbsp;&nbsp;{{ enemy.description }}</span>
             </Scroll>
         </div>
         <a-divider dashed style="border-color: #ddd4"></a-divider>
@@ -40,7 +40,7 @@ function mark() {
 <style lang="less" scoped>
 #enemy-target {
     width: 100%;
-    font-size: 2.5vh;
+    font-size: 2.8vh;
 }
 
 #enemy-desc {

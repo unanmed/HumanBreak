@@ -3,6 +3,7 @@ import fss from 'fs';
 import fse from 'fs-extra';
 import Fontmin from 'fontmin';
 import { exec } from 'child_process';
+import * as babel from '@babel/core';
 
 (async function () {
     // 1. 去除未使用的文件
@@ -100,7 +101,7 @@ import { exec } from 'child_process';
         exec(
             `babel ${data.main.plugin
                 .map(v => `./dist/project/plugin/${v}.js`)
-                .join(' ')} --out-file ./dist/project/plugin.min.js`
+                .join(' ')} --out-file ./dist/project/plugin.m.js`
         ).on('close', async () => {
             const main = await fs.readFile('./dist/main.js', 'utf-8');
             await fs.writeFile(
