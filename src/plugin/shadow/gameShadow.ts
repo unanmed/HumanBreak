@@ -1,7 +1,9 @@
+import { power } from 'mutate-animate';
 import { Polygon } from './polygon';
 import {
     Light,
     getAllLights,
+    moveLight,
     refreshLight,
     removeAllLights,
     setBackground,
@@ -25,7 +27,7 @@ export default function init() {
         }
     };
 
-    return { updateShadow, clearShadowCache, setCalShadow };
+    return { updateShadow, clearShadowCache, setCalShadow, testLight: test };
 }
 
 const shadowInfo: Partial<Record<FloorIds, Light[]>> = {
@@ -34,8 +36,8 @@ const shadowInfo: Partial<Record<FloorIds, Light[]>> = {
             id: 'mt48_1',
             x: 0,
             y: 0,
-            decay: 1000,
-            r: 2000,
+            decay: 0,
+            r: 300,
             color: '#0000',
             followHero: true
         }
@@ -95,16 +97,21 @@ export function updateShadow(nocache: boolean = false) {
                     const t: LocString = `${x},${y - 1}`;
                     const b: LocString = `${x},${y + 1}`;
 
-                    if (x === 0 || (blocks[l] && blocks[l].event.noPass)) {
+                    if (x === 0) left -= immerse * 2;
+                    if (x + 1 === w) right += immerse * 2;
+                    if (y === 0) top -= immerse * 2;
+                    if (y + 1 === h) bottom += immerse * 2;
+
+                    if (blocks[l] && blocks[l].event.noPass) {
                         left -= immerse;
                     }
-                    if (x + 1 === w || (blocks[r] && blocks[r].event.noPass)) {
+                    if (blocks[r] && blocks[r].event.noPass) {
                         right += immerse;
                     }
-                    if (y === 0 || (blocks[t] && blocks[t].event.noPass)) {
+                    if (blocks[t] && blocks[t].event.noPass) {
                         top -= immerse;
                     }
-                    if (y + 1 === h || (blocks[b] && blocks[b].event.noPass)) {
+                    if (blocks[b] && blocks[b].event.noPass) {
                         bottom += immerse;
                     }
                     nodes.push(
@@ -145,4 +152,8 @@ export function clearShadowCache(floorId: FloorIds) {
 export function setCalShadow(n: boolean) {
     calMapShadow = n;
     updateShadow();
+}
+
+function test() {
+    moveLight('mt48_1', 480, 48, 2000, power(4, 'in-out'));
 }
