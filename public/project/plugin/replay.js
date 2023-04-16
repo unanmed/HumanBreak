@@ -1,6 +1,6 @@
 ///<reference path="../../../src/types/core.d.ts" />
 
-import { studySkill, canStudySkill } from './study';
+import { studySkill, canStudySkill } from './study.js';
 
 const replayableSettings = ['autoSkill'];
 

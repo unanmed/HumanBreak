@@ -1,5 +1,5 @@
 ///<reference path="../../../src/types/core.d.ts" />
-import { slide } from './utils';
+import { slide } from './utils.js';
 
 const list = ['tower6'];
 

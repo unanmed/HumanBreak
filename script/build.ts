@@ -108,11 +108,6 @@ import * as rollup from 'rollup';
         const compressed = babel.transformSync(code.output[0].code)?.code!;
         await fs.writeFile('./dist/project/plugin.m.js', compressed, 'utf-8');
 
-        const main = await fs.readFile('./dist/main.js', 'utf-8');
-        main.replace(
-            /this.pluginUseCompress\s*=\s*false\;/,
-            'this.pluginUseCompress = true;'
-        );
         await fse.remove('./dist/project/plugin/');
     } catch (e) {
         console.log('压缩插件失败');
@@ -121,7 +116,11 @@ import * as rollup from 'rollup';
     // 4. 压缩main.js
     try {
         // 先获取不能压缩的部分
-        const main = await fs.readFile('./dist/main.js', 'utf-8');
+        const main = (await fs.readFile('./public/main.js', 'utf-8')).replace(
+            /this.pluginUseCompress\s*=\s*false\;/,
+            'this.pluginUseCompress = true;'
+        );
+
         const endIndex = main.indexOf('// >>>> body end');
         const nonCompress = main.slice(0, endIndex);
         const needCompress = main.slice(endIndex + 17);

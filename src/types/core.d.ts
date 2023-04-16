@@ -1267,7 +1267,7 @@ interface Main extends MainData {
      * 加载一个脚本
      * @param src 脚本路径
      */
-    loadScript(src: string): Promise<void>;
+    loadScript(src: string, module?: boolean): Promise<void>;
 
     /**
      * 动态加载js文件

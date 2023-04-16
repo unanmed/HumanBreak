@@ -1,21 +1,21 @@
-import './fiveLayer';
-import './heroFourFrames';
-import './hotReload';
-import './itemDetail';
-import './popup';
-import './replay';
-import './ui';
-import * as halo from './halo';
-import * as hero from './hero';
-import * as loopMap from './loopMap';
-import * as remainEnemy from './remainEnemy';
-import * as removeMap from './removeMap';
-import * as shop from './shop';
-import * as skill from './skills';
-import * as skillTree from './skillTree';
-import * as study from './study';
-import * as towerBoss from './towerBoss';
-import * as utils from './utils';
+import './fiveLayer.js';
+import './heroFourFrames.js';
+import './hotReload.js';
+import './itemDetail.js';
+import './popup.js';
+import './replay.js';
+import './ui.js';
+import * as halo from './halo.js';
+import * as hero from './hero.js';
+import * as loopMap from './loopMap.js';
+import * as remainEnemy from './remainEnemy.js';
+import * as removeMap from './removeMap.js';
+import * as shop from './shop.js';
+import * as skill from './skills.js';
+import * as skillTree from './skillTree.js';
+import * as study from './study.js';
+import * as towerBoss from './towerBoss.js';
+import * as utils from './utils.js';
 
 export {
     halo,
