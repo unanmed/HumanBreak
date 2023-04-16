@@ -1,5 +1,5 @@
 ///<reference path="../../../src/types/core.d.ts" />
-'use strict';
+export {};
 
 (function () {
     if (main.mode !== 'play' || main.replayChecking) return;

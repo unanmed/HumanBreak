@@ -1,5 +1,7 @@
 import { ref, watch } from 'vue';
 
+// todo 优化，可以考虑改成reactive
+
 /** 打开和关闭ui时是否展示动画 */
 export const transition = ref(false);
 

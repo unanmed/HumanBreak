@@ -24,6 +24,7 @@ specifiers:
   lodash: ^4.17.21
   lz-string: ^1.5.0
   mutate-animate: ^1.1.1
+  rollup: ^3.20.2
   terser: ^5.16.9
   three: ^0.149.0
   ts-node: ^10.9.1
@@ -61,10 +62,11 @@ devDependencies:
   form-data: 4.0.0
   fs-extra: 10.1.0
   less: 4.1.3
+  rollup: 3.20.2
   terser: 5.16.9
   ts-node: 10.9.1_o6avl3oodj6mwqsx3rm2wfkgv4
   typescript: 4.9.5
-  unplugin-vue-components: 0.22.12_vue@3.2.47
+  unplugin-vue-components: 0.22.12_rollup@3.20.2+vue@3.2.47
   vite: 4.2.1_lu7yuwtv4qfbkrotoux232iypi
   vue-tsc: 1.2.0_typescript@4.9.5
 
@@ -1620,7 +1622,7 @@ packages:
       rimraf: 3.0.2
     dev: true
 
-  /@rollup/pluginutils/5.0.2:
+  /@rollup/pluginutils/5.0.2_rollup@3.20.2:
     resolution: {integrity: sha512-pTd9rIsP92h+B6wWwFbW8RkZv4hiR/xKsqre4SIuAOaOEQRxi0lqLke9k2/7WegC85GgUs9pjmOjCUi3In4vwA==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
@@ -1632,6 +1634,7 @@ packages:
       '@types/estree': 1.0.0
       estree-walker: 2.0.2
       picomatch: 2.3.1
+      rollup: 3.20.2
     dev: true
 
   /@simonwep/pickr/1.8.2:
@@ -4399,7 +4402,7 @@ packages:
     engines: {node: '>= 10.0.0'}
     dev: true
 
-  /unplugin-vue-components/0.22.12_vue@3.2.47:
+  /unplugin-vue-components/0.22.12_rollup@3.20.2+vue@3.2.47:
     resolution: {integrity: sha512-FxyzsuBvMCYPIk+8cgscGBQ345tvwVu+qY5IhE++eorkyvA4Z1TiD/HCiim+Kbqozl10i4K+z+NCa2WO2jexRA==}
     engines: {node: '>=14'}
     peerDependencies:
@@ -4410,7 +4413,7 @@ packages:
         optional: true
     dependencies:
       '@antfu/utils': 0.7.2
-      '@rollup/pluginutils': 5.0.2
+      '@rollup/pluginutils': 5.0.2_rollup@3.20.2
       chokidar: 3.5.3
       debug: 4.3.4
       fast-glob: 3.2.12

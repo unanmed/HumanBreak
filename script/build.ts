@@ -2,8 +2,8 @@ import fs from 'fs/promises';
 import fss from 'fs';
 import fse from 'fs-extra';
 import Fontmin from 'fontmin';
-import { exec } from 'child_process';
 import * as babel from '@babel/core';
+import * as rollup from 'rollup';
 
 (async function () {
     // 1. 去除未使用的文件
@@ -40,7 +40,7 @@ import * as babel from '@babel/core';
             })
         );
         await fse.remove('./dist/maps/');
-        // 编辑器需要留着吗？
+        // 在线查看什么都看不到，这编辑器难道还需要留着吗？
     } catch {}
 
     // 2. 压缩字体
@@ -98,22 +98,23 @@ import * as babel from '@babel/core';
 
     // 3. 压缩js插件
     try {
-        exec(
-            `babel ${data.main.plugin
-                .map(v => `./dist/project/plugin/${v}.js`)
-                .join(' ')} --out-file ./dist/project/plugin.m.js`
-        ).on('close', async () => {
-            const main = await fs.readFile('./dist/main.js', 'utf-8');
-            await fs.writeFile(
-                './dist/main.js',
-                main.replace(
-                    /this.pluginUseCompress\s*=\s*false\;/,
-                    'this.pluginUseCompress = true;'
-                )
-            );
-            await fse.remove('./dist/project/plugin/');
+        const build = await rollup.rollup({
+            input: 'public/project/plugin/index.js'
         });
-    } catch {
+        const code = await build.generate({
+            format: 'iife',
+            name: 'CorePlugin'
+        });
+        const compressed = babel.transformSync(code.output[0].code)?.code!;
+        await fs.writeFile('./dist/project/plugin.m.js', compressed, 'utf-8');
+
+        const main = await fs.readFile('./dist/main.js', 'utf-8');
+        main.replace(
+            /this.pluginUseCompress\s*=\s*false\;/,
+            'this.pluginUseCompress = true;'
+        );
+        await fse.remove('./dist/project/plugin/');
+    } catch (e) {
         console.log('压缩插件失败');
     }
 
@@ -124,20 +125,8 @@ import * as babel from '@babel/core';
         const endIndex = main.indexOf('// >>>> body end');
         const nonCompress = main.slice(0, endIndex);
         const needCompress = main.slice(endIndex + 17);
-        await fs.writeFile('./dist/temp.js', needCompress, 'utf-8');
-        await fs.rm('./dist/main.js');
-        exec('babel ./dist/temp.js --out-file ./dist/main.js').on(
-            'close',
-            async () => {
-                const nowMain = await fs.readFile('./dist/main.js', 'utf-8');
-                await fs.writeFile(
-                    './dist/main.js',
-                    nonCompress + nowMain,
-                    'utf-8'
-                );
-                await fs.rm('./dist/temp.js');
-            }
-        );
+        const compressed = babel.transformSync(needCompress)?.code;
+        await fs.writeFile('./dist/main.js', nonCompress + compressed, 'utf-8');
     } catch {
         console.log('main.js压缩失败');
     }

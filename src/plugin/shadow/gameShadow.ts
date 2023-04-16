@@ -1,7 +1,8 @@
-import { power } from 'mutate-animate';
+import { hyper, power } from 'mutate-animate';
 import { Polygon } from './polygon';
 import {
     Light,
+    animateLight,
     getAllLights,
     moveLight,
     refreshLight,
@@ -27,7 +28,7 @@ export default function init() {
         }
     };
 
-    return { updateShadow, clearShadowCache, setCalShadow, testLight: test };
+    return { updateShadow, clearShadowCache, setCalShadow };
 }
 
 const shadowInfo: Partial<Record<FloorIds, Light[]>> = {
@@ -35,11 +36,10 @@ const shadowInfo: Partial<Record<FloorIds, Light[]>> = {
         {
             id: 'mt48_1',
             x: 0,
-            y: 0,
+            y: 48,
             decay: 0,
             r: 300,
-            color: '#0000',
-            followHero: true
+            color: '#0000'
         }
     ]
 };
@@ -152,8 +152,4 @@ export function clearShadowCache(floorId: FloorIds) {
 export function setCalShadow(n: boolean) {
     calMapShadow = n;
     updateShadow();
-}
-
-function test() {
-    moveLight('mt48_1', 480, 48, 2000, power(4, 'in-out'));
 }
