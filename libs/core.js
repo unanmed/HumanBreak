@@ -320,13 +320,12 @@ core.prototype._loadPlugin = async function () {
         core.plugin.showMarkedEnemy.value = true;
     }
     if (main.pluginUseCompress) {
-        await main.loadScript(`project/plugin.min.js?v=${main.version}`);
+        await main.loadScript(`project/plugin.m.js?v=${main.version}`);
     } else {
-        for await (const plugin of mainData.plugin) {
-            await main.loadScript(
-                `project/plugin/${plugin}.js?v=${main.version}`
-            );
-        }
+        await main.loadScript(
+            `project/plugin/index.js?v=${main.version}`,
+            true
+        );
     }
 };
 

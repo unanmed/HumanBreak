@@ -2568,7 +2568,7 @@ control.prototype._doSL_load = function (id, callback) {
             id == 'autoSave' ? id : 'save' + id,
             null,
             function (data) {
-                if (!main.replayChecking) {
+                if (!main.replayChecking && data) {
                     core.plugin.startOpened.value = false;
                     core.plugin.loaded.value = false;
                 }
