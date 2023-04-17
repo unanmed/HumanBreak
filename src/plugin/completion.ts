@@ -11,7 +11,7 @@ export default function init() {
 }
 
 export const floors: Record<number, FloorIds[]> = {
-    1: ['MT0', 'tower7']
+    1: ['MT0', 'MT0']
 };
 const achis: Record<number, Record<AchievementType, number[]>> = {
     1: {

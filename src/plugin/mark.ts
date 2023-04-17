@@ -71,7 +71,7 @@ export function getMarkInfo(id: EnemyIds, noMessage: boolean = false) {
             tip('success', `踩到了${core.material.enemys[id].name}的临界！`);
         }
         reached[info.nextCritical] = true;
-        const n = core.nextCriticals(id, 1, void 0, void 0, 'empty')[0]?.[0];
+        const n = core.nextCriticals(id, 1, void 0, void 0, 'MT0')[0]?.[0];
         const next = (n ?? 0) + core.status.hero.atk;
         info.nextCritical = next;
     }
@@ -86,8 +86,7 @@ export function checkMarkedEnemy(noMessage: boolean = false) {
     getMarkedEnemy().forEach(v => {
         getMarkInfo(v);
         const damage =
-            core.getDamageInfo(v, void 0, void 0, void 0, 'empty')?.damage ??
-            -1;
+            core.getDamageInfo(v, void 0, void 0, void 0, 'MT0')?.damage ?? -1;
         if (damage === -1) return;
         const info = enemyDamageInfo[v]!;
         const name = core.material.enemys[v].name;

@@ -3,7 +3,7 @@
         <div id="start-div">
             <img id="background" src="/project/images/bg.jpg" />
             <div id="start-main">
-                <div id="title">人类：开天辟地</div>
+                <div id="title">插件教学</div>
                 <div id="settings">
                     <div
                         id="sound"

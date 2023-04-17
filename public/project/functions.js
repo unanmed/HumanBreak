@@ -1174,7 +1174,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 return;
             }
 
-            const [x, y] = flags.mouseLoc;
+            const [x, y] = flags.mouseLoc ?? [0, 0];
             const mx = Math.round(x + core.bigmap.offsetX / 32);
             const my = Math.round(y + core.bigmap.offsetY / 32);
 

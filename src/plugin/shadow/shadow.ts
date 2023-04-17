@@ -54,7 +54,9 @@ export default function init() {
         transitionLight,
         moveLightAs,
         getAllLights,
-        refreshLight
+        refreshLight,
+        getLight,
+        moveLight
     };
 }
 
@@ -81,6 +83,7 @@ const transitionList: Record<string, Transition> = {};
 export function initShadowCanvas() {
     const w = core._PX_ ?? core.__PIXELS__;
     const h = core._PY_ ?? core.__PIXELS__;
+
     ctx = core.createCanvas('shadow', -32, -32, w + 64, h + 64, 55);
     canvas = ctx.canvas;
     const s = core.domStyle.scale * devicePixelRatio;
@@ -192,7 +195,7 @@ export function refreshLight() {
  * @param mode 动画方式，渐变函数，高级动画提供了大量内置的渐变函数
  * @param relative 相对方式，是绝对还是相对
  */
-export function animateLight<K extends Exclude<keyof Light, 'id'>>(
+export function animateLight<K extends SelectKey<Light, number>>(
     id: string,
     key: K,
     n: Light[K],

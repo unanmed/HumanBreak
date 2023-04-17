@@ -16,6 +16,7 @@ import gameShadow from './plugin/shadow/gameShadow';
 import achievement from './plugin/ui/achievement';
 import completion, { floors } from './plugin/completion';
 import path from './plugin/fx/path';
+import * as ani from 'mutate-animate';
 
 function forward() {
     const toForward: any[] = [
@@ -65,6 +66,11 @@ function forward() {
         const all = core.floorIds.slice(from, to + 1);
         floors[i + 1] = all;
     });
+
+    // @ts-ignore
+    core.plugin.ani = ani;
+    // @ts-ignore
+    core.plugin.shadow = shadow();
 }
 
 main.forward = forward;

@@ -4176,7 +4176,7 @@ control.prototype._resize_canvas = function (obj) {
             var ctx = core.dymCanvas[name],
                 canvas = ctx.canvas;
             var ratio = canvas.hasAttribute('isHD')
-                ? core.domStyle.ratio * devicePixelRatio
+                ? core.domStyle.scale * devicePixelRatio
                 : 1;
             canvas.style.width =
                 (canvas.width / ratio) * core.domStyle.scale + 'px';

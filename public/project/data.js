@@ -2,7 +2,6 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 {
 	"main": {
 		"floorIds": [
-			"empty",
 			"MT0",
 			"MT1",
 			"MT2",
@@ -13,66 +12,9 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"MT7",
 			"MT8",
 			"MT9",
-			"MT10",
-			"MT11",
-			"MT12",
-			"MT13",
-			"MT14",
-			"MT15",
-			"MT16",
-			"MT17",
-			"MT18",
-			"MT19",
-			"MT20",
-			"MT21",
-			"tower1",
-			"tower2",
-			"tower3",
-			"tower4",
-			"tower5",
-			"tower6",
-			"tower7",
-			"MT22",
-			"MT23",
-			"MT24",
-			"MT25",
-			"MT26",
-			"MT27",
-			"MT28",
-			"MT29",
-			"MT30",
-			"MT31",
-			"MT32",
-			"MT33",
-			"MT34",
-			"MT35",
-			"MT36",
-			"MT37",
-			"MT38",
-			"MT39",
-			"MT40",
-			"MT41",
-			"MT42",
-			"MT43",
-			"MT44",
-			"MT45",
-			"snowTown",
-			"snowShop",
-			"MT46",
-			"MT47",
-			"MT48",
-			"MT49",
-			"MT50"
+			"MT10"
 		],
-		"floorPartitions": [
-			[
-				"MT0",
-				"MT16"
-			],
-			[
-				"MT17"
-			]
-		],
+		"floorPartitions": [],
 		"images": [
 			"IQ.png",
 			"arrow.png",
@@ -111,70 +53,11 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"winskin3.png"
 		],
 		"tilesets": [
-			"magictower.png",
-			"043-Cave01.png",
-			"004-Mountain01.png",
-			"Map-Tower01.png",
-			"Caverna1.png",
-			"map-tower.png",
-			"winter1.png",
-			"snowTown.png",
-			"room.png"
+			"magictower.png"
 		],
-		"animates": [
-			"amazed",
-			"angry",
-			"angry2",
-			"bulb",
-			"emm",
-			"explosion1",
-			"explosion2",
-			"explosion3",
-			"explosion4",
-			"fire",
-			"focus",
-			"fret",
-			"hand",
-			"ice",
-			"jianji",
-			"luv",
-			"magicAtk",
-			"stone",
-			"sweat",
-			"sweat2",
-			"sword",
-			"zone"
-		],
-		"bgms": [
-			"beforeBoss.mp3",
-			"beforeNight.mp3",
-			"cave.mp3",
-			"escape.mp3",
-			"grass.mp3",
-			"mount.mp3",
-			"night.mp3",
-			"palaceNorth.mp3",
-			"palaceSouth.mp3",
-			"plot1.mp3",
-			"road.mp3",
-			"title.mp3",
-			"tower.mp3",
-			"towerBoss.mp3",
-			"towerBoss2.mp3",
-			"towerBoss3.mp3",
-			"winter.mp3",
-			"winterTown.mp3"
-		],
+		"animates": [],
+		"bgms": [],
 		"sounds": [
-			"008-System08.ogg",
-			"015-Jump01.ogg",
-			"050-Explosion03.ogg",
-			"051-Explosion04.ogg",
-			"087-Action02.ogg",
-			"094-Attack06.ogg",
-			"118-Fire02.ogg",
-			"119-Fire03.ogg",
-			"120-Ice01.ogg",
 			"arrow.mp3",
 			"attack.mp3",
 			"bomb.mp3",
@@ -335,9 +218,9 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		]
 	},
 	"firstData": {
-		"title": "人类：开天辟地",
-		"name": "HumanBreak",
-		"version": "Ver 2.7.3.1",
+		"title": "插件教学",
+		"name": "AncTePlugin",
+		"version": "Ver 1.0.0",
 		"floorId": "MT0",
 		"hero": {
 			"image": "hero1.png",
@@ -503,100 +386,10 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				"value": "true"
 			},
 			{
-				"type": "hideStatusBar"
-			},
-			{
-				"type": "setText",
-				"text": [
-					0,
-					0,
-					0,
-					1
-				],
-				"background": "winskin3.png",
-				"textfont": 20,
-				"time": 25,
-				"letterSpacing": 1
-			},
-			{
 				"type": "setGlobalAttribute",
 				"name": "font",
 				"value": "normal"
 			},
-			{
-				"type": "playSound",
-				"name": "paper.mp3"
-			},
-			"人类简史——起源篇",
-			{
-				"type": "playSound",
-				"name": "paper.mp3"
-			},
-			"在万物的发展中，任何物体都有它自己的发光点。",
-			{
-				"type": "playSound",
-				"name": "paper.mp3"
-			},
-			"人类，这个起初完全不起眼的种族，",
-			{
-				"type": "playSound",
-				"name": "paper.mp3"
-			},
-			"却在那一天发生了惊天的变动。",
-			{
-				"type": "playSound",
-				"name": "paper.mp3"
-			},
-			"那曾是一个不起眼的日子。",
-			{
-				"type": "playSound",
-				"name": "paper.mp3"
-			},
-			"直到一记闪电劈在了山上。",
-			{
-				"type": "playSound",
-				"name": "paper.mp3"
-			},
-			"山火蔓延，霎时间，茂密的树林已然变为了焦炭。",
-			{
-				"type": "playSound",
-				"name": "paper.mp3"
-			},
-			"山火的发生让野兽饥不择食，",
-			{
-				"type": "playSound",
-				"name": "paper.mp3"
-			},
-			"无数的人类被野兽硬生生拖走。",
-			{
-				"type": "playSound",
-				"name": "paper.mp3"
-			},
-			"那又是一个不起眼的日子，",
-			{
-				"type": "playSound",
-				"name": "paper.mp3"
-			},
-			"却让人类又一次发生了翻天地覆的变化。",
-			{
-				"type": "playSound",
-				"name": "paper.mp3"
-			},
-			"一位野蛮人，也是我们的主角，",
-			{
-				"type": "playSound",
-				"name": "paper.mp3"
-			},
-			"踏上了属于他的旅途。",
-			{
-				"type": "sleep",
-				"time": 1000
-			},
-			{
-				"type": "playSound",
-				"name": "paper.mp3"
-			},
-			"公元前8000年",
 			{
 				"type": "setText",
 				"text": [
@@ -606,11 +399,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 					1
 				],
 				"background": "winskin2.png",
-				"textfont": 20,
-				"time": 25
-			},
-			{
-				"type": "showStatusBar"
+				"textfont": 16
 			}
 		],
 		"shops": [

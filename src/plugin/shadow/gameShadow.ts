@@ -32,25 +32,105 @@ export default function init() {
 }
 
 const shadowInfo: Partial<Record<FloorIds, Light[]>> = {
-    MT48: [
+    MT1: [
         {
-            id: 'mt48_1',
+            id: 'mt1_1',
+            x: 112,
+            y: 208,
+            decay: 100,
+            r: 300,
+            color: '#0000'
+        },
+        {
+            id: 'mt1_2',
+            x: 240,
+            y: 336,
+            decay: 50,
+            r: 150,
+            color: '#0000',
+            noShelter: true
+        },
+        {
+            id: 'mt1_3',
+            x: 336,
+            y: 272,
+            decay: 50,
+            r: 200,
+            color: '#5bf3'
+        }
+    ],
+    MT2: [
+        {
+            id: 'mt2_1',
             x: 0,
-            y: 48,
-            decay: 0,
+            y: 0,
+            decay: 50,
+            r: 200,
+            color: '#0000',
+            followHero: true
+        }
+    ],
+    MT3: [
+        {
+            id: 'mt3_1',
+            x: 112,
+            y: 88,
+            decay: 50,
+            r: 200,
+            color: '#0000'
+        },
+        {
+            id: 'mt3_2',
+            x: 368,
+            y: 88,
+            decay: 50,
+            r: 400,
+            color: '#0000'
+        },
+        {
+            id: 'mt3_3',
+            x: 80,
+            y: 272,
+            decay: 50,
+            r: 300,
+            color: '#0000'
+        }
+    ],
+    MT4: [
+        {
+            id: 'mt4_1',
+            x: 80,
+            y: 240,
+            decay: 50,
+            r: 300,
+            color: '#0000'
+        }
+    ],
+    MT5: [
+        {
+            id: 'mt5_1',
+            x: 336,
+            y: 240,
+            decay: 50,
             r: 300,
             color: '#0000'
         }
     ]
 };
 const backgroundInfo: Partial<Record<FloorIds, Color>> = {
-    MT48: '#0008'
+    MT1: '#0008',
+    MT2: '#000',
+    MT3: '#000a',
+    MT4: '#000a',
+    MT5: '#000a'
 };
 const blurInfo: Partial<Record<FloorIds, number>> = {
-    MT48: 4
+    MT1: 3,
+    MT2: 3
 };
 const immersionInfo: Partial<Record<FloorIds, number>> = {
-    MT48: 4
+    MT1: 4,
+    MT2: 4
 };
 const shadowCache: Partial<Record<FloorIds, Polygon[]>> = {};
 

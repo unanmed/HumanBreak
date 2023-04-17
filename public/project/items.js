@@ -1161,7 +1161,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"name": "bgm查看器",
 		"canUseItemEffect": "true",
 		"text": "可以查看游戏内你已经听过的bgm，歌曲名格式：歌手——歌曲名",
-		"useItemEffect": "core.plugin.bgmOpened.value = true;"
+		"useItemEffect": ""
 	},
 	"I559": {
 		"cls": "constants",
