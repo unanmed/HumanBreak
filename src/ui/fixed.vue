@@ -87,7 +87,7 @@ async function calHeight() {
     if (core.plugin.fixedDetailOpened.value) {
         showFixed.value = false;
     }
-    main = document.getElementById('enemy-fixed') as HTMLDivElement;
+    updateMain();
     if (!main) return;
     const style = getComputedStyle(main);
     const h = parseFloat(style.height);
@@ -106,10 +106,19 @@ function getLabel(attr: keyof DetailedEnemy) {
     return core.getStatusLabel(attr);
 }
 
+function updateMain() {
+    main = document.getElementById('enemy-fixed') as HTMLDivElement;
+    if (main) {
+        main.addEventListener('mouseleave', () => {
+            showFixed.value = false;
+        });
+    }
+}
+
 onUpdated(calHeight);
 
 onMounted(() => {
-    main = document.getElementById('enemy-fixed') as HTMLDivElement;
+    updateMain();
     calHeight();
 });
 </script>

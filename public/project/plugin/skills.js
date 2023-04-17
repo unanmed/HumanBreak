@@ -28,7 +28,6 @@ const jumpIgnoreFloor = [
     'MT38',
     'MT39',
     'MT40',
-    'MT41',
     'MT42',
     'MT43',
     'MT44',
