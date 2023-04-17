@@ -20,7 +20,20 @@ var ignoreInJump = {
 };
 
 /** @type {FloorIds[]} */
-const jumpIgnoreFloor = ['MT31', 'snowTown'];
+const jumpIgnoreFloor = [
+    'MT31',
+    'snowTown',
+    'MT36',
+    'MT37',
+    'MT38',
+    'MT39',
+    'MT40',
+    'MT41',
+    'MT42',
+    'MT43',
+    'MT44',
+    'MT45'
+];
 // 跳跃
 export function jumpSkill() {
     if (core.status.floorId.startsWith('tower'))
