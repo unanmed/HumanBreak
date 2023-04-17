@@ -123,6 +123,13 @@ main.floors.snowTown=
                 7,
                 14
             ]
+        },
+        "18,0": {
+            "floorId": "MT45",
+            "loc": [
+                3,
+                14
+            ]
         }
     },
     "beforeBattle": {},
