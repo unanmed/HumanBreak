@@ -870,8 +870,7 @@ actions.prototype._getClickLoc = function (x, y) {
         statusBar.y =
             core.dom.statusBar.offsetHeight +
             3 +
-            32 * core.values.statusCanvasRowsOnMobile +
-            9;
+            32 * core.values.statusCanvasRowsOnMobile;
     } else {
         statusBar.x = core.dom.statusBar.offsetWidth + 3;
         statusBar.y = 3;
