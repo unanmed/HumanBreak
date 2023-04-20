@@ -941,7 +941,7 @@ interface HeroStatus {
     /**
      * 勇士当前的位置
      */
-    loc: Loc;
+    loc: DiredLoc;
 
     /**
      * 当前的变量

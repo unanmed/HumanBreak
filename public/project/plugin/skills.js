@@ -45,20 +45,14 @@ export function jumpSkill() {
     if (!flags.skill2) return;
     if (!flags['jump_' + core.status.floorId])
         flags['jump_' + core.status.floorId] = 0;
-    if (
-        core.status.floorId == 'MT14' &&
-        flags['jump_' + core.status.floorId] == 2 &&
-        !flags.MT14Jump
-    ) {
-        if (
-            !(
-                core.status.hero.loc.x === 77 &&
-                core.status.hero.loc.y === 5 &&
-                core.status.hero.loc.direction === 'right'
-            )
-        ) {
+    if (core.status.floorId == 'MT14') {
+        const loc = core.status.hero.loc;
+        if (loc.x === 77 && loc.y === 5) {
+            flags.MT14Jump = true;
+        }
+        if (flags.jump_MT14 === 2 && !flags.MT14Jump) {
             return core.drawTip('该地图还有一个必跳的地方，你还没有跳');
-        } else flags.MT14Jump = true;
+        }
     }
     if (flags['jump_' + core.status.floorId] >= 3)
         return core.drawTip('当前地图使用次数已用完');
