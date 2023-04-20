@@ -231,8 +231,8 @@ main.prototype.loadScript = async function (src, module) {
 
 main.prototype.init = async function (mode, callback) {
     try {
-        var a = {};
-        var b = {};
+        const a = {};
+        const b = {};
         new Proxy(a, b);
         new Promise(res => res());
         eval('`${123}`');

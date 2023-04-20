@@ -1,7 +1,7 @@
 ///<reference path="../../../src/types/core.d.ts" />
 export {};
 
-(function () {
+/* @__PURE__ */ (function () {
     if (main.mode !== 'play' || main.replayChecking) return;
 
     /**

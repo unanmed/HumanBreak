@@ -41,6 +41,9 @@ import * as rollup from 'rollup';
         );
         await fse.remove('./dist/maps/');
         // 在线查看什么都看不到，这编辑器难道还需要留着吗？
+        await fse.remove('./dist/_server');
+        await fse.remove('./dist/editor.html');
+        await fse.remove('./dist/server.cjs');
     } catch {}
 
     // 2. 压缩字体
