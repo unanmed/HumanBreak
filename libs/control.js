@@ -1654,9 +1654,16 @@ control.prototype._updateDamage_extraDamage = function (floorId, onMap) {
                 });
             } else {
                 // 电摇嘲讽
-                if (core.status.checkBlock.mockery[x + ',' + y]) {
+                const mockery = core.status.checkBlock.mockery[x + ',' + y];
+                if (mockery) {
+                    mockery.sort((a, b) =>
+                        a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]
+                    );
+                    const [tx, ty] = mockery[0];
+                    const dir =
+                        x > tx ? '←' : x < tx ? '→' : y > ty ? '↑' : '↓';
                     core.status.damage.extraData.push({
-                        text: '嘲',
+                        text: '嘲' + dir,
                         px: 32 * x + 16,
                         py: 32 * (y + 1) - 14,
                         color: '#fd4',
