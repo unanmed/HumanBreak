@@ -1050,8 +1050,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "items",
 		"name": "新物品",
 		"text": "，防御+${core.values.blueGem}",
-		"itemEffect": "core.status.hero.def += 8 * core.status.thisMap.ratio",
-		"itemEffectTip": "，防御+${8 * core.status.thisMap.ratio}",
+		"itemEffect": "core.status.hero.mdef += 640 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.plugin.skillTree.getSkillLevel(11) / 20 + 1)",
+		"itemEffectTip": "，智慧+${640 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.plugin.skillTree.getSkillLevel(11) / 20 + 1)}",
 		"useItemEffect": "core.status.hero.def += core.values.blueGem",
 		"canUseItemEffect": "true"
 	},

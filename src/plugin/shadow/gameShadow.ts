@@ -31,27 +31,10 @@ export default function init() {
     return { updateShadow, clearShadowCache, setCalShadow };
 }
 
-const shadowInfo: Partial<Record<FloorIds, Light[]>> = {
-    MT48: [
-        {
-            id: 'mt48_1',
-            x: 0,
-            y: 48,
-            decay: 0,
-            r: 300,
-            color: '#0000'
-        }
-    ]
-};
-const backgroundInfo: Partial<Record<FloorIds, Color>> = {
-    MT48: '#0008'
-};
-const blurInfo: Partial<Record<FloorIds, number>> = {
-    MT48: 4
-};
-const immersionInfo: Partial<Record<FloorIds, number>> = {
-    MT48: 4
-};
+const shadowInfo: Partial<Record<FloorIds, Light[]>> = {};
+const backgroundInfo: Partial<Record<FloorIds, Color>> = {};
+const blurInfo: Partial<Record<FloorIds, number>> = {};
+const immersionInfo: Partial<Record<FloorIds, number>> = {};
 const shadowCache: Partial<Record<FloorIds, Polygon[]>> = {};
 
 let calMapShadow = true;

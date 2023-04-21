@@ -693,7 +693,53 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				"need": "25000",
 				"title": "中级智人",
 				"clear": true,
-				"action": []
+				"action": [
+					{
+						"type": "setValue",
+						"name": "status:mdef",
+						"operator": "+=",
+						"value": "2000"
+					},
+					{
+						"type": "setValue",
+						"name": "status:atk",
+						"operator": "+=",
+						"value": "25"
+					},
+					{
+						"type": "setValue",
+						"name": "status:def",
+						"operator": "+=",
+						"value": "25"
+					},
+					"恭喜升级！攻防+25，智慧+2000！"
+				]
+			},
+			{
+				"need": "100000",
+				"title": "中级智人",
+				"clear": true,
+				"action": [
+					{
+						"type": "setValue",
+						"name": "status:mdef",
+						"operator": "+=",
+						"value": "2000"
+					},
+					{
+						"type": "setValue",
+						"name": "status:atk",
+						"operator": "+=",
+						"value": "25"
+					},
+					{
+						"type": "setValue",
+						"name": "status:def",
+						"operator": "+=",
+						"value": "25"
+					},
+					"恭喜升级！攻防+25，智慧+2000！"
+				]
 			}
 		]
 	},

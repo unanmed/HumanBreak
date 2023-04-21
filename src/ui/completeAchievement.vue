@@ -44,7 +44,7 @@ const point = achi.point;
 
 const nowPoint = getNowPoint() - point;
 const now = ref(nowPoint);
-const progress = computed(() => now.value / totalPoint);
+const progress = computed(() => Math.floor(now.value / totalPoint));
 
 onMounted(async () => {
     await sleep(500);

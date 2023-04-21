@@ -132,7 +132,7 @@ import { isMobile } from '../plugin/use';
 import { has } from '../plugin/utils';
 
 const width = ref(
-    isMobile ? window.innerWidth - 100 : window.innerWidth * 0.175
+    isMobile ? window.innerWidth - 60 : window.innerWidth * 0.175
 );
 const height = ref(isMobile ? 250 : window.innerHeight - 100);
 const updateStatus = ref(false);

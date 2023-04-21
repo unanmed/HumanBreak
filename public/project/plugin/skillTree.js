@@ -130,7 +130,7 @@ const skills = {
                 '<span style="color: gold">主动技能，快捷键3</span>，',
                 '减少一定的攻击，增加一定的防御'
             ],
-            consume: '500 * level + 1000',
+            consume: '1000 * level ** 2 + 1000',
             front: [[9, 5]],
             loc: [2, 5],
             max: 5,
@@ -144,7 +144,7 @@ const skills = {
                 '<span style="color: gold">主动技能</span>，可以消耗500智慧学习一个怪物的技能，',
                 '持续5场战斗，每学习一次消耗的智慧点增加250，每次升级使持续的战斗次数增加3次。更多信息可在学习后在百科全书查看。'
             ],
-            consume: '2500 * level ** 2 + 2500',
+            consume: '2500 * 2 ** level + 5000',
             front: [
                 [8, 10],
                 [12, 5]
@@ -215,13 +215,10 @@ export function getSkillLevel(skill) {
 
 export function getSkillConsume(skill) {
     return eval(
-        this.getSkillFromIndex(skill).consume.replace(
-            /level(:\d+)?/g,
-            (str, $1) => {
-                if ($1) return `core.plugin.skillTree.getSkillLevel(${$1})`;
-                else return `core.plugin.skillTree.getSkillLevel(${skill})`;
-            }
-        )
+        getSkillFromIndex(skill).consume.replace(/level(:\d+)?/g, (str, $1) => {
+            if ($1) return `core.plugin.skillTree.getSkillLevel(${$1})`;
+            else return `core.plugin.skillTree.getSkillLevel(${skill})`;
+        })
     );
 }
 

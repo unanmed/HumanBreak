@@ -69,11 +69,11 @@ main.floors.MT41=
             "你竟然能发现这里？！",
             "那我就送你回到标题界面吧！",
             {
-                "type": "restart"
-            },
-            {
                 "type": "function",
                 "function": "function(){\ncore.completeAchievement('explore', 3);\n}"
+            },
+            {
+                "type": "restart"
             }
         ]
     },

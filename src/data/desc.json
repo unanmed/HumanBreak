@@ -429,6 +429,15 @@
             "<span style=\"color: gold\">调试模式下无法完成成就！</span>"
         ]
     },
+    "score": {
+        "text": "计分方式",
+        "condition": "true",
+        "desc": [
+            "第一章计分方式：血量 + 黄 * 5000 + 蓝 * 15000",
+            "<br>",
+            "第二章计分方式：血量 / 10 + 黄 * 2000 + 蓝 * 5000 + 红 * 10000"
+        ]
+    },
     "skillTree": {
         "text": "技能树",
         "condition": "flags.chapter > 0",

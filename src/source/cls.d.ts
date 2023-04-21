@@ -617,6 +617,8 @@ interface IdToCls {
     X70050: 'tileset';
     X70056: 'tileset';
     X70058: 'tileset';
+    X70059: 'tileset';
+    X70060: 'tileset';
     X70064: 'tileset';
     X70065: 'tileset';
     X70066: 'tileset';

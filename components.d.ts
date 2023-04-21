@@ -11,7 +11,6 @@ declare module '@vue/runtime-core' {
     AProgress: typeof import('ant-design-vue/es')['Progress']
     ASelect: typeof import('ant-design-vue/es')['Select']
     ASelectOption: typeof import('ant-design-vue/es')['SelectOption']
-    ASlider: typeof import('ant-design-vue/es')['Slider']
     ASwitch: typeof import('ant-design-vue/es')['Switch']
     Box: typeof import('./src/components/box.vue')['default']
     BoxAnimate: typeof import('./src/components/boxAnimate.vue')['default']
