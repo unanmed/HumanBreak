@@ -140,6 +140,7 @@ const skills = {
             index: 11,
             title: '学习',
             desc: [
+                '<span style="color: lightcoral">当前版本此技能无效！</span>',
                 '<span style="color: gold">主动技能</span>，可以消耗500智慧学习一个怪物的技能，',
                 '持续5场战斗，每学习一次消耗的智慧点增加250，每次升级使持续的战斗次数增加3次。更多信息可在学习后在百科全书查看。'
             ],

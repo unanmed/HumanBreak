@@ -224,8 +224,9 @@ main.prototype.loadScript = async function (src, module) {
     script.src = src;
     if (module) script.type = 'module';
     document.body.appendChild(script);
-    await new Promise(res => {
+    await new Promise((res, rej) => {
         script.addEventListener('load', res);
+        script.addEventListener('error', rej);
     });
 };
 
@@ -285,21 +286,27 @@ main.prototype.init = async function (mode, callback) {
         await main.loadScript(`project/floors.min.js?v=${main.version}`);
         main.dom.mainTips.style.display = 'none';
     } else {
-        try {
-            await main.loadScript(
+        await new Promise(res => {
+            main.loadScript(
                 `/all/__all_floors__.js?v=${
                     main.version
                 }&id=${main.floorIds.join(',')}`
+            ).then(
+                () => {
+                    main.dom.mainTips.style.display = 'none';
+                    main.supportBunch = true;
+                    res();
+                },
+                async () => {
+                    await Promise.all(
+                        mainData.floorIds.map(v =>
+                            main.loadScript(`project/floors/${v}.js`)
+                        )
+                    );
+                    res();
+                }
             );
-            main.dom.mainTips.style.display = 'none';
-            main.supportBunch = true;
-        } catch {
-            await Promise.all(
-                mainData.floorIds.map(v =>
-                    main.loadScript(`project/floors/${v}.js`)
-                )
-            );
-        }
+        });
     }
 
     // 初始化core

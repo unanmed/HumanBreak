@@ -165,14 +165,10 @@ type SoundIds =
 
 type BgmIds =
     | 'beforeBoss.mp3'
-    | 'beforeNight.mp3'
     | 'cave.mp3'
     | 'escape.mp3'
     | 'grass.mp3'
     | 'mount.mp3'
-    | 'night.mp3'
-    | 'palaceNorth.mp3'
-    | 'palaceSouth.mp3'
     | 'plot1.mp3'
     | 'road.mp3'
     | 'title.mp3'
