@@ -303,6 +303,7 @@ main.prototype.init = async function (mode, callback) {
                             main.loadScript(`project/floors/${v}.js`)
                         )
                     );
+                    main.dom.mainTips.style.display = 'none';
                     res();
                 }
             );
