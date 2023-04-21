@@ -219,7 +219,7 @@ function main() {
 }
 // >>>> body end
 
-main.prototype.loadScript = function (src, module) {
+main.prototype.loadScript = async function (src, module) {
     const script = document.createElement('script');
     script.src = src;
     if (module) script.type = 'module';
