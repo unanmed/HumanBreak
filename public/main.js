@@ -334,29 +334,28 @@ main.prototype.init = async function (mode, callback) {
     main.core = core;
 
     // 自动放缩最大化
-    const auto = core.getLocalStorage('autoScale');
+    let auto = core.getLocalStorage('autoScale');
     if (auto == null) {
         core.setLocalStorage('autoScale', true);
+        auto = true;
     }
     if (auto && !core.domStyle.isVertical) {
         try {
             core.plugin.utils.maxGameScale();
-            if (!core.getLocalStorage('fullscreen', false)) {
-                requestAnimationFrame(() => {
-                    var style = getComputedStyle(main.dom.gameGroup);
-                    var height = parseFloat(style.height);
-                    if (height > window.innerHeight * 0.95) {
-                        core.control.setDisplayScale(-1);
-                        if (!core.isPlaying() && core.flags.enableHDCanvas) {
-                            core.domStyle.ratio = Math.max(
-                                window.devicePixelRatio || 1,
-                                core.domStyle.scale
-                            );
-                            core.resize();
-                        }
+            requestAnimationFrame(() => {
+                var style = getComputedStyle(main.dom.gameGroup);
+                var height = parseFloat(style.height);
+                if (height > window.innerHeight * 0.95) {
+                    core.control.setDisplayScale(-1);
+                    if (!core.isPlaying() && core.flags.enableHDCanvas) {
+                        core.domStyle.ratio = Math.max(
+                            window.devicePixelRatio || 1,
+                            core.domStyle.scale
+                        );
+                        core.resize();
                     }
-                });
-            }
+                }
+            });
         } catch {}
     }
 };
