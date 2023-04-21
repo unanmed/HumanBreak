@@ -290,6 +290,8 @@ function openStudy() {}
 #status-spring {
     line-height: 0;
     color: rgb(167, 255, 167);
+    top: 0;
+    font-size: 1.4vw;
 }
 
 #status-key {

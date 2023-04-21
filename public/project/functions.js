@@ -926,57 +926,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
 
             // 勇士位置应该在这里进行计算，四个位置依次遍历，去重
             let toMap = [];
-            if (
-                core.has(x) &&
-                core.has(y) &&
-                !(core.has(hero?.x) && core.has(hero?.y)) &&
-                core.has(floorId) &&
-                flags.autoLocate &&
-                flags.chapter >= 2
-            ) {
-                const floor = core.status.maps[floorId];
-                // 存在坐标，进行遍历
-                for (const [dir, { x: dx, y: dy }] of Object.entries(
-                    core.utils.scan
-                )) {
-                    // 只有攻击和防御和特殊光环需要注意，其他的都不会随楼层与坐标变化
-                    const nx = x + dx;
-                    const ny = y + dy;
-                    if (
-                        nx < 0 ||
-                        nx >= floor.width ||
-                        ny < 0 ||
-                        ny >= floor.height
-                    ) {
-                        continue;
-                    }
-                    if (
-                        core.noPass(nx, ny) ||
-                        !core.canMoveHero(nx, ny, backDir(dir), floorId)
-                    ) {
-                        continue;
-                    }
-                    const toGet = ['atk', 'def'];
-                    const status = core.plugin.hero.getHeroStatusOf(
-                        hero,
-                        toGet,
-                        nx,
-                        ny,
-                        floorId
-                    );
-                    if (
-                        toMap.some(v =>
-                            toGet.every(vv => v[1][vv] === status[vv])
-                        )
-                    ) {
-                        continue;
-                    }
-                    toMap.push(dir);
-                }
-            } else {
-                // 指定了勇士坐标或者没有怪物坐标时
-                toMap = ['none'];
-            }
+
+            // 指定了勇士坐标或者没有怪物坐标时
+            toMap = ['none'];
 
             function getDamage(h) {
                 const enemyInfo = core.getEnemyInfo(enemy, hero, x, y, floorId);
