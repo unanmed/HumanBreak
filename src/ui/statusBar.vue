@@ -145,7 +145,7 @@ const hero = shallowReactive<Partial<HeroStatus>>({});
 const keys = shallowReactive<number[]>([]);
 const floor = ref<string>();
 const lvName = ref<string>();
-const skill = ref<string>('无');
+const skill = ref<string>(flags.autoSkill ? '自动切换' : '无');
 const up = ref(0);
 const spring = ref<number>();
 const skillOpened = ref(core.getFlag('chapter', 0) > 0);
@@ -179,12 +179,16 @@ function update() {
     keys[2] = core.itemCount('redKey');
     floor.value = core.status.thisMap?.title;
     lvName.value = core.getLvName(hero.lv);
-    if (flags.blade && flags.bladeOn) {
-        skill.value = '断灭之刃';
-    } else if (flags.shield && flags.shieldOn) {
-        skill.value = '铸剑为盾';
+    if (flags.autoSkill) {
+        skill.value = '自动切换';
     } else {
-        skill.value = '无';
+        if (flags.blade && flags.bladeOn) {
+            skill.value = '断灭之刃';
+        } else if (flags.shield && flags.shieldOn) {
+            skill.value = '铸剑为盾';
+        } else {
+            skill.value = '无';
+        }
     }
     up.value = core.getNextLvUpNeed() ?? 0;
     if (core.hasFlag('spring')) {
