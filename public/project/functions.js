@@ -1222,7 +1222,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     core.actions._clickGameInfo_openComments();
                     break;
                 case 49: // 1: 断灭之刃
-                    if (!flags.bladeOn || flags.autoSkill) break;
+                    if (!flags.bladeOn) break;
+                    if (!flags.autoSkill) {
+                        core.tip('error', '已开启自动切换技能！');
+                        break;
+                    }
                     core.status.route.push('key:49'); // 将按键记在录像中
                     core.playSound('光标移动');
                     if (flags.blade) flags.blade = false;
@@ -1245,8 +1249,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     }
                     break;
                 case 51: // 3: 铸剑为盾
-                    if (!flags.shieldOn || flags.autoSkill) break;
-                    console.log(1);
+                    if (!flags.shieldOn) break;
+                    if (!flags.autoSkill) {
+                        core.tip('error', '已开启自动切换技能！');
+                        break;
+                    }
                     core.status.route.push('key:51'); // 将按键记在录像中
                     core.playSound('光标移动');
                     if (flags.shield) flags.shield = false;

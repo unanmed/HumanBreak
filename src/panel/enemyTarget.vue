@@ -33,7 +33,7 @@ const marked = ref(hasMarkedEnemy(enemy.id));
 function mark() {
     if (marked.value) unmarkEnemy(enemy.id);
     if (!marked.value) markEnemy(enemy.id);
-    marked.value = !marked.value;
+    marked.value = hasMarkedEnemy(enemy.id);
 }
 </script>
 

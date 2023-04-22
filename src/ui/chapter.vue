@@ -41,8 +41,8 @@ onMounted(async () => {
     can.style.width = `${window.innerWidth}px`;
     can.style.height = `${window.innerHeight}px`;
     text.style.left = `${w + 10}px`;
-    text.style.top = `${window.innerHeight / 2 - h * 0.025}px`;
-    text.style.height = `${h * 0.05}px`;
+    text.style.top = `47.5vh`;
+    text.style.height = `5vh`;
     text.style.width = `${textWidth}px`;
 
     let soundPlayed = false;

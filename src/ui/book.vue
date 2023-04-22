@@ -161,7 +161,10 @@ function keyup(e: KeyboardEvent) {
     if (c === KeyCode.KeyX || c === KeyCode.Escape) {
         exit();
     }
-    if (c === KeyCode.Enter && !detail.value) {
+    if (
+        (c === KeyCode.Enter || c === KeyCode.KeyC || c === KeyCode.Space) &&
+        !detail.value
+    ) {
         select(enemy[selected.value], selected.value);
     }
 }
