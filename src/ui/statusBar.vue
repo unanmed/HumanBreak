@@ -208,7 +208,7 @@ function update() {
     jumpCnt.value =
         flags.skill2 &&
         !core.plugin.skillEffects.jumpIgnoreFloor.includes(core.status.floorId)
-            ? 3 - flags[`jump_${core.status.floorId}`]
+            ? 3 - (flags[`jump_${core.status.floorId}`] ?? 0)
             : void 0;
 }
 
