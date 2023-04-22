@@ -115,7 +115,7 @@ function core() {
         width: main.mode == 'editor' ? this.__SIZE__ : this._WIDTH_, // map width and height
         height: main.mode == 'editor' ? this.__SIZE__ : this._HEIGHT_,
         v2: false,
-        threshold: 1024,
+        threshold: 512,
         extend: 10,
         scale: 1.0,
         tempCanvas: null, // A temp canvas for drawing
