@@ -193,6 +193,8 @@ function update() {
     up.value = core.getNextLvUpNeed() ?? 0;
     if (core.hasFlag('spring')) {
         spring.value = 50 - flags.springCount;
+    } else {
+        spring.value = void 0;
     }
     skillOpened.value = core.getFlag('chapter', 0) > 0;
     studyOpened.value = core.plugin.skillTree.getSkillLevel(11) > 0;

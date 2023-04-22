@@ -545,7 +545,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                         return (
                             '战斗前，怪物偷取勇士' +
                             (enemy.hungry || 0) +
-                            '%加在自己身上（勇士攻击也会降低）'
+                            '%的攻击加在自己身上（勇士攻击也会降低）'
                         );
                     },
                     '#b67'
@@ -1224,7 +1224,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     break;
                 case 49: // 1: 断灭之刃
                     if (!flags.bladeOn) break;
-                    if (!flags.autoSkill) {
+                    if (flags.autoSkill) {
                         core.tip('error', '已开启自动切换技能！');
                         break;
                     }
@@ -1251,7 +1251,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     break;
                 case 51: // 3: 铸剑为盾
                     if (!flags.shieldOn) break;
-                    if (!flags.autoSkill) {
+                    if (flags.autoSkill) {
                         core.tip('error', '已开启自动切换技能！');
                         break;
                     }
