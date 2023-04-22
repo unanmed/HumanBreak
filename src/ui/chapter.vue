@@ -41,8 +41,6 @@ onMounted(async () => {
     can.style.width = `${window.innerWidth}px`;
     can.style.height = `${window.innerHeight}px`;
     text.style.left = `${w + 10}px`;
-    text.style.top = `47.5vh`;
-    text.style.height = `5vh`;
     text.style.width = `${textWidth}px`;
 
     let soundPlayed = false;
@@ -128,16 +126,19 @@ onMounted(async () => {
     left: 0;
     top: 0;
     user-select: none;
+    display: flex;
+    align-items: center;
 }
 
 #chapter-back {
+    position: fixed;
     width: 100%;
     height: 100%;
 }
 
 #chapter-text {
-    position: fixed;
-    font-family: 'scroll';
+    position: relative;
+    font-family: 'normal';
     font-size: 5vh;
     text-shadow: 0px 0px 5px #fff;
 }
