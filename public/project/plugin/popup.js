@@ -81,7 +81,8 @@ function checkMockery(loc, force) {
                         'autotile',
                         'tileset',
                         'npcs',
-                        'npc48'
+                        'npc48',
+                        'terrains'
                     ].includes(block.event.cls)
                 ) {
                     action.push(

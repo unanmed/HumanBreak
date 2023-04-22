@@ -266,6 +266,7 @@ function exit() {
 
     .list-text {
         font-size: 2.5vh;
+        padding: 0 20px;
     }
 
     .list-end {
