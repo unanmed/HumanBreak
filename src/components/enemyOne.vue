@@ -2,7 +2,7 @@
     <div
         class="enemy-container"
         @click="select"
-        @mouseenter="enter"
+        @mousemove="enter"
         :selected="selected"
     >
         <div class="info">
@@ -174,7 +174,6 @@ function enter() {
     }
 }
 
-.enemy-container:hover,
 .enemy-container[selected='true'] {
     border: 1.5px solid gold;
 }
