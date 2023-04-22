@@ -58,14 +58,14 @@
                         useFixed ? 'ON' : 'OFF'
                     }}</span
                 >
-                <span
+                <!-- <span
                     class="selectable"
                     :selected="selected === 'autoLocate'"
                     @click="click('autoLocate')"
                     >勇士自动定位:&nbsp;&nbsp;&nbsp;{{
                         autoLocate ? 'ON' : 'OFF'
                     }}</span
-                >
+                > -->
                 <span
                     class="selectable"
                     :selected="selected === 'antiAliasing'"
@@ -74,7 +74,7 @@
                         antiAliasing ? 'ON' : 'OFF'
                     }}</span
                 >
-                <span
+                <!-- <span
                     class="selectable"
                     :selected="selected === 'showStudied'"
                     v-if="core.plugin.skillTree.getSkillLevel(11) > 0"
@@ -82,7 +82,7 @@
                     >展示已学习技能:&nbsp;&nbsp;&nbsp;{{
                         showStudied ? 'ON' : 'OFF'
                     }}</span
-                >
+                > -->
             </div></template
         >
         <template #right><span v-html="descText"></span></template
