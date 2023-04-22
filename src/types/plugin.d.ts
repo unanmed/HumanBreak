@@ -31,6 +31,7 @@ interface PluginDeclaration
     hero: GamePluginHeroRealStatus;
 
     skills: Record<Chapter, Skill[]>;
+    skillEffects: SkillEffects;
 
     /**
      * 添加函数  例：添加弹出文字，像这个就可以使用core.addPop或core.plugin.addPop调用
@@ -433,6 +434,10 @@ interface PluginAchievement {
      * 检查所有到达过的楼层，用于成就的计算
      */
     checkVisitedFloor(): void;
+}
+
+interface SkillEffects {
+    jumpIgnoreFloor: FloorIds[];
 }
 
 type Chapter = 'chapter1' | 'chapter2';

@@ -20,7 +20,7 @@ var ignoreInJump = {
 };
 
 /** @type {FloorIds[]} */
-const jumpIgnoreFloor = [
+export const jumpIgnoreFloor = [
     'MT31',
     'snowTown',
     'MT36',
@@ -177,5 +177,6 @@ export function jumpSkill() {
 }
 
 core.plugin.skillEffects = {
-    jumpSkill
+    jumpSkill,
+    jumpIgnoreFloor
 };

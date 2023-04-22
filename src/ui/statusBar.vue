@@ -25,6 +25,12 @@
                             class="status-icon"
                         />
                         <span>{{ skill }}</span>
+                        <span
+                            v-if="has(spring)"
+                            id="status-spring"
+                            class="status-extra"
+                            >剩余{{ spring }}</span
+                        >
                     </div>
                     <div id="status-hp" class="status-item">
                         <img src="/project/images/hp.png" class="status-icon" />
@@ -37,10 +43,10 @@
                             >+{{ format(hero.hpmax!) }}/t</span
                         >
                         <span
-                            v-if="has(spring)"
-                            id="status-spring"
+                            v-if="has(jumpCnt)"
+                            id="status-jump"
                             class="status-extra"
-                            >剩余{{ spring }}</span
+                            >跳跃剩余{{ jumpCnt }}</span
                         >
                     </div>
                     <div id="status-atk" class="status-item">
@@ -124,7 +130,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, shallowReactive, watch } from 'vue';
+import { onMounted, ref, shallowReactive, watch } from 'vue';
 import Box from '../components/box.vue';
 import Scroll from '../components/scroll.vue';
 import { status } from '../plugin/ui/statusBar';
@@ -150,6 +156,7 @@ const up = ref(0);
 const spring = ref<number>();
 const skillOpened = ref(core.getFlag('chapter', 0) > 0);
 const studyOpened = ref(core.plugin.skillTree.getSkillLevel(11) > 0);
+const jumpCnt = ref<number>();
 /**
  * 要展示的勇士属性
  */
@@ -198,6 +205,11 @@ function update() {
     }
     skillOpened.value = core.getFlag('chapter', 0) > 0;
     studyOpened.value = core.plugin.skillTree.getSkillLevel(11) > 0;
+    jumpCnt.value =
+        flags.skill2 &&
+        !core.plugin.skillEffects.jumpIgnoreFloor.includes(core.status.floorId)
+            ? 3 - flags[`jump_${core.status.floorId}`]
+            : void 0;
 }
 
 function openSkillTree() {
@@ -213,6 +225,10 @@ function viewMap() {
 }
 
 function openStudy() {}
+
+onMounted(() => {
+    update();
+});
 </script>
 
 <style lang="less" scoped>
@@ -298,6 +314,12 @@ function openStudy() {}
     color: rgb(167, 255, 167);
     top: 0;
     font-size: 1.4vw;
+}
+
+#status-jump {
+    line-height: 0;
+    top: 0;
+    font-size: 1.3vw;
 }
 
 #status-key {
