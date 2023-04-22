@@ -80,8 +80,8 @@ const width = ref(
     isMobile ? window.innerWidth - 100 : window.innerWidth * 0.175
 );
 const height = ref(isMobile ? 250 : window.innerHeight - 100);
-const left = ref(50);
-const top = ref(50);
+const left = ref(isMobile ? 30 : 50);
+const top = ref(isMobile ? 30 : 50);
 
 watch(left, n => emits('update:left', n));
 watch(top, n => emits('update:top', n));
