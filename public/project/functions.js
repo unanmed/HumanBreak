@@ -482,7 +482,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 }
                 if (core.getFlag('springCount', 0) == 50) {
                     core.setFlag('springCount', 0);
-                    core.status.hero.hpmax = core.getNakedStatus('hpmax') * 1.1;
+                    core.status.hero.hpmax +=
+                        core.getNakedStatus('hpmax') * 0.1;
                 }
                 core.updateStatusBar();
             }
