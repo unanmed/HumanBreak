@@ -63,21 +63,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             if (noexit) {
                 core.status.extraEvent = core.clone(core.status.event);
             }
-            flags.cheat = 0;
-            if (reason != '智慧之始') {
-                flags.cheat += 100;
-            }
-            if (core.status.hero.atk >= 1000 || core.status.hero.def >= 1000)
-                flags.cheat += 50;
-            if (flags.cheat >= 30) {
-                while (true) {
-                    console.log(Math.pow(Math.random(), Math.random()));
-                }
-            }
-            if (reason == '智慧之始')
+
+            if (reason === '智慧之始') {
                 core.status.hero.hp +=
                     core.itemCount('yellowKey') * 5000 +
                     core.itemCount('blueKey') * 15000;
+            }
 
             // 游戏获胜事件
             core.ui.closePanel();
