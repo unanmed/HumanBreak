@@ -1126,7 +1126,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 根据keyCode值来执行对应操作
             switch (keyCode) {
                 case 74: // J:打开技能树
-                    core.useItem('skill1');
+                    core.useItem('skill1', true);
                     break;
                 case 27: // ESC：打开菜单栏
                     core.openSettings(true);

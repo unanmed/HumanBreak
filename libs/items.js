@@ -76,7 +76,8 @@ items.prototype.getItemEffectTip = function (itemId) {
 
 ////// 使用道具 //////
 items.prototype.useItem = function (itemId, noRoute, callback) {
-    const ignore = ['I560', 'I559'];
+    /** @type {AllIdsOf<'items'>[]} */
+    const ignore = ['I560', 'I559', 'skill1'];
     if (
         !this.canUseItem(itemId) ||
         (core.isReplaying() && ignore.includes(itemId))
@@ -286,6 +287,7 @@ items.prototype.loadEquip = function (equipId, callback) {
         if (callback) callback();
         return;
     }
+    core.status.route.push(`equip:${equipId}`);
 
     this._realLoadEquip(
         type,
@@ -302,6 +304,7 @@ items.prototype.unloadEquip = function (equipType, callback) {
         if (callback) callback();
         return;
     }
+    core.status.route.push(`unequip:${equipId}`);
 
     this._realLoadEquip(equipType, null, unloadEquipId, callback);
 };
