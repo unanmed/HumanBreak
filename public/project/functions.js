@@ -1028,7 +1028,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 damage += init_damage + (turn - 1) * per_damage;
                 // 无上之盾
                 if (core.hasFlag('superSheild')) {
-                    damage -= hero_IQ;
+                    if (flags.chapter >= 2) damage -= hero_IQ / 10;
+                    else damage -= hero_IQ;
                 }
                 // 生命回复
                 damage -= hero_recovery * turn;
@@ -1261,7 +1262,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 case 55: // 快捷键7：绑定为轻按，方便手机版操作
                     core.getNextItem();
                     break;
-                case 118: // F7：开启debug模式
+                case 119: // F8：开启debug模式
                     core.debug();
                     break;
             }
