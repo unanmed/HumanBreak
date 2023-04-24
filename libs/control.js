@@ -87,7 +87,6 @@ control.prototype._init = function () {
     this.registerReplayAction('getNext', this._replayAction_getNext);
     this.registerReplayAction('moveDirectly', this._replayAction_moveDirectly);
     this.registerReplayAction('key', this._replayAction_key);
-    this.registerReplayAction('click', this._replayAction_click);
     this.registerReplayAction('ignoreInput', this._replayAction_ignoreInput);
     this.registerReplayAction('no', this._replayAction_no);
     // --- 注册系统的resize
@@ -1795,7 +1794,6 @@ control.prototype.startReplay = function (list) {
 
 ////// 更改播放状态 //////
 control.prototype.triggerReplay = function () {
-    console.log(core.dymCanvas.replay.canvas.style.width);
     if (core.status.replay.pausing) this.resumeReplay();
     else this.pauseReplay();
 };

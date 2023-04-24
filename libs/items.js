@@ -79,7 +79,7 @@ items.prototype.useItem = function (itemId, noRoute, callback) {
     const ignore = ['I560', 'I559'];
     if (
         !this.canUseItem(itemId) ||
-        (ignore.includes(itemId) && core.isReplaying())
+        (core.isReplaying() && ignore.includes(itemId))
     ) {
         if (callback) callback();
         return;
