@@ -29,3 +29,5 @@ dist-ssr
 dist.zip
 story.md
 dist.rar
+*.h5save
+*.h5route

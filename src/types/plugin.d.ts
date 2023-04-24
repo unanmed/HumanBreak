@@ -25,10 +25,10 @@ interface PluginDeclaration
      */
     utils: GamePluginUtils;
     loopMap: GamePluginLoopMap;
-    towerBoss: GamePluginBoss;
     skillTree: GamePluginSkillTree;
     study: GamePluginStudy;
     hero: GamePluginHeroRealStatus;
+    replay: PluginReplay;
 
     skills: Record<Chapter, Skill[]>;
     skillEffects: SkillEffects;
@@ -123,14 +123,6 @@ interface GamePluginUtils {
 
 interface GamePluginLoopMap {
     checkLoopMap(): void;
-}
-
-interface GamePluginBoss {
-    /**
-     * 自动修复特殊boss战的录像
-     * @param isStart 是否要开始修剪录像
-     */
-    autoFixRouteBoss(isStart?: boolean);
 }
 
 interface PluginUtils {
@@ -434,6 +426,12 @@ interface PluginAchievement {
      * 检查所有到达过的楼层，用于成就的计算
      */
     checkVisitedFloor(): void;
+}
+
+interface PluginReplay {
+    ready(): void;
+    readyClip(): number;
+    clip(...replace: string[]): void;
 }
 
 interface SkillEffects {

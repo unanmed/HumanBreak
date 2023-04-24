@@ -141,12 +141,6 @@ main.floors.tower1=
                 "time": 500
             }
         ],
-        "13,1": [
-            {
-                "type": "function",
-                "function": "function(){\nconsole.trace()\n}"
-            }
-        ],
         "7,14": [
             {
                 "type": "changeFloor",

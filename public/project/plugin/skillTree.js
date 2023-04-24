@@ -199,6 +199,10 @@ const skills = {
 
 core.plugin.skills = skills;
 
+export function resetSkillLevel() {
+    levels = [];
+}
+
 export function getSkillFromIndex(index) {
     for (const [, skill] of Object.entries(skills)) {
         const s = skill.find(v => v.index === index);
@@ -311,5 +315,6 @@ core.plugin.skillTree = {
     saveSkillTree,
     loadSkillTree,
     upgradeSkill,
-    openTree
+    openTree,
+    resetSkillLevel
 };

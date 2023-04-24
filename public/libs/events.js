@@ -29,6 +29,7 @@ events.prototype.startGame = function (hard, seed, route, callback) {
     core.plugin.loaded.value = false;
 
     if (main.mode != 'play') return;
+    core.plugin.skillTree.resetSkillLevel();
 
     // 无动画的开始游戏
     if (core.flags.startUsingCanvas || route != null) {

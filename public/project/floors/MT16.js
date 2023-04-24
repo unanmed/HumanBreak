@@ -46,7 +46,7 @@ main.floors.MT16=
                 "yes": [
                     {
                         "type": "setValue",
-                        "name": "flag:finishChase",
+                        "name": "flag:finishChase1",
                         "value": "true"
                     },
                     {
@@ -87,6 +87,10 @@ main.floors.MT16=
                     }
                 ],
                 "no": [
+                    {
+                        "type": "function",
+                        "function": "function(){\ncore.plugin.replay.readyClip();\n}"
+                    },
                     {
                         "type": "choices",
                         "text": "请选择难度",
@@ -133,10 +137,6 @@ main.floors.MT16=
                     {
                         "type": "function",
                         "function": "function(){\ncore.status.maps.MT15.canFlyFrom = false\n}"
-                    },
-                    {
-                        "type": "function",
-                        "function": "function(){\ncore.plugin.towerBoss.autoFixRouteBoss(true);\n}"
                     }
                 ]
             },

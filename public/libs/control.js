@@ -1784,6 +1784,7 @@ control.prototype.startReplay = function (list) {
     core.status.replay.totalList = core.status.route.concat(list);
     core.status.replay.steps = 0;
     core.status.replay.save = [];
+    core.plugin.replay.ready();
     core.createCanvas('replay', 0, core._PY_ - 40, core._PX_, 40, 199);
     core.setOpacity('replay', 0.6);
     this._replay_drawProgress();

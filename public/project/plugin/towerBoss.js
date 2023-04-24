@@ -1,4 +1,5 @@
 ///<reference path="../../../src/types/core.d.ts" />
+import { clip } from './replay.js';
 
 // 1000多行，改不动了，原来什么样就什么样吧
 
@@ -16,23 +17,10 @@ function initTowerBoss() {
     seconds = 0;
     heroHp = core.status.hero.hp;
     dynamicChangeHp(0, 10000, 10000);
-    autoFixRouteBoss(true);
     core.insertAction([{ type: 'sleep', time: 1000, noSkip: true }]);
     setTimeout(bossCore, 1000);
 }
-// 录像自动修正
-export function autoFixRouteBoss(isStart) {
-    var route = core.status.route;
-    if (isStart) {
-        // 开始修正 记录当前录像长度
-        flags.startFix = route.length - 1;
-        return;
-    }
-    // 结束修正 删除录像 并追加跳过步骤
-    route.splice(flags.startFix);
-    route.push('choices:0');
-    delete flags.startFix;
-}
+
 // 血条
 function healthBar(now, total) {
     var nowLength = (now / total) * 476; // 当前血量下绘制长度
@@ -383,7 +371,7 @@ function bossCore() {
             clearInterval(interval);
             clearInterval(flags.boom);
             core.status.hero.hp = heroHp;
-            core.plugin.towerBoss.autoFixRouteBoss(false);
+            clip('choices:0');
             delete flags.__bgm__;
             core.pauseBgm();
             core.insertAction([
@@ -1569,6 +1557,7 @@ function lineDamage(x1, y1, x2, y2, damage) {
 }
 
 core.plugin.towerBoss = {
-    initTowerBoss,
-    autoFixRouteBoss
+    initTowerBoss
 };
+
+export {};
