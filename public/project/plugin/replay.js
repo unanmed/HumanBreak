@@ -44,6 +44,7 @@ let shopOpened = false;
 let openedShopId = '';
 core.registerReplayAction('openShop', name => {
     if (!name.startsWith('openShop:')) return false;
+    if (shopOpened) return false;
     openedShopId = name.slice(9);
     shopOpened = true;
     core.replay();

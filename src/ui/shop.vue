@@ -175,10 +175,6 @@ import { isMobile } from '../plugin/use';
 import BoxAnimate from '../components/boxAnimate.vue';
 import { KeyCode } from '../plugin/keyCodes';
 import { sleep } from 'mutate-animate';
-import {
-    completeAchievement,
-    hasCompletedAchievement
-} from '../plugin/ui/achievement';
 
 const id = core.plugin.openedShopId;
 const shop = core.status.shops[core.plugin.openedShopId] as ItemShopEvent;
@@ -200,8 +196,6 @@ const cnt = core.itemCount;
 const count = ref(0);
 const nowMoney = ref(core.status.hero.money);
 const update = ref(false);
-
-let achiN = 0;
 
 let bought = false;
 
@@ -248,10 +242,8 @@ function confirm() {
     if (count.value === 0) {
         return;
     }
-    achiN = 0;
     const money = core.status.hero.money;
     bought = true;
-    core.status.route.push(`openShop:${id}`);
     if (mode.value === 'buy') {
         if (cost.value <= money) {
             core.getItem(item.value.id, count.value);
@@ -319,6 +311,7 @@ onMounted(async () => {
     if (core.plugin.transition.value) await sleep(600);
     document.addEventListener('keyup', keyup);
     document.addEventListener('keydown', keydown);
+    core.status.route.push(`openShop:${id}`);
 });
 
 onUnmounted(() => {

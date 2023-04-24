@@ -1070,7 +1070,7 @@ interface Core extends Pick<Main, CoreDataFromMain> {
      * @param coreData 初始化信息
      * @param callback 初始化完成后的回调函数
      */
-    init(coreData: MainData, callback?: () => void): void;
+    init(coreData: MainData, callback?: () => void): Promise<void>;
 
     /**
      * @deprecated

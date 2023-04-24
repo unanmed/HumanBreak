@@ -328,7 +328,7 @@ main.prototype.init = async function (mode, callback) {
     ].forEach(function (t) {
         coreData[t] = main[t];
     });
-    core.init(coreData, callback);
+    await core.init(coreData, callback);
     core.resize();
 
     main.core = core;
