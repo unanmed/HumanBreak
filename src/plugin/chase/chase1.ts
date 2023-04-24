@@ -1,6 +1,7 @@
 import { Animation, bezier, hyper, linear, shake, sleep } from 'mutate-animate';
 import { Chase, shake2 } from './chase';
 import { ChaseCameraData } from './data';
+import { completeAchievement } from '../ui/achievement';
 
 const ani = new Animation();
 ani.register('rect', 0);
@@ -580,6 +581,9 @@ export function para3(chase: Chase) {
             core.showStatusBar();
             ani.time(750).apply('rect', 0);
             chase.end();
+            if (!chase.showPath) {
+                completeAchievement('challenge', 0);
+            }
             await sleep(750);
             ani.ticker.destroy();
             core.deleteCanvas('chaseBack');
