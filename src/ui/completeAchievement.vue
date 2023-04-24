@@ -44,7 +44,7 @@ const point = achi.point;
 
 const nowPoint = getNowPoint() - point;
 const now = ref(nowPoint);
-const progress = computed(() => Math.floor(now.value / totalPoint));
+const progress = computed(() => now.value / totalPoint);
 
 onMounted(async () => {
     await sleep(500);
@@ -57,7 +57,7 @@ onMounted(async () => {
             ticker.destroy();
         }
         const ratio = (nowTime - time) / 1000;
-        now.value = Math.round(nowPoint + point * ratio);
+        now.value = Math.floor(nowPoint + point * ratio);
     });
     await sleep(4600);
     showComplete.value = false;
