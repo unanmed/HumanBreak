@@ -942,40 +942,19 @@ ui.prototype.clearUI = function () {
 
 ////// 左上角绘制一段提示 //////
 ui.prototype.drawTip = function (text, id, frame) {
-    text = core.replaceText(text) || '';
-    var realText = this._getRealContent(text);
-    var one = {
-        text: text,
-        textX: 21,
-        width: 26 + core.calWidth('data', realText, '16px Arial'),
-        opacity: 0.1,
-        stage: 1,
-        frame: frame || 0,
-        time: 0
-    };
-    if (id != null) {
-        var info = core.getBlockInfo(id);
-        if (info == null || !info.image || info.bigImage) {
-            // 检查状态栏图标
-            if (core.statusBar.icons[id] instanceof Image) {
-                info = {
-                    image: core.statusBar.icons[id],
-                    posX: 0,
-                    posY: 0,
-                    height: 32
-                };
-            } else info = null;
-        }
-        if (info != null) {
-            one.image = info.image;
-            one.posX = info.posX;
-            one.posY = info.posY;
-            one.height = info.height;
-            one.textX += 24;
-            one.width += 24;
-        }
-    }
-    core.animateFrame.tip = one;
+    let t =
+        text +
+        ' [' +
+        core.status.hero.loc.x +
+        ',' +
+        core.status.hero.loc.y +
+        ',' +
+        core.status.floorId +
+        ']  ';
+    if (core.status.floorId === 'tower6')
+        t += core.searchBlockWithFilter(v => v.event.cls === 'enemys').length;
+
+    console.log(t);
 };
 
 ui.prototype._drawTip_drawOne = function (tip) {
@@ -4229,5 +4208,5 @@ ui.prototype.deleteAllCanvas = function () {
     this.deleteCanvas(function () {
         return true;
     });
-    if (main.mode === 'play' && !core.isReplaying()) core.initShadowCanvas();
+    if (main.mode === 'play' && !main.replayChecking) core.initShadowCanvas();
 };

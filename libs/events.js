@@ -25,8 +25,10 @@ events.prototype.resetGame = function (hero, hard, floorId, maps, values) {
 events.prototype.startGame = function (hard, seed, route, callback) {
     hard = hard || '';
     core.dom.gameGroup.style.display = 'block';
-    core.plugin.startOpened.value = false;
-    core.plugin.loaded.value = false;
+    if (!main.replayChecking) {
+        core.plugin.startOpened.value = false;
+        core.plugin.loaded.value = false;
+    }
 
     if (main.mode != 'play') return;
     core.plugin.skillTree.resetSkillLevel();
@@ -73,7 +75,9 @@ events.prototype._startGame_start = function (hard, seed, route, callback) {
         core.events._startGame_afterStart(callback);
     });
 
-    if (route != null) core.startReplay(route);
+    if (route != null) {
+        core.startReplay(route);
+    }
 };
 
 events.prototype._startGame_setHard = function () {
