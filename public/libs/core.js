@@ -310,17 +310,38 @@ core.prototype.init = async function (coreData, callback) {
     });
 };
 
+core.prototype.initSync = function (coreData, callback) {
+    this._forwardFuncs();
+    for (var key in coreData) core[key] = coreData[key];
+    this._init_flags();
+    this._init_platform();
+    this._init_others();
+    this._loadPluginSync();
+
+    core.loader._load(function () {
+        core.extensions._load(function () {
+            core._afterLoadResources(callback);
+        });
+    });
+};
+
+core.prototype._loadPluginSync = function () {
+    core.plugin = {};
+    if (main.useCompress) main.loadMod('project', 'plugin', () => 0);
+    else main.loadMod('project', 'plugin.min', () => 0);
+};
+
 core.prototype._loadPlugin = async function () {
     const mainData = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main;
     core.plugin = {};
     // 加载插件
-    if (!main.replayChecking && main.mode === 'play') {
+    if (main.mode === 'play') {
         main.forward();
         core.resetSettings();
         core.plugin.showMarkedEnemy.value = true;
     }
     if (main.pluginUseCompress) {
-        await main.loadScript(`project/plugin.m.js?v=${main.version}`);
+        await main.loadScript(`project/plugin.min.js?v=${main.version}`);
     } else {
         await main.loadScript(
             `project/plugin/index.js?v=${main.version}`,

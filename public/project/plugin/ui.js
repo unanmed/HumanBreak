@@ -2,10 +2,15 @@
 export {};
 
 (function () {
-    if (main.replayChecking) return (core.plugin.gameUi = {});
+    if (main.replayChecking)
+        return (core.plugin.gameUi = {
+            openItemShop: () => 0,
+            showChapter: () => 0,
+            openSkill: () => 0
+        });
 
     function openItemShop(itemShopId) {
-        if (!main.replayChecking) {
+        if (!core.isReplaying()) {
             core.plugin.openedShopId = itemShopId;
             core.plugin.shopOpened.value = true;
         }

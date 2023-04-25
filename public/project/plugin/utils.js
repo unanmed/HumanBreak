@@ -51,3 +51,4 @@ core.plugin.utils = {
     has,
     maxGameScale
 };
+core.has = has;

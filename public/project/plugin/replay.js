@@ -80,7 +80,7 @@ core.registerReplayAction('buy', name => {
     const [type, id, num] = name
         .split(':')
         .map(v => (/^\d+$/.test(v) ? parseInt(v) : v));
-    const shop = core.status.shops[id];
+    const shop = core.status.shops[openedShopId];
     const item = shop.choices.find(v => v.id === id);
     if (!item) return false;
     flags.itemShop ??= {};
@@ -98,6 +98,7 @@ core.registerReplayAction('buy', name => {
     if (cost > core.status.hero.money) return false;
     core.status.hero.money -= cost;
     flags.itemShop[openedShopId][id] += type === 'buy' ? num : -num;
+    core.addItem(id, type === 'buy' ? num : -num);
     core.status.route.push(name);
     core.replay();
     return true;

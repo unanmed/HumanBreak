@@ -109,7 +109,7 @@ import * as rollup from 'rollup';
             name: 'CorePlugin'
         });
         const compressed = babel.transformSync(code.output[0].code)?.code!;
-        await fs.writeFile('./dist/project/plugin.m.js', compressed, 'utf-8');
+        await fs.writeFile('./dist/project/plugin.min.js', compressed, 'utf-8');
 
         await fse.remove('./dist/project/plugin/');
     } catch (e) {

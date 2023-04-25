@@ -13,6 +13,16 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             core.status = core.clone(core.initStatus, function (name) {
                 return name != 'hero' && name != 'maps';
             });
+            const bgmaps = {};
+            const handler = {
+                set(target, p, v) {
+                    if (core.status.floorId === 'tower6') console.trace();
+
+                    target[p] = v;
+                    return true;
+                }
+            };
+            core.status.bgmaps = new Proxy(bgmaps, handler);
             core.control._bindRoutePush();
             core.status.played = true;
             // 初始化人物，图标，统计信息
@@ -52,6 +62,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             if (main.mode === 'play' && !main.replayChecking) {
                 core.splitArea();
                 core.resetFlagSettings();
+            } else {
+                flags.autoSkill ??= true;
+                flags.itemDetail ??= true;
+                flags.autoLocate ??= true;
             }
         },
         win: function (reason, norank, noexit) {
@@ -141,7 +155,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // ---------- 重绘新地图；这一步将会设置core.status.floorId ---------- //
             core.drawMap(floorId);
 
-            core.updateShadow();
+            if (!main.replayChecking) core.updateShadow();
 
             // 切换楼层BGM
             if (core.status.maps[floorId].bgm) {
@@ -200,7 +214,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     core.visitFloor(floorId);
                 }
             }
-            if (!flags.debug) core.checkVisitedFloor();
+            if (!flags.debug && !main.replayChecking) core.checkVisitedFloor();
         },
         flyTo: function (toId, callback) {
             // 楼层传送器的使用，从当前楼层飞往toId
@@ -1119,7 +1133,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 return;
             }
 
-            const [x, y] = flags.mouseLoc;
+            const [x, y] = flags.mouseLoc ?? [];
             const mx = Math.round(x + core.bigmap.offsetX / 32);
             const my = Math.round(y + core.bigmap.offsetY / 32);
 
@@ -1407,6 +1421,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             core.updateCheckBlock();
             // 更新全地图显伤
             core.updateDamage();
+
+            if (main.replayChecking) return;
 
             // 已学习的技能
             if (

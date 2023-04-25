@@ -219,7 +219,7 @@ function main() {
 }
 // >>>> body end
 
-main.prototype.loadScript = async function (src, module) {
+main.prototype.loadScript = function (src, module) {
     const script = document.createElement('script');
     script.src = src;
     if (module) script.type = 'module';
@@ -243,6 +243,67 @@ main.prototype.init = async function (mode, callback) {
         return;
     }
 
+    if (main.replayChecking) {
+        main.loadSync(mode, callback);
+    } else {
+        main.loadAsync(mode, callback);
+    }
+};
+
+main.prototype.loadSync = function (mode, callback) {
+    main.mode = mode;
+    if (main.useCompress) {
+        main.loadMod('project', 'project', () => 0);
+    } else {
+        main.pureData.forEach(v => {
+            main.loadMod('project', v, () => 0);
+        });
+    }
+
+    const mainData = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main;
+    Object.assign(main, mainData);
+
+    if (main.useCompress) {
+        main.loadMod('libs', 'libs', () => 0);
+    } else {
+        main.loadList.forEach(v => {
+            main.loadMod('libs', v, () => 0);
+        });
+    }
+
+    for (const name of main.loadList) {
+        if (name === 'core') continue;
+        core[name] = new window[name]();
+    }
+
+    main.loadFloors(() => 0);
+
+    const coreData = {};
+    [
+        'dom',
+        'statusBar',
+        'canvas',
+        'images',
+        'tilesets',
+        'materials',
+        'animates',
+        'bgms',
+        'sounds',
+        'floorIds',
+        'floors',
+        'floorPartitions'
+    ].forEach(function (t) {
+        coreData[t] = main[t];
+    });
+
+    core.initSync(coreData, callback);
+    core.resize();
+    main.core = core;
+
+    core.completeAchievement = () => 0;
+};
+
+main.prototype.loadAsync = async function (mode, callback) {
     for (var i = 0; i < main.dom.gameCanvas.length; i++) {
         main.canvas[main.dom.gameCanvas[i].id] =
             main.dom.gameCanvas[i].getContext('2d');
