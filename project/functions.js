@@ -13,16 +13,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             core.status = core.clone(core.initStatus, function (name) {
                 return name != 'hero' && name != 'maps';
             });
-            const bgmaps = {};
-            const handler = {
-                set(target, p, v) {
-                    if (core.status.floorId === 'tower6') console.trace();
-
-                    target[p] = v;
-                    return true;
-                }
-            };
-            core.status.bgmaps = new Proxy(bgmaps, handler);
             core.control._bindRoutePush();
             core.status.played = true;
             // 初始化人物，图标，统计信息
