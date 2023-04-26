@@ -136,7 +136,10 @@ export class Chase {
     ) {
         const func = () => {
             if (!flags.chaseTime?.[floorId]) return;
-            if (Date.now() - (flags.chaseTime?.[floorId] ?? 0) >= time) {
+            if (
+                Date.now() - (flags.chaseTime?.[floorId] ?? Date.now()) >=
+                time
+            ) {
                 fn(this);
                 this.ani.ticker.remove(func);
             }
@@ -242,10 +245,11 @@ export async function startChase(index: number) {
         flags.chaseHard === 0
     );
     flags.chase = chase;
+    const hard = flags.chaseHard;
 
     // 成就
     chase.onEnd(() => {
-        if (flags.chaseHard === 1) {
+        if (hard === 1) {
             if (index === 1) {
                 completeAchievement('challenge', 0);
             }

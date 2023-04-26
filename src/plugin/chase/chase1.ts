@@ -581,9 +581,6 @@ export function para3(chase: Chase) {
             core.showStatusBar();
             ani.time(750).apply('rect', 0);
             chase.end();
-            if (!chase.showPath) {
-                completeAchievement('challenge', 0);
-            }
             await sleep(750);
             ani.ticker.destroy();
             core.deleteCanvas('chaseBack');
