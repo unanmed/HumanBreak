@@ -199,7 +199,7 @@ function update() {
     }
     up.value = core.getNextLvUpNeed() ?? 0;
     if (core.hasFlag('spring')) {
-        spring.value = 50 - flags.springCount;
+        spring.value = 50 - (flags.springCount ?? 0);
     } else {
         spring.value = void 0;
     }

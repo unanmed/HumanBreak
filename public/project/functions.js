@@ -1032,8 +1032,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 damage += init_damage + (turn - 1) * per_damage;
                 // 无上之盾
                 if (core.hasFlag('superSheild')) {
-                    if (flags.chapter >= 2) damage -= hero_IQ / 10;
-                    else damage -= hero_IQ;
+                    damage -= hero_IQ / 10;
                 }
                 // 生命回复
                 damage -= hero_recovery * turn;

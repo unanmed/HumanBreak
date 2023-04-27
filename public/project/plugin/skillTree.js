@@ -89,8 +89,7 @@ const skills = {
             index: 7,
             title: '无上之盾',
             desc: [
-                '<span style="color: #dd4">第一章终极技能</span>，战斗时智慧会充当等量护盾，',
-                '到达第二章后<span style="color: gold">效果变为1/10</span>'
+                '<span style="color: #dd4">第一章终极技能</span>，战斗时智慧的 1/10 会充当等量护盾。'
             ],
             consume: '2500',
             front: [
