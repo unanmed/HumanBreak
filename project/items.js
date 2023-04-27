@@ -1160,7 +1160,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "constants",
 		"name": "bgm查看器",
 		"canUseItemEffect": "true",
-		"text": "可以查看游戏内你已经听过的bgm，歌曲名格式：歌手——歌曲名",
+		"text": "可以查看游戏内你已经听过的bgm，歌曲名格式：歌手——歌曲名。未完工。",
 		"useItemEffect": "core.plugin.bgmOpened.value = true;"
 	},
 	"I559": {
@@ -1221,11 +1221,11 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"canUseItemEffect": "true",
 		"text": "!!html<span style=\"color: gold\">饰品</span>。与寒冰没有任何关系，但是为什么叫寒冰护符呢？攻击和额外攻击各增加5%",
 		"equip": {
-			"type": 0,
+			"type": "饰品",
 			"value": {},
 			"percentage": {
-				"atk": 5,
-				"mana": 5
+				"mana": 5,
+				"atk": 5
 			}
 		}
 	},
