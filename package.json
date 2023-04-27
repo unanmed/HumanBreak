@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build && ts-node-esm script/build.ts",
-    "build-gh": "vue-tsc && vite build --base=/HumanBreak/ && ts-node-esm script/build.ts",
-    "build-local": "vue-tsc && vite build --base=/ && ts-node-esm script/build.ts",
+    "build-gh": "vue-tsc && vite build --base=/HumanBreak/ && ts-node-esm script/build.ts 1",
+    "build-local": "vue-tsc && vite build --base=/ && ts-node-esm script/build.ts 1",
     "preview": "vite preview",
     "preview-node": "cd dist && node server.cjs",
     "update": "ts-node-esm script/update.ts",
