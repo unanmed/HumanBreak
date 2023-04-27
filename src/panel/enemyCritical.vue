@@ -63,10 +63,12 @@
                 >
                 <span
                     ><span style="font-family: 'Fira Code'">{{
-                        nowDamage[0] < 0 && !has(enemy.damage) ? '=>' : ''
+                        (nowDamage[0] as number) < 0 && !has(enemy.damage)
+                            ? '=>'
+                            : ''
                     }}</span
                     >{{
-                        nowDamage[0] < 0 && !has(enemy.damage)
+                        (nowDamage[0] as number) < 0 && !has(enemy.damage)
                             ? format(-nowDamage[0])
                             : format(nowDamage[0])
                     }}</span
@@ -296,6 +298,10 @@ onMounted(() => {
         position: absolute;
         top: 25vh;
         width: 90vw;
+    }
+
+    .slider-div span {
+        font-size: 1.5vh;
     }
 }
 </style>
