@@ -55,15 +55,18 @@ import * as rollup from 'rollup';
         const project = await fs.readdir('./public/project');
         const floors = await fs.readdir('./public/project/floors');
         const assets = await fs.readdir('./dist/assets/');
+        const plugin = await fs.readdir('./public/project/plugin');
         const all = [
             ...libs.map(v => `./public/libs/${v}`),
             ...project.map(v => `./public/project/${v}`),
             ...floors.map(v => `./public/project/floors/${v}`),
-            ...assets.map(v => `./dist/assets/${v}`)
+            ...assets.map(v => `./dist/assets/${v}`),
+            ...plugin.map(v => `./public/project/plugin/${v}`)
         ];
         for await (const dir of all) {
             const stat = await fs.stat(dir);
             if (!stat.isFile()) continue;
+            if (dir.endsWith('.ttf')) continue;
             const file = await fs.readFile(dir, 'utf-8');
             for (let i = 0; i < file.length; i++) {
                 const char = file[i];
@@ -132,4 +135,9 @@ import * as rollup from 'rollup';
     } catch {
         console.log('main.js压缩失败');
     }
+
+    // 5. 杂项
+    try {
+        await fse.copy('./LICENSE', './dist/LICENSE');
+    } catch {}
 })();
