@@ -167,5 +167,9 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"E616": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E617": {"name":"冰封雕像","hp":12500,"atk":2750,"def":2000,"money":2,"exp":150,"point":0,"special":[]},
 	"E618": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
-	"E643": {"name":"苍蓝史莱姆","hp":17500,"atk":2800,"def":2000,"money":3,"exp":175,"point":0,"special":[28],"paleShield":30}
+	"E643": {"name":"苍蓝史莱姆","hp":17500,"atk":2800,"def":2000,"money":3,"exp":175,"point":0,"special":[28],"paleShield":30},
+	"E644": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E645": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E646": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E647": {"name":"苍蓝之灵-虚","hp":30000,"atk":5000,"def":3000,"money":10,"exp":2500,"point":0,"special":[28],"paleShield":10}
 }

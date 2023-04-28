@@ -1221,7 +1221,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"canUseItemEffect": "true",
 		"text": "!!html<span style=\"color: gold\">饰品</span>。与寒冰没有任何关系，但是为什么叫寒冰护符呢？攻击和额外攻击各增加5%",
 		"equip": {
-			"type": "饰品",
+			"type": "首饰",
 			"value": {},
 			"percentage": {
 				"mana": 5,
