@@ -70,7 +70,7 @@ main.floors.MT16=
                     },
                     {
                         "type": "function",
-                        "function": "function(){\ncore.status.maps.MT14.canFlyFrom = false\n}"
+                        "function": "function(){\ncore.status.maps.MT14.canFlyFrom = false;\ncore.chaseInit1();\n}"
                     },
                     {
                         "type": "show",

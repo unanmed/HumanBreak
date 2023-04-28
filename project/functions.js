@@ -1747,7 +1747,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             checkLoopMap();
 
             // 追猎
-            if (core.status.checkBlock.haveHunt) {
+            if (
+                core.status.checkBlock.haveHunt &&
+                !core
+                    .getBlockId(core.status.hero.loc.x, core.status.hero.loc.y)
+                    ?.endsWith('Portal')
+            ) {
                 var x = core.status.hero.loc.x,
                     y = core.status.hero.loc.y;
                 core.status.maps[core.status.floorId].blocks.forEach(function (
