@@ -94,10 +94,6 @@ const format = core.formatBigNumber;
         font-size: 3.8vw;
     }
 
-    #special-scroll {
-        height: 50vh;
-    }
-
     #critical-des,
     .critical {
         font-size: 3.6vw;

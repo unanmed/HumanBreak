@@ -33,7 +33,8 @@ export const jumpIgnoreFloor = [
     'MT44',
     'MT45',
     'MT46',
-    'MT47'
+    'MT47',
+    'MT48'
 ];
 // 跳跃
 export function jumpSkill() {

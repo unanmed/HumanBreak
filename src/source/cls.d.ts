@@ -571,6 +571,10 @@ interface IdToCls {
     I641: 'items';
     I642: 'items';
     E643: 'enemys';
+    E644: 'enemys';
+    E645: 'enemys';
+    E646: 'enemys';
+    E647: 'enemys';
     X20032: 'tileset';
     X20033: 'tileset';
     X20034: 'tileset';

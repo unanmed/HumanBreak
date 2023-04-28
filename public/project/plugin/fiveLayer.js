@@ -6,7 +6,7 @@ function createCanvas(name, zIndex) {
     if (!name) return;
     var canvas = document.createElement('canvas');
     canvas.id = name;
-    canvas.className = 'gameCanvas';
+    canvas.className = 'gameCanvas no-anti-aliasing';
     // 编辑器模式下设置zIndex会导致加入的图层覆盖优先级过高
     if (main.mode != 'editor') canvas.style.zIndex = zIndex || 0;
     // 将图层插入进游戏内容
