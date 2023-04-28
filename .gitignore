@@ -32,3 +32,4 @@ dist.rar
 *.h5save
 *.h5route
 index.cjs
+!public/swap/*.h5save

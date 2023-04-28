@@ -81,6 +81,10 @@ main.floors.MT18=
 ],
     "beforeBattle": {},
     "cannotMoveIn": {},
-    "bg2map": [],
-    "fg2map": []
+    "bg2map": [
+
+],
+    "fg2map": [
+
+]
 }

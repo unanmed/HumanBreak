@@ -2,9 +2,10 @@ import { Animation, circle, hyper, sleep, TimingFn } from 'mutate-animate';
 import { completeAchievement } from '../ui/achievement';
 import { has } from '../utils';
 import { ChaseCameraData, ChasePath, getChaseDataByIndex } from './data';
+import { init1 } from './chase1';
 
 export default function init() {
-    return { startChase };
+    return { startChase, chaseInit1: init1 };
 }
 
 export function shake2(power: number, timing: TimingFn): TimingFn {
@@ -31,7 +32,7 @@ export class Chase {
      */
     showPath: boolean = false;
 
-    endFn?: () => void;
+    endFn?: (lose: boolean) => void;
 
     /**
      * 开始一个追逐战
@@ -213,14 +214,14 @@ export class Chase {
      * 当追逐战结束后执行函数
      * @param fn 执行的函数
      */
-    onEnd(fn: () => void) {
+    onEnd(fn: (lose: boolean) => void) {
         this.endFn = fn;
     }
 
     /**
      * 结束这个追逐战
      */
-    end() {
+    end(lose: boolean = false) {
         this.ani.ticker.destroy();
         delete flags.onChase;
         delete flags.chase;
@@ -229,7 +230,7 @@ export class Chase {
         delete flags.chaseIndex;
         flags.__lockViewport__ = false;
         core.deleteCanvas('chasePath');
-        if (this.endFn) this.endFn();
+        if (this.endFn) this.endFn(lose);
     }
 }
 
@@ -248,9 +249,9 @@ export async function startChase(index: number) {
     const hard = flags.chaseHard;
 
     // 成就
-    chase.onEnd(() => {
+    chase.onEnd(lose => {
         if (hard === 1) {
-            if (index === 1) {
+            if (index === 1 && !lose) {
                 completeAchievement('challenge', 0);
             }
         }

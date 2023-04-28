@@ -158,7 +158,7 @@ export async function wolfMove(chase: Chase) {
 export function judgeFail1(chase: Chase) {
     chase.ani.ticker.add(() => {
         if (core.status.hero.loc.x > core.bigmap.offsetX / 32 + 17) {
-            chase.end();
+            chase.end(true);
             ani.time(750).apply('rect', 0);
             core.lose('逃跑失败');
         }

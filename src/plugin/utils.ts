@@ -5,6 +5,8 @@ import { isNil } from 'lodash';
 import { Animation, sleep, TimingFn } from 'mutate-animate';
 import { ComputedRef, ref } from 'vue';
 import { EVENT_KEY_CODE_MAP } from './keyCodes';
+import axios from 'axios';
+import { decompressFromBase64 } from 'lz-string';
 
 type CanParseCss = keyof {
     [P in keyof CSSStyleDeclaration as CSSStyleDeclaration[P] extends string
@@ -15,7 +17,14 @@ type CanParseCss = keyof {
 };
 
 export default function init() {
-    return { has, getDamageColor, parseCss, tip, changeLocalStorage };
+    return {
+        has,
+        getDamageColor,
+        parseCss,
+        tip,
+        changeLocalStorage,
+        swapChapter
+    };
 }
 
 /**
@@ -227,4 +236,21 @@ export function changeLocalStorage<T>(
     const now = core.getLocalStorage(name, defaultValue);
     const to = fn(now);
     core.setLocalStorage(name, to);
+}
+
+export async function swapChapter(chapter: number, hard: number) {
+    const h = hard === 2 ? 'hard' : 'easy';
+    const save = await axios.get(
+        `${import.meta.env.BASE_URL}swap/${chapter}.${h}.h5save`,
+        {
+            responseType: 'text',
+            responseEncoding: 'utf-8'
+        }
+    );
+    const data = JSON.parse(decompressFromBase64(save.data));
+
+    core.loadData(data.data, () => {
+        core.removeFlag('__fromLoad__');
+        core.drawTip('读档成功');
+    });
 }

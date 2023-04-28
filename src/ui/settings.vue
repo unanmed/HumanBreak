@@ -146,6 +146,9 @@ function click(id: keyof Settings) {
     }
     if (!ignore.includes(id)) {
         settings[id].value = !settings[id].value;
+        if (id === 'autoSkill') {
+            core.status.route.push(`set:autoSkill:${settings.autoSkill.value}`);
+        }
     } else {
         if (id === 'fullscreen') {
             triggerFullscreen();

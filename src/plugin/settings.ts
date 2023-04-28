@@ -64,7 +64,7 @@ watch(useFixed, n => {
     core.setLocalStorage('useFixed', n);
 });
 
-watch(autoSkill, n => {
+watch(autoLocate, n => {
     flags.autoLocate = n;
     core.updateStatusBar();
     core.status.route.push(`set:autoLocate:${n}`);
@@ -101,9 +101,9 @@ function resetFlag() {
     flags.itemDetail ??= true;
     flags.autoLocate ??= true;
 
-    itemDetail.value = flags.itemDetail ? true : false;
-    autoSkill.value = flags.autoSkill ? true : false;
-    autoLocate.value = flags.autoLocate ? true : false;
+    itemDetail.value = !!flags.itemDetail;
+    autoSkill.value = !!flags.autoSkill;
+    autoLocate.value = !!flags.autoLocate;
 }
 
 export async function triggerFullscreen() {
