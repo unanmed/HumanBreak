@@ -216,6 +216,8 @@ function main() {
 
     this.__VERSION__ = '2.10.0';
     this.__VERSION_CODE__ = 510;
+
+    this.timestamp = 0;
 }
 // >>>> body end
 
@@ -468,6 +470,7 @@ main.prototype.importFonts = function (fonts) {
             font +
             '"; src: url("project/fonts/' +
             font +
+            (main.pluginUseCompress ? '-' + main.timestamp : '') +
             '.ttf") format("truetype"); }';
     });
     style.innerHTML = html;

@@ -29,6 +29,7 @@ interface PluginDeclaration
     study: GamePluginStudy;
     hero: GamePluginHeroRealStatus;
     replay: PluginReplay;
+    chase: PluginChase;
 
     skills: Record<Chapter, Skill[]>;
     skillEffects: SkillEffects;
@@ -432,6 +433,10 @@ interface PluginReplay {
     ready(): void;
     readyClip(): number;
     clip(...replace: string[]): void;
+}
+
+interface PluginChase {
+    chaseInit1(): void;
 }
 
 interface SkillEffects {

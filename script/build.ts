@@ -6,6 +6,7 @@ import * as babel from '@babel/core';
 import * as rollup from 'rollup';
 
 (async function () {
+    const timestamp = Date.now();
     // 1. 去除未使用的文件
     const data = (() => {
         const data = fss.readFileSync('./public/project/data.js', 'utf-8');
@@ -98,6 +99,14 @@ import * as rollup from 'rollup';
                 })()
             )
         ]);
+        await Promise.all([
+            ...fonts.map(v => {
+                return fse.rename(
+                    `./dist/project/fonts/${v}.ttf`,
+                    `./dist/project/fonts/${v}-${timestamp}.ttf`
+                );
+            })
+        ]);
     } catch (e) {
         await fse.copy('./public/project/fonts', './dist/project/fonts');
     }
@@ -122,10 +131,12 @@ import * as rollup from 'rollup';
     // 4. 压缩main.js
     try {
         // 先获取不能压缩的部分
-        const main = (await fs.readFile('./public/main.js', 'utf-8')).replace(
-            /this.pluginUseCompress\s*=\s*false\;/,
-            'this.pluginUseCompress = true;'
-        );
+        const main = (await fs.readFile('./public/main.js', 'utf-8'))
+            .replace(
+                /this.pluginUseCompress\s*=\s*false\;/,
+                'this.pluginUseCompress = true;'
+            )
+            .replace('this.timestamp = 0', `this.timestamp = ${timestamp};`);
 
         const endIndex = main.indexOf('// >>>> body end');
         const nonCompress = main.slice(0, endIndex);

@@ -16,6 +16,7 @@ import * as skillTree from './skillTree.js';
 import * as study from './study.js';
 import * as towerBoss from './towerBoss.js';
 import * as utils from './utils.js';
+import * as chase from './chase.js';
 
 export {
     halo,
@@ -28,5 +29,6 @@ export {
     skillTree,
     study,
     towerBoss,
-    utils
+    utils,
+    chase
 };
