@@ -46,7 +46,7 @@
             <a-divider
                 dashed
                 style="border-color: #ddd4"
-                :type="isMobile ? 'horizontal' : 'vertical'"
+                type="vertical"
                 id="divider-vertical"
             ></a-divider>
             <div id="item-sell-info">
@@ -455,5 +455,25 @@ onUnmounted(() => {
 
 #sell-total {
     transition: color 0.2s linear;
+}
+
+@media screen and (max-width: 600px) {
+    #shop {
+        width: 90vw;
+        padding-top: 5vh;
+        font-size: 3.8vw;
+    }
+
+    #item-list {
+        width: 40vw;
+    }
+
+    #shop-bottom {
+        width: 90vw;
+    }
+
+    #item-sell-info {
+        width: 50vw;
+    }
 }
 </style>
