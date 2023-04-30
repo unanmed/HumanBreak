@@ -32,14 +32,34 @@ export function useDrag(
     onup?: (e: MouseEvent | TouchEvent) => void,
     global: boolean = false
 ) {
-    let down = false;
+    const touchFn = (e: TouchEvent) => {
+        const ele = global ? document : e.target;
+        if (ele) {
+            (ele as HTMLElement).removeEventListener('touchmove', touchFn);
+        }
+        fn(e.touches[0].clientX, e.touches[0].clientY, e);
+    };
+
+    const mouseUp = (e: MouseEvent) => {
+        const ele = global ? document : e.target;
+        if (ele) {
+            (ele as HTMLElement).removeEventListener('mousemove', mouseFn);
+        }
+        onup && onup(e);
+    };
 
     const md = (e: MouseEvent) => {
-        down = true;
+        const ele = global ? document : e.target;
+        if (ele) {
+            (ele as HTMLElement).addEventListener('mousemove', mouseFn);
+        }
         if (ondown) ondown(e.clientX, e.clientY, e);
     };
     const td = (e: TouchEvent) => {
-        down = true;
+        const ele = global ? document : e.target;
+        if (ele) {
+            (ele as HTMLElement).addEventListener('touchmove', touchFn);
+        }
         if (ondown) ondown(e.touches[0].clientX, e.touches[0].clientY, e);
     };
 
@@ -56,39 +76,21 @@ export function useDrag(
     const target = global ? document : ele;
 
     const mouseFn = (e: MouseEvent) => {
-        if (!down) return;
         fn(e.clientX, e.clientY, e);
     };
 
-    const touchFn = (e: TouchEvent) => {
-        if (!down) return;
-        fn(e.touches[0].clientX, e.touches[0].clientY, e);
-    };
-
-    const mouseUp = (e: MouseEvent) => {
-        if (!down) return;
-        onup && onup(e);
-        down = false;
-    };
-
     const touchUp = (e: TouchEvent) => {
-        if (!down) return;
         onup && onup(e);
-        down = false;
     };
 
     if (target instanceof Array) {
         target.forEach(v => {
             v.addEventListener('mouseup', mouseUp);
             v.addEventListener('touchend', touchUp);
-            v.addEventListener('mousemove', mouseFn);
-            v.addEventListener('touchmove', touchFn);
         });
     } else {
         target.addEventListener('mouseup', mouseUp as EventListener);
         target.addEventListener('touchend', touchUp as EventListener);
-        target.addEventListener('mousemove', mouseFn as EventListener);
-        target.addEventListener('touchmove', touchFn as EventListener);
     }
     dragFnMap.set(fn, [mouseFn, touchFn, mouseUp, touchUp]);
 }
