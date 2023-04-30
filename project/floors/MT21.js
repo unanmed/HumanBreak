@@ -28,8 +28,14 @@ main.floors.MT21=
                         "yes": [
                             "计分方式：生命+黄*5000+蓝*15000",
                             {
+                                "type": "setValue",
+                                "name": "status:hp",
+                                "operator": "+=",
+                                "value": "item:yellowKey*5000+item:blueKey*15000"
+                            },
+                            {
                                 "type": "win",
-                                "reason": "智慧之始"
+                                "reason": "智慧之始-new"
                             },
                             {
                                 "type": "exit"
