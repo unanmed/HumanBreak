@@ -59,7 +59,9 @@ export {};
         )
             return;
         // 首先重新加载main.floors对应的楼层
-        await import(`/project/floors/${data}.js?v=${Date.now()}`);
+        await import(
+            /* @vite-ignore */ `./project/floors/${data}.js?v=${Date.now()}`
+        );
         // 然后写入core.floors并解析
         core.floors[data] = main.floors[data];
         const floor = core.loadFloor(data);
@@ -127,7 +129,7 @@ export {};
 
     async function reloadPlugin(data) {
         // 直接import就完事了
-        await import(`/project/plugin/${data}.js?v=${Date.now()}`);
+        await import(/* @vite-ignore */ `./src/plugin/game/${data}.js`);
         console.log(`plugin hot reload: ${data}.js`);
     }
 

@@ -92,7 +92,7 @@ export function useDrag(
         target.addEventListener('mouseup', mouseUp as EventListener);
         target.addEventListener('touchend', touchUp as EventListener);
     }
-    dragFnMap.set(fn, [mouseFn, touchFn, mouseUp, touchUp]);
+    dragFnMap.set(fn, [mouseUp, touchUp]);
 }
 
 /**
@@ -103,8 +103,6 @@ export function cancelGlobalDrag(fn: DragFn): void {
     const fns = dragFnMap.get(fn);
     dragFnMap.delete(fn);
     if (!fns) return;
-    document.removeEventListener('mousemove', fns[0]);
-    document.removeEventListener('touchmove', fns[1]);
     document.removeEventListener('mouseup', fns[0]);
     document.removeEventListener('touchend', fns[1]);
 }

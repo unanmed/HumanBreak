@@ -17,6 +17,7 @@ import * as study from './study.js';
 import * as towerBoss from './towerBoss.js';
 import * as utils from './utils.js';
 import * as chase from './chase.js';
+import * as damage from './damage';
 
 export {
     halo,
@@ -30,5 +31,6 @@ export {
     study,
     towerBoss,
     utils,
-    chase
+    chase,
+    damage
 };

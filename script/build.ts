@@ -4,6 +4,9 @@ import fse from 'fs-extra';
 import Fontmin from 'fontmin';
 import * as babel from '@babel/core';
 import * as rollup from 'rollup';
+import typescript from '@rollup/plugin-typescript';
+import rollupBabel from '@rollup/plugin-babel';
+import terser from '@rollup/plugin-terser';
 
 (async function () {
     const timestamp = Date.now();
@@ -113,18 +116,31 @@ import * as rollup from 'rollup';
 
     // 3. 压缩js插件
     try {
+        await fse.remove('./dist/project/plugin.min.js');
+
         const build = await rollup.rollup({
-            input: 'public/project/plugin/index.js'
+            input: 'src/plugin/game/index.js',
+            plugins: [
+                typescript({
+                    sourceMap: false
+                }),
+                rollupBabel({
+                    babelHelpers: 'bundled',
+                    sourceType: 'module'
+                }),
+                terser()
+            ]
         });
-        const code = await build.generate({
+        await build.write({
             format: 'iife',
-            name: 'CorePlugin'
+            name: 'CorePlugin',
+            file: './dist/project/plugin.min.js'
         });
-        const compressed = babel.transformSync(code.output[0].code)?.code!;
-        await fs.writeFile('./dist/project/plugin.min.js', compressed, 'utf-8');
 
         await fse.remove('./dist/project/plugin/');
     } catch (e) {
+        console.log(e);
+
         console.log('压缩插件失败');
     }
 

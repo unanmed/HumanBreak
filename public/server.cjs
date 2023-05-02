@@ -41,9 +41,11 @@ next();
 const listenedFloors = [];
 const listenedPlugins = [];
 
+const pluginBase = 'public/plugin/game';
+
 const hasPlugin = (function () {
     try {
-        fss.readdirSync('./project/plugin');
+        fss.readdirSync(pluginBase);
         return true;
     } catch {
         return false;
@@ -339,7 +341,7 @@ async function watch() {
     });
 
     // 脚本编辑 热重载
-    const scripts = await extract('project/functions.js', 'project/plugins.js');
+    const scripts = await extract('project/functions.js');
     scripts.forEach(v => {
         const dir = path.resolve(__dirname, v);
         const type = v.split('/').at(-1).slice(0, -3);
@@ -351,9 +353,11 @@ async function watch() {
 
     // 插件热重载
     if (hasPlugin) {
-        const plugins = await extract('project/plugin/*.js');
+        const plugins = (await extract('../src/plugin/game/*.js')).concat(
+            await extract('../src/plugin/game/*.ts')
+        );
         plugins.forEach(v => {
-            watchOnePlugin(v.slice(15));
+            watchOnePlugin(v.slice(19));
         });
     }
 
@@ -390,9 +394,9 @@ function testWatchFloor(url) {
  */
 function testWatchPlugin(url) {
     if (!hasPlugin) return;
-    if (/project(\/|\\)plugin(\/|\\).*\.js/.test(url)) {
-        const f = url.slice(15);
-        if (!listenedFloors.includes(f.slice(0, -3))) {
+    if (/src(\/|\\)plugin(\/|\\)game(\/|\\).*\.(js|ts)/.test(url)) {
+        const f = url.slice(19);
+        if (!listenedPlugins.includes(f.slice(0, -3))) {
             watchOnePlugin(f);
         }
     }
@@ -419,15 +423,19 @@ function watchOneFloor(file) {
  * @param {string} file 要监听的文件
  */
 function watchOnePlugin(file) {
-    if (!/.*\.js/.test(file)) return;
+    if (!/.*\.(js|ts)/.test(file)) return;
     const f = file.slice(0, -3);
     listenedPlugins.push(file.slice(0, -3));
-    fss.watchFile(`project/plugin/${file}`, { interval: 500 }, () => {
-        const plugin = f;
-        if (hotReloadData.includes(`@@plugin:${plugin}`)) return;
-        hotReloadData += `@@plugin:${plugin}`;
-        console.log(`plugin hot reload: ${plugin}`);
-    });
+    fss.watchFile(
+        path.resolve(__dirname, `../src/plugin/game/${file}`),
+        { interval: 500 },
+        () => {
+            const plugin = f;
+            if (hotReloadData.includes(`@@plugin:${plugin}`)) return;
+            hotReloadData += `@@plugin:${plugin}`;
+            console.log(`plugin hot reload: ${plugin}`);
+        }
+    );
 }
 
 /**

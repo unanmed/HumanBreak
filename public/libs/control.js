@@ -44,11 +44,6 @@ control.prototype._init = function () {
     );
     this.registerAnimationFrame('weather', true, this._animationFrame_weather);
     this.registerAnimationFrame('tip', true, this._animateFrame_tip);
-    this.registerAnimationFrame(
-        'parallelDo',
-        false,
-        this._animationFrame_parallelDo
-    );
     // --- 注册系统的天气
     this.registerWeather(
         'rain',
@@ -477,10 +472,6 @@ control.prototype._animateFrame_tip = function (timestamp) {
     if (tip.opacity <= 0) {
         core.animateFrame.tip = null;
     }
-};
-
-control.prototype._animationFrame_parallelDo = function (timestamp) {
-    core.control.controldata.parallelDo(timestamp);
 };
 
 // ------ 标题界面的处理 ------ //

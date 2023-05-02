@@ -30,6 +30,7 @@ interface PluginDeclaration
     hero: GamePluginHeroRealStatus;
     replay: PluginReplay;
     chase: PluginChase;
+    damage: PluginDamage;
 
     skills: Record<Chapter, Skill[]>;
     skillEffects: SkillEffects;
@@ -455,6 +456,12 @@ interface Skill {
     max: number;
     effect: string[];
 }
+
+interface PluginDamage {
+    Enemy: new () => DamageEnemy;
+}
+
+interface DamageEnemy {}
 
 type Forward<T> = {
     [K in keyof T as T[K] extends Function
