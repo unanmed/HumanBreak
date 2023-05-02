@@ -1018,15 +1018,6 @@ events.prototype.pushBox = function (data) {
     if (data.event.id == 'box') core.removeBlock(data.x, data.y);
     else core.setBlock('flower', data.x, data.y);
     // 勇士前进一格，然后触发推箱子后事件
-    core.insertAction([
-        { type: 'moveAction' },
-        { type: 'function', function: 'function() { core.afterPushBox(); }' }
-    ]);
-};
-
-////// 推箱子后的事件 //////
-events.prototype.afterPushBox = function () {
-    return this.eventdata.afterPushBox();
 };
 
 events.prototype._sys_ski = function (data, callback) {

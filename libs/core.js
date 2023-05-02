@@ -343,10 +343,7 @@ core.prototype._loadPlugin = async function () {
     if (main.pluginUseCompress) {
         await main.loadScript(`project/plugin.min.js?v=${main.version}`);
     } else {
-        await main.loadScript(
-            `project/plugin/index.js?v=${main.version}`,
-            true
-        );
+        await main.loadScript(`src/plugin/game/index.js`, true);
     }
 };
 
