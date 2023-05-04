@@ -30,7 +30,6 @@ interface PluginDeclaration
     hero: GamePluginHeroRealStatus;
     replay: PluginReplay;
     chase: PluginChase;
-    damage: PluginDamage;
 
     skills: Record<Chapter, Skill[]>;
     skillEffects: SkillEffects;
@@ -94,6 +93,12 @@ interface PluginDeclaration
      * 重置变量的设置信息
      */
     resetFlagSettings(): void;
+
+    /**
+     * 判定一个值是否不是undefined或null
+     * @param value 要判断的值
+     */
+    has<T>(value: T): value is NonNullable<T>;
 }
 
 interface GamePluginUtils {
@@ -455,10 +460,6 @@ interface Skill {
     loc: LocArr;
     max: number;
     effect: string[];
-}
-
-interface PluginDamage {
-    Enemy: new () => DamageEnemy;
 }
 
 interface DamageEnemy {}
