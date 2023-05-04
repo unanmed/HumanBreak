@@ -1,5 +1,6 @@
+import { getHeroStatusOf, getHeroStatusOn } from './hero';
 import { Range, RangeCollection } from './range';
-import { ensureArray } from './utils';
+import { ensureArray, has } from './utils';
 
 interface HaloType {
     square: {
@@ -9,7 +10,23 @@ interface HaloType {
     };
 }
 
-type HaloFn<T extends EnemyIds = EnemyIds> = (enemy: Enemy<T>) => Enemy<T>;
+interface EnemyInfo {
+    atk: number;
+    def: number;
+    hp: number;
+    special: number[];
+    damageDecline: number;
+    atkBuff: number;
+    defBuff: number;
+    hpBuff: number;
+    together: number;
+}
+
+interface DamageInfo {
+    damage: number;
+}
+
+type HaloFn = (info: EnemyInfo, enemy: Enemy) => void;
 
 export const haloSpecials: number[] = [21, 25, 26, 27];
 
@@ -41,7 +58,7 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
      * @param type 光环的范围类型
      * @param data 光环范围信息
      * @param halo 光环效果函数
-     * @param recursion 是否递归施加，一般只有在光环预平衡阶段会使用到
+     * @param recursion 是否递归施加，只有在光环预平衡阶段会使用到
      */
     applyHalo<K extends keyof HaloType>(
         type: K,
@@ -50,12 +67,31 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
         recursion: boolean = false
     ) {
         const arr = ensureArray(halo);
+        const enemy = this.range.scan(type, data);
+        if (!recursion) {
+            arr.forEach(v => {
+                enemy.forEach(e => {
+                    e.injectHalo(v);
+                });
+            });
+        } else {
+            enemy.forEach(e => {
+                arr.forEach(v => {
+                    e.injectHalo(v);
+                    e.preProvideHalo();
+                });
+            });
+        }
     }
 
     /**
      * 预平衡光环
      */
-    preBalanceHalo() {}
+    preBalanceHalo() {
+        this.list.forEach(v => {
+            v.preProvideHalo();
+        });
+    }
 }
 
 export class DamageEnemy<T extends EnemyIds = EnemyIds> {
@@ -65,10 +101,15 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     floorId?: FloorIds;
     enemy: Enemy<T>;
 
-    /** 计算特殊属性但不计算光环的属性 */
-    noHaloInfo?: Enemy<T>;
-    /** 既计算特殊属性又计算光环的属性 */
-    realInfo?: Enemy<T>;
+    /** 怪物属性 */
+    info!: EnemyInfo;
+    /** 是否需要计算属性 */
+    needCalculate: boolean = true;
+    /** 怪物伤害 */
+    damage?: DamageInfo;
+    /** 是否需要计算伤害 */
+    needCalDamage: boolean = true;
+
     /** 向其他怪提供过的光环 */
     providedHalo: number[] = [];
 
@@ -78,19 +119,99 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         this.x = x;
         this.y = y;
         this.floorId = floorId;
+        this.reset();
     }
 
     reset() {
-        delete this.noHaloInfo;
-        delete this.realInfo;
+        const enemy = this.enemy;
+        this.info = {
+            hp: enemy.hp,
+            atk: enemy.atk,
+            def: enemy.def,
+            special: enemy.special.slice(),
+            damageDecline: 0,
+            atkBuff: 0,
+            defBuff: 0,
+            hpBuff: 0,
+            together: 0
+        };
+        this.needCalculate = true;
+        this.needCalDamage = true;
     }
 
-    calAttribute() {}
+    /**
+     * 计算怪物在不计光环下的属性，在inject光环之前，预平衡光环之后执行
+     * @param hero 勇士属性
+     * @param getReal 是否获取勇士真实属性，默认获取
+     * @returns
+     */
+    calAttribute(
+        hero: Partial<HeroStatus> = core.status.hero,
+        getReal: boolean = true
+    ) {
+        if (!this.needCalculate) return;
+        const special = this.info.special;
+        const info = this.info;
+        const enemy = this.enemy;
+        const floorId = this.floorId ?? core.status.floorId;
+        const { atk } = getReal
+            ? getHeroStatusOf(hero, ['atk'], hero.x, hero.y, hero.floorId)
+            : hero;
+
+        if (!has(atk)) return;
+
+        // 饥渴
+        if (special.includes(7)) {
+            info.atk += (atk * (enemy.hungry ?? 0)) / 100;
+        }
+
+        // 智慧之源
+        if (flags.hard === 2 && special.includes(14)) {
+            info.atk += flags[`inte_${floorId}`] ?? 0;
+        }
+
+        // 极昼永夜
+        info.atk -= flags[`night_${floorId}`] ?? 0;
+        info.def -= flags[`night_${floorId}`] ?? 0;
+
+        // 坚固
+        if (special.includes(3) && enemy.def < atk - 1) {
+            info.def = atk - 1;
+        }
+
+        // 融化，融化不属于怪物光环，因此不能用provide和inject计算，需要在这里计算
+        if (has(flags[`melt_${floorId}`]) && has(this.x) && has(this.y)) {
+            for (const [loc, per] of Object.entries(flags[`melt_${floorId}`])) {
+                const [mx, my] = loc.split(',').map(v => parseInt(v));
+                if (Math.abs(mx - this.x) <= 1 && Math.abs(my - this.y) <= 1) {
+                    info.atkBuff += per as number;
+                    info.defBuff += per as number;
+                }
+            }
+        }
+    }
+
+    /**
+     * 获取怪物的真实属性信息，在inject光环后执行
+     */
+    getRealInfo() {
+        if (!this.needCalculate) return this.info;
+
+        // 此时已经inject光环，因此直接计算真实属性
+        const info = this.info;
+        info.atk *= info.atkBuff / 100 + 1;
+        info.def *= info.defBuff / 100 + 1;
+        info.hp *= info.hpBuff / 100 + 1;
+
+        this.needCalculate = false;
+
+        return this.info;
+    }
 
     getHaloSpecials(): number[] {
         if (!this.floorId) return [];
         if (!core.has(this.x) || !core.has(this.y)) return [];
-        const special = this.realInfo?.special ?? this.enemy.special;
+        const special = this.info.special ?? this.enemy.special;
         const filter = special.filter(v => {
             return haloSpecials.includes(v) && !this.providedHalo.includes(v);
         });
@@ -113,21 +234,72 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
      * 向其他怪提供光环
      */
     provideHalo() {
+        if (!this.floorId) return;
+        if (!core.has(this.x) || !core.has(this.y)) return;
+        const collection = core.status.maps[this.floorId].enemy;
         const speical = this.getHaloSpecials();
 
         const square7: HaloFn[] = [];
+        const square5: HaloFn[] = [];
 
-        if (speical.includes(21)) {
+        if (speical.includes(8)) {
+            square5.push((e, enemy) => {
+                if (e === this.info) e.together += enemy.together ?? 0;
+            });
+            this.providedHalo.push(8);
         }
+
+        // 冰封光环
+        if (speical.includes(21)) {
+            square7.push((e, enemy) => {
+                e.damageDecline += enemy.iceDecline ?? 0;
+            });
+            this.providedHalo.push(21);
+        }
+
+        // 冰封之核
+        if (speical.includes(26)) {
+            square5.push((e, enemy) => {
+                e.defBuff += enemy.iceCore ?? 0;
+            });
+            this.providedHalo.push(26);
+        }
+
+        // 火焰之核
+        if (speical.includes(27)) {
+            square5.push((e, enemy) => {
+                e.atkBuff += enemy.fireCore ?? 0;
+            });
+            this.providedHalo.push(27);
+        }
+
+        collection.applyHalo('square', { x: this.x, y: this.y, d: 7 }, square7);
+        collection.applyHalo('square', { x: this.x, y: this.y, d: 5 }, square5);
     }
 
     /**
      * 接受其他怪的光环
      */
-    injectHalo(halo: HaloFn<T>) {}
+    injectHalo(halo: HaloFn) {
+        halo.call(this, this.info, this.enemy);
+    }
 
-    calDamage() {}
+    /**
+     * 计算怪物伤害
+     */
+    calDamage() {
+        if (!this.needCalDamage) return this.damage!;
+        const info = this.getRealInfo();
+    }
 }
+
+/**
+ * 获取需要计算怪物伤害的方向
+ * @param x 怪物横坐标
+ * @param y 怪物纵坐标
+ * @param floorId 怪物所在楼层
+ */
+export function getNeedCalDir(x: number, y: number, floorId: FloorIds) {}
 
 declare global {
     interface PluginDeclaration {

@@ -968,4 +968,8 @@ interface HeroStatus {
         last: [];
         [k: string]: any;
     };
+
+    x?: number;
+    y?: number;
+    floorId?: FloorIds;
 }

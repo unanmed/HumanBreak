@@ -15,7 +15,12 @@ type PartialNumbericEnemyProperty =
     | 'purify'
     | 'atkValue'
     | 'defValue'
-    | 'damage';
+    | 'damage'
+    | 'iceDecline'
+    | 'iceCore'
+    | 'fireCore'
+    | 'together'
+    | 'hungry';
 
 type BooleanEnemyProperty =
     | 'zoneSquare'
