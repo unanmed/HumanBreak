@@ -1,6 +1,6 @@
 import { getHeroStatusOf, getHeroStatusOn } from './hero';
 import { Range, RangeCollection } from './range';
-import { ensureArray, has } from './utils';
+import { backDir, ensureArray, has, ofDir } from './utils';
 
 interface HaloType {
     square: {
@@ -101,7 +101,11 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     floorId?: FloorIds;
     enemy: Enemy<T>;
 
-    /** 怪物属性 */
+    /**
+     * 怪物属性。
+     * 属性计算流程：预平衡光环(即计算加光环的光环怪的光环) -> 计算怪物在没有光环下的属性
+     * -> provide inject 光环 -> 计算怪物的光环加成 -> 计算完毕
+     */
     info!: EnemyInfo;
     /** 是否需要计算属性 */
     needCalculate: boolean = true;
@@ -143,7 +147,6 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
      * 计算怪物在不计光环下的属性，在inject光环之前，预平衡光环之后执行
      * @param hero 勇士属性
      * @param getReal 是否获取勇士真实属性，默认获取
-     * @returns
      */
     calAttribute(
         hero: Partial<HeroStatus> = core.status.hero,
@@ -294,12 +297,58 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
 }
 
 /**
+ * 计算伤害时会用到的勇士属性，攻击防御，其余的不会有buff加成，直接从core.status.hero取
+ */
+const realStatus: (keyof HeroStatus)[] = ['atk', 'def'];
+
+/**
  * 获取需要计算怪物伤害的方向
  * @param x 怪物横坐标
  * @param y 怪物纵坐标
  * @param floorId 怪物所在楼层
  */
-export function getNeedCalDir(x: number, y: number, floorId: FloorIds) {}
+export function getNeedCalDir(
+    x: number,
+    y: number,
+    floorId: FloorIds,
+    hero: Partial<HeroStatus> = core.status.hero
+): [Dir | 'none', Partial<HeroStatus>][] {
+    // 第一章或序章，用不到这个函数
+    if (flags.chapter < 2) {
+        return [['none', getHeroStatusOf(hero, realStatus, x, y, floorId)]];
+    }
+
+    // 如果指定了勇士坐标
+    if (has(hero.x) && has(hero.y)) {
+        const { x, y, floorId } = hero;
+        if (has(floorId)) {
+            return [['none', getHeroStatusOf(hero, realStatus, x, y, floorId)]];
+        } else {
+            return [['none', getHeroStatusOf(hero, realStatus, x, y, floorId)]];
+        }
+    }
+
+    const needMap: Dir[] = ['left', 'down', 'right', 'up'];
+    const { width, height } = core.status.maps[floorId];
+    const blocks = core.getMapBlocksObj(floorId);
+
+    return needMap
+        .filter(v => {
+            const [tx, ty] = ofDir(x, y, v);
+            if (tx < 0 || ty < 0 || tx >= width || ty >= height) return false;
+            const index = `${tx},${ty}` as LocString;
+            const block = blocks[index];
+            if (block.event.noPass) return false;
+            if (!core.canMoveHero(tx, ty, backDir(v), floorId)) return false;
+
+            return true;
+        })
+        .map(v => {
+            const [tx, ty] = ofDir(x, y, v);
+            const status = getHeroStatusOf(hero, realStatus, tx, ty, floorId);
+            return [v, status];
+        });
+}
 
 declare global {
     interface PluginDeclaration {

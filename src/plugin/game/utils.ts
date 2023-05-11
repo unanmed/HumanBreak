@@ -52,10 +52,22 @@ export function ensureArray<T>(arr: T): T extends any[] ? T : T[] {
     return arr instanceof Array ? arr : [arr];
 }
 
+export function ofDir(x: number, y: number, dir: Dir2): LocArr {
+    const { x: dx, y: dy } = core.utils.scan2[dir];
+    return [x + dx, y + dy];
+}
+
+declare global {
+    interface GamePluginUtils {
+        ofDir: typeof ofDir;
+    }
+}
+
 core.plugin.utils = {
     slide,
     backDir,
     has,
-    maxGameScale
+    maxGameScale,
+    ofDir
 };
 core.has = has;
