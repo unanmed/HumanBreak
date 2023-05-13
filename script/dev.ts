@@ -537,6 +537,7 @@ async function startWsServer(port: number = 8080) {
             });
         });
     };
+    return tryNext();
 }
 
 (async function () {

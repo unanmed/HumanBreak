@@ -5,33 +5,6 @@ export {};
     if (main.mode !== 'play' || main.replayChecking) return;
 
     /**
-     * 发送请求
-     * @param {string} url
-     * @param {string} type
-     * @param {string} data
-     * @returns {Promise<string>}
-     */
-    async function post(url, type, data) {
-        const xhr = new XMLHttpRequest();
-        xhr.open(type, url);
-        xhr.send(data);
-        const res = await new Promise(res => {
-            xhr.onload = () => {
-                if (xhr.status !== 200) {
-                    console.error(`hot reload: http ${xhr.status}`);
-                    res('@error');
-                } else res('success');
-            };
-            xhr.onerror = () => {
-                res('@error');
-                console.error(`hot reload: error on connection`);
-            };
-        });
-        if (res === 'success') return xhr.response;
-        else return '@error';
-    }
-
-    /**
      * 热重载css
      * @param {string} data
      */
@@ -44,7 +17,7 @@ export {};
         link.href = data;
         link.id = 'mota-css';
         document.head.appendChild(link);
-        console.log(`css hot reload: ${data}`);
+        console.log(`Css hot reload: ${data}`);
     }
 
     /**
@@ -60,7 +33,7 @@ export {};
             return;
         // 首先重新加载main.floors对应的楼层
         await import(
-            /* @vite-ignore */ `./project/floors/${data}.js?v=${Date.now()}`
+            /* @vite-ignore */ `/forceTem/project/floors/${data}.js?v=${Date.now()}`
         );
         // 然后写入core.floors并解析
         core.floors[data] = main.floors[data];
@@ -79,19 +52,18 @@ export {};
             }
             core.updateStatusBar(true, true);
         }
-        console.log(`floor hot reload: ${data}`);
+        console.log(`Floor hot reload: ${data}`);
     }
 
     /**
      * 热重载脚本编辑
-     * @param {string} data
      */
     async function reloadScript() {
         // 脚本编辑略微麻烦点
         const before = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a;
         // 这里不能用动态导入，因为动态导入会变成模块，变量就不是全局的了
         const script = document.createElement('script');
-        script.src = `/project/functions.js?v=${Date.now()}`;
+        script.src = `/forceTem/project/functions.js?v=${Date.now()}`;
         document.body.appendChild(script);
         await new Promise(res => {
             script.onload = () => res('success');
@@ -118,7 +90,7 @@ export {};
                             core.ui.uidata[id] = now;
                         }
                         core.updateStatusBar(true, true);
-                        console.log(`function hot reload: ${mod}.${id}`);
+                        console.log(`Function hot reload: ${mod}.${id}`);
                     } catch (e) {
                         console.error(e);
                     }
@@ -127,19 +99,13 @@ export {};
         }
     }
 
-    async function reloadPlugin(data) {
-        // 直接import就完事了
-        await import(/* @vite-ignore */ `./src/plugin/game/${data}.js`);
-        console.log(`plugin hot reload: ${data}.js`);
-    }
-
     /**
      * 属性热重载，包括全塔属性等
      * @param {string} data
      */
     async function reloadData(data) {
         const script = document.createElement('script');
-        script.src = `/project/${data}.js?v=${Date.now()}`;
+        script.src = `.forceTem/project/${data}.js?v=${Date.now()}`;
         document.body.appendChild(script);
         await new Promise(res => {
             script.onload = () => res('success');
@@ -189,38 +155,19 @@ export {};
             location.reload();
         }
         core.updateStatusBar(true, true);
-        console.log(`data hot reload: ${data}`);
+        console.log(`Data hot reload: ${data}`);
     }
 
-    // 初始化
-    (async function () {
-        const data = await post('/reload', 'POST', 'test');
-        if (data === '@error') {
-            console.log(`未检测到node服务，热重载插件将无法使用`);
-        } else {
-            console.log(`热重载插件加载成功`);
-            // reload
-            setInterval(async () => {
-                const res = await post('/reload', 'POST');
-                if (res === '@error') return;
-                if (res === 'true') location.reload();
-                else return;
-            }, 1000);
-
-            // hot reload
-            setInterval(async () => {
-                const res = await post('/hotReload', 'POST');
-                const data = res.split('@@');
-                data.forEach(v => {
-                    if (v === '') return;
-                    const [type, file] = v.split(':');
-                    if (type === 'css') reloadCss(file);
-                    if (type === 'data') reloadData(file);
-                    if (type === 'floor') reloadFloor(file);
-                    if (type === 'script') reloadScript(file);
-                    if (type === 'plugin') reloadPlugin(file);
-                });
-            }, 1000);
-        }
-    })();
+    const ws = new WebSocket('ws://127.0.0.1:8080');
+    ws.addEventListener('open', () => {
+        console.log(`Web socket connect successfully`);
+    });
+    ws.addEventListener('message', e => {
+        const data = JSON.parse(e.data);
+        if (data.type === 'reload') location.reload();
+        if (data.type === 'floorHotReload') reloadFloor(data.floor);
+        if (data.type === 'dataHotReload') reloadData(data.data);
+        if (data.type === 'functionsHotReload') reloadScript();
+        if (data.type === 'cssHotReload') reloadCss(data.path);
+    });
 })();
