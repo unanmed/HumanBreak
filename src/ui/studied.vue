@@ -13,7 +13,7 @@
                     <div v-for="(num, i) of studied" :key="i">
                         <div id="studied-rough">
                             <right-outlined
-                                :folded="!!folded[i]"
+                                :class="folded[i] ? 'folded' : ''"
                                 @click="folded[i] = !folded[i]"
                                 id="studied-fold"
                             />
@@ -109,7 +109,7 @@ onMounted(() => {
     transition: transform 0.2s ease-out;
 }
 
-#studied-fold[folded='true'] {
+#studied-fold.folded {
     transform: rotate(90deg);
 }
 </style>
