@@ -314,75 +314,76 @@ async function writeMultiFiles(req: Request, res: Response) {
  * @param {string} data 信息
  */
 async function doDeclaration(type: string, data: string) {
-    const buf = Buffer.from(data, 'base64');
-    data = buf.toString('utf-8');
-    if (type === 'events') {
-        // 事件
-        const eventData = JSON.parse(data.split('\n').slice(1).join(''));
+    try {
+        const buf = Buffer.from(data, 'base64');
+        data = buf.toString('utf-8');
+        if (type === 'events') {
+            // 事件
+            const eventData = JSON.parse(data.split('\n').slice(1).join(''));
 
-        let eventDec = 'type EventDeclaration = \n';
-        for (const id in eventData.commonEvent) {
-            eventDec += `    | '${id}'\n`;
-        }
-        await fs.writeFile('../src/source/events.d.ts', eventDec, 'utf-8');
-    } else if (type === 'items') {
-        // 道具
-        const itemData = JSON.parse(data.split('\n').slice(1).join(''));
+            let eventDec = 'type EventDeclaration = \n';
+            for (const id in eventData.commonEvent) {
+                eventDec += `    | '${id}'\n`;
+            }
+            await fs.writeFile('src/source/events.d.ts', eventDec, 'utf-8');
+        } else if (type === 'items') {
+            // 道具
+            const itemData = JSON.parse(data.split('\n').slice(1).join(''));
 
-        let itemDec = 'interface ItemDeclaration {\n';
-        for (const id in itemData) {
-            itemDec += `    ${id}: '${itemData[id].cls}';\n`;
-        }
-        itemDec += '}';
-        await fs.writeFile('../src/source/items.d.ts', itemDec, 'utf-8');
-    } else if (type === 'maps') {
-        // 映射
-        const d = JSON.parse(data.split('\n').slice(1).join(''));
+            let itemDec = 'interface ItemDeclaration {\n';
+            for (const id in itemData) {
+                itemDec += `    ${id}: '${itemData[id].cls}';\n`;
+            }
+            itemDec += '}';
+            await fs.writeFile('src/source/items.d.ts', itemDec, 'utf-8');
+        } else if (type === 'maps') {
+            // 映射
+            const d = JSON.parse(data.split('\n').slice(1).join(''));
 
-        let id2num = 'interface IdToNumber {\n';
-        let num2id = 'interface NumberToId {\n';
-        let id2cls = 'interface IdToCls {\n';
-        for (const num in d) {
-            const { id, cls } = d[num];
-            id2num += `    ${id}: ${num};\n`;
-            num2id += `    ${num}: '${id}';\n`;
-            id2cls += `    ${id}: '${cls}';\n`;
-        }
-        id2cls += '}';
-        id2num += '}';
-        num2id += '}';
-        await fs.writeFile('../src/source/cls.d.ts', id2cls, 'utf-8');
-        await fs.writeFile(
-            '../src/source/maps.d.ts',
-            `${id2num}\n${num2id}`,
-            'utf-8'
-        );
-    } else if (type === 'data') {
-        // 全塔属性的注册信息
-        const d = JSON.parse(data.split('\n').slice(1).join('')).main;
+            let id2num = 'interface IdToNumber {\n';
+            let num2id = 'interface NumberToId {\n';
+            let id2cls = 'interface IdToCls {\n';
+            for (const num in d) {
+                const { id, cls } = d[num];
+                id2num += `    ${id}: ${num};\n`;
+                num2id += `    ${num}: '${id}';\n`;
+                id2cls += `    ${id}: '${cls}';\n`;
+            }
+            id2cls += '}';
+            id2num += '}';
+            num2id += '}';
+            await fs.writeFile('src/source/cls.d.ts', id2cls, 'utf-8');
+            await fs.writeFile(
+                'src/source/maps.d.ts',
+                `${id2num}\n${num2id}`,
+                'utf-8'
+            );
+        } else if (type === 'data') {
+            // 全塔属性的注册信息
+            const d = JSON.parse(data.split('\n').slice(1).join('')).main;
 
-        let floorId = 'type FloorIds =\n';
-        let imgs = 'type ImageIds =\n';
-        let anis = 'type AnimationIds =\n';
-        let sounds = 'type SoundIds =\n';
-        let names = 'interface NameMap {\n';
-        let bgms = 'type BgmIds =\n';
-        let fonts = 'type FontIds =\n';
+            let floorId = 'type FloorIds =\n';
+            let imgs = 'type ImageIds =\n';
+            let anis = 'type AnimationIds =\n';
+            let sounds = 'type SoundIds =\n';
+            let names = 'interface NameMap {\n';
+            let bgms = 'type BgmIds =\n';
+            let fonts = 'type FontIds =\n';
 
-        floorId += d.floorIds.map((v: any) => `    | '${v}'\n`).join('');
-        imgs += d.images.map((v: any) => `    | '${v}'\n`).join('');
-        anis += d.animates.map((v: any) => `    | '${v}'\n`).join('');
-        sounds += d.sounds.map((v: any) => `    | '${v}'\n`).join('');
-        bgms += d.bgms.map((v: any) => `    | '${v}'\n`).join('');
-        fonts += d.fonts.map((v: any) => `    | '${v}'\n`).join('');
-        for (const name in d.nameMap) {
-            names += `    '${name}': '${d.nameMap[name]}';\n`;
-        }
-        names += '}';
+            floorId += d.floorIds.map((v: any) => `    | '${v}'\n`).join('');
+            imgs += d.images.map((v: any) => `    | '${v}'\n`).join('');
+            anis += d.animates.map((v: any) => `    | '${v}'\n`).join('');
+            sounds += d.sounds.map((v: any) => `    | '${v}'\n`).join('');
+            bgms += d.bgms.map((v: any) => `    | '${v}'\n`).join('');
+            fonts += d.fonts.map((v: any) => `    | '${v}'\n`).join('');
+            for (const name in d.nameMap) {
+                names += `    '${name}': '${d.nameMap[name]}';\n`;
+            }
+            names += '}';
 
-        await fs.writeFile(
-            '../src/source/data.d.ts',
-            `
+            await fs.writeFile(
+                'src/source/data.d.ts',
+                `
 ${floorId}
 ${d.images.length > 0 ? imgs : 'type ImageIds = never\n'}
 ${d.animates.length > 0 ? anis : 'type AnimationIds = never\n'}
@@ -391,8 +392,11 @@ ${d.bgms.length > 0 ? bgms : 'type BgmIds = never\n'}
 ${d.fonts.length > 0 ? fonts : 'type FontIds = never\n'}
 ${names}
 `,
-            'utf-8'
-        );
+                'utf-8'
+            );
+        }
+    } catch (e) {
+        console.log(e);
     }
 }
 
@@ -496,7 +500,7 @@ function watchProject() {
 
         // 数据热重载
         if (/project(\/|\\).*\.js/.test(path)) {
-            const data = basename(path);
+            const data = basename(path).slice(0, -3);
             ws.send(JSON.stringify({ type: 'dataHotReload', data }));
             console.log(`Data hot reload: ${data}.`);
             return;
@@ -510,7 +514,9 @@ function watchProject() {
         }
 
         // 剩余内容全部reload
-        ws.send(JSON.stringify({ type: 'reload' }));
+        if (!/_.*/.test(path)) {
+            ws.send(JSON.stringify({ type: 'reload' }));
+        }
     });
 }
 

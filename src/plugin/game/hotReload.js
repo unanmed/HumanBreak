@@ -105,7 +105,7 @@ export {};
      */
     async function reloadData(data) {
         const script = document.createElement('script');
-        script.src = `.forceTem/project/${data}.js?v=${Date.now()}`;
+        script.src = `/forceTem/project/${data}.js?v=${Date.now()}`;
         document.body.appendChild(script);
         await new Promise(res => {
             script.onload = () => res('success');
