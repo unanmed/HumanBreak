@@ -15,6 +15,7 @@ import nodeResolve from '@rollup/plugin-node-resolve';
 import EventEmitter from 'events';
 import { WebSocket, WebSocketServer } from 'ws';
 import chokidar from 'chokidar';
+import commonjs from '@rollup/plugin-commonjs';
 
 const base = './public';
 
@@ -144,10 +145,13 @@ async function getEsmFile(
             },
             cache: true,
             watch: {
-                exclude: '**/node_modules/**',
-                buildDelay: 200
+                exclude: '**/node_modules/**'
             },
-            plugins: [typescript({ sourceMap: true }), nodeResolve()],
+            plugins: [
+                typescript({ sourceMap: true }),
+                nodeResolve(),
+                commonjs()
+            ],
             onwarn() {}
         });
 
@@ -479,7 +483,8 @@ function watchProject() {
             '**/_save/**',
             /\.min\./,
             /(^|[\/\\])\../,
-            /(^|[\/\\])[^a-zA-Z:\._0-9\/\\]/
+            /(^|[\/\\])[^a-zA-Z:\._0-9\/\\]/,
+            /_.*/
         ]
     });
     watcher.on('change', async path => {
@@ -514,9 +519,7 @@ function watchProject() {
         }
 
         // 剩余内容全部reload
-        if (!/_.*/.test(path)) {
-            ws.send(JSON.stringify({ type: 'reload' }));
-        }
+        ws.send(JSON.stringify({ type: 'reload' }));
     });
 }
 

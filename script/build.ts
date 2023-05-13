@@ -7,6 +7,8 @@ import * as rollup from 'rollup';
 import typescript from '@rollup/plugin-typescript';
 import rollupBabel from '@rollup/plugin-babel';
 import terser from '@rollup/plugin-terser';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
 
 (async function () {
     const timestamp = Date.now();
@@ -128,7 +130,9 @@ import terser from '@rollup/plugin-terser';
                     babelHelpers: 'bundled',
                     sourceType: 'module'
                 }),
-                terser()
+                terser(),
+                resolve(),
+                commonjs()
             ]
         });
         await build.write({
