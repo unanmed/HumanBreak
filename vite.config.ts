@@ -47,13 +47,18 @@ export default defineConfig({
             '/makeDir': FSHOST,
             '/moveFile': FSHOST,
             '/deleteFile': FSHOST,
-            '/reload': FSHOST,
-            '/hotReload': FSHOST,
             '^/all/.*': {
                 target: FSHOST,
                 changeOrigin: true,
                 rewrite(path) {
                     return path.replace(/^\/all/, '');
+                },
+            },
+            '^/forceTem/.*': {
+                target: FSHOST,
+                changeOrigin: true,
+                rewrite(path) {
+                    return path.replace(/^\/forceTem/, '');
                 },
             }
         },

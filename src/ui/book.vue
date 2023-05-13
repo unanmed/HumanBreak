@@ -38,7 +38,7 @@
 </template>
 
 <script setup lang="tsx">
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 import { sleep } from 'mutate-animate';
 import { onMounted, onUnmounted, ref } from 'vue';
 import EnemyOne from '../components/enemyOne.vue';

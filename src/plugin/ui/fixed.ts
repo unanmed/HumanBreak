@@ -1,4 +1,4 @@
-import { cloneDeep, debounce } from 'lodash';
+import { cloneDeep, debounce } from 'lodash-es';
 import { ref } from 'vue';
 import { getDamageColor } from '../utils';
 

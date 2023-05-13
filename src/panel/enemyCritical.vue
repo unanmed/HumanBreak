@@ -91,7 +91,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { getCriticalDamage, getDefDamage } from '../plugin/ui/book';
 import Chart, { ChartConfiguration } from 'chart.js/auto';
 import { has, setCanvasSize } from '../plugin/utils';
-import { debounce } from 'lodash';
+import { debounce } from 'lodash-es';
 import { isMobile } from '../plugin/use';
 
 const props = defineProps<{

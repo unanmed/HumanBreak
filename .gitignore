@@ -33,3 +33,4 @@ dist.rar
 *.h5route
 index.cjs
 !public/swap/*.h5save
+_bundle
