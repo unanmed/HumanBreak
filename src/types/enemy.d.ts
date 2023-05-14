@@ -20,7 +20,11 @@ type PartialNumbericEnemyProperty =
     | 'iceCore'
     | 'fireCore'
     | 'together'
-    | 'hungry';
+    | 'hungry'
+    | 'ice'
+    | 'crit'
+    | 'courage'
+    | 'charge';
 
 type BooleanEnemyProperty =
     | 'zoneSquare'

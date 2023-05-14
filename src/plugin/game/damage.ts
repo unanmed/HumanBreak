@@ -20,10 +20,17 @@ interface EnemyInfo {
     defBuff: number;
     hpBuff: number;
     together: number;
+    enemy: Enemy;
 }
 
 interface DamageInfo {
     damage: number;
+    /** 从勇士位置指向怪物的方向 */
+    dir: Dir | 'none';
+    x?: number;
+    y?: number;
+    /** 自动切换技能时使用的技能 */
+    skill?: number;
 }
 
 type HaloFn = (info: EnemyInfo, enemy: Enemy) => void;
@@ -52,6 +59,8 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
     calAttribute(noCache: boolean = false) {}
 
     calDamage(noCache: boolean = false) {}
+
+    calMapDamage(noCache: boolean = false) {}
 
     /**
      * 向怪物施加光环
@@ -110,7 +119,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     /** 是否需要计算属性 */
     needCalculate: boolean = true;
     /** 怪物伤害 */
-    damage?: DamageInfo;
+    damage?: DamageInfo[];
     /** 是否需要计算伤害 */
     needCalDamage: boolean = true;
 
@@ -137,7 +146,8 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
             atkBuff: 0,
             defBuff: 0,
             hpBuff: 0,
-            together: 0
+            together: 0,
+            enemy: this.enemy
         };
         this.needCalculate = true;
         this.needCalDamage = true;
@@ -290,16 +300,70 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     /**
      * 计算怪物伤害
      */
-    calDamage() {
+    calDamage(hero: Partial<HeroStatus> = core.status.hero) {
         if (!this.needCalDamage) return this.damage!;
         const info = this.getRealInfo();
+        const dirs = getNeedCalDir(this.x, this.y, this.floorId, hero);
+
+        const damageCache: Record<string, number> = {};
+
+        return (this.damage = dirs.map(dir => {
+            const status = getHeroStatusOf(hero, realStatus);
+            let damage = calDamageWith(info, status) ?? Infinity;
+            let skill = -1;
+
+            if (flags.autoSkill) {
+                for (let i = 0; i < skills.length; i++) {
+                    const [unlock, condition] = skills[i];
+                    if (!flags[unlock]) continue;
+                    flags[condition] = true;
+                    const status = getHeroStatusOf(hero, realStatus);
+                    const id = `${status.atk},${status.def}`;
+                    const d =
+                        id in damageCache
+                            ? damageCache[id]
+                            : calDamageWith(info, status) ?? Infinity;
+                    if (d < damage) {
+                        damage = d;
+                        skill = i;
+                    }
+                    flags[condition] = false;
+                    damageCache[id] = d;
+                }
+            }
+
+            let x = this.x;
+            let y = this.y;
+            if (has(this.x) && has(this.y)) {
+                if (dir !== 'none') {
+                    [x, y] = ofDir(this.x, this.y, dir);
+                }
+            }
+
+            return {
+                damage,
+                dir,
+                skill,
+                x,
+                y
+            };
+        }));
     }
+
+    calMapDamage() {}
 }
 
 /**
  * 计算伤害时会用到的勇士属性，攻击防御，其余的不会有buff加成，直接从core.status.hero取
  */
 const realStatus: (keyof HeroStatus)[] = ['atk', 'def'];
+/**
+ * 主动技能列表
+ */
+const skills = [
+    ['bladeOn', 'blade'],
+    ['shieldOn', 'shield']
+];
 
 /**
  * 获取需要计算怪物伤害的方向
@@ -308,46 +372,119 @@ const realStatus: (keyof HeroStatus)[] = ['atk', 'def'];
  * @param floorId 怪物所在楼层
  */
 export function getNeedCalDir(
-    x: number,
-    y: number,
-    floorId: FloorIds,
+    x?: number,
+    y?: number,
+    floorId: FloorIds = core.status.floorId,
     hero: Partial<HeroStatus> = core.status.hero
-): [Dir | 'none', Partial<HeroStatus>][] {
-    // 第一章或序章，用不到这个函数
-    if (flags.chapter < 2) {
-        return [['none', getHeroStatusOf(hero, realStatus, x, y, floorId)]];
+): (Dir | 'none')[] {
+    // 第一章或序章，或者没有指定怪物位置，或者没开自动定位，用不到这个函数
+    if (flags.chapter < 2 || !has(x) || !has(y)) {
+        return ['none'];
     }
 
     // 如果指定了勇士坐标
     if (has(hero.x) && has(hero.y)) {
-        const { x, y, floorId } = hero;
-        if (has(floorId)) {
-            return [['none', getHeroStatusOf(hero, realStatus, x, y, floorId)]];
-        } else {
-            return [['none', getHeroStatusOf(hero, realStatus, x, y, floorId)]];
-        }
+        return ['none'];
     }
 
     const needMap: Dir[] = ['left', 'down', 'right', 'up'];
     const { width, height } = core.status.maps[floorId];
     const blocks = core.getMapBlocksObj(floorId);
 
-    return needMap
-        .filter(v => {
-            const [tx, ty] = ofDir(x, y, v);
-            if (tx < 0 || ty < 0 || tx >= width || ty >= height) return false;
-            const index = `${tx},${ty}` as LocString;
-            const block = blocks[index];
-            if (block.event.noPass) return false;
-            if (!core.canMoveHero(tx, ty, backDir(v), floorId)) return false;
+    return needMap.filter(v => {
+        const [tx, ty] = ofDir(x, y, v);
+        if (tx < 0 || ty < 0 || tx >= width || ty >= height) return false;
+        const index = `${tx},${ty}` as LocString;
+        const block = blocks[index];
+        if (block.event.noPass) return false;
+        if (!core.canMoveHero(tx, ty, backDir(v), floorId)) return false;
 
-            return true;
-        })
-        .map(v => {
-            const [tx, ty] = ofDir(x, y, v);
-            const status = getHeroStatusOf(hero, realStatus, tx, ty, floorId);
-            return [v, status];
-        });
+        return true;
+    });
+}
+
+/**
+ * 计算怪物伤害
+ * @param info 怪物信息
+ * @param hero 勇士信息
+ */
+export function calDamageWith(
+    info: EnemyInfo,
+    hero: Partial<HeroStatus>
+): number | null {
+    const { hp, hpmax, mana, mdef } = core.status.hero;
+    let { atk, def } = hero as HeroStatus;
+    const { hp: monHp, atk: monAtk, def: monDef, special, enemy } = info;
+
+    let damage = 0;
+
+    // 饥渴
+    if (special.includes(7)) {
+        atk *= 1 - enemy.hungry! / 100;
+    }
+
+    let heroPerDamage: number;
+
+    // 绝对防御
+    if (special.includes(9)) {
+        heroPerDamage = atk + mana - monDef;
+        if (heroPerDamage <= 0) return null;
+    } else {
+        heroPerDamage = atk - monDef;
+        if (heroPerDamage > 0) heroPerDamage += mana;
+        else return null;
+    }
+
+    let enemyPerDamage: number;
+
+    // 魔攻
+    if (special.includes(2) || special.includes(13)) {
+        enemyPerDamage = monAtk;
+    } else {
+        enemyPerDamage = monAtk - def;
+        if (enemyPerDamage < 0) enemyPerDamage = 0;
+    }
+
+    // 连击
+    if (special.includes(4)) enemyPerDamage *= 2;
+    if (special.includes(5)) enemyPerDamage *= 3;
+    if (special.includes(6)) enemyPerDamage *= enemy.n!;
+
+    // 霜冻
+    if (special.includes(20) && !core.hasEquip('I589')) {
+        heroPerDamage *= 1 - enemy.ice! / 100;
+    }
+    heroPerDamage *= 1 - info.damageDecline;
+
+    let turn = Math.ceil(monHp / heroPerDamage);
+
+    // 致命一击
+    if (special.includes(1)) {
+        const times = Math.floor(turn / 5);
+        damage += ((times * (enemy.crit! - 100)) / 100) * enemyPerDamage;
+    }
+
+    // 勇气之刃
+    if (turn > 1 && special.includes(10)) {
+        damage += (enemy.courage! / 100 - 1) * enemyPerDamage;
+    }
+
+    // 勇气冲锋
+    if (special.includes(11)) {
+        damage += (enemy.charge! / 100) * enemyPerDamage;
+        turn += 5;
+    }
+
+    damage += (turn - 1) * enemyPerDamage;
+    // 无上之盾
+    if (core.hasFlag('superSheild')) {
+        damage -= mdef / 10;
+    }
+    // 生命回复
+    damage -= hpmax * turn;
+    if (flags.hard === 1) damage *= 0.9;
+
+    return damage;
 }
 
 declare global {

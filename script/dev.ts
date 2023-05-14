@@ -5,7 +5,7 @@ import {
     ServerResponse,
     createServer as http
 } from 'http';
-import { isNil, some } from 'lodash-es';
+import { isNil } from 'lodash-es';
 import config from '../mota.config.js';
 import fs from 'fs-extra';
 import { resolve, basename } from 'path';
