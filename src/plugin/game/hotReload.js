@@ -27,8 +27,9 @@ export {};
     async function reloadFloor(data) {
         // 如果被砍层了直接忽略
         if (
-            core.status.maps[data].deleted ||
-            core.status.maps[data].forceDelete
+            core.status.maps &&
+            (core.status.maps[data].deleted ||
+                core.status.maps[data].forceDelete)
         )
             return;
         // 首先重新加载main.floors对应的楼层

@@ -16,6 +16,8 @@ import gameShadow from './plugin/shadow/gameShadow';
 import achievement from './plugin/ui/achievement';
 import completion, { floors } from './plugin/completion';
 import path from './plugin/fx/path';
+import gameCanvas from './plugin/fx/gameCanvas';
+import noise from './plugin/fx/noise';
 
 function forward() {
     const toForward: any[] = [
@@ -36,7 +38,9 @@ function forward() {
         gameShadow(),
         achievement(),
         completion(),
-        path()
+        path(),
+        gameCanvas(),
+        noise()
     ];
 
     // 初始化所有插件，并转发到core上

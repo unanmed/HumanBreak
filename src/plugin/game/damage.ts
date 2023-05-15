@@ -60,6 +60,9 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
         this.floorId = floorId;
     }
 
+    /**
+     * 解析本地图的怪物信息
+     */
     extract() {
         core.extractBlocks(this.floorId);
         core.status.maps[this.floorId].blocks.forEach(v => {

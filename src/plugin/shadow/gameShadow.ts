@@ -31,8 +31,49 @@ export default function init() {
     return { updateShadow, clearShadowCache, setCalShadow };
 }
 
-const shadowInfo: Partial<Record<FloorIds, Light[]>> = {};
-const backgroundInfo: Partial<Record<FloorIds, Color>> = {};
+const shadowInfo: Partial<Record<FloorIds, Light[]>> = {
+    MT50: [
+        {
+            id: 'mt50_1',
+            x: 144,
+            y: 144,
+            decay: 20,
+            r: 150,
+            color: '#ee995333',
+            noShelter: true
+        },
+        {
+            id: 'mt50_2',
+            x: 336,
+            y: 144,
+            decay: 20,
+            r: 150,
+            color: '#ee995333',
+            noShelter: true
+        },
+        {
+            id: 'mt50_2',
+            x: 336,
+            y: 336,
+            decay: 20,
+            r: 150,
+            color: '#ee995333',
+            noShelter: true
+        },
+        {
+            id: 'mt50_2',
+            x: 144,
+            y: 336,
+            decay: 20,
+            r: 150,
+            color: '#ee995333',
+            noShelter: true
+        }
+    ]
+};
+const backgroundInfo: Partial<Record<FloorIds, Color>> = {
+    MT50: '#0006'
+};
 const blurInfo: Partial<Record<FloorIds, number>> = {};
 const immersionInfo: Partial<Record<FloorIds, number>> = {};
 const shadowCache: Partial<Record<FloorIds, Polygon[]>> = {};
