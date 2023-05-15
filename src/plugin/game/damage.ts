@@ -33,6 +33,17 @@ interface DamageInfo {
     skill?: number;
 }
 
+interface MapDamage {
+    damage: number;
+    type: string[];
+}
+
+interface HaloData<T extends keyof HaloType = keyof HaloType> {
+    type: T;
+    data: HaloType[T];
+    from: DamageEnemy;
+}
+
 type HaloFn = (info: EnemyInfo, enemy: Enemy) => void;
 
 export const haloSpecials: number[] = [21, 25, 26, 27];
@@ -42,6 +53,8 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
     list: DamageEnemy[] = [];
 
     range: Range<DamageEnemy> = new Range(this);
+    mapDamage: Record<string, MapDamage> = {};
+    haloList: HaloData[] = [];
 
     constructor(floorId: FloorIds) {
         this.floorId = floorId;
@@ -52,13 +65,36 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
         core.status.maps[this.floorId].blocks.forEach(v => {
             if (v.event.cls !== 'enemy48' && v.event.cls !== 'enemys') return;
             const enemy = core.material.enemys[v.event.id as EnemyIds];
-            this.list.push(new DamageEnemy(enemy));
+            this.list.push(
+                new DamageEnemy(enemy, v.x, v.y, this.floorId, this)
+            );
         });
     }
 
-    calAttribute(noCache: boolean = false) {}
+    /**
+     * 计算怪物真实属性
+     * @param noCache 是否不使用缓存
+     */
+    calRealAttribute(noCache: boolean = false) {
+        this.list.forEach(v => {
+            if (noCache) v.reset();
+            v.calRealAttribute();
+        });
+    }
 
-    calDamage(noCache: boolean = false) {}
+    /**
+     * 计算怪物伤害
+     * @param noCache 是否不使用缓存
+     */
+    calDamage(noCache: boolean = false) {
+        this.list.forEach(v => {
+            if (noCache || v.needCalculate) {
+                v.reset();
+                v.calRealAttribute();
+            }
+            v.calDamage();
+        });
+    }
 
     calMapDamage(noCache: boolean = false) {}
 
@@ -109,6 +145,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     y?: number;
     floorId?: FloorIds;
     enemy: Enemy<T>;
+    col?: EnemyCollection;
 
     /**
      * 怪物属性。
@@ -126,12 +163,19 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     /** 向其他怪提供过的光环 */
     providedHalo: number[] = [];
 
-    constructor(enemy: Enemy<T>, x?: number, y?: number, floorId?: FloorIds) {
+    constructor(
+        enemy: Enemy<T>,
+        x?: number,
+        y?: number,
+        floorId?: FloorIds,
+        col?: EnemyCollection
+    ) {
         this.id = enemy.id;
         this.enemy = enemy;
         this.x = x;
         this.y = y;
         this.floorId = floorId;
+        this.col = col;
         this.reset();
     }
 
@@ -221,6 +265,16 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         return this.info;
     }
 
+    /**
+     * 计算真实属性
+     */
+    calRealAttribute() {
+        this.preProvideHalo();
+        this.calAttribute();
+        this.provideHalo();
+        this.getRealInfo();
+    }
+
     getHaloSpecials(): number[] {
         if (!this.floorId) return [];
         if (!core.has(this.x) || !core.has(this.y)) return [];
@@ -229,7 +283,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
             return haloSpecials.includes(v) && !this.providedHalo.includes(v);
         });
         if (filter.length === 0) return [];
-        const collection = core.status.maps[this.floorId].enemy;
+        const collection = this.col ?? core.status.maps[this.floorId].enemy;
         if (!collection) {
             throw new Error(
                 `Unexpected undefined of enemy collection in floor ${this.floorId}.`
@@ -249,7 +303,8 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     provideHalo() {
         if (!this.floorId) return;
         if (!core.has(this.x) || !core.has(this.y)) return;
-        const collection = core.status.maps[this.floorId].enemy;
+        const col = this.col ?? core.status.maps[this.floorId].enemy;
+        if (!col) return;
         const speical = this.getHaloSpecials();
 
         const square7: HaloFn[] = [];
@@ -286,8 +341,8 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
             this.providedHalo.push(27);
         }
 
-        collection.applyHalo('square', { x: this.x, y: this.y, d: 7 }, square7);
-        collection.applyHalo('square', { x: this.x, y: this.y, d: 5 }, square5);
+        col.applyHalo('square', { x: this.x, y: this.y, d: 7 }, square7);
+        col.applyHalo('square', { x: this.x, y: this.y, d: 5 }, square5);
     }
 
     /**
@@ -306,12 +361,14 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         const dirs = getNeedCalDir(this.x, this.y, this.floorId, hero);
 
         const damageCache: Record<string, number> = {};
+        this.needCalDamage = false;
 
         return (this.damage = dirs.map(dir => {
             const status = getHeroStatusOf(hero, realStatus);
             let damage = calDamageWith(info, status) ?? Infinity;
             let skill = -1;
 
+            // 自动切换技能
             if (flags.autoSkill) {
                 for (let i = 0; i < skills.length; i++) {
                     const [unlock, condition] = skills[i];
@@ -332,11 +389,14 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                 }
             }
 
-            let x = this.x;
-            let y = this.y;
+            let x: number | undefined;
+            let y: number | undefined;
             if (has(this.x) && has(this.y)) {
                 if (dir !== 'none') {
                     [x, y] = ofDir(this.x, this.y, dir);
+                } else {
+                    x = hero.x ?? this.x;
+                    y = hero.y ?? this.y;
                 }
             }
 
@@ -391,7 +451,7 @@ export function getNeedCalDir(
     const { width, height } = core.status.maps[floorId];
     const blocks = core.getMapBlocksObj(floorId);
 
-    return needMap.filter(v => {
+    const res = needMap.filter(v => {
         const [tx, ty] = ofDir(x, y, v);
         if (tx < 0 || ty < 0 || tx >= width || ty >= height) return false;
         const index = `${tx},${ty}` as LocString;
@@ -401,6 +461,7 @@ export function getNeedCalDir(
 
         return true;
     });
+    return res.length === 0 ? ['none'] : res;
 }
 
 /**
@@ -477,7 +538,7 @@ export function calDamageWith(
 
     damage += (turn - 1) * enemyPerDamage;
     // 无上之盾
-    if (core.hasFlag('superSheild')) {
+    if (flags.superSheild) {
         damage -= mdef / 10;
     }
     // 生命回复
