@@ -17,31 +17,6 @@ main.floors.MT48=
     "eachArrive": [],
     "parallelDo": "",
     "events": {
-        "7,0": [
-            "本塔的第二章测试版已结束。",
-            "本章还剩余最后一个大区域，约30层，较为复杂，请期待下次更新。",
-            "计分方式：血量/10+黄*2000+蓝*5000+红*10000",
-            {
-                "type": "setValue",
-                "name": "status:hp",
-                "operator": "/=",
-                "value": "10"
-            },
-            {
-                "type": "setValue",
-                "name": "status:hp",
-                "operator": "+=",
-                "value": "item:yellowKey*2000+item:blueKey*5000+item:redKey*10000"
-            },
-            {
-                "type": "function",
-                "function": "function(){\ncore.status.hero.hp = Math.ceil(core.status.hero.hp);\n}"
-            },
-            {
-                "type": "win",
-                "reason": "第二章测试"
-            }
-        ],
         "7,10": [
             "\t[苍蓝之灵-虚,E647]\b[up,7,7]你来了，智慧之神看中的人。",
             "\t[中级智人]\b[up,hero]你是什么人？",
@@ -54,12 +29,109 @@ main.floors.MT48=
             "\t[苍蓝之灵-虚,E647]\b[up,7,7]你现在还有很多疑虑吧，那里便有你想要找的答案。",
             "\t[中级智人]\b[up,hero]那么我怎么过去？",
             "\t[苍蓝之灵-虚,E647]\b[up,7,7]打败我，你便有资格进入。",
-            "\t[中级智人]\b[up,hero]为什么又是要打架？",
+            "\t[中级智人]\b[up,hero]为什么又是要打一场？",
             "\t[苍蓝之灵-虚,E647]\b[up,7,7]......",
             "\t[苍蓝之灵-虚,E647]\b[up,7,7]之后，你会明白的。",
             {
                 "type": "hide",
                 "remove": true
+            }
+        ],
+        "7,0": [
+            {
+                "type": "if",
+                "condition": "(flag:pale1!==1)",
+                "true": [
+                    {
+                        "type": "setCurtain",
+                        "color": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "time": 1500,
+                        "keep": true
+                    },
+                    {
+                        "type": "setText",
+                        "text": [
+                            0,
+                            0,
+                            0,
+                            1
+                        ],
+                        "background": "winskin3.png"
+                    },
+                    "人类简史——进化篇",
+                    {
+                        "type": "playSound",
+                        "name": "paper.mp3"
+                    },
+                    "孤注一掷。",
+                    {
+                        "type": "playSound",
+                        "name": "paper.mp3"
+                    },
+                    "为拯救自己，人类执行了苍蓝计划。",
+                    {
+                        "type": "playSound",
+                        "name": "paper.mp3"
+                    },
+                    "硬币一旦抛出，又有谁能得知它的朝向呢？",
+                    {
+                        "type": "playSound",
+                        "name": "paper.mp3"
+                    },
+                    "在它落地之前，前方，是毁灭，亦是重生。",
+                    {
+                        "type": "playSound",
+                        "name": "paper.mp3"
+                    },
+                    "当他踏入宫殿的那一刻，硬币便已抛出。",
+                    {
+                        "type": "playSound",
+                        "name": "paper.mp3"
+                    },
+                    "来自未来的“孤注一掷”。",
+                    {
+                        "type": "playSound",
+                        "name": "paper.mp3"
+                    },
+                    {
+                        "type": "setText",
+                        "text": [
+                            255,
+                            255,
+                            255,
+                            1
+                        ],
+                        "background": "winskin2.png"
+                    },
+                    {
+                        "type": "changeFloor",
+                        "floorId": "MT49",
+                        "loc": [
+                            7,
+                            14
+                        ]
+                    },
+                    {
+                        "type": "setCurtain",
+                        "time": 1500
+                    },
+                    "\t[中级智人]\b[up,hero]！！",
+                    "\t[中级智人]\b[up,hero]这，这是！",
+                    "\t[中级智人]\b[up,hero]这就是未来人类的最后底牌了吗？",
+                    "\t[中级智人]\b[up,hero]我一定要弄清楚这里面的东西。",
+                    "\t[中级智人]\b[up,hero]前方，一定会有我所寻找的答案。",
+                    {
+                        "type": "setValue",
+                        "name": "flag:pale1",
+                        "value": "1"
+                    }
+                ],
+                "false": []
             }
         ]
     },
@@ -75,7 +147,7 @@ main.floors.MT48=
     "beforeBattle": {},
     "afterBattle": {
         "7,7": [
-            "\t[中级智人]\b[up,hero]为什么，为什么一定要打架，决定胜负呢？",
+            "\t[中级智人]\b[up,hero]为什么，为什么一定要打一场，来决定胜负呢？",
             {
                 "type": "openDoor",
                 "loc": [
