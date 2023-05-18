@@ -131,9 +131,8 @@ async function getEsmFile(
 
     const watcher = rollupMap.get(path);
 
-    const file = (bundleIndex++).toString();
-
     if (!watcher) {
+        const file = (bundleIndex++).toString();
         await fs.ensureDir('_bundle');
         // 配置rollup监听器
         const w = rollup.watch({
@@ -162,6 +161,10 @@ async function getEsmFile(
             bundled: new RefValue(false)
         };
         w.on('event', e => {
+            if (e.code === 'ERROR') {
+                console.log(e.error);
+            }
+
             if (e.code === 'BUNDLE_END') {
                 info.bundled.value = true;
                 console.log(`${path} bundle end`);
@@ -173,7 +176,7 @@ async function getEsmFile(
         });
         w.on('change', id => {
             console.log(`${id} changed. Refresh Page.`);
-            ws.send(JSON.stringify({ type: 'reload' }));
+            ws && ws.send(JSON.stringify({ type: 'reload' }));
         });
         rollupMap.set(path, info);
 
@@ -491,14 +494,14 @@ function watchProject() {
         // 楼层热重载
         if (/project(\/|\\)floors(\/|\\).*\.js$/.test(path)) {
             const floor = basename(path).slice(0, -3);
-            ws.send(JSON.stringify({ type: 'floorHotReload', floor }));
+            ws && ws.send(JSON.stringify({ type: 'floorHotReload', floor }));
             console.log(`Floor hot reload: ${floor}.`);
             return;
         }
 
         // 脚本编辑热重载
         if (/project(\/|\\)functions\.js$/.test(path)) {
-            ws.send(JSON.stringify({ type: 'functionsHotReload' }));
+            ws && ws.send(JSON.stringify({ type: 'functionsHotReload' }));
             console.log(`Functions hot reload.`);
             return;
         }
@@ -506,20 +509,20 @@ function watchProject() {
         // 数据热重载
         if (/project(\/|\\).*\.js/.test(path)) {
             const data = basename(path).slice(0, -3);
-            ws.send(JSON.stringify({ type: 'dataHotReload', data }));
+            ws && ws.send(JSON.stringify({ type: 'dataHotReload', data }));
             console.log(`Data hot reload: ${data}.`);
             return;
         }
 
         // css热重载
         if (/.*\.css$/.test(path)) {
-            ws.send(JSON.stringify({ type: 'cssHotReload', path }));
+            ws && ws.send(JSON.stringify({ type: 'cssHotReload', path }));
             console.log(`Css hot reload: ${path}.`);
             return;
         }
 
         // 剩余内容全部reload
-        ws.send(JSON.stringify({ type: 'reload' }));
+        ws && ws.send(JSON.stringify({ type: 'reload' }));
     });
 }
 
