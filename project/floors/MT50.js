@@ -12,10 +12,7 @@ main.floors.MT50=
     "images": [],
     "ratio": 8,
     "defaultGround": "T650",
-    "bgm": [
-        "palaceSouth.mp3",
-        "winter.mp3"
-    ],
+    "bgm": "palaceSouth.mp3",
     "firstArrive": [],
     "eachArrive": [],
     "parallelDo": "",
@@ -44,7 +41,15 @@ main.floors.MT50=
             "本区域可以使用跳跃技能，不要忘记了。"
         ]
     },
-    "changeFloor": {},
+    "changeFloor": {
+        "0,7": {
+            "floorId": "MT51",
+            "loc": [
+                14,
+                7
+            ]
+        }
+    },
     "beforeBattle": {},
     "afterBattle": {},
     "afterGetItem": {},
