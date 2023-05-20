@@ -99,7 +99,16 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
         });
     }
 
-    calMapDamage(noCache: boolean = false) {}
+    /**
+     * 计算地图伤害
+     * @param noCache 是否不使用缓存
+     */
+    calMapDamage(noCache: boolean = false) {
+        if (noCache) this.mapDamage = {};
+        this.list.forEach(v => {
+            v.calMapDamage(this.mapDamage);
+        });
+    }
 
     /**
      * 向怪物施加光环
@@ -413,7 +422,11 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         }));
     }
 
-    calMapDamage() {}
+    calMapDamage(damage?: Record<string, MapDamage>) {
+        damage ??= {};
+
+        return damage;
+    }
 }
 
 /**

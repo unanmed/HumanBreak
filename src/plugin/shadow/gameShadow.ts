@@ -39,7 +39,7 @@ const shadowInfo: Partial<Record<FloorIds, Light[]>> = {
             y: 144,
             decay: 20,
             r: 150,
-            color: '#ee995333',
+            color: '#e953',
             noShelter: true
         },
         {
@@ -48,7 +48,7 @@ const shadowInfo: Partial<Record<FloorIds, Light[]>> = {
             y: 144,
             decay: 20,
             r: 150,
-            color: '#ee995333',
+            color: '#e953',
             noShelter: true
         },
         {
@@ -57,7 +57,7 @@ const shadowInfo: Partial<Record<FloorIds, Light[]>> = {
             y: 336,
             decay: 20,
             r: 150,
-            color: '#ee995333',
+            color: '#e953',
             noShelter: true
         },
         {
@@ -66,7 +66,7 @@ const shadowInfo: Partial<Record<FloorIds, Light[]>> = {
             y: 336,
             decay: 20,
             r: 150,
-            color: '#ee995333',
+            color: '#e953',
             noShelter: true
         }
     ]

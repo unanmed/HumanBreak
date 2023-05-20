@@ -1,5 +1,3 @@
-///<reference path="../../../src/types/core.d.ts" />
-
 /**
  * 滑动数组
  * @param arr
