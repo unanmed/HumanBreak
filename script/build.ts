@@ -1,6 +1,5 @@
-import fs from 'fs/promises';
 import fss from 'fs';
-import fse from 'fs-extra';
+import fs from 'fs-extra';
 import Fontmin from 'fontmin';
 import * as babel from '@babel/core';
 import * as rollup from 'rollup';
@@ -45,11 +44,11 @@ import commonjs from '@rollup/plugin-commonjs';
                 });
             })
         );
-        if (process.argv[2] !== '1') await fse.remove('./dist/maps/');
+        if (process.argv[2] !== '1') await fs.remove('./dist/maps/');
         // 在线查看什么都看不到，这编辑器难道还需要留着吗？
-        await fse.remove('./dist/_server');
-        await fse.remove('./dist/editor.html');
-        await fse.remove('./dist/server.cjs');
+        await fs.remove('./dist/_server');
+        await fs.remove('./dist/editor.html');
+        await fs.remove('./dist/server.cjs');
     } catch {}
 
     // 2. 压缩字体
@@ -106,19 +105,19 @@ import commonjs from '@rollup/plugin-commonjs';
         ]);
         await Promise.all([
             ...fonts.map(v => {
-                return fse.rename(
+                return fs.rename(
                     `./dist/project/fonts/${v}.ttf`,
                     `./dist/project/fonts/${v}-${timestamp}.ttf`
                 );
             })
         ]);
     } catch (e) {
-        await fse.copy('./public/project/fonts', './dist/project/fonts');
+        await fs.copy('./public/project/fonts', './dist/project/fonts');
     }
 
     // 3. 压缩js插件
     try {
-        await fse.remove('./dist/project/plugin.min.js');
+        await fs.remove('./dist/project/plugin.min.js');
 
         const build = await rollup.rollup({
             input: 'src/plugin/game/index.js',
@@ -141,7 +140,7 @@ import commonjs from '@rollup/plugin-commonjs';
             file: './dist/project/plugin.min.js'
         });
 
-        await fse.remove('./dist/project/plugin/');
+        await fs.remove('./dist/project/plugin/');
     } catch (e) {
         console.log(e);
 
@@ -169,6 +168,6 @@ import commonjs from '@rollup/plugin-commonjs';
 
     // 5. 杂项
     try {
-        await fse.copy('./LICENSE', './dist/LICENSE');
+        await fs.copy('./LICENSE', './dist/LICENSE');
     } catch {}
 })();
