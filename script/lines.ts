@@ -1,9 +1,11 @@
 import fs from 'fs-extra';
-import { resolve } from 'path';
+import { extname, resolve } from 'path';
 
 (async function () {
     const dir = './src';
-    let total = 0;
+    let totalLines = 0;
+    let totalFiles = 0;
+    const list: Record<string, [number, number]> = {};
 
     const check = async (dir: string) => {
         const d = await fs.readdir(dir);
@@ -18,7 +20,12 @@ import { resolve } from 'path';
                 ) {
                     const file = await fs.readFile(resolve(dir, one), 'utf-8');
                     const lines = file.split('\n').length;
-                    total += lines;
+                    const ext = extname(one);
+                    list[ext] ??= [0, 0];
+                    list[ext][0]++;
+                    list[ext][1] += lines;
+                    totalLines += lines;
+                    totalFiles++;
                 }
             } else {
                 await check(resolve(dir, one));
@@ -27,5 +34,16 @@ import { resolve } from 'path';
     };
     await check(dir);
 
-    console.log(total);
+    for (const [ext, [file, lines]] of Object.entries(list)) {
+        console.log(
+            `${ext.slice(1).padEnd(7, ' ')}files: ${file
+                .toString()
+                .padEnd(6, ' ')}lines: ${lines}`
+        );
+    }
+    console.log(
+        `\x1b[33mtotal  files: ${totalFiles
+            .toString()
+            .padEnd(6, ' ')}lines: ${totalLines}\x1b[0m`
+    );
 })();

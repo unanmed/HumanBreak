@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "update": "ts-node-esm script/update.ts",
     "declare": "ts-node-esm script/declare.ts",
-    "type": "vue-tsc --noEmit"
+    "type": "vue-tsc --noEmit",
+    "lines": "ts-node-esm script/lines.ts"
   },
   "dependencies": {
     "@ant-design/icons-vue": "^6.1.0",
