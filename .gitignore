@@ -34,3 +34,4 @@ dist.rar
 index.cjs
 !public/swap/*.h5save
 _bundle
+out

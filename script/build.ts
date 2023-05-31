@@ -8,6 +8,12 @@ import rollupBabel from '@rollup/plugin-babel';
 import terser from '@rollup/plugin-terser';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
+import { splitResorce } from './resource.js';
+import compressing from 'compressing';
+
+const map = !!Number(process.argv[2]);
+const resorce = !!Number(process.argv[3]);
+const compress = !!Number(process.argv[4]);
 
 (async function () {
     const timestamp = Date.now();
@@ -44,7 +50,7 @@ import commonjs from '@rollup/plugin-commonjs';
                 });
             })
         );
-        if (process.argv[2] !== '1') await fs.remove('./dist/maps/');
+        if (!map) await fs.remove('./dist/maps/');
         // 在线查看什么都看不到，这编辑器难道还需要留着吗？
         await fs.remove('./dist/_server');
         await fs.remove('./dist/editor.html');
@@ -60,13 +66,11 @@ import commonjs from '@rollup/plugin-commonjs';
         const project = await fs.readdir('./public/project');
         const floors = await fs.readdir('./public/project/floors');
         const assets = await fs.readdir('./dist/assets/');
-        const plugin = await fs.readdir('./public/project/plugin');
         const all = [
             ...libs.map(v => `./public/libs/${v}`),
             ...project.map(v => `./public/project/${v}`),
             ...floors.map(v => `./public/project/floors/${v}`),
-            ...assets.map(v => `./dist/assets/${v}`),
-            ...plugin.map(v => `./public/project/plugin/${v}`)
+            ...assets.map(v => `./dist/assets/${v}`)
         ];
         for await (const dir of all) {
             const stat = await fs.stat(dir);
@@ -112,7 +116,7 @@ import commonjs from '@rollup/plugin-commonjs';
             })
         ]);
     } catch (e) {
-        await fs.copy('./public/project/fonts', './dist/project/fonts');
+        console.log('字体压缩失败');
     }
 
     // 3. 压缩js插件
@@ -142,8 +146,6 @@ import commonjs from '@rollup/plugin-commonjs';
 
         await fs.remove('./dist/project/plugin/');
     } catch (e) {
-        console.log(e);
-
         console.log('压缩插件失败');
     }
 
@@ -170,4 +172,15 @@ import commonjs from '@rollup/plugin-commonjs';
     try {
         await fs.copy('./LICENSE', './dist/LICENSE');
     } catch {}
+
+    // 6. 资源分离
+    if (resorce) {
+        await splitResorce(compress);
+    }
+
+    // 7. 压缩本体
+    if (compress) {
+        await fs.ensureDir('./out');
+        await compressing.zip.compressDir('./dist', './out/dist.zip');
+    }
 })();

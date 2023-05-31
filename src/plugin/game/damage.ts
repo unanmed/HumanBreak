@@ -19,7 +19,6 @@ interface EnemyInfo {
     atkBuff: number;
     defBuff: number;
     hpBuff: number;
-    together: number;
     enemy: Enemy;
 }
 
@@ -202,7 +201,6 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
             atkBuff: 0,
             defBuff: 0,
             hpBuff: 0,
-            together: 0,
             enemy: this.enemy
         };
         this.needCalculate = true;
@@ -322,9 +320,13 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         const square7: HaloFn[] = [];
         const square5: HaloFn[] = [];
 
+        // 抱团
         if (speical.includes(8)) {
             square5.push((e, enemy) => {
-                if (e === this.info) e.together += enemy.together ?? 0;
+                if (e.special.includes(8)) {
+                    e.atkBuff += enemy.together ?? 0;
+                    e.defBuff += enemy.together ?? 0;
+                }
             });
             this.providedHalo.push(8);
         }
@@ -424,6 +426,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
 
     calMapDamage(damage?: Record<string, MapDamage>) {
         damage ??= {};
+        if (!has(this.x) || !has(this.y)) return damage;
 
         return damage;
     }
@@ -436,7 +439,7 @@ const realStatus: (keyof HeroStatus)[] = ['atk', 'def'];
 /**
  * 主动技能列表
  */
-const skills = [
+const skills: [unlock: string, condition: string][] = [
     ['bladeOn', 'blade'],
     ['shieldOn', 'shield']
 ];
