@@ -130,7 +130,8 @@ const settings: Record<keyof Settings, Ref<boolean>> = {
     useFixed,
     autoLocate,
     antiAliasing,
-    fullscreen
+    fullscreen,
+    betterLoad: ref(false)
 };
 
 const ignore: (keyof Settings)[] = ['fullscreen'];
