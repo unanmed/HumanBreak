@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import { uniqueSymbol } from './utils.js';
-import { extname, resolve } from 'path';
+import { basename, extname, resolve } from 'path';
+import { dirname } from 'path';
 
 type ResorceType =
     | 'bgms'
@@ -96,39 +97,50 @@ async function doSplit(compress: boolean) {
     );
 
     let currSize = 0;
+    const length = Object.fromEntries(
+        priority.map(v => [v, dirInfo[v].length])
+    );
+    const soruceIndex: Record<string, number> = {};
     const split = async (index: number): Promise<void> => {
         size -= currSize;
         currSize = 0;
 
         const cut: string[] = [];
 
-        (() => {
-            const mapped: ResorceType[] = [];
+        const mapped: ResorceType[] = [];
+        while (1) {
+            const toCut = priority.find(
+                v => dirInfo[v].length > 0 && !mapped.includes(v)
+            );
+            if (!toCut) break;
+
+            mapped.push(toCut);
+            const l = dirInfo[toCut].length;
+            const data: string[] = [];
+
+            let pass = 0;
             while (1) {
-                const toCut = priority.find(
-                    v => dirInfo[v].length > 0 && !mapped.includes(v)
-                );
-                if (!toCut) return;
-
-                mapped.push(toCut);
-
-                let pass = 0;
-                while (1) {
-                    const stats = dirInfo[toCut];
-                    const stat = stats[pass];
-                    if (!stat) {
-                        break;
-                    }
-                    if (currSize + stat.size >= MAX_SIZE) {
-                        pass++;
-                        continue;
-                    }
-                    cut.push(`${toCut}/${stat.name}`);
-                    stats.splice(pass, 1);
-                    currSize += stat.size;
+                const stats = dirInfo[toCut];
+                const stat = stats[pass];
+                if (!stat) {
+                    break;
                 }
+                if (currSize + stat.size >= MAX_SIZE) {
+                    pass++;
+                    continue;
+                }
+                data.push(`${toCut}/${stat.name}`);
+                stats.splice(pass, 1);
+                currSize += stat.size;
             }
-        })();
+
+            if (l === length[toCut] && dirInfo[toCut].length === 0) {
+                soruceIndex[`${toCut}.*`] = index;
+            } else {
+                data.map(v => (soruceIndex[v] = index));
+            }
+            cut.push(...data);
+        }
 
         const dir = `./dist-resource/${index}`;
         await fs.ensureDir(dir);
@@ -138,7 +150,11 @@ async function doSplit(compress: boolean) {
             cut.map(v =>
                 fs.move(
                     resolve('./dist/project', v),
-                    resolve(dir, `${v}-${SYMBOL}`)
+                    resolve(
+                        dir,
+                        dirname(v),
+                        `${basename(v).split('.')[0]}-${SYMBOL}${extname(v)}`
+                    )
                 )
             )
         );
@@ -148,4 +164,25 @@ async function doSplit(compress: boolean) {
     };
 
     await split(0);
+
+    await rewriteMain(soruceIndex);
+}
+
+async function rewriteMain(sourceIndex: Record<string, number>) {
+    const main = await fs.readFile('./dist/main.js', 'utf-8');
+    const res = main
+        .replace(/this\.USE_RESOURCE\s*\=\s*false/, 'this.USE_RESOURCE = true')
+        .replace(
+            /this\.RESOURCE_URL\s*\=\s*'.*'/,
+            "this.RESOURCE_URL = '/games/HumanBreakRes/'"
+        )
+        .replace(
+            /this\.RESOURCE_SYMBOL\s*\=\s*'.*'/,
+            `this.RESOURCE_SYMBOL = '${SYMBOL}'`
+        )
+        .replace(
+            /this\.RESOURCE_INDEX\s*\=\s*\{.*\}/,
+            `this.RESOURCE_INDEX = ${JSON.stringify(sourceIndex, void 0, 8)}`
+        );
+    await fs.writeFile('./dist/main.js', res, 'utf-8');
 }
