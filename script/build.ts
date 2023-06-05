@@ -178,9 +178,20 @@ const compress = !!Number(process.argv[4]);
         await splitResorce(compress);
     }
 
-    // 7. 压缩本体
+    // 7. 压缩
     if (compress) {
         await fs.ensureDir('./out');
         await compressing.zip.compressDir('./dist', './out/dist.zip');
+
+        // 压缩资源
+        if (resorce) {
+            const resources = await fs.readdir('./dist-resource');
+            for await (const index of resources) {
+                await compressing.zip.compressDir(
+                    `./dist-resource/${index}`,
+                    `./out/${index}.zip`
+                );
+            }
+        }
     }
 })();

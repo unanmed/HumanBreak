@@ -221,7 +221,7 @@ function main() {
 
     // 远程资源地址，在线游戏中，塔本体不包含任何资源，只包含源码，从而可以降低游戏本体的体积并平均分担资源包体积
     // 从而可以优化加载并避免网站发布的大小限制
-    this.USE_RESORCE = false;
+    this.USE_RESOURCE = false;
     this.RESOURCE_URL = '';
     this.RESOURCE_SYMBOL = '';
     this.RESOURCE_INDEX = {};
