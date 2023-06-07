@@ -33,7 +33,7 @@ type Stats = fs.Stats & { name?: string };
 export async function splitResorce(compress: boolean = false) {
     const folder = await fs.stat('./dist');
     totalSize = folder.size;
-    // if (totalSize < MAX_SIZE) return;
+    if (totalSize < MAX_SIZE) return;
 
     await fs.ensureDir('./dist-resource');
     await doSplit(compress);
@@ -45,6 +45,7 @@ async function sortDir(dir: string, ext?: string[]) {
 
     for await (const one of path) {
         if (ext && !ext.includes(extname(one))) continue;
+        if (one === 'bg.jpg') continue;
         const stat = await fs.stat(resolve(dir, one));
         if (!stat.isFile()) continue;
         const status: Stats = {

@@ -3,7 +3,8 @@ import { extname, resolve } from 'path';
 import { formatSize } from './utils.js';
 
 (async function () {
-    const dir = process.argv.slice(2) || ['./src'];
+    let dir = process.argv.slice(2);
+    if (dir.length === 0) dir = ['./src'];
     let totalLines = 0;
     let totalFiles = 0;
     let totalSize = 0;
