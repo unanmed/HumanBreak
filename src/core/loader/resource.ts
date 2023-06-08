@@ -1,12 +1,16 @@
 import axios, { AxiosResponse } from 'axios';
 import { Disposable } from '../common/disposable';
 import { ensureArray } from '../../plugin/game/utils';
+import { has } from '../../plugin/utils';
+import JSZip from 'jszip';
+import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
 
 interface ResourceData {
     image: HTMLImageElement;
     arraybuffer: ArrayBuffer;
     text: string;
     json: any;
+    zip: ZippedResource;
 }
 
 type ResourceType = keyof ResourceData;
@@ -25,20 +29,43 @@ export class Resource<
         super(resource);
         this.data = this.resolveUrl(resource);
         this.format = type;
+
         this.on('active', this.load);
     }
 
+    /**
+     * 解析资源url
+     * @param resource 资源字符串
+     * @returns 解析出的资源url
+     */
     protected resolveUrl(resource: string) {
         const resolve = resource.split('.');
         const type = resolve[0];
-        const name = resolve.slice(1).join('.');
-        return resource;
+        const name = resolve.slice(1, -1).join('.');
+        const ext = '.' + resolve.at(-1);
+
+        if (!main.USE_RESOURCE) {
+            return `/games/${core.data.firstData.name}/project/${type}/${name}${ext}`;
+        }
+
+        const base = main.RESOURCE_URL;
+        const indexes = main.RESOURCE_INDEX;
+        const symbol = main.RESOURCE_SYMBOL;
+
+        if (has(indexes[`${type}.*`])) {
+            const i = indexes[`${type}.*`];
+            return `${base}${i}/${type}/${name}-${symbol}${ext}`;
+        } else {
+            const i = indexes[`${type}.${name}${ext}`];
+            const index = has(i) ? i : 0;
+            return `${base}${index}/${type}/${name}-${symbol}${ext}`;
+        }
     }
 
     /**
      * 加载资源
      */
-    protected async load() {
+    protected load() {
         const data = this.data;
         if (!data) {
             throw new Error(`Unexpected null of url in loading resource.`);
@@ -53,11 +80,23 @@ export class Resource<
                     res('@imageLoaded');
                 });
             });
-        } else {
+        } else if (
+            this.format === 'json' ||
+            this.format === 'text' ||
+            this.format === 'arraybuffer'
+        ) {
             this.request = axios
                 .get(data, { responseType: this.format })
                 .then(v => {
-                    this.resource = v;
+                    this.resource = v.data;
+                    this.loaded = true;
+                    return v;
+                });
+        } else if (this.format === 'zip') {
+            this.request = axios
+                .get(data, { responseType: 'arraybuffer' })
+                .then(v => {
+                    this.resource = new ZippedResource(v.data);
                     this.loaded = true;
                     return v;
                 });
@@ -68,15 +107,35 @@ export class Resource<
      * 获取资源，如果还没加载会等待加载完毕再获取
      */
     async getData(): Promise<ResourceData[T] | null> {
+        if (!this.activated) return null;
         if (this.loaded) return this.resource ?? null;
         else {
+            if (!this.request) this.load();
             await this.request;
             return this.resource ?? null;
         }
     }
 }
 
-class ReosurceStore extends Map<string, Resource> {
+interface ZippedEvent extends EmitableEvent {
+    ready: (data: JSZip) => void;
+}
+
+export class ZippedResource extends EventEmitter<ZippedEvent> {
+    zip: Promise<JSZip>;
+    data?: JSZip;
+
+    constructor(buffer: ArrayBuffer) {
+        super();
+        this.zip = JSZip.loadAsync(buffer).then(v => {
+            this.emit('ready', v);
+            this.data = v;
+            return v;
+        });
+    }
+}
+
+class ResourceStore extends Map<string, Resource> {
     active(key: string[] | string) {
         const keys = ensureArray(key);
         keys.forEach(v => this.get(v)?.active());
@@ -115,10 +174,10 @@ class ReosurceStore extends Map<string, Resource> {
 declare global {
     interface Window {
         /** 游戏资源 */
-        gameResource: ReosurceStore;
+        gameResource: ResourceStore;
     }
     /** 游戏资源 */
-    const gameResource: ReosurceStore;
+    const gameResource: ResourceStore;
 }
 
-window.gameResource = new ReosurceStore();
+window.gameResource = new ResourceStore();

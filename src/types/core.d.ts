@@ -1256,6 +1256,11 @@ interface Main extends MainData {
      */
     readonly __VERSION_CODE__: number;
 
+    readonly RESOURCE_INDEX: Record<string, string>;
+    readonly RESOURCE_URL: string;
+    readonly RESOURCE_SYMBOL: string;
+    readonly USE_RESOURCE: boolean;
+
     /**
      * 初始化游戏
      * @param mode 初始化游戏的模式，游玩还是编辑器

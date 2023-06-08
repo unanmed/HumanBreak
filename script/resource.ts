@@ -175,7 +175,7 @@ async function rewriteMain(sourceIndex: Record<string, number>) {
         .replace(/this\.USE_RESOURCE\s*\=\s*false/, 'this.USE_RESOURCE = true')
         .replace(
             /this\.RESOURCE_URL\s*\=\s*'.*'/,
-            "this.RESOURCE_URL = '/games/HumanBreakRes/'"
+            "this.RESOURCE_URL = '/games/HumanBreakRes'"
         )
         .replace(
             /this\.RESOURCE_SYMBOL\s*\=\s*'.*'/,
