@@ -18,7 +18,6 @@ import completion, { floors } from './plugin/completion';
 import path from './plugin/fx/path';
 import gameCanvas from './plugin/fx/gameCanvas';
 import noise from './plugin/fx/noise';
-import load from './core/loader/load';
 
 function forward() {
     const toForward: any[] = [
@@ -61,7 +60,6 @@ function forward() {
     }
 
     console.log('插件转发完成！');
-    load();
 
     Object.values(floors).forEach((v, i) => {
         const from = core.floorIds.indexOf(v[0]);
