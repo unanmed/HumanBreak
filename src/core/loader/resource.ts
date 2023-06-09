@@ -11,16 +11,24 @@ interface ResourceData {
     text: string;
     json: any;
     zip: ZippedResource;
+    bgm: HTMLAudioElement;
 }
 
-type ResourceType = keyof ResourceData;
+export type ResourceType = keyof ResourceData;
 
 export class Resource<
     T extends ResourceType = ResourceType
 > extends Disposable<string> {
     format: T;
-    request?: Promise<AxiosResponse<ResourceData[T]> | '@imageLoaded'>;
+    request?: Promise<
+        AxiosResponse<ResourceData[T]> | '@imageLoaded' | '@bgmLoaded'
+    >;
     loaded: boolean = false;
+    resStr: string;
+
+    type!: string;
+    name!: string;
+    ext!: string;
 
     /** 资源数据 */
     resource?: ResourceData[T];
@@ -29,8 +37,18 @@ export class Resource<
         super(resource);
         this.data = this.resolveUrl(resource);
         this.format = type;
+        this.resStr = resource;
 
         this.on('active', this.load);
+        this.on('load', this.onload);
+    }
+
+    protected onload(v: ResourceData[T]) {
+        if (this.type === 'fonts') {
+            document.fonts.add(new FontFace(this.name, v as ArrayBuffer));
+        } else if (this.type === 'sounds') {
+            ancTe.sound.add(this.resStr, v as ArrayBuffer);
+        }
     }
 
     /**
@@ -40,9 +58,9 @@ export class Resource<
      */
     protected resolveUrl(resource: string) {
         const resolve = resource.split('.');
-        const type = resolve[0];
-        const name = resolve.slice(1, -1).join('.');
-        const ext = '.' + resolve.at(-1);
+        const type = (this.type = resolve[0]);
+        const name = (this.name = resolve.slice(1, -1).join('.'));
+        const ext = (this.ext = '.' + resolve.at(-1));
 
         if (!main.USE_RESOURCE) {
             return `/games/${core.data.firstData.name}/project/${type}/${name}${ext}`;
@@ -77,7 +95,19 @@ export class Resource<
                 img.addEventListener('load', () => {
                     this.resource = img;
                     this.loaded = true;
+                    this.emit('load', img);
                     res('@imageLoaded');
+                });
+            });
+        } else if (this.format === 'bgm') {
+            this.request = new Promise(res => {
+                const audio = new Audio();
+                audio.src = data;
+                audio.addEventListener('load', () => {
+                    this.resource = audio;
+                    this.loaded = true;
+                    this.emit('load', audio);
+                    res('@bgmLoaded');
                 });
             });
         } else if (
@@ -90,6 +120,7 @@ export class Resource<
                 .then(v => {
                     this.resource = v.data;
                     this.loaded = true;
+                    this.emit('load', v.data);
                     return v;
                 });
         } else if (this.format === 'zip') {
@@ -98,6 +129,7 @@ export class Resource<
                 .then(v => {
                     this.resource = new ZippedResource(v.data);
                     this.loaded = true;
+                    this.emit('load', this.resource);
                     return v;
                 });
         }
@@ -172,12 +204,10 @@ class ResourceStore extends Map<string, Resource> {
 }
 
 declare global {
-    interface Window {
+    interface AncTe {
         /** 游戏资源 */
-        gameResource: ResourceStore;
+        resource: ResourceStore;
     }
-    /** 游戏资源 */
-    const gameResource: ResourceStore;
 }
 
-window.gameResource = new ResourceStore();
+ancTe.resource = new ResourceStore();

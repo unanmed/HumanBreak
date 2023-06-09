@@ -23,11 +23,12 @@ let totalSize = 0;
 type Stats = fs.Stats & { name?: string };
 
 export async function splitResorce(compress: boolean = false) {
+    await fs.ensureDir('./dist-resource');
+    await fs.emptyDir('./dist-resource');
     const folder = await fs.stat('./dist');
     totalSize = folder.size;
     if (totalSize < MAX_SIZE) return;
 
-    await fs.ensureDir('./dist-resource');
     await doSplit(compress);
 }
 

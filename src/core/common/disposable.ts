@@ -37,16 +37,19 @@ export class Disposable<T> extends EventEmitter<DisposableEvent<T>> {
     }
 
     active() {
+        if (this.activated) return;
         this.activated = true;
         this.emit('active', this._data!);
     }
 
     dispose() {
+        if (!this.activated) return;
         this.activated = false;
         this.emit('dispose', this._data!);
     }
 
     destroy() {
+        if (this.destroyed) return;
         this.destroyed = true;
         this.emit('destroy');
         delete this._data;
