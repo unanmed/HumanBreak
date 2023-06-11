@@ -3,7 +3,7 @@ export {};
 declare global {
     interface AncTe {}
     interface Window {
-        ancTe: AncTe;
+        readonly ancTe: AncTe;
     }
     const ancTe: AncTe;
 }

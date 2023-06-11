@@ -15,6 +15,7 @@ interface ResourceData {
 }
 
 export type ResourceType = keyof ResourceData;
+export type NonZipResource = Exclude<ResourceType, 'zip'>;
 
 export class Resource<
     T extends ResourceType = ResourceType
@@ -33,21 +34,45 @@ export class Resource<
     /** 资源数据 */
     resource?: ResourceData[T];
 
-    constructor(resource: string, type: T) {
+    constructor(resource: string, format: T) {
         super(resource);
         this.data = this.resolveUrl(resource);
-        this.format = type;
+        this.format = format;
         this.resStr = resource;
 
-        this.on('active', this.load);
-        this.on('load', this.onload);
+        this.once('active', this.load);
+        this.once('load', this.onLoad);
+        this.once('loadstart', this.onLoadStart);
     }
 
-    protected onload(v: ResourceData[T]) {
+    protected onLoadStart(v?: ResourceData[T]) {
+        if (this.format === 'bgm') {
+            // bgm 单独处理，因为它可以边播放边加载
+        }
+    }
+
+    protected onLoad(v: ResourceData[T]) {
+        // 资源类型处理
         if (this.type === 'fonts') {
             document.fonts.add(new FontFace(this.name, v as ArrayBuffer));
         } else if (this.type === 'sounds') {
             ancTe.sound.add(this.resStr, v as ArrayBuffer);
+        }
+
+        // 资源加载类型处理
+        if (this.format === 'zip') {
+            (this.resource as ZippedResource).once('ready', data => {
+                data.forEach((path, file) => {
+                    const [base, name] = path.split(/(\/|\\)/);
+                    const id = `${base}.${name}`;
+                    const type = getTypeByResource(id) as NonZipResource;
+                    const format = getZipFormatByType(type);
+                    ancTe.resource.set(
+                        id,
+                        new Resource(id, type).setData(file.async(format))
+                    );
+                });
+            });
         }
     }
 
@@ -84,6 +109,9 @@ export class Resource<
      * 加载资源
      */
     protected load() {
+        if (this.loaded) {
+            throw new Error(`Cannot load one resource twice.`);
+        }
         const data = this.data;
         if (!data) {
             throw new Error(`Unexpected null of url in loading resource.`);
@@ -92,6 +120,7 @@ export class Resource<
             this.request = new Promise(res => {
                 const img = new Image();
                 img.src = data;
+                this.emit('loadstart', img);
                 img.addEventListener('load', () => {
                     this.resource = img;
                     this.loaded = true;
@@ -103,6 +132,7 @@ export class Resource<
             this.request = new Promise(res => {
                 const audio = new Audio();
                 audio.src = data;
+                this.emit('loadstart', audio);
                 audio.addEventListener('load', () => {
                     this.resource = audio;
                     this.loaded = true;
@@ -115,6 +145,7 @@ export class Resource<
             this.format === 'text' ||
             this.format === 'arraybuffer'
         ) {
+            this.emit('loadstart');
             this.request = axios
                 .get(data, { responseType: this.format })
                 .then(v => {
@@ -124,6 +155,7 @@ export class Resource<
                     return v;
                 });
         } else if (this.format === 'zip') {
+            this.emit('loadstart');
             this.request = axios
                 .get(data, { responseType: 'arraybuffer' })
                 .then(v => {
@@ -147,6 +179,25 @@ export class Resource<
             return this.resource ?? null;
         }
     }
+
+    /**
+     * 设置资源数据，不再需要加载
+     * @param data 数据
+     */
+    protected setData(data: ResourceData[T] | Promise<ResourceData[T]>) {
+        if (data instanceof Promise) {
+            data.then(v => {
+                this.loaded = true;
+                this.resource = v;
+                this.emit('load', v);
+            });
+        } else {
+            this.loaded = true;
+            this.resource = data;
+            this.emit('load', data);
+        }
+        return this;
+    }
 }
 
 interface ZippedEvent extends EmitableEvent {
@@ -167,7 +218,7 @@ export class ZippedResource extends EventEmitter<ZippedEvent> {
     }
 }
 
-class ResourceStore extends Map<string, Resource> {
+class ResourceStore<T extends ResourceType> extends Map<string, Resource<T>> {
     active(key: string[] | string) {
         const keys = ensureArray(key);
         keys.forEach(v => this.get(v)?.active());
@@ -183,7 +234,7 @@ class ResourceStore extends Map<string, Resource> {
         keys.forEach(v => this.get(v)?.destroy());
     }
 
-    push(data: [string, Resource][] | Record<string, Resource>): void {
+    push(data: [string, Resource<T>][] | Record<string, Resource<T>>): void {
         if (data instanceof Array) {
             for (const [key, res] of data) {
                 if (this.has(key)) {
@@ -201,13 +252,41 @@ class ResourceStore extends Map<string, Resource> {
     ): Promise<ResourceData[T] | null> {
         return this.get(key)?.getData() ?? null;
     }
+
+    getDataSync<T extends ResourceType = ResourceType>(
+        key: string
+    ): ResourceData[T] | null {
+        return this.get(key)?.resource ?? null;
+    }
 }
 
 declare global {
     interface AncTe {
         /** 游戏资源 */
-        resource: ResourceStore;
+        resource: ResourceStore<Exclude<ResourceType, 'zip'>>;
+        zipResource: ResourceStore<'zip'>;
     }
 }
 
 ancTe.resource = new ResourceStore();
+ancTe.zipResource = new ResourceStore();
+
+console.log(JSZip.external.Promise);
+
+export function getTypeByResource(resource: string): ResourceType {
+    const type = resource.split('.')[0];
+
+    if (type === 'zip') return 'zip';
+    else if (type === 'bgms') return 'bgm';
+    else if (['images', 'autotiles', 'materials', 'tilesets'].includes(type)) {
+        return 'image';
+    } else if (['sounds', 'fonts'].includes(type)) return 'arraybuffer';
+    else if (type === 'animates') return 'json';
+
+    return 'arraybuffer';
+}
+
+export function getZipFormatByType(type: ResourceType): 'arraybuffer' | 'text' {
+    if (type === 'text' || type === 'json') return 'text';
+    else return 'arraybuffer';
+}

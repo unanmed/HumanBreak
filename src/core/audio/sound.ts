@@ -1,4 +1,4 @@
-export class MotaAudio {}
+export class SoundEffect {}
 
 class SoundController {
     add(uri: string, data: ArrayBuffer) {}

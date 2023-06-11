@@ -1,10 +1,9 @@
 import resource from '../../data/resource.json';
-import { Resource, ResourceType } from './resource';
+import { NonZipResource, Resource, getTypeByResource } from './resource';
 
 const info = resource as ResourceInfo[];
 
 export interface ResourceInfo {
-    floor: [FloorIds, FloorIds][];
     includes: string[];
     zip: boolean;
     zippedName?: string;
@@ -13,13 +12,15 @@ export interface ResourceInfo {
 export function readyAllResource() {
     info.forEach(v => {
         if (v.zip) {
-            const res = new Resource(`zip.${v.zippedName}`, 'zip');
-            ancTe.resource.push([[`zip.${v.zippedName}`, res]]);
+            const id = `zip.${v.zippedName}`;
+            ancTe.zipResource.push([[id, new Resource(id, 'zip')]]);
         } else {
-            const res: [string, Resource][] = v.includes.map(v => {
-                const type = v.split('.')[0];
-                return [v, new Resource(v, type as ResourceType)];
-            });
+            const res: [string, Resource<NonZipResource>][] = v.includes.map(
+                v => {
+                    const type = getTypeByResource(v);
+                    return [v, new Resource(v, type as NonZipResource)];
+                }
+            );
             ancTe.resource.push(res);
         }
     });
