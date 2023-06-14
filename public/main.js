@@ -245,7 +245,7 @@ main.prototype.init = async function (mode, callback) {
         const b = {};
         new Proxy(a, b);
         new Promise(res => res());
-        eval('`${123}`');
+        eval('`${0}`');
     } catch {
         alert('浏览器版本过低，无法游玩本塔！');
         alert('建议使用Edge浏览器或Chrome浏览器游玩！');
