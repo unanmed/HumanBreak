@@ -1,30 +1,62 @@
 import { has } from '../../plugin/utils';
 import { AudioPlayer } from './audio';
+import resource from '../../data/resource.json';
 
 export class SoundEffect extends AudioPlayer {
     static playIndex = 0;
 
     private playing: Record<string, AudioBufferSourceNode> = {};
     private _stopingAll: boolean = false;
+    private playMap: Map<AudioBufferSourceNode, number> = new Map();
+
+    stereo: boolean = false;
+
+    gain: GainNode = AudioPlayer.ac.createGain();
+    panner: PannerNode | null = null;
+    merger: ChannelMergerNode | null = null;
 
     constructor(data: ArrayBuffer, stereo: boolean = false) {
         super(data);
 
         this.on('end', node => {
             if (this._stopingAll) return;
-            const entry = Object.entries(this.playing);
-            const index = entry.find(v => node === v[1])?.[0];
+            const index = this.playMap.get(node);
             if (!index) return;
             delete this.playing[index];
         });
-        this.initAudio(stereo);
+        this.on('update', () => {
+            this.initAudio(this.stereo);
+        });
+
+        this.stereo = stereo;
     }
 
     /**
      * 设置音频路由线路
      * @param stereo 是否启用立体声
      */
-    protected initAudio(stereo: boolean = false) {}
+    protected initAudio(stereo: boolean = false) {
+        const channel = this.buffer?.numberOfChannels;
+        const ac = AudioPlayer.ac;
+        if (!channel) return;
+        if (stereo) {
+            this.panner = ac.createPanner();
+            this.panner.connect(this.gain);
+            if (channel === 1) {
+                this.merger = ac.createChannelMerger();
+                this.merger.connect(this.panner);
+                this.baseNode = [
+                    { node: this.merger, channel: 0 },
+                    { node: this.merger, channel: 1 }
+                ];
+            } else {
+                this.baseNode = [{ node: this.panner }];
+            }
+        } else {
+            this.baseNode = [{ node: this.gain }];
+        }
+        this.gain.connect(this.getDestination());
+    }
 
     /**
      * 播放音频
@@ -35,6 +67,7 @@ export class SoundEffect extends AudioPlayer {
         if (!node) return;
         const index = SoundEffect.playIndex++;
         this.playing[index] = node;
+        this.playMap.set(node, index);
         return index;
     }
 
@@ -71,7 +104,8 @@ class SoundController {
      * @param data 音频的ArrayBuffer信息，会被解析为AudioBuffer
      */
     add(uri: string, data: ArrayBuffer) {
-        const se = new SoundEffect(data);
+        const stereo = resource.stereoSE.includes(uri);
+        const se = new SoundEffect(data, stereo);
         if (this.list[uri]) {
             console.warn(`Repeated sound effect: ${uri}.`);
         }

@@ -4,7 +4,7 @@ import { Resource, getTypeByResource } from './resource';
 const info = resource;
 
 export function readyAllResource() {
-    info.forEach(v => {
+    info.resource.forEach(v => {
         const type = getTypeByResource(v);
         if (type === 'zip') {
             ancTe.zipResource.set(v, new Resource(v, 'zip'));

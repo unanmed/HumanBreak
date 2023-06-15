@@ -92,7 +92,6 @@ function main() {
         'actions',
         'data',
         'ui',
-        'extensions',
         'core'
     ];
     this.pureData = [
