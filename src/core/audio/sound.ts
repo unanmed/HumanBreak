@@ -23,6 +23,7 @@ export class SoundEffect extends AudioPlayer {
             const index = this.playMap.get(node);
             if (!index) return;
             delete this.playing[index];
+            this.playMap.delete(node);
         });
         this.on('update', () => {
             this.initAudio(this.stereo);
@@ -39,6 +40,8 @@ export class SoundEffect extends AudioPlayer {
         const channel = this.buffer?.numberOfChannels;
         const ac = AudioPlayer.ac;
         if (!channel) return;
+        this.panner = null;
+        this.merger = null;
         if (stereo) {
             this.panner = ac.createPanner();
             this.panner.connect(this.gain);
@@ -80,6 +83,7 @@ export class SoundEffect extends AudioPlayer {
             v.stop();
         });
         this.playing = {};
+        this.playMap.clear();
         this._stopingAll = false;
     }
 
