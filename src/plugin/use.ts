@@ -16,7 +16,13 @@ const dragFnMap = new Map<DragFn, DragMap>();
 /**
  * 是否是移动设备
  */
-export const isMobile = matchMedia('(max-width: 600px)').matches;
+export let isMobile = matchMedia('(max-width: 600px)').matches;
+
+window.addEventListener('resize', () => {
+    requestAnimationFrame(() => {
+        isMobile = matchMedia('(max-width: 600px)').matches;
+    });
+});
 
 /**
  * 向一个元素添加拖拽事件
