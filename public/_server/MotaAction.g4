@@ -636,13 +636,6 @@ return '{' + [
 
 
 mainStyle_m
-    : '主要样式设置：' '标题界面背景图：' EvalString BGNL? Newline 
-      '竖屏标题界面背景图：' EvalString BGNL? Newline 
-      '标题样式；可写 display: none 隐藏标题' EvalString BGNL? Newline 
-      '标题按钮样式：' EvalString BGNL? Newline 
-      '横屏状态栏背景；url(...) 0 0/100% 100% no-repeat 可将图片拉伸自适配' BGNL? Newline EvalString BGNL? Newline  
-      '竖屏状态栏背景：' EvalString BGNL? Newline 
-      '竖屏工具栏背景：' EvalString BGNL? Newline 
       '楼层切换样式：' EvalString BGNL? Newline
       '状态栏颜色' ColorString Colour '边框颜色' ColorString Colour BGNL? Newline
       '选中框颜色' ColorString Colour '全局字体' EvalString BEND
@@ -652,14 +645,7 @@ tooltip : 主要样式设置
 default : ["project/images/bg.jpg", "project/images/bg.jpg", "color: white", "background-color: #32369F; opacity: 0.85; color: #FFFFFF; border: #FFFFFF 2px solid; caret-color: #FFD700;", "url(project/materials/ground.png) repeat", "url(project/materials/ground.png) repeat", "url(project/materials/ground.png) repeat", "background-color: black; color: white", "255,255,255,1", "rgba(255,255,255,1)", "204,204,204,1", "rgba(204,204,204,1)", "255,215,0,1", "rgba(255,215,0,1)", "Verdana"]
 helpUrl : /_docs/#/instruction
 var code = {
-    startBackground: EvalString_0,
-    startVerticalBackground: EvalString_1,
-    startLogoStyle: EvalString_2,
-    startButtonsStyle: EvalString_3,
-    statusLeftBackground: EvalString_4,
-    statusTopBackground: EvalString_5,
-    toolsBackground: EvalString_6,
-    floorChangingStyle: EvalString_7,
+    floorChangingStyle: EvalString_0,
     statusBarColor: JSON.parse('['+ColorString_0+']'),
     borderColor: JSON.parse('['+ColorString_1+']'),
     selectColor: JSON.parse('['+ColorString_2+']'),
@@ -4062,8 +4048,8 @@ Floor_Meta_List
     /*Floor_Meta_List ['title','name','canFlyTo', 'canFlyFrom', 'canUseQuickShop', 'cannotViewMap', 'cannotMoveDirectly', 'defaultGround', 'ratio', 'upFloor', 'downFloor', 'flyPoint', 'bgm', 'color', 'weather', 'underGround']*/;
 
 Global_Attribute_List
-    :   '全局字体'|'横屏左侧状态栏背景'|'竖屏上方状态栏背景'|'竖屏下方道具栏背景'|'边框颜色'|'状态栏文字色'|'选中框颜色'|'楼层转换样式'|'装备列表'
-    /*Global_Attribute_List ['font','statusLeftBackground','statusTopBackground', 'toolsBackground', 'borderColor', 'statusBarColor', 'selectColor', 'floorChangingStyle', 'equipName']*/;
+    :   '全局字体'|'边框颜色'|'状态栏文字色'|'选中框颜色'|'楼层转换样式'|'装备列表'
+    /*Global_Attribute_List ['font', 'borderColor', 'statusBarColor', 'selectColor', 'floorChangingStyle', 'equipName']*/;
 
 Global_Value_List
     :   '血网伤害'|'中毒伤害'|'衰弱效果'|'红宝石效果'|'蓝宝石效果'|'绿宝石效果'|'红血瓶效果'|'蓝血瓶效果'|'黄血瓶效果'|'绿血瓶效果'|'破甲比例'|'反击比例'|'净化比例'|'仇恨增加值'|'图块每帧时间'|'上下楼时间'

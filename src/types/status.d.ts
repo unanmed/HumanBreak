@@ -325,21 +325,6 @@ interface TextAttribute {
 
 interface StatusStyle {
     /**
-     * 左侧状态栏背景，css的background属性
-     */
-    statusLeftBackground: string;
-
-    /**
-     * 上部状态栏背景，css的background属性
-     */
-    statusTopBackground: string;
-
-    /**
-     * 竖屏下的工具栏背景，css的background属性
-     */
-    toolsBackground: string;
-
-    /**
      * 游戏的边框颜色
      */
     borderColor: Color;

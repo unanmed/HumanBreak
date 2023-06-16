@@ -1,10 +1,8 @@
 import { has } from '../../plugin/utils';
-import { AudioPlayer } from './audio';
+import { AudioParamOf, AudioPlayer } from './audio';
 import resource from '../../data/resource.json';
 
-type Panner = {
-    [P in SelectKey<PannerNode, AudioParam>]: number;
-};
+type Panner = AudioParamOf<PannerNode>;
 
 export class SoundEffect extends AudioPlayer {
     static playIndex = 0;
@@ -45,6 +43,11 @@ export class SoundEffect extends AudioPlayer {
 
     /**
      * 设置音频路由线路
+     * ```txt
+     * 不启用立体声：source -> gain -> destination
+     * 启用立体声：source -> panner -> gain --> destination
+     * 单声道立体声：source -> merger -> panner -> gain -> destination
+     * ```
      * @param stereo 是否启用立体声
      */
     protected initAudio(stereo: boolean = false) {

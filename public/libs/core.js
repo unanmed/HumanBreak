@@ -235,23 +235,12 @@ function core() {
             animateTime: 0
         },
         globalAttribute: {
-            equipName: main.equipName || [],
-            statusLeftBackground:
-                main.styles.statusLeftBackground ||
-                'url(project/materials/ground.png) repeat',
-            statusTopBackground:
-                main.styles.statusTopBackground ||
-                'url(project/materials/ground.png) repeat',
-            toolsBackground:
-                main.styles.toolsBackground ||
-                'url(project/materials/ground.png) repeat',
-            borderColor: main.styles.borderColor || [204, 204, 204, 1],
-            statusBarColor: main.styles.statusBarColor || [255, 255, 255, 1],
-            floorChangingStyle:
-                main.styles.floorChangingStyle ||
-                'background-color: black; color: white',
-            selectColor: main.styles.selectColor || [255, 215, 0, 1],
-            font: main.styles.font || 'Verdana'
+            equipName: main.equipName,
+            borderColor: main.styles.borderColor,
+            statusBarColor: main.styles.statusBarColor,
+            floorChangingStyle: main.styles.floorChangingStyle,
+            selectColor: main.styles.selectColor,
+            font: main.styles.font
         },
         curtainColor: null,
 
@@ -304,9 +293,7 @@ core.prototype.init = async function (coreData, callback) {
     }
 
     core.loader._load(function () {
-        core.extensions._load(function () {
-            core._afterLoadResources(callback);
-        });
+        core._afterLoadResources(callback);
     });
 };
 
@@ -319,9 +306,7 @@ core.prototype.initSync = function (coreData, callback) {
     this._loadPluginSync();
 
     core.loader._load(function () {
-        core.extensions._load(function () {
-            core._afterLoadResources(callback);
-        });
+        core._afterLoadResources(callback);
     });
 };
 
