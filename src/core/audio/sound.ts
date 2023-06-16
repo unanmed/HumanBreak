@@ -2,6 +2,10 @@ import { has } from '../../plugin/utils';
 import { AudioPlayer } from './audio';
 import resource from '../../data/resource.json';
 
+type Panner = {
+    [P in SelectKey<PannerNode, AudioParam>]: number;
+};
+
 export class SoundEffect extends AudioPlayer {
     static playIndex = 0;
 
@@ -14,6 +18,13 @@ export class SoundEffect extends AudioPlayer {
     gain: GainNode = AudioPlayer.ac.createGain();
     panner: PannerNode | null = null;
     merger: ChannelMergerNode | null = null;
+
+    set volumn(value: number) {
+        this.gain.gain.value = value;
+    }
+    get volumn(): number {
+        return this.gain.gain.value;
+    }
 
     constructor(data: ArrayBuffer, stereo: boolean = false) {
         super(data);
@@ -95,6 +106,17 @@ export class SoundEffect extends AudioPlayer {
         this.playing[index]?.stop();
         delete this.playing[index];
     }
+
+    /**
+     * 设置立体声信息
+     * @param panner 立体声信息
+     */
+    setPanner(panner: Partial<Panner>) {
+        if (!this.panner) return;
+        for (const [key, value] of Object.entries(panner)) {
+            this.panner[key as keyof Panner].value = value;
+        }
+    }
 }
 
 class SoundController {
@@ -111,7 +133,7 @@ class SoundController {
         const stereo = resource.stereoSE.includes(uri);
         const se = new SoundEffect(data, stereo);
         if (this.list[uri]) {
-            console.warn(`Repeated sound effect: ${uri}.`);
+            console.warn(`Repeated sound effect: '${uri}'.`);
         }
         return (this.list[uri] = se);
     }
