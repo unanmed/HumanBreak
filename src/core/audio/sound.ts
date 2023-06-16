@@ -11,7 +11,7 @@ export class SoundEffect extends AudioPlayer {
     private _stopingAll: boolean = false;
     private playMap: Map<AudioBufferSourceNode, number> = new Map();
 
-    stereo: boolean = false;
+    private _stereo: boolean = false;
 
     gain: GainNode = AudioPlayer.ac.createGain();
     panner: PannerNode | null = null;
@@ -22,6 +22,14 @@ export class SoundEffect extends AudioPlayer {
     }
     get volumn(): number {
         return this.gain.gain.value;
+    }
+
+    set stereo(value: boolean) {
+        this._stereo = value;
+        this.initAudio(value);
+    }
+    get stereo(): boolean {
+        return this._stereo;
     }
 
     constructor(data: ArrayBuffer, stereo: boolean = false) {
@@ -35,10 +43,10 @@ export class SoundEffect extends AudioPlayer {
             this.playMap.delete(node);
         });
         this.on('update', () => {
-            this.initAudio(this.stereo);
+            this.initAudio(this._stereo);
         });
 
-        this.stereo = stereo;
+        this._stereo = stereo;
     }
 
     /**
