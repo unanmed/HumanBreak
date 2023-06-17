@@ -253,3 +253,8 @@ export async function swapChapter(chapter: number, hard: number) {
         core.drawTip('读档成功');
     });
 }
+
+export function ensureArray<T>(arr: T): T extends any[] ? T : T[] {
+    // @ts-ignore
+    return arr instanceof Array ? arr : [arr];
+}

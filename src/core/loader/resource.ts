@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import { Disposable } from '../common/disposable';
-import { ensureArray } from '../../plugin/game/utils';
+import { ensureArray } from '../../plugin/utils';
 import { has } from '../../plugin/utils';
 import JSZip from 'jszip';
 import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
