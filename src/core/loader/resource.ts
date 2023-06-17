@@ -25,7 +25,7 @@ export class Resource<
         AxiosResponse<ResourceData[T]> | '@imageLoaded' | '@bgmLoaded'
     >;
     loaded: boolean = false;
-    resStr: string;
+    uri: string;
 
     type!: string;
     name!: string;
@@ -38,7 +38,7 @@ export class Resource<
         super(resource);
         this.data = this.resolveUrl(resource);
         this.format = format;
-        this.resStr = resource;
+        this.uri = resource;
 
         this.once('active', this.load);
         this.once('load', this.onLoad);
@@ -48,6 +48,7 @@ export class Resource<
     protected onLoadStart(v?: ResourceData[T]) {
         if (this.format === 'bgm') {
             // bgm 单独处理，因为它可以边播放边加载
+            ancTe.bgm.add(this.uri, v!);
         }
     }
 
@@ -56,7 +57,7 @@ export class Resource<
         if (this.type === 'fonts') {
             document.fonts.add(new FontFace(this.name, v as ArrayBuffer));
         } else if (this.type === 'sounds') {
-            ancTe.sound.add(this.resStr, v as ArrayBuffer);
+            ancTe.sound.add(this.uri, v as ArrayBuffer);
         }
 
         // 资源加载类型处理

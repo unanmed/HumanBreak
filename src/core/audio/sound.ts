@@ -1,6 +1,7 @@
 import { has } from '../../plugin/utils';
 import { AudioParamOf, AudioPlayer } from './audio';
 import resource from '../../data/resource.json';
+import { ResourceController } from '../loader/controller';
 
 type Panner = AudioParamOf<PannerNode>;
 
@@ -131,9 +132,7 @@ export class SoundEffect extends AudioPlayer {
     }
 }
 
-class SoundController {
-    list: Record<string, SoundEffect> = {};
-
+class SoundController extends ResourceController<ArrayBuffer, SoundEffect> {
     private seIndex: Record<number, SoundEffect> = {};
 
     /**
@@ -148,14 +147,6 @@ class SoundController {
             console.warn(`Repeated sound effect: '${uri}'.`);
         }
         return (this.list[uri] = se);
-    }
-
-    /**
-     * 移除一个音频
-     * @param uri 要移除的音频的uri
-     */
-    remove(uri: string) {
-        delete this.list[uri];
     }
 
     /**
