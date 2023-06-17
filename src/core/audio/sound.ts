@@ -25,8 +25,8 @@ export class SoundEffect extends AudioPlayer {
     }
 
     set stereo(value: boolean) {
+        if (value !== this._stereo) this.initAudio(value);
         this._stereo = value;
-        this.initAudio(value);
     }
     get stereo(): boolean {
         return this._stereo;
@@ -55,6 +55,7 @@ export class SoundEffect extends AudioPlayer {
      * 不启用立体声：source -> gain -> destination
      * 启用立体声：source -> panner -> gain --> destination
      * 单声道立体声：source -> merger -> panner -> gain -> destination
+     * 单声道立体声指音源为单声道，合成为双声道后模拟为立体声
      * ```
      * @param stereo 是否启用立体声
      */

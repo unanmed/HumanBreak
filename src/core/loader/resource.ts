@@ -147,7 +147,12 @@ export class Resource<
         ) {
             this.emit('loadstart');
             this.request = axios
-                .get(data, { responseType: this.format })
+                .get(data, {
+                    responseType: this.format,
+                    onDownloadProgress: e => {
+                        this.emit('progress', e);
+                    }
+                })
                 .then(v => {
                     this.resource = v.data;
                     this.loaded = true;
@@ -157,7 +162,12 @@ export class Resource<
         } else if (this.format === 'zip') {
             this.emit('loadstart');
             this.request = axios
-                .get(data, { responseType: 'arraybuffer' })
+                .get(data, {
+                    responseType: 'arraybuffer',
+                    onDownloadProgress: e => {
+                        this.emit('progress', e);
+                    }
+                })
                 .then(v => {
                     this.resource = new ZippedResource(v.data);
                     this.loaded = true;
