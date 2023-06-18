@@ -11,7 +11,7 @@ class BgmController extends ResourceController<HTMLAudioElement> {
      */
     add(uri: string, data: HTMLAudioElement) {
         if (this.list[uri]) {
-            console.warn(`Repeated bgm: '${uri}'`);
+            console.warn(`Repeated bgm: '${uri}'.`);
         }
         this.list[uri] = data;
         data.loop = true;
@@ -21,8 +21,12 @@ class BgmController extends ResourceController<HTMLAudioElement> {
      * 切换bgm
      * @param id bgm的id
      */
-    play(id: BgmIds) {
+    play(id: BgmIds, when: number = 0) {
+        if (this.playing === id) return;
+        this.stop();
         const bgm = this.get(id);
+        bgm.currentTime = when;
+        bgm.play();
     }
 
     /**

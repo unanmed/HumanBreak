@@ -271,19 +271,6 @@ class ResourceStore<T extends ResourceType> extends Map<string, Resource<T>> {
     }
 }
 
-declare global {
-    interface AncTe {
-        /** 游戏资源 */
-        resource: ResourceStore<Exclude<ResourceType, 'zip'>>;
-        zipResource: ResourceStore<'zip'>;
-    }
-}
-
-ancTe.resource = new ResourceStore();
-ancTe.zipResource = new ResourceStore();
-
-console.log(JSZip.external.Promise);
-
 export function getTypeByResource(resource: string): ResourceType {
     const type = resource.split('.')[0];
 
@@ -301,3 +288,14 @@ export function getZipFormatByType(type: ResourceType): 'arraybuffer' | 'text' {
     if (type === 'text' || type === 'json') return 'text';
     else return 'arraybuffer';
 }
+
+declare global {
+    interface AncTe {
+        /** 游戏资源 */
+        resource: ResourceStore<Exclude<ResourceType, 'zip'>>;
+        zipResource: ResourceStore<'zip'>;
+    }
+}
+
+ancTe.resource = new ResourceStore();
+ancTe.zipResource = new ResourceStore();
