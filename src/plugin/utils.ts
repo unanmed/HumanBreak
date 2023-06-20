@@ -6,6 +6,7 @@ import { ComputedRef, ref } from 'vue';
 import { EVENT_KEY_CODE_MAP } from './keyCodes';
 import axios from 'axios';
 import { decompressFromBase64 } from 'lz-string';
+import { parseColor } from './webgl/utils';
 
 type CanParseCss = keyof {
     [P in keyof CSSStyleDeclaration as CSSStyleDeclaration[P] extends string
@@ -257,4 +258,8 @@ export async function swapChapter(chapter: number, hard: number) {
 export function ensureArray<T>(arr: T): T extends any[] ? T : T[] {
     // @ts-ignore
     return arr instanceof Array ? arr : [arr];
+}
+
+export function pColor(color: string) {
+    return core.arrayToRGBA(parseColor(color));
 }

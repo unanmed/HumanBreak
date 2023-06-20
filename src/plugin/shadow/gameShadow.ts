@@ -12,6 +12,7 @@ import {
     setLightList,
     setShadowNodes
 } from './shadow';
+import { pColor } from '../utils';
 
 export default function init() {
     const origin4 = control.prototype.drawHero;
@@ -39,7 +40,7 @@ const shadowInfo: Partial<Record<FloorIds, Light[]>> = {
             y: 144,
             decay: 20,
             r: 150,
-            color: '#e953',
+            color: pColor('#e953'),
             noShelter: true
         },
         {
@@ -48,7 +49,7 @@ const shadowInfo: Partial<Record<FloorIds, Light[]>> = {
             y: 144,
             decay: 20,
             r: 150,
-            color: '#e953',
+            color: pColor('#e953'),
             noShelter: true
         },
         {
@@ -57,7 +58,7 @@ const shadowInfo: Partial<Record<FloorIds, Light[]>> = {
             y: 336,
             decay: 20,
             r: 150,
-            color: '#e953',
+            color: pColor('#e953'),
             noShelter: true
         },
         {
@@ -66,13 +67,13 @@ const shadowInfo: Partial<Record<FloorIds, Light[]>> = {
             y: 336,
             decay: 20,
             r: 150,
-            color: '#e953',
+            color: pColor('#e953'),
             noShelter: true
         }
     ]
 };
 const backgroundInfo: Partial<Record<FloorIds, Color>> = {
-    MT50: '#0006'
+    MT50: pColor('#0006')
 };
 const blurInfo: Partial<Record<FloorIds, number>> = {};
 const immersionInfo: Partial<Record<FloorIds, number>> = {};
@@ -86,7 +87,7 @@ export function updateShadow(nocache: boolean = false) {
     if (!shadowInfo[floor] || !backgroundInfo[floor]) {
         removeAllLights();
         setShadowNodes([]);
-        setBackground('#0000');
+        setBackground('transparent');
         return;
     }
     const f = core.status.thisMap;

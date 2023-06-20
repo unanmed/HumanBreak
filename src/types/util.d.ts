@@ -563,7 +563,7 @@ type RGBArray = [number, number, number, number?];
 /**
  * 样板的颜色字符串
  */
-type Color = `#${string}` | _RGBA | RGBArray;
+type Color = `#${string}` | _RGBA | RGBArray | 'transparent';
 
 /**
  * 四个方向

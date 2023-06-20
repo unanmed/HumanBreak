@@ -1,7 +1,5 @@
 interface MotaConfig {
     name: string;
-    /** 资源分组打包信息 */
-    resourceZip?: string[][];
     resourceName?: string;
 }
 
