@@ -88,21 +88,34 @@ export class Resource<
         const name = (this.name = resolve.slice(1, -1).join('.'));
         const ext = (this.ext = '.' + resolve.at(-1));
 
-        if (!main.USE_RESOURCE) {
-            return `/games/${core.data.firstData.name}/project/${type}/${name}${ext}`;
-        }
+        const distBase = import.meta.env.BASE_URL;
 
         const base = main.RESOURCE_URL;
         const indexes = main.RESOURCE_INDEX;
         const symbol = main.RESOURCE_SYMBOL;
+        const t = main.RESOURCE_TYPE;
 
-        if (has(indexes[`${type}.*`])) {
-            const i = indexes[`${type}.*`];
-            return `${base}${i}/${type}/${name}-${symbol}${ext}`;
+        if (t === 'dist') {
+            if (has(indexes[`${type}.*`])) {
+                const i = indexes[`${type}.*`];
+                if (i !== 'dist') {
+                    return `${base}${i}/${type}/${name}-${symbol}${ext}`;
+                } else {
+                    return `${distBase}resource/${type}/${name}-${symbol}${ext}`;
+                }
+            } else {
+                const i = indexes[`${type}.${name}${ext}`];
+                const index = has(i) ? i : '0';
+                if (i !== 'dist') {
+                    return `${base}${index}/${type}/${name}-${symbol}${ext}`;
+                } else {
+                    return `${distBase}resource/${type}/${name}-${symbol}${ext}`;
+                }
+            }
+        } else if (t === 'gh' || t === 'local') {
+            return `${distBase}resource/${type}/${name}-${symbol}${ext}`;
         } else {
-            const i = indexes[`${type}.${name}${ext}`];
-            const index = has(i) ? i : 0;
-            return `${base}${index}/${type}/${name}-${symbol}${ext}`;
+            return `${distBase}project/${type}/${name}${ext}`;
         }
     }
 

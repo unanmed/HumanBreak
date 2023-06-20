@@ -4,7 +4,8 @@
         "composite": true,
         "module": "ESNext",
         "moduleResolution": "Node",
-        "allowSyntheticDefaultImports": true
+        "allowSyntheticDefaultImports": true,
+        "strict": true
     },
-    "include": ["vite.config.ts", "mota.config.ts"]
+    "include": ["vite.config.ts", "mota.config.ts", "script/**/*.ts"]
 }

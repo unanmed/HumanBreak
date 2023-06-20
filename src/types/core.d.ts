@@ -1259,7 +1259,7 @@ interface Main extends MainData {
     readonly RESOURCE_INDEX: Record<string, string>;
     readonly RESOURCE_URL: string;
     readonly RESOURCE_SYMBOL: string;
-    readonly USE_RESOURCE: boolean;
+    readonly RESOURCE_TYPE: 'dev' | 'dist' | 'gh' | 'local';
 
     /**
      * 初始化游戏

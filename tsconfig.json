@@ -19,8 +19,7 @@
         "src/**/*.d.ts",
         "src/**/*.tsx",
         "src/**/*.vue",
-        "mota.config.ts",
-        "script/**/*.ts"
+        "mota.config.ts"
     ],
     "references": [{ "path": "./tsconfig.node.json" }]
 }

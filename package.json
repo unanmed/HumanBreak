@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "ts-node-esm script/dev.ts",
-    "build": "vue-tsc && vite build && ts-node-esm script/build.ts 0 1 1",
-    "build-gh": "vue-tsc && vite build --base=/HumanBreak/ && ts-node-esm script/build.ts 1",
-    "build-local": "vue-tsc && vite build --base=/ && ts-node-esm script/build.ts 1",
+    "build": "vue-tsc && vite build && ts-node-esm script/build.ts dist",
+    "build-gh": "vue-tsc && vite build --base=/HumanBreak/ && ts-node-esm script/build.ts gh",
+    "build-local": "vue-tsc && vite build --base=/ && ts-node-esm script/build.ts local",
     "preview": "vite preview",
     "update": "ts-node-esm script/update.ts",
     "declare": "ts-node-esm script/declare.ts",

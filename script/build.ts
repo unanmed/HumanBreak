@@ -11,9 +11,10 @@ import commonjs from '@rollup/plugin-commonjs';
 import { splitResorce } from './resource.js';
 import compressing from 'compressing';
 
-const map = !!Number(process.argv[2]);
-const resorce = !!Number(process.argv[3]);
-const compress = !!Number(process.argv[4]);
+const type = process.argv[2];
+const map = false;
+const resorce = type !== 'dev';
+const compress = type === 'dist';
 
 (async function () {
     const timestamp = Date.now();
@@ -175,7 +176,7 @@ const compress = !!Number(process.argv[4]);
 
     // 6. 资源分离
     if (resorce) {
-        await splitResorce(compress);
+        await splitResorce(type);
     }
 
     // 7. 压缩
