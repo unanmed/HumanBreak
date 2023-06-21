@@ -3579,107 +3579,20 @@ control.prototype.screenFlash = function (
 ////// 播放背景音乐 //////
 control.prototype.playBgm = function (bgm, startTime) {
     bgm = core.getMappedName(bgm);
-    if (main.mode != 'play' || !core.material.bgms[bgm]) return;
-    // 如果不允许播放
-    if (!core.musicStatus.bgmStatus) {
-        try {
-            core.musicStatus.playingBgm = bgm;
-            core.musicStatus.lastBgm = bgm;
-            core.material.bgms[bgm].pause();
-        } catch (e) {
-            console.error(e);
-        }
-        return;
-    }
-
-    try {
-        this._playBgm_play(bgm, startTime);
-    } catch (e) {
-        console.log('无法播放BGM ' + bgm);
-        console.error(e);
-        core.musicStatus.playingBgm = null;
-    }
-};
-
-control.prototype._playBgm_play = function (bgm, startTime) {
-    // 如果当前正在播放，且和本BGM相同，直接忽略
-    if (
-        core.musicStatus.playingBgm == bgm &&
-        !core.material.bgms[core.musicStatus.playingBgm].paused &&
-        !startTime
-    ) {
-        return;
-    }
-    // 如果正在播放中，暂停
-    if (core.musicStatus.playingBgm) {
-        core.material.bgms[core.musicStatus.playingBgm].pause();
-    }
-    // 缓存BGM
-    core.loader.loadBgm(bgm);
-    // 播放当前BGM
-    core.material.bgms[bgm].volume =
-        core.musicStatus.userVolume * core.musicStatus.designVolume;
-    core.material.bgms[bgm].currentTime = startTime || 0;
-    core.material.bgms[bgm].play();
-    core.musicStatus.playingBgm = bgm;
-    core.musicStatus.lastBgm = bgm;
-    core.setBgmSpeed(100);
-};
-
-///// 设置当前背景音乐的播放速度 //////
-control.prototype.setBgmSpeed = function (speed, usePitch) {
-    var bgm = core.musicStatus.playingBgm;
-    if (main.mode != 'play' || !core.material.bgms[bgm]) return;
-    bgm = core.material.bgms[bgm];
-    if (speed < 30 || speed > 300) return;
-    bgm.playbackRate = speed / 100;
-    core.musicStatus.bgmSpeed = speed;
-
-    if (bgm.preservesPitch != null) {
-        if (bgm.__preservesPitch == null)
-            bgm.__preservesPitch = bgm.preservesPitch;
-        if (usePitch == null) bgm.preservesPitch = bgm.__preservesPitch;
-        else if (usePitch) bgm.preservesPitch = false;
-        else bgm.preservesPitch = true;
-        core.musicStatus.bgmUsePitch = usePitch;
-    }
+    if (main.mode !== 'play') return;
+    ancTe.bgm.play(bgm, startTime);
 };
 
 ////// 暂停背景音乐的播放 //////
 control.prototype.pauseBgm = function () {
     if (main.mode != 'play') return;
-    try {
-        if (core.musicStatus.playingBgm) {
-            core.musicStatus.pauseTime =
-                core.material.bgms[core.musicStatus.playingBgm].currentTime;
-            core.material.bgms[core.musicStatus.playingBgm].pause();
-            core.musicStatus.playingBgm = null;
-        }
-    } catch (e) {
-        console.log('无法暂停BGM');
-        console.error(e);
-    }
+    ancTe.bgm.pause();
 };
 
 ////// 恢复背景音乐的播放 //////
 control.prototype.resumeBgm = function (resumeTime) {
     if (main.mode != 'play') return;
-    try {
-        var speed = core.musicStatus.bgmSpeed;
-        var usePitch = core.musicStatus.bgmUsePitch;
-        core.playBgm(
-            core.musicStatus.playingBgm ||
-                core.musicStatus.lastBgm ||
-                main.startBgm,
-            resumeTime ? core.musicStatus.pauseTime : 0
-        );
-        if (resumeTime) {
-            core.setBgmSpeed(speed, usePitch);
-        }
-    } catch (e) {
-        console.log('无法恢复BGM');
-        console.error(e);
-    }
+    ancTe.bgm.resume();
 };
 
 ////// 更改背景音乐的播放 //////

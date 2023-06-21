@@ -25,10 +25,15 @@ export class BgmController extends ResourceController<HTMLAudioElement> {
     play(id: BgmIds, when: number = 0) {
         if (this.playing === id) return;
         this.pause();
-        const bgm = this.get(id);
-        bgm.currentTime = when;
-        bgm.play();
-        this.playing = id;
+        if (core.musicStatus.bgmStatus) {
+            const bgm = this.get(id);
+            bgm.currentTime = when;
+            bgm.volume = core.musicStatus.userVolume;
+            bgm.play();
+            this.playing = id;
+        } else {
+            delete this.playing;
+        }
         this.lastBgm = id;
     }
 

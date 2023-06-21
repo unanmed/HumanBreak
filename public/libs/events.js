@@ -2308,11 +2308,6 @@ events.prototype._action_setVolume = function (data, x, y, prefix) {
     );
 };
 
-events.prototype._action_setBgmSpeed = function (data, x, y, prefix) {
-    core.setBgmSpeed(data.value, data.pitch || false);
-    core.doAction();
-};
-
 events.prototype._action_setValue = function (data, x, y, prefix) {
     this.setValue(data.name, data.operator, data.value, prefix);
     if (!data.norefresh) {

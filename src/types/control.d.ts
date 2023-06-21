@@ -980,13 +980,6 @@ interface Control {
     playBgm(bgm: BgmIds | NameMapIn<BgmIds>, startTime?: number): void;
 
     /**
-     * 设置背景音乐的播放速度和音调
-     * @param speed 要设置到的速度，100是原速
-     * @param usePitch 是否允许声调改变
-     */
-    setBgmSpeed(speed: number, usePitch?: boolean): void;
-
-    /**
      * 暂停背景音乐的播放
      */
     pauseBgm(): void;
