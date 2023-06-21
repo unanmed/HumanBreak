@@ -3585,19 +3585,19 @@ control.prototype.playBgm = function (bgm, startTime) {
 
 ////// 暂停背景音乐的播放 //////
 control.prototype.pauseBgm = function () {
-    if (main.mode != 'play') return;
+    if (main.mode !== 'play') return;
     ancTe.bgm.pause();
 };
 
 ////// 恢复背景音乐的播放 //////
 control.prototype.resumeBgm = function (resumeTime) {
-    if (main.mode != 'play') return;
+    if (main.mode !== 'play') return;
     ancTe.bgm.resume();
 };
 
 ////// 更改背景音乐的播放 //////
 control.prototype.triggerBgm = function () {
-    if (main.mode != 'play') return;
+    if (main.mode !== 'play') return;
 
     core.musicStatus.bgmStatus = !core.musicStatus.bgmStatus;
     if (core.musicStatus.bgmStatus) this.resumeBgm();

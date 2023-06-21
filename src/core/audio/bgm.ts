@@ -63,6 +63,7 @@ export class BgmController extends ResourceController<HTMLAudioElement> {
         if (has(this.playing) || !this.lastBgm) return;
         const bgm = this.get(this.lastBgm);
         bgm.play();
+        this.playing = this.lastBgm;
     }
 
     get(id: BgmIds) {
