@@ -95,6 +95,7 @@ export class SoundEffect extends AudioPlayer {
         const index = SoundEffect.playIndex++;
         this.playing[index] = node;
         this.playMap.set(node, index);
+
         return index;
     }
 
@@ -136,7 +137,7 @@ export class SoundController extends ResourceController<
     ArrayBuffer,
     SoundEffect
 > {
-    private seIndex: Record<number, SoundEffect> = {};
+    private seIndex: Record<string, SoundEffect> = {};
 
     /**
      * 添加一个新的音频
@@ -157,11 +158,13 @@ export class SoundController extends ResourceController<
      * @param sound 音效的名称
      * @returns 本次播放的音效的唯一标识符，如果音效不存在返回-1
      */
-    play(sound: SoundIds): number {
+    play(sound: SoundIds, end?: () => void): number {
         const se = this.get(sound);
         const index = se.playSE();
         if (!has(index)) return -1;
         this.seIndex[index] = se;
+        if (end) se.once('end', end);
+        se.volumn = core.musicStatus.userVolume;
 
         return index;
     }
@@ -197,5 +200,16 @@ export class SoundController extends ResourceController<
      */
     get(sound: SoundIds) {
         return this.list[`sounds.${sound}`];
+    }
+
+    getPlaying(sound?: SoundIds) {
+        if (sound) {
+            const se = this.get(sound);
+            return Object.keys(this.seIndex).filter(
+                v => this.seIndex[v] === se
+            );
+        } else {
+            return Object.keys(this.seIndex);
+        }
     }
 }

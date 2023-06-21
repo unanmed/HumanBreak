@@ -3614,62 +3614,19 @@ control.prototype.playSound = function (sound, pitch, callback) {
         !core.material.sounds[sound]
     )
         return;
-    try {
-        if (core.musicStatus.audioContext != null) {
-            var source = core.musicStatus.audioContext.createBufferSource();
-            source.__name = sound;
-            source.buffer = core.material.sounds[sound];
-            source.connect(core.musicStatus.gainNode);
-            var id = setTimeout(null);
-            if (pitch && pitch >= 30 && pitch <= 300) {
-                source.playbackRate.setValueAtTime(pitch / 100, 0);
-            }
-            source.onended = function () {
-                delete core.musicStatus.playingSounds[id];
-                if (callback) callback();
-            };
-            core.musicStatus.playingSounds[id] = source;
-            if (source.start) source.start(0);
-            else if (source.noteOn) source.noteOn(0);
-            return id;
-        } else {
-            core.material.sounds[sound].volume = core.musicStatus.userVolume;
-            core.material.sounds[sound].play();
-            if (callback) callback();
-        }
-    } catch (e) {
-        console.log('无法播放SE ' + sound);
-        console.error(e);
-    }
+    ancTe.sound.play(sound, callback);
 };
 
 ////// 停止所有音频 //////
 control.prototype.stopSound = function (id) {
-    if (id == null) {
-        Object.keys(core.musicStatus.playingSounds).forEach(function (id) {
-            core.control.stopSound(id);
-        });
-        return;
-    }
-    var source = core.musicStatus.playingSounds[id];
-    if (!source) return;
-    try {
-        if (source.stop) source.stop();
-        else if (source.noteOff) source.noteOff();
-    } catch (e) {
-        console.error(e);
-    }
-    delete core.musicStatus.playingSounds[id];
+    if (typeof id === 'number') ancTe.sound.stop(id);
+    else ancTe.sound.stopAll();
 };
 
 ////// 获得当前正在播放的所有（指定）音效的id列表 //////
 control.prototype.getPlayingSounds = function (name) {
     name = core.getMappedName(name);
-    return Object.keys(core.musicStatus.playingSounds).filter(function (one) {
-        return (
-            name == null || core.musicStatus.playingSounds[one].__name == name
-        );
-    });
+    return ancTe.sound.getPlaying(name);
 };
 
 ////// 检查bgm状态 //////
