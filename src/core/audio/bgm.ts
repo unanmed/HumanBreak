@@ -3,6 +3,7 @@ import { ResourceController } from '../loader/controller';
 
 export class BgmController extends ResourceController<HTMLAudioElement> {
     playing?: BgmIds;
+    lastBgm?: BgmIds;
 
     /**
      * 添加一个bgm
@@ -23,11 +24,12 @@ export class BgmController extends ResourceController<HTMLAudioElement> {
      */
     play(id: BgmIds, when: number = 0) {
         if (this.playing === id) return;
-        this.stop();
+        this.pause();
         const bgm = this.get(id);
         bgm.currentTime = when;
         bgm.play();
         this.playing = id;
+        this.lastBgm = id;
     }
 
     /**
@@ -42,10 +44,20 @@ export class BgmController extends ResourceController<HTMLAudioElement> {
     /**
      * 停止当前的bgm播放
      */
-    stop() {
+    pause() {
         if (!has(this.playing)) return;
         const bgm = this.get(this.playing);
         bgm.pause();
+        delete this.playing;
+    }
+
+    /**
+     * 继续上一个BGM的播放
+     */
+    resume() {
+        if (has(this.playing) || !this.lastBgm) return;
+        const bgm = this.get(this.lastBgm);
+        bgm.play();
     }
 
     get(id: BgmIds) {
