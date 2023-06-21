@@ -132,7 +132,10 @@ export class SoundEffect extends AudioPlayer {
     }
 }
 
-class SoundController extends ResourceController<ArrayBuffer, SoundEffect> {
+export class SoundController extends ResourceController<
+    ArrayBuffer,
+    SoundEffect
+> {
     private seIndex: Record<number, SoundEffect> = {};
 
     /**
@@ -196,10 +199,3 @@ class SoundController extends ResourceController<ArrayBuffer, SoundEffect> {
         return this.list[`sounds.${sound}`];
     }
 }
-
-declare global {
-    interface AncTe {
-        sound: SoundController;
-    }
-}
-ancTe.sound = new SoundController();

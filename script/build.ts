@@ -56,6 +56,10 @@ const compress = type === 'dist';
         await fs.remove('./dist/_server');
         await fs.remove('./dist/editor.html');
         await fs.remove('./dist/server.cjs');
+
+        await fs.remove('./dist/project/materials/airwall.png');
+        await fs.remove('./dist/project/materials/ground.png');
+        await fs.remove('./dist/project/materials/icons_old.png');
     } catch {}
 
     // 2. 压缩字体

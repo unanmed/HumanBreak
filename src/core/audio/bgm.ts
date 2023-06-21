@@ -1,7 +1,7 @@
 import { has } from '../../plugin/utils';
 import { ResourceController } from '../loader/controller';
 
-class BgmController extends ResourceController<HTMLAudioElement> {
+export class BgmController extends ResourceController<HTMLAudioElement> {
     playing?: BgmIds;
 
     /**
@@ -27,6 +27,7 @@ class BgmController extends ResourceController<HTMLAudioElement> {
         const bgm = this.get(id);
         bgm.currentTime = when;
         bgm.play();
+        this.playing = id;
     }
 
     /**
@@ -48,13 +49,6 @@ class BgmController extends ResourceController<HTMLAudioElement> {
     }
 
     get(id: BgmIds) {
-        return this.list[`bgm.${id}`];
+        return this.list[`bgms.${id}`];
     }
 }
-
-declare global {
-    interface AncTe {
-        bgm: BgmController;
-    }
-}
-ancTe.bgm = new BgmController();

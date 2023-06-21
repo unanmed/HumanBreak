@@ -37,12 +37,13 @@ export class Resource<
     constructor(resource: string, format: T) {
         super(resource);
         this.data = this.resolveUrl(resource);
+
         this.format = format;
         this.uri = resource;
 
-        this.once('active', this.load);
-        this.once('load', this.onLoad);
-        this.once('loadstart', this.onLoadStart);
+        this.once('active', () => this.load());
+        this.once('load', v => this.onLoad(v));
+        this.once('loadstart', v => this.onLoadStart(v));
     }
 
     protected onLoadStart(v?: ResourceData[T]) {
@@ -242,7 +243,10 @@ export class ZippedResource extends EventEmitter<ZippedEvent> {
     }
 }
 
-class ResourceStore<T extends ResourceType> extends Map<string, Resource<T>> {
+export class ResourceStore<T extends ResourceType> extends Map<
+    string,
+    Resource<T>
+> {
     active(key: string[] | string) {
         const keys = ensureArray(key);
         keys.forEach(v => this.get(v)?.active());
@@ -301,14 +305,3 @@ export function getZipFormatByType(type: ResourceType): 'arraybuffer' | 'text' {
     if (type === 'text' || type === 'json') return 'text';
     else return 'arraybuffer';
 }
-
-declare global {
-    interface AncTe {
-        /** 游戏资源 */
-        resource: ResourceStore<Exclude<ResourceType, 'zip'>>;
-        zipResource: ResourceStore<'zip'>;
-    }
-}
-
-ancTe.resource = new ResourceStore();
-ancTe.zipResource = new ResourceStore();

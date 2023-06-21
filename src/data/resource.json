@@ -1,6 +1,9 @@
 {
     "resource": [
         "zip.resource.zip",
+        "zip.weather.zip",
+        "zip.materials.zip",
+        "materials.keyboard.png",
         "bgms.tower.mp3",
         "bgms.cave.mp3",
         "bgms.mount.mp3",

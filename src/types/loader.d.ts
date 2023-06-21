@@ -22,7 +22,11 @@ interface Loader {
      * @param imgName 图片名称
      * @param callback 加载完毕的回调函数
      */
-    loadImage(dir: string, imgName: string, callback?: () => void): void;
+    loadImage(
+        dir: string,
+        imgName: string,
+        callback?: (name: string, img: HTMLImageElement) => void
+    ): void;
 
     /**
      * 从zip中加载一系列图片

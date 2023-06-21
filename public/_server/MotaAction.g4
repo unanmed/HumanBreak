@@ -636,6 +636,13 @@ return '{' + [
 
 
 mainStyle_m
+    : '主要样式设置：' '标题界面背景图：' EvalString BGNL? Newline 
+      '竖屏标题界面背景图：' EvalString BGNL? Newline 
+      '标题样式；可写 display: none 隐藏标题' EvalString BGNL? Newline 
+      '标题按钮样式：' EvalString BGNL? Newline 
+      '横屏状态栏背景；url(...) 0 0/100% 100% no-repeat 可将图片拉伸自适配' BGNL? Newline EvalString BGNL? Newline  
+      '竖屏状态栏背景：' EvalString BGNL? Newline 
+      '竖屏工具栏背景：' EvalString BGNL? Newline 
       '楼层切换样式：' EvalString BGNL? Newline
       '状态栏颜色' ColorString Colour '边框颜色' ColorString Colour BGNL? Newline
       '选中框颜色' ColorString Colour '全局字体' EvalString BEND
@@ -645,7 +652,14 @@ tooltip : 主要样式设置
 default : ["project/images/bg.jpg", "project/images/bg.jpg", "color: white", "background-color: #32369F; opacity: 0.85; color: #FFFFFF; border: #FFFFFF 2px solid; caret-color: #FFD700;", "url(project/materials/ground.png) repeat", "url(project/materials/ground.png) repeat", "url(project/materials/ground.png) repeat", "background-color: black; color: white", "255,255,255,1", "rgba(255,255,255,1)", "204,204,204,1", "rgba(204,204,204,1)", "255,215,0,1", "rgba(255,215,0,1)", "Verdana"]
 helpUrl : /_docs/#/instruction
 var code = {
-    floorChangingStyle: EvalString_0,
+    startBackground: EvalString_0,
+    startVerticalBackground: EvalString_1,
+    startLogoStyle: EvalString_2,
+    startButtonsStyle: EvalString_3,
+    statusLeftBackground: EvalString_4,
+    statusTopBackground: EvalString_5,
+    toolsBackground: EvalString_6,
+    floorChangingStyle: EvalString_7,
     statusBarColor: JSON.parse('['+ColorString_0+']'),
     borderColor: JSON.parse('['+ColorString_1+']'),
     selectColor: JSON.parse('['+ColorString_2+']'),

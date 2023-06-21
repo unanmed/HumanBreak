@@ -254,7 +254,7 @@ async function writeFile(req: Request, res: Response) {
         if (name.endsWith('project/events.js')) doDeclaration('events', value);
         if (name.endsWith('project/items.js')) doDeclaration('items', value);
         if (name.endsWith('project/maps.js')) doDeclaration('maps', value);
-        if (name.endsWith('project/data.js')) doDeclaration('data', value);
+        if (name.endsWith('project/data.js')) writeDevResource(value);
     } catch (e) {
         console.log(e);
         res.end(
@@ -313,6 +313,44 @@ async function writeMultiFiles(req: Request, res: Response) {
     });
     await Promise.all(tasks).catch(e => console.log(e));
     res.end();
+}
+
+async function writeDevResource(data: string) {
+    try {
+        const buf = Buffer.from(data, 'base64');
+        data = buf.toString('utf-8');
+        const info = JSON.parse(data.split('\n').slice(1).join(''));
+        const res: string[] = [];
+        const icons = await fs.readFile('./public/project/icons.js', 'utf-8');
+        const iconData = JSON.parse(icons.split('\n').slice(1).join(''));
+        res.push(
+            ...info.main.animates.map((v: any) => `animates.${v}.animate`),
+            ...info.main.bgms.map((v: any) => `bgms.${v}`),
+            ...info.main.fonts.map((v: any) => `fonts.${v}.ttf`),
+            ...info.main.images.map((v: any) => `images.${v}`),
+            ...info.main.sounds.map((v: any) => `sounds.${v}`),
+            ...info.main.tilesets.map((v: any) => `tilesets.${v}`),
+            ...Object.keys(iconData.autotile).map(v => `autotiles.${v}.png`),
+            ...[
+                'animates',
+                'cloud',
+                'enemy48',
+                'enemys',
+                'fog',
+                'icons',
+                'items',
+                'keyboard',
+                'npc48',
+                'npcs',
+                'sun',
+                'terrains'
+            ].map(v => `materials.${v}.png`)
+        );
+        const text = JSON.stringify(res, void 0, 4);
+        await fs.writeFile('./src/data/resource-dev.json', text, 'utf-8');
+    } catch (e) {
+        console.log(e);
+    }
 }
 
 /**

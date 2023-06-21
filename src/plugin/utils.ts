@@ -2,7 +2,7 @@ import { message } from 'ant-design-vue';
 import { MessageApi } from 'ant-design-vue/lib/message';
 import { isNil } from 'lodash-es';
 import { Animation, sleep, TimingFn } from 'mutate-animate';
-import { ComputedRef, ref } from 'vue';
+import { ref } from 'vue';
 import { EVENT_KEY_CODE_MAP } from './keyCodes';
 import axios from 'axios';
 import { decompressFromBase64 } from 'lz-string';
@@ -211,14 +211,12 @@ export async function doByInterval(
     interval: number,
     awaitFirst: boolean = false
 ) {
+    if (awaitFirst) {
+        await sleep(interval);
+    }
     for await (const fn of funcs) {
-        if (awaitFirst) {
-            await sleep(interval);
-        }
         fn();
-        if (!awaitFirst) {
-            await sleep(interval);
-        }
+        await sleep(interval);
     }
 }
 

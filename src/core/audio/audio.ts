@@ -44,6 +44,7 @@ export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
     async update(data: ArrayBuffer) {
         this.data = data;
         this.buffer = await ac.decodeAudioData(data);
+
         this.emit('update', this.buffer);
     }
 
@@ -61,9 +62,10 @@ export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
      * 播放音频
      */
     play(when?: number, offset?: number, duration?: number) {
-        if (!this.source) return;
         this.ready();
-        this.source?.start(when, offset, duration);
+        if (!this.source) return;
+
+        this.source.start(when, offset, duration);
 
         const source = this.source;
         this.source?.addEventListener('ended', ev => {

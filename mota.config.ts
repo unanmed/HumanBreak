@@ -16,11 +16,25 @@ export default defineConfig({
         'resource.zip': [
             'autotiles/*',
             'tilesets/*',
-            'materials/*',
             'images/*',
             'animates/*',
             'sounds/*',
             'fonts/*'
+        ],
+        'weather.zip': [
+            'materials/fog.png',
+            'materials/cloud.png',
+            'materials/sun.png'
+        ],
+        'materials.zip': [
+            'materials/animates.png',
+            'materials/enemy48.png',
+            'materials/enemys.png',
+            'materials/icons.png',
+            'materials/items.png',
+            'materials/npc48.png',
+            'materials/npcs.png',
+            'materials/terrains.png'
         ]
     }
 });
