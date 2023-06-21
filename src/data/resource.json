@@ -1,6 +1,20 @@
 {
     "resource": [
-        ""
+        "zip.resource.zip",
+        "bgms.tower.mp3",
+        "bgms.cave.mp3",
+        "bgms.mount.mp3",
+        "bgms.towerBoss3.mp3",
+        "bgms.winter.mp3",
+        "bgms.title.mp3",
+        "bgms.road.mp3",
+        "bgms.beforeBoss.mp3",
+        "bgms.winterTown.mp3",
+        "bgms.towerBoss.mp3",
+        "bgms.grass.mp3",
+        "bgms.plot1.mp3",
+        "bgms.escape.mp3",
+        "bgms.towerBoss2.mp3"
     ],
     "stereoSE": [
         ""
