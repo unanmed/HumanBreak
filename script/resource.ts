@@ -57,6 +57,9 @@ async function zipResource() {
                 const dir = file.split('/')[0];
                 dirs.push(dir);
                 await fs.copy(`./_temp/origin/${dir}`, `./_temp/${dir}`);
+            } else if (file.startsWith('!')) {
+                const dir = file.slice(1);
+                await fs.remove(`./_temp/${dir}`);
             } else {
                 const [dir, name] = file.split('/');
                 if (dirs.includes(dir)) dirs.push(dir);

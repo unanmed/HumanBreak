@@ -19,7 +19,8 @@ export default defineConfig({
             'images/*',
             'animates/*',
             'sounds/*',
-            'fonts/*'
+            'fonts/*',
+            '!images/bg.jpg'
         ],
         'weather.zip': [
             'materials/fog.png',
