@@ -32,14 +32,7 @@ loader.prototype._load = function (callback) {
 
 loader.prototype._load_sync = function (callback) {
     this._loadAnimates_sync();
-    this._loadMusic_sync();
-    core.loader._loadMaterials_sync(function () {
-        core.loader._loadExtraImages_sync(function () {
-            core.loader._loadAutotiles_sync(function () {
-                core.loader._loadTilesets_sync(callback);
-            });
-        });
-    });
+    callback();
 };
 
 loader.prototype._load_async = function (callback) {
@@ -116,15 +109,6 @@ loader.prototype._load_async = function (callback) {
 
 loader.prototype._loadMaterials_sync = function (callback) {
     callback();
-    this._setStartLoadTipText('正在加载资源文件...');
-    this.loadImages(
-        'materials',
-        core.materials,
-        core.material.images,
-        function () {
-            core.loader._loadMaterials_afterLoad();
-        }
-    );
 };
 
 loader.prototype._loadMaterials_async = function (onprogress, onfinished) {
