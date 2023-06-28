@@ -336,10 +336,15 @@ main.prototype.loadAsync = async function (mode, callback) {
     // 加载核心js代码
     if (main.useCompress) {
         await main.loadScript(`libs/libs.min.js?v=${main.version}`);
+        main.loading.emit('coreLoaded');
     } else {
         await Promise.all(
             main.loadList.map(v =>
-                main.loadScript(`libs/${v}.js?v=${main.version}`)
+                main.loadScript(`libs/${v}.js?v=${main.version}`).then(vv => {
+                    if (v === 'core') {
+                        main.loading.emit('coreLoaded');
+                    }
+                })
             )
         );
     }
@@ -398,6 +403,8 @@ main.prototype.loadAsync = async function (mode, callback) {
         coreData[t] = main[t];
     });
     await core.init(coreData, callback);
+    main.loading.emit('coreInit');
+
     core.resize();
 
     main.core = core;

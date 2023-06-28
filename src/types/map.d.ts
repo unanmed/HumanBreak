@@ -1376,6 +1376,8 @@ interface Maps {
      * @param doCallback 是否执行该动画的回调函数
      */
     stopAnimate(id?: number, doCallback?: boolean): void;
+
+    _makeAutotileEdges(): void;
 }
 
 declare const maps: new () => Maps;

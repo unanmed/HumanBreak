@@ -4,6 +4,7 @@ import { ensureArray } from '../../plugin/utils';
 import { has } from '../../plugin/utils';
 import JSZip from 'jszip';
 import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
+import { loading } from './load';
 
 interface ResourceData {
     image: HTMLImageElement;
@@ -16,6 +17,8 @@ interface ResourceData {
 
 export type ResourceType = keyof ResourceData;
 export type NonZipResource = Exclude<ResourceType, 'zip'>;
+
+const autotiles: Partial<Record<AllIdsOf<'autotile'>, HTMLImageElement>> = {};
 
 export class Resource<
     T extends ResourceType = ResourceType
@@ -59,6 +62,42 @@ export class Resource<
             document.fonts.add(new FontFace(this.name, v as ArrayBuffer));
         } else if (this.type === 'sounds') {
             ancTe.sound.add(this.uri, v as ArrayBuffer);
+        } else if (this.type === 'images') {
+            const name = `${this.name}${this.ext}` as ImageIds;
+            loading.on(
+                'coreLoaded',
+                () => {
+                    core.material.images.images[name] = v as HTMLImageElement;
+                },
+                { immediate: true }
+            );
+        } else if (this.type === 'materials') {
+            const name = this.name as SelectKey<
+                MaterialImages,
+                HTMLImageElement
+            >;
+
+            loading.on(
+                'coreLoaded',
+                () => {
+                    core.material.images[name] = v;
+                },
+                { immediate: true }
+            );
+        } else if (this.type === 'autotiles') {
+            const name = this.name as AllIdsOf<'autotile'>;
+            autotiles[name] = v;
+            loading.addAutotileLoaded();
+            loading.onAutotileLoaded(autotiles);
+        } else if (this.type === 'tilesets') {
+            const name = `${this.name}${this.ext}`;
+            loading.on(
+                'coreLoaded',
+                () => {
+                    core.material.images.tilesets[name] = v;
+                },
+                { immediate: true }
+            );
         }
 
         // 资源加载类型处理

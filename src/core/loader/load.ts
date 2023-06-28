@@ -1,5 +1,14 @@
 import resource from '../../data/resource.json';
+import { has } from '../../plugin/utils';
+import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
 import { Resource, getTypeByResource } from './resource';
+
+interface GameLoadEvent extends EmitableEvent {
+    coreLoaded: () => void;
+    autotileLoaded: () => void;
+    coreInit: () => void;
+    materialLoaded: () => void;
+}
 
 const info = resource;
 
@@ -32,3 +41,79 @@ export function readyAllResource() {
     });
     ancTe.resource.forEach(v => v.active());
 }
+
+class GameLoading extends EventEmitter<GameLoadEvent> {
+    private autotileLoaded: number = 0;
+    private autotileNum?: number;
+    private autotileListened: boolean = false;
+
+    private materialsNum: number = main.materials.length;
+    private materialsLoaded: number = 0;
+
+    constructor() {
+        super();
+        this.on(
+            'coreInit',
+            () => {
+                this.autotileNum = Object.keys(
+                    core.material.icons.autotile
+                ).length;
+            },
+            { immediate: true }
+        );
+        this.on('materialLoaded', () => {
+            core.loader._loadMaterials_afterLoad();
+        });
+    }
+
+    addMaterialLoaded() {
+        this.once('coreInit', () => {
+            this.materialsLoaded++;
+            if (this.materialsLoaded === this.materialsNum) {
+                this.emit('materialLoaded');
+            }
+        });
+    }
+
+    addAutotileLoaded() {
+        this.once('coreInit', () => {
+            this.autotileLoaded++;
+            if (this.autotileLoaded === this.autotileNum) {
+                this.emit('autotileLoaded');
+            }
+        });
+    }
+
+    /**
+     * 当自动原件加载完毕时
+     * @param autotiles 自动原件数组
+     */
+    onAutotileLoaded(
+        autotiles: Partial<Record<AllIdsOf<'autotile'>, HTMLImageElement>>
+    ) {
+        if (this.autotileListened) return;
+        this.autotileListened = true;
+        this.on('autotileLoaded', () => {
+            const keys = Object.keys(
+                core.material.icons.autotile
+            ) as AllIdsOf<'autotile'>[];
+
+            keys.forEach(v => {
+                core.material.images.autotile[v] = autotiles[v]!;
+            });
+
+            setTimeout(() => {
+                core.maps._makeAutotileEdges();
+            });
+        });
+    }
+}
+
+export const loading = new GameLoading();
+
+declare global {
+    interface Main {
+        loading: EventEmitter<GameLoadEvent>;
+    }
+}
+main.loading = loading;

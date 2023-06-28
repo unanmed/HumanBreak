@@ -3,8 +3,6 @@ import { SoundController } from './audio/sound';
 import { readyAllResource } from './loader/load';
 import { ResourceStore, ResourceType } from './loader/resource';
 
-export {};
-
 declare global {
     interface AncTe {
         sound: SoundController;

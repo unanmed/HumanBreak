@@ -810,7 +810,7 @@ type CoreStatusBarElements = {
     readonly [key: string]: HTMLElement;
 };
 
-type Materails = [
+type Materials = [
     'animates',
     'enemys',
     'items',

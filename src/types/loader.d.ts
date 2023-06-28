@@ -64,6 +64,8 @@ interface Loader {
      * @param name 要释放的bgm的id或名称
      */
     freeBgm(name: BgmIds | NameMapIn<BgmIds>): void;
+
+    _loadMaterials_afterLoad(): void;
 }
 
 declare const loader: new () => Loader;

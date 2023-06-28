@@ -19,7 +19,11 @@ function core() {
     this.__HALF_SIZE__ = Math.floor(this.__SIZE__ / 2);
     this.material = {
         animates: {},
-        images: {},
+        images: {
+            images: {},
+            autotile: {},
+            tilesets: {}
+        },
         bgms: {},
         sounds: {},
         items: {},

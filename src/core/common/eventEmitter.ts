@@ -5,16 +5,19 @@ export interface EmitableEvent {
 interface Listener<T extends (...params: any) => any> {
     fn: T;
     once?: boolean;
+    immediate?: boolean;
 }
 
 interface ListenerOptions {
     once: boolean;
+    immediate: boolean;
 }
 
 export class EventEmitter<T extends EmitableEvent = {}> {
     private events: {
         [P in keyof T]?: Listener<T[P]>[];
     } = {};
+    private emitted: (keyof T)[] = [];
 
     /**
      * 监听某个事件
@@ -27,6 +30,16 @@ export class EventEmitter<T extends EmitableEvent = {}> {
         fn: T[K],
         options?: Partial<ListenerOptions>
     ) {
+        if (options?.immediate && this.emitted.includes(event)) {
+            fn();
+            if (!options.once) {
+                this.events[event] ??= [];
+                this.events[event]?.push({
+                    fn
+                });
+            }
+            return;
+        }
         this.events[event] ??= [];
         this.events[event]?.push({
             fn,
@@ -60,6 +73,9 @@ export class EventEmitter<T extends EmitableEvent = {}> {
      * @param params 传入的参数
      */
     emit<K extends keyof T>(event: K, ...params: Parameters<T[K]>) {
+        if (!this.emitted.includes(event)) {
+            this.emitted.push(event);
+        }
         const events = (this.events[event] ??= []);
         for (let i = 0; i < events.length; i++) {
             const e = events[i];
