@@ -40,6 +40,11 @@ export function readyAllResource() {
         }
     });
     ancTe.resource.forEach(v => v.active());
+    loading.once('coreInit', () => {
+        const animates = new Resource('__all_animates__', 'text');
+        ancTe.resource.set('__all_animates__', animates);
+        animates.active();
+    });
 }
 
 class GameLoading extends EventEmitter<GameLoadEvent> {

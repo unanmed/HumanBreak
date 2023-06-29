@@ -84,6 +84,7 @@ export class Resource<
                 },
                 { immediate: true }
             );
+            loading.addMaterialLoaded();
         } else if (this.type === 'autotiles') {
             const name = this.name as AllIdsOf<'autotile'>;
             autotiles[name] = v;
@@ -115,6 +116,23 @@ export class Resource<
                 });
             });
         }
+
+        if (this.name === '__all_animates__') {
+            if (this.format !== 'text') {
+                throw new Error(
+                    `Unexpected mismatch of '__all_animates__' response type.` +
+                        ` Expected: text. Meet: ${this.format}`
+                );
+            }
+            const data = (v as string).split('@@@~~~###~~~@@@');
+            data.forEach((v, i) => {
+                const id = main.animates[i];
+                if (v === '') {
+                    throw new Error(`Cannot find animate: '${id}'`);
+                }
+                core.material.animates[id] = core.loader._loadAnimate(v);
+            });
+        }
     }
 
     /**
@@ -123,6 +141,15 @@ export class Resource<
      * @returns 解析出的资源url
      */
     protected resolveUrl(resource: string) {
+        if (resource === '__all_animates__') {
+            this.type = 'animates';
+            this.name = '__all_animates__';
+            this.ext = '.animate';
+
+            return `/all/__all_animates__?v=${
+                main.version
+            }&id=${main.animates.join(',')}`;
+        }
         const resolve = resource.split('.');
         const type = (this.type = resolve[0]);
         const name = (this.name = resolve.slice(1, -1).join('.'));

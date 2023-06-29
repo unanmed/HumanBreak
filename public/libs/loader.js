@@ -32,7 +32,15 @@ loader.prototype._load = function (callback) {
 
 loader.prototype._load_sync = function (callback) {
     this._loadAnimates_sync();
-    callback();
+    if (main.mode === 'play') return callback();
+    this._loadMusic_sync();
+    core.loader._loadMaterials_sync(function () {
+        core.loader._loadExtraImages_sync(function () {
+            core.loader._loadAutotiles_sync(function () {
+                core.loader._loadTilesets_sync(callback);
+            });
+        });
+    });
 };
 
 loader.prototype._load_async = function (callback) {
@@ -108,7 +116,17 @@ loader.prototype._load_async = function (callback) {
 // ----- 加载资源文件 ------ //
 
 loader.prototype._loadMaterials_sync = function (callback) {
-    callback();
+    if (main.mode === 'play') return callback();
+    this._setStartLoadTipText('正在加载资源文件...');
+    this.loadImages(
+        'materials',
+        core.materials,
+        core.material.images,
+        function () {
+            core.loader._loadMaterials_afterLoad();
+            callback();
+        }
+    );
 };
 
 loader.prototype._loadMaterials_async = function (onprogress, onfinished) {
@@ -138,7 +156,15 @@ loader.prototype._loadMaterials_afterLoad = function () {
 // ------ 加载使用的图片 ------ //
 
 loader.prototype._loadExtraImages_sync = function (callback) {
-    callback();
+    if (main.mode === 'play') return callback();
+    core.material.images.images = {};
+    this._setStartLoadTipText('正在加载图片文件...');
+    core.loadImages(
+        'images',
+        core.images,
+        core.material.images.images,
+        callback
+    );
 };
 
 loader.prototype._loadExtraImages_async = function (onprogress, onfinished) {
@@ -173,7 +199,16 @@ loader.prototype._loadExtraImages_async = function (onprogress, onfinished) {
 // ------ 加载自动元件 ------ //
 
 loader.prototype._loadAutotiles_sync = function (callback) {
-    callback();
+    if (main.mode === 'play') return callback();
+    core.material.images.autotile = {};
+    var keys = Object.keys(core.material.icons.autotile);
+    var autotiles = {};
+
+    this._setStartLoadTipText('正在加载自动元件...');
+    this.loadImages('autotiles', keys, autotiles, function () {
+        core.loader._loadAutotiles_afterLoad(keys, autotiles);
+        callback();
+    });
 };
 
 loader.prototype._loadAutotiles_async = function (onprogress, onfinished) {
@@ -193,12 +228,32 @@ loader.prototype._loadAutotiles_async = function (onprogress, onfinished) {
     );
 };
 
-loader.prototype._loadAutotiles_afterLoad = function (keys, autotiles) {};
+loader.prototype._loadAutotiles_afterLoad = function (keys, autotiles) {
+    if (main.mode === 'play') return;
+    // autotile需要保证顺序
+    keys.forEach(function (v) {
+        core.material.images.autotile[v] = autotiles[v];
+    });
+
+    setTimeout(function () {
+        core.maps._makeAutotileEdges();
+    });
+};
 
 // ------ 加载额外素材 ------ //
 
 loader.prototype._loadTilesets_sync = function (callback) {
-    callback();
+    if (main.mode === 'play') return callback();
+    core.material.images.tilesets = {};
+    this._setStartLoadTipText('正在加载额外素材...');
+    this.loadImages(
+        'tilesets',
+        core.tilesets,
+        core.material.images.tilesets,
+        function () {
+            callback();
+        }
+    );
 };
 
 loader.prototype._loadTilesets_async = function (onprogress, onfinished) {
@@ -217,7 +272,27 @@ loader.prototype._loadTilesets_async = function (onprogress, onfinished) {
 // ------ 实际加载一系列图片 ------ //
 
 loader.prototype.loadImages = function (dir, names, toSave, callback) {
-    return callback();
+    if (main.mode === 'play') return callback();
+    if (!names || names.length == 0) {
+        if (callback) callback();
+        return;
+    }
+    var items = 0;
+    for (var i = 0; i < names.length; i++) {
+        this.loadImage(dir, names[i], function (id, image) {
+            core.loader._setStartLoadTipText('正在加载图片 ' + id + '...');
+            if (toSave[id] !== undefined) {
+                if (image != null) toSave[id] = image;
+                return;
+            }
+            toSave[id] = image;
+            items++;
+            core.loader._setStartProgressVal(items * (100 / names.length));
+            if (items == names.length) {
+                if (callback) callback();
+            }
+        });
+    }
 };
 
 loader.prototype.loadImage = function (dir, imgName, callback) {
@@ -288,6 +363,7 @@ loader.prototype.loadImagesFromZip = function (
 // ------ 加载动画文件 ------ //
 
 loader.prototype._loadAnimates_sync = function () {
+    if (main.mode === 'play') return;
     this._setStartLoadTipText('正在加载动画文件...');
 
     if (main.supportBunch) {

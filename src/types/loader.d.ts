@@ -66,6 +66,8 @@ interface Loader {
     freeBgm(name: BgmIds | NameMapIn<BgmIds>): void;
 
     _loadMaterials_afterLoad(): void;
+
+    _loadAnimate(data: string): Animate;
 }
 
 declare const loader: new () => Loader;

@@ -324,7 +324,6 @@ async function writeDevResource(data: string) {
         const icons = await fs.readFile('./public/project/icons.js', 'utf-8');
         const iconData = JSON.parse(icons.split('\n').slice(1).join(''));
         res.push(
-            ...info.main.animates.map((v: any) => `animates.${v}.animate`),
             ...info.main.bgms.map((v: any) => `bgms.${v}`),
             ...info.main.fonts.map((v: any) => `fonts.${v}.ttf`),
             ...info.main.images.map((v: any) => `images.${v}`),
