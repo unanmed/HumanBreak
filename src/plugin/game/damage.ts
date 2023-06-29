@@ -1,6 +1,6 @@
 import { getHeroStatusOf, getHeroStatusOn } from './hero';
 import { Range, RangeCollection } from './range';
-import { backDir, ensureArray, has, ofDir } from './utils';
+import { backDir, ensureArray, has, manhattan, ofDir } from './utils';
 
 interface HaloType {
     square: {
@@ -34,7 +34,8 @@ interface DamageInfo {
 
 interface MapDamage {
     damage: number;
-    type: string[];
+    type: Set<string>;
+    mockery?: LocArr[];
 }
 
 interface HaloData<T extends keyof HaloType = keyof HaloType> {
@@ -104,8 +105,14 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
      */
     calMapDamage(noCache: boolean = false) {
         if (noCache) this.mapDamage = {};
+        const hero = getHeroStatusOn(
+            realStatus,
+            core.status.hero.loc.x,
+            core.status.hero.loc.y,
+            this.floorId
+        );
         this.list.forEach(v => {
-            v.calMapDamage(this.mapDamage);
+            v.calMapDamage(this.mapDamage, hero);
         });
     }
 
@@ -424,11 +431,108 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         }));
     }
 
-    calMapDamage(damage?: Record<string, MapDamage>) {
-        damage ??= {};
-        if (!has(this.x) || !has(this.y)) return damage;
+    /**
+     * 计算地图伤害
+     * @param damage 存入的对象
+     */
+    calMapDamage(
+        damage: Record<string, MapDamage> = {},
+        hero: Partial<HeroStatus> = getHeroStatusOn(realStatus)
+    ) {
+        if (!has(this.x) || !has(this.y) || !has(this.floorId)) return damage;
+        const enemy = this.enemy;
+        const floor = core.status.maps[this.floorId];
+        const w = floor.width;
+        const h = floor.height;
+
+        // 突刺
+        if (this.info.special.includes(15)) {
+            const range = enemy.range ?? 1;
+            const startX = Math.max(0, this.x - range);
+            const startY = Math.max(0, this.y - range);
+            const endX = Math.min(floor.width - 1, this.x + range);
+            const endY = Math.min(floor.height - 1, this.y + range);
+            const dam = Math.max((enemy.value ?? 0) - hero.def!, 0);
+
+            for (let x = startX; x <= endX; x++) {
+                for (let y = startY; y <= endY; y++) {
+                    if (
+                        !enemy.zoneSquare &&
+                        manhattan(x, y, this.x, this.y) > range
+                    ) {
+                        continue;
+                    }
+                    const loc = `${x},${y}`;
+                    this.setMapDamage(damage, loc, dam, '突刺');
+                }
+            }
+        }
+
+        // 射击
+        if (this.info.special.includes(24)) {
+            const dirs: Dir[] = ['left', 'down', 'up', 'right'];
+            const dam = Math.max((enemy.atk ?? 0) - hero.def!, 0);
+            const objs = core.getMapBlocksObj(this.floorId);
+
+            for (const dir of dirs) {
+                let x = this.x;
+                let y = this.y;
+                const { x: dx, y: dy } = core.utils.scan[dir];
+                while (1) {
+                    if (x < 0 || y < 0 || x >= w || y >= h) break;
+                    x += dx;
+                    y += dy;
+                    const loc = `${x},${y}` as LocString;
+                    const block = objs[loc];
+                    if (
+                        block.event.noPass &&
+                        block.event.cls !== 'enemys' &&
+                        block.event.cls !== 'enemy48' &&
+                        block.id !== 141 &&
+                        block.id !== 151
+                    ) {
+                        break;
+                    }
+                    this.setMapDamage(damage, loc, dam, '射击');
+                }
+            }
+        }
+
+        // 电摇嘲讽
+        if (this.info.special.includes(19)) {
+            const objs = core.getMapBlocksObj(this.floorId);
+            for (let nx = 0; nx < w; nx++) {
+                const loc = `${nx},${this.y}` as LocString;
+                const block = objs[loc];
+                if (!block.event.noPass) {
+                    damage[loc] ??= { damage: 0, type: new Set() };
+                    damage[loc].mockery ??= [];
+                    damage[loc].mockery!.push([this.x, this.y]);
+                }
+            }
+            for (let ny = 0; ny < h; ny++) {
+                const loc = `${this.x},${ny}` as LocString;
+                const block = objs[loc];
+                if (!block.event.noPass) {
+                    damage[loc] ??= { damage: 0, type: new Set() };
+                    damage[loc].mockery ??= [];
+                    damage[loc].mockery!.push([this.x, this.y]);
+                }
+            }
+        }
 
         return damage;
+    }
+
+    private setMapDamage(
+        damage: Record<string, MapDamage>,
+        loc: string,
+        dam: number,
+        type: string
+    ) {
+        damage[loc] ??= { damage: 0, type: new Set() };
+        damage[loc].damage += dam;
+        damage[loc].type.add(type);
     }
 }
 
