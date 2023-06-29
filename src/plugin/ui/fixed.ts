@@ -53,6 +53,7 @@ export function getDetailedEnemy<I extends EnemyIds>(
     y: number,
     floorId: FloorIds = core.status.floorId
 ): DetailedEnemy<I> {
+    // todo: 删除 getDamageInfo
     const ratio = core.status.maps[floorId].ratio;
     const enemyInfo = Object.assign(
         {},

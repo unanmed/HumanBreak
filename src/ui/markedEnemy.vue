@@ -102,6 +102,7 @@ function getName(id: EnemyIds) {
 }
 
 function getDamage(id: EnemyIds) {
+    // todo: 删除 getDamageInfo
     return (
         core.formatBigNumber(
             core.getDamageInfo(id, void 0, void 0, void 0, 'empty')?.damage

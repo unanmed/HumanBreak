@@ -58,6 +58,7 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
 
     constructor(floorId: FloorIds) {
         this.floorId = floorId;
+        this.extract();
     }
 
     /**

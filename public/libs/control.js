@@ -894,12 +894,7 @@ control.prototype._moveAction_popAutomaticRoute = function () {
 
 ////// 让勇士开始移动 //////
 control.prototype.moveHero = function (direction, callback) {
-    // 如果正在移动，直接return
-    if (core.status.heroMoving != 0) return;
-    if (core.isset(direction)) core.setHeroLoc('direction', direction);
-
-    if (callback) return this.moveAction(callback);
-    this._moveHero_moving();
+    // see src/plugin/game/popup.js
 };
 
 control.prototype._moveHero_moving = function () {
@@ -1455,34 +1450,12 @@ control.prototype._moveDirectyFollowers = function (x, y) {
 
 ////// 更新领域、夹击、阻击的伤害地图 //////
 control.prototype.updateCheckBlock = function (floorId) {
-    return this.controldata.updateCheckBlock(floorId);
+    throw new Error(`This function has been deprecated.`);
 };
 
 ////// 检查并执行领域、夹击、阻击事件 //////
 control.prototype.checkBlock = function () {
-    var x = core.getHeroLoc('x'),
-        y = core.getHeroLoc('y'),
-        loc = x + ',' + y;
-    var damage = core.status.checkBlock.damage[loc];
-    if (damage) {
-        core.status.hero.hp -= damage;
-        var text =
-            Object.keys(core.status.checkBlock.type[loc] || {}).join('，') ||
-            '伤害';
-        core.drawTip('受到' + text + damage + '点');
-        core.drawHeroAnimate('zone');
-        this._checkBlock_disableQuickShop();
-        core.status.hero.statistics.extraDamage += damage;
-        if (core.status.hero.hp <= 0) {
-            core.status.hero.hp = 0;
-            core.updateStatusBar(false, true);
-            core.events.lose();
-            return;
-        } else {
-            core.updateStatusBar(false, true);
-        }
-    }
-    this._checkBlock_repulse(core.status.checkBlock.repulse[loc]);
+    // see src/plugin/game/popup.js
 };
 
 control.prototype._checkBlock_disableQuickShop = function () {
@@ -1514,23 +1487,7 @@ control.prototype._checkBlock_repulse = function (repulse) {
 
 ////// 更新全地图显伤 //////
 control.prototype.updateDamage = function (floorId, ctx) {
-    floorId = floorId || core.status.floorId;
-    if (!floorId || core.status.gameOver || main.mode != 'play') return;
-    var onMap = ctx == null;
-
-    // 没有怪物手册
-    if (!core.hasItem('book')) return;
-    core.status.damage.posX = core.bigmap.posX;
-    core.status.damage.posY = core.bigmap.posY;
-    if (!onMap) {
-        var width = core.floors[floorId].width,
-            height = core.floors[floorId].height;
-        // 地图过大的缩略图不绘制显伤
-        if (width * height > core.bigmap.threshold) return;
-    }
-    this._updateDamage_damage(floorId, onMap);
-    this._updateDamage_extraDamage(floorId, onMap);
-    this.drawDamage(ctx);
+    // see src/plugin/game/itemDetail.js
 };
 
 control.prototype._updateDamage_damage = function (floorId, onMap) {
@@ -1596,6 +1553,7 @@ control.prototype._updateDamage_damage = function (floorId, onMap) {
 };
 
 control.prototype._updateDamage_extraDamage = function (floorId, onMap) {
+    // todo: 不使用 core.status.checkBlock
     core.status.damage.extraData = [];
     if (!core.flags.displayExtraDamage) return;
 
@@ -3677,15 +3635,7 @@ control.prototype.updateStatusBar = function (doNotCheckAutoEvents, immediate) {
 };
 
 control.prototype.updateStatusBar_update = function () {
-    core.control.updateNextFrame = false;
-    if (!core.isPlaying() || core.hasFlag('__statistics__')) {
-        return;
-    }
-    core.control.controldata.updateStatusBar();
-    if (!core.control.noAutoEvents) core.checkAutoEvents();
-    core.control._updateStatusBar_setToolboxIcon();
-    core.clearRouteFolding();
-    core.control.noAutoEvents = true;
+    // see src/plugin/game/ui.js
 };
 
 control.prototype._updateStatusBar_setToolboxIcon = function () {
@@ -3730,44 +3680,11 @@ control.prototype._updateStatusBar_setToolboxIcon = function () {
 };
 
 control.prototype.showStatusBar = function () {
-    if (main.mode == 'editor') return;
-    if (core.domStyle.showStatusBar) return;
-    var statusItems = core.dom.status;
-    core.domStyle.showStatusBar = true;
-    core.removeFlag('hideStatusBar');
-    // 显示
-    for (var i = 0; i < statusItems.length; ++i)
-        statusItems[i].style.opacity = 1;
-    this.setToolbarButton(false);
-    core.dom.tools.hard.style.display = 'block';
-    core.dom.toolBar.style.display = 'block';
+    // see src/plugin/game/ui.js
 };
 
 control.prototype.hideStatusBar = function (showToolbox) {
-    if (main.mode == 'editor') return;
-
-    // 如果原本就是隐藏的，则先显示
-    if (!core.domStyle.showStatusBar) this.showStatusBar();
-    if (core.isReplaying()) showToolbox = true;
-
-    var statusItems = core.dom.status,
-        toolItems = core.dom.tools;
-    core.domStyle.showStatusBar = false;
-    core.setFlag('hideStatusBar', true);
-    core.setFlag('showToolbox', showToolbox || null);
-    // 隐藏
-    for (var i = 0; i < statusItems.length; ++i)
-        statusItems[i].style.opacity = 0;
-    if (
-        (!core.domStyle.isVertical && !core.flags.extendToolbar) ||
-        !showToolbox
-    ) {
-        for (var i = 0; i < toolItems.length; ++i)
-            toolItems[i].style.display = 'none';
-    }
-    if (!core.domStyle.isVertical && !core.flags.extendToolbar) {
-        core.dom.toolBar.style.display = 'none';
-    }
+    // see src/plugin/game/ui.js
 };
 
 ////// 改变工具栏为按钮1-8 //////

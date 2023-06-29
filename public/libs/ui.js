@@ -3301,6 +3301,7 @@ ui.prototype._drawViewMaps = function (index, x, y) {
     this.clearUI();
     if (index == null) return this._drawViewMaps_drawHint();
     core.animateFrame.tip = null;
+    // todo: 不使用 core.status.checkBlock
     core.status.checkBlock.cache = {};
     var data = this._drawViewMaps_buildData(index, x, y);
     core.fillRect('ui', 0, 0, core._PX_, core._PY_, '#000000');

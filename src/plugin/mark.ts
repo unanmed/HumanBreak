@@ -81,6 +81,7 @@ export function getMarkInfo(id: EnemyIds, noMessage: boolean = false) {
  * 检查被标记怪物的状态
  */
 export function checkMarkedEnemy(noMessage: boolean = false) {
+    // todo: 删除 getDamageInfo
     checkMarkedStatus.value = !checkMarkedStatus.value;
     const hp = core.status.hero.hp;
     getMarkedEnemy().forEach(v => {

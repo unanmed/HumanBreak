@@ -49,6 +49,7 @@ import { LeftOutlined } from '@ant-design/icons-vue';
 import { KeyCode } from '../plugin/keyCodes';
 import { noClosePanel } from '../plugin/uiController';
 
+// todo: 不使用 core.status.checkBlock
 const floorId =
     // @ts-ignore
     core.floorIds[core.status.event?.ui?.index] ?? core.status.floorId;

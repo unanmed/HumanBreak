@@ -4,6 +4,7 @@ export {};
 // 伤害弹出
 // 复写阻激夹域检测
 control.prototype.checkBlock = function (forceMockery) {
+    // todo: 不使用 core.status.checkBlock
     var x = core.getHeroLoc('x'),
         y = core.getHeroLoc('y'),
         loc = x + ',' + y;
@@ -37,6 +38,7 @@ control.prototype.checkBlock = function (forceMockery) {
 };
 
 control.prototype.moveHero = function (direction, callback) {
+    // todo: 不使用 core.status.checkBlock
     // 如果正在移动，直接return
     if (core.status.heroMoving != 0) return;
     if (core.isset(direction)) core.setHeroLoc('direction', direction);
@@ -57,6 +59,7 @@ control.prototype.moveHero = function (direction, callback) {
  * @param {boolean} force
  */
 function checkMockery(loc, force) {
+    // todo: 不使用 core.status.checkBlock
     if (core.status.lockControl && !force) return;
     const mockery = core.status.checkBlock.mockery[loc];
     if (mockery) {

@@ -45,6 +45,7 @@ core.registerReplayAction('upgradeSkill', name => {
 });
 
 core.registerReplayAction('study', name => {
+    // todo: 删除getEnemyInfo
     if (!name.startsWith('study:')) return false;
     const [num, x, y] = name
         .slice(6)

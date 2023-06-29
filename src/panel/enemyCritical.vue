@@ -94,6 +94,8 @@ import { has, setCanvasSize } from '../plugin/utils';
 import { debounce } from 'lodash-es';
 import { isMobile } from '../plugin/use';
 
+// todo: 删除 getDamageInfo
+
 const props = defineProps<{
     fromBook?: boolean;
 }>();

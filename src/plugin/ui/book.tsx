@@ -53,6 +53,7 @@ export function getDefDamage(
     y?: number,
     floorId?: FloorIds
 ) {
+    // todo: 删除 getDamageInfo
     const ratio = core.status.thisMap.ratio;
     const res: [number, number][] = [];
 
@@ -102,6 +103,7 @@ export function getCriticalDamage(
     y?: number,
     floorId?: FloorIds
 ): [number, number][] {
+    // todo: 删除 getDamageInfo
     const ratio = core.status.thisMap.ratio;
     const res: [number, number][] = [];
 

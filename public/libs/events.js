@@ -370,73 +370,7 @@ events.prototype.doSystemEvent = function (type, data, callback) {
 
 ////// 触发(x,y)点的事件 //////
 events.prototype.trigger = function (x, y, callback) {
-    var _executeCallback = function () {
-        // 因为trigger之后还有可能触发其他同步脚本（比如阻激夹域检测）
-        // 所以这里强制callback被异步触发
-        if (callback) {
-            setTimeout(callback, 1); // +1是为了录像检测系统
-        }
-        return;
-    };
-    if (core.status.gameOver) return _executeCallback();
-    if (core.status.event.id == 'action') {
-        core.insertAction(
-            {
-                type: 'function',
-                function:
-                    'function () { core.events._trigger_inAction(' +
-                    x +
-                    ',' +
-                    y +
-                    '); }',
-                async: true
-            },
-            null,
-            null,
-            null,
-            true
-        );
-        return _executeCallback();
-    }
-    if (core.status.event.id) return _executeCallback();
-
-    var block = core.getBlock(x, y);
-    if (block == null) return _executeCallback();
-
-    // 执行该点的脚本
-    if (block.event.script) {
-        core.clearRouteFolding();
-        try {
-            eval(block.event.script);
-        } catch (ee) {
-            console.error(ee);
-        }
-    }
-
-    // 碰触事件
-    if (block.event.event) {
-        core.clearRouteFolding();
-        core.insertAction(block.event.event, block.x, block.y);
-        // 不再执行该点的系统事件
-        return _executeCallback();
-    }
-
-    if (block.event.trigger && block.event.trigger != 'null') {
-        var noPass = block.event.noPass,
-            trigger = block.event.trigger;
-        if (noPass) core.clearAutomaticRouteNode(x, y);
-
-        // 转换楼层能否穿透
-        if (
-            trigger == 'changeFloor' &&
-            !noPass &&
-            this._trigger_ignoreChangeFloor(block)
-        )
-            return _executeCallback();
-        core.status.automaticRoute.moveDirectly = false;
-        this.doSystemEvent(trigger, block);
-    }
-    return _executeCallback();
+    // see src/plugin/game/loopMap.js
 };
 
 events.prototype._trigger_inAction = function (x, y) {
@@ -801,15 +735,7 @@ events.prototype._getNextItem = function (direction, noRoute) {
 };
 
 events.prototype._sys_changeFloor = function (data, callback) {
-    data = data.event.data;
-    var heroLoc = {};
-    if (data.loc) heroLoc = { x: data.loc[0], y: data.loc[1] };
-    if (data.direction) heroLoc.direction = data.direction;
-    if (core.status.event.id != 'action') core.status.event.id = null;
-    core.changeFloor(data.floorId, data.stair, heroLoc, data.time, function () {
-        core.replay();
-        if (callback) callback();
-    });
+    // see src/plugin/game/loopMap.js
 };
 
 ////// 楼层切换 //////
@@ -4487,40 +4413,7 @@ events.prototype.eventMoveHero = function (steps, time, callback) {
 };
 
 events.prototype._eventMoveHero_moving = function (step, moveSteps) {
-    var curr = moveSteps[0];
-    var direction = curr[0],
-        x = core.getHeroLoc('x'),
-        y = core.getHeroLoc('y');
-    // ------ 前进/后退
-    var o = direction == 'backward' ? -1 : 1;
-    if (direction == 'forward' || direction == 'backward')
-        direction = core.getHeroLoc('direction');
-    var faceDirection = direction;
-    if (direction == 'leftup' || direction == 'leftdown')
-        faceDirection = 'left';
-    if (direction == 'rightup' || direction == 'rightdown')
-        faceDirection = 'right';
-    core.setHeroLoc('direction', direction);
-    if (curr[1] <= 0) {
-        core.setHeroLoc('direction', faceDirection);
-        moveSteps.shift();
-        return true;
-    }
-    if (step <= 4) {
-        core.drawHero('leftFoot', 4 * o * step);
-    } else if (step <= 8) {
-        core.drawHero('rightFoot', 4 * o * step);
-    }
-    if (step == 8) {
-        core.setHeroLoc('x', x + o * core.utils.scan2[direction].x, true);
-        core.setHeroLoc('y', y + o * core.utils.scan2[direction].y, true);
-        core.updateFollowers();
-        curr[1]--;
-        if (curr[1] <= 0) moveSteps.shift();
-        core.setHeroLoc('direction', faceDirection);
-        return true;
-    }
-    return false;
+    // see src/plugin/game/heroFourFrames.js
 };
 
 ////// 勇士跳跃事件 //////

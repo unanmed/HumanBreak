@@ -75,23 +75,7 @@ maps.prototype.loadFloor = function (floorId, map) {
 };
 
 maps.prototype._loadFloor_doNotCopy = function () {
-    return [
-        'firstArrive',
-        'eachArrive',
-        'blocks',
-        'parallelDo',
-        'map',
-        'bgmap',
-        'fgmap',
-        'events',
-        'changeFloor',
-        'beforeBattle',
-        'afterBattle',
-        'afterGetItem',
-        'afterOpenDoor',
-        'cannotMove',
-        'cannotMoveIn'
-    ];
+    // see src/plugin/game/fiveLayer.js
 };
 
 /// 根据需求解析出blocks
@@ -714,44 +698,7 @@ maps.prototype.getMapBlocksObj = function (floorId, noCache) {
 
 ////// 将背景前景层变成二维数组的形式 //////
 maps.prototype._getBgFgMapArray = function (name, floorId, noCache) {
-    floorId = floorId || core.status.floorId;
-    if (!floorId) return [];
-    var width = core.floors[floorId].width;
-    var height = core.floors[floorId].height;
-
-    if (!noCache && core.status[name + 'maps'][floorId])
-        return core.status[name + 'maps'][floorId];
-
-    var arr =
-        main.mode == 'editor' &&
-        !(window.editor && editor.uievent && editor.uievent.isOpen)
-            ? core.cloneArray(editor[name + 'map'])
-            : null;
-    if (arr == null)
-        arr = core.cloneArray(core.floors[floorId][name + 'map'] || []);
-
-    for (var y = 0; y < height; ++y) {
-        if (arr[y] == null) arr[y] = Array(width).fill(0);
-    }
-    (core.getFlag('__' + name + 'v__', {})[floorId] || []).forEach(function (
-        one
-    ) {
-        arr[one[1]][one[0]] = one[2] || 0;
-    });
-    (core.getFlag('__' + name + 'd__', {})[floorId] || []).forEach(function (
-        one
-    ) {
-        arr[one[1]][one[0]] = 0;
-    });
-    if (main.mode == 'editor') {
-        for (var x = 0; x < width; x++) {
-            for (var y = 0; y < height; y++) {
-                arr[y][x] = arr[y][x].idnum || arr[y][x] || 0;
-            }
-        }
-    }
-    if (core.status[name + 'maps']) core.status[name + 'maps'][floorId] = arr;
-    return arr;
+    // see src/plugin/game/loopMap.js
 };
 
 maps.prototype.getBgMapArray = function (floorId) {
@@ -825,11 +772,7 @@ maps.prototype.generateMovableArray = function (floorId) {
 };
 
 maps.prototype._generateMovableArray_arrays = function (floorId) {
-    return {
-        bgArray: this.getBgMapArray(floorId),
-        fgArray: this.getFgMapArray(floorId),
-        eventArray: this.getMapArray(floorId)
-    };
+    // see src/plugin/game/fiveLayer.js
 };
 
 ////// 勇士能否前往某方向 //////
@@ -902,6 +845,7 @@ maps.prototype._canMoveHero_checkPoint = function (
         return false;
 
     // 4. 检查是否能进将死的领域
+    // todo: 不使用 core.status.checkBlock
     if (
         floorId == core.status.floorId &&
         !core.flags.canGoDeadZone &&
@@ -995,6 +939,7 @@ maps.prototype._canMoveDirectly_checkGlobal = function () {
 };
 
 maps.prototype._canMoveDirectly_checkStartPoint = function (sx, sy) {
+    // todo: 不使用 core.status.checkBlock
     if (core.status.checkBlock.damage[sx + ',' + sy]) return false;
     var block = core.getBlock(sx, sy);
     if (block != null) {
@@ -1079,6 +1024,7 @@ maps.prototype._canMoveDirectly_checkNextPoint = function (blocksObj, x, y) {
         if (!ignore) return false;
     }
     // 是否存在阻激夹域伤害
+    // todo: 不使用 core.status.checkBlock
     if (core.status.checkBlock.damage[index]) return false;
     if (core.status.checkBlock.repulse[index]) return false;
     if (core.status.checkBlock.mockery[index]) return false;
@@ -1177,6 +1123,7 @@ maps.prototype._automaticRoute_deepAdd = function (x, y, blocks) {
         // if (block.event.trigger == 'changeFloor') deepAdd+=10;
     }
     // 绕过存在伤害的地方
+    // todo: 不使用 core.status.checkBlock
     deepAdd += (core.status.checkBlock.damage[x + ',' + y] || 0) * 100;
     deepAdd += core.status.checkBlock.mockery[`${x},${y}`] ? 1000 : 0;
     return deepAdd;
@@ -1668,26 +1615,7 @@ maps.prototype.drawBg = function (floorId, config) {
 };
 
 maps.prototype._drawBg_draw = function (floorId, toDrawCtx, cacheCtx, config) {
-    config.ctx = cacheCtx;
-    core.maps._drawBg_drawBackground(floorId, config);
-    // ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制背景图块；后绘制的覆盖先绘制的。
-    core.maps._drawFloorImages(
-        floorId,
-        config.ctx,
-        'bg',
-        null,
-        null,
-        config.onMap
-    );
-    core.maps._drawBgFgMap(floorId, 'bg', config);
-    if (config.onMap)
-        core.drawImage(
-            toDrawCtx,
-            cacheCtx.canvas,
-            core.bigmap.v2 ? -32 : 0,
-            core.bigmap.v2 ? -32 : 0
-        );
-    config.ctx = toDrawCtx;
+    // see src/plugin/game/fiveLayer.js
 };
 
 maps.prototype._drawBg_drawBackground = function (floorId, config) {
@@ -1841,25 +1769,7 @@ maps.prototype.drawFg = function (floorId, config) {
 };
 
 maps.prototype._drawFg_draw = function (floorId, toDrawCtx, cacheCtx, config) {
-    config.ctx = cacheCtx;
-    // ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制前景图块；后绘制的覆盖先绘制的。
-    core.maps._drawFloorImages(
-        floorId,
-        config.ctx,
-        'fg',
-        null,
-        null,
-        config.onMap
-    );
-    core.maps._drawBgFgMap(floorId, 'fg', config);
-    if (config.onMap)
-        core.drawImage(
-            toDrawCtx,
-            cacheCtx.canvas,
-            core.bigmap.v2 ? -32 : 0,
-            core.bigmap.v2 ? -32 : 0
-        );
-    config.ctx = toDrawCtx;
+    // see src/plugin/game/fiveLayer.js
 };
 
 ////// 实际的背景/前景图块的绘制 //////
@@ -2679,6 +2589,7 @@ maps.prototype._drawThumbnail_realDrawTempCanvas = function (
     options.ctx.imageSmoothingEnabled = true;
     // 缩略图：显伤
     if (options.damage && core.hasItem('book')) {
+        // todo: 删除 updateCheckBlock
         core.updateCheckBlock(floorId);
         core.control.updateDamage(floorId, options.ctx);
     }

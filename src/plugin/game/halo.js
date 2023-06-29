@@ -8,6 +8,7 @@
 export function drawHalo(ctx, onMap) {
     if (main.replayChecking) return;
     if (!core.getLocalStorage('showHalo', true)) return;
+    // todo: 不使用 core.status.checkBlock
     const halo = core.status.checkBlock.halo;
     ctx.save();
     for (const [loc, range] of Object.entries(halo)) {

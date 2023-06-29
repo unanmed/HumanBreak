@@ -263,6 +263,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             return true;
         },
         beforeBattle: function (enemyId, x, y) {
+            // todo: 不使用 core.status.checkBlock
             // 战斗前触发的事件，可以加上一些战前特效（详见下面支援的例子）
             // 此函数在“检测能否战斗和自动存档”【之后】执行。如果需要更早的战前事件，请在插件中覆重写 core.events.doSystemEvent 函数。
             // 返回true则将继续战斗，返回false将不再战斗。
@@ -713,6 +714,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             ];
         },
         getEnemyInfo: function (enemy, hero, x, y, floorId) {
+            // todo: 删除这个函数
             // 获得某个怪物变化后的数据；该函数将被伤害计算和怪物手册使用
             // 例如：坚固、模仿、仿攻等等
             //
@@ -1379,6 +1381,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             );
         },
         updateStatusBar: function () {
+            // todo: 删除 updateCheckBlock
             // 更新状态栏
 
             // 检查等级
@@ -1737,6 +1740,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             checkLoopMap();
 
             // 追猎
+            // todo: 重写
             if (
                 core.status.checkBlock.haveHunt &&
                 !core
@@ -1872,6 +1876,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
 
             // 判定能否瞬移到该点
             if (ignoreSteps == null) ignoreSteps = core.canMoveDirectly(x, y);
+            // todo: 删除这个判断
             if (core.status.checkBlock.haveHunt) return false;
             if (ignoreSteps >= 0) {
                 core.clearMap('hero');
