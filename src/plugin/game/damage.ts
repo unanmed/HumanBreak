@@ -123,7 +123,6 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
         this.list.forEach(v => {
             v.calMapDamage(this.mapDamage, hero);
         });
-        console.log(this.mapDamage);
     }
 
     /**
@@ -235,16 +234,36 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
                 const id = `${x},${y}` as LocString;
                 const dam = this.mapDamage[id];
                 if (!dam || objs[id]?.event.noPass) continue;
-                if (dam.damage === 0) continue;
-                const damage = core.formatBigNumber(dam.damage, true);
-                const color = dam.damage < 0 ? '#6eff6a' : '#fa3';
-                core.status.damage.extraData.push({
-                    text: damage,
-                    px: 32 * x + 16,
-                    py: 32 * (y + 1) - 14,
-                    color,
-                    alpha: 1
-                });
+
+                // 地图伤害
+                if (dam.damage !== 0) {
+                    const damage = core.formatBigNumber(dam.damage, true);
+                    const color = dam.damage < 0 ? '#6eff6a' : '#fa3';
+                    core.status.damage.extraData.push({
+                        text: damage,
+                        px: 32 * x + 16,
+                        py: 32 * (y + 1) - 14,
+                        color,
+                        alpha: 1
+                    });
+                }
+
+                // 电摇嘲讽
+                if (dam.mockery) {
+                    dam.mockery.sort((a, b) =>
+                        a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]
+                    );
+                    const [tx, ty] = dam.mockery[0];
+                    const dir =
+                        x > tx ? '←' : x < tx ? '→' : y > ty ? '↑' : '↓';
+                    core.status.damage.extraData.push({
+                        text: '嘲' + dir,
+                        px: 32 * x + 16,
+                        py: 32 * (y + 1) - 14,
+                        color: '#fd4',
+                        alpha: 1
+                    });
+                }
             }
         }
     }
@@ -602,7 +621,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
             for (let nx = 0; nx < w; nx++) {
                 const loc = `${nx},${this.y}` as LocString;
                 const block = objs[loc];
-                if (!block.event.noPass) {
+                if (!block?.event.noPass) {
                     damage[loc] ??= { damage: 0, type: new Set() };
                     damage[loc].mockery ??= [];
                     damage[loc].mockery!.push([this.x, this.y]);
@@ -611,7 +630,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
             for (let ny = 0; ny < h; ny++) {
                 const loc = `${this.x},${ny}` as LocString;
                 const block = objs[loc];
-                if (!block.event.noPass) {
+                if (!block?.event.noPass) {
                     damage[loc] ??= { damage: 0, type: new Set() };
                     damage[loc].mockery ??= [];
                     damage[loc].mockery!.push([this.x, this.y]);
