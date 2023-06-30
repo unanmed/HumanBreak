@@ -1450,7 +1450,8 @@ control.prototype._moveDirectyFollowers = function (x, y) {
 
 ////// 更新领域、夹击、阻击的伤害地图 //////
 control.prototype.updateCheckBlock = function (floorId) {
-    throw new Error(`This function has been deprecated.`);
+    // throw new Error(`This function has been deprecated.`);
+    return this.controldata.updateCheckBlock(floorId);
 };
 
 ////// 检查并执行领域、夹击、阻击事件 //////

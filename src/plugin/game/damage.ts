@@ -672,11 +672,17 @@ export function calDamageWith(
     return damage;
 }
 
+export function initFloorDamage(floorId: FloorIds) {
+    const floor = core.status.maps[floorId];
+    floor.enemy = new EnemyCollection(floorId);
+}
+
 declare global {
     interface PluginDeclaration {
         damage: {
             Enemy: typeof DamageEnemy;
             Collection: typeof EnemyCollection;
+            initFloorDamage: typeof initFloorDamage;
         };
     }
 
@@ -687,5 +693,6 @@ declare global {
 
 core.plugin.damage = {
     Enemy: DamageEnemy,
-    Collection: EnemyCollection
+    Collection: EnemyCollection,
+    initFloorDamage
 };

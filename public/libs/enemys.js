@@ -414,12 +414,19 @@ enemys.prototype.getDefDamage = function (enemy, k, x, y, floorId, hero) {
 };
 
 enemys.prototype.getEnemyInfo = function (enemy, hero, x, y, floorId) {
-    throw new Error(`This function has been deprecated.`);
+    // throw new Error(`This function has been deprecated.`);
+    if (enemy == null) return null;
+    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
+    return this.enemydata.getEnemyInfo(enemy, hero, x, y, floorId);
 };
 
 ////// 获得战斗伤害信息（实际伤害计算函数） //////
 enemys.prototype.getDamageInfo = function (enemy, hero, x, y, floorId) {
-    throw new Error(`This function has been deprecated.`);
+    // throw new Error(`This function has been deprecated.`);
+    if (enemy == null) return null;
+    // 移动到了脚本编辑 - getDamageInfo中
+    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
+    return this.enemydata.getDamageInfo(enemy, hero, x, y, floorId);
 };
 
 ////// 获得在某个勇士属性下怪物伤害 //////

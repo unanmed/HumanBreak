@@ -115,6 +115,10 @@ export class Resource<
                     );
                 });
             });
+        } else if (this.format === 'image') {
+            const img = v as HTMLImageElement;
+            img.setAttribute('_width', img.width.toString());
+            img.setAttribute('_height', img.height.toString());
         }
 
         if (this.name === '__all_animates__') {

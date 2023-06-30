@@ -101,7 +101,7 @@ if (main.mode == 'editor') {
         parent.appendChild(input2);
     }
 }
-core.maps._loadFloor_doNotCopy = function () {
+maps.prototype._loadFloor_doNotCopy = function () {
     return [
         'firstArrive',
         'eachArrive',
@@ -121,7 +121,7 @@ core.maps._loadFloor_doNotCopy = function () {
     ];
 };
 ////// 绘制背景和前景层 //////
-core.maps._drawBg_draw = function (floorId, toDrawCtx, cacheCtx, config) {
+maps.prototype._drawBg_draw = function (floorId, toDrawCtx, cacheCtx, config) {
     config.ctx = cacheCtx;
     core.maps._drawBg_drawBackground(floorId, config);
     // ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制背景图块；后绘制的覆盖先绘制的。
@@ -154,7 +154,7 @@ core.maps._drawBg_draw = function (floorId, toDrawCtx, cacheCtx, config) {
         );
     config.ctx = toDrawCtx;
 };
-core.maps._drawFg_draw = function (floorId, toDrawCtx, cacheCtx, config) {
+maps.prototype._drawFg_draw = function (floorId, toDrawCtx, cacheCtx, config) {
     config.ctx = cacheCtx;
     // ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制前景图块；后绘制的覆盖先绘制的。
     core.maps._drawFloorImages(
@@ -187,7 +187,7 @@ core.maps._drawFg_draw = function (floorId, toDrawCtx, cacheCtx, config) {
     config.ctx = toDrawCtx;
 };
 ////// 移动判定 //////
-core.maps._generateMovableArray_arrays = function (floorId) {
+maps.prototype._generateMovableArray_arrays = function (floorId) {
     return {
         bgArray: this.getBgMapArray(floorId),
         fgArray: this.getFgMapArray(floorId),
