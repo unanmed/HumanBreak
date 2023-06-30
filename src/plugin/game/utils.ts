@@ -79,6 +79,24 @@ export function checkV2(x?: number, y?: number) {
     );
 }
 
+export function formatDamage(damage: number): DamageString {
+    let dam = '';
+    let color = '';
+    if (!Number.isFinite(damage)) {
+        dam = '???';
+        color = '#f22';
+    } else {
+        dam = core.formatBigNumber(damage, true);
+        if (damage <= 0) color = '#1f1';
+        else if (damage < core.status.hero.hp / 3) color = '#fff';
+        else if (damage < (core.status.hero.hp * 2) / 3) color = '#ff0';
+        else if (damage < core.status.hero.hp) color = '#f93';
+        else color = '#f22';
+    }
+
+    return { damage: dam, color: color as Color };
+}
+
 declare global {
     interface GamePluginUtils {
         ofDir: typeof ofDir;

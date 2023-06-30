@@ -1,6 +1,14 @@
 import { getHeroStatusOf, getHeroStatusOn } from './hero';
 import { Range, RangeCollection } from './range';
-import { backDir, checkV2, ensureArray, has, manhattan, ofDir } from './utils';
+import {
+    backDir,
+    checkV2,
+    ensureArray,
+    formatDamage,
+    has,
+    manhattan,
+    ofDir
+} from './utils';
 
 interface HaloType {
     square: {
@@ -97,7 +105,6 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
                 v.calRealAttribute();
             }
             v.calDamage(void 0, onMap);
-            console.log(v.damage);
         });
     }
 
@@ -116,6 +123,7 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
         this.list.forEach(v => {
             v.calMapDamage(this.mapDamage, hero);
         });
+        console.log(this.mapDamage);
     }
 
     /**
@@ -156,6 +164,89 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
         this.list.forEach(v => {
             v.preProvideHalo();
         });
+    }
+
+    render(onMap?: boolean): void;
+    render(onMap: boolean, cal: boolean, noCache: boolean): void;
+    render(
+        onMap: boolean = false,
+        cal: boolean = false,
+        noCache: boolean = false
+    ) {
+        if (cal) {
+            this.calDamage(noCache, true);
+            this.calMapDamage(noCache);
+        }
+
+        // 怪物伤害
+        this.list.forEach(v => {
+            if (onMap && !checkV2(v.x, v.y)) return;
+
+            if (!v.damage) {
+                throw new Error(
+                    `Unexpected null of enemy's damage. Loc: '${v.x},${v.y}'. Floor: ${v.floorId}`
+                );
+            }
+            for (const dam of v.damage) {
+                if (dam.dir === 'none') {
+                    // 怪物本身所在位置
+                    const { damage, color } = formatDamage(dam.damage);
+                    core.status.damage.data.push({
+                        text: damage,
+                        px: 32 * v.x! + 1,
+                        py: 32 * (v.y! + 1) - 1,
+                        color: color
+                    });
+                }
+            }
+        });
+
+        // 地图伤害
+        const floor = core.status.maps[this.floorId];
+        const width = floor.width;
+        const height = floor.height;
+        const objs = core.getMapBlocksObj(this.floorId);
+
+        const startX =
+            onMap && core.bigmap.v2
+                ? Math.max(0, core.bigmap.posX - core.bigmap.extend)
+                : 0;
+        const endX =
+            onMap && core.bigmap.v2
+                ? Math.min(
+                      width,
+                      core.bigmap.posX + core._WIDTH_ + core.bigmap.extend + 1
+                  )
+                : width;
+        const startY =
+            onMap && core.bigmap.v2
+                ? Math.max(0, core.bigmap.posY - core.bigmap.extend)
+                : 0;
+        const endY =
+            onMap && core.bigmap.v2
+                ? Math.min(
+                      height,
+                      core.bigmap.posY + core._HEIGHT_ + core.bigmap.extend + 1
+                  )
+                : height;
+
+        for (let x = startX; x < endX; x++) {
+            for (let y = startY; y < endY; y++) {
+                const id = `${x},${y}` as LocString;
+                const dam = this.mapDamage[id];
+                if (!dam || objs[id]?.event.noPass) continue;
+                if (dam.damage === 0) continue;
+                const damage = core.formatBigNumber(dam.damage, true);
+                const color = dam.damage < 0 ? '#6eff6a' : '#fa3';
+                core.status.damage.extraData.push({
+                    text: damage,
+                    px: 32 * x + 16,
+                    py: 32 * (y + 1) - 14,
+                    color,
+                    alpha: 1
+                });
+            }
+        }
     }
 }
 
@@ -491,6 +582,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                     const loc = `${x},${y}` as LocString;
                     const block = objs[loc];
                     if (
+                        block &&
                         block.event.noPass &&
                         block.event.cls !== 'enemys' &&
                         block.event.cls !== 'enemy48' &&
