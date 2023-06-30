@@ -39,6 +39,8 @@ interface Block<N extends Exclude<AllNumbers, 0> = Exclude<AllNumbers, 0>> {
      */
     id: N;
 
+    disable: boolean;
+
     /**
      * 事件信息
      */

@@ -24,7 +24,8 @@ type PartialNumbericEnemyProperty =
     | 'ice'
     | 'crit'
     | 'courage'
-    | 'charge';
+    | 'charge'
+    | 'paleShield';
 
 type BooleanEnemyProperty =
     | 'zoneSquare'

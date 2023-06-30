@@ -62,6 +62,23 @@ export function manhattan(x1: number, y1: number, x2: number, y2: number) {
     return Math.abs(x1 - x2) + Math.abs(y1 - y2);
 }
 
+/**
+ * 检查一个点是否在当前超大地图 v2 优化范围内
+ */
+export function checkV2(x?: number, y?: number) {
+    return (
+        has(x) &&
+        has(y) &&
+        !(
+            core.bigmap.v2 &&
+            (x < core.bigmap.posX - core.bigmap.extend ||
+                x > core.bigmap.posX + core._WIDTH_ + core.bigmap.extend ||
+                y < core.bigmap.posY - core.bigmap.extend ||
+                y > core.bigmap.posY + core._HEIGHT_ + core.bigmap.extend)
+        )
+    );
+}
+
 declare global {
     interface GamePluginUtils {
         ofDir: typeof ofDir;

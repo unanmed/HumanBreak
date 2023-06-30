@@ -608,7 +608,7 @@ interface InitGameStatus {
     /**
      * 伤害显示信息
      */
-    damage: DeepReadonly<DamageStatus>;
+    damage: DamageStatus;
 
     /**
      * 是否锁定了用户控制

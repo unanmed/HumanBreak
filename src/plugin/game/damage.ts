@@ -1,6 +1,6 @@
 import { getHeroStatusOf, getHeroStatusOn } from './hero';
 import { Range, RangeCollection } from './range';
-import { backDir, ensureArray, has, manhattan, ofDir } from './utils';
+import { backDir, checkV2, ensureArray, has, manhattan, ofDir } from './utils';
 
 interface HaloType {
     square: {
@@ -90,13 +90,14 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
      * 计算怪物伤害
      * @param noCache 是否不使用缓存
      */
-    calDamage(noCache: boolean = false) {
+    calDamage(noCache: boolean = false, onMap: boolean = false) {
         this.list.forEach(v => {
             if (noCache || v.needCalculate) {
                 v.reset();
                 v.calRealAttribute();
             }
-            v.calDamage();
+            v.calDamage(void 0, onMap);
+            console.log(v.damage);
         });
     }
 
@@ -377,7 +378,11 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     /**
      * 计算怪物伤害
      */
-    calDamage(hero: Partial<HeroStatus> = core.status.hero) {
+    calDamage(
+        hero: Partial<HeroStatus> = core.status.hero,
+        onMap: boolean = false
+    ) {
+        if (onMap && !checkV2(this.x, this.y)) return this.damage!;
         if (!this.needCalDamage) return this.damage!;
         const info = this.getRealInfo();
         const dirs = getNeedCalDir(this.x, this.y, this.floorId, hero);
@@ -580,7 +585,7 @@ export function getNeedCalDir(
         if (tx < 0 || ty < 0 || tx >= width || ty >= height) return false;
         const index = `${tx},${ty}` as LocString;
         const block = blocks[index];
-        if (block.event.noPass) return false;
+        if (!block || block.event.noPass) return false;
         if (!core.canMoveHero(tx, ty, backDir(v), floorId)) return false;
 
         return true;
@@ -641,6 +646,11 @@ export function calDamageWith(
     }
     heroPerDamage *= 1 - info.damageDecline;
 
+    // 苍蓝刻
+    if (special.includes(28)) {
+        heroPerDamage *= 1 - enemy.paleShield! / 100;
+    }
+
     let turn = Math.ceil(monHp / heroPerDamage);
 
     // 致命一击
@@ -672,9 +682,9 @@ export function calDamageWith(
     return damage;
 }
 
-export function initFloorDamage(floorId: FloorIds) {
+export function ensureFloorDamage(floorId: FloorIds) {
     const floor = core.status.maps[floorId];
-    floor.enemy = new EnemyCollection(floorId);
+    floor.enemy ??= new EnemyCollection(floorId);
 }
 
 declare global {
@@ -682,7 +692,7 @@ declare global {
         damage: {
             Enemy: typeof DamageEnemy;
             Collection: typeof EnemyCollection;
-            initFloorDamage: typeof initFloorDamage;
+            ensureFloorDamage: typeof ensureFloorDamage;
         };
     }
 
@@ -694,5 +704,5 @@ declare global {
 core.plugin.damage = {
     Enemy: DamageEnemy,
     Collection: EnemyCollection,
-    initFloorDamage
+    ensureFloorDamage
 };

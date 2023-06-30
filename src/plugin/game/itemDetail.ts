@@ -1,10 +1,9 @@
-///<reference path="../../../src/types/core.d.ts" />
 export {};
 
-core.control.updateDamage = function (floorId, ctx) {
-    floorId = floorId || core.status.floorId;
-    if (!floorId || core.status.gameOver || main.mode != 'play') return;
+core.control.updateDamage = function (floorId = core.status.floorId, ctx) {
+    if (!floorId || core.status.gameOver || main.mode !== 'play') return;
     const onMap = ctx == null;
+    const floor = core.status.maps[floorId];
 
     // 没有怪物手册
     if (!core.hasItem('book')) return;
@@ -16,20 +15,25 @@ core.control.updateDamage = function (floorId, ctx) {
         // 地图过大的缩略图不绘制显伤
         if (width * height > core.bigmap.threshold) return;
     }
-    this._updateDamage_damage(floorId, onMap);
-    this._updateDamage_extraDamage(floorId, onMap);
+    // 计算伤害
+    core.plugin.damage.ensureFloorDamage(floorId);
+    floor.enemy.calDamage(true, onMap);
+    core.status.damage.data = [];
+
+    // this._updateDamage_damage(floorId, onMap);
+    // this._updateDamage_extraDamage(floorId, onMap);
     getItemDetail(floorId, onMap); // 宝石血瓶详细信息
     this.drawDamage(ctx);
 };
 
 // 获取宝石信息 并绘制
-function getItemDetail(floorId, onMap) {
+function getItemDetail(floorId: FloorIds, onMap: boolean) {
     if (!core.getFlag('itemDetail')) return;
     floorId ??= core.status.thisMap.floorId;
-    let diff = {};
+    let diff: Record<string | symbol, number | undefined> = {};
     const before = core.status.hero;
     const hero = core.clone(core.status.hero);
-    const handler = {
+    const handler: ProxyHandler<any> = {
         set(target, key, v) {
             diff[key] = v - (target[key] || 0);
             if (!diff[key]) diff[key] = void 0;
@@ -54,14 +58,17 @@ function getItemDetail(floorId, onMap) {
             }
         }
         diff = {};
-        const id = block.event.id;
+        const id = block.event.id as AllIdsOf<'items'>;
         const item = core.material.items[id];
         if (item.cls === 'equips') {
             // 装备也显示
-            const diff = core.clone(item.equip.value ?? {});
+            const diff: Record<string, any> = core.clone(
+                item.equip.value ?? {}
+            );
             const per = item.equip.percentage ?? {};
             for (const name in per) {
-                diff[name + 'per'] = per[name].toString() + '%';
+                diff[name + 'per'] =
+                    per[name as SelectKey<HeroStatus, number>].toString() + '%';
             }
             drawItemDetail(diff, x, y);
             return;
@@ -69,7 +76,7 @@ function getItemDetail(floorId, onMap) {
         // 跟数据统计原理一样 执行效果 前后比较
         core.setFlag('__statistics__', true);
         try {
-            eval(item.itemEffect);
+            eval(item.itemEffect!);
         } catch (error) {}
         drawItemDetail(diff, x, y);
     });
@@ -79,7 +86,7 @@ function getItemDetail(floorId, onMap) {
 }
 
 // 绘制
-function drawItemDetail(diff, x, y) {
+function drawItemDetail(diff: any, x: number, y: number) {
     const px = 32 * x + 2,
         py = 32 * y + 31;
     let content = '';
@@ -121,7 +128,7 @@ function drawItemDetail(diff, x, y) {
             text: content,
             px: px,
             py: py - 10 * i,
-            color: color
+            color: color as Color
         });
         i++;
     }

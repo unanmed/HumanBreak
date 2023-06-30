@@ -250,7 +250,7 @@ interface Utils {
      * @returns 格式化结果
      */
     formatBigNumber<T extends string>(x: T, onMap?: number): T;
-    formatBigNumber(x: number | string, onMap?: number): string;
+    formatBigNumber(x: number | string, onMap?: number | boolean): string;
 
     /**
      * @deprecated
