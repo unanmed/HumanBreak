@@ -263,40 +263,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             return true;
         },
         beforeBattle: function (enemyId, x, y) {
-            // todo: 不使用 core.status.checkBlock
             // 战斗前触发的事件，可以加上一些战前特效（详见下面支援的例子）
             // 此函数在“检测能否战斗和自动存档”【之后】执行。如果需要更早的战前事件，请在插件中覆重写 core.events.doSystemEvent 函数。
             // 返回true则将继续战斗，返回false将不再战斗。
-
-            // ------ 支援技能 ------ //
-            if (x != null && y != null) {
-                var index = x + ',' + y,
-                    cache = core.status.checkBlock.cache[index] || {},
-                    guards = cache.guards || [];
-                // 如果存在支援怪
-                if (guards.length > 0) {
-                    // 记录flag，当前要参与支援的怪物
-                    core.setFlag('__guards__' + x + '_' + y, guards);
-                    var actions = [{ type: 'playSound', name: 'jump.mp3' }];
-                    // 增加支援的特效动画（图块跳跃）
-                    guards.forEach(function (g) {
-                        core.push(actions, {
-                            type: 'jump',
-                            from: [g[0], g[1]],
-                            to: [x, y],
-                            time: 300,
-                            keep: false,
-                            async: true
-                        });
-                    });
-                    core.push(actions, [
-                        { type: 'waitAsync' }, // 等待所有异步事件执行完毕
-                        { type: 'trigger', loc: [x, y] } // 重要！重新触发本点事件（即重新触发战斗）
-                    ]);
-                    core.insertAction(actions);
-                    return false;
-                }
-            }
 
             return true;
         },

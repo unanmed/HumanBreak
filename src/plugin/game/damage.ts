@@ -113,6 +113,7 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
      * @param noCache 是否不使用缓存
      */
     calMapDamage(noCache: boolean = false) {
+        if (!noCache) return;
         if (noCache) this.mapDamage = {};
         const hero = getHeroStatusOn(
             realStatus,

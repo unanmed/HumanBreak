@@ -1554,74 +1554,7 @@ control.prototype._updateDamage_damage = function (floorId, onMap) {
 };
 
 control.prototype._updateDamage_extraDamage = function (floorId, onMap) {
-    // todo: 不使用 core.status.checkBlock
-    core.status.damage.extraData = [];
-    if (!core.flags.displayExtraDamage) return;
-
-    var width = core.floors[floorId].width,
-        height = core.floors[floorId].height;
-    var startX =
-        onMap && core.bigmap.v2
-            ? Math.max(0, core.bigmap.posX - core.bigmap.extend)
-            : 0;
-    var endX =
-        onMap && core.bigmap.v2
-            ? Math.min(
-                  width,
-                  core.bigmap.posX + core._WIDTH_ + core.bigmap.extend + 1
-              )
-            : width;
-    var startY =
-        onMap && core.bigmap.v2
-            ? Math.max(0, core.bigmap.posY - core.bigmap.extend)
-            : 0;
-    var endY =
-        onMap && core.bigmap.v2
-            ? Math.min(
-                  height,
-                  core.bigmap.posY + core._HEIGHT_ + core.bigmap.extend + 1
-              )
-            : height;
-
-    for (var x = startX; x < endX; x++) {
-        for (var y = startY; y < endY; y++) {
-            var alpha = 1;
-            if (core.noPass(x, y, floorId)) {
-                if (core.flags.extraDamageType == 2) alpha = 0;
-                else if (core.flags.extraDamageType == 1) alpha = 0.6;
-            }
-            var damage = core.status.checkBlock.damage[x + ',' + y] || 0;
-            if (damage > 0) {
-                // 该点伤害
-                damage = core.formatBigNumber(damage, true);
-                core.status.damage.extraData.push({
-                    text: damage,
-                    px: 32 * x + 16,
-                    py: 32 * (y + 1) - 14,
-                    color: '#fa3',
-                    alpha: alpha
-                });
-            } else {
-                // 电摇嘲讽
-                const mockery = core.status.checkBlock.mockery[x + ',' + y];
-                if (mockery) {
-                    mockery.sort((a, b) =>
-                        a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]
-                    );
-                    const [tx, ty] = mockery[0];
-                    const dir =
-                        x > tx ? '←' : x < tx ? '→' : y > ty ? '↑' : '↓';
-                    core.status.damage.extraData.push({
-                        text: '嘲' + dir,
-                        px: 32 * x + 16,
-                        py: 32 * (y + 1) - 14,
-                        color: '#fd4',
-                        alpha: alpha
-                    });
-                }
-            }
-        }
-    }
+    // Deprecated. See src/plugin/game/damage.ts EnemyCollection.render.
 };
 
 ////// 重绘地图显伤 //////
