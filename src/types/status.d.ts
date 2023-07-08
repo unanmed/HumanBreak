@@ -859,7 +859,7 @@ interface HeroStatus {
     hp: number;
 
     /**
-     * 勇士生命上限
+     * 勇士生命回复
      */
     hpmax: number;
 
@@ -894,7 +894,7 @@ interface HeroStatus {
     money: number;
 
     /**
-     * 勇士的魔法
+     * 勇士的额外攻击
      */
     mana: number;
 

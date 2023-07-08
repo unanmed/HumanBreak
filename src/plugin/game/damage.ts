@@ -52,7 +52,23 @@ interface HaloData<T extends keyof HaloType = keyof HaloType> {
     from: DamageEnemy;
 }
 
+interface DamageDelta {
+    dir: DamageDir;
+    /** 跟最小伤害值的减伤 */
+    delta: number;
+    damage: number;
+    /** 跟当前方向的减伤 */
+    dirDelta: number;
+    info: DamageInfo;
+}
+
+interface CriticalDamageDelta extends Omit<DamageDelta, 'info'> {
+    /** 勇士的攻击增量 */
+    atkDelta: number;
+}
+
 type HaloFn = (info: EnemyInfo, enemy: Enemy) => void;
+type DamageDir = Dir | 'none';
 
 export const haloSpecials: number[] = [21, 25, 26, 27];
 
@@ -294,6 +310,12 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     /** 向其他怪提供过的光环 */
     providedHalo: number[] = [];
 
+    /**
+     * 伤害计算进度，0 -> 预平衡光环 -> 1 -> 计算没有光环的属性 -> 2 -> provide inject 光环
+     * -> 3 -> 计算光环加成 -> 4 -> 计算完毕
+     */
+    private progress: number = 0;
+
     constructor(
         enemy: Enemy<T>,
         x?: number,
@@ -336,7 +358,8 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         hero: Partial<HeroStatus> = core.status.hero,
         getReal: boolean = true
     ) {
-        if (!this.needCalculate) return;
+        if (this.progress !== 1) return this.info;
+        this.progress = 2;
         const special = this.info.special;
         const info = this.info;
         const enemy = this.enemy;
@@ -382,7 +405,9 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
      * 获取怪物的真实属性信息，在inject光环后执行
      */
     getRealInfo() {
-        if (!this.needCalculate) return this.info;
+        if (this.progress === 4) return this.info;
+        if (this.progress <= 3) this.ensureCaled(3);
+        this.progress = 4;
 
         // 此时已经inject光环，因此直接计算真实属性
         const info = this.info;
@@ -405,6 +430,17 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         this.getRealInfo();
     }
 
+    /**
+     * 确保怪物属性计算已经到达某个进度
+     * @param progress 期望进度
+     */
+    ensureCaled(progress: number) {
+        if (progress <= 1) this.preProvideHalo();
+        if (progress <= 2) this.calAttribute();
+        if (progress <= 3) this.provideHalo();
+        if (progress <= 4) this.getRealInfo();
+    }
+
     getHaloSpecials(): number[] {
         if (!this.floorId) return [];
         if (!core.has(this.x) || !core.has(this.y)) return [];
@@ -425,12 +461,17 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     /**
      * 光环预提供，用于平衡所有怪的光环属性，避免出现不同情况下光环效果不一致的现象
      */
-    preProvideHalo() {}
+    preProvideHalo() {
+        if (this.progress !== 0) return;
+        this.progress = 1;
+    }
 
     /**
      * 向其他怪提供光环
      */
     provideHalo() {
+        if (this.progress !== 2) return;
+        this.progress = 3;
         if (!this.floorId) return;
         if (!core.has(this.x) || !core.has(this.y)) return;
         const col = this.col ?? core.status.maps[this.floorId].enemy;
@@ -498,54 +539,9 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         const info = this.getRealInfo();
         const dirs = getNeedCalDir(this.x, this.y, this.floorId, hero);
 
-        const damageCache: Record<string, number> = {};
         this.needCalDamage = false;
 
-        return (this.damage = dirs.map(dir => {
-            const status = getHeroStatusOf(hero, realStatus);
-            let damage = calDamageWith(info, status) ?? Infinity;
-            let skill = -1;
-
-            // 自动切换技能
-            if (flags.autoSkill) {
-                for (let i = 0; i < skills.length; i++) {
-                    const [unlock, condition] = skills[i];
-                    if (!flags[unlock]) continue;
-                    flags[condition] = true;
-                    const status = getHeroStatusOf(hero, realStatus);
-                    const id = `${status.atk},${status.def}`;
-                    const d =
-                        id in damageCache
-                            ? damageCache[id]
-                            : calDamageWith(info, status) ?? Infinity;
-                    if (d < damage) {
-                        damage = d;
-                        skill = i;
-                    }
-                    flags[condition] = false;
-                    damageCache[id] = d;
-                }
-            }
-
-            let x: number | undefined;
-            let y: number | undefined;
-            if (has(this.x) && has(this.y)) {
-                if (dir !== 'none') {
-                    [x, y] = ofDir(this.x, this.y, dir);
-                } else {
-                    x = hero.x ?? this.x;
-                    y = hero.y ?? this.y;
-                }
-            }
-
-            return {
-                damage,
-                dir,
-                skill,
-                x,
-                y
-            };
-        }));
+        return (this.damage = this.calEnemyDamage(info, hero, dirs));
     }
 
     /**
@@ -651,6 +647,254 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         damage[loc] ??= { damage: 0, type: new Set() };
         damage[loc].damage += dam;
         damage[loc].type.add(type);
+    }
+
+    private calEnemyDamage(
+        enemy: EnemyInfo = this.getRealInfo(),
+        hero: Partial<HeroStatus> = core.status.hero,
+        dir: DamageDir | DamageDir[]
+    ): DamageInfo[] {
+        const damageCache: Record<string, number> = {};
+        const dirs = ensureArray(dir);
+
+        return dirs.map(dir => {
+            const status = getHeroStatusOf(hero, realStatus);
+            let damage = calDamageWith(enemy, status) ?? Infinity;
+            let skill = -1;
+
+            // 自动切换技能
+            if (flags.autoSkill) {
+                for (let i = 0; i < skills.length; i++) {
+                    const [unlock, condition] = skills[i];
+                    if (!flags[unlock]) continue;
+                    flags[condition] = true;
+                    const status = getHeroStatusOf(hero, realStatus);
+                    const id = `${status.atk},${status.def}`;
+                    const d =
+                        id in damageCache
+                            ? damageCache[id]
+                            : calDamageWith(enemy, status) ?? Infinity;
+                    if (d < damage) {
+                        damage = d;
+                        skill = i;
+                    }
+                    flags[condition] = false;
+                    damageCache[id] = d;
+                }
+            }
+
+            let x: number | undefined;
+            let y: number | undefined;
+            if (has(this.x) && has(this.y)) {
+                if (dir !== 'none') {
+                    [x, y] = ofDir(this.x, this.y, dir);
+                } else {
+                    x = hero.x ?? this.x;
+                    y = hero.y ?? this.y;
+                }
+            }
+
+            return {
+                damage,
+                dir,
+                skill,
+                x,
+                y
+            };
+        });
+    }
+
+    /**
+     * 计算怪物临界，计算临界时，根据当前方向计算临界，但也会输出与当前最少伤害的伤害差值
+     * @param num 要计算多少个临界
+     * @param dir 从勇士位置指向怪物的方向
+     * @param hero 勇士属性，最终结果将会与由此属性计算出的伤害相减计算减伤
+     */
+    calCritical(
+        num: number = 1,
+        dir: DamageDir | DamageDir[] = 'none',
+        hero: Partial<HeroStatus> = core.status.hero
+    ): CriticalDamageDelta[][] {
+        const origin = this.calEnemyDamage(void 0, hero, dir);
+        const min = Math.min(...origin.map(v => v.damage));
+        const seckill = this.getSeckillAtk();
+
+        return origin.map(v => {
+            const dir = v.dir;
+            if (
+                dir === 'none' ||
+                !has(this.x) ||
+                !has(this.y) ||
+                !has(this.floorId)
+            ) {
+                const status = getHeroStatusOf(hero, realStatus);
+                return this.calCriticalWith(num, min, seckill, v, status);
+            } else {
+                const [x, y] = ofDir(this.x, this.y, dir);
+                const status = getHeroStatusOf(
+                    hero,
+                    realStatus,
+                    x,
+                    y,
+                    this.floorId
+                );
+                return this.calCriticalWith(num, min, seckill, v, status);
+            }
+        });
+    }
+
+    /**
+     * 二分计算怪物临界
+     * @param num 计算的临界数量
+     * @param min 当前怪物伤害最小值
+     * @param seckill 秒杀怪物时的攻击
+     * @param hero 勇士真实属性
+     */
+    private calCriticalWith(
+        num: number,
+        min: number,
+        seckill: number,
+        origin: DamageInfo,
+        hero: Partial<HeroStatus>
+    ): CriticalDamageDelta[] {
+        if (!isFinite(seckill)) return [];
+        const damageCache: Record<number, number> = {};
+        const res: CriticalDamageDelta[] = [];
+        const def = hero.def!;
+        const precision =
+            seckill < Number.MAX_SAFE_INTEGER ? 1 : seckill / 1e15;
+
+        let curr = hero.atk!;
+        let start = curr;
+        let end = seckill;
+
+        let i = 0;
+        while (1) {
+            if (res.length >= num) break;
+            if (end - start <= 2 * precision) {
+                // 到达二分所需精度，计算临界准确值
+                const damages: number[] = [];
+                let cal = false;
+                [start, (start + end) / 2, end].forEach((v, i) => {
+                    const damage = (damages[i] =
+                        calDamageWith(this.info, { atk: v, def }) ?? Infinity);
+                    if (i !== 0 && damages[i] < damages[i - 1]) {
+                        res.push({
+                            damage: damages[i],
+                            atkDelta: v - hero.atk!,
+                            dir: origin.dir,
+                            delta: damages[i] - min,
+                            dirDelta: damages[i] - origin.damage
+                        });
+
+                        // 计算下一个临界，借助于之前的计算，可以直接知道下一个临界在哪个范围内
+                        const d = Object.entries(damageCache)
+                            .filter(v => {
+                                return parseFloat(v[0]) <= damage;
+                            })
+                            .map(v => [parseFloat(v[0]), v[1]])
+                            .sort((a, b) => a[0] - b[0]);
+
+                        for (let i = 0; i < d.length - 1; i++) {
+                            const [a, dam] = d[i];
+                            const [na, ndam] = d[i + 1];
+                            if (na < damage) {
+                                start = a;
+                                end = na;
+                                cal = true;
+                            }
+                        }
+                    }
+                });
+                if (!cal) break;
+            }
+            curr = Math.floor((start + end) / 2);
+
+            const damage =
+                calDamageWith(this.info, { atk: curr, def }) ?? Infinity;
+            damageCache[curr] = damage;
+            if (damage < origin.damage) {
+                end = curr;
+            } else {
+                start = curr;
+            }
+            if (i++ >= 10000) {
+                throw new Error(
+                    `Unexpected endless loop in calculating critical.` +
+                        `Enemy loc: ${this.x},${this.y}. Floor: ${this.floorId}`
+                );
+            }
+        }
+
+        return res;
+    }
+
+    /**
+     * 计算n防减伤
+     * @param num 要加多少防御
+     * @param dir 从勇士位置指向怪物的方向
+     * @param hero 勇士属性，最终结果将会与由此属性计算出的伤害相减计算减伤
+     */
+    calDefDamage(
+        num: number = 1,
+        dir: DamageDir | DamageDir[] = 'none',
+        hero: Partial<HeroStatus> = core.status.hero
+    ): DamageDelta[] {
+        const damage = this.calEnemyDamage(
+            void 0,
+            { def: (hero.def ?? core.status.hero.def) + num },
+            dir
+        );
+        const origin = this.calEnemyDamage(void 0, hero, dir);
+        const min = Math.min(...origin.map(v => v.damage));
+
+        return damage.map((v, i) => {
+            const finite = isFinite(v.damage);
+            return {
+                dir: v.dir,
+                damage: v.damage,
+                info: v,
+                delta: finite ? v.damage - min : Infinity,
+                dirDelta: finite ? v.damage - origin[i].damage : Infinity
+            };
+        });
+    }
+
+    /**
+     * 获取怪物秒杀时所需的攻击
+     */
+    getSeckillAtk(): number {
+        const info = this.getRealInfo();
+        const add = info.def + info.hp - core.status.hero.mana;
+
+        // 坚固，不可能通过攻击秒杀
+        if (info.special.includes(3)) {
+            return Infinity;
+        }
+
+        // 饥渴，会偷取勇士攻击
+        if (info.special.includes(7)) {
+            return add / (1 - this.enemy.hungry! / 100);
+        }
+
+        // 霜冻
+        if (info.special.includes(20) && !core.hasEquip('I589')) {
+            return (
+                info.def +
+                info.hp / (1 - this.enemy.ice!) -
+                core.status.hero.mana
+            );
+        }
+
+        if (info.damageDecline !== 0) {
+            return (
+                info.def +
+                info.hp / (1 - info.damageDecline) -
+                core.status.hero.mana
+            );
+        } else {
+            return add;
+        }
     }
 }
 

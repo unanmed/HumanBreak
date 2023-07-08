@@ -261,5 +261,5 @@ export function ensureArray<T>(arr: T): T extends any[] ? T : T[] {
 export function pColor(color: string) {
     const arr = parseColor(color);
     arr[3] ??= 1;
-    return `rgba(${arr.join(',')})`;
+    return `rgba(${arr.join(',')})` as Color;
 }
