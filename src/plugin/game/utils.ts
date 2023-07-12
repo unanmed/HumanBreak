@@ -97,7 +97,16 @@ export function formatDamage(damage: number): DamageString {
     return { damage: dam, color: color as Color };
 }
 
+/**
+ * 判断一个数组的数值是否全部相等
+ * @param arr 要判断的数组
+ */
 export function equal(arr: number[]): boolean;
+/**
+ * 判断一个数组的元素的某个属性的数值是否全部相等
+ * @param arr 要判断的数组
+ * @param key 要判断的属性名
+ */
 export function equal<T>(arr: T[], key: keyof T): boolean;
 export function equal(arr: any, key?: any) {
     if (has(key)) {
@@ -113,7 +122,16 @@ export function equal(arr: any, key?: any) {
     }
 }
 
+/**
+ * 获得一个数组的数值的最大值和最小值
+ * @param arr 要获得的数组
+ */
 export function boundary(arr: number[]): [number, number];
+/**
+ * 获得一个数组的元素的某个属性的数值的最大值和最小值
+ * @param arr 要获得的数组
+ * @param key 要获得的属性名
+ */
 export function boundary<T>(arr: T[], key: keyof T): [number, number];
 export function boundary(arr: any, key?: any) {
     if (has(key)) {

@@ -80,6 +80,11 @@ interface DamageStatus {
      * 地图伤害或其它在地图上显示的文字
      */
     extraData: DamageStatusExtraData[];
+
+    /**
+     * 不同方向伤害不同的信息
+     */
+    dir: DamageDirData[];
 }
 
 interface DamageStatusData {
@@ -109,6 +114,13 @@ interface DamageStatusExtraData extends DamageStatusData {
      * 文字的不透明度
      */
     alpha: number;
+}
+
+interface DamageDirData {
+    x: number;
+    y: number;
+    dir: Dir;
+    color: Color;
 }
 
 interface AutomaticRouteStatus {

@@ -194,6 +194,9 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
             this.calDamage(noCache, true);
             this.calMapDamage(noCache);
         }
+        core.status.damage.data = [];
+        core.status.damage.extraData = [];
+        core.status.damage.dir = [];
 
         // 怪物伤害
         this.list.forEach(v => {
@@ -207,11 +210,18 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
             if (equal(v.damage, 'damage')) {
                 // 伤害全部相等，绘制在怪物本身所在位置
                 const { damage, color } = formatDamage(v.damage[0].damage);
+                const critical = v.calCritical(1)[0]?.[0];
                 core.status.damage.data.push({
                     text: damage,
                     px: 32 * v.x! + 1,
                     py: 32 * (v.y! + 1) - 1,
                     color: color
+                });
+                core.status.damage.data.push({
+                    text: critical?.atkDelta.toString() ?? '?',
+                    px: 32 * v.x! + 1,
+                    py: 32 * (v.y! + 1) - 11,
+                    color: '#fff'
                 });
             } else {
                 const [min, max] = boundary(v.damage, 'damage');
@@ -226,33 +236,16 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
                 });
                 // 然后根据位置依次绘制对应位置的伤害
                 for (const dam of v.damage) {
+                    if (dam.dir === 'none') continue;
                     const d = ((dam.damage - min) / delta) * 255;
                     const color = core.arrayToRGB([d, 255 - d, 0]);
-                    if (dam.dir === 'down' || dam.dir === 'up') {
-                        const dir = dam.dir === 'down' ? '↑' : '↓';
-                        core.status.damage.extraData.push({
-                            text: dir,
-                            px: 32 * v.x! + 16,
-                            py:
-                                32 * v.y! +
-                                16 +
-                                core.utils.scan[dam.dir].y * 16,
-                            color: color,
-                            alpha: 1
-                        });
-                    } else if (dam.dir === 'left' || dam.dir === 'right') {
-                        const dir = dam.dir === 'left' ? '→' : '←';
-                        core.status.damage.extraData.push({
-                            text: dir,
-                            px:
-                                32 * v.x! +
-                                16 +
-                                core.utils.scan[dam.dir].x * 16,
-                            py: 32 * v.y! + 16,
-                            color: color,
-                            alpha: 1
-                        });
-                    }
+
+                    core.status.damage.dir.push({
+                        x: v.x!,
+                        y: v.y!,
+                        dir: dam.dir,
+                        color: color
+                    });
                 }
             }
         });
@@ -385,6 +378,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
             hpBuff: 0,
             enemy: this.enemy
         };
+        this.progress = 0;
         this.needCalculate = true;
         this.needCalDamage = true;
     }
@@ -398,7 +392,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         hero: Partial<HeroStatus> = core.status.hero,
         getReal: boolean = true
     ) {
-        if (this.progress !== 1) return this.info;
+        if (this.progress !== 1) return;
         this.progress = 2;
         const special = this.info.special;
         const info = this.info;
@@ -451,9 +445,9 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
 
         // 此时已经inject光环，因此直接计算真实属性
         const info = this.info;
-        info.atk *= info.atkBuff / 100 + 1;
-        info.def *= info.defBuff / 100 + 1;
-        info.hp *= info.hpBuff / 100 + 1;
+        info.atk = Math.floor(info.atk * (info.atkBuff / 100 + 1));
+        info.def = Math.floor(info.def * (info.defBuff / 100 + 1));
+        info.hp = Math.floor(info.hp * (info.hpBuff / 100 + 1));
 
         this.needCalculate = false;
 
@@ -576,12 +570,11 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     ) {
         if (onMap && !checkV2(this.x, this.y)) return this.damage!;
         if (!this.needCalDamage) return this.damage!;
-        const info = this.getRealInfo();
         const dirs = getNeedCalDir(this.x, this.y, this.floorId, hero);
 
         this.needCalDamage = false;
 
-        return (this.damage = this.calEnemyDamage(info, hero, dirs));
+        return (this.damage = this.calEnemyDamage(hero, dirs));
     }
 
     /**
@@ -689,7 +682,6 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     }
 
     private calEnemyDamage(
-        enemy: EnemyInfo = this.getRealInfo(),
         hero: Partial<HeroStatus> = core.status.hero,
         dir: DamageDir | DamageDir[]
     ): DamageInfo[] {
@@ -698,6 +690,11 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
 
         return dirs.map(dir => {
             const status = getHeroStatusOf(hero, realStatus);
+            let enemy: EnemyInfo;
+            this.reset();
+            this.preProvideHalo();
+            this.calAttribute(status, false);
+            enemy = this.getRealInfo();
             let damage = calDamageWith(enemy, status) ?? Infinity;
             let skill = -1;
 
@@ -708,11 +705,20 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                     if (!flags[unlock]) continue;
                     flags[condition] = true;
                     const status = getHeroStatusOf(hero, realStatus);
+                    // 这几个技能会导致怪物属性也改变，需要重新计算怪物属性
+                    if (needCalSpecial.some(v => enemy.special.includes(v))) {
+                        this.reset();
+                        this.preProvideHalo();
+                        this.calAttribute(status, false);
+                        enemy = this.getRealInfo();
+                    }
+
                     const id = `${status.atk},${status.def}`;
                     const d =
                         id in damageCache
                             ? damageCache[id]
                             : calDamageWith(enemy, status) ?? Infinity;
+
                     if (d < damage) {
                         damage = d;
                         skill = i;
@@ -720,6 +726,12 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                     flags[condition] = false;
                     damageCache[id] = d;
                 }
+            }
+            if (needCalSpecial.some(v => enemy.special.includes(v))) {
+                this.reset();
+                this.preProvideHalo();
+                this.calAttribute(status, false);
+                this.getRealInfo();
             }
 
             let x: number | undefined;
@@ -754,7 +766,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         dir: DamageDir | DamageDir[] = 'none',
         hero: Partial<HeroStatus> = core.status.hero
     ): CriticalDamageDelta[][] {
-        const origin = this.calEnemyDamage(void 0, hero, dir);
+        const origin = this.calEnemyDamage(hero, dir);
         const min = Math.min(...origin.map(v => v.damage));
         const seckill = this.getSeckillAtk();
 
@@ -821,7 +833,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                     if (i !== 0 && damages[i] < damages[i - 1]) {
                         res.push({
                             damage: damages[i],
-                            atkDelta: v - hero.atk!,
+                            atkDelta: Math.ceil(v - hero.atk!),
                             dir: origin.dir,
                             delta: damages[i] - min,
                             dirDelta: damages[i] - origin.damage
@@ -830,20 +842,19 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                         // 计算下一个临界，借助于之前的计算，可以直接知道下一个临界在哪个范围内
                         const d = Object.entries(damageCache)
                             .filter(v => {
-                                return parseFloat(v[0]) <= damage;
+                                return parseFloat(v[0]) < damage;
                             })
                             .map(v => [parseFloat(v[0]), v[1]])
                             .sort((a, b) => a[0] - b[0]);
 
                         for (let i = 0; i < d.length - 1; i++) {
-                            const [a, dam] = d[i];
                             const [na, ndam] = d[i + 1];
                             if (ndam < damage) {
-                                start = a;
+                                start = v;
                                 end = na;
                                 cal = true;
                             }
-                            ori = dam;
+                            ori = damage;
                         }
                     }
                 });
@@ -882,11 +893,10 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         hero: Partial<HeroStatus> = core.status.hero
     ): DamageDelta[] {
         const damage = this.calEnemyDamage(
-            void 0,
             { def: (hero.def ?? core.status.hero.def) + num },
             dir
         );
-        const origin = this.calEnemyDamage(void 0, hero, dir);
+        const origin = this.calEnemyDamage(hero, dir);
         const min = Math.min(...origin.map(v => v.damage));
 
         return damage.map((v, i) => {
@@ -950,6 +960,10 @@ const skills: [unlock: string, condition: string][] = [
     ['bladeOn', 'blade'],
     ['shieldOn', 'shield']
 ];
+/**
+ * 需要在每次切换技能时都重新计算怪物属性的特殊属性
+ */
+const needCalSpecial = [3, 7];
 
 /**
  * 获取需要计算怪物伤害的方向
@@ -982,10 +996,10 @@ export function getNeedCalDir(
         const [tx, ty] = ofDir(x, y, v);
         if (tx < 0 || ty < 0 || tx >= width || ty >= height) return false;
         const index = `${tx},${ty}` as LocString;
+        if (!core.canMoveHero(tx, ty, backDir(v), floorId)) return false;
         const block = blocks[index];
         if (!block) return true;
-        if (block.event.noPass) return false;
-        if (!core.canMoveHero(tx, ty, backDir(v), floorId)) return false;
+        if (block.event.noPass || block.event.cls === 'items') return false;
 
         return true;
     });

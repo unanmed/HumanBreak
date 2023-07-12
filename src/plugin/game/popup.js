@@ -37,6 +37,108 @@ control.prototype.checkBlock = function (forceMockery) {
     checkMockery(loc, forceMockery);
 };
 
+/**
+ * @param {CanvasRenderingContext2D} ctx
+ */
+control.prototype._drawDamage_draw = function (ctx, onMap) {
+    if (!core.hasItem('book')) return;
+    core.plugin.halo.drawHalo(ctx, onMap);
+
+    core.setFont(ctx, "14px 'normal'");
+    core.setTextAlign(ctx, 'center');
+    core.setTextBaseline(ctx, 'middle');
+    core.status.damage.extraData.forEach(function (one) {
+        var px = one.px,
+            py = one.py;
+        if (onMap && core.bigmap.v2) {
+            px -= core.bigmap.posX * 32;
+            py -= core.bigmap.posY * 32;
+            if (
+                px < -32 ||
+                px > core._PX_ + 32 ||
+                py < -32 ||
+                py > core._PY_ + 32
+            )
+                return;
+        }
+        var alpha = core.setAlpha(ctx, one.alpha);
+        core.fillBoldText(ctx, one.text, px, py, one.color);
+        core.setAlpha(ctx, alpha);
+    });
+
+    core.setTextAlign(ctx, 'left');
+    core.setTextBaseline(ctx, 'alphabetic');
+    core.status.damage.data.forEach(function (one) {
+        var px = one.px,
+            py = one.py;
+        if (onMap && core.bigmap.v2) {
+            px -= core.bigmap.posX * 32;
+            py -= core.bigmap.posY * 32;
+            if (
+                px < -32 * 2 ||
+                px > core._PX_ + 32 ||
+                py < -32 ||
+                py > core._PY_ + 32
+            )
+                return;
+        }
+        core.fillBoldText(ctx, one.text, px, py, one.color);
+    });
+
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 2;
+    core.status.damage.dir.forEach(v => {
+        let x = v.x;
+        let y = v.y;
+        if (onMap && core.bigmap.v2) {
+            x -= core.bigmap.posX;
+            y -= core.bigmap.posY;
+        }
+        if (x < -1 || x > 15 || y < 0 || y > 15) return;
+        let px = x * 32;
+        let py = y * 32;
+        ctx.beginPath();
+        if (v.dir === 'down') {
+            py -= 32;
+            ctx.moveTo(px + 16, py + 18);
+            ctx.lineTo(px + 16, py + 32);
+            ctx.moveTo(px + 10, py + 26);
+            ctx.lineTo(px + 16, py + 32);
+            ctx.lineTo(px + 22, py + 26);
+        } else if (v.dir === 'left') {
+            px += 32;
+            ctx.moveTo(px + 14, py + 16);
+            ctx.lineTo(px, py + 16);
+            ctx.moveTo(px + 6, py + 10);
+            ctx.lineTo(px, py + 16);
+            ctx.lineTo(px + 6, py + 22);
+        } else if (v.dir === 'up') {
+            py += 32;
+            ctx.moveTo(px + 16, py + 14);
+            ctx.lineTo(px + 16, py);
+            ctx.moveTo(px + 10, py + 6);
+            ctx.lineTo(px + 16, py);
+            ctx.lineTo(px + 22, py + 6);
+        } else {
+            px -= 32;
+            ctx.moveTo(px + 18, py + 16);
+            ctx.lineTo(px + 32, py + 16);
+            ctx.moveTo(px + 26, py + 10);
+            ctx.lineTo(px + 32, py + 16);
+            ctx.lineTo(px + 26, py + 22);
+        }
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+        ctx.strokeStyle = v.color;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    });
+    ctx.restore();
+};
+
 control.prototype.moveHero = function (direction, callback) {
     // todo: 不使用 core.status.checkBlock
     // 如果正在移动，直接return
