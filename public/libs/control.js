@@ -1587,25 +1587,8 @@ control.prototype._drawDamage_draw = function (ctx, onMap) {
     core.plugin.halo.drawHalo(ctx, onMap);
 
     core.setFont(ctx, "14px 'normal'");
-    core.setTextAlign(ctx, 'left');
-    core.status.damage.data.forEach(function (one) {
-        var px = one.px,
-            py = one.py;
-        if (onMap && core.bigmap.v2) {
-            px -= core.bigmap.posX * 32;
-            py -= core.bigmap.posY * 32;
-            if (
-                px < -32 * 2 ||
-                px > core._PX_ + 32 ||
-                py < -32 ||
-                py > core._PY_ + 32
-            )
-                return;
-        }
-        core.fillBoldText(ctx, one.text, px, py, one.color);
-    });
-
     core.setTextAlign(ctx, 'center');
+    core.setTextBaseline(ctx, 'middle');
     core.status.damage.extraData.forEach(function (one) {
         var px = one.px,
             py = one.py;
@@ -1623,6 +1606,25 @@ control.prototype._drawDamage_draw = function (ctx, onMap) {
         var alpha = core.setAlpha(ctx, one.alpha);
         core.fillBoldText(ctx, one.text, px, py, one.color);
         core.setAlpha(ctx, alpha);
+    });
+
+    core.setTextAlign(ctx, 'left');
+    core.setTextBaseline(ctx, 'alphabetic');
+    core.status.damage.data.forEach(function (one) {
+        var px = one.px,
+            py = one.py;
+        if (onMap && core.bigmap.v2) {
+            px -= core.bigmap.posX * 32;
+            py -= core.bigmap.posY * 32;
+            if (
+                px < -32 * 2 ||
+                px > core._PX_ + 32 ||
+                py < -32 ||
+                py > core._PY_ + 32
+            )
+                return;
+        }
+        core.fillBoldText(ctx, one.text, px, py, one.color);
     });
 };
 

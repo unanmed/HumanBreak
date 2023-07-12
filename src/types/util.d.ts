@@ -265,7 +265,7 @@ interface Utils {
      * @param color 一行三列的数组，各元素必须为不大于255的自然数
      * @returns 该颜色的十六进制表示，使用小写字母
      */
-    arrayToRGB(color: RGBArray): string;
+    arrayToRGB(color: RGBArray): _RGBA;
 
     /**
      * 颜色数组转字符串

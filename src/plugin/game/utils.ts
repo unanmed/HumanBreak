@@ -97,6 +97,45 @@ export function formatDamage(damage: number): DamageString {
     return { damage: dam, color: color as Color };
 }
 
+export function equal(arr: number[]): boolean;
+export function equal<T>(arr: T[], key: keyof T): boolean;
+export function equal(arr: any, key?: any) {
+    if (has(key)) {
+        for (let i = 1; i < arr.length; i++) {
+            if (arr[i][key] !== arr[0][key]) return false;
+        }
+        return true;
+    } else {
+        for (let i = 1; i < arr.length; i++) {
+            if (arr[i] !== arr[0]) return false;
+        }
+        return true;
+    }
+}
+
+export function boundary(arr: number[]): [number, number];
+export function boundary<T>(arr: T[], key: keyof T): [number, number];
+export function boundary(arr: any, key?: any) {
+    if (has(key)) {
+        let min = arr[0][key];
+        let max = arr[0][key];
+        for (let i = 1; i < arr.length; i++) {
+            const ele = arr[i][key];
+            if (ele < min) min = ele;
+            if (ele > max) max = ele;
+        }
+        return [min, max];
+    } else {
+        let min = arr[0];
+        let max = arr[0];
+        for (let i = 1; i < arr.length; i++) {
+            const ele = arr[i];
+            if (ele < min) min = ele;
+            if (ele > max) max = ele;
+        }
+        return [min, max];
+    }
+}
 declare global {
     interface GamePluginUtils {
         ofDir: typeof ofDir;

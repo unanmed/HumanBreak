@@ -1,3 +1,4 @@
+import { boundary, equal } from './utils';
 import { getHeroStatusOf, getHeroStatusOn } from './hero';
 import { Range, RangeCollection } from './range';
 import {
@@ -32,7 +33,7 @@ interface EnemyInfo {
 
 interface DamageInfo {
     damage: number;
-    /** 从勇士位置指向怪物的方向 */
+    /** 从怪物位置指向勇士的方向 */
     dir: Dir | 'none';
     x?: number;
     y?: number;
@@ -203,16 +204,55 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
                     `Unexpected null of enemy's damage. Loc: '${v.x},${v.y}'. Floor: ${v.floorId}`
                 );
             }
-            for (const dam of v.damage) {
-                if (dam.dir === 'none') {
-                    // 怪物本身所在位置
-                    const { damage, color } = formatDamage(dam.damage);
-                    core.status.damage.data.push({
-                        text: damage,
-                        px: 32 * v.x! + 1,
-                        py: 32 * (v.y! + 1) - 1,
-                        color: color
-                    });
+            if (equal(v.damage, 'damage')) {
+                // 伤害全部相等，绘制在怪物本身所在位置
+                const { damage, color } = formatDamage(v.damage[0].damage);
+                core.status.damage.data.push({
+                    text: damage,
+                    px: 32 * v.x! + 1,
+                    py: 32 * (v.y! + 1) - 1,
+                    color: color
+                });
+            } else {
+                const [min, max] = boundary(v.damage, 'damage');
+                const delta = max - min;
+                const { damage, color } = formatDamage(min);
+                // 在怪物位置绘制最低的伤害
+                core.status.damage.data.push({
+                    text: damage,
+                    px: 32 * v.x! + 1,
+                    py: 32 * (v.y! + 1) - 1,
+                    color: color
+                });
+                // 然后根据位置依次绘制对应位置的伤害
+                for (const dam of v.damage) {
+                    const d = (dam.damage - min) / delta;
+                    const color = core.arrayToRGB([d * 255, 255 - d * 255, 0]);
+                    if (dam.dir === 'down' || dam.dir === 'up') {
+                        const dir = dam.dir === 'down' ? '↑' : '↓';
+                        core.status.damage.extraData.push({
+                            text: dir,
+                            px: 32 * v.x! + 16,
+                            py:
+                                32 * v.y! +
+                                16 +
+                                core.utils.scan[dam.dir].y * 16,
+                            color: color,
+                            alpha: 1
+                        });
+                    } else if (dam.dir === 'left' || dam.dir === 'right') {
+                        const dir = dam.dir === 'left' ? '→' : '←';
+                        core.status.damage.extraData.push({
+                            text: dir,
+                            px:
+                                32 * v.x! +
+                                16 +
+                                core.utils.scan[dam.dir].x * 16,
+                            py: 32 * v.y! + 16,
+                            color: color,
+                            alpha: 1
+                        });
+                    }
                 }
             }
         });
@@ -259,7 +299,7 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
                     core.status.damage.extraData.push({
                         text: damage,
                         px: 32 * x + 16,
-                        py: 32 * (y + 1) - 14,
+                        py: 32 * y + 16,
                         color,
                         alpha: 1
                     });
@@ -435,10 +475,10 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
      * @param progress 期望进度
      */
     ensureCaled(progress: number) {
-        if (progress <= 1) this.preProvideHalo();
-        if (progress <= 2) this.calAttribute();
-        if (progress <= 3) this.provideHalo();
-        if (progress <= 4) this.getRealInfo();
+        if (progress >= 1) this.preProvideHalo();
+        if (progress >= 2) this.calAttribute();
+        if (progress >= 3) this.provideHalo();
+        if (progress >= 4) this.getRealInfo();
     }
 
     getHaloSpecials(): number[] {
@@ -591,8 +631,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                 let x = this.x;
                 let y = this.y;
                 const { x: dx, y: dy } = core.utils.scan[dir];
-                while (1) {
-                    if (x < 0 || y < 0 || x >= w || y >= h) break;
+                while (x >= 0 && y >= 0 && x < w && y < h) {
                     x += dx;
                     y += dy;
                     const loc = `${x},${y}` as LocString;
@@ -707,7 +746,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     /**
      * 计算怪物临界，计算临界时，根据当前方向计算临界，但也会输出与当前最少伤害的伤害差值
      * @param num 要计算多少个临界
-     * @param dir 从勇士位置指向怪物的方向
+     * @param dir 从怪物位置指向勇士的方向
      * @param hero 勇士属性，最终结果将会与由此属性计算出的伤害相减计算减伤
      */
     calCritical(
@@ -767,6 +806,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         let curr = hero.atk!;
         let start = curr;
         let end = seckill;
+        let ori = origin.damage;
 
         let i = 0;
         while (1) {
@@ -798,11 +838,12 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                         for (let i = 0; i < d.length - 1; i++) {
                             const [a, dam] = d[i];
                             const [na, ndam] = d[i + 1];
-                            if (na < damage) {
+                            if (ndam < damage) {
                                 start = a;
                                 end = na;
                                 cal = true;
                             }
+                            ori = dam;
                         }
                     }
                 });
@@ -813,7 +854,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
             const damage =
                 calDamageWith(this.info, { atk: curr, def }) ?? Infinity;
             damageCache[curr] = damage;
-            if (damage < origin.damage) {
+            if (damage < ori) {
                 end = curr;
             } else {
                 start = curr;
@@ -832,7 +873,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     /**
      * 计算n防减伤
      * @param num 要加多少防御
-     * @param dir 从勇士位置指向怪物的方向
+     * @param dir 从怪物位置指向勇士的方向
      * @param hero 勇士属性，最终结果将会与由此属性计算出的伤害相减计算减伤
      */
     calDefDamage(
@@ -915,6 +956,7 @@ const skills: [unlock: string, condition: string][] = [
  * @param x 怪物横坐标
  * @param y 怪物纵坐标
  * @param floorId 怪物所在楼层
+ * @returns 由怪物方向指向勇士的方向
  */
 export function getNeedCalDir(
     x?: number,
@@ -941,7 +983,8 @@ export function getNeedCalDir(
         if (tx < 0 || ty < 0 || tx >= width || ty >= height) return false;
         const index = `${tx},${ty}` as LocString;
         const block = blocks[index];
-        if (!block || block.event.noPass) return false;
+        if (!block) return true;
+        if (block.event.noPass) return false;
         if (!core.canMoveHero(tx, ty, backDir(v), floorId)) return false;
 
         return true;
