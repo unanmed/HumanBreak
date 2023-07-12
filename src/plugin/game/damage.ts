@@ -226,8 +226,8 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
                 });
                 // 然后根据位置依次绘制对应位置的伤害
                 for (const dam of v.damage) {
-                    const d = (dam.damage - min) / delta;
-                    const color = core.arrayToRGB([d * 255, 255 - d * 255, 0]);
+                    const d = ((dam.damage - min) / delta) * 255;
+                    const color = core.arrayToRGB([d, 255 - d, 0]);
                     if (dam.dir === 'down' || dam.dir === 'up') {
                         const dir = dam.dir === 'down' ? '↑' : '↓';
                         core.status.damage.extraData.push({

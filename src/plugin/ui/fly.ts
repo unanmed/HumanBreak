@@ -27,11 +27,11 @@ const bfsCache: Partial<Record<FloorIds, MapBFSResult>> = {};
  */
 const drawCache: Record<string, MapDrawData> = {};
 
-const arrow: Partial<Record<AllIds, Dir>> = {
-    leftPortal: 'left',
-    rightPortal: 'right',
-    upPortal: 'up',
-    downPortal: 'down'
+const arrow: Partial<Record<AllNumbers, Dir>> = {
+    92: 'left',
+    94: 'right',
+    91: 'up',
+    93: 'down'
 };
 
 /**
@@ -175,13 +175,13 @@ export function getMapData(
 
     while (queue.length > 0) {
         const now = queue.shift()!;
-        const change = core.floors[now].changeFloor;
-        const blocks = core.getMapBlocksObj(now, noCache);
+        const floor = core.floors[now];
+        const change = floor.changeFloor;
         for (const [loc, ev] of Object.entries(change)) {
             const target = ev.floorId as FloorIds;
             if (target.startsWith(':')) continue;
-            const block = blocks[loc as LocString];
-            const id = block.event.id;
+            const [x, y] = loc.split(',').map(v => parseInt(v));
+            const id = floor.map[y][x] as AllNumbers;
             if (id in arrow) {
                 if (!used[target]) {
                     const from = `${now},${loc},${arrow[id]}` as BFSFromString;
