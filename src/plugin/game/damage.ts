@@ -29,6 +29,9 @@ interface EnemyInfo {
     defBuff: number;
     hpBuff: number;
     enemy: Enemy;
+    x?: number;
+    y?: number;
+    floorId?: FloorIds;
 }
 
 interface DamageInfo {
@@ -71,7 +74,7 @@ interface CriticalDamageDelta extends Omit<DamageDelta, 'info'> {
 type HaloFn = (info: EnemyInfo, enemy: Enemy) => void;
 type DamageDir = Dir | 'none';
 
-export const haloSpecials: number[] = [21, 25, 26, 27];
+export const haloSpecials: number[] = [8, 21, 25, 26, 27];
 
 export class EnemyCollection implements RangeCollection<DamageEnemy> {
     floorId: FloorIds;
@@ -105,9 +108,17 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
      * @param noCache 是否不使用缓存
      */
     calRealAttribute(noCache: boolean = false) {
+        if (!noCache) return;
         this.list.forEach(v => {
-            if (noCache) v.reset();
-            v.calRealAttribute();
+            v.reset();
+            v.preProvideHalo();
+        });
+        this.list.forEach(v => {
+            v.calAttribute();
+            v.provideHalo();
+        });
+        this.list.forEach(v => {
+            v.getRealInfo();
         });
     }
 
@@ -116,11 +127,8 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
      * @param noCache 是否不使用缓存
      */
     calDamage(noCache: boolean = false, onMap: boolean = false) {
+        if (noCache) this.calRealAttribute(noCache);
         this.list.forEach(v => {
-            if (noCache || v.needCalculate) {
-                v.reset();
-                v.calRealAttribute();
-            }
             v.calDamage(void 0, onMap);
         });
     }
@@ -161,13 +169,13 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
         if (!recursion) {
             arr.forEach(v => {
                 enemy.forEach(e => {
-                    e.injectHalo(v);
+                    e.injectHalo(v, e.enemy);
                 });
             });
         } else {
             enemy.forEach(e => {
                 arr.forEach(v => {
-                    e.injectHalo(v);
+                    e.injectHalo(v, e.enemy);
                     e.preProvideHalo();
                 });
             });
@@ -333,8 +341,6 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
      * -> provide inject 光环 -> 计算怪物的光环加成 -> 计算完毕
      */
     info!: EnemyInfo;
-    /** 是否需要计算属性 */
-    needCalculate: boolean = true;
     /** 怪物伤害 */
     damage?: DamageInfo[];
     /** 是否需要计算伤害 */
@@ -376,38 +382,25 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
             atkBuff: 0,
             defBuff: 0,
             hpBuff: 0,
-            enemy: this.enemy
+            enemy: this.enemy,
+            x: this.x,
+            y: this.y,
+            floorId: this.floorId
         };
         this.progress = 0;
-        this.needCalculate = true;
         this.needCalDamage = true;
+        this.providedHalo = [];
     }
 
     /**
      * 计算怪物在不计光环下的属性，在inject光环之前，预平衡光环之后执行
-     * @param hero 勇士属性
-     * @param getReal 是否获取勇士真实属性，默认获取
      */
-    calAttribute(
-        hero: Partial<HeroStatus> = core.status.hero,
-        getReal: boolean = true
-    ) {
+    calAttribute() {
         if (this.progress !== 1) return;
         this.progress = 2;
         const special = this.info.special;
         const info = this.info;
-        const enemy = this.enemy;
         const floorId = this.floorId ?? core.status.floorId;
-        const { atk } = getReal
-            ? getHeroStatusOf(hero, ['atk'], hero.x, hero.y, hero.floorId)
-            : hero;
-
-        if (!has(atk)) return;
-
-        // 饥渴
-        if (special.includes(7)) {
-            info.atk += (atk * (enemy.hungry ?? 0)) / 100;
-        }
 
         // 智慧之源
         if (flags.hard === 2 && special.includes(14)) {
@@ -417,11 +410,6 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         // 极昼永夜
         info.atk -= flags[`night_${floorId}`] ?? 0;
         info.def -= flags[`night_${floorId}`] ?? 0;
-
-        // 坚固
-        if (special.includes(3) && enemy.def < atk - 1) {
-            info.def = atk - 1;
-        }
 
         // 融化，融化不属于怪物光环，因此不能用provide和inject计算，需要在这里计算
         if (has(flags[`melt_${floorId}`]) && has(this.x) && has(this.y)) {
@@ -439,40 +427,22 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
      * 获取怪物的真实属性信息，在inject光环后执行
      */
     getRealInfo() {
+        if (this.progress < 3) {
+            throw new Error(
+                `Unexpected early real info calculating. Progress: ${this.progress}`
+            );
+        }
         if (this.progress === 4) return this.info;
-        if (this.progress <= 3) this.ensureCaled(3);
         this.progress = 4;
 
         // 此时已经inject光环，因此直接计算真实属性
         const info = this.info;
+
         info.atk = Math.floor(info.atk * (info.atkBuff / 100 + 1));
         info.def = Math.floor(info.def * (info.defBuff / 100 + 1));
         info.hp = Math.floor(info.hp * (info.hpBuff / 100 + 1));
 
-        this.needCalculate = false;
-
         return this.info;
-    }
-
-    /**
-     * 计算真实属性
-     */
-    calRealAttribute() {
-        this.preProvideHalo();
-        this.calAttribute();
-        this.provideHalo();
-        this.getRealInfo();
-    }
-
-    /**
-     * 确保怪物属性计算已经到达某个进度
-     * @param progress 期望进度
-     */
-    ensureCaled(progress: number) {
-        if (progress >= 1) this.preProvideHalo();
-        if (progress >= 2) this.calAttribute();
-        if (progress >= 3) this.provideHalo();
-        if (progress >= 4) this.getRealInfo();
     }
 
     getHaloSpecials(): number[] {
@@ -510,15 +480,17 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         if (!core.has(this.x) || !core.has(this.y)) return;
         const col = this.col ?? core.status.maps[this.floorId].enemy;
         if (!col) return;
-        const speical = this.getHaloSpecials();
+        const special = this.getHaloSpecials();
 
         const square7: HaloFn[] = [];
         const square5: HaloFn[] = [];
 
+        // e 是被加成怪的属性，enemy 是施加光环的怪
+
         // 抱团
-        if (speical.includes(8)) {
+        if (special.includes(8)) {
             square5.push((e, enemy) => {
-                if (e.special.includes(8)) {
+                if (e.special.includes(8) && e.x !== this.x && this.y !== e.y) {
                     e.atkBuff += enemy.together ?? 0;
                     e.defBuff += enemy.together ?? 0;
                 }
@@ -527,25 +499,25 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         }
 
         // 冰封光环
-        if (speical.includes(21)) {
-            square7.push((e, enemy) => {
-                e.damageDecline += enemy.iceDecline ?? 0;
+        if (special.includes(21)) {
+            square7.push(e => {
+                e.damageDecline += this.enemy.iceHalo ?? 0;
             });
             this.providedHalo.push(21);
         }
 
         // 冰封之核
-        if (speical.includes(26)) {
-            square5.push((e, enemy) => {
-                e.defBuff += enemy.iceCore ?? 0;
+        if (special.includes(26)) {
+            square5.push(e => {
+                e.defBuff += this.enemy.iceCore ?? 0;
             });
             this.providedHalo.push(26);
         }
 
         // 火焰之核
-        if (speical.includes(27)) {
-            square5.push((e, enemy) => {
-                e.atkBuff += enemy.fireCore ?? 0;
+        if (special.includes(27)) {
+            square5.push(e => {
+                e.atkBuff += this.enemy.fireCore ?? 0;
             });
             this.providedHalo.push(27);
         }
@@ -557,8 +529,8 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     /**
      * 接受其他怪的光环
      */
-    injectHalo(halo: HaloFn) {
-        halo.call(this, this.info, this.enemy);
+    injectHalo(halo: HaloFn, enemy: Enemy) {
+        halo(this.info, enemy);
     }
 
     /**
@@ -687,14 +659,10 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     ): DamageInfo[] {
         const damageCache: Record<string, number> = {};
         const dirs = ensureArray(dir);
+        const enemy = this.getRealInfo();
 
         return dirs.map(dir => {
             const status = getHeroStatusOf(hero, realStatus);
-            let enemy: EnemyInfo;
-            this.reset();
-            this.preProvideHalo();
-            this.calAttribute(status, false);
-            enemy = this.getRealInfo();
             let damage = calDamageWith(enemy, status) ?? Infinity;
             let skill = -1;
 
@@ -705,13 +673,6 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                     if (!flags[unlock]) continue;
                     flags[condition] = true;
                     const status = getHeroStatusOf(hero, realStatus);
-                    // 这几个技能会导致怪物属性也改变，需要重新计算怪物属性
-                    if (needCalSpecial.some(v => enemy.special.includes(v))) {
-                        this.reset();
-                        this.preProvideHalo();
-                        this.calAttribute(status, false);
-                        enemy = this.getRealInfo();
-                    }
 
                     const id = `${status.atk},${status.def}`;
                     const d =
@@ -726,12 +687,6 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                     flags[condition] = false;
                     damageCache[id] = d;
                 }
-            }
-            if (needCalSpecial.some(v => enemy.special.includes(v))) {
-                this.reset();
-                this.preProvideHalo();
-                this.calAttribute(status, false);
-                this.getRealInfo();
             }
 
             let x: number | undefined;
@@ -960,10 +915,6 @@ const skills: [unlock: string, condition: string][] = [
     ['bladeOn', 'blade'],
     ['shieldOn', 'shield']
 ];
-/**
- * 需要在每次切换技能时都重新计算怪物属性的特殊属性
- */
-const needCalSpecial = [3, 7];
 
 /**
  * 获取需要计算怪物伤害的方向
@@ -1017,13 +968,15 @@ export function calDamageWith(
 ): number | null {
     const { hp, hpmax, mana, mdef } = core.status.hero;
     let { atk, def } = hero as HeroStatus;
-    const { hp: monHp, atk: monAtk, def: monDef, special, enemy } = info;
+    let { hp: monHp, atk: monAtk, def: monDef, special, enemy } = info;
 
     let damage = 0;
 
     // 饥渴
     if (special.includes(7)) {
-        atk *= 1 - enemy.hungry! / 100;
+        const delta = Math.floor((atk * enemy.hungry!) / 100);
+        atk -= delta;
+        monAtk += delta;
     }
 
     let heroPerDamage: number;
@@ -1032,11 +985,22 @@ export function calDamageWith(
     if (special.includes(9)) {
         heroPerDamage = atk + mana - monDef;
         if (heroPerDamage <= 0) return null;
+    } else if (special.includes(3)) {
+        // 由于坚固的特性，只能放到这来计算了
+        if (atk > enemy.def) heroPerDamage = 1 + mana;
+        else return null;
     } else {
         heroPerDamage = atk - monDef;
         if (heroPerDamage > 0) heroPerDamage += mana;
         else return null;
     }
+
+    // 霜冻
+    if (special.includes(20) && !core.hasEquip('I589')) {
+        heroPerDamage *= 1 - enemy.ice! / 100;
+    }
+
+    heroPerDamage *= 1 - info.damageDecline / 100;
 
     let enemyPerDamage: number;
 
@@ -1048,16 +1012,15 @@ export function calDamageWith(
         if (enemyPerDamage < 0) enemyPerDamage = 0;
     }
 
+    // 先攻
+    if (special.includes(17)) {
+        damage += enemyPerDamage;
+    }
+
     // 连击
     if (special.includes(4)) enemyPerDamage *= 2;
     if (special.includes(5)) enemyPerDamage *= 3;
     if (special.includes(6)) enemyPerDamage *= enemy.n!;
-
-    // 霜冻
-    if (special.includes(20) && !core.hasEquip('I589')) {
-        heroPerDamage *= 1 - enemy.ice! / 100;
-    }
-    heroPerDamage *= 1 - info.damageDecline;
 
     // 苍蓝刻
     if (special.includes(28)) {

@@ -72,21 +72,17 @@ export class Range<C extends Partial<Loc>> {
 Range.registerRangeType(
     'square',
     (col, { x, y, d }) => {
-        const cache = (col.cache.square ??= {});
-        const index = `${x},${y},${d}`;
-        if (index in cache) return cache[index];
         const list = col.collection.list;
+        const r = Math.floor(d / 2);
 
-        const r = Math.floor(d);
-
-        return (cache[index] = list.filter(v => {
+        return list.filter(v => {
             return (
                 core.has(v.x) &&
                 core.has(v.y) &&
                 Math.abs(v.x - x) <= r &&
                 Math.abs(v.y - y) <= r
             );
-        }));
+        });
     },
     (col, { x, y, d }, item) => {
         const r = Math.floor(d / 2);
