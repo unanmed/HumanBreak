@@ -232,7 +232,19 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
                     color: '#fff'
                 });
             } else {
-                const [min, max] = boundary(v.damage, 'damage');
+                let min = v.damage[0].damage;
+                let max = min;
+                let minI = 0;
+                for (let i = 1; i < v.damage.length; i++) {
+                    const dam = v.damage[i].damage;
+                    if (dam < min) {
+                        min = dam;
+                        minI = i;
+                    }
+                    if (dam > max) {
+                        max = dam;
+                    }
+                }
                 const delta = max - min;
                 const { damage, color } = formatDamage(min);
                 // 在怪物位置绘制最低的伤害
@@ -241,6 +253,14 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
                     px: 32 * v.x! + 1,
                     py: 32 * (v.y! + 1) - 1,
                     color: color
+                });
+                // 绘制临界
+                const critical = v.calCritical(1, v.damage[minI].dir)[0]?.[0];
+                core.status.damage.data.push({
+                    text: critical?.atkDelta.toString() ?? '?',
+                    px: 32 * v.x! + 1,
+                    py: 32 * (v.y! + 1) - 11,
+                    color: '#fff'
                 });
                 // 然后根据位置依次绘制对应位置的伤害
                 for (const dam of v.damage) {
