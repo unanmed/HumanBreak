@@ -490,7 +490,10 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         // 抱团
         if (special.includes(8)) {
             square5.push((e, enemy) => {
-                if (e.special.includes(8) && e.x !== this.x && this.y !== e.y) {
+                if (
+                    e.special.includes(8) &&
+                    (e.x !== this.x || this.y !== e.y)
+                ) {
                     e.atkBuff += enemy.together ?? 0;
                     e.defBuff += enemy.together ?? 0;
                 }
@@ -657,38 +660,10 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         hero: Partial<HeroStatus> = core.status.hero,
         dir: DamageDir | DamageDir[]
     ): DamageInfo[] {
-        const damageCache: Record<string, number> = {};
         const dirs = ensureArray(dir);
         const enemy = this.getRealInfo();
 
         return dirs.map(dir => {
-            const status = getHeroStatusOf(hero, realStatus);
-            let damage = calDamageWith(enemy, status) ?? Infinity;
-            let skill = -1;
-
-            // 自动切换技能
-            if (flags.autoSkill) {
-                for (let i = 0; i < skills.length; i++) {
-                    const [unlock, condition] = skills[i];
-                    if (!flags[unlock]) continue;
-                    flags[condition] = true;
-                    const status = getHeroStatusOf(hero, realStatus);
-
-                    const id = `${status.atk},${status.def}`;
-                    const d =
-                        id in damageCache
-                            ? damageCache[id]
-                            : calDamageWith(enemy, status) ?? Infinity;
-
-                    if (d < damage) {
-                        damage = d;
-                        skill = i;
-                    }
-                    flags[condition] = false;
-                    damageCache[id] = d;
-                }
-            }
-
             let x: number | undefined;
             let y: number | undefined;
             if (has(this.x) && has(this.y)) {
@@ -700,6 +675,8 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                 }
             }
 
+            const { damage, skill } = this.calEnemyDamageOf(hero, enemy, x, y);
+
             return {
                 damage,
                 dir,
@@ -708,6 +685,37 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                 y
             };
         });
+    }
+
+    private calEnemyDamageOf(
+        hero: Partial<HeroStatus>,
+        enemy: EnemyInfo,
+        x?: number,
+        y?: number
+    ) {
+        const status = getHeroStatusOf(hero, realStatus, x, y, this.floorId);
+        let damage = calDamageWith(enemy, status) ?? Infinity;
+        let skill = -1;
+
+        // 自动切换技能
+        if (flags.autoSkill) {
+            for (let i = 0; i < skills.length; i++) {
+                const [unlock, condition] = skills[i];
+                if (!flags[unlock]) continue;
+                flags[condition] = true;
+                const status = getHeroStatusOf(hero, realStatus);
+
+                const d = calDamageWith(enemy, status) ?? Infinity;
+
+                if (d < damage) {
+                    damage = d;
+                    skill = i;
+                }
+                flags[condition] = false;
+            }
+        }
+
+        return { damage, skill };
     }
 
     /**
@@ -733,18 +741,10 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                 !has(this.y) ||
                 !has(this.floorId)
             ) {
-                const status = getHeroStatusOf(hero, realStatus);
-                return this.calCriticalWith(num, min, seckill, v, status);
+                return this.calCriticalWith(num, min, seckill, v, hero);
             } else {
                 const [x, y] = ofDir(this.x, this.y, dir);
-                const status = getHeroStatusOf(
-                    hero,
-                    realStatus,
-                    x,
-                    y,
-                    this.floorId
-                );
-                return this.calCriticalWith(num, min, seckill, v, status);
+                return this.calCriticalWith(num, min, seckill, v, hero, x, y);
             }
         });
     }
@@ -761,65 +761,58 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         min: number,
         seckill: number,
         origin: DamageInfo,
-        hero: Partial<HeroStatus>
+        hero: Partial<HeroStatus>,
+        x?: number,
+        y?: number
     ): CriticalDamageDelta[] {
         if (!isFinite(seckill)) return [];
-        const damageCache: Record<number, number> = {};
         const res: CriticalDamageDelta[] = [];
         const def = hero.def!;
         const precision =
-            seckill < Number.MAX_SAFE_INTEGER ? 1 : seckill / 1e15;
+            (seckill < Number.MAX_SAFE_INTEGER ? 1 : seckill / 1e15) * 2;
+        const enemy = this.getRealInfo();
 
         let curr = hero.atk!;
         let start = curr;
         let end = seckill;
         let ori = origin.damage;
+        if (start >= end) return [];
+
+        const calDam = () => {
+            return this.calEnemyDamageOf({ atk: curr, def }, enemy, x, y)
+                .damage;
+        };
 
         let i = 0;
-        while (1) {
-            if (res.length >= num) break;
-            if (end - start <= 2 * precision) {
+        while (res.length < num) {
+            if (end - start <= precision) {
                 // 到达二分所需精度，计算临界准确值
-                const damages: number[] = [];
                 let cal = false;
-                [start, (start + end) / 2, end].forEach((v, i) => {
-                    const damage = (damages[i] =
-                        calDamageWith(this.info, { atk: v, def }) ?? Infinity);
-                    if (i !== 0 && damages[i] < damages[i - 1]) {
+                for (const v of [(start + end) / 2, end]) {
+                    curr = v;
+                    const dam = calDam();
+                    if (dam < ori) {
                         res.push({
-                            damage: damages[i],
+                            damage: dam,
                             atkDelta: Math.ceil(v - hero.atk!),
                             dir: origin.dir,
-                            delta: damages[i] - min,
-                            dirDelta: damages[i] - origin.damage
+                            delta: dam - min,
+                            dirDelta: dam - origin.damage
                         });
 
-                        // 计算下一个临界，借助于之前的计算，可以直接知道下一个临界在哪个范围内
-                        const d = Object.entries(damageCache)
-                            .filter(v => {
-                                return parseFloat(v[0]) < damage;
-                            })
-                            .map(v => [parseFloat(v[0]), v[1]])
-                            .sort((a, b) => a[0] - b[0]);
-
-                        for (let i = 0; i < d.length - 1; i++) {
-                            const [na, ndam] = d[i + 1];
-                            if (ndam < damage) {
-                                start = v;
-                                end = na;
-                                cal = true;
-                            }
-                            ori = damage;
-                        }
+                        start = v;
+                        end = seckill;
+                        cal = true;
+                        ori = dam;
+                        break;
                     }
-                });
+                }
                 if (!cal) break;
             }
             curr = Math.floor((start + end) / 2);
 
-            const damage =
-                calDamageWith(this.info, { atk: curr, def }) ?? Infinity;
-            damageCache[curr] = damage;
+            const damage = calDam();
+
             if (damage < ori) {
                 end = curr;
             } else {
@@ -878,16 +871,26 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
             return Infinity;
         }
 
+        // 列方程求解
         // 饥渴，会偷取勇士攻击
         if (info.special.includes(7)) {
-            return add / (1 - this.enemy.hungry! / 100);
+            if (info.damageDecline === 0) {
+                return add / (1 - this.enemy.hungry! / 100);
+            } else {
+                return (
+                    (info.hp / (1 - info.damageDecline / 100) -
+                        core.status.hero.mana +
+                        info.def) /
+                    (1 - this.enemy.hungry! / 100)
+                );
+            }
         }
 
         // 霜冻
         if (info.special.includes(20) && !core.hasEquip('I589')) {
             return (
                 info.def +
-                info.hp / (1 - this.enemy.ice!) -
+                info.hp / (1 - this.enemy.ice! / 100) -
                 core.status.hero.mana
             );
         }
@@ -895,7 +898,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         if (info.damageDecline !== 0) {
             return (
                 info.def +
-                info.hp / (1 - info.damageDecline) -
+                info.hp / (1 - info.damageDecline / 100) -
                 core.status.hero.mana
             );
         } else {
