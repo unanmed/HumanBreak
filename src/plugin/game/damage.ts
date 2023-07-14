@@ -54,6 +54,7 @@ interface HaloData<T extends keyof HaloType = keyof HaloType> {
     type: T;
     data: HaloType[T];
     from: DamageEnemy;
+    special: number;
 }
 
 interface DamageDelta {
@@ -107,8 +108,8 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
      * 计算怪物真实属性
      * @param noCache 是否不使用缓存
      */
-    calRealAttribute(noCache: boolean = false) {
-        if (!noCache) return;
+    calRealAttribute() {
+        this.haloList = [];
         this.list.forEach(v => {
             v.reset();
             v.preProvideHalo();
@@ -127,7 +128,7 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
      * @param noCache 是否不使用缓存
      */
     calDamage(noCache: boolean = false, onMap: boolean = false) {
-        if (noCache) this.calRealAttribute(noCache);
+        if (noCache) this.calRealAttribute();
         this.list.forEach(v => {
             v.calDamage(void 0, onMap);
         });
@@ -137,9 +138,8 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
      * 计算地图伤害
      * @param noCache 是否不使用缓存
      */
-    calMapDamage(noCache: boolean = false) {
-        if (!noCache) return;
-        if (noCache) this.mapDamage = {};
+    calMapDamage() {
+        this.mapDamage = {};
         const hero = getHeroStatusOn(
             realStatus,
             core.status.hero.loc.x,
@@ -200,7 +200,7 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
     ) {
         if (cal) {
             this.calDamage(noCache, true);
-            this.calMapDamage(noCache);
+            this.calMapDamage();
         }
         core.status.damage.data = [];
         core.status.damage.extraData = [];
@@ -527,6 +527,12 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                 e.damageDecline += this.enemy.iceHalo ?? 0;
             });
             this.providedHalo.push(21);
+            col.haloList.push({
+                type: 'square',
+                data: { x: this.x, y: this.y, d: 7 },
+                special: 21,
+                from: this
+            });
         }
 
         // 冰封之核
@@ -535,6 +541,12 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                 e.defBuff += this.enemy.iceCore ?? 0;
             });
             this.providedHalo.push(26);
+            col.haloList.push({
+                type: 'square',
+                data: { x: this.x, y: this.y, d: 5 },
+                special: 26,
+                from: this
+            });
         }
 
         // 火焰之核
@@ -543,6 +555,12 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                 e.atkBuff += this.enemy.fireCore ?? 0;
             });
             this.providedHalo.push(27);
+            col.haloList.push({
+                type: 'square',
+                data: { x: this.x, y: this.y, d: 5 },
+                special: 27,
+                from: this
+            });
         }
 
         col.applyHalo('square', { x: this.x, y: this.y, d: 7 }, square7);

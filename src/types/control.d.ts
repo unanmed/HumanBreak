@@ -490,7 +490,7 @@ interface Control {
      * 重绘地图显伤
      * @param ctx 绘制到的画布
      */
-    drawDamage(ctx?: CtxRefer): void;
+    drawDamage(ctx?: CtxRefer, floorId: FloorIds): void;
 
     /**
      * 选择录像文件

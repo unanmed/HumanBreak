@@ -1492,65 +1492,7 @@ control.prototype.updateDamage = function (floorId, ctx) {
 };
 
 control.prototype._updateDamage_damage = function (floorId, onMap) {
-    core.status.damage.data = [];
-    if (!core.flags.displayEnemyDamage && !core.flags.displayExtraDamage)
-        return;
-
-    core.extractBlocks(floorId);
-    core.status.maps[floorId].blocks.forEach(function (block) {
-        var x = block.x,
-            y = block.y;
-
-        // v2优化，只绘制范围内的部分
-        if (onMap && core.bigmap.v2) {
-            if (
-                x < core.bigmap.posX - core.bigmap.extend ||
-                x > core.bigmap.posX + core._WIDTH_ + core.bigmap.extend ||
-                y < core.bigmap.posY - core.bigmap.extend ||
-                y > core.bigmap.posY + core._HEIGHT_ + core.bigmap.extend
-            ) {
-                return;
-            }
-        }
-
-        if (
-            !block.disable &&
-            block.event.cls.indexOf('enemy') == 0 &&
-            block.event.displayDamage !== false
-        ) {
-            if (core.flags.displayEnemyDamage) {
-                var damageString = core.enemys.getDamageString(
-                    block.event.id,
-                    x,
-                    y,
-                    floorId
-                );
-                core.status.damage.data.push({
-                    text: damageString.damage,
-                    px: 32 * x + 1,
-                    py: 32 * (y + 1) - 1,
-                    color: damageString.color
-                });
-            }
-            if (core.flags.displayCritical) {
-                var critical = core.enemys.nextCriticals(
-                    block.event.id,
-                    1,
-                    x,
-                    y,
-                    floorId
-                );
-                critical = core.formatBigNumber((critical[0] || [])[0], true);
-                if (critical == '???') critical = '?';
-                core.status.damage.data.push({
-                    text: critical,
-                    px: 32 * x + 1,
-                    py: 32 * (y + 1) - 11,
-                    color: '#FFFFFF'
-                });
-            }
-        }
-    });
+    // Deprecated. See src/plugin/game/damage.ts EnemyCollection.render.
 };
 
 control.prototype._updateDamage_extraDamage = function (floorId, onMap) {
@@ -1558,7 +1500,7 @@ control.prototype._updateDamage_extraDamage = function (floorId, onMap) {
 };
 
 ////// 重绘地图显伤 //////
-control.prototype.drawDamage = function (ctx) {
+control.prototype.drawDamage = function (ctx, floorId = core.status.floorId) {
     if (core.status.gameOver || !core.status.damage || main.mode != 'play')
         return;
     var onMap = false;
@@ -1579,53 +1521,11 @@ control.prototype.drawDamage = function (ctx) {
             return this.updateDamage();
         }
     }
-    return this._drawDamage_draw(ctx, onMap);
+    return this._drawDamage_draw(ctx, onMap, floorId);
 };
 
 control.prototype._drawDamage_draw = function (ctx, onMap) {
-    if (!core.hasItem('book')) return;
-    core.plugin.halo.drawHalo(ctx, onMap);
-
-    core.setFont(ctx, "14px 'normal'");
-    core.setTextAlign(ctx, 'center');
-    core.setTextBaseline(ctx, 'middle');
-    core.status.damage.extraData.forEach(function (one) {
-        var px = one.px,
-            py = one.py;
-        if (onMap && core.bigmap.v2) {
-            px -= core.bigmap.posX * 32;
-            py -= core.bigmap.posY * 32;
-            if (
-                px < -32 ||
-                px > core._PX_ + 32 ||
-                py < -32 ||
-                py > core._PY_ + 32
-            )
-                return;
-        }
-        var alpha = core.setAlpha(ctx, one.alpha);
-        core.fillBoldText(ctx, one.text, px, py, one.color);
-        core.setAlpha(ctx, alpha);
-    });
-
-    core.setTextAlign(ctx, 'left');
-    core.setTextBaseline(ctx, 'alphabetic');
-    core.status.damage.data.forEach(function (one) {
-        var px = one.px,
-            py = one.py;
-        if (onMap && core.bigmap.v2) {
-            px -= core.bigmap.posX * 32;
-            py -= core.bigmap.posY * 32;
-            if (
-                px < -32 * 2 ||
-                px > core._PX_ + 32 ||
-                py < -32 ||
-                py > core._PY_ + 32
-            )
-                return;
-        }
-        core.fillBoldText(ctx, one.text, px, py, one.color);
-    });
+    // Deprecated. See src/plugin/game/popup.js
 };
 
 // ------ 录像相关 ------ //

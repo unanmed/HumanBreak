@@ -19,15 +19,13 @@ core.control.updateDamage = function (floorId = core.status.floorId, ctx) {
     core.plugin.damage.ensureFloorDamage(floorId);
 
     floor.enemy.calDamage(true, onMap);
-    floor.enemy.calMapDamage(true);
+    floor.enemy.calMapDamage();
     core.status.damage.data = [];
 
     floor.enemy.render();
 
-    // this._updateDamage_damage(floorId, onMap);
-    // this._updateDamage_extraDamage(floorId, onMap);
     getItemDetail(floorId, onMap); // 宝石血瓶详细信息
-    this.drawDamage(ctx);
+    this.drawDamage(ctx, floorId);
 };
 
 // 获取宝石信息 并绘制

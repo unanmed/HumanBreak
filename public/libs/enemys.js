@@ -448,7 +448,7 @@ enemys.prototype._getDamage = function (enemy, hero, x, y, floorId) {
 
 ////// 获得当前楼层的怪物列表 //////
 enemys.prototype.getCurrentEnemys = function (floorId) {
-    // todo: 删除getEnemyInfo - _getCurrentEnemys_addEnemy
+    // todo: 删除 getEnemyInfo - _getCurrentEnemys_addEnemy
     floorId = floorId || core.status.floorId;
     var enemys = [],
         used = {};

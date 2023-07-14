@@ -1,5 +1,5 @@
 ///<reference path="../../../src/types/core.d.ts" />
-export {};
+import { drawHalo } from './halo';
 
 // 伤害弹出
 // 复写阻激夹域检测
@@ -40,9 +40,9 @@ control.prototype.checkBlock = function (forceMockery) {
 /**
  * @param {CanvasRenderingContext2D} ctx
  */
-control.prototype._drawDamage_draw = function (ctx, onMap) {
+control.prototype._drawDamage_draw = function (ctx, onMap, floorId) {
     if (!core.hasItem('book')) return;
-    core.plugin.halo.drawHalo(ctx, onMap);
+    drawHalo(ctx, onMap, floorId);
 
     core.setFont(ctx, "14px 'normal'");
     core.setTextAlign(ctx, 'center');

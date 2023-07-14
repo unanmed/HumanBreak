@@ -939,8 +939,7 @@ maps.prototype._canMoveDirectly_checkGlobal = function () {
 };
 
 maps.prototype._canMoveDirectly_checkStartPoint = function (sx, sy) {
-    // todo: 不使用 core.status.checkBlock
-    if (core.status.checkBlock.damage[sx + ',' + sy]) return false;
+    if (core.status.thisMap.enemy.mapDamage[`${sx},${sy}`]) return false;
     var block = core.getBlock(sx, sy);
     if (block != null) {
         // 只有起点是传送点才是能无视
@@ -2589,8 +2588,6 @@ maps.prototype._drawThumbnail_realDrawTempCanvas = function (
     options.ctx.imageSmoothingEnabled = true;
     // 缩略图：显伤
     if (options.damage && core.hasItem('book')) {
-        // todo: 删除 updateCheckBlock
-        core.updateCheckBlock(floorId);
         core.control.updateDamage(floorId, options.ctx);
     }
 };
