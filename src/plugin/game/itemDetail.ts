@@ -23,7 +23,7 @@ core.control.updateDamage = function (floorId = core.status.floorId, ctx) {
     floor.enemy.calMapDamage();
     core.status.damage.data = [];
 
-    floor.enemy.render();
+    floor.enemy.render(true);
 
     getItemDetail(floorId, onMap); // 宝石血瓶详细信息
     this.drawDamage(ctx, floorId);
