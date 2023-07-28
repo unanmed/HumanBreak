@@ -18,6 +18,7 @@ import completion, { floors } from './plugin/completion';
 import path from './plugin/fx/path';
 import gameCanvas from './plugin/fx/gameCanvas';
 import noise from './plugin/fx/noise';
+import smooth from './plugin/fx/smoothView';
 
 function forward() {
     const toForward: any[] = [
@@ -40,7 +41,8 @@ function forward() {
         completion(),
         path(),
         gameCanvas(),
-        noise()
+        noise(),
+        smooth()
     ];
 
     // 初始化所有插件，并转发到core上
