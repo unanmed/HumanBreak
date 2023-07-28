@@ -32,12 +32,6 @@ interface ControlData {
     updateStatusBar(): void;
 
     /**
-     * 更新一个地图的地图伤害
-     * @param floorId 要更新的楼层id
-     */
-    updateCheckBlock(floorId: FloorIds): void;
-
-    /**
      * 每步移动后执行的函数
      * @param callback 回调函数（好像没什么必要吧
      */

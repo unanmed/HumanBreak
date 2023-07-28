@@ -468,12 +468,6 @@ interface Control {
     updateFollowers(): void;
 
     /**
-     * 更新领域、夹击、阻击的伤害地图
-     * @param floorId 更新的地图id
-     */
-    updateCheckBlock(floorId?: FloorIds): void;
-
-    /**
      * 检查并执行领域、夹击、阻击事件
      */
     checkBlock(): void;
