@@ -145,7 +145,7 @@ interface EventData {
      * 游戏失败
      * @param reason 失败原因
      */
-    lose(reason: string): void;
+    lose(reason?: string): void;
 
     /**
      * 切换楼层中，即屏幕完全变黑的那一刻

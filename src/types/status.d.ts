@@ -774,7 +774,7 @@ interface GameStatus extends InitGameStatus {
     /**
      * 获得当前楼层信息，等价于core.status.maps[core.status.floorId]
      */
-    thisMap: ResolvedFloor;
+    thisMap: Floor;
 
     /**
      * 地图伤害
@@ -949,6 +949,8 @@ interface HeroStatus {
      * 勇士的跟随者
      */
     followers: Follower[];
+
+    statistics: HeroStatistics;
 
     /**
      * 勇士拥有的道具

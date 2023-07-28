@@ -138,7 +138,6 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
 
     /**
      * 计算地图伤害
-     * @param noCache 是否不使用缓存
      */
     calMapDamage() {
         this.mapDamage = {};

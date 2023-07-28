@@ -36,8 +36,12 @@ export default function init() {
 
         tran.transition('x', ox).transition('y', oy);
 
-        needSmooth = true;
-        func();
+        if (tran.easeTime > 0) {
+            needSmooth = true;
+            func();
+        } else {
+            core.setViewport(tran.value.x, tran.value.y);
+        }
     };
 
     let time2 = Date.now();
@@ -45,19 +49,19 @@ export default function init() {
     control.prototype._moveAction_moving = function (...params: any[]) {
         if (Date.now() - time2 > 20)
             tran.mode(hyper('sin', 'out')).time(200).absolute();
-        origin1.call(this, ...params);
+        return origin1.call(this, ...params);
     };
 
     const origin2 = control.prototype.moveDirectly;
     control.prototype.moveDirectly = function (...params: any[]) {
         time2 = Date.now();
         tran.mode(hyper('sin', 'out')).time(600).absolute();
-        origin2.call(this, ...params);
+        return origin2.call(this, ...params);
     };
 
     const origin3 = events.prototype._changeFloor_beforeChange;
     events.prototype._changeFloor_beforeChange = function (...params: any[]) {
         tran.time(1).absolute();
-        origin3.call(this, ...params);
+        return origin3.call(this, ...params);
     };
 }

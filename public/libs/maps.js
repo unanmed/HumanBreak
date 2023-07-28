@@ -793,6 +793,7 @@ maps.prototype._canMoveHero_checkPoint = function (
     floorId = floorId || core.status.floorId;
     if (!floorId) return false;
     arrays = arrays || this._generateMovableArray_arrays(floorId);
+    const floor = core.status.maps[floorId];
 
     // 1. 检查该点 cannotMove
     if (
@@ -845,13 +846,12 @@ maps.prototype._canMoveHero_checkPoint = function (
         return false;
 
     // 4. 检查是否能进将死的领域
-    // todo: 不使用 core.status.checkBlock
     if (
         floorId == core.status.floorId &&
         !core.flags.canGoDeadZone &&
         !core.status.lockControl &&
         Math.max(core.status.hero.hp, 1) <=
-            ((core.status.checkBlock.damage || {})[nx + ',' + ny] || 0) &&
+            (floor.enemy.mapDamage[`${nx},${ny}`]?.damage ?? 0) &&
         arrays.eventArray[ny][nx] == 0
     )
         return false;
@@ -1023,10 +1023,11 @@ maps.prototype._canMoveDirectly_checkNextPoint = function (blocksObj, x, y) {
         if (!ignore) return false;
     }
     // 是否存在阻激夹域伤害
-    // todo: 不使用 core.status.checkBlock
-    // if (core.status.checkBlock.damage[index]) return false;
-    // if (core.status.checkBlock.repulse[index]) return false;
-    // if (core.status.checkBlock.mockery[index]) return false;
+    const damage = core.status.thisMap.enemy.mapDamage[index];
+    if (damage) {
+        if (damage.damage !== 0) return false;
+        if (damage.mockery) return false;
+    }
 
     return true;
 };
@@ -1107,24 +1108,21 @@ maps.prototype._automaticRoute_deepAdd = function (x, y, blocks) {
     var block = blocks[x + ',' + y];
     if (block && !block.disable) {
         var id = block.event.id;
-        // 绕过亮灯
-        if (id == 'light') deepAdd += 100;
-        // 绕过路障
-        if (id.endsWith('Net') && !core.hasFlag(id.substring(0, id.length - 3)))
-            deepAdd += 100;
+
         // 绕过血瓶和绿宝石
         if (
             core.hasFlag('__potionNoRouting__') &&
             (id.endsWith('Potion') || id == 'greenGem')
         )
             deepAdd += 100;
-        // 绕过传送点
-        // if (block.event.trigger == 'changeFloor') deepAdd+=10;
     }
     // 绕过存在伤害的地方
-    // todo: 不使用 core.status.checkBlock
-    // deepAdd += (core.status.checkBlock.damage[x + ',' + y] || 0) * 100;
-    // deepAdd += core.status.checkBlock.mockery[`${x},${y}`] ? 1000 : 0;
+    const damage = core.status.thisMap.enemy.mapDamage[`${x},${y}`];
+    if (damage) {
+        deepAdd += damage.damage * 100;
+        deepAdd += !!damage.mockery ? 1e5 : 0;
+    }
+
     return deepAdd;
 };
 

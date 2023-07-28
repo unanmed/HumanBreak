@@ -979,11 +979,10 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
     ];
     var canMoveDirectlyArray = core.canMoveDirectlyArray(dirs, canMoveArray);
 
-    for (var i = 0; i < dirs.length; ++i) {
-        var d = dirs[i],
-            dx = d[0],
-            dy = d[1],
-            dir = d[2];
+    for (let i = 0; i < dirs.length; ++i) {
+        var d = dirs[i];
+        const [dx, dy, dir] = d;
+
         if (
             dx < 0 ||
             dx >= core.bigmap.width ||
@@ -1461,20 +1460,7 @@ control.prototype._checkBlock_disableQuickShop = function () {
 
 ////// 阻击 //////
 control.prototype._checkBlock_repulse = function (repulse) {
-    if (!repulse || repulse.length == 0) return;
-    var actions = [];
-    repulse.forEach(function (t) {
-        actions.push({
-            type: 'move',
-            loc: [t[0], t[1]],
-            steps: [t[3]],
-            time: 250,
-            keep: true,
-            async: true
-        });
-    });
-    actions.push({ type: 'waitAsync' });
-    core.insertAction(actions);
+    // Deprecated.
 };
 
 ////// 更新全地图显伤 //////

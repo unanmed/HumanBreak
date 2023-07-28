@@ -3,23 +3,24 @@ import { drawHalo } from './halo';
 
 // 伤害弹出
 // 复写阻激夹域检测
-control.prototype.checkBlock = function (forceMockery) {
-    // todo: 不使用 core.status.checkBlock
+control.prototype.checkBlock = function (forceMockery: boolean = false) {
     var x = core.getHeroLoc('x'),
         y = core.getHeroLoc('y'),
         loc = x + ',' + y;
-    var damage = 0;
+    const floor = core.status.floorId;
+    const info = core.status.maps[floor].enemy.mapDamage[loc];
+    var damage = info.damage;
     if (damage) {
-        if (!main.replayChecking)
+        if (!main.replayChecking) {
             core.addPop(
                 (x - core.bigmap.offsetX / 32) * 32 + 12,
                 (y - core.bigmap.offsetY / 32) * 32 + 20,
-                -damage.toString()
+                (-damage).toString()
             );
+        }
         core.status.hero.hp -= damage;
-        var text =
-            Object.keys(core.status.checkBlock.type[loc] || {}).join('，') ||
-            '伤害';
+        const type = Array.from(info.type.keys());
+        var text = type.join('，') || '伤害';
         core.drawTip('受到' + text + damage + '点');
         core.drawHeroAnimate('zone');
         this._checkBlock_disableQuickShop();
@@ -33,14 +34,14 @@ control.prototype.checkBlock = function (forceMockery) {
             core.updateStatusBar();
         }
     }
-    // this._checkBlock_repulse(core.status.checkBlock.repulse[loc]);
-    // checkMockery(loc, forceMockery);
+    checkMockery(loc, forceMockery);
 };
 
-/**
- * @param {CanvasRenderingContext2D} ctx
- */
-control.prototype._drawDamage_draw = function (ctx, onMap, floorId) {
+control.prototype._drawDamage_draw = function (
+    ctx: CanvasRenderingContext2D,
+    onMap: boolean,
+    floorId: FloorIds
+) {
     if (!core.hasItem('book')) return;
     drawHalo(ctx, onMap, floorId);
 
@@ -62,7 +63,7 @@ control.prototype._drawDamage_draw = function (ctx, onMap, floorId) {
                 return;
         }
         var alpha = core.setAlpha(ctx, one.alpha);
-        core.fillBoldText(ctx, one.text, px, py, one.color);
+        core.fillBoldText(ctx, one.text, px, py, one.color as string);
         core.setAlpha(ctx, alpha);
     });
 
@@ -82,7 +83,7 @@ control.prototype._drawDamage_draw = function (ctx, onMap, floorId) {
             )
                 return;
         }
-        core.fillBoldText(ctx, one.text, px, py, one.color);
+        core.fillBoldText(ctx, one.text, px, py, one.color as string);
     });
 
     ctx.save();
@@ -132,38 +133,31 @@ control.prototype._drawDamage_draw = function (ctx, onMap, floorId) {
         ctx.strokeStyle = 'black';
         ctx.lineWidth = 2.5;
         ctx.stroke();
-        ctx.strokeStyle = v.color;
+        ctx.strokeStyle = v.color as string;
         ctx.lineWidth = 1;
         ctx.stroke();
     });
     ctx.restore();
 };
 
-control.prototype.moveHero = function (direction, callback) {
-    // todo: 不使用 core.status.checkBlock
+control.prototype.moveHero = function (direction: Dir, callback: () => void) {
     // 如果正在移动，直接return
     if (core.status.heroMoving != 0) return;
     if (core.isset(direction)) core.setHeroLoc('direction', direction);
 
     const nx = core.nextX();
     const ny = core.nextY();
-    // if (core.status.checkBlock.mockery[`${nx},${ny}`]) {
-    //     core.autosave();
-    // }
+    if (core.status.thisMap.enemy.mapDamage[`${nx},${ny}`]?.mockery) {
+        core.autosave();
+    }
 
     if (callback) return this.moveAction(callback);
     this._moveHero_moving();
 };
 
-/**
- * 电摇嘲讽
- * @param {LocString} loc
- * @param {boolean} force
- */
-function checkMockery(loc, force) {
-    // todo: 不使用 core.status.checkBlock
+function checkMockery(loc: string, force: boolean = false) {
     if (core.status.lockControl && !force) return;
-    const mockery = core.status.checkBlock.mockery[loc];
+    const mockery = core.status.thisMap.enemy.mapDamage[loc]?.mockery;
     if (mockery) {
         mockery.sort((a, b) => (a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]));
         const action = [];
@@ -179,7 +173,6 @@ function checkMockery(loc, force) {
             y += dy;
             const block = blocks[`${x},${y}`];
             if (block) {
-                block.event.cls === '';
                 if (
                     [
                         'animates',
