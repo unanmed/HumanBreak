@@ -75,6 +75,7 @@ interface CriticalDamageDelta extends Omit<DamageDelta, 'info'> {
 type HaloFn = (info: EnemyInfo, enemy: Enemy) => void;
 type DamageDir = Dir | 'none';
 
+/** 光环属性 */
 export const haloSpecials: number[] = [8, 21, 25, 26, 27];
 
 export class EnemyCollection implements RangeCollection<DamageEnemy> {
@@ -94,6 +95,7 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
      * 解析本地图的怪物信息
      */
     extract() {
+        this.list = [];
         core.extractBlocks(this.floorId);
         core.status.maps[this.floorId].blocks.forEach(v => {
             if (v.event.cls !== 'enemy48' && v.event.cls !== 'enemys') return;
