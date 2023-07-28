@@ -4,12 +4,11 @@ import { drawHalo } from './halo';
 // 伤害弹出
 // 复写阻激夹域检测
 control.prototype.checkBlock = function (forceMockery: boolean = false) {
-    var x = core.getHeroLoc('x'),
+    const x = core.getHeroLoc('x'),
         y = core.getHeroLoc('y'),
         loc = x + ',' + y;
-    const floor = core.status.floorId;
-    const info = core.status.maps[floor].enemy.mapDamage[loc];
-    var damage = info.damage;
+    const info = core.status.thisMap.enemy.mapDamage[loc];
+    const damage = info?.damage;
     if (damage) {
         if (!main.replayChecking) {
             core.addPop(
@@ -20,7 +19,7 @@ control.prototype.checkBlock = function (forceMockery: boolean = false) {
         }
         core.status.hero.hp -= damage;
         const type = Array.from(info.type.keys());
-        var text = type.join('，') || '伤害';
+        const text = type.join('，') || '伤害';
         core.drawTip('受到' + text + damage + '点');
         core.drawHeroAnimate('zone');
         this._checkBlock_disableQuickShop();

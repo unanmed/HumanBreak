@@ -1,5 +1,6 @@
 const haloColor: Record<number, string[]> = {
     21: ['cyan'],
+    25: ['purple'],
     26: ['blue'],
     27: ['red']
 };
@@ -11,7 +12,20 @@ export function drawHalo(
 ) {
     if (main.replayChecking) return;
     if (!core.getLocalStorage('showHalo', true)) return;
-    const list = core.status.maps[floorId].enemy.haloList;
+    const list = core.status.maps[floorId].enemy.haloList.concat(
+        Object.keys(flags[`melt_${floorId}`] ?? {}).map(v => {
+            const [x, y] = v.split(',').map(v => parseInt(v));
+            return {
+                type: 'square',
+                data: {
+                    x,
+                    y,
+                    d: 3
+                },
+                special: 25
+            };
+        })
+    );
     ctx.save();
     for (const halo of list) {
         if (halo.type === 'square') {

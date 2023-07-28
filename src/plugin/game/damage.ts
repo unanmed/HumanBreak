@@ -1,4 +1,4 @@
-import { boundary, equal } from './utils';
+import { equal } from './utils';
 import { getHeroStatusOf, getHeroStatusOn } from './hero';
 import { Range, RangeCollection } from './range';
 import {
@@ -53,8 +53,8 @@ interface MapDamage {
 interface HaloData<T extends keyof HaloType = keyof HaloType> {
     type: T;
     data: HaloType[T];
-    from: DamageEnemy;
     special: number;
+    from?: DamageEnemy;
 }
 
 interface DamageDelta {
@@ -1110,7 +1110,6 @@ declare global {
         damage: {
             Enemy: typeof DamageEnemy;
             Collection: typeof EnemyCollection;
-            ensureFloorDamage: typeof ensureFloorDamage;
         };
     }
 
@@ -1121,6 +1120,5 @@ declare global {
 
 core.plugin.damage = {
     Enemy: DamageEnemy,
-    Collection: EnemyCollection,
-    ensureFloorDamage
+    Collection: EnemyCollection
 };
