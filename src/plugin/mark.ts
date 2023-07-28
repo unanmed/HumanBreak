@@ -18,6 +18,7 @@ const enemyDamageInfo: Partial<Record<EnemyIds, Record<number, boolean>>> = {};
  * @param id 标记的怪物id
  */
 export function markEnemy(id: EnemyIds) {
+    // todo: 不使用 nextCriticals
     if (hasMarkedEnemy(id)) return;
     markedEnemy.push(id);
     markInfo[id] = {
@@ -64,6 +65,7 @@ export function getMarkedEnemy() {
  * @param id 怪物id
  */
 export function getMarkInfo(id: EnemyIds, noMessage: boolean = false) {
+    // todo: 不使用 nextCriticals
     const reached = criticalReached[id]!;
     const info = markInfo[id]!;
     if (core.status.hero.atk >= info.nextCritical) {

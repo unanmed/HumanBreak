@@ -111,6 +111,7 @@ function getDamage(id: EnemyIds) {
 }
 
 function getCritical(id: EnemyIds) {
+    // todo: 不使用 nextCriticals
     return (
         core
             .nextCriticals(id, 1, void 0, void 0, 'empty')[0]

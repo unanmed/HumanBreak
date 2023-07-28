@@ -54,6 +54,7 @@ export function getDetailedEnemy<I extends EnemyIds>(
     floorId: FloorIds = core.status.floorId
 ): DetailedEnemy<I> {
     // todo: 删除 getDamageInfo
+    // todo: 不使用 nextCriticals
     const ratio = core.status.maps[floorId].ratio;
     const enemyInfo = Object.assign(
         {},

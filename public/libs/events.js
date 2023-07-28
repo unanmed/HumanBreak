@@ -471,6 +471,7 @@ events.prototype._sys_battle = function (data, callback) {
 
 ////// 战斗 //////
 events.prototype.battle = function (id, x, y, force, callback) {
+    // todo: 重写这个函数的一部分，修改参数
     core.saveAndStopAutomaticRoute();
     id = id || core.getBlockId(x, y);
     if (!id) return core.clearContinueAutomaticRoute(callback);

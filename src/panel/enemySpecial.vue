@@ -49,6 +49,7 @@ const enemy = core.plugin.bookDetailEnemy;
 
 const info = getSpecialHint(enemy);
 
+// todo: 不使用 nextCriticals
 const criticals = core.nextCriticals(enemy, isMobile ? 4 : 8, mx, my);
 
 const format = core.formatBigNumber;

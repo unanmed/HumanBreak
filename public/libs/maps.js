@@ -3531,6 +3531,7 @@ maps.prototype.resetMap = function (floorId) {
 
 ////// 初始化独立的block canvas //////
 maps.prototype._initDetachedBlock = function (blockInfo, x, y, displayDamage) {
+    // todo: 不使用 nextCriticals
     var headCanvas = null,
         bodyCanvas = '__body_' + x + '_' + y,
         damageCanvas = null;

@@ -203,12 +203,14 @@ enemys.prototype.getEnemyValue = function (enemy, name, x, y, floorId) {
 
 ////// 能否获胜 //////
 enemys.prototype.canBattle = function (enemy, x, y, floorId) {
+    // todo: 重写这个函数
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     var damage = this.getDamage(enemy, x, y, floorId);
     return damage != null && damage < core.status.hero.hp;
 };
 
 enemys.prototype.getDamageString = function (enemy, x, y, floorId, hero) {
+    // todo: 重写这个函数
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     var damage = this.getDamage(enemy, x, y, floorId, hero);
 
@@ -399,6 +401,7 @@ enemys.prototype._nextCriticals_useBinarySearch = function (
 
 ////// N防减伤计算 //////
 enemys.prototype.getDefDamage = function (enemy, k, x, y, floorId, hero) {
+    // todo: 删除这个函数
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     k = k || 1;
     var nowDamage = this._getDamage(enemy, hero, x, y, floorId);
@@ -488,6 +491,7 @@ enemys.prototype._getCurrentEnemys_addEnemy = function (
     y,
     floorId
 ) {
+    // todo: 删除这个函数
     var enemy = this._getCurrentEnemys_getEnemy(enemyId);
     if (enemy == null) return;
 
