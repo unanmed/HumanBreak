@@ -1,4 +1,4 @@
-export {};
+import { ensureFloorDamage } from './damage';
 
 core.control.updateDamage = function (floorId = core.status.floorId, ctx) {
     if (!floorId || core.status.gameOver || main.mode !== 'play') return;
@@ -16,7 +16,7 @@ core.control.updateDamage = function (floorId = core.status.floorId, ctx) {
         if (width * height > core.bigmap.threshold) return;
     }
     // 计算伤害
-    core.plugin.damage.ensureFloorDamage(floorId);
+    ensureFloorDamage(floorId);
 
     floor.enemy.calDamage(true, onMap);
     floor.enemy.calMapDamage();

@@ -53,11 +53,6 @@ import { noClosePanel } from '../plugin/uiController';
 const floorId =
     // @ts-ignore
     core.floorIds[core.status.event?.ui?.index] ?? core.status.floorId;
-// 清除浏览地图时的光环缓存
-if (floorId !== core.status.floorId && core.status.checkBlock) {
-    // @ts-ignore
-    core.status.checkBlock.cache = {};
-}
 
 const enemy = core.getCurrentEnemys(floorId);
 

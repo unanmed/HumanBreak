@@ -238,7 +238,7 @@ interface AnimateFrame {
     /**
      * 勇士移动的时候上一次的换腿时间
      */
-    readonly moveTime: number;
+    moveTime: number;
 
     /**
      * @deprecated
@@ -249,7 +249,7 @@ interface AnimateFrame {
     /**
      * 当前是否在左腿上，使用了四帧插件时无效
      */
-    readonly leftLeg: boolean;
+    leftLeg: boolean;
 
     /**
      * 当前天气信息
@@ -965,7 +965,7 @@ interface Core extends Pick<Main, CoreDataFromMain> {
     /**
      * 大地图信息
      */
-    readonly bigmap: Readonly<CoreBigmap>;
+    readonly bigmap: CoreBigmap;
 
     /**
      * 存档信息

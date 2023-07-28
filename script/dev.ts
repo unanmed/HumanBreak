@@ -569,24 +569,17 @@ function setupSocket(socket: WebSocket) {
     watchProject();
 }
 
-async function startWsServer(port: number = 8080) {
-    const tryNext = () => {
-        return new Promise<WebSocketServer>(res => {
-            const server = new WebSocketServer({
-                port: port++
-            });
-
-            server.on('error', async () => {
-                res(await tryNext());
-            });
-
-            server.on('connection', socket => {
-                setupSocket(socket);
-                res(server);
-            });
+async function startWsServer(http: Server) {
+    return new Promise<WebSocketServer>(res => {
+        const server = new WebSocketServer({
+            server: http
         });
-    };
-    return tryNext();
+
+        server.on('connection', socket => {
+            setupSocket(socket);
+            res(server);
+        });
+    });
 }
 
 (async function () {
@@ -596,8 +589,8 @@ async function startWsServer(port: number = 8080) {
     console.log(`游戏地址：http://localhost:5173/games/${config.name}/`);
 
     // 2. 启动样板http服务
-    await startHttpServer();
+    const server = await startHttpServer(3000);
 
     // 3. 启动样板ws热重载服务
-    await startWsServer();
+    await startWsServer(server);
 })();

@@ -159,7 +159,7 @@ export {};
         console.log(`Data hot reload: ${data}`);
     }
 
-    const ws = new WebSocket('ws://127.0.0.1:8080');
+    const ws = new WebSocket('ws://127.0.0.1:3000');
     ws.addEventListener('open', () => {
         console.log(`Web socket connect successfully`);
     });

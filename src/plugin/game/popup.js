@@ -8,7 +8,7 @@ control.prototype.checkBlock = function (forceMockery) {
     var x = core.getHeroLoc('x'),
         y = core.getHeroLoc('y'),
         loc = x + ',' + y;
-    var damage = core.status.checkBlock.damage[loc];
+    var damage = 0;
     if (damage) {
         if (!main.replayChecking)
             core.addPop(
@@ -33,8 +33,8 @@ control.prototype.checkBlock = function (forceMockery) {
             core.updateStatusBar();
         }
     }
-    this._checkBlock_repulse(core.status.checkBlock.repulse[loc]);
-    checkMockery(loc, forceMockery);
+    // this._checkBlock_repulse(core.status.checkBlock.repulse[loc]);
+    // checkMockery(loc, forceMockery);
 };
 
 /**
@@ -147,9 +147,9 @@ control.prototype.moveHero = function (direction, callback) {
 
     const nx = core.nextX();
     const ny = core.nextY();
-    if (core.status.checkBlock.mockery[`${nx},${ny}`]) {
-        core.autosave();
-    }
+    // if (core.status.checkBlock.mockery[`${nx},${ny}`]) {
+    //     core.autosave();
+    // }
 
     if (callback) return this.moveAction(callback);
     this._moveHero_moving();

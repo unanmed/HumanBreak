@@ -287,16 +287,7 @@ control.prototype._animationFrame_animate = function (timestamp) {
 };
 
 control.prototype._animationFrame_heroMoving = function (timestamp) {
-    if (core.status.heroMoving <= 0) return;
-    // 换腿
-    if (timestamp - core.animateFrame.moveTime > core.values.moveSpeed) {
-        core.animateFrame.leftLeg = !core.animateFrame.leftLeg;
-        core.animateFrame.moveTime = timestamp;
-    }
-    core.drawHero(
-        core.animateFrame.leftLeg ? 'leftFoot' : 'rightFoot',
-        4 * core.status.heroMoving
-    );
+    // Deprecated. See src/plugin/game/heroFourFrames.js
 };
 
 control.prototype._animationFrame_weather = function (timestamp) {

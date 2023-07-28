@@ -154,6 +154,7 @@ export function boundary(arr: any, key?: any) {
         return [min, max];
     }
 }
+
 declare global {
     interface GamePluginUtils {
         ofDir: typeof ofDir;

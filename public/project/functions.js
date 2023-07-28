@@ -1368,8 +1368,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 core.statusBar.hard.setAttribute('_style', hardColor);
             }
 
-            // 更新阻激夹域的伤害值
-            core.updateCheckBlock();
             // 更新全地图显伤
             core.updateDamage();
 
@@ -1845,8 +1843,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
 
             // 判定能否瞬移到该点
             if (ignoreSteps == null) ignoreSteps = core.canMoveDirectly(x, y);
-            // todo: 删除这个判断
-            if (core.status.checkBlock.haveHunt) return false;
             if (ignoreSteps >= 0) {
                 core.clearMap('hero');
                 // 获得勇士最后的朝向

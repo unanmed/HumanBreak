@@ -117,7 +117,8 @@ maps.prototype._loadFloor_doNotCopy = function () {
         'afterBattle',
         'afterGetItem',
         'afterOpenDoor',
-        'cannotMove'
+        'cannotMove',
+        'enemy'
     ];
 };
 ////// 绘制背景和前景层 //////
