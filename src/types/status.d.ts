@@ -963,8 +963,8 @@ interface HeroStatus {
      * 勇士学习的特技
      */
     special: {
-        num: [];
-        last: [];
+        num: number[];
+        last: number[];
         [k: string]: any;
     };
 

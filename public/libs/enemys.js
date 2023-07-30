@@ -203,14 +203,11 @@ enemys.prototype.getEnemyValue = function (enemy, name, x, y, floorId) {
 
 ////// 能否获胜 //////
 enemys.prototype.canBattle = function (enemy, x, y, floorId) {
-    // todo: 重写这个函数
-    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
-    var damage = this.getDamage(enemy, x, y, floorId);
-    return damage != null && damage < core.status.hero.hp;
+    // Deprecated. See src/plugin/game/battle.ts
 };
 
 enemys.prototype.getDamageString = function (enemy, x, y, floorId, hero) {
-    // todo: 重写这个函数
+    // todo: 删除
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     var damage = this.getDamage(enemy, x, y, floorId, hero);
 
@@ -237,7 +234,7 @@ enemys.prototype.getDamageString = function (enemy, x, y, floorId, hero) {
 
 ////// 接下来N个临界值和临界减伤计算 //////
 enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId, hero) {
-    // todo: 删除 getDamageInfo
+    // todo: 删除这个函数
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     number = number || 1;
 
@@ -284,7 +281,7 @@ enemys.prototype._nextCriticals_overAtk = function (
     floorId,
     hero
 ) {
-    // todo: 删除 getDamageInfo
+    // todo: 删除这个函数
     var calNext = function (currAtk, maxAtk) {
         var start = currAtk,
             end = maxAtk;
@@ -342,7 +339,7 @@ enemys.prototype._nextCriticals_useBinarySearch = function (
     floorId,
     hero
 ) {
-    // todo: 删除 getDamageInfo
+    // todo: 删除这个函数
     var mon_hp = info.mon_hp,
         hero_atk = core.getStatusOrDefault(hero, 'atk'),
         mon_def = info.mon_def,
@@ -417,7 +414,7 @@ enemys.prototype.getDefDamage = function (enemy, k, x, y, floorId, hero) {
 };
 
 enemys.prototype.getEnemyInfo = function (enemy, hero, x, y, floorId) {
-    // throw new Error(`This function has been deprecated.`);
+    // todo: 删除这个函数
     if (enemy == null) return null;
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     return this.enemydata.getEnemyInfo(enemy, hero, x, y, floorId);
@@ -425,7 +422,7 @@ enemys.prototype.getEnemyInfo = function (enemy, hero, x, y, floorId) {
 
 ////// 获得战斗伤害信息（实际伤害计算函数） //////
 enemys.prototype.getDamageInfo = function (enemy, hero, x, y, floorId) {
-    // throw new Error(`This function has been deprecated.`);
+    // todo: 删除这个函数
     if (enemy == null) return null;
     // 移动到了脚本编辑 - getDamageInfo中
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
@@ -434,11 +431,12 @@ enemys.prototype.getDamageInfo = function (enemy, hero, x, y, floorId) {
 
 ////// 获得在某个勇士属性下怪物伤害 //////
 enemys.prototype.getDamage = function (enemy, x, y, floorId, hero) {
+    // todo: 修改这个函数的参数
     return this._getDamage(enemy, hero, x, y, floorId);
 };
 
 enemys.prototype._getDamage = function (enemy, hero, x, y, floorId) {
-    // todo: 删除 getDamageInfo
+    // todo: 重写这个函数
     if (enemy == null) enemy = core.getBlockId(x, y, floorId);
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     if (enemy == null) return null;
@@ -451,7 +449,7 @@ enemys.prototype._getDamage = function (enemy, hero, x, y, floorId) {
 
 ////// 获得当前楼层的怪物列表 //////
 enemys.prototype.getCurrentEnemys = function (floorId) {
-    // todo: 删除 getEnemyInfo - _getCurrentEnemys_addEnemy
+    // todo: 重写这个函数
     floorId = floorId || core.status.floorId;
     var enemys = [],
         used = {};

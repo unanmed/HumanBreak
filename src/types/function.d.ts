@@ -162,18 +162,6 @@ interface EventData {
     flyTo(toId: FloorIds, callback?: () => void): boolean;
 
     /**
-     * 与怪物战斗前
-     * @param enemyId 打败的怪物
-     * @param x 怪物横坐标
-     * @param y 怪物纵坐标
-     */
-    beforeBattle(
-        enemyId: AllIdsOf<'enemys' | 'enemy48'>,
-        x?: number,
-        y?: number
-    ): void;
-
-    /**
      * 与怪物战斗后
      * @param enemyId 打败的怪物
      * @param x 怪物横坐标

@@ -462,8 +462,6 @@ interface Skill {
     effect: string[];
 }
 
-interface DamageEnemy {}
-
 type Forward<T> = {
     [K in keyof T as T[K] extends Function
         ? K extends `_${string}`

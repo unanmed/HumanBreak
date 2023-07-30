@@ -430,16 +430,7 @@ events.prototype._trigger_ignoreChangeFloor = function (block) {
 };
 
 events.prototype._sys_battle = function (data, callback) {
-    // 检查是否需要改变朝向
-    /* if (data.x == core.nextX() && data.y == core.nextY()) {
-        var dir = core.turnDirection(":back");
-        var id = data.event.id, toId = (data.event.faceIds || {})[dir];
-        if (toId && id != toId) {
-            var number = core.getNumberById(toId);
-            if (number > 0)
-                core.setBlock(number, data.x, data.y);
-        }
-    } */
+    // todo: 重写这个函数的一部分
 
     // 检查战前事件
     var beforeBattle = [];
@@ -471,35 +462,17 @@ events.prototype._sys_battle = function (data, callback) {
 
 ////// 战斗 //////
 events.prototype.battle = function (id, x, y, force, callback) {
-    // todo: 重写这个函数的一部分，修改参数
-    core.saveAndStopAutomaticRoute();
-    id = id || core.getBlockId(x, y);
-    if (!id) return core.clearContinueAutomaticRoute(callback);
-    // 非强制战斗
-    if (!core.enemys.canBattle(id, x, y) && !force && !core.status.event.id) {
-        core.stopSound();
-        core.playSound('操作失败');
-        core.drawTip('你打不过此怪物！', id);
-        return core.clearContinueAutomaticRoute(callback);
-    }
-    // 自动存档
-    if (!core.status.event.id) core.autosave(true);
-    // 战前事件
-    if (!this.beforeBattle(id, x, y))
-        return core.clearContinueAutomaticRoute(callback);
-    // 战后事件
-    this.afterBattle(id, x, y);
-    if (callback) callback();
+    // Deprecated. See src/plugin/game/battle.ts
 };
 
 ////// 战斗前触发的事件 //////
 events.prototype.beforeBattle = function (enemyId, x, y) {
-    return this.eventdata.beforeBattle(enemyId, x, y);
+    // Deprecated. See src/plugin/game/battle.ts
 };
 
 ////// 战斗结束后触发的事件 //////
 events.prototype.afterBattle = function (enemyId, x, y) {
-    return this.eventdata.afterBattle(enemyId, x, y);
+    // Deprecated. See src/plugin/game/battle.ts
 };
 
 events.prototype._sys_openDoor = function (data, callback) {
@@ -2140,6 +2113,7 @@ events.prototype._action_disableShop = function (data, x, y, prefix) {
 };
 
 events.prototype._action_battle = function (data, x, y, prefix) {
+    // todo: 修改battle的参数
     if (data.id) {
         this.battle(data.id, null, null, true, core.doAction);
     } else {

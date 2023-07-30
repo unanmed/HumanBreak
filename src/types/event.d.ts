@@ -109,10 +109,10 @@ interface Events extends EventData {
      * @param callback 回调函数
      */
     battle(
-        id: AllIdsOf<'enemys' | 'enemy48'>,
-        x?: number,
-        y?: number,
-        force?: boolean,
+        x: number,
+        y: number,
+        dir: Dir | 'none',
+        force: boolean = false,
         callback?: () => void
     ): void;
 
@@ -758,6 +758,8 @@ interface Events extends EventData {
      * @param itemId 道具id，其中敌人手册、传送器和飞行器会被特殊处理
      */
     tryUseItem(itemId: ItemIdOf<'tools' | 'constants'>): void;
+
+    _sys_battle(data: Block, callback?: () => void): void;
 }
 
 declare const events: new () => Events;

@@ -47,12 +47,6 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					_lint: true,
 					_data: '楼层飞行'
 				},
-				beforeBattle: {
-					_leaf: true,
-					_type: 'textarea',
-					_lint: true,
-					_data: '战前判定'
-				},
 				afterBattle: {
 					_leaf: true,
 					_type: 'textarea',

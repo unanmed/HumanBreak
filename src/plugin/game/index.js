@@ -18,6 +18,7 @@ import * as towerBoss from './towerBoss';
 import * as utils from './utils';
 import * as chase from './chase';
 import * as damage from './damage';
+import * as battle from './battle';
 
 export {
     halo,
@@ -32,5 +33,6 @@ export {
     towerBoss,
     utils,
     chase,
-    damage
+    damage,
+    battle
 };

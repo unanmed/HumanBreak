@@ -1,7 +1,5 @@
-///<reference path="../../../src/types/core.d.ts" />
-
 // 负责勇士技能：学习
-const values = {
+const values: Record<number, string[]> = {
     1: ['crit'],
     6: ['n'],
     7: ['hungry'],
@@ -12,7 +10,7 @@ const values = {
 
 const cannotStudy = [9, 12, 14, 15, 24];
 
-export function canStudySkill(number) {
+export function canStudySkill(number: number) {
     const s = (core.status.hero.special ??= { num: [], last: [] });
     if (core.plugin.skillTree.getSkillLevel(11) === 0) return false;
     if (s.num.length >= 1) return false;
@@ -21,7 +19,7 @@ export function canStudySkill(number) {
     return true;
 }
 
-export function studySkill(enemy, number) {
+export function studySkill(enemy: any, number: number) {
     core.status.hero.special ??= { num: [], last: [] };
     const s = core.status.hero.special;
     const specials = core.getSpecials();
@@ -41,13 +39,13 @@ export function studySkill(enemy, number) {
     }
 }
 
-export function forgetStudiedSkill(num, i) {
+export function forgetStudiedSkill(num: number, i: number) {
     const s = core.status.hero.special;
     const index = i !== void 0 && i !== null ? i : s.num.indexOf(num);
     if (index === -1) return;
     s.num.splice(index, 1);
     s.last.splice(index, 1);
-    const value = values[number] ?? [];
+    const value = values[num] ?? [];
     for (const key of value) {
         delete s[key];
     }
@@ -62,16 +60,8 @@ export function checkStudiedSkill() {
     const s = core.status.hero.special;
     for (let i = 0; i < s.last.length; i++) {
         if (s.last[i] <= 0) {
-            this.forgetStudiedSkill(void 0, i);
+            forgetStudiedSkill(1, i);
             i--;
         }
     }
 }
-
-core.plugin.study = {
-    canStudySkill,
-    studySkill,
-    forgetStudiedSkill,
-    declineStudiedSkill,
-    checkStudiedSkill
-};

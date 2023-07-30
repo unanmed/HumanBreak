@@ -73,7 +73,7 @@ interface CriticalDamageDelta extends Omit<DamageDelta, 'info'> {
 }
 
 type HaloFn = (info: EnemyInfo, enemy: Enemy) => void;
-type DamageDir = Dir | 'none';
+export type DamageDir = Dir | 'none';
 
 /** 光环属性 */
 export const haloSpecials: number[] = [8, 21, 25, 26, 27];
@@ -695,7 +695,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         damage[loc].type.add(type);
     }
 
-    private calEnemyDamage(
+    calEnemyDamage(
         hero: Partial<HeroStatus> = core.status.hero,
         dir: DamageDir | DamageDir[]
     ): DamageInfo[] {

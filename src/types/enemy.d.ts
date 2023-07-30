@@ -26,7 +26,10 @@ type PartialNumbericEnemyProperty =
     | 'courage'
     | 'charge'
     | 'paleShield'
-    | 'iceHalo';
+    | 'iceHalo'
+    | 'day'
+    | 'night'
+    | 'melt';
 
 type BooleanEnemyProperty =
     | 'zoneSquare'
@@ -314,10 +317,10 @@ interface Enemys extends EnemyData {
      * @returns true表示可以打败，false表示无法打败
      */
     canBattle(
-        enemy: EnemyIds | Enemy,
-        x?: number,
-        y?: number,
-        floorId?: FloorIds
+        x: number,
+        y: number,
+        floorId?: FloorIds,
+        dir?: Dir | 'none' | (Dir | 'none')[]
     ): boolean;
 
     /**
