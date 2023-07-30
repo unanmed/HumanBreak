@@ -1,11 +1,11 @@
 import './fiveLayer';
-import './heroFourFrames';
-import './hotReload';
-import './itemDetail';
-import './popup';
+import './fx/heroFourFrames';
+import './dev/hotReload';
+import './fx/itemDetail';
+import './enemy/checkblock';
 import './replay';
 import './ui';
-import * as halo from './halo';
+import * as halo from './fx/halo';
 import * as hero from './hero';
 import * as loopMap from './loopMap';
 import * as remainEnemy from './remainEnemy';

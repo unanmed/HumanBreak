@@ -2086,17 +2086,7 @@ events.prototype._action_disableShop = function (data, x, y, prefix) {
 };
 
 events.prototype._action_battle = function (data, x, y, prefix) {
-    // todo: 修改battle的参数
-    if (data.id) {
-        this.battle(data.id, null, null, true, core.doAction);
-    } else {
-        if (data.floorId != core.status.floorId) {
-            core.doAction();
-            return;
-        }
-        var loc = this.__action_getLoc(data.loc, x, y, prefix);
-        this.battle(null, loc[0], loc[1], true, core.doAction);
-    }
+    // Deprecated. See src/plugin/game/enemy/battle.ts
 };
 
 events.prototype._action_trigger = function (data, x, y, prefix) {

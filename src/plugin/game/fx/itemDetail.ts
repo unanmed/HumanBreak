@@ -1,4 +1,4 @@
-import { ensureFloorDamage } from './enemy/damage';
+import { ensureFloorDamage } from '../enemy/damage';
 
 core.control.updateDamage = function (floorId = core.status.floorId, ctx) {
     if (!floorId || core.status.gameOver || main.mode !== 'play') return;

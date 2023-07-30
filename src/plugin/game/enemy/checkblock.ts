@@ -1,5 +1,4 @@
-///<reference path="../../../src/types/core.d.ts" />
-import { drawHalo } from './halo';
+import { drawHalo } from '../fx/halo';
 
 // 伤害弹出
 // 复写阻激夹域检测

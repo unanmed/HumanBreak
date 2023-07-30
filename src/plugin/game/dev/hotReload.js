@@ -1,4 +1,4 @@
-///<reference path="../../../src/types/core.d.ts" />
+///<reference path="../../../../src/types/core.d.ts" />
 export {};
 
 /* @__PURE__ */ (function () {

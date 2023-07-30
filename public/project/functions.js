@@ -1171,12 +1171,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             }
             core.setFlag('__fromLoad__', true);
 
-            // TODO：增加自己的一些读档处理
             core.plugin.skillTree.loadSkillTree(data.skills);
 
             // 切换到对应的楼层
             core.changeFloor(data.floorId, null, data.hero.loc, 0, function () {
-                // TODO：可以在这里设置读档后播放BGM
                 if (core.hasFlag('__bgm__')) {
                     // 持续播放
                     core.playBgm(core.getFlag('__bgm__'));
