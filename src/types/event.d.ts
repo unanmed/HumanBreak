@@ -760,6 +760,10 @@ interface Events extends EventData {
     tryUseItem(itemId: ItemIdOf<'tools' | 'constants'>): void;
 
     _sys_battle(data: Block, callback?: () => void): void;
+
+    _action_battle(data: any, x?: number, y?: number, prefix?: any): void;
+
+    __action_getLoc(data: any, x?: number, y?: number, prefix?: any): any;
 }
 
 declare const events: new () => Events;

@@ -203,7 +203,7 @@ enemys.prototype.getEnemyValue = function (enemy, name, x, y, floorId) {
 
 ////// 能否获胜 //////
 enemys.prototype.canBattle = function (enemy, x, y, floorId) {
-    // Deprecated. See src/plugin/game/battle.ts
+    // Deprecated. See src/plugin/game/enemy/battle.ts
 };
 
 enemys.prototype.getDamageString = function (enemy, x, y, floorId, hero) {

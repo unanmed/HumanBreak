@@ -1,5 +1,10 @@
-import { DamageDir, DamageEnemy, getNeedCalDir } from './damage';
-import { findDir, has } from './utils';
+import {
+    DamageDir,
+    DamageEnemy,
+    getNeedCalDir,
+    getSingleEnemy
+} from './damage';
+import { findDir, has } from '../utils';
 
 export function getEnemy(
     x: number,
@@ -202,6 +207,24 @@ core.events._sys_battle = function (data: Block, callback?: () => void) {
     } else {
         const dir = findDir(data, core.status.hero.loc) as DamageDir;
         this.battle(data.x, data.y, dir, false, callback);
+    }
+};
+
+core.events._action_battle = function (data, x, y, prefix) {
+    if (data.id) {
+        const enemy = getSingleEnemy(data.id as EnemyIds);
+        // todo: 与不在地图上的怪物战斗
+    } else {
+        if (data.floorId != core.status.floorId) {
+            core.doAction();
+            return;
+        }
+        const [ex, ey] = this.__action_getLoc(data.loc, x, y, prefix) as LocArr;
+        const dir = findDir(core.status.hero.loc, {
+            x: ex,
+            y: ey
+        }) as DamageDir;
+        this.battle(ex, ey, dir, true, core.doAction);
     }
 };
 

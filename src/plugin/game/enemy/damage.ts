@@ -1,6 +1,6 @@
-import { equal } from './utils';
-import { getHeroStatusOf, getHeroStatusOn } from './hero';
-import { Range, RangeCollection } from './range';
+import { equal } from '../utils';
+import { getHeroStatusOf, getHeroStatusOn } from '../hero';
+import { Range, RangeCollection } from '../range';
 import {
     backDir,
     checkV2,
@@ -9,7 +9,7 @@ import {
     has,
     manhattan,
     ofDir
-} from './utils';
+} from '../utils';
 
 interface HaloType {
     square: {
@@ -968,11 +968,11 @@ const skills: [unlock: string, condition: string][] = [
 export function getNeedCalDir(
     x?: number,
     y?: number,
-    floorId: FloorIds = core.status.floorId,
+    floorId?: FloorIds,
     hero: Partial<HeroStatus> = core.status.hero
 ): (Dir | 'none')[] {
     // 第一章或序章，或者没有指定怪物位置，或者没开自动定位，用不到这个函数
-    if (flags.chapter < 2 || !has(x) || !has(y)) {
+    if (flags.chapter < 2 || !has(x) || !has(y) || !floorId) {
         return ['none'];
     }
 
@@ -1103,6 +1103,15 @@ export function calDamageWith(
 export function ensureFloorDamage(floorId: FloorIds) {
     const floor = core.status.maps[floorId];
     floor.enemy ??= new EnemyCollection(floorId);
+}
+
+export function getSingleEnemy(id: EnemyIds) {
+    const e = core.material.enemys[id];
+    const enemy = new DamageEnemy(e);
+    enemy.calAttribute();
+    enemy.getRealInfo();
+    enemy.calDamage(core.status.hero, false)[0];
+    return enemy;
 }
 
 declare global {

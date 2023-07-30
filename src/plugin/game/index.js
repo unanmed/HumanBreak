@@ -17,8 +17,8 @@ import * as study from './study';
 import * as towerBoss from './towerBoss';
 import * as utils from './utils';
 import * as chase from './chase';
-import * as damage from './damage';
-import * as battle from './battle';
+import * as damage from './enemy/damage';
+import * as battle from './enemy/battle';
 
 export {
     halo,

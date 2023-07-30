@@ -430,49 +430,22 @@ events.prototype._trigger_ignoreChangeFloor = function (block) {
 };
 
 events.prototype._sys_battle = function (data, callback) {
-    // todo: 重写这个函数的一部分
-
-    // 检查战前事件
-    var beforeBattle = [];
-    core.push(
-        beforeBattle,
-        core.floors[core.status.floorId].beforeBattle[data.x + ',' + data.y]
-    );
-    core.push(
-        beforeBattle,
-        (core.material.enemys[data.event.id] || {}).beforeBattle
-    );
-    if (beforeBattle.length > 0) {
-        core.push(beforeBattle, [{ type: 'battle', x: data.x, y: data.y }]);
-        core.clearContinueAutomaticRoute();
-
-        // 自动存档
-        var inAction = core.status.event.id == 'action';
-        if (inAction) {
-            core.insertAction(beforeBattle, data.x, data.y);
-            core.doAction();
-        } else {
-            core.autosave(true);
-            core.insertAction(beforeBattle, data.x, data.y, callback);
-        }
-    } else {
-        this.battle(data.event.id, data.x, data.y, false, callback);
-    }
+    // Deprecated. See /src/plugin/game/enemy/battle.ts
 };
 
 ////// 战斗 //////
 events.prototype.battle = function (id, x, y, force, callback) {
-    // Deprecated. See src/plugin/game/battle.ts
+    // Deprecated. See src/plugin/game/enemy/battle.ts
 };
 
 ////// 战斗前触发的事件 //////
 events.prototype.beforeBattle = function (enemyId, x, y) {
-    // Deprecated. See src/plugin/game/battle.ts
+    // Deprecated. See src/plugin/game/enemy/battle.ts
 };
 
 ////// 战斗结束后触发的事件 //////
 events.prototype.afterBattle = function (enemyId, x, y) {
-    // Deprecated. See src/plugin/game/battle.ts
+    // Deprecated. See src/plugin/game/enemy/battle.ts
 };
 
 events.prototype._sys_openDoor = function (data, callback) {
