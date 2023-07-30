@@ -207,29 +207,7 @@ enemys.prototype.canBattle = function (enemy, x, y, floorId) {
 };
 
 enemys.prototype.getDamageString = function (enemy, x, y, floorId, hero) {
-    // todo: 删除
-    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
-    var damage = this.getDamage(enemy, x, y, floorId, hero);
-
-    var color = '#000000';
-
-    if (damage == null) {
-        damage = '???';
-        color = '#FF2222';
-    } else {
-        if (damage <= 0) color = '#11FF11';
-        else if (damage < core.status.hero.hp / 3) color = '#FFFFFF';
-        else if (damage < (core.status.hero.hp * 2) / 3) color = '#FFFF00';
-        else if (damage < core.status.hero.hp) color = '#FF9933';
-        else color = '#FF2222';
-
-        damage = core.formatBigNumber(damage, true);
-    }
-
-    return {
-        damage: damage,
-        color: color
-    };
+    // Deprecated.
 };
 
 ////// 接下来N个临界值和临界减伤计算 //////

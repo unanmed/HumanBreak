@@ -5,6 +5,7 @@ import './fx/itemDetail';
 import './enemy/checkblock';
 import './replay';
 import './ui';
+import './fx/rewrite';
 import * as halo from './fx/halo';
 import * as hero from './hero';
 import * as loopMap from './loopMap';

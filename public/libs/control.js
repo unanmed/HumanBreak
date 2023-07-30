@@ -1501,7 +1501,7 @@ control.prototype.drawDamage = function (ctx, floorId = core.status.floorId) {
 };
 
 control.prototype._drawDamage_draw = function (ctx, onMap) {
-    // Deprecated. See src/plugin/game/popup.js
+    // Deprecated. See src/plugin/game/fx/checkblock.js
 };
 
 // ------ 录像相关 ------ //

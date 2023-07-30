@@ -1380,6 +1380,19 @@ interface Maps {
     stopAnimate(id?: number, doCallback?: boolean): void;
 
     _makeAutotileEdges(): void;
+
+    _initDetachedBlock(
+        info: BlockInfo,
+        x: number,
+        y: number,
+        displayDamage: boolean
+    ): {
+        headCanvas: string | null;
+        bodyCanvas: string;
+        damageCanvas: string | null;
+    };
+
+    _getBigImageInfo(bigImage: HTMLImageElement, face: Dir, posX: number): any;
 }
 
 declare const maps: new () => Maps;
