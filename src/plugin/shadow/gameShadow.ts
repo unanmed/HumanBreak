@@ -82,7 +82,7 @@ const shadowCache: Partial<Record<FloorIds, Polygon[]>> = {};
 let calMapShadow = true;
 
 export function updateShadow(nocache: boolean = false) {
-    // 需要优化，优化成bfs
+    // todo: 需要优化，优化成bfs
     const floor = core.status.floorId;
     if (!shadowInfo[floor] || !backgroundInfo[floor]) {
         removeAllLights();
