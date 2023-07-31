@@ -1,4 +1,4 @@
-///<reference path="../../../src/types/core.d.ts" />
+///<reference path="../../../../src/types/core.d.ts" />
 
 /**
  * 检查漏怪
