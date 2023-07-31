@@ -806,6 +806,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     ): CriticalDamageDelta[] {
         // todo: 可以优化，根据之前的计算可以直接确定下一个临界的范围
         if (!isFinite(seckill)) return [];
+
         const res: CriticalDamageDelta[] = [];
         const def = hero.def!;
         const precision =
@@ -816,7 +817,6 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         let start = curr;
         let end = seckill;
         let ori = origin.damage;
-        if (start >= end) return [];
 
         const calDam = () => {
             return this.calEnemyDamageOf({ atk: curr, def }, enemy, x, y)
@@ -864,6 +864,18 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                         `Enemy loc: ${this.x},${this.y}. Floor: ${this.floorId}`
                 );
             }
+        }
+
+        if (res.length === 0) {
+            curr = hero.atk!;
+            const dam = calDam();
+            res.push({
+                damage: dam,
+                atkDelta: 0,
+                dir: origin.dir,
+                delta: dam - min,
+                dirDelta: 0
+            });
         }
 
         return res;
