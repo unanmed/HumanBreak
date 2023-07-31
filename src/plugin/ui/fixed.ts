@@ -1,6 +1,8 @@
 import { cloneDeep, debounce } from 'lodash-es';
 import { ref } from 'vue';
 import { getDamageColor } from '../utils';
+import { ToShowEnemy, detailInfo, specials } from './book';
+import { DamageEnemy } from '../game/enemy/damage';
 
 export const showFixed = ref(false);
 
@@ -11,14 +13,15 @@ const show = debounce((ev: MouseEvent) => {
     if (!flags.mouseLoc) return;
     flags.clientLoc = [ev.clientX, ev.clientY];
     const [mx, my] = getLocFromMouseLoc(...flags.mouseLoc);
-    const e = core.getBlockId(mx, my);
-    if (e !== lastId) showFixed.value = false;
-    if (!e || !core.getClsFromId(e)?.startsWith('enemy')) return;
+    const e = core.status.thisMap.enemy.list.find(v => {
+        v.x === mx && v.y === my;
+    });
 
-    lastId = e as EnemyIds;
-    const enemy = core.material.enemys[e as EnemyIds];
-    const detail = getDetailedEnemy(enemy, mx, my);
-    core.plugin.bookDetailEnemy = detail;
+    if (!e) return;
+
+    lastId = e.id;
+    const detail = getDetailedEnemy(e);
+    detailInfo.enemy = detail;
     showFixed.value = true;
 }, 200);
 
@@ -47,47 +50,54 @@ export function getLocFromMouseLoc(x: number, y: number): LocArr {
     return [mx, my];
 }
 
-export function getDetailedEnemy<I extends EnemyIds>(
-    enemy: Enemy<I>,
-    x: number,
-    y: number,
+export function getDetailedEnemy(
+    enemy: DamageEnemy,
     floorId: FloorIds = core.status.floorId
-): DetailedEnemy<I> {
+): ToShowEnemy {
     // todo: 删除 getDamageInfo
     // todo: 不使用 nextCriticals
     const ratio = core.status.maps[floorId].ratio;
-    const enemyInfo = Object.assign(
-        {},
-        enemy,
-        core.getEnemyInfo(enemy, void 0, x, y, floorId),
-        core.getDamageInfo(enemy, void 0, x, y, floorId) ?? {}
+
+    const dam = enemy.calEnemyDamage(core.status.hero, 'none')[0].damage;
+    const cri = enemy.calCritical(1, 'none')[0]?.[0];
+    const critical = core.formatBigNumber(cri?.atkDelta);
+    const criticalDam = core.formatBigNumber(cri?.delta);
+    const defDam = core.formatBigNumber(
+        enemy.calDefDamage(ratio, 'none')[0].damage
     );
-    const critical = core.nextCriticals(enemy, 1, x, y, floorId);
-    const defDamage = core.getDefDamage(enemy, ratio, x, y, floorId);
-    const specialText = core.getSpecialText(enemyInfo);
-    let toShowSpecial = cloneDeep(specialText);
-    if (toShowSpecial.length > 2) {
-        toShowSpecial = toShowSpecial.slice(0, 2).concat(['...']);
-    }
-    const specialColor = core.getSpecialColor(enemyInfo);
-    let toShowColor = cloneDeep(specialColor);
-    if (toShowColor.length > 2) {
-        toShowColor = toShowColor.slice(0, 2).concat(['#fff']);
-    }
-    if (toShowSpecial.length === 0) {
-        toShowSpecial = ['无属性'];
-        toShowColor = ['#fff'];
-    }
-    const damageColor = getDamageColor(enemyInfo.damage);
-    const detail: DetailedEnemy<I> = Object.assign(enemyInfo, {
-        critical: critical[0]?.[0] ?? '???',
-        criticalDamage: critical[0]?.[1] ?? '???',
-        defDamage,
-        specialColor,
-        specialText,
-        toShowColor,
-        toShowSpecial,
-        damageColor
+    const damage = core.formatBigNumber(dam);
+
+    const fromFunc = (
+        func: string | ((enemy: Enemy) => string),
+        enemy: Enemy
+    ) => {
+        return typeof func === 'string' ? func : func(enemy);
+    };
+    const special: [string, string, string][] = enemy.enemy.special.map(vv => {
+        const s = specials[vv];
+        return [
+            fromFunc(s[0], enemy.enemy),
+            fromFunc(s[1], enemy.enemy),
+            s[2] as string
+        ];
     });
+    const showSpecial =
+        special.length > 2
+            ? special.slice(0, 2).concat(['...', '', '#fff'])
+            : special.slice();
+
+    const damageColor = getDamageColor(dam) as string;
+
+    const detail: ToShowEnemy = {
+        enemy,
+        onMapEnemy: [enemy],
+        critical,
+        criticalDam,
+        defDam,
+        damageColor,
+        special,
+        showSpecial,
+        damage
+    };
     return detail;
 }

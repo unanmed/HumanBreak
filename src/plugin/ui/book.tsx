@@ -21,6 +21,15 @@ interface BookDetailInfo {
 
 export const detailInfo: BookDetailInfo = {};
 
+export const specials = Object.fromEntries(
+    core.getSpecials().map(v => {
+        return [v[0], v.slice(1)];
+    })
+) as Record<
+    string,
+    EnemySpecialDeclaration extends [number, ...infer F] ? F : never
+>;
+
 /**
  * 获取怪物的特殊技能描述
  * @param enemy 怪物实例
@@ -51,7 +60,6 @@ export function getDefDamage(
     addDef: number = 0,
     addAtk: number = 0
 ) {
-    // todo: 删除 getDamageInfo
     const ratio = core.status.thisMap.ratio;
     const res: [number, number][] = [];
 
@@ -95,7 +103,6 @@ export function getCriticalDamage(
     addAtk: number = 0,
     addDef: number = 0
 ): [number, number][] {
-    // todo: 删除 getDamageInfo
     const ratio = core.status.thisMap.ratio;
     const res: [number, number][] = [];
 
