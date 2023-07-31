@@ -15,7 +15,7 @@
             v-model:now="scroll"
             v-model:drag="drag"
         >
-            <div v-for="(e, i) of enemy" class="enemy">
+            <div v-for="(e, i) of toShow" class="enemy">
                 <EnemyOne
                     :selected="i === selected"
                     :enemy="e"
@@ -38,7 +38,6 @@
 </template>
 
 <script setup lang="tsx">
-import { cloneDeep } from 'lodash-es';
 import { sleep } from 'mutate-animate';
 import { onMounted, onUnmounted, ref } from 'vue';
 import EnemyOne from '../components/enemyOne.vue';
@@ -48,46 +47,87 @@ import BookDetail from './bookDetail.vue';
 import { LeftOutlined } from '@ant-design/icons-vue';
 import { KeyCode } from '../plugin/keyCodes';
 import { noClosePanel } from '../plugin/uiController';
+import { ToShowEnemy, detailInfo } from '../plugin/ui/book';
 
-// todo: 不使用 core.status.checkBlock
 const floorId =
     // @ts-ignore
     core.floorIds[core.status.event?.ui?.index] ?? core.status.floorId;
 
+const specials = Object.fromEntries(
+    core.getSpecials().map(v => {
+        return [v[0], v.slice(1)];
+    })
+) as Record<
+    string,
+    EnemySpecialDeclaration extends [number, ...infer F] ? F : never
+>;
+
 const enemy = core.getCurrentEnemys(floorId);
+const toShow: ToShowEnemy[] = enemy.map(v => {
+    const cri = v.enemy.calCritical(1, 'none')[0];
+    const critical = core.formatBigNumber(cri[0]?.atkDelta);
+    const criticalDam = core.formatBigNumber(-cri[0]?.delta);
+    const ratio = core.status.maps[floorId].ratio;
+    const defDam = core.formatBigNumber(
+        -v.enemy.calDefDamage(ratio, 'none')[0]?.delta
+    );
+    const damage = core.formatBigNumber(
+        v.enemy.damage?.[0]?.damage ?? Infinity
+    );
+
+    const fromFunc = (
+        func: string | ((enemy: Enemy) => string),
+        enemy: Enemy
+    ) => {
+        return typeof func === 'string' ? func : func(enemy);
+    };
+    const special: [string, string, string][] = v.enemy.enemy.special.map(
+        vv => {
+            const s = specials[vv];
+            return [
+                fromFunc(s[0], v.enemy.enemy),
+                fromFunc(s[1], v.enemy.enemy),
+                s[2] as string
+            ];
+        }
+    );
+    const showSpecial =
+        special.length > 2
+            ? special.slice(0, 2).concat(['...', '', '#fff'])
+            : special.slice();
+
+    const damageColor = getDamageColor(
+        v.enemy.damage?.[0]?.damage ?? Infinity
+    ) as string;
+
+    return {
+        critical,
+        criticalDam,
+        defDam,
+        special,
+        damageColor,
+        showSpecial,
+        damage,
+        ...v
+    };
+});
 
 const scroll = ref(0);
 const drag = ref(false);
 const detail = ref(false);
 const selected = ref(0);
 
-// 解析
-enemy.forEach(v => {
-    const l = v.specialText.length;
-    v.toShowSpecial = cloneDeep(v.specialText);
-    v.toShowColor = cloneDeep(v.specialColor);
-    if (l >= 3) {
-        v.toShowSpecial = v.specialText.slice(0, 2).concat(['...']);
-        v.toShowColor = v.specialColor.slice(0, 2).concat(['#fff']);
-    }
-    v.toShowColor = v.toShowColor.map(v => {
-        if (typeof v === 'string') return v;
-        else return core.arrayToRGBA(v);
-    });
-    v.damageColor = getDamageColor(v.damage!);
-});
-
 /**
  * 选择怪物，展示详细信息
  * @param enemy 选择的怪物
  * @param index 选择的怪物索引
  */
-function select(enemy: Enemy & DetailedEnemy, index: number) {
+function select(enemy: ToShowEnemy, index: number) {
     if (drag.value) return;
     const h = window.innerHeight;
     const y = index * h * 0.2 - scroll.value;
-    core.plugin.bookDetailEnemy = enemy;
-    core.plugin.bookDetailPos = y;
+    detailInfo.enemy = enemy;
+    detailInfo.pos = y;
     detail.value = true;
     hide();
 }
@@ -161,7 +201,7 @@ function keyup(e: KeyboardEvent) {
         (c === KeyCode.Enter || c === KeyCode.KeyC || c === KeyCode.Space) &&
         !detail.value
     ) {
-        select(enemy[selected.value], selected.value);
+        select(toShow[selected.value], selected.value);
     }
 }
 

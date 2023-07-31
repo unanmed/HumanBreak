@@ -18,6 +18,7 @@ import { uiStack } from './plugin/uiController';
     display: flex;
     justify-content: center;
     overflow: hidden;
+    font-size: 16px;
 }
 
 @media screen and (max-width: 600px) {

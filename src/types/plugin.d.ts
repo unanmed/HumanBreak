@@ -168,12 +168,6 @@ interface PluginUtils {
 }
 
 interface PluginUis {
-    /** 怪物手册的怪物详细信息的初始位置 */
-    bookDetailPos: number;
-
-    /** 怪物手册详细信息展示的怪物 */
-    bookDetailEnemy: DetailedEnemy;
-
     /** 定点查看的界面，特殊属性还是临界 */
     fixedDetailPanel: 'special' | 'critical';
 

@@ -3,7 +3,11 @@
         <div id="enemy-desc">
             <span>怪物描述</span>
             <Scroll id="enemy-desc-scroll">
-                <span>&nbsp;&nbsp;&nbsp;&nbsp;{{ enemy.description }}</span>
+                <span
+                    >&nbsp;&nbsp;&nbsp;&nbsp;{{
+                        enemy.enemy.enemy.description
+                    }}</span
+                >
             </Scroll>
         </div>
         <a-divider dashed style="border-color: #ddd4"></a-divider>
@@ -26,14 +30,15 @@
 import { ref } from 'vue';
 import Scroll from '../components/scroll.vue';
 import { hasMarkedEnemy, markEnemy, unmarkEnemy } from '../plugin/mark';
+import { detailInfo } from '../plugin/ui/book';
 
-const enemy = core.plugin.bookDetailEnemy;
-const marked = ref(hasMarkedEnemy(enemy.id));
+const enemy = detailInfo.enemy!;
+const marked = ref(hasMarkedEnemy(enemy.enemy.id));
 
 function mark() {
-    if (marked.value) unmarkEnemy(enemy.id);
-    if (!marked.value) markEnemy(enemy.id);
-    marked.value = hasMarkedEnemy(enemy.id);
+    if (marked.value) unmarkEnemy(enemy.enemy.id);
+    if (!marked.value) markEnemy(enemy.enemy.id);
+    marked.value = hasMarkedEnemy(enemy.enemy.id);
 }
 </script>
 

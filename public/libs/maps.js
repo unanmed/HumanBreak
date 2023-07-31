@@ -3531,64 +3531,7 @@ maps.prototype.resetMap = function (floorId) {
 
 ////// 初始化独立的block canvas //////
 maps.prototype._initDetachedBlock = function (blockInfo, x, y, displayDamage) {
-    // todo: 不使用 nextCriticals 和 getDamageString
-    var headCanvas = null,
-        bodyCanvas = '__body_' + x + '_' + y,
-        damageCanvas = null;
-    // head
-    if (!blockInfo.bigImage && blockInfo.height > 32) {
-        headCanvas = '__head_' + x + '_' + y;
-        core.createCanvas(headCanvas, 0, 0, 32, blockInfo.height - 32, 55);
-    }
-    // body
-    if (blockInfo.bigImage) {
-        var bigImageInfo = this._getBigImageInfo(
-            blockInfo.bigImage,
-            blockInfo.face,
-            blockInfo.posX
-        );
-        core.createCanvas(
-            bodyCanvas,
-            0,
-            0,
-            bigImageInfo.per_width,
-            bigImageInfo.per_height,
-            35
-        );
-    } else {
-        core.createCanvas(bodyCanvas, 0, 0, 32, 32, 35);
-    }
-    // damage
-    var damage = null,
-        damageColor = null;
-    if (
-        blockInfo.cls.indexOf('enemy') == 0 &&
-        core.hasItem('book') &&
-        displayDamage
-    ) {
-        var damageString = core.enemys.getDamageString(blockInfo.id, x, y);
-        damage = damageString.damage;
-        damageColor = damageString.color;
-    }
-    if (damage != null) {
-        damageCanvas = '__damage_' + x + '_' + y;
-        var ctx = core.createCanvas(damageCanvas, 0, 0, 32, 32, 65);
-        ctx.textAlign = 'left';
-        ctx.font = 'bold 11px Arial';
-        core.fillBoldText(ctx, damage, 1, 31, damageColor);
-        if (core.flags.displayCritical) {
-            var critical = core.enemys.nextCriticals(blockInfo.id);
-            if (critical.length > 0) critical = critical[0];
-            critical = core.formatBigNumber(critical[0], true);
-            if (critical == '???') critical = '?';
-            core.fillBoldText(ctx, critical, 1, 21, '#FFFFFF');
-        }
-    }
-    return {
-        headCanvas: headCanvas,
-        bodyCanvas: bodyCanvas,
-        damageCanvas: damageCanvas
-    };
+    // Deprecated. See src/plugin/game/fx/rewrite.ts
 };
 
 ////// 移动独立的block canvas //////

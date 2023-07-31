@@ -391,14 +391,6 @@ interface Enemys extends EnemyData {
     ): number;
 
     /**
-     * 获得某张地图的敌人集合，用于手册绘制
-     * @example core.getCurrentEnemys('MT0') // 主塔0层的敌人集合
-     * @param floorId 地图id
-     * @returns 敌人集合，按伤害升序排列，支持多朝向怪合并
-     */
-    getCurrentEnemys(floorId?: FloorIds): DetailedEnemy[];
-
-    /**
      * 检查某些楼层是否还有漏打的（某种）敌人
      * @example core.hasEnemyLeft('greenSlime', ['sample0', 'sample1']) // 样板0层和1层是否有漏打的绿头怪
      * @param enemyId 敌人id，可选，默认为任意敌人

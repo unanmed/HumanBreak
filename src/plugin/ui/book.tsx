@@ -1,39 +1,40 @@
+import { CurrentEnemy } from '../game/enemy/battle';
 import { has } from '../utils';
+
+export interface ToShowEnemy extends CurrentEnemy {
+    critical: string;
+    criticalDam: string;
+    defDam: string;
+    /** [名称, 描述, 颜色] */
+    special: [string, string, string][];
+    damageColor: string;
+    showSpecial: [string, string, string][];
+    damage: string;
+}
+
+interface BookDetailInfo {
+    /** 怪物手册详细信息展示的怪物 */
+    enemy?: ToShowEnemy;
+    /** 怪物手册的怪物详细信息的初始位置 */
+    pos?: number;
+}
+
+export const detailInfo: BookDetailInfo = {};
 
 /**
  * 获取怪物的特殊技能描述
  * @param enemy 怪物实例
  */
-export function getSpecialHint(enemy: Enemy & DetailedEnemy) {
-    const all = core
-        .getSpecials()
-        .filter(v => enemy.special.includes(v[0]))
-        .sort((a, b) => a[0] - b[0]);
-
-    const des = all.map(v => {
-        const des = v[2];
-        if (des instanceof Function) {
-            return des(enemy);
-        }
-        return des;
-    });
-    const name = all.map(v => {
-        const name = v[1];
-        if (name instanceof Function) {
-            return name(enemy);
-        }
-        return name;
-    });
-
+export function getSpecialHint(enemy: ToShowEnemy) {
     return (
         <div>
-            {all.map((v, i) => {
+            {enemy.showSpecial.map((v, i) => {
                 return (
                     <div class="special">
-                        <span style={{ color: core.arrayToRGBA(v[3]) }}>
-                            &nbsp;&nbsp;&nbsp;&nbsp;{name[i]}：
+                        <span style={{ color: v[2] }}>
+                            &nbsp;&nbsp;&nbsp;&nbsp;{v[0]}：
                         </span>
-                        <span innerHTML={des[i]}></span>
+                        <span innerHTML={v[1]}></span>
                     </div>
                 );
             })}
@@ -46,12 +47,9 @@ export function getSpecialHint(enemy: Enemy & DetailedEnemy) {
  * @param enemy 怪物实例
  */
 export function getDefDamage(
-    enemy: DetailedEnemy,
+    enemy: ToShowEnemy,
     addDef: number = 0,
-    addAtk: number = 0,
-    x?: number,
-    y?: number,
-    floorId?: FloorIds
+    addAtk: number = 0
 ) {
     // todo: 删除 getDamageInfo
     const ratio = core.status.thisMap.ratio;
@@ -63,29 +61,26 @@ export function getDefDamage(
     const max = 100 - Math.floor(addDef / ratio);
 
     for (let i = 0; i <= max; i++) {
-        const dam = core.getDamageInfo(
-            enemy.id,
+        const dam = enemy.enemy.calEnemyDamage(
             {
-                def: core.getStatus('def') + ratio * i + addDef,
-                atk: core.getStatus('atk') + addAtk
+                atk: core.status.hero.atk + addAtk,
+                def: core.status.hero.def + addDef + i * ratio
             },
-            x,
-            y,
-            floorId
+            'none'
         );
 
         if (res.length === 0) {
-            origin = dam?.damage;
+            origin = dam[0].damage;
             if (has(origin)) {
                 res.push([addDef + i * ratio, origin]);
                 last = origin;
             }
             continue;
         }
-        if (!has(dam)) continue;
-        if (dam.damage === res.at(-1)?.[1]) continue;
-        last = dam.damage;
-        res.push([ratio * i + addDef, dam.damage]);
+        if (!isFinite(dam[0].damage)) continue;
+        if (dam[0].damage === res.at(-1)?.[1]) continue;
+        last = dam[0].damage;
+        res.push([ratio * i + addDef, dam[0].damage]);
     }
 
     return res;
@@ -96,12 +91,9 @@ export function getDefDamage(
  * @param enemy 怪物实例
  */
 export function getCriticalDamage(
-    enemy: DetailedEnemy,
+    enemy: ToShowEnemy,
     addAtk: number = 0,
-    addDef: number = 0,
-    x?: number,
-    y?: number,
-    floorId?: FloorIds
+    addDef: number = 0
 ): [number, number][] {
     // todo: 删除 getDamageInfo
     const ratio = core.status.thisMap.ratio;
@@ -113,29 +105,26 @@ export function getCriticalDamage(
     const max = 100 - Math.floor(addAtk / ratio);
 
     for (let i = 0; i <= max; i++) {
-        const dam = core.getDamageInfo(
-            enemy.id,
+        const dam = enemy.enemy.calEnemyDamage(
             {
-                atk: core.getStatus('atk') + ratio * i + addAtk,
-                def: core.getStatus('def') + addDef
+                atk: core.status.hero.atk + addAtk + i * ratio,
+                def: core.status.hero.def + addDef
             },
-            x,
-            y,
-            floorId
+            'none'
         );
 
         if (res.length === 0) {
-            origin = dam?.damage;
+            origin = dam[0].damage;
             if (has(origin)) {
                 res.push([addAtk + i * ratio, origin]);
                 last = origin;
             }
             continue;
         }
-        if (!has(dam)) continue;
-        if (dam.damage === res.at(-1)?.[1]) continue;
-        last = dam.damage;
-        res.push([ratio * i + addAtk, dam.damage]);
+        if (!isFinite(dam[0].damage)) continue;
+        if (dam[0].damage === res.at(-1)?.[1]) continue;
+        last = dam[0].damage;
+        res.push([ratio * i + addAtk, dam[0].damage]);
     }
 
     return res;

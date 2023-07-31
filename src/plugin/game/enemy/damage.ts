@@ -417,7 +417,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
      * 计算怪物在不计光环下的属性，在inject光环之前，预平衡光环之后执行
      */
     calAttribute() {
-        if (this.progress !== 1) return;
+        if (this.progress !== 1 && has(this.x) && has(this.floorId)) return;
         this.progress = 2;
         const special = this.info.special;
         const info = this.info;
@@ -448,7 +448,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
      * 获取怪物的真实属性信息，在inject光环后执行
      */
     getRealInfo() {
-        if (this.progress < 3) {
+        if (this.progress < 3 && has(this.x) && has(this.floorId)) {
             throw new Error(
                 `Unexpected early real info calculating. Progress: ${this.progress}`
             );
@@ -804,6 +804,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         x?: number,
         y?: number
     ): CriticalDamageDelta[] {
+        // todo: 可以优化，根据之前的计算可以直接确定下一个临界的范围
         if (!isFinite(seckill)) return [];
         const res: CriticalDamageDelta[] = [];
         const def = hero.def!;

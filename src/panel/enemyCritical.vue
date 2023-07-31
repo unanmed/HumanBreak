@@ -88,13 +88,11 @@
 
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from 'vue';
-import { getCriticalDamage, getDefDamage } from '../plugin/ui/book';
+import { detailInfo, getCriticalDamage, getDefDamage } from '../plugin/ui/book';
 import Chart, { ChartConfiguration } from 'chart.js/auto';
 import { has, setCanvasSize } from '../plugin/utils';
 import { debounce } from 'lodash-es';
 import { isMobile } from '../plugin/use';
-
-// todo: 删除 getDamageInfo
 
 const props = defineProps<{
     fromBook?: boolean;
@@ -103,7 +101,7 @@ const props = defineProps<{
 const critical = ref<HTMLCanvasElement>();
 const def = ref<HTMLCanvasElement>();
 
-const enemy = core.plugin.bookDetailEnemy;
+const enemy = detailInfo.enemy!;
 const ceil = Math.ceil;
 
 const x = ref(props.fromBook ? void 0 : flags.mouseLoc[0]);
@@ -115,8 +113,8 @@ y.value = has(y.value)
     ? Math.round(y.value + core.bigmap.offsetY / 32)
     : void 0;
 
-let originCri = getCriticalDamage(enemy, 0, 0, x.value, y.value);
-let originDef = getDefDamage(enemy, 0, 0, x.value, y.value);
+let originCri = getCriticalDamage(enemy, 0, 0);
+let originDef = getDefDamage(enemy, 0, 0);
 
 // 当前数据
 const allCri = ref(originCri);
@@ -126,25 +124,24 @@ const allDef = ref(originDef);
 const addAtk = ref(0);
 const addDef = ref(0);
 
-const originDamage = core.getDamageInfo(enemy.id, void 0, x.value, y.value);
+const originDamage = enemy.enemy.calEnemyDamage(core.status.hero, 'none')[0]
+    .damage;
 
 // 转发core上的内容至当前作用域
 const format = core.formatBigNumber;
 const ratio = core.status.thisMap.ratio;
 
 const nowDamage = computed(() => {
-    const dam = core.getDamageInfo(
-        enemy.id,
+    const dam = enemy.enemy.calEnemyDamage(
         {
-            atk: core.getStatus('atk') + addAtk.value * ratio,
-            def: core.getStatus('def') + addDef.value * ratio
+            atk: core.status.hero.atk + addAtk.value * ratio,
+            def: core.status.hero.def + addDef.value * ratio
         },
-        x.value,
-        y.value
-    );
-    if (!has(dam)) return ['???', '???'];
-    if (!has(originDamage)) return [-dam.damage, dam.damage];
-    return [originDamage.damage - dam.damage, dam.damage];
+        'none'
+    )[0].damage;
+    if (!isFinite(dam)) return ['???', '???'];
+    if (!isFinite(originDamage)) return [-dam, dam];
+    return [originDamage - dam, dam];
 });
 
 function generateChart(ele: HTMLCanvasElement, data: [number, number][]) {
@@ -199,16 +196,12 @@ const update = debounce((atk: Chart, def: Chart) => {
     allCri.value = getCriticalDamage(
         enemy,
         addAtk.value * ratio,
-        addDef.value * ratio,
-        x.value,
-        y.value
+        addDef.value * ratio
     );
     allDef.value = getDefDamage(
         enemy,
         addDef.value * ratio,
-        addAtk.value * ratio,
-        x.value,
-        y.value
+        addAtk.value * ratio
     );
     if (allCri.value.length > originCri.length) originCri = allCri.value;
     if (allDef.value.length > originDef.length) originDef = allDef.value;

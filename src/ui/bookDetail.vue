@@ -2,7 +2,7 @@
 <template>
     <div id="detail">
         <div id="info" :style="{ top: `${top}px` }">
-            <EnemyOne :enemy="enemy"></EnemyOne>
+            <EnemyOne :enemy="enemy!"></EnemyOne>
             <a-divider
                 dashed
                 style="margin: 2vh 0 2vh 0; border-color: #ddd4; width: 100%"
@@ -80,14 +80,15 @@ import { KeyCode } from '../plugin/keyCodes';
 import { keycode } from '../plugin/utils';
 import { sleep } from 'mutate-animate';
 import EnemyTarget from '../panel/enemyTarget.vue';
+import { detailInfo } from '../plugin/ui/book';
 
 const props = defineProps<{
     fromBook?: boolean;
     defaultPanel?: 'special' | 'critical' | 'target';
 }>();
 
-const enemy = core.plugin.bookDetailEnemy;
-const top = ref(core.plugin.bookDetailPos);
+const enemy = detailInfo.enemy;
+const top = ref(detailInfo.pos);
 const panel = ref<string>(props.defaultPanel ?? 'special');
 
 let detail: HTMLDivElement;
@@ -102,7 +103,7 @@ function changePanel(e: MouseEvent, to: string) {
 }
 
 function close() {
-    top.value = core.plugin.bookDetailPos;
+    top.value = detailInfo.pos;
     detail.style.opacity = '0';
     emits('close');
 }

@@ -1,10 +1,16 @@
 import {
     DamageDir,
     DamageEnemy,
+    ensureFloorDamage,
     getNeedCalDir,
     getSingleEnemy
 } from './damage';
 import { findDir, has } from '../utils';
+
+export interface CurrentEnemy {
+    enemy: DamageEnemy;
+    onMapEnemy: DamageEnemy[];
+}
 
 export function getEnemy(
     x: number,
@@ -228,13 +234,39 @@ core.events._action_battle = function (data, x, y, prefix) {
     }
 };
 
+core.enemys.getCurrentEnemys = function (floorId = core.status.floorId) {
+    floorId = floorId || core.status.floorId;
+    const enemys: CurrentEnemy[] = [];
+    const used: Record<string, DamageEnemy[]> = {};
+    ensureFloorDamage(floorId);
+    const floor = core.status.maps[floorId];
+    floor.enemy.list.forEach(v => {
+        if (!(v.id in used)) {
+            const e = new DamageEnemy(v.enemy);
+            e.calAttribute();
+            e.getRealInfo();
+            e.calDamage();
+            const curr: CurrentEnemy = {
+                enemy: e,
+                onMapEnemy: [v]
+            };
+            enemys.push(curr);
+            used[v.id] = curr.onMapEnemy;
+        } else {
+            used[v.id].push(v);
+        }
+    });
+
+    return enemys.sort((a, b) => {
+        return (
+            (a.enemy.damage?.[0]?.damage ?? Infinity) -
+            (b.enemy.damage?.[0]?.damage ?? Infinity)
+        );
+    });
+};
+
 declare global {
     interface Events {
-        /**
-         * 与怪物战斗前
-         * @param x 怪物横坐标
-         * @param y 怪物纵坐标
-         */
         beforeBattle(
             enemy: DamageEnemy,
             x: number,
@@ -242,14 +274,15 @@ declare global {
             dir: DamageDir
         ): boolean;
 
-        /**
-         * 与怪物战斗后
-         */
         afterBattle(
             enemy: DamageEnemy,
             x: number,
             y: number,
             dir: DamageDir
         ): void;
+    }
+
+    interface Enemys {
+        getCurrentEnemys(floorId?: FloorIds): CurrentEnemy[];
     }
 }

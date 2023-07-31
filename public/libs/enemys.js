@@ -427,24 +427,7 @@ enemys.prototype._getDamage = function (enemy, hero, x, y, floorId) {
 
 ////// 获得当前楼层的怪物列表 //////
 enemys.prototype.getCurrentEnemys = function (floorId) {
-    // todo: 重写这个函数
-    floorId = floorId || core.status.floorId;
-    var enemys = [],
-        used = {};
-    core.extractBlocks(floorId);
-    core.status.maps[floorId].blocks.forEach(function (block) {
-        if (!block.disable && block.event.cls.indexOf('enemy') == 0) {
-            this._getCurrentEnemys_addEnemy(
-                block.event.id,
-                enemys,
-                used,
-                block.x,
-                block.y,
-                floorId
-            );
-        }
-    }, this);
-    return this._getCurrentEnemys_sort(enemys);
+    // Deprecated. See src/plugin/game/enemy/battle.ts
 };
 
 enemys.prototype._getCurrentEnemys_getEnemy = function (enemyId) {

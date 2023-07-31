@@ -18,14 +18,9 @@
                     <span>加攻</span>
                     <span>减伤</span>
                 </div>
-                <div v-for="[atk, dam] of criticals" class="critical">
-                    <span class="critical-atk">{{ format(atk) }}</span>
-                    <span
-                        ><span style="font-family: 'Fira Code'">{{
-                            dam < 0 ? '=>' : ''
-                        }}</span
-                        >{{ dam < 0 ? `${format(-dam)}` : format(dam) }}</span
-                    >
+                <div v-for="cri of criticals[0]" class="critical">
+                    <span class="critical-atk">{{ format(cri.atkDelta) }}</span>
+                    <span>{{ format(cri.delta) }}</span>
                 </div>
             </div>
         </div>
@@ -34,23 +29,17 @@
 
 <script lang="ts" setup>
 import { isMobile } from '../plugin/use';
-import { getSpecialHint } from '../plugin/ui/book';
-import { has } from '../plugin/utils';
+import { detailInfo, getSpecialHint } from '../plugin/ui/book';
 
 const props = defineProps<{
     fromBook?: boolean;
 }>();
 
-const [x, y] = props.fromBook ? [void 0, void 0] : flags.mouseLoc;
-const mx = has(x) ? Math.round(x + core.bigmap.offsetX / 32) : void 0;
-const my = has(y) ? Math.round(y + core.bigmap.offsetY / 32) : void 0;
-
-const enemy = core.plugin.bookDetailEnemy;
+const enemy = detailInfo.enemy!;
 
 const info = getSpecialHint(enemy);
 
-// todo: 不使用 nextCriticals
-const criticals = core.nextCriticals(enemy, isMobile ? 4 : 8, mx, my);
+const criticals = enemy.enemy.calCritical(isMobile ? 4 : 8, 'none');
 
 const format = core.formatBigNumber;
 </script>

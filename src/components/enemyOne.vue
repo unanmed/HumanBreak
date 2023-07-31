@@ -7,9 +7,9 @@
     >
         <div class="info">
             <div class="leftbar">
-                <span class="name">{{ enemy.name }}</span>
+                <span class="name">{{ enemy.enemy.enemy.name }}</span>
                 <BoxAnimate
-                    :id="enemy.id"
+                    :id="enemy.enemy.id"
                     :width="isMobile ? 32 : w"
                     :height="isMobile ? 32 : w"
                     style="margin: 5%"
@@ -19,9 +19,9 @@
                     v-if="has(enemy.special) && enemy.special.length > 0"
                 >
                     <span
-                        v-for="(text, i) in enemy.toShowSpecial"
-                        :style="{ color: enemy.toShowColor![i] as string }"
-                        >&nbsp;{{ text }}&nbsp;</span
+                        v-for="(text, i) in enemy.showSpecial"
+                        :style="{ color: text[2] }"
+                        >&nbsp;{{ text[0] }}&nbsp;</span
                     >
                 </div>
                 <div class="special-text" v-else>无属性</div>
@@ -36,42 +36,42 @@
                     <div class="detail-info">
                         <span style="color: lightgreen"
                             >生命&nbsp;&nbsp;&nbsp;&nbsp;{{
-                                core.formatBigNumber(enemy.hp)
+                                core.formatBigNumber(enemy.enemy.info.hp)
                             }}</span
                         >
                     </div>
                     <div class="detail-info">
                         <span style="color: lightcoral"
                             >攻击&nbsp;&nbsp;&nbsp;&nbsp;{{
-                                core.formatBigNumber(enemy.atk)
+                                core.formatBigNumber(enemy.enemy.info.atk)
                             }}</span
                         >
                     </div>
                     <div class="detail-info">
                         <span style="color: lightblue"
                             >防御&nbsp;&nbsp;&nbsp;&nbsp;{{
-                                core.formatBigNumber(enemy.def)
+                                core.formatBigNumber(enemy.enemy.info.def)
                             }}</span
                         >
                     </div>
                     <div class="detail-info">
                         <span style="color: lightyellow"
                             >金币&nbsp;&nbsp;&nbsp;&nbsp;{{
-                                core.formatBigNumber(enemy.money)
+                                core.formatBigNumber(enemy.enemy.enemy.money)
                             }}</span
                         >
                     </div>
                     <div class="detail-info">
                         <span style="color: lawngreen"
                             >经验&nbsp;&nbsp;&nbsp;&nbsp;{{
-                                core.formatBigNumber(enemy.exp)
+                                core.formatBigNumber(enemy.enemy.enemy.exp)
                             }}</span
                         >
                     </div>
                     <div class="detail-info">
-                        <span :style="{color: enemy.damageColor! as string}"
+                        <span :style="{ color: enemy.damageColor }"
                             >伤害&nbsp;&nbsp;&nbsp;&nbsp;{{
-                                core.formatBigNumber(enemy.damage!)
+                                enemy.damage
                             }}</span
                         >
                     </div>
@@ -79,7 +79,7 @@
                     <div class="detail-info">
                         <span style="color: lightsalmon"
                             >临界&nbsp;&nbsp;&nbsp;&nbsp;{{
-                                core.formatBigNumber(enemy.critical)
+                                enemy.critical
                             }}</span
                         >
                     </div>
@@ -87,27 +87,9 @@
                         <span style="color: lightpink"
                             >减伤&nbsp;&nbsp;&nbsp;&nbsp;<span
                                 :style="{
-                                    color:
-                                        enemy.criticalDamage < 0 &&
-                                        !has(enemy.damage)
-                                            ? 'gold'
-                                            : 'lightpink'
+                                    color: 'lightpink'
                                 }"
-                                ><span style="font-family: 'Fira Code'">{{
-                                    enemy.criticalDamage < 0 &&
-                                    !has(enemy.damage)
-                                        ? isMobile
-                                            ? '-'
-                                            : '=>'
-                                        : ''
-                                }}</span
-                                >{{
-                                    core.formatBigNumber(
-                                        enemy.criticalDamage < 0
-                                            ? -enemy.criticalDamage
-                                            : enemy.criticalDamage
-                                    )
-                                }}</span
+                                >{{ enemy.criticalDam }}</span
                             ></span
                         >
                     </div>
@@ -116,7 +98,7 @@
                             >{{
                                 core.formatBigNumber(core.status.thisMap.ratio)
                             }}防&nbsp;&nbsp;&nbsp;&nbsp;{{
-                                core.formatBigNumber(enemy.defDamage)
+                                core.formatBigNumber(enemy.defDam)
                             }}</span
                         >
                     </div>
@@ -130,9 +112,10 @@
 import { has } from '../plugin/utils';
 import BoxAnimate from '../components/boxAnimate.vue';
 import { isMobile } from '../plugin/use';
+import { ToShowEnemy } from '../plugin/ui/book';
 
 const props = defineProps<{
-    enemy: DetailedEnemy;
+    enemy: ToShowEnemy;
     selected?: boolean;
 }>();
 

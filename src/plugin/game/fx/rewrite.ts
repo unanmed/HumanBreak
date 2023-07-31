@@ -2,8 +2,6 @@ import { getEnemy } from '../enemy/battle';
 import { DamageDir, getNeedCalDir } from '../enemy/damage';
 import { formatDamage } from '../utils';
 
-export {};
-
 core.maps._initDetachedBlock = function (
     info: BlockInfo,
     x: number,
