@@ -12,11 +12,6 @@
                 <div id="studied-main">
                     <div v-for="(num, i) of studied" :key="i">
                         <div id="studied-rough">
-                            <right-outlined
-                                :folded="!!folded[i]"
-                                @click="folded[i] = !folded[i]"
-                                id="studied-fold"
-                            />
                             <span
                                 >{{ i }}. {{ skills[i] }}，剩余{{
                                     last[i]
