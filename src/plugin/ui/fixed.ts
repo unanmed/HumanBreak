@@ -1,7 +1,7 @@
 import { cloneDeep, debounce } from 'lodash-es';
 import { ref } from 'vue';
 import { getDamageColor } from '../utils';
-import { ToShowEnemy, detailInfo, specials } from './book';
+import { ToShowEnemy, detailInfo } from './book';
 import { DamageEnemy } from '../game/enemy/damage';
 
 export const showFixed = ref(false);
@@ -54,8 +54,15 @@ export function getDetailedEnemy(
     enemy: DamageEnemy,
     floorId: FloorIds = core.status.floorId
 ): ToShowEnemy {
-    // todo: 删除 getDamageInfo
-    // todo: 不使用 nextCriticals
+    const specials = Object.fromEntries(
+        core.getSpecials().map(v => {
+            return [v[0], v.slice(1)];
+        })
+    ) as Record<
+        string,
+        EnemySpecialDeclaration extends [number, ...infer F] ? F : never
+    >;
+
     const ratio = core.status.maps[floorId].ratio;
 
     const dam = enemy.calEnemyDamage(core.status.hero, 'none')[0].damage;

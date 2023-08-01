@@ -99,6 +99,16 @@ interface PluginDeclaration
      * @param value 要判断的值
      */
     has<T>(value: T): value is NonNullable<T>;
+
+    applyFragWith(
+        canvas: HTMLCanvasElement,
+        length?: number,
+        time?: number
+    ): {
+        canvas: HTMLCanvasElement;
+        onEnd: Promise<void>;
+        animation: import('mutate-animate').Animation;
+    };
 }
 
 interface GamePluginUtils {

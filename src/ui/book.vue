@@ -47,11 +47,20 @@ import BookDetail from './bookDetail.vue';
 import { LeftOutlined } from '@ant-design/icons-vue';
 import { KeyCode } from '../plugin/keyCodes';
 import { noClosePanel } from '../plugin/uiController';
-import { ToShowEnemy, detailInfo, specials } from '../plugin/ui/book';
+import { ToShowEnemy, detailInfo } from '../plugin/ui/book';
 
 const floorId =
     // @ts-ignore
     core.floorIds[core.status.event?.ui?.index] ?? core.status.floorId;
+
+const specials = Object.fromEntries(
+    core.getSpecials().map(v => {
+        return [v[0], v.slice(1)];
+    })
+) as Record<
+    string,
+    EnemySpecialDeclaration extends [number, ...infer F] ? F : never
+>;
 
 const enemy = core.getCurrentEnemys(floorId);
 const toShow: ToShowEnemy[] = enemy.map(v => {

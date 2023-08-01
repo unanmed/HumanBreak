@@ -21,15 +21,6 @@ interface BookDetailInfo {
 
 export const detailInfo: BookDetailInfo = {};
 
-export const specials = Object.fromEntries(
-    core.getSpecials().map(v => {
-        return [v[0], v.slice(1)];
-    })
-) as Record<
-    string,
-    EnemySpecialDeclaration extends [number, ...infer F] ? F : never
->;
-
 /**
  * 获取怪物的特殊技能描述
  * @param enemy 怪物实例

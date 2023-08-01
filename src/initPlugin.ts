@@ -19,6 +19,7 @@ import path from './plugin/fx/path';
 import gameCanvas from './plugin/fx/gameCanvas';
 import noise from './plugin/fx/noise';
 import smooth from './plugin/fx/smoothView';
+import frag from './plugin/fx/frag';
 
 function forward() {
     const toForward: any[] = [
@@ -42,7 +43,8 @@ function forward() {
         path(),
         gameCanvas(),
         noise(),
-        smooth()
+        smooth(),
+        frag()
     ];
 
     // 初始化所有插件，并转发到core上
