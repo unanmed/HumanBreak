@@ -30,7 +30,8 @@ export default function init() {
 export function applyFragWith(
     canvas: HTMLCanvasElement,
     length: number = 4,
-    time: number = 1000
+    time: number = 1000,
+    config: any = {}
 ) {
     // 先切分图片
     const imgs = splitCanvas(canvas, length);
@@ -44,14 +45,17 @@ export function applyFragWith(
         const centerY = v.y + v.canvas.height / 2;
         const onX = centerX === cx;
         const onY = centerY === cy;
-        const rate = MAX_MOVE_LENGTH - 1 + Math.random() ** 3 * MOVE_FLUSH;
+        const mml = config.maxMoveLength ?? MAX_MOVE_LENGTH;
+        const mf = config.moveFlush ?? MOVE_FLUSH;
+        const rate = mml - 1 + Math.random() ** 3 * mf;
         let endX = onY ? 0 : (centerX - cx) * rate;
         let endY = onX ? 0 : (centerY - cy) * rate;
         const mx = Math.abs(endX + centerX) + Math.abs(v.canvas.width);
         const my = Math.abs(endY + centerY) + Math.abs(v.canvas.height);
         if (mx > maxX) maxX = mx;
         if (my > maxY) maxY = my;
-        const endRad = Math.random() * MAX_ROTATE * 2 - MAX_ROTATE;
+        const r = config.maxRotate ?? MAX_ROTATE;
+        const endRad = Math.random() * r * 2 - r;
 
         return {
             deltaX: endX,
@@ -68,7 +72,8 @@ export function applyFragWith(
     const ctx = frag.getContext('2d')!;
     const ani = new Animation();
     ani.register('rate', 0);
-    ani.absolute().time(time).mode(FRAG_TIMING).apply('rate', 1);
+    const ft = config.fragTiming ?? FRAG_TIMING;
+    ani.absolute().time(time).mode(ft).apply('rate', 1);
     frag.width = maxX * 2;
     frag.height = maxY * 2;
     ctx.save();
@@ -145,8 +150,8 @@ function splitCanvas(canvas: HTMLCanvasElement, l: number): SplittedImage[] {
         console.warn('切分画布要求切分边长大于等于画布长宽的一半！');
         return [];
     }
-    const w = canvas.width % l === 0 ? canvas.width : canvas.width - l;
-    const h = canvas.height % l === 0 ? canvas.height : canvas.height - l;
+    const w = canvas.width;
+    const h = canvas.height;
     const numX = Math.floor(w / l);
     const numY = Math.floor(h / l);
     const rw = (w - numX * l) / 2;
