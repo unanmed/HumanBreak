@@ -18,7 +18,8 @@ export {};
 
     function updateVueStatusBar() {
         if (main.replayChecking) return;
-        core.plugin.statusBarStatus.value = !core.plugin.statusBarStatus.value;
+        ancTe.plugin.status.statusBarStatus.value =
+            !ancTe.plugin.status.statusBarStatus.value;
         ancTe.plugin.mark.checkMarkedEnemy();
     }
 

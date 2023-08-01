@@ -27,7 +27,6 @@ events.prototype.startGame = function (hard, seed, route, callback) {
     core.dom.gameGroup.style.display = 'block';
     if (!main.replayChecking) {
         ancTe.plugin.ui.startOpened.value = false;
-        ancTe.plugin.ui.loaded.value = false;
     }
 
     if (main.mode != 'play') return;

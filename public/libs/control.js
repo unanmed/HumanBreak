@@ -2318,7 +2318,6 @@ control.prototype._doSL_load = function (id, callback) {
         )[0];
         if (!main.replayChecking) {
             ancTe.plugin.ui.startOpened.value = false;
-            ancTe.plugin.ui.loaded.value = false;
         }
         if (core.isPlaying() && !core.status.gameOver) {
             core.control.autosave(0);
@@ -2336,7 +2335,6 @@ control.prototype._doSL_load = function (id, callback) {
             function (data) {
                 if (!main.replayChecking && data) {
                     ancTe.plugin.ui.startOpened.value = false;
-                    ancTe.plugin.ui.loaded.value = false;
                 }
                 if (id == 'autoSave' && data != null) {
                     core.saves.autosave.data = data;
