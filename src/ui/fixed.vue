@@ -84,7 +84,7 @@ async function calHeight() {
     vw = window.innerWidth;
     width.value = vh * 0.28;
     await new Promise(res => requestAnimationFrame(res));
-    if (core.plugin.fixedDetailOpened.value) {
+    if (ancTe.plugin.ui.fixedDetailOpened.value) {
         showFixed.value = false;
     }
     updateMain();

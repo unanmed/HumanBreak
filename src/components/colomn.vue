@@ -68,7 +68,7 @@ onMounted(async () => {
     resize();
 
     await sleep(50);
-    if (core.plugin.transition.value) await sleep(600);
+    if (ancTe.plugin.ui.transition.value) await sleep(600);
     document.addEventListener('keyup', key);
 });
 onUpdated(resize);

@@ -475,3 +475,8 @@ type Forward<T> = {
 };
 
 type ForwardKeys<T> = keyof Forward<T>;
+
+declare const ancTe: import('../core/index').AncTe;
+interface Window {
+    ancTe: import('../core/index').AncTe;
+}

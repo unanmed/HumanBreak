@@ -481,7 +481,6 @@ control.prototype.showStartAnimate = function (noAnimate, callback) {
 };
 
 control.prototype._showStartAnimate_resetDom = function () {
-    if (main.mode === 'play') core.plugin.loaded.value = true;
     core.status.played = false;
     core.dom.gameGroup.style.display = 'none';
     core.clearStatus();
@@ -2318,8 +2317,8 @@ control.prototype._doSL_load = function (id, callback) {
             1
         )[0];
         if (!main.replayChecking) {
-            core.plugin.startOpened.value = false;
-            core.plugin.loaded.value = false;
+            ancTe.plugin.ui.startOpened.value = false;
+            ancTe.plugin.ui.loaded.value = false;
         }
         if (core.isPlaying() && !core.status.gameOver) {
             core.control.autosave(0);
@@ -2336,8 +2335,8 @@ control.prototype._doSL_load = function (id, callback) {
             null,
             function (data) {
                 if (!main.replayChecking && data) {
-                    core.plugin.startOpened.value = false;
-                    core.plugin.loaded.value = false;
+                    ancTe.plugin.ui.startOpened.value = false;
+                    ancTe.plugin.ui.loaded.value = false;
                 }
                 if (id == 'autoSave' && data != null) {
                     core.saves.autosave.data = data;
@@ -3017,7 +3016,7 @@ control.prototype.removeSwitch = function (x, y, floorId, name) {
 control.prototype.lockControl = function () {
     core.status.lockControl = true;
     if (!main.replayChecking) {
-        core.plugin.showFixed.value = false;
+        ancTe.plugin.fixed.showFixed.value = false;
     }
 };
 

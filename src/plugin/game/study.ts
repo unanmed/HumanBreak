@@ -27,7 +27,7 @@ export function studySkill(enemy: any, number: number) {
     if (special instanceof Function) special = special(enemy);
     if (!canStudySkill(number)) {
         if (!main.replayChecking) {
-            core.tip('error', `无法学习${special}`);
+            ancTe.plugin.utils.tip('error', `无法学习${special}`);
         }
         return;
     }

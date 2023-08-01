@@ -50,8 +50,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 core.hideStatusBar(core.hasFlag('showToolbox'));
             else core.showStatusBar();
             if (main.mode === 'play' && !main.replayChecking) {
-                core.splitArea();
-                core.resetFlagSettings();
+                ancTe.plugin.fly.splitArea();
+                ancTe.plugin.setting.resetFlagSettings();
             } else {
                 flags.autoSkill ??= true;
                 flags.itemDetail ??= true;
@@ -146,8 +146,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             core.drawMap(floorId);
 
             if (!main.replayChecking) {
-                core.updateShadow();
-                core.setCanvasFilterByFloorId(floorId);
+                ancTe.plugin.gameShadow.updateShadow();
+                ancTe.plugin.gameCanvas.setCanvasFilterByFloorId(floorId);
             }
 
             // 切换楼层BGM
@@ -207,7 +207,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     core.visitFloor(floorId);
                 }
             }
-            if (!flags.debug && !main.replayChecking) core.checkVisitedFloor();
+            if (!flags.debug && !main.replayChecking)
+                ancTe.plugin.completion.checkVisitedFloor();
         },
         flyTo: function (toId, callback) {
             // 楼层传送器的使用，从当前楼层飞往toId
@@ -1013,15 +1014,15 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 case 67: // C：怪物临界
                     if (core.getBlockCls(mx, my)?.startsWith('enemy')) {
                         core.plugin.fixedDetailPanel = 'critical';
-                        core.plugin.showFixed.value = false;
-                        core.plugin.fixedDetailOpened.value = true;
+                        ancTe.plugin.fixed.showFixed.value = false;
+                        ancTe.plugin.ui.fixedDetailOpened.value = true;
                     }
                     break;
                 case 69: // E：怪物属性
                     if (core.getBlockCls(mx, my)?.startsWith('enemy')) {
                         core.plugin.fixedDetailPanel = 'special';
-                        core.plugin.showFixed.value = false;
-                        core.plugin.fixedDetailOpened.value = true;
+                        ancTe.plugin.fixed.showFixed.value = false;
+                        ancTe.plugin.ui.fixedDetailOpened.value = true;
                     }
                     break;
                 case 77: // M：快速标记
@@ -1029,12 +1030,18 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     const block = blocks[`${mx},${my}`];
                     if (block.event.cls.startsWith('enemy')) {
                         const name = core.material.enemys[block.event.id].name;
-                        if (core.hasMarkedEnemy(block.event.id)) {
-                            core.tip('success', `已取消标记${name}！`);
-                            core.unmarkEnemy(block.event.id);
+                        if (ancTe.plugin.mark.hasMarkedEnemy(block.event.id)) {
+                            ancTe.plugin.utils.tip(
+                                'success',
+                                `已取消标记${name}！`
+                            );
+                            ancTe.plugin.mark.unmarkEnemy(block.event.id);
                         } else {
-                            core.tip('success', `已标记${name}！`);
-                            core.markEnemy(block.event.id);
+                            ancTe.plugin.utils.tip(
+                                'success',
+                                `已标记${name}！`
+                            );
+                            ancTe.plugin.mark.checkMarkedEnemy(block.event.id);
                         }
                     }
                     break;
@@ -1050,7 +1057,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 case 49: // 1: 断灭之刃
                     if (!flags.bladeOn) break;
                     if (flags.autoSkill) {
-                        core.tip('error', '已开启自动切换技能！');
+                        ancTe.plugin.utils.tip('error', '已开启自动切换技能！');
                         break;
                     }
                     core.status.route.push('key:49'); // 将按键记在录像中
@@ -1077,7 +1084,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 case 51: // 3: 铸剑为盾
                     if (!flags.shieldOn) break;
                     if (flags.autoSkill) {
-                        core.tip('error', '已开启自动切换技能！');
+                        ancTe.plugin.utils.tip('error', '已开启自动切换技能！');
                         break;
                     }
                     core.status.route.push('key:51'); // 将按键记在录像中
@@ -1184,7 +1191,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 if (callback) callback();
 
                 if (flags.onChase) {
-                    core.startChase(flags.chaseIndex);
+                    ancTe.plugin.fly.startChase(flags.chaseIndex);
                     if (flags.chaseIndex === 1) {
                         core.playBgm('escape.mp3', 43.5);
                     }
@@ -1244,9 +1251,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 core.plugin.skillTree.getSkillLevel(11) > 0 &&
                 (core.status.hero.special?.num ?? []).length > 0
             ) {
-                core.plugin.showStudiedSkill.value = true;
+                ancTe.plugin.ui.showStudiedSkill.value = true;
             } else {
-                core.plugin.showStudiedSkill.value = false;
+                ancTe.plugin.ui.showStudiedSkill.value = false;
             }
         },
         moveOneStep: function (callback) {

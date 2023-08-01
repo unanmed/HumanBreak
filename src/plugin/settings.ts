@@ -33,7 +33,7 @@ export const antiAliasing = ref(true);
 export const fullscreen = ref(false);
 
 watch(transition, n => {
-    core.plugin.transition.value = n;
+    ancTe.plugin.ui.transition.value = n;
     core.setLocalStorage('transition', n);
 });
 
@@ -88,7 +88,7 @@ watch(antiAliasing, n => {
 function reset() {
     const t = core.getLocalStorage('transition', false);
     transition.value = t;
-    core.plugin.transition.value = transition.value;
+    ancTe.plugin.ui.transition.value = transition.value;
     autoScale.value = core.getLocalStorage('autoScale', true);
     showStudied.value = core.getLocalStorage('showStudied', true);
     showHalo.value = core.getLocalStorage('showHalo', true);

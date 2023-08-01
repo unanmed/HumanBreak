@@ -13,6 +13,8 @@ import Shop from '../ui/shop.vue';
 import Achievement from '../ui/achievement.vue';
 import Bgm from '../ui/bgmList.vue';
 
+// todo: 优化开启控制器
+
 export const bookOpened = ref(false);
 export const toolOpened = ref(false);
 export const equipOpened = ref(false);
@@ -25,22 +27,14 @@ export const flyOpened = ref(false);
 export const showStudiedSkill = ref(false);
 export const fixedDetailOpened = ref(false);
 export const shopOpened = ref(false);
-export const startOpened = ref(false);
+export const startOpened = ref(true);
 export const achievementOpened = ref(false);
 export const bgmOpened = ref(false);
 
 export const transition = ref(true);
 export const noClosePanel = ref(false);
 
-export const loaded = ref(false);
 export const startAnimationEnded = ref(false);
-
-watch(loaded, n => {
-    if (n && startAnimationEnded.value) startOpened.value = true;
-});
-watch(startAnimationEnded, n => {
-    if (n && loaded.value) startOpened.value = true;
-});
 
 let app: HTMLDivElement;
 
@@ -98,7 +92,6 @@ export default function init() {
         shopOpened,
         startOpened,
         startAnimationEnded,
-        loaded,
         achievementOpened,
         bgmOpened
     };

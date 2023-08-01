@@ -496,7 +496,11 @@ function intelligentArrow(fromSelf) {
                         damaged[loc + direction] = true;
                         core.drawHeroAnimate('hand');
                         core.status.hero.hp -= 1000;
-                        core.addPop(x * 32 + 16, y * 32 + 16, -1000);
+                        ancTe.plugin.pop.addPop(
+                            x * 32 + 16,
+                            y * 32 + 16,
+                            -1000
+                        );
                         core.updateStatusBar();
                         if (core.status.hero.hp < 0) {
                             clearInterval(skill1);
@@ -511,7 +515,11 @@ function intelligentArrow(fromSelf) {
                         damaged[loc + direction] = true;
                         core.drawHeroAnimate('hand');
                         core.status.hero.hp -= 1000;
-                        core.addPop(x * 32 + 16, y * 32 + 16, -1000);
+                        ancTe.plugin.pop.addPop(
+                            x * 32 + 16,
+                            y * 32 + 16,
+                            -1000
+                        );
                         core.updateStatusBar();
                         if (core.status.hero.hp < 0) {
                             clearInterval(skill1);
@@ -637,7 +645,7 @@ function icyMomentem() {
             if (x == locs[index][0] && y == locs[index][1]) {
                 core.drawHeroAnimate('hand');
                 core.status.hero.hp -= 5000;
-                core.addPop(x * 32 + 16, y * 32 + 16, -5000);
+                ancTe.plugin.pop.addPop(x * 32 + 16, y * 32 + 16, -5000);
                 core.updateStatusBar();
                 if (core.status.hero.hp < 0) {
                     core.status.hero.hp = 0;
@@ -812,7 +820,7 @@ function getThunderDamage(x, y, power) {
         hy = core.status.hero.loc.y;
     if (Math.abs(hx - x) <= 1 && Math.abs(hy - y) <= 1) {
         core.status.hero.hp -= 3000 * power;
-        core.addPop(x * 32 + 16, y * 32 + 16, -3000 * power);
+        ancTe.plugin.pop.addPop(x * 32 + 16, y * 32 + 16, -3000 * power);
         core.updateStatusBar();
         if (core.status.hero.hp < 0) {
             core.status.hero.hp = 0;
@@ -976,7 +984,11 @@ function ballThunder() {
                         ) {
                             damaged[i] = true;
                             core.status.hero.hp -= 3000;
-                            core.addPop(x * 32 + 16, y * 32 + 16, -3000);
+                            ancTe.plugin.pop.addPop(
+                                x * 32 + 16,
+                                y * 32 + 16,
+                                -3000
+                            );
                             core.updateStatusBar();
                             core.playSound('electron.mp3');
                             if (core.status.hero.hp < 0) {
@@ -1482,7 +1494,7 @@ function boomingAnimate() {
                     hy = core.status.hero.loc.y;
                 if (loc[0] == hx && loc[1] == hy) {
                     core.status.hero.hp -= 3000;
-                    core.addPop(x * 32 + 16, y * 32 + 16, -3000);
+                    ancTe.plugin.pop.addPop(x * 32 + 16, y * 32 + 16, -3000);
                     core.updateStatusBar();
                     if (core.status.hero.hp < 0) {
                         core.status.hero.hp = 0;
@@ -1521,7 +1533,7 @@ function lineDamage(x1, y1, x2, y2, damage) {
                 n2 = ((y2 - y1) / (x2 - x1)) * (loc2[0] - x1) + y1 - loc2[1];
             if (n1 * n2 <= 0) {
                 core.status.hero.hp -= damage;
-                core.addPop(x * 32 + 16, y * 32 + 16, -damage);
+                ancTe.plugin.pop.addPop(x * 32 + 16, y * 32 + 16, -damage);
                 core.updateStatusBar();
                 core.playSound('electron.mp3');
                 if (core.status.hero.hp < 0) {
@@ -1541,7 +1553,7 @@ function lineDamage(x1, y1, x2, y2, damage) {
                 n2 = ((y2 - y1) / (x2 - x1)) * (loc2[0] - x1) + y1 - loc2[1];
             if (n1 * n2 <= 0) {
                 core.status.hero.hp -= damage;
-                core.addPop(x * 32 + 16, y * 32 + 16, -damage);
+                ancTe.plugin.pop.addPop(x * 32 + 16, y * 32 + 16, -damage);
                 core.updateStatusBar();
                 core.playSound('electron.mp3');
                 if (core.status.hero.hp < 0) {

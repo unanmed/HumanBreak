@@ -30,7 +30,7 @@ if (e && core.getClsFromId(e)?.startsWith('enemy')) {
 }
 
 function close() {
-    core.plugin.fixedDetailOpened.value = false;
+    ancTe.plugin.ui.fixedDetailOpened.value = false;
 }
 </script>
 

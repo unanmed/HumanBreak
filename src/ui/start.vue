@@ -69,6 +69,7 @@ import { doByInterval, keycode } from '../plugin/utils';
 import { KeyCode } from '../plugin/keyCodes';
 import { achievementOpened } from '../plugin/uiController';
 import { triggerFullscreen } from '../plugin/settings';
+import { loading } from '../core/loader/load';
 
 let startdiv: HTMLDivElement;
 let start: HTMLDivElement;
@@ -96,6 +97,7 @@ const toshow = reactive<string[]>([]);
 const selected = ref('start-game');
 
 function resize() {
+    if (!window.core) return;
     const scale = core.domStyle.scale;
     const h = core._PY_;
     const height = h * scale;
@@ -290,34 +292,34 @@ async function setButtonAnimate() {
 
 onMounted(async () => {
     cursor = document.getElementById('cursor')!;
-    played = core.getLocalStorage('oneweek1', false);
     startdiv = document.getElementById('start-div') as HTMLDivElement;
     main = document.getElementById('start-main') as HTMLDivElement;
     start = document.getElementById('start') as HTMLDivElement;
     background = document.getElementById('background') as HTMLImageElement;
 
-    core.registerResize('start', resize);
-    resize();
+    loading.once('coreInit', async () => {
+        window.addEventListener('resize', resize);
+        resize();
 
-    soundChecked.value = core.musicStatus.bgmStatus;
+        soundChecked.value = core.musicStatus.bgmStatus;
 
-    await sleep(50);
-    document.addEventListener('keydown', keydown);
-    document.addEventListener('keyup', keyup);
-    start.style.opacity = '1';
-    if (played) {
-        text.value = text2;
-        hard.splice(1, 0, '挑战');
-    }
-    setButtonAnimate().then(() => (showed.value = true));
-    await sleep(1000);
-    showCursor();
-    await sleep(1200);
-    core.dom.startPanel.style.display = 'none';
+        await sleep(50);
+        document.addEventListener('keydown', keydown);
+        document.addEventListener('keyup', keyup);
+        start.style.opacity = '1';
+        if (played) {
+            text.value = text2;
+            hard.splice(1, 0, '挑战');
+        }
+        setButtonAnimate().then(() => (showed.value = true));
+        await sleep(1000);
+        showCursor();
+        await sleep(1200);
+    });
 });
 
 onUnmounted(() => {
-    core.unregisterResize('start');
+    window.removeEventListener('resize', resize);
     document.removeEventListener('keydown', keydown);
     document.removeEventListener('keyup', keyup);
 });

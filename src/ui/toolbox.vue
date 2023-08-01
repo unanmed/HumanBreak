@@ -165,19 +165,19 @@ async function select(id: ShowItemIds, nouse: boolean = false) {
 }
 
 function exit() {
-    core.plugin.toolOpened.value = false;
+    ancTe.plugin.ui.toolOpened.value = false;
 }
 
 async function use(id: ShowItemIds) {
     if (id === 'none') return;
     if (core.canUseItem(id)) {
         // 应该暂时把动画去掉
-        const before = core.plugin.transition.value;
-        core.plugin.transition.value = false;
+        const before = ancTe.plugin.ui.transition.value;
+        ancTe.plugin.ui.transition.value = false;
         exit();
         await sleep(50);
         core.useItem(id);
-        core.plugin.transition.value = before;
+        ancTe.plugin.ui.transition.value = before;
     } else {
         message.warn({
             content: '当前无法使用该道具！',
@@ -187,12 +187,12 @@ async function use(id: ShowItemIds) {
 }
 
 async function toEquip() {
-    const before = core.plugin.transition.value;
-    core.plugin.transition.value = false;
+    const before = ancTe.plugin.ui.transition.value;
+    ancTe.plugin.ui.transition.value = false;
     exit();
     await sleep(50);
-    core.plugin.equipOpened.value = true;
-    core.plugin.transition.value = before;
+    ancTe.plugin.ui.equipOpened.value = true;
+    ancTe.plugin.ui.transition.value = before;
 }
 
 function keyup(e: KeyboardEvent) {
@@ -239,7 +239,7 @@ function keydown(e: KeyboardEvent) {
 }
 
 onMounted(async () => {
-    if (core.plugin.transition.value) await sleep(600);
+    if (ancTe.plugin.ui.transition.value) await sleep(600);
     else await sleep(50);
     document.addEventListener('keyup', keyup);
     document.addEventListener('keydown', keydown);

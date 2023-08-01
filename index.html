@@ -24,30 +24,30 @@
         <img id='startImageLogo' />
     </div>
     <script>
-        (function () {
-            var startImageBackgroundDiv = document.getElementById('startImageBackgroundDiv');
-            var startImageLogo = document.getElementById('startImageLogo');
-            var startImageDiv = document.getElementById('startImageDiv');
-            startImageLogo.onload = function () {
-                startImageBackgroundDiv.style.display = 'block';
-                var onAnimationEnd = function () {
-                    if (window.core && core.plugin && core.plugin.startAnimationEnded) {
-                        core.plugin.startAnimationEnded.value = true;
-                        startImageBackgroundDiv.style.display = 'none';
-                        startImageLogo.classList.remove("startImageAnimation");
-                        startImageDiv.classList.remove("startImageDivAnimation");
-                    }
-                }
-                startImageDiv.addEventListener("webkitAnimationEnd", onAnimationEnd);
-                startImageDiv.addEventListener("animationend", onAnimationEnd);
-                startImageLogo.classList.add("startImageAnimation");
-                startImageDiv.classList.add("startImageDivAnimation");
-                // 注释下面这句话以禁止单击立刻跳过开场动画
-                startImageBackgroundDiv.onclick = onAnimationEnd;
-            }
-            startImageLogo.onerror = function () { }
-            startImageLogo.src = "logo.png";
-        })();
+        // (function () {
+        //     var startImageBackgroundDiv = document.getElementById('startImageBackgroundDiv');
+        //     var startImageLogo = document.getElementById('startImageLogo');
+        //     var startImageDiv = document.getElementById('startImageDiv');
+        //     startImageLogo.onload = function () {
+        //         startImageBackgroundDiv.style.display = 'block';
+        //         var onAnimationEnd = function () {
+        //             if (window.core && core.plugin && ancTe.plugin.ui.startAnimationEnded) {
+        //                 ancTe.plugin.ui.startAnimationEnded.value = true;
+        //                 startImageBackgroundDiv.style.display = 'none';
+        //                 startImageLogo.classList.remove("startImageAnimation");
+        //                 startImageDiv.classList.remove("startImageDivAnimation");
+        //             }
+        //         }
+        //         startImageDiv.addEventListener("webkitAnimationEnd", onAnimationEnd);
+        //         startImageDiv.addEventListener("animationend", onAnimationEnd);
+        //         startImageLogo.classList.add("startImageAnimation");
+        //         startImageDiv.classList.add("startImageDivAnimation");
+        //         // 注释下面这句话以禁止单击立刻跳过开场动画
+        //         startImageBackgroundDiv.onclick = onAnimationEnd;
+        //     }
+        //     startImageLogo.onerror = function () { }
+        //     startImageLogo.src = "logo.png";
+        // })();
     </script>
     <div id="game">
         <!-- injection -->

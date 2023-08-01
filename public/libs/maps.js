@@ -3108,7 +3108,7 @@ maps.prototype.removeBlock = function (x, y, floorId) {
         const block = blocks[i];
         this.removeBlockByIndex(i, floorId);
         this._removeBlockFromMap(floorId, block);
-        if (!main.replayChecking) core.updateShadow(true);
+        if (!main.replayChecking) ancTe.plugin.gameShadow.updateShadow(true);
         return true;
     }
     return false;
@@ -3271,7 +3271,7 @@ maps.prototype.setBlock = function (number, x, y, floorId, noredraw) {
             }
         }
     }
-    if (!main.replayChecking) core.updateShadow(true);
+    if (!main.replayChecking) ancTe.plugin.gameShadow.updateShadow(true);
 };
 
 maps.prototype.animateSetBlock = function (

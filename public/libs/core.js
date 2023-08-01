@@ -324,11 +324,6 @@ core.prototype._loadPlugin = async function () {
     const mainData = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main;
     core.plugin = {};
     // 加载插件
-    if (main.mode === 'play') {
-        main.forward();
-        core.resetSettings();
-        core.plugin.showMarkedEnemy.value = true;
-    }
     if (main.pluginUseCompress) {
         await main.loadScript(`project/plugin.min.js?v=${main.version}`);
     } else {

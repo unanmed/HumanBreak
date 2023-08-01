@@ -60,7 +60,7 @@ const content = computed(() => {
 });
 
 function exit() {
-    core.plugin.skillOpened.value = false;
+    ancTe.plugin.ui.skillOpened.value = false;
 }
 </script>
 

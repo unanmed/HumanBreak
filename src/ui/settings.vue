@@ -137,7 +137,7 @@ const settings: Record<keyof Settings, Ref<boolean>> = {
 const ignore: (keyof Settings)[] = ['fullscreen'];
 
 function exit() {
-    core.plugin.settingsOpened.value = false;
+    ancTe.plugin.ui.settingsOpened.value = false;
 }
 
 function click(id: keyof Settings) {

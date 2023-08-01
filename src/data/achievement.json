@@ -37,7 +37,7 @@
             "text": [
                 "第一章完成度达到100%"
             ],
-            "progress": "${core.getChapterCompletion(1)} / 100",
+            "progress": "${ancTe.plugin.completion.getChapterCompletion(1)} / 100",
             "percent": true,
             "point": 50
         },
@@ -55,7 +55,7 @@
             "text": [
                 "第二章完成度达到100%"
             ],
-            "progress": "${core.getChapterCompletion(2)} / 100",
+            "progress": "${ancTe.plugin.completion.getChapterCompletion(2)} / 100",
             "percent": true,
             "point": 50
         },

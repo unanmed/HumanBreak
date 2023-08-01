@@ -4228,5 +4228,6 @@ ui.prototype.deleteAllCanvas = function () {
     this.deleteCanvas(function () {
         return true;
     });
-    if (main.mode === 'play' && !main.replayChecking) core.initShadowCanvas();
+    if (main.mode === 'play' && !main.replayChecking && ancTe.plugin.shadow)
+        ancTe.plugin.shadow.initShadowCanvas();
 };

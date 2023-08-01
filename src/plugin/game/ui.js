@@ -12,30 +12,34 @@ export {};
     function openItemShop(itemShopId) {
         if (!core.isReplaying()) {
             core.plugin.openedShopId = itemShopId;
-            core.plugin.shopOpened.value = true;
+            ancTe.plugin.ui.shopOpened.value = true;
         }
     }
 
     function updateVueStatusBar() {
         if (main.replayChecking) return;
         core.plugin.statusBarStatus.value = !core.plugin.statusBarStatus.value;
-        core.checkMarkedEnemy();
+        ancTe.plugin.mark.checkMarkedEnemy();
     }
 
     ui.prototype.drawBook = function () {
-        if (!core.isReplaying()) return (core.plugin.bookOpened.value = true);
+        if (!core.isReplaying())
+            return (ancTe.plugin.ui.bookOpened.value = true);
     };
 
     ui.prototype._drawToolbox = function () {
-        if (!core.isReplaying()) return (core.plugin.toolOpened.value = true);
+        if (!core.isReplaying())
+            return (ancTe.plugin.ui.toolOpened.value = true);
     };
 
     ui.prototype._drawEquipbox = function () {
-        if (!core.isReplaying()) return (core.plugin.equipOpened.value = true);
+        if (!core.isReplaying())
+            return (ancTe.plugin.ui.equipOpened.value = true);
     };
 
     ui.prototype.drawFly = function () {
-        if (!core.isReplaying()) return (core.plugin.flyOpened.value = true);
+        if (!core.isReplaying())
+            return (ancTe.plugin.ui.flyOpened.value = true);
     };
 
     control.prototype.updateStatusBar_update = function () {
@@ -53,7 +57,7 @@ export {};
     control.prototype.showStatusBar = function () {
         if (main.mode == 'editor') return;
         core.removeFlag('hideStatusBar');
-        core.plugin.showStatusBar.value = true;
+        ancTe.plugin.ui.showStatusBar.value = true;
         core.dom.tools.hard.style.display = 'block';
         core.dom.toolBar.style.display = 'block';
     };
@@ -64,7 +68,7 @@ export {};
         // 如果原本就是隐藏的，则先显示
         if (!core.domStyle.showStatusBar) this.showStatusBar();
         if (core.isReplaying()) showToolbox = true;
-        core.plugin.showStatusBar.value = false;
+        ancTe.plugin.ui.showStatusBar.value = false;
 
         var toolItems = core.dom.tools;
         core.setFlag('hideStatusBar', true);
@@ -83,13 +87,13 @@ export {};
 
     function showChapter(chapter) {
         if (core.isReplaying()) return;
-        core.plugin.chapterContent.value = chapter;
-        core.plugin.chapterShowed.value = true;
+        ancTe.plugin.chapter.chapterContent.value = chapter;
+        ancTe.plugin.chapter.chapterShowed.value = true;
     }
 
     function openSkill() {
         if (core.isReplaying()) return;
-        core.plugin.skillOpened.value = true;
+        ancTe.plugin.ui.skillOpened.value = true;
     }
 
     core.plugin.gameUi = {

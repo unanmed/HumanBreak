@@ -1,5 +1,4 @@
 import resource from '../../data/resource.json';
-import { has } from '../../plugin/utils';
 import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
 import { Resource, getTypeByResource } from './resource';
 
@@ -118,7 +117,7 @@ export const loading = new GameLoading();
 
 declare global {
     interface Main {
-        loading: EventEmitter<GameLoadEvent>;
+        loading: GameLoading;
     }
 }
 main.loading = loading;

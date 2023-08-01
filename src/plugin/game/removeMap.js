@@ -36,7 +36,7 @@ export function removeMaps(fromId, toId, force) {
         deleted = true;
     }
     if (deleted && !main.replayChecking) {
-        core.splitArea();
+        ancTe.plugin.fly.splitArea();
     }
 }
 

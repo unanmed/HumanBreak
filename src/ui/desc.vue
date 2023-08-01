@@ -28,7 +28,7 @@ type DescKey = keyof typeof desc;
 const selected = ref(Object.keys(desc)[0] as DescKey);
 
 function exit() {
-    core.plugin.descOpened.value = false;
+    ancTe.plugin.ui.descOpened.value = false;
 }
 
 const content = computed(() => {

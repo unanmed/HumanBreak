@@ -1,20 +1,43 @@
 import { BgmController } from './audio/bgm';
 import { SoundController } from './audio/sound';
-import { readyAllResource } from './loader/load';
+import { loading, readyAllResource } from './loader/load';
 import { ResourceStore, ResourceType } from './loader/resource';
+import { resolvePlugin } from './plugin';
 
-declare global {
-    interface AncTe {
-        sound: SoundController;
-        /** 游戏资源 */
-        resource: ResourceStore<Exclude<ResourceType, 'zip'>>;
-        zipResource: ResourceStore<'zip'>;
-        bgm: BgmController;
-    }
-    interface Window {
-        ancTe: AncTe;
-    }
-    const ancTe: AncTe;
+interface AncTePlugin {
+    pop: ReturnType<typeof import('../plugin/pop').default>;
+    ui: ReturnType<typeof import('../plugin/uiController').default>;
+    use: ReturnType<typeof import('../plugin/use').default>;
+    animate: ReturnType<typeof import('../plugin/animateController').default>;
+    utils: ReturnType<typeof import('../plugin/utils').default>;
+    status: ReturnType<typeof import('../plugin/ui/statusBar').default>;
+    mark: ReturnType<typeof import('../plugin/mark').default>;
+    setting: ReturnType<typeof import('../plugin/settings').default>;
+    chapter: ReturnType<typeof import('../plugin/ui/chapter').default>;
+    fly: ReturnType<typeof import('../plugin/ui/fly').default>;
+    chase: ReturnType<typeof import('../plugin/chase/chase').default>;
+    fixed: ReturnType<typeof import('../plugin/ui/fixed').default>;
+    webglUtils: ReturnType<typeof import('../plugin/webgl/utils').default>;
+    shadow: ReturnType<typeof import('../plugin/shadow/shadow').default>;
+    gameShadow: ReturnType<
+        typeof import('../plugin/shadow/gameShadow').default
+    >;
+    achievement: ReturnType<typeof import('../plugin/ui/achievement').default>;
+    completion: ReturnType<typeof import('../plugin/completion').default>;
+    path: ReturnType<typeof import('../plugin/fx/path').default>;
+    gameCanvas: ReturnType<typeof import('../plugin/fx/gameCanvas').default>;
+    noise: ReturnType<typeof import('../plugin/fx/noise').default>;
+    smooth: ReturnType<typeof import('../plugin/fx/smoothView').default>;
+    frag: ReturnType<typeof import('../plugin/fx/frag').default>;
+}
+
+export interface AncTe {
+    sound: SoundController;
+    /** 游戏资源 */
+    resource: ResourceStore<Exclude<ResourceType, 'zip'>>;
+    zipResource: ResourceStore<'zip'>;
+    bgm: BgmController;
+    plugin: AncTePlugin;
 }
 
 function ready() {
@@ -22,9 +45,12 @@ function ready() {
         bgm: new BgmController(),
         resource: new ResourceStore(),
         zipResource: new ResourceStore(),
-        sound: new SoundController()
+        sound: new SoundController(),
+        // @ts-ignore
+        plugin: {}
     };
 
     readyAllResource();
+    loading.once('coreInit', resolvePlugin);
 }
 ready();

@@ -166,8 +166,8 @@ async function show() {
  */
 async function exit() {
     noClosePanel.value = true;
-    core.plugin.bookOpened.value = false;
-    if (core.plugin.transition.value) await sleep(650);
+    ancTe.plugin.ui.bookOpened.value = false;
+    if (ancTe.plugin.ui.transition.value) await sleep(650);
     else await sleep(100);
     if (core.events.recoverEvents(core.status.event.interval)) {
         return;
@@ -244,7 +244,7 @@ function keydown(e: KeyboardEvent) {
 }
 
 onMounted(async () => {
-    if (core.plugin.transition.value) await sleep(600);
+    if (ancTe.plugin.ui.transition.value) await sleep(600);
     else await sleep(50);
     document.addEventListener('keyup', keyup);
     document.addEventListener('keydown', keydown);

@@ -51,7 +51,7 @@ const content = computed(() => {
 const name = computed(() => list[selected.value]!.name);
 
 function exit() {
-    core.plugin.bgmOpened.value = false;
+    ancTe.plugin.ui.bgmOpened.value = false;
 }
 
 function select(id: BgmIds) {
