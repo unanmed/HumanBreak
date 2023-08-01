@@ -206,6 +206,7 @@ core.events.afterBattle = function (
         frag.style.top = `${top}px`;
         frag.style.zIndex = '45';
         frag.style.position = 'absolute';
+        frag.style.filter = 'sepia(20%)brightness(120%)';
         core.dom.gameDraw.appendChild(frag);
         manager.onEnd.then(() => {
             frag.remove();

@@ -1,4 +1,4 @@
-import { Animation, bezier, sleep } from 'mutate-animate';
+import { Animation, linear, sleep } from 'mutate-animate';
 
 interface SplittedImage {
     canvas: HTMLCanvasElement;
@@ -17,11 +17,11 @@ interface FraggingImage extends SplittedImage {
 /** 最大移动距离，最终位置距离中心的距离变成原来的几倍 */
 const MAX_MOVE_LENGTH = 1.15;
 /** 移动距离波动，在最大移动距离的基础上加上多少倍距离的波动距离 */
-const MOVE_FLUSH = 0.2;
+const MOVE_FLUSH = 0.7;
 /** 最大旋转角，单位是弧度 */
-const MAX_ROTATE = 0.4;
+const MAX_ROTATE = 0.5;
 /** 碎裂动画的速率曲线函数 */
-const FRAG_TIMING = bezier(0.75);
+const FRAG_TIMING = linear();
 
 export default function init() {
     return { applyFragWith };
@@ -30,7 +30,7 @@ export default function init() {
 export function applyFragWith(
     canvas: HTMLCanvasElement,
     length: number = 4,
-    time: number = 4000
+    time: number = 1000
 ) {
     // 先切分图片
     const imgs = splitCanvas(canvas, length);
@@ -44,7 +44,7 @@ export function applyFragWith(
         const centerY = v.y + v.canvas.height / 2;
         const onX = centerX === cx;
         const onY = centerY === cy;
-        const rate = MAX_MOVE_LENGTH - 1 + Math.random() * MOVE_FLUSH;
+        const rate = MAX_MOVE_LENGTH - 1 + Math.random() ** 3 * MOVE_FLUSH;
         let endX = onY ? 0 : (centerX - cx) * rate;
         let endY = onX ? 0 : (centerY - cy) * rate;
         const mx = Math.abs(endX + centerX) + Math.abs(v.canvas.width);
