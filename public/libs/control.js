@@ -1697,7 +1697,7 @@ control.prototype._drawDamage_draw = function (ctx, onMap) {
     if (!core.hasItem('book')) return;
     core.plugin.halo.drawHalo(ctx, onMap);
 
-    core.setFont(ctx, "14px 'normal'");
+    core.setFont(ctx, "11px 'normal'");
     core.setTextAlign(ctx, 'left');
     core.status.damage.data.forEach(function (one) {
         var px = one.px,

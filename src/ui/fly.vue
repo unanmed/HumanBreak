@@ -92,7 +92,7 @@ import {
     RightOutlined,
     DoubleRightOutlined
 } from '@ant-design/icons-vue';
-import { debounce } from 'lodash';
+import { debounce } from 'lodash-es';
 import { downloadCanvasImage, keycode, tip } from '../plugin/utils';
 import { sleep } from 'mutate-animate';
 import { KeyCode } from '../plugin/keyCodes';

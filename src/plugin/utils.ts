@@ -1,7 +1,7 @@
 /// <reference path="../types/core.d.ts" />
 import { message } from 'ant-design-vue';
 import { MessageApi } from 'ant-design-vue/lib/message';
-import { isNil } from 'lodash';
+import { isNil } from 'lodash-es';
 import { Animation, sleep, TimingFn } from 'mutate-animate';
 import { ComputedRef, ref } from 'vue';
 import { EVENT_KEY_CODE_MAP } from './keyCodes';

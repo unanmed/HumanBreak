@@ -427,12 +427,19 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
 
             // 打怪特效
             if (core.has(x) && core.has(y)) {
+                const mml = core.getFragProperty('mml');
+                const mr = core.getFragProperty('mr');
+                const mf = core.getFragProperty('mf');
                 const frame = core.status.globalAnimateStatus % 2;
                 const canvas = document.createElement('canvas');
                 canvas.width = 32;
                 canvas.height = 32;
                 core.drawIcon(canvas, enemy.id, 0, 0, 32, 32, frame);
-                const manager = core.applyFragWith(canvas);
+                const manager = core.applyFragWith(canvas, void 0, void 0, {
+                    maxMoveLength: mml,
+                    moveFlush: mf,
+                    moveRotate: mr
+                });
                 const frag = manager.canvas;
                 frag.style.imageRendering = 'pixelated';
                 frag.style.width = `${frag.width * core.domStyle.scale}px`;
