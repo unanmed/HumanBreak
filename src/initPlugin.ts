@@ -17,6 +17,7 @@ import achievement from './plugin/ui/achievement';
 import completion, { floors } from './plugin/completion';
 import path from './plugin/fx/path';
 import * as ani from 'mutate-animate';
+import frag from './plugin/fx/frag';
 
 function forward() {
     const toForward: any[] = [
@@ -37,7 +38,8 @@ function forward() {
         gameShadow(),
         achievement(),
         completion(),
-        path()
+        path(),
+        frag(),
     ];
 
     // 初始化所有插件，并转发到core上
@@ -70,7 +72,7 @@ function forward() {
     // @ts-ignore
     core.plugin.ani = ani;
     // @ts-ignore
-    core.plugin.shadow = shadow();
+    core.plugin.shadow = toForward[13];
 }
 
 main.forward = forward;
