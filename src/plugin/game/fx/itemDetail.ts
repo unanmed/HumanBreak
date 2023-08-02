@@ -19,7 +19,7 @@ core.control.updateDamage = function (floorId = core.status.floorId, ctx) {
     ensureFloorDamage(floorId);
 
     floor.enemy.extract();
-    floor.enemy.calDamage(true, onMap);
+    floor.enemy.calDamage(true);
     floor.enemy.calMapDamage();
     core.status.damage.data = [];
 

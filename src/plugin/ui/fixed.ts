@@ -65,13 +65,11 @@ export function getDetailedEnemy(
 
     const ratio = core.status.maps[floorId].ratio;
 
-    const dam = enemy.calEnemyDamage(core.status.hero, 'none')[0].damage;
-    const cri = enemy.calCritical(1, 'none')[0]?.[0];
+    const dam = enemy.calDamage().damage;
+    const cri = enemy.calCritical(1)[0];
     const critical = core.formatBigNumber(cri?.atkDelta);
     const criticalDam = core.formatBigNumber(cri?.delta);
-    const defDam = core.formatBigNumber(
-        enemy.calDefDamage(ratio, 'none')[0].damage
-    );
+    const defDam = core.formatBigNumber(enemy.calDefDamage(ratio).damage);
     const damage = core.formatBigNumber(dam);
 
     const fromFunc = (

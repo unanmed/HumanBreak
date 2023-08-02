@@ -363,22 +363,13 @@ interface GamePluginHeroRealStatus {
      * @param y 勇士所在纵坐标
      * @param floorId 勇士所在楼层
      */
-    getHeroStatusOn(
-        name: 'all',
-        x?: number,
-        y?: number,
-        floorId?: FloorIds
-    ): HeroStatus;
+    getHeroStatusOn(name: 'all', floorId?: FloorIds): HeroStatus;
     getHeroStatusOn(
         name: (keyof HeroStatus)[],
-        x?: number,
-        y?: number,
         floorId?: FloorIds
     ): Partial<HeroStatus>;
     getHeroStatusOn<K extends keyof HeroStatus>(
         name: K,
-        x?: number,
-        y?: number,
         floorId?: FloorIds
     ): HeroStatus[K];
 
@@ -393,22 +384,16 @@ interface GamePluginHeroRealStatus {
     getHeroStatusOf(
         status: Partial<HeroStatus>,
         name: 'all',
-        x?: number,
-        y?: number,
         floorId?: FloorIds
     ): HeroStatus;
     getHeroStatusOf(
         status: Partial<HeroStatus>,
         name: (keyof HeroStatus)[],
-        x?: number,
-        y?: number,
         floorId?: FloorIds
     ): Partial<HeroStatus>;
     getHeroStatusOf<K extends keyof HeroStatus>(
         status: Partial<HeroStatus>,
         name: K,
-        x?: number,
-        y?: number,
         floorId?: FloorIds
     ): HeroStatus[K];
 }

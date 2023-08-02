@@ -2822,6 +2822,7 @@ control.prototype.getRealStatus = function (name) {
 
 ////// 从status中获得实际属性（增幅后的），如果不存在则从勇士属性中获取 //////
 control.prototype.getRealStatusOrDefault = function (status, name) {
+    // todo: 删除
     return core.plugin.hero.getHeroStatusOf(status, name);
 };
 

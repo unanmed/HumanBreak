@@ -111,7 +111,6 @@ interface Events extends EventData {
     battle(
         x: number,
         y: number,
-        dir: Dir | 'none',
         force: boolean = false,
         callback?: () => void
     ): void;

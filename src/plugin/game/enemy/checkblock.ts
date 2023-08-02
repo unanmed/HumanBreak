@@ -17,7 +17,7 @@ control.prototype.checkBlock = function (forceMockery: boolean = false) {
             );
         }
         core.status.hero.hp -= damage;
-        const type = Array.from(info.type.keys());
+        const type = [...info.type];
         const text = type.join('，') || '伤害';
         core.drawTip('受到' + text + damage + '点');
         core.drawHeroAnimate('zone');

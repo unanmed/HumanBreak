@@ -1,4 +1,3 @@
-import { equal } from '../utils';
 import { getHeroStatusOf, getHeroStatusOn } from '../hero';
 import { Range, RangeCollection } from '../range';
 import {
@@ -36,10 +35,6 @@ interface EnemyInfo {
 
 interface DamageInfo {
     damage: number;
-    /** 从怪物位置指向勇士的方向 */
-    dir: Dir | 'none';
-    x?: number;
-    y?: number;
     /** 自动切换技能时使用的技能 */
     skill?: number;
 }
@@ -58,12 +53,9 @@ interface HaloData<T extends keyof HaloType = keyof HaloType> {
 }
 
 interface DamageDelta {
-    dir: DamageDir;
     /** 跟最小伤害值的减伤 */
     delta: number;
     damage: number;
-    /** 跟当前方向的减伤 */
-    dirDelta: number;
     info: DamageInfo;
 }
 
@@ -73,7 +65,6 @@ interface CriticalDamageDelta extends Omit<DamageDelta, 'info'> {
 }
 
 type HaloFn = (info: EnemyInfo, enemy: Enemy) => void;
-export type DamageDir = Dir | 'none';
 
 /** 光环属性 */
 export const haloSpecials: number[] = [8, 21, 25, 26, 27];
@@ -129,10 +120,10 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
      * 计算怪物伤害
      * @param noCache 是否不使用缓存
      */
-    calDamage(noCache: boolean = false, onMap: boolean = false) {
+    calDamage(noCache: boolean = false) {
         if (noCache) this.calRealAttribute();
         this.list.forEach(v => {
-            v.calDamage(void 0, onMap);
+            v.calDamage(void 0);
         });
     }
 
@@ -141,12 +132,7 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
      */
     calMapDamage() {
         this.mapDamage = {};
-        const hero = getHeroStatusOn(
-            realStatus,
-            core.status.hero.loc.x,
-            core.status.hero.loc.y,
-            this.floorId
-        );
+        const hero = getHeroStatusOn(realStatus, this.floorId);
         this.list.forEach(v => {
             v.calMapDamage(this.mapDamage, hero);
         });
@@ -192,15 +178,8 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
         });
     }
 
-    render(onMap?: boolean): void;
-    render(onMap: boolean, cal: boolean, noCache: boolean): void;
-    render(
-        onMap: boolean = false,
-        cal: boolean = false,
-        noCache: boolean = false
-    ) {
+    render(onMap: boolean = false, cal: boolean = false) {
         if (cal) {
-            this.calDamage(noCache, true);
             this.calMapDamage();
         }
         core.status.damage.data = [];
@@ -211,72 +190,23 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
         this.list.forEach(v => {
             if (onMap && !checkV2(v.x, v.y)) return;
 
-            if (!v.damage) {
-                throw new Error(
-                    `Unexpected null of enemy's damage. Loc: '${v.x},${v.y}'. Floor: ${v.floorId}`
-                );
-            }
-            if (equal(v.damage, 'damage')) {
-                // 伤害全部相等，绘制在怪物本身所在位置
-                const { damage, color } = formatDamage(v.damage[0].damage);
-                const critical = v.calCritical(1)[0]?.[0];
-                core.status.damage.data.push({
-                    text: damage,
-                    px: 32 * v.x! + 1,
-                    py: 32 * (v.y! + 1) - 1,
-                    color: color
-                });
-                core.status.damage.data.push({
-                    text: critical?.atkDelta.toString() ?? '?',
-                    px: 32 * v.x! + 1,
-                    py: 32 * (v.y! + 1) - 11,
-                    color: '#fff'
-                });
-            } else {
-                let min = v.damage[0].damage;
-                let max = min;
-                let minI = 0;
-                for (let i = 1; i < v.damage.length; i++) {
-                    const dam = v.damage[i].damage;
-                    if (dam < min) {
-                        min = dam;
-                        minI = i;
-                    }
-                    if (dam > max) {
-                        max = dam;
-                    }
-                }
-                const delta = max - min;
-                const { damage, color } = formatDamage(min);
-                // 在怪物位置绘制最低的伤害
-                core.status.damage.data.push({
-                    text: damage,
-                    px: 32 * v.x! + 1,
-                    py: 32 * (v.y! + 1) - 1,
-                    color: color
-                });
-                // 绘制临界
-                const critical = v.calCritical(1, v.damage[minI].dir)[0]?.[0];
-                core.status.damage.data.push({
-                    text: critical?.atkDelta.toString() ?? '?',
-                    px: 32 * v.x! + 1,
-                    py: 32 * (v.y! + 1) - 11,
-                    color: '#fff'
-                });
-                // 然后根据位置依次绘制对应位置的伤害
-                for (const dam of v.damage) {
-                    if (dam.dir === 'none') continue;
-                    const d = ((dam.damage - min) / delta) * 255;
-                    const color = core.arrayToRGB([d, 255 - d, 0]);
+            const { damage } = v.calDamage();
 
-                    core.status.damage.dir.push({
-                        x: v.x!,
-                        y: v.y!,
-                        dir: dam.dir,
-                        color: color
-                    });
-                }
-            }
+            // 伤害全部相等，绘制在怪物本身所在位置
+            const { damage: dam, color } = formatDamage(damage);
+            const critical = v.calCritical(1)[0];
+            core.status.damage.data.push({
+                text: dam,
+                px: 32 * v.x! + 1,
+                py: 32 * (v.y! + 1) - 1,
+                color: color
+            });
+            core.status.damage.data.push({
+                text: critical?.atkDelta.toString() ?? '?',
+                px: 32 * v.x! + 1,
+                py: 32 * (v.y! + 1) - 11,
+                color: '#fff'
+            });
         });
 
         // 地图伤害
@@ -362,10 +292,6 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
      * -> provide inject 光环 -> 计算怪物的光环加成 -> 计算完毕
      */
     info!: EnemyInfo;
-    /** 怪物伤害 */
-    damage?: DamageInfo[];
-    /** 是否需要计算伤害 */
-    needCalDamage: boolean = true;
 
     /** 向其他怪提供过的光环 */
     providedHalo: number[] = [];
@@ -409,7 +335,6 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
             floorId: this.floorId
         };
         this.progress = 0;
-        this.needCalDamage = true;
         this.providedHalo = [];
     }
 
@@ -578,17 +503,9 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     /**
      * 计算怪物伤害
      */
-    calDamage(
-        hero: Partial<HeroStatus> = core.status.hero,
-        onMap: boolean = false
-    ) {
-        if (onMap && !checkV2(this.x, this.y)) return this.damage!;
-        if (!this.needCalDamage) return this.damage!;
-        const dirs = getNeedCalDir(this.x, this.y, this.floorId, hero);
-
-        this.needCalDamage = false;
-
-        return (this.damage = this.calEnemyDamage(hero, dirs));
+    calDamage(hero: Partial<HeroStatus> = core.status.hero) {
+        const enemy = this.getRealInfo();
+        return this.calEnemyDamageOf(hero, enemy);
     }
 
     /**
@@ -695,44 +612,8 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         damage[loc].type.add(type);
     }
 
-    calEnemyDamage(
-        hero: Partial<HeroStatus> = core.status.hero,
-        dir: DamageDir | DamageDir[]
-    ): DamageInfo[] {
-        const dirs = ensureArray(dir);
-        const enemy = this.getRealInfo();
-
-        return dirs.map(dir => {
-            let x: number | undefined;
-            let y: number | undefined;
-            if (has(this.x) && has(this.y)) {
-                if (dir !== 'none') {
-                    [x, y] = ofDir(this.x, this.y, dir);
-                } else {
-                    x = hero.x ?? this.x;
-                    y = hero.y ?? this.y;
-                }
-            }
-
-            const { damage, skill } = this.calEnemyDamageOf(hero, enemy, x, y);
-
-            return {
-                damage,
-                dir,
-                skill,
-                x,
-                y
-            };
-        });
-    }
-
-    private calEnemyDamageOf(
-        hero: Partial<HeroStatus>,
-        enemy: EnemyInfo,
-        x?: number,
-        y?: number
-    ) {
-        const status = getHeroStatusOf(hero, realStatus, x, y, this.floorId);
+    private calEnemyDamageOf(hero: Partial<HeroStatus>, enemy: EnemyInfo) {
+        const status = getHeroStatusOf(hero, realStatus, this.floorId);
         let damage = calDamageWith(enemy, status) ?? Infinity;
         let skill = -1;
 
@@ -765,27 +646,11 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
      */
     calCritical(
         num: number = 1,
-        dir: DamageDir | DamageDir[] = 'none',
         hero: Partial<HeroStatus> = core.status.hero
-    ): CriticalDamageDelta[][] {
-        const origin = this.calEnemyDamage(hero, dir);
-        const min = Math.min(...origin.map(v => v.damage));
+    ): CriticalDamageDelta[] {
+        const origin = this.calDamage(hero);
         const seckill = this.getSeckillAtk();
-
-        return origin.map(v => {
-            const dir = v.dir;
-            if (
-                dir === 'none' ||
-                !has(this.x) ||
-                !has(this.y) ||
-                !has(this.floorId)
-            ) {
-                return this.calCriticalWith(num, min, seckill, v, hero);
-            } else {
-                const [x, y] = ofDir(this.x, this.y, dir);
-                return this.calCriticalWith(num, min, seckill, v, hero, x, y);
-            }
-        });
+        return this.calCriticalWith(num, seckill, origin, hero);
     }
 
     /**
@@ -797,12 +662,9 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
      */
     private calCriticalWith(
         num: number,
-        min: number,
         seckill: number,
         origin: DamageInfo,
-        hero: Partial<HeroStatus>,
-        x?: number,
-        y?: number
+        hero: Partial<HeroStatus>
     ): CriticalDamageDelta[] {
         // todo: 可以优化，根据之前的计算可以直接确定下一个临界的范围
         if (!isFinite(seckill)) return [];
@@ -819,8 +681,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         let ori = origin.damage;
 
         const calDam = () => {
-            return this.calEnemyDamageOf({ atk: curr, def }, enemy, x, y)
-                .damage;
+            return this.calEnemyDamageOf({ atk: curr, def }, enemy).damage;
         };
 
         let i = 0;
@@ -835,9 +696,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                         res.push({
                             damage: dam,
                             atkDelta: Math.ceil(v - hero.atk!),
-                            dir: origin.dir,
-                            delta: dam - min,
-                            dirDelta: dam - origin.damage
+                            delta: dam - ori
                         });
 
                         start = v;
@@ -872,9 +731,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
             res.push({
                 damage: dam,
                 atkDelta: 0,
-                dir: origin.dir,
-                delta: dam - min,
-                dirDelta: 0
+                delta: 0
             });
         }
 
@@ -889,26 +746,19 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
      */
     calDefDamage(
         num: number = 1,
-        dir: DamageDir | DamageDir[] = 'none',
         hero: Partial<HeroStatus> = core.status.hero
-    ): DamageDelta[] {
-        const damage = this.calEnemyDamage(
-            { def: (hero.def ?? core.status.hero.def) + num },
-            dir
-        );
-        const origin = this.calEnemyDamage(hero, dir);
-        const min = Math.min(...origin.map(v => v.damage));
-
-        return damage.map((v, i) => {
-            const finite = isFinite(v.damage);
-            return {
-                dir: v.dir,
-                damage: v.damage,
-                info: v,
-                delta: finite ? v.damage - min : Infinity,
-                dirDelta: finite ? v.damage - origin[i].damage : Infinity
-            };
+    ): DamageDelta {
+        const damage = this.calDamage({
+            def: (hero.def ?? core.status.hero.def) + num
         });
+        const origin = this.calDamage(hero);
+        const finite = isFinite(damage.damage);
+
+        return {
+            damage: damage.damage,
+            info: damage,
+            delta: finite ? damage.damage - origin.damage : Infinity
+        };
     }
 
     /**
@@ -923,7 +773,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
             return Infinity;
         }
 
-        // 列方程求解
+        // 列方程求解，拿笔算一下就知道了
         // 饥渴，会偷取勇士攻击
         if (info.special.includes(7)) {
             if (info.damageDecline === 0) {
@@ -970,47 +820,6 @@ const skills: [unlock: string, condition: string][] = [
     ['bladeOn', 'blade'],
     ['shieldOn', 'shield']
 ];
-
-/**
- * 获取需要计算怪物伤害的方向
- * @param x 怪物横坐标
- * @param y 怪物纵坐标
- * @param floorId 怪物所在楼层
- * @returns 由怪物方向指向勇士的方向
- */
-export function getNeedCalDir(
-    x?: number,
-    y?: number,
-    floorId?: FloorIds,
-    hero: Partial<HeroStatus> = core.status.hero
-): (Dir | 'none')[] {
-    // 第一章或序章，或者没有指定怪物位置，或者没开自动定位，用不到这个函数
-    if (flags.chapter < 2 || !has(x) || !has(y) || !floorId) {
-        return ['none'];
-    }
-
-    // 如果指定了勇士坐标
-    if (has(hero.x) && has(hero.y)) {
-        return ['none'];
-    }
-
-    const needMap: Dir[] = ['left', 'down', 'right', 'up'];
-    const { width, height } = core.status.maps[floorId];
-    const blocks = core.getMapBlocksObj(floorId);
-
-    const res = needMap.filter(v => {
-        const [tx, ty] = ofDir(x, y, v);
-        if (tx < 0 || ty < 0 || tx >= width || ty >= height) return false;
-        const index = `${tx},${ty}` as LocString;
-        if (!core.canMoveHero(tx, ty, backDir(v), floorId)) return false;
-        const block = blocks[index];
-        if (!block) return true;
-        if (block.event.noPass || block.event.cls === 'items') return false;
-
-        return true;
-    });
-    return res.length === 0 ? ['none'] : res;
-}
 
 /**
  * 计算怪物伤害
@@ -1123,7 +932,7 @@ export function getSingleEnemy(id: EnemyIds) {
     const enemy = new DamageEnemy(e);
     enemy.calAttribute();
     enemy.getRealInfo();
-    enemy.calDamage(core.status.hero, false)[0];
+    enemy.calDamage(core.status.hero);
     return enemy;
 }
 

@@ -5,32 +5,21 @@
  * @param y 勇士所在纵坐标
  * @param floorId 勇士所在楼层
  */
-export function getHeroStatusOn(
-    name: 'all',
-    x?: number,
-    y?: number,
-    floorId?: FloorIds
-): HeroStatus;
+export function getHeroStatusOn(name: 'all', floorId?: FloorIds): HeroStatus;
 export function getHeroStatusOn(
     name: (keyof HeroStatus)[],
-    x?: number,
-    y?: number,
     floorId?: FloorIds
 ): Partial<HeroStatus>;
 export function getHeroStatusOn<K extends keyof HeroStatus>(
     name: K,
-    x?: number,
-    y?: number,
     floorId?: FloorIds
 ): HeroStatus[K];
 export function getHeroStatusOn(
     name: keyof HeroStatus | 'all' | (keyof HeroStatus)[],
-    x?: number,
-    y?: number,
     floorId?: FloorIds
 ) {
     // @ts-ignore
-    return getHeroStatusOf(core.status.hero, name, x, y, floorId);
+    return getHeroStatusOf(core.status.hero, name, floorId);
 }
 
 /**
@@ -44,44 +33,34 @@ export function getHeroStatusOn(
 export function getHeroStatusOf(
     status: Partial<HeroStatus>,
     name: 'all',
-    x?: number,
-    y?: number,
     floorId?: FloorIds
 ): HeroStatus;
 export function getHeroStatusOf(
     status: Partial<HeroStatus>,
     name: (keyof HeroStatus)[],
-    x?: number,
-    y?: number,
     floorId?: FloorIds
 ): Partial<HeroStatus>;
 export function getHeroStatusOf<K extends keyof HeroStatus>(
     status: Partial<HeroStatus>,
     name: K,
-    x?: number,
-    y?: number,
     floorId?: FloorIds
 ): HeroStatus[K];
 export function getHeroStatusOf(
     status: DeepPartial<HeroStatus>,
     name: keyof HeroStatus | 'all' | (keyof HeroStatus)[],
-    x?: number,
-    y?: number,
     floorId?: FloorIds
 ) {
-    return getRealStatus(status, name, x, y, floorId);
+    return getRealStatus(status, name, floorId);
 }
 
 function getRealStatus(
     status: DeepPartial<HeroStatus>,
     name: keyof HeroStatus | 'all' | (keyof HeroStatus)[],
-    x?: number,
-    y?: number,
-    floorId?: FloorIds
+    floorId: FloorIds = core.status.floorId
 ): any {
     if (name instanceof Array) {
         return Object.fromEntries(
-            name.map(v => [v, getRealStatus(status, v, x, y, floorId)])
+            name.map(v => [v, getRealStatus(status, v, floorId)])
         );
     }
 
@@ -90,7 +69,7 @@ function getRealStatus(
             Object.keys(core.status.hero).map(v => [
                 v,
                 v !== 'all' &&
-                    getRealStatus(status, v as keyof HeroStatus, x, y, floorId)
+                    getRealStatus(status, v as keyof HeroStatus, floorId)
             ])
         );
     }
@@ -101,10 +80,6 @@ function getRealStatus(
             `Wrong hero status property name is delivered: ${name}`
         );
     }
-
-    x ??= core.status.hero.loc.x;
-    y ??= core.status.hero.loc.y;
-    floorId ??= core.status.floorId;
 
     // 永夜、极昼
     if (name === 'atk' || name === 'def') {

@@ -1,5 +1,4 @@
 import { getEnemy } from '../enemy/battle';
-import { DamageDir, getNeedCalDir } from '../enemy/damage';
 import { formatDamage } from '../utils';
 
 core.maps._initDetachedBlock = function (
@@ -37,16 +36,8 @@ core.maps._initDetachedBlock = function (
         displayDamage
     ) {
         const enemy = getEnemy(x, y);
-        const dam = enemy.calEnemyDamage(core.status.hero, getNeedCalDir(x, y));
-        let min = Infinity;
-        let minDir: DamageDir = 'none';
-        for (const d of dam) {
-            if (d.damage < min) {
-                min = d.damage;
-                minDir = d.dir;
-            }
-        }
-        const { damage, color } = formatDamage(min);
+        const dam = enemy.calDamage();
+        const { damage, color } = formatDamage(dam.damage);
 
         damageCanvas = '__damage_' + x + '_' + y;
         const ctx = core.createCanvas(damageCanvas, 0, 0, 32, 32, 65);
@@ -54,8 +45,8 @@ core.maps._initDetachedBlock = function (
         ctx.font = '14px normal';
         core.fillBoldText(ctx, damage, 1, 31, color as string);
         if (core.flags.displayCritical) {
-            const critical = enemy.calCritical(1, minDir)[0];
-            const atk = core.formatBigNumber(critical[0].dirDelta, true);
+            const critical = enemy.calCritical(1);
+            const atk = core.formatBigNumber(critical[0]?.delta, true);
             const display = atk === '???' ? '?' : atk;
             core.fillBoldText(ctx, display, 1, 21, '#FFFFFF');
         }

@@ -1,10 +1,4 @@
-import {
-    DamageDir,
-    DamageEnemy,
-    ensureFloorDamage,
-    getNeedCalDir,
-    getSingleEnemy
-} from './damage';
+import { DamageEnemy, ensureFloorDamage, getSingleEnemy } from './damage';
 import { findDir, has } from '../utils';
 
 export interface CurrentEnemy {
@@ -31,32 +25,23 @@ export function getEnemy(
 core.enemys.canBattle = function (
     x: number,
     y: number,
-    floorId: FloorIds = core.status.floorId,
-    dir: DamageDir | DamageDir[] = getNeedCalDir(x, y, floorId)
+    floorId: FloorIds = core.status.floorId
 ) {
     const enemy = getEnemy(x, y, floorId);
-    const damage = enemy.calEnemyDamage(core.status.hero, dir);
-
-    return damage.some(v => {
-        return v.damage < core.status.hero.hp;
-    });
+    const { damage } = enemy.calDamage();
+    return damage < core.status.hero.hp;
 };
 
 core.events.battle = function (
     x: number,
     y: number,
-    dir: DamageDir,
     force: boolean = false,
     callback?: () => void
 ) {
     core.saveAndStopAutomaticRoute();
     const enemy = getEnemy(x, y);
     // 非强制战斗
-    if (
-        !core.enemys.canBattle(x, y, void 0, dir) &&
-        !force &&
-        !core.status.event.id
-    ) {
+    if (!core.enemys.canBattle(x, y) && !force && !core.status.event.id) {
         core.stopSound();
         core.playSound('操作失败');
         core.drawTip('你打不过此怪物！', enemy.id);
@@ -65,10 +50,10 @@ core.events.battle = function (
     // 自动存档
     if (!core.status.event.id) core.autosave(true);
     // 战前事件
-    if (!this.beforeBattle(enemy, x, y, dir))
+    if (!this.beforeBattle(enemy, x, y))
         return core.clearContinueAutomaticRoute(callback);
     // 战后事件
-    this.afterBattle(enemy, x, y, dir);
+    this.afterBattle(enemy, x, y);
     callback?.();
 };
 
@@ -79,8 +64,7 @@ core.events.beforeBattle = function () {
 core.events.afterBattle = function (
     enemy: DamageEnemy,
     x?: number,
-    y?: number,
-    dir: DamageDir = 'none'
+    y?: number
 ) {
     const floorId = core.status.floorId;
     const special = enemy.info.special;
@@ -96,7 +80,7 @@ core.events.afterBattle = function (
     if (!core.material.animates[animate]?.se) core.playSound('attack.mp3');
 
     // 战斗伤害
-    const info = enemy.calEnemyDamage(core.status.hero, dir)[0];
+    const info = enemy.calDamage(core.status.hero);
     const damage = info.damage;
     // 判定是否致死
     if (damage >= core.status.hero.hp) {
@@ -238,8 +222,7 @@ core.events._sys_battle = function (data: Block, callback?: () => void) {
             core.insertAction(beforeBattle, data.x, data.y, callback);
         }
     } else {
-        const dir = findDir(data, core.status.hero.loc) as DamageDir;
-        this.battle(data.x, data.y, dir, false, callback);
+        this.battle(data.x, data.y, false, callback);
     }
 };
 
@@ -253,11 +236,7 @@ core.events._action_battle = function (data, x, y, prefix) {
             return;
         }
         const [ex, ey] = this.__action_getLoc(data.loc, x, y, prefix) as LocArr;
-        const dir = findDir(core.status.hero.loc, {
-            x: ex,
-            y: ey
-        }) as DamageDir;
-        this.battle(ex, ey, dir, true, core.doAction);
+        this.battle(ex, ey, true, core.doAction);
     }
 };
 
@@ -285,28 +264,16 @@ core.enemys.getCurrentEnemys = function (floorId = core.status.floorId) {
     });
 
     return enemys.sort((a, b) => {
-        return (
-            (a.enemy.damage?.[0]?.damage ?? Infinity) -
-            (b.enemy.damage?.[0]?.damage ?? Infinity)
-        );
+        const ad = a.enemy.calDamage().damage;
+        const bd = b.enemy.calDamage().damage;
+        return ad - bd;
     });
 };
 
 declare global {
     interface Events {
-        beforeBattle(
-            enemy: DamageEnemy,
-            x: number,
-            y: number,
-            dir: DamageDir
-        ): boolean;
-
-        afterBattle(
-            enemy: DamageEnemy,
-            x: number,
-            y: number,
-            dir: DamageDir
-        ): void;
+        beforeBattle(enemy: DamageEnemy, x: number, y: number): boolean;
+        afterBattle(enemy: DamageEnemy, x: number, y: number): void;
     }
 
     interface Enemys {
