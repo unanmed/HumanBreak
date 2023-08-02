@@ -1,3 +1,5 @@
+import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
+
 type MotaSettingType = boolean | number | MotaSetting;
 
 interface MotaSettingItem<T extends MotaSettingType = MotaSettingType> {
@@ -8,7 +10,15 @@ interface MotaSettingItem<T extends MotaSettingType = MotaSettingType> {
     display?: (value: T) => string;
 }
 
-class MotaSetting {
+interface SettingEvent extends EmitableEvent {
+    valueChange: <T extends boolean | number>(
+        key: string,
+        newValue: T,
+        oldValue: T
+    ) => void;
+}
+
+class MotaSetting extends EventEmitter<SettingEvent> {
     private list: Record<string, MotaSettingItem> = {};
     special?: string;
 
@@ -17,6 +27,7 @@ class MotaSetting {
      */
     markAsSpecial(sp: string) {
         this.special = sp;
+        this.register('@special', '', false);
         return this;
     }
 
@@ -70,7 +81,9 @@ class MotaSetting {
                     `Expected: ${typeof setting.value}. Recieve: ${typeof value}`
             );
         }
+        const old = setting.value as boolean | number;
         setting.value = value;
+        this.emit('valueChange', this.formatKey(key), old, value);
     }
 
     /**
@@ -86,7 +99,9 @@ class MotaSetting {
                     `Type expected: number. See: ${typeof setting.value}`
             );
         }
+        const old = setting.value as boolean | number;
         setting.value += value;
+        this.emit('valueChange', this.formatKey(key), old, value);
     }
 
     /**
@@ -114,6 +129,10 @@ class MotaSetting {
         }
 
         return now.list[list.at(-1)!] ?? null;
+    }
+
+    private formatKey(key: string) {
+        return key.replace('.@special', '');
     }
 }
 
