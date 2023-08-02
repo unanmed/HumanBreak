@@ -1,14 +1,6 @@
 import { getHeroStatusOf, getHeroStatusOn } from '../hero';
 import { Range, RangeCollection } from '../range';
-import {
-    backDir,
-    checkV2,
-    ensureArray,
-    formatDamage,
-    has,
-    manhattan,
-    ofDir
-} from '../utils';
+import { checkV2, ensureArray, formatDamage, has, manhattan } from '../utils';
 
 interface HaloType {
     square: {
