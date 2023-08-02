@@ -64,16 +64,14 @@ const specials = Object.fromEntries(
 
 const enemy = core.getCurrentEnemys(floorId);
 const toShow: ToShowEnemy[] = enemy.map(v => {
-    const cri = v.enemy.calCritical(1, 'none')[0];
+    const e = v.enemy;
+    const dam = e.calDamage().damage;
+    const cri = e.calCritical(1);
     const critical = core.formatBigNumber(cri[0]?.atkDelta);
     const criticalDam = core.formatBigNumber(-cri[0]?.delta);
     const ratio = core.status.maps[floorId].ratio;
-    const defDam = core.formatBigNumber(
-        -v.enemy.calDefDamage(ratio, 'none')[0]?.delta
-    );
-    const damage = core.formatBigNumber(
-        v.enemy.damage?.[0]?.damage ?? Infinity
-    );
+    const defDam = core.formatBigNumber(-e.calDefDamage(ratio).delta);
+    const damage = core.formatBigNumber(dam);
 
     const fromFunc = (
         func: string | ((enemy: Enemy) => string),
@@ -96,9 +94,7 @@ const toShow: ToShowEnemy[] = enemy.map(v => {
             ? special.slice(0, 2).concat(['...', '', '#fff'])
             : special.slice();
 
-    const damageColor = getDamageColor(
-        v.enemy.damage?.[0]?.damage ?? Infinity
-    ) as string;
+    const damageColor = getDamageColor(dam) as string;
 
     return {
         critical,

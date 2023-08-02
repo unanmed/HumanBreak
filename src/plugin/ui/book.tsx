@@ -60,26 +60,23 @@ export function getDefDamage(
     const max = 100 - Math.floor(addDef / ratio);
 
     for (let i = 0; i <= max; i++) {
-        const dam = enemy.enemy.calEnemyDamage(
-            {
-                atk: core.status.hero.atk + addAtk,
-                def: core.status.hero.def + addDef + i * ratio
-            },
-            'none'
-        );
+        const dam = enemy.enemy.calDamage({
+            atk: core.status.hero.atk + addAtk,
+            def: core.status.hero.def + addDef + i * ratio
+        });
 
         if (res.length === 0) {
-            origin = dam[0].damage;
+            origin = dam.damage;
             if (has(origin)) {
                 res.push([addDef + i * ratio, origin]);
                 last = origin;
             }
             continue;
         }
-        if (!isFinite(dam[0].damage)) continue;
-        if (dam[0].damage === res.at(-1)?.[1]) continue;
-        last = dam[0].damage;
-        res.push([ratio * i + addDef, dam[0].damage]);
+        if (!isFinite(dam.damage)) continue;
+        if (dam.damage === res.at(-1)?.[1]) continue;
+        last = dam.damage;
+        res.push([ratio * i + addDef, dam.damage]);
     }
 
     return res;
@@ -103,26 +100,23 @@ export function getCriticalDamage(
     const max = 100 - Math.floor(addAtk / ratio);
 
     for (let i = 0; i <= max; i++) {
-        const dam = enemy.enemy.calEnemyDamage(
-            {
-                atk: core.status.hero.atk + addAtk + i * ratio,
-                def: core.status.hero.def + addDef
-            },
-            'none'
-        );
+        const dam = enemy.enemy.calDamage({
+            atk: core.status.hero.atk + addAtk + i * ratio,
+            def: core.status.hero.def + addDef
+        });
 
         if (res.length === 0) {
-            origin = dam[0].damage;
+            origin = dam.damage;
             if (has(origin)) {
                 res.push([addAtk + i * ratio, origin]);
                 last = origin;
             }
             continue;
         }
-        if (!isFinite(dam[0].damage)) continue;
-        if (dam[0].damage === res.at(-1)?.[1]) continue;
-        last = dam[0].damage;
-        res.push([ratio * i + addAtk, dam[0].damage]);
+        if (!isFinite(dam.damage)) continue;
+        if (dam.damage === res.at(-1)?.[1]) continue;
+        last = dam.damage;
+        res.push([ratio * i + addAtk, dam.damage]);
     }
 
     return res;

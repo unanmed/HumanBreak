@@ -124,21 +124,17 @@ const allDef = ref(originDef);
 const addAtk = ref(0);
 const addDef = ref(0);
 
-const originDamage = enemy.enemy.calEnemyDamage(core.status.hero, 'none')[0]
-    .damage;
+const originDamage = enemy.enemy.calDamage(core.status.hero).damage;
 
 // 转发core上的内容至当前作用域
 const format = core.formatBigNumber;
 const ratio = core.status.thisMap.ratio;
 
 const nowDamage = computed(() => {
-    const dam = enemy.enemy.calEnemyDamage(
-        {
-            atk: core.status.hero.atk + addAtk.value * ratio,
-            def: core.status.hero.def + addDef.value * ratio
-        },
-        'none'
-    )[0].damage;
+    const dam = enemy.enemy.calDamage({
+        atk: core.status.hero.atk + addAtk.value * ratio,
+        def: core.status.hero.def + addDef.value * ratio
+    }).damage;
     if (!isFinite(dam)) return ['???', '???'];
     if (!isFinite(originDamage)) return [-dam, dam];
     return [originDamage - dam, dam];

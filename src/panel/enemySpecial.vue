@@ -18,7 +18,7 @@
                     <span>加攻</span>
                     <span>减伤</span>
                 </div>
-                <div v-for="cri of criticals[0]" class="critical">
+                <div v-for="cri of criticals" class="critical">
                     <span class="critical-atk">{{ format(cri.atkDelta) }}</span>
                     <span>{{ format(cri.delta) }}</span>
                 </div>
@@ -39,7 +39,7 @@ const enemy = detailInfo.enemy!;
 
 const info = getSpecialHint(enemy);
 
-const criticals = enemy.enemy.calCritical(isMobile ? 4 : 8, 'none');
+const criticals = enemy.enemy.calCritical(isMobile ? 4 : 8);
 
 const format = core.formatBigNumber;
 </script>

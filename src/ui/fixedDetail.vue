@@ -9,22 +9,22 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
-import { getDetailedEnemy } from '../plugin/ui/fixed';
+import { getDetailedEnemy, getLocFromMouseLoc } from '../plugin/ui/fixed';
 import BookDetail from './bookDetail.vue';
+import { detailInfo } from '../plugin/ui/book';
 
 const panel = core.plugin.fixedDetailPanel ?? 'special';
 
-core.plugin.bookDetailPos = 0;
+detailInfo.pos = 0;
 
 const [x, y] = flags.mouseLoc;
-const mx = Math.round(x + core.bigmap.offsetX / 32);
-const my = Math.round(y + core.bigmap.offsetY / 32);
-const e = core.getBlockId(mx, my);
-if (e && core.getClsFromId(e)?.startsWith('enemy')) {
-    const enemy = core.material.enemys[e as EnemyIds];
-    const detail = getDetailedEnemy(enemy, mx, my);
-    core.plugin.bookDetailEnemy = detail;
+const [mx, my] = getLocFromMouseLoc(x, y);
+const enemy = core.status.thisMap.enemy.list.find(v => {
+    return v.x === mx && v.y === my;
+});
+if (enemy) {
+    const detail = getDetailedEnemy(enemy);
+    detailInfo.enemy = detail;
 } else {
     close();
 }

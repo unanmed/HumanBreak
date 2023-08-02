@@ -9,25 +9,21 @@
                 v-model:width="width"
             >
                 <div id="enemy-fixed">
-                    <span id="enemy-name">{{ enemy.name }}</span>
+                    <span id="enemy-name">{{ enemy.enemy.enemy.name }}</span>
                     <div id="enemy-special">
                         <span
-                            v-for="(text, i) of enemy.toShowSpecial"
-                            :style="{color: (enemy.toShowColor[i] as string)} "
-                            >{{ text }}</span
+                            v-for="(text, i) of enemy.showSpecial"
+                            :style="{ color: text[2] }"
+                            >{{ text[0] }}</span
                         >
                     </div>
                     <div class="enemy-attr" v-for="(a, i) of toShowAttrs">
-                        <span
-                            class="attr-name"
-                            :style="{ color: attrColor[i] }"
-                            >{{ getLabel(a) }}</span
-                        >
-                        <span
-                            class="attr-value"
-                            :style="{ color: attrColor[i] }"
-                            >{{ format(enemy[a] as number) }}</span
-                        >
+                        <span class="attr-name" :style="{ color: a[2] }">{{
+                            a[1]
+                        }}</span>
+                        <span class="attr-value" :style="{ color: a[2] }">{{
+                            format(a[0])
+                        }}</span>
                     </div>
                 </div>
             </Box>
@@ -36,9 +32,10 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUpdated, ref, watch } from 'vue';
+import { ComputedRef, computed, onMounted, onUpdated, ref, watch } from 'vue';
 import Box from '../components/box.vue';
 import { showFixed } from '../plugin/ui/fixed';
+import { ToShowEnemy, detailInfo } from '../plugin/ui/book';
 
 watch(showFixed, n => {
     if (n) calHeight();
@@ -47,29 +44,20 @@ watch(showFixed, n => {
 let main: HTMLDivElement;
 
 const format = core.formatBigNumber;
+const enemy = ref(detailInfo.enemy!);
 
-const toShowAttrs: (keyof DetailedEnemy)[] = [
-    'hp',
-    'atk',
-    'def',
-    'money',
-    'exp',
-    'critical',
-    'criticalDamage',
-    'defDamage'
-];
-const attrColor = [
-    'lightgreen',
-    'lightcoral',
-    'lightblue',
-    'lightyellow',
-    'lawngreen',
-    'lightsalmon',
-    'lightpink',
-    'cyan'
-];
-
-const enemy = ref(core.plugin.bookDetailEnemy);
+const toShowAttrs: ComputedRef<[number | string, string, string][]> = computed(
+    () => [
+        [enemy.value.enemy.info.hp, '生命', 'lightgreen'],
+        [enemy.value.enemy.info.atk, '攻击', 'lightcoral'],
+        [enemy.value.enemy.info.def, '防御', 'lightblue'],
+        [enemy.value.enemy.enemy.money, '金币', 'lightyellow'],
+        [enemy.value.enemy.enemy.exp, '经验', 'lawgreen'],
+        [enemy.value.critical, '临界', 'lightsalmon'],
+        [enemy.value.criticalDam, '减伤', 'lightpink'],
+        [enemy.value.defDam, `${core.status.thisMap?.ratio ?? 1}防`, 'cyan']
+    ]
+);
 
 const left = ref(0);
 const top = ref(0);
@@ -79,7 +67,7 @@ let vh = window.innerHeight;
 let vw = window.innerWidth;
 
 async function calHeight() {
-    enemy.value = core.plugin.bookDetailEnemy;
+    enemy.value = detailInfo.enemy!;
     vh = window.innerHeight;
     vw = window.innerWidth;
     width.value = vh * 0.28;
@@ -97,13 +85,6 @@ async function calHeight() {
     if (cx + width.value + 10 > vw - 10) left.value = vw - width.value - 10;
     else left.value = cx + 10;
     height.value = h;
-}
-
-function getLabel(attr: keyof DetailedEnemy) {
-    if (attr === 'critical') return '临界';
-    if (attr === 'criticalDamage') return '临界减伤';
-    if (attr === 'defDamage') return `${core.status?.thisMap?.ratio ?? 1}防`;
-    return core.getStatusLabel(attr);
 }
 
 function updateMain() {
