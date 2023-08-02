@@ -8,6 +8,7 @@ interface MotaSettingItem<T extends MotaSettingType = MotaSettingType> {
     defaults?: boolean | number;
     step?: number;
     display?: (value: T) => string;
+    special?: string;
 }
 
 interface SettingEvent extends EmitableEvent {
@@ -20,14 +21,13 @@ interface SettingEvent extends EmitableEvent {
 
 class MotaSetting extends EventEmitter<SettingEvent> {
     private list: Record<string, MotaSettingItem> = {};
-    special?: string;
 
     /**
      * 标记为特殊的设置项
      */
-    markAsSpecial(sp: string) {
-        this.special = sp;
-        this.register('@special', '', false);
+    markSpecial(key: string, sp: string) {
+        const setting = this.getSettingBy(key.split('.'));
+        setting.special = sp;
         return this;
     }
 
@@ -83,7 +83,7 @@ class MotaSetting extends EventEmitter<SettingEvent> {
         }
         const old = setting.value as boolean | number;
         setting.value = value;
-        this.emit('valueChange', this.formatKey(key), old, value);
+        this.emit('valueChange', key, old, value);
     }
 
     /**
@@ -101,7 +101,7 @@ class MotaSetting extends EventEmitter<SettingEvent> {
         }
         const old = setting.value as boolean | number;
         setting.value += value;
-        this.emit('valueChange', this.formatKey(key), old, value);
+        this.emit('valueChange', key, old, value);
     }
 
     /**
@@ -130,10 +130,6 @@ class MotaSetting extends EventEmitter<SettingEvent> {
 
         return now.list[list.at(-1)!] ?? null;
     }
-
-    private formatKey(key: string) {
-        return key.replace('.@special', '');
-    }
 }
 
 export const mainSetting = new MotaSetting();
@@ -159,11 +155,8 @@ mainSetting
         new MotaSetting()
             .register('autoSkill', '自动切换技能', true)
             .register('fixed', '定点查看', true)
-            .register(
-                'hotkey',
-                '快捷键',
-                new MotaSetting().markAsSpecial('hotkey')
-            )
+            .register('hotkey', '快捷键', false)
+            .markSpecial('hotkey', 'hotkey')
     )
     .register(
         'utils',
