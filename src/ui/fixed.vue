@@ -54,7 +54,7 @@ const toShowAttrs: ComputedRef<[number | string, string, string][]> = computed(
         [enemy.value.enemy.enemy.money, '金币', 'lightyellow'],
         [enemy.value.enemy.enemy.exp, '经验', 'lawgreen'],
         [enemy.value.critical, '临界', 'lightsalmon'],
-        [enemy.value.criticalDam, '减伤', 'lightpink'],
+        [enemy.value.criticalDam, '临界减伤', 'lightpink'],
         [enemy.value.defDam, `${core.status.thisMap?.ratio ?? 1}防`, 'cyan']
     ]
 );

@@ -615,7 +615,7 @@ onMounted(async () => {
     document.addEventListener('keyup', keyup);
     map.addEventListener('touchstart', touchdown);
     map.addEventListener('touchend', touchup);
-    map.addEventListener('touchend', touchmove);
+    map.addEventListener('touchmove', touchmove);
 });
 
 onUnmounted(() => {
