@@ -51,11 +51,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             else core.showStatusBar();
             if (main.mode === 'play' && !main.replayChecking) {
                 ancTe.plugin.fly.splitArea();
-                ancTe.plugin.setting.resetFlagSettings();
+                ancTe.game.hook.emit('reset');
             } else {
                 flags.autoSkill ??= true;
-                flags.itemDetail ??= true;
-                flags.autoLocate ??= true;
             }
         },
         win: function (reason, norank, noexit) {

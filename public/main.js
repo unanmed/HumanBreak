@@ -415,10 +415,7 @@ main.prototype.loadAsync = async function (mode, callback) {
 
     // 自动放缩最大化
     let auto = core.getLocalStorage('autoScale');
-    if (auto == null) {
-        core.setLocalStorage('autoScale', true);
-        auto = true;
-    }
+
     if (auto && !core.domStyle.isVertical) {
         try {
             core.plugin.utils.maxGameScale();

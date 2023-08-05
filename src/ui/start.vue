@@ -68,7 +68,7 @@ import { Matrix4 } from '../plugin/webgl/matrix';
 import { doByInterval, keycode } from '../plugin/utils';
 import { KeyCode } from '../plugin/keyCodes';
 import { achievementOpened } from '../plugin/uiController';
-import { triggerFullscreen } from '../plugin/settings';
+import { triggerFullscreen } from '../core/main/setting';
 import { loading } from '../core/loader/load';
 
 let startdiv: HTMLDivElement;
@@ -203,7 +203,7 @@ function bgm() {
 
 async function setFullscreen() {
     const index = toshow.length - toshow.indexOf(selected.value) - 1;
-    await triggerFullscreen();
+    await triggerFullscreen(!fullscreen.value);
     requestAnimationFrame(() => {
         fullscreen.value = !!document.fullscreenElement;
         setCursor(buttons[index], index);

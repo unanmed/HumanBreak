@@ -169,7 +169,7 @@ core.events.afterBattle = function (
     else core.clearContinueAutomaticRoute();
 
     // 打怪特效
-    if (has(x) && has(y)) {
+    if (core.getLocalStorage('frag') && has(x) && has(y)) {
         const frame = core.status.globalAnimateStatus % 2;
         const canvas = document.createElement('canvas');
         canvas.width = 32;

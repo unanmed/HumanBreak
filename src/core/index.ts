@@ -1,7 +1,9 @@
 import { BgmController } from './audio/bgm';
 import { SoundController } from './audio/sound';
+import { EventEmitter } from './common/eventEmitter';
 import { loading, readyAllResource } from './loader/load';
 import { ResourceStore, ResourceType } from './loader/resource';
+import { GameEvent } from './main/game';
 import { resolvePlugin } from './plugin';
 
 interface AncTePlugin {
@@ -38,6 +40,9 @@ export interface AncTe {
     zipResource: ResourceStore<'zip'>;
     bgm: BgmController;
     plugin: AncTePlugin;
+    game: {
+        hook: EventEmitter<GameEvent>;
+    };
 }
 
 function ready() {

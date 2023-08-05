@@ -21,8 +21,16 @@ export let isMobile = matchMedia('(max-width: 600px)').matches;
 window.addEventListener('resize', () => {
     requestAnimationFrame(() => {
         isMobile = matchMedia('(max-width: 600px)').matches;
+        checkMobile();
     });
 });
+checkMobile();
+
+function checkMobile() {
+    if (isMobile) {
+        alert('手机端建议使用自带的浏览器进行游玩，并在进入游戏后开启全屏游玩');
+    }
+}
 
 /**
  * 向一个元素添加拖拽事件

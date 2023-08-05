@@ -31,7 +31,7 @@ core.control.updateDamage = function (floorId = core.status.floorId, ctx) {
 
 // 获取宝石信息 并绘制
 function getItemDetail(floorId: FloorIds, onMap: boolean) {
-    if (!core.getFlag('itemDetail')) return;
+    if (!core.getLocalStorage('itemDetail')) return;
     floorId ??= core.status.thisMap.floorId;
     let diff: Record<string | symbol, number | undefined> = {};
     const before = core.status.hero;
