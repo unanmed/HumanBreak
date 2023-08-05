@@ -3,7 +3,7 @@ import { SoundController } from './audio/sound';
 import { EventEmitter } from './common/eventEmitter';
 import { loading, readyAllResource } from './loader/load';
 import { ResourceStore, ResourceType } from './loader/resource';
-import { GameEvent } from './main/game';
+import { GameEvent, hook } from './main/game';
 import { resolvePlugin } from './plugin';
 
 interface AncTePlugin {
@@ -52,7 +52,10 @@ function ready() {
         zipResource: new ResourceStore(),
         sound: new SoundController(),
         // @ts-ignore
-        plugin: {}
+        plugin: {},
+        game: {
+            hook
+        }
     };
 
     readyAllResource();

@@ -5,5 +5,3 @@ export interface GameEvent extends EmitableEvent {
 }
 
 export const hook = new EventEmitter<GameEvent>();
-
-ancTe.game.hook = hook;
