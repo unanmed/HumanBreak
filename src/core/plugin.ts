@@ -5,7 +5,6 @@ import animate from '../plugin/animateController';
 import utils from '../plugin/utils';
 import status from '../plugin/ui/statusBar';
 import mark from '../plugin/mark';
-import setting from '../plugin/settings';
 import chapter from '../plugin/ui/chapter';
 import fly from '../plugin/ui/fly';
 import chase from '../plugin/chase/chase';
@@ -31,7 +30,6 @@ export function resolvePlugin() {
         ['utils', utils()],
         ['status', status()],
         ['mark', mark()],
-        ['setting', setting()],
         ['chapter', chapter()],
         ['fly', fly()],
         ['chase', chase()],

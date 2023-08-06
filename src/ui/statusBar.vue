@@ -179,7 +179,7 @@ watch(status, update);
  */
 function update() {
     toShow.forEach(v => {
-        hero[v] = core.getRealStatus(v);
+        hero[v] = core.plugin.getHeroStatusOn(v);
     });
     keys[0] = core.itemCount('yellowKey');
     keys[1] = core.itemCount('blueKey');

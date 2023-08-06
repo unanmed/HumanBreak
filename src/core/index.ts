@@ -14,7 +14,6 @@ interface AncTePlugin {
     utils: ReturnType<typeof import('../plugin/utils').default>;
     status: ReturnType<typeof import('../plugin/ui/statusBar').default>;
     mark: ReturnType<typeof import('../plugin/mark').default>;
-    setting: ReturnType<typeof import('../plugin/settings').default>;
     chapter: ReturnType<typeof import('../plugin/ui/chapter').default>;
     fly: ReturnType<typeof import('../plugin/ui/fly').default>;
     chase: ReturnType<typeof import('../plugin/chase/chase').default>;

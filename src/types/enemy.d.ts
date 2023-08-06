@@ -324,57 +324,6 @@ interface Enemys extends EnemyData {
     ): boolean;
 
     /**
-     * 获得某只敌人的地图显伤，包括颜色
-     * @example core.getDamageString('greenSlime', 0, 0, 'MT0') // 绿头怪的地图显伤
-     * @param enemy 敌人id或敌人对象
-     * @param x 敌人的横坐标
-     * @param y 敌人的纵坐标
-     * @param floorId 敌人所在的地图
-     */
-    getDamageString(
-        enemy: EnemyIds | Enemy,
-        x?: number,
-        y?: number,
-        floorId?: FloorIds
-    ): DamageString;
-
-    /**
-     * 获得某只敌人接下来的若干个临界及其减伤，算法基于useLoop开关选择回合法或二分法
-     * @example core.nextCriticals('greenSlime', 9, 0, 0, 'MT0') // 绿头怪接下来的9个临界
-     * @param enemy 敌人id或敌人对象
-     * @param number 要计算的临界数量，默认为1
-     * @param x 敌人的横坐标
-     * @param y 敌人的纵坐标
-     * @param floorId 敌人所在的地图
-     * @returns 两列的二维数组，每行表示一个临界及其减伤
-     */
-    nextCriticals(
-        enemy: EnemyIds | Enemy,
-        number?: number,
-        x?: number,
-        y?: number,
-        floorId?: FloorIds
-    ): [critical: number, damage: number][];
-
-    /**
-     * 计算再加若干点防御能使某只敌人对主角的总伤害降低多少
-     * @example core.nextCriticals('greenSlime', 10, 0, 0, 'MT0') // 再加10点防御能使绿头怪的伤害降低多少
-     * @param enemy 敌人id或敌人对象
-     * @param k 假设主角增加的防御力，默认为1
-     * @param x 敌人的横坐标
-     * @param y 敌人的纵坐标
-     * @param floorId 敌人所在的地图
-     * @returns 总伤害的减少量
-     */
-    getDefDamage(
-        enemy: EnemyIds | Enemy,
-        k?: number,
-        x?: number,
-        y?: number,
-        floorId?: FloorIds
-    ): number;
-
-    /**
      * 获得某只敌人对主角的总伤害
      * @example core.getDamage('greenSlime',0,0,'MT0') // 绿头怪的总伤害
      * @param enemy 敌人id或敌人对象

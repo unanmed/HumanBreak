@@ -81,18 +81,6 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					_type: 'textarea',
 					_lint: true,
 					_data: '怪物特殊属性'
-				},
-				getEnemyInfo: {
-					_leaf: true,
-					_type: 'textarea',
-					_lint: true,
-					_data: '怪物真实属性'
-				},
-				getDamageInfo: {
-					_leaf: true,
-					_type: 'textarea',
-					_lint: true,
-					_data: '战斗伤害信息'
 				}
 			}
 		},

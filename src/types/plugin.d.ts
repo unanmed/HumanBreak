@@ -85,16 +85,6 @@ interface PluginDeclaration
     unmarkEnemy(id: EnemyIds): void;
 
     /**
-     * 重置设置信息
-     */
-    resetSettings(): void;
-
-    /**
-     * 重置变量的设置信息
-     */
-    resetFlagSettings(): void;
-
-    /**
      * 判定一个值是否不是undefined或null
      * @param value 要判断的值
      */

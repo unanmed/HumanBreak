@@ -1,15 +1,17 @@
 import { reactive, ref } from 'vue';
 import { tip } from './utils';
+import type { DamageEnemy } from './game/enemy/damage';
 
 export const showMarkedEnemy = ref(false);
 
 const markedEnemy = reactive<EnemyIds[]>([]);
 
 interface MarkInfo {
+    enemy: DamageEnemy;
     nextCritical: number;
 }
 
-const markInfo: Partial<Record<EnemyIds, MarkInfo>> = {};
+export const markInfo: Partial<Record<EnemyIds, MarkInfo>> = {};
 const criticalReached: Partial<Record<EnemyIds, Record<number, boolean>>> = {};
 const enemyDamageInfo: Partial<Record<EnemyIds, Record<number, boolean>>> = {};
 
@@ -18,12 +20,16 @@ const enemyDamageInfo: Partial<Record<EnemyIds, Record<number, boolean>>> = {};
  * @param id 标记的怪物id
  */
 export function markEnemy(id: EnemyIds) {
-    // todo: 不使用 nextCriticals
+    const { Enemy } = core.plugin.damage;
     if (hasMarkedEnemy(id)) return;
     markedEnemy.push(id);
+    const enemy = new Enemy(core.material.enemys[id]);
+    enemy.calAttribute();
+    enemy.getRealInfo();
     markInfo[id] = {
         nextCritical:
-            core.nextCriticals(id, 1)[0]?.[0] ?? 0 + core.status.hero.atk
+            enemy.calCritical(1)[0]?.atkDelta ?? 0 + core.status.hero.atk,
+        enemy
     };
     criticalReached[id] = { 0: true };
     enemyDamageInfo[id] = { 1: false, 2: false, 3: false };
@@ -65,7 +71,6 @@ export function getMarkedEnemy() {
  * @param id 怪物id
  */
 export function getMarkInfo(id: EnemyIds, noMessage: boolean = false) {
-    // todo: 不使用 nextCriticals
     const reached = criticalReached[id]!;
     const info = markInfo[id]!;
     if (core.status.hero.atk >= info.nextCritical) {
@@ -73,7 +78,7 @@ export function getMarkInfo(id: EnemyIds, noMessage: boolean = false) {
             tip('success', `踩到了${core.material.enemys[id].name}的临界！`);
         }
         reached[info.nextCritical] = true;
-        const n = core.nextCriticals(id, 1, void 0, void 0, 'empty')[0]?.[0];
+        const n = info.enemy.calCritical(1)[0]?.atkDelta;
         const next = (n ?? 0) + core.status.hero.atk;
         info.nextCritical = next;
     }
@@ -83,15 +88,13 @@ export function getMarkInfo(id: EnemyIds, noMessage: boolean = false) {
  * 检查被标记怪物的状态
  */
 export function checkMarkedEnemy(noMessage: boolean = false) {
-    // todo: 删除 getDamageInfo
     checkMarkedStatus.value = !checkMarkedStatus.value;
     const hp = core.status.hero.hp;
     getMarkedEnemy().forEach(v => {
         getMarkInfo(v);
-        const damage =
-            core.getDamageInfo(v, void 0, void 0, void 0, 'empty')?.damage ??
-            -1;
-        if (damage === -1) return;
+        const { enemy } = markInfo[v]!;
+        const damage = enemy.calDamage().damage;
+        if (!isFinite(damage)) return;
         const info = enemyDamageInfo[v]!;
         const name = core.material.enemys[v].name;
         let res = 0;

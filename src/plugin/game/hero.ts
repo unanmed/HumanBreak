@@ -115,6 +115,13 @@ function getRealStatus(
     return s;
 }
 
+declare global {
+    interface PluginDeclaration {
+        getHeroStatusOf: typeof getHeroStatusOf;
+        getHeroStatusOn: typeof getHeroStatusOn;
+    }
+}
+
 core.plugin.hero = {
     getHeroStatusOf,
     getHeroStatusOn

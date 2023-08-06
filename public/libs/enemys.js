@@ -212,217 +212,43 @@ enemys.prototype.getDamageString = function (enemy, x, y, floorId, hero) {
 
 ////// 接下来N个临界值和临界减伤计算 //////
 enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId, hero) {
-    // todo: 删除这个函数
-    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
-    number = number || 1;
-
-    var specialCriticals = this._nextCriticals_special(
-        enemy,
-        number,
-        x,
-        y,
-        floorId
-    );
-    if (specialCriticals != null) return specialCriticals;
-    var info = this.getDamageInfo(enemy, hero, x, y, floorId);
-    if (info == null) {
-        // 如果未破防...
-        var overAtk = this._nextCriticals_overAtk(enemy, x, y, floorId);
-        if (overAtk == null) return [];
-        if (typeof overAtk[1] == 'number') return [[overAtk[0], -overAtk[1]]];
-        info = overAtk[1];
-        info.__over__ = true;
-        info.__overAtk__ = overAtk[0];
-    }
-
-    if (typeof info == 'number') return [[0, 0]];
-    if (info.damage <= 0 && !core.flags.enableNegativeDamage) {
-        return [[info.__overAtk__ || 0, 0]];
-    }
-
-    return this._nextCriticals_useBinarySearch(
-        enemy,
-        info,
-        number,
-        x,
-        y,
-        floorId,
-        hero
-    );
+    // Deprecated. See src/plugin/game/enemy/damage.ts DamageEnemy.calCritical.
 };
 
 /// 未破防临界采用二分计算
-enemys.prototype._nextCriticals_overAtk = function (
-    enemy,
-    x,
-    y,
-    floorId,
-    hero
-) {
-    // todo: 删除这个函数
-    var calNext = function (currAtk, maxAtk) {
-        var start = currAtk,
-            end = maxAtk;
-        if (start > end) return null;
-
-        while (start < end) {
-            var mid = Math.floor((start + end) / 2);
-            if (mid - start > end - mid) mid--;
-            var nextInfo = core.enemys.getDamageInfo(
-                enemy,
-                { atk: mid, x: hero?.x, y: hero?.y },
-                x,
-                y,
-                floorId
-            );
-            if (nextInfo != null) end = mid;
-            else start = mid + 1;
-        }
-        var nextInfo = core.enemys.getDamageInfo(
-            enemy,
-            { atk: start, x: hero?.x, y: hero?.y },
-            x,
-            y,
-            floorId
-        );
-        return nextInfo == null
-            ? null
-            : [start - core.getStatusOrDefault(hero, 'atk'), nextInfo];
-    };
-    return calNext(
-        core.getStatusOrDefault(hero, 'atk') + 1,
-        core.getEnemyValue(enemy, 'hp', x, y, floorId) +
-            core.getEnemyValue(enemy, 'def', x, y, floorId)
-    );
+enemys.prototype._nextCriticals_overAtk = function (enemy) {
+    // Deprecated. See src/plugin/game/enemy/damage.ts DamageEnemy.calCritical.
 };
 
-enemys.prototype._nextCriticals_special = function (
-    enemy,
-    number,
-    x,
-    y,
-    floorId
-) {
-    if (this.hasSpecial(enemy.special, 10) || this.hasSpecial(enemy.special, 3))
-        return []; // 模仿or坚固临界
-    return null;
+enemys.prototype._nextCriticals_special = function (enemy) {
+    // Deprecated. See src/plugin/game/enemy/damage.ts DamageEnemy.calCritical.
 };
 
-enemys.prototype._nextCriticals_useBinarySearch = function (
-    enemy,
-    info,
-    number,
-    x,
-    y,
-    floorId,
-    hero
-) {
-    // todo: 删除这个函数
-    var mon_hp = info.mon_hp,
-        hero_atk = core.getStatusOrDefault(hero, 'atk'),
-        mon_def = info.mon_def,
-        pre = info.damage;
-    var list = [];
-    var start_atk = hero_atk;
-    if (info.__over__) {
-        start_atk += info.__overAtk__;
-        list.push([info.__overAtk__, -info.damage]);
-    }
-    var calNext = function (currAtk, maxAtk) {
-        var start = Math.floor(currAtk),
-            end = Math.floor(maxAtk);
-        if (start > end) return null;
-
-        while (start < end) {
-            var mid = Math.floor((start + end) / 2);
-            if (mid - start > end - mid) mid--;
-            var nextInfo = core.enemys.getDamageInfo(
-                enemy,
-                { atk: mid, x: hero?.x, y: hero?.y },
-                x,
-                y,
-                floorId
-            );
-            if (nextInfo == null || typeof nextInfo == 'number') return null;
-            if (pre > nextInfo.damage) end = mid;
-            else start = mid + 1;
-        }
-        var nextInfo = core.enemys.getDamageInfo(
-            enemy,
-            { atk: start, x: hero?.x, y: hero?.y },
-            x,
-            y,
-            floorId
-        );
-        return nextInfo == null ||
-            typeof nextInfo == 'number' ||
-            nextInfo.damage >= pre
-            ? null
-            : [start, nextInfo.damage];
-    };
-    var currAtk = start_atk;
-    while (true) {
-        var next = calNext(currAtk + 1, mon_hp + mon_def, pre);
-        if (next == null) break;
-        currAtk = next[0];
-        pre = next[1];
-        list.push([currAtk - hero_atk, info.damage - pre]);
-        if (pre <= 0 && !core.flags.enableNegativeDamage) break;
-        if (list.length >= number) break;
-    }
-    if (list.length == 0) list.push([0, 0]);
-    return list;
+enemys.prototype._nextCriticals_useBinarySearch = function (enemy) {
+    // Deprecated. See src/plugin/game/enemy/damage.ts DamageEnemy.calCritical.
 };
 
 ////// N防减伤计算 //////
 enemys.prototype.getDefDamage = function (enemy, k, x, y, floorId, hero) {
-    // todo: 删除这个函数
-    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
-    k = k || 1;
-    var nowDamage = this._getDamage(enemy, hero, x, y, floorId);
-    var nextDamage = this._getDamage(
-        enemy,
-        Object.assign({}, hero ?? {}, { def: core.getStatus('def') + k }),
-        x,
-        y,
-        floorId
-    );
-    if (nowDamage == null || nextDamage == null) return '???';
-    return nowDamage - nextDamage;
+    // Deprecated. See src/plugin/game/enemy/damage.ts DamageEnemy.calDefDamage.
 };
 
 enemys.prototype.getEnemyInfo = function (enemy, hero, x, y, floorId) {
-    // todo: 删除这个函数
-    if (enemy == null) return null;
-    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
-    return this.enemydata.getEnemyInfo(enemy, hero, x, y, floorId);
+    // Deprecated. See src/plugin/game/enemy/damage.ts
 };
 
 ////// 获得战斗伤害信息（实际伤害计算函数） //////
 enemys.prototype.getDamageInfo = function (enemy, hero, x, y, floorId) {
-    // todo: 删除这个函数
-    if (enemy == null) return null;
-    // 移动到了脚本编辑 - getDamageInfo中
-    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
-    return this.enemydata.getDamageInfo(enemy, hero, x, y, floorId);
+    // Deprecated. See src/plugin/game/enemy/damage.ts
 };
 
 ////// 获得在某个勇士属性下怪物伤害 //////
 enemys.prototype.getDamage = function (enemy, x, y, floorId, hero) {
-    // todo: 修改这个函数的参数
-    return this._getDamage(enemy, hero, x, y, floorId);
+    // Deprecated. See src/plugin/game/enemy/damage.ts
 };
 
 enemys.prototype._getDamage = function (enemy, hero, x, y, floorId) {
-    // todo: 重写这个函数
-    if (enemy == null) enemy = core.getBlockId(x, y, floorId);
-    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
-    if (enemy == null) return null;
-
-    var info = this.getDamageInfo(enemy, hero, x, y, floorId);
-    if (info == null) return null;
-    if (typeof info == 'number') return info;
-    return info.damage;
+    // Deprecated. See src/plugin/game/enemy/damage.ts
 };
 
 ////// 获得当前楼层的怪物列表 //////
@@ -431,114 +257,19 @@ enemys.prototype.getCurrentEnemys = function (floorId) {
 };
 
 enemys.prototype._getCurrentEnemys_getEnemy = function (enemyId) {
-    var enemy = core.material.enemys[enemyId];
-    if (!enemy) return null;
-
-    // 检查朝向；displayIdInBook
-    return (
-        core.material.enemys[enemy.displayIdInBook] ||
-        core.material.enemys[(enemy.faceIds || {}).down] ||
-        enemy
-    );
+    // Deprecated. See src/plugin/game/enemy/battle.ts
 };
 
-enemys.prototype._getCurrentEnemys_addEnemy = function (
-    enemyId,
-    enemys,
-    used,
-    x,
-    y,
-    floorId
-) {
-    // todo: 删除这个函数
-    var enemy = this._getCurrentEnemys_getEnemy(enemyId);
-    if (enemy == null) return;
-
-    var id = enemy.id;
-
-    var enemyInfo = this.getEnemyInfo(enemy, null, null, null, floorId);
-    var locEnemyInfo = this.getEnemyInfo(enemy, null, x, y, floorId);
-
-    if (
-        !core.flags.enableEnemyPoint ||
-        (locEnemyInfo.atk == enemyInfo.atk &&
-            locEnemyInfo.def == enemyInfo.def &&
-            locEnemyInfo.hp == enemyInfo.hp)
-    ) {
-        x = null;
-        y = null;
-    } else {
-        // 检查enemys里面是否使用了存在的内容
-        for (var i = 0; i < enemys.length; ++i) {
-            var one = enemys[i];
-            if (
-                id == one.id &&
-                one.locs != null &&
-                locEnemyInfo.atk == one.atk &&
-                locEnemyInfo.def == one.def &&
-                locEnemyInfo.hp == one.hp
-            ) {
-                one.locs.push([x, y]);
-                return;
-            }
-        }
-        enemyInfo = locEnemyInfo;
-    }
-    var id = enemy.id + ':' + x + ':' + y;
-    if (used[id]) return;
-    used[id] = true;
-
-    var specialText = core.enemys.getSpecialText(enemy);
-    var specialColor = core.enemys.getSpecialColor(enemy);
-
-    var critical = this.nextCriticals(enemy, 1, x, y, floorId);
-    if (critical.length > 0) critical = critical[0];
-
-    var e = core.clone(enemy);
-    for (var v in enemyInfo) {
-        e[v] = enemyInfo[v];
-    }
-    if (x != null && y != null) {
-        e.locs = [[x, y]];
-    }
-    e.name = core.getEnemyValue(enemy, 'name', x, y, floorId);
-    e.specialText = specialText;
-    e.specialColor = specialColor;
-    e.damage = this.getDamage(enemy, x, y, floorId);
-    e.critical = critical[0];
-    e.criticalDamage = critical[1];
-    e.defDamage = this._getCurrentEnemys_addEnemy_defDamage(
-        enemy,
-        x,
-        y,
-        floorId
-    );
-    enemys.push(e);
+enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId) {
+    // Deprecated. See src/plugin/game/enemy/battle.ts
 };
 
-enemys.prototype._getCurrentEnemys_addEnemy_defDamage = function (
-    enemy,
-    x,
-    y,
-    floorId
-) {
-    var ratio = core.status.maps[floorId || core.status.floorId].ratio || 1;
-    return this.getDefDamage(enemy, ratio, x, y, floorId);
+enemys.prototype._getCurrentEnemys_addEnemy_defDamage = function (enemy) {
+    // Deprecated. See src/plugin/game/enemy/battle.ts
 };
 
 enemys.prototype._getCurrentEnemys_sort = function (enemys) {
-    return enemys.sort(function (a, b) {
-        if (a.damage == b.damage) {
-            return a.money - b.money;
-        }
-        if (a.damage == null) {
-            return 1;
-        }
-        if (b.damage == null) {
-            return -1;
-        }
-        return a.damage - b.damage;
-    });
+    // Deprecated. See src/plugin/game/enemy/battle.ts
 };
 
 enemys.prototype.hasEnemyLeft = function (enemyId, floorId) {

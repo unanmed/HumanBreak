@@ -56,7 +56,12 @@
 
 <script lang="ts" setup>
 import { reactive, ref, watch } from 'vue';
-import { checkMarkedStatus, getMarkedEnemy, unmarkEnemy } from '../plugin/mark';
+import {
+    checkMarkedStatus,
+    getMarkedEnemy,
+    markInfo,
+    unmarkEnemy
+} from '../plugin/mark';
 import { has } from '../plugin/utils';
 import Box from '../components/box.vue';
 import Scroll from '../components/scroll.vue';
@@ -102,27 +107,16 @@ function getName(id: EnemyIds) {
 }
 
 function getDamage(id: EnemyIds) {
-    // todo: 删除 getDamageInfo
-    return (
-        core.formatBigNumber(
-            core.getDamageInfo(id, void 0, void 0, void 0, 'empty')?.damage
-        ) ?? '???'
-    );
+    return core.formatBigNumber(markInfo[id]!.enemy.calDamage().damage);
 }
 
 function getCritical(id: EnemyIds) {
-    // todo: 不使用 nextCriticals
-    return (
-        core
-            .nextCriticals(id, 1, void 0, void 0, 'empty')[0]
-            ?.map(v => core.formatBigNumber(v)) ?? [0, 0]
-    );
+    const { delta, atkDelta } = markInfo[id]!.enemy.calCritical(1)[0];
+    return [-delta, atkDelta];
 }
 
 function getDefDamage(id: EnemyIds) {
-    return core.formatBigNumber(
-        core.getDefDamage(id, ratio, void 0, void 0, 'empty')
-    );
+    return core.formatBigNumber(markInfo[id]!.enemy.calDefDamage(ratio).delta);
 }
 </script>
 

@@ -59,38 +59,6 @@ interface EnemyData {
     getSpecials(): EnemySpecialDeclaration[];
 
     /**
-     * 获得怪物真实属性
-     * @param enemy 敌人id或敌人对象
-     * @param hero 勇士信息，不填则从core.status.hero获取
-     * @param x 敌人的横坐标
-     * @param y 敌人的纵坐标
-     * @param floorId 敌人所在的地图
-     */
-    getEnemyInfo(
-        enemy: EnemyIds | Enemy,
-        hero?: HeroStatus,
-        x?: number,
-        y?: number,
-        floorId?: FloorIds
-    ): EnemyInfo;
-
-    /**
-     * 获得战斗伤害信息（实际伤害计算函数）
-     * @param enemy 敌人id或敌人对象
-     * @param hero 勇士信息，不填则从core.status.hero获取
-     * @param x 敌人的横坐标
-     * @param y 敌人的纵坐标
-     * @param floorId 敌人所在的地图
-     */
-    getDamageInfo(
-        enemy: EnemyIds | Enemy,
-        hero?: Partial<HeroStatus>,
-        x?: number,
-        y?: number,
-        floorId?: FloorIds
-    ): DamageInfo;
-
-    /**
      * 判定某种特殊属性的有无
      * @example core.hasSpecial('greenSlime', 1) // 判定绿头怪有无先攻属性
      * @param special 敌人id或敌人对象或正整数数组或自然数

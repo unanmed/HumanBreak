@@ -45,20 +45,20 @@ core.registerReplayAction('upgradeSkill', name => {
 });
 
 core.registerReplayAction('study', name => {
-    // todo: 删除getEnemyInfo
-    if (!name.startsWith('study:')) return false;
-    const [num, x, y] = name
-        .slice(6)
-        .split(',')
-        .map(v => parseInt(v));
-    if (!canStudySkill(num)) return false;
-    const id = core.getBlockId(x, y);
-    const enemy = core.getEnemyInfo(id, void 0, x, y);
-    if (!enemy.special.includes(num)) return false;
-    studySkill(enemy, num);
-    core.status.route.push(name);
-    core.replay();
-    return true;
+    // todo
+    // if (!name.startsWith('study:')) return false;
+    // const [num, x, y] = name
+    //     .slice(6)
+    //     .split(',')
+    //     .map(v => parseInt(v));
+    // if (!canStudySkill(num)) return false;
+    // const id = core.getBlockId(x, y);
+    // const enemy = core.getEnemyInfo(id, void 0, x, y);
+    // if (!enemy.special.includes(num)) return false;
+    // studySkill(enemy, num);
+    // core.status.route.push(name);
+    // core.replay();
+    // return true;
 });
 
 // 商店
