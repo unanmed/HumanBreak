@@ -45,7 +45,7 @@ function mark() {
 <style lang="less" scoped>
 #enemy-target {
     width: 100%;
-    font-size: 2.8vh;
+    font-size: 160%;
 }
 
 #enemy-desc {
@@ -75,12 +75,12 @@ function mark() {
 }
 
 @media screen and (max-width: 600px) {
-    #enemy-target {
-        font-size: 3.8vw;
+    #enemy-desc {
+        font-size: 70%;
     }
 
     #mark-target {
-        font-size: 4vw;
+        font-size: 100%;
     }
 }
 </style>

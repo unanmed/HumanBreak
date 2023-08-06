@@ -628,7 +628,7 @@ onUnmounted(() => {
 #fly {
     width: 100%;
     height: 100%;
-    font-size: 2.7vh;
+    font-size: 150%;
     font-family: 'normal';
     display: flex;
     align-items: center;
@@ -739,7 +739,7 @@ onUnmounted(() => {
 @media screen and (max-width: 600px) {
     #fly {
         padding: 5%;
-        font-size: 3.8vw;
+        font-size: 100%;
     }
 
     #fly-main {

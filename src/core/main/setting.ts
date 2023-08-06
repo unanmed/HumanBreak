@@ -3,6 +3,7 @@ import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
 import { transition } from '../../plugin/uiController';
 import { loading } from '../loader/load';
 import { hook } from './game';
+import { isMobile } from '../../plugin/use';
 
 type MotaSettingType = boolean | number | MotaSetting;
 

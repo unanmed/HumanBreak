@@ -302,7 +302,7 @@ function selectChapter(delta: number) {
     width: 90vh;
     height: 90vh;
     font-family: 'normal';
-    font-size: 2.8vh;
+    font-size: 150%;
     display: flex;
     flex-direction: column;
     user-select: none;
@@ -311,7 +311,7 @@ function selectChapter(delta: number) {
 #skill-title {
     width: 100%;
     text-align: center;
-    font-size: 4vh;
+    font-size: 130%;
     height: 5vh;
     line-height: 1;
 }
@@ -330,7 +330,7 @@ function selectChapter(delta: number) {
 
 #divider {
     width: 100%;
-    margin: 1vh 0 1vh 0;
+    margin: 1vh 0;
 }
 
 #divider-split {
@@ -374,7 +374,7 @@ function selectChapter(delta: number) {
 }
 
 .upgrade-divider {
-    margin: 1vh 0 1vh 0;
+    margin: 1vh 0;
     border-color: #ddd4;
 }
 
@@ -393,13 +393,13 @@ function selectChapter(delta: number) {
     #skill-tree {
         width: 100%;
         height: 100%;
-        font-size: 3.3vw;
+        font-size: 100%;
         padding: 5%;
     }
 
     #skill-title {
         width: 100%;
-        font-size: 4vw;
+        font-size: 130%;
         height: 5vw;
     }
 
@@ -420,22 +420,6 @@ function selectChapter(delta: number) {
 
     #front-scroll {
         height: 18vh;
-    }
-
-    #skill-consume {
-        font-size: 2.2vh;
-    }
-
-    #front-scroll {
-        font-size: 2.2vh;
-    }
-
-    #skill-chapter {
-        font-size: 2.2vh;
-    }
-
-    #skill-level {
-        font-size: 2.2vh;
     }
 }
 </style>

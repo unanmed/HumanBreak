@@ -236,13 +236,13 @@ onMounted(() => {
     background-color: #0009;
     width: 100%;
     height: 100%;
-    padding: 1vh 0 1vh 0;
+    padding: 1vh 0;
 }
 
 .status-item {
     position: relative;
     max-width: 17.5vw;
-    font-size: 1.9vw;
+    font-size: 200%;
     width: 100%;
     margin-bottom: 1vh;
     text-shadow: 3px 2px 3px #000, 0px 0px 3px #111;
@@ -278,7 +278,7 @@ onMounted(() => {
 
 #status-floor {
     max-width: 17.5vw;
-    font-size: 1.9vw;
+    font-size: 200%;
     width: 100%;
     text-align: center;
     text-shadow: 3px 2px 3px #000, 0px 0px 3px #111;
@@ -286,7 +286,7 @@ onMounted(() => {
 
 #status-lv {
     max-width: 17.5vw;
-    font-size: 1.9vw;
+    font-size: 200%;
     width: 100%;
     text-align: center;
     text-shadow: 3px 2px 3px #000, 0px 0px 3px #111;
@@ -296,7 +296,7 @@ onMounted(() => {
     position: absolute;
     right: 10%;
     bottom: 0;
-    font-size: 1.6vw;
+    font-size: 75%;
 }
 
 #status-mana {
@@ -313,13 +313,13 @@ onMounted(() => {
     line-height: 0;
     color: rgb(167, 255, 167);
     top: 0;
-    font-size: 1.4vw;
+    font-size: 75%;
 }
 
 #status-jump {
     line-height: 0;
     top: 0;
-    font-size: 1.3vw;
+    font-size: 75%;
 }
 
 #status-key {
@@ -336,24 +336,20 @@ onMounted(() => {
 
 @media screen and (max-width: 600px) {
     .status-item {
-        max-width: 150px;
-        font-size: 18px;
+        max-width: 40vw;
+        font-size: 120%;
     }
 
     #status-floor {
-        max-width: 150px;
-        font-size: 18px;
+        max-width: 40vw;
+        font-size: 120%;
         width: 100%;
     }
 
     #status-lv {
-        max-width: 150px;
-        font-size: 18px;
+        max-width: 40vw;
+        font-size: 120%;
         width: 100%;
-    }
-
-    .status-extra {
-        font-size: 14px;
     }
 
     .status-icon {

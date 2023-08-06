@@ -70,6 +70,7 @@ import { KeyCode } from '../plugin/keyCodes';
 import { achievementOpened } from '../plugin/uiController';
 import { triggerFullscreen } from '../core/main/setting';
 import { loading } from '../core/loader/load';
+import { isMobile } from '../plugin/use';
 
 let startdiv: HTMLDivElement;
 let start: HTMLDivElement;
@@ -102,9 +103,15 @@ function resize() {
     const h = core._PY_;
     const height = h * scale;
     const width = height * 1.5;
-    startdiv.style.width = `${width}px`;
-    startdiv.style.height = `${height}px`;
-    main.style.fontSize = `${scale * 16}px`;
+    if (!isMobile) {
+        startdiv.style.width = `${width}px`;
+        startdiv.style.height = `${height}px`;
+        main.style.fontSize = `${scale * 16}px`;
+    } else {
+        startdiv.style.width = `${window.innerWidth}px`;
+        startdiv.style.height = `${(window.innerHeight * 2) / 3}px`;
+        main.style.fontSize = `${scale * 8}px`;
+    }
 }
 
 function showCursor() {
@@ -137,7 +144,7 @@ async function clickStartButton(id: string) {
     }
     if (id === 'load-game') {
         core.dom.gameGroup.style.display = 'block';
-        start.style.top = '100vh';
+        start.style.top = '200vh';
         core.load();
     }
     if (id === 'replay') core.chooseReplayFile();
@@ -336,11 +343,15 @@ onUnmounted(() => {
     opacity: 0;
     transition: opacity 0.6s ease-out;
     background-color: black;
+    object-fit: contain;
 }
 
 #start-div {
     position: relative;
     overflow: hidden;
+    object-fit: contain;
+    width: 100%;
+    height: 100%;
 }
 
 #background {

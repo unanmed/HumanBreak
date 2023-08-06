@@ -266,7 +266,7 @@ onUnmounted(() => {
     flex-direction: row;
     justify-content: space-between;
     font-family: 'normal';
-    font-size: 2.5vh;
+    font-size: 150%;
     user-select: none;
 }
 
@@ -327,7 +327,7 @@ onUnmounted(() => {
     justify-content: space-between;
     align-items: center;
     margin: 1vh 0 0 0;
-    padding: 0.5vh 0.5vw 0.5vh 0.5vw;
+    padding: 0.5vh 0.5vw;
     border: #0000 0.5px solid;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -402,7 +402,7 @@ onUnmounted(() => {
     #toolbox-main {
         flex-direction: column-reverse;
         height: 100%;
-        font-size: 3.8vw;
+        font-size: 100%;
     }
 
     .item-list {

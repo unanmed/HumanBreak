@@ -37,7 +37,7 @@
                         </Scroll>
                         <a-divider
                             class="display-divider"
-                            type="vertical"
+                            :type="isMobile ? 'horizontal' : 'vertical'"
                             dashed
                         ></a-divider>
                     </div>
@@ -106,6 +106,7 @@ import { RightOutlined, LeftOutlined } from '@ant-design/icons-vue';
 import { splitText } from '../plugin/utils';
 import Scroll from '../components/scroll.vue';
 import { settingsOpened } from '../plugin/uiController';
+import { isMobile } from '../plugin/use';
 
 const props = defineProps<{
     info?: MotaSetting;
@@ -262,12 +263,12 @@ function exit() {
 }
 
 .setting-scroll {
-    width: 300px;
+    width: 20vw;
     height: 100%;
 }
 
 .setting-info {
-    width: 400px;
+    width: 25vw;
 
     .info-divider {
         border-color: #fff4;
@@ -302,6 +303,54 @@ function exit() {
             font-size: 80%;
             width: 40%;
         }
+    }
+}
+
+@media screen and (max-width: 600px) {
+    #tools {
+        top: 2vh;
+    }
+
+    .setting-main {
+        font-size: 120%;
+
+        .setting-container {
+            flex-direction: column;
+            height: auto;
+        }
+
+        .setting-select {
+            flex-direction: column;
+            width: 90vw;
+        }
+    }
+
+    .list-enter-from,
+    .list-leave-to {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+
+    .setting-scroll {
+        width: 90vw;
+        height: 20vh;
+    }
+
+    .setting-display {
+        width: 90vw;
+        flex-direction: column;
+        height: 22vh;
+
+        .display-divider {
+            width: 100%;
+            height: auto;
+            margin: 1vh 0;
+        }
+    }
+
+    .setting-info {
+        width: 90vw;
+        height: 30vh;
     }
 }
 </style>

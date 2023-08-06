@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { getDamageColor } from '../utils';
 import { ToShowEnemy, detailInfo } from './book';
 import { DamageEnemy } from '../game/enemy/damage';
+import { isMobile } from '../use';
 
 export const showFixed = ref(false);
 
@@ -87,9 +88,10 @@ export function getDetailedEnemy(
             s[2] as string
         ];
     });
+    const l = isMobile ? 1 : 2;
     const showSpecial =
-        special.length > 2
-            ? special.slice(0, 2).concat(['...', '', '#fff'])
+        special.length > l
+            ? special.slice(0, l).concat([['...', '', '#fff']])
             : special.slice();
 
     const damageColor = getDamageColor(dam) as string;

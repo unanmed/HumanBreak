@@ -48,6 +48,8 @@ import { LeftOutlined } from '@ant-design/icons-vue';
 import { KeyCode } from '../plugin/keyCodes';
 import { noClosePanel } from '../plugin/uiController';
 import { ToShowEnemy, detailInfo } from '../plugin/ui/book';
+import { isMobile } from '../plugin/use';
+import { getDetailedEnemy } from '../plugin/ui/fixed';
 
 const floorId =
     // @ts-ignore
@@ -63,50 +65,9 @@ const specials = Object.fromEntries(
 >;
 
 const enemy = core.getCurrentEnemys(floorId);
-const toShow: ToShowEnemy[] = enemy.map(v => {
-    const e = v.enemy;
-    const dam = e.calDamage().damage;
-    const cri = e.calCritical(1);
-    const critical = core.formatBigNumber(cri[0]?.atkDelta);
-    const criticalDam = core.formatBigNumber(-cri[0]?.delta);
-    const ratio = core.status.maps[floorId].ratio;
-    const defDam = core.formatBigNumber(-e.calDefDamage(ratio).delta);
-    const damage = core.formatBigNumber(dam);
-
-    const fromFunc = (
-        func: string | ((enemy: Enemy) => string),
-        enemy: Enemy
-    ) => {
-        return typeof func === 'string' ? func : func(enemy);
-    };
-    const special: [string, string, string][] = v.enemy.enemy.special.map(
-        vv => {
-            const s = specials[vv];
-            return [
-                fromFunc(s[0], v.enemy.enemy),
-                fromFunc(s[1], v.enemy.enemy),
-                s[2] as string
-            ];
-        }
-    );
-    const showSpecial =
-        special.length > 2
-            ? special.slice(0, 2).concat(['...', '', '#fff'])
-            : special.slice();
-
-    const damageColor = getDamageColor(dam) as string;
-
-    return {
-        critical,
-        criticalDam,
-        defDam,
-        special,
-        damageColor,
-        showSpecial,
-        damage,
-        ...v
-    };
-});
+const toShow: ToShowEnemy[] = enemy.map(v =>
+    getDetailedEnemy(v.enemy, floorId)
+);
 
 const scroll = ref(0);
 const drag = ref(false);
@@ -292,6 +253,10 @@ onUnmounted(async () => {
     #book {
         width: 100%;
         padding: 5%;
+    }
+
+    .enemy {
+        height: 15vh;
     }
 }
 </style>

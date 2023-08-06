@@ -138,7 +138,7 @@ function getDefDamage(id: EnemyIds) {
 }
 
 .marked-main {
-    padding: 1vh 0 1vh 0;
+    padding: 1vh 0;
     background-color: #0009;
     display: flex;
     flex-direction: column;

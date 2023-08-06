@@ -187,14 +187,14 @@ function exit() {
     width: 90vh;
     height: 90vh;
     font-family: 'normal';
-    font-size: 2.8vh;
+    font-size: 150%;
     display: flex;
     flex-direction: column;
     user-select: none;
 }
 
 #divider {
-    margin: 1vh 0 1vh 0;
+    margin: 1% 0;
     border-color: #ddd4;
 }
 
@@ -207,8 +207,8 @@ function exit() {
     display: flex;
     flex-direction: row;
     justify-content: space-around;
-    margin-top: 3vh;
-    font-size: 3.5vh;
+    margin-top: 3%;
+    font-size: 130%;
 }
 
 .list-scroll {
@@ -219,7 +219,7 @@ function exit() {
 #list {
     overflow: hidden;
     width: 100%;
-    height: 69vh;
+    height: max-content;
 }
 
 #achievement-list {
@@ -251,8 +251,8 @@ function exit() {
         flex-direction: column;
         align-items: center;
         border: 2px double rgba(132, 132, 132, 0.17);
-        border-radius: 1vh;
-        margin: 2vh 0 2.5vh 0;
+        border-radius: 10px;
+        margin: 2% 0 2.5% 0;
         background-color: rgba(59, 59, 59, 0.281);
     }
 
@@ -265,7 +265,7 @@ function exit() {
     }
 
     .list-text {
-        font-size: 2.5vh;
+        font-size: 100%;
         padding: 0 20px;
     }
 
@@ -274,14 +274,13 @@ function exit() {
         height: 95%;
         display: flex;
         flex-direction: column-reverse;
-        font-size: 2.3vh;
+        font-size: 90%;
 
         .end-info {
             display: flex;
             flex-direction: row;
             justify-content: space-between;
             align-items: end;
-            font-size: 2.3vh;
         }
 
         .complete {
@@ -300,8 +299,6 @@ function exit() {
 
         .progress {
             width: 100%;
-            height: 2.6vh;
-            font-size: 1vh;
         }
     }
 }
@@ -317,8 +314,8 @@ function exit() {
     }
 
     #point-number {
-        font-size: 2vh;
-        margin-left: 2vh;
+        font-size: 70%;
+        margin-left: 2%;
         white-space: nowrap;
     }
 }
@@ -327,11 +324,6 @@ function exit() {
     #achievement {
         width: 90vw;
         height: 90vh;
-        font-size: 4.2vw;
-    }
-
-    #column {
-        font-size: 4.3vw;
     }
 
     .list-one {
@@ -341,15 +333,8 @@ function exit() {
             height: 15vh;
         }
 
-        .list-text {
-            font-size: 3.2vw;
-        }
-
         .list-end {
             margin-bottom: 0.8vh;
-            .end-info {
-                font-size: 3.2vw;
-            }
         }
     }
 }

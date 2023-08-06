@@ -1,3 +1,5 @@
+import { debounce } from 'lodash-es';
+
 export default function init() {
     return { useDrag, useWheel, useUp, isMobile };
 }
@@ -18,6 +20,7 @@ const dragFnMap = new Map<DragFn, DragMap>();
  */
 export let isMobile = matchMedia('(max-width: 600px)').matches;
 
+let alerted = false;
 window.addEventListener('resize', () => {
     requestAnimationFrame(() => {
         isMobile = matchMedia('(max-width: 600px)').matches;
@@ -27,8 +30,9 @@ window.addEventListener('resize', () => {
 checkMobile();
 
 function checkMobile() {
-    if (isMobile) {
+    if (isMobile && !alerted) {
         alert('手机端建议使用自带的浏览器进行游玩，并在进入游戏后开启全屏游玩');
+        alerted = true;
     }
 }
 
@@ -47,11 +51,11 @@ export function useDrag(
     global: boolean = false
 ) {
     const touchFn = (e: TouchEvent) => {
-        const ele = global ? document : e.target;
-        if (ele) {
-            (ele as HTMLElement).removeEventListener('touchmove', touchFn);
-        }
         fn(e.touches[0].clientX, e.touches[0].clientY, e);
+    };
+
+    const mouseFn = (e: MouseEvent) => {
+        fn(e.clientX, e.clientY, e);
     };
 
     const mouseUp = (e: MouseEvent) => {
@@ -88,10 +92,6 @@ export function useDrag(
     }
 
     const target = global ? document : ele;
-
-    const mouseFn = (e: MouseEvent) => {
-        fn(e.clientX, e.clientY, e);
-    };
 
     const touchUp = (e: TouchEvent) => {
         onup && onup(e);

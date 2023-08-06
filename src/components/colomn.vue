@@ -86,21 +86,9 @@ onUnmounted(() => {
     justify-content: center;
     align-items: center;
     font-family: 'normal';
-    font-size: 2.7vh;
+    font-size: 150%;
     user-select: none;
 }
-
-.column {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: 'normal';
-    font-size: 2.7vh;
-    user-select: none;
-}
-
 .column-main {
     width: 70%;
     height: 70%;
@@ -151,7 +139,7 @@ onUnmounted(() => {
         flex-direction: column;
         width: 90%;
         height: 75%;
-        font-size: 3.8vw;
+        font-size: 80%;
     }
 
     .divider {

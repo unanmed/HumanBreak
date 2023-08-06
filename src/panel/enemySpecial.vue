@@ -48,7 +48,7 @@ const format = core.formatBigNumber;
 #special-main {
     width: 100%;
     user-select: none;
-    font-size: 2em;
+    font-size: 160%;
     position: absolute;
     top: 20vh;
 }
@@ -61,7 +61,7 @@ const format = core.formatBigNumber;
 
 #critical-des,
 .critical {
-    font-size: 1.6vw;
+    font-size: 110%;
     display: flex;
     flex-direction: column;
 }
@@ -80,17 +80,13 @@ const format = core.formatBigNumber;
 }
 
 @media screen and (max-width: 600px) {
-    #detail-main {
-        font-size: 3.8vw;
-    }
-
     #critical-des,
     .critical {
-        font-size: 3.6vw;
+        font-size: 70%;
     }
 
     #special {
-        font-size: 3.8vw;
+        font-size: 70%;
     }
 
     #special-main {

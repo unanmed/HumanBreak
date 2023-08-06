@@ -325,7 +325,7 @@ onUnmounted(() => {
     width: 90vh;
     height: 90vh;
     font-family: 'normal';
-    font-size: 2.8vh;
+    font-size: 150%;
     display: flex;
     flex-direction: column;
     user-select: none;
@@ -339,7 +339,7 @@ onUnmounted(() => {
 #item-name {
     width: 100%;
     text-align: center;
-    font-size: 4vh;
+    font-size: 140%;
     height: 5vh;
     line-height: 1;
 }
@@ -425,7 +425,7 @@ onUnmounted(() => {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    margin: 1vh 0 1vh 0;
+    margin: 1vh 0;
     transition: color 0.2s linear;
 }
 
@@ -461,7 +461,7 @@ onUnmounted(() => {
     #shop {
         width: 90vw;
         padding-top: 5vh;
-        font-size: 3.8vw;
+        font-size: 100%;
     }
 
     #item-list {

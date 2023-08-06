@@ -139,11 +139,7 @@
                     style="border-color: #ddd4; margin: 1vh 0 1vh 0"
                 ></a-divider>
                 <div id="equip-add">
-                    <span
-                        :style="{ 'font-size': isMobile ? '3.8vw' : '3vh' }"
-                        id="title"
-                        >增减属性</span
-                    >
+                    <span id="title">增减属性</span>
                     <Scroll style="width: 100%; height: 100%">
                         <component :is="addStatus"></component>
                     </Scroll>
@@ -153,11 +149,7 @@
                     style="border-color: #ddd4; margin: 1vh 0 1vh 0"
                 ></a-divider>
                 <div id="equip-desc-text">
-                    <span
-                        :style="{ 'font-size': isMobile ? '3.8vw' : '3vh' }"
-                        id="title"
-                        >装备介绍</span
-                    >
+                    <span id="title">装备介绍</span>
                     <Scroll id="desc-text" style="height: 100%; width: 100%">
                         <div v-if="!descText.value!.startsWith('!!html')">
                             {{ descText.value }}
@@ -493,7 +485,7 @@ onUnmounted(() => {
     display: flex;
     flex-direction: row;
     font-family: 'normal';
-    font-size: 2.5vh;
+    font-size: 150%;
 }
 
 .divider {
@@ -515,11 +507,11 @@ onUnmounted(() => {
         .select {
             width: 100%;
             font-family: 'normal';
-            font-size: 1.9vh;
+            font-size: 75%;
         }
 
         #sort-type {
-            font-size: 1.9vh;
+            font-size: 75%;
             white-space: nowrap;
         }
     }
@@ -649,7 +641,7 @@ onUnmounted(() => {
         flex-basis: 50%;
         width: 100%;
         text-align: right;
-        font-size: 2.9vh;
+        font-size: 110%;
         white-space: nowrap;
 
         .hero-status-label {
@@ -670,7 +662,7 @@ onUnmounted(() => {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    padding: 0.5vh 0.5vw 0.5vh 0.5vw;
+    padding: 0.5vh 0.5vw;
     border: #0000 0.5px solid;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -704,7 +696,7 @@ onUnmounted(() => {
     #equipbox-main {
         height: 90vh;
         flex-direction: column-reverse;
-        font-size: 3.8vw;
+        font-size: 100%;
     }
 
     #equip-now-div {

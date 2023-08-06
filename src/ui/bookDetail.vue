@@ -142,7 +142,7 @@ onMounted(async () => {
             if (y > (parseFloat(style.height) * 4) / 5) moved = true;
         },
         () => {
-            if (moved === false && panel.value !== 'critical') {
+            if (moved === false && panel.value === 'special') {
                 close();
             }
             moved = false;

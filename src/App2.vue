@@ -40,5 +40,7 @@ import CompleteAchievement from './ui/completeAchievement.vue';
     width: 0;
     height: 0;
     overflow: visible;
+    left: 0;
+    top: 0;
 }
 </style>

@@ -143,7 +143,7 @@ function enter() {
 <style lang="less" scoped>
 .enemy-container {
     border: 1.5px solid transparent;
-    border-radius: 1.1vw;
+    border-radius: 15px;
     transition: all 0.2s linear;
     height: 100%;
 
@@ -168,7 +168,7 @@ function enter() {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 2vh;
+    font-size: 120%;
     padding-left: 1%;
 }
 
@@ -192,8 +192,8 @@ function enter() {
 }
 
 .rightbar {
-    font-size: 2.5vh;
-    width: 100%;
+    font-size: 140%;
+    width: 85%;
     height: 100%;
     padding: 1.5vh 0 1.5vh 0;
 
@@ -215,15 +215,17 @@ function enter() {
 
 @media screen and (max-width: 600px) {
     .rightbar {
-        font-size: 3.2vw;
+        width: 80%;
+        font-size: 85%;
     }
 
     .leftbar {
-        font-size: 2vw;
+        width: 20%;
+        font-size: 80%;
     }
 
     .enemy-container {
-        border-radius: 1.6vh;
+        border-radius: 20px;
     }
 }
 </style>

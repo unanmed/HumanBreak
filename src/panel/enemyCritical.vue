@@ -245,7 +245,7 @@ onMounted(() => {
 .des {
     width: 100%;
     text-align: center;
-    font-size: 2.5vh;
+    font-size: 140%;
 }
 
 .slider-div {
@@ -254,7 +254,7 @@ onMounted(() => {
     align-items: center;
 
     span {
-        font-size: 1.1vw;
+        font-size: 120%;
         line-height: 1;
     }
 }
@@ -267,12 +267,12 @@ onMounted(() => {
     display: flex;
     flex-direction: row;
     justify-content: space-around;
-    font-size: 3vh;
+    font-size: 160%;
 }
 
 @media screen and (max-width: 600px) {
     #now-damage {
-        font-size: 3vw;
+        font-size: 100%;
 
         div {
             display: flex;
@@ -292,7 +292,7 @@ onMounted(() => {
     }
 
     .slider-div span {
-        font-size: 1.5vh;
+        font-size: 70%;
     }
 }
 </style>
