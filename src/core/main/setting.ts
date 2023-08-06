@@ -292,8 +292,6 @@ function handleScreenSetting<T extends number | boolean>(
     n: T,
     o: T
 ) {
-    if (n === o) return;
-
     if (key === 'fullscreen') {
         // 全屏
         triggerFullscreen(n as boolean);
@@ -336,8 +334,6 @@ function handleActionSetting<T extends number | boolean>(
     n: T,
     o: T
 ) {
-    if (n === o) return;
-
     if (key === 'autoSkill') {
         // 自动切换技能
         flags.autoSkill = n;
@@ -354,8 +350,6 @@ function handleUtilsSetting<T extends number | boolean>(
     n: T,
     o: T
 ) {
-    if (n === o) return;
-
     if (key === 'betterLoad') {
         // 加载优化
         core.setLocalStorage('betterLoad', n);

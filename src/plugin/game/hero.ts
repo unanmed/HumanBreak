@@ -1,8 +1,6 @@
 /**
  * 获取勇士在某一点的属性
  * @param name 要获取的勇士属性
- * @param x 勇士所在横坐标
- * @param y 勇士所在纵坐标
  * @param floorId 勇士所在楼层
  */
 export function getHeroStatusOn(name: 'all', floorId?: FloorIds): HeroStatus;
@@ -26,8 +24,6 @@ export function getHeroStatusOn(
  * 获取一定状态下的勇士在某一点的属性
  * @param status 勇士的状态
  * @param name 要获取的勇士属性
- * @param x 勇士所在横坐标
- * @param y 勇士所在纵坐标
  * @param floorId 勇士所在楼层
  */
 export function getHeroStatusOf(

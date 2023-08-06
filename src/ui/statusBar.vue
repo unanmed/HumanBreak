@@ -178,8 +178,9 @@ watch(status, update);
  * 更新显示内容
  */
 function update() {
+    if (!core?.plugin?.hero?.getHeroStatusOn) return;
     toShow.forEach(v => {
-        hero[v] = core.plugin.getHeroStatusOn(v);
+        hero[v] = core.plugin.hero.getHeroStatusOn(v);
     });
     keys[0] = core.itemCount('yellowKey');
     keys[1] = core.itemCount('blueKey');
