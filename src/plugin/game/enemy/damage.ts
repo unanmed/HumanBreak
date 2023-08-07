@@ -193,8 +193,13 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
                 py: 32 * (v.y! + 1) - 1,
                 color: color
             });
+            const criGem = core.getLocalStorage('criticalGem', false);
+            const n = critical?.atkDelta ?? Infinity;
+            const ratio = core.status.maps[this.floorId].ratio;
+            const cri = criGem ? Math.ceil(n / ratio) : n;
+
             core.status.damage.data.push({
-                text: critical?.atkDelta.toString() ?? '?',
+                text: isFinite(cri) ? cri.toString() : '?',
                 px: 32 * v.x! + 1,
                 py: 32 * (v.y! + 1) - 11,
                 color: '#fff'

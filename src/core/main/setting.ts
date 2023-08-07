@@ -319,15 +319,14 @@ function handleScreenSetting<T extends number | boolean>(
                 canvas.classList.add('no-anti-aliasing');
             }
         }
-    } else if (key === 'autoScale') {
-        // 自动放缩
-        core.setLocalStorage('autoScale', n);
     } else if (key === 'fontSize') {
         // 字体大小
         core.setLocalStorage('fontSize', n);
         root.style.fontSize = root2.style.fontSize = `${n}px`;
     } else if (key === 'smoothView') {
         core.setLocalStorage('smoothView', n);
+    } else if (key === 'criticalGem') {
+        core.setLocalStorage('criticalGem', n);
     }
 }
 
@@ -339,9 +338,7 @@ function handleActionSetting<T extends number | boolean>(
     if (key === 'autoSkill') {
         // 自动切换技能
         flags.autoSkill = n;
-    }
-
-    if (key === 'fixed') {
+    } else if (key === 'fixed') {
         // 定点查看
         core.setLocalStorage('fixed', n);
     }
@@ -355,6 +352,9 @@ function handleUtilsSetting<T extends number | boolean>(
     if (key === 'betterLoad') {
         // 加载优化
         core.setLocalStorage('betterLoad', n);
+    } else if (key === 'autoScale') {
+        // 自动放缩
+        core.setLocalStorage('autoScale', n);
     }
 }
 
@@ -370,9 +370,10 @@ mainSetting
             .register('itemDetail', '宝石血瓶显伤', true)
             .register('transition', '界面动画', false)
             .register('antiAlias', '抗锯齿', false)
-            .register('autoScale', '自动放缩', true)
             .register('fontSize', '字体大小', 16, [8, 28, 1])
             .register('smoothView', '平滑镜头', true)
+            .register('criticalGem', '临界显示方式', false)
+            .setDisplayFunc('criticalGem', value => (value ? '宝石数' : '攻击'))
     )
     .register(
         'action',
@@ -387,7 +388,9 @@ mainSetting
     .register(
         'utils',
         '功能设置',
-        new MotaSetting().register('betterLoad', '优化加载', true)
+        new MotaSetting()
+            .register('betterLoad', '优化加载', true)
+            .register('autoScale', '自动放缩', true)
     );
 
 loading.once('coreInit', () => {
@@ -398,15 +401,15 @@ loading.once('coreInit', () => {
         'screen.itemDetail': !!core.getLocalStorage('itemDetail', true),
         'screen.transition': !!core.getLocalStorage('transition', false),
         'screen.antiAlias': !!core.getLocalStorage('antiAlias', false),
-        'screen.autoScale': !!core.getLocalStorage('autoScale', true),
         'screen.fontSize': core.getLocalStorage('fontSize', 16),
         'screen.smoothView': !!core.getLocalStorage('smoothView', true),
         'action.fixed': !!core.getLocalStorage('fixed', true),
-        'utils.betterLoad': !!core.getLocalStorage('betterLoad', true)
+        'utils.betterLoad': !!core.getLocalStorage('betterLoad', true),
+        'utils.autoScale': !!core.getLocalStorage('autoScale', true)
     });
 });
 
-hook.once('reset', () => {
+hook.on('reset', () => {
     mainSetting.reset({
         'action.autoSkill': flags.autoSkill ?? true
     });

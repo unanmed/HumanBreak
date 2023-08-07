@@ -20,6 +20,7 @@ import * as utils from './utils';
 import * as chase from './chase';
 import * as damage from './enemy/damage';
 import * as battle from './enemy/battle';
+import * as special from './enemy/special';
 
 export {
     halo,
@@ -35,5 +36,6 @@ export {
     utils,
     chase,
     damage,
-    battle
+    battle,
+    special
 };
