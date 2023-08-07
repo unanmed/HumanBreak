@@ -384,6 +384,9 @@ mainSetting
             .register('hotkey', '快捷键', false)
             .markSpecial('hotkey', 'hotkey')
             .setDisplayFunc('hotkey', () => '')
+            .register('toolbar', '自定义工具栏', false)
+            .markSpecial('toolbar', 'toolbar')
+            .setDisplayFunc('toolbar', () => '')
     )
     .register(
         'utils',
