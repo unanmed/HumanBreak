@@ -154,6 +154,7 @@ async function clickStartButton(id: string) {
 }
 
 function onmove(e: MouseEvent) {
+    if (!window.core) return;
     const { offsetX, offsetY } = e;
     const ele = e.target as HTMLDivElement;
     const style = getComputedStyle(ele);

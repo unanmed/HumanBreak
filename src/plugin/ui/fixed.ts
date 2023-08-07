@@ -56,15 +56,6 @@ export function getDetailedEnemy(
     enemy: DamageEnemy,
     floorId: FloorIds = core.status.floorId
 ): ToShowEnemy {
-    const specials = Object.fromEntries(
-        core.getSpecials().map(v => {
-            return [v[0], v.slice(1)];
-        })
-    ) as Record<
-        string,
-        EnemySpecialDeclaration extends [number, ...infer F] ? F : never
-    >;
-
     const ratio = core.status.maps[floorId].ratio;
 
     const dam = enemy.calDamage().damage;
@@ -81,11 +72,11 @@ export function getDetailedEnemy(
         return typeof func === 'string' ? func : func(enemy);
     };
     const special: [string, string, string][] = enemy.enemy.special.map(vv => {
-        const s = specials[vv];
+        const s = core.plugin.special[vv];
         return [
-            fromFunc(s[0], enemy.enemy),
-            fromFunc(s[1], enemy.enemy),
-            s[2] as string
+            fromFunc(s.name, enemy.enemy),
+            fromFunc(s.desc, enemy.enemy),
+            s.color as string
         ];
     });
     const l = isMobile ? 1 : 2;

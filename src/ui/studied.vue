@@ -10,26 +10,11 @@
         >
             <Scroll :no-scroll="true" style="height: 100%">
                 <div id="studied-main">
-                    <div v-for="(num, i) of studied" :key="i">
-                        <div id="studied-rough">
-                            <right-outlined
-                                :class="folded[i] ? 'folded' : ''"
-                                @click="folded[i] = !folded[i]"
-                                id="studied-fold"
-                            />
-                            <span
-                                >{{ i }}. {{ skills[i] }}，剩余{{
-                                    last[i]
-                                }}场战斗</span
-                            >
-                        </div>
-                        <div id="studied-detail" v-if="!folded[i]">
-                            {{ hint(num) }}
-                        </div>
-                    </div>
-                </div></Scroll
-            ></Box
-        >
+                    <div
+                        v-for="(num, i) of studied"
+                        :key="i"
+                    ></div></div></Scroll
+        ></Box>
     </div>
 </template>
 
@@ -60,24 +45,6 @@ const last = computed(() => {
     status.value;
     return core.status.hero.special?.last ?? [];
 });
-
-const skills = computed(() => {
-    const specials = core.getSpecials();
-    return studied.value.map(v => {
-        const s = specials[v - 1][1];
-        // @ts-ignore
-        if (s instanceof Function) return s(core.status.hero.special);
-        else return s;
-    });
-});
-
-function hint(number: number) {
-    const specials = core.getSpecials();
-    const s = specials[number - 1][2];
-    // @ts-ignore
-    if (s instanceof Function) return s(core.status.hero.special);
-    else return s;
-}
 
 async function calHeight() {
     await new Promise<void>(resolve => {

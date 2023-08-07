@@ -103,11 +103,7 @@ editor_multi = function () {
             "!doc": core.material.items[name].name || "道具"
         }
     });
-    functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.enemys.getSpecials().forEach(function (one) {
-        var name = one[1];
-        if (name instanceof Function) name = name({});
-        coredef.core.enemys.hasSpecial["!doc"] += name + "(" + one[0] + "); ";
-    });
+
     Object.keys(core.canvas).forEach(function (name) {
         coredef.core.canvas[name] = {
             "!type": "CanvasRenderingContext2D",

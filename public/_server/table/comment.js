@@ -191,18 +191,9 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "popCheckboxSet",
 					"_checkboxSet": function () {
-						var array = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.enemys.getSpecials()
-						var b = [],
-							c = [];
-						for (var index = 0; index < array.length; index++) {
-							b.push(array[index][0])
-							var name = array[index][1];
-							if (name instanceof Function) name = name({});
-							c.push(name + "(" + array[index][0] + ")")
-						}
 						return {
-							"prefix": c,
-							"key": b
+							"prefix": [],
+							"key": []
 						}
 					},
 					"_data": "特殊属性"

@@ -326,6 +326,8 @@ function handleScreenSetting<T extends number | boolean>(
         // 字体大小
         core.setLocalStorage('fontSize', n);
         root.style.fontSize = root2.style.fontSize = `${n}px`;
+    } else if (key === 'smoothView') {
+        core.setLocalStorage('smoothView', n);
     }
 }
 
@@ -370,6 +372,7 @@ mainSetting
             .register('antiAlias', '抗锯齿', false)
             .register('autoScale', '自动放缩', true)
             .register('fontSize', '字体大小', 16, [8, 28, 1])
+            .register('smoothView', '平滑镜头', true)
     )
     .register(
         'action',
@@ -397,6 +400,7 @@ loading.once('coreInit', () => {
         'screen.antiAlias': !!core.getLocalStorage('antiAlias', false),
         'screen.autoScale': !!core.getLocalStorage('autoScale', true),
         'screen.fontSize': core.getLocalStorage('fontSize', 16),
+        'screen.smoothView': !!core.getLocalStorage('smoothView', true),
         'action.fixed': !!core.getLocalStorage('fixed', true),
         'utils.betterLoad': !!core.getLocalStorage('betterLoad', true)
     });

@@ -52,25 +52,6 @@ interface ControlData {
     parallelDo(time: number): void;
 }
 
-interface EnemyData {
-    /**
-     * 获得所有特殊属性定义
-     */
-    getSpecials(): EnemySpecialDeclaration[];
-
-    /**
-     * 判定某种特殊属性的有无
-     * @example core.hasSpecial('greenSlime', 1) // 判定绿头怪有无先攻属性
-     * @param special 敌人id或敌人对象或正整数数组或自然数
-     * @param test 待检查的属性编号
-     * @returns 若special为数组或数且含有test或相等、或special为敌人id或对象且具有此属性，则返回true
-     */
-    hasSpecial(
-        special: number | number[] | EnemyIds | Enemy,
-        test: number
-    ): boolean;
-}
-
 interface UiData {
     /**
      * 数据统计界面统计的道具数量
@@ -183,11 +164,6 @@ interface FunctionsData {
      * 游戏的逻辑信息
      */
     control: ControlData;
-
-    /**
-     * 怪物信息
-     */
-    enemys: EnemyData;
 
     /**
      * ui信息

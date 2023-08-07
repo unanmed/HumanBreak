@@ -75,7 +75,7 @@ export {};
             const fns = before[mod];
             for (const id in fns) {
                 const fn = fns[id];
-                if (typeof fn !== 'function' || id === 'hasSpecial') continue;
+                if (typeof fn !== 'function') continue;
                 const now = after[mod][id];
                 if (fn.toString() !== now.toString()) {
                     try {

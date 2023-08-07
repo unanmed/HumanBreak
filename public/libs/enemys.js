@@ -9,14 +9,8 @@ function enemys() {
 ////// 初始化 //////
 enemys.prototype._init = function () {
     this.enemys = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80;
-    this.enemydata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.enemys;
     for (var enemyId in this.enemys) {
         this.enemys[enemyId].id = enemyId;
-    }
-    if (main.mode == 'play') {
-        this.enemydata.hasSpecial = function (a, b) {
-            return core.enemys.hasSpecial(a, b);
-        };
     }
 };
 
@@ -62,143 +56,40 @@ enemys.prototype.getEnemys = function () {
 
 ////// 判断是否含有某特殊属性 //////
 enemys.prototype.hasSpecial = function (special, test) {
-    if (special == null) return false;
-
-    if (special instanceof Array) {
-        return special.indexOf(test) >= 0;
-    }
-
-    if (typeof special == 'number') {
-        return special === test;
-    }
-
-    if (typeof special == 'string') {
-        return this.hasSpecial(core.material.enemys[special], test);
-    }
-
-    if (special.special != null) {
-        return this.hasSpecial(special.special, test);
-    }
-
-    return false;
+    // Deprecated. Use `Array.includes` instead.
 };
 
 enemys.prototype.getSpecials = function () {
-    return this.enemydata.getSpecials();
+    // Deprecated. See src/plugin/game/enemy/special.ts
 };
 
 ////// 获得所有特殊属性的名称 //////
 enemys.prototype.getSpecialText = function (enemy) {
-    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
-    if (!enemy) return [];
-    var special = enemy.special;
-    var text = [];
-
-    var specials = this.getSpecials();
-    if (specials) {
-        for (var i = 0; i < specials.length; i++) {
-            if (this.hasSpecial(special, specials[i][0]))
-                text.push(this._calSpecialContent(enemy, specials[i][1]));
-        }
-    }
-    return text;
+    // Deprecated.
 };
 
 ////// 获得所有特殊属性的颜色 //////
 enemys.prototype.getSpecialColor = function (enemy) {
-    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
-    if (!enemy) return [];
-    var special = enemy.special;
-    var colors = [];
-
-    var specials = this.getSpecials();
-    if (specials) {
-        for (var i = 0; i < specials.length; i++) {
-            if (this.hasSpecial(special, specials[i][0]))
-                colors.push(specials[i][3] || null);
-        }
-    }
-    return colors;
+    // Deprecated.
 };
 
 ////// 获得所有特殊属性的额外标记 //////
 enemys.prototype.getSpecialFlag = function (enemy) {
-    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
-    if (!enemy) return [];
-    var special = enemy.special;
-    var flag = 0;
-
-    var specials = this.getSpecials();
-    if (specials) {
-        for (var i = 0; i < specials.length; i++) {
-            if (this.hasSpecial(special, specials[i][0]))
-                flag |= specials[i][4] || 0;
-        }
-    }
-    return flag;
+    // Deprecated.
 };
 
 ////// 获得每个特殊属性的说明 //////
 enemys.prototype.getSpecialHint = function (enemy, special) {
-    var specials = this.getSpecials();
-
-    if (special == null) {
-        if (specials == null) return [];
-        var hints = [];
-        for (var i = 0; i < specials.length; i++) {
-            if (this.hasSpecial(enemy, specials[i][0]))
-                hints.push(
-                    '\r[' +
-                        core.arrayToRGBA(specials[i][3] || '#FF6A6A') +
-                        ']\\d' +
-                        this._calSpecialContent(enemy, specials[i][1]) +
-                        '：\\d\r[]' +
-                        this._calSpecialContent(enemy, specials[i][2])
-                );
-        }
-        return hints;
-    }
-
-    if (specials == null) return '';
-    for (var i = 0; i < specials.length; i++) {
-        if (special == specials[i][0])
-            return (
-                '\r[#FF6A6A]\\d' +
-                this._calSpecialContent(enemy, specials[i][1]) +
-                '：\\d\r[]' +
-                this._calSpecialContent(enemy, specials[i][2])
-            );
-    }
-    return '';
+    // Deprecated.
 };
 
 enemys.prototype._calSpecialContent = function (enemy, content) {
-    if (typeof content == 'string') return content;
-    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
-    if (content instanceof Function) {
-        return content(enemy);
-    }
-    return '';
+    // Deprecated.
 };
 
 ////// 获得某个点上某个怪物的某项属性 //////
 enemys.prototype.getEnemyValue = function (enemy, name, x, y, floorId) {
-    floorId = floorId || core.status.floorId;
-    if (
-        (((flags.enemyOnPoint || {})[floorId] || {})[x + ',' + y] || {})[
-            name
-        ] != null
-    ) {
-        return flags.enemyOnPoint[floorId][x + ',' + y][name];
-    }
-    if (enemy == null) {
-        var block = core.getBlock(x, y, floorId);
-        if (block == null) return null;
-        enemy = core.material.enemys[block.event.id];
-    }
-    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
-    if (enemy == null) return null;
-    return enemy[name];
+    // Deprecated.
 };
 
 ////// 能否获胜 //////
@@ -273,30 +164,5 @@ enemys.prototype._getCurrentEnemys_sort = function (enemys) {
 };
 
 enemys.prototype.hasEnemyLeft = function (enemyId, floorId) {
-    if (floorId == null) floorId = core.status.floorId;
-    if (!(floorId instanceof Array)) floorId = [floorId];
-    var enemyMap = {};
-    if (enemyId instanceof Array)
-        enemyId.forEach(function (v) {
-            enemyMap[v] = true;
-        });
-    else if (enemyId) enemyMap[enemyId] = true;
-    else enemyMap = null;
-    for (var i = 0; i < floorId.length; i++) {
-        core.extractBlocks(floorId[i]);
-        var mapBlocks = core.status.maps[floorId[i]].blocks;
-        for (var b = 0; b < mapBlocks.length; b++) {
-            if (
-                !mapBlocks[b].disable &&
-                mapBlocks[b].event.cls.indexOf('enemy') === 0
-            ) {
-                if (
-                    enemyMap === null ||
-                    enemyMap[core.getFaceDownId(mapBlocks[b])]
-                )
-                    return true;
-            }
-        }
-    }
-    return false;
+    // Deprecated.
 };

@@ -2203,19 +2203,7 @@ events.prototype._action_setEnemy = function (data, x, y, prefix) {
 };
 
 events.prototype._action_setEnemyOnPoint = function (data, x, y, prefix) {
-    var loc = this.__action_getLoc2D(data.loc, x, y, prefix);
-    loc.forEach(function (one) {
-        core.setEnemyOnPoint(
-            one[0],
-            one[1],
-            data.floorId,
-            data.name,
-            data.value,
-            data.operator,
-            prefix,
-            data.norefresh
-        );
-    });
+    // Deprecated.
     core.doAction();
 };
 
@@ -3545,35 +3533,8 @@ events.prototype.setEnemy = function (
 };
 
 ////// 设置某个点上的怪物属性 //////
-events.prototype.setEnemyOnPoint = function (
-    x,
-    y,
-    floorId,
-    name,
-    value,
-    operator,
-    prefix,
-    norefresh
-) {
-    floorId = floorId || core.status.floorId;
-    var block = core.getBlock(x, y, floorId);
-    if (block == null) return;
-    if (block.event.cls.indexOf('enemy') != 0) return;
-    var enemy = core.material.enemys[block.event.id];
-    if (enemy == null) return;
-    if (typeof value === 'string' && name == 'name')
-        value = value.replaceAll(/\r/g, '\\r');
-    value = this._updateValueByOperator(
-        core.calValue(value, prefix),
-        core.getEnemyValue(enemy, name, x, y, floorId),
-        operator
-    );
-    flags.enemyOnPoint = flags.enemyOnPoint || {};
-    flags.enemyOnPoint[floorId] = flags.enemyOnPoint[floorId] || {};
-    flags.enemyOnPoint[floorId][x + ',' + y] =
-        flags.enemyOnPoint[floorId][x + ',' + y] || {};
-    flags.enemyOnPoint[floorId][x + ',' + y][name] = value;
-    if (!norefresh) core.updateStatusBar();
+events.prototype.setEnemyOnPoint = function (x, y) {
+    // Deprecated.
 };
 
 ////// 重置某个点上的怪物属性 //////

@@ -96,7 +96,7 @@ core.events.afterBattle = function (
     core.status.hero.statistics.battle++;
 
     // 智慧之源
-    if (core.hasSpecial(special, 14) && flags.hard === 2) {
+    if (special.includes(14) && flags.hard === 2) {
         core.addFlag(
             'inte_' + floorId,
             Math.ceil((core.status.hero.mdef / 10) * 0.3) * 10
@@ -106,11 +106,11 @@ core.events.afterBattle = function (
     }
 
     // 极昼永夜
-    if (core.hasSpecial(special, 22)) {
+    if (special.includes(22)) {
         flags[`night_${floorId}`] ??= 0;
         flags[`night_${floorId}`] -= enemy.enemy.night!;
     }
-    if (core.hasSpecial(special, 23)) {
+    if (special.includes(23)) {
         flags[`night_${floorId}`] ??= 0;
         flags[`night_${floorId}`] += enemy.enemy.day;
     }
@@ -120,7 +120,7 @@ core.events.afterBattle = function (
     // }
 
     // 如果是融化怪，需要特殊标记一下
-    if (core.hasSpecial(special, 25) && core.has(x) && core.has(y)) {
+    if (special.includes(25) && core.has(x) && core.has(y)) {
         flags[`melt_${floorId}`] ??= {};
         flags[`melt_${floorId}`][`${x},${y}`] = enemy.enemy.melt;
     }

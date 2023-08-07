@@ -22,21 +22,6 @@ export function canStudySkill(number: number) {
 export function studySkill(enemy: any, number: number) {
     core.status.hero.special ??= { num: [], last: [] };
     const s = core.status.hero.special;
-    const specials = core.getSpecials();
-    let special = specials[number - 1][1];
-    if (special instanceof Function) special = special(enemy);
-    if (!canStudySkill(number)) {
-        if (!main.replayChecking) {
-            ancTe.plugin.utils.tip('error', `无法学习${special}`);
-        }
-        return;
-    }
-    s.num.push(number);
-    s.last.push(core.plugin.skillTree.getSkillLevel(11) * 3 + 2);
-    const value = values[number] ?? [];
-    for (const key of value) {
-        s[key] = enemy[key];
-    }
 }
 
 export function forgetStudiedSkill(num: number, i: number) {

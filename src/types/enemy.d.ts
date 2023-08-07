@@ -242,7 +242,7 @@ interface BookEnemyInfo extends Enemy, EnemyInfo {
 /**
  * 怪物模块
  */
-interface Enemys extends EnemyData {
+interface Enemys {
     /**
      * 所有的怪物信息
      */
@@ -251,61 +251,11 @@ interface Enemys extends EnemyData {
     };
 
     /**
-     * 脚本编辑的怪物相关
-     */
-    readonly enemydata: EnemyData;
-
-    /**
      * 获得所有怪物原始数据的一个副本
      */
     getEnemys(): {
         [P in EnemyIds]: Enemy<P>;
     };
-
-    /**
-     * 获得某种敌人的全部特殊属性名称
-     * @example core.getSpecialText('greenSlime') // ['先攻', '3连击', '破甲', '反击']
-     * @param enemy 敌人id或敌人对象，如core.material.enemys.greenSlime
-     * @returns 字符串数组
-     */
-    getSpecialText(enemy: EnemyIds | Enemy): string[];
-
-    /**
-     * 获得所有特殊属性的颜色
-     * @param enemy 敌人id或敌人对象，如core.material.enemys.greenSlime
-     */
-    getSpecialColor(enemy: EnemyIds | Enemy): Color[];
-
-    /**
-     * 获得所有特殊属性的额外标记
-     * @param enemy 敌人id或敌人对象，如core.material.enemys.greenSlime
-     */
-    getSpecialFlag(enemy: EnemyIds | Enemy): number[];
-
-    /**
-     * 获得某种敌人的某种特殊属性的介绍
-     * @example core.getSpecialHint('bat', 1) // '先攻：怪物首先攻击'
-     * @param enemy 敌人id或敌人对象，用于确定属性的具体数值
-     * @param special 属性编号，可以是该敌人没有的属性
-     * @returns 属性的介绍，以属性名加中文冒号开头
-     */
-    getSpecialHint(enemy: EnemyIds | Enemy, special: number): string;
-
-    /**
-     * 获得某个敌人的某项属性值
-     * @param enemy 敌人id或敌人对象
-     * @param name 获取的敌人属性
-     * @param x 敌人的横坐标
-     * @param y 敌人的纵坐标
-     * @param floorId 敌人所在楼层
-     */
-    getEnemyValue<K extends keyof Enemy>(
-        enemy: EnemyIds | Enemy,
-        name: K,
-        x?: number,
-        y?: number,
-        floorId?: FloorIds
-    ): Enemy[K];
 
     /**
      * 判定主角当前能否打败某只敌人
@@ -321,34 +271,6 @@ interface Enemys extends EnemyData {
         y: number,
         floorId?: FloorIds,
         dir?: Dir | 'none' | (Dir | 'none')[]
-    ): boolean;
-
-    /**
-     * 获得某只敌人对主角的总伤害
-     * @example core.getDamage('greenSlime',0,0,'MT0') // 绿头怪的总伤害
-     * @param enemy 敌人id或敌人对象
-     * @param x 敌人的横坐标
-     * @param y 敌人的纵坐标
-     * @param floorId 敌人所在的地图
-     * @returns 总伤害，如果因为没有破防或无敌怪等其他原因无法战斗，则返回null
-     */
-    getDamage(
-        enemy: EnemyIds | Enemy,
-        x?: number,
-        y?: number,
-        floorId?: FloorIds
-    ): number;
-
-    /**
-     * 检查某些楼层是否还有漏打的（某种）敌人
-     * @example core.hasEnemyLeft('greenSlime', ['sample0', 'sample1']) // 样板0层和1层是否有漏打的绿头怪
-     * @param enemyId 敌人id，可选，默认为任意敌人
-     * @param floorId 地图id或其数组，可选，默认为当前地图
-     * @returns true表示有敌人被漏打，false表示敌人已死光
-     */
-    hasEnemyLeft(
-        enemyId?: EnemyIds | EnemyIds[],
-        floorId?: FloorIds | FloorIds[]
     ): boolean;
 }
 

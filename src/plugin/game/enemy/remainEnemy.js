@@ -1,5 +1,7 @@
 ///<reference path="../../../../src/types/core.d.ts" />
 
+// todo: 优化，直接调用 floor.enemy.list 进行计算
+
 /**
  * 检查漏怪
  * @param {FloorIds[]} floorIds
