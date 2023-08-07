@@ -21,7 +21,9 @@
                                     :selected="item === info.item"
                                     @click="click(item.key, i, item)"
                                 >
-                                    <span>{{ item.name }}</span>
+                                    <span class="setting-name">{{
+                                        item.name
+                                    }}</span>
                                     <span
                                         :selected="item === info.item"
                                         class="setting-cascade"
@@ -259,6 +261,8 @@ onUnmounted(() => {
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
+        width: 100%;
+        overflow: hidden;
     }
 
     .setting-cascade {
@@ -273,9 +277,17 @@ onUnmounted(() => {
         color: cyan;
     }
 
+    .setting-name {
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 70%;
+        overflow: hidden;
+    }
+
     .setting-value {
         margin-right: 10px;
         color: rgb(242, 255, 101);
+        white-space: nowrap;
     }
 }
 

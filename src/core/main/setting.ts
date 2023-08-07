@@ -394,18 +394,20 @@ mainSetting
     );
 
 loading.once('coreInit', () => {
+    const get = core.getLocalStorage;
     mainSetting.reset({
         'screen.fullscreen': false,
-        'screen.halo': !!core.getLocalStorage('showHalo', true),
-        'screen.frag': !!core.getLocalStorage('frag', true),
-        'screen.itemDetail': !!core.getLocalStorage('itemDetail', true),
-        'screen.transition': !!core.getLocalStorage('transition', false),
-        'screen.antiAlias': !!core.getLocalStorage('antiAlias', false),
-        'screen.fontSize': core.getLocalStorage('fontSize', 16),
-        'screen.smoothView': !!core.getLocalStorage('smoothView', true),
-        'action.fixed': !!core.getLocalStorage('fixed', true),
-        'utils.betterLoad': !!core.getLocalStorage('betterLoad', true),
-        'utils.autoScale': !!core.getLocalStorage('autoScale', true)
+        'screen.halo': !!get('showHalo', true),
+        'screen.frag': !!get('frag', true),
+        'screen.itemDetail': !!get('itemDetail', true),
+        'screen.transition': !!get('transition', false),
+        'screen.antiAlias': !!get('antiAlias', false),
+        'screen.fontSize': get('fontSize', 16),
+        'screen.smoothView': !!get('smoothView', true),
+        'screen.criticalGem': !!get('criticalGem', false),
+        'action.fixed': !!get('fixed', true),
+        'utils.betterLoad': !!get('betterLoad', true),
+        'utils.autoScale': !!get('autoScale', true)
     });
 });
 
