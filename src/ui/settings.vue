@@ -92,7 +92,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, shallowRef } from 'vue';
+import { computed, onMounted, onUnmounted, onUpdated, shallowRef } from 'vue';
 import {
     mainSetting,
     MotaSetting,
@@ -103,10 +103,12 @@ import {
 } from '../core/main/setting';
 import settingText from '../data/settings.json';
 import { RightOutlined, LeftOutlined } from '@ant-design/icons-vue';
-import { splitText } from '../plugin/utils';
+import { keycode, splitText } from '../plugin/utils';
 import Scroll from '../components/scroll.vue';
 import { settingsOpened } from '../plugin/uiController';
 import { isMobile } from '../plugin/use';
+import { sleep } from 'mutate-animate';
+import { KeyCode } from '../plugin/keyCodes';
 
 const props = defineProps<{
     info?: MotaSetting;
@@ -170,6 +172,21 @@ function changeValue(value: number | boolean) {
 function exit() {
     settingsOpened.value = false;
 }
+
+function key(e: KeyboardEvent) {
+    const c = keycode(e.keyCode);
+    if (c === KeyCode.Escape || c === KeyCode.KeyX) exit();
+}
+
+onMounted(async () => {
+    await sleep(50);
+    if (ancTe.plugin.ui.transition.value) await sleep(600);
+    document.addEventListener('keyup', key);
+});
+
+onUnmounted(() => {
+    document.removeEventListener('keyup', key);
+});
 </script>
 
 <style lang="less" scoped>
