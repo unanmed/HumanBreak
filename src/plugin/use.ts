@@ -1,5 +1,3 @@
-import { debounce } from 'lodash-es';
-
 export default function init() {
     return { useDrag, useWheel, useUp, isMobile };
 }
@@ -31,7 +29,9 @@ checkMobile();
 
 function checkMobile() {
     if (isMobile && !alerted) {
-        alert('手机端建议使用自带的浏览器进行游玩，并在进入游戏后开启全屏游玩');
+        alert(
+            '手机端建议使用自带的浏览器进行游玩，并在进入游戏后开启游戏内的全屏设置游玩'
+        );
         alerted = true;
     }
 }

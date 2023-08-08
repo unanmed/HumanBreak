@@ -4,6 +4,7 @@ import { transition } from '../../plugin/uiController';
 import { loading } from '../loader/load';
 import { hook } from './game';
 import { isMobile } from '../../plugin/use';
+import { GameStorage } from './storage';
 
 type MotaSettingType = boolean | number | MotaSetting;
 
@@ -396,21 +397,38 @@ mainSetting
             .register('autoScale', '自动放缩', true)
     );
 
+interface SettingStorage {
+    showHalo: boolean;
+    frag: boolean;
+    itemDetail: boolean;
+    transition: boolean;
+    antiAlias: boolean;
+    fontSize: number;
+    smoothView: boolean;
+    criticalGem: boolean;
+    fixed: boolean;
+    betterLoad: boolean;
+    autoScale: boolean;
+}
+
+const storage = new GameStorage<SettingStorage>(
+    GameStorage.fromAncTe('setting')
+);
+
 loading.once('coreInit', () => {
-    const get = core.getLocalStorage;
     mainSetting.reset({
-        'screen.fullscreen': false,
-        'screen.halo': !!get('showHalo', true),
-        'screen.frag': !!get('frag', true),
-        'screen.itemDetail': !!get('itemDetail', true),
-        'screen.transition': !!get('transition', false),
-        'screen.antiAlias': !!get('antiAlias', false),
-        'screen.fontSize': get('fontSize', 16),
-        'screen.smoothView': !!get('smoothView', true),
-        'screen.criticalGem': !!get('criticalGem', false),
-        'action.fixed': !!get('fixed', true),
-        'utils.betterLoad': !!get('betterLoad', true),
-        'utils.autoScale': !!get('autoScale', true)
+        'screen.fullscreen': !!document.fullscreenElement,
+        'screen.halo': !!storage.getValue('showHalo', true),
+        'screen.frag': !!storage.getValue('frag', true),
+        'screen.itemDetail': !!storage.getValue('itemDetail', true),
+        'screen.transition': !!storage.getValue('transition', false),
+        'screen.antiAlias': !!storage.getValue('antiAlias', false),
+        'screen.fontSize': storage.getValue('fontSize', 16),
+        'screen.smoothView': !!storage.getValue('smoothView', true),
+        'screen.criticalGem': !!storage.getValue('criticalGem', false),
+        'action.fixed': !!storage.getValue('fixed', true),
+        'utils.betterLoad': !!storage.getValue('betterLoad', true),
+        'utils.autoScale': !!storage.getValue('autoScale', true)
     });
 });
 

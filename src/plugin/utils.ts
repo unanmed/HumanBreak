@@ -263,3 +263,10 @@ export function pColor(color: string) {
     arr[3] ??= 1;
     return `rgba(${arr.join(',')})` as Color;
 }
+
+export function deleteWith<T>(arr: T[], ele: T): T[] {
+    const index = arr.indexOf(ele);
+    if (index === -1) return arr;
+    arr.splice(index, 1);
+    return arr;
+}

@@ -997,6 +997,8 @@ interface Core extends Pick<Main, CoreDataFromMain> {
      */
     readonly flags: CoreFlags;
 
+    readonly firstData: FirstData;
+
     /**
      * 获得所有楼层的信息
      * @example core.floors[core.status.floorId].events // 获得本楼层的所有自定义事件
