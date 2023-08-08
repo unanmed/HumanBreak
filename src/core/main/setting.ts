@@ -5,6 +5,7 @@ import { loading } from '../loader/load';
 import { hook } from './game';
 import { isMobile } from '../../plugin/use';
 import { GameStorage } from './storage';
+import { triggerFullscreen } from '../../plugin/utils';
 
 type MotaSettingType = boolean | number | MotaSetting;
 
@@ -268,22 +269,6 @@ mainSetting.on('valueChange', (key, n, o) => {
         handleUtilsSetting(setting, n, o);
     }
 });
-
-export async function triggerFullscreen(full: boolean) {
-    const { maxGameScale } = core.plugin.utils;
-    if (!!document.fullscreenElement && !full) {
-        await document.exitFullscreen();
-        requestAnimationFrame(() => {
-            maxGameScale(1);
-        });
-    }
-    if (full && !document.fullscreenElement) {
-        await document.body.requestFullscreen();
-        requestAnimationFrame(() => {
-            maxGameScale();
-        });
-    }
-}
 
 const root = document.getElementById('root') as HTMLDivElement;
 const root2 = document.getElementById('root2') as HTMLDivElement;

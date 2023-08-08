@@ -270,3 +270,19 @@ export function deleteWith<T>(arr: T[], ele: T): T[] {
     arr.splice(index, 1);
     return arr;
 }
+
+export async function triggerFullscreen(full: boolean) {
+    const { maxGameScale } = core.plugin.utils;
+    if (!!document.fullscreenElement && !full) {
+        await document.exitFullscreen();
+        requestAnimationFrame(() => {
+            maxGameScale(1);
+        });
+    }
+    if (full && !document.fullscreenElement) {
+        await document.body.requestFullscreen();
+        requestAnimationFrame(() => {
+            maxGameScale();
+        });
+    }
+}
