@@ -4,6 +4,7 @@ import { EventEmitter } from './common/eventEmitter';
 import { loading, readyAllResource } from './loader/load';
 import { ResourceStore, ResourceType } from './loader/resource';
 import { GameEvent, hook } from './main/game';
+import { GameStorage } from './main/storage';
 import { resolvePlugin } from './plugin';
 
 interface AncTePlugin {
@@ -41,6 +42,7 @@ export interface AncTe {
     plugin: AncTePlugin;
     game: {
         hook: EventEmitter<GameEvent>;
+        storage: GameStorage<any>[];
     };
 }
 
@@ -53,7 +55,8 @@ function ready() {
         // @ts-ignore
         plugin: {},
         game: {
-            hook
+            hook,
+            storage: GameStorage.list
         }
     };
 

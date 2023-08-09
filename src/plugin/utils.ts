@@ -286,3 +286,13 @@ export async function triggerFullscreen(full: boolean) {
         });
     }
 }
+
+export function generateBinary(arr: boolean[]) {
+    let num = 0;
+    arr.forEach((v, i) => {
+        if (v) {
+            num += 1 << i;
+        }
+    });
+    return num;
+}
