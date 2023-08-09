@@ -35,7 +35,7 @@ export class GameStorage<T> {
     }
 
     getValue<K extends keyof T>(key: K): T[K] | null;
-    getValue<K extends keyof T>(key: K, defaults?: T[K]): T[K];
+    getValue<K extends keyof T>(key: K, defaults: T[K]): T[K];
     getValue<K extends keyof T>(key: K, defaults?: T[K]) {
         if (this.data[key]) return this.data[key];
         else {

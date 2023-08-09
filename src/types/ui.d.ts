@@ -822,6 +822,10 @@ interface Ui {
      * 绘制浏览地图
      */
     _drawViewMaps();
+
+    _drawReplay();
+
+    _drawStatistics();
 }
 
 declare const ui: new () => Ui;

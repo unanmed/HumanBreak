@@ -1,5 +1,6 @@
 import { KeyCode } from '../../../plugin/keyCodes';
-import { deleteWith, generateBinary, has } from '../../../plugin/utils';
+import { getLocFromMouseLoc } from '../../../plugin/ui/fixed';
+import { deleteWith, generateBinary, has, tip } from '../../../plugin/utils';
 import { EmitableEvent, EventEmitter } from '../../common/eventEmitter';
 import { GameStorage } from '../storage';
 
@@ -142,118 +143,175 @@ export const hotkey = new Hotkey('gameKey');
 hotkey
     .register('book', '怪物手册', {
         defaults: KeyCode.KeyX,
-        func: () => {}
+        func: () => {
+            core.openBook(true);
+        }
     })
     .register('save', '存档界面', {
         defaults: KeyCode.KeyS,
-        func: () => {}
+        func: () => {
+            core.save(true);
+        }
     })
     .register('load', '读档界面', {
         defaults: KeyCode.KeyD,
-        func: () => {}
+        func: () => {
+            core.load(true);
+        }
     })
-    .register('undo1', '撤回', {
+    .register('undo', '回退', {
         defaults: KeyCode.KeyA,
-        func: () => {}
+        func: () => {
+            core.doSL('autoSave', 'load');
+        }
     })
-    .register('undo2', '撤回 手机端', {
-        defaults: KeyCode.Digit5,
-        func: () => {}
-    })
-    .register('redo1', '重做', {
+    .register('redo', '撤销回退', {
         defaults: KeyCode.KeyW,
-        func: () => {}
-    })
-    .register('redo2', '重做 手机端', {
-        defaults: KeyCode.Digit6,
-        func: () => {}
+        func: () => {
+            core.doSL('autoSave', 'reload');
+        }
     })
     .register('toolbox', '道具栏', {
         defaults: KeyCode.KeyT,
-        func: () => {}
+        func: () => {
+            core.openToolbox(true);
+        }
     })
     .register('equipbox', '装备栏', {
         defaults: KeyCode.KeyQ,
-        func: () => {}
+        func: () => {
+            core.openEquipbox(true);
+        }
     })
     .register('fly', '楼层传送', {
         defaults: KeyCode.KeyG,
-        func: () => {}
+        func: () => {
+            core.useFly(true);
+        }
     })
     .register('turn', '勇士转向', {
         defaults: KeyCode.KeyZ,
-        func: () => {}
+        func: () => {
+            core.turnHero();
+        }
     })
-    .register('getNext1', '轻按', {
+    .register('getNext', '轻按', {
         defaults: KeyCode.Space,
-        func: () => {}
-    })
-    .register('getNext2', '轻按 手机端', {
-        defaults: KeyCode.Digit7,
-        func: () => {}
+        func: () => {
+            core.getNextItem();
+        }
     })
     .register('menu', '菜单', {
         defaults: KeyCode.Escape,
-        func: () => {}
+        func: () => {
+            core.openSettings(true);
+        }
     })
     .register('replay', '录像回放', {
         defaults: KeyCode.KeyR,
-        func: () => {}
+        func: () => {
+            core.ui._drawReplay();
+        }
     })
     .register('restart', '开始菜单', {
         defaults: KeyCode.KeyN,
-        func: () => {}
+        func: () => {
+            core.confirmRestart();
+        }
     })
     .register('shop', '快捷商店', {
         defaults: KeyCode.KeyV,
-        func: () => {}
+        func: () => {
+            core.openQuickShop(true);
+        }
     })
     .register('statistics', '数据统计', {
         defaults: KeyCode.KeyB,
-        func: () => {}
+        func: () => {
+            core.ui._drawStatistics();
+        }
     })
     .register('viewMap1', '浏览地图', {
         defaults: KeyCode.PageUp,
-        func: () => {}
+        func: () => {
+            core.ui._drawViewMaps();
+        }
     })
     .register('viewMap2', '浏览地图', {
         defaults: KeyCode.PageDown,
-        func: () => {}
+        func: () => {
+            core.ui._drawViewMaps();
+        }
     })
     .register('comment', '评论区', {
         defaults: KeyCode.KeyP,
-        func: () => {}
+        func: () => {
+            core.actions._clickGameInfo_openComments();
+        }
     })
     .register('mark', '标记怪物', {
         defaults: KeyCode.KeyM,
-        func: () => {}
+        func: () => {
+            const [x, y] = flags.mouseLoc ?? [];
+            const [mx, my] = getLocFromMouseLoc(x, y);
+            const blocks = core.getMapBlocksObj();
+            const block = blocks[`${mx},${my}`];
+            if (block.event.cls.startsWith('enemy')) {
+                const id = block.event.id as EnemyIds;
+                const name = core.material.enemys[id].name;
+                if (ancTe.plugin.mark.hasMarkedEnemy(id)) {
+                    tip('success', `已取消标记${name}！`);
+                    ancTe.plugin.mark.unmarkEnemy(id);
+                } else {
+                    tip('success', `已标记${name}！`);
+                    ancTe.plugin.mark.checkMarkedEnemy(false);
+                }
+            }
+        }
     })
     .register('skillTree', '技能树', {
         defaults: KeyCode.KeyJ,
-        func: () => {}
+        func: () => {
+            core.useItem('skill1', true);
+        }
     })
     .register('desc', '百科全书', {
         defaults: KeyCode.KeyH,
-        func: () => {}
+        func: () => {
+            core.useItem('I560', true);
+        }
     })
     .register('special', '鼠标位置怪物属性', {
         defaults: KeyCode.KeyE,
-        func: () => {}
+        func: () => {
+            const [x, y] = flags.mouseLoc ?? [];
+            const [mx, my] = getLocFromMouseLoc(x, y);
+            if (core.getBlockCls(mx, my)?.startsWith('enemy')) {
+                core.plugin.fixedDetailPanel = 'special';
+                ancTe.plugin.fixed.showFixed.value = false;
+                ancTe.plugin.ui.fixedDetailOpened.value = true;
+            }
+        }
     })
     .register('critical', '鼠标位置怪物临界', {
         defaults: KeyCode.KeyC,
-        func: () => {}
+        func: () => {
+            const [x, y] = flags.mouseLoc ?? [];
+            const [mx, my] = getLocFromMouseLoc(x, y);
+            if (core.getBlockCls(mx, my)?.startsWith('enemy')) {
+                core.plugin.fixedDetailPanel = 'critical';
+                ancTe.plugin.fixed.showFixed.value = false;
+                ancTe.plugin.ui.fixedDetailOpened.value = true;
+            }
+        }
     })
     .group('action', '游戏操作', [
         'save',
         'load',
-        'undo1',
-        'undo2',
-        'redo1',
-        'redo2',
+        'undo',
+        'redo',
         'turn',
-        'getNext1',
-        'getNext2',
+        'getNext',
         'mark'
     ])
     .group('view', '快捷查看', [

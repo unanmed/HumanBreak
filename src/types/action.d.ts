@@ -134,6 +134,8 @@ interface Actions extends VoidedActionFuncs {
     _out(x: number): boolean;
 
     _getNextFlyFloor(delta: number, index: number): number;
+
+    _clickGameInfo_openComments();
 }
 
 declare const actions: new () => Actions;
