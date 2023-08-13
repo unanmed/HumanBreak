@@ -3,7 +3,6 @@ import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
 import { transition } from '../../plugin/uiController';
 import { loading } from '../loader/load';
 import { hook } from './game';
-import { isMobile } from '../../plugin/use';
 import { GameStorage } from './storage';
 import { triggerFullscreen } from '../../plugin/utils';
 
@@ -352,7 +351,6 @@ mainSetting
         new MotaSetting()
             .register('fullscreen', '全屏游戏', false)
             .register('halo', '光环显示', true)
-            .register('frag', '打怪特效', true)
             .register('itemDetail', '宝石血瓶显伤', true)
             .register('transition', '界面动画', false)
             .register('antiAlias', '抗锯齿', false)
@@ -376,10 +374,17 @@ mainSetting
     )
     .register(
         'utils',
-        '功能设置',
+        '系统设置',
         new MotaSetting()
             .register('betterLoad', '优化加载', true)
             .register('autoScale', '自动放缩', true)
+    )
+    .register(
+        'fx',
+        '特效设置',
+        new MotaSetting()
+            .register('paraLight', '野外阴影', true)
+            .register('frag', '打怪特效', true)
     );
 
 interface SettingStorage {
@@ -394,6 +399,7 @@ interface SettingStorage {
     fixed: boolean;
     betterLoad: boolean;
     autoScale: boolean;
+    paraLight: boolean;
 }
 
 const storage = new GameStorage<SettingStorage>(
@@ -404,7 +410,6 @@ loading.once('coreInit', () => {
     mainSetting.reset({
         'screen.fullscreen': !!document.fullscreenElement,
         'screen.halo': !!storage.getValue('showHalo', true),
-        'screen.frag': !!storage.getValue('frag', true),
         'screen.itemDetail': !!storage.getValue('itemDetail', true),
         'screen.transition': !!storage.getValue('transition', false),
         'screen.antiAlias': !!storage.getValue('antiAlias', false),
@@ -413,7 +418,9 @@ loading.once('coreInit', () => {
         'screen.criticalGem': !!storage.getValue('criticalGem', false),
         'action.fixed': !!storage.getValue('fixed', true),
         'utils.betterLoad': !!storage.getValue('betterLoad', true),
-        'utils.autoScale': !!storage.getValue('autoScale', true)
+        'utils.autoScale': !!storage.getValue('autoScale', true),
+        'fx.paraLight': !!storage.getValue('paraLight', true),
+        'fx.frag': !!storage.getValue('frag', true)
     });
 });
 
