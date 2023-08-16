@@ -9,6 +9,7 @@ interface FocusEvent<T> extends EmitableEvent {
     add: (item: T) => void;
     pop: (item: T | null) => void;
     register: (item: T[]) => void;
+    unregister: (item: T[]) => void;
     splice: (spliced: T[]) => void;
 }
 
@@ -63,7 +64,10 @@ export class Focus<T = any> extends EventEmitter<FocusEvent<T>> {
      */
     add(item: T) {
         if (!this.targets.has(item)) {
-            console.warn(`向显示列表里面添加了不在物品集合里面的物品`);
+            console.warn(
+                `向显示列表里面添加了不在物品集合里面的物品`,
+                `添加的物品：${item}`
+            );
             return;
         }
         this.stack.push(item);
@@ -93,7 +97,7 @@ export class Focus<T = any> extends EventEmitter<FocusEvent<T>> {
     }
 
     /**
-     * 注册一个物品
+     * 注册物品
      * @param item 要注册的物品
      */
     register(...item: T[]) {
@@ -101,6 +105,17 @@ export class Focus<T = any> extends EventEmitter<FocusEvent<T>> {
             this.targets.add(v);
         });
         this.emit('register', item);
+    }
+
+    /**
+     * 取消注册物品
+     * @param item 要取消注册的物品
+     */
+    unregister(...item: T[]) {
+        item.forEach(v => {
+            this.targets.delete(v);
+        });
+        this.emit('unregister', item);
     }
 }
 
@@ -114,11 +129,13 @@ export class GameUi extends EventEmitter<GameUiEvent> {
 
     component: Component;
     hotkey?: Hotkey;
+    id: string;
 
-    constructor(component: Component, hotkey?: Hotkey) {
+    constructor(id: string, component: Component, hotkey?: Hotkey) {
         super();
         this.component = component;
         this.hotkey = hotkey;
+        this.id = id;
         GameUi.uiList.push(this);
     }
 }
