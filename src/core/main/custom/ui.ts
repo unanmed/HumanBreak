@@ -1,4 +1,4 @@
-import { Component, reactive } from 'vue';
+import { Component, shallowReactive } from 'vue';
 import { EmitableEvent, EventEmitter } from '../../common/eventEmitter';
 import { KeyCode } from '../../../plugin/keyCodes';
 import { Hotkey } from './hotkey';
@@ -21,7 +21,7 @@ export class Focus<T = any> extends EventEmitter<FocusEvent<T>> {
 
     constructor(react?: boolean) {
         super();
-        this.stack = react ? reactive([]) : [];
+        this.stack = react ? shallowReactive([]) : [];
     }
 
     /**
@@ -105,6 +105,7 @@ export class Focus<T = any> extends EventEmitter<FocusEvent<T>> {
             this.targets.add(v);
         });
         this.emit('register', item);
+        return this;
     }
 
     /**
@@ -116,6 +117,7 @@ export class Focus<T = any> extends EventEmitter<FocusEvent<T>> {
             this.targets.delete(v);
         });
         this.emit('unregister', item);
+        return this;
     }
 }
 
@@ -158,5 +160,23 @@ export class UiController extends Focus<GameUi> {
      */
     emitKey(key: KeyCode, e: KeyboardEvent) {
         this.focused?.hotkey?.emitKey(key, e);
+    }
+
+    /**
+     * 根据id获取到ui
+     * @param id ui的id
+     */
+    get(id: string) {
+        return [...this.targets.values()].find(v => v.id === id);
+    }
+
+    /**
+     * 关闭一个ui，注意在其之后的ui都会同时关闭掉
+     * @param id 要关闭的ui的id
+     */
+    close(id: string) {
+        const ui = this.stack.find(v => v.id === id);
+        if (!ui) return;
+        this.splice(ui);
     }
 }

@@ -287,6 +287,10 @@ export async function triggerFullscreen(full: boolean) {
     }
 }
 
+/**
+ * 根据布尔值数组转换成一个二进制数
+ * @param arr 要转换的布尔值数组
+ */
 export function generateBinary(arr: boolean[]) {
     let num = 0;
     arr.forEach((v, i) => {
