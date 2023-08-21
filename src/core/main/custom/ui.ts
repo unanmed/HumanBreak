@@ -1,4 +1,4 @@
-import { Component, shallowReactive } from 'vue';
+import { Component, h, shallowReactive } from 'vue';
 import { EmitableEvent, EventEmitter } from '../../common/eventEmitter';
 import { KeyCode } from '../../../plugin/keyCodes';
 import { Hotkey } from './hotkey';
@@ -19,9 +19,13 @@ export class Focus<T = any> extends EventEmitter<FocusEvent<T>> {
     stack: T[];
     focused: T | null = null;
 
-    constructor(react?: boolean) {
+    /** ui是否平等，在平等时，关闭ui不再会将其之后的ui全部删除，而是保留 */
+    readonly equal: boolean;
+
+    constructor(react: boolean = false, equal: boolean = false) {
         super();
         this.stack = react ? shallowReactive([]) : [];
+        this.equal = equal;
     }
 
     /**
@@ -79,12 +83,15 @@ export class Focus<T = any> extends EventEmitter<FocusEvent<T>> {
      */
     pop() {
         const item = this.stack.pop() ?? null;
+        const last = this.stack.at(-1) ?? null;
+        if (!last) this.unfocus();
+        else this.focus(last);
         this.emit('pop', item);
         return item;
     }
 
     /**
-     * 从一个位置开始删除显示列表
+     * 从一个位置开始删除显示列表，如果ui平等，则只会删除一个，否则会将其之后的所有ui全部删除
      * @param item 从哪开始删除，包括此项
      */
     splice(item: T) {
@@ -93,7 +100,13 @@ export class Focus<T = any> extends EventEmitter<FocusEvent<T>> {
             this.emit('splice', []);
             return;
         }
-        this.emit('splice', this.stack.splice(index));
+        const last = this.stack.at(-1) ?? null;
+        if (!last) this.unfocus();
+        else this.focus(last);
+        this.emit(
+            'splice',
+            this.stack.splice(index, this.equal ? 1 : Infinity)
+        );
     }
 
     /**
@@ -133,6 +146,9 @@ export class GameUi extends EventEmitter<GameUiEvent> {
     hotkey?: Hotkey;
     id: string;
 
+    vBind: any = {};
+    vOn: Record<string, (...params: any[]) => any> = {};
+
     constructor(id: string, component: Component, hotkey?: Hotkey) {
         super();
         this.component = component;
@@ -140,17 +156,53 @@ export class GameUi extends EventEmitter<GameUiEvent> {
         this.id = id;
         GameUi.uiList.push(this);
     }
+
+    /**
+     * 双向数据绑定，即 vue 内的 v-bind
+     * @param data 要绑定的数据
+     */
+    vbind(data: any) {
+        this.vBind = data;
+    }
+
+    /**
+     * 监听这个ui组件所触发的某种事件
+     * @param event 要监听的事件
+     * @param fn 事件触发时执行的函数
+     */
+    von(event: string, fn: (...params: any[]) => any) {
+        this.vOn[event] = fn;
+    }
+
+    /**
+     * 取消监听这个ui组件所触发的某种事件
+     * @param event 要取消监听的事件
+     */
+    voff(event: string) {
+        delete this.vOn[event];
+    }
 }
 
 export class UiController extends Focus<GameUi> {
-    constructor() {
-        super(true);
+    static list: UiController[] = [];
+
+    constructor(equal?: boolean) {
+        super(true, equal);
+        UiController.list.push(this);
         this.on('splice', spliced => {
             spliced.forEach(v => {
                 v.emit('close');
+                if (this.stack.length === 0) {
+                    this.emit('end');
+                }
             });
         });
-        this.on('add', item => item.emit('open'));
+        this.on('add', item => {
+            if (this.stack.length === 1) {
+                this.emit('start');
+            }
+            item.emit('open');
+        });
     }
 
     /**
@@ -171,7 +223,7 @@ export class UiController extends Focus<GameUi> {
     }
 
     /**
-     * 关闭一个ui，注意在其之后的ui都会同时关闭掉
+     * 关闭一个ui，注意如果不是平等模式，在其之后的ui都会同时关闭掉
      * @param id 要关闭的ui的id
      */
     close(id: string) {

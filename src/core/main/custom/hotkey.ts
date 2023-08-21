@@ -135,11 +135,12 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * @param hotkey 被继承的按键
      * @param cover 继承时是否覆盖同id的按键
      */
-    extend(hotkey: Hotkey, cover: boolean) {
+    extend(hotkey: Hotkey, cover: boolean = false) {
         Object.values(hotkey.list).forEach(v => {
             if (v.id in this.list && !cover) return;
             this.register(v.id, v.name, v);
         });
+        return this;
     }
 
     private ensureKey(key: KeyCode) {
@@ -177,7 +178,7 @@ hotkey
             core.doSL('autoSave', 'load');
         }
     })
-    .register('redo', '撤销回退', {
+    .register('redo', '恢复', {
         defaults: KeyCode.KeyW,
         func: () => {
             core.doSL('autoSave', 'reload');
