@@ -55,8 +55,8 @@ export class GameStorage<T> {
         return `HumanBreak_${key}`;
     }
 
-    static fromAncTe(key: string) {
-        return `AncTe@${key}`;
+    static fromAuthor(author: string, key: string) {
+        return `${author}@${key}`;
     }
 }
 

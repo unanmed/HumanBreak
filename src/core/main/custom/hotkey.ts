@@ -31,12 +31,14 @@ type RegisterData = Omit<HotkeyData, 'id' | 'key' | 'name'>;
 export class Hotkey extends EventEmitter<HotkeyEvent> {
     keyMap: Map<KeyCode, HotkeyData[]> = new Map();
     list: Record<string, HotkeyData> = {};
-    storage: GameStorage<Record<string, KeyCode>>;
+    storage?: GameStorage<Record<string, KeyCode>>;
     groups: Record<string, GroupInfo> = {};
 
-    constructor(id: string) {
+    constructor(id: string, storage: boolean = true) {
         super();
-        this.storage = new GameStorage(GameStorage.fromAncTe(id));
+        if (storage) {
+            this.storage = new GameStorage(GameStorage.fromAuthor('AncTe', id));
+        }
     }
 
     /**
@@ -47,7 +49,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
         const key = {
             id,
             name,
-            key: this.storage.getValue(id, data.defaults),
+            key: this.storage?.getValue(id, data.defaults) ?? data.defaults,
             ...data
         };
         this.ensureKey(key.key).push(key);

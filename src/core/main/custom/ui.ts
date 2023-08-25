@@ -185,6 +185,7 @@ export class GameUi extends EventEmitter<GameUiEvent> {
 
 export class UiController extends Focus<GameUi> {
     static list: UiController[] = [];
+    list: Record<string, GameUi> = {};
 
     constructor(equal?: boolean) {
         super(true, equal);
@@ -219,7 +220,7 @@ export class UiController extends Focus<GameUi> {
      * @param id ui的id
      */
     get(id: string) {
-        return [...this.targets.values()].find(v => v.id === id);
+        return this.list[id];
     }
 
     /**
@@ -227,8 +228,36 @@ export class UiController extends Focus<GameUi> {
      * @param id 要关闭的ui的id
      */
     close(id: string) {
-        const ui = this.stack.find(v => v.id === id);
+        const ui = this.get(id);
         if (!ui) return;
         this.splice(ui);
+    }
+
+    /**
+     * 打开一个新的ui
+     * @param id 要打开的ui的id
+     */
+    open(id: string) {
+        const ui = this.get(id);
+        if (!ui) return;
+        this.add(ui);
+    }
+
+    override register(...item: GameUi[]): this {
+        super.register(...item);
+        item.forEach(v => {
+            this.list[v.id] = v;
+        });
+
+        return this;
+    }
+
+    override unregister(...item: GameUi[]): this {
+        super.unregister(...item);
+        item.forEach(v => {
+            delete this.list[v.id];
+        });
+
+        return this;
     }
 }

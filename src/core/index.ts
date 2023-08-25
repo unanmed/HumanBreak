@@ -3,7 +3,9 @@ import { SoundController } from './audio/sound';
 import { EventEmitter } from './common/eventEmitter';
 import { loading, readyAllResource } from './loader/load';
 import { ResourceStore, ResourceType } from './loader/resource';
+import { UiController } from './main/custom/ui';
 import { GameEvent, hook } from './main/game';
+import { fixedUi, mainUi } from './main/init/ui';
 import { GameStorage } from './main/storage';
 import { resolvePlugin } from './plugin';
 
@@ -44,6 +46,10 @@ export interface AncTe {
         hook: EventEmitter<GameEvent>;
         storage: GameStorage<any>[];
     };
+    ui: {
+        main: UiController;
+        fixed: UiController;
+    };
 }
 
 function ready() {
@@ -57,6 +63,10 @@ function ready() {
         game: {
             hook,
             storage: GameStorage.list
+        },
+        ui: {
+            main: mainUi,
+            fixed: fixedUi
         }
     };
 

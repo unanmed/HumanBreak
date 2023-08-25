@@ -61,3 +61,5 @@ fixedUi.register(
     new GameUi('chapter', Chapter),
     new GameUi('completeAchi', CompleteAchi)
 );
+
+mainUi.focus(mainUi.get('start'), true);
