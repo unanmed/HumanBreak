@@ -1,3 +1,5 @@
+import { has } from '../../plugin/utils';
+
 export interface EmitableEvent {
     [event: string]: (...params: any) => any;
 }
@@ -85,5 +87,81 @@ export class EventEmitter<T extends EmitableEvent = {}> {
                 i--;
             }
         }
+    }
+
+    /**
+     * 取消监听所有的事件，删除所有监听函数
+     */
+    removeAllListeners(): void;
+    /**
+     * 取消监听一个事件的所有函数
+     * @param event 要取消监听的事件
+     */
+    removeAllListeners(event: keyof T): void;
+    removeAllListeners(event?: keyof T) {
+        if (has(event)) this.events[event] = [];
+        else this.events = {};
+    }
+}
+
+type IndexedSymbol = number | string | symbol;
+
+export class IndexedEventEmitter<
+    T extends EmitableEvent
+> extends EventEmitter<T> {
+    private fnMap: {
+        [P in keyof T]?: Map<IndexedSymbol, T[P]>;
+    } = {};
+
+    /**
+     * 监听事件，并将函数与唯一标识符绑定
+     * @param event 事件类型
+     * @param symbol 监听函数的唯一标识符
+     * @param fn 监听函数
+     * @param options 监听配置
+     */
+    onIndex<K extends keyof T>(
+        event: K,
+        symbol: IndexedSymbol,
+        fn: T[K],
+        options: Partial<ListenerOptions>
+    ) {
+        const map = this.ensureMap(event);
+        if (map.has(symbol)) {
+            console.warn(
+                `监听${String(event)}出错：已存在标识符为${String(
+                    symbol
+                )}的监听函数，已将其覆盖`
+            );
+            this.offIndex(event, symbol);
+        }
+        map.set(symbol, fn);
+        this.on(event, fn, options);
+    }
+
+    /**
+     * 监听事件，绑定唯一标识符，但监听函数只会执行一次
+     * @param event 要监听的事件
+     * @param symbol 监听函数的唯一标识符
+     * @param fn 监听函数
+     */
+    onceIndex<K extends keyof T>(event: K, symbol: IndexedSymbol, fn: T[K]) {
+        this.onIndex(event, symbol, fn, { once: true });
+    }
+
+    /**
+     * 取消监听一个事件
+     * @param event 要取消监听的事件
+     * @param symbol 取消监听的函数的唯一标识符
+     */
+    offIndex<K extends keyof T>(event: K, symbol: IndexedSymbol) {
+        const map = this.ensureMap(event);
+        const fn = map.get(symbol);
+        if (!fn) return;
+        this.off(event, fn);
+    }
+
+    private ensureMap<K extends keyof T>(event: K) {
+        return this.fnMap[event] ?? new Map<IndexedSymbol, T[K]>();
     }
 }
