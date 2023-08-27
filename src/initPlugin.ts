@@ -18,6 +18,7 @@ import completion, { floors } from './plugin/completion';
 import path from './plugin/fx/path';
 import * as ani from 'mutate-animate';
 import frag from './plugin/fx/frag';
+import shader from './plugin/fx/shader';
 
 function forward() {
     const toForward: any[] = [
@@ -40,6 +41,7 @@ function forward() {
         completion(),
         path(),
         frag(),
+        shader()
     ];
 
     // 初始化所有插件，并转发到core上
