@@ -1,6 +1,6 @@
-import { Ticker } from 'mutate-animate';
+import { Animation, Ticker, hyper } from 'mutate-animate';
 import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
-import { loading } from '../loader/load';
+import { ensureArray } from '../../plugin/utils';
 
 interface ShaderEvent extends EmitableEvent {}
 
@@ -31,6 +31,32 @@ interface ShaderEffectShader {
 interface MixedImage {
     canvas: HTMLCanvasElement;
     update(): void;
+}
+
+type UniformBinderNum = 1 | 2 | 3 | 4;
+type UniformBinderType = 'f' | 'i';
+type UniformFunc<
+    N extends UniformBinderNum,
+    T extends UniformBinderType,
+    V extends 'v' | ''
+> = `uniform${N}${T}${V}`;
+
+type UniformBinderValue<N extends UniformBinderNum> = N extends 1
+    ? number
+    : N extends 2
+    ? [number, number]
+    : N extends 3
+    ? [number, number, number]
+    : [number, number, number, number];
+
+interface UniformBinder<
+    N extends UniformBinderNum,
+    T extends UniformBinderType,
+    V extends 'v' | ''
+> {
+    value: UniformBinderValue<N>;
+    set(value: UniformBinderValue<N>): void;
+    get(): UniformBinderValue<N>;
 }
 
 const builtinVs = `
@@ -106,23 +132,29 @@ export class ShaderEffect extends EventEmitter<ShaderEvent> {
      * @param compile 是否重新编译着色器脚本，并重新创建纹理
      */
     update(compile: boolean = false) {
-        const gl = this.gl;
-        if (compile) {
-            gl.deleteProgram(this.program);
-            gl.deleteTexture(this.texture);
-            gl.deleteBuffer(this.buffer?.position ?? null);
-            gl.deleteBuffer(this.buffer?.texture ?? null);
-            gl.deleteShader(this.shader?.vertex ?? null);
-            gl.deleteShader(this.shader?.fragment ?? null);
-
-            this.program = this.createProgram();
-            this.programInfo = this.getProgramInfo();
-            this.buffer = this.initBuffers();
-            this.texture = this.createTexture();
-            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-        }
+        if (compile) this.compile();
         this.textureCanvas?.update();
         this.drawScene();
+    }
+
+    /**
+     * 仅重新编译着色器，不进行纹理创建和特效渲染
+     */
+    compile() {
+        const gl = this.gl;
+        gl.deleteProgram(this.program);
+        gl.deleteTexture(this.texture);
+        gl.deleteBuffer(this.buffer?.position ?? null);
+        gl.deleteBuffer(this.buffer?.texture ?? null);
+        gl.deleteShader(this.shader?.vertex ?? null);
+        gl.deleteShader(this.shader?.fragment ?? null);
+
+        this.program = this.createProgram();
+        this.programInfo = this.getProgramInfo();
+        this.buffer = this.initBuffers();
+        this.texture = this.createTexture();
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.useProgram(this.program);
     }
 
     /**
@@ -180,6 +212,64 @@ export class ShaderEffect extends EventEmitter<ShaderEvent> {
 
         // 绘制
         gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+    }
+
+    /**
+     * 创建一个全局变量绑定器，用于操作全局变量
+     * @param uniform 全局变量的变量名
+     * @param num 变量的元素数量，float和int视为1，vec2 vec3 vec4分别视为 2 3 4
+     * @param type 数据类型，可以填'f'，表示浮点型，或者填'i'，表示整型
+     * @param vector 是否为向量，可以填'v'，表示是向量，或者填''，表示不是向量
+     * @returns 一个uniform绑定器，用于操作全局变量uniform
+     */
+    createUniformBinder<
+        N extends UniformBinderNum,
+        T extends UniformBinderType,
+        V extends 'v' | ''
+    >(uniform: string, num: N, type: T, vector: V): UniformBinder<N, T, V> {
+        if (!this.program) {
+            throw new Error(
+                `Uniform binder should be use when the program initialized.`
+            );
+        }
+
+        const suffix = `${num}${type}${vector ? 'v' : ''}`;
+        const func = `uniform${suffix}` as UniformFunc<N, T, V>;
+        const value = (
+            num === 1 ? 0 : Array(num).fill(0)
+        ) as UniformBinderValue<N>;
+
+        const loc = this.gl.getUniformLocation(this.program, uniform);
+        const gl = this.gl;
+
+        return {
+            value,
+            set(value) {
+                this.value = value;
+                let v;
+                if (vector === 'v') {
+                    let _v = ensureArray(value);
+                    if (type === 'f') {
+                        v = new Float32Array(_v);
+                    } else {
+                        v = new Int32Array(_v);
+                    }
+                } else {
+                    v = ensureArray(value);
+                }
+                // 对uniform赋值
+                if (vector === 'v') {
+                    // @ts-ignore
+                    gl[func](loc, v);
+                } else {
+                    // @ts-ignore
+                    gl[func](loc, ...v);
+                }
+            },
+            get() {
+                return this.value;
+            }
+        };
     }
 
     private createProgram() {
@@ -398,7 +488,8 @@ export function replaceGameCanvas(effect: ShaderEffect, canvas: string[]) {
     let zIndex = 0;
     canvas.forEach(v => {
         const canvas = core.canvas[v].canvas;
-        const z = parseInt(canvas.style.zIndex);
+        const style = getComputedStyle(canvas);
+        const z = parseInt(style.zIndex);
         if (z > zIndex) zIndex = z;
         canvas.style.display = 'none';
     });
