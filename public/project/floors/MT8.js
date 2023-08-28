@@ -44,7 +44,7 @@ main.floors.MT8=
         ],
         "10,9": [
             "这里是第二个特效展示木牌。",
-            "下面我将对事件层和勇士层进行处理，任何不透明的像素都将变成完全黑色，否则完全透明。它的着色器脚本：\n\r[yellow]void main() {\n    float alpha = texture2D(uSampler, vTextureCoord).a;\n    gl_FragColor = vec4(0.0, 0.0, 0.0, alpha == 0 ? 0 : 1);\n}\r",
+            "下面我将对事件层和勇士层进行处理，任何不透明的像素都将变成完全黑色，否则完全透明。它的着色器脚本：\n\r[yellow]void main() {\n    float alpha = texture2D(uSampler, vTextureCoord).a;\n    gl_FragColor = vec4(0.0, 0.0, 0.0, alpha == 0.0 ? 0.0 : 1.0);\n}\r",
             {
                 "type": "function",
                 "function": "function(){\nflags.lastShaderSample?.end();\nflags.lastShaderSample = core.shaderSample2();\n}"
@@ -67,7 +67,12 @@ main.floors.MT8=
             }
         ],
         "4,9": [
-            "不过我们发现到目前为止特效都不会动，只能保持为一定的状态，怎么让特效也能动呢？那就期待插件的下一次更新吧！"
+            "不过我们发现到目前为止特效都不会动，只能保持为一定的状态，怎么让特效也能动呢？那就期待插件的下一次更新吧！",
+            "下面将清除着色器特效。",
+            {
+                "type": "function",
+                "function": "function(){\nflags.lastShaderSample?.end();\n}"
+            }
         ]
     },
     "changeFloor": {

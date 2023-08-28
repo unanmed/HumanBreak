@@ -228,3 +228,10 @@ export function changeLocalStorage<T>(
     const to = fn(now);
     core.setLocalStorage(name, to);
 }
+
+export function ensureArray<T extends any>(
+    value: T
+): T extends any[] ? T : T[] {
+    // @ts-ignore
+    return value instanceof Array ? value : [value];
+}

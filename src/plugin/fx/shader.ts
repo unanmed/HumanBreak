@@ -1,4 +1,5 @@
-import { Ticker } from 'mutate-animate';
+import { Animation, Ticker, hyper } from 'mutate-animate';
+import { ensureArray } from '../utils';
 
 const isWebGLSupported = (() => {
     return !!document.createElement('canvas').getContext('webgl');
@@ -29,6 +30,32 @@ interface MixedImage {
     update(): void;
 }
 
+type UniformBinderNum = 1 | 2 | 3 | 4;
+type UniformBinderType = 'f' | 'i';
+type UniformFunc<
+    N extends UniformBinderNum,
+    T extends UniformBinderType,
+    V extends 'v' | ''
+> = `uniform${N}${T}${V}`;
+
+type UniformBinderValue<N extends UniformBinderNum> = N extends 1
+    ? number
+    : N extends 2
+    ? [number, number]
+    : N extends 3
+    ? [number, number, number]
+    : [number, number, number, number];
+
+interface UniformBinder<
+    N extends UniformBinderNum,
+    T extends UniformBinderType,
+    V extends 'v' | ''
+> {
+    value: UniformBinderValue<N>;
+    set(value: UniformBinderValue<N>): void;
+    get(): UniformBinderValue<N>;
+}
+
 export default function init() {
     return {
         ShaderEffect,
@@ -37,7 +64,12 @@ export default function init() {
         shaderSample1: sample1,
         shaderSample2: sample2,
         shaderSample3: sample3,
-        shaderSample4: sample4
+        shaderSample4: sample4,
+        shaderSample5: sample5,
+        shaderSample6: sample6,
+        shaderSample7: sample7,
+        shaderSample8: sample8,
+        shaderSample9: sample9
     };
 }
 
@@ -97,6 +129,170 @@ const sample4 = buildSample(
 `
 );
 
+const sample5 = buildAnimtedSample(
+    ['bg', 'bg2', 'event', 'fg', 'fg2', 'hero'],
+    `
+    uniform float uGrayscale;
+
+    void main() {
+        vec4 rgba = texture2D(uSampler, vTextureCoord);
+        float avr = (rgba.r + rgba.g + rgba.b) / 3.0;
+        float dr = (rgba.r - avr) * (1.0 - uGrayscale);
+        float dg = (rgba.g - avr) * (1.0 - uGrayscale);
+        float db = (rgba.b - avr) * (1.0 - uGrayscale);
+
+        gl_FragColor = vec4(avr + dr, avr + dg, avr + db, rgba.a);
+    }`,
+    effect => {
+        const binder = effect.createUniformBinder('uGrayscale', 1, 'f', '');
+        binder.set(0);
+        const ani = new Animation();
+        ani.register('grayscale', 0);
+        ani.time(5000)
+            .mode(hyper('sin', 'in-out'))
+            .absolute()
+            .apply('grayscale', 1);
+        ani.ticker.add(() => binder.set(ani.value.grayscale));
+
+        return [ani];
+    }
+);
+
+const sample6 = buildAnimtedSample(
+    ['bg', 'bg2', 'event', 'fg', 'fg2', 'hero'],
+    `
+    uniform float uOffset;
+
+    float noise(float x) {
+        float y = fract(sin(x) * 100000.0);
+        return y;
+    }
+    
+    void main() {
+        vec4 rgba = texture2D(uSampler, vTextureCoord);
+        float n = noise(rgba.r + rgba.g + rgba.b + uOffset) / 10.0;
+    
+        gl_FragColor = vec4(rgba.rgb + n, rgba.a);
+    }
+    `,
+    effect => {
+        const binder = effect.createUniformBinder('uOffset', 1, 'f', '');
+        binder.set(0);
+        const ani = new Animation();
+        ani.ticker.add(() => binder.set(binder.get() + 0.001));
+
+        return [ani];
+    }
+);
+
+const sample7 = buildAnimtedSample(
+    ['bg', 'bg2', 'event', 'fg', 'fg2', 'hero'],
+    `
+    uniform float uOffset;
+
+    float noise(float x) {
+        float y = fract(sin(x) * 100000.0);
+        return y;
+    }
+
+    void main() {
+        float brigtness = -0.1 + noise(uOffset) / 50.0;
+        vec2 xy = vTextureCoord;
+        float x = xy.x + noise(xy.y + uOffset) / 100.0;
+        float y = xy.y;
+        vec4 color = texture2D(uSampler, vec2(x, y));
+        vec4 color1 = vec4(color.rgb + vec3(brigtness), color.a);
+
+        gl_FragColor = color1;
+    }
+    `,
+    effect => {
+        const binder = effect.createUniformBinder('uOffset', 1, 'f', '');
+        binder.set(0);
+        const ani = new Animation();
+        ani.ticker.add(() => binder.set(binder.get() + 0.001));
+
+        return [ani];
+    }
+);
+
+const sample8 = buildAnimtedSample(
+    ['bg', 'bg2', 'event', 'fg', 'fg2', 'hero'],
+    `
+    uniform float uStrength;
+    varying vec4 vpos;
+
+    void main() {
+        float alpha = clamp(distance(vec2(0, 0), vpos.xy) - 0.6, 0.0, 1.0) * uStrength;
+        vec4 tex = texture2D(uSampler, vTextureCoord);
+        gl_FragColor = vec4(color1.rgb * (1.0 - alpha), 1.0);
+    }
+    `,
+    effect => {
+        const binder = effect.createUniformBinder('uStrength', 1, 'f', '');
+        binder.set(0);
+        const ani = new Animation();
+        ani.ticker.add(time => {
+            binder.set((Math.sin(time / 2000 - Math.PI / 2) + 1) / 2);
+        });
+
+        return [ani];
+    },
+    `
+    varying vec4 vpos;
+
+    void main() {
+        vTextureCoord = aTextureCoord;
+        vpos = aVertexPosition;
+        gl_Position = aVertexPosition;
+    }
+    `
+);
+
+const sample9 = buildAnimtedSample(
+    ['bg', 'bg2', 'event', 'fg', 'fg2', 'hero'],
+    `
+    uniform float uStrength;
+    varying vec4 vpos;
+
+    float noise(float x) {
+        float y = fract(sin(x) * 100000.0);
+        return y;
+    }
+
+    void main() {
+        float brigtness = -uStrength / 10.0;
+        vec2 xy = vTextureCoord;
+        float x = xy.x + noise(xy.y + uStrength + 1.0) / 300.0 * uStrength;
+        float y = xy.y;
+        vec4 color = texture2D(uSampler, vec2(x, y));
+        vec4 color1 = vec4(color.rgb + vec3(brigtness), color.a);
+
+        float alpha = clamp(distance(vec2(0, 0), vpos.xy) - 0.6, 0.0, 1.0) * uStrength;
+        gl_FragColor = vec4(color1.rgb * (1.0 - alpha), 1.0);
+    }
+    `,
+    effect => {
+        const binder = effect.createUniformBinder('uStrength', 1, 'f', '');
+        binder.set(0);
+        const ani = new Animation();
+        ani.ticker.add(time => {
+            binder.set((Math.sin(time / 2000 - Math.PI / 2) + 1) / 2);
+        });
+
+        return [ani];
+    },
+    `
+    varying vec4 vpos;
+
+    void main() {
+        vTextureCoord = aTextureCoord;
+        vpos = aVertexPosition;
+        gl_Position = aVertexPosition;
+    }
+    `
+);
+
 function buildSample(canvas: string[], fs: string) {
     return () => {
         const effect = new ShaderEffect([0, 0, 0, 0]);
@@ -112,6 +308,35 @@ function buildSample(canvas: string[], fs: string) {
             end() {
                 ticker.destroy();
                 manager.remove();
+            }
+        };
+    };
+}
+
+function buildAnimtedSample(
+    canvas: string[],
+    fs: string,
+    bind: (effect: ShaderEffect) => Animation[],
+    vs?: string
+) {
+    return () => {
+        const effect = new ShaderEffect([0, 0, 0, 0]);
+        effect.baseImage(...canvas.map(v => core.canvas[v].canvas));
+        effect.vs(vs ?? ShaderEffect.defaultVs);
+        effect.fs(fs);
+        effect.compile();
+
+        const anis = bind(effect);
+
+        effect.update();
+        const ticker = setTickerFor(effect);
+        const manager = replaceGameCanvas(effect, canvas);
+
+        return {
+            end() {
+                ticker.destroy();
+                manager.remove();
+                anis.forEach(v => v.ticker.destroy());
             }
         };
     };
@@ -189,23 +414,29 @@ export class ShaderEffect {
      * @param compile 是否重新编译着色器脚本，并重新创建纹理
      */
     update(compile: boolean = false) {
-        const gl = this.gl;
-        if (compile) {
-            gl.deleteProgram(this.program);
-            gl.deleteTexture(this.texture);
-            gl.deleteBuffer(this.buffer?.position ?? null);
-            gl.deleteBuffer(this.buffer?.texture ?? null);
-            gl.deleteShader(this.shader?.vertex ?? null);
-            gl.deleteShader(this.shader?.fragment ?? null);
-
-            this.program = this.createProgram();
-            this.programInfo = this.getProgramInfo();
-            this.buffer = this.initBuffers();
-            this.texture = this.createTexture();
-            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-        }
+        if (compile) this.compile();
         this.textureCanvas?.update();
         this.drawScene();
+    }
+
+    /**
+     * 仅重新编译着色器，不进行纹理创建和特效渲染
+     */
+    compile() {
+        const gl = this.gl;
+        gl.deleteProgram(this.program);
+        gl.deleteTexture(this.texture);
+        gl.deleteBuffer(this.buffer?.position ?? null);
+        gl.deleteBuffer(this.buffer?.texture ?? null);
+        gl.deleteShader(this.shader?.vertex ?? null);
+        gl.deleteShader(this.shader?.fragment ?? null);
+
+        this.program = this.createProgram();
+        this.programInfo = this.getProgramInfo();
+        this.buffer = this.initBuffers();
+        this.texture = this.createTexture();
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.useProgram(this.program);
     }
 
     /**
@@ -263,6 +494,64 @@ export class ShaderEffect {
 
         // 绘制
         gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+    }
+
+    /**
+     * 创建一个全局变量绑定器，用于操作全局变量
+     * @param uniform 全局变量的变量名
+     * @param num 变量的元素数量，float和int视为1，vec2 vec3 vec4分别视为 2 3 4
+     * @param type 数据类型，可以填'f'，表示浮点型，或者填'i'，表示整型
+     * @param vector 是否为向量，可以填'v'，表示是向量，或者填''，表示不是向量
+     * @returns 一个uniform绑定器，用于操作全局变量uniform
+     */
+    createUniformBinder<
+        N extends UniformBinderNum,
+        T extends UniformBinderType,
+        V extends 'v' | ''
+    >(uniform: string, num: N, type: T, vector: V): UniformBinder<N, T, V> {
+        if (!this.program) {
+            throw new Error(
+                `Uniform binder should be use when the program initialized.`
+            );
+        }
+
+        const suffix = `${num}${type}${vector ? 'v' : ''}`;
+        const func = `uniform${suffix}` as UniformFunc<N, T, V>;
+        const value = (
+            num === 1 ? 0 : Array(num).fill(0)
+        ) as UniformBinderValue<N>;
+
+        const loc = this.gl.getUniformLocation(this.program, uniform);
+        const gl = this.gl;
+
+        return {
+            value,
+            set(value) {
+                this.value = value;
+                let v;
+                if (vector === 'v') {
+                    let _v = ensureArray(value);
+                    if (type === 'f') {
+                        v = new Float32Array(_v);
+                    } else {
+                        v = new Int32Array(_v);
+                    }
+                } else {
+                    v = ensureArray(value);
+                }
+                // 对uniform赋值
+                if (vector === 'v') {
+                    // @ts-ignore
+                    gl[func](loc, v);
+                } else {
+                    // @ts-ignore
+                    gl[func](loc, ...v);
+                }
+            },
+            get() {
+                return this.value;
+            }
+        };
     }
 
     private createProgram() {
