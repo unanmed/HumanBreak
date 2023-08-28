@@ -225,7 +225,7 @@ const sample8 = buildAnimtedSample(
     void main() {
         float alpha = clamp(distance(vec2(0, 0), vpos.xy) - 0.6, 0.0, 1.0) * uStrength;
         vec4 tex = texture2D(uSampler, vTextureCoord);
-        gl_FragColor = vec4(color1.rgb * (1.0 - alpha), 1.0);
+        gl_FragColor = vec4(tex.rgb * (1.0 - alpha), 1.0);
     }
     `,
     effect => {
