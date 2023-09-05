@@ -423,6 +423,13 @@ export class ShaderEffect extends EventEmitter<ShaderEvent> {
     `;
 }
 
+interface GameCanvasReplacer {
+    recover(): void;
+    append(): void;
+    remove(): void;
+    update(compile?: boolean): void;
+}
+
 function floorPower2(value: number) {
     return Math.pow(2, Math.ceil(Math.log(value) / Math.LN2));
 }
@@ -484,7 +491,16 @@ export function setTickerFor(effect: ShaderEffect) {
     return ticker;
 }
 
-export function replaceGameCanvas(effect: ShaderEffect, canvas: string[]) {
+/**
+ * 用着色器特效画布替换样板画布
+ * @param effect 着色器特效实例
+ * @param canvas 要替换的画布列表
+ * @returns 特效控制器，用于控制特效的显示
+ */
+export function replaceGameCanvas(
+    effect: ShaderEffect,
+    canvas: string[]
+): GameCanvasReplacer {
     let zIndex = 0;
     canvas.forEach(v => {
         const canvas = core.canvas[v].canvas;

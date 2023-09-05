@@ -62,4 +62,4 @@ fixedUi.register(
     new GameUi('completeAchi', CompleteAchi)
 );
 
-mainUi.focus(mainUi.get('start'), true);
+mainUi.focusByNum(mainUi.open('start'));

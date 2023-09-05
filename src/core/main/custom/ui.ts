@@ -1,4 +1,4 @@
-import { Component, h, shallowReactive } from 'vue';
+import { Component, shallowReactive } from 'vue';
 import { EmitableEvent, EventEmitter } from '../../common/eventEmitter';
 import { KeyCode } from '../../../plugin/keyCodes';
 import { Hotkey } from './hotkey';
@@ -212,7 +212,7 @@ export class UiController extends Focus<IndexedGameUi> {
      */
     open(id: string, vOn?: UiVOn, vBind?: UiVBind) {
         const ui = this.get(id);
-        if (!ui) return;
+        if (!ui) return -1;
         const num = this.num++;
         this.add({ num, ...ui.with(vOn, vBind) });
         return num;
@@ -223,18 +223,34 @@ export class UiController extends Focus<IndexedGameUi> {
      * @param id ui的id
      * @param ui 对应的GameUi实例
      */
-    resgister(id: string, ui: GameUi) {
-        if (id in this.list) {
-            console.warn(`已存在id为'${id}'的ui，已将其覆盖`);
-        }
-        this.list[id] = ui;
+    register(...ui: GameUi[]) {
+        ui.forEach(v => {
+            const id = v.id;
+            if (id in this.list) {
+                console.warn(`已存在id为'${id}'的ui，已将其覆盖`);
+            }
+            this.list[id] = v;
+        });
     }
 
     /**
      * 取消注册一个ui
      * @param id 要取消注册的ui的id
      */
-    unregister(id: string) {
-        delete this.list[id];
+    unregister(...id: string[]) {
+        id.forEach(v => {
+            delete this.list[v];
+        });
+        return this;
+    }
+
+    /**
+     * 根据ui的唯一标识符进行聚焦
+     * @param num 要聚焦于的ui的唯一标识符
+     */
+    focusByNum(num: number, add?: boolean) {
+        const ui = this.stack.find(v => v.num === num);
+        if (!ui) return;
+        this.focus(ui);
     }
 }
