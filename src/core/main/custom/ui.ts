@@ -14,7 +14,6 @@ interface FocusEvent<T> extends EmitableEvent {
 }
 
 export class Focus<T = any> extends EventEmitter<FocusEvent<T>> {
-    targets: Set<T> = new Set();
     /** 显示列表 */
     stack: T[];
     focused: T | null = null;
@@ -67,13 +66,6 @@ export class Focus<T = any> extends EventEmitter<FocusEvent<T>> {
      * @param item 添加的物品
      */
     add(item: T) {
-        if (!this.targets.has(item)) {
-            console.warn(
-                `向显示列表里面添加了不在物品集合里面的物品`,
-                `添加的物品：${item}`
-            );
-            return;
-        }
         this.stack.push(item);
         this.emit('add', item);
     }
@@ -96,6 +88,14 @@ export class Focus<T = any> extends EventEmitter<FocusEvent<T>> {
      */
     splice(item: T) {
         const index = this.stack.indexOf(item);
+        this.spliceIndex(index);
+    }
+
+    /**
+     * 根据索引在显示列表中删除一项
+     * @param index 要删除的项的索引
+     */
+    spliceIndex(index: number) {
         if (index === -1) {
             this.emit('splice', []);
             return;
@@ -108,30 +108,6 @@ export class Focus<T = any> extends EventEmitter<FocusEvent<T>> {
             this.stack.splice(index, this.equal ? 1 : Infinity)
         );
     }
-
-    /**
-     * 注册物品
-     * @param item 要注册的物品
-     */
-    register(...item: T[]) {
-        item.forEach(v => {
-            this.targets.add(v);
-        });
-        this.emit('register', item);
-        return this;
-    }
-
-    /**
-     * 取消注册物品
-     * @param item 要取消注册的物品
-     */
-    unregister(...item: T[]) {
-        item.forEach(v => {
-            this.targets.delete(v);
-        });
-        this.emit('unregister', item);
-        return this;
-    }
 }
 
 interface GameUiEvent extends EmitableEvent {
@@ -139,15 +115,21 @@ interface GameUiEvent extends EmitableEvent {
     open: () => void;
 }
 
+interface ShowableGameUi {
+    ui: GameUi;
+    vOn?: UiVOn;
+    vBind?: UiVBind;
+}
+
+type UiVOn = Record<string, (param?: any) => void>;
+type UiVBind = Record<string, any>;
+
 export class GameUi extends EventEmitter<GameUiEvent> {
     static uiList: GameUi[] = [];
 
     component: Component;
     hotkey?: Hotkey;
     id: string;
-
-    vBind: any = {};
-    vOn: Record<string, (...params: any[]) => any> = {};
 
     constructor(id: string, component: Component, hotkey?: Hotkey) {
         super();
@@ -158,41 +140,30 @@ export class GameUi extends EventEmitter<GameUiEvent> {
     }
 
     /**
-     * 双向数据绑定，即 vue 内的 v-bind
-     * @param data 要绑定的数据
+     * 根据 v-on 和 v-bind 创建可以显示的 ui 组件
+     * @param vOn 监听的事件
+     * @param vBind 绑定的数据
      */
-    vbind(data: any) {
-        this.vBind = data;
-    }
-
-    /**
-     * 监听这个ui组件所触发的某种事件
-     * @param event 要监听的事件
-     * @param fn 事件触发时执行的函数
-     */
-    von(event: string, fn: (...params: any[]) => any) {
-        this.vOn[event] = fn;
-    }
-
-    /**
-     * 取消监听这个ui组件所触发的某种事件
-     * @param event 要取消监听的事件
-     */
-    voff(event: string) {
-        delete this.vOn[event];
+    with(vOn?: UiVOn, vBind?: UiVBind): ShowableGameUi {
+        return { ui: this, vOn, vBind };
     }
 }
 
-export class UiController extends Focus<GameUi> {
+interface IndexedGameUi extends ShowableGameUi {
+    num: number;
+}
+
+export class UiController extends Focus<IndexedGameUi> {
     static list: UiController[] = [];
     list: Record<string, GameUi> = {};
+    num: number = 0;
 
     constructor(equal?: boolean) {
         super(true, equal);
         UiController.list.push(this);
         this.on('splice', spliced => {
             spliced.forEach(v => {
-                v.emit('close');
+                v.ui.emit('close');
                 if (this.stack.length === 0) {
                     this.emit('end');
                 }
@@ -202,7 +173,7 @@ export class UiController extends Focus<GameUi> {
             if (this.stack.length === 1) {
                 this.emit('start');
             }
-            item.emit('open');
+            item.ui.emit('open');
         });
     }
 
@@ -212,7 +183,7 @@ export class UiController extends Focus<GameUi> {
      * @param e 按键操作事件
      */
     emitKey(key: KeyCode, e: KeyboardEvent) {
-        this.focused?.hotkey?.emitKey(key, e);
+        this.focused?.ui.hotkey?.emitKey(key, e, this.focused);
     }
 
     /**
@@ -225,39 +196,45 @@ export class UiController extends Focus<GameUi> {
 
     /**
      * 关闭一个ui，注意如果不是平等模式，在其之后的ui都会同时关闭掉
-     * @param id 要关闭的ui的id
+     * @param num 要关闭的ui的唯一标识符
      */
-    close(id: string) {
-        const ui = this.get(id);
-        if (!ui) return;
-        this.splice(ui);
+    close(num: number) {
+        const ui = this.stack.findIndex(v => v.num === num);
+        this.spliceIndex(ui);
     }
 
     /**
      * 打开一个新的ui
      * @param id 要打开的ui的id
+     * @param vOn 监听的事件
+     * @param vBind 绑定的数据
+     * @returns ui的唯一标识符
      */
-    open(id: string) {
+    open(id: string, vOn?: UiVOn, vBind?: UiVBind) {
         const ui = this.get(id);
         if (!ui) return;
-        this.add(ui);
+        const num = this.num++;
+        this.add({ num, ...ui.with(vOn, vBind) });
+        return num;
     }
 
-    override register(...item: GameUi[]): this {
-        super.register(...item);
-        item.forEach(v => {
-            this.list[v.id] = v;
-        });
-
-        return this;
+    /**
+     * 注册一个ui
+     * @param id ui的id
+     * @param ui 对应的GameUi实例
+     */
+    resgister(id: string, ui: GameUi) {
+        if (id in this.list) {
+            console.warn(`已存在id为'${id}'的ui，已将其覆盖`);
+        }
+        this.list[id] = ui;
     }
 
-    override unregister(...item: GameUi[]): this {
-        super.unregister(...item);
-        item.forEach(v => {
-            delete this.list[v.id];
-        });
-
-        return this;
+    /**
+     * 取消注册一个ui
+     * @param id 要取消注册的ui的id
+     */
+    unregister(id: string) {
+        delete this.list[id];
     }
 }

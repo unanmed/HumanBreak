@@ -5,7 +5,7 @@ import { EmitableEvent, EventEmitter } from '../../common/eventEmitter';
 import { GameStorage } from '../storage';
 
 interface HotkeyEvent extends EmitableEvent {
-    emit: (key: KeyCode, e: KeyboardEvent) => void;
+    emit: (key: KeyCode, e: KeyboardEvent, ...params: any[]) => void;
     keyChange: (data: HotkeyData, before: KeyCode, after: KeyCode) => void;
 }
 
@@ -86,8 +86,8 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * 执行一个按键操作
      * @param key 按下的按键
      */
-    emitKey(key: KeyCode, e: KeyboardEvent): any[] {
-        this.emit('emit', key, e);
+    emitKey(key: KeyCode, e: KeyboardEvent, ...params: any[]): any[] {
+        this.emit('emit', key, e, ...params);
         return this.getData(key).map(v => {
             const assist = generateBinary([e.ctrlKey, e.altKey, e.shiftKey]);
             const need = generateBinary([!!v.ctrl, !!v.alt, !!v.shift]);
