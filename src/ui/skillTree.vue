@@ -173,7 +173,7 @@ const level = computed(() => {
 });
 
 function exit() {
-    ancTe.plugin.ui.skillTreeOpened.value = false;
+    mota.plugin.ui.skillTreeOpened.value = false;
 }
 
 function resize() {
@@ -274,7 +274,7 @@ onMounted(async () => {
     draw();
 
     await sleep(50);
-    if (ancTe.plugin.ui.transition.value) await sleep(600);
+    if (mota.plugin.ui.transition.value) await sleep(600);
     canvas.addEventListener('click', click);
     document.addEventListener('keyup', key);
 });

@@ -403,7 +403,7 @@ interface SettingStorage {
 }
 
 const storage = new GameStorage<SettingStorage>(
-    GameStorage.fromAuthor('AncTe', 'setting')
+    GameStorage.fromAuthor('Mota', 'setting')
 );
 
 loading.once('coreInit', () => {

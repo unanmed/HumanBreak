@@ -248,7 +248,7 @@ export class UiController extends Focus<IndexedGameUi> {
      * 根据ui的唯一标识符进行聚焦
      * @param num 要聚焦于的ui的唯一标识符
      */
-    focusByNum(num: number, add?: boolean) {
+    focusByNum(num: number) {
         const ui = this.stack.find(v => v.num === num);
         if (!ui) return;
         this.focus(ui);

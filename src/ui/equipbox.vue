@@ -303,7 +303,7 @@ function changeSort() {
 }
 
 function exit() {
-    ancTe.plugin.ui.equipOpened.value = false;
+    mota.plugin.ui.equipOpened.value = false;
 }
 
 function clickList(i: number) {
@@ -421,12 +421,12 @@ function dragout(e: Event) {
 }
 
 async function toTool() {
-    const before = ancTe.plugin.ui.transition.value;
-    ancTe.plugin.ui.transition.value = false;
+    const before = mota.plugin.ui.transition.value;
+    mota.plugin.ui.transition.value = false;
     exit();
     await sleep(50);
-    ancTe.plugin.ui.toolOpened.value = true;
-    ancTe.plugin.ui.transition.value = before;
+    mota.plugin.ui.toolOpened.value = true;
+    mota.plugin.ui.transition.value = before;
 }
 
 function keyup(e: KeyboardEvent) {
@@ -447,7 +447,7 @@ watch(toShow, n => {
 
 onMounted(async () => {
     bind();
-    if (ancTe.plugin.ui.transition.value) await sleep(600);
+    if (mota.plugin.ui.transition.value) await sleep(600);
     else await sleep(50);
     document.addEventListener('keyup', keyup);
 });

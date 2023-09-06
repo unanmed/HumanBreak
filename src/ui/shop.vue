@@ -303,12 +303,12 @@ function keydown(e: KeyboardEvent) {
 
 function exit() {
     if (bought) core.status.route.push('closeShop');
-    ancTe.plugin.ui.shopOpened.value = false;
+    mota.plugin.ui.shopOpened.value = false;
 }
 
 onMounted(async () => {
     await sleep(50);
-    if (ancTe.plugin.ui.transition.value) await sleep(600);
+    if (mota.plugin.ui.transition.value) await sleep(600);
     document.addEventListener('keyup', keyup);
     document.addEventListener('keydown', keydown);
     core.status.route.push(`openShop:${id}`);

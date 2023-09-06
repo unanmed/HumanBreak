@@ -451,7 +451,7 @@ type Forward<T> = {
 
 type ForwardKeys<T> = keyof Forward<T>;
 
-declare const ancTe: import('../core/index').AncTe;
+declare const mota: import('../core/index').Mota;
 interface Window {
-    ancTe: import('../core/index').AncTe;
+    mota: import('../core/index').Mota;
 }

@@ -37,7 +37,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
     constructor(id: string, storage: boolean = true) {
         super();
         if (storage) {
-            this.storage = new GameStorage(GameStorage.fromAuthor('AncTe', id));
+            this.storage = new GameStorage(GameStorage.fromAuthor('Mota', id));
         }
     }
 
@@ -274,12 +274,12 @@ hotkey
             if (block.event.cls.startsWith('enemy')) {
                 const id = block.event.id as EnemyIds;
                 const name = core.material.enemys[id].name;
-                if (ancTe.plugin.mark.hasMarkedEnemy(id)) {
+                if (mota.plugin.mark.hasMarkedEnemy(id)) {
                     tip('success', `已取消标记${name}！`);
-                    ancTe.plugin.mark.unmarkEnemy(id);
+                    mota.plugin.mark.unmarkEnemy(id);
                 } else {
                     tip('success', `已标记${name}！`);
-                    ancTe.plugin.mark.checkMarkedEnemy(false);
+                    mota.plugin.mark.checkMarkedEnemy(false);
                 }
             }
         }
@@ -303,8 +303,8 @@ hotkey
             const [mx, my] = getLocFromMouseLoc(x, y);
             if (core.getBlockCls(mx, my)?.startsWith('enemy')) {
                 core.plugin.fixedDetailPanel = 'special';
-                ancTe.plugin.fixed.showFixed.value = false;
-                ancTe.plugin.ui.fixedDetailOpened.value = true;
+                mota.plugin.fixed.showFixed.value = false;
+                mota.plugin.ui.fixedDetailOpened.value = true;
             }
         }
     })
@@ -315,8 +315,8 @@ hotkey
             const [mx, my] = getLocFromMouseLoc(x, y);
             if (core.getBlockCls(mx, my)?.startsWith('enemy')) {
                 core.plugin.fixedDetailPanel = 'critical';
-                ancTe.plugin.fixed.showFixed.value = false;
-                ancTe.plugin.ui.fixedDetailOpened.value = true;
+                mota.plugin.fixed.showFixed.value = false;
+                mota.plugin.ui.fixedDetailOpened.value = true;
             }
         }
     })

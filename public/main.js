@@ -405,7 +405,7 @@ main.prototype.loadAsync = async function (mode, callback) {
     await core.init(coreData, callback);
     if (main.mode === 'play') main.loading.emit('coreInit');
     if (main.mode === 'play') {
-        ancTe.plugin.mark.showMarkedEnemy.value = true;
+        mota.plugin.mark.showMarkedEnemy.value = true;
     }
 
     core.resize();

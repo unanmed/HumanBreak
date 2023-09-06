@@ -52,7 +52,7 @@ export class Resource<
     protected onLoadStart(v?: ResourceData[T]) {
         if (this.format === 'bgm') {
             // bgm 单独处理，因为它可以边播放边加载
-            ancTe.bgm.add(this.uri, v!);
+            mota.bgm.add(this.uri, v!);
         }
     }
 
@@ -61,7 +61,7 @@ export class Resource<
         if (this.type === 'fonts') {
             document.fonts.add(new FontFace(this.name, v as ArrayBuffer));
         } else if (this.type === 'sounds') {
-            ancTe.sound.add(this.uri, v as ArrayBuffer);
+            mota.sound.add(this.uri, v as ArrayBuffer);
         } else if (this.type === 'images') {
             const name = `${this.name}${this.ext}` as ImageIds;
             loading.on(
@@ -109,7 +109,7 @@ export class Resource<
                     const id = `${base}.${name}`;
                     const type = getTypeByResource(id) as NonZipResource;
                     const format = getZipFormatByType(type);
-                    ancTe.resource.set(
+                    mota.resource.set(
                         id,
                         new Resource(id, type).setData(file.async(format))
                     );

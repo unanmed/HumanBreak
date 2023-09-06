@@ -175,7 +175,7 @@ core.events.afterBattle = function (
         canvas.width = 32;
         canvas.height = 32;
         core.drawIcon(canvas, enemy.id, 0, 0, 32, 32, frame);
-        const manager = ancTe.plugin.frag.applyFragWith(canvas);
+        const manager = mota.plugin.frag.applyFragWith(canvas);
         const frag = manager.canvas;
         frag.style.imageRendering = 'pixelated';
         frag.style.width = `${frag.width * core.domStyle.scale}px`;

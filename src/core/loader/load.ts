@@ -19,9 +19,9 @@ export function readyAllResource() {
     info.resource.forEach(v => {
         const type = getTypeByResource(v);
         if (type === 'zip') {
-            ancTe.zipResource.set(v, new Resource(v, 'zip'));
+            mota.zipResource.set(v, new Resource(v, 'zip'));
         } else {
-            ancTe.resource.set(v, new Resource(v, type));
+            mota.resource.set(v, new Resource(v, type));
         }
     });
 }
@@ -35,13 +35,13 @@ export function readyAllResource() {
     loadData.forEach(v => {
         const type = getTypeByResource(v);
         if (type !== 'zip') {
-            ancTe.resource.set(v, new Resource(v, type));
+            mota.resource.set(v, new Resource(v, type));
         }
     });
-    ancTe.resource.forEach(v => v.active());
+    mota.resource.forEach(v => v.active());
     loading.once('coreInit', () => {
         const animates = new Resource('__all_animates__', 'text');
-        ancTe.resource.set('__all_animates__', animates);
+        mota.resource.set('__all_animates__', animates);
         animates.active();
     });
 }

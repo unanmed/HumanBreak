@@ -19,10 +19,10 @@ import gameCanvas from '../plugin/fx/gameCanvas';
 import noise from '../plugin/fx/noise';
 import smooth from '../plugin/fx/smoothView';
 import frag from '../plugin/fx/frag';
-import { AncTe } from '.';
+import { Mota } from '.';
 
 export function resolvePlugin() {
-    const toForward: [keyof AncTe['plugin'], any][] = [
+    const toForward: [keyof Mota['plugin'], any][] = [
         ['pop', pop()],
         ['ui', ui()],
         ['use', use()],
@@ -47,7 +47,7 @@ export function resolvePlugin() {
     ];
 
     for (const [key, obj] of toForward) {
-        ancTe.plugin[key] = obj;
+        mota.plugin[key] = obj;
     }
 
     // 完成度相关

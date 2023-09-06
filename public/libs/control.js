@@ -2317,7 +2317,7 @@ control.prototype._doSL_load = function (id, callback) {
             1
         )[0];
         if (!main.replayChecking) {
-            ancTe.plugin.ui.startOpened.value = false;
+            mota.plugin.ui.startOpened.value = false;
         }
         if (core.isPlaying() && !core.status.gameOver) {
             core.control.autosave(0);
@@ -2334,7 +2334,7 @@ control.prototype._doSL_load = function (id, callback) {
             null,
             function (data) {
                 if (!main.replayChecking && data) {
-                    ancTe.plugin.ui.startOpened.value = false;
+                    mota.plugin.ui.startOpened.value = false;
                 }
                 if (id == 'autoSave' && data != null) {
                     core.saves.autosave.data = data;
@@ -3013,7 +3013,7 @@ control.prototype.removeSwitch = function (x, y, floorId, name) {
 control.prototype.lockControl = function () {
     core.status.lockControl = true;
     if (!main.replayChecking) {
-        ancTe.plugin.fixed.showFixed.value = false;
+        mota.plugin.fixed.showFixed.value = false;
     }
 };
 
@@ -3346,19 +3346,19 @@ control.prototype.screenFlash = function (
 control.prototype.playBgm = function (bgm, startTime) {
     bgm = core.getMappedName(bgm);
     if (main.mode !== 'play') return;
-    ancTe.bgm.play(bgm, startTime);
+    mota.bgm.play(bgm, startTime);
 };
 
 ////// 暂停背景音乐的播放 //////
 control.prototype.pauseBgm = function () {
     if (main.mode !== 'play') return;
-    ancTe.bgm.pause();
+    mota.bgm.pause();
 };
 
 ////// 恢复背景音乐的播放 //////
 control.prototype.resumeBgm = function (resumeTime) {
     if (main.mode !== 'play') return;
-    ancTe.bgm.resume();
+    mota.bgm.resume();
 };
 
 ////// 更改背景音乐的播放 //////
@@ -3380,19 +3380,19 @@ control.prototype.playSound = function (sound, pitch, callback) {
         !core.material.sounds[sound]
     )
         return;
-    ancTe.sound.play(sound, callback);
+    mota.sound.play(sound, callback);
 };
 
 ////// 停止所有音频 //////
 control.prototype.stopSound = function (id) {
-    if (typeof id === 'number') ancTe.sound.stop(id);
-    else ancTe.sound.stopAll();
+    if (typeof id === 'number') mota.sound.stop(id);
+    else mota.sound.stopAll();
 };
 
 ////// 获得当前正在播放的所有（指定）音效的id列表 //////
 control.prototype.getPlayingSounds = function (name) {
     name = core.getMappedName(name);
-    return ancTe.sound.getPlaying(name);
+    return mota.sound.getPlaying(name);
 };
 
 ////// 检查bgm状态 //////

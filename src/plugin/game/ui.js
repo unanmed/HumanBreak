@@ -12,35 +12,34 @@ export {};
     function openItemShop(itemShopId) {
         if (!core.isReplaying()) {
             core.plugin.openedShopId = itemShopId;
-            ancTe.plugin.ui.shopOpened.value = true;
+            mota.plugin.ui.shopOpened.value = true;
         }
     }
 
     function updateVueStatusBar() {
         if (main.replayChecking) return;
-        ancTe.plugin.status.statusBarStatus.value =
-            !ancTe.plugin.status.statusBarStatus.value;
-        ancTe.plugin.mark.checkMarkedEnemy();
+        mota.plugin.status.statusBarStatus.value =
+            !mota.plugin.status.statusBarStatus.value;
+        mota.plugin.mark.checkMarkedEnemy();
     }
 
     ui.prototype.drawBook = function () {
         if (!core.isReplaying())
-            return (ancTe.plugin.ui.bookOpened.value = true);
+            return (mota.plugin.ui.bookOpened.value = true);
     };
 
     ui.prototype._drawToolbox = function () {
         if (!core.isReplaying())
-            return (ancTe.plugin.ui.toolOpened.value = true);
+            return (mota.plugin.ui.toolOpened.value = true);
     };
 
     ui.prototype._drawEquipbox = function () {
         if (!core.isReplaying())
-            return (ancTe.plugin.ui.equipOpened.value = true);
+            return (mota.plugin.ui.equipOpened.value = true);
     };
 
     ui.prototype.drawFly = function () {
-        if (!core.isReplaying())
-            return (ancTe.plugin.ui.flyOpened.value = true);
+        if (!core.isReplaying()) return (mota.plugin.ui.flyOpened.value = true);
     };
 
     control.prototype.updateStatusBar_update = function () {
@@ -58,7 +57,7 @@ export {};
     control.prototype.showStatusBar = function () {
         if (main.mode == 'editor') return;
         core.removeFlag('hideStatusBar');
-        ancTe.plugin.ui.showStatusBar.value = true;
+        mota.plugin.ui.showStatusBar.value = true;
         core.dom.tools.hard.style.display = 'block';
         core.dom.toolBar.style.display = 'block';
     };
@@ -69,7 +68,7 @@ export {};
         // 如果原本就是隐藏的，则先显示
         if (!core.domStyle.showStatusBar) this.showStatusBar();
         if (core.isReplaying()) showToolbox = true;
-        ancTe.plugin.ui.showStatusBar.value = false;
+        mota.plugin.ui.showStatusBar.value = false;
 
         var toolItems = core.dom.tools;
         core.setFlag('hideStatusBar', true);
@@ -88,13 +87,13 @@ export {};
 
     function showChapter(chapter) {
         if (core.isReplaying()) return;
-        ancTe.plugin.chapter.chapterContent.value = chapter;
-        ancTe.plugin.chapter.chapterShowed.value = true;
+        mota.plugin.chapter.chapterContent.value = chapter;
+        mota.plugin.chapter.chapterShowed.value = true;
     }
 
     function openSkill() {
         if (core.isReplaying()) return;
-        ancTe.plugin.ui.skillOpened.value = true;
+        mota.plugin.ui.skillOpened.value = true;
     }
 
     core.plugin.gameUi = {

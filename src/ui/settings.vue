@@ -182,7 +182,7 @@ function key(e: KeyboardEvent) {
 
 onMounted(async () => {
     await sleep(50);
-    if (ancTe.plugin.ui.transition.value) await sleep(600);
+    if (mota.plugin.ui.transition.value) await sleep(600);
     document.addEventListener('keyup', key);
 });
 

@@ -30,7 +30,7 @@ if (enemy) {
 }
 
 function close() {
-    ancTe.plugin.ui.fixedDetailOpened.value = false;
+    mota.plugin.ui.fixedDetailOpened.value = false;
 }
 </script>
 

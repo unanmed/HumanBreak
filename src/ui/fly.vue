@@ -147,7 +147,7 @@ let thumbCtx: CanvasRenderingContext2D;
 let downloadMode = false;
 
 function exit() {
-    ancTe.plugin.ui.flyOpened.value = false;
+    mota.plugin.ui.flyOpened.value = false;
 }
 
 const title = computed(() => {
@@ -610,7 +610,7 @@ onMounted(async () => {
     });
 
     await sleep(50);
-    if (ancTe.plugin.ui.transition.value) await sleep(600);
+    if (mota.plugin.ui.transition.value) await sleep(600);
 
     document.addEventListener('keyup', keyup);
     map.addEventListener('touchstart', touchdown);

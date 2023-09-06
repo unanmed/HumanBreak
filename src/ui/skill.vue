@@ -60,7 +60,7 @@ const content = computed(() => {
 });
 
 function exit() {
-    ancTe.plugin.ui.skillOpened.value = false;
+    mota.plugin.ui.skillOpened.value = false;
 }
 </script>
 

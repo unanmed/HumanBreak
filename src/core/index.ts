@@ -35,7 +35,7 @@ interface AncTePlugin {
     frag: ReturnType<typeof import('../plugin/fx/frag').default>;
 }
 
-export interface AncTe {
+export interface Mota {
     sound: SoundController;
     /** 游戏资源 */
     resource: ResourceStore<Exclude<ResourceType, 'zip'>>;
@@ -53,7 +53,7 @@ export interface AncTe {
 }
 
 function ready() {
-    window.ancTe = {
+    window.mota = {
         bgm: new BgmController(),
         resource: new ResourceStore(),
         zipResource: new ResourceStore(),
