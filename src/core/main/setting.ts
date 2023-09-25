@@ -4,7 +4,7 @@ import { transition } from '../../plugin/uiController';
 import { loading } from '../loader/load';
 import { hook } from './game';
 import { GameStorage } from './storage';
-import { triggerFullscreen } from '../../plugin/utils';
+import { nextFrame, triggerFullscreen } from '../../plugin/utils';
 
 type MotaSettingType = boolean | number | MotaSetting;
 
@@ -428,4 +428,57 @@ hook.on('reset', () => {
     mainSetting.reset({
         'action.autoSkill': flags.autoSkill ?? true
     });
+});
+
+hook.on('moveDirectly', (x, y, moveSteps, ctx) => {
+    // 计算绘制区域的宽高，并尽可能小的创建route层
+    // var sx = core.bigmap.width * 32,
+    //     sy = core.bigmap.height * 32,
+    //     dx = 0,
+    //     dy = 0;
+    // moveStep.forEach(function (t) {
+    //     sx = Math.min(sx, t.x * 32);
+    //     dx = Math.max(dx, t.x * 32);
+    //     sy = Math.min(sy, t.y * 32);
+    //     dy = Math.max(dy, t.y * 32);
+    // });
+    // core.status.automaticRoute.offsetX = sx;
+    // core.status.automaticRoute.offsetY = sy;
+    // var ctx = core.createCanvas(
+    //     'route',
+    //     sx - core.bigmap.offsetX,
+    //     sy - core.bigmap.offsetY,
+    //     dx - sx + 32,
+    //     dy - sy + 32,
+    //     95
+    // );
+    ctx.clearRect(0, 0, 480, 480);
+    ctx.fillStyle = '#bfbfbf';
+    ctx.strokeStyle = '#bfbfbf';
+    ctx.lineWidth = 4;
+    const scan: { [key: string]: { [key: string]: number } } = {
+        up: { x: 0, y: -1 },
+        left: { x: -1, y: 0 },
+        down: { x: 0, y: 1 },
+        right: { x: 1, y: 0 }
+    };
+    for (let m = 0; m < moveSteps.length; m++) {
+        if (m == moveSteps.length - 1) {
+            ctx.fillRect(x * 32 + 10, y * 32 + 10, 12, 12);
+        } else {
+            ctx.beginPath();
+            const cx = x * 32 + 16,
+                cy = y * 32 + 16;
+            const currDir = moveSteps[m].direction,
+                nextDir = moveSteps[m + 1].direction;
+            ctx.moveTo(cx - scan[currDir].x * 11, cy - scan[currDir].y * 11);
+            ctx.lineTo(cx, cy);
+            ctx.lineTo(cx + scan[nextDir].x * 11, cy + scan[nextDir].y * 11);
+            ctx.stroke();
+            x += scan[currDir].x;
+            y += scan[currDir].y;
+        }
+    }
+    ctx.canvas.style.transition = 'all 1s linear';
+    nextFrame(() => (ctx.canvas.style.opacity = '0'));
 });
