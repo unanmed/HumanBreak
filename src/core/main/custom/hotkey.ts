@@ -37,7 +37,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
     constructor(id: string, storage: boolean = true) {
         super();
         if (storage) {
-            this.storage = new GameStorage(GameStorage.fromAuthor('Mota', id));
+            this.storage = new GameStorage(GameStorage.fromAuthor('AncTe', id));
         }
     }
 
