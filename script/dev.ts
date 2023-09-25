@@ -582,6 +582,14 @@ async function startWsServer(http: Server) {
     });
 }
 
+async function ensureConfig() {
+    try {
+        fs.readFile(resolvePath('_server/config.json'));
+    } catch {
+        fs.writeFile(resolvePath('_server/config.json'), '{}', 'utf-8');
+    }
+}
+
 (async function () {
     // 1. 启动vite服务
     const vite = await createServer();
@@ -589,6 +597,7 @@ async function startWsServer(http: Server) {
     console.log(`游戏地址：http://localhost:5173/games/${config.name}/`);
 
     // 2. 启动样板http服务
+    await ensureConfig();
     const server = await startHttpServer(3000);
 
     // 3. 启动样板ws热重载服务
