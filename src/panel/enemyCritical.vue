@@ -140,7 +140,11 @@ const nowDamage = computed(() => {
     return [originDamage - dam, dam];
 });
 
-function generateChart(ele: HTMLCanvasElement, data: [number, number][]) {
+function generateChart(
+    ele: HTMLCanvasElement,
+    data: [number, number][],
+    ref?: Ref<number>
+) {
     Chart.defaults.color = '#aaa';
     const config: ChartConfiguration = {
         type: 'line',
@@ -169,6 +173,15 @@ function generateChart(ele: HTMLCanvasElement, data: [number, number][]) {
             }
         }
     };
+    if (ref) {
+        config.options!.onClick = (e, elements) => {
+            if (elements.length > 0) {
+                const index = elements[0].index;
+                // @ts-ignore
+                ref.value = e.chart.data.labels[index];
+            }
+        };
+    }
     return new Chart(ele, config);
 }
 
@@ -220,8 +233,8 @@ onMounted(() => {
     setCanvasSize(c, width, height);
     setCanvasSize(d, width, height);
 
-    const criChart = generateChart(c, allCri.value);
-    const defChart = generateChart(d, allDef.value);
+    const criChart = generateChart(c, allCri.value, addAtk);
+    const defChart = generateChart(d, allDef.value, addDef);
 
     watch(addAtk, n => {
         update(criChart, defChart);
