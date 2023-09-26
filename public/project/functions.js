@@ -177,7 +177,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             else core.setWeather();
 
             checkLoopMap();
-
+            core.deleteCanvas('route2');
             // ...可以新增一些其他内容，比如创建个画布在右上角显示什么内容等等
         },
         afterChangeFloor: function (floorId) {

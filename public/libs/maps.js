@@ -880,7 +880,7 @@ maps.prototype._canMoveHero_checkCannotInOut = function (
 
 ////// 能否瞬间移动 //////
 maps.prototype.canMoveDirectly = function (destX, destY) {
-    return this.canMoveDirectlyArray([[destX, destY]])[0];
+    return this.canMoveDirectlyArray([[destX, destY]]).ans[0];
 };
 
 maps.prototype.canMoveDirectlyArray = function (locs, canMoveArray) {
@@ -954,54 +954,71 @@ maps.prototype._canMoveDirectly_bfs = function (
     locs,
     number,
     ans,
-    canMoveArray
+    canMoveArray = this.generateMovableArray()
 ) {
-    canMoveArray = canMoveArray || this.generateMovableArray();
-    var blocksObj = this.getMapBlocksObj();
-    // 滑冰
-    var bgMap = this.getBgMapArray();
+    const blocksObj = this.getMapBlocksObj(),
+        // 滑冰
+        bgMap = this.getBgMapArray();
 
-    var visited = [],
-        queue = [];
+    let visited = {},
+        route = {};
+    let queue = new PriorityQueue({
+        comparator: function (a, b) {
+            return a.depth - b.depth;
+        }
+    });
+
     visited[sx + ',' + sy] = 0;
-    queue.push(sx + ',' + sy);
+    route[sx + ',' + sy] = '';
+    queue.queue({ depth: 0, x: sx, y: sy });
 
-    while (queue.length > 0) {
-        var now = queue.shift().split(','),
-            x = parseInt(now[0]),
-            y = parseInt(now[1]);
-        for (var direction in core.utils.scan) {
+    while (queue.length != 0) {
+        const curr = queue.dequeue();
+        const { depth, x, y } = curr;
+        const now = x + ',' + y;
+        for (const direction in core.utils.scan) {
             if (!core.inArray(canMoveArray[x][y], direction)) continue;
-            var nx = x + core.utils.scan[direction].x,
-                ny = y + core.utils.scan[direction].y,
-                nindex = nx + ',' + ny;
+            const nx = x + core.utils.scan[direction].x;
+            const ny = y + core.utils.scan[direction].y;
+            const nindex = nx + ',' + ny;
             if (visited[nindex]) continue;
+            if (
+                nx < 0 ||
+                nx >= core.bigmap.width ||
+                ny < 0 ||
+                ny >= core.bigmap.height ||
+                route[nx + ',' + ny] != null
+            )
+                continue;
             if (core.onSki(bgMap[ny][nx])) continue;
             if (!this._canMoveDirectly_checkNextPoint(blocksObj, nx, ny))
                 continue;
+            // 不可通行
+            if (core.noPass(nx, ny)) continue;
+            route[nx + ',' + ny] = direction;
             visited[nindex] = visited[now] + 1;
             // if (nx == ex && ny == ey) return visited[nindex];
-            for (var i in ans) {
+            for (const i in ans) {
                 if (locs[i][0] == nx && locs[i][1] == ny && ans[i] == null) {
                     // 不可以绿点为终点
-                    var block = blocksObj[nx + ',' + ny];
+                    const block = blocksObj[nindex];
                     if (block && !block.disable && block.event.trigger) {
                         ans[i] = -1;
                     } else {
                         ans[i] = visited[nindex];
                     }
                     number--;
-                    if (number == 0) return ans;
+                    if (number == 0) return { ans, route };
                 }
             }
-            queue.push(nindex);
+            queue.queue({ depth: depth + 1, x: nx, y: ny });
         }
     }
 
     for (var i in ans) {
         if (ans[i] == null) ans[i] = -1;
     }
-    return ans;
+    return { ans, route };
 };
 
 maps.prototype._canMoveDirectly_checkNextPoint = function (blocksObj, x, y) {
@@ -1040,7 +1057,17 @@ maps.prototype.automaticRoute = function (destX, destY) {
     // BFS找寻最短路径
     var route = this._automaticRoute_bfs(startX, startY, destX, destY);
     if (route[destX + ',' + destY] == null) return [];
-    // 路径数组转换
+    return this.routeToMoveSteps(startX, startY, destX, destY, route);
+};
+
+// 路径数组转换
+maps.prototype.routeToMoveSteps = function (
+    startX,
+    startY,
+    destX,
+    destY,
+    route
+) {
     var ans = [],
         nowX = destX,
         nowY = destY;
@@ -1083,7 +1110,7 @@ maps.prototype._automaticRoute_bfs = function (startX, startY, destX, destY) {
                 route[nx + ',' + ny] != null
             )
                 continue;
-            // 重点
+            // 终点
             if (nx == destX && ny == destY) {
                 route[nx + ',' + ny] = direction;
                 break;

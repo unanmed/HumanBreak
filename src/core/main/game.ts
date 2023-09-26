@@ -2,11 +2,11 @@ import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
 
 export interface GameEvent extends EmitableEvent {
     reset: () => void;
-    moveDirectly: (
+    beforeMoveDirectly: (
         x: number,
         y: number,
-        moveSteps: Array<{ direction: string; step: number }>,
-        ctx: CanvasRenderingContext2D
+        moveSteps: { direction: Dir; step: number }[],
+        ctxName: string
     ) => void;
 }
 
