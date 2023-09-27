@@ -18,13 +18,13 @@ function drawHeroDetail(px: number, py: number) {
 
     let i = 0;
     for (const [key, value] of Object.entries(toDraw)) {
-        const ctx = core.canvas['hero'].canvas;
+        const ctx = core.canvas['hero'];
         core.fillBoldText(
             ctx,
-            value.value.toString(),
+            core.formatBigNumber(value.value),
             px,
             py - 10 * i,
-            value.color as string
+            value.color
         );
         i++;
     }
