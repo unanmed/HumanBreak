@@ -289,6 +289,11 @@ function handleScreenSetting<T extends number | boolean>(
     } else if (key === 'itemDetail') {
         // 宝石血瓶显伤
         core.setLocalStorage('itemDetail', n);
+    } else if (key === 'heroDetail') {
+        // 勇士显伤
+        core.setLocalStorage('heroDetail', n);
+        core.drawHero();
+        // storage.setValue('heroDetail', n as boolean);
     } else if (key === 'transition') {
         // 界面动画
         core.setLocalStorage('transition', n);
@@ -352,6 +357,7 @@ mainSetting
             .register('fullscreen', '全屏游戏', false)
             .register('halo', '光环显示', true)
             .register('itemDetail', '宝石血瓶显伤', true)
+            .register('heroDetail', '勇士显伤', false)
             .register('transition', '界面动画', false)
             .register('antiAlias', '抗锯齿', false)
             .register('fontSize', '字体大小', 16, [8, 28, 1])
@@ -400,6 +406,7 @@ interface SettingStorage {
     betterLoad: boolean;
     autoScale: boolean;
     paraLight: boolean;
+    heroDetail: boolean;
 }
 
 const storage = new GameStorage<SettingStorage>(
@@ -411,6 +418,7 @@ loading.once('coreInit', () => {
         'screen.fullscreen': !!document.fullscreenElement,
         'screen.halo': !!storage.getValue('showHalo', true),
         'screen.itemDetail': !!storage.getValue('itemDetail', true),
+        'screen.heroDetail': !!storage.getValue('heroDetail', false),
         'screen.transition': !!storage.getValue('transition', false),
         'screen.antiAlias': !!storage.getValue('antiAlias', false),
         'screen.fontSize': storage.getValue('fontSize', 16),
