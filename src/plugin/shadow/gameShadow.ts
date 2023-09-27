@@ -13,11 +13,17 @@ import {
     setShadowNodes
 } from './shadow';
 import { pColor } from '../utils';
+import { drawHeroDetail } from '../game/fx/heroDetail';
 
 export default function init() {
     const origin4 = control.prototype.drawHero;
     control.prototype.drawHero = function () {
         origin4.apply(core.control, arguments);
+        drawHeroDetail(
+            core.status.heroCenter.px - 16,
+            core.status.heroCenter.py + 20
+        );
+
         if (core.getFlag('__heroOpacity__') !== 0) {
             getAllLights().forEach(v => {
                 if (!v.followHero) return;
