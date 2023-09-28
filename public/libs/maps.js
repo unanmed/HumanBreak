@@ -880,7 +880,7 @@ maps.prototype._canMoveHero_checkCannotInOut = function (
 
 ////// 能否瞬间移动 //////
 maps.prototype.canMoveDirectly = function (destX, destY) {
-    return this.canMoveDirectlyArray([[destX, destY]]).ans[0];
+    return this.canMoveDirectlyArray([[destX, destY]]).ignoreSteps[0];
 };
 
 maps.prototype.canMoveDirectlyArray = function (locs, canMoveArray) {
@@ -891,7 +891,7 @@ maps.prototype.canMoveDirectlyArray = function (locs, canMoveArray) {
         fromY = core.getHeroLoc('y');
     if (!this._canMoveDirectly_checkGlobal()) {
         for (var i = 0; i < number; ++i) ans.push(-1);
-        return ans;
+        return { canMoveDirectlyArray: ans };
     }
     for (var i = 0; i < number; ++i) {
         if (locs[i][0] == fromX && locs[i][1] == fromY) {
@@ -907,14 +907,14 @@ maps.prototype.canMoveDirectlyArray = function (locs, canMoveArray) {
             number--;
         } else ans.push(null);
     }
-    if (number == 0) return ans;
+    if (number == 0) return { canMoveDirectlyArray: ans };
 
     // 检查起点事件
     if (!this._canMoveDirectly_checkStartPoint(fromX, fromY)) {
         for (var i in ans) {
             if (ans[i] == null) ans[i] = -1;
         }
-        return ans;
+        return { canMoveDirectlyArray: ans };
     }
 
     return this._canMoveDirectly_bfs(
@@ -1008,7 +1008,8 @@ maps.prototype._canMoveDirectly_bfs = function (
                         ans[i] = visited[nindex];
                     }
                     number--;
-                    if (number == 0) return { ans, route };
+                    if (number == 0)
+                        return { canMoveDirectlyArray: ans, route };
                 }
             }
             queue.queue({ depth: depth + 1, x: nx, y: ny });
@@ -1018,7 +1019,7 @@ maps.prototype._canMoveDirectly_bfs = function (
     for (var i in ans) {
         if (ans[i] == null) ans[i] = -1;
     }
-    return { ans, route };
+    return { canMoveDirectlyArray: ans, route };
 };
 
 maps.prototype._canMoveDirectly_checkNextPoint = function (blocksObj, x, y) {

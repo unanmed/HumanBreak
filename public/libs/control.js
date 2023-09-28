@@ -976,7 +976,7 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
         [destX, destY + 1, 'up'],
         [destX + 1, destY, 'left']
     ];
-    const { ans: canMoveDirectlyArray, route } = core.canMoveDirectlyArray(
+    const { canMoveDirectlyArray, route } = core.canMoveDirectlyArray(
         dirs,
         canMoveArray
     );
@@ -999,12 +999,13 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
             if (dir) {
                 core.moveHero(dir, function () {});
             }
-            mota.game.hook.emit(
-                'beforeMoveDirectly',
-                x,
-                y,
-                core.routeToMoveSteps(x, y, dx, dy, route)
-            );
+            if (route)
+                mota.game.hook.emit(
+                    'beforeMoveDirectly',
+                    x,
+                    y,
+                    core.routeToMoveSteps(x, y, dx, dy, route)
+                );
             return true;
         }
     }

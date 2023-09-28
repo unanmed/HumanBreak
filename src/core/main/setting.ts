@@ -312,6 +312,9 @@ function handleScreenSetting<T extends number | boolean>(
         core.setLocalStorage('smoothView', n);
     } else if (key === 'criticalGem') {
         core.setLocalStorage('criticalGem', n);
+    } else if (key === 'directMoveRoute') {
+        // 瞬移绘制路径
+        core.setLocalStorage('directMoveRoute', n);
     }
 }
 
@@ -385,6 +388,7 @@ mainSetting
         new MotaSetting()
             .register('paraLight', '野外阴影', true)
             .register('frag', '打怪特效', true)
+            .register('directMoveRoute', '瞬移路径', true)
     );
 
 interface SettingStorage {
@@ -400,6 +404,7 @@ interface SettingStorage {
     betterLoad: boolean;
     autoScale: boolean;
     paraLight: boolean;
+    directMoveRoute: boolean;
 }
 
 const storage = new GameStorage<SettingStorage>(
@@ -420,7 +425,8 @@ loading.once('coreInit', () => {
         'utils.betterLoad': !!storage.getValue('betterLoad', true),
         'utils.autoScale': !!storage.getValue('autoScale', true),
         'fx.paraLight': !!storage.getValue('paraLight', true),
-        'fx.frag': !!storage.getValue('frag', true)
+        'fx.frag': !!storage.getValue('frag', true),
+        'fx.directMoveRoute': !!storage.getValue('directMoveRoute', true)
     });
 });
 
@@ -428,39 +434,4 @@ hook.on('reset', () => {
     mainSetting.reset({
         'action.autoSkill': flags.autoSkill ?? true
     });
-});
-
-hook.on('beforeMoveDirectly', (x, y, moveSteps, ctxName = 'route2') => {
-    core.deleteCanvas(ctxName);
-    const ctx = core.createCanvas(ctxName, 0, 0, 480, 480, 15);
-    ctx.clearRect(0, 0, 480, 480);
-    ctx.fillStyle = '#bfbfbf';
-    ctx.strokeStyle = '#bfbfbf';
-    ctx.lineWidth = 4;
-    for (let m = 0; m < moveSteps.length; m++) {
-        if (m === 0) ctx.fillRect(x * 32 + 10, y * 32 + 10, 12, 12);
-        const currDir = moveSteps[m].direction;
-        x += core.utils.scan[currDir].x;
-        y += core.utils.scan[currDir].y;
-        if (m === moveSteps.length - 1)
-            ctx.fillRect(x * 32 + 10, y * 32 + 10, 12, 12);
-        else {
-            const nextDir = moveSteps[m + 1].direction;
-            const cx = x * 32 + 16,
-                cy = y * 32 + 16;
-            ctx.beginPath();
-            ctx.moveTo(
-                cx - core.utils.scan[currDir].x * 11,
-                cy - core.utils.scan[currDir].y * 11
-            );
-            ctx.lineTo(cx, cy);
-            ctx.lineTo(
-                cx + core.utils.scan[nextDir].x * 11,
-                cy + core.utils.scan[nextDir].y * 11
-            );
-            ctx.stroke();
-        }
-    }
-    ctx.canvas.style.transition = 'all 0.6s ease-in';
-    nextFrame(() => (ctx.canvas.style.opacity = '0'));
 });
