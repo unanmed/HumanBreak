@@ -6,7 +6,7 @@ control.prototype.checkBlock = function (forceMockery: boolean = false) {
     const x = core.getHeroLoc('x'),
         y = core.getHeroLoc('y'),
         loc = x + ',' + y;
-    const info = core.status.thisMap.enemy?.mapDamage[loc];
+    const info = core.status.thisMap.enemy.mapDamage[loc];
     const damage = info?.damage;
     if (damage) {
         if (!main.replayChecking) {
@@ -145,7 +145,7 @@ control.prototype.moveHero = function (direction: Dir, callback: () => void) {
 
     const nx = core.nextX();
     const ny = core.nextY();
-    if (core.status.thisMap.enemy?.mapDamage[`${nx},${ny}`]?.mockery) {
+    if (core.status.thisMap.enemy.mapDamage[`${nx},${ny}`]?.mockery) {
         core.autosave();
     }
 
@@ -155,7 +155,7 @@ control.prototype.moveHero = function (direction: Dir, callback: () => void) {
 
 function checkMockery(loc: string, force: boolean = false) {
     if (core.status.lockControl && !force) return;
-    const mockery = core.status.thisMap.enemy?.mapDamage[loc]?.mockery;
+    const mockery = core.status.thisMap.enemy.mapDamage[loc]?.mockery;
     if (mockery) {
         mockery.sort((a, b) => (a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]));
         const action = [];

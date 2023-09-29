@@ -851,7 +851,7 @@ maps.prototype._canMoveHero_checkPoint = function (
         !core.flags.canGoDeadZone &&
         !core.status.lockControl &&
         Math.max(core.status.hero.hp, 1) <=
-            (floor.enemy?.mapDamage[`${nx},${ny}`]?.damage ?? 0) &&
+            (floor.enemy.mapDamage[`${nx},${ny}`]?.damage ?? 0) &&
         arrays.eventArray[ny][nx] == 0
     )
         return false;
@@ -939,7 +939,7 @@ maps.prototype._canMoveDirectly_checkGlobal = function () {
 };
 
 maps.prototype._canMoveDirectly_checkStartPoint = function (sx, sy) {
-    if (core.status.thisMap.enemy?.mapDamage[`${sx},${sy}`]) return false;
+    if (core.status.thisMap.enemy.mapDamage[`${sx},${sy}`]) return false;
     var block = core.getBlock(sx, sy);
     if (block != null) {
         // 只有起点是传送点才是能无视
@@ -1023,7 +1023,7 @@ maps.prototype._canMoveDirectly_checkNextPoint = function (blocksObj, x, y) {
         if (!ignore) return false;
     }
     // 是否存在阻激夹域伤害
-    const damage = core.status.thisMap.enemy?.mapDamage[index];
+    const damage = core.status.thisMap.enemy.mapDamage[index];
     if (damage) {
         if (damage.damage !== 0) return false;
         if (damage.mockery) return false;
@@ -1117,7 +1117,7 @@ maps.prototype._automaticRoute_deepAdd = function (x, y, blocks) {
             deepAdd += 100;
     }
     // 绕过存在伤害的地方
-    const damage = core.status.thisMap.enemy?.mapDamage[`${x},${y}`];
+    const damage = core.status.thisMap.enemy.mapDamage[`${x},${y}`];
     if (damage) {
         deepAdd += damage.damage * 100;
         deepAdd += !!damage.mockery ? 1e5 : 0;

@@ -6,7 +6,7 @@ core.control.updateDamage = function (floorId = core.status.floorId, ctx) {
     const floor = core.status.maps[floorId];
 
     // 没有怪物手册
-    if (!core.hasItem('book')) return;
+    // if (!core.hasItem('book')) return;
     core.status.damage.posX = core.bigmap.posX;
     core.status.damage.posY = core.bigmap.posY;
     if (!onMap) {

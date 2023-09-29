@@ -15,7 +15,7 @@ const show = debounce((ev: MouseEvent) => {
     flags.clientLoc = [ev.clientX, ev.clientY];
     const [mx, my] = getLocFromMouseLoc(...flags.mouseLoc);
 
-    const e = core.status.thisMap.enemy?.list.find(v => {
+    const e = core.status.thisMap.enemy.list.find(v => {
         return v.x === mx && v.y === my;
     });
 
