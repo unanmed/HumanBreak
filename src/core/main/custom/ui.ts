@@ -18,7 +18,7 @@ export class Focus<T = any> extends EventEmitter<FocusEvent<T>> {
     stack: T[];
     focused: T | null = null;
 
-    /** ui是否平等，在平等时，关闭ui不再会将其之后的ui全部删除，而是保留 */
+    /** 聚焦目标是否平等，在平等时，关闭聚焦目标不再会将其之后的目标全部删除，而是保留 */
     readonly equal: boolean;
 
     constructor(react: boolean = false, equal: boolean = false) {
@@ -83,7 +83,7 @@ export class Focus<T = any> extends EventEmitter<FocusEvent<T>> {
     }
 
     /**
-     * 从一个位置开始删除显示列表，如果ui平等，则只会删除一个，否则会将其之后的所有ui全部删除
+     * 从一个位置开始删除显示列表，如果平等，则只会删除一个，否则会将其之后的所有的目标全部删除
      * @param item 从哪开始删除，包括此项
      */
     splice(item: T) {
@@ -249,8 +249,16 @@ export class UiController extends Focus<IndexedGameUi> {
      * @param num 要聚焦于的ui的唯一标识符
      */
     focusByNum(num: number) {
-        const ui = this.stack.find(v => v.num === num);
+        const ui = this.getByNum(num);
         if (!ui) return;
         this.focus(ui);
+    }
+
+    /**
+     * 根据唯一标识符获取对应的ui
+     * @param num ui的唯一标识符
+     */
+    getByNum(num: number) {
+        return this.stack.find(v => v.num === num);
     }
 }
