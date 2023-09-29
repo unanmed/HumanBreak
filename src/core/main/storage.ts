@@ -55,8 +55,22 @@ export class GameStorage<T> {
         return `HumanBreak_${key}`;
     }
 
+    /**
+     * 获取与作者相关联的存储键
+     * @param author 作者名称
+     * @param key 存储名称
+     */
     static fromAuthor(author: string, key: string) {
         return `${author}@${key}`;
+    }
+
+    /**
+     * 根据存储键获取对应的存储实例
+     * @param key 存储键
+     * @example Storage.get(Storage.fromAuthor('AncTe', 'setting'));
+     */
+    static get(key: string) {
+        return this.list.find(v => v.key === key);
     }
 }
 

@@ -44,7 +44,7 @@ export interface Mota {
     plugin: AncTePlugin;
     game: {
         hook: EventEmitter<GameEvent>;
-        storage: GameStorage<any>[];
+        storage: typeof GameStorage;
     };
     ui: {
         main: UiController;
@@ -62,7 +62,7 @@ function ready() {
         plugin: {},
         game: {
             hook,
-            storage: GameStorage.list
+            storage: GameStorage
         },
         ui: {
             main: mainUi,
