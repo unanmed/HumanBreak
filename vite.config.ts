@@ -26,7 +26,15 @@ export default defineConfig({
             output: {
                 manualChunks: {
                     antdv: ['ant-design-vue', '@ant-design/icons-vue'],
-                    common: ['lodash-es', 'axios', 'lz-string', 'chart.js', 'mutate-animate', 'three']
+                    common: [
+                        'lodash-es',
+                        'axios',
+                        'lz-string',
+                        'chart.js',
+                        'mutate-animate',
+                        'three',
+                        '@vueuse/core'
+                    ]
                 }
             }
         }
