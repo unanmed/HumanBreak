@@ -8,5 +8,6 @@
     "bracketSpacing": true,
     "vueIndentScriptAndStyle": false,
     "arrowParens": "avoid",
-    "trailingComma": "none"
+    "trailingComma": "none",
+    "endOfLine": "auto"
 }
