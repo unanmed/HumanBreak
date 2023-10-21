@@ -60,7 +60,10 @@ const compress = type === 'dist';
         await fs.remove('./dist/project/materials/airwall.png');
         await fs.remove('./dist/project/materials/ground.png');
         await fs.remove('./dist/project/materials/icons_old.png');
-    } catch {}
+    } catch (e) {
+        console.log('去除未使用的文件失败！');
+        console.log(e);
+    }
 
     // 2. 压缩字体
     try {
@@ -122,6 +125,7 @@ const compress = type === 'dist';
         ]);
     } catch (e) {
         console.log('字体压缩失败');
+        console.log(e);
     }
 
     // 3. 压缩js插件
@@ -153,6 +157,7 @@ const compress = type === 'dist';
         await fs.remove('./dist/project/plugin/');
     } catch (e) {
         console.log('压缩插件失败');
+        console.log(e);
     }
 
     // 4. 压缩main.js
@@ -170,14 +175,18 @@ const compress = type === 'dist';
         const needCompress = main.slice(endIndex + 17);
         const compressed = babel.transformSync(needCompress)?.code;
         await fs.writeFile('./dist/main.js', nonCompress + compressed, 'utf-8');
-    } catch {
+    } catch (e) {
         console.log('main.js压缩失败');
+        console.log(e);
     }
 
     // 5. 杂项
     try {
         await fs.copy('./LICENSE', './dist/LICENSE');
-    } catch {}
+    } catch (e) {
+        console.log('添加杂项失败');
+        console.log(e);
+    }
 
     // 6. 资源分离
     if (resorce) {
@@ -186,18 +195,23 @@ const compress = type === 'dist';
 
     // 7. 压缩
     if (compress) {
-        await fs.ensureDir('./out');
-        await compressing.zip.compressDir('./dist', './out/dist.zip');
+        try {
+            await fs.ensureDir('./out');
+            await compressing.zip.compressDir('./dist', './out/dist.zip');
 
-        // 压缩资源
-        if (resorce) {
-            const resources = await fs.readdir('./dist-resource');
-            for await (const index of resources) {
-                await compressing.zip.compressDir(
-                    `./dist-resource/${index}`,
-                    `./out/${index}.zip`
-                );
+            // 压缩资源
+            if (resorce) {
+                const resources = await fs.readdir('./dist-resource');
+                for await (const index of resources) {
+                    await compressing.zip.compressDir(
+                        `./dist-resource/${index}`,
+                        `./out/${index}.zip`
+                    );
+                }
             }
+        } catch (e) {
+            console.log('压缩为zip失败！');
+            console.log(e);
         }
     }
 })();
