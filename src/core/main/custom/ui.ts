@@ -158,6 +158,8 @@ export class UiController extends Focus<IndexedGameUi> {
     list: Record<string, GameUi> = {};
     num: number = 0;
 
+    private hold: boolean = false;
+
     constructor(equal?: boolean) {
         super(true, equal);
         UiController.list.push(this);
@@ -165,7 +167,8 @@ export class UiController extends Focus<IndexedGameUi> {
             spliced.forEach(v => {
                 v.ui.emit('close');
                 if (this.stack.length === 0) {
-                    this.emit('end');
+                    if (!this.hold) this.emit('end');
+                    this.hold = false;
                 }
             });
         });
@@ -192,6 +195,17 @@ export class UiController extends Focus<IndexedGameUi> {
      */
     get(id: string) {
         return this.list[id];
+    }
+
+    /**
+     * 暂时保持下一次删除ui不会导致ui整体被关闭，引起ui背景闪烁。
+     * 例如可以用于道具栏，打开道具时就应当 holdOn，然后通过道具使用钩子来判断接下来是否要隐藏 app:
+     * ```txt
+     * hold on -> close -> use item -> hook -> stack.length === 0 ? hide app : no action
+     * ```
+     */
+    holdOn() {
+        this.hold = true;
     }
 
     /**
