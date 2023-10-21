@@ -135,6 +135,7 @@ const compress = type === 'dist';
                     sourceMap: false
                 }),
                 rollupBabel({
+                    // todo: 是否需要添加 polyfill?
                     babelHelpers: 'bundled',
                     sourceType: 'module'
                 }),
