@@ -1,6 +1,6 @@
 import { Component, shallowReactive } from 'vue';
 import { EmitableEvent, EventEmitter } from '../../common/eventEmitter';
-import { KeyCode } from '../../../plugin/keyCodes';
+import { KeyCode } from '@/plugin/keyCodes';
 import { Hotkey } from './hotkey';
 
 interface FocusEvent<T> extends EmitableEvent {

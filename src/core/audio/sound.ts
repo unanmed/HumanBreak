@@ -1,6 +1,6 @@
-import { has } from '../../plugin/utils';
+import { has } from '@/plugin/utils';
 import { AudioParamOf, AudioPlayer } from './audio';
-import resource from '../../data/resource.json';
+import resource from '@/data/resource.json';
 import { ResourceController } from '../loader/controller';
 
 type Panner = AudioParamOf<PannerNode>;

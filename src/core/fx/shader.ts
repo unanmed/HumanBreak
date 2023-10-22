@@ -1,6 +1,6 @@
 import { Animation, Ticker, hyper } from 'mutate-animate';
 import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
-import { ensureArray } from '../../plugin/utils';
+import { ensureArray } from '@/plugin/utils';
 
 interface ShaderEvent extends EmitableEvent {}
 

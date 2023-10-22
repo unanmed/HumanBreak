@@ -12,7 +12,12 @@
         "esModuleInterop": true,
         "lib": ["ESNext", "DOM", "DOM.Iterable"],
         "skipLibCheck": true,
-        "noEmit": true
+        "noEmit": true,
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["src/*"],
+            "@ui/*": ["src/ui/*"]
+        }
     },
     "include": [
         "src/**/*.ts",

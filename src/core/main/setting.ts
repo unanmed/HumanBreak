@@ -1,10 +1,10 @@
 import { reactive } from 'vue';
 import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
-import { transition } from '../../plugin/uiController';
+import { transition } from '@/plugin/uiController';
 import { loading } from '../loader/load';
 import { hook } from './game';
 import { GameStorage } from './storage';
-import { triggerFullscreen } from '../../plugin/utils';
+import { triggerFullscreen } from '@/plugin/utils';
 
 type MotaSettingType = boolean | number | MotaSetting;
 

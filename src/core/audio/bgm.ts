@@ -1,4 +1,4 @@
-import { has } from '../../plugin/utils';
+import { has } from '@/plugin/utils';
 import { ResourceController } from '../loader/controller';
 
 export class BgmController extends ResourceController<HTMLAudioElement> {

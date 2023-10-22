@@ -1,6 +1,6 @@
-import { KeyCode } from '../../../plugin/keyCodes';
-import { getLocFromMouseLoc } from '../../../plugin/ui/fixed';
-import { deleteWith, generateBinary, has, tip } from '../../../plugin/utils';
+import { KeyCode } from '@/plugin/keyCodes';
+import { getLocFromMouseLoc } from '@/plugin/ui/fixed';
+import { deleteWith, generateBinary, has, tip } from '@/plugin/utils';
 import { EmitableEvent, EventEmitter } from '../../common/eventEmitter';
 import { GameStorage } from '../storage';
 

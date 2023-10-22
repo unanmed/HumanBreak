@@ -1,4 +1,4 @@
-import resource from '../../data/resource.json';
+import resource from '@/data/resource.json';
 import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
 import { Resource, getTypeByResource } from './resource';
 

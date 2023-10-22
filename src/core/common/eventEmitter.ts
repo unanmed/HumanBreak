@@ -1,4 +1,4 @@
-import { has } from '../../plugin/utils';
+import { has } from '@/plugin/utils';
 
 export interface EmitableEvent {
     [event: string]: (...params: any) => any;

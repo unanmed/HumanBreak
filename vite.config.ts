@@ -5,6 +5,7 @@ import components from 'unplugin-vue-components/vite';
 import vuejsx from '@vitejs/plugin-vue-jsx'
 import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers';
 import motaConfig from './mota.config';
+import { resolve } from 'path';
 
 const FSHOST = 'http://127.0.0.1:3000/';
 
@@ -21,6 +22,12 @@ export default defineConfig({
         components({ resolvers: [AntDesignVueResolver()] })
     ],
     base: `/games/${motaConfig.name}/`,
+    resolve: {
+        alias: {
+            '@': resolve(__dirname, './src'),
+            '@ui': resolve(__dirname, './src/ui')
+        }
+    },
     build: {
         rollupOptions: {
             output: {
