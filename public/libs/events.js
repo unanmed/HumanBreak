@@ -26,7 +26,7 @@ events.prototype.startGame = function (hard, seed, route, callback) {
     hard = hard || '';
     core.dom.gameGroup.style.display = 'block';
     if (!main.replayChecking) {
-        mota.plugin.ui.startOpened.value = false;
+        mota.ui.fixed.closeByName('start');
     }
 
     if (main.mode != 'play') return;

@@ -218,6 +218,23 @@ export class UiController extends Focus<IndexedGameUi> {
     }
 
     /**
+     * 根据id关闭所有同id的ui，注意非平等模式下，会将第一个ui后的所有ui都关闭掉
+     * @param id 要关闭的ui的id
+     */
+    closeByName(id: string) {
+        console.log(id);
+        if (!this.equal) {
+            const ui = this.stack.findIndex(v => v.ui.id === id);
+            this.spliceIndex(ui);
+        } else {
+            let ui;
+            while ((ui = this.stack.findIndex(v => v.ui.id === id)) !== -1) {
+                this.spliceIndex(ui);
+            }
+        }
+    }
+
+    /**
      * 打开一个新的ui
      * @param id 要打开的ui的id
      * @param vOn 监听的事件

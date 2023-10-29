@@ -6,7 +6,7 @@ import 'ant-design-vue/dist/antd.dark.css';
 import './core/index';
 
 createApp(App).mount('#root');
-createApp(App2).mount('#root2');
+// createApp(App2).mount('#root2');
 
 main.init('play');
 main.listen();

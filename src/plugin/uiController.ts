@@ -40,41 +40,41 @@ let app: HTMLDivElement;
 
 /** ui声明列表 */
 const UI_LIST: [Ref<boolean>, Component][] = [
-    [bookOpened, Book],
-    [toolOpened, Toolbox],
-    [equipOpened, Equipbox],
-    [settingsOpened, Settings],
-    [descOpened, Desc],
-    [skillOpened, Skill],
-    [skillTreeOpened, SkillTree],
-    [flyOpened, Fly],
-    [fixedDetailOpened, FixedDetail],
-    [shopOpened, Shop],
-    [achievementOpened, Achievement],
-    [bgmOpened, Bgm]
+    // [bookOpened, Book],
+    // [toolOpened, Toolbox],
+    // [equipOpened, Equipbox],
+    // [settingsOpened, Settings],
+    // [descOpened, Desc],
+    // [skillOpened, Skill],
+    // [skillTreeOpened, SkillTree],
+    // [flyOpened, Fly],
+    // [fixedDetailOpened, FixedDetail],
+    // [shopOpened, Shop],
+    // [achievementOpened, Achievement],
+    // [bgmOpened, Bgm]
 ];
 
 /** ui栈 */
 export const uiStack = shallowReactive<Component[]>([]);
 
 export default function init() {
-    app = document.getElementById('root') as HTMLDivElement;
-    UI_LIST.forEach(([ref, com]) => {
-        watch(ref, n => {
-            if (n === true) {
-                uiStack.push(markRaw(com));
-                showApp();
-            } else {
-                const index = uiStack.findIndex(v => v === com);
-                if (index === -1) return;
-                if (uiStack.length === 1) {
-                    hideApp(index);
-                } else {
-                    uiStack.splice(index, 1);
-                }
-            }
-        });
-    });
+    // app = document.getElementById('root') as HTMLDivElement;
+    // UI_LIST.forEach(([ref, com]) => {
+    //     watch(ref, n => {
+    //         if (n === true) {
+    //             uiStack.push(markRaw(com));
+    //             showApp();
+    //         } else {
+    //             const index = uiStack.findIndex(v => v === com);
+    //             if (index === -1) return;
+    //             if (uiStack.length === 1) {
+    //                 hideApp(index);
+    //             } else {
+    //                 uiStack.splice(index, 1);
+    //             }
+    //         }
+    //     });
+    // });
     return {
         uiStack,
         transition,

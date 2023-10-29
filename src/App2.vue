@@ -1,18 +1,18 @@
 <template>
-    <div id="non-ui">
+    <!-- <div id="non-ui">
         <Start v-if="startOpened"></Start>
         <StatusBar v-if="showStatusBar"></StatusBar>
         <MarkedEnemy v-if="showMarkedEnemy && showStatusBar"></MarkedEnemy>
-        <!-- <Studied
+        <Studied
             v-if="showStudiedSkill && showStatusBar && showStudied"
-        ></Studied> -->
+        ></Studied> 
         <Fixed v-if="showStatusBar && useFixed"></Fixed>
         <Chapter v-if="chapterShowed" :chapter="chapterContent"></Chapter>
         <CompleteAchievement
             v-if="showComplete"
             :complete="completeAchi"
         ></CompleteAchievement>
-    </div>
+    </div> -->
 </template>
 
 <script lang="ts" setup>

@@ -2317,7 +2317,7 @@ control.prototype._doSL_load = function (id, callback) {
             1
         )[0];
         if (!main.replayChecking) {
-            mota.plugin.ui.startOpened.value = false;
+            mota.ui.fixed.open('start');
         }
         if (core.isPlaying() && !core.status.gameOver) {
             core.control.autosave(0);
@@ -2334,7 +2334,7 @@ control.prototype._doSL_load = function (id, callback) {
             null,
             function (data) {
                 if (!main.replayChecking && data) {
-                    mota.plugin.ui.startOpened.value = false;
+                    mota.ui.fixed.closeByName('start');
                 }
                 if (id == 'autoSave' && data != null) {
                     core.saves.autosave.data = data;

@@ -19,6 +19,7 @@ import Start from '@ui/start.vue';
 import { GameUi, UiController } from '../custom/ui';
 import { Hotkey } from '../custom/hotkey';
 import { KeyCode } from '@/plugin/keyCodes';
+import { hook } from '../game';
 
 export const exitKey = new Hotkey('exitKey');
 exitKey
@@ -48,8 +49,7 @@ mainUi.register(
     new GameUi('fixedDetail', FixedDetail, exitKey),
     new GameUi('shop', Shop, exitKey),
     new GameUi('achievement', Achievement, exitKey),
-    new GameUi('bgm', Bgm, exitKey),
-    new GameUi('start', Start)
+    new GameUi('bgm', Bgm, exitKey)
     // todo: 把游戏主 div 加入到 mainUi 里面
 );
 
@@ -59,7 +59,37 @@ fixedUi.register(
     new GameUi('markedEnemy', Mark),
     new GameUi('fixed', Fixed),
     new GameUi('chapter', Chapter),
-    new GameUi('completeAchi', CompleteAchi)
+    new GameUi('completeAchi', CompleteAchi),
+    new GameUi('start', Start)
 );
 
-mainUi.focusByNum(mainUi.open('start'));
+hook.once('mounted', () => {
+    mainUi.on('start', () => {
+        const ui = document.getElementById('ui-main');
+        if (ui) {
+            ui.style.display = 'flex';
+        }
+    });
+    mainUi.on('end', () => {
+        const ui = document.getElementById('ui-main');
+        if (ui) {
+            ui.style.display = 'none';
+        }
+    });
+    fixedUi.on('start', () => {
+        console.log(1);
+        const ui = document.getElementById('ui-fixed');
+        if (ui) {
+            ui.style.display = 'block';
+        }
+    });
+    fixedUi.on('end', () => {
+        console.log(1);
+        const ui = document.getElementById('ui-fixed');
+        if (ui) {
+            ui.style.display = 'none';
+        }
+    });
+
+    mainUi.focusByNum(fixedUi.open('start'));
+});
