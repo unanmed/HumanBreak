@@ -2317,7 +2317,7 @@ control.prototype._doSL_load = function (id, callback) {
             1
         )[0];
         if (!main.replayChecking) {
-            mota.ui.fixed.open('start');
+            mota.ui.fixed.closeByName('start');
         }
         if (core.isPlaying() && !core.status.gameOver) {
             core.control.autosave(0);

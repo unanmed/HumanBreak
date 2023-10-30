@@ -64,32 +64,19 @@ fixedUi.register(
 );
 
 hook.once('mounted', () => {
+    const ui = document.getElementById('ui-main')!;
+    const fixed = document.getElementById('ui-fixed')!;
+
     mainUi.on('start', () => {
-        const ui = document.getElementById('ui-main');
-        if (ui) {
-            ui.style.display = 'flex';
-        }
+        ui.style.display = 'flex';
     });
     mainUi.on('end', () => {
-        const ui = document.getElementById('ui-main');
-        if (ui) {
-            ui.style.display = 'none';
-        }
+        ui.style.display = 'none';
     });
     fixedUi.on('start', () => {
-        console.log(1);
-        const ui = document.getElementById('ui-fixed');
-        if (ui) {
-            ui.style.display = 'block';
-        }
+        fixed.style.display = 'block';
     });
     fixedUi.on('end', () => {
-        console.log(1);
-        const ui = document.getElementById('ui-fixed');
-        if (ui) {
-            ui.style.display = 'none';
-        }
+        fixed.style.display = 'none';
     });
-
-    mainUi.focusByNum(fixedUi.open('start'));
 });
