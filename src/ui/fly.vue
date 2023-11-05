@@ -97,6 +97,10 @@ import { downloadCanvasImage, keycode, tip } from '../plugin/utils';
 import { sleep } from 'mutate-animate';
 import { KeyCode } from '../plugin/keyCodes';
 
+const props = defineProps<{
+    num: number;
+}>();
+
 type Loc2 = [number, number, number, number];
 
 const area = getArea();
@@ -147,7 +151,7 @@ let thumbCtx: CanvasRenderingContext2D;
 let downloadMode = false;
 
 function exit() {
-    mota.plugin.ui.flyOpened.value = false;
+    mota.ui.main.close(props.num);
 }
 
 const title = computed(() => {

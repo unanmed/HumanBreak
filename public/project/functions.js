@@ -405,16 +405,18 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     break;
                 case 67: // C：怪物临界
                     if (core.getBlockCls(mx, my)?.startsWith('enemy')) {
-                        core.plugin.fixedDetailPanel = 'critical';
                         mota.plugin.fixed.showFixed.value = false;
-                        mota.plugin.ui.fixedDetailOpened.value = true;
+                        mota.ui.main.open('fixedDetail', void 0, {
+                            panel: 'critical'
+                        });
                     }
                     break;
                 case 69: // E：怪物属性
                     if (core.getBlockCls(mx, my)?.startsWith('enemy')) {
-                        core.plugin.fixedDetailPanel = 'special';
                         mota.plugin.fixed.showFixed.value = false;
-                        mota.plugin.ui.fixedDetailOpened.value = true;
+                        mota.ui.main.open('fixedDetail', void 0, {
+                            panel: 'special'
+                        });
                     }
                     break;
                 case 77: // M：快速标记

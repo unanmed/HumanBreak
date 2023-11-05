@@ -82,6 +82,10 @@ import { isMobile } from '../plugin/use';
 import { sleep } from 'mutate-animate';
 import { KeyCode } from '../plugin/keyCodes';
 
+const props = defineProps<{
+    num: number;
+}>();
+
 let canvas: HTMLCanvasElement;
 let ctx: CanvasRenderingContext2D;
 
@@ -173,7 +177,7 @@ const level = computed(() => {
 });
 
 function exit() {
-    mota.plugin.ui.skillTreeOpened.value = false;
+    mota.ui.main.close(props.num);
 }
 
 function resize() {

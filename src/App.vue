@@ -1,20 +1,13 @@
 <template>
-    <!-- <div id="ui">
-        <template v-for="com of uiStack">
-            <component :is="com"></component>
-        </template>
-    </div> -->
     <div id="ui-new">
         <div id="ui-main">
             <div id="ui-list">
                 <div class="ui-one" v-for="ui of mainUi.stack">
-                    <template>
-                        <component
-                            :is="ui.ui.component"
-                            v-on="ui.vOn ?? {}"
-                            v-bind="ui.vBind ?? {}"
-                        ></component>
-                    </template>
+                    <component
+                        :is="ui.ui.component"
+                        v-on="ui.vOn ?? {}"
+                        v-bind="ui.vBind ?? {}"
+                    ></component>
                 </div>
             </div>
         </div>
@@ -64,9 +57,12 @@ onMounted(() => {
     height: 100vh;
     display: none;
     justify-content: center;
+    align-items: center;
     left: 0;
     top: 0;
     position: fixed;
+    background-color: #000b;
+    backdrop-filter: blur(5px);
 }
 
 #ui-list {

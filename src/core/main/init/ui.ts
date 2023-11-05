@@ -1,21 +1,4 @@
-import Book from '@ui/book.vue';
-import Toolbox from '@ui/toolbox.vue';
-import Equipbox from '@ui/equipbox.vue';
-import Settings from '@ui/settings.vue';
-import Desc from '@ui/desc.vue';
-import Skill from '@ui/skill.vue';
-import SkillTree from '@ui/skillTree.vue';
-import Fly from '@ui/fly.vue';
-import FixedDetail from '@ui/fixedDetail.vue';
-import Shop from '@ui/shop.vue';
-import Achievement from '@ui/achievement.vue';
-import Bgm from '@ui/bgmList.vue';
-import StatusBar from '@ui/statusBar.vue';
-import Mark from '@ui/markedEnemy.vue';
-import Fixed from '@ui/fixed.vue';
-import Chapter from '@ui/chapter.vue';
-import CompleteAchi from '@ui/completeAchievement.vue';
-import Start from '@ui/start.vue';
+import * as UI from '@ui/.';
 import { GameUi, UiController } from '../custom/ui';
 import { Hotkey } from '../custom/hotkey';
 import { KeyCode } from '@/plugin/keyCodes';
@@ -38,29 +21,29 @@ exitKey
 
 export const mainUi = new UiController();
 mainUi.register(
-    new GameUi('book', Book, exitKey),
-    new GameUi('toolbox', Toolbox, exitKey),
-    new GameUi('equipbox', Equipbox, exitKey),
-    new GameUi('settings', Settings, exitKey),
-    new GameUi('desc', Desc, exitKey),
-    new GameUi('skill', Skill, exitKey),
-    new GameUi('skillTree', SkillTree, exitKey),
-    new GameUi('fly', Fly, exitKey),
-    new GameUi('fixedDetail', FixedDetail, exitKey),
-    new GameUi('shop', Shop, exitKey),
-    new GameUi('achievement', Achievement, exitKey),
-    new GameUi('bgm', Bgm, exitKey)
+    new GameUi('book', UI.Book, exitKey),
+    new GameUi('toolbox', UI.Toolbox, exitKey),
+    new GameUi('equipbox', UI.Equipbox, exitKey),
+    new GameUi('settings', UI.Settings, exitKey),
+    new GameUi('desc', UI.Desc, exitKey),
+    new GameUi('skill', UI.Skill, exitKey),
+    new GameUi('skillTree', UI.SkillTree, exitKey),
+    new GameUi('fly', UI.Fly, exitKey),
+    new GameUi('fixedDetail', UI.FixedDetail, exitKey),
+    new GameUi('shop', UI.Shop, exitKey),
+    new GameUi('achievement', UI.Achievement, exitKey),
+    new GameUi('bgm', UI.BgmList, exitKey)
     // todo: 把游戏主 div 加入到 mainUi 里面
 );
 
 export const fixedUi = new UiController(true);
 fixedUi.register(
-    new GameUi('statusBar', StatusBar),
-    new GameUi('markedEnemy', Mark),
-    new GameUi('fixed', Fixed),
-    new GameUi('chapter', Chapter),
-    new GameUi('completeAchi', CompleteAchi),
-    new GameUi('start', Start)
+    new GameUi('statusBar', UI.StatusBar),
+    new GameUi('markedEnemy', UI.Marked),
+    new GameUi('fixed', UI.Fixed),
+    new GameUi('chapter', UI.Chapter),
+    new GameUi('completeAchi', UI.CompleteAchi),
+    new GameUi('start', UI.Start)
 );
 
 hook.once('mounted', () => {
@@ -69,9 +52,11 @@ hook.once('mounted', () => {
 
     mainUi.on('start', () => {
         ui.style.display = 'flex';
+        core.lockControl();
     });
     mainUi.on('end', () => {
         ui.style.display = 'none';
+        core.closePanel();
     });
     fixedUi.on('start', () => {
         fixed.style.display = 'block';
@@ -79,4 +64,7 @@ hook.once('mounted', () => {
     fixedUi.on('end', () => {
         fixed.style.display = 'none';
     });
+
+    // todo: 暂时先这么搞，之后重写加载界面，需要改成先显示加载界面，加载完毕后再打开这个界面
+    fixedUi.open('start');
 });

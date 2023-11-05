@@ -1161,21 +1161,21 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"name": "bgm查看器",
 		"canUseItemEffect": "true",
 		"text": "可以查看游戏内你已经听过的bgm，歌曲名格式：歌手——歌曲名。未完工。",
-		"useItemEffect": "mota.plugin.utils.tip('warn', '当前道具还未制作完成！');\n// mota.plugin.ui.bgmOpened.value = true;"
+		"useItemEffect": "mota.plugin.utils.tip('warn', '当前道具还未制作完成！');\n// mota.ui.main.open('bgm');"
 	},
 	"I559": {
 		"cls": "constants",
 		"name": "系统设置",
 		"canUseItemEffect": "true",
 		"text": "内含所有系统设置项",
-		"useItemEffect": "if (!core.isReplaying()) mota.plugin.ui.settingsOpened.value = true;"
+		"useItemEffect": "if (!core.isReplaying()) mota.ui.main.open('settings');"
 	},
 	"I560": {
 		"cls": "constants",
 		"name": "百科全书",
 		"canUseItemEffect": "true",
 		"text": "一个包含游戏中所有功能详细说明的百科全书，可以查看游戏中所有的功能",
-		"useItemEffect": "if (!core.isReplaying()) mota.plugin.ui.descOpened.value = true;"
+		"useItemEffect": "if (!core.isReplaying()) mota.ui.main.open('desc');"
 	},
 	"I565": {
 		"cls": "constants",
@@ -1233,7 +1233,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "constants",
 		"name": "成就",
 		"canUseItemEffect": "true",
-		"useItemEffect": "mota.plugin.ui.achievementOpened.value = true;",
+		"useItemEffect": "mota.ui.main.open('achievement');",
 		"text": "可以查看成就"
 	}
 }

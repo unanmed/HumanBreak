@@ -176,8 +176,13 @@ import BoxAnimate from '../components/boxAnimate.vue';
 import { KeyCode } from '../plugin/keyCodes';
 import { sleep } from 'mutate-animate';
 
-const id = core.plugin.openedShopId;
-const shop = core.status.shops[core.plugin.openedShopId] as ItemShopEvent;
+const props = defineProps<{
+    num: number;
+    shopId: string;
+}>();
+
+const id = props.shopId;
+const shop = core.status.shops[id] as ItemShopEvent;
 if (!shop.item) {
     throw new TypeError(
         `Wrong global shop type delivered in opening item shop.`
@@ -303,7 +308,7 @@ function keydown(e: KeyboardEvent) {
 
 function exit() {
     if (bought) core.status.route.push('closeShop');
-    mota.plugin.ui.shopOpened.value = false;
+    mota.ui.main.close(props.num);
 }
 
 onMounted(async () => {

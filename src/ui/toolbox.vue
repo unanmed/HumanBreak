@@ -118,6 +118,10 @@ import { hyper, sleep } from 'mutate-animate';
 import { message } from 'ant-design-vue';
 import { KeyCode } from '../plugin/keyCodes';
 
+const props = defineProps<{
+    num: number;
+}>();
+
 type ItemMode = 'tools' | 'constants';
 type ShowItemIds = ItemIdOf<'constants' | 'tools'> | 'none';
 
@@ -165,7 +169,7 @@ async function select(id: ShowItemIds, nouse: boolean = false) {
 }
 
 function exit() {
-    mota.plugin.ui.toolOpened.value = false;
+    mota.ui.main.close(props.num);
 }
 
 async function use(id: ShowItemIds) {
@@ -187,12 +191,9 @@ async function use(id: ShowItemIds) {
 }
 
 async function toEquip() {
-    const before = mota.plugin.ui.transition.value;
-    mota.plugin.ui.transition.value = false;
+    mota.ui.main.holdOn();
     exit();
-    await sleep(50);
-    mota.plugin.ui.equipOpened.value = true;
-    mota.plugin.ui.transition.value = before;
+    mota.ui.main.open('equipbox');
 }
 
 function keyup(e: KeyboardEvent) {

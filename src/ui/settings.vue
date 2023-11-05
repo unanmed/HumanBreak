@@ -94,7 +94,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted, onUpdated, shallowRef } from 'vue';
+import { computed, onMounted, onUnmounted, shallowRef } from 'vue';
 import {
     mainSetting,
     MotaSetting,
@@ -107,7 +107,6 @@ import settingText from '../data/settings.json';
 import { RightOutlined, LeftOutlined } from '@ant-design/icons-vue';
 import { keycode, splitText } from '../plugin/utils';
 import Scroll from '../components/scroll.vue';
-import { settingsOpened } from '../plugin/uiController';
 import { isMobile } from '../plugin/use';
 import { sleep } from 'mutate-animate';
 import { KeyCode } from '../plugin/keyCodes';
@@ -115,6 +114,7 @@ import { KeyCode } from '../plugin/keyCodes';
 const props = defineProps<{
     info?: MotaSetting;
     text?: SettingText;
+    num: number;
 }>();
 
 const setting = props.info ?? mainSetting;
@@ -172,7 +172,7 @@ function changeValue(value: number | boolean) {
 }
 
 function exit() {
-    settingsOpened.value = false;
+    mota.ui.main.close(props.num);
 }
 
 function key(e: KeyboardEvent) {

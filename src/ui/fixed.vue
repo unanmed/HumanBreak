@@ -72,7 +72,7 @@ async function calHeight() {
     vw = window.innerWidth;
     width.value = vh * 0.28;
     await new Promise(res => requestAnimationFrame(res));
-    if (mota.plugin.ui.fixedDetailOpened.value) {
+    if (mota.ui.main.hasName('fixedDetail')) {
         showFixed.value = false;
     }
     updateMain();

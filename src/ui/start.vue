@@ -67,7 +67,6 @@ import { sleep } from 'mutate-animate';
 import { Matrix4 } from '../plugin/webgl/matrix';
 import { doByInterval, keycode } from '../plugin/utils';
 import { KeyCode } from '../plugin/keyCodes';
-import { achievementOpened } from '../plugin/uiController';
 import { triggerFullscreen } from '../plugin/utils';
 import { loading } from '../core/loader/load';
 import { isMobile } from '../plugin/use';
@@ -149,7 +148,7 @@ async function clickStartButton(id: string) {
     }
     if (id === 'replay') core.chooseReplayFile();
     if (id === 'achievement') {
-        achievementOpened.value = true;
+        mota.ui.main.open('achievement');
     }
 }
 

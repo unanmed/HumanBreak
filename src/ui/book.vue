@@ -49,6 +49,12 @@ import { KeyCode } from '../plugin/keyCodes';
 import { noClosePanel } from '../plugin/uiController';
 import { ToShowEnemy, detailInfo } from '../plugin/ui/book';
 import { getDetailedEnemy } from '../plugin/ui/fixed';
+import { GameUi } from '@/core/main/custom/ui';
+
+const props = defineProps<{
+    num: number;
+    ui: GameUi;
+}>();
 
 const floorId =
     // @ts-ignore
@@ -113,7 +119,7 @@ async function show() {
  */
 async function exit() {
     noClosePanel.value = true;
-    mota.plugin.ui.bookOpened.value = false;
+    mota.ui.main.close(props.num);
     if (mota.plugin.ui.transition.value) await sleep(650);
     else await sleep(100);
     if (core.events.recoverEvents(core.status.event.interval)) {

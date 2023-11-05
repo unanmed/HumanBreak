@@ -715,10 +715,11 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                 start = curr;
             }
             if (i++ >= 10000) {
-                throw new Error(
+                console.warn(
                     `Unexpected endless loop in calculating critical.` +
                         `Enemy Id: ${this.id}. Loc: ${this.x},${this.y}. Floor: ${this.floorId}`
                 );
+                break;
             }
         }
 

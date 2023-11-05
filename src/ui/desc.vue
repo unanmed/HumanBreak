@@ -23,12 +23,16 @@ import desc from '../data/desc.json';
 import { has, splitText } from '../plugin/utils';
 import Colomn from '../components/colomn.vue';
 
+const props = defineProps<{
+    num: number;
+}>();
+
 type DescKey = keyof typeof desc;
 
 const selected = ref(Object.keys(desc)[0] as DescKey);
 
 function exit() {
-    mota.plugin.ui.descOpened.value = false;
+    mota.ui.main.close(props.num);
 }
 
 const content = computed(() => {

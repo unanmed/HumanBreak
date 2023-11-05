@@ -179,7 +179,15 @@ import {
     SortAscendingOutlined,
     SortDescendingOutlined
 } from '@ant-design/icons-vue';
-import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
+import {
+    computed,
+    nextTick,
+    onMounted,
+    onUnmounted,
+    reactive,
+    ref,
+    watch
+} from 'vue';
 import Scroll from '../components/scroll.vue';
 import { getAddStatus, getEquips, getNowStatus } from '../plugin/ui/equipbox';
 import BoxAnimate from '../components/boxAnimate.vue';
@@ -187,6 +195,12 @@ import { has, keycode, tip, type } from '../plugin/utils';
 import { cancelGlobalDrag, isMobile, useDrag } from '../plugin/use';
 import { hyper, sleep } from 'mutate-animate';
 import { KeyCode } from '../plugin/keyCodes';
+import { GameUi } from '@/core/main/custom/ui';
+
+const props = defineProps<{
+    num: number;
+    ui: GameUi;
+}>();
 
 const equips = ref(getEquips());
 const col = ref('all');
@@ -303,7 +317,7 @@ function changeSort() {
 }
 
 function exit() {
-    mota.plugin.ui.equipOpened.value = false;
+    mota.ui.main.close(props.num);
 }
 
 function clickList(i: number) {
@@ -420,13 +434,11 @@ function dragout(e: Event) {
     toEquipType.value = -1;
 }
 
-async function toTool() {
-    const before = mota.plugin.ui.transition.value;
+function toTool() {
     mota.plugin.ui.transition.value = false;
+    mota.ui.main.holdOn();
     exit();
-    await sleep(50);
-    mota.plugin.ui.toolOpened.value = true;
-    mota.plugin.ui.transition.value = before;
+    mota.ui.main.open('toolbox');
 }
 
 function keyup(e: KeyboardEvent) {
@@ -447,9 +459,10 @@ watch(toShow, n => {
 
 onMounted(async () => {
     bind();
-    if (mota.plugin.ui.transition.value) await sleep(600);
-    else await sleep(50);
-    document.addEventListener('keyup', keyup);
+    await sleep(50);
+    nextTick(() => {
+        document.addEventListener('keyup', keyup);
+    });
 });
 
 onUnmounted(() => {

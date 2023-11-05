@@ -168,29 +168,11 @@ interface PluginUtils {
 }
 
 interface PluginUis {
-    /** 定点查看的界面，特殊属性还是临界 */
-    fixedDetailPanel: 'special' | 'critical';
-
-    /** 打开的商店id */
-    openedShopId: string;
-
     /** ui是否使用渐变 */
     readonly transition: Ref<boolean>;
 
-    /** 手册是否打开 */
-    readonly bookOpened: Ref<boolean>;
-
-    /** 道具栏是否打开 */
-    readonly toolOpened: Ref<boolean>;
-
-    /** 装备栏是否打开 */
-    readonly equipOpened: Ref<boolean>;
-
     /** 是否显示状态栏 */
     readonly showStatusBar: Ref<boolean>;
-
-    /** 设置界面是否打开 */
-    readonly settingsOpened: Ref<boolean>;
 
     /** 是否正在进行章节显示 */
     readonly chapterShowed: Ref<boolean>;
@@ -198,44 +180,14 @@ interface PluginUis {
     /** 章节显示的内容 */
     readonly chapterContent: Ref<boolean>;
 
-    /** 百科全书是否打开了 */
-    readonly descOpened: Ref<boolean>;
-
-    /** 技能查看界面是否打开 */
-    readonly skillOpened: Ref<boolean>;
-
-    /** 技能树界面是否打开 */
-    readonly skillTreeOpened: Ref<boolean>;
-
-    /** 楼传界面是否打开 */
-    readonly flyOpened: Ref<boolean>;
-
     /** 是否展示标记的怪物 */
     readonly showMarkedEnemy: Ref<boolean>;
 
     /** 是否展示已学习的技能 */
     readonly showStudiedSkill: Ref<boolean>;
 
-    /** 定点查看是否打开 */
-    readonly fixedDetailOpened: Ref<boolean>;
-
     /** 是否展示移动鼠标显示怪物信息的盒子 */
     readonly showFixed: Ref<boolean>;
-
-    /** 商店是否打开 */
-    readonly shopOpened: Ref<boolean>;
-
-    /** 开始界面是否打开 */
-    readonly startOpened: Ref<boolean>;
-
-    /** 成就界面是否打开 */
-    readonly achievementOpened: Ref<boolean>;
-
-    /** bgm界面是否打开 */
-    readonly bgmOpened: Ref<boolean>;
-
-    /** ui栈 */
-    readonly uiStack: Ref<any[]>;
 
     /**
      * 显示章节

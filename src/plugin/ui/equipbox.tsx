@@ -67,7 +67,7 @@ export function getNowStatus(nowEquip?: Equip, onCol: boolean = false) {
             {toShow.map(v => {
                 let status: string;
                 if (v === 'lv') status = core.getLvName() ?? '';
-                else status = core.plugin.getHeroStatusOn(v)?.toString();
+                else status = core.plugin.hero.getHeroStatusOn(v)?.toString();
 
                 let add = 0;
                 if (has(nowEquip)) {

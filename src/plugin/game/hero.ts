@@ -113,8 +113,10 @@ function getRealStatus(
 
 declare global {
     interface PluginDeclaration {
-        getHeroStatusOf: typeof getHeroStatusOf;
-        getHeroStatusOn: typeof getHeroStatusOn;
+        hero: {
+            getHeroStatusOf: typeof getHeroStatusOf;
+            getHeroStatusOn: typeof getHeroStatusOn;
+        };
     }
 }
 

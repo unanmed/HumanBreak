@@ -98,7 +98,7 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue';
-import { achievementOpened, noClosePanel } from '../plugin/uiController';
+import { noClosePanel } from '../plugin/uiController';
 import { LeftOutlined } from '@ant-design/icons-vue';
 import list from '../data/achievement.json';
 import {
@@ -108,6 +108,10 @@ import {
 } from '../plugin/ui/achievement';
 import Scroll from '../components/scroll.vue';
 import { isMobile } from '../plugin/use';
+
+const props = defineProps<{
+    num: number;
+}>();
 
 type AchievementList = typeof list;
 type AchievementType = keyof AchievementList;
@@ -173,12 +177,13 @@ function getAllAchievements(type: AchievementType): ResolvedAchievement[] {
 }
 
 function exit() {
+    // ???
     try {
         core.closePanel();
     } catch {
         noClosePanel.value = true;
     }
-    achievementOpened.value = false;
+    mota.ui.main.close(props.num);
 }
 </script>
 

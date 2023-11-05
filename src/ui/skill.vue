@@ -22,6 +22,10 @@ import skills from '../data/skill.json';
 import { has } from '../plugin/utils';
 import Column from '../components/colomn.vue';
 
+const props = defineProps<{
+    num: number;
+}>();
+
 type Skills = keyof typeof skills;
 
 const selected = ref<Skills>('none');
@@ -60,7 +64,7 @@ const content = computed(() => {
 });
 
 function exit() {
-    mota.plugin.ui.skillOpened.value = false;
+    mota.ui.main.close(props.num);
 }
 </script>
 

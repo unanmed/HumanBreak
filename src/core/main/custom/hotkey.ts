@@ -302,9 +302,10 @@ hotkey
             const [x, y] = flags.mouseLoc ?? [];
             const [mx, my] = getLocFromMouseLoc(x, y);
             if (core.getBlockCls(mx, my)?.startsWith('enemy')) {
-                core.plugin.fixedDetailPanel = 'special';
                 mota.plugin.fixed.showFixed.value = false;
-                mota.plugin.ui.fixedDetailOpened.value = true;
+                mota.ui.main.open('fixedDetail', void 0, {
+                    panel: 'special'
+                });
             }
         }
     })
@@ -314,9 +315,10 @@ hotkey
             const [x, y] = flags.mouseLoc ?? [];
             const [mx, my] = getLocFromMouseLoc(x, y);
             if (core.getBlockCls(mx, my)?.startsWith('enemy')) {
-                core.plugin.fixedDetailPanel = 'critical';
                 mota.plugin.fixed.showFixed.value = false;
-                mota.plugin.ui.fixedDetailOpened.value = true;
+                mota.ui.main.open('fixedDetail', void 0, {
+                    panel: 'critical'
+                });
             }
         }
     })

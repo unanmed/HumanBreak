@@ -13,7 +13,12 @@ import { getDetailedEnemy, getLocFromMouseLoc } from '../plugin/ui/fixed';
 import BookDetail from './bookDetail.vue';
 import { detailInfo } from '../plugin/ui/book';
 
-const panel = core.plugin.fixedDetailPanel ?? 'special';
+const props = defineProps<{
+    num: number;
+    panel?: 'special' | 'critical' | 'target';
+}>();
+
+const panel = props.panel ?? 'special';
 
 detailInfo.pos = 0;
 
@@ -30,7 +35,7 @@ if (enemy) {
 }
 
 function close() {
-    mota.plugin.ui.fixedDetailOpened.value = false;
+    mota.ui.main.close(props.num);
 }
 </script>
 

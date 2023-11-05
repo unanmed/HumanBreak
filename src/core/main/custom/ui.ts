@@ -124,6 +124,12 @@ interface ShowableGameUi {
 type UiVOn = Record<string, (param?: any) => void>;
 type UiVBind = Record<string, any>;
 
+interface MountedVBind {
+    num: number;
+    ui: GameUi;
+    [x: string]: any;
+}
+
 export class GameUi extends EventEmitter<GameUiEvent> {
     static uiList: GameUi[] = [];
 
@@ -151,6 +157,11 @@ export class GameUi extends EventEmitter<GameUiEvent> {
 
 interface IndexedGameUi extends ShowableGameUi {
     num: number;
+    vBind?: MountedVBind;
+}
+
+interface HoldOnController {
+    end(): void;
 }
 
 export class UiController extends Focus<IndexedGameUi> {
@@ -166,11 +177,13 @@ export class UiController extends Focus<IndexedGameUi> {
         this.on('splice', spliced => {
             spliced.forEach(v => {
                 v.ui.emit('close');
-                if (this.stack.length === 0) {
-                    if (!this.hold) this.emit('end');
-                    this.hold = false;
-                }
             });
+            if (this.stack.length === 0) {
+                console.log(this.hold);
+
+                if (!this.hold) this.emit('end');
+                this.hold = false;
+            }
         });
         this.on('add', item => {
             if (this.stack.length === 1) {
@@ -201,11 +214,17 @@ export class UiController extends Focus<IndexedGameUi> {
      * 暂时保持下一次删除ui不会导致ui整体被关闭，引起ui背景闪烁。
      * 例如可以用于道具栏，打开道具时就应当 holdOn，然后通过道具使用钩子来判断接下来是否要隐藏 app:
      * ```txt
-     * hold on -> close -> use item -> hook -> stack.length === 0 ? hide app : no action
+     * hold on -> close -> use item -> hook -> stack.length === 0 ? end() : no action
      * ```
      */
-    holdOn() {
+    holdOn(): HoldOnController {
         this.hold = true;
+
+        return {
+            end: () => {
+                this.emit('end');
+            }
+        };
     }
 
     /**
@@ -222,7 +241,6 @@ export class UiController extends Focus<IndexedGameUi> {
      * @param id 要关闭的ui的id
      */
     closeByName(id: string) {
-        console.log(id);
         if (!this.equal) {
             const ui = this.stack.findIndex(v => v.ui.id === id);
             this.spliceIndex(ui);
@@ -245,7 +263,15 @@ export class UiController extends Focus<IndexedGameUi> {
         const ui = this.get(id);
         if (!ui) return -1;
         const num = this.num++;
-        this.add({ num, ...ui.with(vOn, vBind) });
+        const sui = ui.with(vOn, {
+            num,
+            ui,
+            ...(vBind ?? {})
+        });
+        this.add({
+            num,
+            ...sui
+        } as IndexedGameUi);
         return num;
     }
 
@@ -291,5 +317,13 @@ export class UiController extends Focus<IndexedGameUi> {
      */
     getByNum(num: number) {
         return this.stack.find(v => v.num === num);
+    }
+
+    /**
+     * 根据ui的唯一标识符来判断当前是否存在某个ui
+     * @param id ui的唯一标识符
+     */
+    hasName(id: string) {
+        return this.stack.some(v => v.ui.id === id);
     }
 }

@@ -11,8 +11,9 @@ export {};
 
     function openItemShop(itemShopId) {
         if (!core.isReplaying()) {
-            core.plugin.openedShopId = itemShopId;
-            mota.plugin.ui.shopOpened.value = true;
+            mota.ui.main.open('shop', void 0, {
+                shopId: itemShopId
+            });
         }
     }
 
@@ -24,22 +25,19 @@ export {};
     }
 
     ui.prototype.drawBook = function () {
-        if (!core.isReplaying())
-            return (mota.plugin.ui.bookOpened.value = true);
+        if (!core.isReplaying()) return mota.ui.main.open('book');
     };
 
     ui.prototype._drawToolbox = function () {
-        if (!core.isReplaying())
-            return (mota.plugin.ui.toolOpened.value = true);
+        if (!core.isReplaying()) return mota.ui.main.open('toolbox');
     };
 
     ui.prototype._drawEquipbox = function () {
-        if (!core.isReplaying())
-            return (mota.plugin.ui.equipOpened.value = true);
+        if (!core.isReplaying()) return mota.ui.main.open('equipbox');
     };
 
     ui.prototype.drawFly = function () {
-        if (!core.isReplaying()) return (mota.plugin.ui.flyOpened.value = true);
+        if (!core.isReplaying()) return mota.ui.main.open('fly');
     };
 
     control.prototype.updateStatusBar_update = function () {
@@ -54,6 +52,7 @@ export {};
         updateVueStatusBar();
     };
 
+    // todo: 多个状态栏分离与控制
     control.prototype.showStatusBar = function () {
         if (main.mode == 'editor') return;
         core.removeFlag('hideStatusBar');
@@ -93,7 +92,7 @@ export {};
 
     function openSkill() {
         if (core.isReplaying()) return;
-        mota.plugin.ui.skillOpened.value = true;
+        mota.ui.main.open('skill');
     }
 
     core.plugin.gameUi = {

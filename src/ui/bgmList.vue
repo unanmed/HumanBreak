@@ -33,6 +33,10 @@ import Colomn from '../components/colomn.vue';
 import bgm from '../data/bgm.json';
 import { splitText } from '../plugin/utils';
 
+const props = defineProps<{
+    num: number;
+}>();
+
 interface Bgm {
     img: string;
     area: string;
@@ -51,7 +55,7 @@ const content = computed(() => {
 const name = computed(() => list[selected.value]!.name);
 
 function exit() {
-    mota.plugin.ui.bgmOpened.value = false;
+    mota.ui.main.close(props.num);
 }
 
 function select(id: BgmIds) {
