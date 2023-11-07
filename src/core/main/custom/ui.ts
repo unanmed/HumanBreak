@@ -179,8 +179,6 @@ export class UiController extends Focus<IndexedGameUi> {
                 v.ui.emit('close');
             });
             if (this.stack.length === 0) {
-                console.log(this.hold);
-
                 if (!this.hold) this.emit('end');
                 this.hold = false;
             }

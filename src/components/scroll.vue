@@ -46,7 +46,7 @@ let content: HTMLDivElement;
 let fromSelf = false;
 
 const resize = async () => {
-    await calHeight();
+    await calHeight(false);
     draw();
 };
 
@@ -87,8 +87,10 @@ function draw() {
 /**
  * 计算元素总长度
  */
-async function calHeight() {
-    await sleep(20);
+async function calHeight(first: boolean) {
+    if (!first) {
+        await sleep(20);
+    }
     const canvas = ctx.canvas;
     const style2 = getComputedStyle(canvas);
     canvas.style.width = `${width}px`;
@@ -123,7 +125,7 @@ onUpdated(async () => {
     if (fromSelf) return;
     now = props.now ?? now;
     content.style.transition = `${cssTarget} 0.2s ease-out`;
-    await calHeight();
+    await calHeight(false);
     scroll();
 });
 
@@ -204,7 +206,7 @@ onMounted(async () => {
     });
 
     window.addEventListener('resize', resize);
-    await calHeight();
+    await calHeight(true);
     draw();
 });
 

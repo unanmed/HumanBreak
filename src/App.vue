@@ -63,11 +63,12 @@ onMounted(() => {
     position: fixed;
     background-color: #000b;
     backdrop-filter: blur(5px);
+    z-index: 1;
 }
 
 #ui-list {
-    width: 90%;
-    height: 90%;
+    width: 90vw;
+    height: 90vh;
     overflow: hidden;
     position: relative;
     left: 0;
@@ -75,8 +76,8 @@ onMounted(() => {
 }
 
 .ui-one {
-    width: 100%;
-    height: 100%;
+    width: 90vw;
+    height: 90vh;
     position: absolute;
     left: 0;
     top: 0;
@@ -92,6 +93,7 @@ onMounted(() => {
     left: 0;
     top: 0;
     display: none;
+    z-index: 0;
 }
 
 @media screen and (max-width: 600px) {

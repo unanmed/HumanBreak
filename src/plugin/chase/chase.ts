@@ -4,6 +4,8 @@ import { has } from '../utils';
 import { ChaseCameraData, ChasePath, getChaseDataByIndex } from './data';
 import { init1 } from './chase1';
 
+// todo: 优化，可以继承自EventEmitter
+
 export default function init() {
     return { startChase, chaseInit1: init1 };
 }
