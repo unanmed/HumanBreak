@@ -313,7 +313,7 @@ function exit() {
 
 onMounted(async () => {
     await sleep(50);
-    if (mota.plugin.ui.transition.value) await sleep(600);
+    // if (mota.plugin.ui.transition.value) await sleep(600);
     document.addEventListener('keyup', keyup);
     document.addEventListener('keydown', keydown);
     core.status.route.push(`openShop:${id}`);

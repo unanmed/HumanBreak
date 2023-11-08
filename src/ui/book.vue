@@ -46,7 +46,6 @@ import { getDamageColor, has, keycode } from '../plugin/utils';
 import BookDetail from './bookDetail.vue';
 import { LeftOutlined } from '@ant-design/icons-vue';
 import { KeyCode } from '../plugin/keyCodes';
-import { noClosePanel } from '../plugin/uiController';
 import { ToShowEnemy, detailInfo } from '../plugin/ui/book';
 import { getDetailedEnemy } from '../plugin/ui/fixed';
 import { GameUi } from '@/core/main/custom/ui';
@@ -118,17 +117,17 @@ async function show() {
  * 退出怪物手册
  */
 async function exit() {
-    noClosePanel.value = true;
+    const hold = mota.ui.main.holdOn();
     mota.ui.main.close(props.num);
-    if (mota.plugin.ui.transition.value) await sleep(650);
-    else await sleep(100);
+    // if (mota.plugin.ui.transition.value) await sleep(650);
+    // else await sleep(100);
     if (core.events.recoverEvents(core.status.event.interval)) {
         return;
     } else if (has(core.status.event.ui)) {
         core.status.boxAnimateObjs = [];
         // @ts-ignore
         core.ui._drawViewMaps(core.status.event.ui);
-    } else core.ui.closePanel();
+    } else hold.end();
 }
 
 function checkScroll() {
@@ -197,8 +196,8 @@ function keydown(e: KeyboardEvent) {
 }
 
 onMounted(async () => {
-    if (mota.plugin.ui.transition.value) await sleep(600);
-    else await sleep(50);
+    // if (mota.plugin.ui.transition.value) await sleep(600);
+    await sleep(50);
     document.addEventListener('keyup', keyup);
     document.addEventListener('keydown', keydown);
 });

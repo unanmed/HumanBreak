@@ -1,6 +1,5 @@
 import { reactive } from 'vue';
 import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
-import { transition } from '@/plugin/uiController';
 import { loading } from '../loader/load';
 import { hook } from './game';
 import { GameStorage } from './storage';
@@ -297,7 +296,7 @@ function handleScreenSetting<T extends number | boolean>(
     } else if (key === 'transition') {
         // 界面动画
         core.setLocalStorage('transition', n);
-        transition.value = n as boolean;
+        // transition.value = n as boolean;
     } else if (key === 'antiAlias') {
         // 抗锯齿
         core.setLocalStorage('antiAlias', n);

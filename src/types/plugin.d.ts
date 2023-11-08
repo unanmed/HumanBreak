@@ -168,12 +168,6 @@ interface PluginUtils {
 }
 
 interface PluginUis {
-    /** ui是否使用渐变 */
-    readonly transition: Ref<boolean>;
-
-    /** 是否显示状态栏 */
-    readonly showStatusBar: Ref<boolean>;
-
     /** 是否正在进行章节显示 */
     readonly chapterShowed: Ref<boolean>;
 
@@ -182,9 +176,6 @@ interface PluginUis {
 
     /** 是否展示标记的怪物 */
     readonly showMarkedEnemy: Ref<boolean>;
-
-    /** 是否展示已学习的技能 */
-    readonly showStudiedSkill: Ref<boolean>;
 
     /** 是否展示移动鼠标显示怪物信息的盒子 */
     readonly showFixed: Ref<boolean>;

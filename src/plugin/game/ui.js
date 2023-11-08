@@ -56,7 +56,9 @@ export {};
     control.prototype.showStatusBar = function () {
         if (main.mode == 'editor') return;
         core.removeFlag('hideStatusBar');
-        mota.plugin.ui.showStatusBar.value = true;
+        if (!mota.ui.fixed.hasName('statusBar')) {
+            mota.ui.fixed.open('statusBar');
+        }
         core.dom.tools.hard.style.display = 'block';
         core.dom.toolBar.style.display = 'block';
     };
@@ -67,7 +69,7 @@ export {};
         // 如果原本就是隐藏的，则先显示
         if (!core.domStyle.showStatusBar) this.showStatusBar();
         if (core.isReplaying()) showToolbox = true;
-        mota.plugin.ui.showStatusBar.value = false;
+        mota.ui.fixed.closeByName('statusBar');
 
         var toolItems = core.dom.tools;
         core.setFlag('hideStatusBar', true);

@@ -98,7 +98,6 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue';
-import { noClosePanel } from '../plugin/uiController';
 import { LeftOutlined } from '@ant-design/icons-vue';
 import list from '../data/achievement.json';
 import {
@@ -177,12 +176,6 @@ function getAllAchievements(type: AchievementType): ResolvedAchievement[] {
 }
 
 function exit() {
-    // ???
-    try {
-        core.closePanel();
-    } catch {
-        noClosePanel.value = true;
-    }
     mota.ui.main.close(props.num);
 }
 </script>

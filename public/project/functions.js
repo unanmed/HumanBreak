@@ -638,14 +638,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             if (main.replayChecking) return;
 
             // 已学习的技能
-            if (
-                core.plugin.skillTree.getSkillLevel(11) > 0 &&
-                (core.status.hero.special?.num ?? []).length > 0
-            ) {
-                mota.plugin.ui.showStudiedSkill.value = true;
-            } else {
-                mota.plugin.ui.showStudiedSkill.value = false;
-            }
+            // if (
+            //     core.plugin.skillTree.getSkillLevel(11) > 0 &&
+            //     (core.status.hero.special?.num ?? []).length > 0
+            // ) {
+            //     mota.plugin.ui.showStudiedSkill.value = true;
+            // } else {
+            //     mota.plugin.ui.showStudiedSkill.value = false;
+            // }
         },
         moveOneStep: function (callback) {
             // 勇士每走一步后执行的操作。callback为行走完毕后的回调

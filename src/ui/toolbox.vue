@@ -172,16 +172,16 @@ function exit() {
     mota.ui.main.close(props.num);
 }
 
-async function use(id: ShowItemIds) {
+function use(id: ShowItemIds) {
     if (id === 'none') return;
     if (core.canUseItem(id)) {
-        // 应该暂时把动画去掉
-        const before = mota.plugin.ui.transition.value;
-        mota.plugin.ui.transition.value = false;
+        const hold = mota.ui.main.holdOn();
         exit();
-        await sleep(50);
-        core.useItem(id);
-        mota.plugin.ui.transition.value = before;
+        core.useItem(id, false, () => {
+            if (mota.ui.main.stack.length === 0) {
+                hold.end();
+            }
+        });
     } else {
         message.warn({
             content: '当前无法使用该道具！',
@@ -240,8 +240,8 @@ function keydown(e: KeyboardEvent) {
 }
 
 onMounted(async () => {
-    if (mota.plugin.ui.transition.value) await sleep(600);
-    else await sleep(50);
+    // if (mota.plugin.ui.transition.value) await sleep(600);
+    await sleep(50);
     document.addEventListener('keyup', keyup);
     document.addEventListener('keydown', keydown);
 });

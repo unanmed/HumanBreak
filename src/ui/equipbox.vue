@@ -435,7 +435,6 @@ function dragout(e: Event) {
 }
 
 function toTool() {
-    mota.plugin.ui.transition.value = false;
     mota.ui.main.holdOn();
     exit();
     mota.ui.main.open('toolbox');
