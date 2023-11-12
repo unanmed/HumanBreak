@@ -8,6 +8,7 @@ import { GameEvent, hook } from './main/game';
 import { fixedUi, mainUi } from './main/init/ui';
 import { GameStorage } from './main/storage';
 import { resolvePlugin } from './plugin';
+import './main/init/';
 
 interface AncTePlugin {
     pop: ReturnType<typeof import('../plugin/pop').default>;

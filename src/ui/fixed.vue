@@ -1,63 +1,94 @@
 <template>
     <div id="fixed">
-        <Transition>
-            <Box
-                v-if="showFixed"
-                v-model:height="height"
-                v-model:left="left"
-                v-model:top="top"
-                v-model:width="width"
-            >
-                <div id="enemy-fixed">
-                    <span id="enemy-name">{{ enemy.enemy.enemy.name }}</span>
-                    <div id="enemy-special">
-                        <span
-                            v-for="(text, i) of enemy.showSpecial"
-                            :style="{ color: text[2] }"
-                            >{{ text[0] }}</span
-                        >
-                    </div>
-                    <div class="enemy-attr" v-for="(a, i) of toShowAttrs">
-                        <span class="attr-name" :style="{ color: a[2] }">{{
-                            a[1]
-                        }}</span>
-                        <span class="attr-value" :style="{ color: a[2] }">{{
-                            format(a[0])
-                        }}</span>
-                    </div>
+        <Box
+            v-model:height="height"
+            v-model:left="left"
+            v-model:top="top"
+            v-model:width="width"
+        >
+            <div id="enemy-fixed">
+                <span id="enemy-name">{{ enemy.enemy.name }}</span>
+                <div id="enemy-special">
+                    <span
+                        v-for="(text, i) of special"
+                        :style="{ color: text[1] }"
+                        >{{ text[0] }}</span
+                    >
                 </div>
-            </Box>
-        </Transition>
+                <div class="enemy-attr" v-for="(a, i) of detail">
+                    <span class="attr-name" :style="{ color: a[2] }">{{
+                        a[1]
+                    }}</span>
+                    <span class="attr-value" :style="{ color: a[2] }">{{
+                        format(a[0])
+                    }}</span>
+                </div>
+            </div>
+        </Box>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { ComputedRef, computed, onMounted, onUpdated, ref, watch } from 'vue';
+import { onMounted, onUpdated, ref, watch } from 'vue';
 import Box from '../components/box.vue';
-import { showFixed } from '../plugin/ui/fixed';
-import { ToShowEnemy, detailInfo } from '../plugin/ui/book';
+import { GameUi } from '@/core/main/custom/ui';
+import type { DamageEnemy } from '@/plugin/game/enemy/damage';
+import { nextFrame } from '@/plugin/utils';
 
-watch(showFixed, n => {
-    if (n) calHeight();
+const props = defineProps<{
+    num: number;
+    ui: GameUi;
+    enemy: DamageEnemy;
+    close: Ref<boolean>;
+    loc: [x: number, y: number];
+}>();
+const emits = defineEmits<{
+    (e: 'close'): void;
+}>();
+
+watch(props.close, n => {
+    if (n) {
+        fixed.style.opacity = '0';
+    }
 });
 
 let main: HTMLDivElement;
+let fixed: HTMLDivElement;
 
 const format = core.formatBigNumber;
-const enemy = ref(detailInfo.enemy!);
+const enemy = props.enemy;
+const detail = ((): [number, string, string][] => {
+    const info = enemy.info;
+    const data = enemy.calCritical()[0];
+    const ratio = core.status.thisMap?.ratio ?? 1;
+    return [
+        [info.hp, '生命', 'lightgreen'],
+        [info.atk, '攻击', 'lightcoral'],
+        [info.def, '防御', 'lightblue'],
+        [enemy.enemy.money, '金币', 'lightyellow'],
+        [enemy.enemy.exp, '经验', 'lawgreen'],
+        [data?.atkDelta ?? 0, '临界', 'lightsalmon'],
+        [data?.delta ?? 0, '临界减伤', 'lightpink'],
+        [enemy.calDefDamage(ratio).delta, `${ratio}防`, 'cyan']
+    ];
+})();
+const special = (() => {
+    const s = enemy.info.special;
 
-const toShowAttrs: ComputedRef<[number | string, string, string][]> = computed(
-    () => [
-        [enemy.value.enemy.info.hp, '生命', 'lightgreen'],
-        [enemy.value.enemy.info.atk, '攻击', 'lightcoral'],
-        [enemy.value.enemy.info.def, '防御', 'lightblue'],
-        [enemy.value.enemy.enemy.money, '金币', 'lightyellow'],
-        [enemy.value.enemy.enemy.exp, '经验', 'lawgreen'],
-        [enemy.value.critical, '临界', 'lightsalmon'],
-        [enemy.value.criticalDam, '临界减伤', 'lightpink'],
-        [enemy.value.defDam, `${core.status.thisMap?.ratio ?? 1}防`, 'cyan']
-    ]
-);
+    const fromFunc = (
+        func: string | ((enemy: Enemy) => string),
+        enemy: Enemy
+    ) => {
+        return typeof func === 'string' ? func : func(enemy);
+    };
+
+    const show = s.slice(0, 2).map(v => {
+        const s = core.plugin.special[v];
+        return [fromFunc(s.name, enemy.enemy), s.color];
+    });
+    if (s.length > 2) show.push(['...', 'white']);
+    return show;
+})();
 
 const left = ref(0);
 const top = ref(0);
@@ -67,19 +98,15 @@ let vh = window.innerHeight;
 let vw = window.innerWidth;
 
 async function calHeight() {
-    enemy.value = detailInfo.enemy!;
     vh = window.innerHeight;
     vw = window.innerWidth;
     width.value = vh * 0.28;
     await new Promise(res => requestAnimationFrame(res));
-    if (mota.ui.main.hasName('fixedDetail')) {
-        showFixed.value = false;
-    }
     updateMain();
     if (!main) return;
     const style = getComputedStyle(main);
     const h = parseFloat(style.height);
-    const [cx, cy] = flags.clientLoc;
+    const [cx, cy] = props.loc;
     if (cy + h + 10 > vh - 10) top.value = vh - h - 10;
     else top.value = cy + 10;
     if (cx + width.value + 10 > vw - 10) left.value = vw - width.value - 10;
@@ -89,11 +116,13 @@ async function calHeight() {
 
 function updateMain() {
     main = document.getElementById('enemy-fixed') as HTMLDivElement;
+    fixed = document.getElementById('fixed') as HTMLDivElement;
     if (main) {
-        main.addEventListener('mouseleave', () => {
-            showFixed.value = false;
-        });
+        main.addEventListener('mouseleave', () => emits('close'));
     }
+    nextFrame(() => {
+        fixed.style.opacity = '1';
+    });
 }
 
 onUpdated(calHeight);
@@ -108,16 +137,8 @@ onMounted(() => {
 #fixed {
     font-family: 'normal';
     font-size: 2.5vh;
-}
-
-.v-enter-active,
-.v-leave-active {
-    transition: opacity 0.2s linear;
-}
-
-.v-enter-from,
-.v-leave-to {
     opacity: 0;
+    transition: opacity 0.2s linear;
 }
 
 #enemy-fixed {

@@ -3013,7 +3013,7 @@ control.prototype.removeSwitch = function (x, y, floorId, name) {
 control.prototype.lockControl = function () {
     core.status.lockControl = true;
     if (!main.replayChecking) {
-        mota.plugin.fixed.showFixed.value = false;
+        // mota.plugin.fixed.showFixed.value = false;
     }
 };
 

@@ -74,6 +74,10 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
         this.extract();
     }
 
+    get(x: number, y: number) {
+        return this.list.find(v => v.x === x && v.y === y);
+    }
+
     /**
      * 解析本地图的怪物信息
      */

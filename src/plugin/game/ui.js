@@ -11,7 +11,7 @@ export {};
 
     function openItemShop(itemShopId) {
         if (!core.isReplaying()) {
-            mota.ui.main.open('shop', void 0, {
+            mota.ui.main.open('shop', {
                 shopId: itemShopId
             });
         }

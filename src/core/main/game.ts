@@ -11,9 +11,12 @@ export interface GameEvent extends EmitableEvent {
 export const hook = new EventEmitter<GameEvent>();
 
 interface ListenerEvent extends EmitableEvent {
-    hoverBlock: (block: Block) => void;
-    leaveBlock: (block: Block) => void;
-    clickBlock: (block: Block) => void;
+    // block
+    hoverBlock: (block: Block, ev: MouseEvent) => void;
+    leaveBlock: (block: Block, ev: MouseEvent, leaveGame: boolean) => void;
+    clickBlock: (block: Block, ev: MouseEvent) => void;
+    // mouse
+    mouseMove: (ev: MouseEvent) => void;
 }
 
 class GameListener extends EventEmitter<ListenerEvent> {
@@ -24,74 +27,83 @@ class GameListener extends EventEmitter<ListenerEvent> {
     constructor() {
         super();
 
-        loading.once('coreInit', () => {
+        if (!!window.core) {
             this.init();
-        });
+        } else {
+            loading.once('coreInit', () => {
+                this.init();
+            });
+        }
     }
 
     private init() {
-        // block
+        // ----- block
         let lastHoverX = -1;
         let lastHoverY = -1;
 
-        const getBlockLoc = (px: number, py: number) => {
+        const data = core.canvas.data.canvas;
+
+        const getBlockLoc = (px: number, py: number, size: number) => {
             return [
-                Math.floor((px - core.bigmap.offsetX) / 32),
-                Math.floor((py - core.bigmap.offsetY) / 32)
+                Math.floor(((px * 32) / size - core.bigmap.offsetX) / 32),
+                Math.floor(((py * 32) / size - core.bigmap.offsetY) / 32)
             ];
         };
 
-        core.registerAction(
-            'onmove',
-            `@GameListener_${this.num}_block`,
-            (x, y, px, py) => {
-                if (core.status.lockControl || !core.isPlaying()) return false;
-                const [bx, by] = getBlockLoc(px, py);
-                const blocks = core.getMapBlocksObj();
-                if (lastHoverX !== bx || lastHoverY !== by) {
-                    const lastBlock = blocks[`${lastHoverX},${lastHoverY}`];
-                    const block = blocks[`${bx},${by}`];
-                    if (!!lastBlock) {
-                        this.emit('leaveBlock', lastBlock);
-                    }
-                    if (!!block) {
-                        this.emit('hoverBlock', block);
-                        lastHoverX = bx;
-                        lastHoverY = by;
-                    } else {
-                        lastHoverX = -1;
-                        lastHoverY = -1;
-                    }
+        // hover & leave
+        data.addEventListener('mousemove', e => {
+            if (core.status.lockControl || !core.isPlaying()) return;
+            this.emit('mouseMove', e);
+            const {
+                x: px,
+                y: py,
+                size
+            } = core.actions._getClickLoc(e.clientX, e.clientY);
+            const [bx, by] = getBlockLoc(px, py, size);
+            const blocks = core.getMapBlocksObj();
+            if (lastHoverX !== bx || lastHoverY !== by) {
+                const lastBlock = blocks[`${lastHoverX},${lastHoverY}`];
+                const block = blocks[`${bx},${by}`];
+                if (!!lastBlock) {
+                    this.emit('leaveBlock', lastBlock, e, false);
                 }
-                return false;
-            },
-            50
-        );
-        core.canvas.data.canvas.addEventListener('mouseleave', () => {
+                if (!!block) {
+                    this.emit('hoverBlock', block, e);
+                    lastHoverX = bx;
+                    lastHoverY = by;
+                } else {
+                    lastHoverX = -1;
+                    lastHoverY = -1;
+                }
+            }
+        });
+        data.addEventListener('mouseleave', e => {
             if (core.status.lockControl || !core.isPlaying()) return;
             const blocks = core.getMapBlocksObj();
             const lastBlock = blocks[`${lastHoverX},${lastHoverY}`];
             if (!!lastBlock) {
-                this.emit('leaveBlock', lastBlock);
+                this.emit('leaveBlock', lastBlock, e, true);
             }
             lastHoverX = -1;
             lastHoverY = -1;
         });
-        core.registerAction(
-            'onup',
-            `@GameListener_${this.num}_block`,
-            (x, y, px, py) => {
-                if (core.status.lockControl || !core.isPlaying()) return false;
-                const [bx, by] = getBlockLoc(px, py);
-                const blocks = core.getMapBlocksObj();
-                const block = blocks[`${bx},${by}`];
-                if (!!block) {
-                    this.emit('clickBlock', block);
-                }
-                return false;
-            },
-            50
-        );
+        // click
+        data.addEventListener('click', e => {
+            if (core.status.lockControl || !core.isPlaying()) return;
+            const {
+                x: px,
+                y: py,
+                size
+            } = core.actions._getClickLoc(e.clientX, e.clientY);
+            const [bx, by] = getBlockLoc(px, py, size);
+            const blocks = core.getMapBlocksObj();
+            const block = blocks[`${bx},${by}`];
+            if (!!block) {
+                this.emit('clickBlock', block, e);
+            }
+        });
+
+        // ----- mouse
     }
 }
 

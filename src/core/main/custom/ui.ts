@@ -150,7 +150,7 @@ export class GameUi extends EventEmitter<GameUiEvent> {
      * @param vOn 监听的事件
      * @param vBind 绑定的数据
      */
-    with(vOn?: UiVOn, vBind?: UiVBind): ShowableGameUi {
+    with(vBind?: UiVBind, vOn?: UiVOn): ShowableGameUi {
         return { ui: this, vOn, vBind };
     }
 }
@@ -257,15 +257,16 @@ export class UiController extends Focus<IndexedGameUi> {
      * @param vBind 绑定的数据
      * @returns ui的唯一标识符
      */
-    open(id: string, vOn?: UiVOn, vBind?: UiVBind) {
+    open(id: string, vBind?: UiVBind, vOn?: UiVOn) {
         const ui = this.get(id);
         if (!ui) return -1;
         const num = this.num++;
-        const sui = ui.with(vOn, {
+        const bind = {
             num,
             ui,
             ...(vBind ?? {})
-        });
+        };
+        const sui = ui.with(bind, vOn);
         this.add({
             num,
             ...sui

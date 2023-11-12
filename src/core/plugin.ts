@@ -8,7 +8,6 @@ import mark from '@/plugin/mark';
 import chapter from '@/plugin/ui/chapter';
 import fly from '@/plugin/ui/fly';
 import chase from '@/plugin/chase/chase';
-import fixed from '@/plugin/ui/fixed';
 import webglUtils from '@/plugin/webgl/utils';
 import shadow from '@/plugin/shadow/shadow';
 import gameShadow from '@/plugin/shadow/gameShadow';
@@ -33,7 +32,6 @@ export function resolvePlugin() {
         ['chapter', chapter()],
         ['fly', fly()],
         ['chase', chase()],
-        ['fixed', fixed()],
         ['webglUtils', webglUtils()],
         ['shadow', shadow()],
         ['gameShadow', gameShadow()],

@@ -136,6 +136,15 @@ interface Actions extends VoidedActionFuncs {
     _getNextFlyFloor(delta: number, index: number): number;
 
     _clickGameInfo_openComments();
+
+    _getClickLoc(
+        x: number,
+        y: number
+    ): {
+        x: number;
+        y: number;
+        size: number;
+    };
 }
 
 declare const actions: new () => Actions;

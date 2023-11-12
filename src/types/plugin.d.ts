@@ -177,9 +177,6 @@ interface PluginUis {
     /** 是否展示标记的怪物 */
     readonly showMarkedEnemy: Ref<boolean>;
 
-    /** 是否展示移动鼠标显示怪物信息的盒子 */
-    readonly showFixed: Ref<boolean>;
-
     /**
      * 显示章节
      * @param chapter 显示的文字
