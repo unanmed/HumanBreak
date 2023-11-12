@@ -13,6 +13,7 @@ export const hook = new EventEmitter<GameEvent>();
 interface ListenerEvent extends EmitableEvent {
     hoverBlock: (block: Block) => void;
     leaveBlock: (block: Block) => void;
+    clickBlock: (block: Block) => void;
 }
 
 class GameListener extends EventEmitter<ListenerEvent> {
@@ -32,13 +33,20 @@ class GameListener extends EventEmitter<ListenerEvent> {
         // block
         let lastHoverX = -1;
         let lastHoverY = -1;
+
+        const getBlockLoc = (px: number, py: number) => {
+            return [
+                Math.floor((px - core.bigmap.offsetX) / 32),
+                Math.floor((py - core.bigmap.offsetY) / 32)
+            ];
+        };
+
         core.registerAction(
             'onmove',
             `@GameListener_${this.num}_block`,
             (x, y, px, py) => {
                 if (core.status.lockControl || !core.isPlaying()) return false;
-                const bx = Math.floor((px - core.bigmap.offsetX) / 32);
-                const by = Math.floor((py - core.bigmap.offsetY) / 32);
+                const [bx, by] = getBlockLoc(px, py);
                 const blocks = core.getMapBlocksObj();
                 if (lastHoverX !== bx || lastHoverY !== by) {
                     const lastBlock = blocks[`${lastHoverX},${lastHoverY}`];
@@ -69,6 +77,21 @@ class GameListener extends EventEmitter<ListenerEvent> {
             lastHoverX = -1;
             lastHoverY = -1;
         });
+        core.registerAction(
+            'onup',
+            `@GameListener_${this.num}_block`,
+            (x, y, px, py) => {
+                if (core.status.lockControl || !core.isPlaying()) return false;
+                const [bx, by] = getBlockLoc(px, py);
+                const blocks = core.getMapBlocksObj();
+                const block = blocks[`${bx},${by}`];
+                if (!!block) {
+                    this.emit('clickBlock', block);
+                }
+                return false;
+            },
+            50
+        );
     }
 }
 
