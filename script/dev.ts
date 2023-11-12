@@ -584,9 +584,9 @@ async function startWsServer(http: Server) {
 
 async function ensureConfig() {
     try {
-        fs.readFile(resolvePath('_server/config.json'));
+        await fs.readFile(resolvePath('_server/config.json'));
     } catch {
-        fs.writeFile(resolvePath('_server/config.json'), '{}', 'utf-8');
+        await fs.writeFile(resolvePath('_server/config.json'), '{}', 'utf-8');
     }
 }
 
