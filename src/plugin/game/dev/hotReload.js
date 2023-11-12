@@ -57,50 +57,6 @@ export {};
     }
 
     /**
-     * 热重载脚本编辑
-     */
-    async function reloadScript() {
-        // 脚本编辑略微麻烦点
-        const before = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a;
-        // 这里不能用动态导入，因为动态导入会变成模块，变量就不是全局的了
-        const script = document.createElement('script');
-        script.src = `/forceTem/project/functions.js?v=${Date.now()}`;
-        document.body.appendChild(script);
-        await new Promise(res => {
-            script.onload = () => res('success');
-        });
-        const after = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a;
-        // 找到差异的函数
-        for (const mod in before) {
-            const fns = before[mod];
-            for (const id in fns) {
-                const fn = fns[id];
-                if (typeof fn !== 'function') continue;
-                const now = after[mod][id];
-                if (fn.toString() !== now.toString()) {
-                    try {
-                        if (mod === 'events') {
-                            core.events.eventdata[id] = now;
-                        } else if (mod === 'enemys') {
-                            core.enemys.enemydata[id] = now;
-                        } else if (mod === 'actions') {
-                            core.actions.actionsdata[id] = now;
-                        } else if (mod === 'control') {
-                            core.control.controldata[id] = now;
-                        } else if (mod === 'ui') {
-                            core.ui.uidata[id] = now;
-                        }
-                        core.updateStatusBar(true, true);
-                        console.log(`Function hot reload: ${mod}.${id}`);
-                    } catch (e) {
-                        console.error(e);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * 属性热重载，包括全塔属性等
      * @param {string} data
      */
@@ -168,7 +124,6 @@ export {};
         if (data.type === 'reload') location.reload();
         if (data.type === 'floorHotReload') reloadFloor(data.floor);
         if (data.type === 'dataHotReload') reloadData(data.data);
-        if (data.type === 'functionsHotReload') reloadScript();
         if (data.type === 'cssHotReload') reloadCss(data.path);
     });
 })();

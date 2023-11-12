@@ -52,7 +52,10 @@
                 ></div>
                 <a-divider class="info-divider" dashed></a-divider>
                 <div class="info-editor" v-if="!!selectedItem">
-                    <div v-if="!!selectedItem.special"></div>
+                    <div class="editor-custom" v-if="!!selectedItem.controller">
+                        <component :is="selectedItem.controller"></component>
+                    </div>
+                    <div v-else-if="!!selectedItem.special"></div>
                     <div
                         class="editor-number"
                         v-else-if="typeof selectedItem.value === 'number'"

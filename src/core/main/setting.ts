@@ -1,4 +1,4 @@
-import { reactive } from 'vue';
+import { Component, reactive } from 'vue';
 import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
 import { loading } from '../loader/load';
 import { hook } from './game';
@@ -14,6 +14,7 @@ export interface MotaSettingItem<T extends MotaSettingType = MotaSettingType> {
     defaults?: boolean | number;
     step?: [number, number, number];
     display?: (value: T) => string;
+    controller?: Component;
     special?: string;
 }
 
@@ -144,6 +145,12 @@ export class MotaSetting extends EventEmitter<SettingEvent> {
     setDisplayFunc(key: string, func: (value: MotaSettingType) => string) {
         const setting = this.getSettingBy(key.split('.'));
         setting.display = func;
+        return this;
+    }
+
+    setValueController(key: string, com: Component) {
+        const setting = this.getSettingBy(key.split('.'));
+        setting.controller = com;
         return this;
     }
 
