@@ -5,7 +5,6 @@ export {};
     if (main.replayChecking)
         return (core.plugin.gameUi = {
             openItemShop: () => 0,
-            showChapter: () => 0,
             openSkill: () => 0
         });
 
@@ -86,12 +85,6 @@ export {};
         }
     };
 
-    function showChapter(chapter) {
-        if (core.isReplaying()) return;
-        mota.plugin.chapter.chapterContent.value = chapter;
-        mota.plugin.chapter.chapterShowed.value = true;
-    }
-
     function openSkill() {
         if (core.isReplaying()) return;
         mota.ui.main.open('skill');
@@ -99,7 +92,6 @@ export {};
 
     core.plugin.gameUi = {
         openItemShop,
-        openSkill,
-        showChapter
+        openSkill
     };
 })();

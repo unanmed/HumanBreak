@@ -18,10 +18,8 @@ interface AncTePlugin {
     utils: ReturnType<typeof import('../plugin/utils').default>;
     status: ReturnType<typeof import('../plugin/ui/statusBar').default>;
     mark: ReturnType<typeof import('../plugin/mark').default>;
-    chapter: ReturnType<typeof import('../plugin/ui/chapter').default>;
     fly: ReturnType<typeof import('../plugin/ui/fly').default>;
     chase: ReturnType<typeof import('../plugin/chase/chase').default>;
-    fixed: ReturnType<typeof import('../plugin/ui/fixed').default>;
     webglUtils: ReturnType<typeof import('../plugin/webgl/utils').default>;
     shadow: ReturnType<typeof import('../plugin/shadow/shadow').default>;
     gameShadow: ReturnType<

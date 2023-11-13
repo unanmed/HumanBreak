@@ -157,7 +157,7 @@ main.floors.MT21=
                     "\t[低级智人]\b[up,hero]或许智慧结晶会告诉我答案吧。",
                     {
                         "type": "function",
-                        "function": "function(){\ncore.plugin.gameUi.showChapter('第二章  智慧');\ncore.plugin.removeMap.removeMaps('tower1', 'tower7', true);\ndelete flags.tower1;\ndelete flags.wordsTimeOut;\ndelete flags.boom;\ndelete flags.booming;\n}"
+                        "function": "function(){\nmota.ui.fixed.open('chapter', { chapter: '第二章  智慧' });\ncore.plugin.removeMap.removeMaps('tower1', 'tower7', true);\ndelete flags.tower1;\ndelete flags.wordsTimeOut;\ndelete flags.boom;\ndelete flags.booming;\n}"
                     },
                     {
                         "type": "setValue",

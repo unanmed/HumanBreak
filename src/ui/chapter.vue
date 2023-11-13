@@ -6,12 +6,14 @@
 </template>
 
 <script lang="ts" setup>
-import { Animation, hyper, power, sleep } from 'mutate-animate';
-import { onMounted, ref } from 'vue';
+import { Animation, hyper, sleep } from 'mutate-animate';
+import { onMounted } from 'vue';
 import { has } from '../plugin/utils';
-import { chapterShowed } from '../plugin/ui/chapter';
+import { GameUi } from '@/core/main/custom/ui';
 
 const props = defineProps<{
+    num: number;
+    ui: GameUi;
     chapter: string;
 }>();
 
@@ -27,7 +29,7 @@ onMounted(async () => {
     const ani = new Animation();
     const w = window.innerWidth * devicePixelRatio;
     const h = window.innerHeight * devicePixelRatio;
-    ctx.font = '5vh scroll';
+    ctx.font = '5vh normal';
     const textWidth = ctx.measureText(props.chapter).width;
     const line = h * 0.05;
     ani.register('rect', 0);
@@ -54,7 +56,7 @@ onMounted(async () => {
         }
 
         if (time >= 4050) {
-            chapterShowed.value = false;
+            mota.ui.fixed.close(props.num);
             ani.ticker.destroy();
         }
 

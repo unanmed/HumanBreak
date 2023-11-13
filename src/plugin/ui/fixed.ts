@@ -1,50 +1,7 @@
-import { cloneDeep, debounce } from 'lodash-es';
-import { ref } from 'vue';
 import { getDamageColor } from '../utils';
-import { ToShowEnemy, detailInfo } from './book';
+import { ToShowEnemy } from './book';
 import { DamageEnemy } from '../game/enemy/damage';
 import { isMobile } from '../use';
-
-// export const showFixed = ref(false);
-
-// let lastId: EnemyIds;
-
-// const show = debounce((ev: MouseEvent) => {
-//     if (!window.flags) return;
-//     if (!flags.mouseLoc) return;
-//     flags.clientLoc = [ev.clientX, ev.clientY];
-//     const [mx, my] = getLocFromMouseLoc(...flags.mouseLoc);
-
-//     const e = core.status.thisMap.enemy.list.find(v => {
-//         return v.x === mx && v.y === my;
-//     });
-
-//     if (!e) return;
-
-//     lastId = e.id;
-//     const detail = getDetailedEnemy(e);
-//     detailInfo.enemy = detail;
-//     showFixed.value = true;
-// }, 200);
-
-// export default function init() {
-//     const data = core.canvas.data.canvas;
-//     data.addEventListener('mousemove', ev => {
-//         if (!core.isPlaying() || core.status.lockControl) return;
-//         const [mx, my] = getLocFromMouseLoc(...flags.mouseLoc);
-//         const e = core.getBlockId(mx, my);
-//         if (e !== lastId) showFixed.value = false;
-//         if (!e) return;
-//         show(ev);
-//     });
-//     data.addEventListener('mousedown', ev => {
-//         showFixed.value = false;
-//     });
-
-//     return {
-//         showFixed
-//     };
-// }
 
 export function getLocFromMouseLoc(x: number, y: number): LocArr {
     const mx = Math.round(x + core.bigmap.offsetX / 32);

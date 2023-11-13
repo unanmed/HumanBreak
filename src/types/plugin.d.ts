@@ -178,12 +178,6 @@ interface PluginUis {
     readonly showMarkedEnemy: Ref<boolean>;
 
     /**
-     * 显示章节
-     * @param chapter 显示的文字
-     */
-    showChapter(chapter: string): void;
-
-    /**
      * 打开技能查看界面
      */
     openSkill(): void;
