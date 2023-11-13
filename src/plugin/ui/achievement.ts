@@ -21,9 +21,6 @@ export default function init() {
     return { completeAchievement, hasCompletedAchievement, addMountSign };
 }
 
-export const showComplete = ref(false);
-export const completeAchi = ref('explore,1');
-
 export const totalPoint = Object.values(list)
     .map((v: Achievement[]) =>
         v.reduce((prev, curr) => {
@@ -54,8 +51,7 @@ export function completeAchievement(type: AchievementType, index: number) {
     if (type === 'explore' && !Object.values(achiDict).includes(index)) {
         checkCompletionAchievement();
     }
-    completeAchi.value = `${type},${index}`;
-    showComplete.value = true;
+    mota.ui.fixed.open('completeAchi', { complete: `${type},${index}` });
 }
 
 /**

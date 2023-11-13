@@ -276,7 +276,6 @@ mainSetting.on('valueChange', (key, n, o) => {
 });
 
 const root = document.getElementById('root') as HTMLDivElement;
-const root2 = document.getElementById('root2') as HTMLDivElement;
 
 function handleScreenSetting<T extends number | boolean>(
     key: string,
@@ -318,7 +317,7 @@ function handleScreenSetting<T extends number | boolean>(
     } else if (key === 'fontSize') {
         // 字体大小
         core.setLocalStorage('fontSize', n);
-        root.style.fontSize = root2.style.fontSize = `${n}px`;
+        root.style.fontSize = `${n}px`;
     } else if (key === 'smoothView') {
         core.setLocalStorage('smoothView', n);
     } else if (key === 'criticalGem') {

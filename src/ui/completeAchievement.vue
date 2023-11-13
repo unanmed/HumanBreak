@@ -25,13 +25,15 @@ import list from '../data/achievement.json';
 import {
     AchievementType,
     getNowPoint,
-    showComplete,
     totalPoint
 } from '../plugin/ui/achievement';
+import { GameUi } from '@/core/main/custom/ui';
 
 const height = window.innerHeight;
 
 const props = defineProps<{
+    num: number;
+    ui: GameUi;
     complete: string;
 }>();
 
@@ -60,7 +62,7 @@ onMounted(async () => {
         now.value = Math.floor(nowPoint + point * ratio);
     });
     await sleep(4600);
-    showComplete.value = false;
+    mota.ui.fixed.close(props.num);
 });
 </script>
 
