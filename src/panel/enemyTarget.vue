@@ -29,15 +29,14 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import Scroll from '../components/scroll.vue';
-import { hasMarkedEnemy, markEnemy, unmarkEnemy } from '../plugin/mark';
 import { detailInfo } from '../plugin/ui/book';
+import { hasMarkedEnemy, markEnemy } from '@/plugin/mark';
 
 const enemy = detailInfo.enemy!;
 const marked = ref(hasMarkedEnemy(enemy.enemy.id));
 
 function mark() {
-    if (marked.value) unmarkEnemy(enemy.enemy.id);
-    if (!marked.value) markEnemy(enemy.enemy.id);
+    markEnemy(enemy.enemy.id);
     marked.value = hasMarkedEnemy(enemy.enemy.id);
 }
 </script>

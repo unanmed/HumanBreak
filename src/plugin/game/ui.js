@@ -20,7 +20,6 @@ export {};
         if (main.replayChecking) return;
         mota.plugin.status.statusBarStatus.value =
             !mota.plugin.status.statusBarStatus.value;
-        mota.plugin.mark.checkMarkedEnemy();
     }
 
     ui.prototype.drawBook = function () {
@@ -49,6 +48,7 @@ export {};
         core.control.noAutoEvents = true;
         // 更新vue状态栏
         updateVueStatusBar();
+        mota.game.hook.emit('statusBarUpdate');
     };
 
     // todo: 多个状态栏分离与控制

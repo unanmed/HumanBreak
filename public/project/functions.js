@@ -420,21 +420,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     }
                     break;
                 case 77: // M：快速标记
+                    // todo: refactor
                     const blocks = core.getMapBlocksObj();
                     const block = blocks[`${mx},${my}`];
-                    if (block.event.cls.startsWith('enemy')) {
-                        const name = core.material.enemys[block.event.id].name;
-                        if (mota.plugin.mark.hasMarkedEnemy(block.event.id)) {
-                            mota.plugin.utils.tip(
-                                'success',
-                                `已取消标记${name}！`
-                            );
-                            mota.plugin.mark.unmarkEnemy(block.event.id);
-                        } else {
-                            mota.plugin.utils.tip('success', `已标记${name}！`);
-                            mota.plugin.mark.checkMarkedEnemy(block.event.id);
-                        }
-                    }
                     break;
                 case 78: // N：重新开始
                     core.confirmRestart();

@@ -48,9 +48,6 @@ interface PluginDeclaration
     /** 状态栏信息，取反后刷新状态栏 */
     readonly statusBarStatus: Ref<boolean>;
 
-    /** 检查标记的怪物，取反后更新显示信息 */
-    readonly checkMarkedStatus: Ref<boolean>;
-
     /**
      * 添加一个动画
      * @param fn 要添加的函数
@@ -62,27 +59,6 @@ interface PluginDeclaration
      * @param fn 要移除的函数
      */
     removeAnimate(fn: (time: number) => void);
-
-    /**
-     * 检查被标记怪物的状态
-     */
-    checkMarkedEnemy(): void;
-
-    /**
-     * 标记怪物
-     * @param id 怪物id
-     */
-    markEnemy(id: EnemyIds): void;
-
-    /**
-     * 是否标记过某个怪物
-     */
-    hasMarkedEnemy(id: EnemyIds): void;
-
-    /**
-     * 取消标记过某个怪物
-     */
-    unmarkEnemy(id: EnemyIds): void;
 
     /**
      * 判定一个值是否不是undefined或null

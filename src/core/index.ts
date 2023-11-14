@@ -17,7 +17,6 @@ interface AncTePlugin {
     animate: ReturnType<typeof import('../plugin/animateController').default>;
     utils: ReturnType<typeof import('../plugin/utils').default>;
     status: ReturnType<typeof import('../plugin/ui/statusBar').default>;
-    mark: ReturnType<typeof import('../plugin/mark').default>;
     fly: ReturnType<typeof import('../plugin/ui/fly').default>;
     chase: ReturnType<typeof import('../plugin/chase/chase').default>;
     webglUtils: ReturnType<typeof import('../plugin/webgl/utils').default>;

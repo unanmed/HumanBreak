@@ -6,6 +6,8 @@ export interface GameEvent extends EmitableEvent {
     reset: () => void;
     /** Emitted in src/App.vue setup. */
     mounted: () => void;
+    /** Emitted in plugin/ui.js */
+    statusBarUpdate: () => void;
 }
 
 export const hook = new EventEmitter<GameEvent>();
@@ -50,7 +52,7 @@ class GameListener extends EventEmitter<ListenerEvent> {
             ];
         };
 
-        // hover & leave
+        // hover & leave & mouseMove
         data.addEventListener('mousemove', e => {
             if (core.status.lockControl || !core.isPlaying()) return;
             this.emit('mouseMove', e);

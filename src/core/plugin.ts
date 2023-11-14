@@ -4,7 +4,6 @@ import use from '@/plugin/use';
 import animate from '@/plugin/animateController';
 import utils from '@/plugin/utils';
 import status from '@/plugin/ui/statusBar';
-import mark from '@/plugin/mark';
 import fly from '@/plugin/ui/fly';
 import chase from '@/plugin/chase/chase';
 import webglUtils from '@/plugin/webgl/utils';
@@ -27,7 +26,6 @@ export function resolvePlugin() {
         ['animate', animate()],
         ['utils', utils()],
         ['status', status()],
-        ['mark', mark()],
         ['fly', fly()],
         ['chase', chase()],
         ['webglUtils', webglUtils()],

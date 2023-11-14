@@ -1,156 +1,159 @@
-import { reactive, ref } from 'vue';
-import { tip } from './utils';
+import { fixedUi } from '@/core/main/init/ui';
 import type { DamageEnemy } from './game/enemy/damage';
+import { tip } from './utils';
+import { ref, Ref } from 'vue';
+import { hook } from '@/core/main/game';
 
-export const showMarkedEnemy = ref(false);
-
-const markedEnemy = reactive<EnemyIds[]>([]);
-
-interface MarkInfo {
-    enemy: DamageEnemy;
-    nextCritical: number;
+export interface MarkInfo<T extends EnemyIds> {
+    id: T;
+    enemy: DamageEnemy<T>;
+    /**
+     * 提示模式，从低到高位数分别为：
+     * 1. 踩临界时
+     * 2. 能打过怪物时
+     * 3. 小于勇士生命值的2/3时
+     * 4. 小于勇士生命值的1/3时
+     * 5. 零伤时
+     * 6. 小于指定伤害时
+     */
+    mode: number;
+    /** 当前提示状态，提示模式的 2-6 */
+    status: number;
+    lastAtk: number;
+    lastDamage: number;
+    markDamage?: number;
+    /** 数据更新用，取反更新标记信息 */
+    update: Ref<boolean>;
 }
 
-export const markInfo: Partial<Record<EnemyIds, MarkInfo>> = {};
-const criticalReached: Partial<Record<EnemyIds, Record<number, boolean>>> = {};
-const enemyDamageInfo: Partial<Record<EnemyIds, Record<number, boolean>>> = {};
+const uiMap = new Map<EnemyIds, number>();
+const marked: MarkInfo<EnemyIds>[] = [];
 
 /**
  * 标记一个怪物，标记后的怪物会在勇士刚好能打过怪物时、伤害刚好小于勇士生命值的2/3和1/3时、踩到临界时提示
  * @param id 标记的怪物id
  */
 export function markEnemy(id: EnemyIds) {
-    const { Enemy } = core.plugin.damage;
     if (hasMarkedEnemy(id)) return;
-    markedEnemy.push(id);
+    const { Enemy } = core.plugin.damage;
     const enemy = new Enemy(core.material.enemys[id]);
     enemy.calAttribute();
     enemy.getRealInfo();
-    markInfo[id] = {
-        nextCritical:
-            enemy.calCritical(1)[0]?.atkDelta ?? 0 + core.status.hero.atk,
-        enemy
+
+    const info: MarkInfo<EnemyIds> = {
+        id,
+        enemy,
+        mode: 0b011111,
+        lastAtk: core.plugin.hero.getHeroStatusOn('atk', 'empty'),
+        lastDamage: enemy.calDamage().damage,
+        status: 0b0,
+        update: ref(true)
     };
-    criticalReached[id] = { 0: true };
-    enemyDamageInfo[id] = { 1: false, 2: false, 3: false };
-    getMarkInfo(id, true);
-    checkMarkedEnemy(true);
+    marked.push(info);
+
+    uiMap.set(id, fixedUi.open('markedEnemy', { enemy: info }));
 }
 
-/**
- * 是否标记过某个怪物
- */
-export function hasMarkedEnemy(id: EnemyIds) {
-    return markedEnemy.includes(id);
-}
-
-/**
- * 取消标记某个怪物
- */
 export function unmarkEnemy(id: EnemyIds) {
-    const index = markedEnemy.indexOf(id);
-    if (index === -1) return;
-    markedEnemy.splice(index, 1);
-    checkMarkedEnemy();
+    fixedUi.close(uiMap.get(id) ?? -1);
+    uiMap.delete(id);
+    const index = marked.findIndex(v => v.id === id);
+    marked.splice(index, 1);
 }
 
-export function unmarkAll() {
-    markedEnemy.splice(0);
-    checkMarkedEnemy();
-}
-
-/**
- * 获得所有被标记的怪物
- */
-export function getMarkedEnemy() {
-    return markedEnemy;
-}
-
-/**
- * 获取怪物的临界信息
- * @param id 怪物id
- */
-export function getMarkInfo(id: EnemyIds, noMessage: boolean = false) {
-    const reached = criticalReached[id]!;
-    const info = markInfo[id]!;
-    if (core.status.hero.atk >= info.nextCritical) {
-        if (!reached[info.nextCritical] && !noMessage) {
-            tip('success', `踩到了${core.material.enemys[id].name}的临界！`);
-        }
-        reached[info.nextCritical] = true;
-        const n = info.enemy.calCritical(1)[0]?.atkDelta;
-        const next = (n ?? 0) + core.status.hero.atk;
-        info.nextCritical = next;
-    }
-}
-
-/**
- * 检查被标记怪物的状态
- */
-export function checkMarkedEnemy(noMessage: boolean = false) {
-    checkMarkedStatus.value = !checkMarkedStatus.value;
-    const hp = core.status.hero.hp;
-    getMarkedEnemy().forEach(v => {
-        getMarkInfo(v);
-        const { enemy } = markInfo[v]!;
-        const damage = enemy.calDamage().damage;
-        if (!isFinite(damage)) return;
-        const info = enemyDamageInfo[v]!;
-        const name = core.material.enemys[v].name;
-        let res = 0;
-        if (damage <= 0) {
-            if (!noMessage) tip('success', `${name}已经零伤了！`);
-        } else if (damage < hp / 3) {
-            if (!info[3] && !noMessage) {
-                tip('success', `${name}的伤害已降至勇士生命值的1/3！`);
+export function checkMarkedEnemy() {
+    marked.forEach(v => {
+        const { id, enemy, mode, lastAtk, lastDamage, markDamage } = v;
+        const atk = core.plugin.hero.getHeroStatusOn('atk', 'empty');
+        let tip = 0;
+        if (mode & 0b11110) {
+            const damage = enemy.calDamage().damage;
+            const hp = core.status.hero.hp;
+            v.lastDamage = damage;
+            if (damage > lastDamage) return;
+            // 重置标记状态
+            if (damage > hp) {
+                v.status &= 0b100001;
             }
-            res = 0b111;
-        } else if (damage < (hp / 3) * 2) {
-            if (!info[2] && !noMessage) {
-                tip('success', `${name}的伤害已降至勇士生命值的2/3！`);
+            if (damage > (markDamage ?? Infinity)) {
+                v.status &= 0b1;
             }
-            res = 0b110;
-        } else if (damage < hp) {
-            if (!info[1] && !noMessage) {
-                tip('success', `你已经能打过${name}了！`);
+            // 能打过怪物提示、2/3提示、1/3提示、零伤提示、指定伤害提示
+            if (mode & (1 << 1) && damage < hp && damage > (hp * 2) / 3) {
+                if (!(v.status & (1 << 1))) {
+                    v.status &= 0b100001;
+                    v.status |= 1 << 1;
+                    tip |= 1 << 1;
+                }
+            } else if (mode & (1 << 2) && damage > hp / 3) {
+                if (!(v.status & (1 << 2))) {
+                    v.status &= 0b100011;
+                    v.status |= 1 << 2;
+                    tip |= 1 << 2;
+                }
+            } else if (mode & (1 << 3) && damage > 0) {
+                if (!(v.status & (1 << 3))) {
+                    v.status &= 0b100111;
+                    v.status |= 1 << 3;
+                    tip |= 1 << 3;
+                }
+            } else if (mode & (1 << 4)) {
+                if (!(v.status & (1 << 4))) {
+                    v.status &= 0b101111;
+                    v.status |= 1 << 4;
+                    tip |= 1 << 4;
+                }
             }
-            res = 0b100;
+            if (mode & (1 << 5) && damage < (markDamage ?? Infinity)) {
+                if (!(v.status & (1 << 5))) {
+                    if (damage < (markDamage ?? Infinity)) {
+                        v.status |= 1 << 5;
+                    } else {
+                        v.status &= 0b011111;
+                    }
+                }
+            }
         }
-        info[1] = info[2] = info[3] = false;
-        if (res & 0b100) {
-            info[1] = true;
+        // 临界提示
+        if (mode & (1 << 0)) {
+            const critical = enemy.calCritical(1)[0]?.atkDelta ?? Infinity;
+            v.lastAtk = atk + critical;
+            if (critical + atk > lastAtk) {
+                tip |= 1 << 0;
+            }
         }
-        if (res & 0b010) {
-            info[2] = true;
-        }
-        if (res & 0b001) {
-            info[3] = true;
-        }
+        makeTip(id, tip, v);
+        v.update.value = !v.update.value;
     });
 }
 
-export const checkMarkedStatus = ref(false);
-
-export default function init() {
-    // 鼠标移动时进行监听，按下M时进行快速标记
-    core.registerAction(
-        'onmove',
-        'mark',
-        (x, y) => {
-            if (core.isPlaying()) {
-                flags.mouseLoc = [x, y];
-            }
-            return false;
-        },
-        150
-    );
-    return {
-        checkMarkedEnemy,
-        checkStatus: checkMarkedStatus,
-        markEnemy,
-        hasMarkedEnemy,
-        unmarkEnemy,
-        showMarkedEnemy,
-        unmarkAll
-    };
+function makeTip(enemy: EnemyIds, mode: number, info: MarkInfo<EnemyIds>) {
+    const name = core.material.enemys[enemy].name;
+    if (mode & (1 << 0)) {
+        tip('success', `已踩到 ${name} 的临界！`);
+    }
+    if (mode & (1 << 1)) {
+        tip('success', `已能打过 ${name}！`);
+    }
+    if (mode & (1 << 2)) {
+        tip('success', `${name} 的伤害已降至 2/3！`);
+    }
+    if (mode & (1 << 3)) {
+        tip('success', `${name} 的伤害已降至 1/3！`);
+    }
+    if (mode & (1 << 4)) {
+        tip('success', `${name} 已零伤！`);
+    }
+    if (mode & (1 << 5)) {
+        const damage = core.formatBigNumber(info.markDamage ?? Infinity);
+        tip('success', `${name} 的伤害已降至 ${damage}！`);
+    }
 }
+
+export function hasMarkedEnemy(id: EnemyIds) {
+    return marked.some(v => v.id === id);
+}
+
+hook.on('statusBarUpdate', () => {
+    checkMarkedEnemy();
+});

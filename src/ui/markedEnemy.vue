@@ -1,122 +1,118 @@
 <template>
     <div id="marked-enemy">
-        <div v-for="v of all">
-            <Box
-                :key="v"
-                v-if="!getBoxPos(v).hidden"
-                v-model:left="getBoxPos(v).left"
-                v-model:top="getBoxPos(v).top"
-                v-model:width="getBoxPos(v).width"
-                v-model:height="getBoxPos(v).height"
-                :resizable="true"
-                :dragable="true"
+        <Box
+            v-model:left="boxPos.left"
+            v-model:top="boxPos.top"
+            v-model:width="boxPos.width"
+            v-model:height="boxPos.height"
+            :resizable="true"
+            :dragable="true"
+        >
+            <Scroll class="box-scroll" :no-scroll="true">
+                <div class="marked-main">
+                    <div class="marked-info">
+                        <BoxAnimate
+                            :id="enemy.id"
+                            :width="24"
+                            :height="24"
+                        ></BoxAnimate>
+                        <span class="marked-name marked-item">{{
+                            getName()
+                        }}</span>
+                    </div>
+                    <span class="marked-damage marked-item"
+                        >伤害：{{ format(info.damage) }}</span
+                    >
+                    <span class="marked-critical marked-item"
+                        >临界：{{ format(info.critical) }}</span
+                    >
+                    <span class="marked-critical-damage marked-item"
+                        >减伤：{{ format(info.criticalDam) }}</span
+                    >
+                    <span class="marked-def marked-item"
+                        >{{ ratio }}防：{{ format(info.defDamage) }}</span
+                    >
+                    <div class="marked-button">
+                        <span
+                            class="marked-hide button-text"
+                            @click.stop="hidden = true"
+                            >隐藏盒子</span
+                        >
+                        <span
+                            class="marked-cancel button-text"
+                            @click.stop="unmarkEnemy(enemy.id)"
+                            >取消标记</span
+                        >
+                    </div>
+                </div></Scroll
             >
-                <Scroll class="box-scroll" :no-scroll="true">
-                    <div class="marked-main">
-                        <div class="marked-info">
-                            <BoxAnimate
-                                :id="v"
-                                :width="24"
-                                :height="24"
-                            ></BoxAnimate>
-                            <span class="marked-name marked-item">{{
-                                getName(v)
-                            }}</span>
-                        </div>
-                        <span class="marked-damage marked-item"
-                            >伤害：{{ getDamage(v) }}</span
-                        >
-                        <span class="marked-critical marked-item"
-                            >临界：{{ getCritical(v)[0] }}</span
-                        >
-                        <span class="marked-critical-damage marked-item"
-                            >减伤：{{ getCritical(v)[1] }}</span
-                        >
-                        <span class="marked-def marked-item"
-                            >{{ ratio }}防：{{ getDefDamage(v) }}</span
-                        >
-                        <div class="marked-button">
-                            <span
-                                class="marked-hide button-text"
-                                @click.stop="getBoxPos(v).hidden = true"
-                                >隐藏盒子</span
-                            >
-                            <span
-                                class="marked-cancel button-text"
-                                @click.stop="unmarkEnemy(v)"
-                                >取消标记</span
-                            >
-                        </div>
-                    </div></Scroll
-                >
-            </Box>
-        </div>
+        </Box>
     </div>
 </template>
 
 <script lang="ts" setup>
 import { reactive, ref, watch } from 'vue';
-import {
-    checkMarkedStatus,
-    getMarkedEnemy,
-    markInfo,
-    unmarkEnemy
-} from '../plugin/mark';
-import { has } from '../plugin/utils';
+import { MarkInfo, unmarkEnemy } from '../plugin/mark';
 import Box from '../components/box.vue';
 import Scroll from '../components/scroll.vue';
 import BoxAnimate from '../components/boxAnimate.vue';
+import { GameUi } from '@/core/main/custom/ui';
+
+const props = defineProps<{
+    num: number;
+    ui: GameUi;
+    enemy: MarkInfo<EnemyIds>;
+}>();
 
 interface BoxPos {
     left: number;
     top: number;
     width: number;
     height: number;
-    hidden: boolean;
 }
 
+interface MarkedEnemy {
+    damage: number;
+    critical: number;
+    criticalDam: number;
+    defDamage: number;
+}
+
+const enemy = props.enemy;
 const ratio = core.status.thisMap?.ratio ?? 1;
 
-let all = getMarkedEnemy();
+const format = core.formatBigNumber;
 
-watch(checkMarkedStatus, update);
+const boxPos = reactive<BoxPos>({
+    left: window.innerWidth - 300,
+    top: 100,
+    width: 200,
+    height: 150
+});
+const info = reactive<MarkedEnemy>({
+    damage: 0,
+    critical: 0,
+    criticalDam: 0,
+    defDamage: 0
+});
 
-const boxPos = reactive<Partial<Record<EnemyIds, BoxPos>>>({});
+const hidden = ref(false);
+
+watch(hidden, n => {
+    if (n) mota.ui.fixed.close(props.num);
+});
+watch(enemy.update, update);
 
 function update() {
-    all.push(...all.splice(0, all.length));
-    for (const id in boxPos) {
-        if (!all.includes(id as EnemyIds)) delete boxPos[id as EnemyIds];
-    }
+    info.damage = enemy.enemy.calDamage().damage;
+    const critical = enemy.enemy.calCritical()[0];
+    info.critical = critical?.atkDelta ?? 0;
+    info.criticalDam = critical.delta ?? 0;
+    info.defDamage = enemy.enemy.calDefDamage(ratio).delta;
 }
 
-function getBoxPos(id: EnemyIds) {
-    if (has(boxPos[id])) return boxPos[id]!;
-    boxPos[id] = {
-        left: window.innerWidth - 300,
-        top: 100,
-        width: 200,
-        height: 150,
-        hidden: false
-    };
-    return boxPos[id]!;
-}
-
-function getName(id: EnemyIds) {
-    return core.material.enemys[id].name;
-}
-
-function getDamage(id: EnemyIds) {
-    return core.formatBigNumber(markInfo[id]!.enemy.calDamage().damage);
-}
-
-function getCritical(id: EnemyIds) {
-    const { delta, atkDelta } = markInfo[id]!.enemy.calCritical(1)[0];
-    return [-delta, atkDelta];
-}
-
-function getDefDamage(id: EnemyIds) {
-    return core.formatBigNumber(markInfo[id]!.enemy.calDefDamage(ratio).delta);
+function getName() {
+    return enemy.enemy.enemy.name;
 }
 </script>
 

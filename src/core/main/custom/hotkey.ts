@@ -267,21 +267,9 @@ hotkey
     .register('mark', '标记怪物', {
         defaults: KeyCode.KeyM,
         func: () => {
+            // todo: refactor
             const [x, y] = flags.mouseLoc ?? [];
             const [mx, my] = getLocFromMouseLoc(x, y);
-            const blocks = core.getMapBlocksObj();
-            const block = blocks[`${mx},${my}`];
-            if (block.event.cls.startsWith('enemy')) {
-                const id = block.event.id as EnemyIds;
-                const name = core.material.enemys[id].name;
-                if (mota.plugin.mark.hasMarkedEnemy(id)) {
-                    tip('success', `已取消标记${name}！`);
-                    mota.plugin.mark.unmarkEnemy(id);
-                } else {
-                    tip('success', `已标记${name}！`);
-                    mota.plugin.mark.checkMarkedEnemy(false);
-                }
-            }
         }
     })
     .register('skillTree', '技能树', {
