@@ -15,11 +15,20 @@ interface ListenerOptions {
     immediate: boolean;
 }
 
+type EmitFn<F extends (...params: any) => any> = (
+    events: Listener<F>[],
+    ...params: Parameters<F>
+) => any;
+
 export class EventEmitter<T extends EmitableEvent = {}> {
     private events: {
         [P in keyof T]?: Listener<T[P]>[];
     } = {};
     private emitted: (keyof T)[] = [];
+
+    private emitter: {
+        [P in keyof T]?: EmitFn<T[P]>;
+    } = {};
 
     /**
      * 监听某个事件
@@ -74,19 +83,38 @@ export class EventEmitter<T extends EmitableEvent = {}> {
      * @param event 要触发的事件类型
      * @param params 传入的参数
      */
-    emit<K extends keyof T>(event: K, ...params: Parameters<T[K]>) {
+    emit<K extends keyof T>(
+        event: K,
+        ...params: Parameters<T[K]>
+    ): ReturnType<T[K]>[];
+    emit<K extends keyof T, R>(event: K, ...params: Parameters<T[K]>): R;
+    emit<K extends keyof T>(event: K, ...params: Parameters<T[K]>): any {
         if (!this.emitted.includes(event)) {
             this.emitted.push(event);
         }
         const events = (this.events[event] ??= []);
-        for (let i = 0; i < events.length; i++) {
-            const e = events[i];
-            e.fn(...(params as any));
-            if (e.once) {
-                events.splice(i, 1);
-                i--;
+        if (!!this.emitter[event]) {
+            const returns = this.emitter[event]!(events, ...params);
+            this.events[event] = events.filter(v => !v.once);
+            return returns;
+        } else {
+            const returns: ReturnType<T[K]>[] = [];
+            for (let i = 0; i < events.length; i++) {
+                const e = events[i];
+                returns.push(e.fn(...(params as any)));
             }
+            this.events[event] = events.filter(v => !v.once);
+            return returns;
         }
+    }
+
+    /**
+     * 设置一个事件的执行器(emitter)
+     * @param event 要设置的事件
+     * @param fn 事件执行器，留空以清除触发器
+     */
+    setEmitter<K extends keyof T>(event: K, fn?: EmitFn<T[K]>) {
+        this.emitter[event] = fn;
     }
 
     /**
