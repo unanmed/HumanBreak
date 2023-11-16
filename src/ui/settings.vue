@@ -52,43 +52,13 @@
                 ></div>
                 <a-divider class="info-divider" dashed></a-divider>
                 <div class="info-editor" v-if="!!selectedItem">
-                    <div class="editor-custom" v-if="!!selectedItem.controller">
-                        <component :is="selectedItem.controller"></component>
-                    </div>
-                    <div v-else-if="!!selectedItem.special"></div>
-                    <div
-                        class="editor-number"
-                        v-else-if="typeof selectedItem.value === 'number'"
-                    >
-                        <span>修改设置：</span>
-                        <a-input-number
-                            class="number-input"
-                            size="large"
-                            :min="selectedItem.step?.[0] ?? 0"
-                            :max="selectedItem.step?.[1] ?? 100"
-                            :step="selectedItem.step?.[2] ?? 1"
-                            :keyboard="true"
-                            :value="selectedItem.value"
-                            @change="changeValue"
-                        ></a-input-number>
-                    </div>
-                    <div
-                        class="editor-boolean"
-                        v-else-if="typeof selectedItem.value === 'boolean'"
-                    >
-                        <span
-                            >当前{{
-                                selectedItem.value ? '开启' : '关闭'
-                            }}</span
-                        >
-                        <a-button
-                            class="boolean-button"
-                            type="primary"
-                            size="large"
-                            @click="changeValue(!selectedItem.value)"
-                        >
-                            {{ selectedItem.value ? '关闭' : '开启' }}设置
-                        </a-button>
+                    <div class="editor-custom">
+                        <component
+                            :is="selectedItem.controller"
+                            :item="selectedItem"
+                            :displayer="displayer"
+                            :setting="setting"
+                        ></component>
                     </div>
                 </div>
             </div>

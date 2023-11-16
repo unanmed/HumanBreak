@@ -2,8 +2,9 @@
     <div id="ui-new">
         <div id="ui-main">
             <div id="ui-list">
-                <div class="ui-one" v-for="ui of mainUi.stack">
+                <div class="ui-one" v-for="(ui, index) of mainUi.stack">
                     <component
+                        v-if="show(index)"
                         :is="ui.ui.component"
                         v-on="ui.vOn ?? {}"
                         v-bind="ui.vBind ?? {}"
@@ -31,6 +32,11 @@ import { hook } from '@/core/main/game';
 onMounted(() => {
     hook.emit('mounted');
 });
+
+function show(index: number) {
+    if (mainUi.show === 'all') return true;
+    if (mainUi.show === 'end') return index === mainUi.stack.length - 1;
+}
 </script>
 
 <style lang="less" scoped>

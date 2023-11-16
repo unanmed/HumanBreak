@@ -1,21 +1,28 @@
-import { Component, reactive } from 'vue';
+import { FunctionalComponent, reactive } from 'vue';
 import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
 import { loading } from '../loader/load';
 import { hook } from './game';
 import { GameStorage } from './storage';
 import { triggerFullscreen } from '@/plugin/utils';
+import { createSettingComponents } from './init/settings';
 
+export interface SettingComponentProps {
+    item: MotaSettingItem;
+    setting: MotaSetting;
+    displayer: SettingDisplayer;
+}
+
+export type SettingComponent = FunctionalComponent<SettingComponentProps>;
 type MotaSettingType = boolean | number | MotaSetting;
 
 export interface MotaSettingItem<T extends MotaSettingType = MotaSettingType> {
     name: string;
     key: string;
     value: T;
+    controller: SettingComponent;
     defaults?: boolean | number;
     step?: [number, number, number];
     display?: (value: T) => string;
-    controller?: Component;
-    special?: string;
 }
 
 interface SettingEvent extends EmitableEvent {
@@ -36,6 +43,8 @@ export interface SettingDisplayInfo {
     text: string[];
 }
 
+const COM = createSettingComponents();
+
 export class MotaSetting extends EventEmitter<SettingEvent> {
     readonly list: Record<string, MotaSettingItem> = {};
 
@@ -50,15 +59,6 @@ export class MotaSetting extends EventEmitter<SettingEvent> {
     }
 
     /**
-     * 标记为特殊的设置项
-     */
-    markSpecial(key: string, sp: string) {
-        const setting = this.getSettingBy(key.split('.'));
-        setting.special = sp;
-        return this;
-    }
-
-    /**
      * 注册一个数字型设置
      * @param key 设置的键名
      * @param value 设置的值
@@ -67,6 +67,7 @@ export class MotaSetting extends EventEmitter<SettingEvent> {
         key: string,
         name: string,
         value: number,
+        com?: SettingComponent,
         step?: [number, number, number]
     ): this;
     /**
@@ -74,17 +75,24 @@ export class MotaSetting extends EventEmitter<SettingEvent> {
      * @param key 设置的键名
      * @param value 设置的值
      */
-    register(key: string, name: string, value: boolean | MotaSetting): this;
+    register(
+        key: string,
+        name: string,
+        value: boolean | MotaSetting,
+        com?: SettingComponent
+    ): this;
     register(
         key: string,
         name: string,
         value: MotaSettingType,
+        com: SettingComponent = COM.DefaultSetting,
         step: [number, number, number] = [0, 100, 1]
     ) {
         const setting: MotaSettingItem = {
             name,
             value,
-            key
+            key,
+            controller: com
         };
         if (!(value instanceof MotaSetting)) setting.defaults = value;
         if (typeof value === 'number') setting.step = step;
@@ -148,7 +156,12 @@ export class MotaSetting extends EventEmitter<SettingEvent> {
         return this;
     }
 
-    setValueController(key: string, com: Component) {
+    /**
+     * 设置一个设置的修改部分组件
+     * @param key 要设置的设置的键
+     * @param com 设置修改部分的组件
+     */
+    setValueController(key: string, com: SettingComponent) {
         const setting = this.getSettingBy(key.split('.'));
         setting.controller = com;
         return this;
@@ -359,43 +372,41 @@ mainSetting
         'screen',
         '显示设置',
         new MotaSetting()
-            .register('fullscreen', '全屏游戏', false)
-            .register('halo', '光环显示', true)
-            .register('itemDetail', '宝石血瓶显伤', true)
-            .register('heroDetail', '勇士显伤', false)
-            .register('transition', '界面动画', false)
-            .register('antiAlias', '抗锯齿', false)
-            .register('fontSize', '字体大小', 16, [8, 28, 1])
-            .register('smoothView', '平滑镜头', true)
-            .register('criticalGem', '临界显示方式', false)
+            .register('fullscreen', '全屏游戏', false, COM.BooleanSetting)
+            .register('halo', '光环显示', true, COM.BooleanSetting)
+            .register('itemDetail', '宝石血瓶显伤', true, COM.BooleanSetting)
+            .register('heroDetail', '勇士显伤', false, COM.BooleanSetting)
+            .register('transition', '界面动画', false, COM.BooleanSetting)
+            .register('antiAlias', '抗锯齿', false, COM.BooleanSetting)
+            .register('fontSize', '字体大小', 16, COM.NumberSetting, [8, 28, 1])
+            .register('smoothView', '平滑镜头', true, COM.BooleanSetting)
+            .register('criticalGem', '临界显示方式', false, COM.BooleanSetting)
             .setDisplayFunc('criticalGem', value => (value ? '宝石数' : '攻击'))
     )
     .register(
         'action',
         '操作设置',
         new MotaSetting()
-            .register('autoSkill', '自动切换技能', true)
-            .register('fixed', '定点查看', true)
-            .register('hotkey', '快捷键', false)
-            .markSpecial('hotkey', 'hotkey')
+            .register('autoSkill', '自动切换技能', true, COM.BooleanSetting)
+            .register('fixed', '定点查看', true, COM.BooleanSetting)
+            .register('hotkey', '快捷键', false, COM.BooleanSetting)
             .setDisplayFunc('hotkey', () => '')
-            .register('toolbar', '自定义工具栏', false)
-            .markSpecial('toolbar', 'toolbar')
+            .register('toolbar', '自定义工具栏', false, COM.BooleanSetting)
             .setDisplayFunc('toolbar', () => '')
     )
     .register(
         'utils',
         '系统设置',
         new MotaSetting()
-            .register('betterLoad', '优化加载', true)
-            .register('autoScale', '自动放缩', true)
+            .register('betterLoad', '优化加载', true, COM.BooleanSetting)
+            .register('autoScale', '自动放缩', true, COM.BooleanSetting)
     )
     .register(
         'fx',
         '特效设置',
         new MotaSetting()
-            .register('paraLight', '野外阴影', true)
-            .register('frag', '打怪特效', true)
+            .register('paraLight', '野外阴影', true, COM.BooleanSetting)
+            .register('frag', '打怪特效', true, COM.BooleanSetting)
     );
 
 interface SettingStorage {

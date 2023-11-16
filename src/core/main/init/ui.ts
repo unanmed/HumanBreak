@@ -35,6 +35,7 @@ mainUi.register(
     new GameUi('bgm', UI.BgmList, exitKey)
     // todo: 把游戏主 div 加入到 mainUi 里面
 );
+mainUi.showAll();
 
 export const fixedUi = new UiController(true);
 fixedUi.register(
@@ -45,6 +46,7 @@ fixedUi.register(
     new GameUi('completeAchi', UI.CompleteAchi),
     new GameUi('start', UI.Start)
 );
+fixedUi.showAll();
 
 hook.once('mounted', () => {
     const ui = document.getElementById('ui-main')!;

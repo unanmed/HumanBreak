@@ -168,6 +168,7 @@ export class UiController extends Focus<IndexedGameUi> {
     static list: UiController[] = [];
     list: Record<string, GameUi> = {};
     num: number = 0;
+    show: 'end' | 'all' = 'all';
 
     private hold: boolean = false;
 
@@ -189,6 +190,20 @@ export class UiController extends Focus<IndexedGameUi> {
             }
             item.ui.emit('open');
         });
+    }
+
+    /**
+     * 设置为仅显示最后一个ui
+     */
+    showEnd() {
+        this.show = 'end';
+    }
+
+    /**
+     * 设置为显示所有ui
+     */
+    showAll() {
+        this.show = 'all';
     }
 
     /**
