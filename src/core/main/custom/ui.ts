@@ -2,6 +2,7 @@ import { Component, shallowReactive } from 'vue';
 import { EmitableEvent, EventEmitter } from '../../common/eventEmitter';
 import { KeyCode } from '@/plugin/keyCodes';
 import { Hotkey } from './hotkey';
+import { generateBinary } from '@/plugin/utils';
 
 interface FocusEvent<T> extends EmitableEvent {
     focus: (before: T | null, after: T) => void;
@@ -136,6 +137,7 @@ export class GameUi extends EventEmitter<GameUiEvent> {
     component: Component;
     hotkey?: Hotkey;
     id: string;
+    symbol: symbol = Symbol();
 
     constructor(id: string, component: Component, hotkey?: Hotkey) {
         super();
@@ -207,15 +209,6 @@ export class UiController extends Focus<IndexedGameUi> {
     }
 
     /**
-     * 执行按键操作
-     * @param key 按键的KeyCode
-     * @param e 按键操作事件
-     */
-    emitKey(key: KeyCode, e: KeyboardEvent) {
-        this.focused?.ui.hotkey?.emitKey(key, e, this.focused);
-    }
-
-    /**
      * 根据id获取到ui
      * @param id ui的id
      */
@@ -274,7 +267,10 @@ export class UiController extends Focus<IndexedGameUi> {
      */
     open(id: string, vBind?: UiVBind, vOn?: UiVOn) {
         const ui = this.get(id);
-        if (!ui) return -1;
+        if (!ui) {
+            console.warn(`Unknown UI: '${id}'.`);
+            return -1;
+        }
         const num = this.num++;
         const bind = {
             num,
