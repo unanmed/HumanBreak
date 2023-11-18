@@ -34,6 +34,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
     keyMap: Map<KeyCode, HotkeyData[]> = new Map();
 
     private scope: symbol = Symbol();
+    private scopeStack: symbol[] = [];
 
     constructor(id: string, name: string) {
         super();
@@ -80,6 +81,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * @param symbol 当前作用域的symbol
      */
     use(symbol: symbol) {
+        this.scopeStack.push(symbol);
         this.scope = symbol;
         for (const key of Object.values(this.data)) {
             key.func.set(symbol, () => {});
@@ -94,6 +96,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
         for (const key of Object.values(this.data)) {
             key.func.delete(symbol);
         }
+        this.scope = this.scopeStack.pop() ?? Symbol();
     }
 
     /**
