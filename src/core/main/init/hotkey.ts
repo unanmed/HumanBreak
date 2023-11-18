@@ -1,0 +1,338 @@
+import { KeyCode } from '@/plugin/keyCodes';
+import { Hotkey } from '../custom/hotkey';
+import { generateBinary, keycode } from '@/plugin/utils';
+
+export const mainScope = Symbol.for('@key_main');
+export const gameKey = new Hotkey('gameKey', '游戏按键');
+
+// ----- Register
+gameKey
+    // --------------------
+    .group('ui', 'ui界面')
+    .register({
+        id: 'book',
+        name: '怪物手册',
+        defaults: KeyCode.KeyX
+    })
+    .register({
+        id: 'save',
+        name: '存档界面',
+        defaults: KeyCode.KeyS
+    })
+    .register({
+        id: 'load',
+        name: '读档界面',
+        defaults: KeyCode.KeyD
+    })
+    .register({
+        id: 'toolbox',
+        name: '道具栏',
+        defaults: KeyCode.KeyT
+    })
+    .register({
+        id: 'equipbox',
+        name: '装备栏',
+        defaults: KeyCode.KeyQ
+    })
+    .register({
+        id: 'fly',
+        name: '楼层传送',
+        defaults: KeyCode.KeyG
+    })
+    .register({
+        id: 'menu',
+        name: '菜单',
+        defaults: KeyCode.Escape
+    })
+    .register({
+        id: 'replay',
+        name: '录像回放',
+        defaults: KeyCode.KeyR
+    })
+    .register({
+        id: 'shop',
+        name: '快捷商店',
+        defaults: KeyCode.KeyV
+    })
+    .register({
+        id: 'statistics',
+        name: '数据统计',
+        defaults: KeyCode.KeyB
+    })
+    .register({
+        id: 'viewMap_1',
+        name: '浏览地图_1',
+        defaults: KeyCode.PageUp
+    })
+    .register({
+        id: 'viewMap_2',
+        name: '浏览地图_2',
+        defaults: KeyCode.PageDown
+    })
+    .register({
+        id: 'skillTree',
+        name: '技能树',
+        defaults: KeyCode.KeyJ
+    })
+    .register({
+        id: 'desc',
+        name: '百科全书',
+        defaults: KeyCode.KeyH
+    })
+    // --------------------
+    .group('function', '功能按键')
+    .register({
+        id: 'undo',
+        name: '回退',
+        defaults: KeyCode.KeyA
+    })
+    .register({
+        id: 'redo',
+        name: '恢复',
+        defaults: KeyCode.KeyW
+    })
+    .register({
+        id: 'turn',
+        name: '勇士转向',
+        defaults: KeyCode.KeyZ
+    })
+    .register({
+        id: 'getNext',
+        name: '轻按',
+        defaults: KeyCode.Space
+    })
+    .register({
+        id: 'mark',
+        name: '标记怪物',
+        defaults: KeyCode.KeyM
+    })
+    .register({
+        id: 'special',
+        name: '鼠标位置怪物属性',
+        defaults: KeyCode.KeyE
+    })
+    .register({
+        id: 'critical',
+        name: '鼠标位置怪物临界',
+        defaults: KeyCode.KeyC
+    })
+    // --------------------
+    .group('system', '系统按键')
+    .register({
+        id: 'restart',
+        name: '回到开始界面',
+        defaults: KeyCode.KeyN
+    })
+    .register({
+        id: 'comment',
+        name: '评论区',
+        defaults: KeyCode.KeyP
+    })
+    // --------------------
+    .group('general', '通用按键')
+    .register({
+        id: 'exit_1',
+        name: '退出ui界面_1',
+        defaults: KeyCode.KeyX
+    })
+    .register({
+        id: 'exit_2',
+        name: '退出ui界面_2',
+        defaults: KeyCode.Escape
+    })
+    .register({
+        id: 'confirm_1',
+        name: '确认_1',
+        defaults: KeyCode.Enter
+    })
+    .register({
+        id: 'confirm_2',
+        name: '确认_2',
+        defaults: KeyCode.Space
+    })
+    .register({
+        id: 'confirm_3',
+        name: '确认_3',
+        defaults: KeyCode.KeyC
+    })
+    // --------------------
+    .group('@ui_start', '开始界面')
+    .register({
+        id: '@start_up',
+        name: '上移光标',
+        defaults: KeyCode.UpArrow
+    })
+    .register({
+        id: '@start_down',
+        name: '下移光标',
+        defaults: KeyCode.DownArrow
+    })
+    // --------------------
+    .group('@ui_book', '怪物手册')
+    .register({
+        id: '@book_up',
+        name: '上移光标',
+        defaults: KeyCode.UpArrow,
+        type: 'down'
+    })
+    .register({
+        id: '@book_down',
+        name: '下移光标',
+        defaults: KeyCode.DownArrow,
+        type: 'down'
+    })
+    .register({
+        id: '@book_pageDown_1',
+        name: '下移5个怪物_1',
+        defaults: KeyCode.RightArrow,
+        type: 'down'
+    })
+    .register({
+        id: '@book_pageDown_2',
+        name: '下移5个怪物_2',
+        defaults: KeyCode.PageDown,
+        type: 'down'
+    })
+    .register({
+        id: '@book_pageUp_1',
+        name: '上移5个怪物_1',
+        defaults: KeyCode.LeftArrow,
+        type: 'down'
+    })
+    .register({
+        id: '@book_pageUp_2',
+        name: '上移5个怪物_2',
+        defaults: KeyCode.PageUp,
+        type: 'down'
+    })
+    // --------------------
+    .group('@ui_toolbox', '道具栏')
+    .register({
+        id: '@toolbox_right',
+        name: '光标右移',
+        defaults: KeyCode.RightArrow,
+        type: 'down'
+    })
+    .register({
+        id: '@toolbox_left',
+        name: '光标左移',
+        defaults: KeyCode.LeftArrow,
+        type: 'down'
+    })
+    .register({
+        id: '@toolbox_up',
+        name: '光标上移',
+        defaults: KeyCode.UpArrow,
+        type: 'down'
+    })
+    .register({
+        id: '@toolbox_right',
+        name: '光标下移',
+        defaults: KeyCode.DownArrow,
+        type: 'down'
+    })
+    // --------------------
+    .group('@ui_shop', '商店')
+    .register({
+        id: '@shop_up',
+        name: '上移光标',
+        defaults: KeyCode.UpArrow
+    })
+    .register({
+        id: '@shop_down',
+        name: '下移光标',
+        defaults: KeyCode.DownArrow
+    })
+    .register({
+        id: '@shop_add',
+        name: '增加购买量',
+        defaults: KeyCode.RightArrow,
+        type: 'down'
+    })
+    .register({
+        id: '@shop_min',
+        name: '减少购买量',
+        defaults: KeyCode.LeftArrow,
+        type: 'down'
+    })
+    // --------------------
+    .group('@ui_fly', '楼层传送')
+    .register({
+        id: '@fly_left',
+        name: '左移地图',
+        defaults: KeyCode.LeftArrow
+    })
+    .register({
+        id: '@fly_right',
+        name: '右移地图',
+        defaults: KeyCode.RightArrow
+    })
+    .register({
+        id: '@fly_up',
+        name: '上移地图',
+        defaults: KeyCode.UpArrow
+    })
+    .register({
+        id: '@fly_down',
+        name: '下移地图',
+        defaults: KeyCode.DownArrow
+    })
+    .register({
+        id: '@fly_last',
+        name: '上一张地图',
+        defaults: KeyCode.PageDown
+    })
+    .register({
+        id: '@fly_next',
+        name: '下一张地图',
+        defaults: KeyCode.PageUp
+    })
+    // --------------------
+    .group('@ui_fly_tradition', '楼层传送-传统按键')
+    .register({
+        id: '@fly_down_t',
+        name: '上一张地图',
+        defaults: KeyCode.DownArrow
+    })
+    .register({
+        id: '@fly_up_t',
+        name: '下一张地图',
+        defaults: KeyCode.UpArrow
+    })
+    .register({
+        id: '@fly_left_t_1',
+        name: '前10张地图_1',
+        defaults: KeyCode.LeftArrow
+    })
+    .register({
+        id: '@fly_left_t_2',
+        name: '前10张地图_2',
+        defaults: KeyCode.PageDown
+    })
+    .register({
+        id: '@fly_right_t_1',
+        name: '后10张地图_1',
+        defaults: KeyCode.RightArrow
+    })
+    .register({
+        id: '@fly_right_t_2',
+        name: '后10张地图_2',
+        defaults: KeyCode.PageUp
+    });
+
+gameKey.enable();
+gameKey.use(mainScope);
+
+// ----- Realization
+
+// ----- Listening
+document.addEventListener('keyup', e => {
+    const assist = generateBinary([e.ctrlKey, e.shiftKey, e.altKey]);
+    const code = keycode(e.keyCode);
+    gameKey.emitKey(code, assist, 'up', e);
+});
+document.addEventListener('keydown', e => {
+    const assist = generateBinary([e.ctrlKey, e.shiftKey, e.altKey]);
+    const code = keycode(e.keyCode);
+    gameKey.emitKey(code, assist, 'down', e);
+});

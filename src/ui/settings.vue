@@ -139,11 +139,6 @@ function click(key: string, index: number, item: MotaSettingItem) {
     }
 }
 
-function changeValue(value: number | boolean) {
-    setting.setValue(displayer.selectStack.join('.'), value);
-    displayer.update();
-}
-
 function exit() {
     mota.ui.main.close(props.num);
 }

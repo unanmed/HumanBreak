@@ -6,6 +6,8 @@ import { GameStorage } from '../storage';
 
 interface HotkeyEvent extends EmitableEvent {}
 
+type KeyEmitType = 'down' | 'up';
+
 interface AssistHoykey {
     ctrl: boolean;
     shift: boolean;
@@ -16,11 +18,13 @@ interface RegisterHotkeyData extends Partial<AssistHoykey> {
     id: string;
     name: string;
     defaults: KeyCode;
+    type?: KeyEmitType;
 }
 
 interface HotkeyData extends Required<RegisterHotkeyData> {
     key: KeyCode;
     func: Map<symbol, HotkeyFunc>;
+    group?: string;
 }
 
 type HotkeyFunc = (code: KeyCode, ev: KeyboardEvent) => void;
@@ -32,9 +36,19 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
     name: string;
     data: Record<string, HotkeyData> = {};
     keyMap: Map<KeyCode, HotkeyData[]> = new Map();
+    /** id to name */
+    groupName: Record<string, string> = {
+        none: '未分类按键'
+    };
+    /** id to keys */
+    groups: Record<string, string[]> = {
+        none: []
+    };
+    enabled: boolean = false;
 
     private scope: symbol = Symbol();
     private scopeStack: symbol[] = [];
+    private grouping: string = 'none';
 
     constructor(id: string, name: string) {
         super();
@@ -53,12 +67,19 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
             shift: !!data.shift,
             alt: !!data.alt,
             key: data.defaults,
-            func: new Map()
+            func: new Map(),
+            group: this.grouping,
+            type: data.type ?? 'up'
         };
         this.ensureMap(d.key);
+        if (d.id in this.data) {
+            console.warn(`已存在id为${d.id}的按键，已将其覆盖`);
+        }
         this.data[d.id] = d;
         const arr = this.keyMap.get(d.key)!;
         arr.push(d);
+        this.groups[this.grouping].push(d.id);
+        return this;
     }
 
     /**
@@ -126,11 +147,18 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * @param key 要触发的按键
      * @param assist 辅助按键，三位二进制数据，从低到高依次为`ctrl` `shift` `alt`
      */
-    emitKey(key: KeyCode, assist: number, ev: KeyboardEvent) {
+    emitKey(
+        key: KeyCode,
+        assist: number,
+        type: KeyEmitType,
+        ev: KeyboardEvent
+    ) {
+        if (!this.enabled) return;
         const toEmit = this.keyMap.get(key);
         if (!toEmit) return;
         const { ctrl, shift, alt } = this.unwarpBinary(assist);
         toEmit.forEach(v => {
+            if (type !== v.type) return;
             if (ctrl === v.ctrl && shift === v.shift && alt === v.alt) {
                 const func = v.func.get(this.scope);
                 if (!func) {
@@ -139,6 +167,31 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
                 func(key, ev);
             }
         });
+    }
+
+    /**
+     * 按键分组，执行后 register 的按键将会加入此分组
+     * @param id 组的id
+     * @param name 组的名称
+     */
+    group(id: string, name: string) {
+        this.grouping = id;
+        this.groupName[id] = name;
+        return this;
+    }
+
+    /**
+     * 启用这个按键控制器
+     */
+    enable() {
+        this.enabled = true;
+    }
+
+    /**
+     * 禁用这个按键控制器
+     */
+    disable() {
+        this.enabled = false;
     }
 
     private unwarpBinary(bin: number): AssistHoykey {
@@ -163,188 +216,3 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
         return this.list.find(v => v.id === id);
     }
 }
-
-// export const hotkey = new Hotkey('gameKey');
-
-// hotkey
-//     .register('book', '怪物手册', {
-//         defaults: KeyCode.KeyX,
-//         func: () => {
-//             core.openBook(true);
-//         }
-//     })
-//     .register('save', '存档界面', {
-//         defaults: KeyCode.KeyS,
-//         func: () => {
-//             core.save(true);
-//         }
-//     })
-//     .register('load', '读档界面', {
-//         defaults: KeyCode.KeyD,
-//         func: () => {
-//             core.load(true);
-//         }
-//     })
-//     .register('undo', '回退', {
-//         defaults: KeyCode.KeyA,
-//         func: () => {
-//             core.doSL('autoSave', 'load');
-//         }
-//     })
-//     .register('redo', '恢复', {
-//         defaults: KeyCode.KeyW,
-//         func: () => {
-//             core.doSL('autoSave', 'reload');
-//         }
-//     })
-//     .register('toolbox', '道具栏', {
-//         defaults: KeyCode.KeyT,
-//         func: () => {
-//             core.openToolbox(true);
-//         }
-//     })
-//     .register('equipbox', '装备栏', {
-//         defaults: KeyCode.KeyQ,
-//         func: () => {
-//             core.openEquipbox(true);
-//         }
-//     })
-//     .register('fly', '楼层传送', {
-//         defaults: KeyCode.KeyG,
-//         func: () => {
-//             core.useFly(true);
-//         }
-//     })
-//     .register('turn', '勇士转向', {
-//         defaults: KeyCode.KeyZ,
-//         func: () => {
-//             core.turnHero();
-//         }
-//     })
-//     .register('getNext', '轻按', {
-//         defaults: KeyCode.Space,
-//         func: () => {
-//             core.getNextItem();
-//         }
-//     })
-//     .register('menu', '菜单', {
-//         defaults: KeyCode.Escape,
-//         func: () => {
-//             core.openSettings(true);
-//         }
-//     })
-//     .register('replay', '录像回放', {
-//         defaults: KeyCode.KeyR,
-//         func: () => {
-//             core.ui._drawReplay();
-//         }
-//     })
-//     .register('restart', '开始菜单', {
-//         defaults: KeyCode.KeyN,
-//         func: () => {
-//             core.confirmRestart();
-//         }
-//     })
-//     .register('shop', '快捷商店', {
-//         defaults: KeyCode.KeyV,
-//         func: () => {
-//             core.openQuickShop(true);
-//         }
-//     })
-//     .register('statistics', '数据统计', {
-//         defaults: KeyCode.KeyB,
-//         func: () => {
-//             core.ui._drawStatistics();
-//         }
-//     })
-//     .register('viewMap1', '浏览地图', {
-//         defaults: KeyCode.PageUp,
-//         func: () => {
-//             core.ui._drawViewMaps();
-//         }
-//     })
-//     .register('viewMap2', '浏览地图', {
-//         defaults: KeyCode.PageDown,
-//         func: () => {
-//             core.ui._drawViewMaps();
-//         }
-//     })
-//     .register('comment', '评论区', {
-//         defaults: KeyCode.KeyP,
-//         func: () => {
-//             core.actions._clickGameInfo_openComments();
-//         }
-//     })
-//     .register('mark', '标记怪物', {
-//         defaults: KeyCode.KeyM,
-//         func: () => {
-//             // todo: refactor
-//             const [x, y] = flags.mouseLoc ?? [];
-//             const [mx, my] = getLocFromMouseLoc(x, y);
-//         }
-//     })
-//     .register('skillTree', '技能树', {
-//         defaults: KeyCode.KeyJ,
-//         func: () => {
-//             core.useItem('skill1', true);
-//         }
-//     })
-//     .register('desc', '百科全书', {
-//         defaults: KeyCode.KeyH,
-//         func: () => {
-//             core.useItem('I560', true);
-//         }
-//     })
-//     .register('special', '鼠标位置怪物属性', {
-//         defaults: KeyCode.KeyE,
-//         func: () => {
-//             const [x, y] = flags.mouseLoc ?? [];
-//             const [mx, my] = getLocFromMouseLoc(x, y);
-//             if (core.getBlockCls(mx, my)?.startsWith('enemy')) {
-//                 // mota.plugin.fixed.showFixed.value = false;
-//                 mota.ui.main.open('fixedDetail', {
-//                     panel: 'special'
-//                 });
-//             }
-//         }
-//     })
-//     .register('critical', '鼠标位置怪物临界', {
-//         defaults: KeyCode.KeyC,
-//         func: () => {
-//             const [x, y] = flags.mouseLoc ?? [];
-//             const [mx, my] = getLocFromMouseLoc(x, y);
-//             if (core.getBlockCls(mx, my)?.startsWith('enemy')) {
-//                 // mota.plugin.fixed.showFixed.value = false;
-//                 mota.ui.main.open('fixedDetail', {
-//                     panel: 'critical'
-//                 });
-//             }
-//         }
-//     })
-//     .group('action', '游戏操作', [
-//         'save',
-//         'load',
-//         'undo',
-//         'redo',
-//         'turn',
-//         'getNext',
-//         'mark'
-//     ])
-//     .group('view', '快捷查看', [
-//         'book',
-//         'toolbox',
-//         'equipbox',
-//         'fly',
-//         'menu',
-//         'replay',
-//         'shop',
-//         'statistics',
-//         'viewMap1',
-//         'viewMap2',
-//         'skillTree',
-//         'desc',
-//         'special',
-//         'critical'
-//     ])
-//     .group('system', '系统按键', ['comment'])
-//     .groupRest('unClassed', '未分类按键');
