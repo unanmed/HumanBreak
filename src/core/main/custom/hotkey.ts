@@ -1,8 +1,6 @@
 import { KeyCode } from '@/plugin/keyCodes';
-import { getLocFromMouseLoc } from '@/plugin/ui/fixed';
-import { deleteWith, generateBinary, has, spliceBy, tip } from '@/plugin/utils';
+import { deleteWith, spliceBy } from '@/plugin/utils';
 import { EmitableEvent, EventEmitter } from '../../common/eventEmitter';
-import { GameStorage } from '../storage';
 
 interface HotkeyEvent extends EmitableEvent {}
 
@@ -45,6 +43,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
         none: []
     };
     enabled: boolean = false;
+    conditionMap: Map<symbol, () => boolean> = new Map();
 
     private scope: symbol = Symbol();
     private scopeStack: symbol[] = [];
@@ -57,7 +56,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
     }
 
     /**
-     * 注册一个按键
+     * 注册一个按键，id可以包含数字后缀，可以显示为同一个按键操作拥有多个按键可以触发
      * @param data 要注册的按键信息
      */
     register(data: RegisterHotkeyData) {
@@ -84,7 +83,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
 
     /**
      * 实现一个按键按下时的操作
-     * @param id 要实现的按键id
+     * @param id 要实现的按键id，可以不包含数字后缀
      * @param func 按键按下时执行的函数
      */
     realize(id: string, func: HotkeyFunc) {
@@ -113,6 +112,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
         spliceBy(this.scopeStack, symbol);
         this.scopeStack.push(symbol);
         this.scope = symbol;
+        this.conditionMap.set(symbol, () => true);
         for (const key of Object.values(this.data)) {
             key.func.set(symbol, () => {});
         }
@@ -162,6 +162,8 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
         ev: KeyboardEvent
     ) {
         if (!this.enabled) return;
+        const when = this.conditionMap.get(this.scope)!;
+        if (!when()) return;
         const toEmit = this.keyMap.get(key);
         if (!toEmit) return;
         const { ctrl, shift, alt } = this.unwarpBinary(assist);
@@ -201,6 +203,15 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      */
     disable() {
         this.enabled = false;
+    }
+
+    /**
+     * 在当前作用域下，满足什么条件时触发按键
+     * @param fn 条件函数
+     */
+    when(fn: () => boolean) {
+        this.conditionMap.set(this.scope, fn);
+        return this;
     }
 
     private unwarpBinary(bin: number): AssistHoykey {
