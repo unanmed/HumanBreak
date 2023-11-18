@@ -160,12 +160,14 @@ gameKey
     .register({
         id: '@start_up',
         name: '上移光标',
-        defaults: KeyCode.UpArrow
+        defaults: KeyCode.UpArrow,
+        type: 'down'
     })
     .register({
         id: '@start_down',
         name: '下移光标',
-        defaults: KeyCode.DownArrow
+        defaults: KeyCode.DownArrow,
+        type: 'down'
     })
     // --------------------
     .group('@ui_book', '怪物手册')
@@ -226,7 +228,7 @@ gameKey
         type: 'down'
     })
     .register({
-        id: '@toolbox_right',
+        id: '@toolbox_down',
         name: '光标下移',
         defaults: KeyCode.DownArrow,
         type: 'down'

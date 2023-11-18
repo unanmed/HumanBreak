@@ -1,38 +1,21 @@
 import * as UI from '@ui/.';
 import { GameUi, UiController } from '../custom/ui';
-import { Hotkey } from '../custom/hotkey';
-import { KeyCode } from '@/plugin/keyCodes';
 import { hook } from '../game';
-
-export const exitKey = new Hotkey('exitKey');
-exitKey
-    .register('exit1', '退出', {
-        defaults: KeyCode.KeyX,
-        func: () => {
-            if (mainUi.focused) mainUi.splice(mainUi.focused);
-        }
-    })
-    .register('exit2', '退出', {
-        defaults: KeyCode.Escape,
-        func: () => {
-            if (mainUi.focused) mainUi.splice(mainUi.focused);
-        }
-    });
 
 export const mainUi = new UiController();
 mainUi.register(
-    new GameUi('book', UI.Book, exitKey),
-    new GameUi('toolbox', UI.Toolbox, exitKey),
-    new GameUi('equipbox', UI.Equipbox, exitKey),
-    new GameUi('settings', UI.Settings, exitKey),
-    new GameUi('desc', UI.Desc, exitKey),
-    new GameUi('skill', UI.Skill, exitKey),
-    new GameUi('skillTree', UI.SkillTree, exitKey),
-    new GameUi('fly', UI.Fly, exitKey),
-    new GameUi('fixedDetail', UI.FixedDetail, exitKey),
-    new GameUi('shop', UI.Shop, exitKey),
-    new GameUi('achievement', UI.Achievement, exitKey),
-    new GameUi('bgm', UI.BgmList, exitKey)
+    new GameUi('book', UI.Book),
+    new GameUi('toolbox', UI.Toolbox),
+    new GameUi('equipbox', UI.Equipbox),
+    new GameUi('settings', UI.Settings),
+    new GameUi('desc', UI.Desc),
+    new GameUi('skill', UI.Skill),
+    new GameUi('skillTree', UI.SkillTree),
+    new GameUi('fly', UI.Fly),
+    new GameUi('fixedDetail', UI.FixedDetail),
+    new GameUi('shop', UI.Shop),
+    new GameUi('achievement', UI.Achievement),
+    new GameUi('bgm', UI.BgmList)
     // todo: 把游戏主 div 加入到 mainUi 里面
 );
 mainUi.showAll();

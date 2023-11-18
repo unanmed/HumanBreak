@@ -88,13 +88,21 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * @param func 按键按下时执行的函数
      */
     realize(id: string, func: HotkeyFunc) {
-        const key = this.data[id];
-        if (!key.func.has(this.scope)) {
-            throw new Error(
-                `Cannot access using scope. Call use before calling realize.`
-            );
+        const toSet = Object.values(this.data).filter(v => {
+            return v.id === id || v.id.split('_').slice(0, -1).join('_') === id;
+        });
+        if (toSet.length === 0) {
+            throw new Error(`Realize nonexistent key '${id}'.`);
         }
-        key.func.set(this.scope, func);
+        for (const key of toSet) {
+            if (!key.func.has(this.scope)) {
+                throw new Error(
+                    `Cannot access using scope. Call use before calling realize.`
+                );
+            }
+            key.func.set(this.scope, func);
+        }
+        return this;
     }
 
     /**
@@ -119,7 +127,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
             key.func.delete(symbol);
         }
         spliceBy(this.scopeStack, symbol);
-        this.scope = this.scopeStack.pop() ?? Symbol();
+        this.scope = this.scopeStack.at(-1) ?? Symbol();
     }
 
     /**
@@ -177,6 +185,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
     group(id: string, name: string) {
         this.grouping = id;
         this.groupName[id] = name;
+        this.groups[id] ??= [];
         return this;
     }
 

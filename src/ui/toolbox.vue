@@ -117,9 +117,12 @@ import { type, keycode, has } from '../plugin/utils';
 import { hyper, sleep } from 'mutate-animate';
 import { message } from 'ant-design-vue';
 import { KeyCode } from '../plugin/keyCodes';
+import { GameUi } from '@/core/main/custom/ui';
+import { gameKey } from '@/core/main/init/hotkey';
 
 const props = defineProps<{
     num: number;
+    ui: GameUi;
 }>();
 
 type ItemMode = 'tools' | 'constants';
@@ -196,30 +199,9 @@ async function toEquip() {
     mota.ui.main.open('equipbox');
 }
 
-function keyup(e: KeyboardEvent) {
-    const c = keycode(e.keyCode);
-    if (c === KeyCode.Escape || c === KeyCode.KeyX || c === KeyCode.KeyT) {
-        exit();
-    }
-    if (c === KeyCode.Enter || c === KeyCode.KeyC) {
-        use(selected.value);
-    }
-}
-
-function keydown(e: KeyboardEvent) {
-    const c = keycode(e.keyCode);
-    const total = items[mode.value].length;
-    if (c === KeyCode.DownArrow) {
-        if (index.value < total - 1) {
-            index.value++;
-        }
-    }
-    if (c === KeyCode.UpArrow) {
-        if (index.value > 0) {
-            index.value--;
-        }
-    }
-    if (c === KeyCode.RightArrow) {
+gameKey.use(props.ui.symbol);
+gameKey
+    .realize('@toolbox_right', () => {
         const constants = items.constants.length;
         if (mode.value === 'tools') {
             if (index.value >= constants) {
@@ -227,8 +209,8 @@ function keydown(e: KeyboardEvent) {
             }
             mode.value = 'constants';
         }
-    }
-    if (c === KeyCode.LeftArrow) {
+    })
+    .realize('@toolbox_left', () => {
         const constants = items.tools.length;
         if (mode.value === 'constants') {
             if (index.value >= constants) {
@@ -236,19 +218,27 @@ function keydown(e: KeyboardEvent) {
             }
             mode.value = 'tools';
         }
-    }
-}
-
-onMounted(async () => {
-    // if (mota.plugin.ui.transition.value) await sleep(600);
-    await sleep(50);
-    document.addEventListener('keyup', keyup);
-    document.addEventListener('keydown', keydown);
-});
+    })
+    .realize('@toolbox_up', () => {
+        if (index.value > 0) {
+            index.value--;
+        }
+    })
+    .realize('@toolbox_down', () => {
+        const total = items[mode.value].length;
+        if (index.value < total - 1) {
+            index.value++;
+        }
+    })
+    .realize('exit', () => {
+        exit();
+    })
+    .realize('confirm', () => {
+        use(selected.value);
+    });
 
 onUnmounted(() => {
-    document.removeEventListener('keyup', keyup);
-    document.removeEventListener('keydown', keydown);
+    gameKey.dispose(props.ui.symbol);
 });
 </script>
 

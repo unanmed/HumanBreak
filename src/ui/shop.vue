@@ -175,9 +175,12 @@ import { isMobile } from '../plugin/use';
 import BoxAnimate from '../components/boxAnimate.vue';
 import { KeyCode } from '../plugin/keyCodes';
 import { sleep } from 'mutate-animate';
+import { GameUi } from '@/core/main/custom/ui';
+import { gameKey } from '@/core/main/init/hotkey';
 
 const props = defineProps<{
     num: number;
+    ui: GameUi;
     shopId: string;
 }>();
 
@@ -276,35 +279,30 @@ function confirm() {
     update.value = !update.value;
 }
 
-function keyup(e: KeyboardEvent) {
-    const c = keycode(e.keyCode);
-    if (c === KeyCode.KeyX || c === KeyCode.Escape || c === KeyCode.KeyV) {
-        exit();
-    }
-    if (c === KeyCode.UpArrow) {
+gameKey.use(props.ui.symbol);
+gameKey
+    .realize('@shop_up', () => {
         if (selected.value >= 1) {
             selected.value--;
         }
-    }
-    if (c === KeyCode.DownArrow) {
+    })
+    .realize('@shop_down', () => {
         if (selected.value <= choices.length - 2) {
             selected.value++;
         }
-    }
-    if (c === KeyCode.KeyC || c === KeyCode.Space || c === KeyCode.Enter) {
-        confirm();
-    }
-}
-
-function keydown(e: KeyboardEvent) {
-    const c = keycode(e.keyCode);
-    if (c === KeyCode.LeftArrow) {
+    })
+    .realize('@shop_add', () => {
         count.value--;
-    }
-    if (c === KeyCode.RightArrow) {
+    })
+    .realize('@shop_min', () => {
         count.value++;
-    }
-}
+    })
+    .realize('exit', () => {
+        exit();
+    })
+    .realize('confirm', () => {
+        confirm();
+    });
 
 function exit() {
     if (bought) core.status.route.push('closeShop');
@@ -312,16 +310,11 @@ function exit() {
 }
 
 onMounted(async () => {
-    await sleep(50);
-    // if (mota.plugin.ui.transition.value) await sleep(600);
-    document.addEventListener('keyup', keyup);
-    document.addEventListener('keydown', keydown);
     core.status.route.push(`openShop:${id}`);
 });
 
 onUnmounted(() => {
-    document.removeEventListener('keyup', keyup);
-    document.removeEventListener('keydown', keydown);
+    gameKey.dispose(props.ui.symbol);
 });
 </script>
 

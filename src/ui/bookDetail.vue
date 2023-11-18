@@ -81,6 +81,7 @@ import { keycode } from '../plugin/utils';
 import { sleep } from 'mutate-animate';
 import EnemyTarget from '../panel/enemyTarget.vue';
 import { detailInfo } from '../plugin/ui/book';
+import { gameKey } from '@/core/main/init/hotkey';
 
 const props = defineProps<{
     fromBook?: boolean;
@@ -90,6 +91,7 @@ const props = defineProps<{
 const enemy = detailInfo.enemy;
 const top = ref(detailInfo.pos);
 const panel = ref<string>(props.defaultPanel ?? 'special');
+const symbol = Symbol();
 
 let detail: HTMLDivElement;
 
@@ -108,17 +110,14 @@ function close() {
     emits('close');
 }
 
-function key(e: KeyboardEvent) {
-    const c = keycode(e.keyCode);
-    if (c === KeyCode.Enter || c === KeyCode.Space || c === KeyCode.KeyC) {
+gameKey.use(symbol);
+gameKey
+    .realize('exit', () => {
         close();
-    }
-    if (!props.fromBook) {
-        if (c === KeyCode.KeyX || c === KeyCode.Escape) {
-            close();
-        }
-    }
-}
+    })
+    .realize('confirm', () => {
+        close();
+    });
 
 onMounted(async () => {
     top.value = 0;
@@ -148,12 +147,10 @@ onMounted(async () => {
             moved = false;
         }
     );
-
-    document.addEventListener('keyup', key);
 });
 
 onUnmounted(() => {
-    document.removeEventListener('keyup', key);
+    gameKey.dispose(symbol);
 });
 </script>
 

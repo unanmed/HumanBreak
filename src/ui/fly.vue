@@ -96,9 +96,12 @@ import { debounce } from 'lodash-es';
 import { downloadCanvasImage, keycode, tip } from '../plugin/utils';
 import { sleep } from 'mutate-animate';
 import { KeyCode } from '../plugin/keyCodes';
+import { GameUi } from '@/core/main/custom/ui';
+import { gameKey } from '@/core/main/init/hotkey';
 
 const props = defineProps<{
     num: number;
+    ui: GameUi;
 }>();
 
 type Loc2 = [number, number, number, number];
@@ -520,28 +523,44 @@ function locateMap(id: FloorIds) {
 
 // -------------------- 键盘事件
 
-function keyup(e: KeyboardEvent) {
-    const c = keycode(e.keyCode);
-    if (c === KeyCode.Enter || c === KeyCode.Space || c === KeyCode.KeyC) fly();
-    if (c === KeyCode.Escape || c === KeyCode.KeyX || c === KeyCode.KeyG) {
+gameKey.use(props.ui.symbol);
+gameKey
+    .realize('@fly_left', () => {
+        if (!tradition.value) changeFloorByDir('left');
+    })
+    .realize('@fly_right', () => {
+        if (!tradition.value) changeFloorByDir('right');
+    })
+    .realize('@fly_up', () => {
+        if (!tradition.value) changeFloorByDir('up');
+    })
+    .realize('@fly_down', () => {
+        if (!tradition.value) changeFloorByDir('down');
+    })
+    .realize('@fly_last', () => {
+        if (!tradition.value) changeFloorByDelta(-1);
+    })
+    .realize('@fly_next', () => {
+        if (!tradition.value) changeFloorByDelta(1);
+    })
+    .realize('@fly_down_t', () => {
+        if (tradition.value) changeFloorByDelta(-1);
+    })
+    .realize('@fly_up_t', () => {
+        if (tradition.value) changeFloorByDelta(1);
+    })
+    .realize('@fly_left_t', () => {
+        if (tradition.value) changeFloorByDelta(-10);
+    })
+    .realize('@fly_right_t', () => {
+        if (tradition.value) changeFloorByDelta(10);
+    })
+    .realize('exit', () => {
         exit();
-    }
-    if (!tradition.value) {
-        if (c === KeyCode.LeftArrow) changeFloorByDir('left');
-        if (c === KeyCode.RightArrow) changeFloorByDir('right');
-        if (c === KeyCode.UpArrow) changeFloorByDir('up');
-        if (c === KeyCode.DownArrow) changeFloorByDir('down');
-        if (c === KeyCode.PageUp) changeFloorByDelta(1);
-        if (c === KeyCode.PageDown) changeFloorByDelta(-1);
-    } else {
-        if (c === KeyCode.UpArrow) changeFloorByDelta(1);
-        if (c === KeyCode.DownArrow) changeFloorByDelta(-1);
-        if (c === KeyCode.LeftArrow) changeFloorByDelta(-10);
-        if (c === KeyCode.RightArrow) changeFloorByDelta(10);
-        if (c === KeyCode.PageUp) changeFloorByDelta(10);
-        if (c === KeyCode.PageDown) changeFloorByDelta(-10);
-    }
-}
+    })
+    .realize('confirm', () => {
+        fly();
+    });
 
 // -------------------- 触摸事件
 
@@ -613,10 +632,6 @@ onMounted(async () => {
         resize(delta);
     });
 
-    await sleep(50);
-    // if (mota.plugin.ui.transition.value) await sleep(600);
-
-    document.addEventListener('keyup', keyup);
     map.addEventListener('touchstart', touchdown);
     map.addEventListener('touchend', touchup);
     map.addEventListener('touchmove', touchmove);
@@ -624,7 +639,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
     cancelGlobalDrag(drag);
-    document.removeEventListener('keyup', keyup);
+    gameKey.dispose(props.ui.symbol);
 });
 </script>
 

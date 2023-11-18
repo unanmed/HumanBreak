@@ -70,6 +70,13 @@ import { KeyCode } from '../plugin/keyCodes';
 import { triggerFullscreen } from '../plugin/utils';
 import { loading } from '../core/loader/load';
 import { isMobile } from '../plugin/use';
+import { GameUi } from '@/core/main/custom/ui';
+import { gameKey } from '@/core/main/init/hotkey';
+
+const props = defineProps<{
+    num: number;
+    ui: GameUi;
+}>();
 
 let startdiv: HTMLDivElement;
 let start: HTMLDivElement;
@@ -179,29 +186,25 @@ function movein(button: HTMLElement, i: number) {
     selected.value = button.id;
 }
 
-function keydown(e: KeyboardEvent) {
-    const c = keycode(e.keyCode);
-    const i = toshow.indexOf(selected.value);
-    if (c === KeyCode.DownArrow) {
-        const next = toshow[i - 1];
-        if (!next) return;
-        selected.value = next;
-        setCursor(buttons[toshow.length - i], toshow.length - i);
-    }
-    if (c === KeyCode.UpArrow) {
+gameKey.use(props.ui.symbol);
+gameKey
+    .realize('@start_up', () => {
+        const i = toshow.indexOf(selected.value);
         const next = toshow[i + 1];
         if (!next) return;
         selected.value = next;
         setCursor(buttons[toshow.length - i - 2], toshow.length - i - 2);
-    }
-}
-
-function keyup(e: KeyboardEvent) {
-    const c = keycode(e.keyCode);
-    if (c === KeyCode.Enter || c === KeyCode.Space || c === KeyCode.KeyC) {
+    })
+    .realize('@start_down', () => {
+        const i = toshow.indexOf(selected.value);
+        const next = toshow[i - 1];
+        if (!next) return;
+        selected.value = next;
+        setCursor(buttons[toshow.length - i], toshow.length - i);
+    })
+    .realize('confirm', () => {
         clickStartButton(selected.value);
-    }
-}
+    });
 
 function bgm() {
     core.triggerBgm();
@@ -310,9 +313,6 @@ onMounted(async () => {
 
         soundChecked.value = core.musicStatus.bgmStatus;
 
-        await sleep(50);
-        document.addEventListener('keydown', keydown);
-        document.addEventListener('keyup', keyup);
         start.style.opacity = '1';
         if (played) {
             text.value = text2;
@@ -327,8 +327,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
     window.removeEventListener('resize', resize);
-    document.removeEventListener('keydown', keydown);
-    document.removeEventListener('keyup', keyup);
+    gameKey.dispose(props.ui.symbol);
 });
 </script>
 

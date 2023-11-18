@@ -49,6 +49,7 @@ import { KeyCode } from '../plugin/keyCodes';
 import { ToShowEnemy, detailInfo } from '../plugin/ui/book';
 import { getDetailedEnemy } from '../plugin/ui/fixed';
 import { GameUi } from '@/core/main/custom/ui';
+import { gameKey } from '@/core/main/init/hotkey';
 
 const props = defineProps<{
     num: number;
@@ -141,70 +142,46 @@ function checkScroll() {
     }
 }
 
-/**
- * 键盘松开时
- */
-function keyup(e: KeyboardEvent) {
-    const c = keycode(e.keyCode);
-    if (c === KeyCode.KeyX || c === KeyCode.Escape) {
+// 按键控制
+gameKey.use(props.ui.symbol);
+gameKey
+    .realize('@book_up', () => {
+        if (selected.value > 0) {
+            selected.value--;
+        }
+        checkScroll();
+    })
+    .realize('@book_down', () => {
+        if (selected.value < enemy.length - 1) {
+            selected.value++;
+        }
+        checkScroll();
+    })
+    .realize('@book_pageDown', () => {
+        if (selected.value <= 4) {
+            selected.value = 0;
+        } else {
+            selected.value -= 5;
+        }
+        checkScroll();
+    })
+    .realize('@book_pageUp', () => {
+        if (selected.value >= enemy.length - 5) {
+            selected.value = enemy.length - 1;
+        } else {
+            selected.value += 5;
+        }
+        checkScroll();
+    })
+    .realize('exit', () => {
         exit();
-    }
-    if (
-        (c === KeyCode.Enter || c === KeyCode.KeyC || c === KeyCode.Space) &&
-        !detail.value
-    ) {
+    })
+    .realize('confirm', () => {
         select(toShow[selected.value], selected.value);
-    }
-}
+    });
 
-/**
- * 键盘按下时
- */
-function keydown(e: KeyboardEvent) {
-    const c = keycode(e.keyCode);
-    if (!detail.value) {
-        if (c === KeyCode.DownArrow) {
-            if (selected.value < enemy.length - 1) {
-                selected.value++;
-            }
-            checkScroll();
-        }
-        if (c === KeyCode.UpArrow) {
-            if (selected.value > 0) {
-                selected.value--;
-            }
-            checkScroll();
-        }
-        // 一次移动5个怪物
-        if (c === KeyCode.LeftArrow || c === KeyCode.PageUp) {
-            if (selected.value <= 4) {
-                selected.value = 0;
-            } else {
-                selected.value -= 5;
-            }
-            checkScroll();
-        }
-        if (c === KeyCode.RightArrow || c === KeyCode.PageDown) {
-            if (selected.value >= enemy.length - 5) {
-                selected.value = enemy.length - 1;
-            } else {
-                selected.value += 5;
-            }
-            checkScroll();
-        }
-    }
-}
-
-onMounted(async () => {
-    // if (mota.plugin.ui.transition.value) await sleep(600);
-    await sleep(50);
-    document.addEventListener('keyup', keyup);
-    document.addEventListener('keydown', keydown);
-});
-
-onUnmounted(async () => {
-    document.removeEventListener('keyup', keyup);
-    document.removeEventListener('keydown', keydown);
+onUnmounted(() => {
+    gameKey.dispose(props.ui.symbol);
 });
 </script>
 
