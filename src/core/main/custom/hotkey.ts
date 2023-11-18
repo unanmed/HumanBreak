@@ -1,6 +1,6 @@
 import { KeyCode } from '@/plugin/keyCodes';
 import { getLocFromMouseLoc } from '@/plugin/ui/fixed';
-import { deleteWith, generateBinary, has, tip } from '@/plugin/utils';
+import { deleteWith, generateBinary, has, spliceBy, tip } from '@/plugin/utils';
 import { EmitableEvent, EventEmitter } from '../../common/eventEmitter';
 import { GameStorage } from '../storage';
 
@@ -81,6 +81,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * @param symbol 当前作用域的symbol
      */
     use(symbol: symbol) {
+        spliceBy(this.scopeStack, symbol);
         this.scopeStack.push(symbol);
         this.scope = symbol;
         for (const key of Object.values(this.data)) {
@@ -89,13 +90,14 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
     }
 
     /**
-     * 释放一个作用域，释放后不能调用{@link realize}函数，除非重新调用{@link use}函数
+     * 释放一个作用域，释放后作用域将退回至删除的作用域的上一级
      * @param symbol 要释放的作用域的symbol
      */
     dispose(symbol: symbol) {
         for (const key of Object.values(this.data)) {
             key.func.delete(symbol);
         }
+        spliceBy(this.scopeStack, symbol);
         this.scope = this.scopeStack.pop() ?? Symbol();
     }
 
