@@ -93,9 +93,7 @@ import {
     DoubleRightOutlined
 } from '@ant-design/icons-vue';
 import { debounce } from 'lodash-es';
-import { downloadCanvasImage, keycode, tip } from '../plugin/utils';
-import { sleep } from 'mutate-animate';
-import { KeyCode } from '../plugin/keyCodes';
+import { downloadCanvasImage, tip } from '../plugin/utils';
 import { GameUi } from '@/core/main/custom/ui';
 import { gameKey } from '@/core/main/init/hotkey';
 

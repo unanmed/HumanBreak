@@ -327,6 +327,69 @@ gameKey.use(mainScope);
 
 // ----- Realization
 
+gameKey
+    .when(() => !core.status.lockControl)
+    .realize('book', () => {
+        core.openBook(true);
+    })
+    .realize('save', () => {
+        core.save(true);
+    })
+    .realize('load', () => {
+        core.load(true);
+    })
+    .realize('toolbox', () => {
+        core.openToolbox(true);
+    })
+    .realize('equipbox', () => {
+        core.openEquipbox(true);
+    })
+    .realize('fly', () => {
+        core.useFly(true);
+    })
+    .realize('menu', () => {
+        core.openSettings(true);
+    })
+    .realize('replay', () => {
+        core.ui._drawReplay();
+    })
+    .realize('shop', () => {
+        core.openQuickShop(true);
+    })
+    .realize('statistics', () => {
+        core.ui._drawStatistics();
+    })
+    .realize('viewMap', () => {
+        core.ui._drawViewMaps();
+    })
+    .realize('skillTree', () => {
+        core.useItem('skill1', true);
+    })
+    .realize('desc', () => {
+        core.useItem('I560', true);
+    })
+    .realize('undo', () => {
+        core.doSL('autoSave', 'load');
+    })
+    .realize('redo', () => {
+        core.doSL('autoSave', 'reload');
+    })
+    .realize('turn', () => {
+        core.turnHero();
+    })
+    .realize('getNext', () => {
+        core.getNextItem();
+    })
+    .realize('mark', () => {})
+    .realize('special', () => {})
+    .realize('critical', () => {})
+    .realize('restart', () => {
+        core.confirmRestart();
+    })
+    .realize('comment', () => {
+        core.actions._clickGameInfo_openComments();
+    });
+
 // ----- Listening
 document.addEventListener('keyup', e => {
     const assist = generateBinary([e.ctrlKey, e.shiftKey, e.altKey]);

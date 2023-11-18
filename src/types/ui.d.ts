@@ -821,11 +821,11 @@ interface Ui {
     /**
      * 绘制浏览地图
      */
-    _drawViewMaps();
+    _drawViewMaps(): void;
 
-    _drawReplay();
+    _drawReplay(): void;
 
-    _drawStatistics();
+    _drawStatistics(): void;
 }
 
 declare const ui: new () => Ui;
