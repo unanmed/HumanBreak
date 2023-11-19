@@ -1,6 +1,8 @@
 import { KeyCode } from '@/plugin/keyCodes';
 import { Hotkey } from '../custom/hotkey';
 import { generateBinary, keycode } from '@/plugin/utils';
+import { hovered } from './fixed';
+import { hasMarkedEnemy, markEnemy, unmarkEnemy } from '@/plugin/mark';
 
 export const mainScope = Symbol.for('@key_main');
 export const gameKey = new Hotkey('gameKey', '游戏按键');
@@ -82,14 +84,24 @@ gameKey
     // --------------------
     .group('function', '功能按键')
     .register({
-        id: 'undo',
-        name: '回退',
+        id: 'undo_1',
+        name: '回退_1',
         defaults: KeyCode.KeyA
     })
     .register({
-        id: 'redo',
-        name: '恢复',
+        id: 'undo_2',
+        name: '回退_2',
+        defaults: KeyCode.Digit5
+    })
+    .register({
+        id: 'redo_1',
+        name: '恢复_1',
         defaults: KeyCode.KeyW
+    })
+    .register({
+        id: 'redo_2',
+        name: '恢复_2',
+        defaults: KeyCode.Digit6
     })
     .register({
         id: 'turn',
@@ -97,9 +109,14 @@ gameKey
         defaults: KeyCode.KeyZ
     })
     .register({
-        id: 'getNext',
-        name: '轻按',
+        id: 'getNext_1',
+        name: '轻按_1',
         defaults: KeyCode.Space
+    })
+    .register({
+        id: 'getNext_2',
+        name: '轻按_2',
+        defaults: KeyCode.Digit7
     })
     .register({
         id: 'mark',
@@ -328,7 +345,7 @@ gameKey.use(mainScope);
 // ----- Realization
 
 gameKey
-    .when(() => !core.status.lockControl)
+    .when(() => !core.status.lockControl && !core.isMoving())
     .realize('book', () => {
         core.openBook(true);
     })
@@ -380,7 +397,14 @@ gameKey
     .realize('getNext', () => {
         core.getNextItem();
     })
-    .realize('mark', () => {})
+    .realize('mark', () => {
+        const cls = hovered?.event.cls;
+        if (cls === 'enemys' || cls === 'enemy48') {
+            const id = hovered!.event.id as EnemyIds;
+            if (hasMarkedEnemy(id)) unmarkEnemy(id);
+            else markEnemy(id);
+        }
+    })
     .realize('special', () => {})
     .realize('critical', () => {})
     .realize('restart', () => {

@@ -52,12 +52,16 @@ export function markEnemy(id: EnemyIds) {
     marked.push(info);
 
     uiMap.set(id, fixedUi.open('markedEnemy', { enemy: info }));
+
+    tip('success', `已标记 ${enemy.enemy.name}！`);
 }
 
 export function unmarkEnemy(id: EnemyIds) {
     fixedUi.close(uiMap.get(id) ?? -1);
     uiMap.delete(id);
     const index = marked.findIndex(v => v.id === id);
+    if (index === -1) return;
+    tip('success', `已取消标记 ${marked[index].enemy.enemy.name}！`);
     marked.splice(index, 1);
 }
 

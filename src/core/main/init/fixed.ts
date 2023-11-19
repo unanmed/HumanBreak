@@ -34,7 +34,7 @@ const closeFixed = () => {
     });
 };
 
-let hovered: Block | null;
+export let hovered: Block | null;
 
 gameListener.on('hoverBlock', block => {
     closeFixed();
