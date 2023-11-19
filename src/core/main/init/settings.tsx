@@ -1,6 +1,7 @@
 import type { SettingComponent, SettingComponentProps } from '../setting';
 import { Button, InputNumber } from 'ant-design-vue';
 import { mainUi } from './ui';
+import { gameKey } from './hotkey';
 
 interface Components {
     DefaultSetting: SettingComponent;
@@ -70,13 +71,13 @@ function NumberSetting(props: SettingComponentProps) {
     );
 }
 
-function showSpecialSetting(id: string) {
+function showSpecialSetting(id: string, vBind?: any) {
     const ui = mainUi.get(id);
     mainUi.showEnd();
     ui.once('close', () => {
         mainUi.showAll();
     });
-    mainUi.open(id);
+    mainUi.open(id, vBind);
 }
 
 function HotkeySetting(props: SettingComponentProps) {
@@ -86,7 +87,11 @@ function HotkeySetting(props: SettingComponentProps) {
             <Button
                 type="primary"
                 size="large"
-                onClick={() => showSpecialSetting('hotkey')}
+                onClick={() =>
+                    showSpecialSetting('hotkey', {
+                        hotkey: gameKey
+                    })
+                }
             >
                 快捷键设置
             </Button>

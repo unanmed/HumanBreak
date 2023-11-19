@@ -389,7 +389,7 @@ mainSetting
         new MotaSetting()
             .register('autoSkill', '自动切换技能', true, COM.BooleanSetting)
             .register('fixed', '定点查看', true, COM.BooleanSetting)
-            .register('hotkey', '快捷键', false, COM.BooleanSetting)
+            .register('hotkey', '快捷键', false, COM.HotkeySetting)
             .setDisplayFunc('hotkey', () => '')
             .register('toolbar', '自定义工具栏', false, COM.BooleanSetting)
             .setDisplayFunc('toolbar', () => '')

@@ -83,11 +83,14 @@ import Scroll from '../components/scroll.vue';
 import { isMobile } from '../plugin/use';
 import { sleep } from 'mutate-animate';
 import { KeyCode } from '../plugin/keyCodes';
+import { gameKey } from '@/core/main/init/hotkey';
+import { GameUi } from '@/core/main/custom/ui';
 
 const props = defineProps<{
     info?: MotaSetting;
     text?: SettingText;
     num: number;
+    ui: GameUi;
 }>();
 
 const setting = props.info ?? mainSetting;
@@ -143,19 +146,13 @@ function exit() {
     mota.ui.main.close(props.num);
 }
 
-function key(e: KeyboardEvent) {
-    const c = keycode(e.keyCode);
-    if (c === KeyCode.Escape || c === KeyCode.KeyX) exit();
-}
-
-onMounted(async () => {
-    await sleep(50);
-    // if (mota.plugin.ui.transition.value) await sleep(600);
-    document.addEventListener('keyup', key);
+gameKey.use(props.ui.symbol);
+gameKey.realize('exit', () => {
+    exit();
 });
 
 onUnmounted(() => {
-    document.removeEventListener('keyup', key);
+    gameKey.dispose(props.ui.symbol);
 });
 </script>
 

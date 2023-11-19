@@ -59,22 +59,22 @@ function resize() {
     if (has(props.right)) right.style.flexBasis = `${props.right}%`;
 }
 
-function key(e: KeyboardEvent) {
-    const c = keycode(e.keyCode);
-    if (c === KeyCode.Escape || c === KeyCode.KeyX) emits('close');
-}
+// function key(e: KeyboardEvent) {
+//     const c = keycode(e.keyCode);
+//     if (c === KeyCode.Escape || c === KeyCode.KeyX) emits('close');
+// }
 
 onMounted(async () => {
     resize();
 
     await sleep(50);
     // if (mota.plugin.ui.transition.value) await sleep(600);
-    document.addEventListener('keyup', key);
+    // document.addEventListener('keyup', key);
 });
 onUpdated(resize);
 
 onUnmounted(() => {
-    document.removeEventListener('keyup', key);
+    // document.removeEventListener('keyup', key);
 });
 </script>
 

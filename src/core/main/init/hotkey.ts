@@ -15,7 +15,10 @@ gameKey
     .register({
         id: 'book',
         name: '怪物手册',
-        defaults: KeyCode.KeyX
+        defaults: KeyCode.KeyX,
+        ctrl: true,
+        shift: true,
+        alt: true
     })
     .register({
         id: 'save',
