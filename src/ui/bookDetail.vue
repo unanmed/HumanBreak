@@ -76,8 +76,6 @@ import { useDrag } from '../plugin/use';
 import EnemySpecial from '../panel/enemySpecial.vue';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons-vue';
 import EnemyCritical from '../panel/enemyCritical.vue';
-import { KeyCode } from '../plugin/keyCodes';
-import { keycode } from '../plugin/utils';
 import { sleep } from 'mutate-animate';
 import EnemyTarget from '../panel/enemyTarget.vue';
 import { detailInfo } from '../plugin/ui/book';

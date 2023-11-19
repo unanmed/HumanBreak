@@ -1,6 +1,6 @@
 import { debounce } from 'lodash-es';
-import { gameListener } from '../game';
-import { fixedUi } from './ui';
+import { gameListener, hook } from '../game';
+import { fixedUi, mainUi } from './ui';
 import { ref } from 'vue';
 import { sleep } from 'mutate-animate';
 
@@ -52,4 +52,11 @@ gameListener.on('mouseMove', e => {
     if (hovered) {
         showFixed(hovered);
     }
+});
+
+hook.once('mounted', () => {
+    mainUi.on('start', () => {
+        showFixed.cancel();
+        closeFixed();
+    });
 });

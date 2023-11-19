@@ -3,6 +3,7 @@ import { Hotkey } from '../custom/hotkey';
 import { generateBinary, keycode } from '@/plugin/utils';
 import { hovered } from './fixed';
 import { hasMarkedEnemy, markEnemy, unmarkEnemy } from '@/plugin/mark';
+import { mainUi } from './ui';
 
 export const mainScope = Symbol.for('@key_main');
 export const gameKey = new Hotkey('gameKey', '游戏按键');
@@ -405,8 +406,12 @@ gameKey
             else markEnemy(id);
         }
     })
-    .realize('special', () => {})
-    .realize('critical', () => {})
+    .realize('special', () => {
+        mainUi.open('fixedDetail', { panel: 'special' });
+    })
+    .realize('critical', () => {
+        mainUi.open('fixedDetail', { panel: 'critical' });
+    })
     .realize('restart', () => {
         core.confirmRestart();
     })
