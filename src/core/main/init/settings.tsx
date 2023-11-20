@@ -38,9 +38,14 @@ function BooleanSetting(props: SettingComponentProps) {
     };
 
     return (
-        <div>
+        <div class="editor-boolean">
             <span>当前 {item.value ? '开启' : '关闭'}</span>
-            <Button type="primary" size="large" onClick={changeValue}>
+            <Button
+                class="boolean-button"
+                type="primary"
+                size="large"
+                onClick={changeValue}
+            >
                 {item.value ? '开启' : '关闭'}设置
             </Button>
         </div>
@@ -55,7 +60,7 @@ function NumberSetting(props: SettingComponentProps) {
     };
 
     return (
-        <div>
+        <div class="editor-number">
             <span> 修改设置： </span>
             <InputNumber
                 class="number-input"
@@ -81,10 +86,10 @@ function showSpecialSetting(id: string, vBind?: any) {
 }
 
 function HotkeySetting(props: SettingComponentProps) {
-    // todo: hotkey.vue
     return (
-        <div>
+        <div style="display: flex; justify-content: center">
             <Button
+                style="font-size: 75%"
                 type="primary"
                 size="large"
                 onClick={() =>
@@ -102,8 +107,9 @@ function HotkeySetting(props: SettingComponentProps) {
 function ToolbarSetting(props: SettingComponentProps) {
     // todo: toolSetting.vue
     return (
-        <div>
+        <div style="display: flex; justify-content: center">
             <Button
+                style="font-size: 75%"
                 type="primary"
                 size="large"
                 onClick={() => showSpecialSetting('toolSetting')}

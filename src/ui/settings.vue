@@ -261,6 +261,31 @@ onUnmounted(() => {
     height: 100%;
 }
 
+.setting-info::v-deep(.editor-boolean) {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 10% 0 5%;
+
+    .boolean-button {
+        font-size: 75%;
+    }
+}
+
+.setting-info::v-deep(.editor-number) {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 10% 0 5%;
+
+    .number-input {
+        font-size: 80%;
+        width: 40%;
+    }
+}
+
 .setting-info {
     width: 25vw;
 
@@ -269,34 +294,9 @@ onUnmounted(() => {
         margin: 2% 0;
     }
 
-    .editor-boolean {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-around;
-        align-items: center;
-        padding: 0 10% 0 5%;
-
-        .boolean-button {
-            font-size: 75%;
-        }
-    }
-
     .info-text {
         font-size: 85%;
         min-height: 30%;
-    }
-
-    .editor-number {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-around;
-        align-items: center;
-        padding: 0 10% 0 5%;
-
-        .number-input {
-            font-size: 80%;
-            width: 40%;
-        }
     }
 }
 

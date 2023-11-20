@@ -87,7 +87,7 @@ function draw() {
 /**
  * 计算元素总长度
  */
-async function calHeight(first: boolean) {
+async function calHeight(first: boolean = false) {
     if (!first) {
         await sleep(20);
     }
@@ -207,6 +207,7 @@ onMounted(async () => {
 
     window.addEventListener('resize', resize);
     await calHeight(true);
+    await calHeight();
     draw();
 });
 

@@ -193,14 +193,14 @@ onUnmounted(() => {
 }
 
 .hotkey-group-one {
-    margin: 2px 0;
+    margin: 0 0 4px 0;
 }
 
 .hotkey-one {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    margin: 2% 3%;
+    margin: 0 3% 2% 3%;
     white-space: nowrap;
 }
 
