@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, onUnmounted, ref } from 'vue';
 import desc from '../data/desc.json';
 import { splitText } from '../plugin/utils';
 import Colomn from '../components/colomn.vue';
@@ -59,6 +59,10 @@ gameKey
     .realize('desc', () => {
         exit();
     });
+
+onUnmounted(() => {
+    gameKey.dispose(props.ui.symbol);
+});
 </script>
 
 <style lang="less" scoped>
