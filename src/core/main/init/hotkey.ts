@@ -1,9 +1,10 @@
 import { KeyCode } from '@/plugin/keyCodes';
-import { Hotkey } from '../custom/hotkey';
+import { Hotkey, HotkeyJSON } from '../custom/hotkey';
 import { generateBinary, keycode } from '@/plugin/utils';
 import { hovered } from './fixed';
 import { hasMarkedEnemy, markEnemy, unmarkEnemy } from '@/plugin/mark';
 import { mainUi } from './ui';
+import { GameStorage } from '../storage';
 
 export const mainScope = Symbol.for('@key_main');
 export const gameKey = new Hotkey('gameKey', '游戏按键');
@@ -15,10 +16,7 @@ gameKey
     .register({
         id: 'book',
         name: '怪物手册',
-        defaults: KeyCode.KeyX,
-        ctrl: true,
-        shift: true,
-        alt: true
+        defaults: KeyCode.KeyX
     })
     .register({
         id: 'save',
@@ -421,6 +419,17 @@ gameKey
     .realize('comment', () => {
         core.actions._clickGameInfo_openComments();
     });
+
+// ----- Storage
+const keyStorage = new GameStorage<Record<string, HotkeyJSON>>(
+    GameStorage.fromAuthor('AncTe', 'gameKey')
+);
+keyStorage.data = {};
+keyStorage.read();
+gameKey.on('set', (id, key, assist) => {
+    keyStorage.setValue(id, { key, assist });
+});
+gameKey.fromJSON(keyStorage.toJSON());
 
 // ----- Listening
 document.addEventListener('keyup', e => {

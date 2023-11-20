@@ -47,6 +47,10 @@ export class GameStorage<T> {
         }
     }
 
+    toJSON() {
+        return JSON.stringify(this.data);
+    }
+
     /**
      * 获取本游戏的存储键
      * @param key 存储名称

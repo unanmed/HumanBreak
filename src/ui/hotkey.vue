@@ -175,7 +175,6 @@ function keyup(e: KeyboardEvent) {
 
 // ban other keys
 gameKey.disable();
-console.log(gameKey.enabled);
 
 onMounted(() => {
     document.addEventListener('keyup', keyup);

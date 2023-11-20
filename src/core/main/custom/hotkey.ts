@@ -1,8 +1,11 @@
 import { KeyCode } from '@/plugin/keyCodes';
-import { deleteWith, spliceBy } from '@/plugin/utils';
+import { deleteWith, generateBinary, spliceBy } from '@/plugin/utils';
 import { EmitableEvent, EventEmitter } from '../../common/eventEmitter';
 
-interface HotkeyEvent extends EmitableEvent {}
+interface HotkeyEvent extends EmitableEvent {
+    set: (id: string, key: KeyCode, assist: number) => void;
+    emit: (key: KeyCode, assist: number, type: KeyEmitType) => void;
+}
 
 type KeyEmitType = 'down' | 'up';
 
@@ -26,6 +29,11 @@ interface HotkeyData extends Required<RegisterHotkeyData> {
 }
 
 type HotkeyFunc = (code: KeyCode, ev: KeyboardEvent) => void;
+
+export interface HotkeyJSON {
+    key: KeyCode;
+    assist: number;
+}
 
 export class Hotkey extends EventEmitter<HotkeyEvent> {
     static list: Hotkey[];
@@ -135,8 +143,9 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * @param id 要设置的按键的id
      * @param key 要设置成的按键
      * @param assist 辅助按键，三位二进制数据，从低到高依次为`ctrl` `shift` `alt`
+     * @param emit 是否触发set事件，当且仅当从fromJSON方法调用时为false
      */
-    set(id: string, key: KeyCode, assist: number) {
+    set(id: string, key: KeyCode, assist: number, emit: boolean = true) {
         const { ctrl, shift, alt } = this.unwarpBinary(assist);
         const data = this.data[id];
         const before = this.keyMap.get(data.key)!;
@@ -148,6 +157,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
         data.ctrl = ctrl;
         data.shift = shift;
         data.alt = alt;
+        if (emit) this.emit('set', id, key, assist);
     }
 
     /**
@@ -177,6 +187,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
                 func(key, ev);
             }
         });
+        this.emit('emit', key, assist, type);
     }
 
     /**
@@ -212,6 +223,24 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
     when(fn: () => boolean) {
         this.conditionMap.set(this.scope, fn);
         return this;
+    }
+
+    toJSON() {
+        const res: Record<string, HotkeyJSON> = {};
+        for (const [key, data] of Object.entries(this.data)) {
+            res[key] = {
+                key: data.key,
+                assist: generateBinary([data.ctrl, data.shift, data.alt])
+            };
+        }
+        return JSON.stringify(res);
+    }
+
+    fromJSON(data: string) {
+        const json: Record<string, HotkeyJSON> = JSON.parse(data);
+        for (const [key, data] of Object.entries(json)) {
+            this.set(key, data.key, data.assist, false);
+        }
     }
 
     private unwarpBinary(bin: number): AssistHoykey {
