@@ -36,6 +36,8 @@ if (hovered) {
     } else {
         close();
     }
+} else {
+    close();
 }
 
 function close() {

@@ -468,10 +468,22 @@ gameKey
         }
     })
     .realize('special', () => {
-        mainUi.open('fixedDetail', { panel: 'special' });
+        if (hovered) {
+            const { x, y } = hovered;
+            const enemy = core.status.thisMap.enemy.list.find(v => {
+                return v.x === x && v.y === y;
+            });
+            if (enemy) mainUi.open('fixedDetail', { panel: 'special' });
+        }
     })
     .realize('critical', () => {
-        mainUi.open('fixedDetail', { panel: 'critical' });
+        if (hovered) {
+            const { x, y } = hovered;
+            const enemy = core.status.thisMap.enemy.list.find(v => {
+                return v.x === x && v.y === y;
+            });
+            if (enemy) mainUi.open('fixedDetail', { panel: 'critical' });
+        }
     })
     .realize('restart', () => {
         core.confirmRestart();

@@ -108,7 +108,7 @@
 
 <script lang="ts" setup>
 import { LeftOutlined, RightOutlined } from '@ant-design/icons-vue';
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import Scroll from '../components/scroll.vue';
 import BoxAnimate from '../components/boxAnimate.vue';
 import { getClsName, getItems } from '../plugin/ui/toolbox';
@@ -180,10 +180,12 @@ function use(id: ShowItemIds) {
     if (core.canUseItem(id)) {
         const hold = mota.ui.main.holdOn();
         exit();
-        core.useItem(id, false, () => {
-            if (mota.ui.main.stack.length === 0) {
-                hold.end();
-            }
+        nextTick(() => {
+            core.useItem(id, false, () => {
+                if (mota.ui.main.stack.length === 0) {
+                    hold.end();
+                }
+            });
         });
     } else {
         message.warn({
@@ -196,7 +198,9 @@ function use(id: ShowItemIds) {
 async function toEquip() {
     mota.ui.main.holdOn();
     exit();
-    mota.ui.main.open('equipbox');
+    nextTick(() => {
+        mota.ui.main.open('equipbox');
+    });
 }
 
 gameKey.use(props.ui.symbol);

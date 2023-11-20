@@ -438,7 +438,9 @@ function dragout(e: Event) {
 function toTool() {
     mota.ui.main.holdOn();
     exit();
-    mota.ui.main.open('toolbox');
+    nextTick(() => {
+        mota.ui.main.open('toolbox');
+    });
 }
 
 gameKey.use(props.ui.symbol);
