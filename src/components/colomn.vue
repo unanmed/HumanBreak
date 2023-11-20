@@ -27,9 +27,7 @@ import { onMounted, onUnmounted, onUpdated, ref } from 'vue';
 import { LeftOutlined } from '@ant-design/icons-vue';
 import Scroll from './scroll.vue';
 import { isMobile } from '../plugin/use';
-import { has, keycode } from '../plugin/utils';
-import { sleep } from 'mutate-animate';
-import { KeyCode } from '../plugin/keyCodes';
+import { has } from '../plugin/utils';
 
 const emits = defineEmits<{
     (e: 'close'): void;
@@ -59,23 +57,10 @@ function resize() {
     if (has(props.right)) right.style.flexBasis = `${props.right}%`;
 }
 
-// function key(e: KeyboardEvent) {
-//     const c = keycode(e.keyCode);
-//     if (c === KeyCode.Escape || c === KeyCode.KeyX) emits('close');
-// }
-
 onMounted(async () => {
     resize();
-
-    await sleep(50);
-    // if (mota.plugin.ui.transition.value) await sleep(600);
-    // document.addEventListener('keyup', key);
 });
 onUpdated(resize);
-
-onUnmounted(() => {
-    // document.removeEventListener('keyup', key);
-});
 </script>
 
 <style lang="less" scoped>

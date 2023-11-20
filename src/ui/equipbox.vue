@@ -196,6 +196,7 @@ import { cancelGlobalDrag, isMobile, useDrag } from '../plugin/use';
 import { hyper, sleep } from 'mutate-animate';
 import { KeyCode } from '../plugin/keyCodes';
 import { GameUi } from '@/core/main/custom/ui';
+import { gameKey } from '@/core/main/init/hotkey';
 
 const props = defineProps<{
     num: number;
@@ -440,17 +441,19 @@ function toTool() {
     mota.ui.main.open('toolbox');
 }
 
-function keyup(e: KeyboardEvent) {
-    const c = keycode(e.keyCode);
-    if (c === KeyCode.KeyQ || c === KeyCode.KeyX || c === KeyCode.Escape) {
+gameKey.use(props.ui.symbol);
+gameKey
+    .realize('exit', () => {
         exit();
-    }
-    if (e.altKey) {
-        const n = e.keyCode - 48;
-        core.quickSaveEquip(n);
-        tip('success', `已保存至${n}号套装`);
-    }
-}
+    })
+    .realize('equipbox', () => {
+        exit();
+    })
+    .realize('quickEquip', id => {
+        const num = parseInt(id.split('_').at(-1)!);
+        core.quickSaveEquip(num);
+        tip('success', `已保存至${num}号套装`);
+    });
 
 watch(toShow, n => {
     bind();
@@ -458,15 +461,11 @@ watch(toShow, n => {
 
 onMounted(async () => {
     bind();
-    await sleep(50);
-    nextTick(() => {
-        document.addEventListener('keyup', keyup);
-    });
 });
 
 onUnmounted(() => {
     cancelGlobalDrag(dragEquip);
-    document.removeEventListener('keyup', keyup);
+    gameKey.dispose(props.ui.symbol);
 });
 </script>
 

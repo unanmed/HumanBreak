@@ -235,6 +235,9 @@ gameKey
     })
     .realize('confirm', () => {
         use(selected.value);
+    })
+    .realize('toolbox', () => {
+        exit();
     });
 
 onUnmounted(() => {

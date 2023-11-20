@@ -135,6 +135,66 @@ gameKey
         name: '鼠标位置怪物临界',
         defaults: KeyCode.KeyC
     })
+    .register({
+        id: 'quickEquip_1',
+        name: '切换/保存套装_1',
+        defaults: KeyCode.Digit1,
+        alt: true
+    })
+    .register({
+        id: 'quickEquip_2',
+        name: '切换/保存套装_2',
+        defaults: KeyCode.Digit2,
+        alt: true
+    })
+    .register({
+        id: 'quickEquip_3',
+        name: '切换/保存套装_3',
+        defaults: KeyCode.Digit3,
+        alt: true
+    })
+    .register({
+        id: 'quickEquip_4',
+        name: '切换/保存套装_4',
+        defaults: KeyCode.Digit4,
+        alt: true
+    })
+    .register({
+        id: 'quickEquip_5',
+        name: '切换/保存套装_5',
+        defaults: KeyCode.Digit5,
+        alt: true
+    })
+    .register({
+        id: 'quickEquip_6',
+        name: '切换/保存套装_6',
+        defaults: KeyCode.Digit6,
+        alt: true
+    })
+    .register({
+        id: 'quickEquip_7',
+        name: '切换/保存套装_7',
+        defaults: KeyCode.Digit7,
+        alt: true
+    })
+    .register({
+        id: 'quickEquip_8',
+        name: '切换/保存套装_8',
+        defaults: KeyCode.Digit8,
+        alt: true
+    })
+    .register({
+        id: 'quickEquip_9',
+        name: '切换/保存套装_9',
+        defaults: KeyCode.Digit9,
+        alt: true
+    })
+    .register({
+        id: 'quickEquip_0',
+        name: '切换/保存套装_0',
+        defaults: KeyCode.Digit0,
+        alt: true
+    })
     // --------------------
     .group('system', '系统按键')
     .register({

@@ -558,6 +558,9 @@ gameKey
     })
     .realize('confirm', () => {
         fly();
+    })
+    .realize('fly', () => {
+        exit();
     });
 
 // -------------------- 触摸事件

@@ -169,12 +169,9 @@ import {
     RightOutlined,
     DoubleRightOutlined
 } from '@ant-design/icons-vue';
-import { keycode, splitText, tip } from '../plugin/utils';
+import { splitText, tip } from '../plugin/utils';
 import Scroll from '../components/scroll.vue';
-import { isMobile } from '../plugin/use';
 import BoxAnimate from '../components/boxAnimate.vue';
-import { KeyCode } from '../plugin/keyCodes';
-import { sleep } from 'mutate-animate';
 import { GameUi } from '@/core/main/custom/ui';
 import { gameKey } from '@/core/main/init/hotkey';
 
@@ -302,6 +299,9 @@ gameKey
     })
     .realize('confirm', () => {
         confirm();
+    })
+    .realize('shop', () => {
+        exit();
     });
 
 function exit() {

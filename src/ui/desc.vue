@@ -20,11 +20,14 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue';
 import desc from '../data/desc.json';
-import { has, splitText } from '../plugin/utils';
+import { splitText } from '../plugin/utils';
 import Colomn from '../components/colomn.vue';
+import { GameUi } from '@/core/main/custom/ui';
+import { gameKey } from '@/core/main/init/hotkey';
 
 const props = defineProps<{
     num: number;
+    ui: GameUi;
 }>();
 
 type DescKey = keyof typeof desc;
@@ -47,6 +50,15 @@ function click(key: DescKey) {
 function show(condition: string) {
     return eval(condition);
 }
+
+gameKey.use(props.ui.symbol);
+gameKey
+    .realize('exit', () => {
+        exit();
+    })
+    .realize('desc', () => {
+        exit();
+    });
 </script>
 
 <style lang="less" scoped>

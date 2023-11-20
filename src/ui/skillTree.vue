@@ -77,13 +77,15 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons-vue';
 import Scroll from '../components/scroll.vue';
-import { has, keycode, splitText, tip } from '../plugin/utils';
+import { has, splitText, tip } from '../plugin/utils';
 import { isMobile } from '../plugin/use';
 import { sleep } from 'mutate-animate';
-import { KeyCode } from '../plugin/keyCodes';
+import { gameKey } from '@/core/main/init/hotkey';
+import { GameUi } from '@/core/main/custom/ui';
 
 const props = defineProps<{
     num: number;
+    ui: GameUi;
 }>();
 
 let canvas: HTMLCanvasElement;
@@ -262,14 +264,17 @@ function upgrade(index: number) {
     }
 }
 
-function key(e: KeyboardEvent) {
-    const c = keycode(e.keyCode);
-    if (c === KeyCode.Escape || c === KeyCode.KeyX || c === KeyCode.KeyJ)
+gameKey.use(props.ui.symbol);
+gameKey
+    .realize('exit', () => {
         exit();
-    if (c === KeyCode.Space || c === KeyCode.Enter || c === KeyCode.KeyC) {
+    })
+    .realize('confirm', () => {
         upgrade(selected.value);
-    }
-}
+    })
+    .realize('skillTree', () => {
+        exit();
+    });
 
 onMounted(async () => {
     canvas = document.getElementById('skill-canvas') as HTMLCanvasElement;
@@ -280,11 +285,10 @@ onMounted(async () => {
     await sleep(50);
     // if (mota.plugin.ui.transition.value) await sleep(600);
     canvas.addEventListener('click', click);
-    document.addEventListener('keyup', key);
 });
 
 onUnmounted(() => {
-    document.removeEventListener('keyup', key);
+    gameKey.dispose(props.ui.symbol);
 });
 
 function selectChapter(delta: number) {

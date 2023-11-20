@@ -28,7 +28,10 @@ interface HotkeyData extends Required<RegisterHotkeyData> {
     group?: string;
 }
 
-type HotkeyFunc = (code: KeyCode, ev: KeyboardEvent) => void;
+/**
+ * @param id 此处的id包含数字后缀
+ */
+type HotkeyFunc = (id: string, code: KeyCode, ev: KeyboardEvent) => void;
 
 export interface HotkeyJSON {
     key: KeyCode;
@@ -184,7 +187,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
                 if (!func) {
                     throw new Error(`Emit unknown scope keys.`);
                 }
-                func(key, ev);
+                func(v.id, key, ev);
             }
         });
         this.emit('emit', key, assist, type);
