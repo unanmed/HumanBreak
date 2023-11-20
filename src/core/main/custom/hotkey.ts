@@ -99,7 +99,9 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      */
     realize(id: string, func: HotkeyFunc) {
         const toSet = Object.values(this.data).filter(v => {
-            return v.id === id || v.id.split('_').slice(0, -1).join('_') === id;
+            const split = v.id.split('_');
+            const last = !isNaN(Number(split.at(-1)));
+            return v.id === id || (last && split.slice(0, -1).join('_') === id);
         });
         if (toSet.length === 0) {
             throw new Error(`Realize nonexistent key '${id}'.`);
