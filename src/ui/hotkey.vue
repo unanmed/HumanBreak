@@ -166,7 +166,8 @@ function keyup(e: KeyboardEvent) {
         if (
             code === KeyCode.Ctrl ||
             code === KeyCode.Shift ||
-            code === KeyCode.Alt
+            code === KeyCode.Alt ||
+            code === KeyCode.Unknown
         ) {
             const data = hotkey.data[id];
             key.assist = generateBinary([data.ctrl, data.shift, data.alt]);
