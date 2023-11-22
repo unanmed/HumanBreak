@@ -136,7 +136,10 @@ function unwarpAssist(assist: number) {
 }
 
 function getKeyShow(key: KeyCode, assist: number) {
-    return unwarpAssist(assist) + KeyCodeUtils.toString(key);
+    return (
+        unwarpAssist(assist) +
+        (key === KeyCode.Unknown ? '' : KeyCodeUtils.toString(key))
+    );
 }
 
 function select(id: string, index: number) {
@@ -146,31 +149,58 @@ function select(id: string, index: number) {
 
 function keyup(e: KeyboardEvent) {
     if (selectedKey.id === 'none') return;
+    e.preventDefault();
     const code = keycode(e.keyCode);
-    if (
-        code === KeyCode.Ctrl ||
-        code === KeyCode.Shift ||
-        code === KeyCode.Alt
-    ) {
-        return;
-    }
+
     const assist = generateBinary([e.ctrlKey, e.shiftKey, e.altKey]);
     const id =
         selectedKey.index === -1
             ? selectedKey.id
             : `${selectedKey.id}_${selectedKey.index}`;
 
-    hotkey.set(id, code, assist);
     const key = keyData[selectedGroup.value][selectedKey.id].keys.find(
         v => v.index === selectedKey.index
     );
+
     if (key) {
-        key.key = code;
-        key.assist = assist;
+        if (
+            code === KeyCode.Ctrl ||
+            code === KeyCode.Shift ||
+            code === KeyCode.Alt
+        ) {
+            const data = hotkey.data[id];
+            key.assist = generateBinary([data.ctrl, data.shift, data.alt]);
+            key.key = data.key;
+        } else {
+            key.key = code;
+            key.assist = assist;
+            hotkey.set(id, code, assist);
+        }
     }
 
     selectedKey.id = 'none';
     selectedKey.index = -1;
+}
+
+function keydown(e: KeyboardEvent) {
+    if (selectedKey.id === 'none') return;
+    e.preventDefault();
+    const code = keycode(e.keyCode);
+    const assist = generateBinary([e.ctrlKey, e.shiftKey, e.altKey]);
+    const key = keyData[selectedGroup.value][selectedKey.id].keys.find(
+        v => v.index === selectedKey.index
+    );
+    if (!key) return;
+    key.assist = assist;
+    key.key = KeyCode.Unknown;
+
+    if (
+        code !== KeyCode.Ctrl &&
+        code !== KeyCode.Shift &&
+        code !== KeyCode.Alt
+    ) {
+        key.key = code;
+    }
 }
 
 // ban other keys
@@ -178,11 +208,13 @@ gameKey.disable();
 
 onMounted(() => {
     document.addEventListener('keyup', keyup);
+    document.addEventListener('keydown', keydown);
 });
 
 onUnmounted(() => {
     gameKey.enable();
     document.removeEventListener('keyup', keyup);
+    document.removeEventListener('keydown', keydown);
 });
 </script>
 
