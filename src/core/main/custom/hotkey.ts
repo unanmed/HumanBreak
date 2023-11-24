@@ -151,7 +151,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * @param emit 是否触发set事件，当且仅当从fromJSON方法调用时为false
      */
     set(id: string, key: KeyCode, assist: number, emit: boolean = true) {
-        const { ctrl, shift, alt } = this.unwarpBinary(assist);
+        const { ctrl, shift, alt } = unwarpBinary(assist);
         const data = this.data[id];
         const before = this.keyMap.get(data.key)!;
         deleteWith(before, data);
@@ -175,13 +175,13 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
         assist: number,
         type: KeyEmitType,
         ev: KeyboardEvent
-    ) {
-        if (!this.enabled) return;
+    ): boolean {
+        if (!this.enabled) return false;
         const when = this.conditionMap.get(this.scope)!;
-        if (!when()) return;
+        if (!when()) return false;
         const toEmit = this.keyMap.get(key);
-        if (!toEmit) return;
-        const { ctrl, shift, alt } = this.unwarpBinary(assist);
+        if (!toEmit) return false;
+        const { ctrl, shift, alt } = unwarpBinary(assist);
         toEmit.forEach(v => {
             if (type !== v.type) return;
             if (ctrl === v.ctrl && shift === v.shift && alt === v.alt) {
@@ -193,6 +193,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
             }
         });
         this.emit('emit', key, assist, type);
+        return toEmit.length > 0;
     }
 
     /**
@@ -248,14 +249,6 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
         }
     }
 
-    private unwarpBinary(bin: number): AssistHoykey {
-        return {
-            ctrl: !!(bin & (1 << 0)),
-            shift: !!(bin & (1 << 1)),
-            alt: !!(bin & (1 << 2))
-        };
-    }
-
     private ensureMap(key: KeyCode) {
         if (!this.keyMap.has(key)) {
             this.keyMap.set(key, []);
@@ -269,4 +262,12 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
     static get(id: string) {
         return this.list.find(v => v.id === id);
     }
+}
+
+export function unwarpBinary(bin: number): AssistHoykey {
+    return {
+        ctrl: !!(bin & (1 << 0)),
+        shift: !!(bin & (1 << 1)),
+        alt: !!(bin & (1 << 2))
+    };
 }

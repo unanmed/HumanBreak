@@ -507,10 +507,14 @@ gameKey.fromJSON(keyStorage.toJSON());
 document.addEventListener('keyup', e => {
     const assist = generateBinary([e.ctrlKey, e.shiftKey, e.altKey]);
     const code = keycode(e.keyCode);
-    gameKey.emitKey(code, assist, 'up', e);
+    if (gameKey.emitKey(code, assist, 'up', e)) {
+        e.preventDefault();
+    }
 });
 document.addEventListener('keydown', e => {
     const assist = generateBinary([e.ctrlKey, e.shiftKey, e.altKey]);
     const code = keycode(e.keyCode);
-    gameKey.emitKey(code, assist, 'down', e);
+    if (gameKey.emitKey(code, assist, 'down', e)) {
+        e.preventDefault();
+    }
 });
