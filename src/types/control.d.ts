@@ -699,12 +699,6 @@ interface Control {
     getNakedStatus(name?: keyof NumbericHeroStatus): number;
 
     /**
-     * 获得某个状态的中文名
-     * @param name 要获取的属性名
-     */
-    getStatusLabel(name: string): string;
-
-    /**
      * 设置主角某个属性的百分比修正倍率，初始值为1，
      * 倍率存放在flag: `__${name}_${buff}__` 中
      * @example core.setBuff('atk', 0.5); // 主角能发挥出的攻击力减半

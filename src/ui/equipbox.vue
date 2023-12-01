@@ -13,7 +13,7 @@
                 <div id="filter">
                     <a-select v-model:value="norm" class="select">
                         <a-select-option v-for="t of normList" :value="t">{{
-                            t === 'none' ? '所有' : label(t)
+                            t === 'none' ? '所有' : getStatusLabel(t)
                         }}</a-select-option>
                     </a-select>
                     <a-divider type="vertical" class="divider"></a-divider>
@@ -191,12 +191,12 @@ import {
 import Scroll from '../components/scroll.vue';
 import { getAddStatus, getEquips, getNowStatus } from '../plugin/ui/equipbox';
 import BoxAnimate from '../components/boxAnimate.vue';
-import { has, keycode, tip, type } from '../plugin/utils';
+import { has, tip, type } from '../plugin/utils';
 import { cancelGlobalDrag, isMobile, useDrag } from '../plugin/use';
-import { hyper, sleep } from 'mutate-animate';
-import { KeyCode } from '../plugin/keyCodes';
+import { hyper } from 'mutate-animate';
 import { GameUi } from '@/core/main/custom/ui';
 import { gameKey } from '@/core/main/init/hotkey';
+import { getStatusLabel } from '../plugin/utils';
 
 const props = defineProps<{
     num: number;
@@ -222,8 +222,6 @@ const sType = ref<'value' | 'percentage'>('value');
 
 // 攻击 防御 回血 额外攻击
 const normList = ['none', 'atk', 'def', 'hpmax', 'mana'];
-
-const label = core.getStatusLabel;
 
 watch(sort, n => {
     selected.value = toShow.value.length - selected.value - 1;

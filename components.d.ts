@@ -17,6 +17,7 @@ declare module '@vue/runtime-core' {
     ASwitch: typeof import('ant-design-vue/es')['Switch']
     Box: typeof import('./src/components/box.vue')['default']
     BoxAnimate: typeof import('./src/components/boxAnimate.vue')['default']
+    Changable: typeof import('./src/components/changable.vue')['default']
     Colomn: typeof import('./src/components/colomn.vue')['default']
     EnemyOne: typeof import('./src/components/enemyOne.vue')['default']
     Scroll: typeof import('./src/components/scroll.vue')['default']

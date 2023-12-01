@@ -8,6 +8,14 @@ export interface GameEvent extends EmitableEvent {
     mounted: () => void;
     /** Emitted in plugin/ui.js */
     statusBarUpdate: () => void;
+    /** Emitted in libs/events.js */
+    afterGetItem: (
+        itemId: AllIdsOf<'items'>,
+        x: number,
+        y: number,
+        isGentleClick: boolean
+    ) => void;
+    afterOpenDoor: (doorId: AllIdsOf<'animates'>, x: number, y: number) => void;
 }
 
 export const hook = new EventEmitter<GameEvent>();

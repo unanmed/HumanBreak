@@ -307,3 +307,29 @@ export function generateBinary(arr: boolean[]) {
     });
     return num;
 }
+
+/**
+ * 获得某个状态的中文名
+ * @param name 要获取的属性名
+ */
+export function getStatusLabel(name: string) {
+    return (
+        {
+            name: '名称',
+            lv: '等级',
+            hpmax: '生命回复',
+            hp: '生命',
+            manamax: '魔力上限',
+            mana: '额外攻击',
+            atk: '攻击',
+            def: '防御',
+            mdef: '智慧',
+            money: '金币',
+            exp: '经验',
+            point: '加点',
+            steps: '步数',
+            up: '升级',
+            none: '无'
+        }[name] || name
+    );
+}

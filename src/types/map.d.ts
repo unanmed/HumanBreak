@@ -215,7 +215,7 @@ interface ResolvedFloor<T extends FloorIds = FloorIds> extends FloorBase<T> {
     /**
      * 获得道具后事件
      */
-    afterGetItem: Record<LocString, MotaEvent>;
+    afterGetItem: Record<LocString, MotaAction>;
 
     /**
      * 开门后事件

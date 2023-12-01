@@ -21,12 +21,6 @@ interface ControlData {
     loadData(data: Save, callback?: () => void): void;
 
     /**
-     * 获取一个属性对应的中文名
-     * @param name 要获取的状态名称
-     */
-    getStatusLabel(name: string): string;
-
-    /**
      * 立即仅更新状态栏
      */
     updateStatusBar(): void;

@@ -471,7 +471,7 @@ events.prototype.openDoor = function (x, y, needKey, callback) {
         core.removeBlock(x, y);
         setTimeout(function () {
             core.status.replay.animate = false;
-            core.events.afterOpenDoor(block.event.id, x, y);
+            mota.game.hook.emit('afterOpenDoor', block.event.id, x, y);
             if (callback) callback();
         }, 1); // +1是为了录像检测系统
     } else {
@@ -556,7 +556,7 @@ events.prototype._openDoor_animate = function (block, x, y, callback) {
         core.maps._removeBlockFromMap(core.status.floorId, block);
         if (!locked) core.unlockControl();
         core.status.replay.animate = false;
-        core.events.afterOpenDoor(block.event.id, x, y);
+        mota.game.hook.emit('afterOpenDoor', block.event.id, x, y);
         if (callback) callback();
     };
 
@@ -582,7 +582,7 @@ events.prototype._openDoor_animate = function (block, x, y, callback) {
 
 ////// 开一个门后触发的事件 //////
 events.prototype.afterOpenDoor = function (doorId, x, y) {
-    return this.eventdata.afterOpenDoor(doorId, x, y);
+    // Deprecated. See hook#afterOpenDoor.
 };
 
 events.prototype._sys_getItem = function (data, callback) {
@@ -636,12 +636,12 @@ events.prototype.getItem = function (id, num, x, y, isGentleClick, callback) {
         itemHint.push(id);
     }
 
-    this.afterGetItem(id, x, y, isGentleClick);
+    mota.game.hook.emit('afterGetItem', id, x, y, isGentleClick);
     if (callback) callback();
 };
 
 events.prototype.afterGetItem = function (id, x, y, isGentleClick) {
-    this.eventdata.afterGetItem(id, x, y, isGentleClick);
+    // Deprecated. See hook#afterGetItem
 };
 
 ////// 获得面前的物品（轻按） //////

@@ -260,90 +260,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             core.changeFloor(toId, stair, loc, null, callback);
 
             return true;
-        },
-        afterOpenDoor: function (doorId, x, y) {
-            // 开一个门后触发的事件
-
-            var todo = [];
-            // 检查该点的获得开门后事件。
-            if (core.status.floorId == null) return;
-            var event =
-                core.floors[core.status.floorId].afterOpenDoor[x + ',' + y];
-            if (event) core.unshift(todo, event);
-
-            if (todo.length > 0) core.insertAction(todo, x, y);
-
-            if (core.status.event.id == null) core.continueAutomaticRoute();
-            else core.clearContinueAutomaticRoute();
-        },
-        afterGetItem: function (itemId, x, y, isGentleClick) {
-            // 获得一个道具后触发的事件
-            // itemId：获得的道具ID；x和y是该道具所在的坐标
-            // isGentleClick：是否是轻按触发的
-            if (
-                (itemId.endsWith('Potion') ||
-                    itemId == 'I482' ||
-                    itemId == 'I484' ||
-                    itemId == 'I487' ||
-                    itemId == 'I491') &&
-                core.material.items[itemId].cls == 'items'
-            )
-                core.playSound('回血');
-            else core.playSound('获得道具');
-
-            var todo = [];
-            // 检查该点的获得道具后事件。
-            if (core.status.floorId == null) return;
-            var event =
-                core.floors[core.status.floorId].afterGetItem[x + ',' + y];
-            if (
-                event &&
-                (event instanceof Array ||
-                    !isGentleClick ||
-                    !event.disableOnGentleClick)
-            ) {
-                core.unshift(todo, event);
-            }
-            if (core.hasFlag('spring')) {
-                if (!core.hasFlag('springCount'))
-                    core.setFlag('springCount', 0);
-                if (
-                    itemId.endsWith('Potion') ||
-                    itemId == 'I482' ||
-                    itemId == 'I484' ||
-                    itemId == 'I487' ||
-                    itemId == 'I491'
-                ) {
-                    core.addFlag('springCount', 1);
-                }
-                if (core.getFlag('springCount', 0) == 50) {
-                    core.setFlag('springCount', 0);
-                    core.status.hero.hpmax +=
-                        core.getNakedStatus('hpmax') * 0.1;
-                }
-                core.updateStatusBar();
-            }
-
-            if (todo.length > 0) core.insertAction(todo, x, y);
-        }
-    },
-    actions: {
-        onKeyUp: function (keyCode, altKey) {
-            // 键盘按键处理，可以在这里自定义快捷键列表
-            // keyCode：当前按键的keyCode（每个键的keyCode自行百度）
-            // altKey：Alt键是否被按下，为true代表同时按下了Alt键
-            // 可以在这里任意增加或编辑每个按键的行为
-
-            if (core.status.lockControl) return;
-
-            // 如果处于正在行走状态，则不处理
-            if (core.isMoving()) return;
-
-            // Alt+0~9，快捷换上套装
-            if (altKey && keyCode >= 48 && keyCode <= 57) {
-                core.items.quickLoadEquip(keyCode - 48);
-                return;
-            }
         }
     },
     control: {
@@ -435,31 +351,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     }
                 }
             });
-        },
-        getStatusLabel: function (name) {
-            // 返回某个状态英文名的对应中文标签，如atk -> 攻击，def -> 防御等。
-            // 请注意此项仅影响 libs/ 下的内容（如绘制怪物手册、数据统计等）
-            // 自行定义的（比如获得道具效果）中用到的“攻击+3”等需要自己去对应地方修改
-
-            return (
-                {
-                    name: '名称',
-                    lv: '等级',
-                    hpmax: '生命回复',
-                    hp: '生命',
-                    manamax: '魔力上限',
-                    mana: '额外攻击',
-                    atk: '攻击',
-                    def: '防御',
-                    mdef: '智慧',
-                    money: '金币',
-                    exp: '经验',
-                    point: '加点',
-                    steps: '步数',
-                    up: '升级',
-                    none: '无'
-                }[name] || name
-            );
         },
         updateStatusBar: function () {
             // 更新状态栏

@@ -1,4 +1,4 @@
-import { has } from '../utils';
+import { getStatusLabel, has } from '../utils';
 
 /**
  * 获取所有装备
@@ -28,9 +28,7 @@ export function getAddStatus(equip: Equip) {
 
                 return (
                     <span style="display: flex">
-                        <span style="flex-basis: 50%">
-                            {core.getStatusLabel(v)}
-                        </span>
+                        <span style="flex-basis: 50%">{getStatusLabel(v)}</span>
                         &nbsp;&nbsp;&nbsp;&nbsp;
                         <span
                             style={{
@@ -84,7 +82,7 @@ export function getNowStatus(nowEquip?: Equip, onCol: boolean = false) {
                 return (
                     <div class="hero-status-one">
                         <span class="hero-status-label">
-                            {core.getStatusLabel(v)}
+                            {getStatusLabel(v)}
                         </span>
                         <div class="hero-status-value">
                             <span style="margin-right: 20%">{status}</span>

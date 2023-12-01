@@ -18,7 +18,6 @@ function actions() {
 }
 
 actions.prototype._init = function () {
-    this.actionsdata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.actions;
     this.actions = {};
     // --- onkeyDown注册
     this.registerAction(
@@ -531,7 +530,6 @@ actions.prototype._sys_keyUp_lockControl = function (keyCode, altKey) {
 
 actions.prototype._sys_keyUp = function (keyCode, altKey) {
     if (!core.status.played) return true;
-    this.actionsdata.onKeyUp(keyCode, altKey);
     if (core.status.automaticRoute && core.status.automaticRoute.autoHeroMove) {
         core.stopAutomaticRoute();
     }

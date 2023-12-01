@@ -87,11 +87,6 @@ interface Actions extends VoidedActionFuncs {
     readonly _HY_: number;
 
     /**
-     * 脚本编辑中的交互函数
-     */
-    readonly actionsdata: ActionData;
-
-    /**
      * 所有已注册的交互操作
      */
     readonly actions: {
