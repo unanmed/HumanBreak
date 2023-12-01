@@ -66,7 +66,12 @@
                         @click="changeFloorByDelta(-1)"
                         class="button-text"
                     />
-                    <span id="fly-now">{{ title }}</span>
+                    <span
+                        class="changable"
+                        id="fly-now"
+                        :change="titleChange"
+                        >{{ title }}</span
+                    >
                     <right-outlined
                         @click="changeFloorByDelta(1)"
                         class="button-text"
@@ -96,6 +101,7 @@ import { debounce } from 'lodash-es';
 import { downloadCanvasImage, tip } from '../plugin/utils';
 import { GameUi } from '@/core/main/custom/ui';
 import { gameKey } from '@/core/main/init/hotkey';
+import { createChangable } from '@/plugin/ui/common';
 
 const props = defineProps<{
     num: number;
@@ -158,6 +164,7 @@ function exit() {
 const title = computed(() => {
     return core.status.maps[nowFloor.value].title;
 });
+const titleChange = createChangable(title).change;
 
 /**
  * 绘制小地图

@@ -45,7 +45,9 @@
                         isMobile ? '' : '&nbsp;&nbsp;&nbsp;&nbsp;'
                     }}</span
                 >
-                <span>{{ format(addAtk * ratio) }}</span>
+                <span class="changable" :change="addAtkChangable">{{
+                    format(addAtk * ratio)
+                }}</span>
             </div>
             <div>
                 <span
@@ -53,7 +55,9 @@
                         isMobile ? '' : '&nbsp;&nbsp;&nbsp;&nbsp;'
                     }}</span
                 >
-                <span>{{ format(addDef * ratio) }}</span>
+                <span class="changable" :change="addDefChangable">{{
+                    format(addDef * ratio)
+                }}</span>
             </div>
             <div>
                 <span
@@ -61,7 +65,7 @@
                         isMobile ? '' : '&nbsp;&nbsp;&nbsp;&nbsp;'
                     }}</span
                 >
-                <span
+                <span class="changable" :change="nowDamageChangable"
                     ><span style="font-family: 'Fira Code'">{{
                         (nowDamage[0] as number) < 0 && !has(enemy.damage)
                             ? '=>'
@@ -80,7 +84,9 @@
                         isMobile ? '' : '&nbsp;&nbsp;&nbsp;&nbsp;'
                     }}</span
                 >
-                <span>{{ format(nowDamage[1]) }}</span>
+                <span class="changable" :change="nowDamageChangable">{{
+                    format(nowDamage[1])
+                }}</span>
             </div>
         </div>
     </div>
@@ -93,6 +99,7 @@ import Chart, { ChartConfiguration } from 'chart.js/auto';
 import { has, setCanvasSize } from '../plugin/utils';
 import { debounce } from 'lodash-es';
 import { isMobile } from '../plugin/use';
+import { createChangable } from '@/plugin/ui/common';
 
 const props = defineProps<{
     fromBook?: boolean;
@@ -123,6 +130,8 @@ const allDef = ref(originDef);
 // 加攻加防数量
 const addAtk = ref(0);
 const addDef = ref(0);
+const addAtkChangable = createChangable(addAtk).change;
+const addDefChangable = createChangable(addDef).change;
 
 const originDamage = enemy.enemy.calDamage(core.status.hero).damage;
 
@@ -139,6 +148,7 @@ const nowDamage = computed(() => {
     if (!isFinite(originDamage)) return [-dam, dam];
     return [originDamage - dam, dam];
 });
+const nowDamageChangable = createChangable(nowDamage, 1).change;
 
 function generateChart(ele: HTMLCanvasElement, data: [number, number][]) {
     Chart.defaults.color = '#aaa';
