@@ -4,6 +4,7 @@
         @click="select"
         @mousemove="enter"
         :selected="selected"
+        :style="style"
     >
         <div class="info">
             <div class="leftbar">
@@ -113,6 +114,7 @@ import { has } from '../plugin/utils';
 import BoxAnimate from '../components/boxAnimate.vue';
 import { isMobile } from '../plugin/use';
 import { ToShowEnemy } from '../plugin/ui/book';
+import border from '@/data/enemyBorder.json';
 
 const props = defineProps<{
     enemy: ToShowEnemy;
@@ -127,6 +129,8 @@ const emits = defineEmits<{
 const core = window.core;
 
 const w = window.innerWidth * 0.032;
+
+const style = border[props.enemy.enemy.enemy.id as keyof typeof border] ?? {};
 
 /**
  * 选择这个怪物时
