@@ -28,7 +28,8 @@ fixedUi.register(
     new GameUi('fixed', UI.Fixed),
     new GameUi('chapter', UI.Chapter),
     new GameUi('completeAchi', UI.CompleteAchi),
-    new GameUi('start', UI.Start)
+    new GameUi('start', UI.Start),
+    new GameUi('toolbar', UI.Toolbar)
 );
 fixedUi.showAll();
 

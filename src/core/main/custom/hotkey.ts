@@ -271,3 +271,10 @@ export function unwarpBinary(bin: number): AssistHoykey {
         alt: !!(bin & (1 << 2))
     };
 }
+
+export function checkAssist(bin: number, key: KeyCode) {
+    return !!(
+        (1 << (key === KeyCode.Ctrl ? 0 : key === KeyCode.Shift ? 1 : 2)) &
+        bin
+    );
+}

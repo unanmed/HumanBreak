@@ -333,3 +333,9 @@ export function getStatusLabel(name: string) {
         }[name] || name
     );
 }
+
+export function flipBinary(num: number, col: number) {
+    const n = 1 << col;
+    if (num & col) return num & ~n;
+    else return num | n;
+}

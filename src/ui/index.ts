@@ -20,3 +20,4 @@ export { default as Studied } from './studied.vue';
 export { default as Study } from './study.vue';
 export { default as Toolbox } from './toolbox.vue';
 export { default as Hotkey } from './hotkey.vue';
+export { default as Toolbar } from './toolbar.vue';
