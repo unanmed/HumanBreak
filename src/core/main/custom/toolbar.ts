@@ -102,6 +102,7 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
         } as ToolbarItemMap[K];
         this.items.push(data);
         this.emit('add', data);
+        return this;
     }
 
     /**
@@ -114,6 +115,7 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
         const item = this.items[index];
         this.items.splice(index, 1);
         this.emit('delete', item);
+        return this;
     }
 
     /**
@@ -129,6 +131,7 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
         if (!toSet) return;
         Object.assign(toSet, item);
         this.emit('set', id, item);
+        return this;
     }
 
     /**
@@ -172,7 +175,7 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
         nextTick(() => {
             this.items.push(...items);
         });
-        // this.items.push(...this.items.splice(0));
+        return this;
     }
 
     setPos(x?: number, y?: number) {
@@ -196,20 +199,21 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
 
 hook.once('reset', () => {
     const toolbar = new CustomToolbar('test');
-    toolbar.add<'hotkey'>({
-        id: 'test1',
-        type: 'hotkey',
-        assist: 0,
-        key: KeyCode.KeyX
-    });
-    toolbar.add<'assistKey'>({
-        id: 'test2',
-        type: 'assistKey',
-        assist: KeyCode.Ctrl
-    });
-    toolbar.add<'item'>({
-        id: 'test3',
-        type: 'item',
-        item: 'book'
-    });
+    toolbar
+        .add<'hotkey'>({
+            id: 'test1',
+            type: 'hotkey',
+            assist: 0,
+            key: KeyCode.KeyX
+        })
+        .add<'assistKey'>({
+            id: 'test2',
+            type: 'assistKey',
+            assist: KeyCode.Ctrl
+        })
+        .add<'item'>({
+            id: 'test3',
+            type: 'item',
+            item: 'book'
+        });
 });
