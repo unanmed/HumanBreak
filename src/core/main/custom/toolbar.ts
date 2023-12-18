@@ -15,8 +15,6 @@ interface CustomToolbarEvent extends EmitableEvent {
     emit: (id: string) => void;
 }
 
-type ToolbarItemType = 'hotkey' | 'item' | 'assistKey';
-
 interface ToolbarItemBase<T extends ToolbarItemType> {
     type: T;
     id: string;
@@ -44,6 +42,8 @@ interface ToolbarItemMap {
     item: ItemToolbarItem;
     assistKey: AssistKeyToolbarItem;
 }
+
+type ToolbarItemType = keyof ToolbarItemMap;
 
 export type SettableItemData<T extends ToolbarItemType = ToolbarItemType> =
     Omit<ToolbarItemMap[T], 'id' | 'type'>;

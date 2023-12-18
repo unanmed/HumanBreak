@@ -84,14 +84,14 @@ function click() {
     height: 50px;
     cursor: pointer;
     background-color: #222;
-    border: 1px solid #ddd8;
+    border: 1.5px solid #ddd8;
     justify-content: center;
     align-items: center;
     transition: all 0.1s linear;
 }
 
 .toolbar-item::v-deep(> *) {
-    height: 50px;
+    height: 100%;
     min-width: 50px;
     display: flex;
     justify-content: center;
@@ -99,6 +99,12 @@ function click() {
     text-align: center;
     text-overflow: clip;
     text-wrap: nowrap;
+    overflow: hidden;
+}
+
+.toolbar-item::v-deep(.button-text)[active='true'] {
+    color: gold;
+    background-color: #555;
 }
 
 .toolbar-item:hover {
