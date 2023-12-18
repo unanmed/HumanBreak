@@ -9,6 +9,7 @@ import { fixedUi, mainUi } from './main/init/ui';
 import { GameStorage } from './main/storage';
 import { resolvePlugin } from './plugin';
 import './main/init/';
+import './main/custom/toolbar';
 
 interface AncTePlugin {
     pop: ReturnType<typeof import('../plugin/pop').default>;

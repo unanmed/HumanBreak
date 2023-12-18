@@ -1,5 +1,6 @@
 <template>
     <Box
+        class="toolbar-container"
         :dragable="true"
         :resizable="true"
         v-model:left="box.x"
@@ -8,7 +9,11 @@
         v-model:width="box.width"
     >
         <div class="toolbar">
-            <div v-for="item of bar.items">
+            <div
+                class="toolbar-item"
+                v-for="item of bar.items"
+                @click.stop="click"
+            >
                 <component
                     :is="(item.com as any)"
                     :item="item"
@@ -52,11 +57,55 @@ watch(box, ({ x, y, width, height }) => {
     bar.width = width;
     bar.height = height;
 });
+
+function click() {
+    // pass
+}
 </script>
 
 <style lang="less" scoped>
+.toolbar-container {
+    background-color: #0009;
+    padding: 5px;
+}
+
 .toolbar {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    font-size: 150%;
+}
+
+.toolbar-item {
+    display: flex;
+    margin: 5px;
+    min-width: 50px;
+    height: 50px;
+    cursor: pointer;
+    background-color: #222;
+    border: 1px solid #ddd8;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.1s linear;
+}
+
+.toolbar-item::v-deep(> *) {
+    height: 50px;
+    min-width: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    text-overflow: clip;
+    text-wrap: nowrap;
+}
+
+.toolbar-item:hover {
+    background-color: #444;
+}
+
+.toolbar-item:active {
+    background-color: #333;
 }
 </style>

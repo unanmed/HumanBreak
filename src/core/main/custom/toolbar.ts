@@ -1,10 +1,12 @@
 import { EmitableEvent, EventEmitter } from '@/core/common/eventEmitter';
 import { KeyCode } from '@/plugin/keyCodes';
 import { flipBinary, has } from '@/plugin/utils';
-import { FunctionalComponent, reactive } from 'vue';
+import { FunctionalComponent, nextTick, reactive } from 'vue';
 import { createToolbarComponents } from '../init/toolbar';
 import { gameKey } from '../init/hotkey';
 import { unwarpBinary } from './hotkey';
+import { fixedUi } from '../init/ui';
+import { hook } from '../game';
 
 interface CustomToolbarEvent extends EmitableEvent {
     add: (item: ValueOf<ToolbarItemMap>) => void;
@@ -77,13 +79,14 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
     x: number = 300;
     y: number = 300;
     width: number = 300;
-    height: number = 100;
+    height: number = 70;
     // ----- other
     assistKey: number = 0;
 
     constructor(id: string) {
         super();
         this.id = id;
+        this.show();
         CustomToolbar.list.push(this);
     }
 
@@ -134,13 +137,12 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
      */
     emitTool(id: string) {
         const item = this.items.find(v => v.id === id);
-        if (!item) return;
+        if (!item) return this;
         this.emit(id);
         if (item.type === 'hotkey') {
             // 按键
-            const { ctrl, shift, alt } = unwarpBinary(
-                item.assist | this.assistKey
-            );
+            const assist = item.assist | this.assistKey;
+            const { ctrl, shift, alt } = unwarpBinary(assist);
             const ev = new KeyboardEvent('keyup', {
                 ctrlKey: ctrl,
                 shiftKey: shift,
@@ -148,7 +150,7 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
             });
 
             // todo: Advanced KeyboardEvent simulate
-            gameKey.emitKey(item.key, item.assist, 'up', ev);
+            gameKey.emitKey(item.key, assist, 'up', ev);
         } else if (item.type === 'item') {
             // 道具
             core.tryUseItem(item.item);
@@ -162,6 +164,15 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
                 this.assistKey = flipBinary(this.assistKey, 2);
             }
         }
+        return this;
+    }
+
+    refresh() {
+        const items = this.items.splice(0);
+        nextTick(() => {
+            this.items.push(...items);
+        });
+        // this.items.push(...this.items.splice(0));
     }
 
     setPos(x?: number, y?: number) {
@@ -174,7 +185,31 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
         has(height) && (this.height = height);
     }
 
+    show() {
+        fixedUi.open('toolbar', { bar: this });
+    }
+
     static get(id: string) {
         return this.list.find(v => v.id === id);
     }
 }
+
+hook.once('reset', () => {
+    const toolbar = new CustomToolbar('test');
+    toolbar.add<'hotkey'>({
+        id: 'test1',
+        type: 'hotkey',
+        assist: 0,
+        key: KeyCode.KeyX
+    });
+    toolbar.add<'assistKey'>({
+        id: 'test2',
+        type: 'assistKey',
+        assist: KeyCode.Ctrl
+    });
+    toolbar.add<'item'>({
+        id: 'test3',
+        type: 'item',
+        item: 'book'
+    });
+});

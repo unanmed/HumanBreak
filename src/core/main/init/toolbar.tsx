@@ -4,7 +4,6 @@ import type {
     CustomToolbarProps
 } from '../custom/toolbar';
 import BoxAnimate from '@/components/boxAnimate.vue';
-import { onUnmounted, ref } from 'vue';
 import { checkAssist } from '../custom/hotkey';
 
 interface Components {
@@ -31,7 +30,7 @@ function DefaultTool(props: CustomToolbarProps) {
 function KeyTool(props: CustomToolbarProps<'hotkey'>) {
     const { item, toolbar } = props;
     return (
-        <span onClick={() => toolbar.emitTool(item.id)}>
+        <span class="button-text" onClick={() => toolbar.emitTool(item.id)}>
             {KeyCodeUtils.toString(item.key)}
         </span>
     );
@@ -40,30 +39,30 @@ function KeyTool(props: CustomToolbarProps<'hotkey'>) {
 function ItemTool(props: CustomToolbarProps<'item'>) {
     const { item, toolbar } = props;
     return (
-        <div onClick={() => toolbar.emitTool(item.id)}>
-            <BoxAnimate id={item.item}></BoxAnimate>
+        <div
+            style="display: flex; justify-content: center; width: 50px"
+            onClick={() => toolbar.emitTool(item.id)}
+        >
+            <BoxAnimate
+                noborder={true}
+                width={50}
+                height={50}
+                id={item.item}
+            ></BoxAnimate>
         </div>
     );
 }
 
 function AssistKeyTool(props: CustomToolbarProps<'assistKey'>) {
     const { item, toolbar } = props;
-    const pressed = ref(checkAssist(toolbar.assistKey, item.assist));
-    const listen = () => {
-        pressed.value = checkAssist(toolbar.assistKey, item.assist);
-    };
-    toolbar.on('emit', listen);
-
-    onUnmounted(() => {
-        toolbar.off('emit', listen);
-    });
+    const pressed = checkAssist(toolbar.assistKey, item.assist);
 
     return (
         <span
             class="button-text"
             // @ts-ignore
-            active={pressed.value}
-            onClick={() => toolbar.emitTool(item.id)}
+            active={pressed}
+            onClick={() => toolbar.emitTool(item.id).refresh()}
         >
             {KeyCodeUtils.toString(item.assist)}
         </span>
