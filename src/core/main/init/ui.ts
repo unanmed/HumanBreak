@@ -16,7 +16,8 @@ mainUi.register(
     new GameUi('shop', UI.Shop),
     new GameUi('achievement', UI.Achievement),
     new GameUi('bgm', UI.BgmList),
-    new GameUi('hotkey', UI.Hotkey)
+    new GameUi('hotkey', UI.Hotkey),
+    new GameUi('toolEditor', UI.ToolEditor)
     // todo: 把游戏主 div 加入到 mainUi 里面
 );
 mainUi.showAll();

@@ -2,7 +2,7 @@
     <div class="colomn">
         <div class="tools">
             <span class="button-text" @click="emits('close')"
-                ><left-outlined /> 返回游戏</span
+                ><left-outlined /> 返回</span
             >
         </div>
         <div class="column-main" :id="`column-${id}`">

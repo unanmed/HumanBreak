@@ -8,7 +8,7 @@ interface Components {
     BooleanSetting: SettingComponent;
     NumberSetting: SettingComponent;
     HotkeySetting: SettingComponent;
-    ToolbarSetting: SettingComponent;
+    ToolbarEditor: SettingComponent;
 }
 
 export function createSettingComponents() {
@@ -17,7 +17,7 @@ export function createSettingComponents() {
         BooleanSetting,
         NumberSetting,
         HotkeySetting,
-        ToolbarSetting
+        ToolbarEditor
     };
     return com;
 }
@@ -104,15 +104,14 @@ function HotkeySetting(props: SettingComponentProps) {
     );
 }
 
-function ToolbarSetting(props: SettingComponentProps) {
-    // todo: toolSetting.vue
+function ToolbarEditor(props: SettingComponentProps) {
     return (
         <div style="display: flex; justify-content: center">
             <Button
                 style="font-size: 75%"
                 type="primary"
                 size="large"
-                onClick={() => showSpecialSetting('toolSetting')}
+                onClick={() => showSpecialSetting('toolEditor')}
             >
                 自定义工具栏
             </Button>

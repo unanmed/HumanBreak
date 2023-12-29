@@ -1,7 +1,13 @@
 import { EmitableEvent, EventEmitter } from '@/core/common/eventEmitter';
 import { KeyCode } from '@/plugin/keyCodes';
 import { flipBinary, has } from '@/plugin/utils';
-import { FunctionalComponent, nextTick, reactive } from 'vue';
+import {
+    FunctionalComponent,
+    markRaw,
+    nextTick,
+    reactive,
+    shallowReactive
+} from 'vue';
 import { createToolbarComponents } from '../init/toolbar';
 import { gameKey } from '../init/hotkey';
 import { unwarpBinary } from './hotkey';
@@ -12,7 +18,7 @@ interface CustomToolbarEvent extends EmitableEvent {
     add: (item: ValueOf<ToolbarItemMap>) => void;
     delete: (item: ValueOf<ToolbarItemMap>) => void;
     set: (id: string, data: Partial<SettableItemData>) => void;
-    emit: (id: string) => void;
+    emit: (id: string, item: ValueOf<ToolbarItemMap>) => void;
 }
 
 interface ToolbarItemBase<T extends ToolbarItemType> {
@@ -70,7 +76,7 @@ const comMap: {
 
 export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
     static num: number = 0;
-    static list: CustomToolbar[] = [];
+    static list: CustomToolbar[] = shallowReactive([]);
 
     items: ValueOf<ToolbarItemMap>[] = reactive([]);
     num: number = CustomToolbar.num++;
@@ -97,7 +103,7 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
     add<K extends ToolbarItemType>(item: Omit<ToolbarItemMap[K], 'com'>) {
         // @ts-ignore
         const data: ToolbarItemMap[K] = {
-            com: comMap[item.type],
+            com: markRaw(comMap[item.type]),
             ...item
         } as ToolbarItemMap[K];
         this.items.push(data);
@@ -141,7 +147,7 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
     emitTool(id: string) {
         const item = this.items.find(v => v.id === id);
         if (!item) return this;
-        this.emit(id);
+        this.emit('emit', id, item);
         if (item.type === 'hotkey') {
             // 按键
             const assist = item.assist | this.assistKey;
