@@ -1,15 +1,34 @@
 <template>
-    <div class="keyboard-container"></div>
+    <div class="keyboard-container">
+        <div
+            v-for="(key, i) of keyboard.keys"
+            class="keyboard-item"
+            @click="keyboard.emitKey(key, i)"
+            :active="!!key.active"
+            :style="{
+                left: `${key.x}px`,
+                top: `${key.y}px`,
+                width: `${key.width}px`,
+                height: `${key.height}px`
+            }"
+        >
+            <span class="keyboard-key button-text">{{
+                key.text ?? KeyCodeUtils.toString(key.key)
+            }}</span>
+        </div>
+    </div>
 </template>
 
 <script lang="ts" setup>
 import { Keyboard } from '@/core/main/custom/keyboard';
 import { KeyboardEmits } from '@/core/main/custom/keyboard';
-import { ref } from 'vue';
+import { KeyCodeUtils } from '@/plugin/keyCodes';
 
 const props = defineProps<{
     keyboard: Keyboard;
 }>();
+
+const fontSize = props.keyboard.fontSize;
 
 const [width, height] = (() => {
     const key = props.keyboard;
@@ -28,5 +47,39 @@ const emits = defineEmits<{
 .keyboard-container {
     width: v-bind(width);
     height: v-bind(height);
+    display: block;
+    font-size: v-bind(fontSize);
+}
+
+.keyboard-item {
+    position: absolute;
+    background-color: #222;
+    border: 1.5px solid #ddd8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.1s linear;
+    cursor: pointer;
+}
+
+.keyboard-item:hover,
+.keyboard-item[active='true'] {
+    background-color: #555;
+}
+
+.keyboard-key[active='true'] {
+    color: gold;
+}
+
+.keyboard-key {
+    height: 100%;
+    min-width: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    text-overflow: clip;
+    text-wrap: nowrap;
+    overflow: hidden;
 }
 </style>

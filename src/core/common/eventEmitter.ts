@@ -5,13 +5,13 @@ export interface EmitableEvent {
     [event: string]: (...params: any) => any;
 }
 
-interface Listener<T extends (...params: any) => any> {
+export interface Listener<T extends (...params: any) => any> {
     fn: T;
     once?: boolean;
     immediate?: boolean;
 }
 
-interface ListenerOptions {
+export interface ListenerOptions {
     once: boolean;
     immediate: boolean;
 }
@@ -22,12 +22,12 @@ type EmitFn<F extends (...params: any) => any> = (
 ) => any;
 
 export class EventEmitter<T extends EmitableEvent = {}> {
-    private events: {
+    protected events: {
         [P in keyof T]?: Listener<T[P]>[];
     } = {};
     private emitted: (keyof T)[] = [];
 
-    private emitter: {
+    protected emitter: {
         [P in keyof T]?: EmitFn<T[P]>;
     } = {};
 
