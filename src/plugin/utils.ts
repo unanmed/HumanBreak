@@ -7,7 +7,8 @@ import { EVENT_KEY_CODE_MAP, KeyCode } from './keyCodes';
 import axios from 'axios';
 import { decompressFromBase64 } from 'lz-string';
 import { parseColor } from './webgl/utils';
-import { KeyboardEmits } from '@/core/main/custom/keyboard';
+import { isAssist, Keyboard, KeyboardEmits } from '@/core/main/custom/keyboard';
+import { mainUi } from '@/core/main/init/ui';
 
 type CanParseCss = keyof {
     [P in keyof CSSStyleDeclaration as CSSStyleDeclaration[P] extends string
@@ -357,6 +358,21 @@ export function getVitualKeyOnce(
     assist: number = 0
 ): Promise<KeyboardEmits> {
     return new Promise(res => {
-        res({ key: KeyCode.Unknown, assist: 0 });
+        const key = Keyboard.get('qwe')!;
+        key.withAssist(assist);
+        const id = mainUi.open('virtualKey', { keyboard: key });
+        key.on('emit', (item, assist, index, ev) => {
+            ev.preventDefault();
+            if (emitAssist) {
+                res({ key: item.key, assist: 0 });
+                key.disposeScope();
+            } else {
+                if (!isAssist(item.key)) {
+                    res({ key: item.key, assist });
+                    key.disposeScope();
+                }
+            }
+            mainUi.close(id);
+        });
     });
 }

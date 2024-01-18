@@ -6,7 +6,7 @@ import {
 import { KeyCode } from '@/plugin/keyCodes';
 import { gameKey } from '../init/hotkey';
 import { unwarpBinary } from './hotkey';
-import { deleteWith } from '@/plugin/utils';
+import { deleteWith, flipBinary } from '@/plugin/utils';
 import { cloneDeep } from 'lodash-es';
 import { shallowReactive } from 'vue';
 
@@ -22,12 +22,6 @@ interface KeyboardItem {
     y: number;
     width: number;
     height: number;
-    active?: boolean;
-}
-
-interface AssistManager {
-    symbol: symbol;
-    end(): void;
 }
 
 interface VirtualKeyEmit {
@@ -46,6 +40,8 @@ interface VirtualKeyboardEvent extends EmitableEvent {
     remove: (item: KeyboardItem) => void;
     extend: (extended: Keyboard) => void;
     emit: VirtualKeyEmitFn;
+    scopeCreate: (scope: symbol) => void;
+    scopeDispose: (scope: symbol) => void;
 }
 
 /**
@@ -62,6 +58,7 @@ export class Keyboard extends EventEmitter<VirtualKeyboardEvent> {
     scope: symbol = Symbol();
     private scopeStack: symbol[] = [];
     private onEmitKey: Record<symbol, Listener<VirtualKeyEmitFn>[]> = {};
+    private scopeAssist: Record<symbol, number> = {};
 
     constructor(id: string) {
         super();
@@ -93,19 +90,11 @@ export class Keyboard extends EventEmitter<VirtualKeyboardEvent> {
     /**
      * 创造一个在某些辅助按键已经按下的情况下的作用域，这些被按下的辅助按键还可以被玩家手动取消
      * @param assist 辅助按键
-     * @returns 作用域控制器，用于结束此作用域
      */
-    withAssist(assist: number): AssistManager {
-        const thisAssist = this.assist;
+    withAssist(assist: number) {
         this.assist = assist;
         const symbol = this.createScope();
-
-        return {
-            symbol,
-            end: () => {
-                this.assist = thisAssist;
-            }
-        };
+        return symbol;
     }
 
     /**
@@ -113,6 +102,7 @@ export class Keyboard extends EventEmitter<VirtualKeyboardEvent> {
      * @returns 作用域的唯一标识符
      */
     createScope() {
+        const last = this.scopeStack.at(-1);
         const symbol = Symbol();
         this.scope = symbol;
         this.scopeStack.push(symbol);
@@ -120,6 +110,12 @@ export class Keyboard extends EventEmitter<VirtualKeyboardEvent> {
         this.onEmitKey[symbol] = ev;
         // @ts-ignore
         this.events = ev;
+        this.emit('scopeCreate', symbol);
+        if (!!last) {
+            this.scopeAssist[symbol] = this.assist;
+        }
+        this.assist = 0;
+        this.scopeAssist[symbol] = 0;
         return symbol;
     }
 
@@ -134,9 +130,12 @@ export class Keyboard extends EventEmitter<VirtualKeyboardEvent> {
         }
         const now = this.scopeStack.pop()!;
         delete this.onEmitKey[now];
+        delete this.scopeAssist[now];
         const symbol = this.scopeStack.at(-1);
+        this.emit('scopeDispose', now);
         if (!symbol) return;
         this.scope = symbol;
+        this.assist = this.scopeAssist[symbol];
         // @ts-ignore
         this.events = this.onEmitKey[symbol];
     }
@@ -168,6 +167,13 @@ export class Keyboard extends EventEmitter<VirtualKeyboardEvent> {
         this.emit('emit', key, this.assist, index, { preventDefault });
 
         if (!prevent) {
+            if (key.key === KeyCode.Ctrl) {
+                this.assist = flipBinary(this.assist, 0);
+            } else if (key.key === KeyCode.Shift) {
+                this.assist = flipBinary(this.assist, 1);
+            } else if (key.key === KeyCode.Alt) {
+                this.assist = flipBinary(this.assist, 2);
+            }
             const ev = generateKeyboardEvent(key.key, this.assist);
             gameKey.emitKey(key.key, this.assist, 'up', ev);
         }
@@ -187,4 +193,8 @@ export function generateKeyboardEvent(key: KeyCode, assist: number) {
     });
 
     return ev;
+}
+
+export function isAssist(key: KeyCode) {
+    return key === KeyCode.Ctrl || key === KeyCode.Shift || key === KeyCode.Alt;
 }

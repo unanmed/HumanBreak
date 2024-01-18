@@ -1,4 +1,5 @@
 import * as UI from '@ui/.';
+import * as MiscUI from './misc';
 import { GameUi, UiController } from '../custom/ui';
 import { hook } from '../game';
 
@@ -17,7 +18,8 @@ mainUi.register(
     new GameUi('achievement', UI.Achievement),
     new GameUi('bgm', UI.BgmList),
     new GameUi('hotkey', UI.Hotkey),
-    new GameUi('toolEditor', UI.ToolEditor)
+    new GameUi('toolEditor', UI.ToolEditor),
+    new GameUi('virtualKey', MiscUI.VirtualKey)
     // todo: 把游戏主 div 加入到 mainUi 里面
 );
 mainUi.showAll();

@@ -4,7 +4,7 @@
             v-for="(key, i) of keyboard.keys"
             class="keyboard-item"
             @click="keyboard.emitKey(key, i)"
-            :active="!!key.active"
+            :active="checkAssist(assist, key.key)"
             :style="{
                 left: `${key.x}px`,
                 top: `${key.y}px`,
@@ -20,27 +20,46 @@
 </template>
 
 <script lang="ts" setup>
+import { checkAssist } from '@/core/main/custom/hotkey';
 import { Keyboard } from '@/core/main/custom/keyboard';
 import { KeyboardEmits } from '@/core/main/custom/keyboard';
 import { KeyCodeUtils } from '@/plugin/keyCodes';
+import { onUnmounted, ref } from 'vue';
 
 const props = defineProps<{
     keyboard: Keyboard;
 }>();
 
-const fontSize = props.keyboard.fontSize;
+const assist = ref(props.keyboard.assist);
+const fontSize = `${props.keyboard.fontSize}px`;
 
 const [width, height] = (() => {
     const key = props.keyboard;
-    const mw = Math.max(...key.keys.map(v => v.x));
-    const mh = Math.max(...key.keys.map(v => v.y));
+    let mw = 0;
+    let mh = 0;
+    for (const k of key.keys) {
+        if (k.x + k.width > mw) mw = k.x + k.width;
+        if (k.y + k.height > mh) mh = k.y + k.height;
+    }
 
-    return [mw, mh];
+    return [`${mw}px`, `${mh}px`];
 })();
+
+function onAssist(_: any, ass: number) {
+    new Promise<void>(res => {
+        assist.value = ass;
+        res();
+    });
+}
+props.keyboard.on('emit', onAssist);
 
 const emits = defineEmits<{
     (e: 'keyup', data: KeyboardEmits): void;
 }>();
+
+onUnmounted(() => {
+    props.keyboard.off('emit', onAssist);
+});
 </script>
 
 <style lang="less" scoped>
@@ -49,6 +68,7 @@ const emits = defineEmits<{
     height: v-bind(height);
     display: block;
     font-size: v-bind(fontSize);
+    position: relative;
 }
 
 .keyboard-item {
