@@ -3,6 +3,8 @@ import { AudioParamOf, AudioPlayer } from './audio';
 import resource from '@/data/resource.json';
 import { ResourceController } from '../loader/controller';
 
+// todo: 立体声，可设置音源位置
+
 type Panner = AudioParamOf<PannerNode>;
 
 export class SoundEffect extends AudioPlayer {

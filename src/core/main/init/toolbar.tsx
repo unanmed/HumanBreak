@@ -6,6 +6,8 @@ import type {
 import BoxAnimate from '@/components/boxAnimate.vue';
 import { checkAssist } from '../custom/hotkey';
 
+// todo: 新增更改设置的ToolItem
+
 interface Components {
     DefaultTool: CustomToolbarComponent;
     KeyTool: CustomToolbarComponent<'hotkey'>;

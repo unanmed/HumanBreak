@@ -3,19 +3,21 @@ import { Button, InputNumber } from 'ant-design-vue';
 import { mainUi } from './ui';
 import { gameKey } from './hotkey';
 
+// todo: 数字类型改为一个输入框，一个加按钮一个减按钮；新增单选框
+
 interface Components {
-    DefaultSetting: SettingComponent;
-    BooleanSetting: SettingComponent;
-    NumberSetting: SettingComponent;
+    Default: SettingComponent;
+    Boolean: SettingComponent;
+    Number: SettingComponent;
     HotkeySetting: SettingComponent;
     ToolbarEditor: SettingComponent;
 }
 
 export function createSettingComponents() {
     const com: Components = {
-        DefaultSetting,
-        BooleanSetting,
-        NumberSetting,
+        Default: DefaultSetting,
+        Boolean: BooleanSetting,
+        Number: NumberSetting,
         HotkeySetting,
         ToolbarEditor
     };

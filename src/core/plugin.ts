@@ -18,6 +18,8 @@ import smooth from '@/plugin/fx/smoothView';
 import frag from '@/plugin/fx/frag';
 import { Mota } from '.';
 
+// todo: 将插件更改为注册形式，分为渲染进程和游戏进程两部分，同时分配优先级
+
 export function resolvePlugin() {
     const toForward: [keyof Mota['plugin'], any][] = [
         ['pop', pop()],

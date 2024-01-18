@@ -30,12 +30,15 @@ export class GameStorage<T> {
      * @param key 存储的名称
      * @param value 存储的值
      */
+    setValue<K extends keyof T>(key: K, value: T[K]): void;
+    setValue(key: string, value: any): void;
     setValue<K extends keyof T>(key: K, value: T[K]) {
         this.data[key] = value;
     }
 
     getValue<K extends keyof T>(key: K): T[K] | null;
     getValue<K extends keyof T>(key: K, defaults: T[K]): T[K];
+    getValue<T>(key: string, defaults?: T): T;
     getValue<K extends keyof T>(key: K, defaults?: T[K]) {
         if (this.data[key]) return this.data[key];
         else {

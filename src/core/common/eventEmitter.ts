@@ -1,3 +1,4 @@
+// todo: 更改utils.ts的形式，使common文件夹可以同时在渲染进程和游戏进程使用
 import { has } from '@/plugin/utils';
 
 export interface EmitableEvent {

@@ -9,6 +9,7 @@ import { GameStorage } from '../storage';
 export const mainScope = Symbol.for('@key_main');
 export const gameKey = new Hotkey('gameKey', '游戏按键');
 
+// todo: 读取上一个手动存档，存档至下一个存档栏
 // ----- Register
 gameKey
     // --------------------

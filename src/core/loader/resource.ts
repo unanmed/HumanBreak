@@ -6,6 +6,8 @@ import JSZip from 'jszip';
 import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
 import { loading } from './load';
 
+// todo: 应当用register去注册资源类型，然后进行分块处理
+
 interface ResourceData {
     image: HTMLImageElement;
     arraybuffer: ArrayBuffer;

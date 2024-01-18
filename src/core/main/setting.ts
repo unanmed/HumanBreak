@@ -85,7 +85,7 @@ export class MotaSetting extends EventEmitter<SettingEvent> {
         key: string,
         name: string,
         value: MotaSettingType,
-        com: SettingComponent = COM.DefaultSetting,
+        com: SettingComponent = COM.Default,
         step: [number, number, number] = [0, 100, 1]
     ) {
         const setting: MotaSettingItem = {
@@ -274,11 +274,34 @@ export class SettingDisplayer extends EventEmitter<SettingDisplayerEvent> {
     }
 }
 
+// todo: 优化存储方式
+
 export const mainSetting = new MotaSetting();
+
+interface SettingStorage {
+    showHalo: boolean;
+    frag: boolean;
+    itemDetail: boolean;
+    transition: boolean;
+    antiAlias: boolean;
+    fontSize: number;
+    smoothView: boolean;
+    criticalGem: boolean;
+    fixed: boolean;
+    betterLoad: boolean;
+    autoScale: boolean;
+    paraLight: boolean;
+    heroDetail: boolean;
+}
+
+const storage = new GameStorage<SettingStorage>(
+    GameStorage.fromAuthor('AncTe', 'setting')
+);
 
 // ----- 监听设置修改
 mainSetting.on('valueChange', (key, n, o) => {
     const [root, setting] = key.split('.');
+
     if (root === 'screen') {
         handleScreenSetting(setting, n, o);
     } else if (root === 'action') {
@@ -367,28 +390,30 @@ function handleUtilsSetting<T extends number | boolean>(
 }
 
 // ----- 游戏的所有设置项
+// todo: 虚拟键盘缩放，小地图楼传缩放
 mainSetting
     .register(
         'screen',
         '显示设置',
         new MotaSetting()
-            .register('fullscreen', '全屏游戏', false, COM.BooleanSetting)
-            .register('halo', '光环显示', true, COM.BooleanSetting)
-            .register('itemDetail', '宝石血瓶显伤', true, COM.BooleanSetting)
-            .register('heroDetail', '勇士显伤', false, COM.BooleanSetting)
-            .register('transition', '界面动画', false, COM.BooleanSetting)
-            .register('antiAlias', '抗锯齿', false, COM.BooleanSetting)
-            .register('fontSize', '字体大小', 16, COM.NumberSetting, [8, 28, 1])
-            .register('smoothView', '平滑镜头', true, COM.BooleanSetting)
-            .register('criticalGem', '临界显示方式', false, COM.BooleanSetting)
+            .register('fullscreen', '全屏游戏', false, COM.Boolean)
+            .register('halo', '光环显示', true, COM.Boolean)
+            .register('itemDetail', '宝石血瓶显伤', true, COM.Boolean)
+            .register('heroDetail', '勇士显伤', false, COM.Boolean)
+            .register('transition', '界面动画', false, COM.Boolean)
+            .register('antiAlias', '抗锯齿', false, COM.Boolean)
+            .register('fontSize', '字体大小', 16, COM.Number, [8, 28, 1])
+            .register('smoothView', '平滑镜头', true, COM.Boolean)
+            .register('criticalGem', '临界显示方式', false, COM.Boolean)
             .setDisplayFunc('criticalGem', value => (value ? '宝石数' : '攻击'))
+            .register('keyScale', '虚拟键盘缩放', 100, COM.Number, [25, 5, 500])
     )
     .register(
         'action',
         '操作设置',
         new MotaSetting()
-            .register('autoSkill', '自动切换技能', true, COM.BooleanSetting)
-            .register('fixed', '定点查看', true, COM.BooleanSetting)
+            .register('autoSkill', '自动切换技能', true, COM.Boolean)
+            .register('fixed', '定点查看', true, COM.Boolean)
             .register('hotkey', '快捷键', false, COM.HotkeySetting)
             .setDisplayFunc('hotkey', () => '')
             .register('toolbar', '自定义工具栏', false, COM.ToolbarEditor)
@@ -398,36 +423,27 @@ mainSetting
         'utils',
         '系统设置',
         new MotaSetting()
-            .register('betterLoad', '优化加载', true, COM.BooleanSetting)
-            .register('autoScale', '自动放缩', true, COM.BooleanSetting)
+            .register('betterLoad', '优化加载', true, COM.Boolean)
+            .register('autoScale', '自动放缩', true, COM.Boolean)
     )
     .register(
         'fx',
         '特效设置',
         new MotaSetting()
-            .register('paraLight', '野外阴影', true, COM.BooleanSetting)
-            .register('frag', '打怪特效', true, COM.BooleanSetting)
+            .register('paraLight', '野外阴影', true, COM.Boolean)
+            .register('frag', '打怪特效', true, COM.Boolean)
+    )
+    .register(
+        'ui',
+        'ui设置',
+        new MotaSetting().register(
+            'mapScale',
+            '小地图楼传缩放',
+            300,
+            COM.Number,
+            [50, 50, 1000]
+        )
     );
-
-interface SettingStorage {
-    showHalo: boolean;
-    frag: boolean;
-    itemDetail: boolean;
-    transition: boolean;
-    antiAlias: boolean;
-    fontSize: number;
-    smoothView: boolean;
-    criticalGem: boolean;
-    fixed: boolean;
-    betterLoad: boolean;
-    autoScale: boolean;
-    paraLight: boolean;
-    heroDetail: boolean;
-}
-
-const storage = new GameStorage<SettingStorage>(
-    GameStorage.fromAuthor('AncTe', 'setting')
-);
 
 loading.once('coreInit', () => {
     mainSetting.reset({

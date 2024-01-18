@@ -3,10 +3,11 @@ import { MessageApi } from 'ant-design-vue/lib/message';
 import { isNil } from 'lodash-es';
 import { Animation, sleep, TimingFn } from 'mutate-animate';
 import { ref } from 'vue';
-import { EVENT_KEY_CODE_MAP } from './keyCodes';
+import { EVENT_KEY_CODE_MAP, KeyCode } from './keyCodes';
 import axios from 'axios';
 import { decompressFromBase64 } from 'lz-string';
 import { parseColor } from './webgl/utils';
+import { KeyboardEmits } from '@/core/main/custom/keyboard';
 
 type CanParseCss = keyof {
     [P in keyof CSSStyleDeclaration as CSSStyleDeclaration[P] extends string
@@ -264,6 +265,11 @@ export function pColor(color: string) {
     return `rgba(${arr.join(',')})` as Color;
 }
 
+/**
+ * 删除数组内的某个项，返回删除后的数组
+ * @param arr 要操作的数组
+ * @param ele 要删除的项
+ */
 export function deleteWith<T>(arr: T[], ele: T): T[] {
     const index = arr.indexOf(ele);
     if (index === -1) return arr;
@@ -338,4 +344,19 @@ export function flipBinary(num: number, col: number) {
     const n = 1 << col;
     if (num & n) return num & ~n;
     else return num | n;
+}
+
+/**
+ * 唤起虚拟键盘，并获取到一次按键操作
+ * @param emitAssist 是否可以获取辅助按键，为true时，如果按下辅助按键，那么会立刻返回该按键，
+ *                   否则会视为开关辅助按键
+ * @param assist 初始化的辅助按键
+ */
+export function getVitualKeyOnce(
+    emitAssist: boolean = false,
+    assist: number = 0
+): Promise<KeyboardEmits> {
+    return new Promise(res => {
+        res({ key: KeyCode.Unknown, assist: 0 });
+    });
 }
