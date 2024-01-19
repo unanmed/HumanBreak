@@ -356,7 +356,8 @@ export function flipBinary(num: number, col: number) {
  */
 export function getVitualKeyOnce(
     emitAssist: boolean = false,
-    assist: number = 0
+    assist: number = 0,
+    emittable: KeyCode[] = []
 ): Promise<KeyboardEmits> {
     return new Promise(res => {
         const key = Keyboard.get('full')!;
@@ -365,11 +366,16 @@ export function getVitualKeyOnce(
         key.on('emit', (item, assist, index, ev) => {
             ev.preventDefault();
             if (emitAssist) {
-                res({ key: item.key, assist: 0 });
-                key.disposeScope();
-                mainUi.close(id);
+                if (emittable.length === 0 || emittable.includes(item.key)) {
+                    res({ key: item.key, assist: 0 });
+                    key.disposeScope();
+                    mainUi.close(id);
+                }
             } else {
-                if (!isAssist(item.key)) {
+                if (
+                    !isAssist(item.key) &&
+                    (emittable.length === 0 || emittable.includes(item.key))
+                ) {
                     res({ key: item.key, assist });
                     key.disposeScope();
                     mainUi.close(id);

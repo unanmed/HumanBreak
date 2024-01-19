@@ -15,7 +15,7 @@
                 @click.stop="click"
             >
                 <component
-                    :is="(item.com as any)"
+                    :is="(CustomToolbar.info[item.type].show as any)"
                     :item="item"
                     :toolbar="bar"
                 ></component>

@@ -1,5 +1,5 @@
 <template>
-    <div id="ui-new">
+    <div id="ui">
         <div id="ui-main">
             <div id="ui-list">
                 <div class="ui-one" v-for="(ui, index) of mainUi.stack">
@@ -41,14 +41,6 @@ function show(index: number) {
 
 <style lang="less" scoped>
 #ui {
-    width: 90%;
-    height: 90%;
-    display: flex;
-    justify-content: center;
-    overflow: hidden;
-}
-
-#ui-new {
     width: 0;
     height: 0;
     left: 0;
@@ -56,6 +48,7 @@ function show(index: number) {
     position: fixed;
     overflow: visible;
     display: block;
+    font-family: 'normal';
 }
 
 #ui-main {

@@ -93,8 +93,8 @@ export class Keyboard extends EventEmitter<VirtualKeyboardEvent> {
      * @param assist 辅助按键
      */
     withAssist(assist: number) {
-        this.assist = assist;
         const symbol = this.createScope();
+        this.assist = assist;
         return symbol;
     }
 

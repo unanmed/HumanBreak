@@ -1,6 +1,6 @@
 import { EmitableEvent, EventEmitter } from '@/core/common/eventEmitter';
 import { KeyCode } from '@/plugin/keyCodes';
-import { flipBinary, has } from '@/plugin/utils';
+import { deleteWith, flipBinary, has } from '@/plugin/utils';
 import {
     FunctionalComponent,
     markRaw,
@@ -8,7 +8,10 @@ import {
     reactive,
     shallowReactive
 } from 'vue';
-import { createToolbarComponents } from '../init/toolbar';
+import {
+    createToolbarComponents,
+    createToolbarEditorComponents
+} from '../init/toolbar';
 import { gameKey } from '../init/hotkey';
 import { unwarpBinary } from './hotkey';
 import { fixedUi } from '../init/ui';
@@ -24,7 +27,6 @@ interface CustomToolbarEvent extends EmitableEvent {
 interface ToolbarItemBase<T extends ToolbarItemType> {
     type: T;
     id: string;
-    com: CustomToolbarComponent<T>;
 }
 
 // 快捷键
@@ -49,7 +51,7 @@ interface ToolbarItemMap {
     assistKey: AssistKeyToolbarItem;
 }
 
-type ToolbarItemType = keyof ToolbarItemMap;
+export type ToolbarItemType = keyof ToolbarItemMap;
 
 export type SettableItemData<T extends ToolbarItemType = ToolbarItemType> =
     Omit<ToolbarItemMap[T], 'id' | 'type'>;
@@ -64,19 +66,27 @@ export type CustomToolbarComponent<
     T extends ToolbarItemType = ToolbarItemType
 > = FunctionalComponent<CustomToolbarProps<T>>;
 
-const COM = createToolbarComponents();
+type ToolItemEmitFn<T extends ToolbarItemType> = (
+    this: CustomToolbar,
+    id: string,
+    item: ToolbarItemMap[T]
+) => boolean;
 
-const comMap: {
-    [P in ToolbarItemType]: CustomToolbarComponent<P>;
-} = {
-    hotkey: COM.KeyTool,
-    item: COM.ItemTool,
-    assistKey: COM.AssistKeyTool
-};
+interface RegisteredCustomToolInfo {
+    name: string;
+    onEmit: ToolItemEmitFn<ToolbarItemType>;
+    show: CustomToolbarComponent;
+    editor: CustomToolbarComponent;
+    onCreate: (item: any) => ToolbarItemBase<ToolbarItemType>;
+}
+
+const COM = createToolbarComponents();
+const EDITOR = createToolbarEditorComponents();
 
 export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
     static num: number = 0;
     static list: CustomToolbar[] = shallowReactive([]);
+    static info: Record<string, RegisteredCustomToolInfo> = {};
 
     items: ValueOf<ToolbarItemMap>[] = reactive([]);
     num: number = CustomToolbar.num++;
@@ -88,6 +98,7 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
     height: number = 70;
     // ----- other
     assistKey: number = 0;
+    showIds: number[] = [];
 
     constructor(id: string) {
         super();
@@ -100,14 +111,15 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
      * 添加一个自定义项
      * @param item 要添加的自定义工具栏项
      */
-    add<K extends ToolbarItemType>(item: Omit<ToolbarItemMap[K], 'com'>) {
-        // @ts-ignore
-        const data: ToolbarItemMap[K] = {
-            com: markRaw(comMap[item.type]),
-            ...item
-        } as ToolbarItemMap[K];
-        this.items.push(data);
-        this.emit('add', data);
+    add<K extends ToolbarItemType>(item: ToolbarItemMap[K]) {
+        const index = this.items.findIndex(v => v.id === item.id);
+        if (index !== -1) {
+            console.warn(`添加了id重复的自定义工具，已将其覆盖`);
+            this.items[index] = item;
+        } else {
+            this.items.push(item);
+        }
+        this.emit('add', item);
         return this;
     }
 
@@ -148,34 +160,21 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
         const item = this.items.find(v => v.id === id);
         if (!item) return this;
         this.emit('emit', id, item);
-        if (item.type === 'hotkey') {
-            // 按键
-            const assist = item.assist | this.assistKey;
-            const { ctrl, shift, alt } = unwarpBinary(assist);
-            const ev = new KeyboardEvent('keyup', {
-                ctrlKey: ctrl,
-                shiftKey: shift,
-                altKey: alt
-            });
-
-            // todo: Advanced KeyboardEvent simulate
-            gameKey.emitKey(item.key, assist, 'up', ev);
-        } else if (item.type === 'item') {
-            // 道具
-            core.tryUseItem(item.item);
-        } else if (item.type === 'assistKey') {
-            // 辅助按键
-            if (item.assist === KeyCode.Ctrl) {
-                this.assistKey = flipBinary(this.assistKey, 0);
-            } else if (item.assist === KeyCode.Shift) {
-                this.assistKey = flipBinary(this.assistKey, 1);
-            } else if (item.assist === KeyCode.Alt) {
-                this.assistKey = flipBinary(this.assistKey, 2);
-            }
+        const info = CustomToolbar.info[item.type];
+        if (!info) {
+            console.warn(`触发了未知的自定义工具类型：'${item.type}'`);
+            return this;
+        }
+        const success = info.onEmit.call(this, id, item);
+        if (!success) {
+            console.warn(`触发自定义工具失败，id:'${id}',type:${item.type}`);
         }
         return this;
     }
 
+    /**
+     * 强制刷新这个自定义工具栏的所有显示
+     */
     refresh() {
         const items = this.items.splice(0);
         nextTick(() => {
@@ -194,14 +193,134 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
         has(height) && (this.height = height);
     }
 
+    /**
+     * 显示这个自定义工具栏，可以显示多个，且内容互通
+     */
     show() {
-        fixedUi.open('toolbar', { bar: this });
+        const id = fixedUi.open('toolbar', { bar: this });
+        this.showIds.push(id);
+        return id;
+    }
+
+    /**
+     * 关闭一个以此实例为基础显示的自定义工具栏
+     * @param id 要关闭的id
+     */
+    close(id: number) {
+        fixedUi.close(id);
+        deleteWith(this.showIds, id);
+    }
+
+    /**
+     * 关闭这个自定义工具栏的所有显示
+     */
+    closeAll() {
+        this.showIds.forEach(v => fixedUi.close(v));
     }
 
     static get(id: string) {
         return this.list.find(v => v.id === id);
     }
+
+    /**
+     * 注册一类自定义工具
+     * @param type 要注册的自定义工具类型
+     * @param name 该类型的中文名
+     * @param onEmit 当触发这个自定义工具的时候执行的函数
+     * @param show 这个自定义工具在自定义工具栏的显示组件
+     * @param editor 这个自定义工具在编辑时编辑组件
+     * @param onCreate 当这个自定义工具在编辑器中被添加时，执行的初始化脚本
+     */
+    static register<K extends ToolbarItemType>(
+        type: K,
+        name: string,
+        onEmit: ToolItemEmitFn<K>,
+        show: CustomToolbarComponent<K>,
+        editor: CustomToolbarComponent<K>,
+        onCreate: (item: any) => ToolbarItemMap[K]
+    ) {
+        if (type in this.info) {
+            console.warn(`已存在名为'${type}'的自定义工具类型，已将其覆盖！`);
+        }
+        const info: RegisteredCustomToolInfo = {
+            name,
+            onEmit: onEmit as ToolItemEmitFn<ToolbarItemType>,
+            show: show as CustomToolbarComponent,
+            editor: editor as CustomToolbarComponent,
+            // @ts-ignore
+            onCreate
+        };
+        this.info[type] = info;
+    }
 }
+
+CustomToolbar.register(
+    'hotkey',
+    '快捷键',
+    function (id, item) {
+        // 按键
+        const assist = item.assist | this.assistKey;
+        const { ctrl, shift, alt } = unwarpBinary(assist);
+        const ev = new KeyboardEvent('keyup', {
+            ctrlKey: ctrl,
+            shiftKey: shift,
+            altKey: alt
+        });
+
+        // todo: Advanced KeyboardEvent simulate
+        gameKey.emitKey(item.key, assist, 'up', ev);
+        return true;
+    },
+    COM.KeyTool,
+    EDITOR.KeyTool,
+    item => {
+        return {
+            key: KeyCode.Unknown,
+            assist: 0,
+            ...item
+        };
+    }
+);
+CustomToolbar.register(
+    'item',
+    '使用道具',
+    function (id, item) {
+        // 道具
+        core.tryUseItem(item.item);
+        return true;
+    },
+    COM.ItemTool,
+    EDITOR.ItemTool,
+    item => {
+        return {
+            item: 'book',
+            ...item
+        };
+    }
+);
+CustomToolbar.register(
+    'assistKey',
+    '辅助按键',
+    function (id, item) {
+        // 辅助按键
+        if (item.assist === KeyCode.Ctrl) {
+            this.assistKey = flipBinary(this.assistKey, 0);
+        } else if (item.assist === KeyCode.Shift) {
+            this.assistKey = flipBinary(this.assistKey, 1);
+        } else if (item.assist === KeyCode.Alt) {
+            this.assistKey = flipBinary(this.assistKey, 2);
+        }
+        return true;
+    },
+    COM.AssistKeyTool,
+    EDITOR.AssistKeyTool,
+    item => {
+        return {
+            assist: KeyCode.Ctrl,
+            ...item
+        };
+    }
+);
 
 hook.once('reset', () => {
     const toolbar = new CustomToolbar('test');
