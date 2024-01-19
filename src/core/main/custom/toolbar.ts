@@ -321,24 +321,3 @@ CustomToolbar.register(
         };
     }
 );
-
-hook.once('reset', () => {
-    const toolbar = new CustomToolbar('test');
-    toolbar
-        .add<'hotkey'>({
-            id: 'test1',
-            type: 'hotkey',
-            assist: 0,
-            key: KeyCode.KeyX
-        })
-        .add<'assistKey'>({
-            id: 'test2',
-            type: 'assistKey',
-            assist: KeyCode.Ctrl
-        })
-        .add<'item'>({
-            id: 'test3',
-            type: 'item',
-            item: 'book'
-        });
-});

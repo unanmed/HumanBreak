@@ -45,7 +45,7 @@
             :type="isMobile ? 'horizontal' : 'vertical'"
         ></a-divider>
         <div id="tool-info">
-            <div id="tool-detail">
+            <div id="tool-detail" v-if="!!bar">
                 <Scroll class="tool-item-list-scroll">
                     <div class="tool-item-list">
                         <div
@@ -152,7 +152,7 @@
                 </Scroll>
             </div>
             <a-divider dashed></a-divider>
-            <div id="tool-preview">
+            <div id="tool-preview" v-if="!!bar">
                 <div id="tool-preview-container">
                     <div class="tool-preview-item" v-for="item of bar.items">
                         <component

@@ -114,10 +114,7 @@ function KeyToolEdtior(props: CustomToolbarProps<'hotkey'>) {
     };
 
     const getKeyShow = (key: KeyCode, assist: number) => {
-        return (
-            unwarpAssist(assist) +
-            (key === KeyCode.Unknown ? '' : KeyCodeUtils.toString(key))
-        );
+        return unwarpAssist(assist) + KeyCodeUtils.toString(key);
     };
 
     return (
