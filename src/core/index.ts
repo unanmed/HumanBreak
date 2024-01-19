@@ -13,7 +13,6 @@ import './main/custom/toolbar';
 
 interface AncTePlugin {
     pop: ReturnType<typeof import('../plugin/pop').default>;
-    ui: ReturnType<typeof import('../plugin/uiController').default>;
     use: ReturnType<typeof import('../plugin/use').default>;
     animate: ReturnType<typeof import('../plugin/animateController').default>;
     utils: ReturnType<typeof import('../plugin/utils').default>;

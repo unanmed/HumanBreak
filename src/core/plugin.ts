@@ -1,5 +1,4 @@
 import pop from '@/plugin/pop';
-import ui from '@/plugin/uiController';
 import use from '@/plugin/use';
 import animate from '@/plugin/animateController';
 import utils from '@/plugin/utils';
@@ -23,7 +22,6 @@ import { Mota } from '.';
 export function resolvePlugin() {
     const toForward: [keyof Mota['plugin'], any][] = [
         ['pop', pop()],
-        ['ui', ui()],
         ['use', use()],
         ['animate', animate()],
         ['utils', utils()],

@@ -283,7 +283,6 @@ onMounted(async () => {
     draw();
 
     await sleep(50);
-    // if (mota.plugin.ui.transition.value) await sleep(600);
     canvas.addEventListener('click', click);
 });
 

@@ -120,8 +120,6 @@ async function show() {
 async function exit() {
     const hold = mota.ui.main.holdOn();
     mota.ui.main.close(props.num);
-    // if (mota.plugin.ui.transition.value) await sleep(650);
-    // else await sleep(100);
     if (core.events.recoverEvents(core.status.event.interval)) {
         return;
     } else if (has(core.status.event.ui)) {
