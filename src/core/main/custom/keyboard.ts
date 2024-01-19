@@ -26,6 +26,7 @@ interface KeyboardItem {
 
 interface VirtualKeyEmit {
     preventDefault(): void;
+    preventAssist(): void;
 }
 
 type VirtualKeyEmitFn = (
@@ -155,6 +156,7 @@ export class Keyboard extends EventEmitter<VirtualKeyboardEvent> {
 
         this.keys.push(...toClone);
         this.emit('extend', keyboard);
+        return this;
     }
 
     /**
@@ -163,10 +165,15 @@ export class Keyboard extends EventEmitter<VirtualKeyboardEvent> {
      */
     emitKey(key: KeyboardItem, index: number) {
         let prevent = false;
+        let preventAss = false;
         const preventDefault = () => (prevent = true);
-        this.emit('emit', key, this.assist, index, { preventDefault });
+        const preventAssist = () => (preventAss = true);
+        this.emit('emit', key, this.assist, index, {
+            preventDefault,
+            preventAssist
+        });
 
-        if (!prevent) {
+        if (!preventAss) {
             if (key.key === KeyCode.Ctrl) {
                 this.assist = flipBinary(this.assist, 0);
             } else if (key.key === KeyCode.Shift) {
@@ -174,6 +181,8 @@ export class Keyboard extends EventEmitter<VirtualKeyboardEvent> {
             } else if (key.key === KeyCode.Alt) {
                 this.assist = flipBinary(this.assist, 2);
             }
+        }
+        if (!prevent) {
             const ev = generateKeyboardEvent(key.key, this.assist);
             gameKey.emitKey(key.key, this.assist, 'up', ev);
         }
@@ -193,8 +202,4 @@ export function generateKeyboardEvent(key: KeyCode, assist: number) {
     });
 
     return ev;
-}
-
-export function isAssist(key: KeyCode) {
-    return key === KeyCode.Ctrl || key === KeyCode.Shift || key === KeyCode.Alt;
 }

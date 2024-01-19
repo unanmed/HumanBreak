@@ -275,8 +275,15 @@ export function unwarpBinary(bin: number): AssistHoykey {
 }
 
 export function checkAssist(bin: number, key: KeyCode) {
-    return !!(
-        (1 << (key === KeyCode.Ctrl ? 0 : key === KeyCode.Shift ? 1 : 2)) &
-        bin
+    return (
+        isAssist(key) &&
+        !!(
+            (1 << (key === KeyCode.Ctrl ? 0 : key === KeyCode.Shift ? 1 : 2)) &
+            bin
+        )
     );
+}
+
+export function isAssist(key: KeyCode) {
+    return key === KeyCode.Ctrl || key === KeyCode.Shift || key === KeyCode.Alt;
 }

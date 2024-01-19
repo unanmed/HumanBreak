@@ -12,9 +12,10 @@
                 height: `${key.height}px`
             }"
         >
-            <span class="keyboard-key button-text">{{
-                key.text ?? KeyCodeUtils.toString(key.key)
-            }}</span>
+            <span
+                class="keyboard-key button-text"
+                v-html="key.text ?? KeyCodeUtils.toString(key.key)"
+            ></span>
         </div>
     </div>
 </template>
@@ -24,7 +25,7 @@ import { checkAssist } from '@/core/main/custom/hotkey';
 import { Keyboard } from '@/core/main/custom/keyboard';
 import { KeyboardEmits } from '@/core/main/custom/keyboard';
 import { KeyCodeUtils } from '@/plugin/keyCodes';
-import { onUnmounted, ref } from 'vue';
+import { nextTick, onUnmounted, ref } from 'vue';
 
 const props = defineProps<{
     keyboard: Keyboard;
@@ -45,10 +46,9 @@ const [width, height] = (() => {
     return [`${mw}px`, `${mh}px`];
 })();
 
-function onAssist(_: any, ass: number) {
-    new Promise<void>(res => {
-        assist.value = ass;
-        res();
+function onAssist() {
+    nextTick(() => {
+        assist.value = props.keyboard.assist;
     });
 }
 props.keyboard.on('emit', onAssist);
@@ -69,6 +69,7 @@ onUnmounted(() => {
     display: block;
     font-size: v-bind(fontSize);
     position: relative;
+    font-family: Arial;
 }
 
 .keyboard-item {
@@ -80,6 +81,7 @@ onUnmounted(() => {
     align-items: center;
     transition: all 0.1s linear;
     cursor: pointer;
+    color: white;
 }
 
 .keyboard-item:hover,
@@ -87,13 +89,14 @@ onUnmounted(() => {
     background-color: #555;
 }
 
-.keyboard-key[active='true'] {
+.keyboard-item[active='true']::v-deep(> *) {
     color: gold;
+    font-weight: 700;
 }
 
 .keyboard-key {
     height: 100%;
-    min-width: 50px;
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
