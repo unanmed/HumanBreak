@@ -57,6 +57,7 @@ import Box from '../components/box.vue';
 import Scroll from '../components/scroll.vue';
 import BoxAnimate from '../components/boxAnimate.vue';
 import { GameUi } from '@/core/main/custom/ui';
+import { fixedUi } from '@/core/main/init/ui';
 
 const props = defineProps<{
     num: number;
@@ -99,7 +100,7 @@ const info = reactive<MarkedEnemy>({
 const hidden = ref(false);
 
 watch(hidden, n => {
-    if (n) mota.ui.fixed.close(props.num);
+    if (n) fixedUi.close(props.num);
 });
 watch(enemy.update, update);
 

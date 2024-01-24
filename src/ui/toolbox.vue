@@ -119,6 +119,7 @@ import { message } from 'ant-design-vue';
 import { KeyCode } from '../plugin/keyCodes';
 import { GameUi } from '@/core/main/custom/ui';
 import { gameKey } from '@/core/main/init/hotkey';
+import { mainUi } from '@/core/main/init/ui';
 
 const props = defineProps<{
     num: number;
@@ -172,17 +173,17 @@ async function select(id: ShowItemIds, nouse: boolean = false) {
 }
 
 function exit() {
-    mota.ui.main.close(props.num);
+    mainUi.close(props.num);
 }
 
 function use(id: ShowItemIds) {
     if (id === 'none') return;
     if (core.canUseItem(id)) {
-        const hold = mota.ui.main.holdOn();
+        const hold = mainUi.holdOn();
         exit();
         nextTick(() => {
             core.useItem(id, false, () => {
-                if (mota.ui.main.stack.length === 0) {
+                if (mainUi.stack.length === 0) {
                     hold.end();
                 }
             });
@@ -196,10 +197,10 @@ function use(id: ShowItemIds) {
 }
 
 async function toEquip() {
-    mota.ui.main.holdOn();
+    mainUi.holdOn();
     exit();
     nextTick(() => {
-        mota.ui.main.open('equipbox');
+        mainUi.open('equipbox');
     });
 }
 

@@ -85,6 +85,7 @@ import { sleep } from 'mutate-animate';
 import { KeyCode } from '../plugin/keyCodes';
 import { gameKey } from '@/core/main/init/hotkey';
 import { GameUi } from '@/core/main/custom/ui';
+import { mainUi } from '@/core/main/init/ui';
 
 const props = defineProps<{
     info?: MotaSetting;
@@ -143,7 +144,7 @@ function click(key: string, index: number, item: MotaSettingItem) {
 }
 
 function exit() {
-    mota.ui.main.close(props.num);
+    mainUi.close(props.num);
 }
 
 gameKey.use(props.ui.symbol);

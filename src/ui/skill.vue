@@ -21,6 +21,7 @@ import { computed, ref } from 'vue';
 import skills from '../data/skill.json';
 import { has } from '../plugin/utils';
 import Column from '../components/colomn.vue';
+import { mainUi } from '@/core/main/init/ui';
 
 const props = defineProps<{
     num: number;
@@ -64,7 +65,7 @@ const content = computed(() => {
 });
 
 function exit() {
-    mota.ui.main.close(props.num);
+    mainUi.close(props.num);
 }
 </script>
 

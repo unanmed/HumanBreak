@@ -1,15 +1,24 @@
-import { BgmController } from './audio/bgm';
-import { SoundController } from './audio/sound';
+import { BgmController, bgm } from './audio/bgm';
+import { SoundController, sound } from './audio/sound';
 import { EventEmitter } from './common/eventEmitter';
 import { loading, readyAllResource } from './loader/load';
-import { ResourceStore, ResourceType } from './loader/resource';
+import {
+    ResourceStore,
+    ResourceType,
+    resource,
+    zipResource
+} from './loader/resource';
 import { UiController } from './main/custom/ui';
-import { GameEvent, hook } from './main/game';
-import { fixedUi, mainUi } from './main/init/ui';
+import { GameEvent, gameListener, hook } from './main/game';
 import { GameStorage } from './main/storage';
-import { resolvePlugin } from './plugin';
+// import { resolvePlugin } from './plugin';
 import './main/init/';
 import './main/custom/toolbar';
+import { fixedUi, mainUi } from './main/init/ui';
+import { gameKey } from './main/init/hotkey';
+import { mainSetting, settingStorage } from './main/setting';
+import { isMobile } from '../plugin/use';
+import { KeyCode } from '@/plugin/keyCodes';
 
 interface AncTePlugin {
     pop: ReturnType<typeof import('../plugin/pop').default>;
@@ -33,42 +42,54 @@ interface AncTePlugin {
     frag: ReturnType<typeof import('../plugin/fx/frag').default>;
 }
 
-export interface Mota {
-    sound: SoundController;
-    /** 游戏资源 */
-    resource: ResourceStore<Exclude<ResourceType, 'zip'>>;
-    zipResource: ResourceStore<'zip'>;
-    bgm: BgmController;
-    plugin: AncTePlugin;
-    game: {
-        hook: EventEmitter<GameEvent>;
-        storage: typeof GameStorage;
-    };
-    ui: {
-        main: UiController;
-        fixed: UiController;
-    };
-}
+// export interface Mota {
+//     sound: SoundController;
+//     /** 游戏资源 */
+//     resource: ResourceStore<Exclude<ResourceType, 'zip'>>;
+//     zipResource: ResourceStore<'zip'>;
+//     bgm: BgmController;
+//     plugin: AncTePlugin;
+//     hook: EventEmitter<GameEvent>;
+//     classes: {
+//         storage: typeof GameStorage;
+//     };
+//     ui: {
+//         main: UiController;
+//         fixed: UiController;
+//     };
+// }
 
 function ready() {
-    window.mota = {
-        bgm: new BgmController(),
-        resource: new ResourceStore(),
-        zipResource: new ResourceStore(),
-        sound: new SoundController(),
-        // @ts-ignore
-        plugin: {},
-        game: {
-            hook,
-            storage: GameStorage
-        },
-        ui: {
-            main: mainUi,
-            fixed: fixedUi
-        }
-    };
+    // window.mota = {
+    //     bgm: new BgmController(),
+    //     resource: new ResourceStore(),
+    //     zipResource: new ResourceStore(),
+    //     sound: new SoundController(),
+    //     // @ts-ignore
+    //     plugin: {},
+    //     hook,
+    //     storage: GameStorage,
+    //     ui: {
+    //         main: mainUi,
+    //         fixed: fixedUi
+    //     }
+    // };
 
     readyAllResource();
-    loading.once('coreInit', resolvePlugin);
+    // loading.once('coreInit', resolvePlugin);
 }
 ready();
+
+Mota.register('var', 'mainUi', mainUi);
+Mota.register('var', 'fixedUi', fixedUi);
+Mota.register('var', 'hook', hook);
+Mota.register('var', 'gameListener', gameListener);
+Mota.register('var', 'bgm', bgm);
+Mota.register('var', 'sound', sound);
+Mota.register('var', 'gameKey', gameKey);
+Mota.register('var', 'loading', loading);
+Mota.register('var', 'mainSetting', mainSetting);
+Mota.register('var', 'KeyCode', KeyCode);
+Mota.register('var', 'resource', resource);
+Mota.register('var', 'zipResource', zipResource);
+Mota.register('var', 'settingStorage', settingStorage);

@@ -215,3 +215,5 @@ export class SoundController extends ResourceController<
         }
     }
 }
+
+export const sound = new SoundController();

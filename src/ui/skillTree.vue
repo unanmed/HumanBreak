@@ -82,6 +82,7 @@ import { isMobile } from '../plugin/use';
 import { sleep } from 'mutate-animate';
 import { gameKey } from '@/core/main/init/hotkey';
 import { GameUi } from '@/core/main/custom/ui';
+import { mainUi } from '@/core/main/init/ui';
 
 const props = defineProps<{
     num: number;
@@ -179,7 +180,7 @@ const level = computed(() => {
 });
 
 function exit() {
-    mota.ui.main.close(props.num);
+    mainUi.close(props.num);
 }
 
 function resize() {

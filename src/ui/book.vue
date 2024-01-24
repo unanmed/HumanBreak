@@ -45,11 +45,11 @@ import Scroll from '../components/scroll.vue';
 import { getDamageColor, has, keycode } from '../plugin/utils';
 import BookDetail from './bookDetail.vue';
 import { LeftOutlined } from '@ant-design/icons-vue';
-import { KeyCode } from '../plugin/keyCodes';
 import { ToShowEnemy, detailInfo } from '../plugin/ui/book';
 import { getDetailedEnemy } from '../plugin/ui/fixed';
 import { GameUi } from '@/core/main/custom/ui';
 import { gameKey } from '@/core/main/init/hotkey';
+import { mainUi } from '@/core/main/init/ui';
 
 const props = defineProps<{
     num: number;
@@ -118,8 +118,8 @@ async function show() {
  * 退出怪物手册
  */
 async function exit() {
-    const hold = mota.ui.main.holdOn();
-    mota.ui.main.close(props.num);
+    const hold = mainUi.holdOn();
+    mainUi.close(props.num);
     if (core.events.recoverEvents(core.status.event.interval)) {
         return;
     } else if (has(core.status.event.ui)) {

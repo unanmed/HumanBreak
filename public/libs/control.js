@@ -2317,7 +2317,7 @@ control.prototype._doSL_load = function (id, callback) {
             1
         )[0];
         if (!main.replayChecking) {
-            mota.ui.fixed.closeByName('start');
+            Mota.require('var', 'fixedUi').closeByName('start');
         }
         if (core.isPlaying() && !core.status.gameOver) {
             core.control.autosave(0);
@@ -2334,7 +2334,7 @@ control.prototype._doSL_load = function (id, callback) {
             null,
             function (data) {
                 if (!main.replayChecking && data) {
-                    mota.ui.fixed.closeByName('start');
+                    Mota.require('var', 'fixedUi').closeByName('start');
                 }
                 if (id == 'autoSave' && data != null) {
                     core.saves.autosave.data = data;
@@ -3012,9 +3012,6 @@ control.prototype.removeSwitch = function (x, y, floorId, name) {
 ////// 锁定状态栏，常常用于事件处理 //////
 control.prototype.lockControl = function () {
     core.status.lockControl = true;
-    if (!main.replayChecking) {
-        // mota.plugin.fixed.showFixed.value = false;
-    }
 };
 
 ////// 解锁状态栏 //////
@@ -3342,23 +3339,24 @@ control.prototype.screenFlash = function (
     });
 };
 
+// todo: deprecate playBgm, pauseBgm, resumeBgm, triggerBgm
 ////// 播放背景音乐 //////
 control.prototype.playBgm = function (bgm, startTime) {
     bgm = core.getMappedName(bgm);
     if (main.mode !== 'play') return;
-    mota.bgm.play(bgm, startTime);
+    Mota.require('var', 'bgm').play(bgm, startTime);
 };
 
 ////// 暂停背景音乐的播放 //////
 control.prototype.pauseBgm = function () {
     if (main.mode !== 'play') return;
-    mota.bgm.pause();
+    Mota.require('var', 'bgm').pause();
 };
 
 ////// 恢复背景音乐的播放 //////
 control.prototype.resumeBgm = function (resumeTime) {
     if (main.mode !== 'play') return;
-    mota.bgm.resume();
+    Mota.require('var', 'bgm').resume();
 };
 
 ////// 更改背景音乐的播放 //////
@@ -3371,6 +3369,7 @@ control.prototype.triggerBgm = function () {
     core.setLocalStorage('bgmStatus', core.musicStatus.bgmStatus);
 };
 
+// todo: deprecate playSound, stopSound, getPlayingSounds
 ////// 播放音频 //////
 control.prototype.playSound = function (sound, pitch, callback) {
     sound = core.getMappedName(sound);
@@ -3380,19 +3379,19 @@ control.prototype.playSound = function (sound, pitch, callback) {
         !core.material.sounds[sound]
     )
         return;
-    mota.sound.play(sound, callback);
+    Mota.require('var', 'sound').play(sound, callback);
 };
 
 ////// 停止所有音频 //////
 control.prototype.stopSound = function (id) {
-    if (typeof id === 'number') mota.sound.stop(id);
-    else mota.sound.stopAll();
+    if (typeof id === 'number') Mota.require('var', 'sound').stop(id);
+    else Mota.require('var', 'sound').stopAll();
 };
 
 ////// 获得当前正在播放的所有（指定）音效的id列表 //////
 control.prototype.getPlayingSounds = function (name) {
     name = core.getMappedName(name);
-    return mota.sound.getPlaying(name);
+    return Mota.require('var', 'sound').getPlaying(name);
 };
 
 ////// 检查bgm状态 //////

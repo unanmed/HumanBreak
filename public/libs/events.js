@@ -26,7 +26,7 @@ events.prototype.startGame = function (hard, seed, route, callback) {
     hard = hard || '';
     core.dom.gameGroup.style.display = 'block';
     if (!main.replayChecking) {
-        mota.ui.fixed.closeByName('start');
+        Mota.require('var', 'fixedUi').closeByName('start');
     }
 
     if (main.mode != 'play') return;
@@ -471,7 +471,12 @@ events.prototype.openDoor = function (x, y, needKey, callback) {
         core.removeBlock(x, y);
         setTimeout(function () {
             core.status.replay.animate = false;
-            mota.game.hook.emit('afterOpenDoor', block.event.id, x, y);
+            Mota.require('var', 'hook').emit(
+                'afterOpenDoor',
+                block.event.id,
+                x,
+                y
+            );
             if (callback) callback();
         }, 1); // +1是为了录像检测系统
     } else {
@@ -556,7 +561,7 @@ events.prototype._openDoor_animate = function (block, x, y, callback) {
         core.maps._removeBlockFromMap(core.status.floorId, block);
         if (!locked) core.unlockControl();
         core.status.replay.animate = false;
-        mota.game.hook.emit('afterOpenDoor', block.event.id, x, y);
+        Mota.require('var', 'hook').emit('afterOpenDoor', block.event.id, x, y);
         if (callback) callback();
     };
 
@@ -636,7 +641,7 @@ events.prototype.getItem = function (id, num, x, y, isGentleClick, callback) {
         itemHint.push(id);
     }
 
-    mota.game.hook.emit('afterGetItem', id, x, y, isGentleClick);
+    Mota.require('var', 'hook').emit('afterGetItem', id, x, y, isGentleClick);
     if (callback) callback();
 };
 

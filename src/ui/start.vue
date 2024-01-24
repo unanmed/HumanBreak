@@ -72,6 +72,7 @@ import { loading } from '../core/loader/load';
 import { isMobile } from '../plugin/use';
 import { GameUi } from '@/core/main/custom/ui';
 import { gameKey } from '@/core/main/init/hotkey';
+import { mainUi } from '@/core/main/init/ui';
 
 const props = defineProps<{
     num: number;
@@ -155,7 +156,7 @@ async function clickStartButton(id: string) {
     }
     if (id === 'replay') core.chooseReplayFile();
     if (id === 'achievement') {
-        mota.ui.main.open('achievement');
+        mainUi.open('achievement');
     }
 }
 

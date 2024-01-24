@@ -227,7 +227,7 @@ export function getSkillConsume(skill) {
 
 export function openTree() {
     if (main.replayChecking) return;
-    mota.ui.main.open('skillTree');
+    Mota.require('var', 'mainUi').open('skillTree');
 }
 
 /**

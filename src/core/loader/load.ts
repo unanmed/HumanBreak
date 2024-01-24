@@ -1,6 +1,11 @@
 import resource from '@/data/resource.json';
 import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
-import { Resource, getTypeByResource } from './resource';
+import {
+    Resource,
+    getTypeByResource,
+    zipResource,
+    resource as res
+} from './resource';
 
 interface GameLoadEvent extends EmitableEvent {
     coreLoaded: () => void;
@@ -19,9 +24,9 @@ export function readyAllResource() {
     info.resource.forEach(v => {
         const type = getTypeByResource(v);
         if (type === 'zip') {
-            mota.zipResource.set(v, new Resource(v, 'zip'));
+            zipResource.set(v, new Resource(v, 'zip'));
         } else {
-            mota.resource.set(v, new Resource(v, type));
+            res.set(v, new Resource(v, type));
         }
     });
 }
@@ -35,13 +40,13 @@ export function readyAllResource() {
     loadData.forEach(v => {
         const type = getTypeByResource(v);
         if (type !== 'zip') {
-            mota.resource.set(v, new Resource(v, type));
+            res.set(v, new Resource(v, type));
         }
     });
-    mota.resource.forEach(v => v.active());
+    res.forEach(v => v.active());
     loading.once('coreInit', () => {
         const animates = new Resource('__all_animates__', 'text');
-        mota.resource.set('__all_animates__', animates);
+        res.set('__all_animates__', animates);
         animates.active();
     });
 }

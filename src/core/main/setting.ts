@@ -3,7 +3,7 @@ import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
 import { loading } from '../loader/load';
 import { hook } from './game';
 import { GameStorage } from './storage';
-import { triggerFullscreen } from '@/plugin/utils';
+import { has, triggerFullscreen } from '@/plugin/utils';
 import { createSettingComponents } from './init/settings';
 
 export interface SettingComponentProps {
@@ -46,6 +46,8 @@ export interface SettingDisplayInfo {
 const COM = createSettingComponents();
 
 export class MotaSetting extends EventEmitter<SettingEvent> {
+    static noStorage: string[] = [];
+
     readonly list: Record<string, MotaSettingItem> = {};
 
     /**
@@ -143,6 +145,31 @@ export class MotaSetting extends EventEmitter<SettingEvent> {
         const old = setting.value as boolean | number;
         setting.value += value;
         this.emit('valueChange', key, old, value);
+    }
+
+    /**
+     * 获取一个设置的值，如果获取到的是一个MotaSetting实例，那么返回undefined
+     * @param key 要获取的设置
+     */
+    getValue(key: string): boolean | number | undefined;
+    /**
+     * 获取一个设置的值，如果获取到的是一个MotaSetting实例，那么返回defaultValue
+     * @param key 要获取的设置
+     * @param defaultValue 设置的默认值
+     */
+    getValue<T extends boolean | number>(key: string, defaultValue: T): T;
+    getValue<T extends boolean | number>(
+        key: string,
+        defaultValue?: T
+    ): T | undefined {
+        const setting = this.getSetting(key);
+        if (!has(setting) && !has(defaultValue)) return void 0;
+        if (setting instanceof MotaSetting) {
+            if (has(setting)) return defaultValue;
+            return void 0;
+        } else {
+            return has(setting) ? (setting.value as T) : (defaultValue as T);
+        }
     }
 
     /**
@@ -277,8 +304,10 @@ export class SettingDisplayer extends EventEmitter<SettingDisplayerEvent> {
 // todo: 优化存储方式
 
 export const mainSetting = new MotaSetting();
+// 添加不参与全局存储的设置
+MotaSetting.noStorage.push('action.autoSkill', 'screen.fullscreen');
 
-interface SettingStorage {
+export interface SettingStorage {
     showHalo: boolean;
     frag: boolean;
     itemDetail: boolean;
@@ -298,8 +327,14 @@ const storage = new GameStorage<SettingStorage>(
     GameStorage.fromAuthor('AncTe', 'setting')
 );
 
+export { storage as settingStorage };
+
 // ----- 监听设置修改
 mainSetting.on('valueChange', (key, n, o) => {
+    if (!MotaSetting.noStorage.includes(key)) {
+        storage.setValue(key, n);
+    }
+
     const [root, setting] = key.split('.');
 
     if (root === 'screen') {
@@ -323,25 +358,23 @@ function handleScreenSetting<T extends number | boolean>(
         triggerFullscreen(n as boolean);
     } else if (key === 'halo') {
         // 光环
-        core.setLocalStorage('showHalo', n);
+        // core.setLocalStorage('showHalo', n);
     } else if (key === 'frag') {
         // 打怪特效
-        core.setLocalStorage('frag', n);
+        // core.setLocalStorage('frag', n);
     } else if (key === 'itemDetail') {
         // 宝石血瓶显伤
-        core.setLocalStorage('itemDetail', n);
+        // core.setLocalStorage('itemDetail', n);
     } else if (key === 'heroDetail') {
         // 勇士显伤
-        core.setLocalStorage('heroDetail', n);
+        // core.setLocalStorage('heroDetail', n);
         core.drawHero();
-        // storage.setValue('heroDetail', n as boolean);
     } else if (key === 'transition') {
         // 界面动画
-        core.setLocalStorage('transition', n);
-        // transition.value = n as boolean;
+        // core.setLocalStorage('transition', n);
     } else if (key === 'antiAlias') {
         // 抗锯齿
-        core.setLocalStorage('antiAlias', n);
+        // core.setLocalStorage('antiAlias', n);
         for (const canvas of core.dom.gameCanvas) {
             if (core.domStyle.hdCanvas.includes(canvas.id)) continue;
             if (n) {
@@ -352,12 +385,12 @@ function handleScreenSetting<T extends number | boolean>(
         }
     } else if (key === 'fontSize') {
         // 字体大小
-        core.setLocalStorage('fontSize', n);
+        // core.setLocalStorage('fontSize', n);
         root.style.fontSize = `${n}px`;
     } else if (key === 'smoothView') {
-        core.setLocalStorage('smoothView', n);
+        // core.setLocalStorage('smoothView', n);
     } else if (key === 'criticalGem') {
-        core.setLocalStorage('criticalGem', n);
+        // core.setLocalStorage('criticalGem', n);
     }
 }
 
@@ -371,7 +404,7 @@ function handleActionSetting<T extends number | boolean>(
         flags.autoSkill = n;
     } else if (key === 'fixed') {
         // 定点查看
-        core.setLocalStorage('fixed', n);
+        // core.setLocalStorage('fixed', n);
     }
 }
 
@@ -382,10 +415,10 @@ function handleUtilsSetting<T extends number | boolean>(
 ) {
     if (key === 'betterLoad') {
         // 加载优化
-        core.setLocalStorage('betterLoad', n);
+        // core.setLocalStorage('betterLoad', n);
     } else if (key === 'autoScale') {
         // 自动放缩
-        core.setLocalStorage('autoScale', n);
+        // core.setLocalStorage('autoScale', n);
     }
 }
 

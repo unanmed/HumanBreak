@@ -10,6 +10,7 @@ import { Animation, hyper, sleep } from 'mutate-animate';
 import { onMounted } from 'vue';
 import { has } from '../plugin/utils';
 import { GameUi } from '@/core/main/custom/ui';
+import { fixedUi } from '@/core/main/init/ui';
 
 const props = defineProps<{
     num: number;
@@ -56,7 +57,7 @@ onMounted(async () => {
         }
 
         if (time >= 4050) {
-            mota.ui.fixed.close(props.num);
+            fixedUi.close(props.num);
             ani.ticker.destroy();
         }
 

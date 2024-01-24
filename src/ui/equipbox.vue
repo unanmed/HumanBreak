@@ -197,6 +197,7 @@ import { hyper } from 'mutate-animate';
 import { GameUi } from '@/core/main/custom/ui';
 import { gameKey } from '@/core/main/init/hotkey';
 import { getStatusLabel } from '../plugin/utils';
+import { mainUi } from '@/core/main/init/ui';
 
 const props = defineProps<{
     num: number;
@@ -316,7 +317,7 @@ function changeSort() {
 }
 
 function exit() {
-    mota.ui.main.close(props.num);
+    mainUi.close(props.num);
 }
 
 function clickList(i: number) {
@@ -434,10 +435,10 @@ function dragout(e: Event) {
 }
 
 function toTool() {
-    mota.ui.main.holdOn();
+    mainUi.holdOn();
     exit();
     nextTick(() => {
-        mota.ui.main.open('toolbox');
+        mainUi.open('toolbox');
     });
 }
 

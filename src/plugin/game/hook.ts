@@ -11,7 +11,9 @@ const potionItems: AllIdsOf<'items'>[] = [
     'I491'
 ];
 
-mota.game.hook.on('afterGetItem', (itemId, x, y, isGentleClick) => {
+const hook = Mota.require('var', 'hook');
+
+hook.on('afterGetItem', (itemId, x, y, isGentleClick) => {
     // 获得一个道具后触发的事件
     // itemId：获得的道具ID；x和y是该道具所在的坐标
     // isGentleClick：是否是轻按触发的
@@ -45,7 +47,7 @@ mota.game.hook.on('afterGetItem', (itemId, x, y, isGentleClick) => {
     if (todo.length > 0) core.insertAction(todo, x, y);
 });
 
-mota.game.hook.on('afterOpenDoor', (doorId, x, y) => {
+hook.on('afterOpenDoor', (doorId, x, y) => {
     // 开一个门后触发的事件
 
     const todo: any[] = [];

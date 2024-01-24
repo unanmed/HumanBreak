@@ -54,7 +54,7 @@ export class Resource<
     protected onLoadStart(v?: ResourceData[T]) {
         if (this.format === 'bgm') {
             // bgm 单独处理，因为它可以边播放边加载
-            mota.bgm.add(this.uri, v!);
+            Mota.require('var', 'bgm').add(this.uri, v!);
         }
     }
 
@@ -63,7 +63,7 @@ export class Resource<
         if (this.type === 'fonts') {
             document.fonts.add(new FontFace(this.name, v as ArrayBuffer));
         } else if (this.type === 'sounds') {
-            mota.sound.add(this.uri, v as ArrayBuffer);
+            Mota.require('var', 'sound').add(this.uri, v as ArrayBuffer);
         } else if (this.type === 'images') {
             const name = `${this.name}${this.ext}` as ImageIds;
             loading.on(
@@ -111,7 +111,7 @@ export class Resource<
                     const id = `${base}.${name}`;
                     const type = getTypeByResource(id) as NonZipResource;
                     const format = getZipFormatByType(type);
-                    mota.resource.set(
+                    resource.set(
                         id,
                         new Resource(id, type).setData(file.async(format))
                     );
@@ -377,3 +377,6 @@ export function getZipFormatByType(type: ResourceType): 'arraybuffer' | 'text' {
     if (type === 'text' || type === 'json') return 'text';
     else return 'arraybuffer';
 }
+
+export const resource = new ResourceStore();
+export const zipResource = new ResourceStore();

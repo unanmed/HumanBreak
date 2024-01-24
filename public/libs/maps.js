@@ -2551,8 +2551,11 @@ maps.prototype._drawThumbnail_realDrawTempCanvas = function (
     blocks,
     options
 ) {
-    options.ctx.imageSmoothingEnabled = core.getLocalStorage(
-        'antiAliasing',
+    // todo: storage获取方式优化
+    const storage = mota.storage;
+    const s = storage.get(storage.fromAuthor('AncTe', 'setting'));
+    options.ctx.imageSmoothingEnabled = !s.getValue(
+        'screen.antiAliasing',
         true
     );
     // 缩略图：背景

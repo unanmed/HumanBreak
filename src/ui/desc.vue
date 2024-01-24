@@ -24,6 +24,7 @@ import { splitText } from '../plugin/utils';
 import Colomn from '../components/colomn.vue';
 import { GameUi } from '@/core/main/custom/ui';
 import { gameKey } from '@/core/main/init/hotkey';
+import { mainUi } from '@/core/main/init/ui';
 
 const props = defineProps<{
     num: number;
@@ -35,7 +36,7 @@ type DescKey = keyof typeof desc;
 const selected = ref(Object.keys(desc)[0] as DescKey);
 
 function exit() {
-    mota.ui.main.close(props.num);
+    mainUi.close(props.num);
 }
 
 const content = computed(() => {

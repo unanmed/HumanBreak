@@ -2,6 +2,8 @@
 export {};
 
 (function () {
+    const { mainUi, fixedUi } = Mota.requireAll('var');
+
     if (main.replayChecking)
         return (core.plugin.gameUi = {
             openItemShop: () => 0,
@@ -10,7 +12,7 @@ export {};
 
     function openItemShop(itemShopId) {
         if (!core.isReplaying()) {
-            mota.ui.main.open('shop', {
+            Mota.require('var', 'mainUi').open('shop', {
                 shopId: itemShopId
             });
         }
@@ -23,19 +25,19 @@ export {};
     }
 
     ui.prototype.drawBook = function () {
-        if (!core.isReplaying()) return mota.ui.main.open('book');
+        if (!core.isReplaying()) return mainUi.open('book');
     };
 
     ui.prototype._drawToolbox = function () {
-        if (!core.isReplaying()) return mota.ui.main.open('toolbox');
+        if (!core.isReplaying()) return mainUi.open('toolbox');
     };
 
     ui.prototype._drawEquipbox = function () {
-        if (!core.isReplaying()) return mota.ui.main.open('equipbox');
+        if (!core.isReplaying()) return mainUi.open('equipbox');
     };
 
     ui.prototype.drawFly = function () {
-        if (!core.isReplaying()) return mota.ui.main.open('fly');
+        if (!core.isReplaying()) return mainUi.open('fly');
     };
 
     control.prototype.updateStatusBar_update = function () {
@@ -48,15 +50,15 @@ export {};
         core.control.noAutoEvents = true;
         // 更新vue状态栏
         updateVueStatusBar();
-        mota.game.hook.emit('statusBarUpdate');
+        Mota.require('var', 'hook').emit('statusBarUpdate');
     };
 
     // todo: 多个状态栏分离与控制
     control.prototype.showStatusBar = function () {
         if (main.mode == 'editor') return;
         core.removeFlag('hideStatusBar');
-        if (!mota.ui.fixed.hasName('statusBar')) {
-            mota.ui.fixed.open('statusBar');
+        if (!fixedUi.hasName('statusBar')) {
+            fixedUi.open('statusBar');
         }
         core.dom.tools.hard.style.display = 'block';
         core.dom.toolBar.style.display = 'block';
@@ -68,7 +70,7 @@ export {};
         // 如果原本就是隐藏的，则先显示
         if (!core.domStyle.showStatusBar) this.showStatusBar();
         if (core.isReplaying()) showToolbox = true;
-        mota.ui.fixed.closeByName('statusBar');
+        fixedUi.closeByName('statusBar');
 
         var toolItems = core.dom.tools;
         core.setFlag('hideStatusBar', true);
@@ -87,7 +89,7 @@ export {};
 
     function openSkill() {
         if (core.isReplaying()) return;
-        mota.ui.main.open('skill');
+        mainUi.open('skill');
     }
 
     core.plugin.gameUi = {

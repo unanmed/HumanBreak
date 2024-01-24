@@ -34,6 +34,7 @@ const closeFixed = () => {
     });
 };
 
+// todo: 应当在这里实现查看临界与特殊属性的功能
 export let hovered: Block | null;
 
 gameListener.on('hoverBlock', block => {

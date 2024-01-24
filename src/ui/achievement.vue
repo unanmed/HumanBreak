@@ -176,7 +176,7 @@ function getAllAchievements(type: AchievementType): ResolvedAchievement[] {
 }
 
 function exit() {
-    mota.ui.main.close(props.num);
+    Mota.require('var', 'mainUi').close(props.num);
 }
 </script>
 

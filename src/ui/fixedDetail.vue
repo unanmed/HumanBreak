@@ -14,6 +14,7 @@ import BookDetail from './bookDetail.vue';
 import { detailInfo } from '../plugin/ui/book';
 import { hovered } from '@/core/main/init/fixed';
 import { GameUi } from '@/core/main/custom/ui';
+import { mainUi } from '@/core/main/init/ui';
 
 const props = defineProps<{
     num: number;
@@ -41,7 +42,7 @@ if (hovered) {
 }
 
 function close() {
-    mota.ui.main.close(props.num);
+    mainUi.close(props.num);
 }
 </script>
 

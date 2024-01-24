@@ -32,6 +32,7 @@ import { computed, onMounted, ref } from 'vue';
 import Colomn from '../components/colomn.vue';
 import bgm from '../data/bgm.json';
 import { splitText } from '../plugin/utils';
+import { mainUi } from '@/core/main/init/ui';
 
 const props = defineProps<{
     num: number;
@@ -55,7 +56,7 @@ const content = computed(() => {
 const name = computed(() => list[selected.value]!.name);
 
 function exit() {
-    mota.ui.main.close(props.num);
+    mainUi.close(props.num);
 }
 
 function select(id: BgmIds) {

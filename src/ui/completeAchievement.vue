@@ -28,6 +28,7 @@ import {
     totalPoint
 } from '../plugin/ui/achievement';
 import { GameUi } from '@/core/main/custom/ui';
+import { fixedUi } from '@/core/main/init/ui';
 
 const height = window.innerHeight;
 
@@ -62,7 +63,7 @@ onMounted(async () => {
         now.value = Math.floor(nowPoint + point * ratio);
     });
     await sleep(4600);
-    mota.ui.fixed.close(props.num);
+    fixedUi.close(props.num);
 });
 </script>
 

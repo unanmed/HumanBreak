@@ -70,3 +70,5 @@ export class BgmController extends ResourceController<HTMLAudioElement> {
         return this.list[`bgms.${id}`];
     }
 }
+
+export const bgm = new BgmController();

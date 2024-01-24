@@ -51,7 +51,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             else core.showStatusBar();
             if (main.mode === 'play' && !main.replayChecking) {
                 mota.plugin.fly.splitArea();
-                mota.game.hook.emit('reset');
+                Mota.require('var', 'hook').emit('reset');
             } else {
                 flags.autoSkill ??= true;
             }

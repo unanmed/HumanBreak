@@ -1168,14 +1168,14 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"name": "系统设置",
 		"canUseItemEffect": "true",
 		"text": "内含所有系统设置项",
-		"useItemEffect": "if (!core.isReplaying()) mota.ui.main.open('settings');"
+		"useItemEffect": "if (!core.isReplaying()) Mota.require('var', 'mainUi').open('settings');"
 	},
 	"I560": {
 		"cls": "constants",
 		"name": "百科全书",
 		"canUseItemEffect": "true",
 		"text": "一个包含游戏中所有功能详细说明的百科全书，可以查看游戏中所有的功能",
-		"useItemEffect": "if (!core.isReplaying()) mota.ui.main.open('desc');"
+		"useItemEffect": "if (!core.isReplaying()) Mota.require('var', 'mainUi').open('desc');"
 	},
 	"I565": {
 		"cls": "constants",
@@ -1233,7 +1233,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "constants",
 		"name": "成就",
 		"canUseItemEffect": "true",
-		"useItemEffect": "mota.ui.main.open('achievement');",
+		"useItemEffect": "Mota.require('var', 'mainUi')open('achievement');",
 		"text": "可以查看成就"
 	}
 }

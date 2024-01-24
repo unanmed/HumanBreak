@@ -174,6 +174,7 @@ import Scroll from '../components/scroll.vue';
 import BoxAnimate from '../components/boxAnimate.vue';
 import { GameUi } from '@/core/main/custom/ui';
 import { gameKey } from '@/core/main/init/hotkey';
+import { mainUi } from '@/core/main/init/ui';
 
 const props = defineProps<{
     num: number;
@@ -306,7 +307,7 @@ gameKey
 
 function exit() {
     if (bought) core.status.route.push('closeShop');
-    mota.ui.main.close(props.num);
+    mainUi.close(props.num);
 }
 
 onMounted(async () => {

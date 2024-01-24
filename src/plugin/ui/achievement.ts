@@ -51,7 +51,9 @@ export function completeAchievement(type: AchievementType, index: number) {
     if (type === 'explore' && !Object.values(achiDict).includes(index)) {
         checkCompletionAchievement();
     }
-    mota.ui.fixed.open('completeAchi', { complete: `${type},${index}` });
+    Mota.require('var', 'fixedUi').open('completeAchi', {
+        complete: `${type},${index}`
+    });
 }
 
 /**
