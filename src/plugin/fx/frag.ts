@@ -1,4 +1,5 @@
 import { Animation, linear, sleep } from 'mutate-animate';
+import { has } from '../utils';
 
 interface SplittedImage {
     canvas: HTMLCanvasElement;
@@ -23,15 +24,44 @@ const MAX_ROTATE = 0.5;
 /** 碎裂动画的速率曲线函数 */
 const FRAG_TIMING = linear();
 
-export default function init() {
-    return { applyFragWith };
+export function init() {
+    Mota.rewrite(core.events, 'afterBattle', 'add', (_, enemy, x, y) => {
+        // 打怪特效
+        if (core.getLocalStorage('frag') && has(x) && has(y)) {
+            const frame = core.status.globalAnimateStatus % 2;
+            const canvas = document.createElement('canvas');
+            canvas.width = 32;
+            canvas.height = 32;
+            core.drawIcon(canvas, enemy.id, 0, 0, 32, 32, frame);
+            const manager = applyFragWith(canvas);
+            const frag = manager.canvas;
+            frag.style.imageRendering = 'pixelated';
+            frag.style.width = `${frag.width * core.domStyle.scale}px`;
+            frag.style.height = `${frag.height * core.domStyle.scale}px`;
+            const left =
+                (x * 32 + 16 - frag.width / 2 - core.bigmap.offsetX) *
+                core.domStyle.scale;
+            const top =
+                (y * 32 + 16 - frag.height / 2 - core.bigmap.offsetY) *
+                core.domStyle.scale;
+            frag.style.left = `${left}px`;
+            frag.style.top = `${top}px`;
+            frag.style.zIndex = '45';
+            frag.style.position = 'absolute';
+            frag.style.filter = 'sepia(20%)brightness(120%)';
+            core.dom.gameDraw.appendChild(frag);
+            manager.onEnd.then(() => {
+                frag.remove();
+            });
+        }
+    });
 }
 
 export function applyFragWith(
     canvas: HTMLCanvasElement,
     length: number = 4,
     time: number = 1000,
-    config: any = {}
+    config: any = {} // todo: 类型标注
 ) {
     // 先切分图片
     const imgs = splitCanvas(canvas, length);

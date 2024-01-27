@@ -1,4 +1,4 @@
-import { CurrentEnemy } from '../game/enemy/battle';
+import type { CurrentEnemy } from '../game/enemy/battle';
 import { has } from '../utils';
 
 export interface ToShowEnemy extends CurrentEnemy {

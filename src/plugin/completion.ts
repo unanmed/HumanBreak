@@ -6,10 +6,6 @@ import {
 import { changeLocalStorage } from './utils';
 import list from '../data/achievement.json';
 
-export default function init() {
-    return { getChapterCompletion, checkVisitedFloor };
-}
-
 export const floors: Record<number, FloorIds[]> = {
     1: ['MT0', 'tower7']
 };

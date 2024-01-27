@@ -5,12 +5,8 @@ let pop: any[] = [];
 
 let time = 0;
 
-// 插件必须有默认导出，并返回所有外部会用到的函数，所有返回的函数会被转发到core上
-// 并且在这里面完成所有的初始化，函数外部也可以进行初始化，但完全不能涉及到样板相关内容
-export default function init() {
+export function init() {
     core.registerAnimationFrame('pop', true, popValue);
-    // 返回值是所有外部可见内容
-    return { addPop, pop };
 }
 
 /**
@@ -53,7 +49,7 @@ function popValue(t: number) {
  * @param py 弹出的纵坐标
  * @param value 弹出的文字
  */
-function addPop(px: number, py: number, value: string) {
+export function addPop(px: number, py: number, value: string) {
     var data = {
         px: px,
         py: py,

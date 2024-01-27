@@ -2,13 +2,8 @@ import { Animation, circle, hyper, sleep, TimingFn } from 'mutate-animate';
 import { completeAchievement } from '../ui/achievement';
 import { has } from '../utils';
 import { ChaseCameraData, ChasePath, getChaseDataByIndex } from './data';
-import { init1 } from './chase1';
 
 // todo: 优化，可以继承自EventEmitter
-
-export default function init() {
-    return { startChase, chaseInit1: init1 };
-}
 
 export function shake2(power: number, timing: TimingFn): TimingFn {
     let r = 0;

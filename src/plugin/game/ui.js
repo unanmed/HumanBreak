@@ -20,8 +20,8 @@ export {};
 
     function updateVueStatusBar() {
         if (main.replayChecking) return;
-        mota.plugin.status.statusBarStatus.value =
-            !mota.plugin.status.statusBarStatus.value;
+        const status = Mota.Plugin.require('status');
+        status.statusBarStatus.value = !status.statusBarStatus.value;
     }
 
     ui.prototype.drawBook = function () {

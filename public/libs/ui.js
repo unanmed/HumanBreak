@@ -4228,6 +4228,4 @@ ui.prototype.deleteAllCanvas = function () {
     this.deleteCanvas(function () {
         return true;
     });
-    if (main.mode === 'play' && !main.replayChecking && mota.plugin.shadow)
-        mota.plugin.shadow.initShadowCanvas();
 };

@@ -167,35 +167,6 @@ core.events.afterBattle = function (
     // 如果已有事件正在处理中
     if (core.status.event.id == null) core.continueAutomaticRoute();
     else core.clearContinueAutomaticRoute();
-
-    // 打怪特效
-    if (core.getLocalStorage('frag') && has(x) && has(y)) {
-        const frame = core.status.globalAnimateStatus % 2;
-        const canvas = document.createElement('canvas');
-        canvas.width = 32;
-        canvas.height = 32;
-        core.drawIcon(canvas, enemy.id, 0, 0, 32, 32, frame);
-        const manager = mota.plugin.frag.applyFragWith(canvas);
-        const frag = manager.canvas;
-        frag.style.imageRendering = 'pixelated';
-        frag.style.width = `${frag.width * core.domStyle.scale}px`;
-        frag.style.height = `${frag.height * core.domStyle.scale}px`;
-        const left =
-            (x * 32 + 16 - frag.width / 2 - core.bigmap.offsetX) *
-            core.domStyle.scale;
-        const top =
-            (y * 32 + 16 - frag.height / 2 - core.bigmap.offsetY) *
-            core.domStyle.scale;
-        frag.style.left = `${left}px`;
-        frag.style.top = `${top}px`;
-        frag.style.zIndex = '45';
-        frag.style.position = 'absolute';
-        frag.style.filter = 'sepia(20%)brightness(120%)';
-        core.dom.gameDraw.appendChild(frag);
-        manager.onEnd.then(() => {
-            frag.remove();
-        });
-    }
 };
 
 core.events._sys_battle = function (data: Block, callback?: () => void) {

@@ -10,7 +10,7 @@ control.prototype.checkBlock = function (forceMockery: boolean = false) {
     const damage = info?.damage;
     if (damage) {
         if (!main.replayChecking) {
-            mota.plugin.pop.addPop(
+            Mota.Plugin.require('pop').addPop(
                 (x - core.bigmap.offsetX / 32) * 32 + 12,
                 (y - core.bigmap.offsetY / 32) * 32 + 20,
                 (-damage).toString()

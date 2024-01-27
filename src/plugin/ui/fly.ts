@@ -1,9 +1,5 @@
 import { has } from '../utils';
 
-export default function init() {
-    return { splitArea, getMapDrawData };
-}
-
 type BFSFromString = `${FloorIds},${number},${number},${Dir}`;
 type BFSToString = `${FloorIds},${number},${number}`;
 

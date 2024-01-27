@@ -36,7 +36,7 @@ export function removeMaps(fromId, toId, force) {
         deleted = true;
     }
     if (deleted && !main.replayChecking) {
-        mota.plugin.fly.splitArea();
+        Mota.Plugin.require('fly').splitArea();
     }
 }
 

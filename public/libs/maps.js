@@ -2552,9 +2552,8 @@ maps.prototype._drawThumbnail_realDrawTempCanvas = function (
     options
 ) {
     // todo: storage获取方式优化
-    const storage = mota.storage;
-    const s = storage.get(storage.fromAuthor('AncTe', 'setting'));
-    options.ctx.imageSmoothingEnabled = !s.getValue(
+    const setting = Mota.require('var', 'mainSetting');
+    options.ctx.imageSmoothingEnabled = !setting.getValue(
         'screen.antiAliasing',
         true
     );
@@ -3111,7 +3110,6 @@ maps.prototype.removeBlock = function (x, y, floorId) {
         const block = blocks[i];
         this.removeBlockByIndex(i, floorId);
         this._removeBlockFromMap(floorId, block);
-        if (!main.replayChecking) mota.plugin.gameShadow.updateShadow(true);
         return true;
     }
     return false;
@@ -3274,7 +3272,6 @@ maps.prototype.setBlock = function (number, x, y, floorId, noredraw) {
             }
         }
     }
-    if (!main.replayChecking) mota.plugin.gameShadow.updateShadow(true);
 };
 
 maps.prototype.animateSetBlock = function (

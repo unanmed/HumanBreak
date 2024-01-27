@@ -50,7 +50,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 core.hideStatusBar(core.hasFlag('showToolbox'));
             else core.showStatusBar();
             if (main.mode === 'play' && !main.replayChecking) {
-                mota.plugin.fly.splitArea();
+                Mota.Plugin.require('fly').splitArea();
                 Mota.require('var', 'hook').emit('reset');
             } else {
                 flags.autoSkill ??= true;
@@ -143,11 +143,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // ---------- 重绘新地图；这一步将会设置core.status.floorId ---------- //
             core.drawMap(floorId);
 
-            if (!main.replayChecking) {
-                mota.plugin.gameShadow.updateShadow();
-                mota.plugin.gameCanvas.setCanvasFilterByFloorId(floorId);
-            }
-
             // 切换楼层BGM
             if (core.status.maps[floorId].bgm) {
                 var bgm = core.status.maps[floorId].bgm;
@@ -206,7 +201,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 }
             }
             if (!flags.debug && !main.replayChecking)
-                mota.plugin.completion.checkVisitedFloor();
+                Mota.Plugin.require('completion').checkVisitedFloor();
         },
         flyTo: function (toId, callback) {
             // 楼层传送器的使用，从当前楼层飞往toId
@@ -345,7 +340,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 if (callback) callback();
 
                 if (flags.onChase) {
-                    mota.plugin.fly.startChase(flags.chaseIndex);
+                    Mota.Plugin.require('chase').startChase(flags.chaseIndex);
                     if (flags.chaseIndex === 1) {
                         core.playBgm('escape.mp3', 43.5);
                     }
