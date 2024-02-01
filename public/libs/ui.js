@@ -3099,13 +3099,14 @@ ui.prototype._drawNotes = function () {
 
 ////// 绘制快捷商店选择栏 //////
 ui.prototype._drawQuickShop = function () {
+    const shop = Mota.Plugin.require('shop');
     core.status.event.id = 'selectShop';
     var shopList = core.status.shops,
-        keys = core.plugin.shop.listShopIds();
+        keys = shop.listShopIds();
     var choices = keys.map(function (shopId) {
         return {
             text: shopList[shopId].textInList,
-            color: core.plugin.shop.isShopVisited(shopId) ? null : '#999999'
+            color: shop.isShopVisited(shopId) ? null : '#999999'
         };
     });
     choices.push('返回游戏');

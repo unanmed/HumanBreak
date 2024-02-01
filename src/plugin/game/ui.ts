@@ -1,28 +1,7 @@
-///<reference path="../../../src/types/core.d.ts" />
-export {};
+// @ts-nocheck
 
-(function () {
+export function init() {
     const { mainUi, fixedUi } = Mota.requireAll('var');
-
-    if (main.replayChecking)
-        return (core.plugin.gameUi = {
-            openItemShop: () => 0,
-            openSkill: () => 0
-        });
-
-    function openItemShop(itemShopId) {
-        if (!core.isReplaying()) {
-            Mota.require('var', 'mainUi').open('shop', {
-                shopId: itemShopId
-            });
-        }
-    }
-
-    function updateVueStatusBar() {
-        if (main.replayChecking) return;
-        const status = Mota.Plugin.require('status');
-        status.statusBarStatus.value = !status.statusBarStatus.value;
-    }
 
     ui.prototype.drawBook = function () {
         if (!core.isReplaying()) return mainUi.open('book');
@@ -86,14 +65,11 @@ export {};
             core.dom.toolBar.style.display = 'none';
         }
     };
+}
 
-    function openSkill() {
-        if (core.isReplaying()) return;
-        mainUi.open('skill');
-    }
-
-    core.plugin.gameUi = {
-        openItemShop,
-        openSkill
-    };
-})();
+function updateVueStatusBar() {
+    Mota.r(() => {
+        const status = Mota.require('var', 'status');
+        status.value = !status.value;
+    });
+}

@@ -1,6 +1,6 @@
 export function chaseInit1() {
-    const ids = ['MT13', 'MT14', 'MT15'];
-    const toRemove = [];
+    const ids: FloorIds[] = ['MT13', 'MT14', 'MT15'];
+    const toRemove: [number, number, FloorIds][] = [];
     ids.forEach(v => {
         core.status.maps[v].cannotMoveDirectly = true;
         core.extractBlocks(v);
@@ -17,7 +17,3 @@ export function chaseInit1() {
         core.removeBlock(...v);
     });
 }
-
-core.plugin.chase = {
-    chaseInit1
-};

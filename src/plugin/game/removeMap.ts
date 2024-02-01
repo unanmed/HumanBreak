@@ -1,14 +1,20 @@
 ///<reference path="../../../src/types/core.d.ts" />
 
-export function removeMaps(fromId, toId, force) {
+export function removeMaps(
+    fromId: FloorIds,
+    toId: FloorIds,
+    force: boolean = false
+) {
     toId = toId || fromId;
     var fromIndex = core.floorIds.indexOf(fromId),
         toIndex = core.floorIds.indexOf(toId);
     if (toIndex < 0) toIndex = core.floorIds.length - 1;
-    flags.__visited__ = flags.__visited__ || {};
-    flags.__removed__ = flags.__removed__ || [];
-    flags.__disabled__ = flags.__disabled__ || {};
-    flags.__leaveLoc__ = flags.__leaveLoc__ || {};
+    // @ts-ignore
+    flags.__visited__ ??= {};
+    flags.__removed__ ??= [];
+    flags.__disabled__ ??= {};
+    // @ts-ignore
+    flags.__leaveLoc__ ??= {};
     flags.__forceDelete__ ??= {};
     let deleted = false;
     for (var i = fromIndex; i <= toIndex; ++i) {
@@ -36,11 +42,11 @@ export function removeMaps(fromId, toId, force) {
         deleted = true;
     }
     if (deleted && !main.replayChecking) {
-        Mota.Plugin.require('fly').splitArea();
+        Mota.Plugin.require('fly_r').splitArea();
     }
 }
 
-export function deleteFlags(floorId) {
+export function deleteFlags(floorId: FloorIds) {
     delete flags[`jump_${floorId}`];
     delete flags[`inte_${floorId}`];
     delete flags[`loop_${floorId}`];
@@ -51,7 +57,7 @@ export function deleteFlags(floorId) {
 // 恢复楼层
 // core.plugin.removeMap.resumeMaps("MT1", "MT300") 恢复MT1~MT300之间的全部层
 // core.plugin.removeMap.resumeMaps("MT10") 只恢复MT10层
-export function resumeMaps(fromId, toId) {
+export function resumeMaps(fromId: FloorIds, toId: FloorIds) {
     toId = toId || fromId;
     var fromIndex = core.floorIds.indexOf(fromId),
         toIndex = core.floorIds.indexOf(toId);
@@ -65,19 +71,21 @@ export function resumeMaps(fromId, toId) {
             flags.__forceDelete__[floorId]
         )
             continue;
+        // @ts-ignore
         flags.__removed__ = flags.__removed__.filter(f => {
             return f != floorId;
         });
+        // @ts-ignore
         core.status.maps[floorId] = core.loadFloor(floorId);
     }
 }
 
 // 分区砍层相关
-var inAnyPartition = floorId => {
+var inAnyPartition = (floorId: FloorIds) => {
     var inPartition = false;
     (core.floorPartitions || []).forEach(floor => {
         var fromIndex = core.floorIds.indexOf(floor[0]);
-        var toIndex = core.floorIds.indexOf(floor[1]);
+        var toIndex = core.floorIds.indexOf(floor[1]!);
         var index = core.floorIds.indexOf(floorId);
         if (fromIndex < 0 || index < 0) return;
         if (toIndex < 0) toIndex = core.floorIds.length - 1;
@@ -87,29 +95,19 @@ var inAnyPartition = floorId => {
 };
 
 // 分区砍层
-export function autoRemoveMaps(floorId) {
+export function autoRemoveMaps(floorId: FloorIds) {
     if (main.mode != 'play' || !inAnyPartition(floorId)) return;
     // 根据分区信息自动砍层与恢复
     (core.floorPartitions || []).forEach(floor => {
         var fromIndex = core.floorIds.indexOf(floor[0]);
-        var toIndex = core.floorIds.indexOf(floor[1]);
+        var toIndex = core.floorIds.indexOf(floor[1]!);
         var index = core.floorIds.indexOf(floorId);
         if (fromIndex < 0 || index < 0) return;
         if (toIndex < 0) toIndex = core.floorIds.length - 1;
         if (index >= fromIndex && index <= toIndex) {
-            core.plugin.removeMap.resumeMaps(
-                core.floorIds[fromIndex],
-                core.floorIds[toIndex]
-            );
+            resumeMaps(core.floorIds[fromIndex], core.floorIds[toIndex]);
         } else {
             removeMaps(core.floorIds[fromIndex], core.floorIds[toIndex]);
         }
     });
 }
-
-core.plugin.removeMap = {
-    removeMaps,
-    deleteFlags,
-    resumeMaps,
-    autoRemoveMaps
-};

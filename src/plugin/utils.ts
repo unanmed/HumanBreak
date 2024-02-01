@@ -225,6 +225,7 @@ export async function doByInterval(
 
 /**
  * 更改一个本地存储
+ * @deprecated
  * @param name 要更改的信息
  * @param fn 更改时执行的函数
  * @param defaultValue 如果不存在时获取的默认值
@@ -287,7 +288,8 @@ export function spliceBy<T>(arr: T[], from: T): T[] {
 }
 
 export async function triggerFullscreen(full: boolean) {
-    const { maxGameScale } = core.plugin.utils;
+    if (!Mota.Plugin.inited) return;
+    const { maxGameScale } = Mota.Plugin.require('utils_g');
     if (!!document.fullscreenElement && !full) {
         await document.exitFullscreen();
         requestAnimationFrame(() => {

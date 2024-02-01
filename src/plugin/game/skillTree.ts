@@ -1,14 +1,11 @@
 ///<reference path="../../../src/types/core.d.ts" />
 
-/**
- * @type {number[]}
- */
-let levels = [];
+let levels: number[] = [];
 
 /**
  * @type {Record<Chapter, Skill[]>}
  */
-const skills = {
+export const skills: Record<Chapter, Skill[]> = {
     chapter1: [
         {
             index: 0,
@@ -195,13 +192,11 @@ const skills = {
     ]
 };
 
-core.plugin.skills = skills;
-
 export function resetSkillLevel() {
     levels = [];
 }
 
-export function getSkillFromIndex(index) {
+export function getSkillFromIndex(index: number) {
     for (const [, skill] of Object.entries(skills)) {
         const s = skill.find(v => v.index === index);
         if (s) return s;
@@ -212,16 +207,21 @@ export function getSkillFromIndex(index) {
  * 获取技能等级
  * @param {number} skill
  */
-export function getSkillLevel(skill) {
+export function getSkillLevel(skill: number) {
     return (levels[skill] ??= 0);
 }
 
-export function getSkillConsume(skill) {
+export function getSkillConsume(skill: number) {
     return eval(
-        getSkillFromIndex(skill).consume.replace(/level(:\d+)?/g, (str, $1) => {
-            if ($1) return `core.plugin.skillTree.getSkillLevel(${$1})`;
-            else return `core.plugin.skillTree.getSkillLevel(${skill})`;
-        })
+        getSkillFromIndex(skill)?.consume.replace(
+            /level(:\d+)?/g,
+            (str, $1) => {
+                if ($1)
+                    return `Mota.Plugin.require('skillTree_g').getSkillLevel(${$1})`;
+                else
+                    return `Mota.Plugin.require('skillTree_g').getSkillLevel(${skill})`;
+            }
+        ) ?? ''
     );
 }
 
@@ -232,17 +232,16 @@ export function openTree() {
 
 /**
  * 能否升级某个技能
- * @param {number} skill
  */
-export function canUpgrade(skill) {
-    const consume = core.plugin.skillTree.getSkillConsume(skill);
+export function canUpgrade(skill: number) {
+    const consume = getSkillConsume(skill);
     if (consume > core.status.hero.mdef) return false;
-    const level = core.plugin.skillTree.getSkillLevel(skill);
+    const level = getSkillLevel(skill);
     const s = getSkillFromIndex(skill);
-    if (level === s.max) return false;
-    const front = s.front;
+    if (level === s?.max) return false;
+    const front = s?.front ?? [];
     for (const [skill, level] of front) {
-        if (core.plugin.skillTree.getSkillLevel(skill) < level) return false;
+        if (getSkillLevel(skill) < level) return false;
     }
     return true;
 }
@@ -251,7 +250,7 @@ export function canUpgrade(skill) {
  * 实际升级效果
  * @param {number} skill
  */
-export function upgradeSkill(skill) {
+export function upgradeSkill(skill: number) {
     if (!canUpgrade(skill)) return false;
     switch (skill) {
         case 0: // 力量 +2攻击
@@ -302,17 +301,6 @@ export function saveSkillTree() {
     return levels.slice();
 }
 
-export function loadSkillTree(data) {
+export function loadSkillTree(data: number[]) {
     levels = data ?? [];
 }
-
-core.plugin.skillTree = {
-    getSkillConsume,
-    getSkillFromIndex,
-    getSkillLevel,
-    saveSkillTree,
-    loadSkillTree,
-    upgradeSkill,
-    openTree,
-    resetSkillLevel
-};

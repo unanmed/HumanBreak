@@ -1,4 +1,4 @@
-///<reference path="../../../src/types/core.d.ts" />
+// @ts-nocheck
 
 // 所有的主动技能效果
 var ignoreInJump = {
@@ -19,8 +19,7 @@ var ignoreInJump = {
     ]
 };
 
-/** @type {FloorIds[]} */
-export const jumpIgnoreFloor = [
+export const jumpIgnoreFloor: FloorIds[] = [
     'MT31',
     'snowTown',
     'MT36',
@@ -178,8 +177,3 @@ export function jumpSkill() {
         return { x: x, y: y };
     }
 }
-
-core.plugin.skillEffects = {
-    jumpSkill,
-    jumpIgnoreFloor
-};

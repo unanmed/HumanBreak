@@ -12,7 +12,8 @@ const cannotStudy = [9, 12, 14, 15, 24];
 
 export function canStudySkill(number: number) {
     const s = (core.status.hero.special ??= { num: [], last: [] });
-    if (core.plugin.skillTree.getSkillLevel(11) === 0) return false;
+    if (Mota.Plugin.require('skillTree_g').getSkillLevel(11) === 0)
+        return false;
     if (s.num.length >= 1) return false;
     if (s.num.includes(number)) return false;
     if (cannotStudy.includes(number)) return false;

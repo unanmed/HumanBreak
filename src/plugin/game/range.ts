@@ -1,3 +1,5 @@
+import { has } from './utils';
+
 type RangeScanFn<C extends Partial<Loc>> = (
     collection: Range<C>,
     data: any
@@ -77,8 +79,8 @@ Range.registerRangeType(
 
         return list.filter(v => {
             return (
-                core.has(v.x) &&
-                core.has(v.y) &&
+                has(v.x) &&
+                has(v.y) &&
                 Math.abs(v.x - x) <= r &&
                 Math.abs(v.y - y) <= r
             );
@@ -87,8 +89,8 @@ Range.registerRangeType(
     (col, { x, y, d }, item) => {
         const r = Math.floor(d / 2);
         return (
-            core.has(item.x) &&
-            core.has(item.y) &&
+            has(item.x) &&
+            has(item.y) &&
             Math.abs(item.x - x) <= r &&
             Math.abs(item.y - y) <= r
         );

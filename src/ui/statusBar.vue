@@ -137,6 +137,8 @@ import { status } from '../plugin/ui/statusBar';
 import { isMobile } from '../plugin/use';
 import { has } from '../plugin/utils';
 
+const skillTree = Mota.Plugin.require('skillTree_g');
+
 const width = ref(
     isMobile ? window.innerWidth - 60 : window.innerWidth * 0.175
 );
@@ -155,7 +157,7 @@ const skill = ref<string>(flags.autoSkill ? '自动切换' : '无');
 const up = ref(0);
 const spring = ref<number>();
 const skillOpened = ref(core.getFlag('chapter', 0) > 0);
-const studyOpened = ref(core.plugin.skillTree.getSkillLevel(11) > 0);
+const studyOpened = ref(skillTree.getSkillLevel(11) > 0);
 const jumpCnt = ref<number>();
 /**
  * 要展示的勇士属性
@@ -178,9 +180,8 @@ watch(status, update);
  * 更新显示内容
  */
 function update() {
-    if (!core?.plugin?.hero?.getHeroStatusOn) return;
     toShow.forEach(v => {
-        hero[v] = core.plugin.hero.getHeroStatusOn(v);
+        hero[v] = Mota.Plugin.require('hero_g').getHeroStatusOn(v);
     });
     keys[0] = core.itemCount('yellowKey');
     keys[1] = core.itemCount('blueKey');
@@ -205,10 +206,12 @@ function update() {
         spring.value = void 0;
     }
     skillOpened.value = core.getFlag('chapter', 0) > 0;
-    studyOpened.value = core.plugin.skillTree.getSkillLevel(11) > 0;
+    studyOpened.value = skillTree.getSkillLevel(11) > 0;
     jumpCnt.value =
         flags.skill2 &&
-        !core.plugin.skillEffects.jumpIgnoreFloor.includes(core.status.floorId)
+        !Mota.Plugin.require('skill_g').jumpIgnoreFloor.includes(
+            core.status.floorId
+        )
             ? 3 - (flags[`jump_${core.status.floorId}`] ?? 0)
             : void 0;
 }

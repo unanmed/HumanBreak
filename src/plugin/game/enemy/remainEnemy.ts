@@ -1,27 +1,19 @@
-///<reference path="../../../../src/types/core.d.ts" />
-
 // todo: 优化，直接调用 floor.enemy.list 进行计算
 
 /**
  * 检查漏怪
- * @param {FloorIds[]} floorIds
  */
-export function checkRemainEnemy(floorIds) {
-    /**
-     * @type {Record<FloorIds, {loc: LocArr, id: EnemyIds}[]>}
-     */
-    const enemy = {};
+export function checkRemainEnemy(floorIds: FloorIds[]) {
+    const enemy: Partial<Record<FloorIds, { loc: LocArr; id: EnemyIds }[]>> =
+        {};
     floorIds.forEach(v => {
         core.extractBlocks(v);
         const blocks = core.status.maps[v].blocks;
         blocks.forEach(block => {
             if (!block.event.cls.startsWith('enemy') || block.disable) return;
-            /**
-             * @type {EnemyIds}
-             */
-            const id = block.event.id;
+            const id: EnemyIds = block.event.id as EnemyIds;
             enemy[v] ??= [];
-            const info = enemy[v];
+            const info = enemy[v]!;
             info.push({ loc: [block.x, block.y], id });
         });
     });
@@ -30,30 +22,23 @@ export function checkRemainEnemy(floorIds) {
 
 /**
  * 获取剩余怪物字符串
- * @param {FloorIds[]} floorIds
  */
-export function getRemainEnemyString(floorIds) {
+export function getRemainEnemyString(floorIds: FloorIds[]) {
     const enemy = checkRemainEnemy(floorIds);
     const str = [];
     let now = [];
     for (const floor in enemy) {
-        /**
-         * @type {{loc: LocArr, id: EnemyIds}[]}
-         */
-        const all = enemy[floor];
-        /**
-         * @type {Record<EnemyIds, number>}
-         */
-        const remain = {};
+        const all: { loc: LocArr; id: EnemyIds }[] = enemy[floor as FloorIds]!;
+        const remain: Partial<Record<EnemyIds, number>> = {};
         all.forEach(v => {
             const id = v.id;
             remain[id] ??= 0;
-            remain[id]++;
+            remain[id]!++;
         });
-        const title = core.status.maps[floor].title;
+        const title = core.status.maps[floor as FloorIds].title;
         for (const id in remain) {
-            const name = core.material.enemys[id].name;
-            now.push(`${title}(${floor}): ${name} * ${remain[id]}`);
+            const name = core.material.enemys[id as EnemyIds].name;
+            now.push(`${title}(${floor}): ${name} * ${remain[id as EnemyIds]}`);
             if (now.length === 10) {
                 str.push(now.join('\n'));
                 now = [];
@@ -67,8 +52,3 @@ export function getRemainEnemyString(floorIds) {
 
     return str;
 }
-
-core.plugin.remainEnemy = {
-    checkRemainEnemy,
-    getRemainEnemyString
-};

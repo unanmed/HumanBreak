@@ -89,6 +89,8 @@ const props = defineProps<{
     ui: GameUi;
 }>();
 
+const skillTree = Mota.Plugin.require('skillTree_g');
+
 let canvas: HTMLCanvasElement;
 let ctx: CanvasRenderingContext2D;
 
@@ -103,9 +105,11 @@ const chapterDict = {
 
 flags.skillTree ??= 0;
 
-const chapterList = Object.keys(core.plugin.skills) as Chapter[];
+const s = Mota.Plugin.require('skillTree_g').skills;
 
-selected.value = core.plugin.skills[chapterList[flags.skillTree]][0].index;
+const chapterList = Object.keys(s) as Chapter[];
+
+selected.value = s[chapterList[flags.skillTree]][0].index;
 chapter.value = chapterList[flags.skillTree];
 
 watch(selected, draw);
@@ -115,20 +119,19 @@ const mdef = ref(core.status.hero.mdef);
 
 const skill = computed(() => {
     update.value;
-    return core.plugin.skillTree.getSkillFromIndex(selected.value);
+    return skillTree.getSkillFromIndex(selected.value);
 });
 
 const skills = computed(() => {
-    return core.plugin.skills[chapter.value];
+    return s[chapter.value];
 });
 
 const desc = computed(() => {
     return eval(
         '`' +
             splitText(skill.value.desc).replace(/level(:\d+)?/g, (str, $1) => {
-                if ($1) return `core.plugin.skillTree.getSkillLevel(${$1})`;
-                else
-                    return `core.plugin.skillTree.getSkillLevel(${skill.value.index})`;
+                if ($1) return `skillTree.getSkillLevel(${$1})`;
+                else return `skillTree.getSkillLevel(${skill.value.index})`;
             }) +
             '`'
     );
@@ -143,9 +146,9 @@ const effect = computed(() => {
                     .join('')
                     .replace(/level(:\d+)?/g, (str, $1) => {
                         if ($1)
-                            return `(core.plugin.skillTree.getSkillLevel(${$1}) + ${v})`;
+                            return `(skillTree.getSkillLevel(${$1}) + ${v})`;
                         else
-                            return `(core.plugin.skillTree.getSkillLevel(${skill.value.index}) + ${v})`;
+                            return `(skillTree.getSkillLevel(${skill.value.index}) + ${v})`;
                     }) +
                 '`'
         );
@@ -163,20 +166,20 @@ const dict = computed(() => {
 
 const front = computed(() => {
     return skill.value.front.map(v => {
-        return `${
-            core.plugin.skillTree.getSkillLevel(v[0]) >= v[1] ? 'a' : 'b'
-        }${v[1]}级  ${skills.value[dict.value[v[0]]].title}`;
+        return `${skillTree.getSkillLevel(v[0]) >= v[1] ? 'a' : 'b'}${
+            v[1]
+        }级  ${skills.value[dict.value[v[0]]].title}`;
     });
 });
 
 const consume = computed(() => {
     update.value;
-    return core.plugin.skillTree.getSkillConsume(selected.value);
+    return skillTree.getSkillConsume(selected.value);
 });
 
 const level = computed(() => {
     update.value;
-    return core.plugin.skillTree.getSkillLevel(selected.value);
+    return skillTree.getSkillLevel(selected.value);
 });
 
 function exit() {
@@ -204,9 +207,9 @@ function draw() {
             ctx.lineTo(
                 ...(s.loc.map(v => (v * 2 - 1) * per + per / 2) as LocArr)
             );
-            if (core.plugin.skillTree.getSkillLevel(s.index) < v.front[i][1])
+            if (skillTree.getSkillLevel(s.index) < v.front[i][1])
                 ctx.strokeStyle = '#aaa';
-            else if (core.plugin.skillTree.getSkillLevel(s.index) === s.max)
+            else if (skillTree.getSkillLevel(s.index) === s.max)
                 ctx.strokeStyle = '#ff0';
             else ctx.strokeStyle = '#0f8';
             ctx.lineWidth = devicePixelRatio;
@@ -215,7 +218,7 @@ function draw() {
     });
     skills.value.forEach(v => {
         const [x, y] = v.loc.map(v => v * 2 - 1);
-        const level = core.plugin.skillTree.getSkillLevel(v.index);
+        const level = skillTree.getSkillLevel(v.index);
         // 技能图标
         ctx.save();
         ctx.lineWidth = per * 0.06;
@@ -256,7 +259,7 @@ function click(e: MouseEvent) {
 }
 
 function upgrade(index: number) {
-    const success = core.plugin.skillTree.upgradeSkill(index);
+    const success = skillTree.upgradeSkill(index);
     if (!success) tip('error', '升级失败！');
     else {
         tip('success', '升级成功！');
@@ -296,7 +299,7 @@ function selectChapter(delta: number) {
     const to = now + delta;
 
     if (has(chapterList[to]) && flags.chapter > to) {
-        selected.value = core.plugin.skills[chapterList[to]][0].index;
+        selected.value = s[chapterList[to]][0].index;
         chapter.value = chapterList[to];
         update.value = !update.value;
         flags.skillTree = to;

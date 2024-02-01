@@ -1449,9 +1449,10 @@ control.prototype.checkBlock = function () {
 
 control.prototype._checkBlock_disableQuickShop = function () {
     // 禁用快捷商店
+    const { setShopVisited } = Mota.Plugin.require('shop_g');
     if (core.flags.disableShopOnDamage) {
         Object.keys(core.status.shops).forEach(function (shopId) {
-            core.plugin.shop.setShopVisited(shopId, false);
+            setShopVisited(shopId, false);
         });
     }
 };
@@ -1544,7 +1545,7 @@ control.prototype.startReplay = function (list) {
     core.status.replay.totalList = core.status.route.concat(list);
     core.status.replay.steps = 0;
     core.status.replay.save = [];
-    core.plugin.replay.ready();
+    Mota.Plugin.require('replay_g').ready();
     core.createCanvas('replay', 0, core._PY_ - 40, core._PX_, 40, 199);
     core.setOpacity('replay', 0.6);
     this._replay_drawProgress();

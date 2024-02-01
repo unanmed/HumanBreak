@@ -84,6 +84,10 @@ interface Block<N extends Exclude<AllNumbers, 0> = Exclude<AllNumbers, 0>> {
          * 门信息
          */
         doorInfo?: DoorInfo;
+
+        data?: any;
+        script?: string;
+        event?: MotaEvent;
     };
 }
 

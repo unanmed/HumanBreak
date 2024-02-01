@@ -272,6 +272,8 @@ interface Enemys {
         floorId?: FloorIds,
         dir?: Dir | 'none' | (Dir | 'none')[]
     ): boolean;
+
+    getCurrentEnemys(floorId: FloorIds): any[];
 }
 
 declare const enemys: new () => Enemys;

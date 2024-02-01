@@ -3850,7 +3850,7 @@ isShopVisited_e
 /* isShopVisited_e
 default : ['shop1']
 allShops : ['IdString_0']    
-var code = 'core.plugin.shop.isShopVisited(\'' + IdString_0 + '\')';
+var code = 'Mota.Plugin.require("shop_g").isShopVisited(\'' + IdString_0 + '\')';
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 

@@ -40,8 +40,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "items",
 		"name": "小绿宝石",
 		"text": "，护盾+${core.values.greenGem}",
-		"itemEffect": "core.status.hero.mdef += 20 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.plugin.skillTree.getSkillLevel(12) / 20 + 1)",
-		"itemEffectTip": "，智慧+${20 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.plugin.skillTree.getSkillLevel(12) / 20 + 1)}",
+		"itemEffect": "core.status.hero.mdef += 20 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (Mota.Plugin.require('skillTree_g').getSkillLevel(12) / 20 + 1)",
+		"itemEffectTip": "，智慧+${20 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (Mota.Plugin.require('skillTree_g').getSkillLevel(12) / 20 + 1)}",
 		"useItemEffect": "core.status.hero.mdef += core.values.greenGem",
 		"canUseItemEffect": "true"
 	},
@@ -97,8 +97,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "items",
 		"name": "红血瓶",
 		"text": "，生命+${core.values.redPotion}",
-		"itemEffect": "core.status.hero.hp += 100 * core.status.thisMap.ratio * (1 + core.plugin.skillTree.getSkillLevel(13) / 50)",
-		"itemEffectTip": "，生命+${100 * core.status.thisMap.ratio * (1 + core.plugin.skillTree.getSkillLevel(13) / 50)}",
+		"itemEffect": "core.status.hero.hp += 100 * core.status.thisMap.ratio * (1 + Mota.Plugin.require('skillTree_g').getSkillLevel(13) / 50)",
+		"itemEffectTip": "，生命+${100 * core.status.thisMap.ratio * (1 + Mota.Plugin.require('skillTree_g').getSkillLevel(13) / 50)}",
 		"useItemEffect": "core.status.hero.hp += core.values.redPotion",
 		"canUseItemEffect": "true"
 	},
@@ -106,8 +106,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "items",
 		"name": "蓝血瓶",
 		"text": "，生命+${core.values.bluePotion}",
-		"itemEffect": "core.status.hero.hp += 200 * core.status.thisMap.ratio * (1 + core.plugin.skillTree.getSkillLevel(13) / 50)",
-		"itemEffectTip": "，生命+${200 * core.status.thisMap.ratio * (1 + core.plugin.skillTree.getSkillLevel(13) / 50)}",
+		"itemEffect": "core.status.hero.hp += 200 * core.status.thisMap.ratio * (1 + Mota.Plugin.require('skillTree_g').getSkillLevel(13) / 50)",
+		"itemEffectTip": "，生命+${200 * core.status.thisMap.ratio * (1 + Mota.Plugin.require('skillTree_g').getSkillLevel(13) / 50)}",
 		"useItemEffect": "core.status.hero.hp += core.values.bluePotion",
 		"canUseItemEffect": "true"
 	},
@@ -115,8 +115,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "items",
 		"name": "黄血瓶",
 		"text": "，生命+${core.values.yellowPotion}",
-		"itemEffect": "core.status.hero.hp += 400 * core.status.thisMap.ratio * (1 + core.plugin.skillTree.getSkillLevel(13) / 50)",
-		"itemEffectTip": "，生命+${400 * core.status.thisMap.ratio * (1 + core.plugin.skillTree.getSkillLevel(13) / 50)}",
+		"itemEffect": "core.status.hero.hp += 400 * core.status.thisMap.ratio * (1 + Mota.Plugin.require('skillTree_g').getSkillLevel(13) / 50)",
+		"itemEffectTip": "，生命+${400 * core.status.thisMap.ratio * (1 + Mota.Plugin.require('skillTree_g').getSkillLevel(13) / 50)}",
 		"useItemEffect": "core.status.hero.hp += core.values.yellowPotion",
 		"canUseItemEffect": "true"
 	},
@@ -124,8 +124,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "items",
 		"name": "绿血瓶",
 		"text": "，生命+${core.values.greenPotion}",
-		"itemEffect": "core.status.hero.hp += 800 * core.status.thisMap.ratio * (1 + core.plugin.skillTree.getSkillLevel(13) / 50)",
-		"itemEffectTip": "，生命+${800 * core.status.thisMap.ratio  * (1 + core.plugin.skillTree.getSkillLevel(13) / 50)}",
+		"itemEffect": "core.status.hero.hp += 800 * core.status.thisMap.ratio * (1 + Mota.Plugin.require('skillTree_g').getSkillLevel(13) / 50)",
+		"itemEffectTip": "，生命+${800 * core.status.thisMap.ratio  * (1 + Mota.Plugin.require('skillTree_g').getSkillLevel(13) / 50)}",
 		"useItemEffect": "core.status.hero.hp += core.values.greenPotion",
 		"canUseItemEffect": "true"
 	},
@@ -349,7 +349,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"name": "查看技能",
 		"text": "查看勇士的技能",
 		"canUseItemEffect": true,
-		"useItemEffect": "core.plugin.gameUi.openSkill();"
+		"useItemEffect": "Mota.Plugin.require('gameUi_g').openSkill();"
 	},
 	"dagger": {
 		"cls": "constants",
@@ -522,7 +522,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"name": "技能树",
 		"text": "打开技能树",
 		"hideInReplay": true,
-		"useItemEffect": "core.plugin.skillTree.openTree();",
+		"useItemEffect": "Mota.Plugin.require('skillTree_g').openTree();",
 		"canUseItemEffect": "true"
 	},
 	"wand": {
@@ -626,8 +626,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "items",
 		"name": "中绿宝石",
 		"text": "，护盾+${core.values.greenGem}",
-		"itemEffect": "core.status.hero.mdef += 40 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.plugin.skillTree.getSkillLevel(12) / 20 + 1)",
-		"itemEffectTip": "，智慧+${40 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.plugin.skillTree.getSkillLevel(12) / 20 + 1)}",
+		"itemEffect": "core.status.hero.mdef += 40 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (Mota.Plugin.require('skillTree_g').getSkillLevel(12) / 20 + 1)",
+		"itemEffectTip": "，智慧+${40 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (Mota.Plugin.require('skillTree_g').getSkillLevel(12) / 20 + 1)}",
 		"useItemEffect": "core.status.hero.mdef += core.values.greenGem",
 		"canUseItemEffect": "true"
 	},
@@ -729,8 +729,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "items",
 		"name": "大绿宝石",
 		"text": "，护盾+${core.values.greenGem}",
-		"itemEffect": "core.status.hero.mdef += 80 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.plugin.skillTree.getSkillLevel(12) / 20 + 1)",
-		"itemEffectTip": "，智慧+${80 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.plugin.skillTree.getSkillLevel(12) / 20 + 1)}",
+		"itemEffect": "core.status.hero.mdef += 80 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (Mota.Plugin.require('skillTree_g').getSkillLevel(12) / 20 + 1)",
+		"itemEffectTip": "，智慧+${80 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (Mota.Plugin.require('skillTree_g').getSkillLevel(12) / 20 + 1)}",
 		"useItemEffect": "core.status.hero.mdef += core.values.greenGem",
 		"canUseItemEffect": "true"
 	},
@@ -896,8 +896,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "items",
 		"name": "超大绿宝石",
 		"text": "，护盾+${core.values.greenGem}",
-		"itemEffect": "core.status.hero.mdef += 160 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.plugin.skillTree.getSkillLevel(12) / 20 + 1)",
-		"itemEffectTip": "，智慧+${160 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.plugin.skillTree.getSkillLevel(12) / 20 + 1)}",
+		"itemEffect": "core.status.hero.mdef += 160 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (Mota.Plugin.require('skillTree_g').getSkillLevel(12) / 20 + 1)",
+		"itemEffectTip": "，智慧+${160 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (Mota.Plugin.require('skillTree_g').getSkillLevel(12) / 20 + 1)}",
 		"useItemEffect": "core.status.hero.mdef += core.values.greenGem",
 		"canUseItemEffect": "true"
 	},
@@ -1019,8 +1019,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "items",
 		"name": "璀璨绿宝石",
 		"text": "，护盾+${core.values.greenGem}",
-		"itemEffect": "core.status.hero.mdef += 320 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.plugin.skillTree.getSkillLevel(12) / 20 + 1)",
-		"itemEffectTip": "，智慧+${320 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.plugin.skillTree.getSkillLevel(12) / 20 + 1)}",
+		"itemEffect": "core.status.hero.mdef += 320 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (Mota.Plugin.require('skillTree_g').getSkillLevel(12) / 20 + 1)",
+		"itemEffectTip": "，智慧+${320 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (Mota.Plugin.require('skillTree_g').getSkillLevel(12) / 20 + 1)}",
 		"useItemEffect": "core.status.hero.mdef += core.values.greenGem",
 		"canUseItemEffect": "true"
 	},
@@ -1050,8 +1050,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "items",
 		"name": "新物品",
 		"text": "，防御+${core.values.blueGem}",
-		"itemEffect": "core.status.hero.mdef += 640 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.plugin.skillTree.getSkillLevel(12) / 20 + 1)",
-		"itemEffectTip": "，智慧+${640 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.plugin.skillTree.getSkillLevel(12) / 20 + 1)}",
+		"itemEffect": "core.status.hero.mdef += 640 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (Mota.Plugin.require('skillTree_g').getSkillLevel(12) / 20 + 1)",
+		"itemEffectTip": "，智慧+${640 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (Mota.Plugin.require('skillTree_g').getSkillLevel(12) / 20 + 1)}",
 		"useItemEffect": "core.status.hero.def += core.values.blueGem",
 		"canUseItemEffect": "true"
 	},
@@ -1071,8 +1071,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "items",
 		"name": "史诗绿宝石",
 		"text": "，护盾+${core.values.greenGem}",
-		"itemEffect": "core.status.hero.mdef += 1280 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.plugin.skillTree.getSkillLevel(12) / 20 + 1)",
-		"itemEffectTip": "，智慧+${1280 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (core.plugin.skillTree.getSkillLevel(12) / 20 + 1)}",
+		"itemEffect": "core.status.hero.mdef += 1280 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (Mota.Plugin.require('skillTree_g').getSkillLevel(12) / 20 + 1)",
+		"itemEffectTip": "，智慧+${1280 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (Mota.Plugin.require('skillTree_g').getSkillLevel(12) / 20 + 1)}",
 		"useItemEffect": "core.status.hero.mdef += core.values.greenGem",
 		"canUseItemEffect": "true"
 	},
@@ -1100,8 +1100,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "items",
 		"name": "大红血瓶",
 		"text": "，生命+${core.values.redPotion}",
-		"itemEffect": "core.status.hero.hp += 1000 * core.status.thisMap.ratio * (1 + core.plugin.skillTree.getSkillLevel(13) / 50)",
-		"itemEffectTip": "，生命+${1000 * core.status.thisMap.ratio * (1 + core.plugin.skillTree.getSkillLevel(13) / 50)}",
+		"itemEffect": "core.status.hero.hp += 1000 * core.status.thisMap.ratio * (1 + Mota.Plugin.require('skillTree_g').getSkillLevel(13) / 50)",
+		"itemEffectTip": "，生命+${1000 * core.status.thisMap.ratio * (1 + Mota.Plugin.require('skillTree_g').getSkillLevel(13) / 50)}",
 		"useItemEffect": "core.status.hero.hp += core.values.redPotion",
 		"canUseItemEffect": "true"
 	},
@@ -1113,8 +1113,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "items",
 		"name": "大蓝血瓶",
 		"text": "，生命+${core.values.redPotion}",
-		"itemEffect": "core.status.hero.hp += 2000 * core.status.thisMap.ratio * (1 + core.plugin.skillTree.getSkillLevel(13) / 50)",
-		"itemEffectTip": "，生命+${2000 * core.status.thisMap.ratio * (1 + core.plugin.skillTree.getSkillLevel(13) / 50)}",
+		"itemEffect": "core.status.hero.hp += 2000 * core.status.thisMap.ratio * (1 + Mota.Plugin.require('skillTree_g').getSkillLevel(13) / 50)",
+		"itemEffectTip": "，生命+${2000 * core.status.thisMap.ratio * (1 + Mota.Plugin.require('skillTree_g').getSkillLevel(13) / 50)}",
 		"useItemEffect": "core.status.hero.hp += core.values.redPotion",
 		"canUseItemEffect": "true"
 	},
@@ -1130,8 +1130,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "items",
 		"name": "大绿血瓶",
 		"text": "，生命+${core.values.redPotion}",
-		"itemEffect": "core.status.hero.hp += 8000 * core.status.thisMap.ratio * (1 + core.plugin.skillTree.getSkillLevel(13) / 50)",
-		"itemEffectTip": "，生命+${8000 * core.status.thisMap.ratio * (1 + core.plugin.skillTree.getSkillLevel(13) / 50)}",
+		"itemEffect": "core.status.hero.hp += 8000 * core.status.thisMap.ratio * (1 + Mota.Plugin.require('skillTree_g').getSkillLevel(13) / 50)",
+		"itemEffectTip": "，生命+${8000 * core.status.thisMap.ratio * (1 + Mota.Plugin.require('skillTree_g').getSkillLevel(13) / 50)}",
 		"useItemEffect": "core.status.hero.hp += core.values.redPotion",
 		"canUseItemEffect": "true"
 	},
@@ -1151,8 +1151,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "items",
 		"name": "大黄血瓶",
 		"text": "，生命+${core.values.redPotion}",
-		"itemEffect": "core.status.hero.hp += 4000 * core.status.thisMap.ratio * (1 + core.plugin.skillTree.getSkillLevel(13) / 50)",
-		"itemEffectTip": "，生命+${4000 * core.status.thisMap.ratio * (1 + core.plugin.skillTree.getSkillLevel(13) / 50)}",
+		"itemEffect": "core.status.hero.hp += 4000 * core.status.thisMap.ratio * (1 + Mota.Plugin.require('skillTree_g').getSkillLevel(13) / 50)",
+		"itemEffectTip": "，生命+${4000 * core.status.thisMap.ratio * (1 + Mota.Plugin.require('skillTree_g').getSkillLevel(13) / 50)}",
 		"useItemEffect": "core.status.hero.hp += core.values.redPotion",
 		"canUseItemEffect": "true"
 	},
@@ -1181,7 +1181,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "constants",
 		"name": "学习",
 		"canUseItemEffect": "true",
-		"text": "可以学习怪物的技能，学习后持续${core.plugin.skillTree.getSkillLevel(11) * 3 + 2}场战斗"
+		"text": "可以学习怪物的技能，学习后持续${Mota.Plugin.require('skillTree_g').getSkillLevel(11) * 3 + 2}场战斗"
 	},
 	"I574": {
 		"cls": "items",

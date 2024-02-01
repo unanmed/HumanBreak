@@ -5,6 +5,7 @@ import {
 } from './ui/achievement';
 import { changeLocalStorage } from './utils';
 import list from '../data/achievement.json';
+import { loading } from '@/core/loader/load';
 
 export const floors: Record<number, FloorIds[]> = {
     1: ['MT0', 'tower7']
@@ -20,6 +21,15 @@ const achis: Record<number, Record<AchievementType, number[]>> = {
 export const achiDict: Record<number, number> = {
     1: 0
 };
+
+loading.once('coreInit', () => {
+    Object.values(floors).forEach((v, i) => {
+        const from = core.floorIds.indexOf(v[0]);
+        const to = core.floorIds.indexOf(v[1]);
+        const all = core.floorIds.slice(from, to + 1);
+        floors[i + 1] = all;
+    });
+});
 
 /**
  * 检查所有到达过的楼层，用于成就的计算

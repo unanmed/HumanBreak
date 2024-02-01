@@ -1,4 +1,4 @@
-///<reference path="../../../src/types/core.d.ts" />
+// @ts-nocheck
 import { clip } from './replay.js';
 
 // 1000多行，改不动了，原来什么样就什么样吧
@@ -11,7 +11,7 @@ var stage = 1,
     boomLocs = [], // 随机轰炸
     heroHp;
 // 初始化
-function initTowerBoss() {
+export function initTowerBoss() {
     stage = 1;
     hp = 10000;
     seconds = 0;
@@ -496,7 +496,7 @@ function intelligentArrow(fromSelf) {
                         damaged[loc + direction] = true;
                         core.drawHeroAnimate('hand');
                         core.status.hero.hp -= 1000;
-                        Mota.Plugin.require('pop').addPop(
+                        Mota.Plugin.require('pop_r').addPop(
                             x * 32 + 16,
                             y * 32 + 16,
                             -1000
@@ -515,7 +515,7 @@ function intelligentArrow(fromSelf) {
                         damaged[loc + direction] = true;
                         core.drawHeroAnimate('hand');
                         core.status.hero.hp -= 1000;
-                        Mota.Plugin.require('pop').addPop(
+                        Mota.Plugin.require('pop_r').addPop(
                             x * 32 + 16,
                             y * 32 + 16,
                             -1000
@@ -645,7 +645,7 @@ function icyMomentem() {
             if (x == locs[index][0] && y == locs[index][1]) {
                 core.drawHeroAnimate('hand');
                 core.status.hero.hp -= 5000;
-                Mota.Plugin.require('pop').addPop(
+                Mota.Plugin.require('pop_r').addPop(
                     x * 32 + 16,
                     y * 32 + 16,
                     -5000
@@ -824,7 +824,7 @@ function getThunderDamage(x, y, power) {
         hy = core.status.hero.loc.y;
     if (Math.abs(hx - x) <= 1 && Math.abs(hy - y) <= 1) {
         core.status.hero.hp -= 3000 * power;
-        Mota.Plugin.require('pop').addPop(
+        Mota.Plugin.require('pop_r').addPop(
             x * 32 + 16,
             y * 32 + 16,
             -3000 * power
@@ -992,7 +992,7 @@ function ballThunder() {
                         ) {
                             damaged[i] = true;
                             core.status.hero.hp -= 3000;
-                            Mota.Plugin.require('pop').addPop(
+                            Mota.Plugin.require('pop_r').addPop(
                                 x * 32 + 16,
                                 y * 32 + 16,
                                 -3000
@@ -1502,7 +1502,7 @@ function boomingAnimate() {
                     hy = core.status.hero.loc.y;
                 if (loc[0] == hx && loc[1] == hy) {
                     core.status.hero.hp -= 3000;
-                    Mota.Plugin.require('pop').addPop(
+                    Mota.Plugin.require('pop_r').addPop(
                         x * 32 + 16,
                         y * 32 + 16,
                         -3000
@@ -1545,7 +1545,7 @@ function lineDamage(x1, y1, x2, y2, damage) {
                 n2 = ((y2 - y1) / (x2 - x1)) * (loc2[0] - x1) + y1 - loc2[1];
             if (n1 * n2 <= 0) {
                 core.status.hero.hp -= damage;
-                Mota.Plugin.require('pop').addPop(
+                Mota.Plugin.require('pop_r').addPop(
                     x * 32 + 16,
                     y * 32 + 16,
                     -damage
@@ -1569,7 +1569,7 @@ function lineDamage(x1, y1, x2, y2, damage) {
                 n2 = ((y2 - y1) / (x2 - x1)) * (loc2[0] - x1) + y1 - loc2[1];
             if (n1 * n2 <= 0) {
                 core.status.hero.hp -= damage;
-                Mota.Plugin.require('pop').addPop(
+                Mota.Plugin.require('pop_r').addPop(
                     x * 32 + 16,
                     y * 32 + 16,
                     -damage
@@ -1587,9 +1587,3 @@ function lineDamage(x1, y1, x2, y2, damage) {
         }
     }
 }
-
-core.plugin.towerBoss = {
-    initTowerBoss
-};
-
-export {};

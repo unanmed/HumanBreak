@@ -36,26 +36,11 @@ export interface Light {
     _offset?: Loc;
 }
 
-export default function init() {
+export function init() {
     core.registerAnimationFrame('shadow', true, () => {
         if (!needRefresh) return;
         drawShadow();
     });
-
-    return {
-        initShadowCanvas,
-        drawShadow,
-        addLight,
-        removeLight,
-        setLight,
-        setShadowNodes,
-        setBackground,
-        animateLight,
-        transitionLight,
-        moveLightAs,
-        getAllLights,
-        refreshLight
-    };
 }
 
 let canvas: HTMLCanvasElement;

@@ -1068,6 +1068,9 @@ interface Control {
      * 屏幕分辨率改变后执行的函数
      */
     resize(): void;
+
+    _drawHero_updateViewport(x: number, y: number, offset: Loc): void;
+    _moveAction_moving(callback: () => void): void;
 }
 
 declare const control: new () => Control;

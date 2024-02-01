@@ -404,6 +404,7 @@ main.prototype.loadAsync = async function (mode, callback) {
     });
     await core.init(coreData, callback);
     if (main.mode === 'play') main.loading.emit('coreInit');
+    core.initStatus.maps = core.maps._initMaps();
 
     core.resize();
 
@@ -414,7 +415,7 @@ main.prototype.loadAsync = async function (mode, callback) {
 
     if (auto && !core.domStyle.isVertical) {
         try {
-            core.plugin.utils.maxGameScale();
+            Mota.Plugin.require('utils_g').maxGameScale();
             requestAnimationFrame(() => {
                 var style = getComputedStyle(main.dom.gameGroup);
                 var height = parseFloat(style.height);

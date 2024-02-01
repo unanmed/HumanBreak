@@ -279,7 +279,7 @@ core.prototype.init = async function (coreData, callback) {
     this._init_flags();
     this._init_platform();
     this._init_others();
-    await this._loadPlugin();
+    await this._loadGameProcess();
 
     var b = main.mode == 'editor';
     // 初始化画布
@@ -307,32 +307,29 @@ core.prototype.initSync = function (coreData, callback) {
     this._init_flags();
     this._init_platform();
     this._init_others();
-    this._loadPluginSync();
+    this._loadGameProcessSync();
 
     core.loader._load(function () {
         core._afterLoadResources(callback);
     });
 };
 
-core.prototype._loadPluginSync = function () {
-    core.plugin = {};
-    if (main.useCompress) main.loadMod('project', 'plugin', () => 0);
-    else main.loadMod('project', 'plugin.min', () => 0);
-};
-
-core.prototype._loadPlugin = async function () {
-    const mainData = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main;
-    core.plugin = {};
-    // 加载插件
+core.prototype._loadGameProcess = async function () {
+    // 加载游戏进程代码
     if (main.pluginUseCompress) {
-        await main.loadScript(`project/plugin.min.js?v=${main.version}`);
+        await main.loadScript(`project/processG.min.js?v=${main.version}`);
     } else {
         if (main.mode === 'play') {
-            await main.loadScript(`src/plugin/game/index.js`, true);
+            await main.loadScript(`src/game/index.ts`, true);
         } else {
-            await main.loadScript(`src/plugin/game/index.esm.js`, true);
+            await main.loadScript(`src/game/index.esm.ts`, true);
         }
     }
+};
+
+core.prototype._loadGameProcessSync = function () {
+    if (main.useCompress) main.loadMod('project', 'processG', () => 0);
+    else main.loadMod('project', 'processG.min', () => 0);
 };
 
 core.prototype._init_flags = function () {
@@ -580,7 +577,6 @@ core.prototype._init_others = function () {
 
 core.prototype._afterLoadResources = function (callback) {
     // 初始化地图
-    core.initStatus.maps = core.maps._initMaps();
     core.control._setRequestAnimationFrame();
     // 图片裁剪
     (main.splitImages || []).forEach(function (one) {
@@ -604,7 +600,7 @@ core.prototype._afterLoadResources = function (callback) {
         }
     });
 
-    if (core.plugin._afterLoadResources) core.plugin._afterLoadResources();
+    // if (core.plugin._afterLoadResources) core.plugin._afterLoadResources();
     core.showStartAnimate();
     if (callback) callback();
 };
@@ -664,8 +660,9 @@ core.prototype._forwardFunc = function (name, funcname) {
 
 core.prototype.doFunc = function (func, _this) {
     if (typeof func == 'string') {
-        func = core.plugin[func];
-        _this = core.plugin;
+        throw new Error('Parameter func must be a function.');
+        // func = core.plugin[func];
+        // _this = core.plugin;
     }
     return func.apply(_this, Array.prototype.slice.call(arguments, 2));
 };

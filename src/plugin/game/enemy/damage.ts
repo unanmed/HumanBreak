@@ -394,7 +394,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
 
     getHaloSpecials(): number[] {
         if (!this.floorId) return [];
-        if (!core.has(this.x) || !core.has(this.y)) return [];
+        if (!has(this.x) || !has(this.y)) return [];
         const special = this.info.special ?? this.enemy.special;
         const filter = special.filter(v => {
             return haloSpecials.includes(v) && !this.providedHalo.includes(v);
@@ -424,7 +424,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         if (this.progress !== 2) return;
         this.progress = 3;
         if (!this.floorId) return;
-        if (!core.has(this.x) || !core.has(this.y)) return;
+        if (!has(this.x) || !has(this.y)) return;
         const col = this.col ?? core.status.maps[this.floorId].enemy;
         if (!col) return;
         const special = this.getHaloSpecials();
@@ -950,8 +950,3 @@ declare global {
         enemy: EnemyCollection;
     }
 }
-
-core.plugin.damage = {
-    Enemy: DamageEnemy,
-    Collection: EnemyCollection
-};

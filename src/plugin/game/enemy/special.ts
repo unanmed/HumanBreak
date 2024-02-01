@@ -7,7 +7,7 @@ export interface SpecialDeclaration {
     color: string;
 }
 
-export const enemySpecials: SpecialDeclaration[] = [
+export const specials: SpecialDeclaration[] = [
     {
         code: 0,
         name: '空',
@@ -202,11 +202,3 @@ export const enemySpecials: SpecialDeclaration[] = [
         color: '#ff6f0a'
     }
 ];
-
-declare global {
-    interface PluginDeclaration {
-        special: SpecialDeclaration[];
-    }
-}
-
-core.plugin.special = enemySpecials;

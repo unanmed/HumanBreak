@@ -16,6 +16,7 @@ const showFixed = debounce((block: Block) => {
     const e = core.material.enemys[block.event.id as EnemyIds];
     if (!e) return;
     const enemy = core.status.thisMap.enemy.get(block.x, block.y);
+    if (!enemy) return;
     fixedUi.open(
         'fixed',
         { enemy, close, loc: [cx, cy] },

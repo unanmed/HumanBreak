@@ -169,18 +169,3 @@ export function findDir(from: Loc, to: Loc): Dir2 | 'none' {
         })?.[0] as Dir2) ?? 'none'
     );
 }
-
-declare global {
-    interface GamePluginUtils {
-        ofDir: typeof ofDir;
-    }
-}
-
-core.plugin.utils = {
-    slide,
-    backDir,
-    has,
-    maxGameScale,
-    ofDir
-};
-core.has = has;

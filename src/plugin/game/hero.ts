@@ -54,6 +54,7 @@ function getRealStatus(
     name: keyof HeroStatus | 'all' | (keyof HeroStatus)[],
     floorId: FloorIds = core.status.floorId
 ): any {
+    const { getSkillLevel } = Mota.Plugin.require('skillTree_g');
     if (name instanceof Array) {
         return Object.fromEntries(
             name.map(v => [v, getRealStatus(status, v, floorId)])
@@ -84,7 +85,7 @@ function getRealStatus(
 
     // 技能
     if (flags.bladeOn && flags.blade) {
-        const level = core.plugin.skillTree.getSkillLevel(2);
+        const level = getSkillLevel(2);
         if (name === 'atk') {
             s *= 1 + 0.1 * level;
         }
@@ -93,7 +94,7 @@ function getRealStatus(
         }
     }
     if (flags.shield && flags.shieldOn) {
-        const level = core.plugin.skillTree.getSkillLevel(10);
+        const level = getSkillLevel(10);
         if (name === 'atk') {
             s *= 1 - 0.1 * level;
         }
@@ -119,8 +120,3 @@ declare global {
         };
     }
 }
-
-core.plugin.hero = {
-    getHeroStatusOf,
-    getHeroStatusOn
-};

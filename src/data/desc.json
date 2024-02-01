@@ -483,14 +483,14 @@
     },
     "study": {
         "text": "学习",
-        "condition": "core.plugin.skillTree.getSkillLevel(11) > 0",
+        "condition": "Mota.Plugin.require('skillTree_g').getSkillLevel(11) > 0",
         "desc": [
             "本条目会详细说明学习的机制与所有可以被学习的技能被学习后的效果。当前已经学习的技能会以与状态栏类似的盒子展示出来。",
             "<br>",
             "<br>",
             "首先，学习技能消耗的智慧点会越来越多，初始消耗的智慧点为500，每学习一次增加250。",
             "学习的技能可以持续5场战斗，在技能树界面每升级一次增加3场，",
-            "<span style=\"color: gold\">当前为${core.plugin.skillTree.getSkillLevel(11) * 3 + 2}场</span>。",
+            "<span style=\"color: gold\">当前为${Mota.Plugin.require('skillTree_g').getSkillLevel(11) * 3 + 2}场</span>。",
             "学习后对应属性的值，例如抱团怪增加的属性百分比，会与被学习的怪物相同。学习界面可以使用背包中的道具或点击状态栏打开。",
             "<br>",
             "<br>",

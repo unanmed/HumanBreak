@@ -713,7 +713,9 @@ type MotaTrigger =
     | 'openDoor'
     | 'ski'
     | 'custom'
-    | 'getItem';
+    | 'getItem'
+    | 'changeFloor'
+    | 'null';
 
 /**
  * 切换楼层的目标坐标

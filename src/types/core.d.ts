@@ -1063,11 +1063,6 @@ interface Core extends Pick<Main, CoreDataFromMain> {
     readonly actions: Actions;
 
     /**
-     * 游戏的插件模块
-     */
-    readonly plugin: PluginDeclaration;
-
-    /**
      * 进行游戏初始化
      * @param coreData 初始化信息
      * @param callback 初始化完成后的回调函数
@@ -1098,8 +1093,7 @@ type CoreMixin = Core &
     Forward<Ui> &
     Forward<Utils> &
     Forward<Icons> &
-    Forward<Actions> &
-    Forward<PluginDeclaration>;
+    Forward<Actions>;
 
 interface MainStyle extends Readonly<StatusStyle> {
     /**

@@ -29,7 +29,7 @@ export function getDetailedEnemy(
         return typeof func === 'string' ? func : func(enemy);
     };
     const special: [string, string, string][] = enemy.enemy.special.map(vv => {
-        const s = core.plugin.special[vv];
+        const s = Mota.Plugin.require('special_g').special[vv];
         return [
             fromFunc(s.name, enemy.enemy),
             fromFunc(s.desc, enemy.enemy),

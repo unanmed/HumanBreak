@@ -19,28 +19,31 @@ import { gameKey } from './main/init/hotkey';
 import { mainSetting, settingStorage } from './main/setting';
 import { isMobile } from '../plugin/use';
 import { KeyCode } from '@/plugin/keyCodes';
+import { status } from '@/plugin/ui/statusBar';
+import './plugin';
+import './package';
 
-interface AncTePlugin {
-    pop: ReturnType<typeof import('../plugin/pop').default>;
-    use: ReturnType<typeof import('../plugin/use').default>;
-    animate: ReturnType<typeof import('../plugin/animateController').default>;
-    utils: ReturnType<typeof import('../plugin/utils').default>;
-    status: ReturnType<typeof import('../plugin/ui/statusBar').default>;
-    fly: ReturnType<typeof import('../plugin/ui/fly').default>;
-    chase: ReturnType<typeof import('../plugin/chase/chase').default>;
-    webglUtils: ReturnType<typeof import('../plugin/webgl/utils').default>;
-    shadow: ReturnType<typeof import('../plugin/shadow/shadow').default>;
-    gameShadow: ReturnType<
-        typeof import('../plugin/shadow/gameShadow').default
-    >;
-    achievement: ReturnType<typeof import('../plugin/ui/achievement').default>;
-    completion: ReturnType<typeof import('../plugin/completion').default>;
-    path: ReturnType<typeof import('../plugin/fx/path').default>;
-    gameCanvas: ReturnType<typeof import('../plugin/fx/gameCanvas').default>;
-    noise: ReturnType<typeof import('../plugin/fx/noise').default>;
-    smooth: ReturnType<typeof import('../plugin/fx/smoothView').default>;
-    frag: ReturnType<typeof import('../plugin/fx/frag').default>;
-}
+// interface AncTePlugin {
+//     pop: ReturnType<typeof import('../plugin/pop').default>;
+//     use: ReturnType<typeof import('../plugin/use').default>;
+//     animate: ReturnType<typeof import('../plugin/animateController').default>;
+//     utils: ReturnType<typeof import('../plugin/utils').default>;
+//     status: ReturnType<typeof import('../plugin/ui/statusBar').default>;
+//     fly: ReturnType<typeof import('../plugin/ui/fly').default>;
+//     chase: ReturnType<typeof import('../plugin/chase/chase').default>;
+//     webglUtils: ReturnType<typeof import('../plugin/webgl/utils').default>;
+//     shadow: ReturnType<typeof import('../plugin/shadow/shadow').default>;
+//     gameShadow: ReturnType<
+//         typeof import('../plugin/shadow/gameShadow').default
+//     >;
+//     achievement: ReturnType<typeof import('../plugin/ui/achievement').default>;
+//     completion: ReturnType<typeof import('../plugin/completion').default>;
+//     path: ReturnType<typeof import('../plugin/fx/path').default>;
+//     gameCanvas: ReturnType<typeof import('../plugin/fx/gameCanvas').default>;
+//     noise: ReturnType<typeof import('../plugin/fx/noise').default>;
+//     smooth: ReturnType<typeof import('../plugin/fx/smoothView').default>;
+//     frag: ReturnType<typeof import('../plugin/fx/frag').default>;
+// }
 
 // export interface Mota {
 //     sound: SoundController;
@@ -93,3 +96,4 @@ Mota.register('var', 'KeyCode', KeyCode);
 Mota.register('var', 'resource', resource);
 Mota.register('var', 'zipResource', zipResource);
 Mota.register('var', 'settingStorage', settingStorage);
+Mota.register('var', 'status', status);

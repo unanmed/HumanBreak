@@ -30,7 +30,7 @@ events.prototype.startGame = function (hard, seed, route, callback) {
     }
 
     if (main.mode != 'play') return;
-    core.plugin.skillTree.resetSkillLevel();
+    Mota.Plugin.require('skillTree_g').resetSkillLevel();
 
     // 无动画的开始游戏
     if (core.flags.startUsingCanvas || route != null) {
@@ -2079,13 +2079,13 @@ events.prototype._action_unloadEquip = function (data, x, y, prefix) {
 };
 
 events.prototype._action_openShop = function (data, x, y, prefix) {
-    core.plugin.shop.setShopVisited(data.id, true);
-    if (data.open) core.plugin.shop.openShop(data.id, true);
+    Mota.Plugin.require('shop_g').setShopVisited(data.id, true);
+    if (data.open) Mota.Plugin.require('shop_g').openShop(data.id, true);
     core.doAction();
 };
 
 events.prototype._action_disableShop = function (data, x, y, prefix) {
-    core.plugin.shop.setShopVisited(data.id, false);
+    Mota.Plugin.require('shop_g').setShopVisited(data.id, false);
     core.doAction();
 };
 
@@ -3272,6 +3272,7 @@ events.prototype.openToolbox = function (fromUserAction) {
 ////// 点击快捷商店按钮时的打开操作 //////
 events.prototype.openQuickShop = function (fromUserAction) {
     if (core.isReplaying()) return;
+    const shop = Mota.Plugin.require('shop_g');
 
     if (Object.keys(core.status.shops).length == 0) {
         core.playSound('操作失败');
@@ -3283,18 +3284,18 @@ events.prototype.openQuickShop = function (fromUserAction) {
     if (Object.keys(core.status.shops).length == 1) {
         var shopId = Object.keys(core.status.shops)[0];
         if (core.status.event.id != null) return;
-        if (!core.plugin.shop.canOpenShop(shopId)) {
+        if (!shop.canOpenShop(shopId)) {
             core.playSound('操作失败');
             core.drawTip('当前无法打开快捷商店！');
             return;
         }
-        var message = core.plugin.shop.canUseQuickShop(shopId);
+        var message = shop.canUseQuickShop(shopId);
         if (message != null) {
             core.playSound('操作失败');
             core.drawTip(message);
             return;
         }
-        core.plugin.shop.openShop(shopId, false);
+        shop.openShop(shopId, false);
         return;
     }
 

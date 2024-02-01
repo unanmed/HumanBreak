@@ -25,9 +25,10 @@ import type {
 } from '@/core/main/setting';
 import type { GameStorage } from '@/core/main/storage';
 import type { DamageEnemy, EnemyCollection } from '@/plugin/game/enemy/damage';
-import type { enemySpecials } from '@/plugin/game/enemy/special';
+import type { specials } from '@/plugin/game/enemy/special';
 import type { Range } from '@/plugin/game/range';
 import type { KeyCode } from '@/plugin/keyCodes';
+import type { Ref } from 'vue';
 
 interface ClassInterface {
     // 渲染进程与游戏进程通用
@@ -82,9 +83,10 @@ interface VariableInterface {
     resource: ResourceStore<Exclude<ResourceType, 'zip'>>;
     zipResource: ResourceStore<'zip'>;
     settingStorage: GameStorage<SettingStorage>;
+    status: Ref<boolean>;
     // 定义于游戏进程，渲染进程依然可用
     haloSpecials: number[];
-    enemySpecials: typeof enemySpecials;
+    enemySpecials: typeof specials;
 }
 
 interface SystemInterfaceMap {
@@ -95,12 +97,67 @@ interface SystemInterfaceMap {
 
 type InterfaceType = keyof SystemInterfaceMap;
 
-interface PluginInterface {}
+interface PluginInterface {
+    // 渲染进程定义的插件
+    pop_r: typeof import('../plugin/pop');
+    use_r: typeof import('../plugin/use');
+    // animate: typeof import('../plugin/animateController');
+    // utils: typeof import('../plugin/utils');
+    // status: typeof import('../plugin/ui/statusBar');
+    fly_r: typeof import('../plugin/ui/fly');
+    chase_r: typeof import('../plugin/chase/chase');
+    // webglUtils: typeof import('../plugin/webgl/utils');
+    shadow_r: typeof import('../plugin/shadow/shadow');
+    gameShadow_r: typeof import('../plugin/shadow/gameShadow');
+    // achievement: typeof import('../plugin/ui/achievement');
+    completion_r: typeof import('../plugin/completion');
+    // path: typeof import('../plugin/fx/path');
+    gameCanvas_r: typeof import('../plugin/fx/gameCanvas');
+    // noise: typeof import('../plugin/fx/noise');
+    smooth_r: typeof import('../plugin/fx/smoothView');
+    frag_r: typeof import('../plugin/fx/frag');
+    // 游戏进程定义的插件
+    utils_g: typeof import('../plugin/game/utils');
+    loopMap_g: typeof import('../plugin/game/loopMap');
+    shop_g: typeof import('../plugin/game/shop');
+    replay_g: typeof import('../plugin/game/replay');
+    skillTree_g: typeof import('../plugin/game/skillTree');
+    removeMap_g: typeof import('../plugin/game/removeMap');
+    remainEnemy_g: typeof import('../plugin/game/enemy/remainEnemy');
+    chase_g: typeof import('../plugin/game/chase');
+    skill_g: typeof import('../plugin/game/skill');
+    towerBoss_g: typeof import('../plugin/game/towerBoss');
+    heroFourFrames_g: typeof import('../plugin/game/fx/heroFourFrames');
+    rewrite_g: typeof import('../plugin/game/fx/rewrite');
+    itemDetail_g: typeof import('../plugin/game/fx/itemDetail');
+    checkBlock_g: typeof import('../plugin/game/enemy/checkblock');
+    halo_g: typeof import('../plugin/game/fx/halo');
+    study_g: typeof import('../plugin/game/study');
+}
+
+interface PackageInterface {
+    axios: typeof import('axios');
+    'chart.js': typeof import('chart.js');
+    jszip: typeof import('jszip');
+    lodash: typeof import('lodash-es');
+    'lz-string': typeof import('lz-string');
+    'mutate-animate': typeof import('mutate-animate');
+    vue: typeof import('vue');
+}
 
 export interface IMota {
     rewrite: typeof rewrite;
+    r: typeof r;
+    rf: typeof rf;
 
+    /** 样板插件接口 */
     Plugin: IPlugin;
+    /**
+     * 样板使用的第三方库接口，可以直接获取到库的原有接口。
+     * 接口在渲染进程中引入，在游戏进程中不会polyfill，因此在游戏进程中使用时，
+     * 应先使用main.replayChecking进行检查，保证该值不存在时才进行使用，否则会引起录像出错
+     */
+    Package: IPackage;
 
     /**
      * 获取一个样板接口
@@ -145,15 +202,12 @@ export interface IMota {
 }
 
 export interface IPlugin {
+    inited: boolean;
+
     /**
      * 初始化所有插件
      */
     init(): void;
-    /**
-     * 初始化指定插件
-     * @param plugin 要初始化的插件
-     */
-    init(plugin: string): void;
 
     /**
      * 获取到一个插件的内容
@@ -169,7 +223,7 @@ export interface IPlugin {
     /**
      * 获取所有插件
      */
-    requireAll(): PluginInterface;
+    requireAll(): PluginInterface & { [x: string]: any };
 
     /**
      * 注册一个插件
@@ -210,6 +264,24 @@ export interface IPlugin {
     register<K extends string>(plugin: K, init: (plugin: K) => any): void;
 }
 
+export interface IPackage {
+    /**
+     * 获取样板使用的第三方库
+     * @param name 要获取的第三方库
+     */
+    require<K extends keyof PackageInterface>(name: K): PackageInterface[K];
+
+    /**
+     * 获取样板使用的所有第三方库
+     */
+    requireAll(): PackageInterface;
+
+    register<K extends keyof PackageInterface>(
+        name: K,
+        data: PackageInterface[K]
+    ): void;
+}
+
 interface IPluginData {
     /** 插件类型，content表示直接注册了内容，function表示注册了初始化函数，内容从其返回值获取 */
     type: 'content' | 'function';
@@ -219,8 +291,8 @@ interface IPluginData {
 
 class MPlugin {
     private static plugins: Record<string, IPluginData> = {};
-    private static inited = false;
     private static pluginData: Record<string, any> = {};
+    static inited = false;
 
     constructor() {
         throw new Error(`System plugin class cannot be constructed.`);
@@ -248,8 +320,8 @@ class MPlugin {
         return this.plugins[key].data;
     }
 
-    static requireAll() {
-        return this.pluginData;
+    static requireAll(): PluginInterface {
+        return this.pluginData as PluginInterface;
     }
 
     static register(key: string, data: any, init?: any) {
@@ -269,6 +341,32 @@ class MPlugin {
     }
 }
 
+class MPackage {
+    // @ts-ignore
+    private static packages: PackageInterface = {};
+
+    constructor() {
+        throw new Error(`System package class cannot be constructed.`);
+    }
+
+    static require<K extends keyof PackageInterface>(
+        name: K
+    ): PackageInterface[K] {
+        return this.packages[name];
+    }
+
+    static requireAll() {
+        return this.packages;
+    }
+
+    static register<K extends keyof PackageInterface>(
+        name: K,
+        data: PackageInterface[K]
+    ) {
+        this.packages[name] = data;
+    }
+}
+
 /**
  * 样板接口系统，通过 Mota 获取到样板的核心功能，不可实例化
  */
@@ -278,7 +376,10 @@ class Mota {
     private static variables: Record<string, any> = {};
 
     static rewrite = rewrite;
+    static r = r;
+    static rf = rf;
     static Plugin = MPlugin;
+    static Package = MPackage;
 
     constructor() {
         throw new Error(`System interface class cannot be constructed.`);
@@ -330,11 +431,19 @@ type _Func = (...params: any) => any;
  * @param bind 原函数的调用对象，默认为base
  * @param rebind 复写函数的调用对象，默认为base
  */
-function rewrite<O, K extends SelectKey<O, _Func>, T = O>(
+function rewrite<
+    O,
+    K extends SelectKey<O, _Func>,
+    R extends 'full' | 'front',
+    T = O
+>(
     base: O,
     key: K,
-    type: 'full' | 'front',
-    re: (this: T, ...params: [..._F<O[K]>[0], ...any[]]) => _F<O[K]>[1],
+    type: R,
+    re: (
+        this: T,
+        ...params: [..._F<O[K]>[0], ...any[]]
+    ) => R extends 'full' ? _F<O[K]>[1] : void,
     bind?: any,
     rebind?: T
 ): (this: T, ...params: [..._F<O[K]>[0], ...any[]]) => _F<O[K]>[1];
@@ -345,8 +454,8 @@ function rewrite<O, K extends SelectKey<O, _Func>, T = O>(
  * @param type 复写类型，add表示在函数后追加
  * @param re 复写函数，类型为add时表示在原函数后面追加复写函数，会在第一个参数中传入原函数的返回值，
  *           并要求复写函数必须有返回值，作为复写的最终返回值。
- * @param bind 原函数的调用对象，默认为base
- * @param rebind 复写函数的调用对象，默认为base
+ * @param bind 原函数的调用对象，默认为`base`
+ * @param rebind 复写函数的调用对象，默认为`base`
  */
 function rewrite<O, K extends SelectKey<O, _Func>, T = O>(
     base: O,
@@ -390,12 +499,49 @@ function rewrite<O, K extends SelectKey<O, _Func>, T = O>(
         const origin = base[key];
         function res(this: T, ...params: [..._F<O[K]>[0], ...any[]]) {
             // @ts-ignore
-            re.call(rebind ?? base, v, ...params);
+            re.call(rebind ?? base, ...params);
             const ret = (origin as _Func).call(bind ?? base, ...params);
             return ret;
         }
         // @ts-ignore
         return (base[key] = res);
+    }
+}
+
+/**
+ * 在渲染进程包裹下执行一段代码，该段代码不会在录像验证中执行，因此里面的内容一定不会引起录像报错
+ * 一般特效，或者是ui显示、内容显示、交互监听等内容应当在渲染进程包裹下执行
+ * @param fn 要执行的函数，传入一个参数，表示所有的第三方库，也就是`Mota.Package.requireAll()`的内容
+ * @param thisArg 函数的执行上下文，即函数中`this`指向
+ */
+function r<T = undefined>(
+    fn: (this: T, packages: PackageInterface) => void,
+    thisArg?: T
+) {
+    if (!main.replayChecking) fn.call(thisArg as T, MPackage.requireAll());
+}
+
+/**
+ * 将一个函数包裹成渲染进程函数，执行这个函数时将直接在渲染进程下执行。该函数与 {@link r} 函数的关系，
+ * 与`call`和`bind`的关系类似。
+ * ```ts
+ * const fn = rf((x) => x * x);
+ * console.log(fn(2)); // 在正常游玩中会输出 4，但是录像验证中会输出undefined，因为录像验证中不会执行渲染进程函数
+ * ```
+ * @param fn 要执行的函数
+ * @param thisArg 函数执行时的上下文，即this指向
+ * @returns 经过渲染进程包裹的函数，直接调用即是在渲染进程下执行的
+ */
+function rf<F extends (...params: any) => any, T>(
+    fn: F,
+    thisArg?: T
+): (this: T, ...params: Parameters<F>) => ReturnType<F> | undefined {
+    // @ts-ignore
+    if (main.replayChecking) return () => {};
+    else {
+        return (...params) => {
+            return fn.call(thisArg, ...params);
+        };
     }
 }
 

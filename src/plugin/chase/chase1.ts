@@ -123,7 +123,7 @@ export const camera1: ChaseCameraData[] = [
  * 追逐战开始前的初始化函数，移除所有血瓶和门等
  */
 export function init1() {
-    return core.plugin.chase.chaseInit1();
+    return Mota.Plugin.require('chase_g').chaseInit1();
 }
 
 export function chaseShake(chase: Chase) {
@@ -561,7 +561,7 @@ export function para3(chase: Chase) {
         'MT14',
         async () => {
             flags.finishChase1 = true;
-            core.plugin.replay.clip('choices:0');
+            Mota.Plugin.require('replay_g').clip('choices:0');
             core.showStatusBar();
             ani.time(750).apply('rect', 0);
             chase.end();

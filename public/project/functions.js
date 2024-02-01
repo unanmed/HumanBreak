@@ -50,7 +50,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 core.hideStatusBar(core.hasFlag('showToolbox'));
             else core.showStatusBar();
             if (main.mode === 'play' && !main.replayChecking) {
-                Mota.Plugin.require('fly').splitArea();
+                Mota.Plugin.require('fly_r').splitArea();
                 Mota.require('var', 'hook').emit('reset');
             } else {
                 flags.autoSkill ??= true;
@@ -113,7 +113,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 正在切换楼层过程中执行的操作；此函数的执行时间是“屏幕完全变黑“的那一刻
             // floorId为要切换到的楼层ID；heroLoc表示勇士切换到的位置
 
-            const { checkLoopMap } = core.plugin.loopMap;
+            const { checkLoopMap } = Mota.Plugin.require('loopMap_g');
 
             flags.floorChanging = true;
 
@@ -131,8 +131,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             }
 
             // 根据分区信息自动砍层与恢复
-            if (core.plugin.removeMap.autoRemoveMaps)
-                core.plugin.removeMap.autoRemoveMaps(floorId);
+            Mota.Plugin.require('removeMap_g')?.autoRemoveMaps?.(floorId);
 
             // 重置画布尺寸
             core.maps.resizeMap(floorId);
@@ -201,7 +200,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 }
             }
             if (!flags.debug && !main.replayChecking)
-                Mota.Plugin.require('completion').checkVisitedFloor();
+                Mota.Plugin.require('completion_r').checkVisitedFloor();
         },
         flyTo: function (toId, callback) {
             // 楼层传送器的使用，从当前楼层飞往toId
@@ -279,7 +278,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 version: core.firstData.version,
                 guid: core.getGuid(),
                 time: new Date().getTime(),
-                skills: core.plugin.skillTree.saveSkillTree()
+                skills: Mota.Plugin.require('skillTree_g').saveSkillTree()
             };
 
             return data;
@@ -327,7 +326,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             }
             core.setFlag('__fromLoad__', true);
 
-            core.plugin.skillTree.loadSkillTree(data.skills);
+            Mota.Plugin.require('skillTree_g').loadSkillTree(data.skills);
 
             // 切换到对应的楼层
             core.changeFloor(data.floorId, null, data.hero.loc, 0, function () {
@@ -340,7 +339,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 if (callback) callback();
 
                 if (flags.onChase) {
-                    Mota.Plugin.require('chase').startChase(flags.chaseIndex);
+                    Mota.Plugin.require('chase_r').startChase(flags.chaseIndex);
                     if (flags.chaseIndex === 1) {
                         core.playBgm('escape.mp3', 43.5);
                     }
@@ -388,7 +387,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 2, 将楼层属性中的cannotMoveDirectly这个开关勾上，即禁止在该层楼使用瞬移。
             // 3. 将flag:cannotMoveDirectly置为true，即可使用flag控制在某段剧情范围内禁止瞬移。
 
-            const { checkLoopMap } = core.plugin.loopMap;
+            const { checkLoopMap } = Mota.Plugin.require('loopMap_g');
 
             // 增加步数
             core.status.hero.steps++;

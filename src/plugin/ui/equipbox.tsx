@@ -59,13 +59,14 @@ export function getNowStatus(nowEquip?: Equip, onCol: boolean = false) {
         'hpmax',
         'money'
     ] as (keyof SelectType<HeroStatus, number>)[];
+    const { getHeroStatusOn } = Mota.Plugin.require('hero_g');
 
     return (
         <div id="hero-status">
             {toShow.map(v => {
                 let status: string;
                 if (v === 'lv') status = core.getLvName() ?? '';
-                else status = core.plugin.hero.getHeroStatusOn(v)?.toString();
+                else status = getHeroStatusOn(v)?.toString();
 
                 let add = 0;
                 if (has(nowEquip)) {
