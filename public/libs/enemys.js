@@ -103,43 +103,43 @@ enemys.prototype.getDamageString = function (enemy, x, y, floorId, hero) {
 
 ////// 接下来N个临界值和临界减伤计算 //////
 enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId, hero) {
-    // Deprecated. See src/plugin/game/enemy/damage.ts DamageEnemy.calCritical.
+    // Deprecated. See src/game/enemy/damage.ts DamageEnemy.calCritical.
 };
 
 /// 未破防临界采用二分计算
 enemys.prototype._nextCriticals_overAtk = function (enemy) {
-    // Deprecated. See src/plugin/game/enemy/damage.ts DamageEnemy.calCritical.
+    // Deprecated. See src/game/enemy/damage.ts DamageEnemy.calCritical.
 };
 
 enemys.prototype._nextCriticals_special = function (enemy) {
-    // Deprecated. See src/plugin/game/enemy/damage.ts DamageEnemy.calCritical.
+    // Deprecated. See src/game/enemy/damage.ts DamageEnemy.calCritical.
 };
 
 enemys.prototype._nextCriticals_useBinarySearch = function (enemy) {
-    // Deprecated. See src/plugin/game/enemy/damage.ts DamageEnemy.calCritical.
+    // Deprecated. See src/game/enemy/damage.ts DamageEnemy.calCritical.
 };
 
 ////// N防减伤计算 //////
 enemys.prototype.getDefDamage = function (enemy, k, x, y, floorId, hero) {
-    // Deprecated. See src/plugin/game/enemy/damage.ts DamageEnemy.calDefDamage.
+    // Deprecated. See src/game/enemy/damage.ts DamageEnemy.calDefDamage.
 };
 
 enemys.prototype.getEnemyInfo = function (enemy, hero, x, y, floorId) {
-    // Deprecated. See src/plugin/game/enemy/damage.ts
+    // Deprecated. See src/game/enemy/damage.ts
 };
 
 ////// 获得战斗伤害信息（实际伤害计算函数） //////
 enemys.prototype.getDamageInfo = function (enemy, hero, x, y, floorId) {
-    // Deprecated. See src/plugin/game/enemy/damage.ts
+    // Deprecated. See src/game/enemy/damage.ts
 };
 
 ////// 获得在某个勇士属性下怪物伤害 //////
 enemys.prototype.getDamage = function (enemy, x, y, floorId, hero) {
-    // Deprecated. See src/plugin/game/enemy/damage.ts
+    // Deprecated. See src/game/enemy/damage.ts
 };
 
 enemys.prototype._getDamage = function (enemy, hero, x, y, floorId) {
-    // Deprecated. See src/plugin/game/enemy/damage.ts
+    // Deprecated. See src/game/enemy/damage.ts
 };
 
 ////// 获得当前楼层的怪物列表 //////

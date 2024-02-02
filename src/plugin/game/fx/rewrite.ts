@@ -1,4 +1,4 @@
-import { getEnemy } from '../enemy/battle';
+import { getEnemy } from '@/game/enemy/battle';
 import { formatDamage } from '../utils';
 
 export function init() {

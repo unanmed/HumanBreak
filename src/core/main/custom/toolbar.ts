@@ -15,7 +15,6 @@ import {
 import { gameKey } from '../init/hotkey';
 import { unwarpBinary } from './hotkey';
 import { fixedUi } from '../init/ui';
-import { hook } from '../game';
 
 interface CustomToolbarEvent extends EmitableEvent {
     add: (item: ValueOf<ToolbarItemMap>) => void;

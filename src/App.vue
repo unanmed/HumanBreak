@@ -27,9 +27,9 @@
 <script lang="ts" setup>
 import { onMounted } from 'vue';
 import { mainUi, fixedUi } from './core/main/init/ui';
-import { hook } from '@/core/main/game';
 
 onMounted(() => {
+    const { hook } = Mota.requireAll('var');
     hook.emit('mounted');
 });
 

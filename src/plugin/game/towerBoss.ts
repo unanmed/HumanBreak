@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { clip } from './replay.js';
+import { clip } from './replay';
 
 // 1000多行，改不动了，原来什么样就什么样吧
 

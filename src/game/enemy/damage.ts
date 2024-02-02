@@ -1,6 +1,12 @@
-import { getHeroStatusOf, getHeroStatusOn } from '../hero';
-import { Range, RangeCollection } from '../range';
-import { checkV2, ensureArray, formatDamage, has, manhattan } from '../utils';
+import { getHeroStatusOf, getHeroStatusOn } from '@/plugin/game/hero';
+import { Range, RangeCollection } from '@/plugin/game/range';
+import {
+    checkV2,
+    ensureArray,
+    formatDamage,
+    has,
+    manhattan
+} from '@/plugin/game/utils';
 
 interface HaloType {
     square: {

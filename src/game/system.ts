@@ -6,7 +6,7 @@ import type {
     EventEmitter,
     IndexedEventEmitter
 } from '@/core/common/eventEmitter';
-import type { loading } from '@/core/loader/load';
+import type { loading } from './game';
 import type {
     Resource,
     ResourceStore,
@@ -17,15 +17,15 @@ import type { Hotkey } from '@/core/main/custom/hotkey';
 import type { Keyboard } from '@/core/main/custom/keyboard';
 import type { CustomToolbar } from '@/core/main/custom/toolbar';
 import type { Focus, GameUi, UiController } from '@/core/main/custom/ui';
-import type { gameListener, hook } from '@/core/main/game';
+import type { gameListener, hook } from './game';
 import type {
     MotaSetting,
     SettingDisplayer,
     SettingStorage
 } from '@/core/main/setting';
 import type { GameStorage } from '@/core/main/storage';
-import type { DamageEnemy, EnemyCollection } from '@/plugin/game/enemy/damage';
-import type { specials } from '@/plugin/game/enemy/special';
+import type { DamageEnemy, EnemyCollection } from './enemy/damage';
+import type { specials } from './enemy/special';
 import type { Range } from '@/plugin/game/range';
 import type { KeyCode } from '@/plugin/keyCodes';
 import type { Ref } from 'vue';
@@ -89,10 +89,13 @@ interface VariableInterface {
     enemySpecials: typeof specials;
 }
 
+interface ModuleInterface {}
+
 interface SystemInterfaceMap {
     class: ClassInterface;
     fn: FunctionInterface;
     var: VariableInterface;
+    module: ModuleInterface;
 }
 
 type InterfaceType = keyof SystemInterfaceMap;
@@ -374,6 +377,7 @@ class Mota {
     private static classes: Record<string, any> = {};
     private static functions: Record<string, any> = {};
     private static variables: Record<string, any> = {};
+    private static modules: Record<string, any> = {};
 
     static rewrite = rewrite;
     static r = r;
@@ -414,7 +418,9 @@ class Mota {
             ? this.classes
             : type === 'fn'
             ? this.functions
-            : this.variables;
+            : type === 'var'
+            ? this.variables
+            : this.modules;
     }
 }
 

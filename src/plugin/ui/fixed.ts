@@ -1,6 +1,6 @@
 import { getDamageColor } from '../utils';
 import { ToShowEnemy } from './book';
-import type { DamageEnemy } from '../game/enemy/damage';
+import type { DamageEnemy } from '../../game/enemy/damage';
 import { isMobile } from '../use';
 
 export function getLocFromMouseLoc(x: number, y: number): LocArr {

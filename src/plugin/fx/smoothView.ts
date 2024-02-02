@@ -52,15 +52,15 @@ export function init() {
     const hso = hyper('sin', 'out');
     let time2 = Date.now();
     Mota.rewrite(core.control, '_moveAction_moving', 'front', () => {
-        const t = setting.getValue('screen.smoothView', false) ? 200 : 1;
+        const t = setting.getValue('screen.smoothView', false) ? 200 : 0;
         if (Date.now() - time2 > 20) tran.mode(hso).time(t).absolute();
     });
     Mota.rewrite(core.control, 'moveDirectly', 'front', () => {
-        const t = setting.getValue('screen.smoothView', false) ? 600 : 1;
+        const t = setting.getValue('screen.smoothView', false) ? 600 : 0;
         time2 = Date.now();
         tran.mode(hso).time(t).absolute();
     });
     Mota.rewrite(core.events, '_changeFloor_beforeChange', 'front', () => {
-        tran.time(1).absolute();
+        tran.time(0).absolute();
     });
 }

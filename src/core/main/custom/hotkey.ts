@@ -40,6 +40,8 @@ export interface HotkeyJSON {
     assist: number;
 }
 
+console.log(2);
+
 export class Hotkey extends EventEmitter<HotkeyEvent> {
     static list: Hotkey[];
 

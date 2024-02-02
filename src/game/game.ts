@@ -1,5 +1,81 @@
-import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
-import { loading } from '../loader/load';
+import { EmitableEvent, EventEmitter } from '../core/common/eventEmitter';
+
+// ----- 加载事件
+interface GameLoadEvent extends EmitableEvent {
+    coreLoaded: () => void;
+    autotileLoaded: () => void;
+    coreInit: () => void;
+    materialLoaded: () => void;
+}
+
+class GameLoading extends EventEmitter<GameLoadEvent> {
+    private autotileLoaded: number = 0;
+    private autotileNum?: number;
+    private autotileListened: boolean = false;
+
+    private materialsNum: number = main.materials.length;
+    private materialsLoaded: number = 0;
+
+    constructor() {
+        super();
+        this.on(
+            'coreInit',
+            () => {
+                this.autotileNum = Object.keys(
+                    core.material.icons.autotile
+                ).length;
+            },
+            { immediate: true }
+        );
+        this.on('materialLoaded', () => {
+            core.loader._loadMaterials_afterLoad();
+        });
+    }
+
+    addMaterialLoaded() {
+        this.once('coreInit', () => {
+            this.materialsLoaded++;
+            if (this.materialsLoaded === this.materialsNum) {
+                this.emit('materialLoaded');
+            }
+        });
+    }
+
+    addAutotileLoaded() {
+        this.once('coreInit', () => {
+            this.autotileLoaded++;
+            if (this.autotileLoaded === this.autotileNum) {
+                this.emit('autotileLoaded');
+            }
+        });
+    }
+
+    /**
+     * 当自动原件加载完毕时
+     * @param autotiles 自动原件数组
+     */
+    onAutotileLoaded(
+        autotiles: Partial<Record<AllIdsOf<'autotile'>, HTMLImageElement>>
+    ) {
+        if (this.autotileListened) return;
+        this.autotileListened = true;
+        this.on('autotileLoaded', () => {
+            const keys = Object.keys(
+                core.material.icons.autotile
+            ) as AllIdsOf<'autotile'>[];
+
+            keys.forEach(v => {
+                core.material.images.autotile[v] = autotiles[v]!;
+            });
+
+            setTimeout(() => {
+                core.maps._makeAutotileEdges();
+            });
+        });
+    }
+}
+
+export const loading = new GameLoading();
 
 export interface GameEvent extends EmitableEvent {
     /** Emitted in events.prototype.resetGame. */
@@ -118,3 +194,9 @@ class GameListener extends EventEmitter<ListenerEvent> {
 }
 
 export const gameListener = new GameListener();
+
+declare global {
+    interface Main {
+        loading: GameLoading;
+    }
+}

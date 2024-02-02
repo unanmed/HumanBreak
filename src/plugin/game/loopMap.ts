@@ -1,4 +1,3 @@
-///<reference path="../../../src/types/core.d.ts" />
 import { slide } from './utils';
 
 const list = ['tower6'];

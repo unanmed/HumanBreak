@@ -5,7 +5,6 @@ import {
 } from './ui/achievement';
 import { changeLocalStorage } from './utils';
 import list from '../data/achievement.json';
-import { loading } from '@/core/loader/load';
 
 export const floors: Record<number, FloorIds[]> = {
     1: ['MT0', 'tower7']
@@ -21,6 +20,8 @@ const achis: Record<number, Record<AchievementType, number[]>> = {
 export const achiDict: Record<number, number> = {
     1: 0
 };
+
+const loading = Mota.require('var', 'loading');
 
 loading.once('coreInit', () => {
     Object.values(floors).forEach((v, i) => {

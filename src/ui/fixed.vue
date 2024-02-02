@@ -32,7 +32,7 @@
 import { onMounted, onUpdated, ref, watch } from 'vue';
 import Box from '../components/box.vue';
 import { GameUi } from '@/core/main/custom/ui';
-import type { DamageEnemy } from '@/plugin/game/enemy/damage';
+import type { DamageEnemy } from '@/game/enemy/damage';
 import { nextFrame } from '@/plugin/utils';
 
 const props = defineProps<{

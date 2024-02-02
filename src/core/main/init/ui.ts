@@ -1,7 +1,6 @@
 import * as UI from '@ui/.';
 import * as MiscUI from './misc';
 import { GameUi, UiController } from '../custom/ui';
-import { hook } from '../game';
 
 export const mainUi = new UiController();
 mainUi.register(
@@ -36,6 +35,7 @@ fixedUi.register(
 );
 fixedUi.showAll();
 
+const hook = Mota.require('var', 'hook');
 hook.once('mounted', () => {
     const ui = document.getElementById('ui-main')!;
     const fixed = document.getElementById('ui-fixed')!;

@@ -4,7 +4,6 @@ import { ensureArray } from '@/plugin/utils';
 import { has } from '@/plugin/utils';
 import JSZip from 'jszip';
 import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
-import { loading } from './load';
 
 // todo: 应当用register去注册资源类型，然后进行分块处理
 
@@ -59,6 +58,7 @@ export class Resource<
     }
 
     protected onLoad(v: ResourceData[T]) {
+        const loading = Mota.require('var', 'loading');
         // 资源类型处理
         if (this.type === 'fonts') {
             document.fonts.add(new FontFace(this.name, v as ArrayBuffer));

@@ -68,7 +68,6 @@ import { Matrix4 } from '../plugin/webgl/matrix';
 import { doByInterval, keycode } from '../plugin/utils';
 import { KeyCode } from '../plugin/keyCodes';
 import { triggerFullscreen } from '../plugin/utils';
-import { loading } from '../core/loader/load';
 import { isMobile } from '../plugin/use';
 import { GameUi } from '@/core/main/custom/ui';
 import { gameKey } from '@/core/main/init/hotkey';
@@ -307,6 +306,8 @@ onMounted(async () => {
     main = document.getElementById('start-main') as HTMLDivElement;
     start = document.getElementById('start') as HTMLDivElement;
     background = document.getElementById('background') as HTMLImageElement;
+
+    const loading = Mota.require('var', 'loading');
 
     loading.once('coreInit', async () => {
         window.addEventListener('resize', resize);

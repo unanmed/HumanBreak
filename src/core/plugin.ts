@@ -27,7 +27,6 @@ import * as frag from '@/plugin/fx/frag';
 import * as use from '@/plugin/use';
 import * as gameCanvas from '@/plugin/fx/gameCanvas';
 import * as smooth from '@/plugin/fx/smoothView';
-import { loading } from './loader/load';
 
 Mota.Plugin.register('shadow_r', shadow, shadow.init);
 Mota.Plugin.register('gameShadow_r', gameShadow, gameShadow.init);
@@ -39,10 +38,6 @@ Mota.Plugin.register('frag_r', frag, frag.init);
 Mota.Plugin.register('use_r', use);
 Mota.Plugin.register('gameCanvas_r', gameCanvas);
 Mota.Plugin.register('smooth_r', smooth, smooth.init);
-
-loading.once('coreInit', () => {
-    Mota.Plugin.init();
-});
 
 // // todo: 将插件更改为注册形式，分为渲染进程和游戏进程两部分，同时分配优先级
 

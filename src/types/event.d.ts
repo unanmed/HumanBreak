@@ -758,9 +758,6 @@ interface Events extends EventData {
      */
     tryUseItem(itemId: ItemIdOf<'tools' | 'constants'>): void;
 
-    beforeBattle(): boolean;
-    afterBattle(enemy: DamageEnemy, x?: number, y?: number): void;
-
     _sys_battle(data: Block, callback?: () => void): void;
 
     _action_battle(data: any, x?: number, y?: number, prefix?: any): void;

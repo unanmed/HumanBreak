@@ -1,4 +1,4 @@
-import { ensureFloorDamage } from '../enemy/damage';
+import { ensureFloorDamage } from '@/game/enemy/damage';
 
 export function init() {
     core.control.updateDamage = function (floorId = core.status.floorId, ctx) {

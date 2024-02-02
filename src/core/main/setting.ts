@@ -1,7 +1,5 @@
 import { FunctionalComponent, reactive } from 'vue';
 import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
-import { loading } from '../loader/load';
-import { hook } from './game';
 import { GameStorage } from './storage';
 import { has, triggerFullscreen } from '@/plugin/utils';
 import { createSettingComponents } from './init/settings';
@@ -478,6 +476,7 @@ mainSetting
         )
     );
 
+const loading = Mota.require('var', 'loading');
 loading.once('coreInit', () => {
     mainSetting.reset({
         'screen.fullscreen': !!document.fullscreenElement,
@@ -497,6 +496,7 @@ loading.once('coreInit', () => {
     });
 });
 
+const { hook } = Mota.requireAll('var');
 hook.on('reset', () => {
     mainSetting.reset({
         'action.autoSkill': flags.autoSkill ?? true

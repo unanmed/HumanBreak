@@ -1,5 +1,3 @@
-///<reference path="../../../src/types/core.d.ts" />
-
 let levels: number[] = [];
 
 /**

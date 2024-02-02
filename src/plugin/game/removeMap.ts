@@ -1,5 +1,3 @@
-///<reference path="../../../src/types/core.d.ts" />
-
 export function removeMaps(
     fromId: FloorIds,
     toId: FloorIds,

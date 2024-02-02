@@ -1468,11 +1468,11 @@ control.prototype.updateDamage = function (floorId, ctx) {
 };
 
 control.prototype._updateDamage_damage = function (floorId, onMap) {
-    // Deprecated. See src/plugin/game/enemy/damage.ts EnemyCollection.render.
+    // Deprecated. See src/game/enemy/damage.ts EnemyCollection.render.
 };
 
 control.prototype._updateDamage_extraDamage = function (floorId, onMap) {
-    // Deprecated. See src/plugin/game/enemy/damage.ts EnemyCollection.render.
+    // Deprecated. See src/game/enemy/damage.ts EnemyCollection.render.
 };
 
 ////// 重绘地图显伤 //////

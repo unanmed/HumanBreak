@@ -1,8 +1,7 @@
 import { fixedUi } from '@/core/main/init/ui';
-import type { DamageEnemy } from './game/enemy/damage';
+import type { DamageEnemy } from '../game/enemy/damage';
 import { tip } from './utils';
 import { ref, Ref } from 'vue';
-import { hook } from '@/core/main/game';
 
 export interface MarkInfo<T extends EnemyIds> {
     id: T;
@@ -35,7 +34,7 @@ const marked: MarkInfo<EnemyIds>[] = [];
  */
 export function markEnemy(id: EnemyIds) {
     if (hasMarkedEnemy(id)) return;
-    const { DamageEnemy } = Mota.Plugin.require('damage_g');
+    const DamageEnemy = Mota.require('class', 'DamageEnemy');
     const enemy = new DamageEnemy(core.material.enemys[id]);
     enemy.calAttribute();
     enemy.getRealInfo();
@@ -159,6 +158,7 @@ export function hasMarkedEnemy(id: EnemyIds) {
     return marked.some(v => v.id === id);
 }
 
+const hook = Mota.require('var', 'hook');
 hook.on('statusBarUpdate', () => {
     checkMarkedEnemy();
 });

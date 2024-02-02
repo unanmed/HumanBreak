@@ -1,5 +1,4 @@
 import { debounce } from 'lodash-es';
-import { gameListener, hook } from '../game';
 import { fixedUi, mainUi } from './ui';
 import { ref } from 'vue';
 import { sleep } from 'mutate-animate';
@@ -38,6 +37,7 @@ const closeFixed = () => {
 // todo: 应当在这里实现查看临界与特殊属性的功能
 export let hovered: Block | null;
 
+const { hook, gameListener } = Mota.requireAll('var');
 gameListener.on('hoverBlock', block => {
     closeFixed();
     hovered = block;

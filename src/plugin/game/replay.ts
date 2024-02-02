@@ -1,5 +1,3 @@
-///<reference path="../../../src/types/core.d.ts" />
-
 import { upgradeSkill } from './skillTree';
 
 const replayableSettings = ['autoSkill'];

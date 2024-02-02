@@ -319,11 +319,11 @@ core.prototype._loadGameProcess = async function () {
     if (main.pluginUseCompress) {
         await main.loadScript(`project/processG.min.js?v=${main.version}`);
     } else {
-        if (main.mode === 'play') {
-            await main.loadScript(`src/game/index.ts`, true);
-        } else {
-            await main.loadScript(`src/game/index.esm.ts`, true);
-        }
+        // if (main.mode === 'play') {
+        //     await main.loadScript(`src/game/index.ts`, true);
+        // } else {
+        //     await main.loadScript(`src/game/index.esm.ts`, true);
+        // }
     }
 };
 

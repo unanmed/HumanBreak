@@ -1,5 +1,8 @@
 // todo: 更改utils.ts的形式，使common文件夹可以同时在渲染进程和游戏进程使用
-import { has } from '@/plugin/utils';
+
+function has<T>(value: T): value is NonNullable<T> {
+    return value !== null && value !== undefined;
+}
 
 export interface EmitableEvent {
     [event: string]: (...params: any) => any;
@@ -20,6 +23,8 @@ type EmitFn<F extends (...params: any) => any> = (
     events: Listener<F>[],
     ...params: Parameters<F>
 ) => any;
+
+console.log(1);
 
 export class EventEmitter<T extends EmitableEvent = {}> {
     protected events: {
