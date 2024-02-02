@@ -119,7 +119,7 @@ const mdef = ref(core.status.hero.mdef);
 
 const skill = computed(() => {
     update.value;
-    return skillTree.getSkillFromIndex(selected.value);
+    return skillTree.getSkillFromIndex(selected.value)!;
 });
 
 const skills = computed(() => {

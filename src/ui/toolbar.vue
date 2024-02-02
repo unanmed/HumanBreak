@@ -28,7 +28,7 @@
 import Box from '@/components/box.vue';
 import { CustomToolbar } from '@/core/main/custom/toolbar';
 import { GameUi } from '@/core/main/custom/ui';
-import { reactive, watch } from 'vue';
+import { onUnmounted, reactive, watch } from 'vue';
 
 interface BoxData {
     x: number;
@@ -44,6 +44,7 @@ const props = defineProps<{
 }>();
 
 const bar = props.bar;
+
 const box = reactive<BoxData>({
     x: bar.x,
     y: bar.y,
@@ -61,6 +62,19 @@ watch(box, ({ x, y, width, height }) => {
 function click() {
     // pass
 }
+
+function posChange() {
+    box.x = bar.x;
+    box.y = bar.y;
+    box.width = bar.width;
+    box.height = bar.height;
+}
+
+bar.on('posChange', posChange);
+
+onUnmounted(() => {
+    bar.off('posChange', posChange);
+});
 </script>
 
 <style lang="less" scoped>

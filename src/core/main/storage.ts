@@ -1,4 +1,4 @@
-export class GameStorage<T> {
+export class GameStorage<T extends object = any> {
     static list: GameStorage<any>[] = [];
 
     key: string;
@@ -52,6 +52,23 @@ export class GameStorage<T> {
 
     toJSON() {
         return JSON.stringify(this.data);
+    }
+
+    clear() {
+        // @ts-ignore
+        this.data = {};
+    }
+
+    keys() {
+        return Object.keys(this.data);
+    }
+
+    values() {
+        return Object.values(this.data);
+    }
+
+    entries() {
+        return Object.entries(this.data);
     }
 
     /**

@@ -170,7 +170,7 @@
 <script lang="ts" setup>
 import { CustomToolbar, ToolbarItemType } from '@/core/main/custom/toolbar';
 import { GameUi } from '@/core/main/custom/ui';
-import { computed, reactive, ref } from 'vue';
+import { computed, onUnmounted, reactive, ref } from 'vue';
 import {
     PlusOutlined,
     RightOutlined,
@@ -294,6 +294,10 @@ function addTool() {
     addingToolId.value = '';
     addingTool.value = false;
 }
+
+onUnmounted(() => {
+    CustomToolbar.save();
+});
 </script>
 
 <style lang="less" scoped>
@@ -402,7 +406,7 @@ function addTool() {
 
     .tool-item-list-item {
         border: 1px solid #ddd8;
-        margin-bottom: 5%;
+        margin-bottom: 3%;
         background-color: #222;
         padding-left: 2%;
     }

@@ -15,12 +15,14 @@ import {
 import { gameKey } from '../init/hotkey';
 import { unwarpBinary } from './hotkey';
 import { fixedUi } from '../init/ui';
+import { GameStorage } from '../storage';
 
 interface CustomToolbarEvent extends EmitableEvent {
     add: (item: ValueOf<ToolbarItemMap>) => void;
     delete: (item: ValueOf<ToolbarItemMap>) => void;
     set: (id: string, data: Partial<SettableItemData>) => void;
     emit: (id: string, item: ValueOf<ToolbarItemMap>) => void;
+    posChange: (bar: CustomToolbar) => void;
 }
 
 interface ToolbarItemBase<T extends ToolbarItemType> {
@@ -48,6 +50,14 @@ interface ToolbarItemMap {
     hotkey: HotkeyToolbarItem;
     item: ItemToolbarItem;
     assistKey: AssistKeyToolbarItem;
+}
+
+interface ToolbarSaveData {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    items: ValueOf<ToolbarItemMap>[];
 }
 
 export type ToolbarItemType = keyof ToolbarItemMap;
@@ -81,6 +91,10 @@ interface RegisteredCustomToolInfo {
 
 const COM = createToolbarComponents();
 const EDITOR = createToolbarEditorComponents();
+
+const toolbarStorage = new GameStorage<Record<string, ToolbarSaveData>>(
+    GameStorage.fromAuthor('AncTe', 'toolbar')
+);
 
 export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
     static num: number = 0;
@@ -215,6 +229,7 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
      */
     closeAll() {
         this.showIds.forEach(v => fixedUi.close(v));
+        this.showIds = [];
     }
 
     static get(id: string) {
@@ -250,6 +265,46 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
             onCreate
         };
         this.info[type] = info;
+    }
+
+    static save() {
+        toolbarStorage.clear();
+        this.list.forEach(v => {
+            const toSave: ToolbarSaveData = {
+                x: v.x,
+                y: v.y,
+                w: v.width,
+                h: v.height,
+                items: []
+            };
+            v.items.forEach(v => {
+                toSave.items.push(v);
+            });
+            toolbarStorage.setValue(v.id, toSave);
+        });
+        toolbarStorage.write();
+    }
+
+    static load() {
+        toolbarStorage.read();
+        for (const [key, value] of Object.entries(toolbarStorage.data)) {
+            const bar = new CustomToolbar(key);
+            bar.x = value.x;
+            bar.y = value.y;
+            bar.width = value.w;
+            bar.height = value.h;
+            for (const item of value.items) {
+                bar.add(item);
+            }
+        }
+    }
+
+    static showAll(): number[] {
+        return CustomToolbar.list.map(v => v.show());
+    }
+
+    static closeAll() {
+        this.list.forEach(v => v.closeAll());
     }
 }
 
@@ -320,3 +375,18 @@ CustomToolbar.register(
         };
     }
 );
+
+window.addEventListener('unload', () => {
+    CustomToolbar.save();
+});
+window.addEventListener('blur', () => {
+    CustomToolbar.save();
+});
+
+Mota.require('var', 'loading').once('coreInit', () => {
+    CustomToolbar.load();
+    CustomToolbar.closeAll();
+});
+Mota.require('var', 'hook').on('reset', () => {
+    CustomToolbar.showAll();
+});

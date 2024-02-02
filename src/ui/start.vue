@@ -72,6 +72,7 @@ import { isMobile } from '../plugin/use';
 import { GameUi } from '@/core/main/custom/ui';
 import { gameKey } from '@/core/main/init/hotkey';
 import { mainUi } from '@/core/main/init/ui';
+import { CustomToolbar } from '@/core/main/custom/toolbar';
 
 const props = defineProps<{
     num: number;
@@ -325,6 +326,8 @@ onMounted(async () => {
         showCursor();
         await sleep(1200);
     });
+
+    CustomToolbar.closeAll();
 });
 
 onUnmounted(() => {
