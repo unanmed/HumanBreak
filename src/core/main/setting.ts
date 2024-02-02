@@ -124,6 +124,7 @@ export class MotaSetting extends EventEmitter<SettingEvent> {
         }
         const old = setting.value as boolean | number;
         setting.value = value;
+
         this.emit('valueChange', key, value, old);
     }
 
@@ -472,7 +473,7 @@ mainSetting
             '小地图楼传缩放',
             300,
             COM.Number,
-            [50, 50, 1000]
+            [50, 1000, 50]
         )
     );
 

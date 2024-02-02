@@ -58,6 +58,7 @@
                             :item="selectedItem"
                             :displayer="displayer"
                             :setting="setting"
+                            :update="update"
                         ></component>
                     </div>
                 </div>
@@ -67,7 +68,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted, shallowRef } from 'vue';
+import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue';
 import {
     mainSetting,
     MotaSetting,
@@ -78,11 +79,9 @@ import {
 } from '../core/main/setting';
 import settingText from '../data/settings.json';
 import { RightOutlined, LeftOutlined } from '@ant-design/icons-vue';
-import { keycode, splitText } from '../plugin/utils';
+import { splitText } from '../plugin/utils';
 import Scroll from '../components/scroll.vue';
 import { isMobile } from '../plugin/use';
-import { sleep } from 'mutate-animate';
-import { KeyCode } from '../plugin/keyCodes';
 import { gameKey } from '@/core/main/init/hotkey';
 import { GameUi } from '@/core/main/custom/ui';
 import { mainUi } from '@/core/main/init/ui';
@@ -98,10 +97,12 @@ const setting = props.info ?? mainSetting;
 const text = props.text ?? (settingText as SettingText);
 const display = shallowRef<SettingDisplayInfo[]>([]);
 const selectedItem = computed(() => display.value.at(-1)?.item);
+const update = ref(false);
 
 const displayer = new SettingDisplayer(setting, text);
 displayer.on('update', (stack, dis) => {
     display.value = dis;
+    update.value = !update.value;
 });
 display.value = displayer.displayInfo;
 
@@ -276,14 +277,27 @@ onUnmounted(() => {
 
 .setting-info::v-deep(.editor-number) {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: space-around;
     align-items: center;
     padding: 0 10% 0 5%;
 
-    .number-input {
+    .number-input,
+    .number-button {
         font-size: 80%;
         width: 40%;
+    }
+
+    .number-button {
+        height: 100%;
+    }
+
+    .editor-number-button {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        margin-top: 10px;
     }
 }
 

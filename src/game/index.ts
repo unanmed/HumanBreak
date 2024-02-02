@@ -14,11 +14,7 @@ Mota.register('class', 'EventEmitter', EventEmitter);
 Mota.register('class', 'IndexedEventEmitter', IndexedEventEmitter);
 Mota.register('class', 'Range', Range);
 // ----- 函数注册
-Mota.register('fn', 'battle', battle.battle);
 Mota.register('fn', 'getEnemy', battle.getEnemy);
-Mota.register('fn', 'afterBattle', battle.afterBattle);
-Mota.register('fn', 'canBattle', battle.canBattle);
-Mota.register('fn', 'getCurrentEnemys', battle.getCurrentEnemys);
 // ----- 变量注册
 Mota.register('var', 'enemySpecials', specials);
 Mota.register('var', 'hook', hook);

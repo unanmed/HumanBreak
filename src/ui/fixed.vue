@@ -83,7 +83,7 @@ const special = (() => {
     };
 
     const show = s.slice(0, 2).map(v => {
-        const s = Mota.Plugin.require('special_g').specials[v];
+        const s = Mota.require('var', 'enemySpecials')[v];
         return [fromFunc(s.name, enemy.enemy), s.color];
     });
     if (s.length > 2) show.push(['...', 'white']);

@@ -24,8 +24,6 @@ type EmitFn<F extends (...params: any) => any> = (
     ...params: Parameters<F>
 ) => any;
 
-console.log(1);
-
 export class EventEmitter<T extends EmitableEvent = {}> {
     protected events: {
         [P in keyof T]?: Listener<T[P]>[];

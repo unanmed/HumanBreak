@@ -48,7 +48,7 @@ function BooleanSetting(props: SettingComponentProps) {
                 size="large"
                 onClick={changeValue}
             >
-                {item.value ? '开启' : '关闭'}设置
+                {item.value ? '关闭' : '开启'}设置
             </Button>
         </div>
     );
@@ -56,24 +56,51 @@ function BooleanSetting(props: SettingComponentProps) {
 
 function NumberSetting(props: SettingComponentProps) {
     const { setting, displayer, item } = props;
-    const changeValue = () => {
-        setting.setValue(displayer.selectStack.join('.'), !item.value);
+    const changeValue = (value: number) => {
+        if (typeof value !== 'number') return;
+        setting.setValue(displayer.selectStack.join('.'), value);
         displayer.update();
     };
 
     return (
         <div class="editor-number">
-            <span> 修改设置： </span>
-            <InputNumber
-                class="number-input"
-                size="large"
-                keyboard={true}
-                min={item.step?.[0] ?? 0}
-                max={item.step?.[1] ?? 100}
-                step={item.step?.[2] ?? 1}
-                value={item.value as number}
-                onChange={changeValue}
-            ></InputNumber>
+            <div class="editor-number-input">
+                <span> 修改设置： </span>
+                <InputNumber
+                    class="number-input"
+                    size="large"
+                    // keyboard={true}
+                    min={item.step?.[0] ?? 0}
+                    max={item.step?.[1] ?? 100}
+                    step={item.step?.[2] ?? 1}
+                    value={item.value as number}
+                    onChange={value => changeValue(value as number)}
+                ></InputNumber>
+            </div>
+            <div class="editor-number-button">
+                <Button
+                    class="number-button"
+                    type="primary"
+                    onClick={() =>
+                        changeValue(
+                            (item.value as number) - (item.step?.[2] ?? 1)
+                        )
+                    }
+                >
+                    减少
+                </Button>
+                <Button
+                    class="number-button"
+                    type="primary"
+                    onClick={() =>
+                        changeValue(
+                            (item.value as number) + (item.step?.[2] ?? 1)
+                        )
+                    }
+                >
+                    增加
+                </Button>
+            </div>
         </div>
     );
 }

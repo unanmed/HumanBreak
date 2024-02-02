@@ -110,11 +110,7 @@ interface EventData {
      * @param x 怪物横坐标
      * @param y 怪物纵坐标
      */
-    afterBattle(
-        enemyId: AllIdsOf<'enemys' | 'enemy48'>,
-        x?: number,
-        y?: number
-    ): void;
+    afterBattle(enemyId: any, x?: number, y?: number): void;
 
     /**
      * 开门后
