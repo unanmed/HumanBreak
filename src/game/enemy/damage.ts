@@ -1,4 +1,4 @@
-import { getHeroStatusOf, getHeroStatusOn } from '@/plugin/game/hero';
+import { getHeroStatusOf, getHeroStatusOn } from '@/game/hero';
 import { Range, RangeCollection } from '@/plugin/game/range';
 import {
     checkV2,

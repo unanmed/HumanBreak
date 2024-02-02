@@ -111,12 +111,3 @@ function getRealStatus(
     if (typeof s === 'number') s = Math.floor(s);
     return s;
 }
-
-declare global {
-    interface PluginDeclaration {
-        hero: {
-            getHeroStatusOf: typeof getHeroStatusOf;
-            getHeroStatusOn: typeof getHeroStatusOn;
-        };
-    }
-}

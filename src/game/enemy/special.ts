@@ -1,4 +1,4 @@
-import { getHeroStatusOn } from '@/plugin/game/hero';
+import { getHeroStatusOn } from '@/game/hero';
 
 export interface SpecialDeclaration {
     code: number;
