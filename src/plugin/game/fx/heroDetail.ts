@@ -1,5 +1,6 @@
 function drawHeroDetail(px: number, py: number) {
-    if (!core.getLocalStorage('heroDetail', false)) return;
+    const setting = Mota.require('var', 'mainSetting');
+    if (!setting.getValue('screen.heroDetail', false)) return;
     const { hp, atk, def } = core.status.hero;
     const toDraw = {
         atk: {

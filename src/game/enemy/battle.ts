@@ -1,5 +1,6 @@
 import { DamageEnemy, ensureFloorDamage, getSingleEnemy } from './damage';
 import { findDir, has } from '../../plugin/game/utils';
+import { loading } from '../game';
 
 export interface CurrentEnemy {
     enemy: DamageEnemy;
@@ -41,7 +42,7 @@ export function battle(
     core.saveAndStopAutomaticRoute();
     const enemy = getEnemy(x, y);
     // 非强制战斗
-    if (!core.enemys.canBattle(x, y) && !force && !core.status.event.id) {
+    if (!canBattle(x, y) && !force && !core.status.event.id) {
         core.stopSound();
         core.playSound('操作失败');
         core.drawTip('你打不过此怪物！', enemy.id);
@@ -189,7 +190,7 @@ export function getCurrentEnemys(floorId = core.status.floorId) {
     });
 }
 
-export function init() {
+function init() {
     core.events._sys_battle = function (data: Block, callback?: () => void) {
         // 检查战前事件
         const floor = core.floors[core.status.floorId];
@@ -214,7 +215,7 @@ export function init() {
                 core.insertAction(beforeBattle, data.x, data.y, callback);
             }
         } else {
-            this.battle(data.x, data.y, false, callback);
+            battle(data.x, data.y, false, callback);
         }
     };
 
@@ -233,7 +234,8 @@ export function init() {
                 y,
                 prefix
             ) as LocArr;
-            this.battle(ex, ey, true, core.doAction);
+            battle(ex, ey, true, core.doAction);
         }
     };
 }
+loading.once('coreInit', init);

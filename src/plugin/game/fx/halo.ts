@@ -11,7 +11,8 @@ export function drawHalo(
     floorId: FloorIds
 ) {
     if (main.replayChecking) return;
-    if (!core.getLocalStorage('showHalo', true)) return;
+    const setting = Mota.require('var', 'mainSetting');
+    if (!setting.getValue('screen.showHalo', true)) return;
     const list = core.status.maps[floorId].enemy.haloList.concat(
         Object.keys(flags[`melt_${floorId}`] ?? {}).map(v => {
             const [x, y] = v.split(',').map(v => parseInt(v));

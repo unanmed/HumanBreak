@@ -203,7 +203,8 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
                 py: 32 * (v.y! + 1) - 1,
                 color: color
             });
-            const criGem = core.getLocalStorage('criticalGem', false);
+            const setting = Mota.require('var', 'mainSetting');
+            const criGem = setting.getValue('screen.criticalGem', false);
             const n = critical?.atkDelta ?? Infinity;
             const ratio = core.status.maps[this.floorId].ratio;
             const cri = criGem ? Math.ceil(n / ratio) : n;

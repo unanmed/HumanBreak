@@ -480,19 +480,19 @@ const loading = Mota.require('var', 'loading');
 loading.once('coreInit', () => {
     mainSetting.reset({
         'screen.fullscreen': !!document.fullscreenElement,
-        'screen.halo': !!storage.getValue('showHalo', true),
-        'screen.itemDetail': !!storage.getValue('itemDetail', true),
-        'screen.heroDetail': !!storage.getValue('heroDetail', false),
-        'screen.transition': !!storage.getValue('transition', false),
-        'screen.antiAlias': !!storage.getValue('antiAlias', false),
-        'screen.fontSize': storage.getValue('fontSize', 16),
-        'screen.smoothView': !!storage.getValue('smoothView', true),
-        'screen.criticalGem': !!storage.getValue('criticalGem', false),
-        'action.fixed': !!storage.getValue('fixed', true),
-        'utils.betterLoad': !!storage.getValue('betterLoad', true),
-        'utils.autoScale': !!storage.getValue('autoScale', true),
-        'fx.paraLight': !!storage.getValue('paraLight', true),
-        'fx.frag': !!storage.getValue('frag', true)
+        'screen.halo': !!storage.getValue('screen.showHalo', true),
+        'screen.itemDetail': !!storage.getValue('screen.itemDetail', true),
+        'screen.heroDetail': !!storage.getValue('screen.heroDetail', false),
+        'screen.transition': !!storage.getValue('screen.transition', false),
+        'screen.antiAlias': !!storage.getValue('screen.antiAlias', false),
+        'screen.fontSize': storage.getValue('screen.fontSize', 16),
+        'screen.smoothView': !!storage.getValue('screen.smoothView', true),
+        'screen.criticalGem': !!storage.getValue('screen.criticalGem', false),
+        'action.fixed': !!storage.getValue('action.fixed', true),
+        'utils.betterLoad': !!storage.getValue('utils.betterLoad', true),
+        'utils.autoScale': !!storage.getValue('utils.autoScale', true),
+        'fx.paraLight': !!storage.getValue('fx.paraLight', true),
+        'fx.frag': !!storage.getValue('fx.frag', true)
     });
 });
 

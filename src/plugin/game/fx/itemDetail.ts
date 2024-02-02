@@ -33,7 +33,8 @@ export function init() {
 
 // 获取宝石信息 并绘制
 function getItemDetail(floorId: FloorIds, onMap: boolean) {
-    if (!core.getLocalStorage('itemDetail')) return;
+    const setting = Mota.require('var', 'mainSetting');
+    if (!setting.getValue('screen.itemDetail')) return;
     floorId ??= core.status.thisMap.floorId;
     let diff: Record<string | symbol, number | undefined> = {};
     const before = core.status.hero;

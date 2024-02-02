@@ -29,41 +29,8 @@ import { CustomToolbar } from './main/custom/toolbar';
 import { Hotkey } from './main/custom/hotkey';
 import { Keyboard } from './main/custom/keyboard';
 
-// export interface Mota {
-//     sound: SoundController;
-//     /** 游戏资源 */
-//     resource: ResourceStore<Exclude<ResourceType, 'zip'>>;
-//     zipResource: ResourceStore<'zip'>;
-//     bgm: BgmController;
-//     plugin: AncTePlugin;
-//     hook: EventEmitter<GameEvent>;
-//     classes: {
-//         storage: typeof GameStorage;
-//     };
-//     ui: {
-//         main: UiController;
-//         fixed: UiController;
-//     };
-// }
-
 function ready() {
-    // window.mota = {
-    //     bgm: new BgmController(),
-    //     resource: new ResourceStore(),
-    //     zipResource: new ResourceStore(),
-    //     sound: new SoundController(),
-    //     // @ts-ignore
-    //     plugin: {},
-    //     hook,
-    //     storage: GameStorage,
-    //     ui: {
-    //         main: mainUi,
-    //         fixed: fixedUi
-    //     }
-    // };
-
     readyAllResource();
-    // loading.once('coreInit', resolvePlugin);
 }
 
 // ----- 类注册
@@ -99,4 +66,5 @@ Mota.register('var', 'settingStorage', settingStorage);
 Mota.register('var', 'status', status);
 
 // ----- 模块注册
+
 ready();

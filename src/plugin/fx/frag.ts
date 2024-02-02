@@ -25,9 +25,11 @@ const MAX_ROTATE = 0.5;
 const FRAG_TIMING = linear();
 
 export function init() {
-    Mota.rewrite(core.events, 'afterBattle', 'add', (_, enemy, x, y) => {
+    const fn = Mota.requireAll('fn');
+    Mota.rewrite(fn, 'afterBattle', 'add', (_, enemy, x, y) => {
         // 打怪特效
-        if (core.getLocalStorage('frag') && has(x) && has(y)) {
+        const setting = Mota.require('var', 'mainSetting');
+        if (setting.getValue('screen.frag') && has(x) && has(y)) {
             const frame = core.status.globalAnimateStatus % 2;
             const canvas = document.createElement('canvas');
             canvas.width = 32;
