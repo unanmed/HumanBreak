@@ -98,7 +98,7 @@ export class GameStorage<T extends object = any> {
     }
 }
 
-window.addEventListener('unload', () => {
+window.addEventListener('beforeunload', () => {
     GameStorage.list.forEach(v => v.write());
 });
 window.addEventListener('blur', () => {

@@ -376,7 +376,7 @@ CustomToolbar.register(
     }
 );
 
-window.addEventListener('unload', () => {
+window.addEventListener('beforeunload', () => {
     CustomToolbar.save();
 });
 window.addEventListener('blur', () => {
