@@ -918,7 +918,9 @@ ui.prototype.closePanel = function () {
     this.clearUI();
     core.maps.generateGroundPattern();
     core.updateStatusBar(true);
-    core.unlockControl();
+    setTimeout(() => {
+        core.unlockControl();
+    }, 0);
     core.status.event.data = null;
     core.status.event.id = null;
     core.status.event.selection = null;
