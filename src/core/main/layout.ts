@@ -2,7 +2,6 @@ import {
     Component,
     RenderFunction,
     SetupContext,
-    SlotsType,
     VNode,
     VNodeChild,
     defineComponent,
@@ -10,8 +9,6 @@ import {
     onMounted
 } from 'vue';
 import BoxAnimate from '@/components/boxAnimate.vue';
-import { mainUi } from './init/ui';
-import { GameUi } from './custom/ui';
 
 interface VForRenderer {
     type: '@v-for';
@@ -436,6 +433,3 @@ export function icon(
 ) {
     return h(BoxAnimate, { id, width, height, noBoarder });
 }
-
-mainUi.register(new GameUi('test', m().export()));
-mainUi.open('test');
