@@ -2551,7 +2551,6 @@ maps.prototype._drawThumbnail_realDrawTempCanvas = function (
     blocks,
     options
 ) {
-    // todo: storage获取方式优化
     const setting = Mota.require('var', 'mainSetting');
     options.ctx.imageSmoothingEnabled = !setting.getValue(
         'screen.antiAliasing',

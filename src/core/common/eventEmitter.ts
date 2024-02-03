@@ -1,5 +1,3 @@
-// todo: 更改utils.ts的形式，使common文件夹可以同时在渲染进程和游戏进程使用
-
 function has<T>(value: T): value is NonNullable<T> {
     return value !== null && value !== undefined;
 }

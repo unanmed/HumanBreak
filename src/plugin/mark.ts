@@ -43,7 +43,7 @@ export function markEnemy(id: EnemyIds) {
         id,
         enemy,
         mode: 0b011111,
-        lastAtk: Mota.Plugin.require('hero_g').getHeroStatusOn('atk', 'empty'),
+        lastAtk: Mota.requireAll('fn').getHeroStatusOn('atk', 'empty'),
         lastDamage: enemy.calDamage().damage,
         status: 0b0,
         update: ref(true)
@@ -65,7 +65,7 @@ export function unmarkEnemy(id: EnemyIds) {
 }
 
 export function checkMarkedEnemy() {
-    const { getHeroStatusOn } = Mota.Plugin.require('hero_g');
+    const { getHeroStatusOn } = Mota.requireAll('fn');
     marked.forEach(v => {
         const { id, enemy, mode, lastAtk, lastDamage, markDamage } = v;
         const atk = getHeroStatusOn('atk', 'empty');

@@ -59,7 +59,7 @@ export function getNowStatus(nowEquip?: Equip, onCol: boolean = false) {
         'hpmax',
         'money'
     ] as (keyof SelectType<HeroStatus, number>)[];
-    const { getHeroStatusOn } = Mota.Plugin.require('hero_g');
+    const { getHeroStatusOn } = Mota.requireAll('fn');
 
     return (
         <div id="hero-status">

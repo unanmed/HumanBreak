@@ -181,7 +181,7 @@ watch(status, update);
  */
 function update() {
     toShow.forEach(v => {
-        hero[v] = Mota.Plugin.require('hero_g').getHeroStatusOn(v);
+        hero[v] = Mota.requireAll('fn').getHeroStatusOn(v);
     });
     keys[0] = core.itemCount('yellowKey');
     keys[1] = core.itemCount('blueKey');

@@ -38,39 +38,3 @@ Mota.Plugin.register('frag_r', frag, frag.init);
 Mota.Plugin.register('use_r', use);
 Mota.Plugin.register('gameCanvas_r', gameCanvas);
 Mota.Plugin.register('smooth_r', smooth, smooth.init);
-
-// // todo: 将插件更改为注册形式，分为渲染进程和游戏进程两部分，同时分配优先级
-
-// export function resolvePlugin() {
-//     const toForward: [keyof Mota['plugin'], any][] = [
-//         ['pop', pop()],
-//         ['use', use()],
-//         ['animate', animate()],
-//         ['utils', utils()],
-//         ['status', status()],
-//         ['fly', fly()],
-//         ['chase', chase()],
-//         ['webglUtils', webglUtils()],
-//         ['shadow', shadow()],
-//         ['gameShadow', gameShadow()],
-//         ['achievement', achievement()],
-//         ['completion', completion()],
-//         ['path', path()],
-//         ['gameCanvas', gameCanvas()],
-//         ['noise', noise()],
-//         ['smooth', smooth()],
-//         ['frag', frag()]
-//     ];
-
-//     for (const [key, obj] of toForward) {
-//         mota.plugin[key] = obj;
-//     }
-
-//     // 完成度相关
-//     Object.values(floors).forEach((v, i) => {
-//         const from = core.floorIds.indexOf(v[0]);
-//         const to = core.floorIds.indexOf(v[1]);
-//         const all = core.floorIds.slice(from, to + 1);
-//         floors[i + 1] = all;
-//     });
-// }

@@ -29,7 +29,8 @@ import type { specials } from './enemy/special';
 import type { Range } from '@/plugin/game/range';
 import type { KeyCode } from '@/plugin/keyCodes';
 import type { Ref } from 'vue';
-import * as battle from './enemy/battle';
+import type * as battle from './enemy/battle';
+import type * as hero from './hero';
 
 interface ClassInterface {
     // 渲染进程与游戏进程通用
@@ -61,8 +62,9 @@ interface ClassInterface {
 }
 
 type _IBattle = typeof battle;
+type _IHero = typeof hero;
 
-interface FunctionInterface extends _IBattle {
+interface FunctionInterface extends _IBattle, _IHero {
     // 定义于渲染进程，录像中会进行polyfill，但是不执行任何内容
     readyAllResource(): void;
     // 定义于游戏进程，渲染进程依然可用

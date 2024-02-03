@@ -6,7 +6,6 @@ import * as replay from './replay';
 import * as ui from './ui';
 import * as rewrite from './fx/rewrite';
 import * as halo from './fx/halo';
-import * as hero from '../../game/hero';
 import * as loopMap from './loopMap';
 import * as removeMap from './removeMap';
 import * as shop from './shop';
@@ -37,7 +36,6 @@ Mota.Plugin.register('study_g', study);
 Mota.Plugin.register('remainEnemy_g', remainEnemy);
 Mota.Plugin.register('checkBlock_g', checkBlock, checkBlock.init);
 // todo: 这几个不应该放到插件
-Mota.Plugin.register('hero_g', hero);
 Mota.Plugin.register('ui_g', ui, ui.init);
 
 // export {

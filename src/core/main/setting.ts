@@ -355,25 +355,11 @@ function handleScreenSetting<T extends number | boolean>(
     if (key === 'fullscreen') {
         // 全屏
         triggerFullscreen(n as boolean);
-    } else if (key === 'halo') {
-        // 光环
-        // core.setLocalStorage('showHalo', n);
-    } else if (key === 'frag') {
-        // 打怪特效
-        // core.setLocalStorage('frag', n);
-    } else if (key === 'itemDetail') {
-        // 宝石血瓶显伤
-        // core.setLocalStorage('itemDetail', n);
     } else if (key === 'heroDetail') {
         // 勇士显伤
-        // core.setLocalStorage('heroDetail', n);
         core.drawHero();
-    } else if (key === 'transition') {
-        // 界面动画
-        // core.setLocalStorage('transition', n);
     } else if (key === 'antiAlias') {
         // 抗锯齿
-        // core.setLocalStorage('antiAlias', n);
         for (const canvas of core.dom.gameCanvas) {
             if (core.domStyle.hdCanvas.includes(canvas.id)) continue;
             if (n) {
@@ -384,12 +370,7 @@ function handleScreenSetting<T extends number | boolean>(
         }
     } else if (key === 'fontSize') {
         // 字体大小
-        // core.setLocalStorage('fontSize', n);
         root.style.fontSize = `${n}px`;
-    } else if (key === 'smoothView') {
-        // core.setLocalStorage('smoothView', n);
-    } else if (key === 'criticalGem') {
-        // core.setLocalStorage('criticalGem', n);
     }
 }
 
@@ -401,9 +382,6 @@ function handleActionSetting<T extends number | boolean>(
     if (key === 'autoSkill') {
         // 自动切换技能
         flags.autoSkill = n;
-    } else if (key === 'fixed') {
-        // 定点查看
-        // core.setLocalStorage('fixed', n);
     }
 }
 
@@ -411,15 +389,7 @@ function handleUtilsSetting<T extends number | boolean>(
     key: string,
     n: T,
     o: T
-) {
-    if (key === 'betterLoad') {
-        // 加载优化
-        // core.setLocalStorage('betterLoad', n);
-    } else if (key === 'autoScale') {
-        // 自动放缩
-        // core.setLocalStorage('autoScale', n);
-    }
-}
+) {}
 
 // ----- 游戏的所有设置项
 // todo: 虚拟键盘缩放，小地图楼传缩放
