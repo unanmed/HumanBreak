@@ -1,5 +1,5 @@
 import type { SettingComponent, SettingComponentProps } from '../setting';
-import { Button, InputNumber } from 'ant-design-vue';
+import { Button, InputNumber, Radio } from 'ant-design-vue';
 import { mainUi } from './ui';
 import { gameKey } from './hotkey';
 
@@ -11,6 +11,7 @@ interface Components {
     Number: SettingComponent;
     HotkeySetting: SettingComponent;
     ToolbarEditor: SettingComponent;
+    RadioSetting: (items: string[]) => SettingComponent;
 }
 
 export function createSettingComponents() {
@@ -19,7 +20,8 @@ export function createSettingComponents() {
         Boolean: BooleanSetting,
         Number: NumberSetting,
         HotkeySetting,
-        ToolbarEditor
+        ToolbarEditor,
+        RadioSetting
     };
     return com;
 }
@@ -103,6 +105,34 @@ function NumberSetting(props: SettingComponentProps) {
             </div>
         </div>
     );
+}
+
+function RadioSetting(items: string[]) {
+    return (props: SettingComponentProps) => {
+        const { setting, displayer, item } = props;
+
+        const changeValue = (value: number) => {
+            if (isNaN(value)) return;
+            setting.setValue(displayer.selectStack.join('.'), value);
+            displayer.update();
+        };
+
+        return (
+            <div>
+                {items.map((v, i) => {
+                    return (
+                        <Radio
+                            value={i}
+                            checked={i === item.value}
+                            onClick={() => changeValue(i)}
+                        >
+                            {v}
+                        </Radio>
+                    );
+                })}
+            </div>
+        );
+    };
 }
 
 function showSpecialSetting(id: string, vBind?: any) {
