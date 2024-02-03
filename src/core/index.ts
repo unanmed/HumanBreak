@@ -28,6 +28,7 @@ import { AudioPlayer } from './audio/audio';
 import { CustomToolbar } from './main/custom/toolbar';
 import { Hotkey } from './main/custom/hotkey';
 import { Keyboard } from './main/custom/keyboard';
+import './main/layout';
 
 function ready() {
     readyAllResource();

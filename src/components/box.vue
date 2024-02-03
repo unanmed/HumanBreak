@@ -43,7 +43,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted, onUpdated, ref, watch } from 'vue';
+import { onMounted, onUnmounted, onUpdated, ref, useSlots, watch } from 'vue';
 import { DragOutlined } from '@ant-design/icons-vue';
 import { isMobile, useDrag, cancelGlobalDrag } from '../plugin/use';
 import { has } from '../plugin/utils';
