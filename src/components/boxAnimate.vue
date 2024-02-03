@@ -63,12 +63,12 @@ function draw() {
 
         drawFn();
         addAnimate(drawFn);
-
-        onUnmounted(() => {
-            removeAnimate(drawFn);
-        });
     }
 }
+
+onUnmounted(() => {
+    removeAnimate(drawFn);
+});
 
 onMounted(() => {
     c = document.getElementById(`box-animate-${id}`) as HTMLCanvasElement;

@@ -2,12 +2,16 @@ import {
     Component,
     RenderFunction,
     SetupContext,
+    SlotsType,
     VNode,
     VNodeChild,
     defineComponent,
     h,
     onMounted
 } from 'vue';
+import BoxAnimate from '@/components/boxAnimate.vue';
+import { mainUi } from './init/ui';
+import { GameUi } from './custom/ui';
 
 interface VForRenderer {
     type: '@v-for';
@@ -54,22 +58,32 @@ export class MComponent {
     static mountNum: number = 0;
 
     content: (MotaComponent | VForRenderer)[] = [];
-    /** 渲染插槽 */
-    slots: Record<string, Record<string, any>> = {};
 
     private onSetupFn?: OnSetupFunction;
     private setupFn?: SetupFunction;
     private onMountedFn?: OnMountedFunction;
     private retFn?: RetFunction;
 
+    private propsDef: Record<string, any> = {};
+    private emitsDef: string[] = [];
+
     /**
-     * 定义一个渲染插槽，插槽需要有一个名称，props可选。当渲染时，会将props传入被渲染的组件。
-     * @param name 插槽名称
-     * @param props 插槽传入的props
+     * 定义一个props，是一个对象，键表示props名称，值表示类型，例如num: Number
+     * 对于直接通过`UiController.open`方法打开的ui，应当包含以下两项
+     * - num: ui的唯一标识符，类型为Number
+     * - ui: 对于的GameUi实例，类型为GameUi
+     * @param props 被定义的props
      */
-    slot(name: string, props?: Record<string, any>): this {
-        this.slots[name] = props ?? {};
-        return this;
+    defineProps(props: Record<string, any>) {
+        this.propsDef = props;
+    }
+
+    /**
+     * 定义这个组件的emits，是一个字符串数组，表示emits的名称
+     * @param emits 被定义的emits
+     */
+    defineEmits(emits: string[]) {
+        this.emitsDef = emits;
     }
 
     /**
@@ -239,29 +253,40 @@ export class MComponent {
      */
     export() {
         if (!this.setupFn) {
-            return defineComponent((props, ctx) => {
-                const mountNum = MComponent.mountNum++;
-                this.onSetupFn?.(props);
+            return defineComponent(
+                (props, ctx) => {
+                    const mountNum = MComponent.mountNum++;
+                    this.onSetupFn?.(props);
 
-                onMounted(() => {
-                    this.onMountedFn?.(
-                        props,
-                        Array.from(
-                            document.getElementsByClassName(
-                                `--mota-component-canvas-${mountNum}`
-                            ) as HTMLCollectionOf<HTMLCanvasElement>
-                        )
-                    );
-                });
+                    onMounted(() => {
+                        this.onMountedFn?.(
+                            props,
+                            Array.from(
+                                document.getElementsByClassName(
+                                    `--mota-component-canvas-${mountNum}`
+                                ) as HTMLCollectionOf<HTMLCanvasElement>
+                            )
+                        );
+                    });
 
-                if (this.retFn) return () => this.retFn!(props, ctx);
-                else {
-                    return () => {
-                        const vNodes = MComponent.vNode(this.content, mountNum);
-                        return vNodes;
-                    };
+                    if (this.retFn) return () => this.retFn!(props, ctx);
+                    else {
+                        return () => {
+                            console.log(ctx.slots.default);
+
+                            const vNodes = MComponent.vNode(
+                                this.content,
+                                mountNum
+                            );
+                            return vNodes;
+                        };
+                    }
+                },
+                {
+                    emits: this.emitsDef,
+                    props: this.propsDef
                 }
-            });
+            );
         } else {
             return defineComponent((props, ctx) => this.setupFn!(props, ctx));
         }
@@ -395,3 +420,22 @@ export class MComponent {
 export function m() {
     return new MComponent();
 }
+
+/**
+ * 生成一个图标的VNode
+ * @param id 图标的id
+ * @param width 显示宽度，单位像素
+ * @param height 显示高度，单位像素
+ * @param noBoarder 显示的时候是否没有边框和背景
+ */
+export function icon(
+    id: AllIds,
+    width?: number,
+    height?: number,
+    noBoarder?: number
+) {
+    return h(BoxAnimate, { id, width, height, noBoarder });
+}
+
+mainUi.register(new GameUi('test', m().export()));
+mainUi.open('test');
