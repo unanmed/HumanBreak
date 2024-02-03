@@ -118,6 +118,12 @@ export class MComponent {
         return this.h(component, [], config);
     }
 
+    /**
+     * 列表渲染一系列内容
+     * @param items 要遍历的列表，可以是一个数组，也可以是一个返回数组的函数
+     * @param map 遍历函数，接收列表的每一项的值和索引，并返回一个VNode，VNode可以通过Vue.h函数，
+     *            或者MComponent.vNode函数生成。
+     */
     vfor<T>(items: T[] | (() => T[]), map: (value: T, index: number) => VNode) {
         this.content.push({
             type: '@v-for',
@@ -133,7 +139,7 @@ export class MComponent {
      * 而因此，几乎所有内容都要求传入一个函数，一般这个函数会在真正渲染的时候执行，并将返回值作为真正值传入。
      * 不过对于部分内容，例如`slots`和`vfor.map`，并不是这样的。具体用法请参考参数注释。
      * 注意如果使用了该包装，那么是无法实现响应式布局的，如果想要使用响应式布局，就必须调用`setup`方法，
-     * 手写全部的setup函数。
+     * 手写全部的`setup`函数。
      * @param type 要添加的渲染内容。
      *             - 可以是一个字符串，表示dom元素，例如`div` `span`等，
      *             - 可以是一个组件，也可以是一个`MComponent`，表示将其的导出作为组件。
@@ -200,6 +206,12 @@ export class MComponent {
         return this;
     }
 
+    /**
+     * 当组件被挂载完毕后执行函数
+     * @param fn 当组件被挂载完毕后执行的函数，接收props和当前级组件（不包含子组件）的所有画布作为参数
+     *           当前级组件表示直接在当前组件中渲染的内容，不包括子组件，子组件的画布需要在其对应的函数中获取
+     *           例如我在A组件中调用了B组件，那么我只能获取A组件的画布，而不能获取B组件的画布
+     */
     onMounted(fn: OnMountedFunction) {
         this.onMountedFn = fn;
         return this;
@@ -255,6 +267,29 @@ export class MComponent {
         }
     }
 
+    /**
+     * 将单个渲染内容生成为一个单个的VNode
+     * @param child 要生成的单个渲染内容
+     * @param mount 组件生成时的挂载id，一般不需要填，用于画布获取
+     */
+    static vNodeS(child: MotaComponent, mount?: number) {
+        return this.vNode([child], mount)[0];
+    }
+
+    /**
+     * 将一个MComponent实例生成为一个VNode列表
+     * @param mc 要生成VNode的组件
+     * @param mount 组件生成时的挂载id，一般不需要填，用于画布获取
+     */
+    static vNodeM(mc: MComponent, mount?: number) {
+        return this.vNode(mc.content, mount);
+    }
+
+    /**
+     * 将一系列MComponent内容生成为一个VNode列表
+     * @param children 要生成VNode的内容列表
+     * @param mount 组件生成时的挂载id，一般不需要填，用于画布获取
+     */
     static vNode(children: (MotaComponent | VForRenderer)[], mount?: number) {
         const mountNum = mount ?? this.mountNum++;
 
@@ -330,6 +365,10 @@ export class MComponent {
         return res;
     }
 
+    /**
+     * 获取props的真实值。因为传入渲染内容的props是一个函数，因此需要一层调用
+     * @param props 要获取的props
+     */
     static unwrapProps(props?: Record<string, () => any>): Record<string, any> {
         if (!props) return {};
         const res: Record<string, any> = {};
