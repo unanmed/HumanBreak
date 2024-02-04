@@ -8,6 +8,7 @@ interface AnimatingBgm {
     ani: Transition;
     timeout: number;
     currentTime: number;
+    endVolume: number;
 }
 
 export class BgmController
@@ -28,6 +29,11 @@ export class BgmController
 
     /** 音量 */
     volume: number = 1;
+    /** 是否关闭了bgm */
+    disable: boolean = false;
+
+    /** 是否正在播放bgm */
+    playing: boolean = false;
 
     private transitionData: Map<BgmIds, AnimatingBgm> = new Map();
 
@@ -61,6 +67,7 @@ export class BgmController
      * @param when 切换至的歌从什么时候开始播放，默认-1，表示不改变，整数表示设置为目标值
      */
     changeTo(id: BgmIds, when: number = -1, noStack: boolean = false) {
+        if (id === this.now) return;
         let prevent = false;
         const preventDefault = () => {
             prevent = true;
@@ -71,8 +78,11 @@ export class BgmController
 
         if (prevent) return;
 
-        this.setTransitionAnimate(id, 1);
-        if (this.now) this.setTransitionAnimate(this.now, 0, when);
+        this.playing = true;
+        if (!this.disable) {
+            this.setTransitionAnimate(id, 1);
+            if (this.now) this.setTransitionAnimate(this.now, 0, when);
+        }
 
         if (!noStack) {
             if (this.now) this.stack.push(this.now);
@@ -97,6 +107,8 @@ export class BgmController
 
         if (prevent) return;
 
+        this.playing = false;
+
         if (transition) this.setTransitionAnimate(this.now, 0);
         else this.get(this.now).pause();
     }
@@ -113,20 +125,37 @@ export class BgmController
         };
         const ev = { preventDefault };
 
-        this.emit('pause', ev, this.now);
+        this.emit('resume', ev, this.now);
 
         if (prevent) return;
 
-        if (transition) this.setTransitionAnimate(this.now, 1);
-        else this.get(this.now).play();
+        this.playing = true;
+
+        if (!this.disable) {
+            if (transition) this.setTransitionAnimate(this.now, 1);
+            else this.get(this.now).play();
+        }
     }
 
     /**
-     * 播放bgm，不进行渐变操作，效果为没有渐变的切歌
+     * 播放bgm，不进行渐变操作，效果为没有渐变的切歌，也会触发changeBgm事件，可以被preventDefault
      * @param id 要播放的bgm
      * @param when 从bgm的何时开始播放
      */
     play(id: BgmIds, when: number = 0, noStack: boolean = false) {
+        if (id === this.now) return;
+        let prevent = false;
+        const preventDefault = () => {
+            prevent = true;
+        };
+        const ev = { preventDefault };
+
+        this.emit('changeBgm', ev, id, this.now);
+
+        if (prevent) return;
+
+        this.playing = true;
+
         const before = this.now ? null : this.get(this.now!);
         const to = this.get(id);
         if (before) {
@@ -135,11 +164,14 @@ export class BgmController
         to.currentTime = when;
         to.volume = this.volume;
         to.play();
-        if (!noStack) {
-            if (this.now) this.stack.push(this.now);
-            this.redoStack = [];
+
+        if (!this.disable) {
+            if (!noStack) {
+                if (this.now) this.stack.push(this.now);
+                this.redoStack = [];
+            }
+            this.now = id;
         }
-        this.now = id;
     }
 
     /**
@@ -201,7 +233,7 @@ export class BgmController
             ani.value.volume = bgm.paused ? 0 : 1;
             const end = () => {
                 ani.ticker.destroy();
-                if (ani.value.volume === 0) {
+                if (tran!.endVolume === 0) {
                     bgm.pause();
                 } else {
                     bgm.volume = ani.value.volume * this.volume;
@@ -212,7 +244,8 @@ export class BgmController
                 end,
                 ani: ani,
                 timeout: -1,
-                currentTime: bgm.currentTime
+                currentTime: bgm.currentTime,
+                endVolume: to
             };
             this.transitionData.set(id, tran);
             ani.ticker.add(() => {
@@ -227,6 +260,7 @@ export class BgmController
         if (when !== -1) {
             bgm.currentTime = when;
         }
+        tran.endVolume = to;
 
         tran.ani
             .time(this.transitionTime)

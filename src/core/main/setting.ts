@@ -3,6 +3,7 @@ import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
 import { GameStorage } from './storage';
 import { has, triggerFullscreen } from '@/plugin/utils';
 import { createSettingComponents } from './init/settings';
+import { bgm } from '../audio/bgm';
 
 export interface SettingComponentProps {
     item: MotaSettingItem;
@@ -306,25 +307,7 @@ export const mainSetting = new MotaSetting();
 // 添加不参与全局存储的设置
 MotaSetting.noStorage.push('action.autoSkill', 'screen.fullscreen');
 
-export interface SettingStorage {
-    showHalo: boolean;
-    frag: boolean;
-    itemDetail: boolean;
-    transition: boolean;
-    antiAlias: boolean;
-    fontSize: number;
-    smoothView: boolean;
-    criticalGem: boolean;
-    fixed: boolean;
-    betterLoad: boolean;
-    autoScale: boolean;
-    paraLight: boolean;
-    heroDetail: boolean;
-}
-
-const storage = new GameStorage<SettingStorage>(
-    GameStorage.fromAuthor('AncTe', 'setting')
-);
+const storage = new GameStorage(GameStorage.fromAuthor('AncTe', 'setting'));
 
 export { storage as settingStorage };
 
@@ -340,8 +323,8 @@ mainSetting.on('valueChange', (key, n, o) => {
         handleScreenSetting(setting, n, o);
     } else if (root === 'action') {
         handleActionSetting(setting, n, o);
-    } else if (root === 'utils') {
-        handleUtilsSetting(setting, n, o);
+    } else if (root === 'audio') {
+        handleAudioSetting(setting, n, o);
     }
 });
 
@@ -385,11 +368,18 @@ function handleActionSetting<T extends number | boolean>(
     }
 }
 
-function handleUtilsSetting<T extends number | boolean>(
+function handleAudioSetting<T extends number | boolean>(
     key: string,
     n: T,
     o: T
-) {}
+) {
+    if (key === 'bgmEnabled') {
+        bgm.disable = !n;
+        core.checkBgm();
+    } else if (key === 'bgmVolume') {
+        bgm.volume = (n as number) / 100;
+    }
+}
 
 // ----- 游戏的所有设置项
 // todo: 虚拟键盘缩放，小地图楼传缩放
@@ -420,6 +410,13 @@ mainSetting
             .setDisplayFunc('hotkey', () => '')
             .register('toolbar', '自定义工具栏', false, COM.ToolbarEditor)
             .setDisplayFunc('toolbar', () => '')
+    )
+    .register(
+        'audio',
+        '音频设置',
+        new MotaSetting()
+            .register('bgmEnabled', '开启音乐', true, COM.Boolean)
+            .register('bgmVolume', '音乐音量', 80, COM.Number, [0, 100, 5])
     )
     .register(
         'utils',
@@ -460,6 +457,8 @@ loading.once('coreInit', () => {
         'screen.smoothView': !!storage.getValue('screen.smoothView', true),
         'screen.criticalGem': !!storage.getValue('screen.criticalGem', false),
         'action.fixed': !!storage.getValue('action.fixed', true),
+        'audio.bgmEnabled': !!storage.getValue('sound.bgmEnabled', true),
+        'audio.bgmVolume': storage.getValue('sound.bgmVolume', 80),
         'utils.betterLoad': !!storage.getValue('utils.betterLoad', true),
         'utils.autoScale': !!storage.getValue('utils.autoScale', true),
         'fx.paraLight': !!storage.getValue('fx.paraLight', true),

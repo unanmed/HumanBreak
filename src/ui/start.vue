@@ -66,13 +66,14 @@ import {
 import { sleep } from 'mutate-animate';
 import { Matrix4 } from '../plugin/webgl/matrix';
 import { doByInterval, keycode } from '../plugin/utils';
-import { KeyCode } from '../plugin/keyCodes';
 import { triggerFullscreen } from '../plugin/utils';
 import { isMobile } from '../plugin/use';
 import { GameUi } from '@/core/main/custom/ui';
 import { gameKey } from '@/core/main/init/hotkey';
 import { mainUi } from '@/core/main/init/ui';
 import { CustomToolbar } from '@/core/main/custom/toolbar';
+import { mainSetting } from '@/core/main/setting';
+import { bgm as mainBgm } from '@/core/audio/bgm';
 
 const props = defineProps<{
     num: number;
@@ -141,7 +142,6 @@ function setCursor(ele: HTMLSpanElement, i: number) {
 }
 
 async function clickStartButton(id: string) {
-    core.checkBgm();
     if (id === 'start-game') showHard();
     if (id === 'back') setButtonAnimate();
     if (id === 'easy' || id === 'hard-hard') {
@@ -314,7 +314,8 @@ onMounted(async () => {
         window.addEventListener('resize', resize);
         resize();
 
-        soundChecked.value = core.musicStatus.bgmStatus;
+        soundChecked.value = mainSetting.getValue('audio.bgmEnabled', true);
+        mainBgm.changeTo('title.mp3');
 
         start.style.opacity = '1';
         if (played) {

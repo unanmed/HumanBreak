@@ -3363,11 +3363,11 @@ control.prototype.resumeBgm = function (resumeTime) {
 ////// 更改背景音乐的播放 //////
 control.prototype.triggerBgm = function () {
     if (main.mode !== 'play') return;
+    const bgm = Mota.require('var', 'bgm');
+    bgm.disable = !bgm.disable;
 
-    core.musicStatus.bgmStatus = !core.musicStatus.bgmStatus;
-    if (core.musicStatus.bgmStatus) this.resumeBgm();
+    if (!bgm.disable) this.resumeBgm();
     else this.pauseBgm();
-    core.setLocalStorage('bgmStatus', core.musicStatus.bgmStatus);
 };
 
 // todo: deprecate playSound, stopSound, getPlayingSounds
@@ -3397,7 +3397,10 @@ control.prototype.getPlayingSounds = function (name) {
 
 ////// 检查bgm状态 //////
 control.prototype.checkBgm = function () {
-    core.playBgm(core.musicStatus.playingBgm || main.startBgm);
+    const bgm = Mota.require('var', 'bgm');
+    if (!bgm.playing) {
+        bgm.changeTo(bgm.now ?? main.startBgm);
+    }
 };
 
 ///// 设置屏幕放缩 //////
