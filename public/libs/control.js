@@ -3345,7 +3345,7 @@ control.prototype.screenFlash = function (
 control.prototype.playBgm = function (bgm, startTime) {
     bgm = core.getMappedName(bgm);
     if (main.mode !== 'play') return;
-    Mota.require('var', 'bgm').play(bgm, startTime);
+    Mota.require('var', 'bgm').changeTo(bgm, startTime);
 };
 
 ////// 暂停背景音乐的播放 //////

@@ -6,6 +6,7 @@ import { ResourceController } from '../loader/controller';
 // todo: 立体声，可设置音源位置
 
 type Panner = AudioParamOf<PannerNode>;
+type Listener = AudioParamOf<AudioListener>;
 
 export class SoundEffect extends AudioPlayer {
     static playIndex = 0;
@@ -35,7 +36,7 @@ export class SoundEffect extends AudioPlayer {
         return this._stereo;
     }
 
-    constructor(data: ArrayBuffer, stereo: boolean = false) {
+    constructor(data: ArrayBuffer, stereo: boolean = true) {
         super(data);
 
         this.on('end', node => {
@@ -62,7 +63,7 @@ export class SoundEffect extends AudioPlayer {
      * ```
      * @param stereo 是否启用立体声
      */
-    protected initAudio(stereo: boolean = false) {
+    protected initAudio(stereo: boolean = true) {
         const channel = this.buffer?.numberOfChannels;
         const ac = AudioPlayer.ac;
         if (!channel) return;
@@ -125,12 +126,17 @@ export class SoundEffect extends AudioPlayer {
 
     /**
      * 设置立体声信息
-     * @param panner 立体声信息
+     * @param source 立体声声源位置与朝向
+     * @param listener 听者的位置、头顶方向、面朝方向
      */
-    setPanner(panner: Partial<Panner>) {
+    setPanner(source: Partial<Panner>, listener: Partial<Listener>) {
         if (!this.panner) return;
-        for (const [key, value] of Object.entries(panner)) {
+        for (const [key, value] of Object.entries(source)) {
             this.panner[key as keyof Panner].value = value;
+        }
+        const l = AudioPlayer.ac.listener;
+        for (const [key, value] of Object.entries(listener)) {
+            l[key as keyof Listener].value = value;
         }
     }
 }

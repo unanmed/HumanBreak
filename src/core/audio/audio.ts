@@ -13,10 +13,7 @@ interface AudioPlayerEvent extends EmitableEvent {
     end: (node: AudioBufferSourceNode) => void;
 }
 
-export type AudioParamOf<T extends AudioNode> = Record<
-    SelectKey<T, AudioParam>,
-    number
->;
+export type AudioParamOf<T> = Record<SelectKey<T, AudioParam>, number>;
 
 export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
     static ac: AudioContext = ac;

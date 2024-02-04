@@ -4,6 +4,7 @@ import { ensureArray } from '@/plugin/utils';
 import { has } from '@/plugin/utils';
 import JSZip from 'jszip';
 import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
+import { bgm } from '../audio/bgm';
 
 // todo: 应当用register去注册资源类型，然后进行分块处理
 
@@ -53,7 +54,7 @@ export class Resource<
     protected onLoadStart(v?: ResourceData[T]) {
         if (this.format === 'bgm') {
             // bgm 单独处理，因为它可以边播放边加载
-            Mota.require('var', 'bgm').add(this.uri, v!);
+            bgm.add(this.uri, v!);
         }
     }
 
