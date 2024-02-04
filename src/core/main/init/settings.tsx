@@ -60,6 +60,9 @@ function NumberSetting(props: SettingComponentProps) {
     const { setting, displayer, item } = props;
     const changeValue = (value: number) => {
         if (typeof value !== 'number') return;
+        if (value < (item.step?.[0] ?? 0) || value > (item.step?.[1] ?? 100)) {
+            return;
+        }
         setting.setValue(displayer.selectStack.join('.'), value);
         displayer.update();
     };

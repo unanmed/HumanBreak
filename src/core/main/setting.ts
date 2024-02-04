@@ -312,8 +312,6 @@ export class SettingDisplayer extends EventEmitter<SettingDisplayerEvent> {
     }
 }
 
-// todo: 优化存储方式
-
 export const mainSetting = new MotaSetting();
 // 添加不参与全局存储的设置
 MotaSetting.noStorage.push('action.autoSkill', 'screen.fullscreen');
@@ -516,4 +514,5 @@ mainSetting
     .setDescription('audio.bgmEnabled', `是否开启背景音乐`)
     .setDescription('audio.bgmVolume', `背景音乐的音量`)
     .setDescription('audio.soundEnabled', `是否开启音效`)
-    .setDescription('audio.soundVolume', `音效的音量`);
+    .setDescription('audio.soundVolume', `音效的音量`)
+    .setDescription('ui.mapScale', `楼传小地图的缩放，百分比格式`);
