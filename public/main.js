@@ -415,7 +415,7 @@ main.prototype.loadAsync = async function (mode, callback) {
 
     if (auto && !core.domStyle.isVertical) {
         try {
-            Mota.Plugin.require('utils_g').maxGameScale();
+            Mota.Plugin.require('utils_g').maxGameScale(1);
             requestAnimationFrame(() => {
                 var style = getComputedStyle(main.dom.gameGroup);
                 var height = parseFloat(style.height);

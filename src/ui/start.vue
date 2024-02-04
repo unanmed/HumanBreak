@@ -25,28 +25,6 @@
                         @click="setFullscreen"
                     />
                 </div>
-                <!-- <div id="background-gradient"></div>
-                <div id="buttons">
-                    <right-outlined id="cursor" />
-                    <TransitionGroup name="start">
-                        <span
-                            class="start-button"
-                            v-for="(v, i) of toshow"
-                            :id="v"
-                            :key="v"
-                            :selected="selected === v"
-                            :showed="showed"
-                            @click="clickStartButton(v)"
-                            @mouseenter="
-                                movein(
-                                    $event.target as HTMLElement,
-                                    toshow.length - i - 1
-                                )
-                            "
-                            >{{ text[i] }}</span
-                        >
-                    </TransitionGroup>
-                </div> -->
                 <div id="buttons-container">
                     <div id="buttons">
                         <template v-if="!inHard">
