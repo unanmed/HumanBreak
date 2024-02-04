@@ -3400,13 +3400,10 @@ control.prototype.checkBgm = function () {
 };
 
 ///// 设置屏幕放缩 //////
-control.prototype.setDisplayScale = function (delta) {
-    var index = core.domStyle.availableScale.indexOf(core.domStyle.scale);
-    if (index < 0) return;
-    index =
-        (index + delta + core.domStyle.availableScale.length) %
-        core.domStyle.availableScale.length;
-    core.domStyle.scale = core.domStyle.availableScale[index];
+control.prototype.setDisplayScale = function (i) {
+    const scale = core.domStyle.availableScale[i];
+    if (!scale) return;
+    core.domStyle.scale = scale;
     core.setLocalStorage('scale', core.domStyle.scale);
     core.resize();
 };

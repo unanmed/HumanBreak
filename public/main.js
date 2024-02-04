@@ -411,7 +411,7 @@ main.prototype.loadAsync = async function (mode, callback) {
     main.core = core;
 
     // 自动放缩最大化
-    let auto = Mota.require('var', 'mainSetting').getValue('autoSclae');
+    let auto = Mota.require('var', 'mainSetting').getValue('autoScale', true);
 
     if (auto && !core.domStyle.isVertical) {
         try {

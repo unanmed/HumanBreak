@@ -1,9 +1,4 @@
 ///<reference path="../../src/types/core.d.ts" />
-
-/*
-loader.js：负责对资源的加载
-
- */
 'use strict';
 
 function loader() {
@@ -32,7 +27,6 @@ loader.prototype._load = function (callback) {
 
 loader.prototype._load_sync = function (callback) {
     this._loadAnimates_sync();
-    if (main.mode === 'play') return callback();
     this._loadMusic_sync();
     core.loader._loadMaterials_sync(function () {
         core.loader._loadExtraImages_sync(function () {
@@ -116,7 +110,6 @@ loader.prototype._load_async = function (callback) {
 // ----- 加载资源文件 ------ //
 
 loader.prototype._loadMaterials_sync = function (callback) {
-    if (main.mode === 'play') return callback();
     this._setStartLoadTipText('正在加载资源文件...');
     this.loadImages(
         'materials',
@@ -156,7 +149,6 @@ loader.prototype._loadMaterials_afterLoad = function () {
 // ------ 加载使用的图片 ------ //
 
 loader.prototype._loadExtraImages_sync = function (callback) {
-    if (main.mode === 'play') return callback();
     core.material.images.images = {};
     this._setStartLoadTipText('正在加载图片文件...');
     core.loadImages(
@@ -199,7 +191,6 @@ loader.prototype._loadExtraImages_async = function (onprogress, onfinished) {
 // ------ 加载自动元件 ------ //
 
 loader.prototype._loadAutotiles_sync = function (callback) {
-    if (main.mode === 'play') return callback();
     core.material.images.autotile = {};
     var keys = Object.keys(core.material.icons.autotile);
     var autotiles = {};
@@ -229,7 +220,6 @@ loader.prototype._loadAutotiles_async = function (onprogress, onfinished) {
 };
 
 loader.prototype._loadAutotiles_afterLoad = function (keys, autotiles) {
-    if (main.mode === 'play') return;
     // autotile需要保证顺序
     keys.forEach(function (v) {
         core.material.images.autotile[v] = autotiles[v];
@@ -243,7 +233,6 @@ loader.prototype._loadAutotiles_afterLoad = function (keys, autotiles) {
 // ------ 加载额外素材 ------ //
 
 loader.prototype._loadTilesets_sync = function (callback) {
-    if (main.mode === 'play') return callback();
     core.material.images.tilesets = {};
     this._setStartLoadTipText('正在加载额外素材...');
     this.loadImages(
@@ -251,6 +240,7 @@ loader.prototype._loadTilesets_sync = function (callback) {
         core.tilesets,
         core.material.images.tilesets,
         function () {
+            core.loader._loadTilesets_afterLoad();
             callback();
         }
     );
@@ -264,15 +254,28 @@ loader.prototype._loadTilesets_async = function (onprogress, onfinished) {
         core.material.images.tilesets,
         onprogress,
         function () {
+            core.loader._loadTilesets_afterLoad();
             onfinished();
         }
     );
 };
 
+loader.prototype._loadTilesets_afterLoad = function () {
+    // 检查宽高是32倍数，如果出错在控制台报错
+    for (var imgName in core.material.images.tilesets) {
+        var img = core.material.images.tilesets[imgName];
+        if (img.width % 32 != 0 || img.height % 32 != 0) {
+            console.warn('警告！' + imgName + '的宽或高不是32的倍数！');
+        }
+        if (img.width * img.height > 32 * 32 * 3000) {
+            console.warn('警告！' + imgName + '上的图块素材个数大于3000！');
+        }
+    }
+};
+
 // ------ 实际加载一系列图片 ------ //
 
 loader.prototype.loadImages = function (dir, names, toSave, callback) {
-    if (main.mode === 'play') return callback();
     if (!names || names.length == 0) {
         if (callback) callback();
         return;
@@ -310,9 +313,7 @@ loader.prototype.loadImage = function (dir, imgName, callback) {
         };
         image.src = 'project/' + dir + '/' + name + '?v=' + main.version;
         if (name.endsWith('.gif')) callback(imgName, null);
-    } catch (e) {
-        console.error(e);
-    }
+    } catch (e) {}
 };
 
 // ------ 从zip中加载一系列图片 ------ //
@@ -363,14 +364,13 @@ loader.prototype.loadImagesFromZip = function (
 // ------ 加载动画文件 ------ //
 
 loader.prototype._loadAnimates_sync = function () {
-    if (main.mode === 'play') return;
     this._setStartLoadTipText('正在加载动画文件...');
 
     if (main.supportBunch) {
         if (core.animates.length > 0) {
             core.http(
                 'GET',
-                '/all/__all_animates__?v=' +
+                '__all_animates__?v=' +
                     main.version +
                     '&id=' +
                     core.animates.join(','),
@@ -403,7 +403,6 @@ loader.prototype._loadAnimates_sync = function () {
                 core.material.animates[t] = core.loader._loadAnimate(content);
             },
             function (e) {
-                console.error(e);
                 core.material.animates[t] = null;
             },
             'text/plain; charset=x-user-defined'
@@ -449,7 +448,6 @@ loader.prototype._loadAnimate = function (content) {
                     image.src = t2;
                     data.images.push(image);
                 } catch (e) {
-                    console.error(e);
                     data.images.push(null);
                 }
             }
@@ -473,7 +471,6 @@ loader.prototype._loadAnimate = function (content) {
         });
         return data;
     } catch (e) {
-        console.error(e);
         return null;
     }
 };
@@ -524,20 +521,19 @@ loader.prototype.loadOneMusic = function (name) {
     if (main.bgmRemote)
         music.src = main.bgmRemoteRoot + core.firstData.name + '/' + name;
     else music.src = 'project/bgms/' + name;
-    music.loop = 'loop';
-    core.material.bgms[name] = music;
+    Mota.require('var', 'bgm').add(`bgms.${name}`, music);
 };
 
 loader.prototype.loadOneSound = function (name) {
+    const sound = Mota.require('var', 'sound');
     core.http(
         'GET',
         'project/sounds/' + name + '?v=' + main.version,
         null,
         function (data) {
-            core.loader._loadOneSound_decodeData(name, data);
+            sound.add(`sounds.${name}`, data);
         },
         function (e) {
-            console.error(e);
             core.material.sounds[name] = null;
         },
         null,
@@ -562,12 +558,10 @@ loader.prototype._loadOneSound_decodeData = function (name, data) {
                 core.material.sounds[name] = buffer;
             },
             function (e) {
-                console.error(e);
                 core.material.sounds[name] = null;
             }
         );
     } catch (e) {
-        console.error(e);
         core.material.sounds[name] = null;
     }
 };

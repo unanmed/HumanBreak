@@ -602,6 +602,7 @@ core.prototype._afterLoadResources = function (callback) {
 
     // if (core.plugin._afterLoadResources) core.plugin._afterLoadResources();
     core.showStartAnimate();
+    Mota.require('var', 'hook').emit('load');
     if (callback) callback();
 };
 

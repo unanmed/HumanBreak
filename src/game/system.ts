@@ -7,22 +7,12 @@ import type {
     IndexedEventEmitter
 } from '@/core/common/eventEmitter';
 import type { loading } from './game';
-import type {
-    Resource,
-    ResourceStore,
-    ResourceType,
-    ZippedResource
-} from '@/core/loader/resource';
 import type { Hotkey } from '@/core/main/custom/hotkey';
 import type { Keyboard } from '@/core/main/custom/keyboard';
 import type { CustomToolbar } from '@/core/main/custom/toolbar';
 import type { Focus, GameUi, UiController } from '@/core/main/custom/ui';
 import type { gameListener, hook } from './game';
-import type {
-    MotaSetting,
-    SettingDisplayer,
-    SettingStorage
-} from '@/core/main/setting';
+import type { MotaSetting, SettingDisplayer } from '@/core/main/setting';
 import type { GameStorage } from '@/core/main/storage';
 import type { DamageEnemy, EnemyCollection } from './enemy/damage';
 import type { specials } from './enemy/special';
@@ -41,9 +31,6 @@ interface ClassInterface {
     GameStorage: typeof GameStorage;
     MotaSetting: typeof MotaSetting;
     SettingDisplayer: typeof SettingDisplayer;
-    Resource: typeof Resource;
-    ZippedResource: typeof ZippedResource;
-    ResourceStore: typeof ResourceStore;
     Focus: typeof Focus;
     GameUi: typeof GameUi;
     UiController: typeof UiController;
@@ -85,9 +72,7 @@ interface VariableInterface {
     // isMobile: boolean;
     bgm: BgmController;
     sound: SoundController;
-    resource: ResourceStore<Exclude<ResourceType, 'zip'>>;
-    zipResource: ResourceStore<'zip'>;
-    settingStorage: GameStorage<SettingStorage>;
+    settingStorage: GameStorage;
     status: Ref<boolean>;
     // 定义于游戏进程，渲染进程依然可用
     haloSpecials: number[];

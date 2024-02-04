@@ -31,10 +31,7 @@ export function has<T>(v: T): v is NonNullable<T> {
 }
 
 export function maxGameScale(n: number = 0) {
-    const index = core.domStyle.availableScale.indexOf(core.domStyle.scale);
-    core.control.setDisplayScale(
-        core.domStyle.availableScale.length - 1 - index - n
-    );
+    core.control.setDisplayScale(core.domStyle.availableScale.length - 1 - n);
     if (!core.isPlaying() && core.flags.enableHDCanvas) {
         // @ts-ignore
         core.domStyle.ratio = Math.max(

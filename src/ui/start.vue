@@ -3,7 +3,7 @@
         <div id="start-div">
             <img id="background" src="/project/images/bg.jpg" />
             <div id="start-main">
-                <div id="title">人类：开天辟地</div>
+                <div id="title">{{ name }}</div>
                 <div id="settings">
                     <div
                         id="sound"
@@ -25,7 +25,7 @@
                         @click="setFullscreen"
                     />
                 </div>
-                <div id="background-gradient"></div>
+                <!-- <div id="background-gradient"></div>
                 <div id="buttons">
                     <right-outlined id="cursor" />
                     <TransitionGroup name="start">
@@ -36,8 +36,6 @@
                             :key="v"
                             :selected="selected === v"
                             :showed="showed"
-                            :index="i"
-                            :length="text[i].length"
                             @click="clickStartButton(v)"
                             @mouseenter="
                                 movein(
@@ -48,6 +46,44 @@
                             >{{ text[i] }}</span
                         >
                     </TransitionGroup>
+                </div> -->
+                <div id="buttons-container">
+                    <div id="buttons">
+                        <template v-if="!inHard">
+                            <span
+                                class="start-button"
+                                id="start-game"
+                                @click="clickStartButton('start-game')"
+                                >开始游戏</span
+                            >
+                            <span
+                                class="start-button"
+                                id="load-game"
+                                @click="clickStartButton('load-game')"
+                                >读取存档</span
+                            >
+                            <span
+                                class="start-button"
+                                id="replay"
+                                @click="clickStartButton('replay')"
+                                >录像回放</span
+                            >
+                        </template>
+                        <template v-else>
+                            <span
+                                class="start-button hard-button"
+                                v-for="hard of hards"
+                                @click="clickHard(hard.name)"
+                                >{{ hard.title }}</span
+                            >
+                            <span
+                                class="start-button"
+                                id="back"
+                                @click="inHard = false"
+                                >返回</span
+                            >
+                        </template>
+                    </div>
                 </div>
             </div>
             <div id="listen" @mousemove="onmove"></div>
@@ -56,21 +92,18 @@
 </template>
 
 <script lang="ts" setup>
-import { nextTick, onMounted, onUnmounted, reactive, ref } from 'vue';
+import { onMounted, onUnmounted, reactive, ref } from 'vue';
 import {
-    RightOutlined,
     SoundOutlined,
     FullscreenOutlined,
     FullscreenExitOutlined
 } from '@ant-design/icons-vue';
 import { sleep } from 'mutate-animate';
 import { Matrix4 } from '../plugin/webgl/matrix';
-import { doByInterval, keycode } from '../plugin/utils';
-import { triggerFullscreen } from '../plugin/utils';
+import { nextFrame, triggerFullscreen } from '../plugin/utils';
 import { isMobile } from '../plugin/use';
 import { GameUi } from '@/core/main/custom/ui';
 import { gameKey } from '@/core/main/init/hotkey';
-import { mainUi } from '@/core/main/init/ui';
 import { CustomToolbar } from '@/core/main/custom/toolbar';
 import { mainSetting } from '@/core/main/setting';
 import { bgm as mainBgm } from '@/core/audio/bgm';
@@ -80,74 +113,43 @@ const props = defineProps<{
     ui: GameUi;
 }>();
 
+const name = core.firstData.title;
+const hards = main.levelChoose;
+
+const inHard = ref(false);
+
 let startdiv: HTMLDivElement;
 let start: HTMLDivElement;
-let main: HTMLDivElement;
-let cursor: HTMLElement;
+let mainDiv: HTMLDivElement;
 let background: HTMLImageElement;
 
-let buttons: HTMLSpanElement[] = [];
-
-let played: boolean;
 const soundChecked = ref(false);
 const fullscreen = ref(!!document.fullscreenElement);
 
-const showed = ref(false);
-
-const text1 = ['开始游戏', '读取存档', '录像回放', '查看成就'].reverse();
-const text2 = ['轮回', '分支', '观测', '回忆'].reverse();
-
-const ids = ['start-game', 'load-game', 'replay', 'achievement'].reverse();
-const hardIds = ['easy', 'hard-hard', 'back'].reverse();
-const hard = ['简单', '困难', '返回'].reverse();
-const text = ref(text1);
-const toshow = reactive<string[]>([]);
-
-const selected = ref('start-game');
-
 function resize() {
     if (!window.core) return;
-    const scale = core.domStyle.scale;
-    const h = core._PY_;
-    const height = h * scale;
-    const width = height * 1.5;
-    if (!isMobile) {
-        startdiv.style.width = `${width}px`;
-        startdiv.style.height = `${height}px`;
-        main.style.fontSize = `${scale * 16}px`;
-    } else {
-        startdiv.style.width = `${window.innerWidth}px`;
-        startdiv.style.height = `${(window.innerHeight * 2) / 3}px`;
-        main.style.fontSize = `${scale * 8}px`;
-    }
-}
 
-function showCursor() {
-    cursor.style.opacity = '1';
-    setCursor(buttons[0], 0);
-}
-
-/**
- * 设置光标位置
- */
-function setCursor(ele: HTMLSpanElement, i: number) {
-    const style = getComputedStyle(ele);
-    cursor.style.top = `${
-        parseFloat(style.height) * (i + 0.5) -
-        parseFloat(style.marginBottom) * (1 - i)
-    }px`;
-    cursor.style.left = `${
-        parseFloat(style.left) - 20 * core.domStyle.scale
-    }px`;
+    nextFrame(() => {
+        const scale = core.domStyle.scale;
+        console.log(scale);
+        const h = core._PY_;
+        const height = h * scale;
+        const width = height * 1.5;
+        if (!isMobile) {
+            startdiv.style.width = `${width}px`;
+            startdiv.style.height = `${height}px`;
+            mainDiv.style.fontSize = `${scale * 16}px`;
+        } else {
+            startdiv.style.width = `${window.innerWidth}px`;
+            startdiv.style.height = `${(window.innerHeight * 2) / 3}px`;
+            mainDiv.style.fontSize = `${scale * 8}px`;
+        }
+    });
 }
 
 async function clickStartButton(id: string) {
-    if (id === 'start-game') showHard();
-    if (id === 'back') setButtonAnimate();
-    if (id === 'easy' || id === 'hard-hard') {
-        start.style.opacity = '0';
-        await sleep(600);
-        core.startGame(id === 'easy' ? 'easy' : 'hard');
+    if (id === 'start-game') {
+        inHard.value = true;
     }
     if (id === 'load-game') {
         core.dom.gameGroup.style.display = 'block';
@@ -155,9 +157,12 @@ async function clickStartButton(id: string) {
         core.load();
     }
     if (id === 'replay') core.chooseReplayFile();
-    if (id === 'achievement') {
-        mainUi.open('achievement');
-    }
+}
+
+async function clickHard(hard: string) {
+    start.style.opacity = '0';
+    await sleep(600);
+    core.startGame(hard);
 }
 
 function onmove(e: MouseEvent) {
@@ -182,31 +187,6 @@ function onmove(e: MouseEvent) {
     }px)matrix3d(${end})`;
 }
 
-function movein(button: HTMLElement, i: number) {
-    setCursor(button, i);
-    selected.value = button.id;
-}
-
-gameKey.use(props.ui.symbol);
-gameKey
-    .realize('@start_up', () => {
-        const i = toshow.indexOf(selected.value);
-        const next = toshow[i + 1];
-        if (!next) return;
-        selected.value = next;
-        setCursor(buttons[toshow.length - i - 2], toshow.length - i - 2);
-    })
-    .realize('@start_down', () => {
-        const i = toshow.indexOf(selected.value);
-        const next = toshow[i - 1];
-        if (!next) return;
-        selected.value = next;
-        setCursor(buttons[toshow.length - i], toshow.length - i);
-    })
-    .realize('confirm', () => {
-        clickStartButton(selected.value);
-    });
-
 function bgm() {
     core.triggerBgm();
     soundChecked.value = !soundChecked.value;
@@ -215,119 +195,26 @@ function bgm() {
 }
 
 async function setFullscreen() {
-    const index = toshow.length - toshow.indexOf(selected.value) - 1;
     await triggerFullscreen(!fullscreen.value);
     requestAnimationFrame(() => {
         fullscreen.value = !!document.fullscreenElement;
-        setCursor(buttons[index], index);
     });
-}
-
-/**
- * 初始 -> 难度
- */
-async function showHard() {
-    cursor.style.transition =
-        'left 0.4s ease-out, top 0.4s ease-out, opacity 0.4s linear';
-    cursor.style.opacity = '0';
-    buttons.forEach(v => (v.style.transition = ''));
-
-    await doByInterval(
-        Array(4).fill(() => ids.unshift(toshow.pop()!)),
-        150
-    );
-    await sleep(250);
-    text.value = hard;
-
-    await doByInterval(
-        Array(3).fill(() => toshow.push(hardIds.shift()!)),
-        150
-    );
-    selected.value = 'easy';
-    nextTick(() => {
-        buttons = toshow
-            .map(v => document.getElementById(v) as HTMLSpanElement)
-            .reverse();
-        cursor.style.opacity = '1';
-        setCursor(buttons[0], 0);
-    });
-    await sleep(600);
-    buttons.forEach(
-        v =>
-            (v.style.transition =
-                'transform 0.3s ease-out, color 0.3s ease-out')
-    );
-}
-
-/**
- * 难度 | 无 -> 初始
- */
-async function setButtonAnimate() {
-    if (toshow.length > 0) {
-        cursor.style.transition =
-            'left 0.4s ease-out, top 0.4s ease-out, opacity 0.4s linear';
-        cursor.style.opacity = '0';
-        buttons.forEach(v => (v.style.transition = ''));
-        await doByInterval(
-            Array(3).fill(() => hardIds.unshift(toshow.pop()!)),
-            150
-        );
-    }
-    text.value = text1;
-    if (played) {
-        text.value = text2;
-    }
-    await sleep(250);
-
-    await doByInterval(
-        Array(4).fill(() => toshow.push(ids.shift()!)),
-        150
-    );
-
-    selected.value = 'start-game';
-    nextTick(() => {
-        buttons = toshow
-            .map(v => document.getElementById(v) as HTMLSpanElement)
-            .reverse();
-        cursor.style.opacity = '1';
-        setCursor(buttons[0], 0);
-        buttons.forEach((v, i) => {});
-    });
-    if (!showed.value) await sleep(1200);
-    else await sleep(600);
-
-    buttons.forEach(
-        v =>
-            (v.style.transition =
-                'transform 0.3s ease-out, color 0.3s ease-out')
-    );
 }
 
 onMounted(async () => {
-    cursor = document.getElementById('cursor')!;
     startdiv = document.getElementById('start-div') as HTMLDivElement;
-    main = document.getElementById('start-main') as HTMLDivElement;
+    mainDiv = document.getElementById('start-main') as HTMLDivElement;
     start = document.getElementById('start') as HTMLDivElement;
     background = document.getElementById('background') as HTMLImageElement;
 
-    const loading = Mota.require('var', 'loading');
+    window.addEventListener('resize', resize);
+    resize();
 
-    loading.once('coreInit', async () => {
-        window.addEventListener('resize', resize);
-        resize();
+    soundChecked.value = mainSetting.getValue('audio.bgmEnabled', true);
+    mainBgm.changeTo(main.startBgm);
 
-        soundChecked.value = mainSetting.getValue('audio.bgmEnabled', true);
-        mainBgm.changeTo('title.mp3');
-
+    nextFrame(() => {
         start.style.opacity = '1';
-        if (played) {
-            text.value = text2;
-            hard.splice(1, 0, '挑战');
-        }
-        setButtonAnimate().then(() => (showed.value = true));
-        await sleep(1000);
-        showCursor();
-        await sleep(1200);
     });
 
     CustomToolbar.closeAll();
@@ -423,59 +310,68 @@ onUnmounted(() => {
             5px 5px 5px rgba(0, 0, 0, 0.4);
         filter: brightness(1.8);
         user-select: none;
-        animation: opacity 3s ease-out 0.5s 1 normal forwards;
+        color: transparent;
+    }
+
+    #buttons-container {
+        display: flex;
+        width: 100%;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        bottom: 10%;
+        position: absolute;
+        height: auto;
+        font-size: 120%;
     }
 
     #buttons {
+        border: 2px solid white;
+        border-radius: 10px;
+        padding: 1% 0;
+        backdrop-filter: blur(5px);
+        background-image: linear-gradient(
+            to bottom,
+            rgba(76, 73, 255, 0.6),
+            rgba(106, 40, 145, 0.6)
+        );
         display: flex;
-        flex-direction: column-reverse;
-        justify-content: center;
+        align-items: center;
         position: absolute;
-        left: 18%;
         bottom: 10%;
         filter: brightness(120%) contrast(110%);
         z-index: 1;
-
-        #cursor {
-            text-shadow: 2px 2px 3px black;
-            position: absolute;
-            opacity: 0;
-            animation: cursor 2.5s linear 0s infinite normal running;
-            transition: left 0.4s ease-out, top 0.4s ease-out,
-                opacity 1.5s ease-out;
-        }
+        flex-direction: column;
+        transition: height 0.2s ease;
+        width: 20%;
 
         .start-button {
             position: relative;
-            font: bold 1.5em 'normal';
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4),
                 0px 0px 1px rgba(255, 255, 255, 0.3);
             background-clip: text;
             -webkit-background-clip: text;
+            font-weight: bold;
+            color: transparent;
+            transition: all 0.2s linear;
+            box-shadow: 0px 0px 8px #0008;
+            border-radius: 6px;
+            padding: 1% 5%;
+            width: 70%;
+            text-wrap: nowrap;
+            text-align: center;
         }
 
-        .start-button[index='1'][length='4'] {
-            left: 7.5%;
+        .start-button:hover {
+            transform: scale(120%);
         }
 
-        .start-button[index='2'][length='4'] {
-            left: 15%;
-        }
-
-        .start-button[index='3'][length='4'] {
-            left: 22.5%;
-        }
-
-        .start-button[index='1'][length='2'] {
-            left: 15%;
-        }
-
-        .start-button[index='2'][length='2'] {
-            left: 30%;
-        }
-
-        .start-button[index='3'][length='2'] {
-            left: 45%;
+        .hard-button {
+            background-image: linear-gradient(
+                to bottom,
+                rgb(255, 255, 255),
+                rgb(255, 0, 0)
+            );
         }
 
         #start-game {
@@ -484,7 +380,7 @@ onUnmounted(() => {
                 rgb(255, 255, 255),
                 rgb(0, 255, 255)
             );
-            margin-bottom: 8%;
+            margin-bottom: 2%;
         }
 
         #load-game {
@@ -493,7 +389,7 @@ onUnmounted(() => {
                 rgb(255, 255, 255),
                 rgb(0, 255, 55)
             );
-            margin-bottom: 8%;
+            margin-bottom: 2%;
         }
 
         #replay {
@@ -502,34 +398,7 @@ onUnmounted(() => {
                 rgb(255, 255, 255),
                 rgb(255, 251, 0)
             );
-            margin-bottom: 8%;
-        }
-
-        #achievement {
-            background-image: linear-gradient(
-                to bottom,
-                rgb(255, 255, 255),
-                rgb(0, 208, 255)
-            );
-            margin-bottom: 8%;
-        }
-
-        #easy {
-            background-image: linear-gradient(
-                to bottom,
-                rgb(255, 255, 255),
-                rgb(87, 255, 72)
-            );
-            margin-bottom: 16%;
-        }
-
-        #hard-hard {
-            background-image: linear-gradient(
-                to bottom,
-                rgb(255, 255, 255),
-                rgb(255, 0, 0)
-            );
-            margin-bottom: 16%;
+            margin-bottom: 2%;
         }
 
         #back {
@@ -538,7 +407,7 @@ onUnmounted(() => {
                 rgb(255, 255, 255),
                 rgb(132, 132, 132)
             );
-            margin-bottom: 16%;
+            margin-bottom: 2%;
         }
     }
 
@@ -601,33 +470,6 @@ onUnmounted(() => {
 .start-button[selected='true'] {
     color: transparent;
     transform: scale(115%) translate(7.5%);
-}
-
-@keyframes cursor {
-    from {
-        transform: rotateX(0deg) scaleY(0.7);
-    }
-    to {
-        transform: rotateX(360deg) scaleY(0.7);
-    }
-}
-
-@keyframes gradient {
-    from {
-        left: -100%;
-    }
-    to {
-        left: 100%;
-    }
-}
-
-@keyframes opacity {
-    from {
-        color: #bbb;
-    }
-    to {
-        color: transparent;
-    }
 }
 
 .start-enter-active {

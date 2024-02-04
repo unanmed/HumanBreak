@@ -1,13 +1,5 @@
 import { BgmController, bgm } from './audio/bgm';
 import { SoundController, SoundEffect, sound } from './audio/sound';
-import { readyAllResource } from './loader/load';
-import {
-    Resource,
-    ResourceStore,
-    ZippedResource,
-    resource,
-    zipResource
-} from './loader/resource';
 import { Focus, GameUi, UiController } from './main/custom/ui';
 import { GameStorage } from './main/storage';
 import './main/init/';
@@ -30,10 +22,6 @@ import { Hotkey } from './main/custom/hotkey';
 import { Keyboard } from './main/custom/keyboard';
 import './main/layout';
 
-function ready() {
-    readyAllResource();
-}
-
 // ----- 类注册
 Mota.register('class', 'AudioPlayer', AudioPlayer);
 Mota.register('class', 'BgmController', BgmController);
@@ -44,13 +32,10 @@ Mota.register('class', 'GameUi', GameUi);
 Mota.register('class', 'Hotkey', Hotkey);
 Mota.register('class', 'Keyboard', Keyboard);
 Mota.register('class', 'MotaSetting', MotaSetting);
-Mota.register('class', 'Resource', Resource);
-Mota.register('class', 'ResourceStore', ResourceStore);
 Mota.register('class', 'SettingDisplayer', SettingDisplayer);
 Mota.register('class', 'SoundController', SoundController);
 Mota.register('class', 'SoundEffect', SoundEffect);
 Mota.register('class', 'UiController', UiController);
-Mota.register('class', 'ZippedResource', ZippedResource);
 // ----- 函数注册
 
 // ----- 变量注册
@@ -61,11 +46,7 @@ Mota.register('var', 'sound', sound);
 Mota.register('var', 'gameKey', gameKey);
 Mota.register('var', 'mainSetting', mainSetting);
 Mota.register('var', 'KeyCode', KeyCode);
-Mota.register('var', 'resource', resource);
-Mota.register('var', 'zipResource', zipResource);
 Mota.register('var', 'settingStorage', settingStorage);
 Mota.register('var', 'status', status);
 
 // ----- 模块注册
-
-ready();
