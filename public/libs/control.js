@@ -3374,12 +3374,6 @@ control.prototype.triggerBgm = function () {
 ////// 播放音频 //////
 control.prototype.playSound = function (sound, pitch, callback) {
     sound = core.getMappedName(sound);
-    if (
-        main.mode != 'play' ||
-        !core.musicStatus.soundStatus ||
-        !core.material.sounds[sound]
-    )
-        return;
     Mota.require('var', 'sound').play(sound, callback);
 };
 

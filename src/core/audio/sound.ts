@@ -11,6 +11,11 @@ type Listener = AudioParamOf<AudioListener>;
 export class SoundEffect extends AudioPlayer {
     static playIndex = 0;
 
+    /** 音量 */
+    static volume: number = 1;
+    /** 是否关闭音效 */
+    static disable: boolean = false;
+
     private playing: Record<string, AudioBufferSourceNode> = {};
     private _stopingAll: boolean = false;
     private playMap: Map<AudioBufferSourceNode, number> = new Map();
@@ -22,10 +27,10 @@ export class SoundEffect extends AudioPlayer {
     merger: ChannelMergerNode | null = null;
 
     set volumn(value: number) {
-        this.gain.gain.value = value;
+        this.gain.gain.value = value * SoundEffect.volume;
     }
     get volumn(): number {
-        return this.gain.gain.value;
+        return this.gain.gain.value / SoundEffect.volume;
     }
 
     set stereo(value: boolean) {
@@ -71,8 +76,6 @@ export class SoundEffect extends AudioPlayer {
         this.panner = null;
         this.merger = null;
         if (stereo) {
-            console.log(1);
-
             this.panner = ac.createPanner();
             this.panner.connect(this.gain);
             if (channel === 1) {
@@ -96,6 +99,7 @@ export class SoundEffect extends AudioPlayer {
      * @returns 音频的唯一id
      */
     playSE() {
+        if (SoundEffect.disable) return;
         const node = this.play();
         if (!node) return;
         const index = SoundEffect.playIndex++;

@@ -4,6 +4,7 @@ import { GameStorage } from './storage';
 import { has, triggerFullscreen } from '@/plugin/utils';
 import { createSettingComponents } from './init/settings';
 import { bgm } from '../audio/bgm';
+import { SoundEffect } from '../audio/sound';
 
 export interface SettingComponentProps {
     item: MotaSettingItem;
@@ -378,6 +379,10 @@ function handleAudioSetting<T extends number | boolean>(
         core.checkBgm();
     } else if (key === 'bgmVolume') {
         bgm.volume = (n as number) / 100;
+    } else if (key === 'soundEnabled') {
+        SoundEffect.disable = !n;
+    } else if (key === 'soundVolume') {
+        SoundEffect.volume = (n as number) / 100;
     }
 }
 
@@ -417,6 +422,8 @@ mainSetting
         new MotaSetting()
             .register('bgmEnabled', '开启音乐', true, COM.Boolean)
             .register('bgmVolume', '音乐音量', 80, COM.Number, [0, 100, 5])
+            .register('soundEnabled', '开启音效', true, COM.Boolean)
+            .register('soundVolume', '音效音量', 80, COM.Number, [0, 100, 5])
     )
     .register(
         'utils',
@@ -459,6 +466,8 @@ loading.once('coreInit', () => {
         'action.fixed': !!storage.getValue('action.fixed', true),
         'audio.bgmEnabled': !!storage.getValue('audio.bgmEnabled', true),
         'audio.bgmVolume': storage.getValue('audio.bgmVolume', 80),
+        'audio.soundEnabled': !!storage.getValue('audio.soundEnabled', true),
+        'audio.soundVolume': storage.getValue('audio.soundVolume', 80),
         'utils.betterLoad': !!storage.getValue('utils.betterLoad', true),
         'utils.autoScale': !!storage.getValue('utils.autoScale', true),
         'fx.paraLight': !!storage.getValue('fx.paraLight', true),
