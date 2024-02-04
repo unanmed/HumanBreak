@@ -266,7 +266,7 @@ onMounted(() => {
     display: flex;
     flex-direction: row;
     max-width: 17.5vw;
-    font-size: 150%;
+    font-size: 200%;
     width: 100%;
     margin-bottom: 14px;
     text-shadow: 3px 2px 3px #000, 0px 0px 3px #111;

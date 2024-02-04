@@ -20,7 +20,7 @@
                 </div>
                 <div v-for="cri of criticals" class="critical">
                     <span class="critical-atk">{{ format(cri.atkDelta) }}</span>
-                    <span>{{ format(cri.delta) }}</span>
+                    <span>{{ format(-cri.delta) }}</span>
                 </div>
             </div>
         </div>
