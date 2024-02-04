@@ -276,10 +276,10 @@ function core() {
 core.prototype.init = async function (coreData, callback) {
     this._forwardFuncs();
     for (var key in coreData) core[key] = coreData[key];
+    await this._loadGameProcess();
     this._init_flags();
     this._init_platform();
     this._init_others();
-    await this._loadGameProcess();
 
     var b = main.mode == 'editor';
     // 初始化画布
@@ -302,12 +302,12 @@ core.prototype.init = async function (coreData, callback) {
 };
 
 core.prototype.initSync = function (coreData, callback) {
+    this._loadGameProcessSync();
     this._forwardFuncs();
     for (var key in coreData) core[key] = coreData[key];
     this._init_flags();
     this._init_platform();
     this._init_others();
-    this._loadGameProcessSync();
 
     core.loader._load(function () {
         core._afterLoadResources(callback);
@@ -319,11 +319,9 @@ core.prototype._loadGameProcess = async function () {
     if (main.pluginUseCompress) {
         await main.loadScript(`project/processG.min.js?v=${main.version}`);
     } else {
-        // if (main.mode === 'play') {
-        //     await main.loadScript(`src/game/index.ts`, true);
-        // } else {
-        //     await main.loadScript(`src/game/index.esm.ts`, true);
-        // }
+        if (main.mode === 'editor') {
+            await main.loadScript(`src/game/index.esm.ts`, true);
+        }
     }
 };
 

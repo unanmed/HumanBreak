@@ -521,17 +521,26 @@ loader.prototype.loadOneMusic = function (name) {
     if (main.bgmRemote)
         music.src = main.bgmRemoteRoot + core.firstData.name + '/' + name;
     else music.src = 'project/bgms/' + name;
-    Mota.require('var', 'bgm').add(`bgms.${name}`, music);
+    if (main.mode === 'editor') {
+        music.loop = 'loop';
+        core.material.bgms[name] = music;
+    } else {
+        Mota.require('var', 'bgm').add(`bgms.${name}`, music);
+    }
 };
 
 loader.prototype.loadOneSound = function (name) {
-    const sound = Mota.require('var', 'sound');
     core.http(
         'GET',
         'project/sounds/' + name + '?v=' + main.version,
         null,
         function (data) {
-            sound.add(`sounds.${name}`, data);
+            if (main.mode === 'editor') {
+                core.loader._loadOneSound_decodeData(name, data);
+            } else {
+                const sound = Mota.require('var', 'sound');
+                sound.add(`sounds.${name}`, data);
+            }
         },
         function (e) {
             core.material.sounds[name] = null;

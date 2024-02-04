@@ -402,13 +402,23 @@ main.prototype.loadAsync = async function (mode, callback) {
     ].forEach(function (t) {
         coreData[t] = main[t];
     });
-    await core.init(coreData, callback);
-    if (main.mode === 'play') main.loading.emit('coreInit');
-    core.initStatus.maps = core.maps._initMaps();
+    if (main.mode === 'play') {
+        await core.init(coreData, callback);
+        main.loading.emit('coreInit');
+        core.initStatus.maps = core.maps._initMaps();
+    } else {
+        await core.init(coreData, () => {
+            callback();
+            core.initStatus.maps = core.maps._initMaps();
+        });
+        main.loading.emit('coreInit');
+    }
 
     core.resize();
 
     main.core = core;
+
+    if (main.mode === 'editor') return;
 
     // 自动放缩最大化
     let auto = Mota.require('var', 'mainSetting').getValue('autoScale', true);
