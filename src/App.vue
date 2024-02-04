@@ -48,7 +48,7 @@ function show(index: number) {
     position: fixed;
     overflow: visible;
     display: block;
-    font-family: 'normal';
+    font-size: 80%;
 }
 
 #ui-main {

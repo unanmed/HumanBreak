@@ -167,12 +167,11 @@ onUnmounted(() => {
     opacity: 0;
     position: absolute;
     left: 14%;
-    font-family: 'normal';
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 72%;
-    height: 90%;
+    height: 100%;
     transition: all 0.6s ease;
     user-select: none;
 }

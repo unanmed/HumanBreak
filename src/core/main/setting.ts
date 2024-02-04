@@ -456,9 +456,7 @@ const loading = Mota.require('var', 'loading');
 loading.once('coreInit', () => {
     mainSetting.reset({
         'screen.fullscreen': !!document.fullscreenElement,
-        'screen.halo': !!storage.getValue('screen.showHalo', true),
         'screen.itemDetail': !!storage.getValue('screen.itemDetail', true),
-        'screen.heroDetail': !!storage.getValue('screen.heroDetail', false),
         'screen.transition': !!storage.getValue('screen.transition', false),
         'screen.antiAlias': !!storage.getValue('screen.antiAlias', false),
         'screen.fontSize': storage.getValue('screen.fontSize', 16),
@@ -469,21 +467,12 @@ loading.once('coreInit', () => {
         'audio.bgmVolume': storage.getValue('audio.bgmVolume', 80),
         'audio.soundEnabled': !!storage.getValue('audio.soundEnabled', true),
         'audio.soundVolume': storage.getValue('audio.soundVolume', 80),
-        'utils.betterLoad': !!storage.getValue('utils.betterLoad', true),
         'utils.autoScale': !!storage.getValue('utils.autoScale', true),
-        'fx.paraLight': !!storage.getValue('fx.paraLight', true),
         'fx.frag': !!storage.getValue('fx.frag', true),
         'ui.mapScale': storage.getValue(
             'ui.mapScale',
             isMobile ? 300 : Math.floor(window.innerWidth / 600) * 50
         )
-    });
-});
-
-const { hook } = Mota.requireAll('var');
-hook.on('reset', () => {
-    mainSetting.reset({
-        'action.autoSkill': flags.autoSkill ?? true
     });
 });
 

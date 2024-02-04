@@ -484,8 +484,6 @@ onUnmounted(() => {
     font-size: 3.2vh;
     height: 5vh;
     justify-content: space-between;
-    font-family: 'normal';
-
     .tools {
         white-space: nowrap;
     }
@@ -496,7 +494,6 @@ onUnmounted(() => {
     width: 100%;
     display: flex;
     flex-direction: row;
-    font-family: 'normal';
     font-size: 150%;
 }
 
@@ -518,7 +515,6 @@ onUnmounted(() => {
 
         .select {
             width: 100%;
-            font-family: 'normal';
             font-size: 75%;
         }
 

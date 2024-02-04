@@ -161,7 +161,6 @@ onUnmounted(() => {
 <style lang="less" scoped>
 #tools {
     width: 100%;
-    font-family: 'normal';
     font-size: 3.2vh;
     height: 5vh;
     position: fixed;

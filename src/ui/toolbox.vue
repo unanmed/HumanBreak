@@ -264,7 +264,6 @@ onUnmounted(() => {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    font-family: 'normal';
     font-size: 150%;
     user-select: none;
 }
@@ -273,7 +272,6 @@ onUnmounted(() => {
     width: 100%;
     display: flex;
     flex-direction: row;
-    font-family: 'normal';
     font-size: 3.2vh;
     height: 5vh;
     justify-content: space-between;

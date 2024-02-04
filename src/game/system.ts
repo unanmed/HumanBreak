@@ -46,6 +46,7 @@ import type * as statusBarTools from '@/plugin/ui/statusBar';
 import type * as toolboxTools from '@/plugin/ui/toolbox';
 import type * as battle from './enemy/battle';
 import type * as hero from './hero';
+import type { Damage } from './enemy/damage';
 
 interface ClassInterface {
     // 渲染进程与游戏进程通用
@@ -124,6 +125,7 @@ interface ModuleInterface {
         typeof flyTools &
         typeof statusBarTools &
         typeof toolboxTools;
+    Damage: typeof Damage;
 }
 
 interface SystemInterfaceMap {
@@ -156,21 +158,14 @@ interface PluginInterface {
     frag_r: typeof import('../plugin/fx/frag');
     // 游戏进程定义的插件
     utils_g: typeof import('../plugin/game/utils');
-    loopMap_g: typeof import('../plugin/game/loopMap');
     shop_g: typeof import('../plugin/game/shop');
     replay_g: typeof import('../plugin/game/replay');
-    skillTree_g: typeof import('../plugin/game/skillTree');
     removeMap_g: typeof import('../plugin/game/removeMap');
     remainEnemy_g: typeof import('../plugin/game/enemy/remainEnemy');
-    chase_g: typeof import('../plugin/game/chase');
-    skill_g: typeof import('../plugin/game/skill');
-    towerBoss_g: typeof import('../plugin/game/towerBoss');
     heroFourFrames_g: typeof import('../plugin/game/fx/heroFourFrames');
     rewrite_g: typeof import('../plugin/game/fx/rewrite');
     itemDetail_g: typeof import('../plugin/game/fx/itemDetail');
     checkBlock_g: typeof import('../plugin/game/enemy/checkblock');
-    halo_g: typeof import('../plugin/game/fx/halo');
-    study_g: typeof import('../plugin/game/study');
 }
 
 interface PackageInterface {
@@ -550,7 +545,7 @@ function rewrite<O, K extends SelectKey<O, _Func>, T = O>(
 }
 
 /**
- * 在渲染进程包裹下执行一段代码，该段代码不会在录像验证中执行，因此里面的内容一定不会引起录像报错
+ * 在渲染进程包裹下执行一段代码，该段代码不会在录像验证及编辑器中执行，因此里面的内容一定不会引起录像报错
  * 一般特效，或者是ui显示、内容显示、交互监听等内容应当在渲染进程包裹下执行。
  * 无法获取到执行内容的返回值，因为渲染进程中的值不应当直接出现在游戏进程中，否则很可能导致录像出错，
  * 如果需要其返回值，应当直接在函数后面新增内容，而不是在游戏进程中使用
@@ -561,7 +556,7 @@ function r<T = undefined>(
     fn: (this: T, packages: PackageInterface) => void,
     thisArg?: T
 ) {
-    if (!main.replayChecking || main.mode === 'editor')
+    if (!main.replayChecking && main.mode === 'play')
         fn.call(thisArg as T, MPackage.requireAll());
 }
 

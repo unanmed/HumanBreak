@@ -659,7 +659,6 @@ onUnmounted(() => {
     width: 100%;
     height: 100%;
     font-size: 150%;
-    font-family: 'normal';
     display: flex;
     align-items: center;
     user-select: none;
@@ -667,7 +666,6 @@ onUnmounted(() => {
 
 #tools {
     width: 100%;
-    font-family: 'normal';
     font-size: 3.2vh;
     height: 5vh;
     position: fixed;

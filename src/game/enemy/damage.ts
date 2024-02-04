@@ -134,7 +134,7 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
      */
     calMapDamage() {
         this.mapDamage = {};
-        const hero = getHeroStatusOn(realStatus, this.floorId);
+        const hero = getHeroStatusOn(Damage.realStatus, this.floorId);
         this.list.forEach(v => {
             v.calMapDamage(this.mapDamage, hero);
         });
@@ -261,23 +261,6 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
                         px: 32 * x + 16,
                         py: 32 * y + 16,
                         color,
-                        alpha: 1
-                    });
-                }
-
-                // 电摇嘲讽
-                if (dam.mockery) {
-                    dam.mockery.sort((a, b) =>
-                        a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]
-                    );
-                    const [tx, ty] = dam.mockery[0];
-                    const dir =
-                        x > tx ? '←' : x < tx ? '→' : y > ty ? '↑' : '↓';
-                    core.status.damage.extraData.push({
-                        text: '嘲' + dir,
-                        px: 32 * x + 16,
-                        py: 32 * (y + 1) - 14,
-                        color: '#fd4',
                         alpha: 1
                     });
                 }
@@ -522,7 +505,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
      */
     calMapDamage(
         damage: Record<string, MapDamage> = {},
-        hero: Partial<HeroStatus> = getHeroStatusOn(realStatus)
+        hero: Partial<HeroStatus> = getHeroStatusOn(Damage.realStatus)
     ) {
         if (!has(this.x) || !has(this.y) || !has(this.floorId)) return damage;
         const enemy = this.enemy;
@@ -583,33 +566,10 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
             }
         }
 
-        // 电摇嘲讽
-        if (this.info.special.includes(19)) {
-            const objs = core.getMapBlocksObj(this.floorId);
-            for (let nx = 0; nx < w; nx++) {
-                const loc = `${nx},${this.y}` as LocString;
-                const block = objs[loc];
-                if (!block?.event.noPass) {
-                    damage[loc] ??= { damage: 0, type: new Set() };
-                    damage[loc].mockery ??= [];
-                    damage[loc].mockery!.push([this.x, this.y]);
-                }
-            }
-            for (let ny = 0; ny < h; ny++) {
-                const loc = `${this.x},${ny}` as LocString;
-                const block = objs[loc];
-                if (!block?.event.noPass) {
-                    damage[loc] ??= { damage: 0, type: new Set() };
-                    damage[loc].mockery ??= [];
-                    damage[loc].mockery!.push([this.x, this.y]);
-                }
-            }
-        }
-
         return damage;
     }
 
-    private setMapDamage(
+    setMapDamage(
         damage: Record<string, MapDamage>,
         loc: string,
         dam: number,
@@ -621,8 +581,8 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     }
 
     private calEnemyDamageOf(hero: Partial<HeroStatus>, enemy: EnemyInfo) {
-        const status = getHeroStatusOf(hero, realStatus, this.floorId);
-        let damage = calDamageWith(enemy, status) ?? Infinity;
+        const status = getHeroStatusOf(hero, Damage.realStatus, this.floorId);
+        let damage = Damage.calDamageWith(enemy, status) ?? Infinity;
         let skill = -1;
 
         // 自动切换技能
@@ -631,9 +591,9 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                 const [unlock, condition] = skills[i];
                 if (!flags[unlock]) continue;
                 flags[condition] = true;
-                const status = getHeroStatusOf(hero, realStatus);
+                const status = getHeroStatusOf(hero, Damage.realStatus);
 
-                const d = calDamageWith(enemy, status) ?? Infinity;
+                const d = Damage.calDamageWith(enemy, status) ?? Infinity;
 
                 if (d < damage) {
                     damage = d;
@@ -819,10 +779,6 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
 }
 
 /**
- * 计算伤害时会用到的勇士属性，攻击防御，其余的不会有buff加成，直接从core.status.hero取
- */
-const realStatus: (keyof HeroStatus)[] = ['atk', 'def'];
-/**
  * 主动技能列表
  */
 const skills: [unlock: string, condition: string][] = [
@@ -830,129 +786,129 @@ const skills: [unlock: string, condition: string][] = [
     ['shieldOn', 'shield']
 ];
 
-/**
- * 计算怪物伤害
- * @param info 怪物信息
- * @param hero 勇士信息
- */
-export function calDamageWith(
-    info: EnemyInfo,
-    hero: Partial<HeroStatus>
-): number | null {
-    const { hp, hpmax, mana, mdef } = core.status.hero;
-    let { atk, def } = hero as HeroStatus;
-    let { hp: monHp, atk: monAtk, def: monDef, special, enemy } = info;
+export namespace Damage {
+    /**
+     * 计算伤害时会用到的勇士属性，攻击防御，其余的不会有buff加成，直接从core.status.hero取
+     */
+    export let realStatus: (keyof HeroStatus)[] = ['atk', 'def'];
 
-    let damage = 0;
+    /**
+     * 计算怪物伤害
+     * @param info 怪物信息
+     * @param hero 勇士信息
+     */
+    export function calDamageWith(
+        info: EnemyInfo,
+        hero: Partial<HeroStatus>
+    ): number | null {
+        const { hp, hpmax, mana, mdef } = core.status.hero;
+        let { atk, def } = hero as HeroStatus;
+        let { hp: monHp, atk: monAtk, def: monDef, special, enemy } = info;
 
-    // 饥渴
-    if (special.includes(7)) {
-        const delta = Math.floor((atk * enemy.hungry!) / 100);
-        atk -= delta;
-        monAtk += delta;
+        let damage = 0;
+
+        // 饥渴
+        if (special.includes(7)) {
+            const delta = Math.floor((atk * enemy.hungry!) / 100);
+            atk -= delta;
+            monAtk += delta;
+        }
+
+        let heroPerDamage: number;
+
+        // 绝对防御
+        if (special.includes(9)) {
+            heroPerDamage = atk + mana - monDef;
+            if (heroPerDamage <= 0) return null;
+        } else if (special.includes(3)) {
+            // 由于坚固的特性，只能放到这来计算了
+            if (atk > enemy.def) heroPerDamage = 1 + mana;
+            else return null;
+        } else {
+            heroPerDamage = atk - monDef;
+            if (heroPerDamage > 0) heroPerDamage += mana;
+            else return null;
+        }
+
+        // 霜冻
+        if (special.includes(20) && !core.hasEquip('I589')) {
+            heroPerDamage *= 1 - enemy.ice! / 100;
+        }
+
+        heroPerDamage *= 1 - info.damageDecline / 100;
+
+        let enemyPerDamage: number;
+
+        // 魔攻
+        if (special.includes(2) || special.includes(13)) {
+            enemyPerDamage = monAtk;
+        } else {
+            enemyPerDamage = monAtk - def;
+            if (enemyPerDamage < 0) enemyPerDamage = 0;
+        }
+
+        // 先攻
+        if (special.includes(17)) {
+            damage += enemyPerDamage;
+        }
+
+        // 连击
+        if (special.includes(4)) enemyPerDamage *= 2;
+        if (special.includes(5)) enemyPerDamage *= 3;
+        if (special.includes(6)) enemyPerDamage *= enemy.n!;
+
+        // 苍蓝刻
+        if (special.includes(28)) {
+            heroPerDamage *= 1 - enemy.paleShield! / 100;
+        }
+
+        let turn = Math.ceil(monHp / heroPerDamage);
+
+        // 致命一击
+        if (special.includes(1)) {
+            const times = Math.floor(turn / 5);
+            damage += ((times * (enemy.crit! - 100)) / 100) * enemyPerDamage;
+        }
+
+        // 勇气之刃
+        if (turn > 1 && special.includes(10)) {
+            damage += (enemy.courage! / 100 - 1) * enemyPerDamage;
+        }
+
+        // 勇气冲锋
+        if (special.includes(11)) {
+            damage += (enemy.charge! / 100) * enemyPerDamage;
+            turn += 5;
+        }
+
+        damage += (turn - 1) * enemyPerDamage;
+        // 无上之盾
+        if (flags.superSheild) {
+            damage -= mdef / 10;
+        }
+        // 生命回复
+        damage -= hpmax * turn;
+        if (flags.hard === 1) damage *= 0.9;
+
+        return damage;
     }
 
-    let heroPerDamage: number;
-
-    // 绝对防御
-    if (special.includes(9)) {
-        heroPerDamage = atk + mana - monDef;
-        if (heroPerDamage <= 0) return null;
-    } else if (special.includes(3)) {
-        // 由于坚固的特性，只能放到这来计算了
-        if (atk > enemy.def) heroPerDamage = 1 + mana;
-        else return null;
-    } else {
-        heroPerDamage = atk - monDef;
-        if (heroPerDamage > 0) heroPerDamage += mana;
-        else return null;
+    export function ensureFloorDamage(floorId: FloorIds) {
+        const floor = core.status.maps[floorId];
+        floor.enemy ??= new EnemyCollection(floorId);
     }
 
-    // 霜冻
-    if (special.includes(20) && !core.hasEquip('I589')) {
-        heroPerDamage *= 1 - enemy.ice! / 100;
+    export function getSingleEnemy(id: EnemyIds) {
+        const e = core.material.enemys[id];
+        const enemy = new DamageEnemy(e);
+        enemy.calAttribute();
+        enemy.getRealInfo();
+        enemy.calDamage(core.status.hero);
+        return enemy;
     }
-
-    heroPerDamage *= 1 - info.damageDecline / 100;
-
-    let enemyPerDamage: number;
-
-    // 魔攻
-    if (special.includes(2) || special.includes(13)) {
-        enemyPerDamage = monAtk;
-    } else {
-        enemyPerDamage = monAtk - def;
-        if (enemyPerDamage < 0) enemyPerDamage = 0;
-    }
-
-    // 先攻
-    if (special.includes(17)) {
-        damage += enemyPerDamage;
-    }
-
-    // 连击
-    if (special.includes(4)) enemyPerDamage *= 2;
-    if (special.includes(5)) enemyPerDamage *= 3;
-    if (special.includes(6)) enemyPerDamage *= enemy.n!;
-
-    // 苍蓝刻
-    if (special.includes(28)) {
-        heroPerDamage *= 1 - enemy.paleShield! / 100;
-    }
-
-    let turn = Math.ceil(monHp / heroPerDamage);
-
-    // 致命一击
-    if (special.includes(1)) {
-        const times = Math.floor(turn / 5);
-        damage += ((times * (enemy.crit! - 100)) / 100) * enemyPerDamage;
-    }
-
-    // 勇气之刃
-    if (turn > 1 && special.includes(10)) {
-        damage += (enemy.courage! / 100 - 1) * enemyPerDamage;
-    }
-
-    // 勇气冲锋
-    if (special.includes(11)) {
-        damage += (enemy.charge! / 100) * enemyPerDamage;
-        turn += 5;
-    }
-
-    damage += (turn - 1) * enemyPerDamage;
-    // 无上之盾
-    if (flags.superSheild) {
-        damage -= mdef / 10;
-    }
-    // 生命回复
-    damage -= hpmax * turn;
-    if (flags.hard === 1) damage *= 0.9;
-
-    return damage;
-}
-
-export function ensureFloorDamage(floorId: FloorIds) {
-    const floor = core.status.maps[floorId];
-    floor.enemy ??= new EnemyCollection(floorId);
-}
-
-export function getSingleEnemy(id: EnemyIds) {
-    const e = core.material.enemys[id];
-    const enemy = new DamageEnemy(e);
-    enemy.calAttribute();
-    enemy.getRealInfo();
-    enemy.calDamage(core.status.hero);
-    return enemy;
 }
 
 declare global {
-    interface PluginDeclaration {
-        damage: {
-            Enemy: typeof DamageEnemy;
-            Collection: typeof EnemyCollection;
-        };
-    }
-
     interface Floor {
         enemy: EnemyCollection;
     }

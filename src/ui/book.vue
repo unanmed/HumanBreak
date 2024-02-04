@@ -188,7 +188,6 @@ onUnmounted(() => {
     user-select: none;
     width: 80%;
     height: 100%;
-    font-family: 'normal';
     overflow: hidden;
     transition: opacity 0.6s linear;
     display: flex;
@@ -208,7 +207,6 @@ onUnmounted(() => {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: 'normal';
 }
 
 .enemy {

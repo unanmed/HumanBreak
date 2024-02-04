@@ -138,7 +138,12 @@ class GameListener extends EventEmitter<ListenerEvent> {
 
         // hover & leave & mouseMove
         data.addEventListener('mousemove', e => {
-            if (core.status.lockControl || !core.isPlaying()) return;
+            if (
+                core.status.lockControl ||
+                !core.isPlaying() ||
+                !core.status.floorId
+            )
+                return;
             this.emit('mouseMove', e);
             const {
                 x: px,
@@ -164,7 +169,12 @@ class GameListener extends EventEmitter<ListenerEvent> {
             }
         });
         data.addEventListener('mouseleave', e => {
-            if (core.status.lockControl || !core.isPlaying()) return;
+            if (
+                core.status.lockControl ||
+                !core.isPlaying() ||
+                !core.status.floorId
+            )
+                return;
             const blocks = core.getMapBlocksObj();
             const lastBlock = blocks[`${lastHoverX},${lastHoverY}`];
             if (!!lastBlock) {
@@ -175,7 +185,12 @@ class GameListener extends EventEmitter<ListenerEvent> {
         });
         // click
         data.addEventListener('click', e => {
-            if (core.status.lockControl || !core.isPlaying()) return;
+            if (
+                core.status.lockControl ||
+                !core.isPlaying() ||
+                !core.status.floorId
+            )
+                return;
             const {
                 x: px,
                 y: py,

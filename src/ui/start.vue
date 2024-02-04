@@ -109,7 +109,6 @@ function resize() {
 
     nextFrame(() => {
         const scale = core.domStyle.scale;
-        console.log(scale);
         const h = core._PY_;
         const height = h * scale;
         const width = height * 1.5;
@@ -169,7 +168,6 @@ function bgm() {
     core.triggerBgm();
     soundChecked.value = !soundChecked.value;
     mainSetting.setValue('audio.bgmEnabled', soundChecked.value);
-    console.log(mainSetting.getValue('audio.bgmEnabled'));
 }
 
 async function setFullscreen() {

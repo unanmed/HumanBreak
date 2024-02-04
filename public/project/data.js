@@ -742,14 +742,23 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 	"flags": {
 		"statusBarItems": [
 			"enableFloor",
+			"enableName",
+			"enableLv",
+			"enableHPMax",
 			"enableHP",
+			"enableMana",
 			"enableAtk",
 			"enableDef",
 			"enableMDef",
 			"enableMoney",
-			"enableKeys"
+			"enableExp",
+			"enableLevelUp",
+			"enableKeys",
+			"enableGreenKey",
+			"enablePZF",
+			"enableDebuff"
 		],
-		"extendToolbar": false,
+		"extendToolbar": true,
 		"flyNearStair": true,
 		"flyRecordPosition": false,
 		"itemFirstText": false,

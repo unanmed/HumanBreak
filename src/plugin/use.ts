@@ -66,6 +66,14 @@ export function useDrag(
         onup && onup(e);
     };
 
+    const touchUp = (e: TouchEvent) => {
+        const ele = global ? document : e.target;
+        if (ele) {
+            (ele as HTMLElement).removeEventListener('touchmove', touchFn);
+        }
+        onup && onup(e);
+    };
+
     const md = (e: MouseEvent) => {
         const ele = global ? document : e.target;
         if (ele) {
@@ -92,10 +100,6 @@ export function useDrag(
     }
 
     const target = global ? document : ele;
-
-    const touchUp = (e: TouchEvent) => {
-        onup && onup(e);
-    };
 
     if (target instanceof Array) {
         target.forEach(v => {

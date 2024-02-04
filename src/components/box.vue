@@ -43,7 +43,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted, onUpdated, ref, useSlots, watch } from 'vue';
+import { onMounted, onUnmounted, onUpdated, ref, watch } from 'vue';
 import { DragOutlined } from '@ant-design/icons-vue';
 import { isMobile, useDrag, cancelGlobalDrag } from '../plugin/use';
 import { has } from '../plugin/utils';
@@ -89,6 +89,8 @@ watch(width, n => emits('update:width', n));
 watch(height, n => emits('update:height', n));
 
 async function click() {
+    console.log(1);
+
     moveSelected.value = true;
     moveTimeout = window.setTimeout(() => {
         moveSelected.value = false;
@@ -231,7 +233,6 @@ onUnmounted(() => {
     top: 50px;
     display: flex;
     overflow: visible;
-    font-family: 'normal';
 }
 
 .box-main {

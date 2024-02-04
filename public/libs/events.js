@@ -30,7 +30,6 @@ events.prototype.startGame = function (hard, seed, route, callback) {
     }
 
     if (main.mode != 'play') return;
-    Mota.Plugin.require('skillTree_g').resetSkillLevel();
 
     // 无动画的开始游戏
     if (core.flags.startUsingCanvas || route != null) {
@@ -495,22 +494,22 @@ events.prototype._trigger_ignoreChangeFloor = function (block) {
 };
 
 events.prototype._sys_battle = function (data, callback) {
-    // Deprecated. See /src/plugin/game/enemy/battle.ts
+    // Deprecated. See /src/game/enemy/battle.ts
 };
 
 ////// 战斗 //////
 events.prototype.battle = function (id, x, y, force, callback) {
-    // Deprecated. See src/plugin/game/enemy/battle.ts
+    // Deprecated. See src/game/enemy/battle.ts
 };
 
 ////// 战斗前触发的事件 //////
 events.prototype.beforeBattle = function (enemyId, x, y) {
-    // Deprecated. See src/plugin/game/enemy/battle.ts
+    // Deprecated. See src/game/enemy/battle.ts
 };
 
 ////// 战斗结束后触发的事件 //////
 events.prototype.afterBattle = function (enemyId, x, y) {
-    // Deprecated. See src/plugin/game/enemy/battle.ts
+    // Deprecated. See src/game/enemy/battle.ts
 };
 
 events.prototype._sys_openDoor = function (data, callback) {

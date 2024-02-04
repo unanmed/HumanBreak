@@ -111,15 +111,6 @@ const def = ref<HTMLCanvasElement>();
 const enemy = detailInfo.enemy!;
 const ceil = Math.ceil;
 
-const x = ref(props.fromBook ? void 0 : flags.mouseLoc[0]);
-const y = ref(props.fromBook ? void 0 : flags.mouseLoc[1]);
-x.value = has(x.value)
-    ? Math.round(x.value + core.bigmap.offsetX / 32)
-    : void 0;
-y.value = has(y.value)
-    ? Math.round(y.value + core.bigmap.offsetY / 32)
-    : void 0;
-
 let originCri = getCriticalDamage(enemy, 0, 0);
 let originDef = getDefDamage(enemy, 0, 0);
 

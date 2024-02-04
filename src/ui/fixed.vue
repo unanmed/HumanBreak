@@ -135,7 +135,6 @@ onMounted(() => {
 
 <style lang="less" scoped>
 #fixed {
-    font-family: 'normal';
     font-size: 2.5vh;
     opacity: 0;
     transition: opacity 0.2s linear;

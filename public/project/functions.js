@@ -49,12 +49,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             if (core.hasFlag('hideStatusBar'))
                 core.hideStatusBar(core.hasFlag('showToolbox'));
             else core.showStatusBar();
-            if (main.mode === 'play' && !main.replayChecking) {
+            Mota.r(() => {
                 Mota.Plugin.require('fly_r').splitArea();
                 Mota.require('var', 'hook').emit('reset');
-            } else {
-                flags.autoSkill ??= true;
-            }
+            });
         },
         win: function (reason, norank, noexit) {
             // 游戏获胜事件
@@ -64,12 +62,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 如果不退出，则临时存储数据
             if (noexit) {
                 core.status.extraEvent = core.clone(core.status.event);
-            }
-
-            if (reason === '智慧之始') {
-                core.status.hero.hp +=
-                    core.itemCount('yellowKey') * 5000 +
-                    core.itemCount('blueKey') * 15000;
             }
 
             // 游戏获胜事件
@@ -112,8 +104,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
         changingFloor: function (floorId, heroLoc) {
             // 正在切换楼层过程中执行的操作；此函数的执行时间是“屏幕完全变黑“的那一刻
             // floorId为要切换到的楼层ID；heroLoc表示勇士切换到的位置
-
-            const { checkLoopMap } = Mota.Plugin.require('loopMap_g');
 
             flags.floorChanging = true;
 
@@ -169,8 +159,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 weather = core.status.maps[floorId].weather;
             if (weather) core.setWeather(weather[0], weather[1]);
             else core.setWeather();
-
-            checkLoopMap();
 
             // ...可以新增一些其他内容，比如创建个画布在右上角显示什么内容等等
         },
@@ -322,18 +310,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 values: values,
                 version: core.firstData.version,
                 guid: core.getGuid(),
-                time: new Date().getTime(),
-                skills: Mota.Plugin.require('skillTree_g').saveSkillTree()
+                time: new Date().getTime()
             };
 
             return data;
         },
         loadData: function (data, callback) {
             // 读档操作；从存储中读取了内容后的行为
-            if (window.flags && flags.onChase) {
-                flags.chase.end();
-                flags.onChase = true;
-            }
             // 重置游戏和路线
             core.resetGame(
                 data.hero,
@@ -371,8 +354,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             }
             core.setFlag('__fromLoad__', true);
 
-            Mota.Plugin.require('skillTree_g').loadSkillTree(data.skills);
-
             // 切换到对应的楼层
             core.changeFloor(data.floorId, null, data.hero.loc, 0, function () {
                 if (core.hasFlag('__bgm__')) {
@@ -382,13 +363,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
 
                 core.removeFlag('__fromLoad__');
                 if (callback) callback();
-
-                if (flags.onChase) {
-                    Mota.Plugin.require('chase_r').startChase(flags.chaseIndex);
-                    if (flags.chaseIndex === 1) {
-                        core.playBgm('escape.mp3', 43.5);
-                    }
-                }
             });
         },
         updateStatusBar: function () {
@@ -397,32 +371,58 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 检查等级
             core.events.checkLvUp();
 
-            // 如果是自定义添加的状态栏，也需要在这里进行设置显示的数值
+            const getHeroStatusOn = Mota.require('fn', 'getHeroStatusOn');
+
+            // 检查HP上限
+            if (core.flags.statusBarItems.indexOf('enableHPMax') >= 0) {
+                core.setStatus(
+                    'hp',
+                    Math.min(getHeroStatusOn('hpmax'), core.getStatus('hp'))
+                );
+            }
+
+            // 设置生命上限、生命值、攻防护盾金币和经验值
+            var statusList = [
+                'hpmax',
+                'hp',
+                'mana',
+                'atk',
+                'def',
+                'mdef',
+                'money',
+                'exp'
+            ];
+            statusList.forEach(function (item) {
+                // 向下取整
+                core.status.hero[item] = Math.floor(core.status.hero[item]);
+            });
+
+            // 设置魔力值; status:manamax 只有在非负时才生效。
+            if (
+                core.status.hero.manamax != null &&
+                core.getRealStatus('manamax') >= 0
+            ) {
+                core.status.hero.mana = Math.min(
+                    core.status.hero.mana,
+                    core.getRealStatus('manamax')
+                );
+            }
 
             // 难度
             if (core.statusBar.hard.innerText != core.status.hard) {
                 core.statusBar.hard.innerText = core.status.hard;
             }
-            var hardColor = core.getFlag('__hardColor__', 'red');
+            var hardColor = core.getFlag('__hardColor__');
+            if (hardColor == null) core.statusBar.hard.innerText = '';
             if (core.statusBar.hard.getAttribute('_style') != hardColor) {
                 core.statusBar.hard.style.color = hardColor;
                 core.statusBar.hard.setAttribute('_style', hardColor);
             }
 
-            // 更新全地图显伤
+            // 更新阻激夹域的伤害值
+            core.updateCheckBlock();
+            // updateDamage只能在此处执行！！更新全地图显伤
             core.updateDamage();
-
-            if (main.replayChecking) return;
-
-            // 已学习的技能
-            // if (
-            //     core.plugin.skillTree.getSkillLevel(11) > 0 &&
-            //     (core.status.hero.special?.num ?? []).length > 0
-            // ) {
-            //     mota.plugin.ui.showStudiedSkill.value = true;
-            // } else {
-            //     mota.plugin.ui.showStudiedSkill.value = false;
-            // }
         },
         moveOneStep: function (callback) {
             // 勇士每走一步后执行的操作。callback为行走完毕后的回调
@@ -431,8 +431,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 1. 将全塔属性中的cannotMoveDirectly这个开关勾上，即可在全塔中全程禁止使用瞬移。
             // 2, 将楼层属性中的cannotMoveDirectly这个开关勾上，即禁止在该层楼使用瞬移。
             // 3. 将flag:cannotMoveDirectly置为true，即可使用flag控制在某段剧情范围内禁止瞬移。
-
-            const { checkLoopMap } = Mota.Plugin.require('loopMap_g');
 
             // 增加步数
             core.status.hero.steps++;
@@ -478,136 +476,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     null,
                     true
                 );
-            }
-
-            checkLoopMap();
-
-            // 追猎
-            // todo: 重写
-            if (
-                core.status.checkBlock.haveHunt &&
-                !core
-                    .getBlockId(core.status.hero.loc.x, core.status.hero.loc.y)
-                    ?.endsWith('Portal')
-            ) {
-                var x = core.status.hero.loc.x,
-                    y = core.status.hero.loc.y;
-                core.status.maps[core.status.floorId].blocks.forEach(function (
-                    block
-                ) {
-                    if (block.x != x && block.y != y) return;
-                    var id = block.event.id,
-                        enemy = core.material.enemys[id];
-                    if (enemy && core.hasSpecial(enemy.special, 12)) {
-                        var nx = block.x,
-                            ny = block.y;
-                        var dx = Math.abs(x - nx),
-                            dy = Math.abs(y - ny);
-                        if (x == block.x) {
-                            if (
-                                y > block.y &&
-                                !core.noPass(block.x, block.y + 1) &&
-                                core.getBlockCls(block.x, block.y + 1) !=
-                                    'items'
-                            ) {
-                                dy--;
-                                ny++;
-                                core.insertAction([
-                                    {
-                                        type: 'move',
-                                        loc: [block.x, block.y],
-                                        time: 200,
-                                        keep: true,
-                                        steps: ['down:1']
-                                    },
-                                    {
-                                        type: 'if',
-                                        condition: dy + '<=1',
-                                        true: [
-                                            { type: 'battle', loc: [nx, ny] }
-                                        ]
-                                    }
-                                ]);
-                            }
-                            if (
-                                y < block.y &&
-                                !core.noPass(block.x, block.y - 1) &&
-                                core.getBlockCls(block.x, block.y - 1) !=
-                                    'items'
-                            ) {
-                                dy--;
-                                ny--;
-                                core.insertAction([
-                                    {
-                                        type: 'move',
-                                        loc: [block.x, block.y],
-                                        time: 200,
-                                        keep: true,
-                                        steps: ['up:1']
-                                    },
-                                    {
-                                        type: 'if',
-                                        condition: dy + '<=1',
-                                        true: [
-                                            { type: 'battle', loc: [nx, ny] }
-                                        ]
-                                    }
-                                ]);
-                            }
-                        } else {
-                            if (
-                                x > block.x &&
-                                !core.noPass(block.x + 1, block.y) &&
-                                core.getBlockCls(block.x + 1, block.y) !=
-                                    'items'
-                            ) {
-                                dx--;
-                                nx++;
-                                core.insertAction([
-                                    {
-                                        type: 'move',
-                                        loc: [block.x, block.y],
-                                        time: 200,
-                                        keep: true,
-                                        steps: ['right:1']
-                                    },
-                                    {
-                                        type: 'if',
-                                        condition: dx + '<=1',
-                                        true: [
-                                            { type: 'battle', loc: [nx, ny] }
-                                        ]
-                                    }
-                                ]);
-                            }
-                            if (
-                                x < block.x &&
-                                !core.noPass(block.x - 1, block.y) &&
-                                core.getBlockCls(block.x - 1, block.y) !=
-                                    'items'
-                            ) {
-                                dx--;
-                                nx--;
-                                core.insertAction([
-                                    {
-                                        type: 'move',
-                                        loc: [block.x, block.y],
-                                        time: 200,
-                                        keep: true,
-                                        steps: ['left:1']
-                                    },
-                                    {
-                                        type: 'if',
-                                        condition: dx + '<=1',
-                                        true: [
-                                            { type: 'battle', loc: [nx, ny] }
-                                        ]
-                                    }
-                                ]);
-                            }
-                        }
-                    }
-                });
             }
 
             // 如需强行终止行走可以在这里条件判定：

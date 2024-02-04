@@ -303,7 +303,6 @@ onUnmounted(() => {
 <style lang="less" scoped>
 #tools {
     width: 100%;
-    font-family: 'normal';
     font-size: 3.2vh;
     height: 5vh;
     position: fixed;
@@ -317,7 +316,6 @@ onUnmounted(() => {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: 'normal';
     font-size: 150%;
     user-select: none;
     align-self: center;

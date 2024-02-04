@@ -1,8 +1,8 @@
 main.floors.empty=
 {
     "floorId": "empty",
-    "title": "山脚",
-    "name": "13",
+    "title": "空地图",
+    "name": "空地图",
     "width": 15,
     "height": 15,
     "canFlyTo": false,
@@ -11,7 +11,7 @@ main.floors.empty=
     "cannotViewMap": true,
     "images": [],
     "ratio": 1,
-    "defaultGround": "grass",
+    "defaultGround": "ground",
     "bgm": "mount.mp3",
     "weather": [
         "sun",

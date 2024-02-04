@@ -323,7 +323,6 @@ onUnmounted(() => {
 #shop {
     width: 90vh;
     height: 90vh;
-    font-family: 'normal';
     font-size: 150%;
     display: flex;
     flex-direction: column;

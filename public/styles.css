@@ -149,7 +149,6 @@ body {
     position: absolute;
     text-align: center;
     font-size: 1.4em;
-    font-family: 'normal';
     display: none;
     z-index: 310;
     bottom: 0;
@@ -450,6 +449,7 @@ p#name {
     background: white;
     width: 250px;
     min-height: 50px;
+    color: #000d;
 }
 
 #inputMessage {

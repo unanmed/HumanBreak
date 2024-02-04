@@ -1,6 +1,6 @@
 import './system';
 import '../plugin/game/index';
-import { DamageEnemy, EnemyCollection } from './enemy/damage';
+import { Damage, DamageEnemy, EnemyCollection } from './enemy/damage';
 import { EventEmitter, IndexedEventEmitter } from '@/core/common/eventEmitter';
 import { Range } from '@/plugin/game/range';
 import { specials } from './enemy/special';
@@ -24,6 +24,7 @@ Mota.register('var', 'hook', hook);
 Mota.register('var', 'gameListener', gameListener);
 Mota.register('var', 'loading', loading);
 // ----- 模块注册
+Mota.register('module', 'Damage', Damage);
 
 main.loading = loading;
 

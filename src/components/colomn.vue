@@ -70,7 +70,6 @@ onUpdated(resize);
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: 'normal';
     font-size: 150%;
     user-select: none;
 }
@@ -111,7 +110,6 @@ onUpdated(resize);
 
 .tools {
     width: 100%;
-    font-family: 'normal';
     font-size: 3.2vh;
     height: 5vh;
     position: fixed;

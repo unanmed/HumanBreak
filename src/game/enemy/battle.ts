@@ -1,4 +1,4 @@
-import { DamageEnemy, ensureFloorDamage, getSingleEnemy } from './damage';
+import { DamageEnemy, Damage } from './damage';
 import { findDir, has } from '../../plugin/game/utils';
 import { loading } from '../game';
 
@@ -31,6 +31,7 @@ function init() {
     ) {
         const enemy = getEnemy(x, y, floorId);
         const { damage } = enemy.calDamage();
+
         return damage < core.status.hero.hp;
     };
 
@@ -173,7 +174,7 @@ function init() {
         floorId = floorId || core.status.floorId;
         const enemys: CurrentEnemy[] = [];
         const used: Record<string, DamageEnemy[]> = {};
-        ensureFloorDamage(floorId);
+        Damage.ensureFloorDamage(floorId);
         const floor = core.status.maps[floorId];
         floor.enemy.list.forEach(v => {
             if (!(v.id in used)) {
@@ -229,7 +230,7 @@ function init() {
 
     core.events._action_battle = function (data, x, y, prefix) {
         if (data.id) {
-            const enemy = getSingleEnemy(data.id as EnemyIds);
+            const enemy = Damage.getSingleEnemy(data.id as EnemyIds);
             // todo: 与不在地图上的怪物战斗
         } else {
             if (data.floorId != core.status.floorId) {

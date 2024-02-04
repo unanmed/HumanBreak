@@ -141,7 +141,6 @@ onMounted(async () => {
 
 #chapter-text {
     position: relative;
-    font-family: 'normal';
     font-size: 5vh;
     text-shadow: 0px 0px 5px #fff;
 }

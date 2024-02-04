@@ -8,14 +8,9 @@ mainUi.register(
     new GameUi('toolbox', UI.Toolbox),
     new GameUi('equipbox', UI.Equipbox),
     new GameUi('settings', UI.Settings),
-    new GameUi('desc', UI.Desc),
-    new GameUi('skill', UI.Skill),
-    new GameUi('skillTree', UI.SkillTree),
     new GameUi('fly', UI.Fly),
     new GameUi('fixedDetail', UI.FixedDetail),
     new GameUi('shop', UI.Shop),
-    new GameUi('achievement', UI.Achievement),
-    new GameUi('bgm', UI.BgmList),
     new GameUi('hotkey', UI.Hotkey),
     new GameUi('toolEditor', UI.ToolEditor),
     new GameUi('virtualKey', MiscUI.VirtualKey)
@@ -29,7 +24,6 @@ fixedUi.register(
     new GameUi('markedEnemy', UI.Marked),
     new GameUi('fixed', UI.Fixed),
     new GameUi('chapter', UI.Chapter),
-    new GameUi('completeAchi', UI.CompleteAchi),
     new GameUi('start', UI.Start),
     new GameUi('toolbar', UI.Toolbar)
 );

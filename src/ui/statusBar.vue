@@ -12,116 +12,164 @@
                 :no-scroll="true"
             >
                 <div id="status-div">
-                    <span
-                        id="status-floor"
-                        @click.stop="viewMap"
-                        class="button-text"
-                        >{{ floor }}</span
+                    <div
+                        v-if="items.includes('enableFloor')"
+                        class="status-item"
                     >
-                    <span id="status-lv">{{ lvName }}</span>
-                    <div id="status-skill" class="status-item">
-                        <img
-                            src="/project/images/skill.png"
-                            class="status-icon"
-                        />
-                        <span>{{ skill }}</span>
-                        <span
-                            v-if="has(spring)"
-                            id="status-spring"
-                            class="status-extra"
-                            >剩余{{ spring }}</span
-                        >
+                        <span class="status-icon">
+                            <img :src="icons.floor.src" />
+                        </span>
+                        <span class="status-value">{{ floor }}</span>
                     </div>
-                    <div id="status-hp" class="status-item">
-                        <img src="/project/images/hp.png" class="status-icon" />
-                        <span class="status-item-bold">{{
-                            format(hero.hp!)
-                        }}</span>
-                        <span
-                            id="status-hpmax"
-                            class="status-extra status-item-bold"
-                            >+{{ format(hero.hpmax!) }}/t</span
-                        >
-                        <span
-                            v-if="has(jumpCnt)"
-                            id="status-jump"
-                            class="status-extra"
-                            >跳跃剩余{{ jumpCnt }}</span
-                        >
+                    <div
+                        v-if="items.includes('enableName')"
+                        class="status-item"
+                    >
+                        <span class="status-icon">
+                            <img v-if="icons.name" :src="icons.icons.src" />
+                        </span>
+                        <span class="status-value">{{ hero.name }}</span>
                     </div>
-                    <div id="status-atk" class="status-item">
-                        <img
-                            src="/project/images/atk.png"
-                            class="status-icon"
-                        />
-                        <span class="status-item-bold">{{
-                            format(hero.atk!)
-                        }}</span>
-                        <span
-                            id="status-mana"
-                            class="status-extra status-item-bold"
-                            >+{{ format(hero.mana!) }}</span
-                        >
+                    <div v-if="items.includes('enableLv')" class="status-item">
+                        <span class="status-icon">
+                            <img :src="icons.lv.src" />
+                        </span>
+                        <span class="status-value">{{ lvName }}</span>
                     </div>
-                    <div id="status-def" class="status-item status-item-bold">
-                        <img
-                            src="/project/images/def.png"
-                            class="status-icon"
-                        />
-                        <span>{{ format(hero.def!) }}</span>
-                    </div>
-                    <div id="status-mdef" class="status-item status-item-bold">
-                        <img src="/project/images/IQ.png" class="status-icon" />
-                        <span>{{ format(hero.mdef!) }}</span>
-                    </div>
-                    <div id="status-money" class="status-item status-item-bold">
-                        <img
-                            src="/project/images/money.png"
-                            class="status-icon"
-                        />
-                        <span>{{ format(hero.money!) }}</span>
-                    </div>
-                    <div id="status-exp" class="status-item status-item-bold">
-                        <img
-                            src="/project/images/exp.png"
-                            class="status-icon"
-                        />
-                        <span>{{ format(up) }}</span>
-                    </div>
-                    <div id="status-key" class="status-item status-item-bold">
-                        <span style="color: #fca; padding-left: 10%">{{
-                            keys[0]?.toString().padStart(2, '0')
-                        }}</span>
-                        <span style="color: #aad">{{
-                            keys[1]?.toString().padStart(2, '0')
-                        }}</span>
-                        <span style="color: #f88; padding-right: 10%">{{
-                            keys[2]?.toString().padStart(2, '0')
+                    <div
+                        v-if="items.includes('enableHPMax')"
+                        class="status-item"
+                    >
+                        <span class="status-icon">
+                            <img :src="icons.hpmax.src" />
+                        </span>
+                        <span class="status-value">{{
+                            format(hero.hpmax ?? 0)
                         }}</span>
                     </div>
-                    <div v-if="skillOpened" class="status-item">
-                        <span
-                            id="skill-tree"
-                            class="button-text"
-                            @click.stop="openSkillTree"
-                            >技能树</span
+                    <div v-if="items.includes('enableHP')" class="status-item">
+                        <span class="status-icon">
+                            <img :src="icons.hp.src" />
+                        </span>
+                        <span class="status-value">{{
+                            format(hero.hp ?? 0)
+                        }}</span>
+                    </div>
+                    <div
+                        v-if="items.includes('enableMana')"
+                        class="status-item"
+                    >
+                        <span class="status-icon">
+                            <img :src="icons.mana.src" />
+                        </span>
+                        <span class="status-value"
+                            >{{ format(hero.mana ?? 0) }} /
+                            {{ format(hero.manamax ?? 0) }}</span
                         >
                     </div>
-                    <div v-if="skillOpened" class="status-item">
+                    <div v-if="items.includes('enableAtk')" class="status-item">
+                        <span class="status-icon">
+                            <img :src="icons.atk.src" />
+                        </span>
+                        <span class="status-value">{{
+                            format(hero.atk ?? 0)
+                        }}</span>
+                    </div>
+                    <div v-if="items.includes('enableDef')" class="status-item">
+                        <span class="status-icon">
+                            <img :src="icons.def.src" />
+                        </span>
+                        <span class="status-value">{{
+                            format(hero.def ?? 0)
+                        }}</span>
+                    </div>
+                    <div
+                        v-if="items.includes('enableMDef')"
+                        class="status-item"
+                    >
+                        <span class="status-icon">
+                            <img :src="icons.mdef.src" />
+                        </span>
+                        <span class="status-value">{{
+                            format(hero.mdef ?? 0)
+                        }}</span>
+                    </div>
+                    <div
+                        v-if="items.includes('enableMoney')"
+                        class="status-item"
+                    >
+                        <span class="status-icon">
+                            <img :src="icons.money.src" />
+                        </span>
+                        <span class="status-value">{{
+                            format(hero.money ?? 0)
+                        }}</span>
+                    </div>
+                    <div
+                        v-if="
+                            items.includes('enableExp') &&
+                            !items.includes('enableLevelUp')
+                        "
+                        class="status-item"
+                    >
+                        <span class="status-icon">
+                            <img :src="icons.exp.src" />
+                        </span>
+                        <span class="status-value">{{
+                            format(hero.exp ?? 0)
+                        }}</span>
+                    </div>
+                    <div
+                        v-if="
+                            items.includes('enableExp') &&
+                            items.includes('enableLevelUp')
+                        "
+                        class="status-item"
+                    >
+                        <span class="status-icon">
+                            <img :src="icons.up.src" />
+                        </span>
+                        <span class="status-value">{{ format(up ?? 0) }}</span>
+                    </div>
+                    <div
+                        v-if="items.includes('enableKeys')"
+                        class="status-item"
+                        id="status-key"
+                    >
                         <span
-                            id="status-skill"
-                            class="button-text"
-                            @click.stop="openSkill"
-                            >查看技能</span
+                            class="status-value status-key"
+                            v-for="(color, i) of keyColor"
+                            :color="color"
+                            >{{
+                                keys[i]?.toString().padStart(2, '0') ?? '00'
+                            }}</span
                         >
                     </div>
-                    <div v-if="studyOpened" class="status-item">
+                    <div
+                        v-if="items.includes('enablePZF')"
+                        class="status-item status-pzf"
+                    >
                         <span
-                            id="status-study"
-                            class="button-text"
-                            @click.stop="openStudy"
-                            >学习</span
+                            class="status-value status-pzf-value"
+                            :index="i"
+                            v-for="(name, i) of pzfName"
                         >
+                            {{ name }} {{ pzf[i] ?? 0 }}
+                        </span>
+                    </div>
+                    <div
+                        v-if="items.includes('enableDebuff')"
+                        class="status-item status-debuff"
+                    >
+                        <template v-for="(name, i) of debuffName">
+                            <span
+                                :index="i"
+                                class="status-value status-debuff-value"
+                                v-if="debuff[i]"
+                            >
+                                {{ name }}
+                            </span>
+                        </template>
                     </div>
                 </div>
             </Scroll>
@@ -135,9 +183,9 @@ import Box from '../components/box.vue';
 import Scroll from '../components/scroll.vue';
 import { status } from '../plugin/ui/statusBar';
 import { isMobile } from '../plugin/use';
-import { has } from '../plugin/utils';
 
-const skillTree = Mota.Plugin.require('skillTree_g');
+const items = core.flags.statusBarItems;
+const icons = core.statusBar.icons;
 
 const width = ref(
     isMobile ? window.innerWidth - 60 : window.innerWidth * 0.175
@@ -151,27 +199,28 @@ watch(height, n => (updateStatus.value = !updateStatus.value));
 
 const hero = shallowReactive<Partial<HeroStatus>>({});
 const keys = shallowReactive<number[]>([]);
+const pzf = shallowReactive<number[]>([]);
+const debuff = shallowReactive<boolean[]>([]);
 const floor = ref<string>();
 const lvName = ref<string>();
-const skill = ref<string>(flags.autoSkill ? '自动切换' : '无');
 const up = ref(0);
-const spring = ref<number>();
-const skillOpened = ref(core.getFlag('chapter', 0) > 0);
-const studyOpened = ref(skillTree.getSkillLevel(11) > 0);
-const jumpCnt = ref<number>();
+const keyColor = ['yellow', 'blue', 'red'];
+const pzfName = ['破', '炸', '飞'];
+const debuffName = ['毒', '衰', '咒'];
+if (items.includes('enableGreenKey')) keyColor.push('green');
 /**
  * 要展示的勇士属性
  */
 const toShow: (keyof NumbericHeroStatus)[] = [
-    'hp', // 生命
-    'atk', // 攻击
-    'def', // 防御
-    'mdef', // 智力
-    'hpmax', // 生命回复
-    'mana', // 额外攻击
-    'money', // 金币
-    'exp', // 经验
-    'lv' // 等级
+    'atk',
+    'def',
+    'mdef',
+    'hpmax',
+    'mana',
+    'money',
+    'exp',
+    'lv',
+    'manamax'
 ];
 
 watch(status, update);
@@ -183,52 +232,22 @@ function update() {
     toShow.forEach(v => {
         hero[v] = Mota.requireAll('fn').getHeroStatusOn(v);
     });
+    hero.name = core.status.hero.name;
+    hero.hp = core.status.hero.hp;
     keys[0] = core.itemCount('yellowKey');
     keys[1] = core.itemCount('blueKey');
     keys[2] = core.itemCount('redKey');
+    keys[3] = core.itemCount('greenKey');
+    debuff[0] = core.getFlag('poison');
+    debuff[1] = core.getFlag('weak');
+    debuff[2] = core.getFlag('curse');
+    pzf[0] = core.itemCount('pickaxe');
+    pzf[1] = core.itemCount('bomb');
+    pzf[2] = core.itemCount('centerFly');
     floor.value = core.status.thisMap?.title;
     lvName.value = core.getLvName(hero.lv);
-    if (flags.autoSkill) {
-        skill.value = '自动切换';
-    } else {
-        if (flags.blade && flags.bladeOn) {
-            skill.value = '断灭之刃';
-        } else if (flags.shield && flags.shieldOn) {
-            skill.value = '铸剑为盾';
-        } else {
-            skill.value = '无';
-        }
-    }
     up.value = core.getNextLvUpNeed() ?? 0;
-    if (core.hasFlag('spring')) {
-        spring.value = 50 - (flags.springCount ?? 0);
-    } else {
-        spring.value = void 0;
-    }
-    skillOpened.value = core.getFlag('chapter', 0) > 0;
-    studyOpened.value = skillTree.getSkillLevel(11) > 0;
-    jumpCnt.value =
-        flags.skill2 &&
-        !Mota.Plugin.require('skill_g').jumpIgnoreFloor.includes(
-            core.status.floorId
-        )
-            ? 3 - (flags[`jump_${core.status.floorId}`] ?? 0)
-            : void 0;
 }
-
-function openSkillTree() {
-    core.useItem('skill1');
-}
-
-function openSkill() {
-    core.useItem('cross');
-}
-
-function viewMap() {
-    core.ui._drawViewMaps();
-}
-
-function openStudy() {}
 
 onMounted(() => {
     update();
@@ -244,11 +263,12 @@ onMounted(() => {
 }
 
 .status-item {
-    position: relative;
+    display: flex;
+    flex-direction: row;
     max-width: 17.5vw;
-    font-size: 200%;
+    font-size: 150%;
     width: 100%;
-    margin-bottom: 1vh;
+    margin-bottom: 14px;
     text-shadow: 3px 2px 3px #000, 0px 0px 3px #111;
     display: flex;
     flex-direction: row;
@@ -260,10 +280,12 @@ onMounted(() => {
 }
 
 .status-icon {
-    width: 2.8vw;
-    height: 2.8vw;
     margin-right: 10%;
     margin-left: 10%;
+}
+
+.status-value {
+    transform: translateY(2px);
 }
 
 #status-header {
@@ -280,85 +302,44 @@ onMounted(() => {
     height: 100%;
 }
 
-#status-floor {
-    max-width: 17.5vw;
-    font-size: 200%;
-    width: 100%;
-    text-align: center;
-    text-shadow: 3px 2px 3px #000, 0px 0px 3px #111;
-}
-
-#status-lv {
-    max-width: 17.5vw;
-    font-size: 200%;
-    width: 100%;
-    text-align: center;
-    text-shadow: 3px 2px 3px #000, 0px 0px 3px #111;
-}
-
-.status-extra {
-    position: absolute;
-    right: 10%;
-    bottom: 0;
-    font-size: 75%;
-}
-
-#status-mana {
-    line-height: 0;
-    color: rgb(255, 211, 211);
-}
-
-#status-hpmax {
-    line-height: 0;
-    color: rgb(167, 255, 167);
-}
-
-#status-spring {
-    line-height: 0;
-    color: rgb(167, 255, 167);
-    top: 0;
-    font-size: 75%;
-}
-
-#status-jump {
-    line-height: 0;
-    top: 0;
-    font-size: 75%;
-}
-
-#status-key {
+#status-key,
+.status-pzf,
+.status-debuff {
     display: flex;
     flex-direction: row;
     justify-content: space-around;
 }
 
-#skill-tree,
-#status-skill {
-    text-align: center;
-    width: 100%;
+.status-key[color='yellow'] {
+    color: #fca;
+}
+.status-key[color='blue'] {
+    color: #aad;
+}
+.status-key[color='red'] {
+    color: #f88;
+}
+.status-key[color='green'] {
+    color: #8f8;
 }
 
-@media screen and (max-width: 600px) {
-    .status-item {
-        max-width: 40vw;
-        font-size: 120%;
-    }
+.status-pzf-value[index='0'] {
+    color: #bc6e27;
+}
+.status-pzf-value[index='1'] {
+    color: #fa14b9;
+}
+.status-pzf-value[index='2'] {
+    color: #8db600;
+}
 
-    #status-floor {
-        max-width: 40vw;
-        font-size: 120%;
-        width: 100%;
-    }
-
-    #status-lv {
-        max-width: 40vw;
-        font-size: 120%;
-        width: 100%;
-    }
-
-    .status-icon {
-        width: 28px;
-        height: 28px;
-    }
+.status-debuff-value[index='0'] {
+    color: #affca8;
+}
+.status-debuff-value[index='1'] {
+    color: #feccd0;
+}
+.status-debuff-value[index='2'] {
+    color: #c2f4e7;
 }
 </style>

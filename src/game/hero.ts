@@ -54,7 +54,6 @@ function getRealStatus(
     name: keyof HeroStatus | 'all' | (keyof HeroStatus)[],
     floorId: FloorIds = core.status.floorId
 ): any {
-    const { getSkillLevel } = Mota.Plugin.require('skillTree_g');
     if (name instanceof Array) {
         return Object.fromEntries(
             name.map(v => [v, getRealStatus(status, v, floorId)])
@@ -74,33 +73,8 @@ function getRealStatus(
     let s = (status?.[name] ?? core.status.hero[name]) as number;
     if (s === null || s === void 0) {
         throw new ReferenceError(
-            `Wrong hero status property name is delivered: ${name}`
+            `Incorrect hero status property name is delivered: ${name}`
         );
-    }
-
-    // 永夜、极昼
-    if (name === 'atk' || name === 'def') {
-        s += window.flags?.[`night_${floorId}`] ?? 0;
-    }
-
-    // 技能
-    if (flags.bladeOn && flags.blade) {
-        const level = getSkillLevel(2);
-        if (name === 'atk') {
-            s *= 1 + 0.1 * level;
-        }
-        if (name === 'def') {
-            s *= 1 - 0.1 * level;
-        }
-    }
-    if (flags.shield && flags.shieldOn) {
-        const level = getSkillLevel(10);
-        if (name === 'atk') {
-            s *= 1 - 0.1 * level;
-        }
-        if (name === 'def') {
-            s *= 1 + 0.1 * level;
-        }
     }
 
     // buff

@@ -884,7 +884,12 @@ control.prototype._moveAction_popAutomaticRoute = function () {
 
 ////// 让勇士开始移动 //////
 control.prototype.moveHero = function (direction, callback) {
-    // see src/plugin/game/popup.js
+    // 如果正在移动，直接return
+    if (core.status.heroMoving != 0) return;
+    if (core.isset(direction)) core.setHeroLoc('direction', direction);
+
+    if (callback) return this.moveAction(callback);
+    this._moveHero_moving();
 };
 
 control.prototype._moveHero_moving = function () {
@@ -1444,7 +1449,7 @@ control.prototype.updateCheckBlock = function (floorId) {
 
 ////// 检查并执行领域、夹击、阻击事件 //////
 control.prototype.checkBlock = function () {
-    // see src/plugin/game/popup.js
+    // see src/plugin/game/enemy/checkblock.js
 };
 
 control.prototype._checkBlock_disableQuickShop = function () {
@@ -1501,7 +1506,46 @@ control.prototype.drawDamage = function (ctx, floorId = core.status.floorId) {
 };
 
 control.prototype._drawDamage_draw = function (ctx, onMap) {
-    // Deprecated. See src/plugin/game/fx/checkblock.js
+    if (!core.hasItem('book')) return;
+
+    core.setFont(ctx, 'bold 11px Arial');
+    core.setTextAlign(ctx, 'left');
+    core.status.damage.data.forEach(function (one) {
+        var px = one.px,
+            py = one.py;
+        if (onMap && core.bigmap.v2) {
+            px -= core.bigmap.posX * 32;
+            py -= core.bigmap.posY * 32;
+            if (
+                px < -32 * 2 ||
+                px > core._PX_ + 32 ||
+                py < -32 ||
+                py > core._PY_ + 32
+            )
+                return;
+        }
+        core.fillBoldText(ctx, one.text, px, py, one.color);
+    });
+
+    core.setTextAlign(ctx, 'center');
+    core.status.damage.extraData.forEach(function (one) {
+        var px = one.px,
+            py = one.py;
+        if (onMap && core.bigmap.v2) {
+            px -= core.bigmap.posX * 32;
+            py -= core.bigmap.posY * 32;
+            if (
+                px < -32 ||
+                px > core._PX_ + 32 ||
+                py < -32 ||
+                py > core._PY_ + 32
+            )
+                return;
+        }
+        var alpha = core.setAlpha(ctx, one.alpha);
+        core.fillBoldText(ctx, one.text, px, py, one.color);
+        core.setAlpha(ctx, alpha);
+    });
 };
 
 // ------ 录像相关 ------ //
@@ -2334,9 +2378,6 @@ control.prototype._doSL_load = function (id, callback) {
             id == 'autoSave' ? id : 'save' + id,
             null,
             function (data) {
-                if (!main.replayChecking && data) {
-                    Mota.require('var', 'fixedUi').closeByName('start');
-                }
                 if (id == 'autoSave' && data != null) {
                     core.saves.autosave.data = data;
                     if (!(core.saves.autosave.data instanceof Array)) {
@@ -2393,6 +2434,9 @@ control.prototype._doSL_load_afterGet = function (id, data) {
     }
     core.ui.closePanel();
     core.loadData(data, function () {
+        if (!main.replayChecking) {
+            Mota.require('var', 'fixedUi').closeByName('start');
+        }
         core.removeFlag('__fromLoad__');
         core.drawTip('读档成功');
         if (id != 'autoSave') {
@@ -2812,17 +2856,17 @@ control.prototype.getStatus = function (name) {
 
 ////// 从status中获得属性，如果不存在则从勇士属性中获取 //////
 control.prototype.getStatusOrDefault = function (status, name) {
-    // Deprecated. See src/plugin/game/hero.ts
+    // Deprecated. See src/game/hero.ts
 };
 
 ////// 获得勇士实际属性（增幅后的） //////
 control.prototype.getRealStatus = function (name) {
-    // Deprecated. See src/plugin/game/hero.ts
+    // Deprecated. See src/game/hero.ts
 };
 
 ////// 从status中获得实际属性（增幅后的），如果不存在则从勇士属性中获取 //////
 control.prototype.getRealStatusOrDefault = function (status, name) {
-    // Deprecated. See src/plugin/game/hero.ts
+    // Deprecated. See src/game/hero.ts
 };
 
 ////// 获得勇士原始属性（无装备和衰弱影响） //////

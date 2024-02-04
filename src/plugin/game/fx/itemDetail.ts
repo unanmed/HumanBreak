@@ -1,6 +1,13 @@
-import { ensureFloorDamage } from '@/game/enemy/damage';
+import { Damage } from '@/game/enemy/damage';
 
 export function init() {
+    const origin = core.control.updateStatusBar;
+    core.updateStatusBar = core.control.updateStatusBar = function () {
+        if (core.getFlag('__statistics__')) return;
+        // @ts-ignore
+        else return origin.apply(core.control, arguments);
+    };
+
     core.control.updateDamage = function (floorId = core.status.floorId, ctx) {
         if (!floorId || core.status.gameOver || main.mode !== 'play') return;
         const onMap = ctx == null;
@@ -17,7 +24,7 @@ export function init() {
             if (width * height > core.bigmap.threshold) return;
         }
         // 计算伤害
-        ensureFloorDamage(floorId);
+        Damage.ensureFloorDamage(floorId);
 
         floor.enemy.extract();
         floor.enemy.calDamage(true);
