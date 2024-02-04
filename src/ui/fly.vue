@@ -103,6 +103,7 @@ import { GameUi } from '@/core/main/custom/ui';
 import { gameKey } from '@/core/main/init/hotkey';
 import { createChangable } from '@/plugin/ui/common';
 import { mainUi } from '@/core/main/init/ui';
+import { mainSetting } from '@/core/main/setting';
 
 const props = defineProps<{
     num: number;
@@ -118,7 +119,8 @@ const nowArea = ref(
 const nowFloor = ref(core.status.floorId);
 const noBorder = ref(true);
 const tradition = ref(false);
-let scale = isMobile ? 1.5 : 3;
+let scale =
+    ((isMobile ? 1.5 : 3) * mainSetting.getValue('ui.mapScale', 100)) / 100;
 let ox = 0;
 let oy = 0;
 let drawedThumbnail: Partial<Record<FloorIds, boolean>> = {};

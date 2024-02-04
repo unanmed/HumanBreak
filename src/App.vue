@@ -94,16 +94,4 @@ function show(index: number) {
     display: none;
     z-index: 0;
 }
-
-@media screen and (max-width: 600px) {
-    #ui {
-        width: 100%;
-        height: 100%;
-    }
-
-    #ui-list {
-        width: 100%;
-        height: 100%;
-    }
-}
 </style>

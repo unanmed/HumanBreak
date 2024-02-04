@@ -5,6 +5,8 @@ import { has, triggerFullscreen } from '@/plugin/utils';
 import { createSettingComponents } from './init/settings';
 import { bgm } from '../audio/bgm';
 import { SoundEffect } from '../audio/sound';
+import settingsText from '@/data/settings.json';
+import { isMobile } from '@/plugin/use';
 
 export interface SettingComponentProps {
     item: MotaSettingItem;
@@ -20,6 +22,7 @@ export interface MotaSettingItem<T extends MotaSettingType = MotaSettingType> {
     key: string;
     value: T;
     controller: SettingComponent;
+    description?: string;
     defaults?: boolean | number;
     step?: [number, number, number];
     display?: (value: T) => string;
@@ -195,6 +198,17 @@ export class MotaSetting extends EventEmitter<SettingEvent> {
         return this;
     }
 
+    /**
+     * 设置一个设置的说明
+     * @param key 要设置的设置的id
+     * @param desc 设置的说明
+     */
+    setDescription(key: string, desc: string) {
+        const setting = this.getSettingBy(key.split('.'));
+        setting.description = desc;
+        return this;
+    }
+
     private getSettingBy(list: string[]) {
         let now: MotaSetting = this;
 
@@ -219,15 +233,13 @@ interface SettingDisplayerEvent extends EmitableEvent {
 
 export class SettingDisplayer extends EventEmitter<SettingDisplayerEvent> {
     setting: MotaSetting;
-    textInfo: SettingText;
     /** 选项选中栈 */
     selectStack: string[] = [];
     displayInfo: SettingDisplayInfo[] = reactive([]);
 
-    constructor(setting: MotaSetting, textInfo: SettingText) {
+    constructor(setting: MotaSetting) {
         super();
         this.setting = setting;
-        this.textInfo = textInfo;
         this.update();
     }
 
@@ -252,7 +264,6 @@ export class SettingDisplayer extends EventEmitter<SettingDisplayerEvent> {
     update() {
         const list = this.selectStack;
         let now = this.setting;
-        let nowText: string[] | SettingText = this.textInfo;
         this.displayInfo = [];
 
         for (let i = 0; i < list.length - 1; i++) {
@@ -271,17 +282,16 @@ export class SettingDisplayer extends EventEmitter<SettingDisplayerEvent> {
             });
 
             now = item;
-            if (nowText && !(nowText instanceof Array))
-                nowText = nowText[list[i]];
         }
-        if (nowText && !(nowText instanceof Array))
-            nowText = nowText[list.at(-1)!];
 
         const last = now.list[list.at(-1)!];
         if (last) {
+            const desc = last.description;
+            const text = desc ? desc.split('\n') : ['请选择设置'];
+
             this.displayInfo.push({
                 item: last,
-                text: nowText instanceof Array ? nowText : ['请选择设置'],
+                text,
                 list: now.list
             });
             if (last.value instanceof MotaSetting) {
@@ -445,7 +455,7 @@ mainSetting
         new MotaSetting().register(
             'mapScale',
             '小地图楼传缩放',
-            300,
+            100,
             COM.Number,
             [50, 1000, 50]
         )
@@ -471,7 +481,11 @@ loading.once('coreInit', () => {
         'utils.betterLoad': !!storage.getValue('utils.betterLoad', true),
         'utils.autoScale': !!storage.getValue('utils.autoScale', true),
         'fx.paraLight': !!storage.getValue('fx.paraLight', true),
-        'fx.frag': !!storage.getValue('fx.frag', true)
+        'fx.frag': !!storage.getValue('fx.frag', true),
+        'ui.mapScale': storage.getValue(
+            'ui.mapScale',
+            isMobile ? 300 : Math.floor(window.innerWidth / 600) * 50
+        )
     });
 });
 
@@ -481,3 +495,25 @@ hook.on('reset', () => {
         'action.autoSkill': flags.autoSkill ?? true
     });
 });
+
+interface SettingTextData {
+    [x: string]: string[] | SettingTextData;
+}
+
+function getSettingText(obj: SettingTextData, key?: string) {
+    for (const [k, value] of Object.entries(obj)) {
+        const setKey = key ? key + '.' + k : k;
+        if (value instanceof Array) {
+            mainSetting.setDescription(setKey, value.join('\n'));
+        } else {
+            getSettingText(value, setKey);
+        }
+    }
+}
+getSettingText(settingsText);
+
+mainSetting
+    .setDescription('audio.bgmEnabled', `是否开启背景音乐`)
+    .setDescription('audio.bgmVolume', `背景音乐的音量`)
+    .setDescription('audio.soundEnabled', `是否开启音效`)
+    .setDescription('audio.soundVolume', `音效的音量`);

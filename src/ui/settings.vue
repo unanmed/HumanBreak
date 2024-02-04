@@ -99,7 +99,7 @@ const display = shallowRef<SettingDisplayInfo[]>([]);
 const selectedItem = computed(() => display.value.at(-1)?.item);
 const update = ref(false);
 
-const displayer = new SettingDisplayer(setting, text);
+const displayer = new SettingDisplayer(setting);
 displayer.on('update', (stack, dis) => {
     display.value = dis;
     update.value = !update.value;
