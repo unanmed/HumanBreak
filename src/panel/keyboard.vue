@@ -6,10 +6,10 @@
             @click="keyboard.emitKey(key, i)"
             :active="checkAssist(assist, key.key)"
             :style="{
-                left: `${key.x}px`,
-                top: `${key.y}px`,
-                width: `${key.width}px`,
-                height: `${key.height}px`
+                left: `${key.x * scale}px`,
+                top: `${key.y * scale}px`,
+                width: `${key.width * scale}px`,
+                height: `${key.height * scale}px`
             }"
         >
             <span
@@ -24,6 +24,7 @@
 import { checkAssist } from '@/core/main/custom/hotkey';
 import { Keyboard } from '@/core/main/custom/keyboard';
 import { KeyboardEmits } from '@/core/main/custom/keyboard';
+import { mainSetting } from '@/core/main/setting';
 import { KeyCodeUtils } from '@/plugin/keyCodes';
 import { nextTick, onUnmounted, ref } from 'vue';
 
@@ -31,8 +32,10 @@ const props = defineProps<{
     keyboard: Keyboard;
 }>();
 
+const scale = mainSetting.getValue('screen.keyScale', 100) / 100;
+
 const assist = ref(props.keyboard.assist);
-const fontSize = `${props.keyboard.fontSize}px`;
+const fontSize = `${props.keyboard.fontSize * scale}px`;
 
 const [width, height] = (() => {
     const key = props.keyboard;

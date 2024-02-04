@@ -321,7 +321,7 @@ onUnmounted(() => {
         z-index: 1;
         flex-direction: column;
         transition: height 0.2s ease;
-        width: 20%;
+        width: 25%;
 
         .start-button {
             position: relative;
@@ -376,7 +376,6 @@ onUnmounted(() => {
                 rgb(255, 255, 255),
                 rgb(255, 251, 0)
             );
-            margin-bottom: 2%;
         }
 
         #back {
@@ -385,7 +384,6 @@ onUnmounted(() => {
                 rgb(255, 255, 255),
                 rgb(132, 132, 132)
             );
-            margin-bottom: 2%;
         }
     }
 
@@ -394,22 +392,22 @@ onUnmounted(() => {
         display: flex;
         align-items: center;
         flex-direction: row-reverse;
-        justify-content: flex-start;
+        justify-content: space-around;
         right: 5%;
         bottom: 10%;
         font-size: 1.3em;
         z-index: 1;
-        width: 50%;
+        width: 12%;
+        background-color: #0008;
+        border-radius: 10px;
 
         .setting-buttons {
-            margin-left: 4%;
             color: white;
             transition: color 0.2s linear;
             cursor: pointer;
         }
 
         .setting-buttons2 {
-            margin-left: 4%;
             position: relative;
             top: 1px;
         }

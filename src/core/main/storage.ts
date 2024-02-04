@@ -87,7 +87,7 @@ export class GameStorage<T extends object = any> {
      * @param key 存储名称
      */
     static fromAuthor(_: any, key: string) {
-        return `${core.firstData.author}@${key}`;
+        return `${data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.author}@${key}`;
     }
 
     /**

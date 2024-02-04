@@ -314,7 +314,7 @@ export class SettingDisplayer extends EventEmitter<SettingDisplayerEvent> {
 
 export const mainSetting = new MotaSetting();
 // 添加不参与全局存储的设置
-MotaSetting.noStorage.push('action.autoSkill', 'screen.fullscreen');
+MotaSetting.noStorage.push('screen.fullscreen');
 
 const storage = new GameStorage(GameStorage.fromAuthor('AncTe', 'setting'));
 
@@ -402,9 +402,7 @@ mainSetting
         '显示设置',
         new MotaSetting()
             .register('fullscreen', '全屏游戏', false, COM.Boolean)
-            .register('halo', '光环显示', true, COM.Boolean)
             .register('itemDetail', '宝石血瓶显伤', true, COM.Boolean)
-            .register('heroDetail', '勇士显伤', false, COM.Boolean)
             .register('transition', '界面动画', false, COM.Boolean)
             .register('antiAlias', '抗锯齿', false, COM.Boolean)
             .register('fontSize', '字体大小', 16, COM.Number, [8, 28, 1])
@@ -417,7 +415,6 @@ mainSetting
         'action',
         '操作设置',
         new MotaSetting()
-            .register('autoSkill', '自动切换技能', true, COM.Boolean)
             .register('fixed', '定点查看', true, COM.Boolean)
             .register('hotkey', '快捷键', false, COM.HotkeySetting)
             .setDisplayFunc('hotkey', () => '')
@@ -436,16 +433,12 @@ mainSetting
     .register(
         'utils',
         '系统设置',
-        new MotaSetting()
-            .register('betterLoad', '优化加载', true, COM.Boolean)
-            .register('autoScale', '自动放缩', true, COM.Boolean)
+        new MotaSetting().register('autoScale', '自动放缩', true, COM.Boolean)
     )
     .register(
         'fx',
         '特效设置',
-        new MotaSetting()
-            .register('paraLight', '野外阴影', true, COM.Boolean)
-            .register('frag', '打怪特效', true, COM.Boolean)
+        new MotaSetting().register('frag', '打怪特效', true, COM.Boolean)
     )
     .register(
         'ui',
