@@ -1,7 +1,3 @@
-import { upgradeSkill } from './skillTree';
-
-const replayableSettings = ['autoSkill'];
-
 let cliping = false;
 let startIndex = 0;
 
@@ -21,45 +17,6 @@ export function clip(...replace: string[]) {
 }
 
 export function init() {
-    // 注册修改设置的录像操作
-    core.registerReplayAction('settings', name => {
-        if (!name.startsWith('set:')) return false;
-        const [, setting, value] = name.split(':');
-        const v = eval(value);
-        if (typeof v !== 'boolean') return false;
-        if (!replayableSettings.includes(setting)) return false;
-        flags[setting] = v;
-        core.status.route.push(name);
-        core.replay();
-        return true;
-    });
-
-    core.registerReplayAction('upgradeSkill', name => {
-        if (!name.startsWith('skill:')) return false;
-        const skill = parseInt(name.slice(6));
-        upgradeSkill(skill);
-        core.status.route.push(name);
-        core.replay();
-        return true;
-    });
-
-    core.registerReplayAction('study', name => {
-        // todo
-        // if (!name.startsWith('study:')) return false;
-        // const [num, x, y] = name
-        //     .slice(6)
-        //     .split(',')
-        //     .map(v => parseInt(v));
-        // if (!canStudySkill(num)) return false;
-        // const id = core.getBlockId(x, y);
-        // const enemy = core.getEnemyInfo(id, void 0, x, y);
-        // if (!enemy.special.includes(num)) return false;
-        // studySkill(enemy, num);
-        // core.status.route.push(name);
-        // core.replay();
-        return true;
-    });
-
     // 商店
     let shopOpened = false;
     let openedShopId = '';

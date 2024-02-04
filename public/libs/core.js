@@ -277,6 +277,7 @@ core.prototype.init = async function (coreData, callback) {
     this._forwardFuncs();
     for (var key in coreData) core[key] = coreData[key];
     await this._loadGameProcess();
+    await this._loadPluginAsync();
     this._init_flags();
     this._init_platform();
     this._init_others();
@@ -302,9 +303,9 @@ core.prototype.init = async function (coreData, callback) {
 };
 
 core.prototype.initSync = function (coreData, callback) {
-    this._loadGameProcessSync();
     this._forwardFuncs();
     for (var key in coreData) core[key] = coreData[key];
+    this._loadGameProcessSync();
     this._init_flags();
     this._init_platform();
     this._init_others();
@@ -312,6 +313,27 @@ core.prototype.initSync = function (coreData, callback) {
     core.loader._load(function () {
         core._afterLoadResources(callback);
     });
+};
+
+core.prototype._loadPluginAsync = async function () {
+    if (!main.useCompress) {
+        await main.loadScript(`project/plugins.js?v=${main.version}`);
+    } else {
+        await main.loadScript(`project/plugins.min.js?v=${main.version}`);
+    }
+    for (const [key, value] of Object.entries(
+        plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1
+    )) {
+        try {
+            value.call(plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1);
+        } catch (e) {
+            throw new Error(`Plugin '${key}' init fail. Error info: ${e}`);
+        }
+    }
+};
+
+core.prototype._loadPluginSync = function () {
+    main.loadMod('project', 'plugins', () => 0);
 };
 
 core.prototype._loadGameProcess = async function () {

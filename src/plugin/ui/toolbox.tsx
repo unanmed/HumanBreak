@@ -1,5 +1,3 @@
-import { has } from '../utils';
-
 interface ClsMap {
     tools: '消耗道具';
     constants: '永久道具';

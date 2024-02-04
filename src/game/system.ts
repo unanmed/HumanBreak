@@ -7,8 +7,16 @@ import type {
     IndexedEventEmitter
 } from '@/core/common/eventEmitter';
 import type { loading } from './game';
-import type { Hotkey } from '@/core/main/custom/hotkey';
-import type { Keyboard } from '@/core/main/custom/keyboard';
+import type {
+    Hotkey,
+    unwarpBinary,
+    checkAssist,
+    isAssist
+} from '@/core/main/custom/hotkey';
+import type {
+    Keyboard,
+    generateKeyboardEvent
+} from '@/core/main/custom/keyboard';
 import type { CustomToolbar } from '@/core/main/custom/toolbar';
 import type { Focus, GameUi, UiController } from '@/core/main/custom/ui';
 import type { gameListener, hook } from './game';
@@ -17,8 +25,25 @@ import type { GameStorage } from '@/core/main/storage';
 import type { DamageEnemy, EnemyCollection } from './enemy/damage';
 import type { specials } from './enemy/special';
 import type { Range } from '@/plugin/game/range';
-import type { KeyCode } from '@/plugin/keyCodes';
+import type { KeyCode, ScanCode } from '@/plugin/keyCodes';
 import type { Ref } from 'vue';
+import type { MComponent, m, icon } from '@/core/main/layout';
+import type { addAnimate, removeAnimate } from '@/plugin/animateController';
+import type { createSettingComponents } from '@/core/main/init/settings';
+import type {
+    createToolbarComponents,
+    createToolbarEditorComponents
+} from '@/core/main/init/toolbar';
+import type * as use from '@/plugin/use';
+import type * as mark from '@/plugin/mark';
+import type * as keyCodes from '@/plugin/keyCodes';
+import type * as bookTools from '@/plugin/ui/book';
+import type * as commonTools from '@/plugin/ui/common';
+import type * as equipboxTools from '@/plugin/ui/equipbox';
+import type * as fixedTools from '@/plugin/ui/fixed';
+import type * as flyTools from '@/plugin/ui/fly';
+import type * as statusBarTools from '@/plugin/ui/statusBar';
+import type * as toolboxTools from '@/plugin/ui/toolbox';
 import type * as battle from './enemy/battle';
 import type * as hero from './hero';
 
@@ -27,7 +52,7 @@ interface ClassInterface {
     EventEmitter: typeof EventEmitter;
     IndexedEventEmitter: typeof IndexedEventEmitter;
     Disposable: typeof Disposable;
-    // 定义于渲染进程，录像中会进行polyfill，但是不执行任何内容
+    // 定义于渲染进程，录像验证使用会报错
     GameStorage: typeof GameStorage;
     MotaSetting: typeof MotaSetting;
     SettingDisplayer: typeof SettingDisplayer;
@@ -41,7 +66,7 @@ interface ClassInterface {
     SoundEffect: typeof SoundEffect;
     SoundController: typeof SoundController;
     BgmController: typeof BgmController;
-    // todo: 放到插件 ShaderEffect: typeof ShaderEffect;
+    MComponent: typeof MComponent;
     // 定义于游戏进程，渲染进程依然可用
     Range: typeof Range;
     EnemyCollection: typeof EnemyCollection;
@@ -52,11 +77,15 @@ type _IBattle = typeof battle;
 type _IHero = typeof hero;
 
 interface FunctionInterface extends _IBattle, _IHero {
-    // 定义于渲染进程，录像中会进行polyfill，但是不执行任何内容
-    readyAllResource(): void;
-    // 定义于游戏进程，渲染进程依然可用
-
-    // todo
+    // 定义于渲染进程，录像验证中会出错
+    m: typeof m;
+    icon: typeof icon;
+    unwrapBinary: typeof unwarpBinary;
+    checkAssist: typeof checkAssist;
+    isAssist: typeof isAssist;
+    generateKeyboardEvent: typeof generateKeyboardEvent;
+    addAnimate: typeof addAnimate;
+    removeAnimate: typeof removeAnimate;
 }
 
 interface VariableInterface {
@@ -69,7 +98,7 @@ interface VariableInterface {
     mainUi: UiController;
     fixedUi: UiController;
     KeyCode: typeof KeyCode;
-    // isMobile: boolean;
+    ScanCode: typeof ScanCode;
     bgm: BgmController;
     sound: SoundController;
     settingStorage: GameStorage;
@@ -79,7 +108,23 @@ interface VariableInterface {
     enemySpecials: typeof specials;
 }
 
-interface ModuleInterface {}
+interface ModuleInterface {
+    CustomComponents: {
+        createSettingComponents: typeof createSettingComponents;
+        createToolbarComponents: typeof createToolbarComponents;
+        createToolbarEditorComponents: typeof createToolbarEditorComponents;
+    };
+    Use: typeof use;
+    Mark: typeof mark;
+    KeyCodes: typeof keyCodes;
+    UITools: typeof bookTools &
+        typeof commonTools &
+        typeof equipboxTools &
+        typeof fixedTools &
+        typeof flyTools &
+        typeof statusBarTools &
+        typeof toolboxTools;
+}
 
 interface SystemInterfaceMap {
     class: ClassInterface;
@@ -516,7 +561,8 @@ function r<T = undefined>(
     fn: (this: T, packages: PackageInterface) => void,
     thisArg?: T
 ) {
-    if (!main.replayChecking) fn.call(thisArg as T, MPackage.requireAll());
+    if (!main.replayChecking || main.mode === 'editor')
+        fn.call(thisArg as T, MPackage.requireAll());
 }
 
 /**
@@ -535,7 +581,7 @@ function rf<F extends (...params: any) => any, T>(
     thisArg?: T
 ): (this: T, ...params: Parameters<F>) => ReturnType<F> | undefined {
     // @ts-ignore
-    if (main.replayChecking) return () => {};
+    if (main.replayChecking || main.mode === 'editor') return () => {};
     else {
         return (...params) => {
             return fn.call(thisArg, ...params);

@@ -254,6 +254,51 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             core.changeFloor(toId, stair, loc, null, callback);
 
             return true;
+        },
+        afterGetItem: function () {
+            // 获得一个道具后触发的事件
+            // itemId：获得的道具ID；x和y是该道具所在的坐标
+            // isGentleClick：是否是轻按触发的
+
+            const potionItems = [
+                'redPotion',
+                'bluePotion',
+                'yellowPotion',
+                'greenPotion'
+            ];
+
+            if (potionItems.includes(itemId)) core.playSound('回血');
+            else core.playSound('获得道具');
+
+            const todo = [];
+            // 检查该点的获得道具后事件。
+            if (core.status.floorId == null) return;
+            const event =
+                core.floors[core.status.floorId].afterGetItem[`${x},${y}`];
+            if (
+                event &&
+                (event instanceof Array ||
+                    !isGentleClick ||
+                    !event.disableOnGentleClick)
+            ) {
+                core.unshift(todo, event);
+            }
+
+            if (todo.length > 0) core.insertAction(todo, x, y);
+        },
+        afterOpenDoor: function () {
+            // 开一个门后触发的事件
+            const todo = [];
+            // 检查该点的获得开门后事件。
+            if (core.status.floorId == null) return;
+            const event =
+                core.floors[core.status.floorId].afterOpenDoor[`${x},${y}`];
+            if (event) core.unshift(todo, event);
+
+            if (todo.length > 0) core.insertAction(todo, x, y);
+
+            if (core.status.event.id == null) core.continueAutomaticRoute();
+            else core.clearContinueAutomaticRoute();
         }
     },
     control: {

@@ -8,7 +8,7 @@
  * Inspired somewhat from https://msdn.microsoft.com/en-us/library/windows/desktop/dd375731(v=vs.85).aspx
  * But these are "more general", as they should work across browsers & OS`s.
  */
-export  enum KeyCode {
+export enum KeyCode {
 	DependsOnKbLayout = -1,
 
 	/**
@@ -223,7 +223,7 @@ export  enum KeyCode {
 /**
  * keyboardEvent.code
  */
-export const enum ScanCode {
+export enum ScanCode {
 	DependsOnKbLayout = -1,
 	None,
 	Hyper,

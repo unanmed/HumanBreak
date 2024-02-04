@@ -1,8 +1,10 @@
+import { loading } from '@/game/game';
+
 const animation: ((time: number) => void)[] = [];
 
 let animateTime = 0;
 
-export default function init() {
+loading.once('coreInit', () => {
     core.registerAnimationFrame('animateController', true, time => {
         if (time - animateTime <= core.values.animateSpeed) return;
         for (const fn of animation) {
@@ -10,8 +12,7 @@ export default function init() {
         }
         animateTime = core.animateFrame.animateTime;
     });
-    return { addAnimate, removeAnimate };
-}
+});
 
 /**
  * 添加一个动画
