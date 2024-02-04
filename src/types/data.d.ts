@@ -117,6 +117,11 @@ interface FirstData {
      * 升级事件
      */
     levelUp: LevelUpEvent;
+
+    /**
+     * 游戏作者
+     */
+    author: string;
 }
 
 /**

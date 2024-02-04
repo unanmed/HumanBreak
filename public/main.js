@@ -2,7 +2,7 @@
 function main() {
     //------------------------ 用户修改内容 ------------------------//
 
-    this.version = '1.0.0'; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
+    this.version = '2.A'; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
 
     this.useCompress = false; // 是否使用压缩文件
     this.pluginUseCompress = false;
@@ -213,17 +213,10 @@ function main() {
     this.floors = {};
     this.canvas = {};
 
-    this.__VERSION__ = '2.10.0';
-    this.__VERSION_CODE__ = 510;
+    this.__VERSION__ = '2.A';
+    this.__VERSION_CODE__ = 600;
 
     this.timestamp = 0;
-
-    // 远程资源地址，在线游戏中，塔本体不包含任何资源，只包含源码，从而可以降低游戏本体的体积并平均分担资源包体积
-    // 从而可以优化加载并避免网站发布的大小限制
-    this.RESOURCE_TYPE = 'dev';
-    this.RESOURCE_URL = '';
-    this.RESOURCE_SYMBOL = '';
-    this.RESOURCE_INDEX = {};
 }
 // >>>> body end
 

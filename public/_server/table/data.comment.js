@@ -185,6 +185,14 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "唯一英文标识符",
 					"_data": "游戏的唯一英文标识符。由英文、数字、下划线组成，不能超过30个字符。\n此项必须修改，其将直接影响到存档的定位！"
 				},
+				"author": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_string": true,
+					"_range": "/^[a-zA-Z0-9_]{1,30}$/.test(thiseval)",
+					"_docs": "作者名称",
+					"_data": "作者名称，用于设置在同一个作者间互通，若此值填写一样，那么所有GameStorage将会互通。默认是匿名Annoymous"
+				},
 				"version": {
 					"_leaf": true,
 					"_type": "textarea",

@@ -83,11 +83,11 @@ export class GameStorage<T extends object = any> {
 
     /**
      * 获取与作者相关联的存储键
-     * @param author 作者名称
+     * @param _ 填充参数，无用
      * @param key 存储名称
      */
-    static fromAuthor(author: string, key: string) {
-        return `${author}@${key}`;
+    static fromAuthor(_: any, key: string) {
+        return `${core.firstData.author}@${key}`;
     }
 
     /**
