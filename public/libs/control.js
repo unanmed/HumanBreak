@@ -3398,7 +3398,9 @@ control.prototype.getPlayingSounds = function (name) {
 ////// 检查bgm状态 //////
 control.prototype.checkBgm = function () {
     const bgm = Mota.require('var', 'bgm');
-    if (!bgm.playing) {
+    if (bgm.disable) {
+        bgm.pause();
+    } else if (!bgm.playing) {
         bgm.changeTo(bgm.now ?? main.startBgm);
     }
 };

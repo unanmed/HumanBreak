@@ -210,6 +210,8 @@ gameKey
 function bgm() {
     core.triggerBgm();
     soundChecked.value = !soundChecked.value;
+    mainSetting.setValue('audio.bgmEnabled', soundChecked.value);
+    console.log(mainSetting.getValue('audio.bgmEnabled'));
 }
 
 async function setFullscreen() {

@@ -51,6 +51,7 @@ export class SoundEffect extends AudioPlayer {
         });
 
         this._stereo = stereo;
+        this.initAudio(stereo);
     }
 
     /**
@@ -70,6 +71,8 @@ export class SoundEffect extends AudioPlayer {
         this.panner = null;
         this.merger = null;
         if (stereo) {
+            console.log(1);
+
             this.panner = ac.createPanner();
             this.panner.connect(this.gain);
             if (channel === 1) {
@@ -131,6 +134,7 @@ export class SoundEffect extends AudioPlayer {
      */
     setPanner(source: Partial<Panner>, listener: Partial<Listener>) {
         if (!this.panner) return;
+        console.log(2);
         for (const [key, value] of Object.entries(source)) {
             this.panner[key as keyof Panner].value = value;
         }
@@ -149,12 +153,12 @@ export class SoundController extends ResourceController<
 
     /**
      * 添加一个新的音频
-     * @param uri 音频的uri
+     * @param uri 音频的uri，由于音频也是一种资源，因此格式为`sounds.xxx`
      * @param data 音频的ArrayBuffer信息，会被解析为AudioBuffer
      */
     add(uri: string, data: ArrayBuffer) {
         const stereo = resource.stereoSE.includes(uri);
-        const se = new SoundEffect(data, stereo);
+        const se = new SoundEffect(data, true);
         if (this.list[uri]) {
             console.warn(`Repeated sound effect: '${uri}'.`);
         }

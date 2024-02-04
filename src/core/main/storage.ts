@@ -1,3 +1,5 @@
+import { has } from '@/plugin/utils';
+
 export class GameStorage<T extends object = any> {
     static list: GameStorage<any>[] = [];
 
@@ -40,7 +42,7 @@ export class GameStorage<T extends object = any> {
     getValue<K extends keyof T>(key: K, defaults: T[K]): T[K];
     getValue<T>(key: string, defaults?: T): T;
     getValue<K extends keyof T>(key: K, defaults?: T[K]) {
-        if (this.data[key]) return this.data[key];
+        if (has(this.data[key])) return this.data[key];
         else {
             if (defaults !== void 0) {
                 this.data[key] = defaults;
