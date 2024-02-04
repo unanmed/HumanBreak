@@ -236,7 +236,7 @@ export class BgmController
                 if (tran!.endVolume === 0) {
                     bgm.pause();
                 } else {
-                    bgm.volume = ani.value.volume * this.volume;
+                    bgm.volume = tran!.endVolume * this.volume;
                 }
                 this.transitionData.delete(id);
             };
