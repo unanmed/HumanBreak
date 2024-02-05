@@ -1047,7 +1047,7 @@ editor_file = function (editor, callback) {
             for (var id_ in fmap) {
                 fraw = fraw.replace('"' + id_ + '"', fmap[id_])
             }
-            var datastr = 'var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = \n';
+            var datastr = '///<reference path="../../src/types/core.d.ts" />\nvar functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = \n';
             datastr += fraw;
             fs.writeFile('project/functions.js', encode(datastr), 'base64', function (err, data) {
                 callback(err);

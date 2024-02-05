@@ -1,25 +1,23 @@
-import typescript from '@rollup/plugin-typescript';
-import fs from 'fs-extra';
-import * as rollup from 'rollup';
-import resolve from '@rollup/plugin-node-resolve';
+import { build } from 'vite';
+import dts from 'vite-plugin-dts';
+
+if (process.argv[2] === 'exe') buildDeclaration();
 
 export async function buildDeclaration() {
-    const build = await rollup.rollup({
-        input: './src/core/index.ts',
+    const b = await build({
+        build: {
+            lib: {
+                entry: './src/main.ts',
+                formats: ['es'],
+                fileName: 'index.js'
+            },
+            outDir: './_temp/types'
+        },
         plugins: [
-            typescript({
-                sourceMap: false,
-                declaration: true,
-                emitDeclarationOnly: true,
-                outDir: './dist/types/',
-                noEmit: false,
-                jsx: 'preserve'
-            }),
-            resolve()
+            dts({
+                rollupTypes: true,
+                declarationOnly: true
+            })
         ]
     });
-    build.write({
-        file: './dist/types/index.d.ts'
-    });
 }
-buildDeclaration();

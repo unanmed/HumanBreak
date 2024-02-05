@@ -10,6 +10,9 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import { splitResorce } from './resource.js';
 import compressing from 'compressing';
+import * as vite from 'vite';
+import legacy from '@vitejs/plugin-legacy';
+import { buildDeclaration } from './buildDeclaration.js';
 
 const type = process.argv[2];
 const map = false;
@@ -18,117 +21,18 @@ const compress = type === 'dist';
 
 (async function () {
     const timestamp = Date.now();
-    // 1. 去除未使用的文件
-    // const data = (() => {
-    //     const data = fss.readFileSync('./public/project/data.js', 'utf-8');
-    //     const json = JSON.parse(
-    //         data
-    //             .split(/(\n|\r\n)/)
-    //             .slice(1)
-    //             .join('\n')
-    //     );
-    //     return json;
-    // })() as { main: Record<string, string[]> };
-    // const main = data.main;
-    // try {
-    //     const data = [
-    //         ['./dist/project/floors', '.js', 'floorIds'],
-    //         ['./dist/project/bgms', '', 'bgms'],
-    //         ['./dist/project/sounds', '', 'sounds'],
-    //         ['./dist/project/images', '', 'images'],
-    //         ['./dist/project/animates', '.animate', 'animates'],
-    //         ['./dist/project/tilesets', '', 'tilesets'],
-    //         ['./dist/project/fonts', '.ttf', 'fonts']
-    //     ];
-    //     await Promise.all(
-    //         data.map(async v => {
-    //             const all = await fs.readdir(`${v[0]}`);
-    //             const data = main[v[2]].map(vv => vv + v[1]);
-    //             all.forEach(async vv => {
-    //                 if (!data.includes(vv)) {
-    //                     await fs.rm(`${v[0]}/${vv}`);
-    //                 }
-    //             });
-    //         })
-    //     );
-    //     if (!map) await fs.remove('./dist/maps/');
-    //     // 在线查看什么都看不到，这编辑器难道还需要留着吗？
-    //     await fs.remove('./dist/_server');
-    //     await fs.remove('./dist/editor.html');
-    //     await fs.remove('./dist/server.cjs');
+    // 1. vite打包
+    await vite.build({
+        plugins: [
+            legacy({
+                targets: ['defaults', 'not IE 11'],
+                polyfills: true,
+                modernPolyfills: true
+            })
+        ]
+    });
 
-    //     await fs.remove('./dist/project/materials/airwall.png');
-    //     await fs.remove('./dist/project/materials/ground.png');
-    //     await fs.remove('./dist/project/materials/icons_old.png');
-    // } catch (e) {
-    //     console.log('去除未使用的文件失败！');
-    //     console.log(e);
-    // }
-
-    // // 2. 压缩字体
-    // try {
-    //     // 获取要压缩的文字列表，libs & projects下的所有js文件
-    //     let texts = ``;
-    //     const exclude = `\n \t`;
-    //     const libs = await fs.readdir('./public/libs');
-    //     const project = await fs.readdir('./public/project');
-    //     const floors = await fs.readdir('./public/project/floors');
-    //     const assets = await fs.readdir('./dist/assets/');
-    //     const all = [
-    //         ...libs.map(v => `./public/libs/${v}`),
-    //         ...project.map(v => `./public/project/${v}`),
-    //         ...floors.map(v => `./public/project/floors/${v}`),
-    //         ...assets.map(v => `./dist/assets/${v}`)
-    //     ];
-    //     for await (const dir of all) {
-    //         const stat = await fs.stat(dir);
-    //         if (!stat.isFile()) continue;
-    //         if (dir.endsWith('.ttf')) continue;
-    //         const file = await fs.readFile(dir, 'utf-8');
-    //         for (let i = 0; i < file.length; i++) {
-    //             const char = file[i];
-    //             if (!texts.includes(char) && !exclude.includes(char))
-    //                 texts += char;
-    //         }
-    //     }
-
-    //     // 获取所有字体（直接压缩字体会报错
-    //     const fonts = main.fonts;
-    //     await Promise.all([
-    //         ...fonts.map(v =>
-    //             (async () => {
-    //                 const fontmin = new Fontmin();
-    //                 fontmin
-    //                     .src<string>(`./public/project/fonts/${v}.ttf`)
-    //                     .dest('./dist/project/fonts')
-    //                     .use(
-    //                         Fontmin.glyph({
-    //                             text: texts
-    //                         })
-    //                     );
-    //                 await new Promise(res => {
-    //                     fontmin.run(err => {
-    //                         if (err) throw err;
-    //                         res('');
-    //                     });
-    //                 });
-    //             })()
-    //         )
-    //     ]);
-    //     await Promise.all([
-    //         ...fonts.map(v => {
-    //             return fs.rename(
-    //                 `./dist/project/fonts/${v}.ttf`,
-    //                 `./dist/project/fonts/${v}-${timestamp}.ttf`
-    //             );
-    //         })
-    //     ]);
-    // } catch (e) {
-    //     console.log('字体压缩失败');
-    //     console.log(e);
-    // }
-
-    // 3. 压缩游戏进程
+    // 2. 压缩游戏进程
     try {
         await fs.remove('./dist/project/processG.min.js');
 
@@ -162,7 +66,7 @@ const compress = type === 'dist';
         console.log(e);
     }
 
-    // 4. 压缩main.js
+    // 3. 压缩main.js
     try {
         // 先获取不能压缩的部分
         const main = (await fs.readFile('./public/main.js', 'utf-8'))
@@ -182,20 +86,79 @@ const compress = type === 'dist';
         console.log(e);
     }
 
-    // 5. 杂项
-    // try {
-    //     await fs.copy('./LICENSE', './dist/LICENSE');
-    // } catch (e) {
-    //     console.log('添加杂项失败');
-    //     console.log(e);
-    // }
+    // 4. 打包类型标注
+    try {
+        await buildDeclaration();
+    } catch (e) {
+        console.log('打包类型标注失败');
+        console.log(e);
+    }
 
-    // 6. 资源分离
-    // if (resorce) {
-    //     await splitResorce(type);
-    // }
+    // 5. 迁移类型标注文件
+    try {
+        await fs.copyFile('./_temp/types/index.d.ts', './dist/index.d.ts');
+        await fs.copy('./src/types', './dist/types');
+        await fs.copy('./src/source', './dist/source');
+    } catch (e) {
+        console.log('迁移类型标注文件');
+        console.log(e);
+    }
 
-    // 7. 压缩
+    // 6. 部分修改类型标注
+    try {
+        const indexDTS = await fs.readFile('./dist/index.d.ts', 'utf-8');
+        const re =
+            '///<reference path="./types/core.d.ts" />\n' +
+            indexDTS
+                .replaceAll('export declare', 'declare')
+                .replace(/export\s*\{\s*\};?/, '')
+                .replace(/import.*;/gu, '') +
+            `declare var Mota: IMota`;
+        await fs.writeFile('./dist/index.d.ts', re, 'utf-8');
+
+        const pluginDTS = await fs.readFile(
+            './dist/types/plugin.d.ts',
+            'utf-8'
+        );
+        const rep = pluginDTS.replace(
+            `declare const Mota: import('../game/system').IMota;
+interface Window {
+    Mota: import('../game/system').IMota;
+}`,
+            ''
+        );
+        await fs.writeFile('./dist/types/plugin.d.ts', rep);
+
+        const js = ['functions.js', 'plugins.js'];
+        for (const file of js) {
+            const info = await fs.readFile('./dist/project/' + file, 'utf-8');
+            const re = info.replace(
+                /\/\/\/\<reference\s*path=('|").*('|")\s*\/>/g,
+                `///<reference path="../index.d.ts" />
+///<reference path="../types/core.d.ts" />`
+            );
+            await fs.writeFile('./dist/project/' + file, re, 'utf-8');
+        }
+    } catch (e) {
+        console.log('修改类型标注失败');
+        console.log(e);
+    }
+
+    // 7. tsconfig.json
+    try {
+        const content = `{
+    "compilerOptions": {
+        "lib": ["ESNext", "DOM", "DOM.Iterable"]
+    },
+    "include": ["index.d.ts", "types/**/d.ts"]
+}`;
+        await fs.writeFile('./dist/tsconfig.json', content, 'utf-8');
+    } catch (e) {
+        console.log('添加tsconfig.json失败');
+        console.log(e);
+    }
+
+    // 8. 压缩
     if (compress) {
         try {
             await fs.ensureDir('./out');

@@ -47,8 +47,33 @@ import type * as toolboxTools from '@/plugin/ui/toolbox';
 import type * as battle from './enemy/battle';
 import type * as hero from './hero';
 import type { Damage } from './enemy/damage';
+// ---------- 插件
+import type * as pop_r from '../plugin/pop';
+import type * as use_r from '../plugin/use';
+import type * as fly_r from '../plugin/ui/fly';
+import type * as shadow_r from '../plugin/shadow/shadow';
+import type * as gameShadow_r from '../plugin/shadow/gameShadow';
+import type * as gameCanvas_r from '../plugin/fx/gameCanvas';
+import type * as smooth_r from '../plugin/fx/smoothView';
+import type * as frag_r from '../plugin/fx/frag';
+import type * as utils_g from '../plugin/game/utils';
+import type * as shop_g from '../plugin/game/shop';
+import type * as replay_g from '../plugin/game/replay';
+import type * as removeMap_g from '../plugin/game/removeMap';
+import type * as remainEnemy_g from '../plugin/game/enemy/remainEnemy';
+import type * as heroFourFrames_g from '../plugin/game/fx/heroFourFrames';
+import type * as rewrite_g from '../plugin/game/fx/rewrite';
+import type * as itemDetail_g from '../plugin/game/fx/itemDetail';
+// ---------- 第三方库
+import type * as _axios from 'axios';
+import type * as _chartJs from 'chart.js';
+import type _jszip from 'jszip';
+import type * as _lodash from 'lodash-es';
+import type * as _lzString from 'lz-string';
+import type * as _mutateAnimate from 'mutate-animate';
+import type * as _vue from 'vue';
 
-interface ClassInterface {
+export interface ClassInterface {
     // 渲染进程与游戏进程通用
     EventEmitter: typeof EventEmitter;
     IndexedEventEmitter: typeof IndexedEventEmitter;
@@ -77,7 +102,7 @@ interface ClassInterface {
 type _IBattle = typeof battle;
 type _IHero = typeof hero;
 
-interface FunctionInterface extends _IBattle, _IHero {
+export interface FunctionInterface extends _IBattle, _IHero {
     // 定义于渲染进程，录像验证中会出错
     m: typeof m;
     icon: typeof icon;
@@ -89,7 +114,7 @@ interface FunctionInterface extends _IBattle, _IHero {
     removeAnimate: typeof removeAnimate;
 }
 
-interface VariableInterface {
+export interface VariableInterface {
     // 定义于渲染进程，录像中会进行polyfill
     loading: typeof loading;
     hook: typeof hook;
@@ -108,7 +133,7 @@ interface VariableInterface {
     enemySpecials: typeof specials;
 }
 
-interface ModuleInterface {
+export interface ModuleInterface {
     CustomComponents: {
         createSettingComponents: typeof createSettingComponents;
         createToolbarComponents: typeof createToolbarComponents;
@@ -127,7 +152,7 @@ interface ModuleInterface {
     Damage: typeof Damage;
 }
 
-interface SystemInterfaceMap {
+export interface SystemInterfaceMap {
     class: ClassInterface;
     fn: FunctionInterface;
     var: VariableInterface;
@@ -136,35 +161,35 @@ interface SystemInterfaceMap {
 
 type InterfaceType = keyof SystemInterfaceMap;
 
-interface PluginInterface {
+export interface PluginInterface {
     // 渲染进程定义的插件
-    pop_r: typeof import('../plugin/pop');
-    use_r: typeof import('../plugin/use');
-    // animate: typeof import('../plugin/animateController');
-    // utils: typeof import('../plugin/utils');
-    // status: typeof import('../plugin/ui/statusBar');
-    fly_r: typeof import('../plugin/ui/fly');
-    // webglUtils: typeof import('../plugin/webgl/utils');
-    shadow_r: typeof import('../plugin/shadow/shadow');
-    gameShadow_r: typeof import('../plugin/shadow/gameShadow');
-    // achievement: typeof import('../plugin/ui/achievement');
-    // path: typeof import('../plugin/fx/path');
-    gameCanvas_r: typeof import('../plugin/fx/gameCanvas');
-    // noise: typeof import('../plugin/fx/noise');
-    smooth_r: typeof import('../plugin/fx/smoothView');
-    frag_r: typeof import('../plugin/fx/frag');
+    pop_r: typeof pop_r;
+    use_r: typeof use_r;
+    // animate: typeof     // animate
+    // utils: typeof     // utils
+    // status: typeof     // status
+    fly_r: typeof fly_r;
+    // webglUtils: typeof     // webglUtils
+    shadow_r: typeof shadow_r;
+    gameShadow_r: typeof gameShadow_r;
+    // achievement: typeof     // achievement
+    // path: typeof     // path
+    gameCanvas_r: typeof gameCanvas_r;
+    // noise: typeof     // noise
+    smooth_r: typeof smooth_r;
+    frag_r: typeof frag_r;
     // 游戏进程定义的插件
-    utils_g: typeof import('../plugin/game/utils');
-    shop_g: typeof import('../plugin/game/shop');
-    replay_g: typeof import('../plugin/game/replay');
-    removeMap_g: typeof import('../plugin/game/removeMap');
-    remainEnemy_g: typeof import('../plugin/game/enemy/remainEnemy');
-    heroFourFrames_g: typeof import('../plugin/game/fx/heroFourFrames');
-    rewrite_g: typeof import('../plugin/game/fx/rewrite');
-    itemDetail_g: typeof import('../plugin/game/fx/itemDetail');
+    utils_g: typeof utils_g;
+    shop_g: typeof shop_g;
+    replay_g: typeof replay_g;
+    removeMap_g: typeof removeMap_g;
+    remainEnemy_g: typeof remainEnemy_g;
+    heroFourFrames_g: typeof heroFourFrames_g;
+    rewrite_g: typeof rewrite_g;
+    itemDetail_g: typeof itemDetail_g;
 }
 
-interface PackageInterface {
+export interface PackageInterface {
     axios: typeof import('axios');
     'chart.js': typeof import('chart.js');
     jszip: typeof import('jszip');
