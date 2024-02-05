@@ -1,3 +1,4 @@
+///<reference path="../../src/types/core.d.ts"/>
 var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
     fiveLayer: function () {
         // 注册插件
@@ -297,6 +298,211 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             });
         }
     },
+    special: function () {
+        // 这个插件负责定义怪物属性
+        const specials = Mota.require('var', 'enemySpecials');
+        // 怪物特殊属性包含四个信息
+        // code: 索引，必须与该属性在数组内的索引一致
+        // name: 特殊属性名称，可以是一个函数，接受 enemy 作为参数，返回字符串
+        // desc: 特殊属性说明，也可以是一个函数，接受 enemy 作为参数，返回字符串
+        // color: 特殊属性颜色，会在怪物手册中显示出来
+        specials.push(
+            {
+                code: 0,
+                name: '空',
+                desc: '空',
+                color: '#fff'
+            },
+            {
+                code: 1,
+                name: '致命一击',
+                desc: enemy =>
+                    `怪物每5回合触发一次强力攻击，造成${enemy.crit}%的伤害`,
+                color: '#fc3'
+            },
+            {
+                code: 2,
+                name: '恶毒',
+                desc: '怪物攻击无视勇士的防御',
+                color: '#bbb0ff'
+            },
+            {
+                code: 3,
+                name: '坚固',
+                desc: '怪物防御不小于勇士攻击-1',
+                color: '#c0b088'
+            },
+            {
+                code: 4,
+                name: '2连击',
+                desc: '怪物每回合攻击2次',
+                color: '#fe7'
+            },
+            {
+                code: 5,
+                name: '3连击',
+                desc: '怪物每回合攻击3次',
+                color: '#fe7'
+            },
+            {
+                code: 6,
+                name: enemy => `${enemy.n}连击`,
+                desc: enemy => `怪物每回合攻击${enemy.n}次`,
+                color: '#fe7'
+            },
+            {
+                code: 7,
+                name: '饥渴',
+                desc: enemy =>
+                    `战斗前，怪物降低勇士${enemy.hungry}%的攻击，并加在自己身上`,
+                color: '#b67'
+            },
+            {
+                code: 8,
+                name: '抱团',
+                desc: enemy =>
+                    `怪物周围5×5范围内每有一个拥有该属性的怪物，自身攻防就增加${enemy.together}%（线性叠加）`,
+                color: '#fa4'
+            },
+            {
+                code: 9,
+                name: '绝对防御',
+                desc: '怪物的奇特护甲可以让勇士的额外攻击失效，攻击变为基础攻击+额外攻击',
+                color: '#80eed6'
+            },
+            {
+                code: 10,
+                name: '勇气之刃',
+                desc: enemy => `怪物第一回合造成${enemy.courage}%的伤害`,
+                color: '#b0c0dd'
+            },
+            {
+                code: 11,
+                name: '勇气冲锋',
+                desc: enemy =>
+                    `怪物首先攻击，造成${enemy.charge}%的伤害，并眩晕勇士5回合`,
+                color: '#ff00d2'
+            },
+            {
+                code: 12,
+                name: '追猎',
+                desc: '当勇士移动到该怪物的水平或竖直方向上时，怪物向勇士移动一格',
+                color: '#9e8'
+            },
+            {
+                code: 13,
+                name: '魔攻',
+                desc: '怪物攻击无视勇士的防御',
+                color: '#bbb0ff'
+            },
+            {
+                code: 14,
+                name: '智慧之源',
+                desc: '困难难度下（简单难度没有效果），战斗后，怪物会吸取勇士30%的智慧（勇士智慧向下取整至整十）加在本层的拥有该属性的怪物攻击上',
+                color: '#bbeef0'
+            },
+            {
+                code: 15,
+                name: '突刺',
+                desc: enemy =>
+                    `勇士走到怪物怪物周围四格时，怪物对勇士造成${core.formatBigNumber(
+                        Math.max((enemy.value || 0) - getHeroStatusOn('def'))
+                    )}点伤害`,
+                color: '#c677dd'
+            },
+            {
+                code: 16,
+                name: '空',
+                desc: '空',
+                color: '#fff'
+            },
+            {
+                code: 17,
+                name: '先攻',
+                desc: '战斗时，怪物首先攻击',
+                color: '#b0b666'
+            },
+            {
+                code: 18,
+                name: '阻击',
+                desc: enemy =>
+                    `经过怪物十字范围内时怪物后退一格，同时对勇士造成${enemy.value}点伤害`,
+                color: '#8888e6'
+            },
+            {
+                code: 19,
+                name: '电摇嘲讽',
+                desc:
+                    '当勇士移动到怪物同行或同列时，勇士会直接冲向怪物，撞碎路上的所有地形和门，拾取路上的道具，与路上的怪物战斗' +
+                    '，最后与该怪物战斗',
+                color: '#ff6666'
+            },
+            {
+                code: 20,
+                name: '霜冻',
+                desc: enemy =>
+                    `怪物寒冷的攻击使勇士动作变慢，勇士每回合对怪物造成的伤害减少${enemy.ice}%。装备杰克的衣服后可以免疫。`,
+                color: 'cyan'
+            },
+            {
+                code: 21,
+                name: '冰封光环',
+                desc: enemy =>
+                    `寒气逼人，使勇士对该怪物周围7*7范围内的怪物伤害减少${enemy.iceHalo}%（线性叠加）`,
+                color: 'cyan'
+            },
+            {
+                code: 22,
+                name: '永夜',
+                desc: enemy =>
+                    `战斗后，减少勇士${enemy.night}点攻防，增加本层所有怪物${enemy.night}点攻防，仅在本层有效`,
+                color: '#d8a'
+            },
+            {
+                code: 23,
+                name: '极昼',
+                desc: enemy =>
+                    `战斗后，减少本层所有怪物${enemy.day}点攻防，增加勇士${enemy.day}点攻防，仅在本层有效`,
+                color: '#ffd'
+            },
+            {
+                code: 24,
+                name: '射击',
+                desc: function () {
+                    return '经过怪物同行或同列的可视范围内时受到一次普通攻击的伤害';
+                },
+                color: '#dda0dd'
+            },
+            {
+                code: 25,
+                name: '融化',
+                desc: enemy =>
+                    `战斗后该怪物会融化，在怪物位置产生一个3*3的范围光环，光环内怪物的攻防增加${enemy.melt}%`,
+                color: '#e6e099'
+            },
+            {
+                code: 26,
+                name: '冰封之核',
+                desc: enemy =>
+                    `怪物拥有逼人的寒气，使周围5*5范围内的怪物防御增加${enemy.iceCore}%`,
+                color: '#70ffd1'
+            },
+            {
+                code: 27,
+                name: '火焰之核',
+                desc: enemy =>
+                    `怪物拥有灼热的火焰，使周围5*5范围内的怪物攻击增加${enemy.fireCore}%`,
+                color: '#ff6f0a'
+            },
+            {
+                code: 28,
+                name: '苍蓝刻',
+                desc: enemy =>
+                    `怪物使用苍蓝之灵的力量，使自身受到的伤害减少${enemy.paleShield}%`,
+                color: '#ff6f0a'
+            }
+        );
+    },
     battle: function () {
         // 这个插件负责战斗相关内容
 
@@ -363,6 +569,29 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
 
             return damage;
         });
+
+        // --------------- 秒杀伤害计算
+        // 用于计算一些特殊属性怪物在一回合内秒杀所需的攻击，依此计算临界的上界
+        // 函数没有参数，返回一个数字，表示临界上界，Infinity表示没有上界，不计算临界
+        // 不能返回数字型外的量
+        Mota.rewrite(
+            Mota.require('class', 'DamageEnemy').prototype,
+            'getSeckillAtk',
+            'full',
+            function () {
+                // 获取怪物的属性
+                const info = this.getRealInfo();
+                // 对于一般的怪物，应该是怪物防御加上怪物血量
+                const add = info.def + info.hp;
+
+                // 坚固，不可能通过攻击秒杀
+                if (info.special.includes(3)) {
+                    return Infinity;
+                }
+
+                return add;
+            }
+        );
 
         // --------------- 地图伤害
         // 全量复写地图伤害的计算函数，注意此处不能使用箭头函数，因为这是在原型上的函数，其this指向实例，也即怪物(DamageEnemy实例)
@@ -442,5 +671,131 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         );
 
         // --------------- 光环处理
+        // 光环分为两类，一类是会增强光环或者给怪物加光环的光环，另一类就是普通光环，这两种光环处理方式不同
+        // 对于前者，光环将会优先递归计算，同时每个光环将会确保只计算一次，直到没有光环需要计算
+        // 对于后者，不进行递归计算，只进行单次遍历计算。
+        // 光环使用 provideHalo 和 injectHalo 作为api，表示提供光环和接受光环
+
+        // 光环属性列表，是一个集合Set，你可以在这里配置会被视为光环的属性
+        const haloSpecials = Mota.require('module', 'Damage').haloSpecials;
+        haloSpecials.add(8).add(11);
+
+        // ----- 计算第二类光环，即普通光环，这类光环更常见，因此放到前面了
+        Mota.rewrite(
+            Mota.require('class', 'DamageEnemy').prototype,
+            'provideHalo',
+            'full',
+            function () {
+                // 这部分用于判断当前是否应该计算光环，即计算光环的函数是否在不应该被调用的时刻调用了
+                // 一般不需要改动
+                if (this.progress !== 2) return;
+                this.progress = 3;
+                if (!this.floorId) return;
+                if (!has(this.x) || !has(this.y)) return;
+                const col = this.col ?? core.status.maps[this.floorId].enemy;
+                if (!col) return;
+                // 获取所有还没有计算的光环，注意这里不能直接获取haloSpecial
+                const special = this.getHaloSpecials();
+
+                const square7 = [];
+                const square5 = [];
+
+                // e 是被加成怪的属性，enemy 是施加光环的怪
+
+                for (const halo of special) {
+                    switch (halo) {
+                        case 8:
+                            square5.push((e, enemy) => {
+                                if (
+                                    e.special.includes(8) &&
+                                    (e.x !== this.x || this.y !== e.y)
+                                ) {
+                                    e.atkBuff += enemy.together ?? 0;
+                                    e.defBuff += enemy.together ?? 0;
+                                }
+                            });
+                            this.providedHalo.add(8);
+                            break;
+                        case 21:
+                            square7.push(e => {
+                                // e.damageDecline += this.enemy.iceHalo ?? 0;
+                            });
+                            col.haloList.push({
+                                type: 'square',
+                                data: { x: this.x, y: this.y, d: 7 },
+                                special: 21,
+                                from: this
+                            });
+                            this.providedHalo.add(21);
+                            break;
+                        case 26:
+                            square5.push(e => {
+                                e.defBuff += this.enemy.iceCore ?? 0;
+                            });
+                            col.haloList.push({
+                                type: 'square',
+                                data: { x: this.x, y: this.y, d: 5 },
+                                special: 26,
+                                from: this
+                            });
+                            this.providedHalo.add(26);
+                            break;
+                        case 27:
+                            square5.push(e => {
+                                e.atkBuff += this.enemy.fireCore ?? 0;
+                            });
+                            col.haloList.push({
+                                type: 'square',
+                                data: { x: this.x, y: this.y, d: 5 },
+                                special: 27,
+                                from: this
+                            });
+                            this.providedHalo.add(27);
+                            break;
+                    }
+                }
+
+                col.applyHalo(
+                    'square',
+                    { x: this.x, y: this.y, d: 7 },
+                    square7
+                );
+                col.applyHalo(
+                    'square',
+                    { x: this.x, y: this.y, d: 5 },
+                    square5
+                );
+            }
+        );
+
+        // ----- 计算第一类光环
+        Mota.rewrite(
+            Mota.require('class', 'DamageEnemy').prototype,
+            'preProvideHalo',
+            'full',
+            function () {
+                if (this.progress !== 0) return;
+                this.progress = 1;
+                const special = this.getHaloSpecials();
+
+                for (const halo of special) {
+                    switch (halo) {
+                        default:
+                            break;
+                    }
+                }
+            }
+        );
+
+        // ----- 接受光环处理
+        Mota.rewrite(
+            Mota.require('class', 'DamageEnemy').prototype,
+            'injectHalo',
+            'full',
+            function (halo, enemy) {
+                // 这里的 halo 是光环函数，enemy 是施加光环的怪物，this.info 是当前怪物信息
+                halo(this.info, enemy);
+            }
+        );
     }
 };

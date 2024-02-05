@@ -445,9 +445,6 @@ gameKey
     .realize('skillTree', () => {
         core.useItem('skill1', true);
     })
-    .realize('desc', () => {
-        core.useItem('I560', true);
-    })
     .realize('undo', () => {
         core.doSL('autoSave', 'load');
     })

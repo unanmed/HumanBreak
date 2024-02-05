@@ -3535,6 +3535,29 @@ control.prototype.hideStatusBar = function (showToolbox) {
     // see src/plugin/game/ui.js
 };
 
+////// 更新状态栏的勇士图标 //////
+control.prototype.updateHeroIcon = function (name) {
+    name = name || 'hero.png';
+    if (core.statusBar.icons.name == name) return;
+    core.statusBar.icons.name = name;
+
+    var image = core.material.images.hero;
+    // 全身图
+    var w = core.material.icons.hero.width || 32;
+    var h = core.material.icons.hero.height || 48;
+    var ratio = Math.min(w / h, 1),
+        width = 32 * ratio,
+        left = 16 - width / 2;
+
+    var canvas = document.createElement('canvas');
+    var ctx = canvas.getContext('2d');
+    canvas.width = 32;
+    canvas.height = 32;
+    core.drawImage(ctx, image, 0, 0, w, h, left, 0, width, 32);
+
+    core.statusBar.image.name.src = canvas.toDataURL('image/png');
+};
+
 ////// 改变工具栏为按钮1-8 //////
 control.prototype.setToolbarButton = function (useButton) {
     if (!core.domStyle.showStatusBar) {

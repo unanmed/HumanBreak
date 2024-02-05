@@ -223,5 +223,17 @@ var maps_90f36752_8815_4be8_b32b_d7fad1d0542e =
 	"327": {"cls":"enemy48","id":"bearDown"},
 	"328": {"cls":"enemy48","id":"bearLeft"},
 	"329": {"cls":"enemy48","id":"bearRight"},
-	"330": {"cls":"enemy48","id":"bearUp"}
+	"330": {"cls":"enemy48","id":"bearUp"},
+	"331": {"cls":"items","id":"I331"},
+	"332": {"cls":"items","id":"I332"},
+	"333": {"cls":"items","id":"I333"},
+	"334": {"cls":"items","id":"I334"},
+	"335": {"cls":"items","id":"I335"},
+	"336": {"cls":"items","id":"I336"},
+	"337": {"cls":"items","id":"I337"},
+	"338": {"cls":"items","id":"I338"},
+	"339": {"cls":"items","id":"I339"},
+	"340": {"cls":"items","id":"I340"},
+	"341": {"cls":"items","id":"I341"},
+	"342": {"cls":"items","id":"I342"}
 }

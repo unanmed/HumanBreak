@@ -105,7 +105,6 @@ interface VariableInterface {
     settingStorage: GameStorage;
     status: Ref<boolean>;
     // 定义于游戏进程，渲染进程依然可用
-    haloSpecials: number[];
     enemySpecials: typeof specials;
 }
 
@@ -519,14 +518,18 @@ function rewrite<O, K extends SelectKey<O, _Func>, T = O>(
         );
     }
     if (type === 'full') {
+        function res(this: T, ...params: any[]) {
+            // @ts-ignore
+            return re.call(rebind ?? this, ...params);
+        }
         // @ts-ignore
-        return (base[key] = re.bind(rebind ?? base));
+        return (base[key] = res);
     } else if (type === 'add') {
         const origin = base[key];
         function res(this: T, ...params: [..._F<O[K]>[0], ...any[]]) {
-            const v = (origin as _Func).call(bind ?? base, ...params);
+            const v = (origin as _Func).call(bind ?? this, ...params);
             // @ts-ignore
-            const ret = re.call(rebind ?? base, v, ...params);
+            const ret = re.call(rebind ?? this, v, ...params);
             return ret;
         }
         // @ts-ignore
@@ -535,8 +538,8 @@ function rewrite<O, K extends SelectKey<O, _Func>, T = O>(
         const origin = base[key];
         function res(this: T, ...params: [..._F<O[K]>[0], ...any[]]) {
             // @ts-ignore
-            re.call(rebind ?? base, ...params);
-            const ret = (origin as _Func).call(bind ?? base, ...params);
+            re.call(rebind ?? this, ...params);
+            const ret = (origin as _Func).call(bind ?? this, ...params);
             return ret;
         }
         // @ts-ignore
