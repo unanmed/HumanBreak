@@ -361,7 +361,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 name: '破甲',
                 desc: enemy =>
                     `战斗前，怪物附加角色防御的${Math.floor(
-                        100 * (enemy.breakArmor || core.values.breakArmor)
+                        100 * (enemy.breakArmor ?? core.values.breakArmor)
                     )}%作为伤害"`,
                 color: '#b67'
             },
@@ -370,7 +370,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 name: '反击',
                 desc: enemy =>
                     `战斗时，怪物每回合附加角色攻击的${Math.floor(
-                        100 * (enemy.counterAttack || core.values.counterAttack)
+                        100 * (enemy.counterAttack ?? core.values.counterAttack)
                     )}%作为伤害，无视角色防御`,
                 color: '#fa4'
             },
@@ -379,7 +379,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 name: '净化',
                 desc: enemy =>
                     `战斗前，怪物附加角色护盾的${
-                        enemy.purify || core.values.purify
+                        enemy.purify ?? core.values.purify
                     }倍作为伤害`,
                 color: '#80eed6'
             },
@@ -578,6 +578,166 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
     battle: function () {
         // 这个插件负责战斗相关内容
 
+        // --------------- 战后脚本
+        // enemy: DamageEnemy实例，也就是怪物本身
+        // x, y: 怪物坐标
+        Mota.rewrite(core.events, 'afterBattle', 'full', (enemy, x, y) => {
+            const { has } = Mota.Plugin.require('utils_g');
+
+            const floorId = core.status.floorId;
+            const special = enemy.info.special;
+
+            // 播放战斗动画
+            let animate = 'hand';
+            // 检查当前装备是否存在攻击动画
+            const equipId = core.getEquip(0);
+            if (equipId && (core.material.items[equipId].equip || {}).animate)
+                animate = core.material.items[equipId].equip.animate;
+
+            // 检查该动画是否存在SE，如果不存在则使用默认音效
+            if (!core.material.animates[animate]?.se)
+                core.playSound('attack.mp3');
+
+            // 战斗伤害
+            const info = enemy.calDamage(core.status.hero);
+            const damage = info.damage;
+            // 判定是否致死
+            if (damage >= core.status.hero.hp) {
+                core.status.hero.hp = 0;
+                core.updateStatusBar(false, true);
+                core.events.lose('战斗失败');
+                return;
+            }
+
+            // 扣减体力值并记录统计数据
+            core.status.hero.hp -= damage;
+            core.status.hero.statistics.battleDamage += damage;
+            core.status.hero.statistics.battle++;
+
+            // 获得金币
+            let money = enemy.enemy.money;
+            let exp = enemy.enemy.exp;
+            if (enemy.info.guard) {
+                enemy.info.guard.forEach(v => {
+                    money += v.enemy.money;
+                    exp += v.enemy.exp;
+                });
+            }
+            core.status.hero.money += money;
+            core.status.hero.statistics.money += money;
+
+            // 获得经验
+            core.status.hero.exp += exp;
+            core.status.hero.statistics.exp += exp;
+
+            const hint =
+                '打败 ' +
+                enemy.enemy.name +
+                '，金币+' +
+                money +
+                '，经验+' +
+                exp;
+            core.drawTip(hint, enemy.id);
+
+            // 中毒
+            if (special.includes(12)) {
+                core.triggerDebuff('get', 'poison');
+            }
+            // 衰弱
+            if (special.includes(13)) {
+                core.triggerDebuff('get', 'weak');
+            }
+            // 诅咒
+            if (special.includes(14)) {
+                core.triggerDebuff('get', 'curse');
+            }
+            // 仇恨怪物将仇恨值减半
+            if (special.includes(17)) {
+                core.setFlag(
+                    'hatred',
+                    Math.floor(core.getFlag('hatred', 0) / 2)
+                );
+            }
+            // 自爆
+            if (special.includes(19)) {
+                core.status.hero.statistics.battleDamage +=
+                    core.status.hero.hp - 1;
+                core.status.hero.hp = 1;
+            }
+            // 退化
+            if (special.includes(21)) {
+                core.status.hero.atk -= enemy.atkValue || 0;
+                core.status.hero.def -= enemy.defValue || 0;
+                if (core.status.hero.atk < 0) core.status.hero.atk = 0;
+                if (core.status.hero.def < 0) core.status.hero.def = 0;
+            }
+            // 增加仇恨值
+            core.setFlag(
+                'hatred',
+                core.getFlag('hatred', 0) + core.values.hatred
+            );
+
+            // 事件的处理
+            const todo = [];
+
+            // 战后事件
+            if (has(core.status.floorId)) {
+                const loc = `${x},${y}`;
+                todo.push(
+                    ...(core.floors[core.status.floorId].afterBattle[loc] ?? [])
+                );
+            }
+            todo.push(...(enemy.enemy.afterBattle ?? []));
+
+            // 如果事件不为空，将其插入
+            if (todo.length > 0) core.insertAction(todo, x, y);
+
+            if (has(x) && has(y)) {
+                core.drawAnimate(animate, x, y);
+                if (special.includes(23)) core.hideBlock(x, y);
+                else core.removeBlock(x, y);
+            } else core.drawHeroAnimate(animate);
+
+            // 如果已有事件正在处理中
+            if (core.status.event.id == null) core.continueAutomaticRoute();
+            else core.clearContinueAutomaticRoute();
+
+            // 打怪特效
+            Mota.r(() => {
+                const setting = Mota.require('var', 'mainSetting');
+                const { applyFragWith } = Mota.Plugin.require('frag_r');
+                if (setting.getValue('fx.frag') && has(x) && has(y)) {
+                    const frame = core.status.globalAnimateStatus % 2;
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 32;
+                    canvas.height = 32;
+                    core.drawIcon(canvas, enemy.id, 0, 0, 32, 32, frame);
+                    const manager = applyFragWith(canvas);
+                    const frag = manager.canvas;
+                    frag.style.imageRendering = 'pixelated';
+                    frag.style.width = `${frag.width * core.domStyle.scale}px`;
+                    frag.style.height = `${
+                        frag.height * core.domStyle.scale
+                    }px`;
+                    const left =
+                        (x * 32 + 16 - frag.width / 2 - core.bigmap.offsetX) *
+                        core.domStyle.scale;
+                    const top =
+                        (y * 32 + 16 - frag.height / 2 - core.bigmap.offsetY) *
+                        core.domStyle.scale;
+                    frag.style.left = `${left}px`;
+                    frag.style.top = `${top}px`;
+                    frag.style.zIndex = '45';
+                    frag.style.position = 'absolute';
+                    frag.style.filter = 'sepia(20%)brightness(120%)';
+                    core.dom.gameDraw.appendChild(frag);
+                    manager.onEnd.then(() => {
+                        frag.remove();
+                    });
+                }
+            });
+        });
+
         // --------------- 战斗伤害
 
         const Damage = Mota.require('module', 'Damage');
@@ -590,7 +750,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         // 返回null表示不能战斗，返回Infinity也可以
         Mota.rewrite(Damage, 'calDamageWith', 'full', (info, hero) => {
             // 获取勇士属性，这几个属性直接从core.status.hero获取
-            const { hp, mana } = core.status.hero;
+            const { hp, mana, manamax } = core.status.hero;
             // 获取勇士属性，这几个属性从勇士真实属性获取
             // 分开获取是因为获取勇士真实属性会对性能造成一定影响
             let { atk, def, mdef, hpmax } = hero;
@@ -601,21 +761,40 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             let damage = 0;
             /** 勇士单回合伤害 */
             let heroPerDamage;
+            /** 战斗回合 */
+            let turn = 0;
+
+            // 无敌
+            if (special.includes(20) && !core.hasItem('cross')) {
+                return null;
+            }
 
             if (special.includes(3)) {
                 // 由于坚固的特性，只能放到这来计算了
                 if (atk > enemy.def) heroPerDamage = 1;
                 else return null;
             } else {
+                // 模仿
+                if (special.includes(10)) {
+                    monAtk = atk;
+                    monDef = def;
+                }
                 heroPerDamage = atk - monDef;
                 if (heroPerDamage <= 0) return null;
+            }
+
+            // 吸血
+            if (special.includes(11)) {
+                const vampire = hp * (info.vampire ?? 0);
+                if (info.add) monHp += vampire;
+                damage += vampire;
             }
 
             /** 怪物单回合伤害 */
             let enemyPerDamage;
 
             // 魔攻
-            if (special.includes(2) || special.includes(13)) {
+            if (special.includes(2)) {
                 enemyPerDamage = monAtk;
             } else {
                 enemyPerDamage = monAtk - def;
@@ -623,21 +802,68 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             }
 
             // 先攻
-            if (special.includes(17)) {
+            if (special.includes(1)) {
                 damage += enemyPerDamage;
             }
 
             // 连击
             if (special.includes(4)) enemyPerDamage *= 2;
             if (special.includes(5)) enemyPerDamage *= 3;
-            if (special.includes(6)) enemyPerDamage *= enemy.n;
+            if (special.includes(6)) enemyPerDamage *= info.n;
 
-            /** 战斗回合 */
-            let turn = Math.ceil(monHp / heroPerDamage);
+            // 破甲
+            if (special.includes(7)) {
+                damage += def * (info.breakArmor ?? core.values.breakArmor);
+            }
 
+            // 反击
+            if (special.includes(8)) {
+                enemyPerDamage +=
+                    atk * (info.counterAttack ?? core.values.counterAttack);
+            }
+
+            // 净化
+            if (special.includes(9)) {
+                damage += mdef * (info.purify ?? core.values.purify);
+            }
+
+            turn = Math.ceil(monHp / heroPerDamage);
+
+            // 支援，支援信息由光环计算而得，直接使用即可
+            if (info.guard) {
+                const guardFirst = false;
+                const inGuard = core.getFlag('__inGuard__');
+                if (!inGuard)
+                    core.setFlag('__extraTurn__', guardFirst ? 0 : turn);
+                core.setFlag('__inGuard__', true);
+                for (const enemy of info.guard) {
+                    const info = enemy.getRealInfo();
+                    damage +=
+                        Damage.calDamageWith(info, {
+                            ...hero,
+                            mdef: 0
+                        }) ?? Infinity;
+                    if (!isFinite(damage)) return null;
+                }
+                if (!inGuard) core.removeFlag('__inGuard__');
+                turn += core.getFlag('__extraTurn__', 0);
+                core.removeFlag('__extraTurn__');
+            }
+
+            // 计算最终伤害
             damage += (turn - 1) * enemyPerDamage;
             damage -= mdef;
             if (!core.flags.enableNegativeDamage) damage = Math.max(0, damage);
+
+            // 仇恨
+            if (special.includes(17)) {
+                damage += core.getFlag('hatred', 0);
+            }
+
+            // 固伤
+            if (special.includes(22)) {
+                damage += info.damage;
+            }
 
             return damage;
         });
@@ -660,13 +886,33 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 if (info.special.includes(3)) {
                     return Infinity;
                 }
+                // 模仿，不计算临界
+                if (info.special.includes(10)) {
+                    return Infinity;
+                }
 
                 return add;
             }
         );
 
         // --------------- 地图伤害
-        // 全量复写地图伤害的计算函数，注意此处不能使用箭头函数，因为这是在原型上的函数，其this指向实例，也即怪物(DamageEnemy实例)
+        const { getHeroStatusOn } = Mota.requireAll('fn');
+        const caledBetween = new Set();
+        // 全量复写地图伤害计算，这个计算会调用所有的 DamageEnemy 的地图伤害计算
+        Mota.rewrite(
+            Mota.require('class', 'EnemyCollection').prototype,
+            'calMapDamage',
+            'full',
+            function () {
+                this.mapDamage = {};
+                caledBetween.clear();
+                const hero = getHeroStatusOn(Damage.realStatus, this.floorId);
+                this.list.forEach(v => {
+                    v.calMapDamage(this.mapDamage, hero);
+                });
+            }
+        );
+        // 全量复写单个怪物地图伤害的计算函数，注意此处不能使用箭头函数，因为这是在原型上的函数，其this指向实例，也即怪物(DamageEnemy实例)
         // 函数接收两个参数，damage和hero，前者表示要将结果存入的对象，后者是勇士真实属性
         // 直接将damage返回即可，返回其他值有可能会引起出错
         // 计算出伤害后直接调用this.setMapDamage即可将伤害传到对象中
@@ -678,21 +924,27 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 // 功能函数，计算曼哈顿距离，和判断一个值是否存在
                 const { manhattan, has } = Mota.Plugin.require('utils_g');
                 // 判断这个怪物是不是在地图上
-                if (!has(this.x) || !has(this.y) || !has(this.floorId))
+                if (
+                    !has(this.x) ||
+                    !has(this.y) ||
+                    !has(this.floorId) ||
+                    !has(this.col)
+                ) {
                     return damage;
-                const enemy = this.enemy;
+                }
+                const enemy = this.info;
                 const floor = core.status.maps[this.floorId];
                 const w = floor.width;
                 const h = floor.height;
 
-                // 突刺
+                // 领域
                 if (this.info.special.includes(15)) {
                     const range = enemy.range ?? 1;
                     const startX = Math.max(0, this.x - range);
                     const startY = Math.max(0, this.y - range);
                     const endX = Math.min(floor.width - 1, this.x + range);
                     const endY = Math.min(floor.height - 1, this.y + range);
-                    const dam = Math.max((enemy.value ?? 0) - hero.def, 0);
+                    const dam = Math.max(enemy.zone ?? 0, 0);
 
                     for (let x = startX; x <= endX; x++) {
                         for (let y = startY; y <= endY; y++) {
@@ -703,16 +955,15 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                                 continue;
                             }
                             const loc = `${x},${y}`;
-                            this.setMapDamage(damage, loc, dam, '突刺');
+                            this.setMapDamage(damage, loc, dam, '领域');
                         }
                     }
                 }
 
-                // 射击
+                // 激光
                 if (this.info.special.includes(24)) {
                     const dirs = ['left', 'down', 'up', 'right'];
-                    const dam = Math.max((enemy.atk ?? 0) - hero.def, 0);
-                    const objs = core.getMapBlocksObj(this.floorId);
+                    const dam = Math.max(enemy.laser ?? 0, 0);
 
                     for (const dir of dirs) {
                         let x = this.x;
@@ -722,19 +973,72 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                             x += dx;
                             y += dy;
                             const loc = `${x},${y}`;
-                            const block = objs[loc];
-                            if (
-                                block &&
-                                block.event.noPass &&
-                                block.event.cls !== 'enemys' &&
-                                block.event.cls !== 'enemy48' &&
-                                block.id !== 141 &&
-                                block.id !== 151
-                            ) {
-                                break;
-                            }
-                            this.setMapDamage(damage, loc, dam, '射击');
+                            this.setMapDamage(damage, loc, dam, '激光');
                         }
+                    }
+                }
+
+                // 夹击
+                if (this.info.special.includes(16)) {
+                    const dirs = ['left', 'down', 'up', 'right'];
+                    const dam = Math.floor(core.status.hero.hp / 2);
+
+                    for (const dir of dirs) {
+                        let x = this.x;
+                        let y = this.y;
+                        const { x: dx, y: dy } = core.utils.scan[dir];
+                        if (caledBetween.has(`${x + dx},${y + dy}`)) continue;
+                        const e = this.col.list.find(v => {
+                            return v.x === x + dx * 2 && v.y === y + dy * 2;
+                        });
+                        if (e) {
+                            const loc = `${x + dx},${y + dy}`;
+                            this.setMapDamage(damage, loc, dam, '夹击');
+                            caledBetween.add(loc);
+                        }
+                    }
+                }
+
+                // 阻击
+                if (this.info.special.includes(18)) {
+                    const range = 1;
+                    const startX = Math.max(0, this.x - range);
+                    const startY = Math.max(0, this.y - range);
+                    const endX = Math.min(floor.width - 1, this.x + range);
+                    const endY = Math.min(floor.height - 1, this.y + range);
+                    const dam = Math.max(enemy.repulse ?? 0, 0);
+
+                    for (let x = startX; x <= endX; x++) {
+                        for (let y = startY; y <= endY; y++) {
+                            if (
+                                !enemy.zoneSquare &&
+                                manhattan(x, y, this.x, this.y) > range
+                            ) {
+                                continue;
+                            }
+                            const loc = `${x},${y}`;
+                            this.setMapDamage(damage, loc, dam, '阻击');
+                            damage[loc].repulse = damage[loc].repulse ?? [];
+                            damage[loc].repulse.push([this.x, this.y]);
+                        }
+                    }
+                }
+
+                // 捕捉
+                if (this.info.special.includes(27)) {
+                    const dirs = ['left', 'down', 'up', 'right'];
+                    for (const dir of dirs) {
+                        let x = this.x;
+                        let y = this.y;
+                        const { x: dx, y: dy } = core.utils.scan[dir];
+                        this.col.list.forEach(v => {
+                            if (v.x === x + dx * 2 && v.y === y + dy * 2) {
+                                const loc = `${x + dx},${y + dy}`;
+                                this.setMapDamage(damage, loc, 0);
+                            }
+                            damage[loc].ambush = damage[loc].ambush ?? [];
+                            damage[loc].ambush.push(this);
+                        });
                     }
                 }
 
@@ -750,7 +1054,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
 
         // 光环属性列表，是一个集合Set，你可以在这里配置会被视为光环的属性
         const haloSpecials = Mota.require('module', 'Damage').haloSpecials;
-        haloSpecials.add(8).add(11);
+        haloSpecials.add(25).add(26).add(28);
 
         // ----- 计算第二类光环，即普通光环，这类光环更常见，因此放到前面了
         Mota.rewrite(
@@ -770,78 +1074,58 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 // 获取所有还没有计算的光环，注意这里不能直接获取haloSpecial
                 const special = this.getHaloSpecials();
 
-                const square7 = [];
-                const square5 = [];
-
                 // e 是被加成怪的属性，enemy 是施加光环的怪
 
                 for (const halo of special) {
                     switch (halo) {
-                        case 8:
-                            square5.push((e, enemy) => {
-                                if (
-                                    e.special.includes(8) &&
-                                    (e.x !== this.x || this.y !== e.y)
-                                ) {
-                                    e.atkBuff += enemy.together ?? 0;
-                                    e.defBuff += enemy.together ?? 0;
-                                }
+                        // 普通光环
+                        case 25: {
+                            const e = this.enemy;
+                            const type = e.haloSquare ? 'square' : 'manhattan';
+                            const r = Math.floor(e.haloRange);
+                            const d = type === 'square' ? r * 2 + 1 : r;
+                            const range = { x: this.x, y: this.y, d };
+
+                            // 施加光环
+                            col.applyHalo(type, range, this, (e, enemy) => {
+                                e.atkBuff += enemy.atkBuff ?? 0;
+                                e.defBuff += enemy.defBuff ?? 0;
+                                e.hpBuff += enemy.hpBuff ?? 0;
                             });
-                            this.providedHalo.add(8);
+                            // 向已施加的光环列表中添加
+                            this.providedHalo.add(25);
                             break;
-                        case 21:
-                            square7.push(e => {
-                                // e.damageDecline += this.enemy.iceHalo ?? 0;
-                            });
-                            col.haloList.push({
-                                type: 'square',
-                                data: { x: this.x, y: this.y, d: 7 },
-                                special: 21,
-                                from: this
-                            });
-                            this.providedHalo.add(21);
-                            break;
-                        case 26:
-                            square5.push(e => {
-                                e.defBuff += this.enemy.iceCore ?? 0;
-                            });
-                            col.haloList.push({
-                                type: 'square',
-                                data: { x: this.x, y: this.y, d: 5 },
-                                special: 26,
-                                from: this
+                        }
+                        case 26: {
+                            const range = { x: this.x, y: this.y, d: 1 };
+                            // 支援
+                            col.applyHalo('square', range, this, (e, enemy) => {
+                                e.guard = e.guard ?? [];
+                                e.guard.push(this);
                             });
                             this.providedHalo.add(26);
                             break;
-                        case 27:
-                            square5.push(e => {
-                                e.atkBuff += this.enemy.fireCore ?? 0;
-                            });
-                            col.haloList.push({
-                                type: 'square',
-                                data: { x: this.x, y: this.y, d: 5 },
-                                special: 27,
-                                from: this
-                            });
-                            this.providedHalo.add(27);
-                            break;
+                        }
                     }
                 }
-
-                col.applyHalo(
-                    'square',
-                    { x: this.x, y: this.y, d: 7 },
-                    square7
-                );
-                col.applyHalo(
-                    'square',
-                    { x: this.x, y: this.y, d: 5 },
-                    square5
-                );
             }
         );
 
         // ----- 计算第一类光环
+        const changeable = Mota.require('module', 'Damage').changeableHaloValue;
+        changeable
+            .set(21, ['atkValue', 'defValue'])
+            .set(7, ['breakArmor'])
+            .set(8, ['counterAttack'])
+            .set(22, ['damage'])
+            .set(25, ['haloRange'])
+            .set(24, ['laser'])
+            .set(6, ['n'])
+            .set(9, ['purify'])
+            .set(15, ['range'])
+            .set(18, ['repulse'])
+            .set(11, ['vampire'])
+            .set(15, ['zone']);
         Mota.rewrite(
             Mota.require('class', 'DamageEnemy').prototype,
             'preProvideHalo',
@@ -850,11 +1134,47 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 if (this.progress !== 0) return;
                 this.progress = 1;
                 const special = this.getHaloSpecials();
+                const col = this.col ?? core.status.maps[this.floorId].enemy;
 
                 for (const halo of special) {
                     switch (halo) {
-                        default:
-                            break;
+                        case 28: {
+                            // 特殊光环
+                            const e = this.enemy;
+                            const type = e.haloSquare ? 'square' : 'manhattan';
+                            const r = Math.floor(e.haloRange);
+                            const d = type === 'square' ? r * 2 + 1 : r;
+                            const range = { x: this.x, y: this.y, d };
+
+                            // 这一句必须放到applyHalo之前
+                            this.providedHalo.add(28);
+
+                            col.applyHalo(
+                                type,
+                                range,
+                                this,
+                                (e, enemy) => {
+                                    const s = enemy.specialHalo;
+                                    e.special.push(...s);
+                                    // 然后计算特殊属性数值
+                                    for (const spec of s) {
+                                        const toChange = changeable.get(spec);
+                                        if (!toChange) continue;
+                                        for (const key of toChange) {
+                                            if (enemy.specialMultiply) {
+                                                e[key] = s[key] ?? 1;
+                                                e[key] *= enemy[key];
+                                            } else {
+                                                e[key] = s[key] ?? 0;
+                                                e[key] += enemy[key];
+                                            }
+                                        }
+                                    }
+                                },
+                                // true表示递归计算，视为第一类光环
+                                true
+                            );
+                        }
                     }
                 }
             }
@@ -870,5 +1190,96 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 halo(this.info, enemy);
             }
         );
+    },
+    checkBlock: function () {
+        Mota.rewrite(core.control, 'checkBlock', 'full', function () {
+            const x = core.getHeroLoc('x'),
+                y = core.getHeroLoc('y'),
+                loc = x + ',' + y;
+            const info = core.status.thisMap.enemy.mapDamage[loc];
+            const damage = info?.damage;
+            const floor = core.status.thisMap;
+            if (damage) {
+                // 伤害弹出，在渲染进程中执行
+                Mota.r(() => {
+                    Mota.Plugin.require('pop_r').addPop(
+                        (x - core.bigmap.offsetX / 32) * 32 + 12,
+                        (y - core.bigmap.offsetY / 32) * 32 + 20,
+                        (-damage).toString()
+                    );
+                });
+                core.status.hero.hp -= damage;
+                const type = [...info.type];
+                const text = type.join('，') || '伤害';
+                core.drawTip('受到' + text + damage + '点');
+                core.drawHeroAnimate('zone');
+                this._checkBlock_disableQuickShop();
+                core.status.hero.statistics.extraDamage += damage;
+                if (core.status.hero.hp <= 0) {
+                    core.status.hero.hp = 0;
+                    core.updateStatusBar();
+                    core.events.lose();
+                    return;
+                } else {
+                    core.updateStatusBar();
+                }
+            }
+            const { findDir, ofDir } = Mota.Plugin.require('utils_g');
+
+            // 阻击处理
+            if (info?.repulse) {
+                const actions = [];
+                for (const [ex, ey] of info.repulse) {
+                    const dir = findDir({ x, y }, { x: ex, y: ey });
+                    const [tx, ty] = ofDir(ex, ey, dir);
+                    if (
+                        tx < 0 ||
+                        ty < 0 ||
+                        tx >= floor.width ||
+                        ty >= floor.height ||
+                        core.getBlock(tx, ty)
+                    ) {
+                        continue;
+                    }
+                    actions.push({
+                        type: 'move',
+                        loc: [ex, ey],
+                        steps: [findDir({ x, y }, { x: ex, y: ey })],
+                        time: 250,
+                        keep: true,
+                        async: true
+                    });
+                }
+                actions.push({ type: 'waitAsync' });
+                core.insertAction(actions);
+            }
+            // 捕捉处理
+            if (info?.ambush) {
+                const actions = [];
+                for (const enemy of info.ambush) {
+                    actions.push({
+                        type: 'move',
+                        loc: [enemy.x, enemy.y],
+                        steps: [findDir(enemy, { x, y })],
+                        time: 250,
+                        keep: false,
+                        async: true
+                    });
+                }
+                actions.push({ type: 'waitAsync' });
+                // 强制战斗
+                for (const enemy of info.ambush) {
+                    actions.push({
+                        type: 'function',
+                        function:
+                            'function() { ' +
+                            `core.battle(${enemy.x}, ${enemy.y}, true, core.doAction); ` +
+                            '}',
+                        async: true
+                    });
+                }
+                core.insertAction(actions);
+            }
+        });
     }
 };

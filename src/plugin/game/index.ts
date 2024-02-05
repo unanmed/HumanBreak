@@ -6,7 +6,6 @@ import * as removeMap from './removeMap';
 import * as shop from './shop';
 import * as utils from './utils';
 import * as remainEnemy from './enemy/remainEnemy';
-import * as checkBlock from './enemy/checkblock';
 
 Mota.Plugin.register('utils_g', utils);
 Mota.Plugin.register('shop_g', shop);
@@ -16,7 +15,6 @@ Mota.Plugin.register('heroFourFrames_g', heroFourFrames, heroFourFrames.init);
 Mota.Plugin.register('rewrite_g', rewrite, rewrite.init);
 Mota.Plugin.register('itemDetail_g', itemDetail, itemDetail.init);
 Mota.Plugin.register('remainEnemy_g', remainEnemy);
-Mota.Plugin.register('checkBlock_g', checkBlock, checkBlock.init);
 
 // export {
 //     halo,

@@ -164,7 +164,6 @@ interface PluginInterface {
     heroFourFrames_g: typeof import('../plugin/game/fx/heroFourFrames');
     rewrite_g: typeof import('../plugin/game/fx/rewrite');
     itemDetail_g: typeof import('../plugin/game/fx/itemDetail');
-    checkBlock_g: typeof import('../plugin/game/enemy/checkblock');
 }
 
 interface PackageInterface {

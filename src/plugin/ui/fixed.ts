@@ -28,19 +28,17 @@ export function getDetailedEnemy(
     ) => {
         return typeof func === 'string' ? func : func(enemy);
     };
-    const special: [string, string, string][] = enemy.enemy.special.map(vv => {
+    const special: [string, string, string][] = enemy.info.special.map(vv => {
         const s = Mota.require('var', 'enemySpecials')[vv];
+        const info = { ...enemy.enemy, ...enemy.info };
         return [
-            fromFunc(s.name, enemy.enemy),
-            fromFunc(s.desc, enemy.enemy),
+            fromFunc(s.name, info),
+            fromFunc(s.desc, info),
             s.color as string
         ];
     });
     const l = isMobile ? 1 : 2;
-    const showSpecial =
-        special.length > l
-            ? special.slice(0, l).concat([['...', '', '#fff']])
-            : special.slice();
+    const showSpecial = special;
 
     const damageColor = getDamageColor(dam) as string;
 

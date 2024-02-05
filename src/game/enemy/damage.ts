@@ -14,9 +14,14 @@ interface HaloType {
         y: number;
         d: number;
     };
+    manhattan: {
+        x: number;
+        y: number;
+        d: number;
+    };
 }
 
-interface EnemyInfo {
+interface EnemyInfo extends Partial<SelectType<Enemy, number | undefined>> {
     atk: number;
     def: number;
     hp: number;
@@ -25,6 +30,7 @@ interface EnemyInfo {
     defBuff: number;
     hpBuff: number;
     enemy: Enemy;
+    guard?: DamageEnemy[];
     x?: number;
     y?: number;
     floorId?: FloorIds;
@@ -39,7 +45,8 @@ interface DamageInfo {
 interface MapDamage {
     damage: number;
     type: Set<string>;
-    mockery?: LocArr[];
+    repulse?: LocArr[];
+    ambush?: DamageEnemy[];
 }
 
 interface HaloData<T extends keyof HaloType = keyof HaloType> {
@@ -103,6 +110,8 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
         this.haloList = [];
         this.list.forEach(v => {
             v.reset();
+        });
+        this.list.forEach(v => {
             v.preProvideHalo();
         });
         this.list.forEach(v => {
@@ -146,21 +155,22 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
     applyHalo<K extends keyof HaloType>(
         type: K,
         data: HaloType[K],
+        enemy: DamageEnemy,
         halo: HaloFn | HaloFn[],
         recursion: boolean = false
     ) {
         const arr = ensureArray(halo);
-        const enemy = this.range.scan(type, data);
+        const enemys = this.range.scan(type, data);
         if (!recursion) {
             arr.forEach(v => {
-                enemy.forEach(e => {
-                    e.injectHalo(v, e.enemy);
+                enemys.forEach(e => {
+                    e.injectHalo(v, enemy.enemy);
                 });
             });
         } else {
-            enemy.forEach(e => {
+            enemys.forEach(e => {
                 arr.forEach(v => {
-                    e.injectHalo(v, e.enemy);
+                    e.injectHalo(v, enemy.enemy);
                     e.preProvideHalo();
                 });
             });
@@ -260,6 +270,26 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
                         alpha: 1
                     });
                 }
+
+                if (dam.ambush) {
+                    core.status.damage.extraData.push({
+                        text: '!',
+                        px: 32 * x + 16,
+                        py: 32 * y + 16,
+                        color: '#fa3',
+                        alpha: 1
+                    });
+                }
+
+                if (dam.repulse) {
+                    core.status.damage.extraData.push({
+                        text: '阻',
+                        px: 32 * x + 16,
+                        py: 32 * y + 16,
+                        color: '#fa3',
+                        alpha: 1
+                    });
+                }
             }
         }
     }
@@ -320,8 +350,15 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
             y: this.y,
             floorId: this.floorId
         };
+
+        for (const [key, value] of Object.entries(enemy)) {
+            if (!(key in this.info) && has(value)) {
+                // @ts-ignore
+                this.info[key] = value;
+            }
+        }
         this.progress = 0;
-        this.providedHalo = new Set();
+        this.providedHalo.clear();
     }
 
     /**
@@ -381,6 +418,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         if (!this.floorId) return [];
         if (!has(this.x) || !has(this.y)) return [];
         const special = this.info.special ?? this.enemy.special;
+
         const filter = special.filter(v => {
             return Damage.haloSpecials.has(v) && !this.providedHalo.has(v);
         });
@@ -397,92 +435,12 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     /**
      * 光环预提供，用于平衡所有怪的光环属性，避免出现不同情况下光环效果不一致的现象
      */
-    preProvideHalo() {
-        if (this.progress !== 0) return;
-        this.progress = 1;
-        const special = this.getHaloSpecials();
-
-        for (const halo of special) {
-            switch (halo) {
-                default:
-                    break;
-            }
-        }
-    }
+    preProvideHalo() {}
 
     /**
      * 向其他怪提供光环
      */
-    provideHalo() {
-        if (this.progress !== 2) return;
-        this.progress = 3;
-        if (!this.floorId) return;
-        if (!has(this.x) || !has(this.y)) return;
-        const col = this.col ?? core.status.maps[this.floorId].enemy;
-        if (!col) return;
-        const special = this.getHaloSpecials();
-
-        const square7: HaloFn[] = [];
-        const square5: HaloFn[] = [];
-
-        // e 是被加成怪的属性，enemy 是施加光环的怪
-
-        for (const halo of special) {
-            switch (halo) {
-                case 8:
-                    square5.push((e, enemy) => {
-                        if (
-                            e.special.includes(8) &&
-                            (e.x !== this.x || this.y !== e.y)
-                        ) {
-                            e.atkBuff += enemy.together ?? 0;
-                            e.defBuff += enemy.together ?? 0;
-                        }
-                    });
-                    this.providedHalo.add(8);
-                    break;
-                case 21:
-                    square7.push(e => {
-                        // e.damageDecline += this.enemy.iceHalo ?? 0;
-                    });
-                    col.haloList.push({
-                        type: 'square',
-                        data: { x: this.x, y: this.y, d: 7 },
-                        special: 21,
-                        from: this
-                    });
-                    this.providedHalo.add(21);
-                    break;
-                case 26:
-                    square5.push(e => {
-                        e.defBuff += this.enemy.iceCore ?? 0;
-                    });
-                    col.haloList.push({
-                        type: 'square',
-                        data: { x: this.x, y: this.y, d: 5 },
-                        special: 26,
-                        from: this
-                    });
-                    this.providedHalo.add(26);
-                    break;
-                case 27:
-                    square5.push(e => {
-                        e.atkBuff += this.enemy.fireCore ?? 0;
-                    });
-                    col.haloList.push({
-                        type: 'square',
-                        data: { x: this.x, y: this.y, d: 5 },
-                        special: 27,
-                        from: this
-                    });
-                    this.providedHalo.add(27);
-                    break;
-            }
-        }
-
-        col.applyHalo('square', { x: this.x, y: this.y, d: 7 }, square7);
-        col.applyHalo('square', { x: this.x, y: this.y, d: 5 }, square5);
-    }
+    provideHalo() {}
 
     /**
      * 接受其他怪的光环
@@ -507,64 +465,6 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         damage: Record<string, MapDamage> = {},
         hero: Partial<HeroStatus> = getHeroStatusOn(Damage.realStatus)
     ) {
-        if (!has(this.x) || !has(this.y) || !has(this.floorId)) return damage;
-        const enemy = this.enemy;
-        const floor = core.status.maps[this.floorId];
-        const w = floor.width;
-        const h = floor.height;
-
-        // 突刺
-        if (this.info.special.includes(15)) {
-            const range = enemy.range ?? 1;
-            const startX = Math.max(0, this.x - range);
-            const startY = Math.max(0, this.y - range);
-            const endX = Math.min(floor.width - 1, this.x + range);
-            const endY = Math.min(floor.height - 1, this.y + range);
-            const dam = Math.max((enemy.value ?? 0) - hero.def!, 0);
-
-            for (let x = startX; x <= endX; x++) {
-                for (let y = startY; y <= endY; y++) {
-                    if (
-                        !enemy.zoneSquare &&
-                        manhattan(x, y, this.x, this.y) > range
-                    ) {
-                        continue;
-                    }
-                    const loc = `${x},${y}`;
-                    this.setMapDamage(damage, loc, dam, '突刺');
-                }
-            }
-        }
-
-        // 射击
-        if (this.info.special.includes(24)) {
-            // const dirs: Dir[] = ['left', 'down', 'up', 'right'];
-            // const dam = Math.max((enemy.atk ?? 0) - hero.def!, 0);
-            // const objs = core.getMapBlocksObj(this.floorId);
-            // for (const dir of dirs) {
-            //     let x = this.x;
-            //     let y = this.y;
-            //     const { x: dx, y: dy } = core.utils.scan[dir];
-            //     while (x >= 0 && y >= 0 && x < w && y < h) {
-            //         x += dx;
-            //         y += dy;
-            //         const loc = `${x},${y}` as LocString;
-            //         const block = objs[loc];
-            //         if (
-            //             block &&
-            //             block.event.noPass &&
-            //             block.event.cls !== 'enemys' &&
-            //             block.event.cls !== 'enemy48' &&
-            //             block.id !== 141 &&
-            //             block.id !== 151
-            //         ) {
-            //             break;
-            //         }
-            //         this.setMapDamage(damage, loc, dam, '射击');
-            //     }
-            // }
-        }
-
         return damage;
     }
 
@@ -572,11 +472,11 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         damage: Record<string, MapDamage>,
         loc: string,
         dam: number,
-        type: string
+        type?: string
     ) {
         damage[loc] ??= { damage: 0, type: new Set() };
         damage[loc].damage += dam;
-        damage[loc].type.add(type);
+        if (type) damage[loc].type.add(type);
     }
 
     private calEnemyDamageOf(hero: Partial<HeroStatus>, enemy: EnemyInfo) {
@@ -730,6 +630,12 @@ export namespace Damage {
     /** 光环属性 */
     export const haloSpecials: Set<number> = new Set();
 
+    /** 会被第一类光环修改的怪物特殊属性数值 */
+    export const changeableHaloValue: Map<
+        number,
+        SelectKey<Enemy, number | undefined>[]
+    > = new Map();
+
     /**
      * 计算伤害时会用到的勇士属性，攻击防御，其余的不会有buff加成，直接从core.status.hero取
      */
@@ -744,55 +650,7 @@ export namespace Damage {
         info: EnemyInfo,
         hero: Partial<HeroStatus>
     ): number | null {
-        const { hp, hpmax, mana, mdef } = core.status.hero;
-        let { atk, def } = hero as HeroStatus;
-        let { hp: monHp, atk: monAtk, def: monDef, special, enemy } = info;
-
-        let damage = 0;
-
-        // 饥渴
-        if (special.includes(7)) {
-            const delta = Math.floor((atk * enemy.hungry!) / 100);
-            atk -= delta;
-            monAtk += delta;
-        }
-
-        let heroPerDamage: number;
-
-        // 绝对防御
-        if (special.includes(3)) {
-            // 由于坚固的特性，只能放到这来计算了
-            if (atk > enemy.def) heroPerDamage = 1 + mana;
-            else return null;
-        } else {
-            heroPerDamage = atk - monDef;
-            if (heroPerDamage > 0) heroPerDamage += mana;
-            else return null;
-        }
-
-        let enemyPerDamage: number;
-
-        // 魔攻
-        if (special.includes(2) || special.includes(13)) {
-            enemyPerDamage = monAtk;
-        } else {
-            enemyPerDamage = monAtk - def;
-            if (enemyPerDamage < 0) enemyPerDamage = 0;
-        }
-
-        // 先攻
-        if (special.includes(17)) {
-            damage += enemyPerDamage;
-        }
-
-        // 连击
-        if (special.includes(4)) enemyPerDamage *= 2;
-        if (special.includes(5)) enemyPerDamage *= 3;
-        if (special.includes(6)) enemyPerDamage *= enemy.n!;
-
-        let turn = Math.ceil(monHp / heroPerDamage);
-
-        return damage;
+        return null;
     }
 
     export function ensureFloorDamage(floorId: FloorIds) {

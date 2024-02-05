@@ -96,3 +96,21 @@ Range.registerRangeType(
         );
     }
 );
+Range.registerRangeType(
+    'manhattan',
+    (col, { x, y, d }) => {
+        const list = col.collection.list;
+        return list.filter(v => {
+            if (!has(v.x) || !has(v.y)) return;
+            const dx = Math.abs(v.x - x);
+            const dy = Math.abs(v.y - y);
+            return dx + dy < d;
+        });
+    },
+    (col, { x, y, d }, item) => {
+        if (!has(item.x) || !has(item.y)) return false;
+        const dx = Math.abs(item.x - x);
+        const dy = Math.abs(item.y - y);
+        return dx + dy < d;
+    }
+);
