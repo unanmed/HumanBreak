@@ -260,6 +260,7 @@ onMounted(() => {
     width: 100%;
     height: 100%;
     padding: 1vh 0;
+    font-size: 100%;
 }
 
 .status-item {
@@ -341,5 +342,12 @@ onMounted(() => {
 }
 .status-debuff-value[index='2'] {
     color: #c2f4e7;
+}
+
+@media screen and (max-width: 600px) {
+    .status-item {
+        font-size: 100%;
+        max-width: 28vw;
+    }
 }
 </style>

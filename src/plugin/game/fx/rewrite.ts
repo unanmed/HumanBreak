@@ -1,5 +1,6 @@
 import { getEnemy } from '@/game/enemy/battle';
 import { formatDamage } from '../utils';
+import { DamageEnemy } from '@/game/enemy/damage';
 
 export function init() {
     core.maps._initDetachedBlock = function (
@@ -36,7 +37,9 @@ export function init() {
             core.hasItem('book') &&
             displayDamage
         ) {
-            const enemy = getEnemy(x, y);
+            const enemy =
+                getEnemy(x, y) ??
+                new DamageEnemy(core.material.enemys[info.id as EnemyIds]);
             const dam = enemy.calDamage();
             const { damage, color } = formatDamage(dam.damage);
 

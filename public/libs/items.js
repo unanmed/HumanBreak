@@ -77,7 +77,7 @@ items.prototype.getItemEffectTip = function (itemId) {
 ////// 使用道具 //////
 items.prototype.useItem = function (itemId, noRoute, callback) {
     /** @type {AllIdsOf<'items'>[]} */
-    const ignore = ['I560', 'I559', 'skill1', 'I642', 'I565', 'I558'];
+    const ignore = ['I342'];
     if (
         !this.canUseItem(itemId) ||
         (core.isReplaying() && ignore.includes(itemId))

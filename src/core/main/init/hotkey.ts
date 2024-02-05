@@ -122,6 +122,26 @@ gameKey
         defaults: KeyCode.Digit7
     })
     .register({
+        id: 'num1',
+        name: '破墙镐',
+        defaults: KeyCode.Digit1
+    })
+    .register({
+        id: 'num2',
+        name: '炸弹',
+        defaults: KeyCode.Digit2
+    })
+    .register({
+        id: 'num3',
+        name: '飞行器',
+        defaults: KeyCode.Digit3
+    })
+    .register({
+        id: 'num4',
+        name: '其他道具',
+        defaults: KeyCode.Digit3
+    })
+    .register({
         id: 'mark',
         name: '标记怪物',
         defaults: KeyCode.KeyM
@@ -488,6 +508,42 @@ gameKey
     })
     .realize('comment', () => {
         core.actions._clickGameInfo_openComments();
+    })
+    .realize('num1', () => {
+        if (core.hasItem('pickaxe')) {
+            core.useItem('pickaxe');
+        }
+    })
+    .realize('num2', () => {
+        if (core.hasItem('bomb')) {
+            core.useItem('bomb');
+        }
+    })
+    .realize('num3', () => {
+        if (core.hasItem('centerFly')) {
+            core.useItem('centerFly');
+        }
+    })
+    .realize('num4', () => {
+        const list: ItemIdOf<'tools' | 'constants'>[] = [
+            'icePickaxe',
+            'freezeBadge',
+            'earthquake',
+            'upFly',
+            'downFly',
+            'jumpShoes',
+            'lifeWand',
+            'poisonWine',
+            'weakWine',
+            'curseWine',
+            'superWine'
+        ];
+        for (const id of list) {
+            if (core.canUseItem(id)) {
+                core.useItem(id);
+                break;
+            }
+        }
     });
 
 // ----- Storage

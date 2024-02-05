@@ -95,6 +95,7 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
         core.extractBlocks(this.floorId);
         core.status.maps[this.floorId].blocks.forEach(v => {
             if (v.event.cls !== 'enemy48' && v.event.cls !== 'enemys') return;
+            if (v.disable) return;
             const enemy = core.material.enemys[v.event.id as EnemyIds];
             this.list.push(
                 new DamageEnemy(enemy, v.x, v.y, this.floorId, this)

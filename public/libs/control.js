@@ -3709,6 +3709,7 @@ control.prototype.resize = function () {
         extendToolbar = false;
         BAR_WIDTH = Math.round(core._PX_ * 0.3);
     }
+    core.domStyle.isVertical = matchMedia('(max-width: 600px)').matches;
 
     var statusCanvas = core.flags.statusCanvas,
         statusCanvasRows = core.values.statusCanvasRowsOnMobile || 3;

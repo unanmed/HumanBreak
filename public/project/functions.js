@@ -492,10 +492,24 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 更新跟随者状态，并绘制
             core.updateFollowers();
             core.drawHero();
+            // 检查中毒状态的扣血和死亡
+            if (core.hasFlag('poison')) {
+                core.status.hero.statistics.poisonDamage +=
+                    core.values.poisonDamage;
+                core.status.hero.hp -= core.values.poisonDamage;
+                if (core.status.hero.hp <= 0) {
+                    core.status.hero.hp = 0;
+                    core.updateStatusBar(false, true);
+                    core.events.lose();
+                    return;
+                } else {
+                    core.updateStatusBar(false, true);
+                }
+            }
 
             // 从v2.7开始，每一步行走不会再刷新状态栏。
             // 如果有特殊要求（如每走一步都加buff之类），可手动取消注释下面这一句：
-            // core.updateStatusBar(true);
+            // core.updateStatusBar(true, true);
 
             // 检查自动事件
             core.checkAutoEvents();
@@ -519,6 +533,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 执行目标点的阻激夹域事件
             core.checkBlock();
 
+            // 执行目标点的script和事件
             if (!hasTrigger) core.trigger(nowx, nowy, callback);
 
             // 检查该点是否是滑冰
@@ -532,6 +547,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     true
                 );
             }
+
+            // ------ 检查目标点事件 END ------ //
 
             // 如需强行终止行走可以在这里条件判定：
             // core.stopAutomaticRoute();

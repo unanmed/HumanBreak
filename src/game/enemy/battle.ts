@@ -16,9 +16,7 @@ export function getEnemy(
         return v.x === x && v.y === y;
     });
     if (!enemy) {
-        throw new Error(
-            `Get null when getting enemy on '${x},${y}' in '${floorId}'`
-        );
+        return null;
     }
     return enemy;
 }
@@ -30,7 +28,7 @@ function init() {
         floorId: FloorIds = core.status.floorId
     ) {
         const enemy = getEnemy(x, y, floorId);
-        const { damage } = enemy.calDamage();
+        const { damage } = enemy!.calDamage();
 
         return damage < core.status.hero.hp;
     };
@@ -47,7 +45,7 @@ function init() {
         if (!core.canBattle(x, y) && !force && !core.status.event.id) {
             core.stopSound();
             core.playSound('操作失败');
-            core.drawTip('你打不过此怪物！', enemy.id);
+            core.drawTip('你打不过此怪物！', enemy!.id);
             return core.clearContinueAutomaticRoute(callback);
         }
         // 自动存档
@@ -98,7 +96,7 @@ function init() {
         const enemy = getEnemy(data.x, data.y);
 
         beforeBattle.push(...(floor.beforeBattle[loc] ?? []));
-        beforeBattle.push(...(enemy.enemy.beforeBattle ?? []));
+        beforeBattle.push(...(enemy!.enemy.beforeBattle ?? []));
 
         if (beforeBattle.length > 0) {
             beforeBattle.push({ type: 'battle', x: data.x, y: data.y });

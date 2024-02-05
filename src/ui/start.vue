@@ -269,8 +269,7 @@ onUnmounted(() => {
     #title {
         margin-top: 7%;
         text-align: center;
-        font: 4em 'normal';
-        font-weight: 200;
+        font-size: 4em;
         background-image: linear-gradient(
             to right,
             rgb(0, 0, 0),
@@ -320,6 +319,7 @@ onUnmounted(() => {
         flex-direction: column;
         transition: height 0.2s ease;
         width: 25%;
+        font-size: 100%;
 
         .start-button {
             position: relative;
@@ -462,5 +462,24 @@ onUnmounted(() => {
 .start-leave-to {
     transform: translateX(-20px);
     opacity: 0;
+}
+
+@media screen and (max-width: 600px) {
+    #start-main {
+        #buttons {
+            width: 50%;
+            font-size: 250%;
+        }
+
+        #settings {
+            font-size: 300%;
+            width: 24%;
+            bottom: 2%;
+        }
+
+        #title {
+            font-size: 8em;
+        }
+    }
 }
 </style>

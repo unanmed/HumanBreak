@@ -736,7 +736,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"hatred": 2,
 		"animateSpeed": 300,
 		"moveSpeed": 100,
-		"statusCanvasRowsOnMobile": 3,
+		"statusCanvasRowsOnMobile": 0,
 		"floorChangeTime": 500
 	},
 	"flags": {
