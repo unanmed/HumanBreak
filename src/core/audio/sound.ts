@@ -176,6 +176,7 @@ export class SoundController extends ResourceController<
      */
     play(sound: SoundIds, end?: () => void): number {
         const se = this.get(sound);
+        if (!se) return -1;
         const index = se.playSE();
         if (!has(index)) return -1;
         this.seIndex[index] = se;

@@ -339,11 +339,15 @@ core.prototype._loadPluginSync = function () {
 
 core.prototype._loadGameProcess = async function () {
     // 加载游戏进程代码
-    if (main.pluginUseCompress) {
+    if (main.pluginUseCompress && main.replayChecking) {
         await main.loadScript(`project/processG.min.js?v=${main.version}`);
     } else {
         if (main.mode === 'editor') {
-            await main.loadScript(`src/game/index.esm.ts`, true);
+            if (main.pluginUseCompress) {
+                await main.loadScript(`project/processG.min.js`);
+            } else {
+                await main.loadScript(`src/game/index.esm.ts`, true);
+            }
         }
     }
 };

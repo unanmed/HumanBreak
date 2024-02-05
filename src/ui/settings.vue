@@ -54,7 +54,7 @@
                 <div class="info-editor" v-if="!!selectedItem">
                     <div class="editor-custom">
                         <component
-                            :is="selectedItem.controller"
+                            :is="(selectedItem.controller as any)"
                             :item="selectedItem"
                             :displayer="displayer"
                             :setting="setting"

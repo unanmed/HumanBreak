@@ -131,8 +131,8 @@ class GameListener extends EventEmitter<ListenerEvent> {
 
         const getBlockLoc = (px: number, py: number, size: number) => {
             return [
-                Math.floor(((px * 32) / size - core.bigmap.offsetX) / 32),
-                Math.floor(((py * 32) / size - core.bigmap.offsetY) / 32)
+                Math.floor(((px * 32) / size + core.bigmap.offsetX) / 32),
+                Math.floor(((py * 32) / size + core.bigmap.offsetY) / 32)
             ];
         };
 

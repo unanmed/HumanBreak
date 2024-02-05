@@ -144,12 +144,10 @@ interface PluginInterface {
     // utils: typeof import('../plugin/utils');
     // status: typeof import('../plugin/ui/statusBar');
     fly_r: typeof import('../plugin/ui/fly');
-    chase_r: typeof import('../plugin/chase/chase');
     // webglUtils: typeof import('../plugin/webgl/utils');
     shadow_r: typeof import('../plugin/shadow/shadow');
     gameShadow_r: typeof import('../plugin/shadow/gameShadow');
     // achievement: typeof import('../plugin/ui/achievement');
-    completion_r: typeof import('../plugin/completion');
     // path: typeof import('../plugin/fx/path');
     gameCanvas_r: typeof import('../plugin/fx/gameCanvas');
     // noise: typeof import('../plugin/fx/noise');

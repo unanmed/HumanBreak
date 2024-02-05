@@ -1146,6 +1146,11 @@ interface Main extends MainData {
     readonly replayChecking: boolean;
 
     /**
+     * 渲染进程是否加载完毕
+     */
+    renderLoaded: boolean;
+
+    /**
      * @deprecated
      * 就是core，应该没人会用main.core吧（
      */

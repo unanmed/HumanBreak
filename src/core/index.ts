@@ -104,3 +104,6 @@ Mota.register('module', 'UITools', {
     statusBar: statusBarTools,
     toolbox: toolboxTools
 });
+
+main.renderLoaded = true;
+Mota.require('var', 'hook').emit('renderLoaded');

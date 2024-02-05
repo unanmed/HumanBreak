@@ -354,8 +354,9 @@ main.prototype.loadAsync = async function (mode, callback) {
         main.dom.mainTips.style.display = 'none';
     } else {
         await new Promise(res => {
+            const all = main.pluginUseCompress ? '' : '/all/';
             main.loadScript(
-                `/all/__all_floors__.js?v=${
+                `/${all}__all_floors__.js?v=${
                     main.version
                 }&id=${main.floorIds.join(',')}`
             ).then(

@@ -1,8 +1,8 @@
 main.floors.empty=
 {
     "floorId": "empty",
-    "title": "空地图",
-    "name": "空地图",
+    "title": "空地图（不能删）",
+    "name": "空地图（不能删）",
     "width": 15,
     "height": 15,
     "canFlyTo": false,

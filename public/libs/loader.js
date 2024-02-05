@@ -525,6 +525,11 @@ loader.prototype.loadOneMusic = function (name) {
         music.loop = 'loop';
         core.material.bgms[name] = music;
     } else {
+        if (!main.renderLoaded) {
+            Mota.require('var', 'hook').once('renderLoaded', () => {
+                Mota.require('var', 'bgm').add(`bgms.${name}`, music);
+            });
+        }
         Mota.require('var', 'bgm').add(`bgms.${name}`, music);
     }
 };
@@ -538,8 +543,15 @@ loader.prototype.loadOneSound = function (name) {
             if (main.mode === 'editor') {
                 core.loader._loadOneSound_decodeData(name, data);
             } else {
-                const sound = Mota.require('var', 'sound');
-                sound.add(`sounds.${name}`, data);
+                if (!main.renderLoaded) {
+                    Mota.require('var', 'hook').once('renderLoaded', () => {
+                        const sound = Mota.require('var', 'sound');
+                        sound.add(`sounds.${name}`, data);
+                    });
+                } else {
+                    const sound = Mota.require('var', 'sound');
+                    sound.add(`sounds.${name}`, data);
+                }
             }
         },
         function (e) {

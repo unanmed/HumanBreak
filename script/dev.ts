@@ -594,7 +594,7 @@ async function ensureConfig() {
     // 1. 启动vite服务
     const vite = await createServer();
     await vite.listen(5173);
-    console.log(`游戏地址：http://localhost:5173/games/${config.name}/`);
+    console.log(`游戏地址：http://localhost:5173`);
 
     // 2. 启动样板http服务
     await ensureConfig();

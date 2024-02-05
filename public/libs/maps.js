@@ -2588,11 +2588,13 @@ maps.prototype._drawThumbnail_realDrawTempCanvas = function (
     blocks,
     options
 ) {
-    const setting = Mota.require('var', 'mainSetting');
-    options.ctx.imageSmoothingEnabled = !setting.getValue(
-        'screen.antiAliasing',
-        true
-    );
+    Mota.r(() => {
+        const setting = Mota.require('var', 'mainSetting');
+        options.ctx.imageSmoothingEnabled = !setting.getValue(
+            'screen.antiAliasing',
+            true
+        );
+    });
     // 缩略图：背景
     this.drawBg(floorId, options);
     // 缩略图：事件

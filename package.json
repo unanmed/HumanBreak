@@ -12,7 +12,8 @@
     "update": "ts-node-esm script/update.ts",
     "declare": "ts-node-esm script/declare.ts",
     "type": "vue-tsc --noEmit",
-    "lines": "ts-node-esm script/lines.ts"
+    "lines": "ts-node-esm script/lines.ts",
+    "declaration": "vue-tsc -p tsconfig.declaration.json"
   },
   "dependencies": {
     "@ant-design/icons-vue": "^6.1.0",

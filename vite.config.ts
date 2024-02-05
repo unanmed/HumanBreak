@@ -21,7 +21,7 @@ export default defineConfig({
         }),
         components({ resolvers: [AntDesignVueResolver()] })
     ],
-    base: `/games/${motaConfig.name}/`,
+    base: `./`,
     resolve: {
         alias: {
             '@': resolve(__dirname, './src'),

@@ -20,8 +20,6 @@
 import * as shadow from '@/plugin/shadow/shadow';
 import * as gameShadow from '@/plugin/shadow/gameShadow';
 import * as fly from '@/plugin/ui/fly';
-import * as chase from '@/plugin/chase/chase';
-import * as completion from '@/plugin/completion';
 import * as pop from '@/plugin/pop';
 import * as frag from '@/plugin/fx/frag';
 import * as use from '@/plugin/use';
@@ -32,8 +30,6 @@ import * as shader from './fx/shader';
 Mota.Plugin.register('shadow_r', shadow, shadow.init);
 Mota.Plugin.register('gameShadow_r', gameShadow, gameShadow.init);
 Mota.Plugin.register('fly_r', fly);
-Mota.Plugin.register('chase_r', chase);
-Mota.Plugin.register('completion_r', completion);
 Mota.Plugin.register('pop_r', pop, pop.init);
 Mota.Plugin.register('frag_r', frag, frag.init);
 Mota.Plugin.register('use_r', use);

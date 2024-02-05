@@ -991,7 +991,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                         const e = this.col.list.find(v => {
                             return v.x === x + dx * 2 && v.y === y + dy * 2;
                         });
-                        if (e) {
+                        if (e && e.info.special.includes(16)) {
                             const loc = `${x + dx},${y + dy}`;
                             this.setMapDamage(damage, loc, dam, '夹击');
                             caledBetween.add(loc);
