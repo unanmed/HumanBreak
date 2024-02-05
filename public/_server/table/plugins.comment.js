@@ -9,11 +9,29 @@ var plugins_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 	"_type": "object",
 	"_data": function (key) {
 		var obj = {
-			"init": {
+			"fiveLayer": {
 				"_leaf": true,
 				"_type": "textarea",
 				"_range": "typeof(thiseval)=='string'",
-				"_data": "双击查看插件详情"
+				"_data": "五图层插件"
+			},
+			"uiRewrite": {
+				"_leaf": true,
+				"_type": "textarea",
+				"_range": "typeof(thiseval)=='string'",
+				"_data": "ui复写"
+			},
+			"special": {
+				"_leaf": true,
+				"_type": "textarea",
+				"_range": "typeof(thiseval)=='string'",
+				"_data": "怪物特殊属性"
+			},
+			"battle": {
+				"_leaf": true,
+				"_type": "textarea",
+				"_range": "typeof(thiseval)=='string'",
+				"_data": "战斗"
 			},
 		}
 		if (obj[key]) return obj[key];

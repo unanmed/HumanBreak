@@ -301,8 +301,15 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
     special: function () {
         // 这个插件负责定义怪物属性
         const specials = Mota.require('var', 'enemySpecials');
+        /**
+         * @param {string | ((enemy: Enemy) => string)} func
+         * @param {Enemy} enemy
+         */
+        const fromFunc = (func, enemy) => {
+            return typeof func === 'string' ? func : func(enemy);
+        };
         // 怪物特殊属性包含四个信息
-        // code: 索引，必须与该属性在数组内的索引一致
+        // code: 索引，必须与该属性在数组内的索引一致，实际判断的时候也是根据索引判断，不会根据code判断
         // name: 特殊属性名称，可以是一个函数，接受 enemy 作为参数，返回字符串
         // desc: 特殊属性说明，也可以是一个函数，接受 enemy 作为参数，返回字符串
         // color: 特殊属性颜色，会在怪物手册中显示出来
@@ -315,14 +322,13 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             },
             {
                 code: 1,
-                name: '致命一击',
-                desc: enemy =>
-                    `怪物每5回合触发一次强力攻击，造成${enemy.crit}%的伤害`,
+                name: '先攻',
+                desc: `怪物首先攻击`,
                 color: '#fc3'
             },
             {
                 code: 2,
-                name: '恶毒',
+                name: '魔攻',
                 desc: '怪物攻击无视勇士的防御',
                 color: '#bbb0ff'
             },
@@ -346,160 +352,226 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             },
             {
                 code: 6,
-                name: enemy => `${enemy.n}连击`,
+                name: enemy => `${enemy.n ?? 4}连击`,
                 desc: enemy => `怪物每回合攻击${enemy.n}次`,
                 color: '#fe7'
             },
             {
                 code: 7,
-                name: '饥渴',
+                name: '破甲',
                 desc: enemy =>
-                    `战斗前，怪物降低勇士${enemy.hungry}%的攻击，并加在自己身上`,
+                    `战斗前，怪物附加角色防御的${Math.floor(
+                        100 * (enemy.breakArmor || core.values.breakArmor)
+                    )}%作为伤害"`,
                 color: '#b67'
             },
             {
                 code: 8,
-                name: '抱团',
+                name: '反击',
                 desc: enemy =>
-                    `怪物周围5×5范围内每有一个拥有该属性的怪物，自身攻防就增加${enemy.together}%（线性叠加）`,
+                    `战斗时，怪物每回合附加角色攻击的${Math.floor(
+                        100 * (enemy.counterAttack || core.values.counterAttack)
+                    )}%作为伤害，无视角色防御`,
                 color: '#fa4'
             },
             {
                 code: 9,
-                name: '绝对防御',
-                desc: '怪物的奇特护甲可以让勇士的额外攻击失效，攻击变为基础攻击+额外攻击',
+                name: '净化',
+                desc: enemy =>
+                    `战斗前，怪物附加角色护盾的${
+                        enemy.purify || core.values.purify
+                    }倍作为伤害`,
                 color: '#80eed6'
             },
             {
                 code: 10,
-                name: '勇气之刃',
-                desc: enemy => `怪物第一回合造成${enemy.courage}%的伤害`,
+                name: '模仿',
+                desc: `怪物的攻防和角色攻防相等`,
                 color: '#b0c0dd'
             },
             {
                 code: 11,
-                name: '勇气冲锋',
-                desc: enemy =>
-                    `怪物首先攻击，造成${enemy.charge}%的伤害，并眩晕勇士5回合`,
+                name: '吸血',
+                desc: enemy => {
+                    const vampire = enemy.vampire || 0;
+                    const hp = Mota.require('fn', 'getHeroStatusOn')('hp');
+                    return (
+                        `战斗前，怪物首先吸取角色的${Math.floor(
+                            100 * vampire
+                        )}%生命（约${Math.floor(hp * vampire)}点）作为伤害` +
+                        (enemy.add ? '，并把伤害数值加到自身生命上' : '')
+                    );
+                },
                 color: '#ff00d2'
             },
             {
                 code: 12,
-                name: '追猎',
-                desc: '当勇士移动到该怪物的水平或竖直方向上时，怪物向勇士移动一格',
+                name: '中毒',
+                desc: `战斗后，角色陷入中毒状态，每一步损失生命${core.data.values.poisonDamage}点`,
                 color: '#9e8'
             },
             {
                 code: 13,
-                name: '魔攻',
-                desc: '怪物攻击无视勇士的防御',
+                name: '衰弱',
+                desc:
+                    `战斗后，角色陷入衰弱状态，攻防暂时下降` +
+                    (core.data.values.weakValue >= 1
+                        ? core.data.values.weakValue + '点'
+                        : parseInt(core.data.values.weakValue * 100) + '%'),
                 color: '#bbb0ff'
             },
             {
                 code: 14,
-                name: '智慧之源',
-                desc: '困难难度下（简单难度没有效果），战斗后，怪物会吸取勇士30%的智慧（勇士智慧向下取整至整十）加在本层的拥有该属性的怪物攻击上',
+                name: '诅咒',
+                desc: '战斗后，角色陷入诅咒状态，战斗无法获得金币和经验',
                 color: '#bbeef0'
             },
             {
                 code: 15,
-                name: '突刺',
+                name: '领域',
                 desc: enemy =>
-                    `勇士走到怪物怪物周围四格时，怪物对勇士造成${core.formatBigNumber(
-                        Math.max((enemy.value || 0) - getHeroStatusOn('def'))
-                    )}点伤害`,
+                    '经过怪物周围' +
+                    (enemy.zoneSquare ? '九宫格' : '十字') +
+                    '范围内' +
+                    (enemy.range || 1) +
+                    '格时自动减生命' +
+                    (enemy.zone || 0) +
+                    '点',
                 color: '#c677dd'
             },
             {
                 code: 16,
-                name: '空',
-                desc: '空',
+                name: '夹击',
+                desc: '经过两只相同的怪物中间，角色生命值变成一半',
                 color: '#fff'
             },
             {
                 code: 17,
-                name: '先攻',
-                desc: '战斗时，怪物首先攻击',
+                name: '仇恨',
+                desc: `战斗前，怪物附加之前积累的仇恨值作为伤害；战斗后，释放一半的仇恨值。（每杀死一个怪物获得${
+                    core.data.values.hatred || 0
+                }点仇恨值）`,
                 color: '#b0b666'
             },
             {
                 code: 18,
                 name: '阻击',
                 desc: enemy =>
-                    `经过怪物十字范围内时怪物后退一格，同时对勇士造成${enemy.value}点伤害`,
+                    '经过怪物周围' +
+                    (enemy.zoneSquare ? '九宫格' : '十字') +
+                    '时自动减生命' +
+                    (enemy.repulse || 0) +
+                    '点，同时怪物后退一格',
                 color: '#8888e6'
             },
             {
                 code: 19,
-                name: '电摇嘲讽',
-                desc:
-                    '当勇士移动到怪物同行或同列时，勇士会直接冲向怪物，撞碎路上的所有地形和门，拾取路上的道具，与路上的怪物战斗' +
-                    '，最后与该怪物战斗',
-                color: '#ff6666'
+                name: '自爆',
+                desc: '战斗后角色的生命值变成1',
+                color: '#f66'
             },
             {
                 code: 20,
-                name: '霜冻',
-                desc: enemy =>
-                    `怪物寒冷的攻击使勇士动作变慢，勇士每回合对怪物造成的伤害减少${enemy.ice}%。装备杰克的衣服后可以免疫。`,
-                color: 'cyan'
+                name: '无敌',
+                desc: `角色无法打败怪物，除非拥有十字架`,
+                color: '#aaa'
             },
             {
                 code: 21,
-                name: '冰封光环',
+                name: '退化',
                 desc: enemy =>
-                    `寒气逼人，使勇士对该怪物周围7*7范围内的怪物伤害减少${enemy.iceHalo}%（线性叠加）`,
+                    '战斗后角色永久下降' +
+                    enemy.atkValue +
+                    '点攻击和' +
+                    enemy.defValue +
+                    '点防御',
                 color: 'cyan'
             },
             {
                 code: 22,
-                name: '永夜',
+                name: '固伤',
                 desc: enemy =>
-                    `战斗后，减少勇士${enemy.night}点攻防，增加本层所有怪物${enemy.night}点攻防，仅在本层有效`,
+                    '战斗前，怪物对角色造成' +
+                    enemy.damage +
+                    '点固定伤害，未开启负伤时无视角色护盾。',
                 color: '#d8a'
             },
             {
                 code: 23,
-                name: '极昼',
-                desc: enemy =>
-                    `战斗后，减少本层所有怪物${enemy.day}点攻防，增加勇士${enemy.day}点攻防，仅在本层有效`,
+                name: '重生',
+                desc: '怪物被击败后，角色转换楼层则怪物将再次出现',
                 color: '#ffd'
             },
             {
                 code: 24,
-                name: '射击',
-                desc: function () {
-                    return '经过怪物同行或同列的可视范围内时受到一次普通攻击的伤害';
-                },
+                name: '激光',
+                desc: enemy =>
+                    '经过怪物同行或同列时自动减生命' + enemy.laser + '点',
                 color: '#dda0dd'
             },
             {
                 code: 25,
-                name: '融化',
+                name: '光环',
                 desc: enemy =>
-                    `战斗后该怪物会融化，在怪物位置产生一个3*3的范围光环，光环内怪物的攻防增加${enemy.melt}%`,
+                    (enemy.range != null
+                        ? (enemy.haloSquare ? '该怪物九宫格' : '该怪物十字') +
+                          enemy.haloRange +
+                          '格范围内'
+                        : '同楼层所有') +
+                    '怪物生命提升' +
+                    (enemy.hpBuff || 0) +
+                    '%，攻击提升' +
+                    (enemy.atkBuff || 0) +
+                    '%，防御提升' +
+                    (enemy.defBuff || 0) +
+                    '%，' +
+                    (enemy.haloAdd ? '可叠加' : '不可叠加'),
                 color: '#e6e099'
             },
             {
                 code: 26,
-                name: '冰封之核',
-                desc: enemy =>
-                    `怪物拥有逼人的寒气，使周围5*5范围内的怪物防御增加${enemy.iceCore}%`,
-                color: '#70ffd1'
+                name: '支援',
+                desc: '当周围一圈的怪物受到攻击时将上前支援，并组成小队战斗。',
+                color: '#77c0b6'
             },
             {
                 code: 27,
-                name: '火焰之核',
+                name: '捕捉',
                 desc: enemy =>
-                    `怪物拥有灼热的火焰，使周围5*5范围内的怪物攻击增加${enemy.fireCore}%`,
-                color: '#ff6f0a'
+                    '当走到怪物周围' +
+                    (enemy.zoneSquare ? '九宫格' : '十字') +
+                    '时会强制进行战斗。',
+                color: '#c0ddbb'
             },
             {
                 code: 28,
-                name: '苍蓝刻',
-                desc: enemy =>
-                    `怪物使用苍蓝之灵的力量，使自身受到的伤害减少${enemy.paleShield}%`,
-                color: '#ff6f0a'
+                name: '特殊光环',
+                desc: enemy => {
+                    let content = '';
+                    enemy.specialHalo?.forEach((v, i) => {
+                        content +=
+                            '&nbsp;'.repeat(8) +
+                            `${i + 1}. <span style="color: ${
+                                specials[v].color
+                            }">${fromFunc(
+                                specials[v].name,
+                                enemy
+                            )}</span>: ${fromFunc(
+                                specials[v].desc,
+                                enemy
+                            )}<br />`;
+                    });
+                    return (
+                        `怪物周围${enemy.haloSquare ? '九宫格' : '十字'}${
+                            enemy.haloRange
+                        }格范围内所有怪物获得以下特殊属性，` +
+                        `特殊属性数值间为${
+                            enemy.specialMultiply ? '相乘' : '相加'
+                        }关系:<br />` +
+                        content
+                    );
+                },
+                color: '#ff0'
             }
         );
     },
@@ -691,6 +763,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 if (this.progress !== 2) return;
                 this.progress = 3;
                 if (!this.floorId) return;
+                const { has } = Mota.Plugin.require('utils_g');
                 if (!has(this.x) || !has(this.y)) return;
                 const col = this.col ?? core.status.maps[this.floorId].enemy;
                 if (!col) return;

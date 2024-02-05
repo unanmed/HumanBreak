@@ -191,109 +191,107 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "popCheckboxSet",
 					"_checkboxSet": function () {
+						var array = Mota.require('var', 'enemySpecials');
+						var b = [],
+							c = [];
+						for (var index = 0; index < array.length; index++) {
+							b.push(index)
+							var name = array[index].name;
+							if (name instanceof Function) name = name({});
+							c.push(name + "(" + index + ")")
+						}
 						return {
-							"prefix": [],
-							"key": []
+							"prefix": c,
+							"key": b
 						}
 					},
 					"_data": "特殊属性"
-				},
-				"crit": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "致命一击",
-					"_data": "致命一击"
-				},
-				"charge": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "勇气冲锋",
-					"_data": "勇气冲锋"
-				},
-				"courage": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "勇气之刃",
-					"_data": "勇气之刃"
-				},
-				"together": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "抱团",
-					"_data": "抱团"
-				},
-				"hungry": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "饥渴",
-					"_data": "饥渴"
-				},
-				"ice": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "霜冻",
-					"_data": "霜冻"
-				},
-				"iceHalo": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "冰封光环",
-					"_data": "冰封光环"
-				},
-				"night": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "永夜",
-					"_data": "永夜"
-				},
-				"day": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "极昼",
-					"_data": "极昼"
-				},
-				"melt": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "融化",
-					"_data": "融化"
-				},
-				"iceCore": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "冰封之核",
-					"_data": "冰封之核"
-				},
-				"fireCore": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "火焰之核",
-					"_data": "火焰之核"
-				},
-				"paleShield": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "苍蓝刻",
-					"_data": "苍蓝刻"
 				},
 				"value": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_docs": "特殊属性数值",
-					"_data": "特殊属性的数值\n如：领域/阻激/激光怪的伤害值；吸血怪的吸血比例；光环怪增加生命的比例"
+					"_data": "特殊属性的数值\n如：领域/阻激/激光怪的伤害值；光环怪增加生命的比例"
+				},
+				"zone": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "领域伤害",
+					"_data": "领域怪的伤害值"
+				},
+				"repulse": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "阻击伤害",
+					"_data": "阻击怪的伤害值"
+				},
+				"laser": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "激光伤害",
+					"_data": "激光怪的伤害值"
+				},
+				"breakArmor": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "破甲比例",
+					"_data": "破甲百分比"
+				},
+				"counterAttack": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "反击比例",
+					"_data": "反击百分比"
+				},
+				"vampire": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "吸血比例",
+					"_data": "吸血怪的吸血百分比"
+				},
+				"hpBuff": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "光环加血",
+					"_data": "光环怪增加生命的比例"
+				},
+				"atkBuff": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "光环加攻",
+					"_data": "光环怪增加攻击的比例"
+				},
+				"defBuff": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "光环加防",
+					"_data": "光环怪增加防御的比例"
 				},
 				"zoneSquare": {
 					"_leaf": true,
 					"_type": "checkbox",
 					"_docs": "九宫格",
-					"_data": "领域、阻击、光环或捕捉怪是否九宫格"
+					"_data": "领域、阻击或捕捉怪是否九宫格"
+				},
+				"haloSquare": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_docs": "九宫格",
+					"_data": "光环怪是否九宫格"
 				},
 				"range": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_range": "(thiseval==~~thiseval && thiseval>0)||thiseval==null",
 					"_docs": "领域范围",
-					"_data": "领域或光环的范围；领域不加默认为1，光环不加则为全图效果"
+					"_data": "领域的范围；不加默认为1"
+				},
+				"haloRange": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_range": "(thiseval==~~thiseval && thiseval>0)||thiseval==null",
+					"_docs": "光环范围",
+					"_data": "光环的范围；不加为全图效果"
 				},
 				"notBomb": {
 					"_leaf": true,
@@ -308,25 +306,38 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "连击数",
 					"_data": "多连击的连击数，净化怪的净化倍率"
 				},
+				"purify": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_range": "(thiseval==~~thiseval && thiseval>0)||thiseval==null",
+					"_docs": "净化倍率",
+					"_data": "净化百分比"
+				},
 				"add": {
 					"_leaf": true,
 					"_type": "checkbox",
 					"_docs": "吸血加到自身",
-					"_data": "吸血后是否加到自身；光环是否叠加"
+					"_data": "吸血后是否加到自身"
+				},
+				"haloAdd": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_docs": "光环是否叠加",
+					"_data": "光环是否叠加"
 				},
 				"atkValue": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_range": "thiseval==~~thiseval||thiseval==null",
 					"_docs": "退化扣攻",
-					"_data": "退化时勇士下降的攻击力点数；光环怪增加攻击的比例；反击的比例"
+					"_data": "退化时勇士下降的攻击力点数"
 				},
 				"defValue": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_range": "thiseval==~~thiseval||thiseval==null",
 					"_docs": "退化扣防",
-					"_data": "退化时勇士下降的防御力点数；光环怪增加防御的比例；破甲的比例"
+					"_data": "退化时勇士下降的防御力点数"
 				},
 				"damage": {
 					"_leaf": true,
@@ -335,12 +346,32 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "固伤",
 					"_data": "战前扣血的点数"
 				},
-				"beforeBattle": {
+				"specialHalo": {
 					"_leaf": true,
-					"_type": "event",
-					"_event": "beforeBattle",
-					"_docs": "战前事件",
-					"_data": "和该怪物战斗前触发的事件列表"
+					"_type": "popCheckboxSet",
+					"_checkboxSet": function () {
+						var array = Mota.require('var', 'enemySpecials');
+						var b = [],
+							c = [];
+						for (var index = 0; index < array.length; index++) {
+							b.push(index)
+							var name = array[index].name;
+							if (name instanceof Function) name = name({});
+							c.push(name + "(" + index + ")")
+						}
+						return {
+							"prefix": c,
+							"key": b
+						}
+					},
+					"_docs": "特殊光环",
+					"_data": "特殊光环增加的特殊属性列表，对于属性的数值也在该怪物属性中填写"
+				},
+				"specialMultiply": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_docs": "特殊数值关系",
+					"_data": "特殊属性的数值在不同怪物的光环加成下是相乘还是相加关系。对于非数值属性，不会进行任何处理"
 				},
 				"afterBattle": {
 					"_leaf": true,

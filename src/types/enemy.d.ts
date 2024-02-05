@@ -36,7 +36,8 @@ type BooleanEnemyProperty =
     | 'haloSquare'
     | 'notBomb'
     | 'add'
-    | 'haloAdd';
+    | 'haloAdd'
+    | 'specialAdd';
 
 type DetailedEnemy<I extends EnemyIds = EnemyIds> = {
     specialText: string[];
@@ -114,6 +115,11 @@ interface EnemySpecialBase {
      * 怪物特殊属性
      */
     special: number[];
+
+    /**
+     * 特殊属性光环
+     */
+    specialHalo?: number[];
 }
 
 interface EnemyInfoBase extends EnemySpecialBase {

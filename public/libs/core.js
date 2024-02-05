@@ -327,7 +327,8 @@ core.prototype._loadPluginAsync = async function () {
         try {
             value.call(plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1);
         } catch (e) {
-            throw new Error(`Plugin '${key}' init fail. Error info: ${e}`);
+            console.error(`Plugin '${key}' init fail. `);
+            throw e;
         }
     }
 };
