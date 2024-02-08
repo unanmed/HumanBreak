@@ -78,7 +78,7 @@ export class GameStorage<T extends object = any> {
      * @param key 存储名称
      */
     static fromGame(key: string) {
-        return `HumanBreak_${key}`;
+        return `${data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.name}_${key}`;
     }
 
     /**

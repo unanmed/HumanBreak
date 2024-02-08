@@ -78,16 +78,7 @@ export class SoundEffect extends AudioPlayer {
         if (stereo) {
             this.panner = ac.createPanner();
             this.panner.connect(this.gain);
-            if (channel === 1) {
-                this.merger = ac.createChannelMerger();
-                this.merger.connect(this.panner);
-                this.baseNode = [
-                    { node: this.merger, channel: 0 },
-                    { node: this.merger, channel: 1 }
-                ];
-            } else {
-                this.baseNode = [{ node: this.panner }];
-            }
+            this.baseNode = [{ node: this.panner }];
         } else {
             this.baseNode = [{ node: this.gain }];
         }
@@ -136,15 +127,18 @@ export class SoundEffect extends AudioPlayer {
      * @param source 立体声声源位置与朝向
      * @param listener 听者的位置、头顶方向、面朝方向
      */
-    setPanner(source: Partial<Panner>, listener: Partial<Listener>) {
+    setPanner(source?: Partial<Panner>, listener?: Partial<Listener>) {
         if (!this.panner) return;
-        console.log(2);
-        for (const [key, value] of Object.entries(source)) {
-            this.panner[key as keyof Panner].value = value;
+        if (source) {
+            for (const [key, value] of Object.entries(source)) {
+                this.panner[key as keyof Panner].value = value;
+            }
         }
-        const l = AudioPlayer.ac.listener;
-        for (const [key, value] of Object.entries(listener)) {
-            l[key as keyof Listener].value = value;
+        if (listener) {
+            const l = AudioPlayer.ac.listener;
+            for (const [key, value] of Object.entries(listener)) {
+                l[key as keyof Listener].value = value;
+            }
         }
     }
 }

@@ -68,16 +68,14 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue';
+import { computed, onUnmounted, ref, shallowRef } from 'vue';
 import {
     mainSetting,
     MotaSetting,
     MotaSettingItem,
     SettingDisplayer,
-    SettingDisplayInfo,
-    SettingText
+    SettingDisplayInfo
 } from '../core/main/setting';
-import settingText from '../data/settings.json';
 import { RightOutlined, LeftOutlined } from '@ant-design/icons-vue';
 import { splitText } from '../plugin/utils';
 import Scroll from '../components/scroll.vue';
@@ -88,13 +86,11 @@ import { mainUi } from '@/core/main/init/ui';
 
 const props = defineProps<{
     info?: MotaSetting;
-    text?: SettingText;
     num: number;
     ui: GameUi;
 }>();
 
 const setting = props.info ?? mainSetting;
-const text = props.text ?? (settingText as SettingText);
 const display = shallowRef<SettingDisplayInfo[]>([]);
 const selectedItem = computed(() => display.value.at(-1)?.item);
 const update = ref(false);

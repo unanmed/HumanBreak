@@ -11,7 +11,10 @@
     "declare": "ts-node-esm script/declare.ts",
     "type": "vue-tsc --noEmit",
     "lines": "ts-node-esm script/lines.ts",
-    "build-dts": "ts-node-esm script/buildDeclaration.ts"
+    "build-dts": "ts-node-esm script/buildDeclaration.ts",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "dependencies": {
     "@ant-design/icons-vue": "^6.1.0",
@@ -58,6 +61,7 @@
     "unplugin-vue-components": "^0.22.12",
     "vite": "^4.4.9",
     "vite-plugin-dts": "^3.7.2",
+    "vitepress": "1.0.0-rc.41",
     "vue-tsc": "^1.8.8",
     "ws": "^8.13.0"
   }

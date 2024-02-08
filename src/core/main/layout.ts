@@ -5,10 +5,12 @@ import {
     VNode,
     VNodeChild,
     defineComponent,
-    h,
+    h as hVue,
+    isVNode,
     onMounted
 } from 'vue';
 import BoxAnimate from '@/components/boxAnimate.vue';
+import { ensureArray } from '@/plugin/utils';
 
 interface VForRenderer {
     type: '@v-for';
@@ -18,7 +20,7 @@ interface VForRenderer {
 
 interface MotaComponent extends MotaComponentConfig {
     type: string;
-    children: MComponent[] | MComponent;
+    children: (MComponent | MotaComponent | VNode)[];
 }
 
 interface MotaComponentConfig {
@@ -32,7 +34,7 @@ interface MotaComponentConfig {
     velse?: boolean;
 }
 
-type OnSetupFunction = (props: Record<string, any>) => void;
+type OnSetupFunction = (props: Record<string, any>, ctx: SetupContext) => void;
 type SetupFunction = (
     props: Record<string, any>,
     ctx: SetupContext
@@ -43,6 +45,7 @@ type RetFunction = (
 ) => VNodeChild | VNodeChild[];
 type OnMountedFunction = (
     props: Record<string, any>,
+    ctx: SetupContext,
     canvas: HTMLCanvasElement[]
 ) => void;
 
@@ -50,6 +53,12 @@ type NonComponentConfig = Omit<
     MotaComponentConfig,
     'innerText' | 'component' | 'slots' | 'dComponent'
 >;
+
+type MComponentChildren =
+    | (MComponent | MotaComponent | VNode)[]
+    | MComponent
+    | MotaComponent
+    | VNode;
 
 export class MComponent {
     static mountNum: number = 0;
@@ -88,7 +97,7 @@ export class MComponent {
      * @param children 渲染内容的子内容
      * @param config 渲染内容的配置信息，参考 {@link MComponent.h}
      */
-    div(children?: MComponent[] | MComponent, config?: NonComponentConfig) {
+    div(children?: MComponentChildren, config?: NonComponentConfig) {
         return this.h('div', children, config);
     }
 
@@ -97,7 +106,7 @@ export class MComponent {
      * @param children 渲染内容的子内容
      * @param config 渲染内容的配置信息，参考 {@link MComponent.h}
      */
-    span(children?: MComponent[] | MComponent, config?: NonComponentConfig) {
+    span(children?: MComponentChildren, config?: NonComponentConfig) {
         return this.h('span', children, config);
     }
 
@@ -136,11 +145,7 @@ export class MComponent {
      *            或者MComponent.vNode函数生成。
      */
     vfor<T>(items: T[] | (() => T[]), map: (value: T, index: number) => VNode) {
-        this.content.push({
-            type: '@v-for',
-            items,
-            map
-        });
+        this.content.push(MCGenerator.vfor(items, map));
         return this;
     }
 
@@ -180,32 +185,10 @@ export class MComponent {
      */
     h(
         type: string | Component | MComponent,
-        children?: MComponent[] | MComponent,
+        children?: MComponentChildren,
         config: MotaComponentConfig = {}
     ): this {
-        if (typeof type === 'string') {
-            this.content.push({
-                type,
-                children: children ?? [],
-                props: config.props,
-                innerText: config.innerText,
-                slots: config.slots,
-                vif: config.vif,
-                velse: config.velse,
-                component: config.component
-            });
-        } else {
-            this.content.push({
-                type: 'component',
-                children: children ?? [],
-                props: config.props,
-                innerText: config.innerText,
-                slots: config.slots,
-                vif: config.vif,
-                velse: config.velse,
-                component: type
-            });
-        }
+        this.content.push(MCGenerator.h(type, children, config));
         return this;
     }
 
@@ -253,11 +236,12 @@ export class MComponent {
             return defineComponent(
                 (props, ctx) => {
                     const mountNum = MComponent.mountNum++;
-                    this.onSetupFn?.(props);
+                    this.onSetupFn?.(props, ctx);
 
                     onMounted(() => {
                         this.onMountedFn?.(
                             props,
+                            ctx,
                             Array.from(
                                 document.getElementsByClassName(
                                     `--mota-component-canvas-${mountNum}`
@@ -269,8 +253,6 @@ export class MComponent {
                     if (this.retFn) return () => this.retFn!(props, ctx);
                     else {
                         return () => {
-                            console.log(ctx.slots.default);
-
                             const vNodes = MComponent.vNode(
                                 this.content,
                                 mountNum
@@ -312,12 +294,19 @@ export class MComponent {
      * @param children 要生成VNode的内容列表
      * @param mount 组件生成时的挂载id，一般不需要填，用于画布获取
      */
-    static vNode(children: (MotaComponent | VForRenderer)[], mount?: number) {
+    static vNode(
+        children: (MotaComponent | VForRenderer | VNode)[],
+        mount?: number
+    ) {
         const mountNum = mount ?? this.mountNum++;
 
         const res: VNode[] = [];
         const vifRes: Map<number, boolean> = new Map();
         children.forEach((v, i) => {
+            if (isVNode(v)) {
+                res.push(v);
+                return;
+            }
             if (v.type === '@v-for') {
                 const node = v as VForRenderer;
                 const items =
@@ -346,7 +335,7 @@ export class MComponent {
                         );
                     }
                     if (v.dComponent) {
-                        res.push(h(v.dComponent(), props, v.slots));
+                        res.push(hVue(v.dComponent(), props, v.slots));
                     } else {
                         if (v.component instanceof MComponent) {
                             res.push(
@@ -356,12 +345,12 @@ export class MComponent {
                                 )
                             );
                         } else {
-                            res.push(h(v.component!, props, v.slots));
+                            res.push(hVue(v.component!, props, v.slots));
                         }
                     }
                 } else if (v.type === 'text') {
                     res.push(
-                        h(
+                        hVue(
                             'span',
                             typeof v.innerText === 'function'
                                 ? v.innerText()
@@ -372,15 +361,17 @@ export class MComponent {
                     const cls = `--mota-component-canvas-${mountNum}`;
                     const mix = !!props.class ? cls + ' ' + props.class : cls;
                     props.class = mix;
-                    res.push(h('canvas', props, node.slots));
+                    res.push(hVue('canvas', props, node.slots));
                 } else {
                     // 这个时候不可能会有插槽，只会有子内容，因此直接渲染子内容
-                    const content = [node.children].flat(2);
+                    const content = node.children;
                     const vn = this.vNode(
-                        content.map(v => v.content).flat(),
+                        content
+                            .map(v => (v instanceof MComponent ? v.content : v))
+                            .flat(),
                         mountNum
                     );
-                    res.push(h(v.type, props, vn));
+                    res.push(hVue(v.type, props, vn));
                 }
             }
         });
@@ -406,7 +397,7 @@ export class MComponent {
      * @param props 要传递的props
      */
     static prop(component: Component, props: Record<string, any>) {
-        return h(component, props);
+        return hVue(component, props);
     }
 }
 
@@ -418,18 +409,101 @@ export function m() {
     return new MComponent();
 }
 
-/**
- * 生成一个图标的VNode
- * @param id 图标的id
- * @param width 显示宽度，单位像素
- * @param height 显示高度，单位像素
- * @param noBoarder 显示的时候是否没有边框和背景
- */
-export function icon(
-    id: AllIds,
-    width?: number,
-    height?: number,
-    noBoarder?: number
-) {
-    return h(BoxAnimate, { id, width, height, noBoarder });
+export namespace MCGenerator {
+    export function h(
+        type: string | Component | MComponent,
+        children?: MComponentChildren,
+        config: MotaComponentConfig = {}
+    ): MotaComponent {
+        if (typeof type === 'string') {
+            return {
+                type,
+                children: ensureArray(children ?? []),
+                props: config.props,
+                innerText: config.innerText,
+                slots: config.slots,
+                vif: config.vif,
+                velse: config.velse,
+                component: config.component
+            };
+        } else {
+            return {
+                type: 'component',
+                children: ensureArray(children ?? []),
+                props: config.props,
+                innerText: config.innerText,
+                slots: config.slots,
+                vif: config.vif,
+                velse: config.velse,
+                component: type
+            };
+        }
+    }
+
+    export function div(
+        children?: MComponentChildren,
+        config?: NonComponentConfig
+    ): MotaComponent {
+        return h('div', children, config);
+    }
+
+    export function span(
+        children?: MComponentChildren,
+        config?: NonComponentConfig
+    ): MotaComponent {
+        return h('span', children, config);
+    }
+
+    export function canvas(config?: NonComponentConfig): MotaComponent {
+        return h('canvas', [], config);
+    }
+
+    export function text(
+        text: string | (() => string),
+        config: NonComponentConfig = {}
+    ): MotaComponent {
+        return h('text', [], { ...config, innerText: text });
+    }
+
+    export function com(
+        component: Component | MComponent,
+        config: Omit<MotaComponentConfig, 'innerText' | 'component'>
+    ): MotaComponent {
+        return h(component, [], config);
+    }
+
+    /**
+     * 生成一个图标的VNode
+     * @param id 图标的id
+     * @param width 显示宽度，单位像素
+     * @param height 显示高度，单位像素
+     * @param noBoarder 显示的时候是否没有边框和背景
+     */
+    export function icon(
+        id: AllIds,
+        width?: number,
+        height?: number,
+        noBoarder?: number
+    ): VNode {
+        return hVue(BoxAnimate, { id, width, height, noBoarder });
+    }
+
+    export function vfor<T>(
+        items: T[] | (() => T[]),
+        map: (value: T, index: number) => VNode
+    ): VForRenderer {
+        return {
+            type: '@v-for',
+            items,
+            map
+        };
+    }
+
+    /**
+     * 为一个常量创建为一个函数
+     * @param value 要创建成函数的值
+     */
+    export function f<T>(value: T): () => T {
+        return () => value;
+    }
 }

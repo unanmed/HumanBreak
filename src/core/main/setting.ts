@@ -213,7 +213,7 @@ export class MotaSetting extends EventEmitter<SettingEvent> {
         let now: MotaSetting = this;
 
         for (let i = 0; i < list.length - 1; i++) {
-            const item = now.list[list[i]].value;
+            const item = now.list[list[i]]?.value;
             if (!(item instanceof MotaSetting)) {
                 throw new Error(
                     `Cannot get setting. The parent isn't a MotaSetting instance.` +
@@ -267,7 +267,7 @@ export class SettingDisplayer extends EventEmitter<SettingDisplayerEvent> {
         this.displayInfo = [];
 
         for (let i = 0; i < list.length - 1; i++) {
-            const item = now.list[list[i]].value;
+            const item = now.list[list[i]]?.value;
             if (!(item instanceof MotaSetting)) {
                 throw new Error(
                     `Cannot get setting. The parent isn't a MotaSetting instance.` +
@@ -443,13 +443,9 @@ mainSetting
     .register(
         'ui',
         'ui设置',
-        new MotaSetting().register(
-            'mapScale',
-            '小地图楼传缩放',
-            100,
-            COM.Number,
-            [50, 1000, 50]
-        )
+        new MotaSetting()
+            .register('mapScale', '小地图缩放', 100, COM.Number, [50, 1000, 50])
+            .setDisplayFunc('mapScale', value => `${value}%`)
     );
 
 const loading = Mota.require('var', 'loading');

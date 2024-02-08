@@ -21,7 +21,7 @@ interface HaloType {
     };
 }
 
-interface EnemyInfo extends Partial<SelectType<Enemy, number | undefined>> {
+interface EnemyInfo extends Partial<Enemy> {
     atk: number;
     def: number;
     hp: number;
@@ -68,7 +68,7 @@ interface CriticalDamageDelta extends Omit<DamageDelta, 'info'> {
     atkDelta: number;
 }
 
-type HaloFn = (info: EnemyInfo, enemy: Enemy) => void;
+type HaloFn = (info: EnemyInfo, enemy: EnemyInfo) => void;
 
 export class EnemyCollection implements RangeCollection<DamageEnemy> {
     floorId: FloorIds;
@@ -165,13 +165,13 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
         if (!recursion) {
             arr.forEach(v => {
                 enemys.forEach(e => {
-                    e.injectHalo(v, enemy.enemy);
+                    e.injectHalo(v, enemy.info);
                 });
             });
         } else {
             enemys.forEach(e => {
                 arr.forEach(v => {
-                    e.injectHalo(v, enemy.enemy);
+                    e.injectHalo(v, enemy.info);
                     e.preProvideHalo();
                 });
             });
@@ -446,7 +446,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     /**
      * 接受其他怪的光环
      */
-    injectHalo(halo: HaloFn, enemy: Enemy) {
+    injectHalo(halo: HaloFn, enemy: EnemyInfo) {
         halo(this.info, enemy);
     }
 

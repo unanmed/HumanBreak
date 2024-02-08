@@ -137,7 +137,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * 释放一个作用域，释放后作用域将退回至删除的作用域的上一级
      * @param symbol 要释放的作用域的symbol
      */
-    dispose(symbol: symbol) {
+    dispose(symbol: symbol = this.scopeStack.at(-1) ?? Symbol()) {
         for (const key of Object.values(this.data)) {
             key.func.delete(symbol);
         }

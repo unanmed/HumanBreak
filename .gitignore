@@ -45,3 +45,6 @@ meeting.md
 
 special.csv
 script/special.ts
+
+docs/.vitepress/dist
+docs/.vitepress/cache

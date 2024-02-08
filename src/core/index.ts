@@ -26,7 +26,7 @@ import {
 } from './main/custom/hotkey';
 import { Keyboard, generateKeyboardEvent } from './main/custom/keyboard';
 import './main/layout';
-import { MComponent, icon, m } from './main/layout';
+import { MComponent, m } from './main/layout';
 import { createSettingComponents } from './main/init/settings';
 import {
     createToolbarComponents,
@@ -45,6 +45,17 @@ import * as fixedTools from '@/plugin/ui/fixed';
 import * as flyTools from '@/plugin/ui/fly';
 import * as statusBarTools from '@/plugin/ui/statusBar';
 import * as toolboxTools from '@/plugin/ui/toolbox';
+import * as UI from '@ui/index';
+import Box from '@/components/box.vue';
+import BoxAnimate from '@/components/boxAnimate.vue.vue';
+import Colomn from '@/components/colomn.vue.vue';
+import EnemyOne from '@/components/enemyOne.vue.vue';
+import Scroll from '@/components/scroll.vue.vue';
+import EnemyCritical from '@/panel/enemyCritical.vue';
+import EnemySpecial from '@/panel/enemySpecial.vue.vue';
+import EnemyTarget from '@/panel/enemyTarget.vue.vue';
+import KeyboardPanel from '@/panel/keyboard.vue.vue';
+import { MCGenerator } from './main/layout';
 
 // ----- 类注册
 Mota.register('class', 'AudioPlayer', AudioPlayer);
@@ -63,7 +74,6 @@ Mota.register('class', 'UiController', UiController);
 Mota.register('class', 'MComponent', MComponent);
 // ----- 函数注册
 Mota.register('fn', 'm', m);
-Mota.register('fn', 'icon', icon);
 Mota.register('fn', 'unwrapBinary', unwarpBinary);
 Mota.register('fn', 'checkAssist', checkAssist);
 Mota.register('fn', 'isAssist', isAssist);
@@ -81,7 +91,6 @@ Mota.register('var', 'KeyCode', KeyCode);
 Mota.register('var', 'ScanCode', ScanCode);
 Mota.register('var', 'settingStorage', settingStorage);
 Mota.register('var', 'status', status);
-
 // ----- 模块注册
 Mota.register('module', 'CustomComponents', {
     createSettingComponents,
@@ -104,6 +113,19 @@ Mota.register('module', 'UITools', {
     statusBar: statusBarTools,
     toolbox: toolboxTools
 });
+Mota.register('module', 'UI', UI);
+Mota.register('module', 'UIComponents', {
+    Box,
+    BoxAnimate,
+    Colomn,
+    EnemyOne,
+    Scroll,
+    EnemyCritical,
+    EnemySpecial,
+    EnemyTarget,
+    Keyboard: KeyboardPanel
+});
+Mota.register('module', 'MCGenerator', MCGenerator);
 
 main.renderLoaded = true;
 Mota.require('var', 'hook').emit('renderLoaded');

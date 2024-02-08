@@ -74,16 +74,6 @@ gameKey
         name: '浏览地图_2',
         defaults: KeyCode.PageDown
     })
-    .register({
-        id: 'skillTree',
-        name: '技能树',
-        defaults: KeyCode.KeyJ
-    })
-    .register({
-        id: 'desc',
-        name: '百科全书',
-        defaults: KeyCode.KeyH
-    })
     // --------------------
     .group('function', '功能按键')
     .register({
@@ -254,20 +244,6 @@ gameKey
         id: 'confirm_3',
         name: '确认_3',
         defaults: KeyCode.KeyC
-    })
-    // --------------------
-    .group('@ui_start', '开始界面')
-    .register({
-        id: '@start_up',
-        name: '上移光标',
-        defaults: KeyCode.UpArrow,
-        type: 'down'
-    })
-    .register({
-        id: '@start_down',
-        name: '下移光标',
-        defaults: KeyCode.DownArrow,
-        type: 'down'
     })
     // --------------------
     .group('@ui_book', '怪物手册')

@@ -154,7 +154,7 @@ export class IndexedEventEmitter<
         event: K,
         symbol: IndexedSymbol,
         fn: T[K],
-        options: Partial<ListenerOptions>
+        options?: Partial<ListenerOptions>
     ) {
         const map = this.ensureMap(event);
         if (map.has(symbol)) {

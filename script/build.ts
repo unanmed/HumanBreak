@@ -107,13 +107,7 @@ const compress = type === 'dist';
     // 6. 部分修改类型标注
     try {
         const indexDTS = await fs.readFile('./dist/index.d.ts', 'utf-8');
-        const re =
-            '///<reference path="./types/core.d.ts" />\n' +
-            indexDTS
-                .replaceAll('export declare', 'declare')
-                .replace(/export\s*\{\s*\};?/, '')
-                .replace(/import.*;/gu, '') +
-            `declare var Mota: IMota`;
+        const re = '///<reference path="./types/core.d.ts" />\n' + indexDTS;
         await fs.writeFile('./dist/index.d.ts', re, 'utf-8');
 
         const pluginDTS = await fs.readFile(
@@ -125,7 +119,10 @@ const compress = type === 'dist';
 interface Window {
     Mota: import('../game/system').IMota;
 }`,
-            ''
+            `declare const Mota: import('./index.d.ts').IMota;
+interface Window {
+    Mota: import('./index.d.ts').IMota;
+}`
         );
         await fs.writeFile('./dist/types/plugin.d.ts', rep);
 
@@ -134,8 +131,7 @@ interface Window {
             const info = await fs.readFile('./dist/project/' + file, 'utf-8');
             const re = info.replace(
                 /\/\/\/\<reference\s*path=('|").*('|")\s*\/>/g,
-                `///<reference path="../index.d.ts" />
-///<reference path="../types/core.d.ts" />`
+                `///<reference path="../types/core.d.ts" />`
             );
             await fs.writeFile('./dist/project/' + file, re, 'utf-8');
         }

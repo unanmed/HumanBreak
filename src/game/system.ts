@@ -27,7 +27,7 @@ import type { specials } from './enemy/special';
 import type { Range } from '@/plugin/game/range';
 import type { KeyCode, ScanCode } from '@/plugin/keyCodes';
 import type { Ref } from 'vue';
-import type { MComponent, m, icon } from '@/core/main/layout';
+import type { MComponent, m, MCGenerator } from '@/core/main/layout';
 import type { addAnimate, removeAnimate } from '@/plugin/animateController';
 import type { createSettingComponents } from '@/core/main/init/settings';
 import type {
@@ -72,6 +72,16 @@ import type * as _lodash from 'lodash-es';
 import type * as _lzString from 'lz-string';
 import type * as _mutateAnimate from 'mutate-animate';
 import type * as _vue from 'vue';
+import type * as UI from '@ui/index';
+import type Box from '@/components/box.vue';
+import type BoxAnimate from '@/components/boxAnimate.vue.vue';
+import type Colomn from '@/components/colomn.vue.vue';
+import type EnemyOne from '@/components/enemyOne.vue.vue';
+import type Scroll from '@/components/scroll.vue.vue';
+import type EnemyCritical from '@/panel/enemyCritical.vue';
+import type EnemySpecial from '@/panel/enemySpecial.vue.vue';
+import type EnemyTarget from '@/panel/enemyTarget.vue.vue';
+import type KeyboardPanel from '@/panel/keyboard.vue.vue';
 
 export interface ClassInterface {
     // 渲染进程与游戏进程通用
@@ -105,7 +115,6 @@ type _IHero = typeof hero;
 export interface FunctionInterface extends _IBattle, _IHero {
     // 定义于渲染进程，录像验证中会出错
     m: typeof m;
-    icon: typeof icon;
     unwrapBinary: typeof unwarpBinary;
     checkAssist: typeof checkAssist;
     isAssist: typeof isAssist;
@@ -150,6 +159,19 @@ export interface ModuleInterface {
         typeof statusBarTools &
         typeof toolboxTools;
     Damage: typeof Damage;
+    UI: typeof UI;
+    UIComponents: {
+        Box: typeof Box;
+        BoxAnimate: typeof BoxAnimate;
+        Colomn: typeof Colomn;
+        EnemyOne: typeof EnemyOne;
+        Scroll: typeof Scroll;
+        EnemyCritical: typeof EnemyCritical;
+        EnemySpecial: typeof EnemySpecial;
+        EnemyTarget: typeof EnemyTarget;
+        KeyboardPanel: typeof KeyboardPanel;
+    };
+    MCGenerator: typeof MCGenerator;
 }
 
 export interface SystemInterfaceMap {

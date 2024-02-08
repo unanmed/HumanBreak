@@ -9,7 +9,7 @@ interface Components {
     Number: SettingComponent;
     HotkeySetting: SettingComponent;
     ToolbarEditor: SettingComponent;
-    RadioSetting: (items: string[]) => SettingComponent;
+    Radio: (items: string[]) => SettingComponent;
 }
 
 export type { Components as SettingDisplayComponents };
@@ -21,7 +21,7 @@ export function createSettingComponents() {
         Number: NumberSetting,
         HotkeySetting,
         ToolbarEditor,
-        RadioSetting
+        Radio: RadioSetting
     };
     return com;
 }

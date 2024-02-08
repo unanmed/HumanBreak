@@ -890,6 +890,10 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 if (info.special.includes(10)) {
                     return Infinity;
                 }
+                // 吸血
+                if (info.special.includes(11) && info.add) {
+                    return add + core.status.hero.hp * (info.vampire ?? 0);
+                }
 
                 return add;
             }
@@ -1112,6 +1116,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         );
 
         // ----- 计算第一类光环
+        // 特殊属性对于的特殊属性数值
         const changeable = Mota.require('module', 'Damage').changeableHaloValue;
         changeable
             .set(21, ['atkValue', 'defValue'])
@@ -1156,12 +1161,15 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                                 (e, enemy) => {
                                     const s = enemy.specialHalo;
                                     e.special.push(...s);
+                                    // 如果是自身，就不进行特殊属性数值处理了
+                                    if (enemy === this.info) return;
                                     // 然后计算特殊属性数值
                                     for (const spec of s) {
                                         const toChange = changeable.get(spec);
                                         if (!toChange) continue;
                                         for (const key of toChange) {
-                                            if (enemy.specialMultiply) {
+                                            // 这种光环应该获取怪物的原始数值，而不是真实数值
+                                            if (enemy.enemy.specialMultiply) {
                                                 e[key] = s[key] ?? 1;
                                                 e[key] *= enemy[key];
                                             } else {
