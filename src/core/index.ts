@@ -47,14 +47,14 @@ import * as statusBarTools from '@/plugin/ui/statusBar';
 import * as toolboxTools from '@/plugin/ui/toolbox';
 import * as UI from '@ui/index';
 import Box from '@/components/box.vue';
-import BoxAnimate from '@/components/boxAnimate.vue.vue';
-import Colomn from '@/components/colomn.vue.vue';
-import EnemyOne from '@/components/enemyOne.vue.vue';
-import Scroll from '@/components/scroll.vue.vue';
+import BoxAnimate from '@/components/boxAnimate.vue';
+import Colomn from '@/components/colomn.vue';
+import EnemyOne from '@/components/enemyOne.vue';
+import Scroll from '@/components/scroll.vue';
 import EnemyCritical from '@/panel/enemyCritical.vue';
-import EnemySpecial from '@/panel/enemySpecial.vue.vue';
-import EnemyTarget from '@/panel/enemyTarget.vue.vue';
-import KeyboardPanel from '@/panel/keyboard.vue.vue';
+import EnemySpecial from '@/panel/enemySpecial.vue';
+import EnemyTarget from '@/panel/enemyTarget.vue';
+import KeyboardPanel from '@/panel/keyboard.vue';
 import { MCGenerator } from './main/layout';
 
 // ----- 类注册

@@ -438,9 +438,6 @@ gameKey
     .realize('viewMap', () => {
         core.ui._drawViewMaps();
     })
-    .realize('skillTree', () => {
-        core.useItem('skill1', true);
-    })
     .realize('undo', () => {
         core.doSL('autoSave', 'load');
     })

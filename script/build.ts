@@ -114,16 +114,7 @@ const compress = type === 'dist';
             './dist/types/plugin.d.ts',
             'utf-8'
         );
-        const rep = pluginDTS.replace(
-            `declare const Mota: import('../game/system').IMota;
-interface Window {
-    Mota: import('../game/system').IMota;
-}`,
-            `declare const Mota: import('./index.d.ts').IMota;
-interface Window {
-    Mota: import('./index.d.ts').IMota;
-}`
-        );
+        const rep = pluginDTS.replaceAll(`../game/system`, `../index.d.ts`);
         await fs.writeFile('./dist/types/plugin.d.ts', rep);
 
         const js = ['functions.js', 'plugins.js'];
@@ -154,7 +145,15 @@ interface Window {
         console.log(e);
     }
 
-    // 8. 压缩
+    // 8. 文档
+    try {
+        await fs.move('./docs/.vitepress/dist', './dist/_docs');
+    } catch (e) {
+        console.log('移动文档失败');
+        console.log(e);
+    }
+
+    // 9. 压缩
     if (compress) {
         try {
             await fs.ensureDir('./out');
