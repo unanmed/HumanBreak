@@ -153,6 +153,14 @@ const compress = type === 'dist';
         console.log(e);
     }
 
+    // 9. 启动服务
+    try {
+        await fs.copy('./script/template/启动服务.exe', './dist/启动服务.exe');
+    } catch (e) {
+        console.log('移动启动服务失败');
+        console.log(e);
+    }
+
     // 9. 压缩
     if (compress) {
         try {
