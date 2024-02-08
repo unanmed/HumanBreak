@@ -161,7 +161,7 @@ const compress = type === 'dist';
         console.log(e);
     }
 
-    // 9. 压缩
+    // 10. 压缩
     if (compress) {
         try {
             await fs.ensureDir('./out');

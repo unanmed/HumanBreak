@@ -4,7 +4,7 @@ import { defineConfig } from 'vitepress';
 export default defineConfig({
     title: 'HTML5魔塔样板',
     description: 'HTML5魔塔样板V2.A的说明文档',
-    base: '/docs/',
+    base: '/_docs/',
     themeConfig: {
         outline: [2, 3],
         // https://vitepress.dev/reference/default-theme-config
