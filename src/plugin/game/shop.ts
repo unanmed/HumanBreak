@@ -53,13 +53,16 @@ function _convertShop(shop: any) {
                 // 检测能否访问该商店
                 {
                     type: 'if',
-                    condition: "core.isShopVisited('" + shop.id + "')",
+                    condition:
+                        "Mota.Plugin.require('shop_g').isShopVisited('" +
+                        shop.id +
+                        "')",
                     true: [
                         // 可以访问，直接插入执行效果
                         {
                             type: 'function',
                             function:
-                                "function() { core.plugin._convertShop_replaceChoices('" +
+                                "function() { Mota.Plugin.require('shop_g')._convertShop_replaceChoices('" +
                                 shop.id +
                                 "', false) }"
                         }
@@ -84,7 +87,7 @@ function _convertShop(shop: any) {
                                 {
                                     type: 'function',
                                     function:
-                                        "function() { core.plugin._convertShop_replaceChoices('" +
+                                        "function() { Mota.Plugin.require('shop_g')._convertShop_replaceChoices('" +
                                         shop.id +
                                         "', true) }"
                                 }
@@ -101,7 +104,10 @@ function _convertShop(shop: any) {
     ];
 }
 
-function _convertShop_replaceChoices(shopId: string, previewMode: boolean) {
+export function _convertShop_replaceChoices(
+    shopId: string,
+    previewMode: boolean
+) {
     var shop = core.status.shops[shopId] as any;
     var choices = (shop.choices || [])
         .filter(function (choice: any) {

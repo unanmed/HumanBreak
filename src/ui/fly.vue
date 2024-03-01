@@ -56,7 +56,7 @@
                 :type="isMobile ? 'horizontal' : 'vertical'"
             ></a-divider>
             <div id="fly-right">
-                <canvas id="fly-thumbnail" @click="fly"></canvas>
+                <canvas id="fly-thumbnail" @click="fly" @wheel="wheel"></canvas>
                 <div id="fly-tools">
                     <double-left-outlined
                         @click="changeFloorByDelta(-10)"
@@ -470,6 +470,10 @@ function click(e: MouseEvent) {
             }
         }
     }
+}
+
+function wheel(ev: WheelEvent) {
+    changeFloorByDelta(-Math.sign(ev.deltaY));
 }
 
 function changeAreaByFloor(id: FloorIds) {

@@ -61,14 +61,14 @@ export default defineConfig({
                 target: FSHOST,
                 changeOrigin: true,
                 rewrite(path) {
-                    return path.replace(/^\/all/, '');
+                    return './' + path.replace(/^\/all/, '');
                 },
             },
             '^/forceTem/.*': {
                 target: FSHOST,
                 changeOrigin: true,
                 rewrite(path) {
-                    return path.replace(/^\/forceTem/, '');
+                    return './' + path.replace(/^\/forceTem/, '');
                 },
             }
         },

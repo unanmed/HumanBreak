@@ -41,11 +41,13 @@ hook.once('mounted', () => {
         ui.style.display = 'flex';
         core.lockControl();
     });
-    mainUi.on('end', () => {
+    mainUi.on('end', noClosePanel => {
         ui.style.display = 'none';
-        try {
-            core.closePanel();
-        } catch {}
+        if (!noClosePanel) {
+            try {
+                core.closePanel();
+            } catch {}
+        }
     });
     fixedUi.on('start', () => {
         fixed.style.display = 'block';

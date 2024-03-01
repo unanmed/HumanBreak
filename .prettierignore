@@ -9,3 +9,4 @@ public/_server/**/*.js
 script/**/*.js
 public/editor.html
 keyCodes.ts
+*.md

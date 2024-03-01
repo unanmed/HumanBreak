@@ -89,8 +89,6 @@ watch(width, n => emits('update:width', n));
 watch(height, n => emits('update:height', n));
 
 async function click() {
-    console.log(1);
-
     moveSelected.value = true;
     moveTimeout = window.setTimeout(() => {
         moveSelected.value = false;

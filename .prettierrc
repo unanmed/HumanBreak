@@ -9,6 +9,5 @@
     "vueIndentScriptAndStyle": false,
     "arrowParens": "avoid",
     "trailingComma": "none",
-    "endOfLine": "auto",
-    "embeddedLanguageFormatting": "off"
+    "endOfLine": "auto"
 }

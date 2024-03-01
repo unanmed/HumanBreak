@@ -184,7 +184,7 @@ function use(id: ShowItemIds) {
         nextTick(() => {
             core.useItem(id, false, () => {
                 if (mainUi.stack.length === 0) {
-                    hold.end();
+                    hold.end(core.status.event.id !== 'toolbox');
                 }
             });
         });

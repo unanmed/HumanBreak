@@ -174,6 +174,7 @@ events.prototype._gameOver_confirmUpload = function (ending, norank) {
     core.ui.drawConfirmBox(
         '你想记录你的ID和成绩吗？',
         function () {
+            console.log(2);
             if (main.isCompetition) {
                 core.events._gameOver_doUpload('', ending, norank);
             } else {
@@ -191,6 +192,7 @@ events.prototype._gameOver_confirmUpload = function (ending, norank) {
             }
         },
         function () {
+            console.log(1);
             if (main.isCompetition)
                 core.events._gameOver_confirmDownload(ending);
             else core.events._gameOver_doUpload(null, ending, norank);
@@ -627,7 +629,7 @@ events.prototype._openDoor_animate = function (block, x, y, callback) {
         core.maps._removeBlockFromMap(core.status.floorId, block);
         if (!locked) core.unlockControl();
         core.status.replay.animate = false;
-        Mota.require('var', 'hook').emit('afterOpenDoor', block.event.id, x, y);
+        core.events.afterOpenDoor(block.event.id, x, y);
         if (callback) callback();
     };
 
@@ -707,7 +709,7 @@ events.prototype.getItem = function (id, num, x, y, isGentleClick, callback) {
         itemHint.push(id);
     }
 
-    Mota.require('var', 'hook').emit('afterGetItem', id, x, y, isGentleClick);
+    this.afterGetItem(id, x, y, isGentleClick);
     if (callback) callback();
 };
 
