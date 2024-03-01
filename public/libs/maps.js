@@ -1063,7 +1063,8 @@ maps.prototype._canMoveDirectly_checkNextPoint = function (blocksObj, x, y) {
     const damage = core.status.thisMap.enemy.mapDamage[index];
     if (damage) {
         if (damage.damage !== 0) return false;
-        if (damage.mockery) return false;
+        if (damage.ambush) return false;
+        if (damage.repulse) return false;
     }
 
     return true;
@@ -1157,7 +1158,8 @@ maps.prototype._automaticRoute_deepAdd = function (x, y, blocks) {
     const damage = core.status.thisMap.enemy.mapDamage[`${x},${y}`];
     if (damage) {
         deepAdd += damage.damage * 100;
-        deepAdd += !!damage.mockery ? 1e5 : 0;
+        deepAdd += damage.repulse ? 1000 : 0;
+        deepAdd += damage.ambush ? 1000 : 0;
     }
 
     return deepAdd;

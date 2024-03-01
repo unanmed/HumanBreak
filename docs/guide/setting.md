@@ -206,7 +206,7 @@ mainSetting
 
 设置的编辑组件实际上只是一种特殊的组件，它接收下面三个参数（`props`）
 
--   `item`: 这个设置的信息，一般只会用到 `value`，也就是这个设置的值，其他信息请参考[API 列表](../api/class.md)
+-   `item`: 这个设置的信息，一般只会用到 `value`，也就是这个设置的值
 -   `setting`: 根级设置实例，例如对于上面注册的设置，就是 `mainSetting`，而不是其任意一级的级联设置
 -   `displayer`: 设置渲染控制器，一般情况下，当设置完值后，调用 `displayer.update` 即可
 
@@ -312,7 +312,7 @@ mainUi.open('settings', { info: mySetting });
 
 除此之外，样板还提供了能够用于创建自己的设置 UI 的 API，它是类 `SettingDisplayer`，你可以为你自己的 UI 创建一个其实例，从而辅助你去创建自己的显示 UI。
 
-创建实例时，要求传入设置作为参数。你可以通过 `add` 来选择一个设置，通过 `cut` 来截断一个设置，最终呈现出来的选择栈会存储在属性 `selectStack` 中，要渲染的信息会存储在属性 `displayInfo` 中。当一个设置被更改时，可以通过 `update` 函数来刷新显示。这样，我们就可以写出自己的设置 UI 了。对于这些内容的详细说明，请参考[API 列表](../api/class.md)。下面是一个极度简易的设置 UI 示例，其中省略了非常多的部分。
+创建实例时，要求传入设置作为参数。你可以通过 `add` 来选择一个设置，通过 `cut` 来截断一个设置，最终呈现出来的选择栈会存储在属性 `selectStack` 中，要渲染的信息会存储在属性 `displayInfo` 中。当一个设置被更改时，可以通过 `update` 函数来刷新显示。这样，我们就可以写出自己的设置 UI 了。下面是一个极度简易的设置 UI 示例，其中省略了非常多的部分。
 
 ```js
 const { MotaSetting, SettingDisplayer, MComponent } = Mota.requireAll('class');

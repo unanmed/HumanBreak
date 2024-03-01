@@ -186,10 +186,10 @@ const myUI = mainUi.get('myUI');
 
 对于 `UiController`，它有下列事件可以被监听：
 
--   `focus(before, after)`: 当 UI 被聚焦时触发，`before` 参数表示之前聚焦的内容，也可能不存在被聚焦的内容，会是 `null`，`after` 参数表示聚焦至哪一个 UI。该事件会在 `mainUi.focusByNum` 或者 `mainUi.focus` 函数执行后触发，这两个函数在样板中没有调用案例，如果需要可以自行调用。该事件继承自类 [`Focus`](../api/class.md#Focus) 的事件。
--   `unfocus(before)`: 取消任何聚焦时触发，与 `focus` 事件类似。该事件继承自类 [`Focus`](../api/class.md#Focus) 的事件。
--   `add(item)`: 打开新 UI 时触发，参数是打开的 UI，是 `GameUi` 实例。该事件继承自类 [`Focus`](../api/class.md#Focus) 的事件。
--   `pop(item)`: 弹出最后一个 UI 时触发，参数是被弹出的 `GameUi` 实例。注意关闭 UI 不会触发此事件，因为关闭 UI 会使用 `splice` 而不是 `pop`。该事件继承自类 [`Focus`](../api/class.md#Focus) 的事件。
--   `splice(spliced)`: 当 UI 被截断（关闭）时触发，参数是被关闭的 UI 数组。该事件继承自类 [`Focus`](../api/class.md#Focus) 的事件。
+-   `focus(before, after)`: 当 UI 被聚焦时触发，`before` 参数表示之前聚焦的内容，也可能不存在被聚焦的内容，会是 `null`，`after` 参数表示聚焦至哪一个 UI。该事件会在 `mainUi.focusByNum` 或者 `mainUi.focus` 函数执行后触发，这两个函数在样板中没有调用案例，如果需要可以自行调用。该事件继承自类 [`Focus`](../api/class/focus) 的事件。
+-   `unfocus(before)`: 取消任何聚焦时触发，与 `focus` 事件类似。该事件继承自类 [`Focus`](../api/class/focus) 的事件。
+-   `add(item)`: 打开新 UI 时触发，参数是打开的 UI，是 `GameUi` 实例。该事件继承自类 [`Focus`](../api/class/focus) 的事件。
+-   `pop(item)`: 弹出最后一个 UI 时触发，参数是被弹出的 `GameUi` 实例。注意关闭 UI 不会触发此事件，因为关闭 UI 会使用 `splice` 而不是 `pop`。该事件继承自类 [`Focus`](../api/class/focus) 的事件。
+-   `splice(spliced)`: 当 UI 被截断（关闭）时触发，参数是被关闭的 UI 数组。该事件继承自类 [`Focus`](../api/class/focus) 的事件。
 -   `start()`: 当 UI 根组件被打开时触发。当 UI 控制器从没有任何 UI 变成有至少一个 UI 被显示时，也即当没有 UI 打开的情况下任何 UI 被打开时，会触发此事件。无参数。
 -   `end()`: 当 UI 根组件被关闭时触发，即当所有 UI 都被关闭时触发。无参数。
