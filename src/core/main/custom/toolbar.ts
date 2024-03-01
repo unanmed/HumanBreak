@@ -199,11 +199,13 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
     setPos(x?: number, y?: number) {
         has(x) && (this.x = x);
         has(y) && (this.y = y);
+        this.emit('posChange', this);
     }
 
     setSize(width?: number, height?: number) {
         has(width) && (this.width = width);
         has(height) && (this.height = height);
+        this.emit('posChange', this);
     }
 
     /**
@@ -288,7 +290,7 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
     static load() {
         toolbarStorage.read();
         for (const [key, value] of Object.entries(toolbarStorage.data)) {
-            const bar = new CustomToolbar(key);
+            const bar = this.get(key) ?? new CustomToolbar(key);
             bar.x = value.x;
             bar.y = value.y;
             bar.width = value.w;

@@ -12,7 +12,7 @@ hero:
           link: /guide/diff
         - theme: alt
           text: API列表
-          link: /api-examples
+          link: /api/index
         - theme: alt
           text: 旧样板文档
           link: https://h5mota.com/games/template/_docs/#/

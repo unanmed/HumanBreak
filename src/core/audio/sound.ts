@@ -1,6 +1,5 @@
 import { has } from '@/plugin/utils';
 import { AudioParamOf, AudioPlayer } from './audio';
-import resource from '@/data/resource.json';
 import { ResourceController } from '../loader/controller';
 
 // todo: 立体声，可设置音源位置
@@ -24,7 +23,6 @@ export class SoundEffect extends AudioPlayer {
 
     gain: GainNode = AudioPlayer.ac.createGain();
     panner: PannerNode | null = null;
-    merger: ChannelMergerNode | null = null;
 
     set volumn(value: number) {
         this.gain.gain.value = value * SoundEffect.volume;
@@ -63,9 +61,7 @@ export class SoundEffect extends AudioPlayer {
      * 设置音频路由线路
      * ```txt
      * 不启用立体声：source -> gain -> destination
-     * 启用立体声：source -> panner -> gain --> destination
-     * 单声道立体声：source -> merger -> panner -> gain -> destination
-     * 单声道立体声指音源为单声道，合成为双声道后模拟为立体声
+     * 启用立体声：source -> panner -> gain -> destination
      * ```
      * @param stereo 是否启用立体声
      */
@@ -74,7 +70,6 @@ export class SoundEffect extends AudioPlayer {
         const ac = AudioPlayer.ac;
         if (!channel) return;
         this.panner = null;
-        this.merger = null;
         if (stereo) {
             this.panner = ac.createPanner();
             this.panner.connect(this.gain);
@@ -155,7 +150,6 @@ export class SoundController extends ResourceController<
      * @param data 音频的ArrayBuffer信息，会被解析为AudioBuffer
      */
     add(uri: string, data: ArrayBuffer) {
-        const stereo = resource.stereoSE.includes(uri);
         const se = new SoundEffect(data, true);
         if (this.list[uri]) {
             console.warn(`Repeated sound effect: '${uri}'.`);

@@ -1116,7 +1116,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         );
 
         // ----- 计算第一类光环
-        // 特殊属性对于的特殊属性数值
+        // 特殊属性对应的特殊属性数值
         const changeable = Mota.require('module', 'Damage').changeableHaloValue;
         changeable
             .set(21, ['atkValue', 'defValue'])

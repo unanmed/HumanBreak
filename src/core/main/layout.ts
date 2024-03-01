@@ -133,7 +133,7 @@ export class MComponent {
      */
     com(
         component: Component | MComponent,
-        config: Omit<MotaComponentConfig, 'innerText' | 'component'>
+        config?: Omit<MotaComponentConfig, 'innerText' | 'component'>
     ) {
         return this.h(component, [], config);
     }

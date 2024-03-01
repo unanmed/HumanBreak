@@ -3,7 +3,7 @@ import { Keyboard } from '../custom/keyboard';
 
 const qweKey = new Keyboard('qwe'); // 字母键盘，A-Z
 const numKey = new Keyboard('num'); // 数字键盘，1-0
-const charKey = new Keyboard('charKey'); // 符号键盘，!@<>等
+const charKey = new Keyboard('char'); // 符号键盘，:;<>等
 const fnKey = new Keyboard('fn'); // Fn键盘，F1-F12
 const assistKey = new Keyboard('assist'); // 辅助键盘，tab,capslk,shift,ctrl等
 const arrowKey = new Keyboard('arrow'); // 方向键

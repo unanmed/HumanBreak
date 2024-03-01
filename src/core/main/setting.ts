@@ -205,7 +205,10 @@ export class MotaSetting extends EventEmitter<SettingEvent> {
      */
     setDescription(key: string, desc: string) {
         const setting = this.getSettingBy(key.split('.'));
-        setting.description = desc;
+        setting.description = desc.replace(
+            /\<\s*script.*\/?\>(.*\<\/\s*script\s*\>)?/g,
+            ''
+        );
         return this;
     }
 

@@ -9,8 +9,6 @@ interface FocusEvent<T> extends EmitableEvent {
     unfocus: (before: T | null) => void;
     add: (item: T) => void;
     pop: (item: T | null) => void;
-    register: (item: T[]) => void;
-    unregister: (item: T[]) => void;
     splice: (spliced: T[]) => void;
 }
 

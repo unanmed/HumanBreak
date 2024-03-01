@@ -38,8 +38,6 @@ interface EnemyInfo extends Partial<Enemy> {
 
 interface DamageInfo {
     damage: number;
-    /** 自动切换技能时使用的技能 */
-    skill?: number;
 }
 
 interface MapDamage {
@@ -105,7 +103,6 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
 
     /**
      * 计算怪物真实属性
-     * @param noCache 是否不使用缓存
      */
     calRealAttribute() {
         this.haloList = [];
@@ -125,6 +122,7 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
     }
 
     /**
+     * @deprecated
      * 计算怪物伤害
      * @param noCache 是否不使用缓存
      */
@@ -488,9 +486,8 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     }
 
     /**
-     * 计算怪物临界，计算临界时，根据当前方向计算临界，但也会输出与当前最少伤害的伤害差值
+     * 计算怪物临界
      * @param num 要计算多少个临界
-     * @param dir 从怪物位置指向勇士的方向
      * @param hero 勇士属性，最终结果将会与由此属性计算出的伤害相减计算减伤
      */
     calCritical(
@@ -591,7 +588,6 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     /**
      * 计算n防减伤
      * @param num 要加多少防御
-     * @param dir 从怪物位置指向勇士的方向
      * @param hero 勇士属性，最终结果将会与由此属性计算出的伤害相减计算减伤
      */
     calDefDamage(

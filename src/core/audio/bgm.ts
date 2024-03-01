@@ -80,8 +80,8 @@ export class BgmController
 
         this.playing = true;
         if (!this.disable) {
-            this.setTransitionAnimate(id, 1);
-            if (this.now) this.setTransitionAnimate(this.now, 0, when);
+            this.setTransitionAnimate(id, 1, when);
+            if (this.now) this.setTransitionAnimate(this.now, 0);
         }
 
         if (!noStack) {

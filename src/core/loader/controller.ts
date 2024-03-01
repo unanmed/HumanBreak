@@ -25,6 +25,6 @@ export abstract class ResourceController<
     remove(uri: string) {
         const content = this.list[uri];
         delete this.list[uri];
-        this.emit(uri, content);
+        this.emit('delete', uri, content);
     }
 }

@@ -3101,7 +3101,7 @@ ui.prototype._drawNotes = function () {
 
 ////// 绘制快捷商店选择栏 //////
 ui.prototype._drawQuickShop = function () {
-    const shop = Mota.Plugin.require('shop');
+    const shop = Mota.Plugin.require('shop_g');
     core.status.event.id = 'selectShop';
     var shopList = core.status.shops,
         keys = shop.listShopIds();

@@ -34,7 +34,7 @@ bgm.play('myBgm.mp3'); // 无渐变的切歌
 
 ### 暂停与继续、撤销与恢复
 
-可以使用 `pause` 和 `resume` 函数暂停或者继续播放，它们都可以传入一个函数，表示暂停或者继续过程是否渐变
+可以使用 `pause` 和 `resume` 函数暂停或者继续播放，它们都可以传入一个参数，表示暂停或者继续过程是否渐变
 
 ```js
 const { bgm } = Mota.requireAll('var');
@@ -188,7 +188,7 @@ convolver.buffer = await ac.decodeAudioData(sound.get('mySound2.mp3').data);
 convolver.connect(ac.destination);
 const se = sound.get('mySound.mp3');
 // 添加至路由根节点，播放时就会经过这个路由节点的处理
-se.baseNode.push(convolver);
+se.baseNode.push({ node: convolver });
 // 或者覆盖系统自带的根节点
-se.baseNode = [convolver];
+se.baseNode = [{ node: convolver }];
 ```

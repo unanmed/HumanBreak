@@ -25,8 +25,7 @@ export default function init() {
         getDamageColor,
         parseCss,
         tip,
-        changeLocalStorage,
-        swapChapter
+        changeLocalStorage
     };
 }
 
@@ -238,23 +237,6 @@ export function changeLocalStorage<T>(
     const now = core.getLocalStorage(name, defaultValue);
     const to = fn(now);
     core.setLocalStorage(name, to);
-}
-
-export async function swapChapter(chapter: number, hard: number) {
-    const h = hard === 2 ? 'hard' : 'easy';
-    const save = await axios.get(
-        `${import.meta.env.BASE_URL}swap/${chapter}.${h}.h5save`,
-        {
-            responseType: 'text',
-            responseEncoding: 'utf-8'
-        }
-    );
-    const data = JSON.parse(decompressFromBase64(save.data));
-
-    core.loadData(data.data, () => {
-        core.removeFlag('__fromLoad__');
-        core.drawTip('读档成功');
-    });
 }
 
 export function ensureArray<T>(arr: T): T extends any[] ? T : T[] {

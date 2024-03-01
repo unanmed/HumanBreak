@@ -1,6 +1,7 @@
 import type { AudioPlayer } from '@/core/audio/audio';
 import type { BgmController } from '@/core/audio/bgm';
 import type { SoundController, SoundEffect } from '@/core/audio/sound';
+import type { ResourceController } from '@/core/loader/controller';
 import type { Disposable } from '@/core/common/disposable';
 import type {
     EventEmitter,
@@ -47,6 +48,7 @@ import type * as toolboxTools from '@/plugin/ui/toolbox';
 import type * as battle from './enemy/battle';
 import type * as hero from './hero';
 import type { Damage } from './enemy/damage';
+import type * as utils from '@/plugin/utils';
 // ---------- 插件
 import type * as pop_r from '../plugin/pop';
 import type * as use_r from '../plugin/use';
@@ -72,6 +74,7 @@ import type * as _lodash from 'lodash-es';
 import type * as _lzString from 'lz-string';
 import type * as _mutateAnimate from 'mutate-animate';
 import type * as _vue from 'vue';
+// ---------- UI
 import type * as UI from '@ui/index';
 import type Box from '@/components/box.vue';
 import type BoxAnimate from '@/components/boxAnimate.vue.vue';
@@ -82,6 +85,7 @@ import type EnemyCritical from '@/panel/enemyCritical.vue';
 import type EnemySpecial from '@/panel/enemySpecial.vue.vue';
 import type EnemyTarget from '@/panel/enemyTarget.vue.vue';
 import type KeyboardPanel from '@/panel/keyboard.vue.vue';
+import type { VirtualKey } from '@/core/main/init/misc';
 
 export interface ClassInterface {
     // 渲染进程与游戏进程通用
@@ -103,6 +107,7 @@ export interface ClassInterface {
     SoundController: typeof SoundController;
     BgmController: typeof BgmController;
     MComponent: typeof MComponent;
+    ResourceController: typeof ResourceController;
     // 定义于游戏进程，渲染进程依然可用
     Range: typeof Range;
     EnemyCollection: typeof EnemyCollection;
@@ -172,6 +177,10 @@ export interface ModuleInterface {
         KeyboardPanel: typeof KeyboardPanel;
     };
     MCGenerator: typeof MCGenerator;
+    RenderUtils: typeof utils;
+    MiscComponents: {
+        VirtualKey: typeof VirtualKey;
+    };
 }
 
 export interface SystemInterfaceMap {
