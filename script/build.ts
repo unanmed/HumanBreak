@@ -161,7 +161,19 @@ const compress = type === 'dist';
         console.log(e);
     }
 
-    // 10. 压缩
+    // 10. 移动端编辑器及常用工具
+    try {
+        await fs.copy(
+            './script/template/editor-mobile.html',
+            './dist/editor-mobile.html'
+        );
+        await fs.copy('./script/template/常用工具', './dist/常用工具');
+    } catch (e) {
+        console.log('移动端编辑器及常用工具失败');
+        console.log(e);
+    }
+
+    // 11. 压缩
     if (compress) {
         try {
             await fs.ensureDir('./out');
