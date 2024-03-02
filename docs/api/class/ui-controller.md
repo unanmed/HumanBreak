@@ -85,7 +85,7 @@ declare function get(id: string): GameUi
 ## holdOn()
 
 ```ts
-declare function holdOn(): { end(): void }
+declare function holdOn(): { end(noClosePanel: boolean): void }
 ```
 
 -   方法说明
@@ -94,7 +94,7 @@ declare function holdOn(): { end(): void }
 
 -   返回值
 
-    返回值是一个对象，包含一个 `end` 方法，用于结束此次的防闪烁处理，如果没有 ui 已经打开，那么会立刻关闭 ui 界面
+    返回值是一个对象，包含一个 `end` 方法，用于结束此次的防闪烁处理，如果没有 ui 已经打开，那么会立刻关闭 ui 界面，参数说明是否要调用 `core.closePanel` 函数
 
 ## close()
 
@@ -214,10 +214,10 @@ interface UiControllerEvent {
 
 ```ts
 interface UiControllerEvent {
-    end: () => void
+    end: (noClosePanel: boolean) => void
 }
 ```
 
 -   事件说明
 
-    当 ui 界面被关闭，也就是当被打开的 ui 个数从 1 变为 0 时，触发该事件。如果当前处于防闪烁状态，那么不会触发
+    当 ui 界面被关闭，也就是当被打开的 ui 个数从 1 变为 0 时，触发该事件。如果当前处于防闪烁状态，那么不会触发。参数说明了当这个 UI 被关闭时是否要调用 `core.closePanel` 函数
