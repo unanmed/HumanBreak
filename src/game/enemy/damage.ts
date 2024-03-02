@@ -644,8 +644,8 @@ export namespace Damage {
      * @param hero 勇士信息
      */
     export function calDamageWith(
-        info: EnemyInfo,
-        hero: Partial<HeroStatus>
+        info: DeepReadonly<EnemyInfo>,
+        hero: DeepReadonly<Partial<HeroStatus>>
     ): number | null {
         return null;
     }

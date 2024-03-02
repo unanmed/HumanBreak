@@ -820,31 +820,27 @@ type Save = DeepReadonly<{
     time: number;
 }>;
 
+type ValueType = number | string | boolean | undefined | null | bigint | symbol;
+
 /**
  * 深度只读一个对象，使其所有属性都只读
  */
 type DeepReadonly<T> = {
-    readonly [P in keyof T]: T[P] extends number | string | boolean
-        ? T[P]
-        : DeepReadonly<T[P]>;
+    readonly [P in keyof T]: T[P] extends ValueType ? T[P] : DeepReadonly<T[P]>;
 };
 
 /**
  * 深度可选一个对象，使其所有属性都可选
  */
 type DeepPartial<T> = {
-    [P in keyof T]?: T[P] extends number | string | boolean
-        ? T[P]
-        : DeepPartial<T[P]>;
+    [P in keyof T]?: T[P] extends ValueType ? T[P] : DeepPartial<T[P]>;
 };
 
 /**
  * 深度必选一个对象，使其所有属性都必选
  */
 type DeepRequired<T> = {
-    [P in keyof T]-?: T[P] extends number | string | boolean
-        ? T[P]
-        : DeepRequired<T[P]>;
+    [P in keyof T]-?: T[P] extends ValueType ? T[P] : DeepRequired<T[P]>;
 };
 
 /**
@@ -858,7 +854,7 @@ type Writable<T> = {
  * 深度可写一个对象，使其所有属性都可写
  */
 type DeepWritable<T> = {
-    -readonly [P in keyof T]: T[P] extends number | string | boolean
+    -readonly [P in keyof T]: T[P] extends ValueType
         ? T[P]
         : DeepWritable<T[P]>;
 };
