@@ -56,6 +56,14 @@ function init() {
         callback?.();
     };
 
+    const getFacedId = (enemy: DamageEnemy) => {
+        const e = enemy.enemy;
+
+        if (e.displayIdInBook) return e.displayIdInBook;
+        if (e.faceIds) return e.faceIds.down;
+        return e.id;
+    };
+
     core.enemys.getCurrentEnemys = function getCurrentEnemys(
         floorId = core.status.floorId
     ) {
@@ -65,7 +73,8 @@ function init() {
         Damage.ensureFloorDamage(floorId);
         const floor = core.status.maps[floorId];
         floor.enemy.list.forEach(v => {
-            if (!(v.id in used)) {
+            const id = getFacedId(v);
+            if (!(id in used)) {
                 const e = new DamageEnemy(v.enemy);
                 e.calAttribute();
                 e.getRealInfo();
@@ -75,9 +84,9 @@ function init() {
                     onMapEnemy: [v]
                 };
                 enemys.push(curr);
-                used[v.id] = curr.onMapEnemy;
+                used[id] = curr.onMapEnemy;
             } else {
-                used[v.id].push(v);
+                used[id].push(v);
             }
         });
 

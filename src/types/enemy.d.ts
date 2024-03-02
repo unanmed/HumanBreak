@@ -59,6 +59,11 @@ type Enemy<I extends EnemyIds = EnemyIds> = {
     displayIdInBook: EnemyIds;
 
     /**
+     * 行走图朝向。在勇士撞上图块时，或图块在移动时，会自动选择最合适的朝向图块（如果存在定义）来进行绘制。
+     */
+    faceIds: Record<Dir, EnemyIds>;
+
+    /**
      * 战前事件
      */
     beforeBattle: MotaEvent;
