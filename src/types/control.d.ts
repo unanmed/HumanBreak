@@ -388,7 +388,7 @@ interface Control {
 
     /**
      * 设置游戏系统画布的偏移量
-     * @param canvasId 字符串或数字，根据ts的说法应该只能填数字，但是浏览器会提高字符串的方式。
+     * @param canvasId 字符串或数字，根据ts的说法应该只能填数字，但是浏览器会提供字符串的方式。
      * 但是还是建议填数字，排列顺序一般是纵深从低到高排列
      * @param x 偏移横坐标
      * @param y 偏移纵坐标
@@ -407,11 +407,13 @@ interface Control {
     addGameCanvasTranslate(x: number, y: number): void;
 
     /**
+     * @deprecated 下一个大版本会添加新的视角控制
      * 更新大地图的可见区域
      */
     updateViewport(): void;
 
     /**
+     * @deprecated 下一个大版本会添加新的视角控制
      * 设置视野范围
      * @param px 相对大地图左上角的偏移横坐标，单位像素
      * @param py 相对大地图左上角的偏移纵坐标，单位像素
@@ -419,6 +421,7 @@ interface Control {
     setViewport(px?: number, py?: number): void;
 
     /**
+     * @deprecated 下一个大版本会添加新的视角控制
      * 移动视野范围，这东西真的有人用吗...高级动画 + setViewport就完事了（
      * @param x 移动的横坐标，单位格子
      * @param y 移动的纵坐标，单位格子
@@ -639,6 +642,7 @@ interface Control {
     removeSave(index: number, callback?: () => void): void;
 
     /**
+     * @deprecated
      * 设置主角的某个属性
      * @example core.setStatus('loc', {x : 0, y : 0, direction : 'up'}); // 设置主角位置为地图左上角，脸朝上
      * @param name 属性名
@@ -647,6 +651,7 @@ interface Control {
     setStatus<K extends keyof HeroStatus>(name: K, value: HeroStatus[K]): void;
 
     /**
+     * @deprecated
      * 增减主角的某个属性，等价于core.setStatus(name, core.getStatus(name) + value)
      * @example core.addStatus('name', '酱'); // 在主角的名字后加一个“酱”字
      * @param name 属性名
@@ -658,6 +663,7 @@ interface Control {
     ): void;
 
     /**
+     * @deprecated
      * 读取主角的某个属性，不包括百分比修正
      * @example core.getStatus('loc'); // 读取主角的坐标和朝向
      * @param name 属性名
@@ -666,6 +672,7 @@ interface Control {
     getStatus<K extends keyof HeroStatus>(name: K): HeroStatus[K];
 
     /**
+     * @deprecated
      * 从status中获得属性，如果不存在则从勇士属性中获取
      * @param status 要从中获取的属性对象
      * @param name 属性名
@@ -676,6 +683,7 @@ interface Control {
     ): HeroStatus[K];
 
     /**
+     * @deprecated
      * 计算主角的某个属性，包括百分比修正
      * @example core.getRealStatus('atk'); // 计算主角的攻击力，包括百分比修正。战斗使用的就是这个值
      * @param name 属性名，注意只能用于数值类属性
@@ -683,6 +691,7 @@ interface Control {
     getRealStatus<K extends keyof NumbericHeroStatus>(name: K): number;
 
     /**
+     * @deprecated
      * 从status中获得增幅后的属性，如果不存在则从勇士属性中获取
      * @param status 要从中获取的属性对象
      * @param name 属性名
@@ -693,6 +702,7 @@ interface Control {
     ): number;
 
     /**
+     * @deprecated
      * 获得勇士原始属性（无装备和衰弱影响）
      * @param name 获取的属性名
      */
@@ -960,6 +970,7 @@ interface Control {
     ): void;
 
     /**
+     * @deprecated
      * 播放背景音乐，中途开播但不计入存档且只会持续到下次场景切换。如需长期生效请将背景音乐的文件名赋值给flags.__bgm__
      * @example core.playBgm('bgm.mp3', 30); // 播放bgm.mp3，并跳过前半分钟
      * @param bgm 背景音乐的文件名，支持全塔属性中映射前的中文名
@@ -968,26 +979,31 @@ interface Control {
     playBgm(bgm: BgmIds | NameMapIn<BgmIds>, startTime?: number): void;
 
     /**
+     * @deprecated
      * 暂停背景音乐的播放
      */
     pauseBgm(): void;
 
     /**
+     * @deprecated
      * 恢复背景音乐的播放
      */
     resumeBgm(resumeTime?: number): void;
 
     /**
+     * @deprecated
      * 设置音乐图标的开启关闭状态
      */
     setMusicBtn(): void;
 
     /**
+     * @deprecated
      * 开启或关闭背景音乐的播放
      */
     triggerBgm(): void;
 
     /**
+     * @deprecated
      * 播放一个音效
      * @param sound 音效名
      * @param pitch 音调，同时会修改播放速度，100为原速
@@ -1001,18 +1017,21 @@ interface Control {
     ): number;
 
     /**
+     * @deprecated
      * 停止音频
      * @param id 停止的音频标识符，不填则停止所有
      */
     stopSound(id?: number): void;
 
     /**
+     * @deprecated
      * 获得正在播放的所有音效的id列表
      * @param name 要获得的音效名
      */
     getPlayingSounds(name?: SoundIds | NameMapIn<SoundIds>): number[];
 
     /**
+     * @deprecated
      * 检查bgm状态，没有播放的话就播放
      */
     checkBgm(): void;

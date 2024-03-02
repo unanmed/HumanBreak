@@ -948,6 +948,7 @@ interface Core extends Pick<Main, CoreDataFromMain> {
     readonly animateFrame: AnimateFrame;
 
     /**
+     * @deprecated
      * 音乐状态
      */
     readonly musicStatus: Readonly<MusicStatus>;

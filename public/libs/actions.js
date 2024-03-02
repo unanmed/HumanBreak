@@ -1684,7 +1684,9 @@ actions.prototype._clickSL = function (x, y) {
     if (x >= this.LAST - 2 && y === core._HEIGHT_ - 1) {
         core.playSound('取消');
         if (core.events.recoverEvents(core.status.event.interval)) return;
-        core.ui.closePanel();
+        setTimeout(() => {
+            core.ui.closePanel();
+        }, 0);
         delete core.status.tempRoute;
         if (!core.isPlaying()) document.getElementById('start').style.top = '0';
         return;
@@ -2345,7 +2347,9 @@ actions.prototype._clickSettings = function (x, y) {
                 return core.confirmRestart();
             case 7:
                 core.playSound('取消');
-                core.ui.closePanel();
+                setTimeout(() => {
+                    core.ui.closePanel();
+                }, 0);
                 break;
         }
     }
@@ -2356,7 +2360,9 @@ actions.prototype._clickSettings = function (x, y) {
 actions.prototype._keyUpSettings = function (keycode) {
     if (keycode == 27 || keycode == 88) {
         core.playSound('取消');
-        core.ui.closePanel();
+        setTimeout(() => {
+            core.ui.closePanel();
+        }, 0);
         return;
     }
     this._selectChoices(

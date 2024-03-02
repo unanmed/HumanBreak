@@ -1,5 +1,6 @@
 interface ActionData {
     /**
+     * @deprecated
      * 当按键弹起时
      * @param keyCode 按键的keyCode
      * @param altKey 当前是否按下了alt键

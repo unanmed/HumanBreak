@@ -68,6 +68,7 @@ interface Utils {
     decompress(value: string): any;
 
     /**
+     * @deprecated
      * 设置本地存储
      * @param key 本地存储的名称
      * @param value 本地存储的值，不填代表删除
@@ -75,6 +76,7 @@ interface Utils {
     setLocalStorage(key: string, value?: any): void;
 
     /**
+     * @deprecated
      * 获得本地存储
      * @param key 获取的本地存储的名称
      * @param defaultValue 当不存在的时候的默认值
@@ -82,6 +84,7 @@ interface Utils {
     getLocalStorage<T>(key: string, defaultValue?: T): T;
 
     /**
+     * @deprecated
      * 移除本地存储
      * @param key 要移除的本地存储的值
      */
@@ -151,6 +154,7 @@ interface Utils {
     ): void;
 
     /**
+     * @deprecated
      * 设置一个全局存储，适用于global:xxx，录像播放时将忽略此函数。
      * @example core.setBlobal('一周目已通关', true); // 设置全局存储“一周目已通关”为true，方便二周目游戏中的新要素。
      * @param key 全局变量名称，支持中文
@@ -159,6 +163,7 @@ interface Utils {
     setGlobal(key: string, value?: any): void;
 
     /**
+     * @deprecated
      * 读取一个全局存储，适用于global:xxx，支持录像。
      * @example if (core.getGlobal('一周目已通关', false) === true) core.getItem('dagger'); // 二周目游戏进行到此处时会获得一把屠龙匕首
      * @param key 全局变量名称，支持中文
@@ -334,6 +339,7 @@ interface Utils {
     getCookie(name: string): string;
 
     /**
+     * @deprecated 已失效（大概
      * 填写非自绘状态栏
      * @example
      * // 更新状态栏中的主角生命，使用加载画面的宣传色

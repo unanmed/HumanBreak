@@ -428,6 +428,7 @@ interface Events extends EventData {
     ): void;
 
     /**
+     * @deprecated 已失效（大概
      * 设置一项敌人属性并计入存档
      * @example core.setEnemy('greenSlime', 'def', 0); // 把绿头怪的防御设为0
      * @param id 敌人id
@@ -447,6 +448,7 @@ interface Events extends EventData {
     ): void;
 
     /**
+     * @deprecated 已失效（大概
      * 设置某个点的敌人属性
      * @param x 横坐标
      * @param y 纵坐标
@@ -469,6 +471,7 @@ interface Events extends EventData {
     ): void;
 
     /**
+     * @deprecated 已失效（大概
      * 重置某个点的敌人属性
      * @param x 横坐标
      * @param y 纵坐标
@@ -483,6 +486,7 @@ interface Events extends EventData {
     ): void;
 
     /**
+     * @deprecated 已失效（大概
      * 将某个点已经设置的敌人属性移动到其他点
      * @param fromX 起始横坐标
      * @param fromY 起始纵坐标
