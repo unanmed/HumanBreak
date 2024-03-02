@@ -224,6 +224,10 @@ onUnmounted(() => {
 }
 
 @media screen and (max-width: 600px) {
+    #tools {
+        transform: translateY(-50%);
+    }
+
     #book {
         width: 100%;
         padding: 5%;

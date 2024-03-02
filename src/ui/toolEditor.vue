@@ -476,7 +476,7 @@ onUnmounted(() => {
     height: 40%;
     display: flex;
     justify-content: center;
-    align-items: start;
+    align-items: flex-start;
 
     #tool-preview-container {
         width: 90%;

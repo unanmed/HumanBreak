@@ -375,12 +375,13 @@ onUnmounted(() => {
         align-items: center;
         width: 100%;
         height: 100%;
+        flex-basis: 50%;
 
         #desc-text {
             margin-top: 2vh;
             margin-left: 0.5vw;
             width: 100%;
-            height: 100%;
+            max-height: 100%;
         }
     }
 }
@@ -391,6 +392,7 @@ onUnmounted(() => {
     }
 
     #tools {
+        transform: translateY(-50%);
         span {
             margin: 0;
         }
@@ -398,8 +400,9 @@ onUnmounted(() => {
 
     #toolbox-main {
         flex-direction: column-reverse;
-        height: 100%;
+        height: 90%;
         font-size: 100%;
+        margin-top: 20%;
     }
 
     .item-list {
@@ -415,6 +418,10 @@ onUnmounted(() => {
     .item-main {
         display: flex;
         flex-direction: column-reverse;
+    }
+
+    #detail {
+        flex-basis: 30%;
     }
 }
 </style>

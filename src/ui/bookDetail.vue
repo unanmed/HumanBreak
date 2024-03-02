@@ -1,6 +1,11 @@
 <!-- 怪物详细信息 -->
 <template>
     <div id="detail">
+        <div id="tools">
+            <span id="back" class="button-text tools" @click="close"
+                ><left-outlined />返回</span
+            >
+        </div>
         <div id="info" :style="{ top: `${top}px` }">
             <EnemyOne :enemy="enemy!"></EnemyOne>
             <a-divider
@@ -207,6 +212,15 @@ onUnmounted(() => {
     opacity: 0;
 }
 
+#tools {
+    position: fixed;
+    height: 6%;
+    font-size: 3.2vh;
+    width: 100%;
+    left: 5%;
+    top: 5%;
+}
+
 @media screen and (max-width: 600px) {
     #detail {
         width: 100%;
@@ -220,6 +234,10 @@ onUnmounted(() => {
         bottom: 5%;
         left: 5vw;
         width: 80vw;
+    }
+
+    #info {
+        transform: translateY(10%);
     }
 }
 </style>

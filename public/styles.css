@@ -319,7 +319,7 @@ span#hard {
     -webkit-box-sizing: border-box;
     display: none;
     padding: 3px;
-    border-top: 2px solid #ddd9;
+    border-top: 2px solid rgba(221, 221, 221, 0.6);
     margin-right: 3px;
 }
 #toolBar .tools {

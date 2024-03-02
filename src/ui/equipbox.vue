@@ -717,7 +717,11 @@ onUnmounted(() => {
     }
 
     #equip-list {
-        flex-basis: 50%;
+        flex-basis: 30%;
+
+        #filter #sort-type {
+            font-size: 150%;
+        }
     }
 
     .divider {

@@ -6,6 +6,8 @@ import vuejsx from '@vitejs/plugin-vue-jsx'
 import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers';
 import dts from 'vite-plugin-dts'
 import { resolve } from 'path';
+// @ts-ignore
+import postcssPreset from 'postcss-preset-env';
 
 const FSHOST = 'http://127.0.0.1:3000/';
 
@@ -46,6 +48,9 @@ export default defineConfig({
             less: {
                 javascriptEnabled: true
             }
+        },
+        postcss: {
+            plugins: [postcssPreset()]
         }
     },
     server: {
