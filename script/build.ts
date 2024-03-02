@@ -177,18 +177,7 @@ const compress = type === 'dist';
     if (compress) {
         try {
             await fs.ensureDir('./out');
-            await compressing.zip.compressDir('./dist', './out/dist.zip');
-
-            // 压缩资源
-            if (resorce) {
-                const resources = await fs.readdir('./dist-resource');
-                for await (const index of resources) {
-                    await compressing.zip.compressDir(
-                        `./dist-resource/${index}`,
-                        `./out/${index}.zip`
-                    );
-                }
-            }
+            await compressing.zip.compressDir('./dist', './dist.zip');
         } catch (e) {
             console.log('压缩为zip失败！');
             console.log(e);
