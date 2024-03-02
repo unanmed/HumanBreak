@@ -60,6 +60,8 @@ const floorId =
     // @ts-ignore
     core.floorIds[core.status.event?.ui?.index] ?? core.status.floorId;
 
+console.log(floorId);
+
 const enemy = core.getCurrentEnemys(floorId);
 const toShow: ToShowEnemy[] = enemy.map(v =>
     getDetailedEnemy(v.enemy, floorId)
@@ -121,11 +123,13 @@ async function exit() {
     const hold = mainUi.holdOn();
     mainUi.close(props.num);
     if (core.events.recoverEvents(core.status.event.interval)) {
+        hold.end(true);
         return;
     } else if (has(core.status.event.ui)) {
         core.status.boxAnimateObjs = [];
         // @ts-ignore
         core.ui._drawViewMaps(core.status.event.ui);
+        hold.end(true);
     } else hold.end();
 }
 
@@ -141,42 +145,44 @@ function checkScroll() {
 }
 
 // 按键控制
-gameKey.use(props.ui.symbol);
-gameKey
-    .realize('@book_up', () => {
-        if (selected.value > 0) {
-            selected.value--;
-        }
-        checkScroll();
-    })
-    .realize('@book_down', () => {
-        if (selected.value < enemy.length - 1) {
-            selected.value++;
-        }
-        checkScroll();
-    })
-    .realize('@book_pageDown', () => {
-        if (selected.value <= 4) {
-            selected.value = 0;
-        } else {
-            selected.value -= 5;
-        }
-        checkScroll();
-    })
-    .realize('@book_pageUp', () => {
-        if (selected.value >= enemy.length - 5) {
-            selected.value = enemy.length - 1;
-        } else {
-            selected.value += 5;
-        }
-        checkScroll();
-    })
-    .realize('exit', () => {
-        exit();
-    })
-    .realize('confirm', () => {
-        select(toShow[selected.value], selected.value);
-    });
+setTimeout(() => {
+    gameKey.use(props.ui.symbol);
+    gameKey
+        .realize('@book_up', () => {
+            if (selected.value > 0) {
+                selected.value--;
+            }
+            checkScroll();
+        })
+        .realize('@book_down', () => {
+            if (selected.value < enemy.length - 1) {
+                selected.value++;
+            }
+            checkScroll();
+        })
+        .realize('@book_pageDown', () => {
+            if (selected.value <= 4) {
+                selected.value = 0;
+            } else {
+                selected.value -= 5;
+            }
+            checkScroll();
+        })
+        .realize('@book_pageUp', () => {
+            if (selected.value >= enemy.length - 5) {
+                selected.value = enemy.length - 1;
+            } else {
+                selected.value += 5;
+            }
+            checkScroll();
+        })
+        .realize('exit', () => {
+            exit();
+        })
+        .realize('confirm', () => {
+            select(toShow[selected.value], selected.value);
+        });
+}, 0);
 
 onUnmounted(() => {
     gameKey.dispose(props.ui.symbol);

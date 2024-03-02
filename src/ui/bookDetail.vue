@@ -219,7 +219,7 @@ onUnmounted(() => {
         font-size: 4vw;
         bottom: 5%;
         left: 5vw;
-        width: 90vw;
+        width: 80vw;
     }
 }
 </style>

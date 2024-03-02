@@ -214,7 +214,7 @@ onMounted(() => {
     const style = getComputedStyle(div);
 
     const width = parseFloat(style.width);
-    const height = window.innerHeight / 5;
+    const height = isMobile ? window.innerHeight / 7 : window.innerHeight / 5;
     const c = critical.value!;
     const d = def.value!;
 

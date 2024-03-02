@@ -182,7 +182,7 @@ function use(id: ShowItemIds) {
         const hold = mainUi.holdOn();
         exit();
         nextTick(() => {
-            core.useItem(id, false, () => {
+            core.tryUseItem(id, false, () => {
                 if (mainUi.stack.length === 0) {
                     hold.end(core.status.event.id !== 'toolbox');
                 }

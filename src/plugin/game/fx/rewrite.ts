@@ -46,7 +46,7 @@ export function init() {
             damageCanvas = '__damage_' + x + '_' + y;
             const ctx = core.createCanvas(damageCanvas, 0, 0, 32, 32, 65);
             ctx.textAlign = 'left';
-            ctx.font = '14px normal';
+            ctx.font = 'bold 11px Arial';
             core.fillBoldText(ctx, damage, 1, 31, color as string);
             if (core.flags.displayCritical) {
                 const critical = enemy.calCritical(1);

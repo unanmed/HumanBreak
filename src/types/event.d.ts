@@ -760,7 +760,11 @@ interface Events extends EventData {
      * @example core.tryUseItem('pickaxe'); // 尝试使用破墙镐
      * @param itemId 道具id，其中敌人手册、传送器和飞行器会被特殊处理
      */
-    tryUseItem(itemId: ItemIdOf<'tools' | 'constants'>): void;
+    tryUseItem(
+        itemId: ItemIdOf<'tools' | 'constants'>,
+        noRoute?: boolean,
+        callback?: () => void
+    ): void;
 
     _sys_battle(data: Block, callback?: () => void): void;
 

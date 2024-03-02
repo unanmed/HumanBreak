@@ -4497,24 +4497,31 @@ events.prototype._checkLvUp_check = function () {
 };
 
 ////// 尝试使用道具 //////
-events.prototype.tryUseItem = function (itemId) {
+events.prototype.tryUseItem = function (itemId, noRoute, callback) {
     if (itemId == 'book') {
         core.ui.closePanel();
-        return core.openBook(false);
+        core.openBook(false);
+        callback();
+        return;
     }
     if (itemId == 'fly') {
         core.ui.closePanel();
-        return core.useFly(false);
+        core.useFly(false);
+        callback();
+        return;
     }
     if (itemId == 'centerFly') {
         core.ui.closePanel();
-        return core.ui._drawCenterFly();
+        core.ui._drawCenterFly();
+        callback();
+        return;
     }
     if (core.canUseItem(itemId)) {
         core.ui.closePanel();
-        core.useItem(itemId);
+        core.useItem(itemId, noRoute, callback);
     } else {
         core.playSound('操作失败');
         core.drawTip('当前无法使用' + core.material.items[itemId].name, itemId);
     }
+    callback();
 };
