@@ -33,7 +33,10 @@ const marked: MarkInfo<EnemyIds>[] = [];
  * @param id 标记的怪物id
  */
 export function markEnemy(id: EnemyIds) {
-    if (hasMarkedEnemy(id)) return;
+    if (hasMarkedEnemy(id)) {
+        unmarkEnemy(id);
+        return;
+    }
     const DamageEnemy = Mota.require('class', 'DamageEnemy');
     const enemy = new DamageEnemy(core.material.enemys[id]);
     enemy.calAttribute();

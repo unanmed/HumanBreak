@@ -4,19 +4,24 @@
     --pixel: 416px;
 }
 
-html, body, div, img {
+html,
+body,
+div,
+img {
     margin: 0;
     padding: 0;
 }
 
-html, body {
+html,
+body {
     width: 100%;
     height: 100%;
     overflow: hidden;
 }
 
 body {
-    font-family: Roboto, "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;;
+    font-family: Roboto, 'Helvetica Neue', Helvetica, 'PingFang SC',
+        'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
 }
 
 /* ::-webkit-scrollbar {
@@ -29,7 +34,7 @@ body {
 }
 
 .cp-app {
-	z-index: 250;
+    z-index: 250;
 }
 
 #colorPanel {
@@ -43,12 +48,15 @@ body {
 }
 
 #colorPicker {
-    margin: 2px 0; 
+    margin: 2px 0;
     border-radius: 3px;
     width: 104px;
 }
 
-#left, #mid, #mid2, #right {
+#left,
+#mid,
+#mid2,
+#right {
     border-radius: 2px;
     box-sizing: border-box;
 }
@@ -171,7 +179,7 @@ body {
     left: 0;
     bottom: 0;
     padding: 10px 5px;
-    margin-left: 8px;;
+    margin-left: 8px;
     box-sizing: border-box;
 }
 
@@ -247,7 +255,8 @@ body {
     position: absolute;
 }
 
-#dataSelection, .appendSelection {
+#dataSelection,
+.appendSelection {
     position: absolute;
     /* top:0;
     left:320px; */
@@ -279,7 +288,8 @@ body {
     line-height: 1.2em;
 }
 
-#mapColMark, #mapRowMark {
+#mapColMark,
+#mapRowMark {
     cursor: crosshair;
 }
 
@@ -356,8 +366,11 @@ table.row {
     z-index: 100;
 }
 
-#menuDiv * { margin: 0; padding: 0; }
-#midMenu{
+#menuDiv * {
+    margin: 0;
+    padding: 0;
+}
+#midMenu {
     border-style: solid;
     border-width: 1px;
     cursor: default;
@@ -373,7 +386,7 @@ table.row {
 
     border-radius: 4px;
 }
-#midMenu .menuitem{
+#midMenu .menuitem {
     font: normal 13px Arial, sans-serif;
     list-style: none;
     margin: 0;
@@ -384,13 +397,13 @@ table.row {
 
     /* padding-right: 20px; */
 }
-#midMenu .menuitem:hover{
+#midMenu .menuitem:hover {
     border-style: dotted;
     border-width: 1px 0;
     padding-bottom: 3px;
     padding-top: 3px;
 }
-#midMenu .menuitem-content{
+#midMenu .menuitem-content {
     font: normal 13px Arial, sans-serif;
 }
 
@@ -408,7 +421,7 @@ table.row {
     position: absolute;
     left: 6px;
     top: 6px;
-    background-image:url('data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIGJhc2VQcm9maWxlPSJmdWxsIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4bWxuczpldj0iaHR0cDovL3d3dy53My5vcmcvMjAwMS94bWwtZXZlbnRzIj4KPGc%2BCgk8cG9seWdvbiBmaWxsPSIjNjY2IiBwb2ludHM9IjkuMjA3LDYuMTI2IDcuNzkzLDcuNTQxIDExLjc5MywxMS41NDEgMTMuMjA3LDEwLjEyNiIgLz4KCTxwYXRoIGZpbGw9IiM2NjYiIGQ9Ik01LjkxNywyYzEuNjA4LDAsMi45MTcsMS4zMDgsMi45MTcsMi45MTdTNy41MjUsNy44MzMsNS45MTcsNy44MzNTMyw2LjUyNSwzLDQuOTE3UzQuMzA4LDIsNS45MTcsMgoJCSBNNS45MTcsMEMzLjIwMSwwLDEsMi4yMDEsMSw0LjkxN3MyLjIwMSw0LjkxNyw0LjkxNyw0LjkxN3M0LjkxNy0yLjIwMSw0LjkxNy00LjkxN0MxMC44MzMsMi4yMDEsOC42MzIsMCw1LjkxNywwTDUuOTE3LDB6IiAvPgo8L2c%2BCjwvc3ZnPgo%3D');
+    background-image: url('data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIGJhc2VQcm9maWxlPSJmdWxsIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4bWxuczpldj0iaHR0cDovL3d3dy53My5vcmcvMjAwMS94bWwtZXZlbnRzIj4KPGc%2BCgk8cG9seWdvbiBmaWxsPSIjNjY2IiBwb2ludHM9IjkuMjA3LDYuMTI2IDcuNzkzLDcuNTQxIDExLjc5MywxMS41NDEgMTMuMjA3LDEwLjEyNiIgLz4KCTxwYXRoIGZpbGw9IiM2NjYiIGQ9Ik01LjkxNywyYzEuNjA4LDAsMi45MTcsMS4zMDgsMi45MTcsMi45MTdTNy41MjUsNy44MzMsNS45MTcsNy44MzNTMyw2LjUyNSwzLDQuOTE3UzQuMzA4LDIsNS45MTcsMgoJCSBNNS45MTcsMEMzLjIwMSwwLDEsMi4yMDEsMSw0LjkxN3MyLjIwMSw0LjkxNyw0LjkxNyw0LjkxN3M0LjkxNy0yLjIwMSw0LjkxNy00LjkxN0MxMC44MzMsMi4yMDEsOC42MzIsMCw1LjkxNywwTDUuOTE3LDB6IiAvPgo8L2c%2BCjwvc3ZnPgo%3D');
 }
 
 #uieventDiv {
@@ -418,7 +431,7 @@ table.row {
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 2000
+    z-index: 2000;
 }
 
 #uieventDialog {
@@ -531,7 +544,7 @@ table.row {
 #appendPicSelection span {
     position: absolute;
     font-size: 11px;
-    }
+}
 
 #left6 {
     left: 5px;
@@ -583,7 +596,8 @@ table.row {
     width: 95%;
 }
 
-.etable table, .etable table td {
+.etable table,
+.etable table td {
     cursor: auto;
 }
 
@@ -617,15 +631,15 @@ table.row {
 /* copy end ---------------------------------------------  */
 
 .etable tr {
-    width: 100%
+    width: 100%;
 }
 
 .etable tr > :nth-child(1) {
-    width: 24%
+    width: 24%;
 }
 
 .etable tr > :nth-child(2) {
-    width: 19%
+    width: 19%;
 }
 
 .etable tr > :nth-child(3) {
@@ -700,6 +714,11 @@ div.checkboxSet {
     margin: -5px;
 }
 
+@font-face {
+    font-family: 'Fira Code';
+    src: url(../../project/fonts/FiraCode-Regular.ttf);
+}
+
 .main .CodeMirror {
-    font-family: Fira Code;
+    font-family: 'Fira Code';
 }

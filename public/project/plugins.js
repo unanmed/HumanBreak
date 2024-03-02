@@ -739,11 +739,43 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         });
 
         // --------------- 战斗伤害
+        const { getHeroStatusOn } = Mota.requireAll('fn');
 
         const Damage = Mota.require('module', 'Damage');
         // 这个数组常量控制着在战斗时哪些属性计算真实属性，也就是经过buff加成的属性
         // 如果有属性不会经过buff加成等，请将其去除，可以提高性能表现
         Damage.realStatus = ['atk', 'def', 'mdef', 'hpmax'];
+
+        // 怪物属性计算，用于获取怪物的初始属性，不经过任何光环加成
+        // 一般对于坚固、模仿等怪物会在这计算
+        Mota.rewrite(
+            Mota.require('class', 'DamageEnemy').prototype,
+            'calAttribute',
+            'full',
+            function () {
+                const { has } = Mota.Plugin.require('utils_g');
+
+                if (this.progress !== 1 && has(this.x) && has(this.floorId))
+                    return;
+                this.progress = 2;
+                const special = this.info.special;
+                const info = this.info;
+                const floorId = this.floorId ?? core.status.floorId;
+
+                const status = getHeroStatusOn(Damage.realStatus, floorId);
+
+                // 坚固
+                if (special.includes(3)) {
+                    info.def = status.atk - 1;
+                }
+
+                // 模仿
+                if (special.includes(10)) {
+                    info.atk = status.atk;
+                    info.def = status.def;
+                }
+            }
+        );
 
         // 复写系统的伤害计算函数即可，全量复写
         // 函数接受两个参数，分别是怪物信息和勇士信息，返回一个数字作为伤害
@@ -900,7 +932,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
         );
 
         // --------------- 地图伤害
-        const { getHeroStatusOn } = Mota.requireAll('fn');
         const caledBetween = new Set();
         // 全量复写地图伤害计算，这个计算会调用所有的 DamageEnemy 的地图伤害计算
         Mota.rewrite(
