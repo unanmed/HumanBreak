@@ -805,19 +805,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 return null;
             }
 
-            if (special.includes(3)) {
-                // 由于坚固的特性，只能放到这来计算了
-                if (atk > enemy.def) heroPerDamage = 1;
-                else return null;
-            } else {
-                // 模仿
-                if (special.includes(10)) {
-                    monAtk = atk;
-                    monDef = def;
-                }
-                heroPerDamage = atk - monDef;
-                if (heroPerDamage <= 0) return null;
-            }
+            heroPerDamage = atk - monDef;
+            if (heroPerDamage <= 0) return null;
 
             // 吸血
             if (special.includes(11)) {
