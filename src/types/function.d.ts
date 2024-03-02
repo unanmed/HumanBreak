@@ -39,12 +39,6 @@ interface ControlData {
      * @param ignoreSteps 忽略的步数，不填则会自动计算
      */
     moveDirectly(x: number, y: number, ignoreSteps?: number): boolean;
-
-    /**
-     * 并行脚本
-     * @param time 距离游戏加载完毕经过的时间
-     */
-    parallelDo(time: number): void;
 }
 
 interface UiData {
