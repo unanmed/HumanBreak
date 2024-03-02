@@ -1578,7 +1578,9 @@ actions.prototype._keyUpViewMaps = function (keycode) {
     ) {
         core.clearMap('data');
         core.playSound('取消');
-        core.ui.closePanel();
+        setTimeout(() => {
+            core.ui.closePanel();
+        }, 0);
         return;
     }
     if (keycode == 86) {
