@@ -1160,7 +1160,11 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                                 this,
                                 (e, enemy) => {
                                     const s = enemy.specialHalo;
-                                    e.special.push(...s);
+                                    for (const spe of s) {
+                                        // 防止重复
+                                        if (!e.special.includes(spe))
+                                            e.special.push(spe);
+                                    }
                                     // 如果是自身，就不进行特殊属性数值处理了
                                     if (e === this.info) return;
                                     // 然后计算特殊属性数值
