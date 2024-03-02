@@ -15,7 +15,7 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"rock": {"name":"石头人","hp":50,"atk":50,"def":0,"money":3,"exp":0,"point":0,"special":[3]},
 	"bluePriest": {"name":"初级法师","hp":100,"atk":120,"def":0,"money":3,"exp":0,"point":1,"special":[9]},
 	"redPriest": {"name":"高级法师","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
-	"brownWizard": {"name":"初级巫师","hp":100,"atk":120,"def":0,"money":16,"exp":0,"point":0,"special":[15],"value":100,"range":2},
+	"brownWizard": {"name":"初级巫师","hp":100,"atk":120,"def":0,"money":16,"exp":0,"point":0,"special":[15],"value":100,"range":2,"zone":100},
 	"redWizard": {"name":"高级巫师","hp":1000,"atk":1200,"def":0,"money":160,"exp":0,"point":0,"special":[15,28],"value":200,"zoneSquare":true,"specialHalo":[6,16],"n":9,"haloRange":2,"haloSquare":true,"zone":200},
 	"swordsman": {"name":"双手剑士","hp":100,"atk":120,"def":0,"money":6,"exp":0,"point":0,"special":[4]},
 	"soldier": {"name":"冥战士","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},

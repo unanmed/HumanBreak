@@ -353,7 +353,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             {
                 code: 6,
                 name: enemy => `${enemy.n ?? 4}连击`,
-                desc: enemy => `怪物每回合攻击${enemy.n}次`,
+                desc: enemy => `怪物每回合攻击${enemy.n ?? 4}次`,
                 color: '#fe7'
             },
             {
@@ -809,7 +809,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
             // 连击
             if (special.includes(4)) enemyPerDamage *= 2;
             if (special.includes(5)) enemyPerDamage *= 3;
-            if (special.includes(6)) enemyPerDamage *= info.n;
+            if (special.includes(6)) enemyPerDamage *= info.n ?? 4;
 
             // 破甲
             if (special.includes(7)) {
@@ -1162,7 +1162,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                                     const s = enemy.specialHalo;
                                     e.special.push(...s);
                                     // 如果是自身，就不进行特殊属性数值处理了
-                                    if (enemy === this.info) return;
+                                    if (e === this.info) return;
                                     // 然后计算特殊属性数值
                                     for (const spec of s) {
                                         const toChange = changeable.get(spec);

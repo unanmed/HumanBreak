@@ -31,6 +31,8 @@ export function getDetailedEnemy(
     const special: [string, string, string][] = enemy.info.special.map(vv => {
         const s = Mota.require('var', 'enemySpecials')[vv];
         const info = { ...enemy.enemy, ...enemy.info };
+        console.log(info);
+
         return [
             fromFunc(s.name, info),
             fromFunc(s.desc, info),
