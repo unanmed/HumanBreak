@@ -1063,9 +1063,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                             if (v.x === x + dx * 2 && v.y === y + dy * 2) {
                                 const loc = `${x + dx},${y + dy}`;
                                 this.setMapDamage(damage, loc, 0);
+                                damage[loc].ambush = damage[loc].ambush ?? [];
+                                damage[loc].ambush.push(this);
                             }
-                            damage[loc].ambush = damage[loc].ambush ?? [];
-                            damage[loc].ambush.push(this);
                         });
                     }
                 }

@@ -385,12 +385,17 @@ class MPlugin {
 
     static init() {
         for (const [key, data] of Object.entries(this.plugins)) {
-            if (data.type === 'content') {
-                data.init?.(key, data.data);
-            } else {
-                data.data = data.init!(key);
+            try {
+                if (data.type === 'content') {
+                    data.init?.(key, data.data);
+                } else {
+                    data.data = data.init!(key);
+                }
+                this.pluginData[key] = data.data;
+            } catch (e) {
+                console.error(`Plugin ${key} init failed.`);
+                console.error(e);
             }
-            this.pluginData[key] = data.data;
         }
         this.inited = true;
     }

@@ -325,10 +325,10 @@ core.prototype._loadPluginAsync = async function () {
         plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1
     )) {
         try {
-            value.call(plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1);
+            value?.call(plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1);
         } catch (e) {
-            console.error(`Plugin '${key}' init fail. `);
-            throw e;
+            console.error(`Plugin '${key}' init failed.`);
+            console.error(e);
         }
     }
 };
