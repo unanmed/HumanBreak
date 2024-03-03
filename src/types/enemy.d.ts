@@ -253,22 +253,6 @@ interface Enemys {
     getEnemys(): {
         [P in EnemyIds]: Enemy<P>;
     };
-
-    /**
-     * 判定主角当前能否打败某只敌人
-     * @example core.canBattle('greenSlime',0,0,'MT0') // 能否打败主塔0层左上角的绿头怪（假设有）
-     * @param enemy 敌人id或敌人对象
-     * @param x 敌人的横坐标
-     * @param y 敌人的纵坐标
-     * @param floorId 敌人所在的地图
-     * @returns true表示可以打败，false表示无法打败
-     */
-    canBattle(
-        x: number,
-        y: number,
-        floorId?: FloorIds,
-        dir?: Dir | 'none' | (Dir | 'none')[]
-    ): boolean;
 }
 
 declare const enemys: new () => Enemys;

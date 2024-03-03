@@ -2833,6 +2833,9 @@ events.prototype._action_function = function (data, x, y, prefix) {
         if (typeof func == 'string' && func.indexOf('function') == 0) {
             eval('(' + func + ')()');
         }
+        if (typeof func === 'function') {
+            func();
+        }
     } catch (e) {
         console.error(e);
     }

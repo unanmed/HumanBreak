@@ -23,25 +23,37 @@ export function getEnemy(
 
 function init() {
     core.enemys.canBattle = function canBattle(
-        x: number,
+        x: number | DamageEnemy,
         y: number,
         floorId: FloorIds = core.status.floorId
     ) {
-        const enemy = getEnemy(x, y, floorId);
-        const { damage } = enemy!.calDamage();
+        const enemy = typeof x === 'number' ? getEnemy(x, y, floorId) : x;
+        if (!enemy) {
+            throw new Error(
+                `Cannot get enemy on x:${x}, y:${y}, floor: ${floorId}`
+            );
+        }
+        const { damage } = enemy.calDamage();
 
         return damage < core.status.hero.hp;
     };
 
     core.events.battle = function battle(
-        x: number,
+        x: number | DamageEnemy,
         y: number,
         force: boolean = false,
         callback?: () => void
     ) {
         core.saveAndStopAutomaticRoute();
-        const enemy = getEnemy(x, y);
+        const isLoc = typeof x === 'number';
+        const enemy = isLoc ? getEnemy(x, y) : x;
+        if (!enemy) {
+            throw new Error(
+                `Cannot battle with enemy since no enemy on ${x},${y}`
+            );
+        }
         // 非强制战斗
+        // @ts-ignore
         if (!core.canBattle(x, y) && !force && !core.status.event.id) {
             core.stopSound();
             core.playSound('操作失败');
@@ -52,7 +64,7 @@ function init() {
         if (!core.status.event.id) core.autosave(true);
         // 战前事件
         // 战后事件
-        core.afterBattle(enemy, x, y);
+        core.afterBattle(enemy, isLoc ? x : enemy.x, y);
         callback?.();
     };
 
@@ -149,5 +161,22 @@ loading.once('coreInit', init);
 declare global {
     interface Enemys {
         getCurrentEnemys(floorId: FloorIds): CurrentEnemy[];
+        canBattle(enemy: DamageEnemy, _?: number, floorId?: FloorIds): boolean;
+        canBattle(x: number, y: number, floorId?: FloorIds): boolean;
+    }
+
+    interface Events {
+        battle(
+            enemy: DamageEnemy,
+            _?: number,
+            force?: boolean,
+            callback?: () => void
+        ): void;
+        battle(
+            x: number,
+            y?: number,
+            force?: boolean,
+            callback?: () => void
+        ): void;
     }
 }

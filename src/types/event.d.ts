@@ -100,22 +100,6 @@ interface Events extends EventData {
     trigger(x: number, y: number, callback?: () => void): void;
 
     /**
-     * 战斗，如果填写了坐标就会删除该点的敌人并触发战后事件
-     * @example core.battle('greenSlime'); // 和从天而降的绿头怪战斗（如果打得过）
-     * @param id 敌人id，必填
-     * @param x 敌人的横坐标
-     * @param y 敌人的纵坐标
-     * @param force true表示强制战斗
-     * @param callback 回调函数
-     */
-    battle(
-        x: number,
-        y: number,
-        force: boolean = false,
-        callback?: () => void
-    ): void;
-
-    /**
      * 开门（包括三种基础墙）
      * @example core.openDoor(0, 0, true, core.jumpHero); // 打开左上角的门，需要钥匙，然后主角原地跳跃半秒
      * @param x 门的横坐标

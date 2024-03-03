@@ -1,6 +1,6 @@
 var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 = 
 {
-	"greenSlime": {"name":"绿头怪","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"greenSlime": {"name":"绿头怪","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[27]},
 	"redSlime": {"name":"红头怪","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[16,18],"value":10},
 	"blackSlime": {"name":"青头怪","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"slimelord": {"name":"怪王","hp":100,"atk":120,"def":0,"money":10,"exp":0,"point":0,"special":[1,9]},

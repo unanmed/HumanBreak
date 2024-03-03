@@ -1059,14 +1059,10 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                         let x = this.x;
                         let y = this.y;
                         const { x: dx, y: dy } = core.utils.scan[dir];
-                        this.col.list.forEach(v => {
-                            if (v.x === x + dx * 2 && v.y === y + dy * 2) {
-                                const loc = `${x + dx},${y + dy}`;
-                                this.setMapDamage(damage, loc, 0);
-                                damage[loc].ambush = damage[loc].ambush ?? [];
-                                damage[loc].ambush.push(this);
-                            }
-                        });
+                        const loc = `${x + dx},${y + dy}`;
+                        this.setMapDamage(damage, loc, 0);
+                        damage[loc].ambush = damage[loc].ambush ?? [];
+                        damage[loc].ambush.push(this);
                     }
                 }
 
@@ -1307,10 +1303,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 for (const enemy of info.ambush) {
                     actions.push({
                         type: 'function',
-                        function:
-                            'function() { ' +
-                            `core.battle(${enemy.x}, ${enemy.y}, true, core.doAction); ` +
-                            '}',
+                        function: () => {
+                            core.battle(enemy, void 0, true, core.doAction);
+                        },
                         async: true
                     });
                 }
