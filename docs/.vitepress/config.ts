@@ -41,7 +41,8 @@ export default defineConfig({
                         },
                         { text: '设置系统', link: '/guide/setting' },
                         { text: '存储系统', link: '/guide/storage' },
-                        { text: '按键系统', link: '/guide/hotkey' }
+                        { text: '按键系统', link: '/guide/hotkey' },
+                        { text: '零碎功能', link: '/guide/misc' }
                     ]
                 }
             ],

@@ -258,7 +258,7 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
                 if (!dam || objs[id]?.event.noPass) continue;
 
                 // 地图伤害
-                if (dam.damage !== 0) {
+                if (dam.damage !== 0 && !dam.ambush) {
                     const damage = core.formatBigNumber(dam.damage, true);
                     const color = dam.damage < 0 ? '#6eff6a' : '#fa3';
                     core.status.damage.extraData.push({
@@ -280,7 +280,7 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
                     });
                 }
 
-                if (dam.repulse) {
+                if (dam.repulse && dam.damage <= 0) {
                     core.status.damage.extraData.push({
                         text: '阻',
                         px: 32 * x + 16,
