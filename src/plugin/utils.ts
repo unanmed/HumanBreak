@@ -287,6 +287,7 @@ export async function triggerFullscreen(full: boolean) {
     }
     mainSetting.setValue('screen.fullscreen', full, true);
     settingStorage.setValue('@@exitFromFullscreen', full);
+    settingStorage.write();
 }
 
 /**

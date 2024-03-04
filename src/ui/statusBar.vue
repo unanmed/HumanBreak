@@ -183,6 +183,9 @@ import Box from '../components/box.vue';
 import Scroll from '../components/scroll.vue';
 import { status } from '../plugin/ui/statusBar';
 import { isMobile } from '../plugin/use';
+import { fontSize } from '../plugin/ui/statusBar';
+
+let main: HTMLDivElement;
 
 const items = core.flags.statusBarItems;
 const icons = core.statusBar.icons;
@@ -196,6 +199,7 @@ const format = core.formatBigNumber;
 
 watch(width, n => (updateStatus.value = !updateStatus.value));
 watch(height, n => (updateStatus.value = !updateStatus.value));
+watch(fontSize, n => (main.style.fontSize = `${n}%`));
 
 const hero = shallowReactive<Partial<HeroStatus>>({});
 const keys = shallowReactive<number[]>([]);
@@ -251,6 +255,7 @@ function update() {
 
 onMounted(() => {
     update();
+    main = document.getElementById('status-main') as HTMLDivElement;
 });
 </script>
 
@@ -260,7 +265,7 @@ onMounted(() => {
     width: 100%;
     height: 100%;
     padding: 1vh 0;
-    font-size: 100%;
+    font-size: v-bind(fontSize);
 }
 
 .status-item {

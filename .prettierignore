@@ -10,3 +10,4 @@ script/**/*.js
 public/editor.html
 keyCodes.ts
 *.md
+setting.ts

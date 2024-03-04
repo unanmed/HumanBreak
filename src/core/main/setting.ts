@@ -7,6 +7,7 @@ import { bgm } from '../audio/bgm';
 import { SoundEffect } from '../audio/sound';
 import settingsText from '@/data/settings.json';
 import { isMobile } from '@/plugin/use';
+import { fontSize } from '@/plugin/ui/statusBar';
 
 export interface SettingComponentProps {
     item: MotaSettingItem;
@@ -380,6 +381,8 @@ function handleScreenSetting<T extends number | boolean>(
     } else if (key === 'fontSize') {
         // 字体大小
         root.style.fontSize = `${n}px`;
+    } else if (key === 'fontSizeStatus') {
+        fontSize.value = n as number;
     }
 }
 
@@ -423,6 +426,7 @@ mainSetting
             .register('transition', '界面动画', false, COM.Boolean)
             .register('antiAlias', '抗锯齿', false, COM.Boolean)
             .register('fontSize', '字体大小', 16, COM.Number, [8, 28, 1])
+            .register('fontSizeStatus', '状态栏字体', 100, COM.Number, [20, 300, 10])
             .register('smoothView', '平滑镜头', true, COM.Boolean)
             .register('criticalGem', '临界显示方式', false, COM.Boolean)
             .setDisplayFunc('criticalGem', value => (value ? '宝石数' : '攻击'))
@@ -473,6 +477,7 @@ loading.once('coreInit', () => {
         'screen.transition': !!storage.getValue('screen.transition', false),
         'screen.antiAlias': !!storage.getValue('screen.antiAlias', false),
         'screen.fontSize': storage.getValue('screen.fontSize', 16),
+        'screen.fontSizeStatus': storage.getValue('screen.fontSizeStatus', 100),
         'screen.smoothView': !!storage.getValue('screen.smoothView', true),
         'screen.criticalGem': !!storage.getValue('screen.criticalGem', false),
         'action.fixed': !!storage.getValue('action.fixed', true),
@@ -510,7 +515,8 @@ mainSetting
     .setDescription('audio.bgmVolume', `背景音乐的音量`)
     .setDescription('audio.soundEnabled', `是否开启音效`)
     .setDescription('audio.soundVolume', `音效的音量`)
-    .setDescription('ui.mapScale', `楼传小地图的缩放，百分比格式`);
+    .setDescription('ui.mapScale', `楼传小地图的缩放，百分比格式`)
+    .setDescription('screen.fontSizeStatus', `修改状态栏的字体大小`);
 
 Mota.requireAll('var').hook.once('mounted', () => {
     if (storage.getValue('@@exitFromFullscreen', false)) {
