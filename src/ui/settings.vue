@@ -307,6 +307,7 @@ onUnmounted(() => {
     .info-text {
         font-size: 85%;
         min-height: 30%;
+        max-height: 50%;
     }
 }
 
