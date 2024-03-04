@@ -12,9 +12,7 @@ export function setGameCanvasFilter(filter: string) {
     });
 }
 
-const filterMap: [FloorIds[], string][] = [
-    [['MT50'], 'brightness(80%)contrast(120%)'] // 童心佬的滤镜（
-];
+export const filterMap: [FloorIds[], string][] = [];
 
 export function getCanvasFilterByFloorId(
     floorId: FloorIds = core.status.floorId

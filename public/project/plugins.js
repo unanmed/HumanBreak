@@ -1312,5 +1312,51 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 core.insertAction(actions);
             }
         });
+    },
+    misc: function () {
+        // 把一些杂项放在这了
+
+        const { loading } = Mota.requireAll('var');
+
+        Mota.r(() => {
+            // 楼层滤镜配置
+            loading.once('coreInit', () => {
+                const { filterMap } = Mota.Plugin.require('gameCanvas_r');
+                // 楼层滤镜是一系列数组，数组第一项是一个数组，表示所有使用这个滤镜的楼层，第二项是滤镜内容
+                filterMap.push(
+                    [
+                        ['sample0', 'sample1', 'sample2'], // 楼层列表
+                        'brightness(120%)' // 滤镜内容
+                    ],
+                    [['MT0'], 'contrast(120%)']
+                );
+            });
+
+            // 点光源配置，参考插件库点光源插件的配置方式
+            loading.once('coreInit', () => {
+                const { shadowInfo, backgroundInfo, blurInfo, immersionInfo } =
+                    Mota.Plugin.require('gameShadow_r');
+                const { pColor } = Mota.require('module', 'RenderUtils');
+
+                // 光源信息
+                shadowInfo.MT0 = [
+                    {
+                        id: 'mt0_1',
+                        x: 144,
+                        y: 144,
+                        decay: 20,
+                        r: 150,
+                        color: pColor('#e953'),
+                        noShelter: true
+                    }
+                ];
+                // 背景色
+                backgroundInfo.MT0 = pColor('#0006');
+                // 虚化程度
+                blurInfo.MT0 = 3;
+                // 浸入墙壁程度
+                immersionInfo.MT0 = 4;
+            });
+        });
     }
 };

@@ -46,7 +46,7 @@ export function init() {
     });
 }
 
-const shadowInfo: Partial<Record<FloorIds, Light[]>> = {
+export const shadowInfo: Partial<Record<FloorIds, Light[]>> = {
     MT50: [
         {
             id: 'mt50_1',
@@ -86,11 +86,11 @@ const shadowInfo: Partial<Record<FloorIds, Light[]>> = {
         }
     ]
 };
-const backgroundInfo: Partial<Record<FloorIds, Color>> = {
+export const backgroundInfo: Partial<Record<FloorIds, Color>> = {
     MT50: pColor('#0006')
 };
-const blurInfo: Partial<Record<FloorIds, number>> = {};
-const immersionInfo: Partial<Record<FloorIds, number>> = {};
+export const blurInfo: Partial<Record<FloorIds, number>> = {};
+export const immersionInfo: Partial<Record<FloorIds, number>> = {};
 const shadowCache: Partial<Record<FloorIds, Polygon[]>> = {};
 
 let calMapShadow = true;

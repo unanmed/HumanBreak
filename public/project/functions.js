@@ -428,17 +428,18 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             core.events.checkLvUp();
 
             const getHeroStatusOn = Mota.require('fn', 'getHeroStatusOn');
+            const { has } = Mota.Plugin.require('utils_g');
 
             // 检查HP上限
             if (core.flags.statusBarItems.indexOf('enableHPMax') >= 0) {
-                core.setStatus(
-                    'hp',
-                    Math.min(getHeroStatusOn('hpmax'), core.getStatus('hp'))
-                );
+                const hpmax = getHeroStatusOn('hpmax');
+                if (core.status.hero.hp > hpmax) {
+                    core.status.hero.hp = hpmax;
+                }
             }
 
             // 设置生命上限、生命值、攻防护盾金币和经验值
-            var statusList = [
+            const statusList = [
                 'hpmax',
                 'hp',
                 'mana',
@@ -448,29 +449,26 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 'money',
                 'exp'
             ];
-            statusList.forEach(function (item) {
+            statusList.forEach(item => {
                 // 向下取整
                 core.status.hero[item] = Math.floor(core.status.hero[item]);
             });
 
             // 设置魔力值; status:manamax 只有在非负时才生效。
-            if (
-                core.status.hero.manamax != null &&
-                core.getRealStatus('manamax') >= 0
-            ) {
-                core.status.hero.mana = Math.min(
-                    core.status.hero.mana,
-                    core.getRealStatus('manamax')
-                );
+            if (has(core.status.hero.manamax)) {
+                const manamax = getHeroStatusOn('manamax');
+                if (manamax >= 0 && getHeroStatusOn('mana') > manamax) {
+                    core.status.hero.mana = manamax;
+                }
             }
 
             // 难度
-            if (core.statusBar.hard.innerText != core.status.hard) {
+            if (core.statusBar.hard.innerText !== core.status.hard) {
                 core.statusBar.hard.innerText = core.status.hard;
             }
-            var hardColor = core.getFlag('__hardColor__');
-            if (hardColor == null) core.statusBar.hard.innerText = '';
-            if (core.statusBar.hard.getAttribute('_style') != hardColor) {
+            const hardColor = core.getFlag('__hardColor__');
+            if (!has(hardColor)) core.statusBar.hard.innerText = '';
+            if (core.statusBar.hard.getAttribute('_style') !== hardColor) {
                 core.statusBar.hard.style.color = hardColor;
                 core.statusBar.hard.setAttribute('_style', hardColor);
             }
