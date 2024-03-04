@@ -10,6 +10,7 @@ import { parseColor } from './webgl/utils';
 import { Keyboard, KeyboardEmits } from '@/core/main/custom/keyboard';
 import { mainUi } from '@/core/main/init/ui';
 import { isAssist } from '@/core/main/custom/hotkey';
+import { mainSetting, settingStorage } from '@/core/main/setting';
 
 type CanParseCss = keyof {
     [P in keyof CSSStyleDeclaration as CSSStyleDeclaration[P] extends string
@@ -284,6 +285,8 @@ export async function triggerFullscreen(full: boolean) {
             maxGameScale();
         });
     }
+    mainSetting.setValue('screen.fullscreen', full, true);
+    settingStorage.setValue('@@exitFromFullscreen', full);
 }
 
 /**

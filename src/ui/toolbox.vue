@@ -387,22 +387,11 @@ onUnmounted(() => {
 }
 
 @media screen and (max-width: 600px) {
-    #toolbox {
-        padding: 5%;
-    }
-
-    #tools {
-        transform: translateY(-50%);
-        span {
-            margin: 0;
-        }
-    }
-
     #toolbox-main {
         flex-direction: column-reverse;
         height: 90%;
         font-size: 100%;
-        margin-top: 20%;
+        margin-top: 10%;
     }
 
     .item-list {

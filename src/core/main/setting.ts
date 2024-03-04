@@ -119,7 +119,7 @@ export class MotaSetting extends EventEmitter<SettingEvent> {
      * @param key 要设置的设置的键
      * @param value 要设置的值
      */
-    setValue(key: string, value: boolean | number) {
+    setValue(key: string, value: boolean | number, noEmit: boolean = false) {
         const setting = this.getSettingBy(key.split('.'));
         if (typeof setting.value !== typeof value) {
             throw new Error(
@@ -130,7 +130,7 @@ export class MotaSetting extends EventEmitter<SettingEvent> {
         const old = setting.value as boolean | number;
         setting.value = value;
 
-        this.emit('valueChange', key, value, old);
+        if (!noEmit) this.emit('valueChange', key, value, old);
     }
 
     /**
@@ -348,8 +348,22 @@ function handleScreenSetting<T extends number | boolean>(
     o: T
 ) {
     if (key === 'fullscreen') {
+        const fontSize = mainSetting.getValue('screen.fontSize', 16);
+        const beforeIsMobile = isMobile;
         // 全屏
-        triggerFullscreen(n as boolean);
+        triggerFullscreen(n as boolean).then(() => {
+            if (beforeIsMobile) {
+                mainSetting.setValue(
+                    'screen.fontSize',
+                    Math.floor((fontSize * 2) / 3)
+                );
+            } else if (isMobile) {
+                mainSetting.setValue(
+                    'screen.fontSize',
+                    Math.floor((fontSize * 3) / 2)
+                );
+            }
+        });
     } else if (key === 'heroDetail') {
         // 勇士显伤
         core.drawHero();
@@ -497,3 +511,11 @@ mainSetting
     .setDescription('audio.soundEnabled', `是否开启音效`)
     .setDescription('audio.soundVolume', `音效的音量`)
     .setDescription('ui.mapScale', `楼传小地图的缩放，百分比格式`);
+
+Mota.requireAll('var').hook.once('mounted', () => {
+    if (storage.getValue('@@exitFromFullscreen', false)) {
+        const fontSize = mainSetting.getValue('screen.fontSize', 16);
+        mainSetting.setValue('screen.fontSize', Math.round((fontSize * 3) / 2));
+    }
+    storage.setValue('@@exitFromFullscreen', !!document.fullscreenElement);
+});

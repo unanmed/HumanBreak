@@ -697,12 +697,7 @@ onUnmounted(() => {
 }
 
 @media screen and (max-width: 600px) {
-    #equipbox {
-        padding: 5%;
-    }
-
     #equipbox-main {
-        height: 90vh;
         flex-direction: column-reverse;
         font-size: 100%;
     }
@@ -717,7 +712,7 @@ onUnmounted(() => {
     }
 
     #equip-list {
-        flex-basis: 30%;
+        flex-basis: 45%;
 
         #filter #sort-type {
             font-size: 150%;

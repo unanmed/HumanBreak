@@ -1326,7 +1326,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
                 filterMap.push(
                     [
                         ['sample0', 'sample1', 'sample2'], // 楼层列表
-                        'brightness(120%)' // 滤镜内容
+                        'brightness(80%)' // 滤镜内容
                     ],
                     [['MT0'], 'contrast(120%)']
                 );
