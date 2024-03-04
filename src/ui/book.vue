@@ -60,8 +60,6 @@ const floorId =
     // @ts-ignore
     core.floorIds[core.status.event?.ui?.index] ?? core.status.floorId;
 
-console.log(floorId);
-
 const enemy = core.getCurrentEnemys(floorId);
 const toShow: ToShowEnemy[] = enemy.map(v =>
     getDetailedEnemy(v.enemy, floorId)
