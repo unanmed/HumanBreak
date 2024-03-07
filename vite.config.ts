@@ -2,9 +2,9 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import legacy from '@vitejs/plugin-legacy';
 import components from 'unplugin-vue-components/vite';
-import vuejsx from '@vitejs/plugin-vue-jsx'
+import vuejsx from '@vitejs/plugin-vue-jsx';
 import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers';
-import dts from 'vite-plugin-dts'
+import dts from 'vite-plugin-dts';
 import { resolve } from 'path';
 // @ts-ignore
 import postcssPreset from 'postcss-preset-env';
@@ -16,7 +16,13 @@ export default defineConfig({
     plugins: [
         vue(),
         vuejsx(),
-        components({ resolvers: [AntDesignVueResolver()] })
+        components({
+            resolvers: [
+                AntDesignVueResolver({
+                    importStyle: false
+                })
+            ]
+        })
     ],
     base: `./`,
     resolve: {
@@ -67,18 +73,18 @@ export default defineConfig({
                 changeOrigin: true,
                 rewrite(path) {
                     return './' + path.replace(/^\/all/, '');
-                },
+                }
             },
             '^/forceTem/.*': {
                 target: FSHOST,
                 changeOrigin: true,
                 rewrite(path) {
                     return './' + path.replace(/^\/forceTem/, '');
-                },
+                }
             }
         },
         watch: {
             ignored: ['**/public/**']
-        },
+        }
     }
 });
