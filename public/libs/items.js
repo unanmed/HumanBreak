@@ -304,7 +304,7 @@ items.prototype.unloadEquip = function (equipType, callback) {
         if (callback) callback();
         return;
     }
-    core.status.route.push(`unequip:${equipId}`);
+    core.status.route.push(`unequip:${unloadEquipId}`);
 
     this._realLoadEquip(equipType, null, unloadEquipId, callback);
 };
