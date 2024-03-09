@@ -1112,9 +1112,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = {
 
                             // 施加光环
                             col.applyHalo(type, range, this, (e, enemy) => {
-                                e.atkBuff += enemy.atkBuff ?? 0;
-                                e.defBuff += enemy.defBuff ?? 0;
-                                e.hpBuff += enemy.hpBuff ?? 0;
+                                e.atkBuff += enemy.enemy.atkBuff ?? 0;
+                                e.defBuff += enemy.enemy.defBuff ?? 0;
+                                e.hpBuff += enemy.enemy.hpBuff ?? 0;
                             });
                             // 向已施加的光环列表中添加
                             this.providedHalo.add(25);
