@@ -8,6 +8,7 @@ import { SoundEffect } from '../audio/sound';
 import settingsText from '@/data/settings.json';
 import { isMobile } from '@/plugin/use';
 import { fontSize } from '@/plugin/ui/statusBar';
+import { show as showFrame, hide as hideFrame } from '@/plugin/frame';
 
 export interface SettingComponentProps {
     item: MotaSettingItem;
@@ -338,6 +339,8 @@ mainSetting.on('valueChange', (key, n, o) => {
         handleActionSetting(setting, n, o);
     } else if (root === 'audio') {
         handleAudioSetting(setting, n, o);
+    } else if (root === 'debug') {
+        handleDebugSetting(setting, n, o)
     }
 });
 
@@ -414,6 +417,17 @@ function handleAudioSetting<T extends number | boolean>(
     }
 }
 
+function handleDebugSetting<T extends number | boolean>(
+    key: string,
+    n: T,
+    o: T
+) {
+    if (key === 'frame'){
+        if (n) showFrame();
+        else hideFrame() 
+    }
+}
+
 // ----- 游戏的所有设置项
 // todo: 虚拟键盘缩放，小地图楼传缩放
 mainSetting
@@ -467,6 +481,12 @@ mainSetting
         new MotaSetting()
             .register('mapScale', '小地图缩放', 100, COM.Number, [50, 1000, 50])
             .setDisplayFunc('mapScale', value => `${value}%`)
+    )
+    .register(
+        'debug', 
+        '调试设置', 
+        new MotaSetting()
+            .register('frame', '帧率显示', false, COM.Boolean)
     );
 
 const loading = Mota.require('var', 'loading');
@@ -490,7 +510,8 @@ loading.once('coreInit', () => {
         'ui.mapScale': storage.getValue(
             'ui.mapScale',
             isMobile ? 300 : Math.floor(window.innerWidth / 600) * 50
-        )
+        ),
+        'debug.frame': !!storage.getValue('debug.frame', false),
     });
 });
 
