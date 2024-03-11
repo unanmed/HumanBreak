@@ -114,7 +114,7 @@ class GameListener extends EventEmitter<ListenerEvent> {
 
     constructor() {
         super();
-
+        if (main.replayChecking) return;
         if (!!window.core) {
             this.init();
         } else {

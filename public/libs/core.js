@@ -306,6 +306,7 @@ core.prototype.initSync = function (coreData, callback) {
     this._forwardFuncs();
     for (var key in coreData) core[key] = coreData[key];
     this._loadGameProcessSync();
+    this._loadPluginSync();
     this._init_flags();
     this._init_platform();
     this._init_others();
@@ -319,6 +320,18 @@ core.prototype._loadPluginAsync = async function () {
     if (!main.useCompress) {
         await main.loadScript(`project/plugins.js?v=${main.version}`);
     }
+    this._initPlugins();
+};
+
+core.prototype._loadPluginSync = function () {
+    if (main.useCompress) main.loadMod('project', 'project', () => 0);
+    else {
+        main.pureData.forEach(v => main.loadMod('project', v, () => 0));
+    }
+    this._initPlugins();
+};
+
+core.prototype._initPlugins = function () {
     for (const [key, value] of Object.entries(
         plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1
     )) {
@@ -329,10 +342,6 @@ core.prototype._loadPluginAsync = async function () {
             console.error(e);
         }
     }
-};
-
-core.prototype._loadPluginSync = function () {
-    main.loadMod('project', 'plugins', () => 0);
 };
 
 core.prototype._loadGameProcess = async function () {

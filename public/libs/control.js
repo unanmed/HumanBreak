@@ -3394,58 +3394,74 @@ control.prototype.screenFlash = function (
 control.prototype.playBgm = function (bgm, startTime) {
     bgm = core.getMappedName(bgm);
     if (main.mode !== 'play') return;
-    Mota.require('var', 'bgm').changeTo(bgm, startTime);
+    Mota.r(() => {
+        Mota.require('var', 'bgm').changeTo(bgm, startTime);
+    });
 };
 
 ////// 暂停背景音乐的播放 //////
 control.prototype.pauseBgm = function () {
     if (main.mode !== 'play') return;
-    Mota.require('var', 'bgm').pause();
+    Mota.r(() => {
+        Mota.require('var', 'bgm').pause();
+    });
 };
 
 ////// 恢复背景音乐的播放 //////
 control.prototype.resumeBgm = function (resumeTime) {
     if (main.mode !== 'play') return;
-    Mota.require('var', 'bgm').resume();
+    Mota.r(() => {
+        Mota.require('var', 'bgm').resume();
+    });
 };
 
 ////// 更改背景音乐的播放 //////
 control.prototype.triggerBgm = function () {
     if (main.mode !== 'play') return;
-    const bgm = Mota.require('var', 'bgm');
-    bgm.disable = !bgm.disable;
+    Mota.r(() => {
+        const bgm = Mota.require('var', 'bgm');
+        bgm.disable = !bgm.disable;
 
-    if (!bgm.disable) this.resumeBgm();
-    else this.pauseBgm();
+        if (!bgm.disable) this.resumeBgm();
+        else this.pauseBgm();
+    });
 };
 
 // todo: deprecate playSound, stopSound, getPlayingSounds
 ////// 播放音频 //////
 control.prototype.playSound = function (sound, pitch, callback) {
-    sound = core.getMappedName(sound);
-    Mota.require('var', 'sound').play(sound, callback);
+    Mota.r(() => {
+        sound = core.getMappedName(sound);
+        Mota.require('var', 'sound').play(sound, callback);
+    });
 };
 
 ////// 停止所有音频 //////
 control.prototype.stopSound = function (id) {
-    if (typeof id === 'number') Mota.require('var', 'sound').stop(id);
-    else Mota.require('var', 'sound').stopAll();
+    Mota.r(() => {
+        if (typeof id === 'number') Mota.require('var', 'sound').stop(id);
+        else Mota.require('var', 'sound').stopAll();
+    });
 };
 
 ////// 获得当前正在播放的所有（指定）音效的id列表 //////
 control.prototype.getPlayingSounds = function (name) {
-    name = core.getMappedName(name);
-    return Mota.require('var', 'sound').getPlaying(name);
+    Mota.r(() => {
+        name = core.getMappedName(name);
+        return Mota.require('var', 'sound').getPlaying(name);
+    });
 };
 
 ////// 检查bgm状态 //////
 control.prototype.checkBgm = function () {
-    const bgm = Mota.require('var', 'bgm');
-    if (bgm.disable) {
-        bgm.pause();
-    } else if (!bgm.playing) {
-        bgm.changeTo(bgm.now ?? main.startBgm);
-    }
+    Mota.r(() => {
+        const bgm = Mota.require('var', 'bgm');
+        if (bgm.disable) {
+            bgm.pause();
+        } else if (!bgm.playing) {
+            bgm.changeTo(bgm.now ?? main.startBgm);
+        }
+    });
 };
 
 ///// 设置屏幕放缩 //////

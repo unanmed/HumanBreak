@@ -31,10 +31,11 @@ export function init() {
         floor.enemy.calMapDamage();
         core.status.damage.data = [];
 
-        floor.enemy.render(true);
-
-        getItemDetail(floorId, onMap); // 宝石血瓶详细信息
-        this.drawDamage(ctx, floorId);
+        Mota.r(() => {
+            floor.enemy.render(true);
+            getItemDetail(floorId, onMap); // 宝石血瓶详细信息
+            this.drawDamage(ctx, floorId);
+        });
     };
 }
 

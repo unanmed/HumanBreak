@@ -10,3 +10,4 @@ public/editor.html
 keyCodes.ts
 *.md
 setting.ts
+dist/project/data.js

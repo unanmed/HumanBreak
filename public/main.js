@@ -298,10 +298,15 @@ main.prototype.loadSync = function (mode, callback) {
     });
 
     core.initSync(coreData, callback);
+    main.loading.emit('coreLoaded');
+    main.loading.emit('coreInit');
+    core.initStatus.maps = core.maps._initMaps();
     core.resize();
     main.core = core;
 
     core.completeAchievement = () => 0;
+
+    core.plugin = { drawLight: 0 };
 };
 
 main.prototype.loadAsync = async function (mode, callback) {
