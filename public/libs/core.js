@@ -318,8 +318,6 @@ core.prototype.initSync = function (coreData, callback) {
 core.prototype._loadPluginAsync = async function () {
     if (!main.useCompress) {
         await main.loadScript(`project/plugins.js?v=${main.version}`);
-    } else {
-        await main.loadScript(`project/plugins.min.js?v=${main.version}`);
     }
     for (const [key, value] of Object.entries(
         plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1
@@ -349,6 +347,9 @@ core.prototype._loadGameProcess = async function () {
                 await main.loadScript(`src/game/index.esm.ts`, true);
             }
         }
+    }
+    if (main.useCompress) {
+        await main.loadScript(`project/project.min.js`);
     }
 };
 
