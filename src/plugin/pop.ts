@@ -6,7 +6,7 @@ let pop: any[] = [];
 let time = 0;
 
 export function init() {
-    core.registerAnimationFrame('pop', true, popValue);
+    // Deprecated.
 }
 
 /**
