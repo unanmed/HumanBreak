@@ -26,9 +26,9 @@ interface EnemyInfo extends Partial<Enemy> {
     def: number;
     hp: number;
     special: number[];
-    atkBuff: number;
-    defBuff: number;
-    hpBuff: number;
+    atkBuff_: number;
+    defBuff_: number;
+    hpBuff_: number;
     enemy: Enemy;
     guard?: DamageEnemy[];
     x?: number;
@@ -341,9 +341,9 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
             atk: enemy.atk,
             def: enemy.def,
             special: enemy.special.slice(),
-            atkBuff: 0,
-            defBuff: 0,
-            hpBuff: 0,
+            atkBuff_: 0,
+            defBuff_: 0,
+            hpBuff_: 0,
             enemy: this.enemy,
             x: this.x,
             y: this.y,
@@ -384,8 +384,8 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
             for (const [loc, per] of Object.entries(flags[`melt_${floorId}`])) {
                 const [mx, my] = loc.split(',').map(v => parseInt(v));
                 if (Math.abs(mx - this.x) <= 1 && Math.abs(my - this.y) <= 1) {
-                    info.atkBuff += per as number;
-                    info.defBuff += per as number;
+                    info.atkBuff_ += per as number;
+                    info.defBuff_ += per as number;
                 }
             }
         }
@@ -406,9 +406,9 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         // 此时已经inject光环，因此直接计算真实属性
         const info = this.info;
 
-        info.atk = Math.floor(info.atk * (info.atkBuff / 100 + 1));
-        info.def = Math.floor(info.def * (info.defBuff / 100 + 1));
-        info.hp = Math.floor(info.hp * (info.hpBuff / 100 + 1));
+        info.atk = Math.floor(info.atk * (info.atkBuff_ / 100 + 1));
+        info.def = Math.floor(info.def * (info.defBuff_ / 100 + 1));
+        info.hp = Math.floor(info.hp * (info.hpBuff_ / 100 + 1));
 
         return this.info;
     }
