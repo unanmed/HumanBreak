@@ -74,12 +74,5 @@ function mark() {
 }
 
 @media screen and (max-width: 600px) {
-    #enemy-desc {
-        font-size: 70%;
-    }
-
-    #mark-target {
-        font-size: 100%;
-    }
 }
 </style>

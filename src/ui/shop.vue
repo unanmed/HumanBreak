@@ -459,7 +459,7 @@ onUnmounted(() => {
     #shop {
         width: 90vw;
         padding-top: 5vh;
-        font-size: 100%;
+        font-size: 225%;
     }
 
     #item-list {

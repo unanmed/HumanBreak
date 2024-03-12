@@ -771,7 +771,7 @@ onUnmounted(() => {
 @media screen and (max-width: 600px) {
     #fly {
         padding: 5%;
-        font-size: 100%;
+        font-size: 225%;
     }
 
     #fly-main {

@@ -317,7 +317,7 @@ onUnmounted(() => {
     }
 
     .setting-main {
-        font-size: 120%;
+        font-size: 225%;
 
         .setting-container {
             flex-direction: column;

@@ -699,7 +699,7 @@ onUnmounted(() => {
 @media screen and (max-width: 600px) {
     #equipbox-main {
         flex-direction: column-reverse;
-        font-size: 100%;
+        font-size: 225%;
     }
 
     #equip-now-div {

@@ -390,7 +390,7 @@ onUnmounted(() => {
     #toolbox-main {
         flex-direction: column-reverse;
         height: 90%;
-        font-size: 100%;
+        font-size: 225%;
         margin-top: 10%;
     }
 

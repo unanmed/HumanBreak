@@ -154,14 +154,14 @@ function onmove(e: MouseEvent) {
     const dx = (offsetX - cx) / cx;
     const dy = (offsetY - cy) / cy;
 
-    const matrix = new Matrix4();
+    // const matrix = new Matrix4();
 
-    matrix.scale(1.2, 1.2, 1);
-    matrix.rotate((dy * 10 * Math.PI) / 180, -(dx * 10 * Math.PI) / 180);
-    const end = Array.from(matrix.transpose()).flat().join(',');
-    background.style.transform = `perspective(${
-        1000 * core.domStyle.scale
-    }px)matrix3d(${end})`;
+    // matrix.scale(1.2, 1.2, 1);
+    // matrix.rotate((dy * 10 * Math.PI) / 180, -(dx * 10 * Math.PI) / 180);
+    // const end = Array.from(matrix.transpose()).flat().join(',');
+    // background.style.transform = `perspective(${
+    //     1000 * core.domStyle.scale
+    // }px)matrix3d(${end})`;
 }
 
 function bgm() {

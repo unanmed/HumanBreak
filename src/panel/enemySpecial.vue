@@ -80,15 +80,6 @@ const format = core.formatBigNumber;
 }
 
 @media screen and (max-width: 600px) {
-    #critical-des,
-    .critical {
-        font-size: 70%;
-    }
-
-    #special {
-        font-size: 70%;
-    }
-
     #special-main {
         top: 25vh;
         width: 90vw;

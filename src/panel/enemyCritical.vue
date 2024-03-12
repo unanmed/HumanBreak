@@ -273,8 +273,6 @@ onMounted(() => {
 
 @media screen and (max-width: 600px) {
     #now-damage {
-        font-size: 100%;
-
         div {
             display: flex;
             flex-direction: column;

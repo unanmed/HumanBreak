@@ -178,7 +178,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, shallowReactive, watch } from 'vue';
+import { onMounted, onUnmounted, ref, shallowReactive, watch } from 'vue';
 import Box from '../components/box.vue';
 import Scroll from '../components/scroll.vue';
 import { status } from '../plugin/ui/statusBar';
@@ -199,7 +199,7 @@ const format = core.formatBigNumber;
 
 watch(width, n => (updateStatus.value = !updateStatus.value));
 watch(height, n => (updateStatus.value = !updateStatus.value));
-watch(fontSize, n => (main.style.fontSize = `${n}%`));
+watch(fontSize, n => (main.style.fontSize = `${isMobile ? n * 1.5 : n}%`));
 
 const hero = shallowReactive<Partial<HeroStatus>>({});
 const keys = shallowReactive<number[]>([]);
@@ -253,9 +253,23 @@ function update() {
     up.value = core.getNextLvUpNeed() ?? 0;
 }
 
+function resize() {
+    requestAnimationFrame(() => {
+        main.style.fontSize = `${
+            isMobile ? fontSize.value * 1.5 : fontSize.value
+        }%`;
+    });
+}
+
 onMounted(() => {
     update();
     main = document.getElementById('status-main') as HTMLDivElement;
+
+    window.addEventListener('resize', resize);
+});
+
+onUnmounted(() => {
+    window.removeEventListener('resize', resize);
 });
 </script>
 
@@ -351,7 +365,7 @@ onMounted(() => {
 
 @media screen and (max-width: 600px) {
     .status-item {
-        font-size: 100%;
+        font-size: v-bind(fontSize);
         max-width: 28vw;
     }
 }
