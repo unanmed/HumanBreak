@@ -165,7 +165,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 	},
 	"firstData": {
 		"title": "魔塔样板",
-		"name": "templateV2A",
+		"name": "template",
 		"author": "Annoymous",
 		"version": "Ver 2.A",
 		"floorId": "sample0",

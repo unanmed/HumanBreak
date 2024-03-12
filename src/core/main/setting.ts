@@ -431,7 +431,7 @@ mainSetting
             .register('criticalGem', '临界显示方式', false, COM.Boolean)
             .setDisplayFunc('criticalGem', value => (value ? '宝石数' : '攻击'))
             .register('keyScale', '虚拟键盘缩放', 100, COM.Number, [25, 5, 500])
-            .register('blur', '背景虚化', true, COM.Boolean)
+            .register('blur', '背景虚化', !isMobile, COM.Boolean)
     )
     .register(
         'action',
@@ -489,7 +489,7 @@ loading.once('coreInit', () => {
         'screen.fontSizeStatus': storage.getValue('screen.fontSizeStatus', 100),
         'screen.smoothView': !!storage.getValue('screen.smoothView', true),
         'screen.criticalGem': !!storage.getValue('screen.criticalGem', false),
-        'screen.blur': !!storage.getValue('screen.blur', true),
+        'screen.blur': !!storage.getValue('screen.blur', !isMobile),
         'action.fixed': !!storage.getValue('action.fixed', true),
         'audio.bgmEnabled': !!storage.getValue('audio.bgmEnabled', true),
         'audio.bgmVolume': storage.getValue('audio.bgmVolume', 80),
