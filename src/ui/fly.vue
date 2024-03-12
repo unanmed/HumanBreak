@@ -746,6 +746,8 @@ onUnmounted(() => {
 #fly-thumbnail {
     width: 35vw;
     height: 35vw;
+    max-height: 75vh;
+    max-width: 75vh;
     border: 0.1vw solid #ddd4;
 }
 
