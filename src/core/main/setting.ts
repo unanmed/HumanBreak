@@ -356,17 +356,19 @@ function handleScreenSetting<T extends number | boolean>(
         const beforeIsMobile = isMobile;
         // 全屏
         triggerFullscreen(n as boolean).then(() => {
-            if (beforeIsMobile) {
-                mainSetting.setValue(
-                    'screen.fontSize',
-                    Math.floor((fontSize * 2) / 3)
-                );
-            } else if (isMobile) {
-                mainSetting.setValue(
-                    'screen.fontSize',
-                    Math.floor((fontSize * 3) / 2)
-                );
-            }
+            requestAnimationFrame(() => {
+                if (beforeIsMobile) {
+                    mainSetting.setValue(
+                        'screen.fontSize',
+                        Math.floor((fontSize * 2) / 3)
+                    );
+                } else if (matchMedia('(max-width: 600px)').matches) {
+                    mainSetting.setValue(
+                        'screen.fontSize',
+                        Math.floor((fontSize * 3) / 2)
+                    );
+                }
+            })
         });
     } else if (key === 'heroDetail') {
         // 勇士显伤
