@@ -1,6 +1,7 @@
 import * as UI from '@ui/.';
 import * as MiscUI from './misc';
 import { GameUi, UiController } from '../custom/ui';
+import { mainSetting } from '../setting';
 
 export const mainUi = new UiController();
 mainUi.register(
@@ -38,8 +39,12 @@ hook.once('mounted', () => {
     const ui = document.getElementById('ui-main')!;
     const fixed = document.getElementById('ui-fixed')!;
 
+    const blur = mainSetting.getSetting('screen.blur');
+
     mainUi.on('start', () => {
         ui.style.display = 'flex';
+        if (blur) ui.style.backdropFilter = 'blur(5px)';
+        else ui.style.backdropFilter = 'none';
         core.lockControl();
     });
     mainUi.on('end', noClosePanel => {

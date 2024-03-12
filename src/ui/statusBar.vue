@@ -266,6 +266,7 @@ onMounted(() => {
     main = document.getElementById('status-main') as HTMLDivElement;
 
     window.addEventListener('resize', resize);
+    resize();
 });
 
 onUnmounted(() => {

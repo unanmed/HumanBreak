@@ -431,6 +431,7 @@ mainSetting
             .register('criticalGem', '临界显示方式', false, COM.Boolean)
             .setDisplayFunc('criticalGem', value => (value ? '宝石数' : '攻击'))
             .register('keyScale', '虚拟键盘缩放', 100, COM.Number, [25, 5, 500])
+            .register('blur', '背景虚化', true, COM.Boolean)
     )
     .register(
         'action',
@@ -525,7 +526,8 @@ mainSetting
     .setDescription('audio.soundEnabled', `是否开启音效`)
     .setDescription('audio.soundVolume', `音效的音量`)
     .setDescription('ui.mapScale', `楼传小地图的缩放，百分比格式`)
-    .setDescription('screen.fontSizeStatus', `修改状态栏的字体大小`);
+    .setDescription('screen.fontSizeStatus', `修改状态栏的字体大小`)
+    .setDescription('screen.blur', '打开任意ui界面时是否有背景虚化效果，移动端打开后可能会有掉帧或者发热现象');
 
 function setFontSize() {
     const absoluteSize = storage.getValue('@@absoluteFontSize', 16 * devicePixelRatio);
