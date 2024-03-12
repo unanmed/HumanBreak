@@ -46,10 +46,14 @@
                 </TransitionGroup>
             </div>
             <div class="setting-info">
-                <div
-                    class="info-text"
-                    v-html="splitText(display.at(-1)?.text ?? ['请选择设置'])"
-                ></div>
+                <Scroll class="info-text-scroll">
+                    <div
+                        class="info-text"
+                        v-html="
+                            splitText(display.at(-1)?.text ?? ['请选择设置'])
+                        "
+                    ></div>
+                </Scroll>
                 <a-divider class="info-divider" dashed></a-divider>
                 <div class="info-editor" v-if="!!selectedItem">
                     <div class="editor-custom">
@@ -307,6 +311,10 @@ onUnmounted(() => {
     .info-text {
         font-size: 85%;
         min-height: 30%;
+        max-height: 50%;
+    }
+
+    .info-text-scroll {
         max-height: 50%;
     }
 }

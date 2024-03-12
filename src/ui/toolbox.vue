@@ -411,6 +411,13 @@ onUnmounted(() => {
 
     #detail {
         flex-basis: 30%;
+
+        #desc {
+            #desc-text {
+                max-height: 10vh;
+                height: 10vh;
+            }
+        }
     }
 }
 </style>
