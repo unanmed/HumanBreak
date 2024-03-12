@@ -43,8 +43,13 @@ hook.once('mounted', () => {
 
     mainUi.on('start', () => {
         ui.style.display = 'flex';
-        if (blur) ui.style.backdropFilter = 'blur(5px)';
-        else ui.style.backdropFilter = 'none';
+        if (blur?.value) {
+            ui.style.backdropFilter = 'blur(5px)';
+            ui.style.backgroundColor = 'rgba(0,0,0,0.7333)';
+        } else {
+            ui.style.backdropFilter = 'none';
+            ui.style.backgroundColor = 'rgba(0,0,0,0.85)';
+        }
         core.lockControl();
     });
     mainUi.on('end', noClosePanel => {

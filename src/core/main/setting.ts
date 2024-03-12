@@ -489,6 +489,7 @@ loading.once('coreInit', () => {
         'screen.fontSizeStatus': storage.getValue('screen.fontSizeStatus', 100),
         'screen.smoothView': !!storage.getValue('screen.smoothView', true),
         'screen.criticalGem': !!storage.getValue('screen.criticalGem', false),
+        'screen.blur': !!storage.getValue('screen.blur', true),
         'action.fixed': !!storage.getValue('action.fixed', true),
         'audio.bgmEnabled': !!storage.getValue('audio.bgmEnabled', true),
         'audio.bgmVolume': storage.getValue('audio.bgmVolume', 80),
@@ -527,7 +528,7 @@ mainSetting
     .setDescription('audio.soundVolume', `音效的音量`)
     .setDescription('ui.mapScale', `楼传小地图的缩放，百分比格式`)
     .setDescription('screen.fontSizeStatus', `修改状态栏的字体大小`)
-    .setDescription('screen.blur', '打开任意ui界面时是否有背景虚化效果，移动端打开后可能会有掉帧或者发热现象');
+    .setDescription('screen.blur', '打开任意ui界面时是否有背景虚化效果，移动端打开后可能会有掉帧或者发热现象。关闭ui后生效');
 
 function setFontSize() {
     const absoluteSize = storage.getValue('@@absoluteFontSize', 16 * devicePixelRatio);
