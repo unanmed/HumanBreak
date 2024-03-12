@@ -5,6 +5,12 @@ import { hovered } from './fixed';
 import { hasMarkedEnemy, markEnemy, unmarkEnemy } from '@/plugin/mark';
 import { mainUi } from './ui';
 import { GameStorage } from '../storage';
+import { mainSetting } from '../setting';
+import {
+    isPaused as isFramePaused,
+    pauseFrame,
+    resumeFrame
+} from '@/plugin/frame';
 
 export const mainScope = Symbol.for('@key_main');
 export const gameKey = new Hotkey('gameKey', '游戏按键');
@@ -396,6 +402,19 @@ gameKey
         id: '@fly_right_t_2',
         name: '后10张地图_2',
         defaults: KeyCode.PageUp
+    })
+    .group('debug', '调试按键')
+    .register({
+        id: 'toggleFrameMonitor',
+        name: '暂停/继续帧率监控',
+        defaults: KeyCode.F2,
+        ctrl: true
+    })
+    .register({
+        id: 'toggleFrameDisplay',
+        name: '开关帧率显示',
+        defaults: KeyCode.F3,
+        ctrl: true
     });
 
 gameKey.enable();
@@ -516,6 +535,17 @@ gameKey
                 core.useItem(id);
                 break;
             }
+        }
+    })
+    .realize('toggleFrameDisplay', () => {
+        const value = mainSetting.getValue('debug.frame');
+        mainSetting.setValue('debug.frame', !value);
+    })
+    .realize('toggleFrameMonitor', () => {
+        if (isFramePaused()) {
+            resumeFrame();
+        } else {
+            pauseFrame();
         }
     });
 

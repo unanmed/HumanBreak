@@ -487,6 +487,8 @@ mainSetting
         '调试设置', 
         new MotaSetting()
             .register('frame', '帧率显示', false, COM.Boolean)
+            .register('performance', '性能分析', false, COM.Performance)
+            .setDisplayFunc('performance', () => '')
     );
 
 const loading = Mota.require('var', 'loading');

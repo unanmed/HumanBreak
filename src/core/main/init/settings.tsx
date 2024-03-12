@@ -10,6 +10,7 @@ interface Components {
     HotkeySetting: SettingComponent;
     ToolbarEditor: SettingComponent;
     Radio: (items: string[]) => SettingComponent;
+    Performance: SettingComponent;
 }
 
 export type { Components as SettingDisplayComponents };
@@ -21,7 +22,8 @@ export function createSettingComponents() {
         Number: NumberSetting,
         HotkeySetting,
         ToolbarEditor,
-        Radio: RadioSetting
+        Radio: RadioSetting,
+        Performance: PerformanceSetting
     };
     return com;
 }
@@ -176,6 +178,21 @@ function ToolbarEditor(props: SettingComponentProps) {
                 onClick={() => showSpecialSetting('toolEditor')}
             >
                 自定义工具栏
+            </Button>
+        </div>
+    );
+}
+
+function PerformanceSetting(props: SettingComponentProps) {
+    return (
+        <div style="display: flex; justify-content: center">
+            <Button
+                style="font-size: 75%"
+                type="primary"
+                size="large"
+                onClick={() => showSpecialSetting('performance')}
+            >
+                打开性能界面
             </Button>
         </div>
     );
