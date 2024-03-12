@@ -2,14 +2,28 @@ import { Ticker } from 'mutate-animate';
 
 const ticker = new Ticker();
 
-const span = document.createElement('span');
-span.style.fontSize = '16px';
-span.style.position = 'fixed';
-span.style.right = '0';
-span.style.top = '0';
-span.style.fontFamily = 'Arial';
-span.style.color = 'lightgreen';
-span.style.padding = '5px';
+const div = document.createElement('div');
+const frameSpan = document.createElement('span');
+const innerSpan = document.createElement('span');
+const realSpan = document.createElement('span');
+
+[frameSpan, innerSpan, realSpan].forEach(v => {
+    v.style.fontSize = '16px';
+    v.style.fontFamily = 'Arial';
+    v.style.color = 'lightgreen';
+    v.style.padding = '0 5px';
+    v.style.textAlign = 'right';
+});
+
+div.style.position = 'fixed';
+div.style.right = '0';
+div.style.top = '0';
+div.style.display = 'flex';
+div.style.flexDirection = 'column';
+
+div.appendChild(frameSpan);
+div.appendChild(innerSpan);
+div.appendChild(realSpan);
 
 let showing = false;
 let pause = false;
@@ -27,6 +41,8 @@ let inLowFrame = false;
 let leaveLowFrameTime = 0;
 let starting = 0;
 let beginLeaveTime = 0;
+let maxFrame = 0;
+let frameThreshold = 0;
 
 export function init() {
     const settings = Mota.require('var', 'mainSetting');
@@ -40,7 +56,11 @@ export function init() {
         lasttimes.push(time);
         const frame = 1000 / ((lasttimes[4] - lasttimes[0]) / 4);
         starting++;
-        if (frame < 50 && starting > 5) {
+        if (frame > maxFrame) {
+            maxFrame = frame;
+            frameThreshold = (frame * 5) / 6;
+        }
+        if (frame < frameThreshold && starting > 5) {
             if (!inLowFrame) {
                 performance.mark(`low_frame_start`);
                 inLowFrame = true;
@@ -62,7 +82,7 @@ export function init() {
                 );
                 beginLeaveTime = measure.duration;
             }
-            if (frame >= 50) {
+            if (frame >= frameThreshold) {
                 leaveLowFrameTime++;
             } else {
                 performance.clearMarks('low_frame_end');
@@ -86,7 +106,7 @@ export function init() {
             }
         }
         frameList.push();
-        span.innerText = frame.toFixed(1);
+        frameSpan.innerText = frame.toFixed(1);
         if (!marked) {
             frameList.push({
                 time,
@@ -103,13 +123,13 @@ export function getFrameList() {
 
 export function show() {
     showing = true;
-    document.body.appendChild(span);
+    document.body.appendChild(div);
     starting = 0;
 }
 
 export function hide() {
     showing = false;
-    span.remove();
+    div.remove();
 }
 
 export function isShowing() {
@@ -118,7 +138,7 @@ export function isShowing() {
 
 export function pauseFrame() {
     pause = true;
-    span.innerText += '(paused)';
+    frameSpan.innerText += '(paused)';
 }
 
 export function resumeFrame() {
@@ -129,3 +149,15 @@ export function resumeFrame() {
 export function isPaused() {
     return pause;
 }
+
+function setSizeText() {
+    innerSpan.innerText = `innerSize: ${window.innerWidth} x ${window.innerHeight}`;
+    realSpan.innerText = `realSize: ${Math.floor(
+        window.innerWidth * devicePixelRatio
+    )} x ${Math.floor(window.innerHeight * devicePixelRatio)}`;
+}
+setSizeText();
+
+window.addEventListener('resize', () => {
+    setSizeText();
+});

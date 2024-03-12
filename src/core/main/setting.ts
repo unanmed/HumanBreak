@@ -351,26 +351,7 @@ function handleScreenSetting<T extends number | boolean>(
     n: T,
     o: T
 ) {
-    if (key === 'fullscreen') {
-        const fontSize = mainSetting.getValue('screen.fontSize', 16);
-        const beforeIsMobile = isMobile;
-        // 全屏
-        triggerFullscreen(n as boolean).then(() => {
-            requestAnimationFrame(() => {
-                if (beforeIsMobile) {
-                    mainSetting.setValue(
-                        'screen.fontSize',
-                        Math.floor((fontSize * 2) / 3)
-                    );
-                } else if (matchMedia('(max-width: 600px)').matches) {
-                    mainSetting.setValue(
-                        'screen.fontSize',
-                        Math.floor((fontSize * 3) / 2)
-                    );
-                }
-            })
-        });
-    } else if (key === 'heroDetail') {
+if (key === 'heroDetail') {
         // 勇士显伤
         core.drawHero();
     } else if (key === 'antiAlias') {
@@ -386,6 +367,9 @@ function handleScreenSetting<T extends number | boolean>(
     } else if (key === 'fontSize') {
         // 字体大小
         root.style.fontSize = `${n}px`;
+        const absoluteSize = (n as number) * devicePixelRatio;
+        storage.setValue('@@absoluteFontSize', absoluteSize);
+        storage.write();
     } else if (key === 'fontSizeStatus') {
         fontSize.value = n as number;
     }
@@ -543,10 +527,13 @@ mainSetting
     .setDescription('ui.mapScale', `楼传小地图的缩放，百分比格式`)
     .setDescription('screen.fontSizeStatus', `修改状态栏的字体大小`);
 
-Mota.requireAll('var').hook.once('mounted', () => {
-    if (storage.getValue('@@exitFromFullscreen', false)) {
-        const fontSize = mainSetting.getValue('screen.fontSize', 16);
-        mainSetting.setValue('screen.fontSize', Math.round((fontSize * 3) / 2));
-    }
-    storage.setValue('@@exitFromFullscreen', !!document.fullscreenElement);
+function setFontSize() {
+    const absoluteSize = storage.getValue('@@absoluteFontSize', 16 * devicePixelRatio);
+    const size = Math.round(absoluteSize / devicePixelRatio);
+    mainSetting.setValue('screen.fontSize', size);
+}
+setFontSize();
+
+window.addEventListener('resize', () => {
+    setFontSize();
 });
