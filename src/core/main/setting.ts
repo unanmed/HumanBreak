@@ -425,7 +425,7 @@ mainSetting
             .register('itemDetail', '宝石血瓶显伤', true, COM.Boolean)
             .register('transition', '界面动画', false, COM.Boolean)
             .register('antiAlias', '抗锯齿', false, COM.Boolean)
-            .register('fontSize', '字体大小', isMobile ? 12 : 16, COM.Number, [8, 28, 1])
+            .register('fontSize', '字体大小', isMobile ? 12 : 16, COM.Number, [4, 36, 1])
             .register('fontSizeStatus', '状态栏字体', 100, COM.Number, [20, 300, 10])
             .register('smoothView', '平滑镜头', true, COM.Boolean)
             .register('criticalGem', '临界显示方式', false, COM.Boolean)
