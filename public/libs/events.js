@@ -537,12 +537,7 @@ events.prototype.openDoor = function (x, y, needKey, callback) {
         core.removeBlock(x, y);
         setTimeout(function () {
             core.status.replay.animate = false;
-            Mota.require('var', 'hook').emit(
-                'afterOpenDoor',
-                block.event.id,
-                x,
-                y
-            );
+            core.events.afterOpenDoor(block.event.id, x, y);
             if (callback) callback();
         }, 1); // +1是为了录像检测系统
     } else {
