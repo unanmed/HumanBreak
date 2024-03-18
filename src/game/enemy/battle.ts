@@ -4,6 +4,7 @@ import { loading } from '../game';
 
 export interface CurrentEnemy {
     enemy: DamageEnemy;
+    // 这个是干啥的？
     onMapEnemy: DamageEnemy[];
 }
 
