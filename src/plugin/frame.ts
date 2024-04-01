@@ -13,6 +13,8 @@ const realSpan = document.createElement('span');
     v.style.color = 'lightgreen';
     v.style.padding = '0 5px';
     v.style.textAlign = 'right';
+    v.style.width = '300px';
+    v.style.height = '20px';
 });
 
 div.style.position = 'fixed';
@@ -20,6 +22,9 @@ div.style.right = '0';
 div.style.top = '0';
 div.style.display = 'flex';
 div.style.flexDirection = 'column';
+div.style.alignItems = 'end';
+div.style.width = '300px';
+div.style.height = '60px';
 
 div.appendChild(frameSpan);
 div.appendChild(innerSpan);
@@ -106,7 +111,7 @@ export function init() {
             }
         }
         frameList.push();
-        frameSpan.innerText = frame.toFixed(1);
+        frameSpan.textContent = frame.toFixed(1);
         if (!marked) {
             frameList.push({
                 time,
@@ -151,8 +156,8 @@ export function isPaused() {
 }
 
 function setSizeText() {
-    innerSpan.innerText = `innerSize: ${window.innerWidth} x ${window.innerHeight}`;
-    realSpan.innerText = `realSize: ${Math.floor(
+    innerSpan.textContent = `innerSize: ${window.innerWidth} x ${window.innerHeight}`;
+    realSpan.textContent = `realSize: ${Math.floor(
         window.innerWidth * devicePixelRatio
     )} x ${Math.floor(window.innerHeight * devicePixelRatio)}`;
 }

@@ -65,7 +65,7 @@ function NumberSetting(props: SettingComponentProps) {
         if (value < (item.step?.[0] ?? 0) || value > (item.step?.[1] ?? 100)) {
             return;
         }
-        setting.setValue(displayer.selectStack.join('.'), value);
+        setting.setValue(displayer.selectStack.join('.'), Math.round(value));
         displayer.update();
     };
 

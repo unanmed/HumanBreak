@@ -301,6 +301,10 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
         }
     }
 
+    static refreshAll(): void {
+        CustomToolbar.list.forEach(v => v.refresh());
+    }
+
     static showAll(): number[] {
         return CustomToolbar.list.map(v => v.show());
     }

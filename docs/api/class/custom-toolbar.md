@@ -33,6 +33,7 @@
     -   [`register`](#register)
     -   [`save`](#save)
     -   [`load`](#load)
+    -   [`refreshAll`](#refreshall)
     -   [`showAll`](#showall)
     -   [`closeAll`](#static-closeall)
 -   实例事件
@@ -430,6 +431,16 @@ declare function load(): void
 -   静态方法说明
 
     从本地存储读取自定义工具栏状态
+
+## refreshAll()
+
+```ts
+declare function refreshAll(): void
+```
+
+-   静态方法说明
+
+    更新所有自定义工具栏
 
 ## showAll()
 

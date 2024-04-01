@@ -9,6 +9,7 @@ import settingsText from '@/data/settings.json';
 import { isMobile } from '@/plugin/use';
 import { fontSize } from '@/plugin/ui/statusBar';
 import { show as showFrame, hide as hideFrame } from '@/plugin/frame';
+import { CustomToolbar } from './custom/toolbar';
 
 export interface SettingComponentProps {
     item: MotaSettingItem;
@@ -341,6 +342,8 @@ mainSetting.on('valueChange', (key, n, o) => {
         handleAudioSetting(setting, n, o);
     } else if (root === 'debug') {
         handleDebugSetting(setting, n, o)
+    } else if (root === 'ui') {
+        handleUiSetting(setting, n, o);
     }
 });
 
@@ -414,6 +417,20 @@ function handleDebugSetting<T extends number | boolean>(
     }
 }
 
+function handleUiSetting<T extends number | boolean>(
+    key: string,
+    n: T,
+    o: T
+) {
+    if (key === 'toolbarScale') {
+        const scale = (n as number) / (o as number)
+        CustomToolbar.list.forEach(v => {
+            v.setSize(v.width * scale, v.height * scale);
+        })
+        CustomToolbar.refreshAll();
+    }
+}
+
 // ----- 游戏的所有设置项
 // todo: 虚拟键盘缩放，小地图楼传缩放
 mainSetting
@@ -468,6 +485,8 @@ mainSetting
         new MotaSetting()
             .register('mapScale', '小地图缩放', 100, COM.Number, [50, 1000, 50])
             .setDisplayFunc('mapScale', value => `${value}%`)
+            .register('toolbarScale', '工具栏缩放', 100, COM.Number, [10, 500, 10])
+            .setDisplayFunc('toolbarScale', value => `${value}%`)
     )
     .register(
         'debug', 
@@ -500,6 +519,10 @@ loading.once('coreInit', () => {
         'ui.mapScale': storage.getValue(
             'ui.mapScale',
             isMobile ? 300 : Math.floor(window.innerWidth / 600) * 50
+        ),
+        'ui.toolbarScale': storage.getValue(
+            'ui.toolbarScale', 
+            isMobile ? 40 : Math.floor(window.innerWidth / 1700 * 10) * 10
         ),
         'debug.frame': !!storage.getValue('debug.frame', false),
     });
