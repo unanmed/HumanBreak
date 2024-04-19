@@ -274,7 +274,11 @@ export async function triggerFullscreen(full: boolean) {
     if (!Mota.Plugin.inited) return;
     const { maxGameScale } = Mota.Plugin.require('utils_g');
     if (!!document.fullscreenElement && !full) {
-        await document.exitFullscreen();
+        if (window.jsinterface) {
+            window.jsinterface.requireLandscape?.();
+        } else {
+            await document.exitFullscreen();
+        }
         requestAnimationFrame(() => {
             maxGameScale(1);
         });

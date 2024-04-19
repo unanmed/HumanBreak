@@ -548,6 +548,20 @@ interface Utils {
 declare const utils: new () => Utils;
 
 /**
+ * APP接口，使用前应先判断是否存在
+ */
+interface JSInterface {
+    /** 强制横屏 */
+    requireLandscape(): void;
+}
+
+declare const jsinterface: JSInterface;
+
+interface Window {
+    readonly jsinterface: JSInterface;
+}
+
+/**
  * 移动的方向
  */
 type Step = Move | 'backward';
