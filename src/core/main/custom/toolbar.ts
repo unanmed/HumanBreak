@@ -197,7 +197,7 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
      * 强制刷新这个自定义工具栏的所有显示
      */
     refresh(reopen: boolean = false) {
-        if (reopen) {
+        if (reopen && this.showIds.length > 0) {
             this.closeAll();
             nextTick(() => {
                 this.show();
