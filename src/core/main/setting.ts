@@ -522,7 +522,7 @@ loading.once('coreInit', () => {
         ),
         'ui.toolbarScale': storage.getValue(
             'ui.toolbarScale', 
-            isMobile ? 40 : Math.floor(window.innerWidth / 1700 * 10) * 10
+            isMobile ? 50 : Math.floor(window.innerWidth / 1700 * 10) * 10
         ),
         'debug.frame': !!storage.getValue('debug.frame', false),
     });

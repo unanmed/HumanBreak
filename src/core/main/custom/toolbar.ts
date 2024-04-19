@@ -286,12 +286,14 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
 
     static save() {
         toolbarStorage.clear();
+        const setting = Mota.require('var', 'mainSetting');
+        const scale = setting.getValue('ui.toolbarScale', 100) / 100;
         this.list.forEach(v => {
             const toSave: ToolbarSaveData = {
                 x: v.x,
                 y: v.y,
-                w: v.width,
-                h: v.height,
+                w: v.width / scale,
+                h: v.height / scale,
                 items: []
             };
             v.items.forEach(v => {

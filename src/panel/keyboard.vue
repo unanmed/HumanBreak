@@ -6,10 +6,10 @@
             @click="keyboard.emitKey(key, i)"
             :active="checkAssist(assist, key.key)"
             :style="{
-                left: `${key.x * scale}px`,
-                top: `${key.y * scale}px`,
-                width: `${key.width * scale}px`,
-                height: `${key.height * scale}px`
+                left: `${key.x * caledScale}px`,
+                top: `${key.y * caledScale}px`,
+                width: `${key.width * caledScale}px`,
+                height: `${key.height * caledScale}px`
             }"
         >
             <span
@@ -35,7 +35,6 @@ const props = defineProps<{
 const scale = mainSetting.getValue('screen.keyScale', 100) / 100;
 
 const assist = ref(props.keyboard.assist);
-const fontSize = `${props.keyboard.fontSize * scale}px`;
 
 const [width, height] = (() => {
     const key = props.keyboard;
@@ -46,8 +45,13 @@ const [width, height] = (() => {
         if (k.y + k.height > mh) mh = k.y + k.height;
     }
 
-    return [`${mw}px`, `${mh}px`];
+    return [mw, mh];
 })();
+
+const caledScale = Math.min(scale, (window.innerWidth / width) * 0.9);
+const caledWidth = `${width * caledScale}px`;
+const caledHeight = `${height * caledScale}px`;
+const fontSize = `${props.keyboard.fontSize * caledScale}px`;
 
 function onAssist() {
     nextTick(() => {
@@ -67,8 +71,8 @@ onUnmounted(() => {
 
 <style lang="less" scoped>
 .keyboard-container {
-    width: v-bind(width);
-    height: v-bind(height);
+    width: v-bind(caledWidth);
+    height: v-bind(caledHeight);
     display: block;
     font-size: v-bind(fontSize);
     position: relative;
