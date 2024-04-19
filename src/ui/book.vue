@@ -50,6 +50,8 @@ import { getDetailedEnemy } from '../plugin/ui/fixed';
 import { GameUi } from '@/core/main/custom/ui';
 import { gameKey } from '@/core/main/init/hotkey';
 import { mainUi } from '@/core/main/init/ui';
+import { mainSetting } from '@/core/main/setting';
+import { isMobile } from '@/plugin/use';
 
 const props = defineProps<{
     num: number;
@@ -69,6 +71,14 @@ const scroll = ref(0);
 const drag = ref(false);
 const detail = ref(false);
 const selected = ref(0);
+
+const settingScale = mainSetting.getValue('ui.bookScale', 100) / 100;
+const scale = isMobile
+    ? Math.max(settingScale * 15, 20)
+    : Math.max(
+          (window.innerWidth / window.innerHeight) * 15 * settingScale,
+          20
+      );
 
 /**
  * 选择怪物，展示详细信息
@@ -216,7 +226,7 @@ onUnmounted(() => {
 .enemy {
     display: flex;
     flex-direction: column;
-    height: 20vh;
+    height: v-bind('scale + "vh"');
     width: 100%;
     padding: 0 1% 0 1%;
 }
@@ -232,7 +242,7 @@ onUnmounted(() => {
     }
 
     .enemy {
-        height: 15vh;
+        height: v-bind('scale * 2 / 3 + "vh"');
     }
 }
 </style>

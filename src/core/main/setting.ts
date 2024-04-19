@@ -487,6 +487,8 @@ mainSetting
             .setDisplayFunc('mapScale', value => `${value}%`)
             .register('toolbarScale', '工具栏缩放', 100, COM.Number, [10, 500, 10])
             .setDisplayFunc('toolbarScale', value => `${value}%`)
+            .register('bookScale', '怪物手册缩放', 100, COM.Number, [10, 500, 10])
+            .setDisplayFunc('bookScale', value => `${value}%`)
     )
     .register(
         'debug', 
@@ -524,6 +526,7 @@ loading.once('coreInit', () => {
             'ui.toolbarScale', 
             isMobile ? 50 : Math.floor(window.innerWidth / 1700 * 10) * 10
         ),
+        'ui.bookScale': storage.getValue('ui.bookScale', isMobile ? 100 : 80),
         'debug.frame': !!storage.getValue('debug.frame', false),
     });
 });
@@ -550,6 +553,8 @@ mainSetting
     .setDescription('audio.soundEnabled', `是否开启音效`)
     .setDescription('audio.soundVolume', `音效的音量`)
     .setDescription('ui.mapScale', `楼传小地图的缩放，百分比格式`)
+    .setDescription('ui.toolbarScale', `自定义工具栏的缩放比例`)
+    .setDescription('ui.bookScale', `怪物手册界面中每个怪物框体的高度缩放，最小值限定为 20% 屏幕高度`)
     .setDescription('screen.fontSizeStatus', `修改状态栏的字体大小`)
     .setDescription('screen.blur', '打开任意ui界面时是否有背景虚化效果，移动端打开后可能会有掉帧或者发热现象。关闭ui后生效');
 
