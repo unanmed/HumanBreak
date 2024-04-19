@@ -204,11 +204,14 @@ import { isMobile } from '@/plugin/use';
 import Scroll from '@/components/scroll.vue';
 import { deleteWith, tip } from '@/plugin/utils';
 import { Modal } from 'ant-design-vue';
+import { mainSetting } from '@/core/main/setting';
 
 const props = defineProps<{
     ui: GameUi;
     num: number;
 }>();
+
+const scale = mainSetting.getValue('ui.toolbarScale', 100) / 100;
 
 const list = CustomToolbar.list;
 
@@ -518,9 +521,9 @@ onUnmounted(() => {
 
     .tool-preview-item {
         display: flex;
-        margin: 5px;
-        min-width: 50px;
-        height: 50px;
+        margin: v-bind('5 * scale + "px"');
+        min-width: v-bind('50 * scale + "px"');
+        height: v-bind('50 * scale + "px"');
         background-color: #222;
         border: 1.5px solid #ddd8;
         justify-content: center;
@@ -547,7 +550,7 @@ onUnmounted(() => {
 
     #tool-left {
         width: 100%;
-        height: 100%;
+        flex-basis: 40%;
         max-height: 40vh;
         display: flex;
         flex-direction: row;
@@ -565,7 +568,11 @@ onUnmounted(() => {
 
     #tool-info {
         width: 100%;
-        height: 100%;
+        flex-basis: 60%;
+
+        #tool-detail {
+            height: 100%;
+        }
     }
 
     .divider {

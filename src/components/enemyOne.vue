@@ -223,12 +223,12 @@ function enter() {
 @media screen and (max-width: 600px) {
     .rightbar {
         width: 80%;
-        font-size: 85%;
+        font-size: 110%;
     }
 
     .leftbar {
         width: 20%;
-        font-size: 80%;
+        font-size: 100%;
     }
 
     .enemy-container {
