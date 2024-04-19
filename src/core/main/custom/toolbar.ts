@@ -399,16 +399,16 @@ CustomToolbar.register(
     }
 );
 
-window.addEventListener('beforeunload', () => {
-    CustomToolbar.save();
-});
-window.addEventListener('blur', () => {
-    CustomToolbar.save();
-});
-
 Mota.require('var', 'loading').once('coreInit', () => {
     CustomToolbar.load();
     CustomToolbar.closeAll();
+
+    window.addEventListener('beforeunload', e => {
+        CustomToolbar.save();
+    });
+    window.addEventListener('blur', () => {
+        CustomToolbar.save();
+    });
 });
 Mota.require('var', 'hook').on('reset', () => {
     CustomToolbar.showAll();
