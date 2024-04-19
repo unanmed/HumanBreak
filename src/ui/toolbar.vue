@@ -28,6 +28,7 @@
 import Box from '@/components/box.vue';
 import { CustomToolbar } from '@/core/main/custom/toolbar';
 import { GameUi } from '@/core/main/custom/ui';
+import { mainSetting } from '@/core/main/setting';
 import { onUnmounted, reactive, watch } from 'vue';
 
 interface BoxData {
@@ -44,6 +45,7 @@ const props = defineProps<{
 }>();
 
 const bar = props.bar;
+const scale = mainSetting.getValue('ui.toolbarScale', 100) / 100;
 
 const box = reactive<BoxData>({
     x: bar.x,
@@ -80,7 +82,7 @@ onUnmounted(() => {
 <style lang="less" scoped>
 .toolbar-container {
     background-color: #0009;
-    padding: 5px;
+    padding: v-bind('scale * 5 + "px"');
 }
 
 .toolbar {
@@ -93,9 +95,9 @@ onUnmounted(() => {
 
 .toolbar-item {
     display: flex;
-    margin: 5px;
-    min-width: 50px;
-    height: 50px;
+    margin: v-bind('scale * 5 + "px"');
+    min-width: v-bind('scale * 50 + "px"');
+    height: v-bind('scale * 50 + "px"');
     cursor: pointer;
     background-color: #222;
     border: 1.5px solid #ddd8;
@@ -106,7 +108,7 @@ onUnmounted(() => {
 
 .toolbar-item::v-deep(> *) {
     height: 100%;
-    min-width: 50px;
+    min-width: v-bind('scale * 50 + "px"');
     display: flex;
     justify-content: center;
     align-items: center;

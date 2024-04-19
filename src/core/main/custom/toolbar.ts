@@ -116,6 +116,14 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
     constructor(id: string) {
         super();
         this.id = id;
+        // 按比例设置初始大小
+        const setting = Mota.require('var', 'mainSetting');
+        const scale = setting.getValue('ui.toolbarScale', 100) / 100;
+        this.width *= scale;
+        this.height *= scale;
+        this.x *= scale;
+        this.y *= scale;
+
         this.show();
         CustomToolbar.list.push(this);
     }
@@ -188,11 +196,18 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
     /**
      * 强制刷新这个自定义工具栏的所有显示
      */
-    refresh() {
-        const items = this.items.splice(0);
-        nextTick(() => {
-            this.items.push(...items);
-        });
+    refresh(reopen: boolean = false) {
+        if (reopen) {
+            this.closeAll();
+            nextTick(() => {
+                this.show();
+            });
+        } else {
+            const items = this.items.splice(0);
+            nextTick(() => {
+                this.items.push(...items);
+            });
+        }
         return this;
     }
 
@@ -301,8 +316,8 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
         }
     }
 
-    static refreshAll(): void {
-        CustomToolbar.list.forEach(v => v.refresh());
+    static refreshAll(reopen: boolean = false): void {
+        CustomToolbar.list.forEach(v => v.refresh(reopen));
     }
 
     static showAll(): number[] {

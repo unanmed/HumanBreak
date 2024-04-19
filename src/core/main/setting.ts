@@ -427,7 +427,7 @@ function handleUiSetting<T extends number | boolean>(
         CustomToolbar.list.forEach(v => {
             v.setSize(v.width * scale, v.height * scale);
         })
-        CustomToolbar.refreshAll();
+        CustomToolbar.refreshAll(true);
     }
 }
 
