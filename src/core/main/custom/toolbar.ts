@@ -116,6 +116,14 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
     constructor(id: string) {
         super();
         this.id = id;
+        // 按比例设置初始大小
+        const setting = Mota.require('var', 'mainSetting');
+        const scale = setting.getValue('ui.toolbarScale', 100) / 100;
+        this.width *= scale;
+        this.height *= scale;
+        this.x *= scale;
+        this.y *= scale;
+
         this.show();
         CustomToolbar.list.push(this);
     }
@@ -188,22 +196,31 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
     /**
      * 强制刷新这个自定义工具栏的所有显示
      */
-    refresh() {
-        const items = this.items.splice(0);
-        nextTick(() => {
-            this.items.push(...items);
-        });
+    refresh(reopen: boolean = false) {
+        if (reopen && this.showIds.length > 0) {
+            this.closeAll();
+            nextTick(() => {
+                this.show();
+            });
+        } else {
+            const items = this.items.splice(0);
+            nextTick(() => {
+                this.items.push(...items);
+            });
+        }
         return this;
     }
 
     setPos(x?: number, y?: number) {
         has(x) && (this.x = x);
         has(y) && (this.y = y);
+        this.emit('posChange', this);
     }
 
     setSize(width?: number, height?: number) {
         has(width) && (this.width = width);
         has(height) && (this.height = height);
+        this.emit('posChange', this);
     }
 
     /**
@@ -269,12 +286,14 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
 
     static save() {
         toolbarStorage.clear();
+        const setting = Mota.require('var', 'mainSetting');
+        const scale = setting.getValue('ui.toolbarScale', 100) / 100;
         this.list.forEach(v => {
             const toSave: ToolbarSaveData = {
                 x: v.x,
                 y: v.y,
-                w: v.width,
-                h: v.height,
+                w: v.width / scale,
+                h: v.height / scale,
                 items: []
             };
             v.items.forEach(v => {
@@ -288,7 +307,7 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
     static load() {
         toolbarStorage.read();
         for (const [key, value] of Object.entries(toolbarStorage.data)) {
-            const bar = new CustomToolbar(key);
+            const bar = this.get(key) ?? new CustomToolbar(key);
             bar.x = value.x;
             bar.y = value.y;
             bar.width = value.w;
@@ -297,6 +316,10 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
                 bar.add(item);
             }
         }
+    }
+
+    static refreshAll(reopen: boolean = false): void {
+        CustomToolbar.list.forEach(v => v.refresh(reopen));
     }
 
     static showAll(): number[] {
@@ -376,16 +399,16 @@ CustomToolbar.register(
     }
 );
 
-window.addEventListener('beforeunload', () => {
-    CustomToolbar.save();
-});
-window.addEventListener('blur', () => {
-    CustomToolbar.save();
-});
-
 Mota.require('var', 'loading').once('coreInit', () => {
     CustomToolbar.load();
     CustomToolbar.closeAll();
+
+    window.addEventListener('beforeunload', e => {
+        CustomToolbar.save();
+    });
+    window.addEventListener('blur', () => {
+        CustomToolbar.save();
+    });
 });
 Mota.require('var', 'hook').on('reset', () => {
     CustomToolbar.showAll();

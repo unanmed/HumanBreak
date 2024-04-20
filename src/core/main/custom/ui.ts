@@ -9,8 +9,6 @@ interface FocusEvent<T> extends EmitableEvent {
     unfocus: (before: T | null) => void;
     add: (item: T) => void;
     pop: (item: T | null) => void;
-    register: (item: T[]) => void;
-    unregister: (item: T[]) => void;
     splice: (spliced: T[]) => void;
 }
 
@@ -163,7 +161,7 @@ interface IndexedGameUi extends ShowableGameUi {
 }
 
 interface HoldOnController {
-    end(): void;
+    end(noClosePanel?: boolean): void;
 }
 
 export class UiController extends Focus<IndexedGameUi> {
@@ -182,7 +180,7 @@ export class UiController extends Focus<IndexedGameUi> {
                 v.ui.emit('close');
             });
             if (this.stack.length === 0) {
-                if (!this.hold) this.emit('end');
+                if (!this.hold) this.emit('end', false);
                 this.hold = false;
             }
         });
@@ -227,8 +225,8 @@ export class UiController extends Focus<IndexedGameUi> {
         this.hold = true;
 
         return {
-            end: () => {
-                this.emit('end');
+            end: (noClosePanel: boolean = false) => {
+                this.emit('end', noClosePanel);
             }
         };
     }

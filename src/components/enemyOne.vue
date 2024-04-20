@@ -19,11 +19,14 @@
                     class="special-text"
                     v-if="has(enemy.special) && enemy.special.length > 0"
                 >
-                    <span
-                        v-for="(text, i) in enemy.showSpecial"
-                        :style="{ color: text[2] }"
-                        >&nbsp;{{ text[0] }}&nbsp;</span
-                    >
+                    <template v-for="(text, i) in enemy.showSpecial">
+                        <span
+                            v-if="i < (isMobile ? 1 : 2)"
+                            :style="{ color: text[2] }"
+                            >&nbsp;{{ text[0] }}&nbsp;</span
+                        >
+                        <span v-if="i === (isMobile ? 1 : 2)">...</span>
+                    </template>
                 </div>
                 <div class="special-text" v-else>无属性</div>
             </div>
@@ -220,12 +223,12 @@ function enter() {
 @media screen and (max-width: 600px) {
     .rightbar {
         width: 80%;
-        font-size: 85%;
+        font-size: 110%;
     }
 
     .leftbar {
         width: 20%;
-        font-size: 80%;
+        font-size: 100%;
     }
 
     .enemy-container {

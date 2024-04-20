@@ -130,13 +130,18 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, shallowReactive, watch } from 'vue';
+import { onMounted, onUnmounted, ref, shallowReactive, watch } from 'vue';
 import Box from '../components/box.vue';
 import Scroll from '../components/scroll.vue';
 import { status } from '../plugin/ui/statusBar';
 import { isMobile } from '../plugin/use';
-import { has } from '../plugin/utils';
+import { fontSize } from '../plugin/ui/statusBar';
+import { has } from '@/plugin/utils';
 
+let main: HTMLDivElement;
+
+const items = core.flags.statusBarItems;
+const icons = core.statusBar.icons;
 const skillTree = Mota.Plugin.require('skillTree_g');
 
 const width = ref(
@@ -148,6 +153,7 @@ const format = core.formatBigNumber;
 
 watch(width, n => (updateStatus.value = !updateStatus.value));
 watch(height, n => (updateStatus.value = !updateStatus.value));
+watch(fontSize, n => (main.style.fontSize = `${isMobile ? n * 1.5 : n}%`));
 
 const hero = shallowReactive<Partial<HeroStatus>>({});
 const keys = shallowReactive<number[]>([]);
@@ -230,8 +236,24 @@ function viewMap() {
 
 function openStudy() {}
 
+function resize() {
+    requestAnimationFrame(() => {
+        main.style.fontSize = `${
+            isMobile ? fontSize.value * 1.5 : fontSize.value
+        }%`;
+    });
+}
+
 onMounted(() => {
     update();
+    main = document.getElementById('status-main') as HTMLDivElement;
+
+    window.addEventListener('resize', resize);
+    resize();
+});
+
+onUnmounted(() => {
+    window.removeEventListener('resize', resize);
 });
 </script>
 
@@ -241,14 +263,16 @@ onMounted(() => {
     width: 100%;
     height: 100%;
     padding: 1vh 0;
+    font-size: v-bind(fontSize);
 }
 
 .status-item {
-    position: relative;
+    display: flex;
+    flex-direction: row;
     max-width: 17.5vw;
     font-size: 200%;
     width: 100%;
-    margin-bottom: 1vh;
+    margin-bottom: 14px;
     text-shadow: 3px 2px 3px #000, 0px 0px 3px #111;
     display: flex;
     flex-direction: row;
@@ -264,6 +288,10 @@ onMounted(() => {
     height: 2.8vw;
     margin-right: 10%;
     margin-left: 10%;
+}
+
+.status-value {
+    transform: translateY(2px);
 }
 
 #status-header {

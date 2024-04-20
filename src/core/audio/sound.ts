@@ -1,6 +1,5 @@
 import { has } from '@/plugin/utils';
 import { AudioParamOf, AudioPlayer } from './audio';
-import resource from '@/data/resource.json';
 import { ResourceController } from '../loader/controller';
 
 // todo: 立体声，可设置音源位置
@@ -24,7 +23,6 @@ export class SoundEffect extends AudioPlayer {
 
     gain: GainNode = AudioPlayer.ac.createGain();
     panner: PannerNode | null = null;
-    merger: ChannelMergerNode | null = null;
 
     set volumn(value: number) {
         this.gain.gain.value = value * SoundEffect.volume;
@@ -63,9 +61,7 @@ export class SoundEffect extends AudioPlayer {
      * 设置音频路由线路
      * ```txt
      * 不启用立体声：source -> gain -> destination
-     * 启用立体声：source -> panner -> gain --> destination
-     * 单声道立体声：source -> merger -> panner -> gain -> destination
-     * 单声道立体声指音源为单声道，合成为双声道后模拟为立体声
+     * 启用立体声：source -> panner -> gain -> destination
      * ```
      * @param stereo 是否启用立体声
      */
@@ -74,20 +70,10 @@ export class SoundEffect extends AudioPlayer {
         const ac = AudioPlayer.ac;
         if (!channel) return;
         this.panner = null;
-        this.merger = null;
         if (stereo) {
             this.panner = ac.createPanner();
             this.panner.connect(this.gain);
-            if (channel === 1) {
-                this.merger = ac.createChannelMerger();
-                this.merger.connect(this.panner);
-                this.baseNode = [
-                    { node: this.merger, channel: 0 },
-                    { node: this.merger, channel: 1 }
-                ];
-            } else {
-                this.baseNode = [{ node: this.panner }];
-            }
+            this.baseNode = [{ node: this.panner }];
         } else {
             this.baseNode = [{ node: this.gain }];
         }
@@ -136,15 +122,18 @@ export class SoundEffect extends AudioPlayer {
      * @param source 立体声声源位置与朝向
      * @param listener 听者的位置、头顶方向、面朝方向
      */
-    setPanner(source: Partial<Panner>, listener: Partial<Listener>) {
+    setPanner(source?: Partial<Panner>, listener?: Partial<Listener>) {
         if (!this.panner) return;
-        console.log(2);
-        for (const [key, value] of Object.entries(source)) {
-            this.panner[key as keyof Panner].value = value;
+        if (source) {
+            for (const [key, value] of Object.entries(source)) {
+                this.panner[key as keyof Panner].value = value;
+            }
         }
-        const l = AudioPlayer.ac.listener;
-        for (const [key, value] of Object.entries(listener)) {
-            l[key as keyof Listener].value = value;
+        if (listener) {
+            const l = AudioPlayer.ac.listener;
+            for (const [key, value] of Object.entries(listener)) {
+                l[key as keyof Listener].value = value;
+            }
         }
     }
 }
@@ -161,7 +150,6 @@ export class SoundController extends ResourceController<
      * @param data 音频的ArrayBuffer信息，会被解析为AudioBuffer
      */
     add(uri: string, data: ArrayBuffer) {
-        const stereo = resource.stereoSE.includes(uri);
         const se = new SoundEffect(data, true);
         if (this.list[uri]) {
             console.warn(`Repeated sound effect: '${uri}'.`);
@@ -176,6 +164,7 @@ export class SoundController extends ResourceController<
      */
     play(sound: SoundIds, end?: () => void): number {
         const se = this.get(sound);
+        if (!se) return -1;
         const index = se.playSE();
         if (!has(index)) return -1;
         this.seIndex[index] = se;

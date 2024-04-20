@@ -46,15 +46,19 @@
                 </TransitionGroup>
             </div>
             <div class="setting-info">
-                <div
-                    class="info-text"
-                    v-html="splitText(display.at(-1)?.text ?? ['请选择设置'])"
-                ></div>
+                <Scroll class="info-text-scroll">
+                    <div
+                        class="info-text"
+                        v-html="
+                            splitText(display.at(-1)?.text ?? ['请选择设置'])
+                        "
+                    ></div>
+                </Scroll>
                 <a-divider class="info-divider" dashed></a-divider>
                 <div class="info-editor" v-if="!!selectedItem">
                     <div class="editor-custom">
                         <component
-                            :is="selectedItem.controller"
+                            :is="(selectedItem.controller as any)"
                             :item="selectedItem"
                             :displayer="displayer"
                             :setting="setting"
@@ -68,16 +72,14 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue';
+import { computed, onUnmounted, ref, shallowRef } from 'vue';
 import {
     mainSetting,
     MotaSetting,
     MotaSettingItem,
     SettingDisplayer,
-    SettingDisplayInfo,
-    SettingText
+    SettingDisplayInfo
 } from '../core/main/setting';
-import settingText from '../data/settings.json';
 import { RightOutlined, LeftOutlined } from '@ant-design/icons-vue';
 import { splitText } from '../plugin/utils';
 import Scroll from '../components/scroll.vue';
@@ -88,13 +90,11 @@ import { mainUi } from '@/core/main/init/ui';
 
 const props = defineProps<{
     info?: MotaSetting;
-    text?: SettingText;
     num: number;
     ui: GameUi;
 }>();
 
 const setting = props.info ?? mainSetting;
-const text = props.text ?? (settingText as SettingText);
 const display = shallowRef<SettingDisplayInfo[]>([]);
 const selectedItem = computed(() => display.value.at(-1)?.item);
 const update = ref(false);
@@ -312,6 +312,11 @@ onUnmounted(() => {
     .info-text {
         font-size: 85%;
         min-height: 30%;
+        max-height: 50%;
+    }
+
+    .info-text-scroll {
+        max-height: 50%;
     }
 }
 
@@ -321,7 +326,7 @@ onUnmounted(() => {
     }
 
     .setting-main {
-        font-size: 120%;
+        font-size: 225%;
 
         .setting-container {
             flex-direction: column;

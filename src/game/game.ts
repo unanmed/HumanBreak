@@ -84,14 +84,16 @@ export interface GameEvent extends EmitableEvent {
     mounted: () => void;
     /** Emitted in plugin/ui.js */
     statusBarUpdate: () => void;
-    /** Emitted in libs/events.js */
-    afterGetItem: (
-        itemId: AllIdsOf<'items'>,
-        x: number,
-        y: number,
-        isGentleClick: boolean
-    ) => void;
-    afterOpenDoor: (doorId: AllIdsOf<'animates'>, x: number, y: number) => void;
+    /** Emitted in core/index.ts */
+    renderLoaded: () => void;
+    // /** Emitted in libs/events.js */
+    // afterGetItem: (
+    //     itemId: AllIdsOf<'items'>,
+    //     x: number,
+    //     y: number,
+    //     isGentleClick: boolean
+    // ) => void;
+    // afterOpenDoor: (doorId: AllIdsOf<'animates'>, x: number, y: number) => void;
 }
 
 export const hook = new EventEmitter<GameEvent>();
@@ -112,7 +114,7 @@ class GameListener extends EventEmitter<ListenerEvent> {
 
     constructor() {
         super();
-
+        if (main.replayChecking) return;
         if (!!window.core) {
             this.init();
         } else {
@@ -131,14 +133,19 @@ class GameListener extends EventEmitter<ListenerEvent> {
 
         const getBlockLoc = (px: number, py: number, size: number) => {
             return [
-                Math.floor(((px * 32) / size - core.bigmap.offsetX) / 32),
-                Math.floor(((py * 32) / size - core.bigmap.offsetY) / 32)
+                Math.floor(((px * 32) / size + core.bigmap.offsetX) / 32),
+                Math.floor(((py * 32) / size + core.bigmap.offsetY) / 32)
             ];
         };
 
         // hover & leave & mouseMove
         data.addEventListener('mousemove', e => {
-            if (core.status.lockControl || !core.isPlaying()) return;
+            if (
+                core.status.lockControl ||
+                !core.isPlaying() ||
+                !core.status.floorId
+            )
+                return;
             this.emit('mouseMove', e);
             const {
                 x: px,
@@ -164,7 +171,12 @@ class GameListener extends EventEmitter<ListenerEvent> {
             }
         });
         data.addEventListener('mouseleave', e => {
-            if (core.status.lockControl || !core.isPlaying()) return;
+            if (
+                core.status.lockControl ||
+                !core.isPlaying() ||
+                !core.status.floorId
+            )
+                return;
             const blocks = core.getMapBlocksObj();
             const lastBlock = blocks[`${lastHoverX},${lastHoverY}`];
             if (!!lastBlock) {
@@ -175,7 +187,12 @@ class GameListener extends EventEmitter<ListenerEvent> {
         });
         // click
         data.addEventListener('click', e => {
-            if (core.status.lockControl || !core.isPlaying()) return;
+            if (
+                core.status.lockControl ||
+                !core.isPlaying() ||
+                !core.status.floorId
+            )
+                return;
             const {
                 x: px,
                 y: py,

@@ -108,7 +108,7 @@ function update() {
     info.damage = enemy.enemy.calDamage().damage;
     const critical = enemy.enemy.calCritical()[0];
     info.critical = critical?.atkDelta ?? 0;
-    info.criticalDam = critical.delta ?? 0;
+    info.criticalDam = critical?.delta ?? 0;
     info.defDamage = enemy.enemy.calDefDamage(ratio).delta;
 }
 

@@ -50,6 +50,8 @@ import { getDetailedEnemy } from '../plugin/ui/fixed';
 import { GameUi } from '@/core/main/custom/ui';
 import { gameKey } from '@/core/main/init/hotkey';
 import { mainUi } from '@/core/main/init/ui';
+import { mainSetting } from '@/core/main/setting';
+import { isMobile } from '@/plugin/use';
 
 const props = defineProps<{
     num: number;
@@ -69,6 +71,14 @@ const scroll = ref(0);
 const drag = ref(false);
 const detail = ref(false);
 const selected = ref(0);
+
+const settingScale = mainSetting.getValue('ui.bookScale', 100) / 100;
+const scale = isMobile
+    ? Math.max(settingScale * 15, 20)
+    : Math.max(
+          (window.innerWidth / window.innerHeight) * 15 * settingScale,
+          20
+      );
 
 /**
  * 选择怪物，展示详细信息
@@ -121,11 +131,13 @@ async function exit() {
     const hold = mainUi.holdOn();
     mainUi.close(props.num);
     if (core.events.recoverEvents(core.status.event.interval)) {
+        hold.end(true);
         return;
     } else if (has(core.status.event.ui)) {
         core.status.boxAnimateObjs = [];
         // @ts-ignore
         core.ui._drawViewMaps(core.status.event.ui);
+        hold.end(true);
     } else hold.end();
 }
 
@@ -141,42 +153,44 @@ function checkScroll() {
 }
 
 // 按键控制
-gameKey.use(props.ui.symbol);
-gameKey
-    .realize('@book_up', () => {
-        if (selected.value > 0) {
-            selected.value--;
-        }
-        checkScroll();
-    })
-    .realize('@book_down', () => {
-        if (selected.value < enemy.length - 1) {
-            selected.value++;
-        }
-        checkScroll();
-    })
-    .realize('@book_pageDown', () => {
-        if (selected.value <= 4) {
-            selected.value = 0;
-        } else {
-            selected.value -= 5;
-        }
-        checkScroll();
-    })
-    .realize('@book_pageUp', () => {
-        if (selected.value >= enemy.length - 5) {
-            selected.value = enemy.length - 1;
-        } else {
-            selected.value += 5;
-        }
-        checkScroll();
-    })
-    .realize('exit', () => {
-        exit();
-    })
-    .realize('confirm', () => {
-        select(toShow[selected.value], selected.value);
-    });
+setTimeout(() => {
+    gameKey.use(props.ui.symbol);
+    gameKey
+        .realize('@book_up', () => {
+            if (selected.value > 0) {
+                selected.value--;
+            }
+            checkScroll();
+        })
+        .realize('@book_down', () => {
+            if (selected.value < enemy.length - 1) {
+                selected.value++;
+            }
+            checkScroll();
+        })
+        .realize('@book_pageDown', () => {
+            if (selected.value <= 4) {
+                selected.value = 0;
+            } else {
+                selected.value -= 5;
+            }
+            checkScroll();
+        })
+        .realize('@book_pageUp', () => {
+            if (selected.value >= enemy.length - 5) {
+                selected.value = enemy.length - 1;
+            } else {
+                selected.value += 5;
+            }
+            checkScroll();
+        })
+        .realize('exit', () => {
+            exit();
+        })
+        .realize('confirm', () => {
+            select(toShow[selected.value], selected.value);
+        });
+}, 0);
 
 onUnmounted(() => {
     gameKey.dispose(props.ui.symbol);
@@ -188,7 +202,6 @@ onUnmounted(() => {
     user-select: none;
     width: 80%;
     height: 100%;
-    font-family: 'normal';
     overflow: hidden;
     transition: opacity 0.6s linear;
     display: flex;
@@ -208,25 +221,28 @@ onUnmounted(() => {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: 'normal';
 }
 
 .enemy {
     display: flex;
     flex-direction: column;
-    height: 20vh;
+    height: v-bind('scale + "vh"');
     width: 100%;
     padding: 0 1% 0 1%;
 }
 
 @media screen and (max-width: 600px) {
+    #tools {
+        transform: translateY(-50%);
+    }
+
     #book {
         width: 100%;
         padding: 5%;
     }
 
     .enemy {
-        height: 15vh;
+        height: v-bind('scale * 2 / 3 + "vh"');
     }
 }
 </style>

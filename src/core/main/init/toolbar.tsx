@@ -8,6 +8,7 @@ import { checkAssist } from '../custom/hotkey';
 import { getVitualKeyOnce } from '@/plugin/utils';
 import { cloneDeep } from 'lodash-es';
 import { Select, SelectOption } from 'ant-design-vue';
+import { mainSetting } from '../setting';
 
 // todo: 新增更改设置的ToolItem
 
@@ -53,15 +54,18 @@ function KeyTool(props: CustomToolbarProps<'hotkey'>) {
 
 function ItemTool(props: CustomToolbarProps<'item'>) {
     const { item, toolbar } = props;
+    const scale = mainSetting.getValue('ui.toolbarScale', 100) / 100;
     return (
         <div
-            style="display: flex; justify-content: center; width: 50px"
+            style={`display: flex; justify-content: center; width: ${
+                50 * scale
+            }px`}
             onClick={() => toolbar.emitTool(item.id)}
         >
             <BoxAnimate
                 noborder={true}
-                width={50}
-                height={50}
+                width={50 * scale}
+                height={50 * scale}
                 id={item.item}
             ></BoxAnimate>
         </div>

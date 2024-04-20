@@ -18,11 +18,7 @@ import type { Keyboard } from '@/core/main/custom/keyboard';
 import type { CustomToolbar } from '@/core/main/custom/toolbar';
 import type { Focus, GameUi, UiController } from '@/core/main/custom/ui';
 import type { gameListener, hook } from './game';
-import type {
-    MotaSetting,
-    SettingDisplayer,
-    SettingStorage
-} from '@/core/main/setting';
+import type { MotaSetting, SettingDisplayer } from '@/core/main/setting';
 import type { GameStorage } from '@/core/main/storage';
 import type { DamageEnemy, EnemyCollection } from './enemy/damage';
 import type { specials } from './enemy/special';
@@ -87,7 +83,7 @@ interface VariableInterface {
     sound: SoundController;
     resource: ResourceStore<Exclude<ResourceType, 'zip'>>;
     zipResource: ResourceStore<'zip'>;
-    settingStorage: GameStorage<SettingStorage>;
+    settingStorage: GameStorage;
     status: Ref<boolean>;
     // 定义于游戏进程，渲染进程依然可用
     haloSpecials: number[];

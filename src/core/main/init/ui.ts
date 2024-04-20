@@ -1,6 +1,7 @@
 import * as UI from '@ui/.';
 import * as MiscUI from './misc';
 import { GameUi, UiController } from '../custom/ui';
+import { mainSetting } from '../setting';
 
 export const mainUi = new UiController();
 mainUi.register(
@@ -35,20 +36,34 @@ fixedUi.register(
 );
 fixedUi.showAll();
 
+let loaded = false;
+let mounted = false;
+
 const hook = Mota.require('var', 'hook');
 hook.once('mounted', () => {
     const ui = document.getElementById('ui-main')!;
     const fixed = document.getElementById('ui-fixed')!;
 
+    const blur = mainSetting.getSetting('screen.blur');
+
     mainUi.on('start', () => {
         ui.style.display = 'flex';
+        if (blur?.value) {
+            ui.style.backdropFilter = 'blur(5px)';
+            ui.style.backgroundColor = 'rgba(0,0,0,0.7333)';
+        } else {
+            ui.style.backdropFilter = 'none';
+            ui.style.backgroundColor = 'rgba(0,0,0,0.85)';
+        }
         core.lockControl();
     });
-    mainUi.on('end', () => {
+    mainUi.on('end', noClosePanel => {
         ui.style.display = 'none';
-        try {
-            core.closePanel();
-        } catch {}
+        if (!noClosePanel) {
+            try {
+                core.closePanel();
+            } catch {}
+        }
     });
     fixedUi.on('start', () => {
         fixed.style.display = 'block';
@@ -57,6 +72,15 @@ hook.once('mounted', () => {
         fixed.style.display = 'none';
     });
 
-    // todo: 暂时先这么搞，之后重写加载界面，需要改成先显示加载界面，加载完毕后再打开这个界面
-    fixedUi.open('start');
+    if (loaded && !mounted) {
+        fixedUi.open('start');
+    }
+    mounted = true;
+});
+hook.once('load', () => {
+    if (mounted) {
+        // todo: 暂时先这么搞，之后重写加载界面，需要改成先显示加载界面，加载完毕后再打开这个界面
+        fixedUi.open('start');
+    }
+    loaded = true;
 });

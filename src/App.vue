@@ -48,6 +48,7 @@ function show(index: number) {
     position: fixed;
     overflow: visible;
     display: block;
+    font-size: 80%;
     font-family: 'normal';
 }
 
@@ -61,7 +62,6 @@ function show(index: number) {
     top: 0;
     position: fixed;
     background-color: #000b;
-    backdrop-filter: blur(5px);
     z-index: 1;
 }
 

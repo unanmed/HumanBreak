@@ -100,22 +100,6 @@ interface Events extends EventData {
     trigger(x: number, y: number, callback?: () => void): void;
 
     /**
-     * 战斗，如果填写了坐标就会删除该点的敌人并触发战后事件
-     * @example core.battle('greenSlime'); // 和从天而降的绿头怪战斗（如果打得过）
-     * @param id 敌人id，必填
-     * @param x 敌人的横坐标
-     * @param y 敌人的纵坐标
-     * @param force true表示强制战斗
-     * @param callback 回调函数
-     */
-    battle(
-        x: number,
-        y: number,
-        force: boolean = false,
-        callback?: () => void
-    ): void;
-
-    /**
      * 开门（包括三种基础墙）
      * @example core.openDoor(0, 0, true, core.jumpHero); // 打开左上角的门，需要钥匙，然后主角原地跳跃半秒
      * @param x 门的横坐标
@@ -428,6 +412,7 @@ interface Events extends EventData {
     ): void;
 
     /**
+     * @deprecated 已失效（大概
      * 设置一项敌人属性并计入存档
      * @example core.setEnemy('greenSlime', 'def', 0); // 把绿头怪的防御设为0
      * @param id 敌人id
@@ -447,6 +432,7 @@ interface Events extends EventData {
     ): void;
 
     /**
+     * @deprecated 已失效（大概
      * 设置某个点的敌人属性
      * @param x 横坐标
      * @param y 纵坐标
@@ -469,6 +455,7 @@ interface Events extends EventData {
     ): void;
 
     /**
+     * @deprecated 已失效（大概
      * 重置某个点的敌人属性
      * @param x 横坐标
      * @param y 纵坐标
@@ -483,6 +470,7 @@ interface Events extends EventData {
     ): void;
 
     /**
+     * @deprecated 已失效（大概
      * 将某个点已经设置的敌人属性移动到其他点
      * @param fromX 起始横坐标
      * @param fromY 起始纵坐标
@@ -756,7 +744,11 @@ interface Events extends EventData {
      * @example core.tryUseItem('pickaxe'); // 尝试使用破墙镐
      * @param itemId 道具id，其中敌人手册、传送器和飞行器会被特殊处理
      */
-    tryUseItem(itemId: ItemIdOf<'tools' | 'constants'>): void;
+    tryUseItem(
+        itemId: ItemIdOf<'tools' | 'constants'>,
+        noRoute?: boolean,
+        callback?: () => void
+    ): void;
 
     _sys_battle(data: Block, callback?: () => void): void;
 

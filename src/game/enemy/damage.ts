@@ -16,15 +16,15 @@ interface HaloType {
     };
 }
 
-interface EnemyInfo {
+interface EnemyInfo extends Partial<Enemy> {
     atk: number;
     def: number;
     hp: number;
     special: number[];
     damageDecline: number;
-    atkBuff: number;
-    defBuff: number;
-    hpBuff: number;
+    atkBuff_: number;
+    defBuff_: number;
+    hpBuff_: number;
     enemy: Enemy;
     x?: number;
     y?: number;
@@ -65,7 +65,7 @@ interface CriticalDamageDelta extends Omit<DamageDelta, 'info'> {
 type HaloFn = (info: EnemyInfo, enemy: Enemy) => void;
 
 /** 光环属性 */
-export const haloSpecials: number[] = [8, 21, 25, 26, 27];
+export const haloSpecials: Set<number> = new Set([8, 21, 25, 26, 27]);
 
 export class EnemyCollection implements RangeCollection<DamageEnemy> {
     floorId: FloorIds;
@@ -302,7 +302,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     info!: EnemyInfo;
 
     /** 向其他怪提供过的光环 */
-    providedHalo: number[] = [];
+    providedHalo: Set<number> = new Set();
 
     /**
      * 伤害计算进度，0 -> 预平衡光环 -> 1 -> 计算没有光环的属性 -> 2 -> provide inject 光环
@@ -334,16 +334,23 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
             def: enemy.def,
             special: enemy.special.slice(),
             damageDecline: 0,
-            atkBuff: 0,
-            defBuff: 0,
-            hpBuff: 0,
+            atkBuff_: 0,
+            defBuff_: 0,
+            hpBuff_: 0,
             enemy: this.enemy,
             x: this.x,
             y: this.y,
             floorId: this.floorId
         };
+
+        for (const [key, value] of Object.entries(enemy)) {
+            if (!(key in this.info) && has(value)) {
+                // @ts-ignore
+                this.info[key] = value;
+            }
+        }
         this.progress = 0;
-        this.providedHalo = [];
+        this.providedHalo.clear();
     }
 
     /**
@@ -370,8 +377,8 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
             for (const [loc, per] of Object.entries(flags[`melt_${floorId}`])) {
                 const [mx, my] = loc.split(',').map(v => parseInt(v));
                 if (Math.abs(mx - this.x) <= 1 && Math.abs(my - this.y) <= 1) {
-                    info.atkBuff += per as number;
-                    info.defBuff += per as number;
+                    info.atkBuff_ += per as number;
+                    info.defBuff_ += per as number;
                 }
             }
         }
@@ -392,9 +399,9 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         // 此时已经inject光环，因此直接计算真实属性
         const info = this.info;
 
-        info.atk = Math.floor(info.atk * (info.atkBuff / 100 + 1));
-        info.def = Math.floor(info.def * (info.defBuff / 100 + 1));
-        info.hp = Math.floor(info.hp * (info.hpBuff / 100 + 1));
+        info.atk = Math.floor(info.atk * (info.atkBuff_ / 100 + 1));
+        info.def = Math.floor(info.def * (info.defBuff_ / 100 + 1));
+        info.hp = Math.floor(info.hp * (info.hpBuff_ / 100 + 1));
 
         return this.info;
     }
@@ -404,7 +411,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         if (!has(this.x) || !has(this.y)) return [];
         const special = this.info.special ?? this.enemy.special;
         const filter = special.filter(v => {
-            return haloSpecials.includes(v) && !this.providedHalo.includes(v);
+            return haloSpecials.has(v) && !this.providedHalo.has(v);
         });
         if (filter.length === 0) return [];
         const collection = this.col ?? core.status.maps[this.floorId].enemy;
@@ -448,11 +455,11 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                     e.special.includes(8) &&
                     (e.x !== this.x || this.y !== e.y)
                 ) {
-                    e.atkBuff += enemy.together ?? 0;
-                    e.defBuff += enemy.together ?? 0;
+                    e.atkBuff_ += enemy.together ?? 0;
+                    e.defBuff_ += enemy.together ?? 0;
                 }
             });
-            this.providedHalo.push(8);
+            this.providedHalo.add(8);
         }
 
         // 冰封光环
@@ -460,7 +467,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
             square7.push(e => {
                 e.damageDecline += this.enemy.iceHalo ?? 0;
             });
-            this.providedHalo.push(21);
+            this.providedHalo.add(21);
             col.haloList.push({
                 type: 'square',
                 data: { x: this.x, y: this.y, d: 7 },
@@ -472,9 +479,9 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         // 冰封之核
         if (special.includes(26)) {
             square5.push(e => {
-                e.defBuff += this.enemy.iceCore ?? 0;
+                e.defBuff_ += this.enemy.iceCore ?? 0;
             });
-            this.providedHalo.push(26);
+            this.providedHalo.add(26);
             col.haloList.push({
                 type: 'square',
                 data: { x: this.x, y: this.y, d: 5 },
@@ -486,9 +493,9 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         // 火焰之核
         if (special.includes(27)) {
             square5.push(e => {
-                e.atkBuff += this.enemy.fireCore ?? 0;
+                e.atkBuff_ += this.enemy.fireCore ?? 0;
             });
-            this.providedHalo.push(27);
+            this.providedHalo.add(27);
             col.haloList.push({
                 type: 'square',
                 data: { x: this.x, y: this.y, d: 5 },
@@ -617,7 +624,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     ) {
         damage[loc] ??= { damage: 0, type: new Set() };
         damage[loc].damage += dam;
-        damage[loc].type.add(type);
+        if (type) damage[loc].type.add(type);
     }
 
     private calEnemyDamageOf(hero: Partial<HeroStatus>, enemy: EnemyInfo) {
@@ -830,6 +837,9 @@ const skills: [unlock: string, condition: string][] = [
     ['shieldOn', 'shield']
 ];
 
+const haloValue: Map<number, SelectKey<Enemy, number | undefined>[]> =
+    new Map();
+
 /**
  * 计算怪物伤害
  * @param info 怪物信息
@@ -946,13 +956,6 @@ export function getSingleEnemy(id: EnemyIds) {
 }
 
 declare global {
-    interface PluginDeclaration {
-        damage: {
-            Enemy: typeof DamageEnemy;
-            Collection: typeof EnemyCollection;
-        };
-    }
-
     interface Floor {
         enemy: EnemyCollection;
     }

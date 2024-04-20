@@ -242,7 +242,7 @@ onUnmounted(() => {
     flex-direction: column;
     width: 50%;
     text-overflow: clip;
-    align-items: end;
+    align-items: flex-end;
     text-align: end;
 
     .hotkey-one-set-item {

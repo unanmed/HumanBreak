@@ -56,15 +56,15 @@
                 :type="isMobile ? 'horizontal' : 'vertical'"
             ></a-divider>
             <div id="fly-right">
-                <canvas id="fly-thumbnail" @click="fly"></canvas>
+                <canvas id="fly-thumbnail" @click="fly" @wheel="wheel"></canvas>
                 <div id="fly-tools">
                     <double-left-outlined
                         @click="changeFloorByDelta(-10)"
-                        class="button-text"
+                        class="button-text fly-button"
                     />
                     <left-outlined
                         @click="changeFloorByDelta(-1)"
-                        class="button-text"
+                        class="button-text fly-button"
                     />
                     <span
                         class="changable"
@@ -74,11 +74,11 @@
                     >
                     <right-outlined
                         @click="changeFloorByDelta(1)"
-                        class="button-text"
+                        class="button-text fly-button"
                     />
                     <double-right-outlined
                         @click="changeFloorByDelta(10)"
-                        class="button-text"
+                        class="button-text fly-button"
                     />
                 </div>
             </div>
@@ -472,6 +472,10 @@ function click(e: MouseEvent) {
     }
 }
 
+function wheel(ev: WheelEvent) {
+    changeFloorByDelta(-Math.sign(ev.deltaY));
+}
+
 function changeAreaByFloor(id: FloorIds) {
     nowArea.value = Object.keys(area).find(v => area[v].includes(id))!;
 }
@@ -725,6 +729,7 @@ onUnmounted(() => {
     flex-direction: column;
     align-items: center;
     justify-content: space-around;
+    position: relative;
 }
 
 #fly-tools {
@@ -734,11 +739,17 @@ onUnmounted(() => {
     flex-direction: row;
     justify-content: space-around;
     align-items: center;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background-color: #0004;
 }
 
 #fly-thumbnail {
     width: 35vw;
     height: 35vw;
+    max-height: 75vh;
+    max-width: 75vh;
     border: 0.1vw solid #ddd4;
 }
 
@@ -766,10 +777,27 @@ onUnmounted(() => {
     background-color: #ddd4;
 }
 
+.fly-button {
+    padding: 3%;
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.301);
+    border: 1px dashed #ddda;
+    filter: drop-shadow(0px 0px 16px black);
+}
+
+#fly-now {
+    text-wrap: nowrap;
+    white-space: nowrap;
+    max-width: 50%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    text-shadow: 1px 1px 1px black, 1px -1px 1px black, -1px 1px 1px black,
+        -1px -1px 1px black;
+}
+
 @media screen and (max-width: 600px) {
     #fly {
-        padding: 5%;
-        font-size: 100%;
+        font-size: 225%;
     }
 
     #fly-main {

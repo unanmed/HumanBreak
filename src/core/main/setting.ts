@@ -7,6 +7,8 @@ import { bgm } from '../audio/bgm';
 import { SoundEffect } from '../audio/sound';
 import settingsText from '@/data/settings.json';
 import { isMobile } from '@/plugin/use';
+import { fontSize } from '@/plugin/ui/statusBar';
+import { CustomToolbar } from './custom/toolbar';
 
 export interface SettingComponentProps {
     item: MotaSettingItem;
@@ -334,6 +336,8 @@ mainSetting.on('valueChange', (key, n, o) => {
         handleActionSetting(setting, n, o);
     } else if (root === 'audio') {
         handleAudioSetting(setting, n, o);
+    } else if (root === 'ui') {
+        handleUiSetting(setting, n, o);
     }
 });
 
@@ -363,6 +367,11 @@ function handleScreenSetting<T extends number | boolean>(
     } else if (key === 'fontSize') {
         // 字体大小
         root.style.fontSize = `${n}px`;
+        const absoluteSize = (n as number) * devicePixelRatio;
+        storage.setValue('@@absoluteFontSize', absoluteSize);
+        storage.write();
+    } else if (key === 'fontSizeStatus') {
+        fontSize.value = n as number;
     }
 }
 
@@ -394,6 +403,16 @@ function handleAudioSetting<T extends number | boolean>(
     }
 }
 
+function handleUiSetting<T extends number | boolean>(key: string, n: T, o: T) {
+    if (key === 'toolbarScale') {
+        const scale = (n as number) / (o as number);
+        CustomToolbar.list.forEach(v => {
+            v.setSize(v.width * scale, v.height * scale);
+        });
+        CustomToolbar.refreshAll(true);
+    }
+}
+
 // ----- 游戏的所有设置项
 // todo: 虚拟键盘缩放，小地图楼传缩放
 mainSetting
@@ -407,11 +426,13 @@ mainSetting
             .register('heroDetail', '勇士显伤', false, COM.Boolean)
             .register('transition', '界面动画', false, COM.Boolean)
             .register('antiAlias', '抗锯齿', false, COM.Boolean)
-            .register('fontSize', '字体大小', 16, COM.Number, [8, 28, 1])
+            .register('fontSize', '字体大小', 16, COM.Number, [2, 48, 1])
+            .register('fontSizeStatus', '状态栏字体', 16, COM.Number, [2, 48, 1])
             .register('smoothView', '平滑镜头', true, COM.Boolean)
             .register('criticalGem', '临界显示方式', false, COM.Boolean)
             .setDisplayFunc('criticalGem', value => (value ? '宝石数' : '攻击'))
             .register('keyScale', '虚拟键盘缩放', 100, COM.Number, [25, 5, 500])
+            .register('blur', '背景虚化', !isMobile, COM.Boolean)
     )
     .register(
         'action',
@@ -450,13 +471,13 @@ mainSetting
     .register(
         'ui',
         'ui设置',
-        new MotaSetting().register(
-            'mapScale',
-            '小地图楼传缩放',
-            100,
-            COM.Number,
-            [50, 1000, 50]
-        )
+        new MotaSetting()
+            .register('mapScale', '小地图缩放', 100, COM.Number, [50, 1000, 50])
+            .setDisplayFunc('mapScale', value => `${value}%`)
+            .register('toolbarScale', '工具栏缩放', 100, COM.Number, [10, 500, 10])
+            .setDisplayFunc('toolbarScale', value => `${value}%`)
+            .register('bookScale', '怪物手册缩放', 100, COM.Number, [10, 500, 10])
+            .setDisplayFunc('bookScale', value => `${value}%`)
     );
 
 const loading = Mota.require('var', 'loading');
@@ -471,6 +492,7 @@ loading.once('coreInit', () => {
         'screen.fontSize': storage.getValue('screen.fontSize', 16),
         'screen.smoothView': !!storage.getValue('screen.smoothView', true),
         'screen.criticalGem': !!storage.getValue('screen.criticalGem', false),
+        'screen.fontSizeStatus': storage.getValue('screen.fontSizeStatus', 100),
         'action.fixed': !!storage.getValue('action.fixed', true),
         'audio.bgmEnabled': !!storage.getValue('audio.bgmEnabled', true),
         'audio.bgmVolume': storage.getValue('audio.bgmVolume', 80),
@@ -483,7 +505,12 @@ loading.once('coreInit', () => {
         'ui.mapScale': storage.getValue(
             'ui.mapScale',
             isMobile ? 300 : Math.floor(window.innerWidth / 600) * 50
-        )
+        ),
+        'ui.toolbarScale': storage.getValue(
+            'ui.toolbarScale',
+            isMobile ? 50 : Math.floor((window.innerWidth / 1700) * 10) * 10
+        ),
+        'ui.bookScale': storage.getValue('ui.bookScale', isMobile ? 100 : 80),
     });
 });
 
@@ -515,4 +542,22 @@ mainSetting
     .setDescription('audio.bgmVolume', `背景音乐的音量`)
     .setDescription('audio.soundEnabled', `是否开启音效`)
     .setDescription('audio.soundVolume', `音效的音量`)
-    .setDescription('ui.mapScale', `楼传小地图的缩放，百分比格式`);
+    .setDescription('ui.mapScale', `楼传小地图的缩放，百分比格式`)
+    .setDescription('ui.toolbarScale', `自定义工具栏的缩放比例`)
+    .setDescription('ui.bookScale', `怪物手册界面中每个怪物框体的高度缩放，最小值限定为 20% 屏幕高度`)
+    .setDescription('screen.fontSizeStatus', `修改状态栏的字体大小`)
+    .setDescription('screen.blur', '打开任意ui界面时是否有背景虚化效果，移动端打开后可能会有掉帧或者发热现象。关闭ui后生效');
+
+function setFontSize() {
+    const absoluteSize = storage.getValue(
+        '@@absoluteFontSize',
+        16 * devicePixelRatio
+    );
+    const size = Math.round(absoluteSize / devicePixelRatio);
+    mainSetting.setValue('screen.fontSize', size);
+}
+setFontSize();
+
+window.addEventListener('resize', () => {
+    setFontSize();
+});
