@@ -25,7 +25,7 @@ const compress = type === 'dist';
     await vite.build({
         plugins: [
             legacy({
-                targets: ['defaults', 'not IE 11'],
+                targets: ['since 2015', '> 50%'],
                 polyfills: true,
                 modernPolyfills: true
             })
