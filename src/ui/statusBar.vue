@@ -267,8 +267,7 @@ onUnmounted(() => {
 }
 
 .status-item {
-    display: flex;
-    flex-direction: row;
+    position: relative;
     max-width: 17.5vw;
     font-size: 200%;
     width: 100%;

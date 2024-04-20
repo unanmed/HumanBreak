@@ -276,10 +276,11 @@ function core() {
 core.prototype.init = async function (coreData, callback) {
     this._forwardFuncs();
     for (var key in coreData) core[key] = coreData[key];
+    await this._loadGameProcess();
+    await this._loadPluginAsync();
     this._init_flags();
     this._init_platform();
     this._init_others();
-    await this._loadGameProcess();
 
     var b = main.mode == 'editor';
     // 初始化画布
@@ -304,26 +305,60 @@ core.prototype.init = async function (coreData, callback) {
 core.prototype.initSync = function (coreData, callback) {
     this._forwardFuncs();
     for (var key in coreData) core[key] = coreData[key];
+    this._loadGameProcessSync();
+    this._loadPluginSync();
     this._init_flags();
     this._init_platform();
     this._init_others();
-    this._loadGameProcessSync();
 
     core.loader._load(function () {
         core._afterLoadResources(callback);
     });
 };
 
+core.prototype._loadPluginAsync = async function () {
+    if (!main.useCompress) {
+        await main.loadScript(`project/plugins.js?v=${main.version}`);
+    }
+    this._initPlugins();
+};
+
+core.prototype._loadPluginSync = function () {
+    if (main.useCompress) main.loadMod('project', 'project', () => 0);
+    else {
+        main.pureData.forEach(v => main.loadMod('project', v, () => 0));
+    }
+    this._initPlugins();
+};
+
+core.prototype._initPlugins = function () {
+    for (const [key, value] of Object.entries(
+        plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1
+    )) {
+        try {
+            value?.call(plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1);
+        } catch (e) {
+            console.error(`Plugin '${key}' init failed.`);
+            console.error(e);
+        }
+    }
+};
+
 core.prototype._loadGameProcess = async function () {
     // 加载游戏进程代码
-    if (main.pluginUseCompress) {
+    if (main.pluginUseCompress && main.replayChecking) {
         await main.loadScript(`project/processG.min.js?v=${main.version}`);
     } else {
-        // if (main.mode === 'play') {
-        //     await main.loadScript(`src/game/index.ts`, true);
-        // } else {
-        //     await main.loadScript(`src/game/index.esm.ts`, true);
-        // }
+        if (main.mode === 'editor') {
+            if (main.pluginUseCompress) {
+                await main.loadScript(`project/processG.min.js`);
+            } else {
+                await main.loadScript(`src/game/index.esm.ts`, true);
+            }
+        }
+    }
+    if (main.useCompress) {
+        await main.loadScript(`project/project.min.js`);
     }
 };
 

@@ -76,6 +76,24 @@ maps.prototype.loadFloor = function (floorId, map) {
 
 maps.prototype._loadFloor_doNotCopy = function () {
     // see src/plugin/game/fiveLayer.js
+    return [
+        'firstArrive',
+        'eachArrive',
+        'blocks',
+        'parallelDo',
+        'map',
+        'bgmap',
+        'fgmap',
+        'bg2map',
+        'fg2map',
+        'events',
+        'changeFloor',
+        'afterBattle',
+        'afterGetItem',
+        'afterOpenDoor',
+        'cannotMove',
+        'enemy'
+    ];
 };
 
 /// 根据需求解析出blocks
