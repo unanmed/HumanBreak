@@ -27,6 +27,7 @@ import type { KeyCode } from '@/plugin/keyCodes';
 import type { Ref } from 'vue';
 import type * as battle from './enemy/battle';
 import type * as hero from './hero';
+import type { Logger } from '@/core/common/logger';
 
 interface ClassInterface {
     // 渲染进程与游戏进程通用
@@ -88,6 +89,7 @@ interface VariableInterface {
     // 定义于游戏进程，渲染进程依然可用
     haloSpecials: number[];
     enemySpecials: typeof specials;
+    logger: Logger;
 }
 
 interface ModuleInterface {}

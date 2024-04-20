@@ -58,6 +58,7 @@ import KeyboardPanel from '@/panel/keyboard.vue';
 import { MCGenerator } from './main/layout';
 import { ResourceController } from './loader/controller';
 import { readyAllResource } from './loader/load';
+import { logger } from './common/logger';
 
 // ----- 类注册
 Mota.register('class', 'AudioPlayer', AudioPlayer);
@@ -93,6 +94,7 @@ Mota.register('var', 'mainSetting', mainSetting);
 Mota.register('var', 'KeyCode', KeyCode);
 Mota.register('var', 'settingStorage', settingStorage);
 Mota.register('var', 'status', status);
+Mota.register('var', 'logger', logger);
 // ----- 模块注册
 Mota.register('module', 'CustomComponents', {
     createSettingComponents,
