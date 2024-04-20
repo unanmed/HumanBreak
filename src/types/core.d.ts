@@ -1140,6 +1140,7 @@ interface SplitImageData {
 }
 
 interface Main extends MainData {
+    renderLoaded: boolean;
     /**
      * 是否在录像验证中
      */
