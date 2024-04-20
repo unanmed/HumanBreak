@@ -305,10 +305,15 @@ main.prototype.loadSync = function (mode, callback) {
     });
 
     core.initSync(coreData, callback);
+    main.loading.emit('coreLoaded');
+    main.loading.emit('coreInit');
+    core.initStatus.maps = core.maps._initMaps();
     core.resize();
     main.core = core;
 
     core.completeAchievement = () => 0;
+
+    core.plugin = { drawLight: 0 };
 };
 
 main.prototype.loadAsync = async function (mode, callback) {
@@ -402,20 +407,30 @@ main.prototype.loadAsync = async function (mode, callback) {
     ].forEach(function (t) {
         coreData[t] = main[t];
     });
-    await core.init(coreData, callback);
-    if (main.mode === 'play') main.loading.emit('coreInit');
-    core.initStatus.maps = core.maps._initMaps();
+    if (main.mode === 'play') {
+        await core.init(coreData, callback);
+        main.loading.emit('coreInit');
+        core.initStatus.maps = core.maps._initMaps();
+    } else {
+        await core.init(coreData, () => {
+            callback();
+            core.initStatus.maps = core.maps._initMaps();
+        });
+        main.loading.emit('coreInit');
+    }
 
     core.resize();
 
     main.core = core;
 
+    if (main.mode === 'editor') return;
+
     // 自动放缩最大化
-    let auto = Mota.require('var', 'mainSetting').getValue('autoSclae');
+    let auto = Mota.require('var', 'mainSetting').getValue('autoScale', true);
 
     if (auto && !core.domStyle.isVertical) {
         try {
-            Mota.Plugin.require('utils_g').maxGameScale();
+            Mota.Plugin.require('utils_g').maxGameScale(1);
             requestAnimationFrame(() => {
                 var style = getComputedStyle(main.dom.gameGroup);
                 var height = parseFloat(style.height);

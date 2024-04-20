@@ -527,6 +527,7 @@ function watchProject() {
             /_.*/
         ]
     });
+    watcher.removeAllListeners();
     watcher.on('change', async path => {
         // 楼层热重载
         if (/project(\/|\\)floors(\/|\\).*\.js$/.test(path)) {

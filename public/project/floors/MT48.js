@@ -131,7 +131,16 @@ main.floors.MT48=
                         "value": "1"
                     }
                 ],
-                "false": []
+                "false": [
+                    {
+                        "type": "changeFloor",
+                        "floorId": "MT49",
+                        "loc": [
+                            7,
+                            14
+                        ]
+                    }
+                ]
             }
         ]
     },
