@@ -310,25 +310,21 @@ onMounted(async () => {
     start = document.getElementById('start') as HTMLDivElement;
     background = document.getElementById('background') as HTMLImageElement;
 
-    const loading = Mota.require('var', 'loading');
+    window.addEventListener('resize', resize);
+    resize();
 
-    loading.once('coreInit', async () => {
-        window.addEventListener('resize', resize);
-        resize();
+    soundChecked.value = mainSetting.getValue('audio.bgmEnabled', true);
+    mainBgm.changeTo('title.mp3');
 
-        soundChecked.value = mainSetting.getValue('audio.bgmEnabled', true);
-        mainBgm.changeTo('title.mp3');
-
-        start.style.opacity = '1';
-        if (played) {
-            text.value = text2;
-            hard.splice(1, 0, '挑战');
-        }
-        setButtonAnimate().then(() => (showed.value = true));
-        await sleep(1000);
-        showCursor();
-        await sleep(1200);
-    });
+    start.style.opacity = '1';
+    if (played) {
+        text.value = text2;
+        hard.splice(1, 0, '挑战');
+    }
+    setButtonAnimate().then(() => (showed.value = true));
+    await sleep(1000);
+    showCursor();
+    await sleep(1200);
 
     CustomToolbar.closeAll();
 });

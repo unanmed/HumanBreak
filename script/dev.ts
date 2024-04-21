@@ -316,6 +316,7 @@ async function writeMultiFiles(req: Request, res: Response) {
 }
 
 async function writeDevResource(data: string) {
+    return;
     try {
         const buf = Buffer.from(data, 'base64');
         data = buf.toString('utf-8');
@@ -324,12 +325,14 @@ async function writeDevResource(data: string) {
         const icons = await fs.readFile('./public/project/icons.js', 'utf-8');
         const iconData = JSON.parse(icons.split('\n').slice(1).join(''));
         res.push(
-            ...info.main.bgms.map((v: any) => `bgms.${v}`),
-            ...info.main.fonts.map((v: any) => `fonts.${v}.ttf`),
-            ...info.main.images.map((v: any) => `images.${v}`),
-            ...info.main.sounds.map((v: any) => `sounds.${v}`),
-            ...info.main.tilesets.map((v: any) => `tilesets.${v}`),
-            ...Object.keys(iconData.autotile).map(v => `autotiles.${v}.png`),
+            ...info.main.bgms.map((v: any) => `audio/${v}`),
+            ...info.main.fonts.map((v: any) => `buffer/project/fonts/${v}.ttf`),
+            ...info.main.images.map((v: any) => `image/project/images/${v}`),
+            ...info.main.sounds.map((v: any) => `buffer/${v}`),
+            ...info.main.tilesets.map((v: any) => `image/project/tilesets${v}`),
+            ...Object.keys(iconData.autotile).map(
+                v => `image/project/autotiles/${v}.png`
+            ),
             ...[
                 'animates',
                 'cloud',
@@ -343,7 +346,7 @@ async function writeDevResource(data: string) {
                 'npcs',
                 'sun',
                 'terrains'
-            ].map(v => `materials.${v}.png`)
+            ].map(v => `material/${v}.png`)
         );
         const text = JSON.stringify(res, void 0, 4);
         await fs.writeFile('./src/data/resource-dev.json', text, 'utf-8');

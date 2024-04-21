@@ -57,7 +57,6 @@ import EnemyTarget from '@/panel/enemyTarget.vue';
 import KeyboardPanel from '@/panel/keyboard.vue';
 import { MCGenerator } from './main/layout';
 import { ResourceController } from './loader/controller';
-import { readyAllResource } from './loader/load';
 import { logger } from './common/logger';
 
 // ----- 类注册
@@ -133,5 +132,3 @@ Mota.register('module', 'MCGenerator', MCGenerator);
 
 main.renderLoaded = true;
 Mota.require('var', 'hook').emit('renderLoaded');
-
-readyAllResource();

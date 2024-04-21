@@ -32,7 +32,8 @@ fixedUi.register(
     new GameUi('chapter', UI.Chapter),
     new GameUi('completeAchi', UI.CompleteAchi),
     new GameUi('start', UI.Start),
-    new GameUi('toolbar', UI.Toolbar)
+    new GameUi('toolbar', UI.Toolbar),
+    new GameUi('load', UI.Load)
 );
 fixedUi.showAll();
 
@@ -72,15 +73,5 @@ hook.once('mounted', () => {
         fixed.style.display = 'none';
     });
 
-    if (loaded && !mounted) {
-        fixedUi.open('start');
-    }
     mounted = true;
-});
-hook.once('load', () => {
-    if (mounted) {
-        // todo: 暂时先这么搞，之后重写加载界面，需要改成先显示加载界面，加载完毕后再打开这个界面
-        fixedUi.open('start');
-    }
-    loaded = true;
 });

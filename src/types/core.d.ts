@@ -98,6 +98,8 @@ type MaterialImages = {
      */
     tilesets: Record<string, HTMLImageElement>;
 
+    keyboard: HTMLImageElement;
+
     hero: HTMLImageElement;
 };
 
@@ -1081,6 +1083,8 @@ interface Core extends Pick<Main, CoreDataFromMain> {
         _this: any,
         ...params: Parameters<F>
     ): ReturnType<F>;
+
+    _afterLoadResources(callback?: () => void): void;
 }
 
 type CoreMixin = Core &

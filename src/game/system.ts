@@ -7,12 +7,6 @@ import type {
     IndexedEventEmitter
 } from '@/core/common/eventEmitter';
 import type { loading } from './game';
-import type {
-    Resource,
-    ResourceStore,
-    ResourceType,
-    ZippedResource
-} from '@/core/loader/resource';
 import type { Hotkey } from '@/core/main/custom/hotkey';
 import type { Keyboard } from '@/core/main/custom/keyboard';
 import type { CustomToolbar } from '@/core/main/custom/toolbar';
@@ -38,9 +32,6 @@ interface ClassInterface {
     GameStorage: typeof GameStorage;
     MotaSetting: typeof MotaSetting;
     SettingDisplayer: typeof SettingDisplayer;
-    Resource: typeof Resource;
-    ZippedResource: typeof ZippedResource;
-    ResourceStore: typeof ResourceStore;
     Focus: typeof Focus;
     GameUi: typeof GameUi;
     UiController: typeof UiController;
@@ -82,8 +73,6 @@ interface VariableInterface {
     // isMobile: boolean;
     bgm: BgmController;
     sound: SoundController;
-    resource: ResourceStore<Exclude<ResourceType, 'zip'>>;
-    zipResource: ResourceStore<'zip'>;
     settingStorage: GameStorage;
     status: Ref<boolean>;
     // 定义于游戏进程，渲染进程依然可用
@@ -529,7 +518,8 @@ function r<T = undefined>(
     fn: (this: T, packages: PackageInterface) => void,
     thisArg?: T
 ) {
-    if (!main.replayChecking) fn.call(thisArg as T, MPackage.requireAll());
+    if (!main.replayChecking && main.mode === 'play')
+        fn.call(thisArg as T, MPackage.requireAll());
 }
 
 /**
@@ -548,7 +538,7 @@ function rf<F extends (...params: any) => any, T>(
     thisArg?: T
 ): (this: T, ...params: Parameters<F>) => ReturnType<F> | undefined {
     // @ts-ignore
-    if (main.replayChecking) return () => {};
+    if (main.replayChecking || main.mode === 'editor') return () => {};
     else {
         return (...params) => {
             return fn.call(thisArg, ...params);

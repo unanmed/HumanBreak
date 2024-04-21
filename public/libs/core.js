@@ -297,9 +297,19 @@ core.prototype.init = async function (coreData, callback) {
         }
     }
 
-    core.loader._load(function () {
-        core._afterLoadResources(callback);
-    });
+    if (main.replayChecking || main.mode === 'editor') {
+        core.loader._load(function () {
+            core._afterLoadResources(callback);
+        });
+    } else {
+        if (main.renderLoaded)
+            Mota.require('var', 'fixedUi').open('load', { callback });
+        else {
+            Mota.require('var', 'hook').once('renderLoaded', () => {
+                Mota.require('var', 'fixedUi').open('load', { callback });
+            });
+        }
+    }
 };
 
 core.prototype.initSync = function (coreData, callback) {
