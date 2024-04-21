@@ -30,7 +30,7 @@ checkMobile();
 function checkMobile() {
     if (isMobile && !alerted) {
         alert(
-            '手机端建议使用自带的浏览器进行游玩，并在进入游戏后开启游戏内的全屏设置游玩'
+            '手机端建议使用新版APP或者自带的浏览器进行游玩，并在进入游戏后开启游戏内的全屏设置游玩'
         );
         alerted = true;
     }
@@ -39,7 +39,7 @@ function checkMobile() {
 /**
  * 向一个元素添加拖拽事件
  * @param ele 目标元素，当为全局拖拽时，传入数组表示所有元素共用一个全局拖拽函数
- * @param fn 推拽时触发的函数，传入x y和鼠标事件或点击事件
+ * @param fn 拖拽时触发的函数，传入x y和鼠标事件或点击事件
  * @param ondown 鼠标按下时执行的函数
  * @param global 是否全局拖拽，即拖拽后鼠标或手指离开元素后是否依然视为正在拖拽
  */
@@ -62,6 +62,14 @@ export function useDrag(
         const ele = global ? document : e.target;
         if (ele) {
             (ele as HTMLElement).removeEventListener('mousemove', mouseFn);
+        }
+        onup && onup(e);
+    };
+
+    const touchUp = (e: TouchEvent) => {
+        const ele = global ? document : e.target;
+        if (ele) {
+            (ele as HTMLElement).removeEventListener('touchmove', touchFn);
         }
         onup && onup(e);
     };
@@ -92,10 +100,6 @@ export function useDrag(
     }
 
     const target = global ? document : ele;
-
-    const touchUp = (e: TouchEvent) => {
-        onup && onup(e);
-    };
 
     if (target instanceof Array) {
         target.forEach(v => {

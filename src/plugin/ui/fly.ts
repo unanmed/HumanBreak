@@ -506,7 +506,7 @@ export class MinimapDrawer {
         y: number
     ) {
         if (
-            this.scale * this.innerRatio > 10 &&
+            this.scale * this.innerRatio > 2 &&
             this.scale * this.innerRatio < 40 &&
             !this.downloadMode &&
             this.showInfo
