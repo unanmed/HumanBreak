@@ -46,10 +46,19 @@ interface AssistKeyToolbarItem extends ToolbarItemBase<'assistKey'> {
     assist: KeyCode.Ctrl | KeyCode.Shift | KeyCode.Alt;
 }
 
+interface MinimatToolbar extends ToolbarItemBase<'minimap'> {
+    action: boolean;
+    scale: number;
+    noBorder: boolean;
+    showInfo: boolean;
+    autoLocate: boolean;
+}
+
 interface ToolbarItemMap {
     hotkey: HotkeyToolbarItem;
     item: ItemToolbarItem;
     assistKey: AssistKeyToolbarItem;
+    minimap: MinimatToolbar;
 }
 
 interface ToolbarSaveData {

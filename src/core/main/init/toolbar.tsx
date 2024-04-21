@@ -9,6 +9,7 @@ import { getVitualKeyOnce } from '@/plugin/utils';
 import { cloneDeep } from 'lodash-es';
 import { Select, SelectOption } from 'ant-design-vue';
 import { mainSetting } from '../setting';
+import Minimap from '@/components/minimap.vue';
 
 // todo: 新增更改设置的ToolItem
 
@@ -85,6 +86,16 @@ function AssistKeyTool(props: CustomToolbarProps<'assistKey'>) {
         >
             {KeyCodeUtils.toString(item.assist)}
         </span>
+    );
+}
+
+function MinimapToolbar(props: CustomToolbarProps<'minimap'>) {
+    const { item, toolbar } = props;
+
+    return (
+        <div>
+            <Minimap></Minimap>
+        </div>
     );
 }
 

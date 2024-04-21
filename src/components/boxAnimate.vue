@@ -9,9 +9,9 @@
 <script lang="tsx" setup>
 import { onMounted, onUnmounted, onUpdated, ref } from 'vue';
 import { addAnimate, removeAnimate } from '../plugin/animateController';
-import { has } from '../plugin/utils';
+import { has, requireUniqueSymbol } from '../plugin/utils';
 
-const id = (Math.random() * 1e8).toFixed(0);
+const id = requireUniqueSymbol().toFixed(0);
 
 const props = defineProps<{
     id: AllIds | 'hero' | 'none';

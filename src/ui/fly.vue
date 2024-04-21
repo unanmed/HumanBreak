@@ -401,6 +401,7 @@ onMounted(async () => {
     drawer = new MinimapDrawer(map);
     drawer.scale = scale;
     drawer.noBorder = noBorder.value;
+    drawer.showInfo = true;
 
     const mapStyle = getComputedStyle(map);
     const thumbStyle = getComputedStyle(thumb);

@@ -21,6 +21,7 @@ import type { KeyCode } from '@/plugin/keyCodes';
 import type { Ref } from 'vue';
 import type * as battle from './enemy/battle';
 import type * as hero from './hero';
+import type * as damage from './enemy/damage';
 import type { Logger } from '@/core/common/logger';
 
 interface ClassInterface {
@@ -51,8 +52,9 @@ interface ClassInterface {
 
 type _IBattle = typeof battle;
 type _IHero = typeof hero;
+type _IDamage = typeof damage;
 
-interface FunctionInterface extends _IBattle, _IHero {
+interface FunctionInterface extends _IBattle, _IHero, _IDamage {
     // 定义于渲染进程，录像中会进行polyfill，但是不执行任何内容
     readyAllResource(): void;
     // 定义于游戏进程，渲染进程依然可用

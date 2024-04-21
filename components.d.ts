@@ -19,6 +19,7 @@ declare module '@vue/runtime-core' {
     BoxAnimate: typeof import('./src/components/boxAnimate.vue')['default']
     Colomn: typeof import('./src/components/colomn.vue')['default']
     EnemyOne: typeof import('./src/components/enemyOne.vue')['default']
+    Minimap: typeof import('./src/components/minimap.vue')['default']
     Scroll: typeof import('./src/components/scroll.vue')['default']
   }
 }

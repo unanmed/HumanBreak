@@ -13,6 +13,7 @@
 import { sleep } from 'mutate-animate';
 import { onMounted, onUnmounted, onUpdated } from 'vue';
 import { cancelGlobalDrag, useDrag, useWheel } from '../plugin/use';
+import { requireUniqueSymbol } from '@/plugin/utils';
 
 let main: HTMLDivElement;
 
@@ -34,7 +35,7 @@ const emits = defineEmits<{
 let now = 0;
 let total = 0;
 
-const id = (1e8 * Math.random()).toFixed(0);
+const id = requireUniqueSymbol().toFixed(0);
 const scale = window.devicePixelRatio;
 const width = props.width ?? 20;
 

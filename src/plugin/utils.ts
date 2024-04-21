@@ -396,3 +396,8 @@ export function formatSize(size: number) {
         ? `${(size / (1 << 20)).toFixed(2)}MB`
         : `${(size / (1 << 30)).toFixed(2)}GB`;
 }
+
+let num = 0;
+export function requireUniqueSymbol() {
+    return num++;
+}

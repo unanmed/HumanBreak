@@ -1,6 +1,6 @@
 import './system';
 import '../plugin/game/index';
-import { DamageEnemy, EnemyCollection } from './enemy/damage';
+import * as damage from './enemy/damage';
 import { EventEmitter, IndexedEventEmitter } from '@/core/common/eventEmitter';
 import { Range } from '@/plugin/game/range';
 import { specials } from './enemy/special';
@@ -9,8 +9,8 @@ import * as battle from './enemy/battle';
 import * as hero from './hero';
 
 // ----- 类注册
-Mota.register('class', 'DamageEnemy', DamageEnemy);
-Mota.register('class', 'EnemyCollection', EnemyCollection);
+Mota.register('class', 'DamageEnemy', damage.DamageEnemy);
+Mota.register('class', 'EnemyCollection', damage.EnemyCollection);
 Mota.register('class', 'EventEmitter', EventEmitter);
 Mota.register('class', 'IndexedEventEmitter', IndexedEventEmitter);
 Mota.register('class', 'Range', Range);
@@ -18,6 +18,7 @@ Mota.register('class', 'Range', Range);
 Mota.register('fn', 'getEnemy', battle.getEnemy);
 Mota.register('fn', 'getHeroStatusOn', hero.getHeroStatusOn);
 Mota.register('fn', 'getHeroStatusOf', hero.getHeroStatusOf);
+Mota.register('fn', 'ensureFloorDamage', damage.ensureFloorDamage);
 // ----- 变量注册
 Mota.register('var', 'enemySpecials', specials);
 Mota.register('var', 'hook', hook);

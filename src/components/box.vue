@@ -46,7 +46,7 @@
 import { onMounted, onUnmounted, onUpdated, ref, watch } from 'vue';
 import { DragOutlined } from '@ant-design/icons-vue';
 import { isMobile, useDrag, cancelGlobalDrag } from '../plugin/use';
-import { has } from '../plugin/utils';
+import { has, requireUniqueSymbol } from '../plugin/utils';
 import { sleep } from 'mutate-animate';
 
 const props = defineProps<{
@@ -65,7 +65,7 @@ const emits = defineEmits<{
     (e: 'update:height', data: number): void;
 }>();
 
-const id = (1e8 * Math.random()).toFixed(0);
+const id = requireUniqueSymbol().toFixed(0);
 
 const moveSelected = ref(false);
 let moveTimeout = 0;

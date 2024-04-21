@@ -214,6 +214,7 @@ export class MinimapDrawer {
     ox: number = 0;
     oy: number = 0;
     noBorder: boolean = false;
+    showInfo: boolean = false;
 
     // cache
     drawedThumbnail: Partial<Record<FloorIds, boolean>> = {};
@@ -436,6 +437,21 @@ export class MinimapDrawer {
                 );
                 ctx.fillStyle = '#000';
             }
+        }
+        if (this.scale > 2) {
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = `3px "normal"`;
+            ctx.strokeStyle = 'black';
+            Mota.require('fn', 'ensureFloorDamage')(floorId);
+            const enemyNum = core.status.maps[floorId].enemy.list.length;
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+            ctx.fillRect(x - 6, y - 2, 12, 4);
+            ctx.fillStyle = 'white';
+            ctx.strokeText(`${enemyNum}怪物`, x, y);
+            ctx.fillText(`${enemyNum}怪物`, x, y);
+            ctx.restore();
         }
     }
 

@@ -27,7 +27,7 @@ import { onMounted, onUnmounted, onUpdated, ref } from 'vue';
 import { LeftOutlined } from '@ant-design/icons-vue';
 import Scroll from './scroll.vue';
 import { isMobile } from '../plugin/use';
-import { has } from '../plugin/utils';
+import { has, requireUniqueSymbol } from '../plugin/utils';
 
 const emits = defineEmits<{
     (e: 'close'): void;
@@ -40,7 +40,7 @@ const props = defineProps<{
     right?: number;
 }>();
 
-const id = (1e8 * Math.random()).toFixed(0);
+const id = requireUniqueSymbol().toFixed(0);
 
 let main: HTMLDivElement;
 let left: HTMLDivElement;
