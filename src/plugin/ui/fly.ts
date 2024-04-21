@@ -1,4 +1,4 @@
-import { has } from '../utils';
+import { downloadCanvasImage, has, tip } from '../utils';
 
 type BFSFromString = `${FloorIds},${number},${number},${Dir}`;
 type BFSToString = `${FloorIds},${number},${number}`;
@@ -199,4 +199,295 @@ export function getMapData(
     };
 
     return (bfsCache[floorId] = res);
+}
+
+type Loc2 = [number, number, number, number];
+
+export class MinimapDrawer {
+    ctx: CanvasRenderingContext2D;
+    canvas: HTMLCanvasElement;
+    scale: number = 1;
+    nowFloor: FloorIds = core.status.floorId;
+    nowArea: string = '';
+
+    // position & config
+    ox: number = 0;
+    oy: number = 0;
+    noBorder: boolean = false;
+
+    // cache
+    drawedThumbnail: Partial<Record<FloorIds, boolean>> = {};
+    thumbnailLoc: Partial<Record<FloorIds, Loc2>> = {};
+
+    // temp
+    private tempCanvas: HTMLCanvasElement = document.createElement('canvas');
+    private tempCtx: CanvasRenderingContext2D;
+
+    private downloadMode: boolean = false;
+
+    constructor(canvas: HTMLCanvasElement) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d')!;
+        this.tempCtx = this.tempCanvas.getContext('2d')!;
+    }
+
+    link(canvas: HTMLCanvasElement) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d')!;
+    }
+
+    clearCache() {
+        this.drawedThumbnail = {};
+        this.thumbnailLoc = {};
+    }
+
+    /**
+     * 绘制小地图
+     * @param noCache 是否不使用缓存
+     */
+    drawMap(noCache: boolean = false) {
+        const border = this.noBorder ? 0.5 : 1;
+        const data = getMapDrawData(
+            this.nowFloor,
+            this.noBorder ? 0 : 5,
+            border,
+            noCache
+        );
+        const temp = this.tempCanvas;
+        const ctx = this.tempCtx;
+        const s = this.scale * devicePixelRatio;
+        temp.width = data.width * s;
+        temp.height = data.height * s;
+        ctx.lineWidth = (border * devicePixelRatio) / 2;
+        ctx.strokeStyle = '#fff';
+        ctx.scale(s, s);
+        ctx.translate(5, 5);
+
+        if (!this.noBorder) {
+            // 绘制连线
+            data.line.forEach(([x1, y1, x2, y2]) => {
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+            });
+        }
+
+        // 绘制地图及缩略图
+        for (const [id, [x, y]] of Object.entries(data.locs) as [
+            FloorIds,
+            LocArr
+        ][]) {
+            if (!this.noBorder) this.drawBorder(id, x, y);
+            this.drawThumbnail(id, x, y);
+        }
+        this.drawToTarget();
+    }
+
+    /**
+     * 绘制一个楼层的边框
+     */
+    drawBorder(id: FloorIds, x: number, y: number) {
+        const border = this.noBorder ? 0.5 : 1;
+        const ctx = this.tempCtx;
+        ctx.lineWidth = border * devicePixelRatio;
+        const map = core.status.maps[id];
+
+        if (!core.hasVisitedFloor(id)) {
+            ctx.fillStyle = '#d0d';
+        } else {
+            ctx.fillStyle = '#000';
+        }
+        if (id === this.nowFloor) {
+            ctx.strokeStyle = 'gold';
+        } else {
+            ctx.strokeStyle = '#fff';
+        }
+
+        ctx.strokeRect(
+            x - map.width / 2,
+            y - map.height / 2,
+            map.width,
+            map.height
+        );
+
+        ctx.fillRect(
+            x - map.width / 2,
+            y - map.height / 2,
+            map.width,
+            map.height
+        );
+        if (id === this.nowFloor) {
+            ctx.fillStyle = '#ff04';
+            ctx.fillRect(
+                x - map.width / 2,
+                y - map.height / 2,
+                map.width,
+                map.height
+            );
+        }
+    }
+
+    /**
+     * 将临时画布的内容绘制到目标画布上
+     */
+    drawToTarget() {
+        const mapCtx = this.ctx;
+        const map = this.canvas;
+        const temp = this.tempCanvas;
+
+        mapCtx.clearRect(0, 0, map.width, map.height);
+        mapCtx.drawImage(
+            temp,
+            0,
+            0,
+            temp.width,
+            temp.height,
+            this.ox * devicePixelRatio + (map.width - temp.width) / 2,
+            this.oy * devicePixelRatio + (map.height - temp.height) / 2,
+            temp.width,
+            temp.height
+        );
+    }
+
+    /**
+     * 检查是否应该绘制缩略图
+     */
+    checkThumbnail(floorId: FloorIds, x: number, y: number) {
+        const scale = this.scale;
+        const ox = this.ox;
+        const oy = this.oy;
+        const map = this.canvas;
+        const temp = this.tempCanvas;
+
+        const floor = core.status.maps[floorId];
+        const s = scale * devicePixelRatio;
+        const px = ox * devicePixelRatio + (map.width - temp.width) / 2 + 5 * s;
+        const py =
+            oy * devicePixelRatio + (map.height - temp.height) / 2 + 5 * s;
+        const left = px + (x - floor.width / 2) * s;
+        const top = py + (y - floor.height / 2) * s;
+        const right = left + floor.width * s;
+        const bottom = top + floor.height * s;
+
+        this.thumbnailLoc[floorId] = [left, top, right, bottom];
+
+        if (
+            this.drawedThumbnail[floorId] ||
+            (!this.noBorder && scale <= 4) ||
+            right < 0 ||
+            bottom < 0 ||
+            left > map.width ||
+            top > map.height
+        )
+            return false;
+
+        return true;
+    }
+
+    /**
+     * 绘制缩略图
+     */
+    drawThumbnail(
+        floorId: FloorIds,
+        x: number,
+        y: number,
+        noCheck: boolean = false
+    ) {
+        if (
+            !this.downloadMode &&
+            !noCheck &&
+            !this.checkThumbnail(floorId, x, y)
+        )
+            return;
+        const floor = core.status.maps[floorId];
+        this.drawedThumbnail[floorId] = true;
+
+        // 绘制缩略图
+        const ctx = this.tempCtx;
+        core.drawThumbnail(floorId, void 0, {
+            all: true,
+            inFlyMap: true,
+            x: x - floor.width / 2,
+            y: y - floor.height / 2,
+            w: floor.width,
+            h: floor.height,
+            ctx,
+            damage: this.scale > 7
+        });
+        if (!this.downloadMode) {
+            if (!core.hasVisitedFloor(floorId)) {
+                ctx.fillStyle = '#d0d6';
+                ctx.fillRect(
+                    x - floor.width / 2,
+                    y - floor.height / 2,
+                    floor.width,
+                    floor.height
+                );
+                ctx.fillStyle = '#000';
+            }
+            if (this.nowFloor === floorId) {
+                ctx.fillStyle = '#ff04';
+                ctx.fillRect(
+                    x - floor.width / 2,
+                    y - floor.height / 2,
+                    floor.width,
+                    floor.height
+                );
+                ctx.fillStyle = '#000';
+            }
+        }
+    }
+
+    /**
+     * 当移动时检查是否应该绘制缩略图
+     */
+    checkMoveThumbnail() {
+        const border = this.noBorder ? 0.5 : 1;
+        const data = getMapDrawData(
+            this.nowFloor,
+            this.noBorder ? 0 : 5,
+            border
+        );
+        for (const [id, [x, y]] of Object.entries(data.locs) as [
+            FloorIds,
+            LocArr
+        ][]) {
+            if (this.checkThumbnail(id, x, y)) {
+                this.drawThumbnail(id, x, y, true);
+            }
+        }
+    }
+
+    download() {
+        if (this.nowArea === '') {
+            tip('error', '当前地图不在任意一个区域内！');
+            return;
+        }
+        this.downloadMode = true;
+        const before = this.scale;
+        this.scale = 32;
+        this.drawMap();
+        downloadCanvasImage(this.tempCanvas, this.nowArea);
+        this.scale = before;
+        this.downloadMode = false;
+        tip('success', '图片下载成功！');
+    }
+
+    /**
+     * 居中地图
+     * @param id 楼层id
+     */
+    locateMap(id: FloorIds) {
+        const data = getMapDrawData(
+            id,
+            this.noBorder ? 0 : 5, // 可恶的0和5，写反了找一个多小时
+            this.noBorder ? 0.5 : 1
+        );
+        if (!data.locs[id]) return;
+
+        const [x, y] = data.locs[id]!;
+        this.ox = (-x + data.width / 2 - 5) * this.scale;
+        this.oy = (-y + data.height / 2 - 5) * this.scale;
+    }
 }

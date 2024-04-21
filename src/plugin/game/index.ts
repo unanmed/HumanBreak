@@ -17,6 +17,7 @@ import * as utils from './utils';
 import * as chase from './chase';
 import * as remainEnemy from './enemy/remainEnemy';
 import * as checkBlock from './enemy/checkblock';
+import './hook';
 
 Mota.Plugin.register('utils_g', utils);
 Mota.Plugin.register('loopMap_g', loopMap, loopMap.init);

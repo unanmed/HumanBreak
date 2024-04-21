@@ -89,7 +89,12 @@
 <script lang="ts" setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import Scroll from '../components/scroll.vue';
-import { getArea, getMapDrawData, getMapData } from '../plugin/ui/fly';
+import {
+    getArea,
+    getMapDrawData,
+    getMapData,
+    MinimapDrawer
+} from '../plugin/ui/fly';
 import { cancelGlobalDrag, isMobile, useDrag, useWheel } from '../plugin/use';
 import {
     LeftOutlined,
@@ -121,10 +126,6 @@ const noBorder = ref(true);
 const tradition = ref(false);
 let scale =
     ((isMobile ? 1.5 : 3) * mainSetting.getValue('ui.mapScale', 100)) / 100;
-let ox = 0;
-let oy = 0;
-let drawedThumbnail: Partial<Record<FloorIds, boolean>> = {};
-let thumbnailLoc: Partial<Record<FloorIds, Loc2>> = {};
 
 noBorder.value = core.getLocalStorage('noBorder', true);
 tradition.value = core.getLocalStorage('flyTradition', false);
@@ -133,32 +134,34 @@ const floor = computed(() => {
     return core.status.maps[nowFloor.value];
 });
 
-watch(nowFloor, draw);
+watch(nowFloor, n => {
+    drawer.nowFloor = n;
+    draw();
+});
 watch(nowArea, n => {
-    ox = 0;
-    oy = 0;
     scale = 3;
     lastScale = 3;
+    drawer.nowArea = n;
+    drawer.scale = 3;
+    drawer.ox = 0;
+    drawer.oy = 0;
     if (area[n] && !area[n].includes(nowFloor.value))
         nowFloor.value =
             area[n].find(v => v === core.status.floorId) ?? area[n][0];
 });
 watch(noBorder, n => {
     core.setLocalStorage('noBorder', n);
-    drawedThumbnail = {};
-    drawMap();
+    drawer.noBorder = true;
+    drawer.drawedThumbnail = {};
+    drawer.drawMap();
 });
 watch(tradition, n => {
     core.setLocalStorage('flyTradition', n);
 });
 
-const temp = document.createElement('canvas');
-const tempCtx = temp.getContext('2d')!;
 let map: HTMLCanvasElement;
-let mapCtx: CanvasRenderingContext2D;
 let thumb: HTMLCanvasElement;
 let thumbCtx: CanvasRenderingContext2D;
-let downloadMode = false;
 
 function exit() {
     mainUi.close(props.num);
@@ -169,192 +172,7 @@ const title = computed(() => {
 });
 const titleChange = createChangable(title).change;
 
-/**
- * 绘制小地图
- * @param noCache 是否不使用缓存
- */
-function drawMap(noCache: boolean = false) {
-    const border = noBorder.value ? 0.5 : 1;
-    const data = getMapDrawData(
-        nowFloor.value,
-        noBorder.value ? 0 : 5,
-        border,
-        noCache
-    );
-    const ctx = tempCtx;
-    const s = scale * devicePixelRatio;
-    temp.width = data.width * s;
-    temp.height = data.height * s;
-    ctx.lineWidth = (border * devicePixelRatio) / 2;
-    ctx.strokeStyle = '#fff';
-    ctx.scale(s, s);
-    ctx.translate(5, 5);
-
-    if (!noBorder.value) {
-        // 绘制连线
-        data.line.forEach(([x1, y1, x2, y2]) => {
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
-        });
-    }
-
-    // 绘制地图及缩略图
-    for (const [id, [x, y]] of Object.entries(data.locs) as [
-        FloorIds,
-        LocArr
-    ][]) {
-        if (!noBorder.value) drawBorder(id, x, y);
-        drawThumbnail(id, x, y);
-    }
-    drawToTarget();
-}
-
-function drawBorder(id: FloorIds, x: number, y: number) {
-    const border = noBorder.value ? 0.5 : 1;
-    const ctx = tempCtx;
-    ctx.lineWidth = border * devicePixelRatio;
-    const map = core.status.maps[id];
-
-    if (!core.hasVisitedFloor(id)) {
-        ctx.fillStyle = '#d0d';
-    } else {
-        ctx.fillStyle = '#000';
-    }
-    if (id === nowFloor.value) {
-        ctx.strokeStyle = 'gold';
-    } else {
-        ctx.strokeStyle = '#fff';
-    }
-
-    ctx.strokeRect(
-        x - map.width / 2,
-        y - map.height / 2,
-        map.width,
-        map.height
-    );
-
-    ctx.fillRect(x - map.width / 2, y - map.height / 2, map.width, map.height);
-    if (id === nowFloor.value) {
-        ctx.fillStyle = '#ff04';
-        ctx.fillRect(
-            x - map.width / 2,
-            y - map.height / 2,
-            map.width,
-            map.height
-        );
-    }
-}
-
-/**
- * 绘制小地图至目标画布
- */
-function drawToTarget(s: number = 1) {
-    mapCtx.clearRect(0, 0, map.width, map.height);
-    mapCtx.drawImage(
-        temp,
-        0,
-        0,
-        temp.width,
-        temp.height,
-        ox * devicePixelRatio + (map.width - temp.width) / 2,
-        oy * devicePixelRatio + (map.height - temp.height) / 2,
-        temp.width,
-        temp.height
-    );
-}
-
-/**
- * 检查是否应该绘制缩略图
- */
-function checkThumbnail(floorId: FloorIds, x: number, y: number) {
-    const floor = core.status.maps[floorId];
-    const s = scale * devicePixelRatio;
-    const px = ox * devicePixelRatio + (map.width - temp.width) / 2 + 5 * s;
-    const py = oy * devicePixelRatio + (map.height - temp.height) / 2 + 5 * s;
-    const left = px + (x - floor.width / 2) * s;
-    const top = py + (y - floor.height / 2) * s;
-    const right = left + floor.width * s;
-    const bottom = top + floor.height * s;
-
-    thumbnailLoc[floorId] = [left, top, right, bottom];
-
-    if (
-        drawedThumbnail[floorId] ||
-        (!noBorder.value && scale <= 4) ||
-        right < 0 ||
-        bottom < 0 ||
-        left > map.width ||
-        top > map.height
-    )
-        return false;
-
-    return true;
-}
-
-/**
- * 绘制缩略图
- */
-function drawThumbnail(
-    floorId: FloorIds,
-    x: number,
-    y: number,
-    noCheck: boolean = false
-) {
-    if (!downloadMode && !noCheck && !checkThumbnail(floorId, x, y)) return;
-    const floor = core.status.maps[floorId];
-    drawedThumbnail[floorId] = true;
-
-    // 绘制缩略图
-    const ctx = tempCtx;
-    core.drawThumbnail(floorId, void 0, {
-        all: true,
-        inFlyMap: true,
-        x: x - floor.width / 2,
-        y: y - floor.height / 2,
-        w: floor.width,
-        h: floor.height,
-        ctx,
-        damage: scale > 7
-    });
-    if (!downloadMode) {
-        if (!core.hasVisitedFloor(floorId)) {
-            ctx.fillStyle = '#d0d6';
-            ctx.fillRect(
-                x - floor.width / 2,
-                y - floor.height / 2,
-                floor.width,
-                floor.height
-            );
-            ctx.fillStyle = '#000';
-        }
-        if (nowFloor.value === floorId) {
-            ctx.fillStyle = '#ff04';
-            ctx.fillRect(
-                x - floor.width / 2,
-                y - floor.height / 2,
-                floor.width,
-                floor.height
-            );
-            ctx.fillStyle = '#000';
-        }
-    }
-}
-
-/**
- * 当移动时检查是否应该绘制缩略图
- */
-function checkMoveThumbnail() {
-    const border = noBorder.value ? 0.5 : 1;
-    const data = getMapDrawData(nowFloor.value, noBorder.value ? 0 : 5, border);
-    for (const [id, [x, y]] of Object.entries(data.locs) as [
-        FloorIds,
-        LocArr
-    ][]) {
-        if (checkThumbnail(id, x, y)) drawThumbnail(id, x, y, true);
-    }
-}
+let drawer: MinimapDrawer;
 
 function drawRight() {
     let w = thumb.width;
@@ -388,26 +206,14 @@ function drawRight() {
  * 绘制所有内容
  */
 function draw() {
-    drawedThumbnail = {};
-    thumbnailLoc = {};
-    drawMap();
+    drawer.clearCache();
+    drawer.drawMap();
     drawRight();
 }
 
 function download() {
-    if (nowArea.value === '') {
-        tip('error', '当前地图不在任意一个区域内！');
-        return;
-    }
-    downloadMode = true;
-    const before = scale;
-    scale = 32;
-    drawMap();
-    downloadCanvasImage(temp, nowArea.value);
-    scale = before;
-    downloadMode = false;
+    drawer.download();
     draw();
-    tip('success', '图片下载成功！');
 }
 
 function fly() {
@@ -418,18 +224,19 @@ function fly() {
 let lastScale = scale;
 const changeScale = debounce((s: number) => {
     map.style.transform = '';
-    drawedThumbnail = {};
-    drawMap();
+    drawer.drawedThumbnail = {};
+    drawer.scale = s;
+    drawer.drawMap();
     lastScale = s;
 }, 200);
 
 function resize(delta: number) {
-    ox *= delta;
-    oy *= delta;
+    drawer.ox *= delta;
+    drawer.oy *= delta;
     scale = delta * scale;
     changeScale(scale);
     map.style.transform = `scale(${scale / lastScale})`;
-    thumbnailLoc = {};
+    drawer.thumbnailLoc = {};
 }
 
 let lastX = 0;
@@ -445,12 +252,12 @@ function drag(x: number, y: number) {
     if (touchScale) return;
     const dx = x - lastX;
     const dy = y - lastY;
-    ox += dx;
-    oy += dy;
+    drawer.ox += dx;
+    drawer.oy += dy;
     lastX = x;
     lastY = y;
-    checkMoveThumbnail();
-    drawToTarget();
+    drawer.checkMoveThumbnail();
+    drawer.drawToTarget();
     if (Math.abs(x - startX) > 10 || Math.abs(y - startY) > 10) moved = true;
 }
 
@@ -460,7 +267,7 @@ function click(e: MouseEvent) {
     const x = e.offsetX * devicePixelRatio;
     const y = e.offsetY * devicePixelRatio;
     for (const [id, [left, top, right, bottom]] of Object.entries(
-        thumbnailLoc
+        drawer.thumbnailLoc
     ) as [FloorIds, Loc2][]) {
         if (x >= left && x <= right && y >= top && y <= bottom) {
             if (id === nowFloor.value) {
@@ -497,7 +304,7 @@ function changeFloorByDelta(delta: number) {
     }
     nowFloor.value = core.floorIds[to];
     changeAreaByFloor(nowFloor.value);
-    locateMap(nowFloor.value);
+    drawer.locateMap(nowFloor.value);
 }
 
 function changeFloorByDir(dir: Dir) {
@@ -509,28 +316,11 @@ function changeFloorByDir(dir: Dir) {
 
         if (d === dir) {
             const target = to.split(',')[0] as FloorIds;
-            locateMap(target);
+            drawer.locateMap(target);
             nowFloor.value = target;
             return;
         }
     }
-}
-
-/**
- * 居中地图
- * @param id 楼层id
- */
-function locateMap(id: FloorIds) {
-    const data = getMapDrawData(
-        id,
-        noBorder.value ? 0 : 5, // 可恶的0和5，写反了找一个多小时
-        noBorder.value ? 0.5 : 1
-    );
-    if (!data.locs[id]) return;
-
-    const [x, y] = data.locs[id]!;
-    ox = (-x + data.width / 2 - 5) * scale;
-    oy = (-y + data.height / 2 - 5) * scale;
 }
 
 // -------------------- 键盘事件
@@ -607,9 +397,12 @@ function touchmove(e: TouchEvent) {
 
 onMounted(async () => {
     map = document.getElementById('fly-map') as HTMLCanvasElement;
-    mapCtx = map.getContext('2d')!;
     thumb = document.getElementById('fly-thumbnail') as HTMLCanvasElement;
     thumbCtx = thumb.getContext('2d')!;
+
+    drawer = new MinimapDrawer(map);
+    drawer.scale = scale;
+    drawer.noBorder = noBorder.value;
 
     const mapStyle = getComputedStyle(map);
     const thumbStyle = getComputedStyle(thumb);
@@ -622,7 +415,7 @@ onMounted(async () => {
         v.addEventListener('click', e => (v as HTMLElement).blur());
     });
 
-    locateMap(nowFloor.value);
+    drawer.locateMap(nowFloor.value);
     draw();
 
     useDrag(

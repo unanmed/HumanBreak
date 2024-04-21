@@ -1,3 +1,5 @@
+import { hook } from '@/game/game';
+
 export {};
 
 const potionItems: AllIdsOf<'items'>[] = [
@@ -10,8 +12,6 @@ const potionItems: AllIdsOf<'items'>[] = [
     'I487',
     'I491'
 ];
-
-const hook = Mota.require('var', 'hook');
 
 hook.on('afterGetItem', (itemId, x, y, isGentleClick) => {
     // 获得一个道具后触发的事件

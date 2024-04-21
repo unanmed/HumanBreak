@@ -33,21 +33,17 @@ class GameLoading extends EventEmitter<GameLoadEvent> {
     }
 
     addMaterialLoaded() {
-        this.once('coreInit', () => {
-            this.materialsLoaded++;
-            if (this.materialsLoaded === this.materialsNum) {
-                this.emit('materialLoaded');
-            }
-        });
+        this.materialsLoaded++;
+        if (this.materialsLoaded === this.materialsNum) {
+            this.emit('materialLoaded');
+        }
     }
 
     addAutotileLoaded() {
-        this.once('coreInit', () => {
-            this.autotileLoaded++;
-            if (this.autotileLoaded === this.autotileNum) {
-                this.emit('autotileLoaded');
-            }
-        });
+        this.autotileLoaded++;
+        if (this.autotileLoaded === this.autotileNum) {
+            this.emit('autotileLoaded');
+        }
     }
 
     /**
