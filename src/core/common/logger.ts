@@ -1,3 +1,5 @@
+import { debounce } from 'lodash-es';
+
 export const enum LogLevel {
     /** 输出所有，包括日志 */
     LOG,
@@ -8,6 +10,29 @@ export const enum LogLevel {
     /** 仅报错 */
     ERROR
 }
+
+let logTip: HTMLSpanElement;
+if (!main.replayChecking) {
+    const tip = document.createElement('span');
+    logTip = tip;
+    tip.style.position = 'fixed';
+    tip.style.right = '0';
+    tip.style.bottom = '0';
+    tip.style.height = '20px';
+    tip.style.width = 'auto';
+    tip.style.textAlign = 'right';
+    tip.style.padding = '0 5px';
+    tip.style.fontSize = '16px';
+    tip.style.fontFamily = 'Arial';
+    tip.style.display = 'none';
+    tip.style.margin = '2px';
+    document.body.appendChild(tip);
+}
+
+const hideTipText = debounce(() => {
+    if (main.replayChecking) return;
+    logTip.style.display = 'none';
+}, 5000);
 
 export class Logger {
     level: LogLevel = LogLevel.LOG;
@@ -32,6 +57,12 @@ export class Logger {
     error(code: number, text: string) {
         if (this.level <= LogLevel.ERROR) {
             console.error(`[ERROR Code ${code}] ${text}`);
+            if (!main.replayChecking) {
+                logTip.style.color = 'lightcoral';
+                logTip.style.display = 'block';
+                logTip.textContent = `Error thrown, please check in console.`;
+                hideTipText();
+            }
         }
     }
 
@@ -43,6 +74,12 @@ export class Logger {
     severe(code: number, text: string) {
         if (this.level <= LogLevel.SEVERE_WARNING) {
             console.warn(`[SEVERE WARNING Code ${code}] ${text}`);
+            if (!main.replayChecking) {
+                logTip.style.color = 'goldenrod';
+                logTip.style.display = 'block';
+                logTip.textContent = `Severe warning thrown, please check in console.`;
+                hideTipText();
+            }
         }
     }
 
@@ -54,6 +91,12 @@ export class Logger {
     warn(code: number, text: string) {
         if (this.level <= LogLevel.WARNING) {
             console.warn(`[WARNING Code ${code}] ${text}`);
+            if (!main.replayChecking) {
+                logTip.style.color = 'gold';
+                logTip.style.display = 'block';
+                logTip.textContent = `Warning thrown, please check in console.`;
+                hideTipText();
+            }
         }
     }
 
