@@ -7,12 +7,14 @@
         v-model:top="box.y"
         v-model:height="box.height"
         v-model:width="box.width"
+        :key="num"
     >
         <div class="toolbar">
             <div
                 class="toolbar-item"
                 v-for="item of bar.items"
                 @click.stop="click"
+                :noaction="!!item.noDefaultAction"
             >
                 <component
                     :is="(CustomToolbar.info[item.type].show as any)"
@@ -97,13 +99,16 @@ onUnmounted(() => {
     display: flex;
     margin: v-bind('scale * 5 + "px"');
     min-width: v-bind('scale * 50 + "px"');
-    height: v-bind('scale * 50 + "px"');
-    cursor: pointer;
+    min-height: v-bind('scale * 50 + "px"');
     background-color: #222;
     border: 1.5px solid #ddd8;
     justify-content: center;
     align-items: center;
     transition: all 0.1s linear;
+}
+
+.toolbar-item[noaction='false'] {
+    cursor: pointer;
 }
 
 .toolbar-item::v-deep(> *) {
@@ -123,11 +128,11 @@ onUnmounted(() => {
     background-color: #555;
 }
 
-.toolbar-item:hover {
+.toolbar-item:hover[noaction='false'] {
     background-color: #444;
 }
 
-.toolbar-item:active {
+.toolbar-item:active[noaction='false'] {
     background-color: #333;
 }
 </style>

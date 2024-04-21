@@ -309,6 +309,7 @@ onMounted(async () => {
     main = document.getElementById('start-main') as HTMLDivElement;
     start = document.getElementById('start') as HTMLDivElement;
     background = document.getElementById('background') as HTMLImageElement;
+    CustomToolbar.closeAll();
 
     window.addEventListener('resize', resize);
     resize();
@@ -325,8 +326,6 @@ onMounted(async () => {
     await sleep(1000);
     showCursor();
     await sleep(1200);
-
-    CustomToolbar.closeAll();
 });
 
 onUnmounted(() => {

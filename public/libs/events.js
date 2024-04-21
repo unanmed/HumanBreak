@@ -4441,7 +4441,6 @@ events.prototype.tryUseItem = function (itemId, noRoute, callback) {
         return;
     }
     if (core.canUseItem(itemId)) {
-        core.ui.closePanel();
         core.useItem(itemId, noRoute, callback);
     } else {
         core.playSound('操作失败');

@@ -83,13 +83,14 @@ export interface GameEvent extends EmitableEvent {
     /** Emitted in core/index.ts */
     renderLoaded: () => void;
     // /** Emitted in libs/events.js */
-    // afterGetItem: (
-    //     itemId: AllIdsOf<'items'>,
-    //     x: number,
-    //     y: number,
-    //     isGentleClick: boolean
-    // ) => void;
-    // afterOpenDoor: (doorId: AllIdsOf<'animates'>, x: number, y: number) => void;
+    afterGetItem: (
+        itemId: AllIdsOf<'items'>,
+        x: number,
+        y: number,
+        isGentleClick: boolean
+    ) => void;
+    afterOpenDoor: (doorId: AllIdsOf<'animates'>, x: number, y: number) => void;
+    afterChangeFloor: (floorId: FloorIds) => void;
 }
 
 export const hook = new EventEmitter<GameEvent>();

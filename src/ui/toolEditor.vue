@@ -525,7 +525,7 @@ onUnmounted(() => {
         display: flex;
         margin: v-bind('5 * scale + "px"');
         min-width: v-bind('50 * scale + "px"');
-        height: v-bind('50 * scale + "px"');
+        min-height: v-bind('50 * scale + "px"');
         background-color: #222;
         border: 1.5px solid #ddd8;
         justify-content: center;

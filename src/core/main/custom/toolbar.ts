@@ -28,6 +28,7 @@ interface CustomToolbarEvent extends EmitableEvent {
 interface ToolbarItemBase<T extends ToolbarItemType> {
     type: T;
     id: string;
+    noDefaultAction?: boolean;
 }
 
 // 快捷键
@@ -52,6 +53,8 @@ interface MinimatToolbar extends ToolbarItemBase<'minimap'> {
     noBorder: boolean;
     showInfo: boolean;
     autoLocate: boolean;
+    width: number;
+    height: number;
 }
 
 interface ToolbarItemMap {
@@ -404,6 +407,28 @@ CustomToolbar.register(
         return {
             assist: KeyCode.Ctrl,
             ...item
+        };
+    }
+);
+CustomToolbar.register(
+    'minimap',
+    '小地图',
+    function (id, item) {
+        return true;
+    },
+    COM.MinimapTool,
+    EDITOR.MinimapTool,
+    item => {
+        return {
+            action: false,
+            scale: 5,
+            width: 300,
+            height: 300,
+            noBorder: false,
+            showInfo: false,
+            autoLocate: true,
+            ...item,
+            noDefaultAction: true
         };
     }
 );

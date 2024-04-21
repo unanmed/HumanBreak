@@ -1,3 +1,4 @@
+import { mainSetting } from '@/core/main/setting';
 import { downloadCanvasImage, has, tip } from '../utils';
 
 type BFSFromString = `${FloorIds},${number},${number},${Dir}`;
@@ -225,11 +226,14 @@ export class MinimapDrawer {
     private tempCtx: CanvasRenderingContext2D;
 
     private downloadMode: boolean = false;
+    private innerRatio: number = 1;
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d')!;
         this.tempCtx = this.tempCanvas.getContext('2d')!;
+        this.innerRatio = mainSetting.getValue('ui.mapScale', 100) / 100;
+        this.scale *= this.innerRatio;
     }
 
     link(canvas: HTMLCanvasElement) {
@@ -327,6 +331,8 @@ export class MinimapDrawer {
                 map.height
             );
         }
+        if (!this.noBorder && this.scale * this.innerRatio <= 7)
+            this.drawEnemy(ctx, id, x, y);
     }
 
     /**
@@ -375,7 +381,7 @@ export class MinimapDrawer {
 
         if (
             this.drawedThumbnail[floorId] ||
-            (!this.noBorder && scale <= 4) ||
+            (!this.noBorder && scale * this.innerRatio <= 7) ||
             right < 0 ||
             bottom < 0 ||
             left > map.width ||
@@ -414,7 +420,7 @@ export class MinimapDrawer {
             w: floor.width,
             h: floor.height,
             ctx,
-            damage: this.scale > 7
+            damage: this.scale * this.innerRatio > 15
         });
         if (!this.downloadMode) {
             if (!core.hasVisitedFloor(floorId)) {
@@ -438,21 +444,7 @@ export class MinimapDrawer {
                 ctx.fillStyle = '#000';
             }
         }
-        if (this.scale > 2) {
-            ctx.save();
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.font = `3px "normal"`;
-            ctx.strokeStyle = 'black';
-            Mota.require('fn', 'ensureFloorDamage')(floorId);
-            const enemyNum = core.status.maps[floorId].enemy.list.length;
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-            ctx.fillRect(x - 6, y - 2, 12, 4);
-            ctx.fillStyle = 'white';
-            ctx.strokeText(`${enemyNum}怪物`, x, y);
-            ctx.fillText(`${enemyNum}怪物`, x, y);
-            ctx.restore();
-        }
+        this.drawEnemy(ctx, floorId, x, y);
     }
 
     /**
@@ -505,5 +497,58 @@ export class MinimapDrawer {
         const [x, y] = data.locs[id]!;
         this.ox = (-x + data.width / 2 - 5) * this.scale;
         this.oy = (-y + data.height / 2 - 5) * this.scale;
+    }
+
+    private drawEnemy(
+        ctx: CanvasRenderingContext2D,
+        floorId: FloorIds,
+        x: number,
+        y: number
+    ) {
+        if (
+            this.scale * this.innerRatio > 10 &&
+            this.scale * this.innerRatio < 40 &&
+            !this.downloadMode &&
+            this.showInfo
+        ) {
+            ctx.save();
+            ctx.lineWidth = 0.5;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = `3px "normal"`;
+            ctx.strokeStyle = 'black';
+            Mota.require('fn', 'ensureFloorDamage')(floorId);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+            ctx.fillRect(x - 6, y - 2, 12, 4);
+            ctx.fillStyle = 'white';
+            const enemy = core.status.maps[floorId].enemy.list;
+            if (enemy.length === 0) {
+                ctx.strokeStyle = 'lightgreen';
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.beginPath();
+                ctx.moveTo(x - 1.5, y);
+                ctx.lineTo(x - 0.5, y + 1);
+                ctx.lineTo(x + 1.5, y - 1);
+                ctx.stroke();
+            } else {
+                const ids = [...new Set(enemy.map(v => v.id))];
+                if (ids.length === 1) {
+                    core.drawIcon(ctx, ids[0], x - 2, y - 2, 4, 4);
+                } else if (ids.length === 2) {
+                    core.drawIcon(ctx, ids[0], x - 4, y - 2, 4, 4);
+                    core.drawIcon(ctx, ids[1], x, y - 2, 4, 4);
+                } else {
+                    core.drawIcon(ctx, ids[0], x - 5, y - 2, 4, 4);
+                    core.drawIcon(ctx, ids[1], x - 1, y - 2, 4, 4);
+                    ctx.fillStyle = 'white';
+                    ctx.strokeStyle = 'black';
+                    ctx.strokeText('…', x + 4, y);
+                    ctx.fillText('…', x + 4, y);
+                }
+            }
+
+            ctx.restore();
+        }
     }
 }

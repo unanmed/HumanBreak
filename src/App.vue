@@ -13,7 +13,7 @@
             </div>
         </div>
         <div id="ui-fixed">
-            <template v-for="ui of fixedUi.stack">
+            <template v-for="ui of fixedUi.stack" :key="ui.num">
                 <component
                     :is="ui.ui.component"
                     v-on="ui.vOn ?? {}"

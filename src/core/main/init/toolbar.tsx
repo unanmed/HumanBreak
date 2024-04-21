@@ -7,7 +7,13 @@ import BoxAnimate from '@/components/boxAnimate.vue';
 import { checkAssist } from '../custom/hotkey';
 import { getVitualKeyOnce } from '@/plugin/utils';
 import { cloneDeep } from 'lodash-es';
-import { Select, SelectOption } from 'ant-design-vue';
+import {
+    Button,
+    InputNumber,
+    Select,
+    SelectOption,
+    Switch
+} from 'ant-design-vue';
 import { mainSetting } from '../setting';
 import Minimap from '@/components/minimap.vue';
 
@@ -18,6 +24,7 @@ interface Components {
     KeyTool: CustomToolbarComponent<'hotkey'>;
     ItemTool: CustomToolbarComponent<'item'>;
     AssistKeyTool: CustomToolbarComponent<'assistKey'>;
+    MinimapTool: CustomToolbarComponent<'minimap'>;
 }
 
 export function createToolbarComponents() {
@@ -25,7 +32,8 @@ export function createToolbarComponents() {
         DefaultTool,
         KeyTool,
         ItemTool,
-        AssistKeyTool
+        AssistKeyTool,
+        MinimapTool
     };
     return com;
 }
@@ -35,7 +43,8 @@ export function createToolbarEditorComponents() {
         DefaultTool: DefaultToolEditor,
         KeyTool: KeyToolEdtior,
         ItemTool: ItemToolEditor,
-        AssistKeyTool: AssistKeyToolEditor
+        AssistKeyTool: AssistKeyToolEditor,
+        MinimapTool: MinimapToolEditor
     };
     return com;
 }
@@ -89,12 +98,20 @@ function AssistKeyTool(props: CustomToolbarProps<'assistKey'>) {
     );
 }
 
-function MinimapToolbar(props: CustomToolbarProps<'minimap'>) {
+function MinimapTool(props: CustomToolbarProps<'minimap'>) {
     const { item, toolbar } = props;
 
     return (
-        <div>
-            <Minimap></Minimap>
+        <div style={{ width: `${item.width}px`, height: `${item.height}px` }}>
+            <Minimap
+                action={item.action}
+                scale={item.scale}
+                noBorder={item.noBorder}
+                showInfo={item.showInfo}
+                autoLocate={item.autoLocate}
+                width={item.width}
+                height={item.height}
+            ></Minimap>
         </div>
     );
 }
@@ -212,6 +229,158 @@ function AssistKeyToolEditor(props: CustomToolbarProps<'assistKey'>) {
                 <SelectOption value={KeyCode.Shift}>Shift</SelectOption>
                 <SelectOption value={KeyCode.Alt}>Alt</SelectOption>
             </Select>
+        </div>
+    );
+}
+
+function MinimapToolEditor(props: CustomToolbarProps<'minimap'>) {
+    const { item, toolbar } = props;
+
+    type K = keyof typeof item;
+    const setConfig: <T extends K>(key: T, value: (typeof item)[T]) => void = (
+        key,
+        value
+    ) => {
+        let v = value;
+        if (key === 'height' || key === 'height') {
+            if ((v as number) > 1000) (v as number) = 1000;
+            if ((v as number) < 50) (v as number) = 50;
+        } else if (key === 'scale') {
+            if ((v as number) > 20) (v as number) = 20;
+            if ((v as number) < 1) (v as number) = 1;
+        }
+        toolbar.set(item.id, { [key]: v });
+        toolbar.refresh();
+    };
+
+    return (
+        <div
+            style="
+                display: flex; flex-direction: column;
+                align-items: center; padding: 0 5%; margin: 1%
+            "
+        >
+            <div class="toolbar-editor-item">
+                <span>宽度</span>
+                <div style="width: 70%; display: flex; justify-content: end">
+                    <InputNumber
+                        class="number-input"
+                        size="large"
+                        // keyboard={true}
+                        min={50}
+                        max={1000}
+                        step={50}
+                        value={item.width}
+                        onChange={value => setConfig('width', value as number)}
+                    ></InputNumber>
+                    <Button
+                        style="margin-left: 5%"
+                        class="number-button"
+                        type="primary"
+                        onClick={() => setConfig('width', item.width - 50)}
+                    >
+                        减少
+                    </Button>
+                    <Button
+                        style="margin-left: 5%"
+                        class="number-button"
+                        type="primary"
+                        onClick={() => setConfig('width', item.width + 50)}
+                    >
+                        增加
+                    </Button>
+                </div>
+            </div>
+            <div class="toolbar-editor-item">
+                <span>高度</span>
+                <div style="width: 70%; display: flex; justify-content: end">
+                    <InputNumber
+                        class="number-input"
+                        size="large"
+                        // keyboard={true}
+                        min={50}
+                        max={1000}
+                        step={50}
+                        value={item.height}
+                        onChange={value => setConfig('height', value as number)}
+                    ></InputNumber>
+                    <Button
+                        style="margin-left: 5%"
+                        class="number-button"
+                        type="primary"
+                        onClick={() => setConfig('height', item.height - 50)}
+                    >
+                        减少
+                    </Button>
+                    <Button
+                        style="margin-left: 5%"
+                        class="number-button"
+                        type="primary"
+                        onClick={() => setConfig('height', item.height + 50)}
+                    >
+                        增加
+                    </Button>
+                </div>
+            </div>
+            <div class="toolbar-editor-item">
+                <span>放缩比例</span>
+                <div style="width: 70%; display: flex; justify-content: end">
+                    <InputNumber
+                        class="number-input"
+                        size="large"
+                        // keyboard={true}
+                        min={1}
+                        max={20}
+                        step={1}
+                        value={item.scale}
+                        onChange={value => setConfig('scale', value as number)}
+                    ></InputNumber>
+                    <Button
+                        style="margin-left: 5%"
+                        class="number-button"
+                        type="primary"
+                        onClick={() => setConfig('scale', item.scale - 1)}
+                    >
+                        减少
+                    </Button>
+                    <Button
+                        style="margin-left: 5%"
+                        class="number-button"
+                        type="primary"
+                        onClick={() => setConfig('scale', item.scale + 1)}
+                    >
+                        增加
+                    </Button>
+                </div>
+            </div>
+            <div class="toolbar-editor-item">
+                <span>无边框模式</span>
+                <Switch
+                    checked={item.noBorder}
+                    onClick={() => setConfig('noBorder', !item.noBorder)}
+                ></Switch>
+            </div>
+            <div class="toolbar-editor-item">
+                <span>显示漏怪</span>
+                <Switch
+                    checked={item.showInfo}
+                    onClick={() => setConfig('showInfo', !item.showInfo)}
+                ></Switch>
+            </div>
+            <div class="toolbar-editor-item">
+                <span>自动居中</span>
+                <Switch
+                    checked={item.autoLocate}
+                    onClick={() => setConfig('autoLocate', !item.autoLocate)}
+                ></Switch>
+            </div>
+            <div class="toolbar-editor-item">
+                <span>允许交互</span>
+                <Switch
+                    checked={item.action}
+                    onClick={() => setConfig('action', !item.action)}
+                ></Switch>
+            </div>
         </div>
     );
 }
