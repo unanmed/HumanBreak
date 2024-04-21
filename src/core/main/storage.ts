@@ -98,6 +98,15 @@ export class GameStorage<T extends object = any> {
     static get(key: string) {
         return this.list.find(v => v.key === key);
     }
+
+    /**
+     * 与Symbol.for类似
+     */
+    static for(key: string) {
+        const s = this.get(key);
+        if (s) return s;
+        else return new GameStorage(key);
+    }
 }
 
 window.addEventListener('beforeunload', () => {

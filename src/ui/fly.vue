@@ -89,12 +89,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import Scroll from '../components/scroll.vue';
-import {
-    getArea,
-    getMapDrawData,
-    getMapData,
-    MinimapDrawer
-} from '../plugin/ui/fly';
+import { getArea, getMapData, MinimapDrawer } from '../plugin/ui/fly';
 import { cancelGlobalDrag, isMobile, useDrag, useWheel } from '../plugin/use';
 import {
     LeftOutlined,
@@ -103,12 +98,13 @@ import {
     DoubleRightOutlined
 } from '@ant-design/icons-vue';
 import { debounce } from 'lodash-es';
-import { downloadCanvasImage, tip } from '../plugin/utils';
+import { tip } from '../plugin/utils';
 import { GameUi } from '@/core/main/custom/ui';
 import { gameKey } from '@/core/main/init/hotkey';
 import { createChangable } from '@/plugin/ui/common';
 import { mainUi } from '@/core/main/init/ui';
 import { mainSetting } from '@/core/main/setting';
+import { GameStorage } from '@/core/main/storage';
 
 const props = defineProps<{
     num: number;
@@ -124,11 +120,13 @@ const nowArea = ref(
 const nowFloor = ref(core.status.floorId);
 const noBorder = ref(true);
 const tradition = ref(false);
-let scale =
-    ((isMobile ? 1.5 : 3) * mainSetting.getValue('ui.mapScale', 100)) / 100;
+const settingScale = mainSetting.getValue('ui.mapScale', 100) / 100;
+let scale = (isMobile ? 1.5 : 3) * settingScale;
 
-noBorder.value = core.getLocalStorage('noBorder', true);
-tradition.value = core.getLocalStorage('flyTradition', false);
+const storage = GameStorage.for(GameStorage.fromAuthor('AncTe', 'flyConfig'));
+
+noBorder.value = storage.getValue('noBorder', true);
+tradition.value = storage.getValue('flyTradition', false);
 
 const floor = computed(() => {
     return core.status.maps[nowFloor.value];
@@ -139,10 +137,10 @@ watch(nowFloor, n => {
     draw();
 });
 watch(nowArea, n => {
-    scale = 3;
-    lastScale = 3;
+    scale = 3 * settingScale;
+    lastScale = 3 * settingScale;
     drawer.nowArea = n;
-    drawer.scale = 3;
+    drawer.scale = 3 * settingScale;
     drawer.ox = 0;
     drawer.oy = 0;
     if (area[n] && !area[n].includes(nowFloor.value))
@@ -150,13 +148,13 @@ watch(nowArea, n => {
             area[n].find(v => v === core.status.floorId) ?? area[n][0];
 });
 watch(noBorder, n => {
-    core.setLocalStorage('noBorder', n);
-    drawer.noBorder = true;
+    storage.setValue('noBorder', n);
+    drawer.noBorder = n;
     drawer.drawedThumbnail = {};
     drawer.drawMap();
 });
 watch(tradition, n => {
-    core.setLocalStorage('flyTradition', n);
+    storage.setValue('flyTradition', n);
 });
 
 let map: HTMLCanvasElement;
