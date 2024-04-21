@@ -84,59 +84,6 @@ export function init() {
             }
             core.fillBoldText(ctx, one.text, px, py, one.color as string);
         });
-
-        ctx.save();
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.lineWidth = 2;
-        core.status.damage.dir.forEach(v => {
-            let x = v.x;
-            let y = v.y;
-            if (onMap && core.bigmap.v2) {
-                x -= core.bigmap.posX;
-                y -= core.bigmap.posY;
-            }
-            if (x < -1 || x > 15 || y < 0 || y > 15) return;
-            let px = x * 32;
-            let py = y * 32;
-            ctx.beginPath();
-            if (v.dir === 'down') {
-                py -= 32;
-                ctx.moveTo(px + 16, py + 18);
-                ctx.lineTo(px + 16, py + 32);
-                ctx.moveTo(px + 10, py + 26);
-                ctx.lineTo(px + 16, py + 32);
-                ctx.lineTo(px + 22, py + 26);
-            } else if (v.dir === 'left') {
-                px += 32;
-                ctx.moveTo(px + 14, py + 16);
-                ctx.lineTo(px, py + 16);
-                ctx.moveTo(px + 6, py + 10);
-                ctx.lineTo(px, py + 16);
-                ctx.lineTo(px + 6, py + 22);
-            } else if (v.dir === 'up') {
-                py += 32;
-                ctx.moveTo(px + 16, py + 14);
-                ctx.lineTo(px + 16, py);
-                ctx.moveTo(px + 10, py + 6);
-                ctx.lineTo(px + 16, py);
-                ctx.lineTo(px + 22, py + 6);
-            } else {
-                px -= 32;
-                ctx.moveTo(px + 18, py + 16);
-                ctx.lineTo(px + 32, py + 16);
-                ctx.moveTo(px + 26, py + 10);
-                ctx.lineTo(px + 32, py + 16);
-                ctx.lineTo(px + 26, py + 22);
-            }
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 2.5;
-            ctx.stroke();
-            ctx.strokeStyle = v.color as string;
-            ctx.lineWidth = 1;
-            ctx.stroke();
-        });
-        ctx.restore();
     };
 
     control.prototype.moveHero = function (
