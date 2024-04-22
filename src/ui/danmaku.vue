@@ -183,6 +183,7 @@ onUnmounted(() => {
     text-wrap: nowrap;
     padding: 0 5px;
     display: flex;
+    align-items: center;
 }
 
 .danmaku-one:hover {
