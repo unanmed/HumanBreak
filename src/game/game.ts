@@ -91,6 +91,7 @@ export interface GameEvent extends EmitableEvent {
     ) => void;
     afterOpenDoor: (doorId: AllIdsOf<'animates'>, x: number, y: number) => void;
     afterChangeFloor: (floorId: FloorIds) => void;
+    moveOneStep: (x: number, y: number, floorId: FloorIds) => void;
 }
 
 export const hook = new EventEmitter<GameEvent>();

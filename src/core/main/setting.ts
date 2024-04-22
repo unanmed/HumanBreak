@@ -486,7 +486,7 @@ mainSetting
             .register('bookScale', '怪物手册缩放', 100, COM.Number, [10, 500, 10])
             .setDisplayFunc('bookScale', value => `${value}%`)
             .register('danmaku', '显示弹幕', true, COM.Boolean)
-            .register('danmakuSpeed', '弹幕速度', 60, COM.Number, [10, 200, 5])
+            .register('danmakuSpeed', '弹幕速度', 60, COM.Number, [10, 1000, 5])
     );
 
 const loading = Mota.require('var', 'loading');
@@ -521,7 +521,10 @@ loading.once('coreInit', () => {
         ),
         'ui.bookScale': storage.getValue('ui.bookScale', isMobile ? 100 : 80),
         'ui.danmaku': storage.getValue('ui.danmaku', true),
-        'ui.danmakuSpeed': storage.getValue('ui.danmakuSpeed', 60),
+        'ui.danmakuSpeed': storage.getValue(
+            'ui.danmakuSpeed', 
+            Math.floor(window.innerWidth / 25) * 5
+        ),
     });
 });
 

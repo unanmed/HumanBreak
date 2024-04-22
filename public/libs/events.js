@@ -4425,19 +4425,19 @@ events.prototype.tryUseItem = function (itemId, noRoute, callback) {
     if (itemId == 'book') {
         core.ui.closePanel();
         core.openBook(false);
-        callback();
+        callback?.();
         return;
     }
     if (itemId == 'fly') {
         core.ui.closePanel();
         core.useFly(false);
-        callback();
+        callback?.();
         return;
     }
     if (itemId == 'centerFly') {
         core.ui.closePanel();
         core.ui._drawCenterFly();
-        callback();
+        callback?.();
         return;
     }
     if (core.canUseItem(itemId)) {
@@ -4446,5 +4446,5 @@ events.prototype.tryUseItem = function (itemId, noRoute, callback) {
         core.playSound('操作失败');
         core.drawTip('当前无法使用' + core.material.items[itemId].name, itemId);
     }
-    callback();
+    callback?.();
 };

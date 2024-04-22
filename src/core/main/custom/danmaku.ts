@@ -6,6 +6,7 @@ import { deleteWith, ensureArray, parseCss, tip } from '@/plugin/utils';
 import axios, { toFormData } from 'axios';
 import { Component, VNode, h, ref, shallowReactive } from 'vue';
 /* @__PURE__ */ import { id, password } from '../../../../user';
+import { mainSetting } from '../setting';
 
 type CSSObj = Partial<Record<CanParseCss, string>>;
 
@@ -97,15 +98,26 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
         const form = toFormData(data);
         /* @__PURE__ */ form.append('userid', id);
         /* @__PURE__ */ form.append('password', password);
-        const res = await axios.post<PostDanmakuResponse>(
-            Danmaku.backend,
-            form
-        );
 
-        this.id = res.data.id;
-        this.posting = false;
+        try {
+            const res = await axios.post<PostDanmakuResponse>(
+                Danmaku.backend,
+                form
+            );
 
-        return res;
+            this.id = res.data.id;
+            this.posting = false;
+
+            return res;
+        } catch (e) {
+            this.posted = false;
+            this.posting = false;
+            logger.error(
+                3,
+                `Unexpected error when posting danmaku. Error info: ${e}`
+            );
+            return Promise.resolve();
+        }
     }
 
     /**
@@ -425,6 +437,20 @@ Danmaku.registerSpecContent('i', content => {
 });
 
 /* @__PURE__ */ Danmaku.backend = `/danmaku`;
+
 Mota.require('var', 'hook').once('reset', () => {
     Danmaku.fetch();
+});
+
+// 勇士移动后显示弹幕
+Mota.require('var', 'hook').on('moveOneStep', (x, y, floor) => {
+    const enabled = mainSetting.getValue('ui.danmaku', true);
+    if (!enabled) return;
+    const f = Danmaku.allInPos[floor];
+    if (f) {
+        const danmaku = f[`${x},${y}`];
+        if (danmaku) {
+            danmaku.show();
+        }
+    }
 });
