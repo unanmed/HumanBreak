@@ -23,6 +23,7 @@ import type * as battle from './enemy/battle';
 import type * as hero from './hero';
 import type * as damage from './enemy/damage';
 import type { Logger } from '@/core/common/logger';
+import type { Danmaku } from '@/core/main/custom/danmaku';
 
 interface ClassInterface {
     // 渲染进程与游戏进程通用
@@ -48,6 +49,7 @@ interface ClassInterface {
     Range: typeof Range;
     EnemyCollection: typeof EnemyCollection;
     DamageEnemy: typeof DamageEnemy;
+    Danmaku: typeof Danmaku;
 }
 
 type _IBattle = typeof battle;

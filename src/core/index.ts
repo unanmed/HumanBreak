@@ -58,6 +58,7 @@ import KeyboardPanel from '@/panel/keyboard.vue';
 import { MCGenerator } from './main/layout';
 import { ResourceController } from './loader/controller';
 import { logger } from './common/logger';
+import { Danmaku } from './main/custom/danmaku';
 
 // ----- 类注册
 Mota.register('class', 'AudioPlayer', AudioPlayer);
@@ -75,6 +76,7 @@ Mota.register('class', 'SoundEffect', SoundEffect);
 Mota.register('class', 'UiController', UiController);
 Mota.register('class', 'MComponent', MComponent);
 Mota.register('class', 'ResourceController', ResourceController);
+Mota.register('class', 'Danmaku', Danmaku);
 // ----- 函数注册
 Mota.register('fn', 'm', m);
 Mota.register('fn', 'unwrapBinary', unwarpBinary);

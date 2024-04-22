@@ -1,3 +1,5 @@
+import { tip } from './utils';
+
 export default function init() {
     return { useDrag, useWheel, useUp, isMobile };
 }
@@ -29,7 +31,8 @@ checkMobile();
 
 function checkMobile() {
     if (isMobile && !alerted) {
-        alert(
+        tip(
+            'info',
             '手机端建议使用新版APP或者自带的浏览器进行游玩，并在进入游戏后开启游戏内的全屏设置游玩'
         );
         alerted = true;

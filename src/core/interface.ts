@@ -12,3 +12,8 @@ export interface Undoable<T> {
      */
     redo(): T | undefined;
 }
+
+export interface ResponseBase {
+    code: number;
+    message: string;
+}

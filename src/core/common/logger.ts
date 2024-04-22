@@ -36,6 +36,7 @@ const hideTipText = debounce(() => {
 
 export class Logger {
     level: LogLevel = LogLevel.LOG;
+    enabled: boolean = true;
 
     constructor(logLevel: LogLevel) {
         this.level = logLevel;
@@ -55,7 +56,7 @@ export class Logger {
      * @param text 错误信息
      */
     error(code: number, text: string) {
-        if (this.level <= LogLevel.ERROR) {
+        if (this.level <= LogLevel.ERROR && this.enabled) {
             console.error(`[ERROR Code ${code}] ${text}`);
             if (!main.replayChecking) {
                 logTip.style.color = 'lightcoral';
@@ -72,7 +73,7 @@ export class Logger {
      * @param text 警告信息
      */
     severe(code: number, text: string) {
-        if (this.level <= LogLevel.SEVERE_WARNING) {
+        if (this.level <= LogLevel.SEVERE_WARNING && this.enabled) {
             console.warn(`[SEVERE WARNING Code ${code}] ${text}`);
             if (!main.replayChecking) {
                 logTip.style.color = 'goldenrod';
@@ -89,7 +90,7 @@ export class Logger {
      * @param text 警告信息
      */
     warn(code: number, text: string) {
-        if (this.level <= LogLevel.WARNING) {
+        if (this.level <= LogLevel.WARNING && this.enabled) {
             console.warn(`[WARNING Code ${code}] ${text}`);
             if (!main.replayChecking) {
                 logTip.style.color = 'gold';
@@ -105,9 +106,17 @@ export class Logger {
      * @param text 日志信息
      */
     log(text: string) {
-        if (this.level <= LogLevel.LOG) {
+        if (this.level <= LogLevel.LOG && this.enabled) {
             console.log(`[LOG] ${text}`);
         }
+    }
+
+    disable() {
+        this.enabled = false;
+    }
+
+    enable() {
+        this.enabled = true;
     }
 }
 

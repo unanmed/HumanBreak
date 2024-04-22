@@ -33,7 +33,8 @@ fixedUi.register(
     new GameUi('completeAchi', UI.CompleteAchi),
     new GameUi('start', UI.Start),
     new GameUi('toolbar', UI.Toolbar),
-    new GameUi('load', UI.Load)
+    new GameUi('load', UI.Load),
+    new GameUi('danmaku', UI.Danmaku)
 );
 fixedUi.showAll();
 

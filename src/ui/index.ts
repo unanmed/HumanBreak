@@ -23,3 +23,4 @@ export { default as Hotkey } from './hotkey.vue';
 export { default as Toolbar } from './toolbar.vue';
 export { default as ToolEditor } from './toolEditor.vue';
 export { default as Load } from './load.vue';
+export { default as Danmaku } from './danmaku.vue';

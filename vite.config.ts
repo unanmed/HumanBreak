@@ -75,7 +75,8 @@ export default defineConfig({
                 rewrite(path) {
                     return path.replace(/^\/forceTem/, '');
                 },
-            }
+            },
+            '/danmaku': 'https://h5mota.com/backend/tower/barrage.php'
         },
         watch: {
             ignored: ['**/public/**']

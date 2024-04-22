@@ -9,6 +9,7 @@ import settingsText from '@/data/settings.json';
 import { isMobile } from '@/plugin/use';
 import { fontSize } from '@/plugin/ui/statusBar';
 import { CustomToolbar } from './custom/toolbar';
+import { fixedUi } from './init/ui';
 
 export interface SettingComponentProps {
     item: MotaSettingItem;
@@ -410,6 +411,12 @@ function handleUiSetting<T extends number | boolean>(key: string, n: T, o: T) {
             v.setSize(v.width * scale, v.height * scale);
         });
         CustomToolbar.refreshAll(true);
+    } else if (key === 'danmaku') {
+        if (n) {
+            fixedUi.open('danmaku');
+        } else {
+            fixedUi.closeByName('danmaku');
+        }
     }
 }
 
@@ -478,6 +485,8 @@ mainSetting
             .setDisplayFunc('toolbarScale', value => `${value}%`)
             .register('bookScale', '怪物手册缩放', 100, COM.Number, [10, 500, 10])
             .setDisplayFunc('bookScale', value => `${value}%`)
+            .register('danmaku', '显示弹幕', true, COM.Boolean)
+            .register('danmakuSpeed', '弹幕速度', 60, COM.Number, [10, 200, 5])
     );
 
 const loading = Mota.require('var', 'loading');
@@ -511,6 +520,8 @@ loading.once('coreInit', () => {
             isMobile ? 50 : Math.floor((window.innerWidth / 1700) * 10) * 10
         ),
         'ui.bookScale': storage.getValue('ui.bookScale', isMobile ? 100 : 80),
+        'ui.danmaku': storage.getValue('ui.danmaku', true),
+        'ui.danmakuSpeed': storage.getValue('ui.danmakuSpeed', 60),
     });
 });
 
@@ -545,6 +556,8 @@ mainSetting
     .setDescription('ui.mapScale', `楼传小地图的缩放，百分比格式`)
     .setDescription('ui.toolbarScale', `自定义工具栏的缩放比例`)
     .setDescription('ui.bookScale', `怪物手册界面中每个怪物框体的高度缩放，最小值限定为 20% 屏幕高度`)
+    .setDescription('ui.danmaku', '是否显示弹幕')
+    .setDescription('ui.danmakuSpeed', '弹幕速度，刷新或开关弹幕显示后起效')
     .setDescription('screen.fontSizeStatus', `修改状态栏的字体大小`)
     .setDescription('screen.blur', '打开任意ui界面时是否有背景虚化效果，移动端打开后可能会有掉帧或者发热现象。关闭ui后生效');
 

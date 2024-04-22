@@ -43,6 +43,7 @@ dam3.png
 dam4.png
 meeting.md
 
-special.csv
+*.csv
 script/special.ts
+script/people.ts
 docs/

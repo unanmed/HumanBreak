@@ -46,6 +46,7 @@ function draw() {
     c.width = scale * w;
     c.height = scale * h;
     ctx.scale(scale, scale);
+    ctx.imageSmoothingEnabled = false;
 
     if (props.id === 'none') return;
 
@@ -73,6 +74,7 @@ onUnmounted(() => {
 onMounted(() => {
     c = document.getElementById(`box-animate-${id}`) as HTMLCanvasElement;
     ctx = c.getContext('2d')!;
+    ctx.imageSmoothingEnabled = false;
     draw();
 });
 
