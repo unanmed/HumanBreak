@@ -55,9 +55,32 @@ function DefaultTool(props: CustomToolbarProps) {
 
 function KeyTool(props: CustomToolbarProps<'hotkey'>) {
     const { item, toolbar } = props;
+
+    const unwarpAssist = (assist: number) => {
+        let res = '';
+        if (assist & (1 << 0)) {
+            res += 'Ctrl + ';
+        }
+        if (assist & (1 << 1)) {
+            res += 'Shift + ';
+        }
+        if (assist & (1 << 2)) {
+            res += 'Alt + ';
+        }
+        return res;
+    };
+
+    const getKeyShow = (key: KeyCode, assist: number) => {
+        return unwarpAssist(assist) + KeyCodeUtils.toString(key);
+    };
+
     return (
-        <span class="button-text" onClick={() => toolbar.emitTool(item.id)}>
-            {KeyCodeUtils.toString(item.key)}
+        <span
+            class="button-text"
+            style="padding: 0 5px"
+            onClick={() => toolbar.emitTool(item.id)}
+        >
+            {getKeyShow(item.key, item.assist)}
         </span>
     );
 }
