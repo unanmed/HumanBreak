@@ -938,6 +938,10 @@ export function calDamageWith(
     damage -= hpmax * turn;
     if (flags.hard === 1) damage *= 0.9;
 
+    if (flags.chapter > 1 && damage < 0) {
+        damage *= 0.25;
+    }
+
     return damage;
 }
 

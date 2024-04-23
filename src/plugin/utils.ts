@@ -511,3 +511,19 @@ export function getIconHeight(icon: AllIds | 'hero') {
     }
     return core.getBlockInfo(icon)?.height ?? 32;
 }
+
+const ascii = 16 ** 2;
+const other = 16 ** 4;
+const emoji = 16 ** 5;
+export function calStringSize(str: string) {
+    let size = 0;
+
+    for (const char of str) {
+        const num = char.charCodeAt(0);
+        if (num < ascii) size += 1;
+        else if (num < other) size += 2;
+        else if (num < emoji) size += 2.5;
+    }
+
+    return size;
+}

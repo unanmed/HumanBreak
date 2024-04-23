@@ -154,7 +154,7 @@ import { Danmaku } from '@/core/main/custom/danmaku';
 import { GameUi } from '@/core/main/custom/ui';
 import { sleep } from 'mutate-animate';
 import { fixedUi } from '@/core/main/init/ui';
-import { tip } from '@/plugin/utils';
+import { calStringSize, tip } from '@/plugin/utils';
 import { gameKey } from '@/core/main/init/hotkey';
 import { isNil } from 'lodash-es';
 import { stringifyCSS, parseCss, getIconHeight } from '@/plugin/utils';
@@ -294,6 +294,11 @@ function close() {
 }
 
 function input(value: string) {
+    const size = calStringSize(value);
+    if (size > 200) {
+        tip('warning', '弹幕长度超限！');
+        return;
+    }
     danmaku.text = value;
 }
 
