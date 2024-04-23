@@ -5,7 +5,7 @@
                 class="danmaku-tool"
                 :open="cssOpened"
                 @click="openTool('css')"
-                >css</span
+                >CSS</span
             >
             <font-colors-outlined
                 class="danmaku-tool"
@@ -87,7 +87,9 @@
                 </span>
             </div>
             <div v-else-if="fillOpened || strokeOpened" id="danmaku-color">
-                <span id="danmaku-color-hint">设置颜色</span>
+                <span id="danmaku-color-hint"
+                    >设置{{ fillOpened ? '填充' : '描边' }}颜色</span
+                >
                 <Scroll
                     class="danmaku-color-scroll"
                     :no-scroll="true"
@@ -457,6 +459,7 @@ onUnmounted(() => {
     color: white;
     transition: color 0.2s linear;
     margin-right: 7px;
+    font-family: 'Fira Code', 'Arial';
 }
 
 .danmaku-tool[open='true'],
@@ -480,7 +483,7 @@ onUnmounted(() => {
     flex-direction: row;
     align-items: center;
     white-space: nowrap;
-    font-family: 'Fira Code';
+    font-family: 'Fira Code', 'Arial';
 
     #danmaku-css-input {
         width: 100%;
@@ -501,6 +504,7 @@ onUnmounted(() => {
     font-size: 80%;
     white-space: nowrap;
     justify-content: space-between;
+    font-family: 'Fira Code', 'Arial';
 
     .danmaku-icon-scroll {
         width: calc(90% - 200px);
@@ -550,7 +554,7 @@ onUnmounted(() => {
     align-items: center;
     white-space: nowrap;
     justify-content: space-between;
-    font-family: 'Fira Code';
+    font-family: 'Fira Code', 'Arial';
     font-size: 75%;
 
     #danmaku-color-container {
