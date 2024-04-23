@@ -3,8 +3,8 @@ import { EmitableEvent, EventEmitter } from '@/core/common/eventEmitter';
 import { logger } from '@/core/common/logger';
 import { ResponseBase } from '@/core/interface';
 import { deleteWith, ensureArray, parseCss, tip } from '@/plugin/utils';
-import axios, { toFormData } from 'axios';
-import { Component, VNode, h, ref, shallowReactive } from 'vue';
+import axios, { AxiosResponse, toFormData } from 'axios';
+import { Component, VNode, h, shallowReactive } from 'vue';
 /* @__PURE__ */ import { id, password } from '../../../../user';
 import { mainSetting } from '../setting';
 
@@ -49,17 +49,45 @@ interface DanmakuEvent extends EmitableEvent {
 
 type SpecContentFn = (content: string, type: string) => VNode;
 
+interface AllowedCSS {
+    property: string;
+    check: (value: string, prop: string) => true | string;
+}
+
+const allowedCSS: Partial<Record<CanParseCss, AllowedCSS>> = {
+    color: {
+        property: 'color',
+        check: () => true
+    },
+    backgroundColor: {
+        property: 'backgroundColor',
+        check: () => true
+    },
+    fontSize: {
+        property: 'fontSize',
+        check: value => {
+            if (!/^\d+%$/.test(value)) {
+                return '字体大小只能设置为百分格式';
+            }
+            if (parseInt(value) > 200) {
+                return '字体最大只能为200%';
+            }
+            return true;
+        }
+    }
+};
+
 export class Danmaku extends EventEmitter<DanmakuEvent> {
-    static num: number = 0;
     static backend: string = `/backend/tower/barrage.php`;
     static all: Set<Danmaku> = new Set();
-    static allInPos: Partial<Record<FloorIds, Record<LocString, Danmaku>>> = {};
+    static allInPos: Partial<Record<FloorIds, Record<LocString, Danmaku[]>>> =
+        {};
 
     static showList: Danmaku[] = shallowReactive([]);
     static showMap: Map<number, Danmaku> = new Map();
     static specList: Record<string, SpecContentFn> = {};
 
-    num: number = Danmaku.num++;
+    static lastEditoredDanmaku?: Danmaku;
 
     id: number = -1;
     text: string = '';
@@ -82,10 +110,10 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
      * 发送弹幕
      * @returns 弹幕发送的 Axios Post 信息，为 Promise
      */
-    async post() {
+    async post(): Promise<AxiosResponse<PostDanmakuResponse>> {
         if (this.posted || this.posting) {
             logger.warn(5, `Repeat post danmaku.`);
-            return Promise.resolve();
+            return Promise.reject();
         }
 
         const data: DanmakuPostInfo = {
@@ -108,6 +136,14 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
             this.id = res.data.id;
             this.posting = false;
 
+            if (res.data.code === 0) {
+                this.posted = true;
+                tip('success', '发送成功');
+                this.addToList();
+            } else {
+                tip('error', res.data.message);
+            }
+
             return res;
         } catch (e) {
             this.posted = false;
@@ -116,7 +152,7 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
                 3,
                 `Unexpected error when posting danmaku. Error info: ${e}`
             );
-            return Promise.resolve();
+            return Promise.reject();
         }
     }
 
@@ -160,7 +196,7 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
         if (!css.color) css.color = this.textColor;
         if (!css.textShadow)
             css.textShadow = `1px 1px 1px ${this.strokeColor}, 1px -1px 1px ${this.strokeColor}, -1px 1px 1px ${this.strokeColor}, -1px -1px 1px ${this.strokeColor}`;
-        return css;
+        return { ...css, ...this.style };
     }
 
     /**
@@ -195,9 +231,17 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
     css(obj: CSSObj, overwrite?: boolean): void;
     css(obj: string | CSSObj, overwrite: boolean = false) {
         const res = typeof obj === 'string' ? parseCss(obj) : obj;
-        if (overwrite) this.style = res;
-        else {
-            this.style = { ...this.style, ...res };
+        const allow = Danmaku.checkCSSAllow(res);
+        if (allow.length === 0) {
+            if (overwrite) this.style = res;
+            else {
+                this.style = { ...this.style, ...res };
+            }
+        } else {
+            logger.error(
+                8,
+                `Post not allowed css danmaku. Allow info: ${allow.join(',')}`
+            );
         }
     }
 
@@ -208,7 +252,8 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
         Danmaku.all.add(this);
         if (!this.floor) return;
         Danmaku.allInPos[this.floor] ??= {};
-        Danmaku.allInPos[this.floor]![`${this.x},${this.y}`] = this;
+        Danmaku.allInPos[this.floor]![`${this.x},${this.y}`] ??= [];
+        Danmaku.allInPos[this.floor]![`${this.x},${this.y}`].push(this);
     }
 
     /**
@@ -374,6 +419,27 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
     }
 
     /**
+     * 检查CSS内容是否符合发弹幕要求
+     * @param css 要检查的CSS内容
+     */
+    static checkCSSAllow(css: CSSObj) {
+        const problem: string[] = [];
+        for (const [key, value] of Object.entries(css)) {
+            if (!allowedCSS[key as CanParseCss]) {
+                problem.push(`不允许的CSS:${key}`);
+                continue;
+            } else {
+                const res = allowedCSS[key as CanParseCss]!.check(value, key);
+                if (res !== true) {
+                    problem.push(res);
+                }
+            }
+        }
+
+        return problem;
+    }
+
+    /**
      * 拉取本塔所有弹幕
      */
     static async fetch() {
@@ -431,6 +497,7 @@ Danmaku.registerSpecContent('i', content => {
     return h(BoxAnimate as Component, {
         id: content,
         noborder: true,
+        noAnimate: true,
         width: 32,
         height: iconInfo.height
     });
@@ -450,7 +517,11 @@ Mota.require('var', 'hook').on('moveOneStep', (x, y, floor) => {
     if (f) {
         const danmaku = f[`${x},${y}`];
         if (danmaku) {
-            danmaku.show();
+            danmaku.forEach(v => {
+                setTimeout(() => {
+                    v.show();
+                }, Math.random() * 1000);
+            });
         }
     }
 });

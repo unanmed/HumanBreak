@@ -27,6 +27,7 @@ import * as frag from '@/plugin/fx/frag';
 import * as use from '@/plugin/use';
 import * as gameCanvas from '@/plugin/fx/gameCanvas';
 import * as smooth from '@/plugin/fx/smoothView';
+import * as animateController from '@/plugin/animateController';
 
 Mota.Plugin.register('shadow_r', shadow, shadow.init);
 Mota.Plugin.register('gameShadow_r', gameShadow, gameShadow.init);
@@ -38,3 +39,8 @@ Mota.Plugin.register('frag_r', frag, frag.init);
 Mota.Plugin.register('use_r', use);
 Mota.Plugin.register('gameCanvas_r', gameCanvas);
 Mota.Plugin.register('smooth_r', smooth, smooth.init);
+Mota.Plugin.register(
+    'animateController_r',
+    animateController,
+    animateController.default
+);

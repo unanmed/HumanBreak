@@ -108,11 +108,13 @@ async function calHeight(first: boolean = false) {
         canvas.height = width * scale;
         if (props.noScroll) canvas.style.height = `0px`;
     }
-    await new Promise(res => {
+    await new Promise<void>(res => {
         requestAnimationFrame(() => {
-            const style = getComputedStyle(content);
-            total = parseFloat(style[canvasAttr]);
-            res('');
+            total =
+                props.type === 'horizontal'
+                    ? content.scrollWidth
+                    : content.scrollHeight;
+            res();
         });
     });
 }

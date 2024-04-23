@@ -34,12 +34,10 @@ fixedUi.register(
     new GameUi('start', UI.Start),
     new GameUi('toolbar', UI.Toolbar),
     new GameUi('load', UI.Load),
-    new GameUi('danmaku', UI.Danmaku)
+    new GameUi('danmaku', UI.Danmaku),
+    new GameUi('danmakuEditor', UI.DanmakuEditor)
 );
 fixedUi.showAll();
-
-let loaded = false;
-let mounted = false;
 
 const hook = Mota.require('var', 'hook');
 hook.once('mounted', () => {
@@ -73,6 +71,4 @@ hook.once('mounted', () => {
     fixedUi.on('end', () => {
         fixed.style.display = 'none';
     });
-
-    mounted = true;
 });

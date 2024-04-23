@@ -33,6 +33,8 @@ interface RollupInfo {
 const rollupMap = new Map<string, RollupInfo>();
 let bundleIndex = 0;
 let ws: WebSocket;
+let h: Server;
+let wt: chokidar.FSWatcher;
 
 class RefValue<T> extends EventEmitter {
     private _value: T;
@@ -448,6 +450,7 @@ ${names}
 }
 
 async function startHttpServer(port: number = 3000) {
+    if (h) return h;
     const server = http();
 
     const tryNext = () => {
@@ -516,6 +519,7 @@ function setupHttp(server: Server) {
 }
 
 function watchProject() {
+    if (wt) return;
     const watcher = chokidar.watch('public/', {
         persistent: true,
         ignored: [
@@ -530,6 +534,7 @@ function watchProject() {
             /_.*/
         ]
     });
+    wt = watcher;
     watcher.removeAllListeners();
     watcher.on('change', async path => {
         // 楼层热重载
@@ -574,6 +579,7 @@ function setupSocket(socket: WebSocket) {
 }
 
 async function startWsServer(http: Server) {
+    if (ws) return;
     return new Promise<WebSocketServer>(res => {
         const server = new WebSocketServer({
             server: http
@@ -603,6 +609,7 @@ async function ensureConfig() {
     // 2. 启动样板http服务
     await ensureConfig();
     const server = await startHttpServer(3000);
+    h = server;
 
     // 3. 启动样板ws热重载服务
     await startWsServer(server);

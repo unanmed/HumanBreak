@@ -523,7 +523,7 @@ loading.once('coreInit', () => {
         'ui.danmaku': storage.getValue('ui.danmaku', true),
         'ui.danmakuSpeed': storage.getValue(
             'ui.danmakuSpeed', 
-            Math.floor(window.innerWidth / 25) * 5
+            Math.floor(window.innerWidth / 30) * 5
         ),
     });
 });

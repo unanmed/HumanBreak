@@ -1,6 +1,6 @@
 import { KeyCode } from '@/plugin/keyCodes';
 import { Hotkey, HotkeyJSON } from '../custom/hotkey';
-import { generateBinary, keycode } from '@/plugin/utils';
+import { generateBinary, keycode, openDanmakuPoster } from '@/plugin/utils';
 import { hovered } from './fixed';
 import { hasMarkedEnemy, markEnemy, unmarkEnemy } from '@/plugin/mark';
 import { mainUi } from './ui';
@@ -135,6 +135,12 @@ gameKey
         id: 'critical',
         name: '鼠标位置怪物临界',
         defaults: KeyCode.KeyC
+    })
+    .register({
+        id: 'danmaku',
+        name: '发送弹幕',
+        defaults: KeyCode.KeyA,
+        ctrl: true
     })
     .register({
         id: 'quickEquip_1',
@@ -485,6 +491,9 @@ gameKey
             });
             if (enemy) mainUi.open('fixedDetail', { panel: 'critical' });
         }
+    })
+    .realize('danmaku', () => {
+        openDanmakuPoster();
     })
     .realize('restart', () => {
         core.confirmRestart();

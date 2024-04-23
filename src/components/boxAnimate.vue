@@ -18,6 +18,7 @@ const props = defineProps<{
     noborder?: boolean;
     width?: number;
     height?: number;
+    noAnimate?: boolean;
 }>();
 
 let c: HTMLCanvasElement;
@@ -26,7 +27,6 @@ let ctx: CanvasRenderingContext2D;
 let drawFn: () => void;
 
 function draw() {
-    if (id === 'none') return;
     if (has(drawFn)) removeAnimate(drawFn);
 
     const cls = core.getClsFromId(props.id as AllIds);
@@ -58,12 +58,16 @@ function draw() {
     } else {
         drawFn = () => {
             core.clearMap(ctx);
-            const frame = core.status.globalAnimateStatus % frames;
+            const frame = props.noAnimate
+                ? 0
+                : core.status.globalAnimateStatus % frames;
             core.drawIcon(ctx, props.id as AllIds, 0, 0, w, h, frame);
         };
 
         drawFn();
-        addAnimate(drawFn);
+        if (!props.noAnimate) {
+            addAnimate(drawFn);
+        }
     }
 }
 

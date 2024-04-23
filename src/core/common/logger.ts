@@ -11,6 +11,17 @@ export const enum LogLevel {
     ERROR
 }
 
+interface LoggerCatchInfo {
+    code?: number;
+    level: LogLevel;
+    message: string;
+}
+
+interface LoggerCatchReturns<T> {
+    ret: T;
+    info: LoggerCatchInfo[];
+}
+
 let logTip: HTMLSpanElement;
 if (!main.replayChecking) {
     const tip = document.createElement('span');
@@ -38,6 +49,9 @@ export class Logger {
     level: LogLevel = LogLevel.LOG;
     enabled: boolean = true;
 
+    private catching: boolean = false;
+    private catchedInfo: LoggerCatchInfo[] = [];
+
     constructor(logLevel: LogLevel) {
         this.level = logLevel;
     }
@@ -56,6 +70,13 @@ export class Logger {
      * @param text 错误信息
      */
     error(code: number, text: string) {
+        if (this.catching) {
+            this.catchedInfo.push({
+                level: LogLevel.ERROR,
+                message: text,
+                code
+            });
+        }
         if (this.level <= LogLevel.ERROR && this.enabled) {
             console.error(`[ERROR Code ${code}] ${text}`);
             if (!main.replayChecking) {
@@ -73,6 +94,13 @@ export class Logger {
      * @param text 警告信息
      */
     severe(code: number, text: string) {
+        if (this.catching) {
+            this.catchedInfo.push({
+                level: LogLevel.ERROR,
+                message: text,
+                code
+            });
+        }
         if (this.level <= LogLevel.SEVERE_WARNING && this.enabled) {
             console.warn(`[SEVERE WARNING Code ${code}] ${text}`);
             if (!main.replayChecking) {
@@ -90,6 +118,13 @@ export class Logger {
      * @param text 警告信息
      */
     warn(code: number, text: string) {
+        if (this.catching) {
+            this.catchedInfo.push({
+                level: LogLevel.ERROR,
+                message: text,
+                code
+            });
+        }
         if (this.level <= LogLevel.WARNING && this.enabled) {
             console.warn(`[WARNING Code ${code}] ${text}`);
             if (!main.replayChecking) {
@@ -106,9 +141,27 @@ export class Logger {
      * @param text 日志信息
      */
     log(text: string) {
+        if (this.catching) {
+            this.catchedInfo.push({
+                level: LogLevel.ERROR,
+                message: text
+            });
+        }
         if (this.level <= LogLevel.LOG && this.enabled) {
             console.log(`[LOG] ${text}`);
         }
+    }
+
+    catch<T>(fn: () => T): LoggerCatchReturns<T> {
+        const before = this.enabled;
+        this.catchedInfo = [];
+        this.disable();
+        this.catching = true;
+        const ret = fn();
+        this.catching = false;
+        if (before) this.enable();
+
+        return { ret, info: this.catchedInfo };
     }
 
     disable() {

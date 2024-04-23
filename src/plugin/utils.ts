@@ -8,8 +8,9 @@ import axios from 'axios';
 import { decompressFromBase64 } from 'lz-string';
 import { parseColor } from './webgl/utils';
 import { Keyboard, KeyboardEmits } from '@/core/main/custom/keyboard';
-import { mainUi } from '@/core/main/init/ui';
+import { fixedUi, mainUi } from '@/core/main/init/ui';
 import { isAssist } from '@/core/main/custom/hotkey';
+import { logger } from '@/core/common/logger';
 
 type CanParseCss = keyof {
     [P in keyof CSSStyleDeclaration as CSSStyleDeclaration[P] extends string
@@ -82,18 +83,108 @@ export function keycode(key: number) {
  * @param css 要解析的css字符串
  */
 export function parseCss(css: string): Partial<Record<CanParseCss, string>> {
-    const str = css.replace(/[\n\s\t]*/g, '').replace(/;*/g, ';');
-    const styles = str.split(';');
+    if (css.length === 0) return {};
+
+    let pointer = -1;
+    let inProp = true;
+    let prop = '';
+    let value = '';
+    let upper = false;
     const res: Partial<Record<CanParseCss, string>> = {};
 
-    for (const one of styles) {
-        const [key, data] = one.split(':');
-        const cssKey = key.replace(/\-([a-z])/g, (str, $1) =>
-            $1.toUpperCase()
-        ) as CanParseCss;
-        res[cssKey] = data;
+    while (++pointer < css.length) {
+        const char = css[pointer];
+
+        if ((char === ' ' || char === '\n' || char === '\r') && inProp) {
+            continue;
+        }
+
+        if (char === '-' && inProp) {
+            if (prop.length !== 0) {
+                upper = true;
+            }
+            continue;
+        }
+
+        if (char === ':') {
+            if (!inProp) {
+                logger.error(
+                    3,
+                    `Syntax error in parsing CSS: Unexpected ':'. Col: ${pointer}. CSS string: '${css}'`
+                );
+                return res;
+            }
+            inProp = false;
+            continue;
+        }
+
+        if (char === ';') {
+            if (prop.length === 0) continue;
+            if (inProp) {
+                logger.error(
+                    4,
+                    `Syntax error in parsing CSS: Unexpected ';'. Col: ${pointer}. CSS string: '${css}'`
+                );
+                return res;
+            }
+            res[prop as CanParseCss] = value.trim();
+            inProp = true;
+            prop = '';
+            value = '';
+            continue;
+        }
+
+        if (upper) {
+            if (!inProp) {
+                logger.error(
+                    5,
+                    `Syntax error in parsing CSS: Missing property name after '-'. Col: ${pointer}. CSS string: '${css}'`
+                );
+            }
+            prop += char.toUpperCase();
+            upper = false;
+        } else {
+            if (inProp) prop += char;
+            else value += char;
+        }
     }
+    if (inProp && prop.length > 0) {
+        logger.error(
+            6,
+            `Syntax error in parsing CSS: Unexpected end of css, expecting ':'. Col: ${pointer}. CSS string: '${css}'`
+        );
+        return res;
+    }
+    if (!inProp && value.trim().length === 0) {
+        logger.error(
+            7,
+            `Syntax error in parsing CSS: Unexpected end of css, expecting property value. Col: ${pointer}. CSS string: '${css}'`
+        );
+        return res;
+    }
+    if (prop.length > 0) res[prop as CanParseCss] = value.trim();
+
     return res;
+}
+
+export function stringifyCSS(css: Partial<Record<CanParseCss, string>>) {
+    let str = '';
+
+    for (const [key, value] of Object.entries(css)) {
+        let pointer = -1;
+        let prop = '';
+        while (++pointer < key.length) {
+            const char = key[pointer];
+            if (char.toLowerCase() === char) {
+                prop += char;
+            } else {
+                prop += `-${char.toLowerCase()}`;
+            }
+        }
+        str += `${prop}:${value};`;
+    }
+
+    return str;
 }
 
 /**
@@ -400,4 +491,23 @@ export function formatSize(size: number) {
 let num = 0;
 export function requireUniqueSymbol() {
     return num++;
+}
+
+export function openDanmakuPoster() {
+    if (!fixedUi.hasName('danmakuEditor')) {
+        fixedUi.open('danmakuEditor');
+    }
+}
+
+export function getIconHeight(icon: AllIds | 'hero') {
+    if (icon === 'hero') {
+        if (core.isPlaying()) {
+            return (
+                core.material.images.images[core.status.hero.image].height / 4
+            );
+        } else {
+            return 48;
+        }
+    }
+    return core.getBlockInfo(icon)?.height ?? 32;
 }
