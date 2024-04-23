@@ -288,7 +288,7 @@ function send() {
 function close() {
     mainDiv.classList.remove('danmaku-startup');
     mainDiv.classList.add('danmaku-close');
-    sleep(400).then(() => {
+    sleep(200).then(() => {
         fixedUi.close(props.num);
     });
 }
@@ -411,11 +411,11 @@ onUnmounted(() => {
 }
 
 .danmaku-startup {
-    animation: editor-startup 0.4s ease-out 0s 1 normal forwards running;
+    animation: editor-startup 0.2s ease-out 0s 1 normal forwards running;
 }
 
 .danmaku-close {
-    animation: editor-close 0.4s ease-in 0s 1 normal forwards running;
+    animation: editor-close 0.2s ease-in 0s 1 normal forwards running;
 }
 
 @keyframes editor-startup {
