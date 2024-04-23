@@ -230,6 +230,9 @@ export function type(
     return content;
 }
 
+message.config({
+    maxCount: 3
+});
 export function tip(
     type: Exclude<keyof MessageApi, 'open' | 'config' | 'destroy'>,
     text: string

@@ -259,6 +259,10 @@ function send() {
         tip('warning', '请进入游戏后再发送弹幕');
         return;
     }
+    if (calStringSize(danmaku.text) > 200) {
+        tip('warning', '弹幕长度超限！');
+        return;
+    }
     const { x, y } = core.status.hero.loc;
     const floor = core.status.floorId;
     if (isNil(x) || isNil(y) || isNil(floor)) {
@@ -297,7 +301,6 @@ function input(value: string) {
     const size = calStringSize(value);
     if (size > 200) {
         tip('warning', '弹幕长度超限！');
-        return;
     }
     danmaku.text = value;
 }
