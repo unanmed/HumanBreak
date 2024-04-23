@@ -2,7 +2,13 @@ import BoxAnimate from '@/components/boxAnimate.vue';
 import { EmitableEvent, EventEmitter } from '@/core/common/eventEmitter';
 import { logger } from '@/core/common/logger';
 import { ResponseBase } from '@/core/interface';
-import { deleteWith, ensureArray, parseCss, tip } from '@/plugin/utils';
+import {
+    deleteWith,
+    ensureArray,
+    getIconHeight,
+    parseCss,
+    tip
+} from '@/plugin/utils';
 import axios, { AxiosResponse, toFormData } from 'axios';
 import { Component, VNode, h, shallowReactive } from 'vue';
 /* @__PURE__ */ import { id, password } from '../../../../user';
@@ -484,22 +490,14 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
 
 // 图标类型
 Danmaku.registerSpecContent('i', content => {
-    const iconInfo = core.getBlockInfo(content as AllIds);
-    if (!iconInfo) {
-        return h(BoxAnimate as Component, {
-            id: 'greenSlime',
-            noborder: true,
-            width: 32,
-            height: 32
-        });
-    }
+    const height = getIconHeight(content as AllIds);
 
     return h(BoxAnimate as Component, {
         id: content,
         noborder: true,
         noAnimate: true,
         width: 32,
-        height: iconInfo.height
+        height
     });
 });
 

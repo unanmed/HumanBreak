@@ -97,7 +97,7 @@ ticker.add(time => {
         if (!hover) {
             const dx = dt * speed;
             value.pos -= dx;
-            ele.style.left = `${value.pos.toFixed(2)}px`;
+            ele.style.transform = `translateX(${value.pos.toFixed(2)}px)`;
         }
 
         if (value.pos + width < 0) {
@@ -134,7 +134,7 @@ function touchStart(id: number) {
 
 function calTop(id: number) {
     const danmaku = eleMap.get(id)!;
-    const fontSize = mainSetting.getValue('screen.fontSize', 16) * 1.25 + 10;
+    const fontSize = mainSetting.getValue('screen.fontSize', 16) * 1.25 + 15;
 
     const used: Set<number> = new Set();
     eleMap.forEach(v => {
@@ -177,7 +177,8 @@ onUnmounted(() => {
 
 .danmaku-one {
     position: fixed;
-    left: 100vw;
+    left: 0;
+    transform: translateX(100vw);
     width: max-content;
     white-space: nowrap;
     text-wrap: nowrap;
