@@ -31,19 +31,16 @@ import { mainSetting } from '@/core/main/setting';
 import { debounce } from 'lodash-es';
 
 interface ElementMap {
-    pos: number;
     ele: HTMLDivElement;
     danmaku: Danmaku;
-    style: CSSStyleDeclaration;
-    width: number;
     hover: boolean;
     top: number;
+    style: CSSStyleDeclaration;
 }
 
 const map = Danmaku.showMap;
 const eleMap: Map<number, ElementMap> = new Map();
 const liked = reactive<Record<number, boolean>>({});
-const ticker = new Ticker();
 
 const speed = mainSetting.getValue('ui.danmakuSpeed', 60);
 
@@ -53,10 +50,10 @@ const likeFn = (l: boolean, d: Danmaku) => {
 
 watch(Danmaku.showList, list => {
     list.forEach(v => {
-        liked[v.id] = v.liked;
-        v.on('like', likeFn);
         if (!eleMap.has(v.id)) {
             nextTick(() => {
+                liked[v.id] = v.liked;
+                v.on('like', likeFn);
                 requestAnimationFrame(() => {
                     addElement(v.id);
                 });
@@ -71,59 +68,39 @@ function addElement(id: number) {
     const div = document.getElementById(`danmaku-${id}`);
     if (!div) return;
 
-    const style = getComputedStyle(div);
-
     const ele: ElementMap = {
         danmaku,
-        pos: window.innerWidth + 100,
         ele: div as HTMLDivElement,
-        style,
-        width: parseInt(style.width),
         hover: false,
-        top: -1
+        top: -1,
+        style: getComputedStyle(div)
     };
+
+    div.style.setProperty('--end', `${-div.scrollWidth}px`);
+    div.style.setProperty(
+        '--duration',
+        `${Math.floor((window.innerWidth + div.scrollWidth) / speed)}s`
+    );
+    div.style.setProperty('left', ele.style.left);
+    div.addEventListener('animationend', () => {
+        danmaku.showEnd();
+        eleMap.delete(id);
+    });
 
     eleMap.set(id, ele);
     calTop(id);
 }
 
-let lastTime = 0;
-ticker.add(time => {
-    const dt = (time - lastTime) / 1000;
-    const toDelete: number[] = [];
-
-    eleMap.forEach((value, id) => {
-        const { danmaku, ele, style, width, hover } = value;
-        if (!hover) {
-            const dx = dt * speed;
-            value.pos -= dx;
-            ele.style.transform = `translateX(${value.pos.toFixed(2)}px)`;
-        }
-
-        if (value.pos + width < 0) {
-            toDelete.push(id);
-        }
-    });
-    lastTime = time;
-
-    toDelete.forEach(v => {
-        eleMap.delete(v);
-        const danmaku = map.get(v);
-        if (danmaku) {
-            danmaku.showEnd();
-        }
-        map.delete(v);
-    });
-});
-
 function mousein(id: number) {
     const danmaku = eleMap.get(id)!;
     danmaku.hover = true;
+    danmaku.ele.classList.add('danmaku-paused');
 }
 
 function mouseleave(id: number) {
     const danmaku = eleMap.get(id)!;
     danmaku.hover = false;
+    danmaku.ele.classList.remove('danmaku-paused');
 }
 
 const touchDebounce = debounce(mouseleave, 3000);
@@ -138,15 +115,19 @@ function calTop(id: number) {
 
     const used: Set<number> = new Set();
     eleMap.forEach(v => {
-        const { pos, width } = v;
+        const { ele, style } = v;
+        const pos = parseInt(style.transform.slice(19, -4));
+        const width = ele.scrollWidth;
         if (
-            pos <= window.innerWidth + 125 &&
-            pos + width >= window.innerWidth + 75
+            pos <= window.innerWidth + 200 &&
+            pos + width >= window.innerWidth
         ) {
             used.add(v.top);
         }
     });
     let i = -1;
+    danmaku.top = 0;
+    danmaku.ele.style.top = `20px`;
     while (++i < 20) {
         if (!used.has(i)) {
             danmaku.top = i;
@@ -156,9 +137,7 @@ function calTop(id: number) {
     }
 }
 
-onUnmounted(() => {
-    ticker.destroy();
-});
+onUnmounted(() => {});
 </script>
 
 <style lang="less" scoped>
@@ -176,6 +155,8 @@ onUnmounted(() => {
 }
 
 .danmaku-one {
+    --end: 0;
+    --duration: 5s;
     position: fixed;
     left: 0;
     transform: translateX(100vw);
@@ -185,11 +166,27 @@ onUnmounted(() => {
     padding: 0 5px;
     display: flex;
     align-items: center;
+    animation: danmaku-roll linear var(--duration) forwards;
+    animation-play-state: running;
 }
 
 .danmaku-one:hover {
     background-color: #0006;
     border-radius: 5px;
+    animation-play-state: paused;
+}
+
+.danmaku-one .danmaku-paused {
+    animation-play-state: paused;
+}
+
+@keyframes danmaku-roll {
+    0% {
+        transform: translateX(100vw);
+    }
+    100% {
+        transform: translateX(var(--end));
+    }
 }
 
 .danmaku-info {

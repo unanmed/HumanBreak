@@ -27,7 +27,7 @@
                     id="danmaku-input-input"
                     :max-length="200"
                     v-model:value="inputValue"
-                    placeholder="请在此输入弹幕"
+                    placeholder="请在此输入弹幕，显示中括号请使用\[或\]"
                     autocomplete="off"
                     @change="input(inputValue)"
                     @pressEnter="inputEnter()"
@@ -302,7 +302,20 @@ function input(value: string) {
     if (size > 200) {
         tip('warning', '弹幕长度超限！');
     }
-    danmaku.text = value;
+
+    const before = danmaku.text;
+    const { info, ret } = logger.catch(() => {
+        danmaku.text = value;
+        return danmaku.parse();
+    });
+    if (info.length > 0) {
+        if (info[0].code === 4) {
+            tip('error', '请检查中括号匹配');
+            danmaku.text = before;
+        } else {
+            danmaku.vNode = ret;
+        }
+    }
 }
 
 function inputEnter() {

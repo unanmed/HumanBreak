@@ -109,7 +109,7 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
     strokeColor: string = 'black';
 
     private posted: boolean = false;
-    private vNode?: VNode;
+    vNode?: VNode;
     private posting: boolean = false;
 
     /**
@@ -351,6 +351,7 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
      * 显示这个弹幕
      */
     show() {
+        if (this.showing) return;
         this.showing = true;
         Danmaku.showList.push(this);
         Danmaku.showMap.set(this.id, this);
@@ -361,6 +362,7 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
      * 显示结束这个弹幕
      */
     showEnd() {
+        if (!this.showing) return;
         this.showing = false;
         deleteWith(Danmaku.showList, this);
         Danmaku.showMap.delete(this.id);
