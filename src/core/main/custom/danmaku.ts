@@ -26,6 +26,7 @@ interface DanmakuInfo {
     comment: string;
     tags: string;
     love: number;
+    my_love_type: boolean;
 }
 
 interface DanmakuPostInfo extends Partial<DanmakuContentInfo> {
@@ -379,7 +380,11 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
             id: this.id
         };
 
-        const res = await axios.post<PostLikeResponse>(Danmaku.backend, post);
+        const form = toFormData(post);
+        /* @__PURE__ */ form.append('userid', id);
+        /* @__PURE__ */ form.append('password', password);
+
+        const res = await axios.post<PostLikeResponse>(Danmaku.backend, form);
         if (res.data.code !== 0) {
             logger.severe(
                 2,
@@ -451,6 +456,8 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
      * 拉取本塔所有弹幕
      */
     static async fetch() {
+        Danmaku.all.clear();
+        Danmaku.allInPos = {};
         const form = toFormData({
             type: 1,
             towername: 'HumanBreak'
@@ -463,6 +470,7 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
             const dan = new Danmaku();
             dan.id = v.id;
             dan.likedNum = v.love;
+            dan.liked = v.my_love_type;
             dan.decode(v);
             dan.posted = true;
             dan.addToList();

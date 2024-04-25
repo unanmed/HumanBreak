@@ -12,10 +12,12 @@
             <span class="danmaku-info">
                 <like-filled
                     class="danmaku-like-icon"
-                    :liked="one.liked"
-                    @click="one.triggerLike()"
+                    :liked="likedMap[one.id] < 0"
+                    @click="postLike(one)"
                 />
-                <span class="danmaku-like-num">{{ one.likedNum }}</span>
+                <span class="danmaku-like-num">{{
+                    Math.abs(likedMap[one.id])
+                }}</span>
             </span>
             <component :is="one.getVNode()"></component>
         </div>
@@ -26,7 +28,6 @@
 import { nextTick, onUnmounted, reactive, watch } from 'vue';
 import { Danmaku } from '../core/main/custom/danmaku';
 import { LikeFilled } from '@ant-design/icons-vue';
-import { Ticker } from 'mutate-animate';
 import { mainSetting } from '@/core/main/setting';
 import { debounce } from 'lodash-es';
 
@@ -37,6 +38,8 @@ interface ElementMap {
     top: number;
     style: CSSStyleDeclaration;
 }
+
+const likedMap: Record<number, number> = reactive({});
 
 const map = Danmaku.showMap;
 const eleMap: Map<number, ElementMap> = new Map();
@@ -79,15 +82,18 @@ function addElement(id: number) {
     div.style.setProperty('--end', `${-div.scrollWidth}px`);
     div.style.setProperty(
         '--duration',
-        `${Math.floor((window.innerWidth + div.scrollWidth) / speed)}s`
+        `${Math.floor((window.innerWidth + div.scrollWidth + 100) / speed)}s`
     );
     div.style.setProperty('left', ele.style.left);
     div.addEventListener('animationend', () => {
         danmaku.showEnd();
         eleMap.delete(id);
+        delete likedMap[id];
     });
 
     eleMap.set(id, ele);
+    likedMap[id] = danmaku.liked ? -danmaku.likedNum : danmaku.likedNum;
+
     calTop(id);
 }
 
@@ -135,6 +141,13 @@ function calTop(id: number) {
             break;
         }
     }
+}
+
+async function postLike(danmaku: Danmaku) {
+    const res = await danmaku.triggerLike();
+
+    const liked = res.data.liked;
+    likedMap[danmaku.id] = liked ? -danmaku.likedNum : danmaku.likedNum;
 }
 
 onUnmounted(() => {});
@@ -200,6 +213,7 @@ onUnmounted(() => {});
 
 .danmaku-like-icon {
     transition: color 0.1s linear;
+    color: white;
 }
 
 .danmaku-like-icon[liked='true'],
