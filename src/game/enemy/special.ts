@@ -225,7 +225,7 @@ export const specials: SpecialDeclaration[] = [
                     )}<br />`;
             });
             return (
-                `怪物周围九宫格${enemy.haloRange}格范围内所有怪物获得以下特殊属性（包括自身），` +
+                `怪物周围方形${enemy.haloRange}格范围内所有怪物获得以下特殊属性（包括自身），` +
                 `特殊属性数值间为${
                     enemy.specialMultiply ? '相乘' : '相加'
                 }关系:<br />` +

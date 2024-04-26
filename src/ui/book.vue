@@ -71,6 +71,7 @@ const scroll = ref(0);
 const drag = ref(false);
 const detail = ref(false);
 const selected = ref(0);
+let detailClosing = false;
 
 const settingScale = mainSetting.getValue('ui.bookScale', 100) / 100;
 const scale = isMobile
@@ -100,8 +101,6 @@ function select(enemy: ToShowEnemy, index: number) {
  */
 async function hide() {
     const div = document.getElementById('book') as HTMLDivElement;
-    div.style.opacity = '0';
-    await sleep(600);
     div.style.display = 'none';
 }
 
@@ -110,7 +109,6 @@ async function hide() {
  */
 async function closeDetail() {
     show();
-    await sleep(600);
     detail.value = false;
 }
 
@@ -120,8 +118,6 @@ async function closeDetail() {
 async function show() {
     const div = document.getElementById('book') as HTMLDivElement;
     div.style.display = 'flex';
-    await sleep(50);
-    div.style.opacity = '1';
 }
 
 /**
@@ -203,7 +199,6 @@ onUnmounted(() => {
     width: 80%;
     height: 100%;
     overflow: hidden;
-    transition: opacity 0.6s linear;
     display: flex;
     flex-direction: column;
     justify-content: space-between;

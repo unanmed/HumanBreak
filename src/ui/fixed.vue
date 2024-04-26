@@ -32,7 +32,7 @@
 import { onMounted, onUpdated, ref, watch } from 'vue';
 import Box from '../components/box.vue';
 import { GameUi } from '@/core/main/custom/ui';
-import type { DamageEnemy } from '@/game/enemy/damage';
+import type { DamageEnemy, EnemyInfo } from '@/game/enemy/damage';
 import { nextFrame } from '@/plugin/utils';
 
 const props = defineProps<{
@@ -68,23 +68,23 @@ const detail = ((): [number, string, string][] => {
         [enemy.enemy.money, '金币', 'lightyellow'],
         [enemy.enemy.exp, '经验', 'lawgreen'],
         [data?.atkDelta ?? 0, '临界', 'lightsalmon'],
-        [-data?.delta ?? 0, '临界减伤', 'lightpink'],
-        [-enemy.calDefDamage(ratio).delta, `${ratio}防`, 'cyan']
+        [data?.delta ?? 0, '临界减伤', 'lightpink'],
+        [enemy.calDefDamage(ratio).delta, `${ratio}防`, 'cyan']
     ];
 })();
 const special = (() => {
     const s = enemy.info.special;
 
     const fromFunc = (
-        func: string | ((enemy: Enemy) => string),
-        enemy: Enemy
+        func: string | ((enemy: EnemyInfo) => string),
+        enemy: EnemyInfo
     ) => {
         return typeof func === 'string' ? func : func(enemy);
     };
 
     const show = s.slice(0, 2).map(v => {
         const s = Mota.require('var', 'enemySpecials')[v];
-        return [fromFunc(s.name, enemy.enemy), s.color];
+        return [fromFunc(s.name, enemy.info), s.color];
     });
     if (s.length > 2) show.push(['...', 'white']);
     return show;

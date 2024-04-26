@@ -132,8 +132,6 @@ onMounted(async () => {
     let moved = false;
     let pos = [0, 0];
 
-    await sleep(600);
-
     useDrag(
         detail,
         (x, y) => {
@@ -178,7 +176,6 @@ onUnmounted(() => {
     align-items: center;
     width: 72%;
     height: 100%;
-    transition: all 0.6s ease;
     user-select: none;
 }
 

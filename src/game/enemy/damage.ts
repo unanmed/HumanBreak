@@ -801,7 +801,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                         res.push({
                             damage: dam,
                             atkDelta: Math.ceil(v - hero.atk!),
-                            delta: dam - ori
+                            delta: -(dam - origin.damage)
                         });
 
                         start = v;
@@ -863,7 +863,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         return {
             damage: damage.damage,
             info: damage,
-            delta: finite ? damage.damage - origin.damage : Infinity
+            delta: -(finite ? damage.damage - origin.damage : Infinity)
         };
     }
 
@@ -947,7 +947,7 @@ export function calDamageWith(
 
     // 饥渴
     if (special.includes(7)) {
-        const delta = Math.floor((atk * enemy.hungry!) / 100);
+        const delta = Math.floor((atk * info.hungry!) / 100);
         atk -= delta;
         monAtk += delta;
     }
@@ -970,7 +970,7 @@ export function calDamageWith(
 
     // 霜冻
     if (special.includes(20) && !core.hasEquip('I589')) {
-        heroPerDamage *= 1 - enemy.ice! / 100;
+        heroPerDamage *= 1 - info.ice! / 100;
     }
 
     heroPerDamage *= 1 - info.damageDecline / 100;
@@ -997,7 +997,7 @@ export function calDamageWith(
 
     // 苍蓝刻
     if (special.includes(28)) {
-        heroPerDamage *= 1 - enemy.paleShield! / 100;
+        heroPerDamage *= 1 - info.paleShield! / 100;
     }
 
     let turn = Math.ceil(monHp / heroPerDamage);
@@ -1005,17 +1005,17 @@ export function calDamageWith(
     // 致命一击
     if (special.includes(1)) {
         const times = Math.floor(turn / 5);
-        damage += ((times * (enemy.crit! - 100)) / 100) * enemyPerDamage;
+        damage += ((times * (info.crit! - 100)) / 100) * enemyPerDamage;
     }
 
     // 勇气之刃
     if (turn > 1 && special.includes(10)) {
-        damage += (enemy.courage! / 100 - 1) * enemyPerDamage;
+        damage += (info.courage! / 100 - 1) * enemyPerDamage;
     }
 
     // 勇气冲锋
     if (special.includes(11)) {
-        damage += (enemy.charge! / 100) * enemyPerDamage;
+        damage += (info.charge! / 100) * enemyPerDamage;
         turn += 5;
     }
 

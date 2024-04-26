@@ -18,8 +18,8 @@ export function getDetailedEnemy(
     const dam = enemy.calDamage().damage;
     const cri = enemy.calCritical(1)[0];
     const critical = core.formatBigNumber(cri?.atkDelta);
-    const criticalDam = core.formatBigNumber(-cri?.delta);
-    const defDam = core.formatBigNumber(-enemy.calDefDamage(ratio).delta);
+    const criticalDam = core.formatBigNumber(cri?.delta);
+    const defDam = core.formatBigNumber(enemy.calDefDamage(ratio).delta);
     const damage = core.formatBigNumber(dam);
 
     const fromFunc = (
