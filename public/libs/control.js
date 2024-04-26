@@ -475,9 +475,10 @@ control.prototype.showStartAnimate = function (noAnimate, callback) {
             core.flags.startUsingCanvas,
             callback
         );
-    core.hideWithAnimate(core.dom.startTop, 20, function () {
-        core.control._showStartAnimate_finished(false, callback);
-    });
+    Mota.require('var', 'fixedUi').open('start');
+    // core.hideWithAnimate(core.dom.startTop, 20, function () {
+    //     core.control._showStartAnimate_finished(false, callback);
+    // });
 };
 
 control.prototype._showStartAnimate_resetDom = function () {
