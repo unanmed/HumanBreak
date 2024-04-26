@@ -7,6 +7,10 @@ export interface SpecialDeclaration {
     color: string;
 }
 
+const fromFunc = (func: string | ((enemy: Enemy) => string), enemy: Enemy) => {
+    return typeof func === 'string' ? func : func(enemy);
+};
+
 export const specials: SpecialDeclaration[] = [
     {
         code: 0,
@@ -46,7 +50,7 @@ export const specials: SpecialDeclaration[] = [
     },
     {
         code: 6,
-        name: enemy => `${enemy.n}连击`,
+        name: enemy => `${enemy.n ?? 4}连击`,
         desc: enemy => `怪物每回合攻击${enemy.n}次`,
         color: '#fe7'
     },
@@ -200,5 +204,24 @@ export const specials: SpecialDeclaration[] = [
         desc: enemy =>
             `怪物使用苍蓝之灵的力量，使自身受到的伤害减少${enemy.paleShield}%`,
         color: '#ff6f0a'
+    },
+    {
+        code: 29,
+        name: '杀戮光环',
+        desc: enemy => {
+            const special = enemy.special;
+            let str = '<div style="margin-left: 10px">';
+
+            special.forEach(v => {
+                const { name, desc, color } = specials[v];
+                str += `<span style="color:${color}">${fromFunc(
+                    name,
+                    enemy
+                )}</span><span>${fromFunc(desc, enemy)}</span>`;
+            });
+
+            return str;
+        },
+        color: '#F721F7'
     }
 ];

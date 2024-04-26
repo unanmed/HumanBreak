@@ -28,7 +28,7 @@ export const detailInfo: BookDetailInfo = {};
 export function getSpecialHint(enemy: ToShowEnemy) {
     return (
         <div>
-            {enemy.showSpecial.map((v, i) => {
+            {enemy.special.map((v, i) => {
                 return (
                     <div class="special">
                         <span style={{ color: v[2] }}>

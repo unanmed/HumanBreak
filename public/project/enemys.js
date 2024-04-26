@@ -145,7 +145,7 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"E593": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E594": {"name":"苍蓝骑士","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E595": {"name":"寒冰兽人","hp":12500,"atk":1800,"def":800,"money":2,"exp":100,"point":0,"special":[7],"hungry":25},
-	"E596": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E596": {"name":"苍蓝兽人","hp":10000,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E597": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E598": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E599": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},

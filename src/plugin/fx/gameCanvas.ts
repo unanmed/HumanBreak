@@ -13,7 +13,8 @@ export function setGameCanvasFilter(filter: string) {
 }
 
 const filterMap: [FloorIds[], string][] = [
-    [['MT50'], 'brightness(80%)contrast(120%)'] // 童心佬的滤镜（
+    [['MT50'], 'brightness(80%)contrast(120%)'], // 童心佬的滤镜（
+    [['MT51'], 'brightness(90%)contrast(120%)'] // 童心佬的滤镜（
 ];
 
 export function getCanvasFilterByFloorId(

@@ -191,9 +191,18 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "popCheckboxSet",
 					"_checkboxSet": function () {
+						var array = Mota.require('var', 'enemySpecials');
+						var b = [],
+							c = [];
+						for (var index = 0; index < array.length; index++) {
+							b.push(index)
+							var name = array[index].name;
+							if (name instanceof Function) name = name({});
+							c.push(name + "(" + index + ")")
+						}
 						return {
-							"prefix": [],
-							"key": []
+							"prefix": c,
+							"key": b
 						}
 					},
 					"_data": "特殊属性"
