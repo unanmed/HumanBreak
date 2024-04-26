@@ -8,15 +8,22 @@ import {
     manhattan
 } from '@/plugin/game/utils';
 
+// todo: 光环划分优先级，从而可以实现光环的多级运算
+
 interface HaloType {
     square: {
         x: number;
         y: number;
         d: number;
     };
+    manhattan: {
+        x: number;
+        y: number;
+        d: number;
+    };
 }
 
-interface EnemyInfo extends Partial<Enemy> {
+export interface EnemyInfo extends Partial<Enemy> {
     atk: number;
     def: number;
     hp: number;
@@ -62,10 +69,30 @@ interface CriticalDamageDelta extends Omit<DamageDelta, 'info'> {
     atkDelta: number;
 }
 
-type HaloFn = (info: EnemyInfo, enemy: Enemy) => void;
+type HaloFn = (info: EnemyInfo, enemy: EnemyInfo) => void;
 
 /** 光环属性 */
-export const haloSpecials: Set<number> = new Set([8, 21, 25, 26, 27]);
+export const haloSpecials: Set<number> = new Set([8, 21, 25, 26, 27, 29]);
+/** 特殊属性对应 */
+export const specialValue: Map<number, SelectKey<Enemy, number | undefined>[]> =
+    new Map();
+specialValue
+    .set(1, ['crit'])
+    .set(6, ['n'])
+    .set(7, ['hungry'])
+    .set(8, ['together'])
+    .set(10, ['courage'])
+    .set(11, ['charge'])
+    .set(15, ['value'])
+    .set(18, ['value'])
+    .set(20, ['ice'])
+    .set(21, ['iceHalo'])
+    .set(22, ['night'])
+    .set(23, ['day'])
+    .set(25, ['melt'])
+    .set(26, ['iceCore'])
+    .set(27, ['fireCore'])
+    .set(28, ['paleShield']);
 
 export class EnemyCollection implements RangeCollection<DamageEnemy> {
     floorId: FloorIds;
@@ -107,6 +134,8 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
         this.haloList = [];
         this.list.forEach(v => {
             v.reset();
+        });
+        this.list.forEach(v => {
             v.preProvideHalo();
         });
         this.list.forEach(v => {
@@ -150,21 +179,22 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
     applyHalo<K extends keyof HaloType>(
         type: K,
         data: HaloType[K],
+        enemy: DamageEnemy,
         halo: HaloFn | HaloFn[],
         recursion: boolean = false
     ) {
         const arr = ensureArray(halo);
-        const enemy = this.range.scan(type, data);
+        const enemys = this.range.scan(type, data);
         if (!recursion) {
             arr.forEach(v => {
-                enemy.forEach(e => {
-                    e.injectHalo(v, e.enemy);
+                enemys.forEach(e => {
+                    e.injectHalo(v, enemy.info);
                 });
             });
         } else {
-            enemy.forEach(e => {
+            enemys.forEach(e => {
                 arr.forEach(v => {
-                    e.injectHalo(v, e.enemy);
+                    e.injectHalo(v, enemy.info);
                     e.preProvideHalo();
                 });
             });
@@ -429,6 +459,66 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     preProvideHalo() {
         if (this.progress !== 0) return;
         this.progress = 1;
+        if (!this.floorId) return;
+        if (!has(this.x) || !has(this.y)) return;
+        const special = this.getHaloSpecials();
+        const col = this.col ?? core.status.maps[this.floorId!].enemy;
+
+        for (const halo of special) {
+            switch (halo) {
+                case 29: {
+                    // 特殊光环
+                    const e = this.enemy;
+                    const type = 'square';
+                    const r = Math.floor(e.haloRange!);
+                    const d = r * 2 + 1;
+                    const range = { x: this.x, y: this.y, d };
+
+                    // 这一句必须放到applyHalo之前
+                    this.providedHalo.add(29);
+
+                    col.applyHalo(
+                        type,
+                        range,
+                        this,
+                        (e, enemy) => {
+                            const s = enemy.specialHalo!;
+
+                            for (const spe of s) {
+                                // 防止重复
+                                if (!e.special.includes(spe))
+                                    e.special.push(spe);
+                            }
+                            // 如果是自身，就不进行特殊属性数值处理了
+                            if (e === this.info) return;
+                            // 然后计算特殊属性数值
+                            for (const spec of s) {
+                                const toChange = specialValue.get(spec);
+                                if (!toChange) continue;
+                                for (const key of toChange) {
+                                    // 这种光环应该获取怪物的原始数值，而不是真实数值
+                                    if (enemy.enemy.specialMultiply) {
+                                        e[key] ??= 1;
+                                        e[key] *= enemy[key] ?? 1;
+                                    } else {
+                                        e[key] ??= 0;
+                                        e[key] += enemy[key] ?? 0;
+                                    }
+                                }
+                            }
+                        },
+                        // true表示递归计算，视为第一类光环
+                        true
+                    );
+                    col.haloList.push({
+                        type: 'square',
+                        data: { x: this.x, y: this.y, d },
+                        special: 29,
+                        from: this
+                    });
+                }
+            }
+        }
     }
 
     /**
@@ -504,14 +594,14 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
             });
         }
 
-        col.applyHalo('square', { x: this.x, y: this.y, d: 7 }, square7);
-        col.applyHalo('square', { x: this.x, y: this.y, d: 5 }, square5);
+        col.applyHalo('square', { x: this.x, y: this.y, d: 7 }, this, square7);
+        col.applyHalo('square', { x: this.x, y: this.y, d: 5 }, this, square5);
     }
 
     /**
      * 接受其他怪的光环
      */
-    injectHalo(halo: HaloFn, enemy: Enemy) {
+    injectHalo(halo: HaloFn, enemy: EnemyInfo) {
         halo(this.info, enemy);
     }
 

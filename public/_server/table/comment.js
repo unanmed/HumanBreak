@@ -285,6 +285,38 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "苍蓝刻",
 					"_data": "苍蓝刻"
 				},
+				"specialHalo": {
+					"_leaf": true,
+					"_type": "popCheckboxSet",
+					"_checkboxSet": function () {
+						var array = Mota.require('var', 'enemySpecials');
+						var b = [],
+							c = [];
+						for (var index = 0; index < array.length; index++) {
+							b.push(index)
+							var name = array[index].name;
+							if (name instanceof Function) name = name({});
+							c.push(name + "(" + index + ")")
+						}
+						return {
+							"prefix": c,
+							"key": b
+						}
+					},
+					"_data": "杀戮光环"
+				},
+				"specialMultiply": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_docs": "光环叠加",
+					"_data": "光环叠加是否为乘算"
+				},
+				"haloRange": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "光环范围",
+					"_data": "光环范围"
+				},
 				"value": {
 					"_leaf": true,
 					"_type": "textarea",

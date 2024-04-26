@@ -156,6 +156,116 @@ function init() {
             core.battle(ex, ey, true, core.doAction);
         }
     };
+
+    core.events.afterBattle = function afterBattle(
+        enemy: DamageEnemy,
+        x?: number,
+        y?: number
+    ) {
+        const floorId = core.status.floorId;
+        const special = enemy.info.special;
+
+        // 播放战斗动画
+        let animate: AnimationIds = 'hand';
+        // 检查当前装备是否存在攻击动画
+        const equipId = core.getEquip(0);
+        if (equipId && (core.material.items[equipId].equip || {}).animate)
+            animate = core.material.items[equipId].equip.animate;
+
+        // 检查该动画是否存在SE，如果不存在则使用默认音效
+        if (!core.material.animates[animate]?.se) core.playSound('attack.mp3');
+
+        // 战斗伤害
+        const info = enemy.calDamage(core.status.hero);
+        const damage = info.damage;
+        // 判定是否致死
+        if (damage >= core.status.hero.hp) {
+            core.status.hero.hp = 0;
+            core.updateStatusBar(false, true);
+            core.events.lose('战斗失败');
+            return;
+        }
+
+        // 扣减体力值并记录统计数据
+        core.status.hero.hp -= damage;
+        core.status.hero.statistics.battleDamage += damage;
+        core.status.hero.statistics.battle++;
+
+        // 智慧之源
+        if (special.includes(14) && flags.hard === 2) {
+            core.addFlag(
+                'inte_' + floorId,
+                Math.ceil((core.status.hero.mdef / 10) * 0.3) * 10
+            );
+            core.status.hero.mdef -=
+                Math.ceil((core.status.hero.mdef / 10) * 0.3) * 10;
+        }
+
+        // 极昼永夜
+        if (special.includes(22)) {
+            flags[`night_${floorId}`] ??= 0;
+            flags[`night_${floorId}`] -= enemy.info.night!;
+        }
+        if (special.includes(23)) {
+            flags[`night_${floorId}`] ??= 0;
+            flags[`night_${floorId}`] += enemy.info.day;
+        }
+
+        // if (core.plugin.skillTree.getSkillLevel(11) > 0) {
+        //     core.plugin.study.declineStudiedSkill();
+        // }
+
+        // 如果是融化怪，需要特殊标记一下
+        if (special.includes(25) && has(x) && has(y)) {
+            flags[`melt_${floorId}`] ??= {};
+            flags[`melt_${floorId}`][`${x},${y}`] = enemy.info.melt;
+        }
+
+        // 获得金币
+        const money = enemy.info.money!;
+        core.status.hero.money += money;
+        core.status.hero.statistics.money += money;
+
+        // 获得经验
+        const exp = enemy.info.exp!;
+        core.status.hero.exp += exp;
+        core.status.hero.statistics.exp += exp;
+
+        const hint =
+            '打败 ' + enemy.enemy.name + '，金币+' + money + '，经验+' + exp;
+        core.drawTip(hint, enemy.id);
+
+        if (core.getFlag('bladeOn') && core.getFlag('blade')) {
+            core.setFlag('blade', false);
+        }
+        if (core.getFlag('shieldOn') && core.getFlag('shield')) {
+            core.setFlag('shield', false);
+        }
+
+        // 事件的处理
+        const todo: MotaEvent = [];
+
+        // 战后事件
+        if (has(core.status.floorId)) {
+            const loc = `${x},${y}` as LocString;
+            todo.push(
+                ...(core.floors[core.status.floorId].afterBattle[loc] ?? [])
+            );
+        }
+        todo.push(...(enemy.enemy.afterBattle ?? []));
+
+        // 如果事件不为空，将其插入
+        if (todo.length > 0) core.insertAction(todo, x, y);
+
+        if (has(x) && has(y)) {
+            core.drawAnimate(animate, x, y);
+            core.removeBlock(x, y);
+        } else core.drawHeroAnimate(animate);
+
+        // 如果已有事件正在处理中
+        if (core.status.event.id == null) core.continueAutomaticRoute();
+        else core.clearContinueAutomaticRoute();
+    };
 }
 loading.once('coreInit', init);
 

@@ -165,7 +165,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"text": "真的是一把很普通的银剑，哦不，铁剑。攻击+180，额外攻击+50",
 		"equip": {
 			"type": 0,
-			"animate": "sword",
+			"animate": "jianji",
 			"value": {
 				"mana": 50,
 				"atk": 180
@@ -349,7 +349,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"name": "查看技能",
 		"text": "查看勇士的技能",
 		"canUseItemEffect": true,
-		"useItemEffect": "Mota.Plugin.require('gameUi_g').openSkill();"
+		"useItemEffect": "Mota.require('var', 'mainUi').open('skill');"
 	},
 	"dagger": {
 		"cls": "constants",

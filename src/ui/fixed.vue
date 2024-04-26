@@ -68,8 +68,8 @@ const detail = ((): [number, string, string][] => {
         [enemy.enemy.money, '金币', 'lightyellow'],
         [enemy.enemy.exp, '经验', 'lawgreen'],
         [data?.atkDelta ?? 0, '临界', 'lightsalmon'],
-        [data?.delta ?? 0, '临界减伤', 'lightpink'],
-        [enemy.calDefDamage(ratio).delta, `${ratio}防`, 'cyan']
+        [-data?.delta ?? 0, '临界减伤', 'lightpink'],
+        [-enemy.calDefDamage(ratio).delta, `${ratio}防`, 'cyan']
     ];
 })();
 const special = (() => {

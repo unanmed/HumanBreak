@@ -1,6 +1,6 @@
 import { getDamageColor } from '../utils';
 import { ToShowEnemy } from './book';
-import type { DamageEnemy } from '../../game/enemy/damage';
+import type { DamageEnemy, EnemyInfo } from '../../game/enemy/damage';
 import { isMobile } from '../use';
 
 export function getLocFromMouseLoc(x: number, y: number): LocArr {
@@ -23,19 +23,21 @@ export function getDetailedEnemy(
     const damage = core.formatBigNumber(dam);
 
     const fromFunc = (
-        func: string | ((enemy: Enemy) => string),
-        enemy: Enemy
+        func: string | ((enemy: EnemyInfo) => string),
+        enemy: EnemyInfo
     ) => {
         return typeof func === 'string' ? func : func(enemy);
     };
-    const special: [string, string, string][] = enemy.enemy.special.map(vv => {
-        const s = Mota.require('var', 'enemySpecials')[vv];
-        return [
-            fromFunc(s.name, enemy.enemy),
-            fromFunc(s.desc, enemy.enemy),
-            s.color as string
-        ];
-    });
+    const special: [string, string, string][] = enemy.info.special
+        .filter(v => !enemy.info.specialHalo?.includes(v))
+        .map(vv => {
+            const s = Mota.require('var', 'enemySpecials')[vv];
+            return [
+                fromFunc(s.name, enemy.info),
+                fromFunc(s.desc, enemy.info),
+                s.color as string
+            ];
+        });
     const l = isMobile ? 1 : 2;
     const showSpecial =
         special.length > l

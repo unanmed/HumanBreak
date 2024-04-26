@@ -36,7 +36,8 @@ type BooleanEnemyProperty =
     | 'haloSquare'
     | 'notBomb'
     | 'add'
-    | 'haloAdd';
+    | 'haloAdd'
+    | 'specialMultiply';
 
 type DetailedEnemy<I extends EnemyIds = EnemyIds> = {
     specialText: string[];
@@ -85,10 +86,12 @@ type Enemy<I extends EnemyIds = EnemyIds> = {
      * 战后事件
      */
     afterBattle: MotaEvent;
+
+    specialHalo?: number[];
 } & {
     [P in PartialNumbericEnemyProperty]?: number;
 } & {
-    [P in BooleanEnemyProperty]: boolean;
+    [P in BooleanEnemyProperty]?: boolean;
 } & EnemyInfoBase;
 
 /**

@@ -582,6 +582,13 @@ interface IdToCls {
     T652: 'terrains';
     T653: 'terrains';
     T654: 'terrains';
+    T655: 'terrains';
+    E656: 'enemys';
+    E657: 'enemys';
+    E658: 'enemys';
+    E659: 'enemys';
+    T660: 'terrains';
+    T661: 'terrains';
     X20032: 'tileset';
     X20033: 'tileset';
     X20034: 'tileset';

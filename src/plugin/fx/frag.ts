@@ -28,8 +28,6 @@ export function init() {
     Mota.rewrite(core.events, 'afterBattle', 'add', (_, enemy, x, y) => {
         // 打怪特效
         const setting = Mota.require('var', 'mainSetting');
-        console.log(setting.getValue('fx.frag'));
-
         if (setting.getValue('fx.frag') && has(x) && has(y)) {
             const frame = core.status.globalAnimateStatus % 2;
             const canvas = document.createElement('canvas');

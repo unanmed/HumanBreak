@@ -20,7 +20,7 @@ export function init() {
         ensureFloorDamage(floorId);
 
         floor.enemy.extract();
-        floor.enemy.calDamage(true);
+        floor.enemy.calRealAttribute();
         floor.enemy.calMapDamage();
         core.status.damage.data = [];
 

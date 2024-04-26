@@ -1,13 +1,17 @@
 import { getHeroStatusOn } from '@/game/hero';
+import { EnemyInfo } from './damage';
 
 export interface SpecialDeclaration {
     code: number;
-    name: string | ((enemy: Enemy) => string);
-    desc: string | ((enemy: Enemy) => string);
+    name: string | ((enemy: EnemyInfo) => string);
+    desc: string | ((enemy: EnemyInfo) => string);
     color: string;
 }
 
-const fromFunc = (func: string | ((enemy: Enemy) => string), enemy: Enemy) => {
+const fromFunc = (
+    func: string | ((enemy: EnemyInfo) => string),
+    enemy: EnemyInfo
+) => {
     return typeof func === 'string' ? func : func(enemy);
 };
 
@@ -209,18 +213,24 @@ export const specials: SpecialDeclaration[] = [
         code: 29,
         name: '杀戮光环',
         desc: enemy => {
-            const special = enemy.special;
-            let str = '<div style="margin-left: 10px">';
-
-            special.forEach(v => {
-                const { name, desc, color } = specials[v];
-                str += `<span style="color:${color}">${fromFunc(
-                    name,
-                    enemy
-                )}</span><span>${fromFunc(desc, enemy)}</span>`;
+            let content = '';
+            enemy.specialHalo?.forEach((v, i) => {
+                content +=
+                    '&nbsp;'.repeat(8) +
+                    `${i + 1}. <span style="color: ${
+                        specials[v].color
+                    }">${fromFunc(specials[v].name, enemy)}</span>: ${fromFunc(
+                        specials[v].desc,
+                        enemy
+                    )}<br />`;
             });
-
-            return str;
+            return (
+                `怪物周围九宫格${enemy.haloRange}格范围内所有怪物获得以下特殊属性（包括自身），` +
+                `特殊属性数值间为${
+                    enemy.specialMultiply ? '相乘' : '相加'
+                }关系:<br />` +
+                content
+            );
         },
         color: '#F721F7'
     }
