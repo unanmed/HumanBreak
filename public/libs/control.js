@@ -475,7 +475,9 @@ control.prototype.showStartAnimate = function (noAnimate, callback) {
             core.flags.startUsingCanvas,
             callback
         );
-    Mota.require('var', 'fixedUi').open('start');
+    Mota.r(() => {
+        Mota.require('var', 'fixedUi').open('start');
+    });
     // core.hideWithAnimate(core.dom.startTop, 20, function () {
     //     core.control._showStartAnimate_finished(false, callback);
     // });
