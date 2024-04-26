@@ -165,7 +165,6 @@ function resize() {
 onUpdated(resize);
 
 onMounted(async () => {
-    await sleep(50);
     resize();
 
     if (!main) return;

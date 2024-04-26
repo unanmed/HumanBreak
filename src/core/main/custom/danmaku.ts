@@ -22,11 +22,15 @@ interface DanmakuResponse extends ResponseBase {
 }
 
 interface DanmakuInfo {
-    id: number;
+    id: string;
     comment: string;
     tags: string;
-    love: number;
+    love: string;
     my_love_type: boolean;
+    userid: string;
+    deler: string;
+    upload_time: string;
+    tower_name: string;
 }
 
 interface DanmakuPostInfo extends Partial<DanmakuContentInfo> {
@@ -468,8 +472,8 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
 
         data.data.list.forEach(v => {
             const dan = new Danmaku();
-            dan.id = v.id;
-            dan.likedNum = v.love;
+            dan.id = parseInt(v.id);
+            dan.likedNum = parseInt(v.love);
             dan.liked = v.my_love_type;
             dan.decode(v);
             dan.posted = true;

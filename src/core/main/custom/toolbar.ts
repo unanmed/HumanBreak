@@ -1,21 +1,16 @@
 import { EmitableEvent, EventEmitter } from '@/core/common/eventEmitter';
-import { KeyCode } from '@/plugin/keyCodes';
-import { deleteWith, flipBinary, has } from '@/plugin/utils';
-import {
-    FunctionalComponent,
-    markRaw,
-    nextTick,
-    reactive,
-    shallowReactive
-} from 'vue';
-import {
-    createToolbarComponents,
-    createToolbarEditorComponents
-} from '../init/toolbar';
-import { gameKey } from '../init/hotkey';
-import { unwarpBinary } from './hotkey';
+import { deleteWith, has } from '@/plugin/utils';
+import { Component, nextTick, reactive, shallowReactive } from 'vue';
 import { fixedUi } from '../init/ui';
 import { GameStorage } from '../storage';
+import type {
+    CustomToolbarComponent,
+    MiscToolbar,
+    SettableItemData,
+    ToolbarItemBase,
+    ToolbarItemMap,
+    ToolbarItemType
+} from '../init/toolbar';
 
 interface CustomToolbarEvent extends EmitableEvent {
     add: (item: ValueOf<ToolbarItemMap>) => void;
@@ -25,45 +20,6 @@ interface CustomToolbarEvent extends EmitableEvent {
     posChange: (bar: CustomToolbar) => void;
 }
 
-interface ToolbarItemBase<T extends ToolbarItemType> {
-    type: T;
-    id: string;
-    noDefaultAction?: boolean;
-}
-
-// 快捷键
-interface HotkeyToolbarItem extends ToolbarItemBase<'hotkey'> {
-    key: KeyCode;
-    assist: number;
-}
-
-// 使用道具
-interface ItemToolbarItem extends ToolbarItemBase<'item'> {
-    item: ItemIdOf<'tools' | 'constants'>;
-}
-
-// 切换辅助按键 ctrl alt shift
-interface AssistKeyToolbarItem extends ToolbarItemBase<'assistKey'> {
-    assist: KeyCode.Ctrl | KeyCode.Shift | KeyCode.Alt;
-}
-
-interface MinimatToolbar extends ToolbarItemBase<'minimap'> {
-    action: boolean;
-    scale: number;
-    noBorder: boolean;
-    showInfo: boolean;
-    autoLocate: boolean;
-    width: number;
-    height: number;
-}
-
-interface ToolbarItemMap {
-    hotkey: HotkeyToolbarItem;
-    item: ItemToolbarItem;
-    assistKey: AssistKeyToolbarItem;
-    minimap: MinimatToolbar;
-}
-
 interface ToolbarSaveData {
     x: number;
     y: number;
@@ -71,21 +27,6 @@ interface ToolbarSaveData {
     h: number;
     items: ValueOf<ToolbarItemMap>[];
 }
-
-export type ToolbarItemType = keyof ToolbarItemMap;
-
-export type SettableItemData<T extends ToolbarItemType = ToolbarItemType> =
-    Omit<ToolbarItemMap[T], 'id' | 'type'>;
-
-export interface CustomToolbarProps<
-    T extends ToolbarItemType = ToolbarItemType
-> {
-    item: ToolbarItemMap[T];
-    toolbar: CustomToolbar;
-}
-export type CustomToolbarComponent<
-    T extends ToolbarItemType = ToolbarItemType
-> = FunctionalComponent<CustomToolbarProps<T>>;
 
 type ToolItemEmitFn<T extends ToolbarItemType> = (
     this: CustomToolbar,
@@ -101,17 +42,90 @@ interface RegisteredCustomToolInfo {
     onCreate: (item: any) => ToolbarItemBase<ToolbarItemType>;
 }
 
-const COM = createToolbarComponents();
-const EDITOR = createToolbarEditorComponents();
+type MiscEmitFn = (
+    id: string,
+    toolbar: CustomToolbar,
+    item: MiscToolbar
+) => void;
+type ActivedFn = (info: MiscInfo) => boolean;
+
+interface MiscInfo {
+    id: string;
+    name: string;
+    emit: MiscEmitFn;
+    display: Component;
+    activable?: boolean;
+    actived?: ActivedFn;
+}
+
+interface Misc {
+    info: Record<string, MiscInfo>;
+
+    /**
+     * 注册一个杂项工具
+     * @param id 杂项工具的id
+     * @param name 这个工具的名称
+     * @param emit 触发这个杂项工具时执行的函数
+     * @param display 这个工具的显示组件
+     * @param activable 是否是可以被激活的工具，例如打开小地图后显示为激活状态
+     */
+    register(
+        this: Misc,
+        id: string,
+        name: string,
+        emit: MiscEmitFn,
+        display: Component
+    ): void;
+
+    bindActivable(id: string, activable: boolean, actived?: ActivedFn): void;
+
+    /**
+     * 刷新所有或指定的包含杂项工具的工具栏
+     * @param id 指定包含这个杂项工具的工具栏刷新，例如填drag，则只会刷新包含drag杂项工具的工具栏
+     */
+    requestRefresh(id?: string): void;
+}
 
 const toolbarStorage = new GameStorage<Record<string, ToolbarSaveData>>(
     GameStorage.fromAuthor('AncTe', 'toolbar')
 );
 
+const misc: Misc = {
+    info: {},
+    register(id, name, emit, display) {
+        this.info[id] = { id, name, emit, display };
+    },
+    bindActivable(id, activable, actived) {
+        this.info[id].activable = activable;
+        this.info[id].actived = actived;
+    },
+    requestRefresh(id) {
+        if (id) {
+            CustomToolbar.list.forEach(v => {
+                if (
+                    v.items.some(v => {
+                        return v.type === 'misc' && v.items?.includes(id);
+                    })
+                ) {
+                    v.refresh();
+                }
+            });
+        } else {
+            CustomToolbar.list.forEach(v => {
+                if (v.items.some(v => v.type === 'misc')) {
+                    v.refresh();
+                }
+            });
+        }
+    }
+};
+
 export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
     static num: number = 0;
     static list: CustomToolbar[] = shallowReactive([]);
     static info: Record<string, RegisteredCustomToolInfo> = {};
+
+    static misc: Misc = misc;
 
     items: ValueOf<ToolbarItemMap>[] = reactive([]);
     num: number = CustomToolbar.num++;
@@ -125,7 +139,7 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
     assistKey: number = 0;
     showIds: number[] = [];
 
-    constructor(id: string) {
+    constructor(id: string, noshow: boolean = false) {
         super();
         this.id = id;
         // 按比例设置初始大小
@@ -136,7 +150,7 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
         this.x *= scale;
         this.y *= scale;
 
-        this.show();
+        if (!noshow) this.show();
         CustomToolbar.list.push(this);
     }
 
@@ -237,8 +251,15 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
 
     /**
      * 显示这个自定义工具栏，可以显示多个，且内容互通
+     * @param multi 是否允许显示多个，不填时，如果已经存在这个工具栏，那么将不会显示
      */
-    show() {
+    show(multi: boolean = false) {
+        if (
+            !multi &&
+            this.showIds.some(v => fixedUi.stack.some(vv => vv.num === v))
+        ) {
+            return -1;
+        }
         const id = fixedUi.open('toolbar', { bar: this });
         this.showIds.push(id);
         return id;
@@ -342,96 +363,6 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
         this.list.forEach(v => v.closeAll());
     }
 }
-
-CustomToolbar.register(
-    'hotkey',
-    '快捷键',
-    function (id, item) {
-        // 按键
-        const assist = item.assist | this.assistKey;
-        const { ctrl, shift, alt } = unwarpBinary(assist);
-        const ev = new KeyboardEvent('keyup', {
-            ctrlKey: ctrl,
-            shiftKey: shift,
-            altKey: alt
-        });
-
-        // todo: Advanced KeyboardEvent simulate
-        gameKey.emitKey(item.key, assist, 'up', ev);
-        return true;
-    },
-    COM.KeyTool,
-    EDITOR.KeyTool,
-    item => {
-        return {
-            key: KeyCode.Unknown,
-            assist: 0,
-            ...item
-        };
-    }
-);
-CustomToolbar.register(
-    'item',
-    '使用道具',
-    function (id, item) {
-        // 道具
-        core.tryUseItem(item.item);
-        return true;
-    },
-    COM.ItemTool,
-    EDITOR.ItemTool,
-    item => {
-        return {
-            item: 'book',
-            ...item
-        };
-    }
-);
-CustomToolbar.register(
-    'assistKey',
-    '辅助按键',
-    function (id, item) {
-        // 辅助按键
-        if (item.assist === KeyCode.Ctrl) {
-            this.assistKey = flipBinary(this.assistKey, 0);
-        } else if (item.assist === KeyCode.Shift) {
-            this.assistKey = flipBinary(this.assistKey, 1);
-        } else if (item.assist === KeyCode.Alt) {
-            this.assistKey = flipBinary(this.assistKey, 2);
-        }
-        return true;
-    },
-    COM.AssistKeyTool,
-    EDITOR.AssistKeyTool,
-    item => {
-        return {
-            assist: KeyCode.Ctrl,
-            ...item
-        };
-    }
-);
-CustomToolbar.register(
-    'minimap',
-    '小地图',
-    function (id, item) {
-        return true;
-    },
-    COM.MinimapTool,
-    EDITOR.MinimapTool,
-    item => {
-        return {
-            action: false,
-            scale: 5,
-            width: 300,
-            height: 300,
-            noBorder: false,
-            showInfo: false,
-            autoLocate: true,
-            ...item,
-            noDefaultAction: true
-        };
-    }
-);
 
 Mota.require('var', 'loading').once('coreInit', () => {
     CustomToolbar.load();

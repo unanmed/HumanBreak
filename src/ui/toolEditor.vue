@@ -191,7 +191,7 @@
 </template>
 
 <script lang="ts" setup>
-import { CustomToolbar, ToolbarItemType } from '@/core/main/custom/toolbar';
+import { CustomToolbar } from '@/core/main/custom/toolbar';
 import { GameUi } from '@/core/main/custom/ui';
 import { computed, onUnmounted, reactive, ref } from 'vue';
 import {
@@ -205,6 +205,7 @@ import Scroll from '@/components/scroll.vue';
 import { deleteWith, tip } from '@/plugin/utils';
 import { Modal } from 'ant-design-vue';
 import { mainSetting } from '@/core/main/setting';
+import { ToolbarItemType } from '@/core/main/init/toolbar';
 
 const props = defineProps<{
     ui: GameUi;

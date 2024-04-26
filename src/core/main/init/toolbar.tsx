@@ -1,11 +1,13 @@
 import { KeyCode, KeyCodeUtils } from '@/plugin/keyCodes';
-import type {
-    CustomToolbarComponent,
-    CustomToolbarProps
-} from '../custom/toolbar';
+import { CustomToolbar } from '../custom/toolbar';
 import BoxAnimate from '@/components/boxAnimate.vue';
-import { checkAssist } from '../custom/hotkey';
-import { getVitualKeyOnce } from '@/plugin/utils';
+import { checkAssist, unwarpBinary } from '../custom/hotkey';
+import {
+    flipBinary,
+    getVitualKeyOnce,
+    openDanmakuPoster,
+    parseCss
+} from '@/plugin/utils';
 import { cloneDeep } from 'lodash-es';
 import {
     Button,
@@ -16,8 +18,75 @@ import {
 } from 'ant-design-vue';
 import { mainSetting } from '../setting';
 import Minimap from '@/components/minimap.vue';
+import { gameKey } from './hotkey';
+import { FunctionalComponent, StyleValue, h } from 'vue';
+import { mainUi } from './ui';
+import { isMobile } from '@/plugin/use';
+import { EllipsisOutlined } from '@ant-design/icons-vue';
 
 // todo: 新增更改设置的ToolItem
+
+export interface ToolbarItemBase<T extends ToolbarItemType> {
+    type: T;
+    id: string;
+    noDefaultAction?: boolean;
+}
+
+// 快捷键
+interface HotkeyToolbarItem extends ToolbarItemBase<'hotkey'> {
+    key: KeyCode;
+    assist: number;
+}
+
+// 使用道具
+interface ItemToolbarItem extends ToolbarItemBase<'item'> {
+    item: ItemIdOf<'tools' | 'constants'>;
+}
+
+// 切换辅助按键 ctrl alt shift
+interface AssistKeyToolbarItem extends ToolbarItemBase<'assistKey'> {
+    assist: KeyCode.Ctrl | KeyCode.Shift | KeyCode.Alt;
+}
+
+// 小地图
+interface MinimapToolbar extends ToolbarItemBase<'minimap'> {
+    action: boolean;
+    scale: number;
+    noBorder: boolean;
+    showInfo: boolean;
+    autoLocate: boolean;
+    width: number;
+    height: number;
+}
+
+// 杂项工具栏
+export interface MiscToolbar extends ToolbarItemBase<'misc'> {
+    folded: boolean;
+    items: string[];
+}
+
+export interface ToolbarItemMap {
+    hotkey: HotkeyToolbarItem;
+    item: ItemToolbarItem;
+    assistKey: AssistKeyToolbarItem;
+    minimap: MinimapToolbar;
+    misc: MiscToolbar;
+}
+
+export type ToolbarItemType = keyof ToolbarItemMap;
+
+export type SettableItemData<T extends ToolbarItemType = ToolbarItemType> =
+    Omit<ToolbarItemMap[T], 'id' | 'type'>;
+
+export interface CustomToolbarProps<
+    T extends ToolbarItemType = ToolbarItemType
+> {
+    item: ToolbarItemMap[T];
+    toolbar: CustomToolbar;
+}
+export type CustomToolbarComponent<
+    T extends ToolbarItemType = ToolbarItemType
+> = FunctionalComponent<CustomToolbarProps<T>>;
 
 interface Components {
     DefaultTool: CustomToolbarComponent;
@@ -135,6 +204,98 @@ function MinimapTool(props: CustomToolbarProps<'minimap'>) {
                 width={item.width}
                 height={item.height}
             ></Minimap>
+        </div>
+    );
+}
+
+function MiscTool(props: CustomToolbarProps<'misc'>) {
+    const { item, toolbar } = props;
+    const scale = mainSetting.getValue('ui.toolbarScale', 100) / 100;
+
+    const triggerFold = () => {
+        item.folded = !item.folded;
+        toolbar.refresh();
+    };
+
+    const unfoldStyle = `
+        min-width: ${50 * scale}px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: ${18 * scale}px;
+    `;
+    const blockStyle = `
+        min-width: ${40 * scale}px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: ${40 * scale}px;
+        border: 1px solid #ddd;
+    `;
+    const toolStyle = `
+        display: flex;
+        align-items: center;
+        min-width: ${40 * scale}px;
+        height: ${40 * scale}px;
+        border: 1px solid #ddd;
+        margin-left: ${5 * scale}px;
+        justify-content: center;
+    `;
+    const toolActivedStyle = `
+        display: flex;
+        align-items: center;
+        min-width: ${40 * scale}px;
+        height: ${40 * scale}px;
+        border: 1px solid #ddd;
+        margin-left: ${5 * scale}px;
+        justify-content: center;
+        color: aqua;
+    `;
+    const containerStyle = `
+        display: flex;
+        align-items: center;
+        padding: 0 ${5 * scale}px;
+    `;
+
+    return (
+        <div style="display: flex; align-items: center; justify-content: left">
+            {item.folded ? (
+                <div
+                    class="button-text"
+                    onClick={triggerFold}
+                    style={unfoldStyle}
+                >
+                    <EllipsisOutlined />
+                </div>
+            ) : (
+                <div style={containerStyle}>
+                    <span
+                        class="button-text"
+                        onClick={triggerFold}
+                        style={blockStyle}
+                    >
+                        折叠
+                    </span>
+                    {item.items.map(v => {
+                        const info = CustomToolbar.misc.info[v];
+                        const { actived } = info;
+                        const style = actived?.(info)
+                            ? toolActivedStyle
+                            : toolStyle;
+                        if (!info) return <span></span>;
+                        else
+                            return (
+                                <div
+                                    class="button-text"
+                                    style={style}
+                                    onClick={() => info.emit(v, toolbar, item)}
+                                >
+                                    {info.display}
+                                </div>
+                            );
+                    })}
+                </div>
+            )}
         </div>
     );
 }
@@ -407,3 +568,332 @@ function MinimapToolEditor(props: CustomToolbarProps<'minimap'>) {
         </div>
     );
 }
+
+function MiscToolEditor(props: CustomToolbarProps<'misc'>) {
+    const { item, toolbar } = props;
+
+    const misc = CustomToolbar.misc.info;
+    const values = Object.values(misc);
+
+    const divStyle = `
+        display: flex; 
+        flex-direction: row; 
+        justify-content: space-between;
+        align-items: center; 
+        padding: 5px 5%; 
+        margin: 1%;
+        width: 100%;
+        border-bottom: 1px solid #888;
+    `;
+    const addStyle = `
+        display: flex; 
+        flex-direction: row; 
+        justify-content: center;
+        align-items: center; 
+        padding: 0 5%; 
+        margin: 1%;
+        width: 100%;
+    `;
+    const containerStyle = `
+        display: flex;
+        flex-direction: column;
+    `;
+
+    return (
+        <div style={containerStyle}>
+            {item.items.map((v, i) => {
+                return (
+                    <div style={divStyle}>
+                        <span>第{i + 1}个工具</span>
+                        <Select
+                            style="width: 180px; font-size: 80%; height: 100%; background-color: #000"
+                            value={v}
+                            onChange={value =>
+                                (item.items[i] = value as string)
+                            }
+                        >
+                            {values.map(v => {
+                                return (
+                                    <SelectOption value={v.id}>
+                                        {v.name}
+                                    </SelectOption>
+                                );
+                            })}
+                        </Select>
+                    </div>
+                );
+            })}
+            <div style={addStyle}>
+                <Button
+                    type="primary"
+                    onClick={() => item.items.push('danmaku')}
+                >
+                    新增杂项工具
+                </Button>
+            </div>
+        </div>
+    );
+}
+
+CustomToolbar.register(
+    'hotkey',
+    '快捷键',
+    function (id, item) {
+        // 按键
+        const assist = item.assist | this.assistKey;
+        const { ctrl, shift, alt } = unwarpBinary(assist);
+        const ev = new KeyboardEvent('keyup', {
+            ctrlKey: ctrl,
+            shiftKey: shift,
+            altKey: alt
+        });
+
+        // todo: Advanced KeyboardEvent simulate
+        gameKey.emitKey(item.key, assist, 'up', ev);
+        return true;
+    },
+    KeyTool,
+    KeyToolEdtior,
+    item => {
+        return {
+            key: KeyCode.Unknown,
+            assist: 0,
+            ...item
+        };
+    }
+);
+CustomToolbar.register(
+    'item',
+    '使用道具',
+    function (id, item) {
+        // 道具
+        core.tryUseItem(item.item);
+        return true;
+    },
+    ItemTool,
+    ItemToolEditor,
+    item => {
+        return {
+            item: 'book',
+            ...item
+        };
+    }
+);
+CustomToolbar.register(
+    'assistKey',
+    '辅助按键',
+    function (id, item) {
+        // 辅助按键
+        if (item.assist === KeyCode.Ctrl) {
+            this.assistKey = flipBinary(this.assistKey, 0);
+        } else if (item.assist === KeyCode.Shift) {
+            this.assistKey = flipBinary(this.assistKey, 1);
+        } else if (item.assist === KeyCode.Alt) {
+            this.assistKey = flipBinary(this.assistKey, 2);
+        }
+        return true;
+    },
+    AssistKeyTool,
+    AssistKeyToolEditor,
+    item => {
+        return {
+            assist: KeyCode.Ctrl,
+            ...item
+        };
+    }
+);
+CustomToolbar.register(
+    'minimap',
+    '小地图',
+    function (id, item) {
+        return true;
+    },
+    MinimapTool,
+    MinimapToolEditor,
+    item => {
+        return {
+            action: false,
+            scale: 5,
+            width: 300,
+            height: 300,
+            noBorder: false,
+            showInfo: false,
+            autoLocate: true,
+            ...item,
+            noDefaultAction: true
+        };
+    }
+);
+CustomToolbar.register(
+    'misc',
+    '杂项',
+    function (id, item) {
+        return true;
+    },
+    MiscTool,
+    MiscToolEditor,
+    item => {
+        return {
+            items: [],
+            folded: true,
+            ...item,
+            noDefaultAction: true
+        };
+    }
+);
+
+// 杂项注册
+Mota.require('var', 'hook').once('reset', () => {
+    // 小地图是否显示
+    let minimapTool = CustomToolbar.list.some(v => v.id === '@misc/minimap');
+    mainUi.on('close', () => {
+        let before = minimapTool;
+        minimapTool = CustomToolbar.list.some(v => v.id === '@misc/minimap');
+        if (before !== minimapTool) {
+            CustomToolbar.misc.requestRefresh('minimap');
+        }
+    });
+
+    CustomToolbar.misc.register(
+        'danmaku',
+        '发弹幕',
+        openDanmakuPoster,
+        h('span', '发弹幕')
+    );
+    CustomToolbar.misc.register(
+        'toolbox',
+        '道具栏',
+        () => {
+            mainUi.open('toolbox');
+        },
+        <img
+            src={core.statusBar.icons.toolbox.src}
+            style="object-fit: contain"
+        ></img>
+    );
+    CustomToolbar.misc.register(
+        'virtualKey',
+        '虚拟键盘',
+        () => {
+            getVitualKeyOnce();
+        },
+        <img
+            src={core.statusBar.icons.keyboard.src}
+            style="object-fit: contain"
+        ></img>
+    );
+    CustomToolbar.misc.register(
+        'shop',
+        '快捷商店',
+        () => {
+            core.openQuickShop(true);
+        },
+        <img
+            src={core.statusBar.icons.shop.src}
+            style="object-fit: contain"
+        ></img>
+    );
+    CustomToolbar.misc.register(
+        'save',
+        '存档',
+        () => {
+            core.save(true);
+        },
+        <img
+            src={core.statusBar.icons.save.src}
+            style="object-fit: contain"
+        ></img>
+    );
+    CustomToolbar.misc.register(
+        'load',
+        '读档',
+        () => {
+            core.load(true);
+        },
+        <img
+            src={core.statusBar.icons.load.src}
+            style="object-fit: contain"
+        ></img>
+    );
+    CustomToolbar.misc.register(
+        'redo',
+        '回退（自动存档）',
+        () => {
+            core.doSL('autoSave', 'load');
+        },
+        h('span', '回退')
+    );
+    CustomToolbar.misc.register(
+        'load',
+        '恢复（撤销自动存档）',
+        () => {
+            core.doSL('autoSave', 'reload');
+        },
+        h('span', '恢复')
+    );
+    CustomToolbar.misc.register(
+        'setting',
+        '系统设置',
+        () => {
+            core.openSettings(true);
+        },
+        <img
+            src={core.statusBar.icons.settings.src}
+            style="object-fit: contain"
+        ></img>
+    );
+    CustomToolbar.misc.register(
+        'minimap',
+        '小地图',
+        (id, tool) => {
+            const index = CustomToolbar.list.findIndex(
+                v => v.id === '@misc/minimap'
+            );
+            minimapTool = index !== -1;
+            if (minimapTool) {
+                const tool = CustomToolbar.list[index];
+                tool.closeAll();
+                CustomToolbar.list.splice(index, 1);
+                minimapTool = false;
+            } else {
+                const tool = new CustomToolbar('@misc/minimap', true);
+                const info = CustomToolbar.info['minimap'].onCreate({
+                    id: `minimap`,
+                    type: 'minimap'
+                }) as MinimapToolbar;
+                info.noBorder = true;
+                info.action = true;
+                info.showInfo = true;
+                if (!isMobile) {
+                    tool.x = window.innerWidth - 420;
+                    tool.y = 100;
+                    tool.width = 320;
+                    tool.height = 320;
+                } else {
+                    info.width = 150;
+                    info.height = 150;
+                    tool.x = window.innerWidth - 220;
+                    tool.y = 50;
+                    tool.width = 170;
+                    tool.height = 170;
+                }
+
+                tool.add(info);
+                tool.show();
+                minimapTool = true;
+            }
+            tool.refresh();
+        },
+        h('span', '小地图')
+    );
+    // CustomToolbar.misc.register(
+    //     'drag',
+    //     '地图拖动',
+    //     () => {
+    //         // todo
+    //     },
+    //     h('span', '拖动地图')
+    // );
+
+    CustomToolbar.misc.bindActivable('minimap', true, () => minimapTool);
+});

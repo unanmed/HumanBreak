@@ -6,6 +6,7 @@ import vuejsx from '@vitejs/plugin-vue-jsx'
 import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers';
 import motaConfig from './mota.config';
 import { resolve } from 'path';
+import postcssPresetEnv from 'postcss-preset-env';
 
 const FSHOST = 'http://127.0.0.1:3000/';
 
@@ -51,6 +52,9 @@ export default defineConfig({
             less: {
                 javascriptEnabled: true
             }
+        },
+        postcss: {
+            plugins: [postcssPresetEnv()]
         }
     },
     server: {
