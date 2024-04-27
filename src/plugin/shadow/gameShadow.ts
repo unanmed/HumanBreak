@@ -85,26 +85,22 @@ const shadowInfo: Partial<Record<FloorIds, Light[]>> = {
             noShelter: true
         }
     ],
-    MT51: [
-        {
-            id: 'mt51_hero',
-            x: 0,
-            y: 0,
-            decay: 50,
-            r: 250,
-            color: 'transparent',
-            followHero: true
-        }
-    ],
     MT52: [
         {
-            id: 'mt52_hero',
-            x: 0,
-            y: 0,
-            decay: 50,
+            id: 'mt51_1',
+            x: 13 * 32 + 16,
+            y: 6 * 32 + 16,
+            decay: 20,
             r: 250,
-            color: 'transparent',
-            followHero: true
+            color: pColor('#e953')
+        },
+        {
+            id: 'mt51_2',
+            x: 1 * 32 + 16,
+            y: 13 * 32 + 16,
+            decay: 20,
+            r: 350,
+            color: pColor('#e953')
         }
     ]
 };
@@ -118,6 +114,35 @@ const immersionInfo: Partial<Record<FloorIds, number>> = {};
 const shadowCache: Partial<Record<FloorIds, Polygon[]>> = {};
 
 let calMapShadow = true;
+
+Mota.require('var', 'loading').once('coreInit', () => {
+    core.floorIds.slice(61).forEach(v => {
+        shadowInfo[v] ??= [];
+        shadowInfo[v]?.push({
+            id: `${v}_hero`,
+            x: 0,
+            y: 0,
+            decay: 50,
+            r: 300,
+            color: 'transparent',
+            followHero: true
+        });
+        core.floors[v].map.forEach((arr, y) => {
+            arr.forEach((num, x) => {
+                if (num === 103) {
+                    shadowInfo[v]?.push({
+                        id: `${v}_${x}_${y}`,
+                        x: x * 32 + 16,
+                        y: y * 32 + 16,
+                        decay: 20,
+                        r: 350,
+                        color: pColor('#e953')
+                    });
+                }
+            });
+        });
+    });
+});
 
 export function updateShadow(nocache: boolean = false) {
     // todo: 需要优化，优化成bfs

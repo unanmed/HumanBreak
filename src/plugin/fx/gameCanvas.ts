@@ -28,6 +28,7 @@ export function setCanvasFilterByFloorId(
 
 Mota.require('var', 'loading').once('coreInit', () => {
     filterMap.push(
-        [core.floorIds.slice(60), 'brightness(80%)contrast(120%)'] // 童心佬的滤镜（
+        [['MT50'], 'brightness(80%)contrast(120%)'], // 童心佬的滤镜（
+        [core.floorIds.slice(61), 'brightness(90%)contrast(120%)'] // 童心佬的滤镜（
     );
 });
