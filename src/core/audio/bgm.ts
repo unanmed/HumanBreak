@@ -67,7 +67,7 @@ export class BgmController
      * @param when 切换至的歌从什么时候开始播放，默认-1，表示不改变，整数表示设置为目标值
      */
     changeTo(id: BgmIds, when: number = -1, noStack: boolean = false) {
-        if (id === this.now) return;
+        if (id === this.now) return this.resume();
         let prevent = false;
         const preventDefault = () => {
             prevent = true;

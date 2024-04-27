@@ -116,4 +116,32 @@ export function init() {
         core.replay();
         return true;
     });
+
+    core.registerReplayAction('skill', name => {
+        if (!name.startsWith('skill:')) return false;
+        const [type, skill] = name.split(':');
+        if (skill === '1') {
+            if (flags.autoSkill || !flags.bladeOn) return true;
+            if (flags.blade) flags.blade = false;
+            else flags.blade = true;
+        } else if (skill === '2') {
+            if (
+                !flags.chase &&
+                !core.status.floorId.startsWith('tower') &&
+                flags.skill2
+            ) {
+                Mota.Plugin.require('skill_g').jumpSkill();
+            } else {
+                if (core.hasItem('pickaxe')) {
+                    core.useItem('pickaxe');
+                }
+            }
+        } else if (skill === '3') {
+            if (flags.autoSkill || !flags.shieldOn) return true;
+            if (flags.shield) flags.shield = false;
+            else flags.shield = true;
+        }
+        core.updateStatusBar();
+        return true;
+    });
 }

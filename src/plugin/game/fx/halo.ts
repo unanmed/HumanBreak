@@ -3,7 +3,7 @@ const haloColor: Record<number, string[]> = {
     25: ['purple'],
     26: ['blue'],
     27: ['red'],
-    29: ['#BD0D0D']
+    29: ['#C3D100']
 };
 
 export function drawHalo(

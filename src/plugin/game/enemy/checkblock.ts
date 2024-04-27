@@ -116,6 +116,7 @@ function checkMockery(loc: string, force: boolean = false) {
         const dir = x > tx ? 'left' : x < tx ? 'right' : y > ty ? 'up' : 'down';
         const { x: dx, y: dy } = core.utils.scan[dir];
 
+        action.push({ type: 'forbidSave', forbid: true });
         action.push({ type: 'changePos', direction: dir });
         const blocks = core.getMapBlocksObj();
         while (1) {
@@ -164,6 +165,7 @@ function checkMockery(loc: string, force: boolean = false) {
             function: `function() { core.checkBlock(true); }`
         });
         action.push({ type: 'stopAsync' });
+        action.push({ type: 'forbidSave' });
         core.insertAction(action);
     }
 }

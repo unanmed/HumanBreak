@@ -208,10 +208,9 @@ gameKey
     });
 
 function bgm() {
-    core.triggerBgm();
+    // core.triggerBgm();
     soundChecked.value = !soundChecked.value;
     mainSetting.setValue('audio.bgmEnabled', soundChecked.value);
-    console.log(mainSetting.getValue('audio.bgmEnabled'));
 }
 
 async function setFullscreen() {
@@ -641,5 +640,20 @@ onUnmounted(() => {
 .start-leave-to {
     transform: translateX(-20px);
     opacity: 0;
+}
+
+@media screen and (max-width: 600px) {
+    #buttons {
+        font-size: 250%;
+    }
+
+    #start-main {
+        #title {
+            font-size: 700%;
+        }
+        #settings {
+            font-size: 400%;
+        }
+    }
 }
 </style>

@@ -68,6 +68,7 @@ export function initShadowCanvas() {
     const h = core._PY_ ?? core.__PIXELS__;
     ctx = core.createCanvas('shadow', -32, -32, w + 64, h + 64, 55);
     canvas = ctx.canvas;
+
     const s = core.domStyle.scale * devicePixelRatio;
     temp1.width = (w + 64) * s;
     temp1.height = (h + 64) * s;

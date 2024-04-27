@@ -105,6 +105,7 @@ function drawItemDetail(diff: any, x: number, y: number) {
         if (typeof diff[name] === 'number')
             content = core.formatBigNumber(diff[name], true);
         else content = diff[name];
+
         switch (name) {
             case 'atk':
             case 'atkper':
@@ -125,6 +126,7 @@ function drawItemDetail(diff: any, x: number, y: number) {
             case 'hpmaxper':
                 color = '#F9FF00';
                 break;
+            case 'manaper':
             case 'mana':
                 color = '#c66';
                 break;

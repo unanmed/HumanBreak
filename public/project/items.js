@@ -1235,5 +1235,39 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"canUseItemEffect": "true",
 		"useItemEffect": "Mota.require('var', 'mainUi')open('achievement');",
 		"text": "可以查看成就"
+	},
+	"I662": {
+		"cls": "equips",
+		"name": "天蓝石",
+		"canUseItemEffect": "true",
+		"equip": {
+			"type": "饰品",
+			"value": {},
+			"percentage": {
+				"hpmax": 10
+			}
+		},
+		"text": "或许是苍蓝之灵的杰作，可以让使用者的恢复能力增强。生命回复增加10%"
+	},
+	"I663": {
+		"cls": "items",
+		"name": "地灵华",
+		"canUseItemEffect": "true",
+		"text": "一个用大地之力制造出的饰品，貌似对魔法攻击有抵抗作用。装备后，对魔攻怪会有50%的防御力（即防御的一半充当抵消魔攻的防御，勇士受到的伤害变为 怪物攻击 - 勇士防御 / 2）",
+		"equip": {
+			"type": "饰品",
+			"value": {},
+			"percentage": {}
+		}
+	},
+	"I664": {
+		"cls": "items",
+		"name": "新物品",
+		"canUseItemEffect": "true"
+	},
+	"I665": {
+		"cls": "items",
+		"name": "新物品",
+		"canUseItemEffect": "true"
 	}
 }

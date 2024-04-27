@@ -1,6 +1,11 @@
 import { KeyCode } from '@/plugin/keyCodes';
 import { Hotkey, HotkeyJSON } from '../custom/hotkey';
-import { generateBinary, keycode, openDanmakuPoster } from '@/plugin/utils';
+import {
+    generateBinary,
+    keycode,
+    openDanmakuPoster,
+    tip
+} from '@/plugin/utils';
 import { hovered } from './fixed';
 import { hasMarkedEnemy, markEnemy, unmarkEnemy } from '@/plugin/mark';
 import { mainUi } from './ui';
@@ -201,6 +206,23 @@ gameKey
         name: '切换/保存套装_0',
         defaults: KeyCode.Digit0,
         alt: true
+    })
+    // --------------------
+    .group('skill', '技能按键')
+    .register({
+        id: 'skill1',
+        name: '断灭之刃',
+        defaults: KeyCode.Digit1
+    })
+    .register({
+        id: 'skill2',
+        name: '跳跃',
+        defaults: KeyCode.Digit2
+    })
+    .register({
+        id: 'skill3',
+        name: '铸剑为盾',
+        defaults: KeyCode.Digit3
     })
     // --------------------
     .group('system', '系统按键')
@@ -500,6 +522,41 @@ gameKey
     })
     .realize('comment', () => {
         core.actions._clickGameInfo_openComments();
+    })
+    .realize('skill1', () => {
+        if (!flags.bladeOn) return;
+        if (flags.autoSkill) {
+            tip('error', '已开启自动切换技能！');
+            return;
+        }
+        core.playSound('光标移动');
+        if (flags.blade) flags.blade = false;
+        else flags.blade = true;
+        core.updateStatusBar();
+    })
+    .realize('skill2', () => {
+        if (
+            !flags.chase &&
+            !core.status.floorId.startsWith('tower') &&
+            flags.skill2
+        ) {
+            Mota.Plugin.require('skill_g').jumpSkill();
+        } else {
+            if (core.hasItem('pickaxe')) {
+                core.useItem('pickaxe');
+            }
+        }
+    })
+    .realize('skill3', () => {
+        if (!flags.shieldOn) return;
+        if (flags.autoSkill) {
+            tip('error', '已开启自动切换技能！');
+            return;
+        }
+        core.playSound('光标移动');
+        if (flags.shield) flags.shield = false;
+        else flags.shield = true;
+        core.updateStatusBar();
     });
 
 // ----- Storage

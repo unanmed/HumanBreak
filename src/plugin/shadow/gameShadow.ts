@@ -95,11 +95,23 @@ const shadowInfo: Partial<Record<FloorIds, Light[]>> = {
             color: 'transparent',
             followHero: true
         }
+    ],
+    MT52: [
+        {
+            id: 'mt52_hero',
+            x: 0,
+            y: 0,
+            decay: 50,
+            r: 250,
+            color: 'transparent',
+            followHero: true
+        }
     ]
 };
 const backgroundInfo: Partial<Record<FloorIds, Color>> = {
     MT50: pColor('#0006'),
-    MT51: pColor('#0004')
+    MT51: pColor('#0004'),
+    MT52: pColor('#0004')
 };
 const blurInfo: Partial<Record<FloorIds, number>> = {};
 const immersionInfo: Partial<Record<FloorIds, number>> = {};

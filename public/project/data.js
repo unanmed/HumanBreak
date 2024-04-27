@@ -159,6 +159,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"escape.mp3",
 			"grass.mp3",
 			"mount.mp3",
+			"palaceNorth.mp3",
+			"palaceSouth.mp3",
 			"plot1.mp3",
 			"road.mp3",
 			"title.mp3",
