@@ -173,7 +173,7 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"E646": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E647": {"name":"苍蓝之灵-虚","hp":30000,"atk":5000,"def":3000,"money":10,"exp":2500,"point":0,"special":[28],"paleShield":10},
 	"E656": {"name":"触手史莱姆","hp":12500,"atk":5000,"def":2500,"money":4,"exp":200,"point":0,"special":[8],"together":25},
-	"E657": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E657": {"name":"触手法师","hp":50000,"atk":2000,"def":3000,"money":5,"exp":300,"point":0,"special":[8,13],"crit":null,"together":25},
 	"E658": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E659": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]}
 }

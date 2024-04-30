@@ -7,6 +7,7 @@ import { specials } from './enemy/special';
 import { gameListener, hook, loading } from './game';
 import * as battle from './enemy/battle';
 import * as hero from './hero';
+import * as miscMechanism from './mechanism/misc';
 
 // ----- 类注册
 Mota.register('class', 'DamageEnemy', damage.DamageEnemy);
@@ -25,6 +26,9 @@ Mota.register('var', 'hook', hook);
 Mota.register('var', 'gameListener', gameListener);
 Mota.register('var', 'loading', loading);
 // ----- 模块注册
+Mota.register('module', 'Mechanism', {
+    BluePalace: miscMechanism.BluePalace
+});
 
 main.loading = loading;
 

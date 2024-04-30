@@ -236,6 +236,11 @@ gameKey
         name: '评论区',
         defaults: KeyCode.KeyP
     })
+    .register({
+        id: 'debug',
+        name: '调试模式',
+        defaults: KeyCode.F8
+    })
     // --------------------
     .group('general', '通用按键')
     .register({
@@ -557,6 +562,9 @@ gameKey
         if (flags.shield) flags.shield = false;
         else flags.shield = true;
         core.updateStatusBar();
+    })
+    .realize('debug', () => {
+        core.debug();
     });
 
 // ----- Storage

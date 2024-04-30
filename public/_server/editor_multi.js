@@ -291,10 +291,10 @@ editor_multi = function () {
     _previewButton.onclick = function () {
         if (!editor_multi.preview) return;
         _format();
-        if (editor_multi.hasError()) {
-            alert("当前好像存在严重的语法错误，请处理后再预览。");
-            return;
-        }
+        // if (editor_multi.hasError()) {
+        //     alert("当前好像存在严重的语法错误，请处理后再预览。");
+        //     return;
+        // }
         editor.uievent.previewEditorMulti(editor_multi.preview, codeEditor.getValue());
     }
 
@@ -350,10 +350,10 @@ editor_multi = function () {
     }
 
     editor_multi.confirm = function (keep) {
-        if (editor_multi.hasError()) {
-            alert("当前好像存在严重的语法错误，请处理后再保存。\n严重的语法错误可能会导致整个编辑器的崩溃。");
-            return;
-        }
+        // if (editor_multi.hasError()) {
+        //     alert("当前好像存在严重的语法错误，请处理后再保存。\n严重的语法错误可能会导致整个编辑器的崩溃。");
+        //     return;
+        // }
 
         if (!editor_multi.id) {
             editor_multi.id = '';

@@ -132,7 +132,8 @@ function checkMockery(loc: string, force: boolean = false) {
                         'npcs',
                         'npc48',
                         'terrains'
-                    ].includes(block.event.cls)
+                    ].includes(block.event.cls) &&
+                    block.event.noPass
                 ) {
                     action.push(
                         {

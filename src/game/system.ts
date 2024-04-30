@@ -24,6 +24,7 @@ import type * as hero from './hero';
 import type * as damage from './enemy/damage';
 import type { Logger } from '@/core/common/logger';
 import type { Danmaku } from '@/core/main/custom/danmaku';
+import type * as misc from './mechanism/misc';
 
 interface ClassInterface {
     // 渲染进程与游戏进程通用
@@ -85,7 +86,11 @@ interface VariableInterface {
     logger: Logger;
 }
 
-interface ModuleInterface {}
+interface ModuleInterface {
+    Mechanism: {
+        BluePalace: typeof misc.BluePalace;
+    };
+}
 
 interface SystemInterfaceMap {
     class: ClassInterface;

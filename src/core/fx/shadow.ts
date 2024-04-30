@@ -11,11 +11,12 @@ import { setCanvasFilterByFloorId } from '@/plugin/fx/gameCanvas';
  * 最大光源数量，必须设置，且光源数不能超过这个值，这个值决定了会预留多少的缓冲区，因此最好尽可能小，同时游戏过程中不可修改
  * 这个值越大，对显卡尤其是显存的要求会越大，不过考虑到各种设备的性能差异，不建议超过10
  */
-const MAX_LIGHT_NUM = 10;
+const MAX_LIGHT_NUM = 5;
 /** 阴影层的Z值 */
 const Z_INDEX = 55;
 // 我也不知道这个数怎么来的，试出来是这个，别动就行
 const FOVY = Math.PI / 1.86;
+const ignore: Set<AllNumbers> = new Set([660]);
 
 interface LightConfig {
     decay: number;
@@ -76,7 +77,7 @@ Mota.require('var', 'loading').once('coreInit', () => {
         103,
         { decay: 50, r: 300, color: [0.9333, 0.6, 0.333, 0.3] },
         { background: [0, 0, 0, 0.26] },
-        { decay: 50, r: 200, color: [0, 0, 0, 0] }
+        { decay: 50, r: 250, color: [0, 0, 0, 0] }
     );
     addLightFromBlock(
         ['MT50'],
@@ -97,7 +98,7 @@ Mota.require('var', 'loading').once('coreInit', () => {
                         y: core.status.heroCenter.py
                     });
                 });
-                shadow.requestRefresh();
+                if (shadow.followHero.size > 0) shadow.requestRefresh();
             }
         }
     });
@@ -1207,7 +1208,8 @@ export function calMapWalls(floor: FloorIds, nocache: boolean = false) {
         if (
             !used.has(x + y * width) &&
             requiredCls.includes(block.event.cls) &&
-            block.event.noPass
+            block.event.noPass &&
+            !ignore.has(block.id)
         ) {
             const queue: Block[] = [block];
             const arr: [number, number][] = [];
@@ -1233,7 +1235,8 @@ export function calMapWalls(floor: FloorIds, nocache: boolean = false) {
                         if (
                             requiredCls.includes(blk.event.cls) &&
                             blk.event.noPass &&
-                            !used.has(blk.x + blk.y * width)
+                            !used.has(blk.x + blk.y * width) &&
+                            !ignore.has(blk.id)
                         ) {
                             used.add(blk.x + blk.y * width);
                             queue.push(blk);
