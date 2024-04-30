@@ -15,7 +15,7 @@ const MAX_LIGHT_NUM = 5;
 /** 阴影层的Z值 */
 const Z_INDEX = 55;
 // 我也不知道这个数怎么来的，试出来是这个，别动就行
-const FOVY = Math.PI / 1.86;
+const FOVY = Math.PI / 2;
 const ignore: Set<AllNumbers> = new Set([660]);
 
 interface LightConfig {
@@ -70,7 +70,7 @@ function addLightFromBlock(floors: FloorIds[], block: number, config: LightConfi
     })
 }
 
-Mota.require('var', 'loading').once('coreInit', () => {
+Mota.require('var', 'hook').once('reset', () => {
     Shadow.init();
     addLightFromBlock(
         core.floorIds.slice(61),
@@ -412,7 +412,7 @@ export class Shadow {
         const polygons = calMapPolygons(this.floorId, this.immerse, nocache);
 
         const res: number[] = [];
-        const ratio = core.domStyle.scale * devicePixelRatio;
+        const ratio = devicePixelRatio * core.domStyle.scale;
         const m = core._PX_ * ratio * 2;
 
         polygons.forEach(v => {
@@ -768,8 +768,8 @@ export class Shadow {
         const gl = Shadow.gl;
         const ratio = core.domStyle.scale * devicePixelRatio;
         const cameraMatrix = mat4.create();
-        mat4.lookAt(cameraMatrix, [light.x * ratio, light.y * ratio, core._PX_ * 2], [light.x * ratio, light.y * ratio, 0], [0, 1, 0]);
-    
+        mat4.lookAt(cameraMatrix, [light.x * ratio, light.y * ratio, core._PX_ * 2 * ratio], [light.x * ratio, light.y * ratio, 0], [0, 1, 0]);
+
         const size = core._PX_ * ratio * 2;
         gl.viewport(0, 0, size, size);
         const framebuffer = Shadow.buffer.depth.framebuffer[index];
@@ -870,7 +870,7 @@ export class Shadow {
         gl.deleteTexture(this.texture.blur);
         gl.deleteTexture(this.texture.color);
         gl.deleteTexture(this.texture.depth);
-        
+
         this.texture.blur = this.create2DTexture(canvas.width);
         this.texture.color = this.create2DTexture(canvas.width);
         this.texture.depth = this.create3DTexture(canvas.width, MAX_LIGHT_NUM);
@@ -887,6 +887,7 @@ export class Shadow {
         const gl = this.gl;
         if (!isWebGL2Supported()) return;
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        const ratio = core.domStyle.scale * devicePixelRatio;
 
         // program
         const depth = createProgram(gl, depthVertex, depthFragment);
@@ -938,7 +939,7 @@ export class Shadow {
 
         // Matrix
         const lightProjection = mat4.create();
-        mat4.perspective(lightProjection, FOVY, 1, 1, core._PX_ * 2);
+        mat4.perspective(lightProjection, FOVY, 1, 1, core._PX_ * ratio);
         this.martix = {
             projection: lightProjection
         }
@@ -975,6 +976,17 @@ export class Shadow {
             depth: this.create3DTexture(core._PX_, MAX_LIGHT_NUM),
             color: this.create2DTexture(core._PX_),
             blur: this.create2DTexture(core._PX_)
+        }
+    }
+
+    static resize() {
+        if (this.martix) {
+            const ratio = core.domStyle.scale * devicePixelRatio;
+            const lightProjection = mat4.create();
+            mat4.perspective(lightProjection, FOVY, 1, 1, core._PX_ * ratio);
+            this.martix = {
+                projection: lightProjection
+            }
         }
     }
 
