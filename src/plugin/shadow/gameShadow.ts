@@ -15,35 +15,35 @@ import { setCanvasFilterByFloorId } from '../fx/gameCanvas';
 
 export function init() {
     // 勇士身上的光源
-    Mota.rewrite(core.control, 'drawHero', 'add', () => {
-        if (core.getFlag('__heroOpacity__') !== 0) {
-            getAllLights().forEach(v => {
-                if (!v.followHero) return;
-                v._offset ??= { x: v.x, y: v.y };
-                v.x = core.status.heroCenter.px + v._offset.x;
-                v.y = core.status.heroCenter.py + v._offset.y;
-                refreshLight();
-            });
-        }
-    });
-    // 更新地形数据
-    Mota.rewrite(core.maps, 'removeBlock', 'add', success => {
-        if (success && main.replayChecking) updateShadow(true);
-        return success;
-    });
-    Mota.rewrite(core.maps, 'setBlock', 'add', () => {
-        if (main.replayChecking) updateShadow(true);
-    });
-    Mota.rewrite(core.events, 'changingFloor', 'add', (_, floorId) => {
-        if (!main.replayChecking) {
-            updateShadow();
-            setCanvasFilterByFloorId(floorId);
-        }
-    });
-    // 初始化画布信息
-    Mota.rewrite(core.ui, 'deleteAllCanvas', 'add', () => {
-        if (main.mode === 'play' && !main.replayChecking) initShadowCanvas();
-    });
+    // Mota.rewrite(core.control, 'drawHero', 'add', () => {
+    //     if (core.getFlag('__heroOpacity__') !== 0) {
+    //         getAllLights().forEach(v => {
+    //             if (!v.followHero) return;
+    //             v._offset ??= { x: v.x, y: v.y };
+    //             v.x = core.status.heroCenter.px + v._offset.x;
+    //             v.y = core.status.heroCenter.py + v._offset.y;
+    //             refreshLight();
+    //         });
+    //     }
+    // });
+    // // 更新地形数据
+    // Mota.rewrite(core.maps, 'removeBlock', 'add', success => {
+    //     if (success && main.replayChecking) updateShadow(true);
+    //     return success;
+    // });
+    // Mota.rewrite(core.maps, 'setBlock', 'add', () => {
+    //     if (main.replayChecking) updateShadow(true);
+    // });
+    // Mota.rewrite(core.events, 'changingFloor', 'add', (_, floorId) => {
+    //     if (!main.replayChecking) {
+    //         updateShadow();
+    //         setCanvasFilterByFloorId(floorId);
+    //     }
+    // });
+    // // 初始化画布信息
+    // Mota.rewrite(core.ui, 'deleteAllCanvas', 'add', () => {
+    //     if (main.mode === 'play' && !main.replayChecking) initShadowCanvas();
+    // });
 }
 
 const shadowInfo: Partial<Record<FloorIds, Light[]>> = {

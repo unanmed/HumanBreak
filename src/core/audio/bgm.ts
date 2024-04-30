@@ -82,6 +82,8 @@ export class BgmController
         if (!this.disable) {
             this.setTransitionAnimate(id, 1, when);
             if (this.now) this.setTransitionAnimate(this.now, 0);
+        } else {
+            this.playing = false;
         }
 
         if (!noStack) {
@@ -134,6 +136,8 @@ export class BgmController
         if (!this.disable) {
             if (transition) this.setTransitionAnimate(this.now, 1);
             else this.get(this.now).play();
+        } else {
+            this.playing = false;
         }
     }
 
@@ -171,6 +175,8 @@ export class BgmController
                 this.redoStack = [];
             }
             this.now = id;
+        } else {
+            this.playing = false;
         }
     }
 

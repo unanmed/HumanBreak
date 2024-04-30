@@ -160,7 +160,7 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
             this.posted = false;
             this.posting = false;
             logger.error(
-                3,
+                1,
                 `Unexpected error when posting danmaku. Error info: ${e}`
             );
             return Promise.reject();

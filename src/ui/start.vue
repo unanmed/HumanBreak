@@ -131,6 +131,7 @@ function showCursor() {
  * 设置光标位置
  */
 function setCursor(ele: HTMLSpanElement, i: number) {
+    if (!ele) return;
     const style = getComputedStyle(ele);
     cursor.style.top = `${
         parseFloat(style.height) * (i + 0.5) -
@@ -297,6 +298,7 @@ async function setButtonAnimate() {
 
     buttons.forEach(
         v =>
+            v &&
             (v.style.transition =
                 'transform 0.3s ease-out, color 0.3s ease-out')
     );

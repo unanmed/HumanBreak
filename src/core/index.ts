@@ -59,6 +59,7 @@ import { MCGenerator } from './main/layout';
 import { ResourceController } from './loader/controller';
 import { logger } from './common/logger';
 import { Danmaku } from './main/custom/danmaku';
+import * as Shadow from './fx/shadow';
 
 // ----- 类注册
 Mota.register('class', 'AudioPlayer', AudioPlayer);
@@ -131,6 +132,7 @@ Mota.register('module', 'UIComponents', {
     Keyboard: KeyboardPanel
 });
 Mota.register('module', 'MCGenerator', MCGenerator);
+Mota.register('module', 'Shadow', Shadow);
 
 main.renderLoaded = true;
 Mota.require('var', 'hook').emit('renderLoaded');

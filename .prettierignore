@@ -10,3 +10,5 @@ script/**/*.js
 public/editor.html
 keyCodes.ts
 src/core/main/setting.ts
+src/core/fx/shadow.ts
+src/core/fx/shadow_upload.js

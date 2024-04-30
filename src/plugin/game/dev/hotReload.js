@@ -53,6 +53,7 @@ export {};
             }
             core.updateStatusBar(true, true);
         }
+        Mota.require('module', 'Shadow').Shadow.update(true);
         console.log(`Floor hot reload: ${data}`);
     }
 
