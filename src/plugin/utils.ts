@@ -385,12 +385,20 @@ export async function triggerFullscreen(full: boolean) {
     if (!Mota.Plugin.inited) return;
     const { maxGameScale } = Mota.Plugin.require('utils_g');
     if (!!document.fullscreenElement && !full) {
+        if (window.jsinterface) {
+            window.jsinterface.requestPortrait();
+            return;
+        }
         await document.exitFullscreen();
         requestAnimationFrame(() => {
             maxGameScale(1);
         });
     }
     if (full && !document.fullscreenElement) {
+        if (window.jsinterface) {
+            window.jsinterface.requestLandscape();
+            return;
+        }
         await document.body.requestFullscreen();
         requestAnimationFrame(() => {
             maxGameScale();

@@ -541,6 +541,15 @@ interface Utils {
 
 declare const utils: new () => Utils;
 
+interface JSInterface {
+    requestLandscape(): void;
+    requestPortrait(): void;
+}
+interface Window {
+    jsinterface: JSInterface;
+}
+declare const jsinterface: JSInterface;
+
 /**
  * 移动的方向
  */
