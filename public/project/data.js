@@ -70,7 +70,19 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"MT55",
 			"MT56",
 			"MT57",
-			"MT58"
+			"MT58",
+			"MT59",
+			"MT60",
+			"MT61",
+			"MT62",
+			"MT63",
+			"MT64",
+			"MT65",
+			"MT66",
+			"MT67",
+			"MT68",
+			"MT69",
+			"MT71"
 		],
 		"floorPartitions": [
 			[

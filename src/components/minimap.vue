@@ -105,6 +105,13 @@ function touchmove(e: TouchEvent) {
     lastDis = dis;
 }
 
+function afterBattle() {
+    requestAnimationFrame(() => {
+        drawer.drawedThumbnail = {};
+        drawer.drawMap();
+    });
+}
+
 onMounted(() => {
     const width = props.width ?? 300;
     const height = props.height ?? 300;
@@ -119,9 +126,13 @@ onMounted(() => {
     drawer.noBorder = props.noBorder ?? false;
     drawer.showInfo = props.showInfo ?? false;
 
+    if (props.autoLocate) {
+        drawer.locateMap(drawer.nowFloor);
+    }
     drawer.drawMap();
 
     hook.on('afterChangeFloor', onChange);
+    hook.on('afterBattle', afterBattle);
 
     if (props.action) {
         useDrag(
@@ -154,6 +165,7 @@ onMounted(() => {
 
 onUnmounted(() => {
     hook.off('afterChangeFloor', onChange);
+    hook.off('afterBattle', afterBattle);
 });
 </script>
 

@@ -256,7 +256,7 @@ async function writeFile(req: Request, res: Response) {
         if (name.endsWith('project/events.js')) doDeclaration('events', value);
         if (name.endsWith('project/items.js')) doDeclaration('items', value);
         if (name.endsWith('project/maps.js')) doDeclaration('maps', value);
-        if (name.endsWith('project/data.js')) writeDevResource(value);
+        if (name.endsWith('project/data.js')) doDeclaration('data', value);
     } catch (e) {
         console.log(e);
         res.end(

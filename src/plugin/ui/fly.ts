@@ -531,7 +531,7 @@ export class MinimapDrawer {
                 ctx.lineTo(x - 0.5, y + 1);
                 ctx.lineTo(x + 1.5, y - 1);
                 ctx.stroke();
-            } else {
+            } else if (enemy.length < 2) {
                 const ids = [...new Set(enemy.map(v => v.id))];
                 if (ids.length === 1) {
                     core.drawIcon(ctx, ids[0], x - 2, y - 2, 4, 4);
@@ -546,6 +546,11 @@ export class MinimapDrawer {
                     ctx.strokeText('…', x + 4, y);
                     ctx.fillText('…', x + 4, y);
                 }
+            } else {
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(`+${enemy.length}`, x, y);
             }
 
             ctx.restore();

@@ -35,7 +35,11 @@ export const jumpIgnoreFloor: FloorIds[] = [
     'MT47',
     'MT48',
     'MT49',
-    'MT50'
+    'MT50',
+    'MT57',
+    'MT59',
+    'MT60',
+    'MT61'
 ];
 // 跳跃
 export function jumpSkill() {

@@ -16,7 +16,7 @@ const MAX_LIGHT_NUM = 5;
 const Z_INDEX = 55;
 // 我也不知道这个数怎么来的，试出来是这个，别动就行
 const FOVY = Math.PI / 2;
-const ignore: Set<AllNumbers> = new Set([660]);
+const ignore: Set<AllNumbers> = new Set([660, 661]);
 
 interface LightConfig {
     decay: number;
@@ -73,16 +73,16 @@ function addLightFromBlock(floors: FloorIds[], block: number, config: LightConfi
 Mota.require('var', 'hook').once('reset', () => {
     Shadow.init();
     addLightFromBlock(
-        core.floorIds.slice(61),
+        core.floorIds.slice(61, 70).concat(core.floorIds.slice(72)),
         103,
         { decay: 50, r: 300, color: [0.9333, 0.6, 0.333, 0.3] },
         { background: [0, 0, 0, 0.26] },
         { decay: 50, r: 250, color: [0, 0, 0, 0] }
     );
     addLightFromBlock(
-        ['MT50'],
+        ['MT50', 'MT60', 'MT61'],
         103,
-        { decay: 20, r: 100, color: [0.9333, 0.6, 0.333, 0.4], noShelter: true },
+        { decay: 20, r: 150, color: [0.9333, 0.6, 0.333, 0.4], noShelter: true },
         { background: [0, 0, 0, 0.4] }
     );
     Shadow.mount();
@@ -95,7 +95,7 @@ Mota.require('var', 'hook').once('reset', () => {
                 shadow.followHero.forEach(v => {
                     shadow.modifyLight(v, {
                         x: core.status.heroCenter.px, 
-                        y: core.status.heroCenter.py
+                        y: core.status.heroCenter.py + 8
                     });
                 });
                 if (shadow.followHero.size > 0) shadow.requestRefresh();

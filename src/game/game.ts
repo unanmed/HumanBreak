@@ -1,4 +1,5 @@
 import { EmitableEvent, EventEmitter } from '../core/common/eventEmitter';
+import { DamageEnemy } from './enemy/damage';
 
 // ----- 加载事件
 interface GameLoadEvent extends EmitableEvent {
@@ -92,6 +93,7 @@ export interface GameEvent extends EmitableEvent {
     afterOpenDoor: (doorId: AllIdsOf<'animates'>, x: number, y: number) => void;
     afterChangeFloor: (floorId: FloorIds) => void;
     moveOneStep: (x: number, y: number, floorId: FloorIds) => void;
+    afterBattle: (enemy: DamageEnemy, x?: number, y?: number) => void;
 }
 
 export const hook = new EventEmitter<GameEvent>();

@@ -1,6 +1,6 @@
 import { DamageEnemy, ensureFloorDamage, getSingleEnemy } from './damage';
 import { findDir, has } from '../../plugin/game/utils';
-import { loading } from '../game';
+import { hook, loading } from '../game';
 
 export interface CurrentEnemy {
     enemy: DamageEnemy;
@@ -265,6 +265,8 @@ function init() {
         // 如果已有事件正在处理中
         if (core.status.event.id == null) core.continueAutomaticRoute();
         else core.clearContinueAutomaticRoute();
+
+        hook.emit('afterBattle', enemy, x, y);
     };
 }
 loading.once('coreInit', init);

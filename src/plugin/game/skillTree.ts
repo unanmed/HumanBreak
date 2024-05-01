@@ -151,7 +151,7 @@ export const skills: Record<Chapter, Skill[]> = {
             index: 12,
             title: '聪慧',
             desc: ['使主角变得更加聪明，每级使绿宝石增加的智慧点上升5%'],
-            consume: 'level > 5 ? 100 * level ** 2 : 250 * level + 1250',
+            consume: 'level > 5 ? 1000 * level ** 2 : 250 * level + 1250',
             front: [
                 [8, 10],
                 [9, 10]
@@ -164,7 +164,7 @@ export const skills: Record<Chapter, Skill[]> = {
             index: 13,
             title: '治愈',
             desc: ['使主角能够更好地回复生命，每级使血瓶的加血量增加2%'],
-            consume: 'level > 5 ? 100 * level ** 2 : 250 * level + 1250',
+            consume: 'level > 5 ? 1000 * level ** 2 : 250 * level + 1250',
             front: [[10, 3]],
             loc: [4, 5],
             max: 20,
@@ -177,7 +177,7 @@ export const skills: Record<Chapter, Skill[]> = {
                 '<span style="color: #dd4">第二章终极技能</span>，',
                 '每打一个怪物，勇士在本楼层对怪物造成的伤害便增加1%'
             ],
-            consume: '15000',
+            consume: '25000',
             front: [
                 [13, 10],
                 [12, 10],
