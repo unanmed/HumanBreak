@@ -205,7 +205,7 @@ void main() {
         if (sheltered > 0.5 && d.z < 0.5) strength = 0.0; // 遮挡逻辑
 
         strengthTotal += strength; // 累计强度
-        lightColor = mix(lightColor, vec4(c.rgb, c.a * strength), strength); // 混合光源颜色
+        lightColor = mix(lightColor, vec4(c.rgb, c.a), strength); // 混合光源颜色
     }
     if (strengthTotal > 1.0) strengthTotal = 1.0;
 

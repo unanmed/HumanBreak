@@ -24,7 +24,7 @@ export namespace BluePalace {
         const blocks = core.status.maps[floorId].blocks;
 
         const ctx = core.createCanvas(`@doorConvert`, 0, 0, 480, 480, 35);
-        const time = core.values.animateSpeed / 4;
+        const time = core.values.animateSpeed / 3;
 
         const toConvert: DoorConvertInfo[] = [];
         blocks.forEach(v => {

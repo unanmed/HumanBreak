@@ -71,7 +71,6 @@ const scroll = ref(0);
 const drag = ref(false);
 const detail = ref(false);
 const selected = ref(0);
-let detailClosing = false;
 
 const settingScale = mainSetting.getValue('ui.bookScale', 100) / 100;
 const scale = isMobile
@@ -139,7 +138,7 @@ async function exit() {
 
 function checkScroll() {
     const h = window.innerHeight;
-    const y = selected.value * h * 0.2 - scroll.value;
+    const y = (selected.value * h * scale) / 100 - scroll.value;
     if (y < 0) {
         scroll.value += y - 20;
     }

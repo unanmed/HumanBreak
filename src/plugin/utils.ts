@@ -242,6 +242,9 @@ export function tip(
         class: 'antdv-message'
     });
 }
+sleep(2000).then(() => {
+    tip('info', `注意，不推荐使用浏览器的缩放功能，使用游戏内的缩放即可`);
+});
 
 /**
  * 设置文字分段换行等
