@@ -10,11 +10,13 @@
             @touchstart="touchStart(one.id)"
         >
             <span class="danmaku-info">
-                <like-filled
+                <span
                     class="danmaku-like-icon"
                     :liked="likedMap[one.id] < 0"
                     @click="postLike(one)"
-                />
+                >
+                    <like-filled />
+                </span>
                 <span class="danmaku-like-num">{{
                     Math.abs(likedMap[one.id])
                 }}</span>

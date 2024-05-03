@@ -101,6 +101,8 @@ type MaterialImages = {
     keyboard: HTMLImageElement;
 
     hero: HTMLImageElement;
+
+    icons: HTMLImageElement;
 };
 
 interface Material {

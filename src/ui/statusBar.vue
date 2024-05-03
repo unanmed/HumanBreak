@@ -20,10 +20,7 @@
                     >
                     <span id="status-lv">{{ lvName }}</span>
                     <div id="status-skill" class="status-item">
-                        <img
-                            src="/project/images/skill.png"
-                            class="status-icon"
-                        />
+                        <img :src="imgs['skill.png'].src" class="status-icon" />
                         <span>{{ skill }}</span>
                         <span
                             v-if="has(spring)"
@@ -33,7 +30,7 @@
                         >
                     </div>
                     <div id="status-hp" class="status-item">
-                        <img src="/project/images/hp.png" class="status-icon" />
+                        <img :src="imgs['hp.png'].src" class="status-icon" />
                         <span class="status-item-bold">{{
                             format(hero.hp!)
                         }}</span>
@@ -50,10 +47,7 @@
                         >
                     </div>
                     <div id="status-atk" class="status-item">
-                        <img
-                            src="/project/images/atk.png"
-                            class="status-icon"
-                        />
+                        <img :src="imgs['atk.png'].src" class="status-icon" />
                         <span class="status-item-bold">{{
                             format(hero.atk!)
                         }}</span>
@@ -64,28 +58,19 @@
                         >
                     </div>
                     <div id="status-def" class="status-item status-item-bold">
-                        <img
-                            src="/project/images/def.png"
-                            class="status-icon"
-                        />
+                        <img :src="imgs['def.png'].src" class="status-icon" />
                         <span>{{ format(hero.def!) }}</span>
                     </div>
                     <div id="status-mdef" class="status-item status-item-bold">
-                        <img src="/project/images/IQ.png" class="status-icon" />
+                        <img :src="imgs['IQ.png'].src" class="status-icon" />
                         <span>{{ format(hero.mdef!) }}</span>
                     </div>
                     <div id="status-money" class="status-item status-item-bold">
-                        <img
-                            src="/project/images/money.png"
-                            class="status-icon"
-                        />
+                        <img :src="imgs['money.png'].src" class="status-icon" />
                         <span>{{ format(hero.money!) }}</span>
                     </div>
                     <div id="status-exp" class="status-item status-item-bold">
-                        <img
-                            src="/project/images/exp.png"
-                            class="status-icon"
-                        />
+                        <img :src="imgs['exp.png'].src" class="status-icon" />
                         <span>{{ format(up) }}</span>
                     </div>
                     <div id="status-key" class="status-item status-item-bold">
@@ -143,8 +128,8 @@ import { has } from '@/plugin/utils';
 
 let main: HTMLDivElement;
 
-const items = core.flags.statusBarItems;
-const icons = core.statusBar.icons;
+const imgs = core.material.images.images;
+
 const skillTree = Mota.Plugin.require('skillTree_g');
 
 const width = ref(

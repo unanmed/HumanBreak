@@ -394,7 +394,7 @@ function handleAudioSetting<T extends number | boolean>(
 ) {
     if (key === 'bgmEnabled') {
         bgm.disable = !n;
-        core.checkBgm();
+        if (core.isPlaying()) core.checkBgm();
     } else if (key === 'bgmVolume') {
         bgm.volume = (n as number) / 100;
     } else if (key === 'soundEnabled') {

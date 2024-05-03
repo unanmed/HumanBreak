@@ -1,7 +1,7 @@
 <template>
     <div id="start">
         <div id="start-div">
-            <img id="background" src="/project/images/bg.jpg" />
+            <img id="background" :src="bg.src" />
             <div id="start-main">
                 <div id="title">人类：开天辟地</div>
                 <div id="settings">
@@ -79,6 +79,8 @@ const props = defineProps<{
     num: number;
     ui: GameUi;
 }>();
+
+const bg = core.material.images.images['bg.jpg'];
 
 let startdiv: HTMLDivElement;
 let start: HTMLDivElement;

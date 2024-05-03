@@ -215,15 +215,6 @@ function main() {
 
     this.__VERSION__ = '2.10.0';
     this.__VERSION_CODE__ = 510;
-
-    this.timestamp = 0;
-
-    // 远程资源地址，在线游戏中，塔本体不包含任何资源，只包含源码，从而可以降低游戏本体的体积并平均分担资源包体积
-    // 从而可以优化加载并避免网站发布的大小限制
-    this.RESOURCE_TYPE = 'dev';
-    this.RESOURCE_URL = '';
-    this.RESOURCE_SYMBOL = '';
-    this.RESOURCE_INDEX = {};
 }
 // >>>> body end
 
@@ -336,7 +327,7 @@ main.prototype.loadAsync = async function (mode, callback) {
     const mainData = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main;
     Object.assign(main, mainData);
 
-    main.importFonts(main.fonts);
+    // main.importFonts(main.fonts);
 
     // 加载核心js代码
     if (main.useCompress) {
@@ -496,7 +487,6 @@ main.prototype.importFonts = function (fonts) {
             font +
             '"; src: url("project/fonts/' +
             font +
-            (main.pluginUseCompress ? '-' + main.timestamp : '') +
             '.ttf") format("truetype"); }';
     });
     style.innerHTML = html;

@@ -8,12 +8,12 @@ import rollupBabel from '@rollup/plugin-babel';
 import terser from '@rollup/plugin-terser';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import { splitResorce } from './resource.js';
+import { splitResource } from './resource.js';
 import compressing from 'compressing';
 
 const type = process.argv[2];
 const map = false;
-const resorce = type !== 'dev';
+const resorce = true;
 const compress = type === 'dist';
 
 (async function () {
@@ -115,14 +115,6 @@ const compress = type === 'dist';
                 })()
             )
         ]);
-        await Promise.all([
-            ...fonts.map(v => {
-                return fs.rename(
-                    `./dist/project/fonts/${v}.ttf`,
-                    `./dist/project/fonts/${v}-${timestamp}.ttf`
-                );
-            })
-        ]);
     } catch (e) {
         console.log('字体压缩失败');
         console.log(e);
@@ -133,7 +125,7 @@ const compress = type === 'dist';
         await fs.remove('./dist/project/plugin.min.js');
 
         const build = await rollup.rollup({
-            input: 'src/plugin/game/index.js',
+            input: 'src/game/index.ts',
             plugins: [
                 typescript({
                     sourceMap: false
@@ -163,12 +155,7 @@ const compress = type === 'dist';
     // 4. 压缩main.js
     try {
         // 先获取不能压缩的部分
-        const main = (await fs.readFile('./public/main.js', 'utf-8'))
-            .replace(
-                /this.pluginUseCompress\s*=\s*false\;/,
-                'this.pluginUseCompress = true;'
-            )
-            .replace('this.timestamp = 0', `this.timestamp = ${timestamp};`);
+        const main = await fs.readFile('./public/main.js', 'utf-8');
 
         const endIndex = main.indexOf('// >>>> body end');
         const nonCompress = main.slice(0, endIndex);
@@ -190,7 +177,11 @@ const compress = type === 'dist';
 
     // 6. 资源分离
     if (resorce) {
-        await splitResorce(type);
+        await splitResource();
+    }
+
+    if (!compress) {
+        await fs.copy('./script/template/启动服务.exe', './dist/启动服务.exe');
     }
 
     // 7. 压缩

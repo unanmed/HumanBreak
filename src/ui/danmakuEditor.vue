@@ -7,21 +7,27 @@
                 @click="openTool('css')"
                 >CSS</span
             >
-            <font-colors-outlined
+            <span
                 class="danmaku-tool"
                 :open="fillOpened"
                 @click="openTool('fillColor')"
-            />
-            <highlight-outlined
+            >
+                <font-colors-outlined />
+            </span>
+            <span
                 class="danmaku-tool"
                 :open="strokeOpened"
                 @click="openTool('strokeColor')"
-            />
-            <meh-outlined
+            >
+                <highlight-outlined />
+            </span>
+            <span
                 class="danmaku-tool"
                 :open="iconOpened"
                 @click="openTool('icon')"
-            />
+            >
+                <meh-outlined />
+            </span>
             <div id="danmaku-input-div">
                 <a-input
                     id="danmaku-input-input"
@@ -33,11 +39,13 @@
                     @pressEnter="inputEnter()"
                 />
             </div>
-            <send-outlined
+            <span
                 class="danmaku-tool danmaku-post"
                 :posting="posting"
                 @click="send()"
-            />
+            >
+                <send-outlined />
+            </span>
         </div>
         <Transition name="danmaku">
             <div v-if="cssOpened" id="danmaku-css">

@@ -26,7 +26,11 @@
 
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue';
-import { loadDefaultResource, LoadTask } from '@/core/common/resource';
+import {
+    loadCompressedResource,
+    loadDefaultResource,
+    LoadTask
+} from '@/core/common/resource';
 import { GameUi } from '@/core/main/custom/ui';
 import { formatSize } from '@/plugin/utils';
 import { logger } from '@/core/common/logger';
@@ -48,32 +52,32 @@ const totalTask = ref(0);
 
 let loadDiv: HTMLDivElement;
 
-loadDefaultResource();
+onMounted(async () => {
+    if (import.meta.env.DEV) loadDefaultResource();
+    else await loadCompressedResource();
 
-LoadTask.onProgress(() => {
-    const loadingNum = [...LoadTask.taskList].filter(v => v.loading).length;
+    LoadTask.onProgress(() => {
+        const loadingNum = [...LoadTask.taskList].filter(v => v.loading).length;
 
-    loadedByte.value = LoadTask.loadedByte;
-    loadedPercent.value = parseFloat(
-        ((LoadTask.loadedByte / LoadTask.totalByte) * 100).toFixed(2)
-    );
-    loading.value = loadingNum;
-    loaded.value = LoadTask.loadedTask;
-    totalByte.value = LoadTask.totalByte;
-    totalTask.value = LoadTask.totalTask;
-});
+        loadedByte.value = LoadTask.loadedByte;
+        loadedPercent.value = parseFloat(
+            ((LoadTask.loadedByte / LoadTask.totalByte) * 100).toFixed(2)
+        );
+        loading.value = loadingNum;
+        loaded.value = LoadTask.loadedTask;
+        totalByte.value = LoadTask.totalByte;
+        totalTask.value = LoadTask.totalTask;
+    });
 
-LoadTask.load().then(async () => {
-    core.loader._loadMaterials_afterLoad();
-    core._afterLoadResources(props.callback);
-    logger.log(`Resource load end.`);
-    loadDiv.style.opacity = '0';
-    await sleep(1000);
-    fixedUi.close(props.num);
-    fixedUi.open('start');
-});
-
-onMounted(() => {
+    LoadTask.load().then(async () => {
+        core.loader._loadMaterials_afterLoad();
+        core._afterLoadResources(props.callback);
+        logger.log(`Resource load end.`);
+        loadDiv.style.opacity = '0';
+        await sleep(1000);
+        fixedUi.close(props.num);
+        fixedUi.open('start');
+    });
     loadDiv = document.getElementById('load') as HTMLDivElement;
 });
 </script>

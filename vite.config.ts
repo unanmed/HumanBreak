@@ -40,7 +40,6 @@ export default defineConfig({
                         'lz-string',
                         'chart.js',
                         'mutate-animate',
-                        'three',
                         '@vueuse/core'
                     ]
                 }

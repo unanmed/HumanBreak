@@ -26,6 +26,29 @@ interface ResourceMap {
     zip: ZipResource;
 }
 
+interface CompressedLoadListItem {
+    type: keyof ResourceType;
+    name: string;
+    usage: string;
+}
+type CompressedLoadList = Record<string, CompressedLoadListItem[]>;
+
+const types: Record<keyof ResourceType, JSZip.OutputType> = {
+    text: 'string',
+    buffer: 'arraybuffer',
+    image: 'blob',
+    material: 'blob',
+    audio: 'arraybuffer',
+    json: 'string',
+    zip: 'arraybuffer'
+};
+
+const base = import.meta.env.DEV ? '/' : '';
+
+function toURL(uri: string) {
+    return import.meta.env.DEV ? uri : `${import.meta.env.BASE_URL}${uri}`;
+}
+
 export abstract class Resource<T = any> extends Disposable<string> {
     type = 'none';
 
@@ -92,7 +115,7 @@ export class ImageResource extends Resource<HTMLImageElement> {
     }
 
     resolveURI(): string {
-        return `/${findURL(this.uri)}`;
+        return toURL(`${base}${findURL(this.uri)}`);
     }
 }
 
@@ -107,7 +130,7 @@ export class MaterialResource extends ImageResource {
     }
 
     override resolveURI(): string {
-        return `/project/materials/${findURL(this.uri)}`;
+        return toURL(`${base}project/materials/${findURL(this.uri)}`);
     }
 }
 
@@ -136,7 +159,7 @@ export class TextResource extends Resource<string> {
     }
 
     resolveURI(): string {
-        return `/${findURL(this.uri)}`;
+        return toURL(`${base}${findURL(this.uri)}`);
     }
 }
 
@@ -164,7 +187,7 @@ export class BufferResource extends Resource<ArrayBuffer> {
     }
 
     resolveURI(): string {
-        return `/${findURL(this.uri)}`;
+        return toURL(`${base}${findURL(this.uri)}`);
     }
 }
 
@@ -190,7 +213,7 @@ export class JSONResource<T = any> extends Resource<T> {
     }
 
     resolveURI(): string {
-        return `/${findURL(this.uri)}`;
+        return toURL(`${base}${findURL(this.uri)}`);
     }
 }
 
@@ -217,7 +240,7 @@ export class AudioResource extends Resource<HTMLAudioElement> {
     }
 
     resolveURI(): string {
-        return `/project/bgms/${findURL(this.uri)}`;
+        return toURL(`${base}project/bgms/${findURL(this.uri)}`);
     }
 }
 
@@ -228,7 +251,7 @@ export class ZipResource extends Resource<JSZip> {
      *            注意后缀名不要是zip，不然有的浏览器会触发下载，而不是加载
      */
     constructor(uri: string) {
-        super(uri);
+        super(uri, 'zip');
         this.type = 'zip';
     }
 
@@ -249,7 +272,7 @@ export class ZipResource extends Resource<JSZip> {
     }
 
     resolveURI(): string {
-        return `/${findURL(this.uri)}`;
+        return toURL(`${base}${findURL(this.uri)}`);
     }
 }
 
@@ -289,7 +312,7 @@ interface LoadEvent<T extends keyof ResourceType> extends EmitableEvent {
         now: number,
         total: number
     ) => void;
-    load: (resource: ResourceMap[T]) => void;
+    load: (resource: ResourceMap[T]) => void | Promise<void>;
     loadStart: (resource: ResourceMap[T]) => void;
 }
 
@@ -371,14 +394,14 @@ export class LoadTask<
                 );
             });
         this.emit('loadStart', this.resource);
-        load.then(() => {
+        return load.then(async value => {
             // @ts-ignore
             LoadTask.loadedTaskList.add(this);
             this.loaded = totalByte;
             LoadTask.loadedTask++;
-            this.emit('load', this.resource);
+            await Promise.all(this.emit('load', this.resource));
+            return value;
         });
-        return load;
     }
 
     /**
@@ -493,7 +516,7 @@ export function loadDefaultResource() {
             });
         });
     });
-    // tilseset
+    // tileset
     data.main.tilesets.forEach(v => {
         const res = LoadTask.add('image', `image/project/tilesets/${v}`);
         res.once('load', res => {
@@ -563,4 +586,112 @@ export function loadDefaultResource() {
     }
 }
 
-export function loadCompressedResource() {}
+export async function loadCompressedResource() {
+    const data = await axios.get(toURL('loadList.json'), {
+        responseType: 'text'
+    });
+    const list: CompressedLoadList = JSON.parse(data.data);
+
+    const d = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d;
+    // 对于bgm，直接按照原来的方式加载即可
+    d.main.bgms.forEach(v => {
+        const res = LoadTask.add('audio', `audio/${v}`);
+        Mota.r(() => {
+            res.once('loadStart', res => {
+                Mota.require('var', 'bgm').add(`bgms.${v}`, res.resource!);
+            });
+        });
+    });
+    // 对于区域内容，按照zip格式进行加载，然后解压处理
+    const autotiles: Partial<Record<AllIdsOf<'autotile'>, HTMLImageElement>> =
+        {};
+    const materialImages = core.materials.slice() as SelectKey<
+        MaterialImages,
+        HTMLImageElement
+    >[];
+    materialImages.push('keyboard');
+    const weathers: (keyof Weather)[] = ['fog', 'cloud', 'sun'];
+
+    Object.entries(list).forEach(v => {
+        const [uri, list] = v;
+        const res = LoadTask.add('zip', `zip/${uri}`);
+
+        res.once('load', resource => {
+            const res = resource.resource;
+            if (!res) return;
+            list.forEach(async v => {
+                const { type, name, usage } = v;
+                const asyncType = types[type];
+                const value = await res
+                    .file(`${type}/${name}`)
+                    ?.async(asyncType);
+
+                if (!value) return;
+
+                // 图片类型的资源
+                if (type === 'image') {
+                    const img = value as Blob;
+                    const image = new Image();
+                    image.src = URL.createObjectURL(img);
+                    image.addEventListener('load', () => {
+                        image.setAttribute('_width', image.width.toString());
+                        image.setAttribute('_height', image.height.toString());
+                    });
+
+                    // 图片
+                    if (usage === 'image') {
+                        core.material.images.images[name as ImageIds] = image;
+                    } else if (usage === 'tileset') {
+                        // 额外素材
+                        core.material.images.tilesets[name] = image;
+                    } else if (usage === 'autotile') {
+                        // 自动元件
+                        autotiles[name.slice(0, -4) as AllIdsOf<'autotile'>] =
+                            image;
+                        const loading = Mota.require('var', 'loading');
+                        loading.addAutotileLoaded();
+                        loading.onAutotileLoaded(autotiles);
+                        core.material.images.autotile[
+                            name.slice(0, -4) as AllIdsOf<'autotile'>
+                        ] = image;
+                    }
+                } else if (type === 'material') {
+                    const img = value as Blob;
+                    const image = new Image();
+                    image.src = URL.createObjectURL(img);
+                    image.addEventListener('load', () => {
+                        image.setAttribute('_width', image.width.toString());
+                        image.setAttribute('_height', image.height.toString());
+                    });
+
+                    // material
+                    if (materialImages.some(v => name === v + '.png')) {
+                        // @ts-ignore
+                        core.material.images[
+                            name.slice(0, -4) as SelectKey<
+                                MaterialImages,
+                                HTMLImageElement
+                            >
+                        ] = image;
+                    } else if (weathers.some(v => name === v + '.png')) {
+                        // @ts-ignore
+                        core.animateFrame.weather[v] = image;
+                    } else {
+                    }
+                }
+
+                if (usage === 'font') {
+                    const font = value as ArrayBuffer;
+                    document.fonts.add(new FontFace(name.slice(0, -4), font));
+                } else if (usage === 'sound') {
+                    const sound = value as ArrayBuffer;
+                    Mota.require('var', 'sound').add(`sounds.${name}`, sound);
+                } else if (usage === 'animate') {
+                    const ani = value as string;
+                    core.material.animates[name.slice(0, -8) as AnimationIds] =
+                        core.loader._loadAnimate(ani);
+                }
+            });
+        });
+    });
+}
