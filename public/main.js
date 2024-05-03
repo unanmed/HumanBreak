@@ -527,57 +527,7 @@ main.prototype.listen = function () {
     };
 
     ////// 在界面上放开某按键时 //////
-    main.dom.body.addEventListener('keyup', function (e) {
-        if (main.editorOpened) return;
-        try {
-            if (
-                main.dom.startPanel.style.display == 'block' &&
-                (main.dom.startButtons.style.display == 'block' ||
-                    main.dom.levelChooseButtons.style.display == 'block')
-            ) {
-                if (e.keyCode == 38 || e.keyCode == 33)
-                    // up/pgup
-                    main.selectButton((main.selectedButton || 0) - 1);
-                else if (e.keyCode == 40 || e.keyCode == 34)
-                    // down/pgdn
-                    main.selectButton((main.selectedButton || 0) + 1);
-                else if (e.keyCode == 67 || e.keyCode == 13 || e.keyCode == 32)
-                    // C/Enter/Space
-                    main.selectButton(main.selectedButton);
-                else if (
-                    e.keyCode == 27 &&
-                    main.dom.levelChooseButtons.style.display == 'block'
-                ) {
-                    // ESC
-                    core.showStartAnimate(true);
-                    e.preventDefault();
-                }
-                e.stopPropagation();
-                return;
-            }
-            if (main.dom.inputDiv.style.display == 'block') {
-                if (e.keyCode == 13) {
-                    setTimeout(function () {
-                        main.dom.inputYes.click();
-                    }, 50);
-                } else if (e.keyCode == 27) {
-                    setTimeout(function () {
-                        main.dom.inputNo.click();
-                    }, 50);
-                }
-                return;
-            }
-            if (
-                core &&
-                core.isPlaying &&
-                core.status &&
-                (core.isPlaying() || core.status.lockControl)
-            )
-                core.onkeyUp(e);
-        } catch (ee) {
-            console.error(ee);
-        }
-    });
+    main.dom.body.addEventListener('keyup', function (e) {});
 
     ////// 开始选择时 //////
     main.dom.body.onselectstart = function () {

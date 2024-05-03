@@ -621,7 +621,7 @@ interface Ui {
     /**
      * 地图中间绘制一段文字
      */
-    drawText(contents: string, callback?: () => void): void;
+    drawText(contents?: string, callback?: () => void): void;
 
     /**
      * 自绘选择光标

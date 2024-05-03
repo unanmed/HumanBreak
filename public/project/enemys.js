@@ -176,7 +176,7 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"E657": {"name":"触手法师","hp":50000,"atk":2000,"def":3000,"money":5,"exp":300,"point":0,"special":[8,13],"crit":null,"together":25},
 	"E658": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E659": {"name":"圣殿莱姆","hp":50000,"atk":8000,"def":3000,"money":5,"exp":600,"point":0,"special":[8,30],"translation":[-2,-1],"together":20},
-	"E666": {"name":"苍蓝之灵-视","hp":300000,"atk":10000,"def":3000,"money":10,"exp":2500,"point":0,"special":[29],"n":5,"specialHalo":[5],"haloRange":5},
+	"E666": {"name":"苍蓝之灵-视","hp":150000,"atk":8000,"def":2000,"money":10,"exp":2500,"point":0,"special":[29],"n":5,"specialHalo":[4],"haloRange":5},
 	"E667": {"name":"苍之蓝","hp":50000,"atk":6000,"def":2000,"money":5,"exp":500,"point":0,"special":[29],"together":25,"specialHalo":[8],"haloRange":3},
 	"E668": {"name":"冰封护卫","hp":30000,"atk":7000,"def":2500,"money":5,"exp":550,"point":0,"special":[29],"specialHalo":[26],"iceCore":15,"haloRange":3},
 	"E669": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},

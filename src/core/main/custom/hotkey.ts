@@ -33,7 +33,11 @@ interface HotkeyData extends Required<RegisterHotkeyData> {
 /**
  * @param id 此处的id包含数字后缀
  */
-type HotkeyFunc = (id: string, code: KeyCode, ev: KeyboardEvent) => void;
+type HotkeyFunc = (
+    id: string,
+    code: KeyCode,
+    ev: KeyboardEvent
+) => void | '@void';
 
 export interface HotkeyJSON {
     key: KeyCode;
@@ -129,7 +133,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
         this.scope = symbol;
         this.conditionMap.set(symbol, () => true);
         for (const key of Object.values(this.data)) {
-            key.func.set(symbol, () => {});
+            key.func.set(symbol, () => '@void');
         }
     }
 
@@ -184,6 +188,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
         const toEmit = this.keyMap.get(key);
         if (!toEmit) return false;
         const { ctrl, shift, alt } = unwarpBinary(assist);
+        let emitted = false;
         toEmit.forEach(v => {
             if (type !== v.type) return;
             if (ctrl === v.ctrl && shift === v.shift && alt === v.alt) {
@@ -191,11 +196,12 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
                 if (!func) {
                     throw new Error(`Emit unknown scope keys.`);
                 }
-                func(v.id, key, ev);
+                const res = func(v.id, key, ev);
+                if (res !== '@void') emitted = true;
             }
         });
         this.emit('emit', key, assist, type);
-        return toEmit.length > 0;
+        return emitted;
     }
 
     /**

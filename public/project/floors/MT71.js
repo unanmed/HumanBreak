@@ -27,7 +27,74 @@ main.floors.MT71=
         }
     },
     "beforeBattle": {},
-    "afterBattle": {},
+    "afterBattle": {
+        "12,7": [
+            {
+                "type": "openDoor",
+                "loc": [
+                    10,
+                    1
+                ]
+            },
+            {
+                "type": "openDoor",
+                "loc": [
+                    10,
+                    13
+                ]
+            },
+            {
+                "type": "setValue",
+                "name": "flag:door_palaceSouth",
+                "operator": "+=",
+                "value": "1"
+            },
+            {
+                "type": "if",
+                "condition": "(flag:door_palaceSouth===2)",
+                "true": [
+                    {
+                        "type": "openDoor",
+                        "loc": [
+                            1,
+                            5
+                        ],
+                        "floorId": "MT50"
+                    },
+                    {
+                        "type": "openDoor",
+                        "loc": [
+                            13,
+                            5
+                        ],
+                        "floorId": "MT50"
+                    },
+                    {
+                        "type": "openDoor",
+                        "loc": [
+                            1,
+                            9
+                        ],
+                        "floorId": "MT50"
+                    },
+                    {
+                        "type": "openDoor",
+                        "loc": [
+                            13,
+                            9
+                        ],
+                        "floorId": "MT50"
+                    },
+                    {
+                        "type": "setValue",
+                        "name": "flag:door_palaceSouth",
+                        "value": "null"
+                    },
+                    "入口处的机关门已开启"
+                ]
+            }
+        ]
+    },
     "afterGetItem": {},
     "afterOpenDoor": {},
     "autoEvent": {},
