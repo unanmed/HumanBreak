@@ -66,6 +66,7 @@ export function getMapDrawData(
     noCache: boolean = false
 ): MapDrawData {
     const id = `${floorId},${interval},${border}`;
+    if (!floorId) return { locs: {}, line: [], width: 1, height: 1 };
     if (drawCache[id] && !noCache) return drawCache[id];
     const { link, maps } = getMapData(floorId, noCache);
     const locs: Partial<Record<FloorIds, LocArr>> = {};
@@ -161,6 +162,7 @@ export function getMapData(
     floorId: FloorIds,
     noCache: boolean = false
 ): MapBFSResult {
+    if (!floorId) return { maps: [], link: {} };
     if (has(bfsCache[floorId]) && !noCache) return bfsCache[floorId]!;
 
     const queue = [floorId];
@@ -531,7 +533,7 @@ export class MinimapDrawer {
                 ctx.lineTo(x - 0.5, y + 1);
                 ctx.lineTo(x + 1.5, y - 1);
                 ctx.stroke();
-            } else if (enemy.length < 2) {
+            } else if (enemy.length <= 2) {
                 const ids = [...new Set(enemy.map(v => v.id))];
                 if (ids.length === 1) {
                     core.drawIcon(ctx, ids[0], x - 2, y - 2, 4, 4);

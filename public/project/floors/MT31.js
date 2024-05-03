@@ -142,13 +142,14 @@ main.floors.MT31=
             }
         ],
         "2,6": [
-            "注意右方的清怪检测是检测\r[gold]勇气之路\r[]的怪物，本区域的怪物不检测，可以暂时留怪"
+            "注意右方的清怪检测是检测\r[gold]勇气之路\r[]的怪物，本区域的怪物不检测，可以暂时留怪",
+            "所以说右边的boss是可以暂时不打的（悲，测试的时候是按必须打测的）"
         ],
         "13,7": [
             "这里是漏怪检测，会检测\r[gold]勇气之路\r[]区域是否有遗漏怪物",
             {
                 "type": "function",
-                "function": "function(){\nconst enemy = Mota.Plugin.require('remainEnemy_g').getRemainEnemyString(core.floorIds.slice(17, 22));\nif (enemy.length === 0) {\n\tcore.insertAction(['当前无剩余怪物！', { \"type\": \"hide\", \"remove\": true }, ]);\n} else {\n\tcore.insertAction(enemy);\n}\n}"
+                "function": "function(){\nconst enemy = Mota.Plugin.require('remainEnemy_g').getRemainEnemyString(core.floorIds.slice(17, 23));\nif (enemy.length === 0) {\n\tcore.insertAction(['当前无剩余怪物！', { \"type\": \"hide\", \"remove\": true }, ]);\n} else {\n\tcore.insertAction(enemy);\n}\n}"
             }
         ]
     },
@@ -194,10 +195,18 @@ main.floors.MT31=
             "\t[低级智人]\b[up,hero]我明白了，我全都明白了。",
             "\t[低级智人]\b[up,hero]智慧，真的可以掌握万物。",
             {
-                "type": "setValue",
-                "name": "flag:door_MT31_7_6",
-                "operator": "+=",
-                "value": "1"
+                "type": "openDoor",
+                "loc": [
+                    7,
+                    5
+                ]
+            },
+            {
+                "type": "openDoor",
+                "loc": [
+                    7,
+                    9
+                ]
             }
         ]
     },
@@ -205,45 +214,9 @@ main.floors.MT31=
     "afterOpenDoor": {},
     "autoEvent": {
         "7,5": {
-            "0": {
-                "condition": "flag:door_MT31_7_6==1",
-                "currentFloor": true,
-                "priority": 0,
-                "delayExecute": false,
-                "multiExecute": false,
-                "data": [
-                    {
-                        "type": "openDoor"
-                    },
-                    {
-                        "type": "setValue",
-                        "name": "flag:door_MT31_7_6",
-                        "operator": "=",
-                        "value": "null"
-                    }
-                ]
-            },
             "1": null
         },
         "7,9": {
-            "0": {
-                "condition": "flag:door_MT31_7_6==1",
-                "currentFloor": true,
-                "priority": 0,
-                "delayExecute": false,
-                "multiExecute": false,
-                "data": [
-                    {
-                        "type": "openDoor"
-                    },
-                    {
-                        "type": "setValue",
-                        "name": "flag:door_MT31_7_6",
-                        "operator": "=",
-                        "value": "null"
-                    }
-                ]
-            },
             "1": null
         }
     },

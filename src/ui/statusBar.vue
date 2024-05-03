@@ -123,6 +123,9 @@
                             >学习</span
                         >
                     </div>
+                    <div v-if="studyOpened" class="status-item">
+                        <!-- 当前学习的技能 -->
+                    </div>
                 </div>
             </Scroll>
         </Box>

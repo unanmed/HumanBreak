@@ -1,4 +1,6 @@
+import { canStudySkill, studySkill } from '@/game/mechanism/study';
 import { upgradeSkill } from './skillTree';
+import { ensureFloorDamage } from '@/game/enemy/damage';
 
 const replayableSettings = ['autoSkill'];
 
@@ -44,19 +46,21 @@ export function init() {
     });
 
     core.registerReplayAction('study', name => {
-        // todo
-        // if (!name.startsWith('study:')) return false;
-        // const [num, x, y] = name
-        //     .slice(6)
-        //     .split(',')
-        //     .map(v => parseInt(v));
-        // if (!canStudySkill(num)) return false;
-        // const id = core.getBlockId(x, y);
-        // const enemy = core.getEnemyInfo(id, void 0, x, y);
-        // if (!enemy.special.includes(num)) return false;
-        // studySkill(enemy, num);
-        // core.status.route.push(name);
-        // core.replay();
+        if (!name.startsWith('study:')) return false;
+        const [num, x, y] = name
+            .slice(6)
+            .split(',')
+            .map(v => parseInt(v));
+        if (!canStudySkill(num)) return false;
+        const id = core.getBlockId(x, y);
+        ensureFloorDamage(core.status.floorId);
+        const col = core.status.thisMap.enemy;
+        col.calRealAttribute();
+        const enemy = col.list.find(v => v.x === x && v.y === y)!.info;
+        if (!enemy.special.includes(num)) return false;
+        studySkill(enemy, num);
+        core.status.route.push(name);
+        core.replay();
         return true;
     });
 
@@ -117,9 +121,7 @@ export function init() {
         return true;
     });
 
-    core.registerReplayAction('skill', name => {
-        if (!name.startsWith('skill:')) return false;
-        const [type, skill] = name.split(':');
+    function skillAction(skill: string) {
         if (skill === '1') {
             if (flags.autoSkill || !flags.bladeOn) return true;
             if (flags.blade) flags.blade = false;
@@ -142,6 +144,32 @@ export function init() {
             else flags.shield = true;
         }
         core.updateStatusBar();
+        core.replay();
         return true;
+    }
+
+    core.registerReplayAction('skill', name => {
+        if (!name.startsWith('skill:')) return false;
+        const [type, skill] = name.split(':');
+        return skillAction(skill);
+    });
+
+    // 兼容旧版
+    core.registerReplayAction('key', name => {
+        if (!name.startsWith('key:')) return false;
+        const key = parseInt(name.slice(4));
+
+        if (key === 49) {
+            core.status.route.push(`skill:1`);
+            return skillAction('1');
+        } else if (key === 50) {
+            core.status.route.push(`skill:2`);
+            return skillAction('2');
+        } else if (key === 51) {
+            core.status.route.push(`skill:3`);
+            return skillAction('3');
+        }
+
+        return false;
     });
 }

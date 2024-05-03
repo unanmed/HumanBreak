@@ -3,7 +3,7 @@ const haloColor: Record<number, string[]> = {
     25: ['purple'],
     26: ['blue'],
     27: ['red'],
-    29: ['#C3D100']
+    29: ['#3CFF49']
 };
 
 export function drawHalo(
@@ -13,15 +13,17 @@ export function drawHalo(
 ) {
     if (main.replayChecking) return;
     const setting = Mota.require('var', 'mainSetting');
-    if (!setting.getValue('screen.showHalo', true)) return;
-    const list = core.status.maps[floorId].enemy.haloList.concat(
+    if (!setting.getValue('screen.halo', true)) return;
+    const col = core.status.maps[floorId].enemy;
+    const [dx, dy] = col.translation;
+    const list = col.haloList.concat(
         Object.keys(flags[`melt_${floorId}`] ?? {}).map(v => {
             const [x, y] = v.split(',').map(v => parseInt(v));
             return {
                 type: 'square',
                 data: {
-                    x,
-                    y,
+                    x: x + dx,
+                    y: y + dy,
                     d: 3
                 },
                 special: 25

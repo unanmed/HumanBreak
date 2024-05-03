@@ -266,6 +266,8 @@ function init() {
         if (core.status.event.id == null) core.continueAutomaticRoute();
         else core.clearContinueAutomaticRoute();
 
+        core.checkAutoEvents();
+
         hook.emit('afterBattle', enemy, x, y);
     };
 }

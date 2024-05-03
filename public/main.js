@@ -527,7 +527,7 @@ main.prototype.listen = function () {
     };
 
     ////// 在界面上放开某按键时 //////
-    main.dom.body.onkeyup = function (e) {
+    main.dom.body.addEventListener('keyup', function (e) {
         if (main.editorOpened) return;
         try {
             if (
@@ -577,7 +577,7 @@ main.prototype.listen = function () {
         } catch (ee) {
             console.error(ee);
         }
-    };
+    });
 
     ////// 开始选择时 //////
     main.dom.body.onselectstart = function () {

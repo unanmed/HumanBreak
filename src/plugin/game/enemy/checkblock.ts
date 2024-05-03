@@ -1,3 +1,4 @@
+import { has, ofDir } from '@/plugin/game/utils';
 import { drawHalo } from '../fx/halo';
 
 export function init() {
@@ -34,6 +35,7 @@ export function init() {
             }
         }
         checkMockery(loc, forceMockery);
+        checkHunt(loc);
     };
 
     control.prototype._drawDamage_draw = function (
@@ -169,4 +171,48 @@ function checkMockery(loc: string, force: boolean = false) {
         action.push({ type: 'forbidSave' });
         core.insertAction(action);
     }
+}
+
+function checkHunt(loc: string) {
+    const hunt = core.status.thisMap.enemy.mapDamage[loc]?.hunt;
+    if (!hunt) return;
+    const { x: hx, y: hy } = core.status.hero.loc;
+
+    const action: any = [];
+
+    for (const [x, y, dir] of hunt) {
+        action.push(
+            {
+                type: 'move',
+                loc: [x, y],
+                time: 100,
+                keep: true,
+                steps: [`${dir}:1`]
+            },
+            {
+                type: 'update'
+            }
+        );
+        const [tx, ty] = ofDir(x, y, dir);
+        if (core.noPass(tx, ty)) return;
+
+        if (has(hy) && x === hx) {
+            if (Math.abs(y - hy) <= 2) {
+                action.push({
+                    type: 'battle',
+                    loc: [tx, ty]
+                });
+            }
+        }
+        if (has(hx) && y === hy) {
+            if (Math.abs(x - hx) <= 2) {
+                action.push({
+                    type: 'battle',
+                    loc: [tx, ty]
+                });
+            }
+        }
+    }
+
+    core.insertAction(action);
 }

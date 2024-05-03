@@ -233,5 +233,18 @@ export const specials: SpecialDeclaration[] = [
             );
         },
         color: '#F721F7'
+    },
+    {
+        code: 30,
+        name: '乾坤挪移',
+        desc: enemy => {
+            const [dx, dy] = enemy.translation!;
+            return `此怪物在场时，所有光环向${
+                dx < 0 ? '左' : '右'
+            }平移${Math.abs(dx)}格，向${dy < 0 ? '上' : '下'}平移${Math.abs(
+                dy
+            )}格。不同怪物间为加算叠加`;
+        },
+        color: '#FDCD0B'
     }
 ];

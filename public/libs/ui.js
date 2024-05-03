@@ -918,9 +918,10 @@ ui.prototype.closePanel = function () {
     this.clearUI();
     core.maps.generateGroundPattern();
     core.updateStatusBar(true);
-    setTimeout(() => {
-        core.unlockControl();
-    }, 0);
+    // 这个setTimeout加了有bug，不加也有
+    // setTimeout(() => {
+    core.unlockControl();
+    // }, 0);
     core.status.event.data = null;
     core.status.event.id = null;
     core.status.event.selection = null;

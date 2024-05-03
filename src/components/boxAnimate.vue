@@ -7,7 +7,7 @@
 </template>
 
 <script lang="tsx" setup>
-import { onMounted, onUnmounted, onUpdated, ref } from 'vue';
+import { onMounted, onUnmounted, onUpdated } from 'vue';
 import { addAnimate, removeAnimate } from '../plugin/animateController';
 import { has, requireUniqueSymbol } from '../plugin/utils';
 

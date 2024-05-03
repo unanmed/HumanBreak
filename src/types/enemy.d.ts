@@ -88,6 +88,7 @@ type Enemy<I extends EnemyIds = EnemyIds> = {
     afterBattle: MotaEvent;
 
     specialHalo?: number[];
+    translation?: [number, number];
 } & {
     [P in PartialNumbericEnemyProperty]?: number;
 } & {

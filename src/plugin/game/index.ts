@@ -11,7 +11,6 @@ import * as removeMap from './removeMap';
 import * as shop from './shop';
 import * as skill from './skill';
 import * as skillTree from './skillTree';
-import * as study from './study';
 import * as towerBoss from './towerBoss';
 import * as utils from './utils';
 import * as chase from './chase';
@@ -33,7 +32,7 @@ Mota.Plugin.register('heroFourFrames_g', heroFourFrames, heroFourFrames.init);
 Mota.Plugin.register('rewrite_g', rewrite, rewrite.init);
 Mota.Plugin.register('itemDetail_g', itemDetail, itemDetail.init);
 Mota.Plugin.register('halo_g', halo);
-Mota.Plugin.register('study_g', study);
+// Mota.Plugin.register('study_g', study);
 Mota.Plugin.register('remainEnemy_g', remainEnemy);
 Mota.Plugin.register('checkBlock_g', checkBlock, checkBlock.init);
 // todo: 这几个不应该放到插件

@@ -16,7 +16,6 @@ export { default as Skill } from './skill.vue';
 export { default as SkillTree } from './skillTree.vue';
 export { default as Start } from './start.vue';
 export { default as StatusBar } from './statusBar.vue';
-export { default as Studied } from './studied.vue';
 export { default as Study } from './study.vue';
 export { default as Toolbox } from './toolbox.vue';
 export { default as Hotkey } from './hotkey.vue';

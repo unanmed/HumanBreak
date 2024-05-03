@@ -81,7 +81,6 @@ import { useDrag } from '../plugin/use';
 import EnemySpecial from '../panel/enemySpecial.vue';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons-vue';
 import EnemyCritical from '../panel/enemyCritical.vue';
-import { sleep } from 'mutate-animate';
 import EnemyTarget from '../panel/enemyTarget.vue';
 import { detailInfo } from '../plugin/ui/book';
 import { gameKey } from '@/core/main/init/hotkey';
@@ -91,16 +90,16 @@ const props = defineProps<{
     defaultPanel?: 'special' | 'critical' | 'target';
 }>();
 
+const emits = defineEmits<{
+    (e: 'close'): void;
+}>();
+
 const enemy = detailInfo.enemy;
 const top = ref(detailInfo.pos);
 const panel = ref<string>(props.defaultPanel ?? 'special');
 const symbol = Symbol();
 
 let detail: HTMLDivElement;
-
-const emits = defineEmits<{
-    (e: 'close'): void;
-}>();
 
 function changePanel(e: MouseEvent, to: string) {
     e.stopPropagation();

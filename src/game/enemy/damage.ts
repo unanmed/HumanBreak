@@ -48,6 +48,7 @@ interface MapDamage {
     damage: number;
     type: Set<string>;
     mockery?: LocArr[];
+    hunt?: [x: number, y: number, dir: Dir][];
 }
 
 interface HaloData<T extends keyof HaloType = keyof HaloType> {
@@ -102,6 +103,9 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
     mapDamage: Record<string, MapDamage> = {};
     haloList: HaloData[] = [];
 
+    /** 乾坤挪移属性 */
+    translation: [number, number] = [0, 0];
+
     constructor(floorId: FloorIds) {
         this.floorId = floorId;
         this.extract();
@@ -128,10 +132,10 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
 
     /**
      * 计算怪物真实属性
-     * @param noCache 是否不使用缓存
      */
     calRealAttribute() {
         this.haloList = [];
+        this.translation = [0, 0];
         this.list.forEach(v => {
             v.reset();
         });
@@ -311,6 +315,17 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
                         alpha: 1
                     });
                 }
+
+                // 追猎
+                if (dam.hunt) {
+                    core.status.damage.extraData.push({
+                        text: '猎',
+                        px: 32 * x + 16,
+                        py: 32 * (y + 1) - 14,
+                        color: '#fd4',
+                        alpha: 1
+                    });
+                }
             }
         }
     }
@@ -381,6 +396,12 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         }
         this.progress = 0;
         this.providedHalo.clear();
+
+        // 在这里计算乾坤挪移
+        if (this.col && enemy.special.includes(30)) {
+            this.col.translation[0] += enemy.translation![0];
+            this.col.translation[1] += enemy.translation![1];
+        }
     }
 
     /**
@@ -392,6 +413,11 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         const special = this.info.special;
         const info = this.info;
         const floorId = this.floorId ?? core.status.floorId;
+        let [dx, dy] = [0, 0];
+        const col = this.col ?? core.status.maps[this.floorId!]?.enemy;
+        if (col) {
+            [dx, dy] = col.translation;
+        }
 
         // 智慧之源
         if (flags.hard === 2 && special.includes(14)) {
@@ -406,7 +432,10 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         if (has(flags[`melt_${floorId}`]) && has(this.x) && has(this.y)) {
             for (const [loc, per] of Object.entries(flags[`melt_${floorId}`])) {
                 const [mx, my] = loc.split(',').map(v => parseInt(v));
-                if (Math.abs(mx - this.x) <= 1 && Math.abs(my - this.y) <= 1) {
+                if (
+                    Math.abs(mx + dx - this.x) <= 1 &&
+                    Math.abs(my + dy - this.y) <= 1
+                ) {
                     info.atkBuff_ += per as number;
                     info.defBuff_ += per as number;
                 }
@@ -463,6 +492,8 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         if (!has(this.x) || !has(this.y)) return;
         const special = this.getHaloSpecials();
         const col = this.col ?? core.status.maps[this.floorId!].enemy;
+        let [dx, dy] = [0, 0];
+        if (col) [dx, dy] = col.translation;
 
         for (const halo of special) {
             switch (halo) {
@@ -472,7 +503,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                     const type = 'square';
                     const r = Math.floor(e.haloRange!);
                     const d = r * 2 + 1;
-                    const range = { x: this.x, y: this.y, d };
+                    const range = { x: this.x + dx, y: this.y + dy, d };
 
                     // 这一句必须放到applyHalo之前
                     this.providedHalo.add(29);
@@ -512,7 +543,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                     );
                     col.haloList.push({
                         type: 'square',
-                        data: { x: this.x, y: this.y, d },
+                        data: { x: this.x + dx, y: this.y + dy, d },
                         special: 29,
                         from: this
                     });
@@ -532,6 +563,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         const col = this.col ?? core.status.maps[this.floorId].enemy;
         if (!col) return;
         const special = this.getHaloSpecials();
+        const [dx, dy] = col.translation;
 
         const square7: HaloFn[] = [];
         const square5: HaloFn[] = [];
@@ -540,27 +572,32 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
 
         // 抱团
         if (special.includes(8)) {
-            square5.push((e, enemy) => {
-                if (
-                    e.special.includes(8) &&
-                    (e.x !== this.x || this.y !== e.y)
-                ) {
-                    e.atkBuff_ += enemy.together ?? 0;
-                    e.defBuff_ += enemy.together ?? 0;
+            col.applyHalo(
+                'square',
+                { x: this.x, y: this.y, d: 5 },
+                this,
+                (e, enemy) => {
+                    if (
+                        e.special.includes(8) &&
+                        (e.x !== this.x || this.y !== e.y)
+                    ) {
+                        e.atkBuff_ += enemy.together ?? 0;
+                        e.defBuff_ += enemy.together ?? 0;
+                    }
                 }
-            });
+            );
             this.providedHalo.add(8);
         }
 
         // 冰封光环
         if (special.includes(21)) {
             square7.push(e => {
-                e.damageDecline += this.enemy.iceHalo ?? 0;
+                e.damageDecline += this.info.iceHalo ?? 0;
             });
             this.providedHalo.add(21);
             col.haloList.push({
                 type: 'square',
-                data: { x: this.x, y: this.y, d: 7 },
+                data: { x: this.x + dx, y: this.y + dy, d: 7 },
                 special: 21,
                 from: this
             });
@@ -569,12 +606,12 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         // 冰封之核
         if (special.includes(26)) {
             square5.push(e => {
-                e.defBuff_ += this.enemy.iceCore ?? 0;
+                e.defBuff_ += this.info.iceCore ?? 0;
             });
             this.providedHalo.add(26);
             col.haloList.push({
                 type: 'square',
-                data: { x: this.x, y: this.y, d: 5 },
+                data: { x: this.x + dx, y: this.y + dy, d: 5 },
                 special: 26,
                 from: this
             });
@@ -583,19 +620,29 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         // 火焰之核
         if (special.includes(27)) {
             square5.push(e => {
-                e.atkBuff_ += this.enemy.fireCore ?? 0;
+                e.atkBuff_ += this.info.fireCore ?? 0;
             });
             this.providedHalo.add(27);
             col.haloList.push({
                 type: 'square',
-                data: { x: this.x, y: this.y, d: 5 },
+                data: { x: this.x + dx, y: this.y + dy, d: 5 },
                 special: 27,
                 from: this
             });
         }
 
-        col.applyHalo('square', { x: this.x, y: this.y, d: 7 }, this, square7);
-        col.applyHalo('square', { x: this.x, y: this.y, d: 5 }, this, square5);
+        col.applyHalo(
+            'square',
+            { x: this.x + dx, y: this.y + dy, d: 7 },
+            this,
+            square7
+        );
+        col.applyHalo(
+            'square',
+            { x: this.x + dx, y: this.y + dy, d: 5 },
+            this,
+            square5
+        );
     }
 
     /**
@@ -699,6 +746,37 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                     damage[loc] ??= { damage: 0, type: new Set() };
                     damage[loc].mockery ??= [];
                     damage[loc].mockery!.push([this.x, this.y]);
+                }
+            }
+        }
+
+        // 追猎
+        if (this.info.special.includes(12)) {
+            const objs = core.getMapBlocksObj(this.floorId);
+            for (let nx = 0; nx < w; nx++) {
+                const loc = `${nx},${this.y}` as LocString;
+                const block = objs[loc];
+                if (!block?.event.noPass) {
+                    damage[loc] ??= { damage: 0, type: new Set() };
+                    damage[loc].hunt ??= [];
+                    damage[loc].hunt!.push([
+                        this.x,
+                        this.y,
+                        nx < this.x ? 'left' : 'right'
+                    ]);
+                }
+            }
+            for (let ny = 0; ny < h; ny++) {
+                const loc = `${this.x},${ny}` as LocString;
+                const block = objs[loc];
+                if (!block?.event.noPass) {
+                    damage[loc] ??= { damage: 0, type: new Set() };
+                    damage[loc].hunt ??= [];
+                    damage[loc].hunt!.push([
+                        this.x,
+                        this.y,
+                        ny < this.y ? 'up' : 'down'
+                    ]);
                 }
             }
         }
@@ -927,9 +1005,6 @@ const skills: [unlock: string, condition: string][] = [
     ['shieldOn', 'shield']
 ];
 
-const haloValue: Map<number, SelectKey<Enemy, number | undefined>[]> =
-    new Map();
-
 /**
  * 计算怪物伤害
  * @param info 怪物信息
@@ -939,7 +1014,13 @@ export function calDamageWith(
     info: EnemyInfo,
     hero: Partial<HeroStatus>
 ): number | null {
-    const { hp, hpmax, mana, mdef } = core.status.hero;
+    const {
+        hp,
+        hpmax,
+        mana,
+        mdef,
+        special: heroSpec = { num: [], last: [] }
+    } = core.status.hero;
     let { atk, def } = hero as HeroStatus;
     let { hp: monHp, atk: monAtk, def: monDef, special, enemy } = info;
 
@@ -950,6 +1031,13 @@ export function calDamageWith(
         const delta = Math.floor((atk * info.hungry!) / 100);
         atk -= delta;
         monAtk += delta;
+    }
+
+    // 勇士学习的饥渴
+    if (heroSpec.num.includes(7)) {
+        const delta = Math.floor((monAtk * heroSpec.hungry!) / 100);
+        atk += delta;
+        monAtk -= delta;
     }
 
     let heroPerDamage: number;
@@ -975,11 +1063,19 @@ export function calDamageWith(
 
     heroPerDamage *= 1 - info.damageDecline / 100;
 
+    // 勇士学习勇气之刃
+    if (heroSpec.num.includes(10)) {
+        monHp -= (heroSpec.courage / 100 - 1) * heroPerDamage;
+    }
+
     let enemyPerDamage: number;
 
     // 魔攻
     if (special.includes(2) || special.includes(13)) {
         enemyPerDamage = monAtk;
+        if (core.hasEquip('I663')) {
+            enemyPerDamage = Math.max(0, enemyPerDamage - 500);
+        }
     } else {
         enemyPerDamage = monAtk - def;
         if (enemyPerDamage < 0) enemyPerDamage = 0;
@@ -995,12 +1091,48 @@ export function calDamageWith(
     if (special.includes(5)) enemyPerDamage *= 3;
     if (special.includes(6)) enemyPerDamage *= enemy.n!;
 
+    // 勇士学习霜冻
+    if (heroSpec.num.includes(20)) {
+        enemyPerDamage *= 1 - heroSpec.ice / 100;
+    }
+
+    // 勇士学习苍蓝刻
+    if (heroSpec.num.includes(28)) {
+        enemyPerDamage *= 1 - heroSpec.paleShield / 100;
+    }
+
     // 苍蓝刻
     if (special.includes(28)) {
         heroPerDamage *= 1 - info.paleShield! / 100;
     }
 
+    // 勇士学习的连击
+    if (heroSpec.num.includes(4)) heroPerDamage *= 2;
+    if (heroSpec.num.includes(5)) heroPerDamage *= 3;
+    if (heroSpec.num.includes(6)) heroPerDamage *= heroSpec.n;
+
+    // 勇士学习勇气冲锋
+    const hasCharge = heroSpec.num.includes(11);
+    if (hasCharge) {
+        monHp -= (heroSpec.charge / 100) * heroPerDamage;
+    }
+
     let turn = Math.ceil(monHp / heroPerDamage);
+
+    // 勇士学习致命一击
+    if (heroSpec.num.includes(1)) {
+        const five =
+            4 * heroPerDamage + (heroPerDamage * (info.crit! - 100)) / 100;
+        const fTurn = Math.floor(monHp / five);
+        const last = monHp - fTurn * five;
+        const lastTurn = Math.min(last / heroPerDamage, 5);
+        turn = fTurn * 5 + lastTurn;
+    }
+
+    if (hasCharge) {
+        turn -= 5;
+        if (turn < 0) turn = 0;
+    }
 
     // 致命一击
     if (special.includes(1)) {
@@ -1014,7 +1146,7 @@ export function calDamageWith(
     }
 
     // 勇气冲锋
-    if (special.includes(11)) {
+    if (special.includes(11) && !hasCharge) {
         damage += (info.charge! / 100) * enemyPerDamage;
         turn += 5;
     }
@@ -1029,7 +1161,8 @@ export function calDamageWith(
     if (flags.hard === 1) damage *= 0.9;
 
     if (flags.chapter > 1 && damage < 0) {
-        damage *= 0.25;
+        const dm = -enemy.hp * 0.25;
+        if (damage < dm) damage = dm;
     }
 
     return damage;

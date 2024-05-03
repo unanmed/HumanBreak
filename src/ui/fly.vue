@@ -402,6 +402,7 @@ onMounted(async () => {
     drawer.scale = scale;
     drawer.noBorder = noBorder.value;
     drawer.showInfo = true;
+    drawer.nowArea = nowArea.value;
 
     const mapStyle = getComputedStyle(map);
     const thumbStyle = getComputedStyle(thumb);

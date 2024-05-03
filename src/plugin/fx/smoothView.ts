@@ -11,7 +11,7 @@ export function init() {
     const setting = Mota.require('var', 'mainSetting');
 
     tran.ticker.add(() => {
-        if (core.isPlaying() && needSmooth) {
+        if (core.isPlaying() && needSmooth && !core.isReplaying()) {
             core.setViewport(tran.value.x, tran.value.y);
         }
     });
@@ -39,7 +39,12 @@ export function init() {
             tran.transition('x', ox).transition('y', oy);
 
             const t = setting.getValue('screen.smoothView', false);
-            if (!t) return;
+            if (!t || core.isReplaying()) {
+                core.bigmap.offsetX = ox;
+                core.bigmap.offsetY = oy;
+                core.control.updateViewport();
+                return;
+            }
             if (tran.easeTime > 0) {
                 needSmooth = true;
                 func();

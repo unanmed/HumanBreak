@@ -37,7 +37,7 @@ export function init() {
             displayDamage
         ) {
             const enemy = getEnemy(x, y);
-            const dam = enemy.calDamage();
+            const dam = enemy?.calDamage() ?? { damage: 0 };
             const { damage, color } = formatDamage(dam.damage);
 
             damageCanvas = '__damage_' + x + '_' + y;
@@ -46,7 +46,7 @@ export function init() {
             ctx.font = '14px normal';
             core.fillBoldText(ctx, damage, 1, 31, color as string);
             if (core.flags.displayCritical) {
-                const critical = enemy.calCritical(1);
+                const critical = enemy?.calCritical(1) ?? [];
                 const atk = core.formatBigNumber(critical[0]?.delta, true);
                 const display = atk === '???' ? '?' : atk;
                 core.fillBoldText(ctx, display, 1, 21, '#FFFFFF');

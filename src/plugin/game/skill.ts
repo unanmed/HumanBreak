@@ -39,12 +39,14 @@ export const jumpIgnoreFloor: FloorIds[] = [
     'MT57',
     'MT59',
     'MT60',
-    'MT61'
+    'MT61',
+    'MT71'
 ];
 // 跳跃
 export function jumpSkill() {
-    if (core.status.floorId.startsWith('tower'))
-        return core.drawTip('当无法使用该技能');
+    if (core.status.floorId.startsWith('tower')) {
+        return core.drawTip('当前无法使用该技能');
+    }
     if (jumpIgnoreFloor.includes(core.status.floorId) || flags.onChase) {
         return core.drawTip('当前楼层无法使用该技能');
     }
@@ -140,6 +142,7 @@ export function jumpSkill() {
             }
         ]);
     }
+
     // 检查一条线上的不可通过
     function checkNoPass(direction, x, y, startNo) {
         if (!startNo) startNo = false;

@@ -1161,7 +1161,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"name": "bgm查看器",
 		"canUseItemEffect": "true",
 		"text": "可以查看游戏内你已经听过的bgm，歌曲名格式：歌手——歌曲名。未完工。",
-		"useItemEffect": "mota.plugin.utils.tip('warn', '当前道具还未制作完成！');\n// mota.ui.main.open('bgm');"
+		"useItemEffect": "//mota.plugin.utils.tip('warn', '当前道具还未制作完成！');\n// mota.ui.main.open('bgm');"
 	},
 	"I559": {
 		"cls": "constants",
@@ -1250,12 +1250,12 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"text": "或许是苍蓝之灵的杰作，可以让使用者的恢复能力增强。生命回复增加10%"
 	},
 	"I663": {
-		"cls": "items",
+		"cls": "equips",
 		"name": "地灵华",
 		"canUseItemEffect": "true",
-		"text": "一个用大地之力制造出的饰品，貌似对魔法攻击有抵抗作用。装备后，对魔攻怪会有50%的防御力（即防御的一半充当抵消魔攻的防御，勇士受到的伤害变为 怪物攻击 - 勇士防御 / 2）",
+		"text": "一个用大地之力制造出的饰品，貌似对魔法攻击有抵抗作用。装备后，对魔攻怪会有500点防御力",
 		"equip": {
-			"type": "饰品",
+			"type": "首饰",
 			"value": {},
 			"percentage": {}
 		}

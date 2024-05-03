@@ -481,6 +481,7 @@ mainSetting
         new MotaSetting()
             .register('mapScale', '小地图缩放', 100, COM.Number, [50, 1000, 50])
             .setDisplayFunc('mapScale', value => `${value}%`)
+            .register('mapLazy', '小地图懒更新', false, COM.Boolean)
             .register('toolbarScale', '工具栏缩放', 100, COM.Number, [10, 500, 10])
             .setDisplayFunc('toolbarScale', value => `${value}%`)
             .register('bookScale', '怪物手册缩放', 100, COM.Number, [10, 500, 10])
@@ -515,6 +516,7 @@ loading.once('coreInit', () => {
             'ui.mapScale',
             isMobile ? 300 : Math.floor(window.innerWidth / 600) * 50
         ),
+        'ui.mapLazy': storage.getValue('ui.mapLazy', false),
         'ui.toolbarScale': storage.getValue(
             'ui.toolbarScale',
             isMobile ? 50 : Math.floor((window.innerWidth / 1700) * 10) * 10
@@ -557,6 +559,7 @@ mainSetting
     .setDescription('audio.soundEnabled', `是否开启音效`)
     .setDescription('audio.soundVolume', `音效的音量`)
     .setDescription('ui.mapScale', `楼传小地图的缩放，百分比格式`)
+    .setDescription('ui.mapLazy', `是否启用小地图懒更新模式，此模式下剩余怪物数量不会实时更新而变成切换地图后更新，打开小地图时出现卡顿可以尝试开启此设置`)
     .setDescription('ui.toolbarScale', `自定义工具栏的缩放比例`)
     .setDescription('ui.bookScale', `怪物手册界面中每个怪物框体的高度缩放，最小值限定为 20% 屏幕高度`)
     .setDescription('ui.danmaku', '是否显示弹幕')

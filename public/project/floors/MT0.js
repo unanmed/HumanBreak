@@ -35,7 +35,7 @@ main.floors.MT0=
         "\r[red]注意！！！\r[]该塔新增了很多新的功能，同时对样板的ui进行了大幅度的改动，操作也有改变，由于内容过多，这里不再一一描述，具体请在道具栏查看百科全书！！百科全书是在你面前的几个道具中的其中一个",
         {
             "type": "function",
-            "function": "function(){\nmota.ui.fixed.open('chapter', { chapter: '序章  起源' });\n}"
+            "function": "function(){\nMota.require('var', 'fixedUi').open('chapter', { chapter: '序章  起源' });\n}"
         }
     ],
     "parallelDo": "",
@@ -64,7 +64,7 @@ main.floors.MT0=
                 "yes": [
                     {
                         "type": "function",
-                        "function": "function(){\ncore.swapChapter(2, flags.hard);\n}"
+                        "function": "function(){\nMota.require('module', 'RenderUtils').swapChapter(2, flags.hard);\n}"
                     }
                 ],
                 "no": []
@@ -86,7 +86,10 @@ main.floors.MT0=
             "这个可以查看bgm，也可以设置bgm，也可以清空设置的bgm"
         ],
         "8,11": [
-            "请仔细阅读这个道具内的说明"
+            "请仔细阅读这个道具内的说明",
+            "注意，虽然内容很多，但是大部分都是“无用”信息，例如对那些ui的说明，基本上打开ui后就能看出来不同区域的功能的，百科全书的说明基本只是对一些细节进行了说明。因此一般来说是不需要非常认真地读关于ui的信息的。",
+            "而对于那些新的内容，例如怪物标记等，可能需要阅读一下。",
+            "这里说一个非常重要的一点，那就是本塔中几乎所有ui都是可以滚动的，尝试用滚轮或者手指拖动进行滚动，包括状态栏！"
         ],
         "7,10": [
             "里面包含了所有游戏的设置，请仔细查看设置"

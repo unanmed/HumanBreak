@@ -136,7 +136,7 @@ interface PluginInterface {
     itemDetail_g: typeof import('../plugin/game/fx/itemDetail');
     checkBlock_g: typeof import('../plugin/game/enemy/checkblock');
     halo_g: typeof import('../plugin/game/fx/halo');
-    study_g: typeof import('../plugin/game/study');
+    // study_g: typeof import('../plugin/game/study');
 }
 
 interface PackageInterface {

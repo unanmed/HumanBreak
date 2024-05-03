@@ -101,7 +101,7 @@ main.floors.MT35=
                     },
                     {
                         "type": "function",
-                        "function": "function(){\ncore.plugin.removeMap.removeMaps('MT22', 'MT31', true);\n}"
+                        "function": "function(){\nMota.Plugin.require('removeMap_g').removeMaps('MT22', 'MT31', true);\n}"
                     },
                     {
                         "type": "changeFloor",

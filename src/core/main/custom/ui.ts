@@ -264,6 +264,7 @@ export class UiController extends Focus<IndexedGameUi> {
      * @returns ui的唯一标识符
      */
     open(id: string, vBind?: UiVBind, vOn?: UiVOn) {
+        if (core.isReplaying() && !this.equal) return -1;
         const ui = this.get(id);
         if (!ui) {
             console.warn(`Unknown UI: '${id}'.`);

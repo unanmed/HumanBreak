@@ -100,7 +100,6 @@ import { has, setCanvasSize } from '../plugin/utils';
 import { debounce } from 'lodash-es';
 import { isMobile } from '../plugin/use';
 import { createChangable } from '@/plugin/ui/common';
-
 const props = defineProps<{
     fromBook?: boolean;
 }>();
@@ -111,8 +110,8 @@ const def = ref<HTMLCanvasElement>();
 const enemy = detailInfo.enemy!;
 const ceil = Math.ceil;
 
-const x = ref(props.fromBook ? void 0 : flags.mouseLoc[0]);
-const y = ref(props.fromBook ? void 0 : flags.mouseLoc[1]);
+const x = ref<number>();
+const y = ref<number>();
 x.value = has(x.value)
     ? Math.round(x.value + core.bigmap.offsetX / 32)
     : void 0;

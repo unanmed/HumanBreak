@@ -141,7 +141,7 @@ export const skills: Record<Chapter, Skill[]> = {
             consume: '2500 * 2 ** level + 5000',
             front: [
                 [8, 10],
-                [12, 5]
+                [12, 10]
             ],
             loc: [4, 1],
             max: 6,

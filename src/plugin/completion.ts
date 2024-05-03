@@ -21,16 +21,14 @@ export const achiDict: Record<number, number> = {
     1: 0
 };
 
-const loading = Mota.require('var', 'loading');
-
-loading.once('coreInit', () => {
+export function init() {
     Object.values(floors).forEach((v, i) => {
         const from = core.floorIds.indexOf(v[0]);
         const to = core.floorIds.indexOf(v[1]);
         const all = core.floorIds.slice(from, to + 1);
         floors[i + 1] = all;
     });
-});
+}
 
 /**
  * 检查所有到达过的楼层，用于成就的计算

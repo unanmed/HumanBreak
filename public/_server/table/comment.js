@@ -285,6 +285,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "苍蓝刻",
 					"_data": "苍蓝刻"
 				},
+				"translation": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "乾坤挪移",
+					"_data": "乾坤挪移"
+				},
 				"specialHalo": {
 					"_leaf": true,
 					"_type": "popCheckboxSet",

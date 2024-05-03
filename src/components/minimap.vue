@@ -9,6 +9,7 @@ import { MinimapDrawer, getArea } from '../plugin/ui/fly';
 import { hook } from '@/game/game';
 import { useDrag, useWheel } from '@/plugin/use';
 import { debounce } from 'lodash-es';
+import { mainSetting } from '@/core/main/setting';
 
 const props = defineProps<{
     action?: boolean;
@@ -22,6 +23,7 @@ const props = defineProps<{
 
 const area = getArea();
 const id = requireUniqueSymbol().toFixed(0);
+const setting = mainSetting.getSetting('ui.mapLazy')!;
 
 let canvas: HTMLCanvasElement;
 let drawer: MinimapDrawer;
@@ -106,10 +108,12 @@ function touchmove(e: TouchEvent) {
 }
 
 function afterBattle() {
-    requestAnimationFrame(() => {
-        drawer.drawedThumbnail = {};
-        drawer.drawMap();
-    });
+    if (!setting.value) {
+        requestAnimationFrame(() => {
+            drawer.drawedThumbnail = {};
+            drawer.drawMap();
+        });
+    }
 }
 
 onMounted(() => {
