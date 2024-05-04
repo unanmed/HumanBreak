@@ -37,7 +37,6 @@ function main() {
         floorNameLabel: document.getElementById('floorNameLabel'),
         statusBar: document.getElementById('statusBar'),
         status: document.getElementsByClassName('status'),
-        toolBar: document.getElementById('toolBar'),
         tools: document.getElementsByClassName('tools'),
         gameCanvas: document.getElementsByClassName('gameCanvas'),
         gif: document.getElementById('gif'),

@@ -427,3 +427,22 @@ Mota.require('var', 'hook').once('reset', () => {
         CustomToolbar.save();
     }
 });
+
+window.addEventListener('resize', () => {
+    requestAnimationFrame(() => {
+        const defaultsTool = CustomToolbar.list.find(v => v.id === '@defaults');
+        if (!defaultsTool) return;
+        // 计算位置
+        if (isMobile) {
+            // 手机端显示在最下方
+            defaultsTool.setPos(25, window.innerHeight - 100);
+            defaultsTool.setSize(window.innerWidth - 50, 100);
+        } else {
+            // 电脑显示在屏幕右方
+            const x = window.innerWidth / 2 + core.domStyle.scale * 240 + 75;
+            defaultsTool.setPos(x, window.innerHeight / 2 + 100);
+            defaultsTool.setSize(window.innerWidth - x - 75, 200);
+        }
+        defaultsTool.refresh(true);
+    });
+});
