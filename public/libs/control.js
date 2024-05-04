@@ -3416,6 +3416,7 @@ control.prototype.setDisplayScale = function (delta) {
 
 ////// 清空状态栏 //////
 control.prototype.clearStatusBar = function () {
+    if (main.mode === 'editor') return;
     Object.keys(core.statusBar).forEach(function (e) {
         if (core.statusBar[e].innerHTML != null) {
             core.statusBar[e].innerHTML = '&nbsp;';

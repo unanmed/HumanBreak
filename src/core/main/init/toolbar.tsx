@@ -5,8 +5,7 @@ import { checkAssist, unwarpBinary } from '../custom/hotkey';
 import {
     flipBinary,
     getVitualKeyOnce,
-    openDanmakuPoster,
-    parseCss
+    openDanmakuPoster
 } from '@/plugin/utils';
 import { cloneDeep } from 'lodash-es';
 import {
@@ -22,7 +21,15 @@ import { gameKey } from './hotkey';
 import { FunctionalComponent, StyleValue, h } from 'vue';
 import { mainUi } from './ui';
 import { isMobile } from '@/plugin/use';
-import { EllipsisOutlined } from '@ant-design/icons-vue';
+import {
+    BackwardOutlined,
+    EllipsisOutlined,
+    FolderOpenOutlined,
+    LayoutOutlined,
+    MessageOutlined,
+    SwapOutlined
+} from '@ant-design/icons-vue';
+import { generateKeyboardEvent } from '../custom/keyboard';
 
 // todo: 新增更改设置的ToolItem
 
@@ -267,7 +274,7 @@ function MiscTool(props: CustomToolbarProps<'misc'>) {
                         onClick={triggerFold}
                         style={toolStyle}
                     >
-                        折叠
+                        <FolderOpenOutlined></FolderOpenOutlined>
                     </span>
                     {item.items.map(v => {
                         const info = CustomToolbar.misc.info[v];
@@ -754,7 +761,7 @@ Mota.require('var', 'hook').once('reset', () => {
         'danmaku',
         '发弹幕',
         openDanmakuPoster,
-        h('span', '发弹幕')
+        h(MessageOutlined)
     );
     CustomToolbar.misc.register(
         'book',
@@ -816,7 +823,14 @@ Mota.require('var', 'hook').once('reset', () => {
         'virtualKey',
         '虚拟键盘',
         () => {
-            getVitualKeyOnce();
+            getVitualKeyOnce().then(value => {
+                gameKey.emitKey(
+                    value.key,
+                    value.assist,
+                    'up',
+                    generateKeyboardEvent(value.key, value.assist)
+                );
+            });
         },
         <img
             src={core.statusBar.icons.keyboard.src}
@@ -874,7 +888,7 @@ Mota.require('var', 'hook').once('reset', () => {
         () => {
             core.doSL('autoSave', 'load');
         },
-        h('span', '回退')
+        h(BackwardOutlined)
     );
     CustomToolbar.misc.register(
         'redo',
@@ -882,7 +896,7 @@ Mota.require('var', 'hook').once('reset', () => {
         () => {
             core.doSL('autoSave', 'reload');
         },
-        h('span', '恢复')
+        h(SwapOutlined)
     );
     CustomToolbar.misc.register(
         'setting',
@@ -940,7 +954,7 @@ Mota.require('var', 'hook').once('reset', () => {
             }
             tool.refresh();
         },
-        h('span', '小地图')
+        h(LayoutOutlined)
     );
     // CustomToolbar.misc.register(
     //     'drag',

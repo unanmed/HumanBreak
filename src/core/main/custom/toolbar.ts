@@ -400,15 +400,15 @@ Mota.require('var', 'hook').once('reset', () => {
                 'fly',
                 'save',
                 'load',
-                'undo',
-                'redo',
-                'danmaku',
-                'minimap',
                 'toolbox',
                 'equipbox',
                 'shop',
                 'virtualKey',
-                'setting'
+                'setting',
+                'undo',
+                'redo',
+                'danmaku',
+                'minimap'
             ]
         });
         // 计算位置

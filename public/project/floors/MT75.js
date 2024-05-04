@@ -1,31 +1,31 @@
 main.floors.MT75=
 {
-"floorId": "MT75",
-"title": "苍蓝之殿-中",
-"name": "75",
-"width": 15,
-"height": 15,
-"canFlyTo": true,
-"canFlyFrom": true,
-"canUseQuickShop": true,
-"cannotViewMap": false,
-"images": [],
-"ratio": 8,
-"defaultGround": "T650",
-"bgm": "palaceNorth.mp3",
-"firstArrive": [],
-"eachArrive": [],
-"parallelDo": "",
-"events": {},
-"changeFloor": {},
-"beforeBattle": {},
-"afterBattle": {},
-"afterGetItem": {},
-"afterOpenDoor": {},
-"autoEvent": {},
-"cannotMove": {},
-"cannotMoveIn": {},
-"map": [
+    "floorId": "MT75",
+    "title": "苍蓝之殿-中",
+    "name": "75",
+    "width": 15,
+    "height": 15,
+    "canFlyTo": true,
+    "canFlyFrom": true,
+    "canUseQuickShop": true,
+    "cannotViewMap": false,
+    "images": [],
+    "ratio": 8,
+    "defaultGround": "T650",
+    "bgm": "palaceNorth.mp3",
+    "firstArrive": [],
+    "eachArrive": [],
+    "parallelDo": "",
+    "events": {},
+    "changeFloor": {},
+    "beforeBattle": {},
+    "afterBattle": {},
+    "afterGetItem": {},
+    "afterOpenDoor": {},
+    "autoEvent": {},
+    "cannotMove": {},
+    "cannotMoveIn": {},
+    "map": [
     [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
     [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
     [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
@@ -42,4 +42,30 @@ main.floors.MT75=
     [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
     [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0]
 ],
+    "bgmap": [
+    [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+    [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+    [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+    [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+    [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+    [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+    [  0,  0,  0,  0,  0,  0,50403,50404,50405,  0,  0,  0,  0,  0,  0],
+    [  0,  0,  0,  0,  0,  0,50411,50412,50413,  0,  0,  0,  0,  0,  0],
+    [  0,  0,  0,  0,  0,  0,50419,50420,50421,  0,  0,  0,  0,  0,  0],
+    [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+    [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+    [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+    [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+    [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+    [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0]
+],
+    "fgmap": [
+
+],
+    "bg2map": [
+
+],
+    "fg2map": [
+
+]
 }

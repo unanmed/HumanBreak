@@ -537,6 +537,7 @@ gameKey
         core.playSound('光标移动');
         if (flags.blade) flags.blade = false;
         else flags.blade = true;
+        core.status.route.push('skill:1');
         core.updateStatusBar();
     })
     .realize('skill2', () => {
@@ -546,6 +547,7 @@ gameKey
             flags.skill2
         ) {
             Mota.Plugin.require('skill_g').jumpSkill();
+            core.status.route.push('skill:2');
         } else {
             if (core.hasItem('pickaxe')) {
                 core.useItem('pickaxe');
@@ -561,6 +563,7 @@ gameKey
         core.playSound('光标移动');
         if (flags.shield) flags.shield = false;
         else flags.shield = true;
+        core.status.route.push('skill:3');
         core.updateStatusBar();
     })
     .realize('debug', () => {

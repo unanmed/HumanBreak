@@ -32,6 +32,25 @@ main.floors.MT20=
         ],
         "8,9": [
             "千丈，勇气贯星海"
+        ],
+        "7,8": [
+            {
+                "type": "if",
+                "condition": "flag:boss1",
+                "true": [
+                    "\t[智人]\b[up,hero]没必要再进去了"
+                ],
+                "false": [
+                    {
+                        "type": "changeFloor",
+                        "floorId": "tower1",
+                        "loc": [
+                            7,
+                            14
+                        ]
+                    }
+                ]
+            }
         ]
     },
     "changeFloor": {
@@ -40,13 +59,6 @@ main.floors.MT20=
             "loc": [
                 7,
                 0
-            ]
-        },
-        "7,8": {
-            "floorId": "tower1",
-            "loc": [
-                7,
-                14
             ]
         }
     },
