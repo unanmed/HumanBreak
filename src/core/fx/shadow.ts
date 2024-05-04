@@ -73,14 +73,14 @@ function addLightFromBlock(floors: FloorIds[], block: number, config: LightConfi
 Mota.require('var', 'hook').once('reset', () => {
     Shadow.init();
     addLightFromBlock(
-        core.floorIds.slice(61, 70).concat(core.floorIds.slice(72)),
+        core.floorIds.slice(61, 70).concat(core.floorIds.slice(72, 81)).concat(core.floorIds.slice(85, 103)),
         103,
         { decay: 50, r: 300, color: [0.9333, 0.6, 0.333, 0.3] },
         { background: [0, 0, 0, 0.26] },
         { decay: 50, r: 250, color: [0, 0, 0, 0] }
     );
     addLightFromBlock(
-        ['MT50', 'MT60', 'MT61'],
+        ['MT50', 'MT60', 'MT61', 'MT72', 'MT73', 'MT74', 'MT75'],
         103,
         { decay: 20, r: 150, color: [0.9333, 0.6, 0.333, 0.4], noShelter: true },
         { background: [0, 0, 0, 0.4] }

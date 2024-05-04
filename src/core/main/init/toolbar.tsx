@@ -16,7 +16,7 @@ import {
     SelectOption,
     Switch
 } from 'ant-design-vue';
-import { mainSetting } from '../setting';
+import { MotaSettingItem, mainSetting } from '../setting';
 import Minimap from '@/components/minimap.vue';
 import { gameKey } from './hotkey';
 import { FunctionalComponent, StyleValue, h } from 'vue';
@@ -224,21 +224,13 @@ function MiscTool(props: CustomToolbarProps<'misc'>) {
         justify-content: center;
         font-size: ${18 * scale}px;
     `;
-    const blockStyle = `
-        min-width: ${40 * scale}px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: ${40 * scale}px;
-        border: 1px solid #ddd;
-    `;
     const toolStyle = `
         display: flex;
         align-items: center;
         min-width: ${40 * scale}px;
         height: ${40 * scale}px;
         border: 1px solid #ddd;
-        margin-left: ${5 * scale}px;
+        margin: ${5 * scale}px ${5 * scale}px ${5 * scale}px 0;
         justify-content: center;
     `;
     const toolActivedStyle = `
@@ -247,7 +239,7 @@ function MiscTool(props: CustomToolbarProps<'misc'>) {
         min-width: ${40 * scale}px;
         height: ${40 * scale}px;
         border: 1px solid #ddd;
-        margin-left: ${5 * scale}px;
+        margin: ${5 * scale}px ${5 * scale}px ${5 * scale}px 0;
         justify-content: center;
         color: aqua;
     `;
@@ -255,6 +247,7 @@ function MiscTool(props: CustomToolbarProps<'misc'>) {
         display: flex;
         align-items: center;
         padding: 0 ${5 * scale}px;
+        flex-wrap: wrap;
     `;
 
     return (
@@ -272,7 +265,7 @@ function MiscTool(props: CustomToolbarProps<'misc'>) {
                     <span
                         class="button-text"
                         onClick={triggerFold}
-                        style={blockStyle}
+                        style={toolStyle}
                     >
                         折叠
                     </span>
@@ -753,12 +746,43 @@ Mota.require('var', 'hook').once('reset', () => {
             CustomToolbar.misc.requestRefresh('minimap');
         }
     });
+    const scale = mainSetting.getSetting('ui.toolbarScale') as Readonly<
+        MotaSettingItem<number>
+    >;
 
     CustomToolbar.misc.register(
         'danmaku',
         '发弹幕',
         openDanmakuPoster,
         h('span', '发弹幕')
+    );
+    CustomToolbar.misc.register(
+        'book',
+        '怪物手册',
+        () => {
+            core.useItem('book', true);
+        },
+        <img
+            src={core.statusBar.icons.book.src}
+            style={{
+                'object-fit': 'contain',
+                width: `${(scale.value / 100) * 32}px`
+            }}
+        ></img>
+    );
+    CustomToolbar.misc.register(
+        'fly',
+        '楼层飞行器',
+        () => {
+            core.useItem('fly', true);
+        },
+        <img
+            src={core.statusBar.icons.fly.src}
+            style={{
+                'object-fit': 'contain',
+                width: `${(scale.value / 100) * 32}px`
+            }}
+        ></img>
     );
     CustomToolbar.misc.register(
         'toolbox',
@@ -768,7 +792,24 @@ Mota.require('var', 'hook').once('reset', () => {
         },
         <img
             src={core.statusBar.icons.toolbox.src}
-            style="object-fit: contain"
+            style={{
+                'object-fit': 'contain',
+                width: `${(scale.value / 100) * 32}px`
+            }}
+        ></img>
+    );
+    CustomToolbar.misc.register(
+        'equipbox',
+        '装备栏',
+        () => {
+            mainUi.open('equipbox');
+        },
+        <img
+            src={core.statusBar.icons.equipbox.src}
+            style={{
+                'object-fit': 'contain',
+                width: `${(scale.value / 100) * 32}px`
+            }}
         ></img>
     );
     CustomToolbar.misc.register(
@@ -779,7 +820,10 @@ Mota.require('var', 'hook').once('reset', () => {
         },
         <img
             src={core.statusBar.icons.keyboard.src}
-            style="object-fit: contain"
+            style={{
+                'object-fit': 'contain',
+                width: `${(scale.value / 100) * 32}px`
+            }}
         ></img>
     );
     CustomToolbar.misc.register(
@@ -790,7 +834,10 @@ Mota.require('var', 'hook').once('reset', () => {
         },
         <img
             src={core.statusBar.icons.shop.src}
-            style="object-fit: contain"
+            style={{
+                'object-fit': 'contain',
+                width: `${(scale.value / 100) * 32}px`
+            }}
         ></img>
     );
     CustomToolbar.misc.register(
@@ -801,7 +848,10 @@ Mota.require('var', 'hook').once('reset', () => {
         },
         <img
             src={core.statusBar.icons.save.src}
-            style="object-fit: contain"
+            style={{
+                'object-fit': 'contain',
+                width: `${(scale.value / 100) * 32}px`
+            }}
         ></img>
     );
     CustomToolbar.misc.register(
@@ -812,11 +862,14 @@ Mota.require('var', 'hook').once('reset', () => {
         },
         <img
             src={core.statusBar.icons.load.src}
-            style="object-fit: contain"
+            style={{
+                'object-fit': 'contain',
+                width: `${(scale.value / 100) * 32}px`
+            }}
         ></img>
     );
     CustomToolbar.misc.register(
-        'redo',
+        'undo',
         '回退（自动存档）',
         () => {
             core.doSL('autoSave', 'load');
@@ -824,7 +877,7 @@ Mota.require('var', 'hook').once('reset', () => {
         h('span', '回退')
     );
     CustomToolbar.misc.register(
-        'load',
+        'redo',
         '恢复（撤销自动存档）',
         () => {
             core.doSL('autoSave', 'reload');
@@ -839,7 +892,10 @@ Mota.require('var', 'hook').once('reset', () => {
         },
         <img
             src={core.statusBar.icons.settings.src}
-            style="object-fit: contain"
+            style={{
+                'object-fit': 'contain',
+                width: `${(scale.value / 100) * 32}px`
+            }}
         ></img>
     );
     CustomToolbar.misc.register(

@@ -11,7 +11,7 @@ import {
 } from '@/plugin/utils';
 import axios, { AxiosResponse, toFormData } from 'axios';
 import { Component, VNode, h, shallowReactive } from 'vue';
-/* @__PURE__ */ import { id, password } from '../../../../user';
+// /* @__PURE__ */ import { id, password } from '../../../../user';
 import { mainSetting } from '../setting';
 
 type CSSObj = Partial<Record<CanParseCss, string>>;
@@ -135,8 +135,8 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
 
         this.posting = true;
         const form = toFormData(data);
-        /* @__PURE__ */ form.append('userid', id);
-        /* @__PURE__ */ form.append('password', password);
+        // /* @__PURE__ */ form.append('userid', id);
+        // /* @__PURE__ */ form.append('password', password);
 
         try {
             const res = await axios.post<PostDanmakuResponse>(
@@ -385,8 +385,8 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
         };
 
         const form = toFormData(post);
-        /* @__PURE__ */ form.append('userid', id);
-        /* @__PURE__ */ form.append('password', password);
+        // /* @__PURE__ */ form.append('userid', id);
+        // /* @__PURE__ */ form.append('password', password);
 
         const res = await axios.post<PostLikeResponse>(Danmaku.backend, form);
         if (res.data.code !== 0) {
@@ -466,8 +466,8 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
             type: 1,
             towername: 'HumanBreak'
         });
-        /* @__PURE__ */ form.append('userid', id);
-        /* @__PURE__ */ form.append('password', password);
+        // /* @__PURE__ */ form.append('userid', id);
+        // /* @__PURE__ */ form.append('password', password);
         const data = await axios.post<DanmakuResponse>(Danmaku.backend, form);
 
         data.data.list.forEach(v => {
@@ -515,7 +515,9 @@ Danmaku.registerSpecContent('i', content => {
     });
 });
 
-/* @__PURE__ */ Danmaku.backend = `/danmaku`;
+if (import.meta.env.DEV) {
+    Danmaku.backend = `/danmaku`;
+}
 
 Mota.require('var', 'hook').once('reset', () => {
     Danmaku.fetch();

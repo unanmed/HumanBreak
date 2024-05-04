@@ -499,7 +499,7 @@ loading.once('coreInit', () => {
         'screen.heroDetail': !!storage.getValue('screen.heroDetail', false),
         'screen.transition': !!storage.getValue('screen.transition', false),
         'screen.antiAlias': !!storage.getValue('screen.antiAlias', false),
-        'screen.fontSize': storage.getValue('screen.fontSize', 16),
+        'screen.fontSize': storage.getValue('screen.fontSize', isMobile ? 9 : 16),
         'screen.smoothView': !!storage.getValue('screen.smoothView', true),
         'screen.criticalGem': !!storage.getValue('screen.criticalGem', false),
         'screen.fontSizeStatus': storage.getValue('screen.fontSizeStatus', 100),

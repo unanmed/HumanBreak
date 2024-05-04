@@ -996,7 +996,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
 /**
  * 计算伤害时会用到的勇士属性，攻击防御，其余的不会有buff加成，直接从core.status.hero取
  */
-const realStatus: (keyof HeroStatus)[] = ['atk', 'def'];
+const realStatus: (keyof HeroStatus)[] = ['atk', 'def', 'hpmax', 'mana'];
 /**
  * 主动技能列表
  */
@@ -1016,12 +1016,10 @@ export function calDamageWith(
 ): number | null {
     const {
         hp,
-        hpmax,
-        mana,
         mdef,
         special: heroSpec = { num: [], last: [] }
     } = core.status.hero;
-    let { atk, def } = hero as HeroStatus;
+    let { atk, def, hpmax, mana } = hero as HeroStatus;
     let { hp: monHp, atk: monAtk, def: monDef, special, enemy } = info;
 
     let damage = 0;

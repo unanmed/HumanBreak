@@ -1,5 +1,5 @@
 <template>
-    <div id="danmaku-editor" @click.stop>
+    <div id="danmaku-editor" @click.capture="clickInter">
         <div id="danmaku-input">
             <span
                 class="danmaku-tool"
@@ -384,9 +384,24 @@ function getAllIcons() {
     ];
 }
 
+let clickIn = false;
+let closed = false;
 function clickOuter() {
-    if (!iconAll.value) close();
-    else iconAll.value = false;
+    requestAnimationFrame(() => {
+        if (!clickIn) {
+            if (!iconAll.value) {
+                if (!closed) {
+                    closed = true;
+                    close();
+                }
+            } else iconAll.value = false;
+        }
+        clickIn = false;
+    });
+}
+
+function clickInter() {
+    clickIn = true;
 }
 
 let lockedBefore = false;
@@ -406,7 +421,8 @@ onMounted(() => {
         if (!lockedBefore) core.unlockControl();
     });
 
-    document.addEventListener('click', clickOuter);
+    document.addEventListener('click', clickOuter, { capture: true });
+    document.addEventListener('touchend', clickOuter, { capture: true });
 });
 
 onUnmounted(() => {
@@ -418,6 +434,7 @@ onUnmounted(() => {
     if (!lockedBefore) core.unlockControl();
     gameKey.enable();
     document.removeEventListener('click', clickOuter);
+    document.removeEventListener('touchend', clickOuter);
 });
 </script>
 

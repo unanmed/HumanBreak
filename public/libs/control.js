@@ -87,8 +87,6 @@ control.prototype._init = function () {
     // --- 注册系统的resize
     this.registerResize('gameGroup', this._resize_gameGroup);
     this.registerResize('canvas', this._resize_canvas);
-    this.registerResize('toolBar', this._resize_toolBar);
-    this.registerResize('tools', this._resize_tools);
 };
 
 // ------ requestAnimationFrame 相关 ------ //
@@ -3499,6 +3497,8 @@ control.prototype.hideStatusBar = function (showToolbox) {
 
 ////// 改变工具栏为按钮1-8 //////
 control.prototype.setToolbarButton = function (useButton) {
+    // Deprecated. Use CustomToolbar instead.
+    return;
     if (!core.domStyle.showStatusBar) {
         // 隐藏状态栏时检查竖屏
         if (!core.domStyle.isVertical && !core.flags.extendToolbar) {
@@ -3692,11 +3692,7 @@ control.prototype._resize_gameGroup = function (obj) {
             obj.outerWidth +
             obj.BAR_WIDTH * core.domStyle.scale +
             (obj.extendToolbar ? 0 : obj.BORDER);
-        totalHeight =
-            obj.outerHeight +
-            (obj.extendToolbar
-                ? obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER
-                : 0);
+        totalHeight = obj.outerHeight;
     }
     gameGroup.style.width = totalWidth + 'px';
     gameGroup.style.height = totalHeight + 'px';
@@ -3787,51 +3783,21 @@ control.prototype._resize_canvas = function (obj) {
 };
 
 control.prototype._resize_toolBar = function (obj) {
-    // toolBar
-    var toolBar = core.dom.toolBar;
-    if (core.domStyle.isVertical) {
-        toolBar.style.left = 0;
-        toolBar.style.right = '';
-        toolBar.style.width = obj.outerWidth - 6 + 'px';
-        toolBar.style.top =
-            obj.statusBarHeightInVertical + obj.outerHeight - 3 + 'px';
-        toolBar.style.height = obj.toolbarHeightInVertical + 'px';
-        toolBar.style.background = 'none';
-    } else {
-        toolBar.style.left = '';
-        toolBar.style.right = 0;
-        toolBar.style.width = obj.outerWidth - 6 + 'px';
-        toolBar.style.top = obj.outerHeight - 3 + 'px';
-        toolBar.style.height =
-            obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER + 'px';
-        toolBar.style.background = 'none';
-    }
-    toolBar.style.fontSize = 16 * core.domStyle.scale + 'px';
-
-    if (
-        !core.domStyle.showStatusBar &&
-        !core.domStyle.isVertical &&
-        !obj.extendToolbar
-    ) {
-        toolBar.style.display = 'none';
-    } else {
-        toolBar.style.display = 'block';
-    }
+    // Deprecated. Use CustomToolbar instead.
 };
 
 control.prototype._resize_tools = function (obj) {
-    var toolsHeight = 32 * core.domStyle.scale;
-    var toolsMarginLeft;
-
-    toolsMarginLeft = (core._HALF_WIDTH_ - 3) * 3 * core.domStyle.scale;
-    for (var i = 0; i < core.dom.tools.length; ++i) {
-        var style = core.dom.tools[i].style;
-        style.height = toolsHeight + 'px';
-        style.marginLeft = toolsMarginLeft + 'px';
-        style.marginTop = 3 * core.domStyle.scale + 'px';
-    }
-    core.dom.hard.style.lineHeight = toolsHeight + 'px';
-
-    core.dom.hard.style.width =
-        obj.outerWidth - 9 * toolsMarginLeft - 8.5 * toolsHeight - 12 + 'px';
+    // Deprecated. Use CustomToolbar instead.
+    // var toolsHeight = 32 * core.domStyle.scale;
+    // var toolsMarginLeft;
+    // toolsMarginLeft = (core._HALF_WIDTH_ - 3) * 3 * core.domStyle.scale;
+    // for (var i = 0; i < core.dom.tools.length; ++i) {
+    //     var style = core.dom.tools[i].style;
+    //     style.height = toolsHeight + 'px';
+    //     style.marginLeft = toolsMarginLeft + 'px';
+    //     style.marginTop = 3 * core.domStyle.scale + 'px';
+    // }
+    // core.dom.hard.style.lineHeight = toolsHeight + 'px';
+    // core.dom.hard.style.width =
+    //     obj.outerWidth - 9 * toolsMarginLeft - 8.5 * toolsHeight - 12 + 'px';
 };

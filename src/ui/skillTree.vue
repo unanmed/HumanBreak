@@ -30,43 +30,47 @@
                 id="divider-vertical"
             ></a-divider>
             <div id="skill-upgrade-info">
-                <span id="skill-level"
-                    >当前等级：{{ level }} / {{ skill.max }}</span
-                >
-                <a-divider dashed class="upgrade-divider"></a-divider>
-                <span
-                    v-if="level < skill.max"
-                    id="skill-consume"
-                    :style="{ color: consume <= mdef ? '#fff' : '#f44' }"
-                    >升级花费：{{ consume }}</span
-                >
-                <span v-else id="skill-consume" style="color: gold"
-                    >已满级</span
-                >
-                <a-divider dashed class="upgrade-divider"></a-divider>
-                <Scroll id="front-scroll" :no-scroll="true"
-                    ><div id="skill-front">
-                        <span>前置技能</span>
-                        <span
-                            v-for="str of front"
-                            :style="{
-                                color: str.startsWith('a') ? '#fff' : '#f44'
-                            }"
-                            >{{ str.slice(1) }}</span
-                        >
-                    </div></Scroll
-                >
-                <a-divider dashed class="upgrade-divider"></a-divider>
-                <div id="skill-chapter">
-                    <span class="button-text" @click="selectChapter(-1)"
-                        ><LeftOutlined
-                    /></span>
-                    &nbsp;&nbsp;
-                    <span>{{ chapterDict[chapter] }}</span>
-                    &nbsp;&nbsp;
-                    <span class="button-text" @click="selectChapter(1)"
-                        ><RightOutlined
-                    /></span>
+                <div id="skill-upgrade-up">
+                    <span id="skill-level"
+                        >当前等级：{{ level }} / {{ skill.max }}</span
+                    >
+                    <a-divider dashed class="upgrade-divider"></a-divider>
+                    <span
+                        v-if="level < skill.max"
+                        id="skill-consume"
+                        :style="{ color: consume <= mdef ? '#fff' : '#f44' }"
+                        >升级花费：{{ consume }}</span
+                    >
+                    <span v-else id="skill-consume" style="color: gold"
+                        >已满级</span
+                    >
+                    <a-divider dashed class="upgrade-divider"></a-divider>
+                    <Scroll id="front-scroll" :no-scroll="true"
+                        ><div id="skill-front">
+                            <span>前置技能</span>
+                            <span
+                                v-for="str of front"
+                                :style="{
+                                    color: str.startsWith('a') ? '#fff' : '#f44'
+                                }"
+                                >{{ str.slice(1) }}</span
+                            >
+                        </div></Scroll
+                    >
+                </div>
+                <div id="skill-upgrade-bottom">
+                    <a-divider dashed class="upgrade-divider"></a-divider>
+                    <div id="skill-chapter">
+                        <span class="button-text" @click="selectChapter(-1)"
+                            ><LeftOutlined
+                        /></span>
+                        &nbsp;&nbsp;
+                        <span>{{ chapterDict[chapter] }}</span>
+                        &nbsp;&nbsp;
+                        <span class="button-text" @click="selectChapter(1)"
+                            ><RightOutlined
+                        /></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -187,9 +191,8 @@ function exit() {
 }
 
 function resize() {
-    const style = getComputedStyle(canvas);
-    canvas.width = parseFloat(style.width) * devicePixelRatio;
-    canvas.height = parseFloat(style.height) * devicePixelRatio;
+    canvas.width = canvas.scrollWidth * devicePixelRatio;
+    canvas.height = canvas.scrollHeight * devicePixelRatio;
 }
 
 function draw() {
@@ -283,8 +286,13 @@ gameKey
 onMounted(async () => {
     canvas = document.getElementById('skill-canvas') as HTMLCanvasElement;
     ctx = canvas.getContext('2d')!;
-    resize();
-    draw();
+
+    requestAnimationFrame(() => {
+        resize();
+        requestAnimationFrame(() => {
+            draw();
+        });
+    });
 
     await sleep(50);
     canvas.addEventListener('click', click);
@@ -382,6 +390,21 @@ function selectChapter(delta: number) {
     align-items: center;
     width: 100%;
     padding-top: 1vh;
+    justify-content: space-between;
+
+    #skill-upgrade-up {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    #skill-upgrade-bottom {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+    }
 }
 
 .upgrade-divider {
@@ -391,7 +414,7 @@ function selectChapter(delta: number) {
 
 #front-scroll {
     width: 100%;
-    height: 39vh;
+    max-height: 30vh;
 }
 
 #skill-front {

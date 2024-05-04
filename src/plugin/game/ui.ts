@@ -39,8 +39,6 @@ export function init() {
         if (!fixedUi.hasName('statusBar')) {
             fixedUi.open('statusBar');
         }
-        core.dom.tools.hard.style.display = 'block';
-        core.dom.toolBar.style.display = 'block';
     };
 
     control.prototype.hideStatusBar = function (showToolbox) {
@@ -60,9 +58,6 @@ export function init() {
         ) {
             for (var i = 0; i < toolItems.length; ++i)
                 toolItems[i].style.display = 'none';
-        }
-        if (!core.domStyle.isVertical && !core.flags.extendToolbar) {
-            core.dom.toolBar.style.display = 'none';
         }
     };
 }

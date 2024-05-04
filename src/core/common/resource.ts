@@ -312,7 +312,7 @@ interface LoadEvent<T extends keyof ResourceType> extends EmitableEvent {
         now: number,
         total: number
     ) => void;
-    load: (resource: ResourceMap[T]) => void | Promise<void>;
+    load: (resource: ResourceMap[T]) => void | Promise<any>;
     loadStart: (resource: ResourceMap[T]) => void;
 }
 
@@ -365,7 +365,7 @@ export class LoadTask<
      * 执行加载过程，当加载完毕后，返回的Promise将会被resolve
      * @returns 加载的Promise
      */
-    load(): Promise<ResourceType[T]> {
+    async load(): Promise<ResourceType[T]> {
         if (this.loadingStarted) {
             logger.warn(
                 2,
@@ -394,14 +394,13 @@ export class LoadTask<
                 );
             });
         this.emit('loadStart', this.resource);
-        return load.then(async value => {
-            // @ts-ignore
-            LoadTask.loadedTaskList.add(this);
-            this.loaded = totalByte;
-            LoadTask.loadedTask++;
-            await Promise.all(this.emit('load', this.resource));
-            return value;
-        });
+        const value = await load;
+        // @ts-ignore
+        LoadTask.loadedTaskList.add(this);
+        this.loaded = totalByte;
+        LoadTask.loadedTask++;
+        await Promise.all(this.emit('load', this.resource));
+        return await value;
     }
 
     /**
@@ -619,79 +618,100 @@ export async function loadCompressedResource() {
         res.once('load', resource => {
             const res = resource.resource;
             if (!res) return;
-            list.forEach(async v => {
-                const { type, name, usage } = v;
-                const asyncType = types[type];
-                const value = await res
-                    .file(`${type}/${name}`)
-                    ?.async(asyncType);
+            return Promise.all(
+                list.map(async v => {
+                    const { type, name, usage } = v;
+                    const asyncType = types[type];
+                    const value = await res
+                        .file(`${type}/${name}`)
+                        ?.async(asyncType);
 
-                if (!value) return;
+                    if (!value) return;
 
-                // 图片类型的资源
-                if (type === 'image') {
-                    const img = value as Blob;
-                    const image = new Image();
-                    image.src = URL.createObjectURL(img);
-                    image.addEventListener('load', () => {
-                        image.setAttribute('_width', image.width.toString());
-                        image.setAttribute('_height', image.height.toString());
-                    });
+                    // 图片类型的资源
+                    if (type === 'image') {
+                        const img = value as Blob;
+                        const image = new Image();
+                        image.src = URL.createObjectURL(img);
+                        image.addEventListener('load', () => {
+                            image.setAttribute(
+                                '_width',
+                                image.width.toString()
+                            );
+                            image.setAttribute(
+                                '_height',
+                                image.height.toString()
+                            );
+                        });
 
-                    // 图片
-                    if (usage === 'image') {
-                        core.material.images.images[name as ImageIds] = image;
-                    } else if (usage === 'tileset') {
-                        // 额外素材
-                        core.material.images.tilesets[name] = image;
-                    } else if (usage === 'autotile') {
-                        // 自动元件
-                        autotiles[name.slice(0, -4) as AllIdsOf<'autotile'>] =
-                            image;
-                        const loading = Mota.require('var', 'loading');
-                        loading.addAutotileLoaded();
-                        loading.onAutotileLoaded(autotiles);
-                        core.material.images.autotile[
-                            name.slice(0, -4) as AllIdsOf<'autotile'>
-                        ] = image;
+                        // 图片
+                        if (usage === 'image') {
+                            core.material.images.images[name as ImageIds] =
+                                image;
+                        } else if (usage === 'tileset') {
+                            // 额外素材
+                            core.material.images.tilesets[name] = image;
+                        } else if (usage === 'autotile') {
+                            // 自动元件
+                            autotiles[
+                                name.slice(0, -4) as AllIdsOf<'autotile'>
+                            ] = image;
+                            const loading = Mota.require('var', 'loading');
+                            loading.addAutotileLoaded();
+                            loading.onAutotileLoaded(autotiles);
+                            core.material.images.autotile[
+                                name.slice(0, -4) as AllIdsOf<'autotile'>
+                            ] = image;
+                        }
+                    } else if (type === 'material') {
+                        const img = value as Blob;
+                        const image = new Image();
+                        image.src = URL.createObjectURL(img);
+                        image.addEventListener('load', () => {
+                            image.setAttribute(
+                                '_width',
+                                image.width.toString()
+                            );
+                            image.setAttribute(
+                                '_height',
+                                image.height.toString()
+                            );
+                        });
+
+                        // material
+                        if (materialImages.some(v => name === v + '.png')) {
+                            // @ts-ignore
+                            core.material.images[
+                                name.slice(0, -4) as SelectKey<
+                                    MaterialImages,
+                                    HTMLImageElement
+                                >
+                            ] = image;
+                        } else if (weathers.some(v => name === v + '.png')) {
+                            // @ts-ignore
+                            core.animateFrame.weather[v] = image;
+                        }
                     }
-                } else if (type === 'material') {
-                    const img = value as Blob;
-                    const image = new Image();
-                    image.src = URL.createObjectURL(img);
-                    image.addEventListener('load', () => {
-                        image.setAttribute('_width', image.width.toString());
-                        image.setAttribute('_height', image.height.toString());
-                    });
 
-                    // material
-                    if (materialImages.some(v => name === v + '.png')) {
-                        // @ts-ignore
-                        core.material.images[
-                            name.slice(0, -4) as SelectKey<
-                                MaterialImages,
-                                HTMLImageElement
-                            >
-                        ] = image;
-                    } else if (weathers.some(v => name === v + '.png')) {
-                        // @ts-ignore
-                        core.animateFrame.weather[v] = image;
-                    } else {
+                    if (usage === 'font') {
+                        const font = value as ArrayBuffer;
+                        document.fonts.add(
+                            new FontFace(name.slice(0, -4), font)
+                        );
+                    } else if (usage === 'sound') {
+                        const sound = value as ArrayBuffer;
+                        Mota.require('var', 'sound').add(
+                            `sounds.${name}`,
+                            sound
+                        );
+                    } else if (usage === 'animate') {
+                        const ani = value as string;
+                        core.material.animates[
+                            name.slice(0, -8) as AnimationIds
+                        ] = core.loader._loadAnimate(ani);
                     }
-                }
-
-                if (usage === 'font') {
-                    const font = value as ArrayBuffer;
-                    document.fonts.add(new FontFace(name.slice(0, -4), font));
-                } else if (usage === 'sound') {
-                    const sound = value as ArrayBuffer;
-                    Mota.require('var', 'sound').add(`sounds.${name}`, sound);
-                } else if (usage === 'animate') {
-                    const ani = value as string;
-                    core.material.animates[name.slice(0, -8) as AnimationIds] =
-                        core.loader._loadAnimate(ani);
-                }
-            });
+                })
+            );
         });
     });
 }
