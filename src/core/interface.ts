@@ -17,3 +17,5 @@ export interface ResponseBase {
     code: number;
     message: string;
 }
+
+export type CSSObj = Partial<Record<CanParseCss, string>>;

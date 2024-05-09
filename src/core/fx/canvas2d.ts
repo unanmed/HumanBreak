@@ -20,6 +20,8 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
     /** 是否是高清画布 */
     highResolution: boolean = true;
 
+    scale: number = 1;
+
     constructor() {
         super();
 
@@ -41,6 +43,7 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
         if (this.autoScale && this.highResolution) {
             ratio *= core.domStyle.scale;
         }
+        this.scale = ratio;
         this.canvas.width = width * ratio;
         this.canvas.height = height * ratio;
         this.width = width;
@@ -82,7 +85,13 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
         newCanvas.setHD(canvas.highResolution);
         newCanvas.withGameScale(canvas.autoScale);
         newCanvas.size(canvas.width, canvas.height);
-        newCanvas.ctx.drawImage(canvas.canvas, 0, 0);
+        newCanvas.ctx.drawImage(
+            canvas.canvas,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
         return newCanvas;
     }
 }
@@ -144,6 +153,7 @@ export class MotaCanvas2D extends MotaOffscreenCanvas2D {
             this.canvas.style.width = `${width}px`;
             this.canvas.style.height = `${height}px`;
         }
+        this.scale = ratio;
         this.canvas.width = width * ratio;
         this.canvas.height = height * ratio;
         this.width = width;

@@ -1,0 +1,200 @@
+import { isNil } from 'lodash-es';
+import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
+import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
+import { Camera } from './camera';
+
+export type RenderFunction = (
+    canvas: MotaOffscreenCanvas2D,
+    camera: Camera
+) => void;
+
+export type RenderItemPosition = 'absolute' | 'static';
+
+interface IRenderCache {
+    /** 缓存列表 */
+    cacheList: Map<string, MotaOffscreenCanvas2D>;
+    /** 当前正在使用的缓存 */
+    using?: string;
+    /** 下次绘制需要写入的缓存 */
+    writing?: string;
+
+    /**
+     * 在之后的绘制中使用缓存，如果缓存不存在，那么就不使用缓存，并在下一次绘制结束后写入
+     * @param index 缓存的索引，不填时表示不使用缓存
+     */
+    useCache(index?: string): void;
+
+    /**
+     * 将下次绘制写入缓存并使用
+     * @param index 缓存的索引，不填时表示不进行缓存
+     */
+    cache(index?: string): void;
+
+    /**
+     * 清除指定或所有缓存
+     * @param index 要清除的缓存，不填代表清除所有
+     */
+    clearCache(index?: string): void;
+}
+
+export interface IRenderUpdater {
+    /**
+     * 更新这个渲染元素
+     * @param item 触发更新事件的元素，可以是自身触发。如果不填表示手动触发，而非渲染内容发生变化而引起的触发
+     */
+    update(item?: RenderItem): void;
+}
+
+export interface ICanvasCachedRenderItem {
+    /** 离屏画布，首先渲染到它上面，然后由Renderer渲染到最终画布上 */
+    canvas: MotaOffscreenCanvas2D;
+}
+
+interface IRenderAnchor {
+    anchorX: number;
+    anchorY: number;
+
+    /**
+     * 设置渲染元素的位置锚点
+     * @param x 锚点的横坐标，小数，0表示最左边，1表示最右边
+     * @param y 锚点的纵坐标，小数，0表示最上边，1表示最下边
+     */
+    setAnchor(x: number, y: number): void;
+}
+
+interface RenderItemEvent extends EmitableEvent {
+    beforeUpdate: (item?: RenderItem) => void;
+    afterUpdate: (item?: RenderItem) => void;
+}
+
+export abstract class RenderItem
+    extends EventEmitter<RenderItemEvent>
+    implements IRenderCache, IRenderUpdater, IRenderAnchor
+{
+    zIndex: number = 0;
+
+    x: number = 0;
+    y: number = 0;
+    width: number = 200;
+    height: number = 200;
+
+    cacheList: Map<string, MotaOffscreenCanvas2D> = new Map();
+
+    using?: string;
+    writing?: string;
+
+    anchorX: number = 0;
+    anchorY: number = 0;
+
+    /** 渲染模式，absolute表示绝对位置，static表示跟随摄像机移动，只对顶层元素有效 */
+    type: 'absolute' | 'static' = 'static';
+
+    parent?: RenderItem;
+
+    constructor() {
+        super();
+
+        this.using = '@default';
+    }
+
+    /**
+     * 渲染这个对象
+     * @param canvas 渲染至的画布
+     * @param ctx 渲染至的画布的渲染上下文
+     * @param camera 渲染时使用的摄像机
+     */
+    abstract render(
+        canvas: HTMLCanvasElement,
+        ctx: CanvasRenderingContext2D,
+        camera: Camera
+    ): void;
+
+    /**
+     * 修改这个对象的大小
+     */
+    abstract size(width: number, height: number): void;
+
+    /**
+     * 修改这个对象的位置
+     */
+    abstract pos(x: number, y: number): void;
+
+    useCache(index?: string): void {
+        if (isNil(index)) {
+            this.using = void 0;
+            return;
+        }
+        if (!this.cacheList.has(index)) {
+            this.writing = index;
+        }
+        this.using = index;
+    }
+
+    cache(index?: string): void {
+        this.writing = index;
+        this.using = index;
+    }
+
+    clearCache(index?: string): void {
+        if (isNil(index)) {
+            this.writing = void 0;
+            this.using = void 0;
+            this.cacheList.clear();
+        } else {
+            this.cacheList.delete(index);
+        }
+    }
+
+    setAnchor(x: number, y: number): void {
+        this.anchorX = x;
+        this.anchorY = y;
+    }
+
+    update(item?: RenderItem): void {
+        this.writing = this.using;
+        this.using = void 0;
+        this.parent?.update(item);
+    }
+}
+
+export function withCacheRender(
+    item: RenderItem & ICanvasCachedRenderItem,
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D,
+    camera: Camera,
+    fn: RenderFunction
+) {
+    const { width, height } = item;
+    const ax = width * item.anchorX;
+    const ay = height * item.anchorY;
+    let write = item.writing;
+    if (!isNil(item.using)) {
+        const cache = item.cacheList.get(item.using);
+        if (cache) {
+            ctx.drawImage(
+                cache.canvas,
+                item.x - ax,
+                item.y - ay,
+                item.width,
+                item.height
+            );
+            return;
+        }
+        write = item.using;
+    }
+    const { canvas: c, ctx: ct } = item.canvas;
+    ct.clearRect(0, 0, c.width, c.height);
+    fn(item.canvas, camera);
+    if (!isNil(write)) {
+        const cache = item.cacheList.get(write);
+        if (cache) {
+            const { canvas, ctx } = cache;
+            ctx.drawImage(c, 0, 0);
+        } else {
+            item.cacheList.set(write, MotaOffscreenCanvas2D.clone(item.canvas));
+        }
+    }
+
+    ctx.drawImage(c, item.x - ax, item.y - ay, item.width, item.height);
+    item.using = write;
+}

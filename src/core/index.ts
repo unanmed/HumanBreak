@@ -60,6 +60,15 @@ import { ResourceController } from './loader/controller';
 import { logger } from './common/logger';
 import { Danmaku } from './main/custom/danmaku';
 import * as Shadow from './fx/shadow';
+import { MotaCanvas2D } from './fx/canvas2d';
+import * as portal from './fx/portal';
+import { heroRender } from './render/hero';
+import { MotaRenderer } from './render/render';
+import { Container } from './render/container';
+import { Sprite } from './render/sprite';
+import { Camera } from './render/camera';
+import { Image, Text } from './render/preset/misc';
+import { RenderItem } from './render/item';
 
 // ----- 类注册
 Mota.register('class', 'AudioPlayer', AudioPlayer);
@@ -78,6 +87,7 @@ Mota.register('class', 'UiController', UiController);
 Mota.register('class', 'MComponent', MComponent);
 Mota.register('class', 'ResourceController', ResourceController);
 Mota.register('class', 'Danmaku', Danmaku);
+Mota.register('class', 'MotaCanvas2D', MotaCanvas2D);
 // ----- 函数注册
 Mota.register('fn', 'm', m);
 Mota.register('fn', 'unwrapBinary', unwarpBinary);
@@ -133,6 +143,19 @@ Mota.register('module', 'UIComponents', {
 });
 Mota.register('module', 'MCGenerator', MCGenerator);
 Mota.register('module', 'Shadow', Shadow);
+Mota.register('module', 'Effect', {
+    Portal: portal
+});
+Mota.register('module', 'Render', {
+    heroRender,
+    MotaRenderer,
+    Container,
+    Sprite,
+    Camera,
+    Text,
+    Image,
+    RenderItem
+});
 
 main.renderLoaded = true;
 Mota.require('var', 'hook').emit('renderLoaded');

@@ -1,7 +1,10 @@
 import { has } from '@/plugin/game/utils';
+import { loading } from '../game';
 
 export namespace BluePalace {
     type DoorConvertInfo = [id: AllIds, x: number, y: number];
+
+    // ---------- 黄蓝门转换
 
     function drawDoors(
         ctx: CanvasRenderingContext2D,
@@ -74,5 +77,31 @@ export namespace BluePalace {
                     setTimeout(res, time);
                 });
             });
+    }
+
+    // ---------- 传送门部分
+
+    interface Portal {
+        fx: number;
+        fy: number;
+        dir: Dir;
+        tx: number;
+        ty: number;
+        toDir: Dir;
+    }
+
+    export const portals: Partial<Record<FloorIds, Portal[]>> = {
+        MT75: [
+            { fx: 7, fy: 7, dir: 'left', tx: 9, ty: 9, toDir: 'down' },
+            { fx: 5, fy: 11, dir: 'right', tx: 7, ty: 9, toDir: 'up' },
+            { fx: 4, fy: 6, dir: 'right', tx: 9, ty: 4, toDir: 'up' },
+            { fx: 5, fy: 9, dir: 'right', tx: 3, ty: 7, toDir: 'up' },
+            { fx: 7, fy: 5, dir: 'right', tx: 4, ty: 9, toDir: 'up' }
+        ]
+    };
+    loading.once('coreInit', initPortals);
+
+    function initPortals() {
+        // 主要是复写勇士绘制以及传送判定，还有自动寻路
     }
 }

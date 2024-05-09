@@ -628,6 +628,7 @@ interface InitGameStatus {
     lockControl: boolean;
 
     /**
+     * @deprecated 迟早给你删喽\
      * 勇士移动状态，每个数字干啥的自己去libs翻，这东西太复杂了，不过应该不会有人用这个东西吧（
      */
     heroMoving: number;
@@ -792,6 +793,11 @@ interface Follower {
      * 跟随者的图片id
      */
     name: ImageIds;
+
+    direction: Dir;
+    x: number;
+    y: number;
+    stop: boolean;
 }
 
 interface HeroStatistics {

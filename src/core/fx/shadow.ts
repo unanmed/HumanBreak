@@ -114,18 +114,18 @@ Mota.require('var', 'hook').once('reset', () => {
             Shadow.update(true);
         }
     });
-    Mota.rewrite(core.events, 'changingFloor', 'add', (_, floorId) => {
-        if (!main.replayChecking) {
-            Shadow.clearBuffer();
-            Shadow.update();
-            setCanvasFilterByFloorId(floorId);
-        }
-    });
     Mota.rewrite(core.control, 'loadData', 'add', () => {
         if (!main.replayChecking) {
             Shadow.update(true);
         }
     });
+    Mota.require('var', 'hook').on('changingFloor', (floorId) => {
+        if (!main.replayChecking) {
+            Shadow.clearBuffer();
+            Shadow.update();
+            setCanvasFilterByFloorId(floorId);
+        }
+    })
 });
 
 // 深度测试着色器

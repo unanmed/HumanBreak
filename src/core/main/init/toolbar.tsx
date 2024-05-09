@@ -27,6 +27,8 @@ import {
     FolderOpenOutlined,
     LayoutOutlined,
     MessageOutlined,
+    RetweetOutlined,
+    RollbackOutlined,
     SwapOutlined
 } from '@ant-design/icons-vue';
 import { generateKeyboardEvent } from '../custom/keyboard';
@@ -888,7 +890,7 @@ Mota.require('var', 'hook').once('reset', () => {
         () => {
             core.doSL('autoSave', 'load');
         },
-        h(BackwardOutlined)
+        h(RollbackOutlined)
     );
     CustomToolbar.misc.register(
         'redo',
@@ -896,7 +898,7 @@ Mota.require('var', 'hook').once('reset', () => {
         () => {
             core.doSL('autoSave', 'reload');
         },
-        h(SwapOutlined)
+        h(RetweetOutlined)
     );
     CustomToolbar.misc.register(
         'setting',

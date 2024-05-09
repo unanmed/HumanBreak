@@ -1048,7 +1048,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 	},
 	"I472": {
 		"cls": "items",
-		"name": "新物品",
+		"name": "传奇绿宝石",
 		"text": "，防御+${core.values.blueGem}",
 		"itemEffect": "core.status.hero.mdef += Math.round(640 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (Mota.Plugin.require('skillTree_g').getSkillLevel(12) / 20 + 1))",
 		"itemEffectTip": "，智慧+${Math.round(640 * core.status.thisMap.ratio / core.getFlag(\"hard\") * (Mota.Plugin.require('skillTree_g').getSkillLevel(12) / 20 + 1))}",

@@ -474,6 +474,7 @@ mainSetting
         new MotaSetting()
             .register('paraLight', '野外阴影', true, COM.Boolean)
             .register('frag', '打怪特效', true, COM.Boolean)
+            .register('portalParticle', '传送门特效', true, COM.Boolean)
     )
     .register(
         'ui',
@@ -512,6 +513,7 @@ loading.once('coreInit', () => {
         'utils.autoScale': !!storage.getValue('utils.autoScale', true),
         'fx.paraLight': !!storage.getValue('fx.paraLight', true),
         'fx.frag': !!storage.getValue('fx.frag', true),
+        'fx.portalParticle': !!storage.getValue('fx.portalParticle', true),
         'ui.mapScale': storage.getValue(
             'ui.mapScale',
             isMobile ? 300 : Math.floor(window.innerWidth / 600) * 50
@@ -565,7 +567,8 @@ mainSetting
     .setDescription('ui.danmaku', '是否显示弹幕')
     .setDescription('ui.danmakuSpeed', '弹幕速度，刷新或开关弹幕显示后起效')
     .setDescription('screen.fontSizeStatus', `修改状态栏的字体大小`)
-    .setDescription('screen.blur', '打开任意ui界面时是否有背景虚化效果，移动端打开后可能会有掉帧或者发热现象。关闭ui后生效');
+    .setDescription('screen.blur', '打开任意ui界面时是否有背景虚化效果，移动端打开后可能会有掉帧或者发热现象。关闭ui后生效')
+    .setDescription('fx.portalParticle', '是否启用苍蓝之殿的传送门粒子特效，启用后可能对性能及设备发热有所影响');
 
 function setFontSize() {
     const absoluteSize = storage.getValue(

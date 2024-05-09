@@ -738,28 +738,29 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			},
 			{
 				"need": "100000",
-				"title": "中级智人",
+				"title": "高级智人",
 				"clear": true,
 				"action": [
 					{
 						"type": "setValue",
 						"name": "status:mdef",
 						"operator": "+=",
-						"value": "2000"
+						"value": "10000"
 					},
 					{
 						"type": "setValue",
 						"name": "status:atk",
 						"operator": "+=",
-						"value": "25"
+						"value": "250"
 					},
 					{
 						"type": "setValue",
 						"name": "status:def",
 						"operator": "+=",
-						"value": "25"
+						"value": "250"
 					},
-					"恭喜升级！攻防+25，智慧+2000！"
+					"恭喜升级！攻防+250，智慧+10000！",
+					"这是这个游戏的最后一级，第三章的玩法会改变，不再设置等级"
 				]
 			}
 		]

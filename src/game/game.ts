@@ -1,5 +1,5 @@
 import { EmitableEvent, EventEmitter } from '../core/common/eventEmitter';
-import { DamageEnemy } from './enemy/damage';
+import type { DamageEnemy } from './enemy/damage';
 
 // ----- 加载事件
 interface GameLoadEvent extends EmitableEvent {
@@ -75,25 +75,36 @@ class GameLoading extends EventEmitter<GameLoadEvent> {
 export const loading = new GameLoading();
 
 export interface GameEvent extends EmitableEvent {
-    /** Emitted in events.prototype.resetGame. */
+    /** Emitted in libs/events.js resetGame. */
     reset: () => void;
     /** Emitted in src/App.vue setup. */
     mounted: () => void;
-    /** Emitted in plugin/ui.js */
+    /** Emitted in plugin/game/ui.ts updateStatusBar_update */
     statusBarUpdate: () => void;
     /** Emitted in core/index.ts */
     renderLoaded: () => void;
-    // /** Emitted in libs/events.js */
+    /** Emitted in libs/events.js getItem */
     afterGetItem: (
         itemId: AllIdsOf<'items'>,
         x: number,
         y: number,
         isGentleClick: boolean
     ) => void;
+    /** Emitted in libs/events.js _openDoor_animate */
     afterOpenDoor: (doorId: AllIdsOf<'animates'>, x: number, y: number) => void;
+    /** Emitted in project/functions.js afterChangeFloor */
     afterChangeFloor: (floorId: FloorIds) => void;
+    /** Emitted in project/functions.js moveOneStep */
     moveOneStep: (x: number, y: number, floorId: FloorIds) => void;
+    /** Emitted in src/game/enemy/battle.ts afterBattle */
     afterBattle: (enemy: DamageEnemy, x?: number, y?: number) => void;
+    /** Emitted in libs/events.js changingFloor */
+    changingFloor: (floorId: FloorIds, heroLoc: Loc) => void;
+    drawHero: (
+        status?: Exclude<keyof MaterialIcon['hero']['down'], 'loc'>,
+        offset?: number,
+        frame?: number
+    ) => void;
 }
 
 export const hook = new EventEmitter<GameEvent>();

@@ -392,6 +392,7 @@ p#name {
 }
 
 #hero {
+    display: none;
     z-index: 40;
 }
 

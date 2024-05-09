@@ -368,7 +368,7 @@ interface Control {
      */
     drawHero(
         status?: Exclude<keyof MaterialIcon['hero']['down'], 'loc'>,
-        offset?: number,
+        offset?: number | (Loc & { offset: number }),
         frame?: number
     ): void;
 
@@ -1071,6 +1071,14 @@ interface Control {
 
     _drawHero_updateViewport(x: number, y: number, offset: Loc): void;
     _moveAction_moving(callback: () => void): void;
+    _drawHero_draw(
+        direction: Dir,
+        x: number,
+        y: number,
+        status: Exclude<keyof MaterialIcon['hero']['down'], 'loc'>,
+        offset: Loc & { offset: number },
+        frame?: number
+    ): void;
 }
 
 declare const control: new () => Control;

@@ -290,10 +290,10 @@ gameKey
         }
     })
     .realize('@shop_add', () => {
-        count.value--;
+        count.value++;
     })
     .realize('@shop_min', () => {
-        count.value++;
+        count.value--;
     })
     .realize('exit', () => {
         exit();
@@ -311,10 +311,12 @@ function exit() {
 }
 
 onMounted(async () => {
+    core.lockControl();
     core.status.route.push(`openShop:${id}`);
 });
 
 onUnmounted(() => {
+    core.unlockControl();
     gameKey.dispose(props.ui.symbol);
 });
 </script>

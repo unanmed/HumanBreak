@@ -802,11 +802,19 @@ control.prototype.setHeroMoveInterval = function (callback) {
     if (core.status.replay.speed > 6) toAdd = 4;
     if (core.status.replay.speed > 12) toAdd = 8;
 
+    Mota.r(() => {
+        const render = Mota.require('module', 'Render').heroRender;
+        render.move(true);
+    });
+
     core.interval.heroMoveInterval = window.setInterval(function () {
+        render.offset += toAdd * 4;
         core.status.heroMoving += toAdd;
         if (core.status.heroMoving >= 8) {
             clearInterval(core.interval.heroMoveInterval);
             core.status.heroMoving = 0;
+            render.offset = 0;
+            render.move(false);
             if (callback) callback();
         }
     }, ((core.values.moveSpeed / 8) * toAdd) / core.status.replay.speed);
@@ -1003,21 +1011,31 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
 };
 
 ////// 绘制勇士 //////
-control.prototype.drawHero = function (status, offset, frame) {
+control.prototype.drawHero = function (status, offset = 0, frame) {
     if (!core.isPlaying() || !core.status.floorId || core.status.gameOver)
         return;
+    if (main.mode === 'play') {
+        Mota.require('module', 'Render').heroRender.draw();
+        if (!core.hasFlag('__lockViewport__')) {
+            const { x, y, direction } = core.status.hero.loc;
+            var way = core.utils.scan2[direction];
+            var dx = way.x,
+                dy = way.y;
+            var offsetX =
+                typeof offset == 'number' ? dx * offset : offset.x || 0;
+            var offsetY =
+                typeof offset == 'number' ? dy * offset : offset.y || 0;
+            offset = { x: offsetX, y: offsetY, offset: offset };
+            this._drawHero_updateViewport(x, y, offset);
+        }
+        return;
+    }
+
     var x = core.getHeroLoc('x'),
         y = core.getHeroLoc('y'),
         direction = core.getHeroLoc('direction');
     status = status || 'stop';
     if (!offset) offset = 0;
-
-    var way = core.utils.scan2[direction];
-    var dx = way.x,
-        dy = way.y;
-    var offsetX = typeof offset == 'number' ? dx * offset : offset.x || 0;
-    var offsetY = typeof offset == 'number' ? dy * offset : offset.y || 0;
-    offset = { x: offsetX, y: offsetY, offset: offset };
 
     core.clearAutomaticRouteNode(x + dx, y + dy);
     core.clearMap('hero');
@@ -1030,9 +1048,6 @@ control.prototype.drawHero = function (status, offset, frame) {
     delete core.canvas.hero._px;
     delete core.canvas.hero._py;
     core.status.preview.enabled = false;
-    if (!core.hasFlag('__lockViewport__')) {
-        this._drawHero_updateViewport(x, y, offset);
-    }
 
     this._drawHero_draw(direction, x, y, status, offset, frame);
 };
@@ -3499,75 +3514,6 @@ control.prototype.hideStatusBar = function (showToolbox) {
 ////// 改变工具栏为按钮1-8 //////
 control.prototype.setToolbarButton = function (useButton) {
     // Deprecated. Use CustomToolbar instead.
-    return;
-    if (!core.domStyle.showStatusBar) {
-        // 隐藏状态栏时检查竖屏
-        if (!core.domStyle.isVertical && !core.flags.extendToolbar) {
-            for (var i = 0; i < core.dom.tools.length; ++i)
-                core.dom.tools[i].style.display = 'none';
-            return;
-        }
-        if (!core.hasFlag('showToolbox')) return;
-        else core.dom.tools.hard.style.display = 'block';
-    }
-
-    if (useButton == null) useButton = core.domStyle.toolbarBtn;
-    if (!core.domStyle.isVertical && !core.flags.extendToolbar)
-        useButton = false;
-    core.domStyle.toolbarBtn = useButton;
-
-    if (useButton) {
-        [
-            'book',
-            'fly',
-            'toolbox',
-            'keyboard',
-            'shop',
-            'save',
-            'load',
-            'settings'
-        ].forEach(function (t) {
-            core.statusBar.image[t].style.display = 'none';
-        });
-        [
-            'btn1',
-            'btn2',
-            'btn3',
-            'btn4',
-            'btn5',
-            'btn6',
-            'btn7',
-            'btn8'
-        ].forEach(function (t) {
-            core.statusBar.image[t].style.display = 'block';
-        });
-        main.statusBar.image.btn8.style.filter = core.getLocalStorage('altKey')
-            ? 'sepia(1) contrast(1.5)'
-            : '';
-    } else {
-        [
-            'btn1',
-            'btn2',
-            'btn3',
-            'btn4',
-            'btn5',
-            'btn6',
-            'btn7',
-            'btn8'
-        ].forEach(function (t) {
-            core.statusBar.image[t].style.display = 'none';
-        });
-        ['book', 'fly', 'toolbox', 'save', 'load', 'settings'].forEach(
-            function (t) {
-                core.statusBar.image[t].style.display = 'block';
-            }
-        );
-        core.statusBar.image.keyboard.style.display =
-            core.statusBar.image.shop.style.display =
-                core.domStyle.isVertical || core.flags.extendToolbar
-                    ? 'block'
-                    : 'none';
-    }
 };
 
 ////// ------ resize处理 ------ //
@@ -3789,16 +3735,4 @@ control.prototype._resize_toolBar = function (obj) {
 
 control.prototype._resize_tools = function (obj) {
     // Deprecated. Use CustomToolbar instead.
-    // var toolsHeight = 32 * core.domStyle.scale;
-    // var toolsMarginLeft;
-    // toolsMarginLeft = (core._HALF_WIDTH_ - 3) * 3 * core.domStyle.scale;
-    // for (var i = 0; i < core.dom.tools.length; ++i) {
-    //     var style = core.dom.tools[i].style;
-    //     style.height = toolsHeight + 'px';
-    //     style.marginLeft = toolsMarginLeft + 'px';
-    //     style.marginTop = 3 * core.domStyle.scale + 'px';
-    // }
-    // core.dom.hard.style.lineHeight = toolsHeight + 'px';
-    // core.dom.hard.style.width =
-    //     obj.outerWidth - 9 * toolsMarginLeft - 8.5 * toolsHeight - 12 + 'px';
 };

@@ -25,13 +25,16 @@ import type * as damage from './enemy/damage';
 import type { Logger } from '@/core/common/logger';
 import type { Danmaku } from '@/core/main/custom/danmaku';
 import type * as misc from './mechanism/misc';
+import type { MotaCanvas2D } from '@/core/fx/canvas2d';
+import type * as portal from '@/core/fx/portal';
+import type { HeroRenderer } from '@/core/render/hero';
 
 interface ClassInterface {
     // 渲染进程与游戏进程通用
     EventEmitter: typeof EventEmitter;
     IndexedEventEmitter: typeof IndexedEventEmitter;
     Disposable: typeof Disposable;
-    // 定义于渲染进程，录像中会进行polyfill，但是不执行任何内容
+    // 定义于渲染进程
     GameStorage: typeof GameStorage;
     MotaSetting: typeof MotaSetting;
     SettingDisplayer: typeof SettingDisplayer;
@@ -45,12 +48,13 @@ interface ClassInterface {
     SoundEffect: typeof SoundEffect;
     SoundController: typeof SoundController;
     BgmController: typeof BgmController;
+    MotaCanvas2D: typeof MotaCanvas2D;
+    Danmaku: typeof Danmaku;
     // todo: 放到插件 ShaderEffect: typeof ShaderEffect;
     // 定义于游戏进程，渲染进程依然可用
     Range: typeof Range;
     EnemyCollection: typeof EnemyCollection;
     DamageEnemy: typeof DamageEnemy;
-    Danmaku: typeof Danmaku;
 }
 
 type _IBattle = typeof battle;
@@ -89,6 +93,12 @@ interface VariableInterface {
 interface ModuleInterface {
     Mechanism: {
         BluePalace: typeof misc.BluePalace;
+    };
+    Effect: {
+        Portal: typeof portal;
+    };
+    Render: {
+        heroRender: HeroRenderer;
     };
 }
 

@@ -240,6 +240,7 @@ interface AnimateFrame {
     readonly animateTime: number;
 
     /**
+     * @deprecated
      * 勇士移动的时候上一次的换腿时间
      */
     moveTime: number;
@@ -251,6 +252,7 @@ interface AnimateFrame {
     lastLegTime: number;
 
     /**
+     * @deprecated
      * 当前是否在左腿上，使用了四帧插件时无效
      */
     leftLeg: boolean;

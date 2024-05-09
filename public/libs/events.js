@@ -843,6 +843,7 @@ events.prototype._changeFloor_afterChange = function (info, callback) {
 
 events.prototype.changingFloor = function (floorId, heroLoc) {
     this.eventdata.changingFloor(floorId, heroLoc);
+    Mota.require('var', 'hook').emit('changingFloor', floorId, heroLoc);
 };
 
 ////// 转换楼层结束的事件 //////
@@ -4252,6 +4253,7 @@ events.prototype._vibrate_update = function (shakeInfo) {
 /////// 使用事件让勇士移动。这个函数将不会触发任何事件 //////
 events.prototype.eventMoveHero = function (steps, time, callback) {
     time = time || core.values.moveSpeed;
+    // const render = Mota.require('module', 'Render').heroRender;
     var step = 0,
         moveSteps = (steps || [])
             .map(function (t) {
@@ -4275,9 +4277,11 @@ events.prototype.eventMoveHero = function (steps, time, callback) {
                 );
             });
     core.status.heroMoving = -1;
+    // render.move(false);
     var _run = function () {
         var cb = function () {
             core.status.heroMoving = 0;
+            // render.move(false);
             core.drawHero();
             if (callback) callback();
         };
@@ -4339,15 +4343,18 @@ events.prototype.jumpHero = function (ex, ey, time, callback) {
 };
 
 events.prototype._jumpHero_doJump = function (jumpInfo, callback) {
+    // const render = Mota.require('module', 'Render').heroRender;
     var cb = function () {
         core.setHeroLoc('x', jumpInfo.ex);
         core.setHeroLoc('y', jumpInfo.ey);
+        render.move(false);
         core.status.heroMoving = 0;
         core.drawHero();
         if (callback) callback();
     };
 
     core.status.heroMoving = -1;
+    // render.move(false);
     var animate = window.setInterval(function () {
         if (jumpInfo.jump_count > 0) core.events._jumpHero_jumping(jumpInfo);
         else {
@@ -4386,6 +4393,7 @@ events.prototype.setHeroIcon = function (name, noDraw) {
     core.material.images.hero = img;
     core.material.icons.hero.width = img.width / 4;
     core.material.icons.hero.height = img.height / 4;
+    // Mota.require('module', 'Render').heroRender.setHero();
     if (!noDraw) core.drawHero();
 };
 
