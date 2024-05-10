@@ -151,8 +151,7 @@ export abstract class RenderItem
     }
 
     update(item?: RenderItem): void {
-        this.writing = this.using;
-        this.using = void 0;
+        this.cache(this.writing);
         this.parent?.update(item);
     }
 }
@@ -168,7 +167,7 @@ export function withCacheRender(
     const ax = width * item.anchorX;
     const ay = height * item.anchorY;
     let write = item.writing;
-    if (!isNil(item.using)) {
+    if (!isNil(item.using) && isNil(item.writing)) {
         const cache = item.cacheList.get(item.using);
         if (cache) {
             ctx.drawImage(
@@ -189,12 +188,11 @@ export function withCacheRender(
         const cache = item.cacheList.get(write);
         if (cache) {
             const { canvas, ctx } = cache;
-            ctx.drawImage(c, 0, 0);
+            ctx.drawImage(c, 0, 0, canvas.width, canvas.height);
         } else {
             item.cacheList.set(write, MotaOffscreenCanvas2D.clone(item.canvas));
         }
     }
 
     ctx.drawImage(c, item.x - ax, item.y - ay, item.width, item.height);
-    item.using = write;
 }

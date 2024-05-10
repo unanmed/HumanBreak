@@ -4,6 +4,7 @@ import { Camera } from './camera';
 import { Container } from './container';
 import { RenderItem, withCacheRender } from './item';
 import { Image, Text } from './preset/misc';
+import { Animation, hyper } from 'mutate-animate';
 
 export class MotaRenderer extends Container {
     canvas: MotaOffscreenCanvas2D;
@@ -64,16 +65,18 @@ export class MotaRenderer extends Container {
             const { canvas: ca, ctx: ct, scale } = canvas;
             const mat = camera.mat;
             const a = mat[0] * scale;
-            const b = mat[1];
-            const c = mat[3];
+            const b = mat[1] * scale;
+            const c = mat[3] * scale;
             const d = mat[4] * scale;
-            const e = mat[6];
-            const f = mat[7];
+            const e = mat[6] * scale;
+            const f = mat[7] * scale;
             this.sortedChildren.forEach(v => {
                 if (v.type === 'absolute') {
-                    ct.setTransform(scale, 0, 0, scale, 0, 0);
+                    ct.transform(scale, 0, 0, scale, 0, 0);
                 } else {
-                    ct.setTransform(a, b, c, d, e, f);
+                    ct.setTransform(1, 0, 0, 1, 0, 0);
+                    ct.translate(ca.width / 2, ca.height / 2);
+                    ct.transform(a, b, c, d, e, f);
                 }
                 v.render(ca, ct, camera);
             });
@@ -87,13 +90,11 @@ export class MotaRenderer extends Container {
         if (this.needUpdate) return;
         this.needUpdate = true;
         requestAnimationFrame(() => {
-            this.writing = this.using;
-            this.using = void 0;
+            this.cache(this.writing);
             this.needUpdate = false;
             this.emit('beforeUpdate', item);
             this.render();
             this.emit('afterUpdate', item);
-            this.using = this.writing;
         });
     }
 
@@ -123,12 +124,13 @@ Mota.require('var', 'hook').once('reset', () => {
 
     const testText = new Text();
     testText.setText('测试测试');
-    testText.pos(100, 100);
+    testText.pos(240, 240);
     testText.setFont('32px normal');
     testText.setStyle('#fff');
     con.size(480, 480);
+    con.pos(-240, -240);
     const testImage = new Image(core.material.images.images['arrow.png']);
-    testImage.pos(200, 200);
+    testImage.pos(240, 240);
 
     con.appendChild([testText, testImage]);
 
@@ -136,7 +138,20 @@ Mota.require('var', 'hook').once('reset', () => {
 
     render.update(render);
 
-    setTimeout(() => {
-        testText.setFont('18px normal');
-    }, 2000);
+    const ani = new Animation();
+    ani.mode(hyper('sin', 'in-out'))
+        .time(10000)
+        .absolute()
+        .rotate(360)
+        .scale(0.7)
+        .move(100, 100);
+    ani.ticker.add(() => {
+        render.cache('@default');
+        camera.reset();
+        camera.move(ani.x, ani.y);
+        camera.scale(ani.size);
+        camera.rotate((ani.angle / 180) * Math.PI);
+        render.update(render);
+    });
+    setTimeout(() => ani.ticker.destroy(), 10000);
 });

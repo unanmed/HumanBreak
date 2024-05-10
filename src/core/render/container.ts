@@ -31,6 +31,7 @@ export class Container extends RenderItem implements ICanvasCachedRenderItem {
                 v.render(c.canvas, c.ctx, camera);
             });
         });
+        this.writing = void 0;
         this.emit('afterUpdate', this);
     }
 

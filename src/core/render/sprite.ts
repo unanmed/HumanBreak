@@ -23,6 +23,7 @@ export class Sprite extends RenderItem {
         withCacheRender(this, canvas, ctx, camera, canvas => {
             this.renderFn(canvas, camera);
         });
+        this.writing = void 0;
         this.emit('afterUpdate', this);
     }
 

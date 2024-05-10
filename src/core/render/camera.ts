@@ -37,7 +37,7 @@ export class Camera extends EventEmitter<CameraEvent> {
      * 移动摄像机，叠加关系
      */
     move(x: number, y: number) {
-        mat3.translate(this.mat, this.mat, [x, y]);
+        mat3.translate(this.mat, this.mat, [-x, -y]);
         this.x += x;
         this.y += y;
     }
@@ -67,7 +67,7 @@ export class Camera extends EventEmitter<CameraEvent> {
      * 设置摄像机的位置，非叠加关系
      */
     setTranslate(x: number, y: number) {
-        mat3.translate(this.mat, this.mat, [x - this.x, y - this.y]);
+        mat3.translate(this.mat, this.mat, [this.x - x, this.y - y]);
         this.x = x;
         this.y = y;
     }

@@ -102,10 +102,11 @@ export class Image extends Sprite {
         super();
         this.image = image;
         this.canvas.withGameScale(false);
+        this.canvas.setHD(false);
         this.size(image.width, image.height);
 
         this.renderFn = ({ canvas, ctx }) => {
-            ctx.drawImage(this.image, 0, 0);
+            ctx.drawImage(this.image, 0, 0, canvas.width, canvas.height);
         };
     }
 
