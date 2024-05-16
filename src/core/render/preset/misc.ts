@@ -90,7 +90,7 @@ export class Text extends Sprite {
     }
 }
 
-type SizedCanvasImageSource = Exclude<
+export type SizedCanvasImageSource = Exclude<
     CanvasImageSource,
     VideoFrame | SVGElement
 >;

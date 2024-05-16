@@ -103,7 +103,7 @@ function drawItemDetail(diff: any, x: number, y: number) {
         let color = '#fff';
 
         if (typeof diff[name] === 'number')
-            content = core.formatBigNumber(diff[name], true);
+            content = core.formatBigNumber(Math.round(diff[name]), true);
         else content = diff[name];
 
         switch (name) {

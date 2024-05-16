@@ -40,7 +40,7 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"angel": {"name":"天使","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"elemental": {"name":"元素生物","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"steelGuard": {"name":"铁守卫","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[18],"value":20},
-	"evilBat": {"name":"邪恶蝙蝠","hp":1000,"atk":800,"def":350,"money":1,"exp":40,"point":0,"special":[2]},
+	"evilBat": {"name":"邪恶蝙蝠","hp":1000,"atk":800,"def":350,"money":1,"exp":40,"point":0,"special":[2],"bigImage":"bear.png"},
 	"frozenSkeleton": {"name":"冻死骨","hp":7500,"atk":2500,"def":1000,"money":2,"exp":90,"point":0,"special":[1,20],"crit":500,"ice":10,"description":"弱小，无助，哀嚎，这就是残酷的现实。哪怕你身处极寒之中，也难有人对你伸出援手。人类总会帮助他人，但在这绝望的环境下，人类的本性便暴露无遗。这一个个精致却又无情的骷髅，便是那些在极寒之中死去的冤魂。"},
 	"silverSlimelord": {"name":"银怪王","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"goldSlimelord": {"name":"金怪王","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},

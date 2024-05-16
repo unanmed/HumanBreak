@@ -14,6 +14,7 @@ export function drawHalo(
     if (main.replayChecking) return;
     const setting = Mota.require('var', 'mainSetting');
     if (!setting.getValue('screen.halo', true)) return;
+    Mota.require('fn', 'ensureFloorDamage')(floorId);
     const col = core.status.maps[floorId].enemy;
     const [dx, dy] = col.translation;
     const list = col.haloList.concat(

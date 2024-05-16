@@ -802,19 +802,19 @@ control.prototype.setHeroMoveInterval = function (callback) {
     if (core.status.replay.speed > 6) toAdd = 4;
     if (core.status.replay.speed > 12) toAdd = 8;
 
-    Mota.r(() => {
-        const render = Mota.require('module', 'Render').heroRender;
-        render.move(true);
-    });
+    // Mota.r(() => {
+    //     const render = Mota.require('module', 'Render').heroRender;
+    //     render.move(true);
+    // });
 
     core.interval.heroMoveInterval = window.setInterval(function () {
-        render.offset += toAdd * 4;
+        // render.offset += toAdd * 4;
         core.status.heroMoving += toAdd;
         if (core.status.heroMoving >= 8) {
             clearInterval(core.interval.heroMoveInterval);
             core.status.heroMoving = 0;
-            render.offset = 0;
-            render.move(false);
+            // render.offset = 0;
+            // render.move(false);
             if (callback) callback();
         }
     }, ((core.values.moveSpeed / 8) * toAdd) / core.status.replay.speed);
@@ -1014,28 +1014,18 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
 control.prototype.drawHero = function (status, offset = 0, frame) {
     if (!core.isPlaying() || !core.status.floorId || core.status.gameOver)
         return;
-    if (main.mode === 'play') {
-        Mota.require('module', 'Render').heroRender.draw();
-        if (!core.hasFlag('__lockViewport__')) {
-            const { x, y, direction } = core.status.hero.loc;
-            var way = core.utils.scan2[direction];
-            var dx = way.x,
-                dy = way.y;
-            var offsetX =
-                typeof offset == 'number' ? dx * offset : offset.x || 0;
-            var offsetY =
-                typeof offset == 'number' ? dy * offset : offset.y || 0;
-            offset = { x: offsetX, y: offsetY, offset: offset };
-            this._drawHero_updateViewport(x, y, offset);
-        }
-        return;
-    }
-
     var x = core.getHeroLoc('x'),
         y = core.getHeroLoc('y'),
         direction = core.getHeroLoc('direction');
     status = status || 'stop';
     if (!offset) offset = 0;
+
+    var way = core.utils.scan2[direction];
+    var dx = way.x,
+        dy = way.y;
+    var offsetX = typeof offset == 'number' ? dx * offset : offset.x || 0;
+    var offsetY = typeof offset == 'number' ? dy * offset : offset.y || 0;
+    offset = { x: offsetX, y: offsetY, offset: offset };
 
     core.clearAutomaticRouteNode(x + dx, y + dy);
     core.clearMap('hero');
@@ -1048,6 +1038,9 @@ control.prototype.drawHero = function (status, offset = 0, frame) {
     delete core.canvas.hero._px;
     delete core.canvas.hero._py;
     core.status.preview.enabled = false;
+    if (!core.hasFlag('__lockViewport__')) {
+        this._drawHero_updateViewport(x, y, offset);
+    }
 
     this._drawHero_draw(direction, x, y, status, offset, frame);
 };

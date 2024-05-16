@@ -1,8 +1,13 @@
 import { Camera } from './camera';
-import { RenderFunction, RenderItem, withCacheRender } from './item';
+import {
+    ICanvasCachedRenderItem,
+    RenderFunction,
+    RenderItem,
+    withCacheRender
+} from './item';
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
 
-export class Sprite extends RenderItem {
+export class Sprite extends RenderItem implements ICanvasCachedRenderItem {
     renderFn: RenderFunction;
 
     canvas: MotaOffscreenCanvas2D;
@@ -19,12 +24,12 @@ export class Sprite extends RenderItem {
         ctx: CanvasRenderingContext2D,
         camera: Camera
     ): void {
-        this.emit('beforeUpdate', this);
+        this.emit('beforeRender');
         withCacheRender(this, canvas, ctx, camera, canvas => {
             this.renderFn(canvas, camera);
         });
         this.writing = void 0;
-        this.emit('afterUpdate', this);
+        this.emit('afterRender');
     }
 
     size(width: number, height: number) {
@@ -38,5 +43,21 @@ export class Sprite extends RenderItem {
     pos(x: number, y: number) {
         this.x = x;
         this.y = y;
+    }
+
+    setRenderFn(fn: RenderFunction) {
+        this.renderFn = fn;
+    }
+
+    setHD(hd: boolean): void {
+        this.highResolution = hd;
+        this.canvas.setHD(hd);
+        this.update(this);
+    }
+
+    setAntiAliasing(anti: boolean): void {
+        this.antiAliasing = anti;
+        this.canvas.setAntiAliasing(anti);
+        this.update(this);
     }
 }

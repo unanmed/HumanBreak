@@ -25,14 +25,19 @@ export class Container extends RenderItem implements ICanvasCachedRenderItem {
         ctx: CanvasRenderingContext2D,
         camera: Camera
     ): void {
-        this.emit('beforeUpdate', this);
+        this.emit('beforeRender');
         withCacheRender(this, canvas, ctx, camera, c => {
             this.sortedChildren.forEach(v => {
+                if (!v.antiAliasing) {
+                    ctx.imageSmoothingEnabled = false;
+                } else {
+                    ctx.imageSmoothingEnabled = true;
+                }
                 v.render(c.canvas, c.ctx, camera);
             });
         });
         this.writing = void 0;
-        this.emit('afterUpdate', this);
+        this.emit('afterRender');
     }
 
     size(width: number, height: number) {
@@ -55,8 +60,24 @@ export class Container extends RenderItem implements ICanvasCachedRenderItem {
     appendChild(children: RenderItem[]) {
         children.forEach(v => (v.parent = this));
         this.children.push(...children);
+        this.sortChildren();
+    }
+
+    sortChildren() {
         this.sortedChildren = this.children
             .slice()
             .sort((a, b) => a.zIndex - b.zIndex);
+    }
+
+    setHD(hd: boolean): void {
+        this.highResolution = hd;
+        this.canvas.setHD(hd);
+        this.update(this);
+    }
+
+    setAntiAliasing(anti: boolean): void {
+        this.antiAliasing = anti;
+        this.canvas.setAntiAliasing(anti);
+        this.update(this);
     }
 }

@@ -101,6 +101,7 @@ export class HeroRenderer extends EventEmitter<HeroRendererEvent> {
      */
     draw() {
         if (!core.isPlaying()) return;
+        return;
         const { ctx, canvas: can } = canvas;
         const { x, y, direction: dir } = core.status.hero.loc;
         ctx.clearRect(0, 0, can.width, can.height);

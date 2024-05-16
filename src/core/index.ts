@@ -69,6 +69,7 @@ import { Sprite } from './render/sprite';
 import { Camera } from './render/camera';
 import { Image, Text } from './render/preset/misc';
 import { RenderItem } from './render/item';
+import { texture } from './render/cache';
 
 // ----- 类注册
 Mota.register('class', 'AudioPlayer', AudioPlayer);
@@ -148,6 +149,7 @@ Mota.register('module', 'Effect', {
 });
 Mota.register('module', 'Render', {
     heroRender,
+    texture,
     MotaRenderer,
     Container,
     Sprite,

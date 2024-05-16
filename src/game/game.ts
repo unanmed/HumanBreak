@@ -6,16 +6,13 @@ interface GameLoadEvent extends EmitableEvent {
     coreLoaded: () => void;
     autotileLoaded: () => void;
     coreInit: () => void;
-    materialLoaded: () => void;
+    loaded: () => void;
 }
 
 class GameLoading extends EventEmitter<GameLoadEvent> {
     private autotileLoaded: number = 0;
     private autotileNum?: number;
     private autotileListened: boolean = false;
-
-    private materialsNum: number = main.materials.length;
-    private materialsLoaded: number = 0;
 
     constructor() {
         super();
@@ -31,13 +28,6 @@ class GameLoading extends EventEmitter<GameLoadEvent> {
         this.on('materialLoaded', () => {
             core.loader._loadMaterials_afterLoad();
         });
-    }
-
-    addMaterialLoaded() {
-        this.materialsLoaded++;
-        if (this.materialsLoaded === this.materialsNum) {
-            this.emit('materialLoaded');
-        }
     }
 
     addAutotileLoaded() {
@@ -100,10 +90,19 @@ export interface GameEvent extends EmitableEvent {
     afterBattle: (enemy: DamageEnemy, x?: number, y?: number) => void;
     /** Emitted in libs/events.js changingFloor */
     changingFloor: (floorId: FloorIds, heroLoc: Loc) => void;
+
     drawHero: (
         status?: Exclude<keyof MaterialIcon['hero']['down'], 'loc'>,
         offset?: number,
         frame?: number
+    ) => void;
+    /** Emitted in libs/maps.js setBlock */
+    setBlock: (
+        x: number,
+        y: number,
+        floorId: FloorIds,
+        oldBlock: AllNumbers,
+        newBlock: AllNumbers
     ) => void;
 }
 

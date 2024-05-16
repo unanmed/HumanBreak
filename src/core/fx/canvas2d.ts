@@ -3,6 +3,7 @@ import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
 import { CSSObj } from '../interface';
 
 interface OffscreenCanvasEvent extends EmitableEvent {
+    /** 当被动触发resize时（例如core.domStyle.scale变化、窗口大小变化）时触发，使用size函数并不会触发 */
     resize: () => void;
 }
 
@@ -19,6 +20,8 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
     autoScale: boolean = false;
     /** 是否是高清画布 */
     highResolution: boolean = true;
+    /** 是否启用抗锯齿 */
+    antiAliasing: boolean = true;
 
     scale: number = 1;
 
@@ -50,6 +53,7 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
         this.height = height;
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         this.ctx.scale(ratio, ratio);
+        this.ctx.imageSmoothingEnabled = this.antiAliasing;
     }
 
     /**
@@ -66,6 +70,24 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
     setHD(hd: boolean) {
         this.highResolution = hd;
         this.size(this.width, this.height);
+    }
+
+    /**
+     * 设置当前画布的抗锯齿设置
+     */
+    setAntiAliasing(anti: boolean) {
+        this.antiAliasing = anti;
+        this.ctx.imageSmoothingEnabled = anti;
+    }
+
+    /**
+     * 清空画布
+     */
+    clear() {
+        this.ctx.save();
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.restore();
     }
 
     /**

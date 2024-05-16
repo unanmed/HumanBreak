@@ -1397,6 +1397,12 @@ interface Maps {
     };
 
     _getBigImageInfo(bigImage: HTMLImageElement, face: Dir, posX: number): any;
+
+    _getBgFgMapArray(
+        name: string,
+        floorId: FloorIds,
+        noCache?: boolean
+    ): number[][];
 }
 
 declare const maps: new () => Maps;

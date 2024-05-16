@@ -28,6 +28,13 @@ import type * as misc from './mechanism/misc';
 import type { MotaCanvas2D } from '@/core/fx/canvas2d';
 import type * as portal from '@/core/fx/portal';
 import type { HeroRenderer } from '@/core/render/hero';
+import type { texture } from '@/core/render/cache';
+import type { MotaRenderer } from '@/core/render/render';
+import type { Container } from '@/core/render/container';
+import type { Sprite } from '@/core/render/sprite';
+import type { Camera } from '@/core/render/camera';
+import type { Image, Text } from '@/core/render/preset/misc';
+import type { RenderItem } from '@/core/render/item';
 
 interface ClassInterface {
     // 渲染进程与游戏进程通用
@@ -99,6 +106,14 @@ interface ModuleInterface {
     };
     Render: {
         heroRender: HeroRenderer;
+        texture: typeof texture;
+        MotaRenderer: MotaRenderer;
+        Container: Container;
+        Sprite: Sprite;
+        Camera: Camera;
+        Text: Text;
+        Image: Image;
+        RenderItem: RenderItem;
     };
 }
 

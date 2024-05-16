@@ -74,6 +74,7 @@ onMounted(async () => {
         core._afterLoadResources(props.callback);
         logger.log(`Resource load end.`);
         loadDiv.style.opacity = '0';
+        Mota.require('var', 'loading').emit('loaded');
         await sleep(1000);
         fixedUi.close(props.num);
         fixedUi.open('start');

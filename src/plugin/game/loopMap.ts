@@ -192,7 +192,7 @@ export function init() {
     maps.prototype._getBgFgMapArray = function (
         name: string,
         floorId: FloorIds,
-        noCache: boolean
+        noCache: boolean = false
     ) {
         floorId = floorId || core.status.floorId;
         if (!floorId) return [];

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "ts-node-esm script/dev.ts",
     "build": "vue-tsc && vite build && ts-node-esm script/build.ts dist",
+    "build-local": "vue-tsc && vite build && ts-node-esm script/build.ts local",
     "preview": "vite preview",
     "update": "ts-node-esm script/update.ts",
     "declare": "ts-node-esm script/declare.ts",

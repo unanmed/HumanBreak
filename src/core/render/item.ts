@@ -2,6 +2,8 @@ import { isNil } from 'lodash-es';
 import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
 import { Camera } from './camera';
+import { Ticker } from 'mutate-animate';
+import type { Container } from './container';
 
 export type RenderFunction = (
     canvas: MotaOffscreenCanvas2D,
@@ -62,15 +64,48 @@ interface IRenderAnchor {
     setAnchor(x: number, y: number): void;
 }
 
+interface IRenderConfig {
+    /** 是否是高清画布 */
+    highResolution: boolean;
+    /** 是否启用抗锯齿 */
+    antiAliasing: boolean;
+
+    /**
+     * 设置当前渲染元素是否使用高清画布
+     * @param hd 是否高清
+     */
+    setHD(hd: boolean): void;
+
+    /**
+     * 设置当前渲染原始是否启用抗锯齿
+     * @param anti 是否抗锯齿
+     */
+    setAntiAliasing(anti: boolean): void;
+}
+
+export interface IRenderDestroyable {
+    /**
+     * 摧毁这个渲染对象，被摧毁后理应不被继续使用
+     */
+    destroy(): void;
+}
+
 interface RenderItemEvent extends EmitableEvent {
     beforeUpdate: (item?: RenderItem) => void;
     afterUpdate: (item?: RenderItem) => void;
+    beforeRender: () => void;
+    afterRender: () => void;
 }
 
 export abstract class RenderItem
     extends EventEmitter<RenderItemEvent>
-    implements IRenderCache, IRenderUpdater, IRenderAnchor
+    implements IRenderCache, IRenderUpdater, IRenderAnchor, IRenderConfig
 {
+    /** 渲染的全局ticker */
+    static ticker: Ticker = new Ticker();
+    /** 包括但不限于怪物、npc、自动元件的动画帧数 */
+    static animatedFrame: number = 0;
+
     zIndex: number = 0;
 
     x: number = 0;
@@ -88,8 +123,14 @@ export abstract class RenderItem
 
     /** 渲染模式，absolute表示绝对位置，static表示跟随摄像机移动，只对顶层元素有效 */
     type: 'absolute' | 'static' = 'static';
+    /** 是否是高清画布 */
+    highResolution: boolean = true;
+    /** 是否抗锯齿 */
+    antiAliasing: boolean = true;
 
     parent?: RenderItem;
+
+    protected needUpdate: boolean = false;
 
     constructor() {
         super();
@@ -151,10 +192,51 @@ export abstract class RenderItem
     }
 
     update(item?: RenderItem): void {
-        this.cache(this.writing);
-        this.parent?.update(item);
+        if (this.needUpdate) return;
+        this.needUpdate = true;
+        requestAnimationFrame(() => {
+            this.needUpdate = false;
+            if (!this.parent) return;
+            this.cache(this.writing);
+            this.refresh(item);
+        });
+    }
+
+    /**
+     * 立刻更新这个组件，不延迟到下一个tick
+     */
+    protected refresh(item?: RenderItem) {
+        this.emit('beforeUpdate', item);
+        this.parent?.refresh(item);
+        this.emit('afterUpdate', item);
+    }
+
+    setHD(hd: boolean): void {
+        this.highResolution = hd;
+        this.update(this);
+    }
+
+    setAntiAliasing(anti: boolean): void {
+        this.antiAliasing = anti;
+        this.update(this);
+    }
+
+    setZIndex(zIndex: number) {
+        this.zIndex = zIndex;
+        (this.parent as Container).sortChildren?.();
     }
 }
+
+Mota.require('var', 'hook').once('reset', () => {
+    let lastTime = 0;
+    RenderItem.ticker.add(time => {
+        if (!core.isPlaying()) return;
+        if (time - lastTime > core.values.animateSpeed) {
+            RenderItem.animatedFrame++;
+            lastTime = time;
+        }
+    });
+});
 
 export function withCacheRender(
     item: RenderItem & ICanvasCachedRenderItem,

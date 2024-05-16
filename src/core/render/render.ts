@@ -1,34 +1,41 @@
-import { isNil } from 'lodash-es';
+import { Animation, hyper, sleep } from 'mutate-animate';
 import { MotaCanvas2D, MotaOffscreenCanvas2D } from '../fx/canvas2d';
 import { Camera } from './camera';
 import { Container } from './container';
-import { RenderItem, withCacheRender } from './item';
-import { Image, Text } from './preset/misc';
-import { Animation, hyper } from 'mutate-animate';
+import { IRenderDestroyable, RenderItem, withCacheRender } from './item';
+import { Layer } from './preset/layer';
 
-export class MotaRenderer extends Container {
+export class MotaRenderer extends Container implements IRenderDestroyable {
+    static list: Set<MotaRenderer> = new Set();
+
     canvas: MotaOffscreenCanvas2D;
     camera: Camera;
 
     /** 摄像机缓存，如果是需要快速切换摄像机的场景，使用缓存可以大幅提升性能表现 */
     cameraCache: Map<Camera, MotaOffscreenCanvas2D> = new Map();
     target: MotaCanvas2D;
+    /** 这个渲染对象的id */
+    id: string;
 
-    private needUpdate: boolean = false;
+    protected needUpdate: boolean = false;
 
-    constructor() {
+    constructor(id: string = 'render-main') {
         super();
+
+        this.id = id;
 
         this.canvas = new MotaOffscreenCanvas2D();
         this.camera = new Camera();
-        this.target = new MotaCanvas2D(`render-main`);
-        this.width = 480;
-        this.height = 480;
+        this.target = new MotaCanvas2D(id);
+        this.width = core._PX_;
+        this.height = core._PY_;
         this.target.withGameScale(true);
-        this.target.size(480, 480);
+        this.target.size(core._PX_, core._PY_);
         this.canvas.withGameScale(true);
-        this.canvas.size(480, 480);
+        this.canvas.size(core._PX_, core._PY_);
         this.target.css(`z-index: 100`);
+
+        MotaRenderer.list.add(this);
     }
 
     /**
@@ -60,6 +67,7 @@ export class MotaRenderer extends Container {
     render() {
         const { canvas, ctx } = this.target;
         const camera = this.camera;
+        this.emit('beforeRender');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         withCacheRender(this, canvas, ctx, camera, canvas => {
             const { canvas: ca, ctx: ct, scale } = canvas;
@@ -72,15 +80,21 @@ export class MotaRenderer extends Container {
             const f = mat[7] * scale;
             this.sortedChildren.forEach(v => {
                 if (v.type === 'absolute') {
-                    ct.transform(scale, 0, 0, scale, 0, 0);
+                    ct.setTransform(scale, 0, 0, scale, 0, 0);
                 } else {
                     ct.setTransform(1, 0, 0, 1, 0, 0);
                     ct.translate(ca.width / 2, ca.height / 2);
                     ct.transform(a, b, c, d, e, f);
                 }
+                if (!v.antiAliasing) {
+                    ctx.imageSmoothingEnabled = false;
+                } else {
+                    ctx.imageSmoothingEnabled = true;
+                }
                 v.render(ca, ct, camera);
             });
         });
+        this.emit('afterRender');
     }
 
     /**
@@ -92,10 +106,14 @@ export class MotaRenderer extends Container {
         requestAnimationFrame(() => {
             this.cache(this.writing);
             this.needUpdate = false;
-            this.emit('beforeUpdate', item);
-            this.render();
-            this.emit('afterUpdate', item);
+            this.refresh(item);
         });
+    }
+
+    protected refresh(item?: RenderItem): void {
+        this.emit('beforeUpdate', item);
+        this.render();
+        this.emit('afterUpdate', item);
     }
 
     /**
@@ -114,44 +132,51 @@ export class MotaRenderer extends Container {
     mount() {
         this.target.mount();
     }
+
+    destroy() {
+        MotaRenderer.list.delete(this);
+    }
 }
+
+window.addEventListener('resize', () => {
+    MotaRenderer.list.forEach(v => v.update(v));
+});
 
 Mota.require('var', 'hook').once('reset', () => {
     const render = new MotaRenderer();
-    const con = new Container('static');
+    const layer = new Layer();
+    const bgLayer = new Layer();
     const camera = render.camera;
     render.mount();
 
-    const testText = new Text();
-    testText.setText('测试测试');
-    testText.pos(240, 240);
-    testText.setFont('32px normal');
-    testText.setStyle('#fff');
-    con.size(480, 480);
-    con.pos(-240, -240);
-    const testImage = new Image(core.material.images.images['arrow.png']);
-    testImage.pos(240, 240);
-
-    con.appendChild([testText, testImage]);
-
-    render.appendChild([con]);
-
-    render.update(render);
+    layer.zIndex = 2;
+    bgLayer.zIndex = 1;
+    render.appendChild([layer, bgLayer]);
+    layer.bindThis('event', true);
+    bgLayer.bindThis('bg', true);
+    bgLayer.setBackground(650);
 
     const ani = new Animation();
-    ani.mode(hyper('sin', 'in-out'))
-        .time(10000)
-        .absolute()
-        .rotate(360)
-        .scale(0.7)
-        .move(100, 100);
+
     ani.ticker.add(() => {
-        render.cache('@default');
         camera.reset();
-        camera.move(ani.x, ani.y);
-        camera.scale(ani.size);
         camera.rotate((ani.angle / 180) * Math.PI);
+        camera.move(240, 240);
         render.update(render);
     });
-    setTimeout(() => ani.ticker.destroy(), 10000);
+
+    sleep(1000).then(() => {
+        ani.mode(hyper('sin', 'out')).time(100).absolute().rotate(30);
+        sleep(100).then(() => {
+            ani.time(3000).rotate(0);
+        });
+        sleep(3100).then(() => {
+            ani.time(5000).mode(hyper('tan', 'in-out')).rotate(3600);
+        });
+        // ani.mode(shake2(5, hyper('sin', 'in-out')), true)
+        //     .time(5000)
+        //     .shake(1, 0);
+    });
+
+    console.log(layer);
 });

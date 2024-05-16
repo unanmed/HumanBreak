@@ -3291,6 +3291,14 @@ maps.prototype.setBlock = function (number, x, y, floorId, noredraw) {
             }
         }
     }
+    Mota.require('var', 'hook').emit(
+        'setBlock',
+        x,
+        y,
+        floorId,
+        originBlock?.id ?? 0,
+        number
+    );
 };
 
 maps.prototype.animateSetBlock = function (

@@ -76,7 +76,7 @@ type MaterialImages = {
     /**
      * 各个类型的图块的图片
      */
-    [C in Exclude<Cls, 'tilesets'>]: HTMLImageElement;
+    [C in Exclude<Cls, 'tileset' | 'autotile'>]: HTMLImageElement;
 } & {
     /**
      * 空气墙
@@ -1415,6 +1415,10 @@ interface MapDataOf<T extends keyof NumberToId> {
      * 图块的类型
      */
     cls: ClsOf<NumberToId[T]>;
+
+    bigImage?: ImageIds;
+
+    faceIds?: Record<Dir, AllIds>;
 }
 
 /**

@@ -89,6 +89,9 @@ type Enemy<I extends EnemyIds = EnemyIds> = {
 
     specialHalo?: number[];
     translation?: [number, number];
+
+    /** 大怪物绑定贴图 */
+    bigImage?: ImageIds;
 } & {
     [P in PartialNumbericEnemyProperty]?: number;
 } & {

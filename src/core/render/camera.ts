@@ -12,6 +12,8 @@ export class Camera extends EventEmitter<CameraEvent> {
     scaleY: number = 1;
     rad: number = 0;
 
+    private saveStack: number[][] = [];
+
     /**
      * 重设摄像机的所有参数
      */
@@ -138,6 +140,23 @@ export class Camera extends EventEmitter<CameraEvent> {
         this.scaleX = scaleX;
         this.scaleY = scaleY;
         this.rad = rad;
+    }
+
+    /**
+     * 保存当前摄像机状态
+     */
+    save() {
+        this.saveStack.push(Array.from(this.mat));
+    }
+
+    /**
+     * 回退当前摄像机状态
+     */
+    restore() {
+        const data = this.saveStack.pop();
+        if (!data) return;
+        const [a, b, c, d, e, f, g, h, i] = data;
+        this.mat = mat3.fromValues(a, b, c, d, e, f, g, h, i);
     }
 
     /**
