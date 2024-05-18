@@ -77,7 +77,7 @@ interface IRenderConfig {
     setHD(hd: boolean): void;
 
     /**
-     * 设置当前渲染原始是否启用抗锯齿
+     * 设置当前渲染元素是否启用抗锯齿
      * @param anti 是否抗锯齿
      */
     setAntiAliasing(anti: boolean): void;
@@ -135,7 +135,7 @@ export abstract class RenderItem
     constructor() {
         super();
 
-        this.using = '@default';
+        // this.using = '@default';
     }
 
     /**
@@ -194,21 +194,7 @@ export abstract class RenderItem
     update(item?: RenderItem): void {
         if (this.needUpdate) return;
         this.needUpdate = true;
-        requestAnimationFrame(() => {
-            this.needUpdate = false;
-            if (!this.parent) return;
-            this.cache(this.writing);
-            this.refresh(item);
-        });
-    }
-
-    /**
-     * 立刻更新这个组件，不延迟到下一个tick
-     */
-    protected refresh(item?: RenderItem) {
-        this.emit('beforeUpdate', item);
-        this.parent?.refresh(item);
-        this.emit('afterUpdate', item);
+        this.parent?.update(item);
     }
 
     setHD(hd: boolean): void {
@@ -223,7 +209,7 @@ export abstract class RenderItem
 
     setZIndex(zIndex: number) {
         this.zIndex = zIndex;
-        (this.parent as Container).sortChildren?.();
+        (this.parent as Container)?.sortChildren?.();
     }
 }
 

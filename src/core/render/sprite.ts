@@ -25,6 +25,10 @@ export class Sprite extends RenderItem implements ICanvasCachedRenderItem {
         camera: Camera
     ): void {
         this.emit('beforeRender');
+        if (this.needUpdate) {
+            this.cache(this.writing);
+            this.needUpdate = false;
+        }
         withCacheRender(this, canvas, ctx, camera, canvas => {
             this.renderFn(canvas, camera);
         });

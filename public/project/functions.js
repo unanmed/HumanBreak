@@ -32,6 +32,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 初始化地图
             core.status.floorId = floorId;
             core.status.maps = maps;
+            core.extractBlocks(floorId);
             core.maps._resetFloorImages();
             // 初始化怪物和道具
             core.material.enemys = core.enemys.getEnemys();

@@ -1,5 +1,7 @@
 import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
+import { logger } from '../common/logger';
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
+import { SizedCanvasImageSource } from './preset/misc';
 
 // 经过测试（https://www.measurethat.net/Benchmarks/Show/30741/1/drawimage-img-vs-canvas-vs-bitmap-cropping-fix-loading）
 // 得出结论，ImageBitmap和Canvas的绘制性能不如Image，于是直接画Image就行，所以缓存基本上就是存Image
@@ -39,6 +41,27 @@ interface TextureRequire {
     images: Record<ImageIds, HTMLImageElement>;
 }
 
+interface RenderableDataBase {
+    /** 图块的总帧数 */
+    frame: number;
+    /** 对应图块属性的动画帧数，-1表示没有设定 */
+    animate: number;
+    /** 是否是大怪物 */
+    bigImage: boolean;
+    render: [x: number, y: number, width: number, height: number][];
+}
+
+export interface RenderableData extends RenderableDataBase {
+    image: SizedCanvasImageSource;
+    autotile: false;
+}
+
+export interface AutotileRenderable extends RenderableDataBase {
+    image: Record<string, SizedCanvasImageSource>;
+    autotile: true;
+    bigImage: false;
+}
+
 interface TextureCacheEvent extends EmitableEvent {}
 
 class TextureCache extends EventEmitter<TextureCacheEvent> {
@@ -48,6 +71,9 @@ class TextureCache extends EventEmitter<TextureCacheEvent> {
     images!: Record<ImageIds, HTMLImageElement>;
 
     idNumberMap!: IdToNumber;
+
+    /** 渲染信息 */
+    renderable: Map<number, RenderableData | AutotileRenderable> = new Map();
 
     constructor() {
         super();
@@ -64,6 +90,7 @@ class TextureCache extends EventEmitter<TextureCacheEvent> {
             this.tileset = core.material.images.tilesets;
             this.autotile = splitAutotiles(this.idNumberMap);
             this.images = core.material.images.images;
+            this.calRenderable();
         });
     }
 
@@ -77,6 +104,191 @@ class TextureCache extends EventEmitter<TextureCacheEvent> {
         key: K
     ): TextureRequire[T][K] {
         return this[type][key];
+    }
+
+    /**
+     * 计算每个图块的可渲染信息
+     */
+    calRenderable() {
+        const map = maps_90f36752_8815_4be8_b32b_d7fad1d0542e;
+        for (const [key, data] of Object.entries(map)) {
+            this.calRenderableByNum(parseInt(key));
+        }
+    }
+
+    calRenderableByNum(
+        num: number
+    ): RenderableData | AutotileRenderable | null {
+        const map = maps_90f36752_8815_4be8_b32b_d7fad1d0542e;
+        const enemys = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80;
+        const icons = icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1;
+
+        /** 特判空图块与空气墙 */
+        if (num === 0 || num === 17) return null;
+
+        // 额外素材
+        if (num >= 10000) {
+            const offset = core.getTilesetOffset(num);
+            if (!offset) return null;
+            const { image, x, y } = offset;
+            const data: RenderableData = {
+                image: this.tileset[image],
+                frame: 1,
+                render: [[x * 32, y * 32, 32, 32]],
+                animate: 0,
+                autotile: false,
+                bigImage: false
+            };
+            this.renderable.set(num, data);
+            return data;
+        }
+
+        const data = map[num as Exclude<AllNumbers, 0>];
+        // 地狱般的分支if
+        if (data) {
+            let { cls, faceIds, bigImage, id, animate } = data;
+            if (cls === 'enemys' || cls === 'enemy48') {
+                // 怪物需要特殊处理，因为它的大怪物信息不在 maps 里面
+                ({ bigImage, faceIds } = enemys[id as EnemyIds]);
+            }
+            if (bigImage) {
+                const image = core.material.images.images[bigImage];
+                if (!image) {
+                    logger.warn(
+                        10,
+                        `Cannot resolve big image of enemy '${id}'.`
+                    );
+                    return null;
+                }
+                let line = 0;
+                if (faceIds) {
+                    const arr = ['down', 'left', 'right', 'up'];
+                    for (let i = 0; i < arr.length; i++) {
+                        if (faceIds[arr[i] as Dir] === id) {
+                            line = i;
+                            break;
+                        }
+                    }
+                }
+                const totalLines = image.width / image.height >= 2 ? 1 : 4;
+                const w = Math.round(image.width / 4);
+                const h = Math.round(image.height / totalLines);
+                const y = h * line;
+                const data: RenderableData = {
+                    image,
+                    frame: 4,
+                    render: [
+                        [0, y, w, h],
+                        [w, y, w, h],
+                        [w * 2, y, w, h],
+                        [w * 3, y, w, h]
+                    ],
+                    animate: (animate ?? 0) - 1,
+                    autotile: false,
+                    bigImage: true
+                };
+                this.renderable.set(num, data);
+                return data;
+            }
+            // enemy48和npc48都应该视为大怪物
+            if (cls === 'enemy48' || cls === 'npc48') {
+                const img = core.material.images[cls];
+                // @ts-ignore
+                const line = icons[cls][id];
+                const w = 32;
+                const h = 48;
+                const y = h * line;
+                const data: RenderableData = {
+                    image: img,
+                    frame: 4,
+                    render: [
+                        [0, y, w, h],
+                        [w, y, w, h],
+                        [w * 2, y, w, h],
+                        [w * 3, y, w, h]
+                    ],
+                    animate: (animate ?? 0) - 1,
+                    autotile: false,
+                    bigImage: true
+                };
+                this.renderable.set(num, data);
+                return data;
+            }
+            // 自动元件
+            if (cls === 'autotile') {
+                const auto = this.autotile[num as AllNumbersOf<'autotile'>];
+                const cell = 32;
+                const render: [number, number, number, number][] = [];
+                if (auto.frame >= 1) {
+                    render.push([0, 0, cell, cell]);
+                }
+                if (auto.frame >= 3) {
+                    render.push(
+                        [cell, 0, cell, cell],
+                        [cell * 2, 0, cell, cell]
+                    );
+                }
+                if (auto.frame >= 4) {
+                    render.push([cell * 3, 0, cell, cell]);
+                }
+                const data: AutotileRenderable = {
+                    image: auto.cache,
+                    frame: auto.frame,
+                    render,
+                    autotile: true,
+                    bigImage: false,
+                    animate: (animate ?? 0) - 1
+                };
+                this.renderable.set(num, data);
+                return data;
+            } else {
+                const image =
+                    core.material.images[
+                        cls as Exclude<Cls, 'tileset' | 'autotile'>
+                    ];
+                const frame = core.getAnimateFrames(cls);
+                const cell = 32;
+                // @ts-ignore
+                const offset = (icons[cls][id] as number) * cell;
+                const render: [number, number, number, number][] = [
+                    [0, offset, cell, cell]
+                ];
+                if (frame === 2) {
+                    render.push([cell, offset, cell, cell]);
+                }
+                if (frame === 4) {
+                    render.push(
+                        [cell, offset, cell, cell],
+                        [cell * 2, offset, cell, cell],
+                        [cell * 3, offset, cell, cell]
+                    );
+                }
+                const data: RenderableData = {
+                    image,
+                    frame: frame,
+                    render,
+                    autotile: false,
+                    bigImage: false,
+                    animate: (animate ?? 0) - 1
+                };
+                this.renderable.set(num, data);
+                return data;
+            }
+        } else {
+            logger.warn(
+                11,
+                `Cannot resolve material ${num}. Material not exists.`
+            );
+            return null;
+        }
+    }
+
+    /**
+     * 获取一个图块的渲染信息，自动元件会特别标明autotile属性
+     * @param num 图块数字
+     */
+    getRenderable(num: number) {
+        return this.renderable.get(num) ?? this.calRenderableByNum(num);
     }
 }
 

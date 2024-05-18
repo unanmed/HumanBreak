@@ -73,7 +73,7 @@ var maps_90f36752_8815_4be8_b32b_d7fad1d0542e =
 	"83": {"cls":"animates","id":"redDoor","trigger":"openDoor","animate":1,"doorInfo":{"time":160,"openSound":"door.mp3","closeSound":"door.mp3","keys":{"redKey":1}},"name":"红门"},
 	"84": {"cls":"animates","id":"greenDoor","trigger":"openDoor","animate":1,"doorInfo":{"time":160,"openSound":"door.mp3","closeSound":"door.mp3","keys":{"greenKey":1}},"name":"绿门"},
 	"85": {"cls":"animates","id":"specialDoor","trigger":"openDoor","animate":1,"doorInfo":{"time":160,"openSound":"door.mp3","closeSound":"door.mp3","keys":{"specialKey":1}},"name":"机关门"},
-	"86": {"cls":"animates","id":"steelDoor","trigger":"openDoor","animate":1,"doorInfo":{"time":160,"openSound":"door.mp3","closeSound":"door.mp3","keys":{"steelKey":1}},"name":"铁门","bigImage":"bear.png"},
+	"86": {"cls":"animates","id":"steelDoor","trigger":"openDoor","animate":1,"doorInfo":{"time":160,"openSound":"door.mp3","closeSound":"door.mp3","keys":{"steelKey":1}},"name":"铁门","bigImage":null},
 	"87": {"cls":"terrains","id":"upFloor","canPass":true},
 	"88": {"cls":"terrains","id":"downFloor","canPass":true},
 	"89": {"cls":"animates","id":"portal","canPass":true},

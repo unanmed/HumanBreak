@@ -1419,6 +1419,8 @@ interface MapDataOf<T extends keyof NumberToId> {
     bigImage?: ImageIds;
 
     faceIds?: Record<Dir, AllIds>;
+
+    animate?: number;
 }
 
 /**

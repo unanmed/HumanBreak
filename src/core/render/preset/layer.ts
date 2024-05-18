@@ -5,8 +5,7 @@ import { Camera } from '../camera';
 import { TimingFn } from 'mutate-animate';
 import { IRenderDestroyable, RenderItem } from '../item';
 import { logger } from '@/core/common/logger';
-import { texture } from '../cache';
-import { SizedCanvasImageSource } from './misc';
+import { AutotileRenderable, RenderableData, texture } from '../cache';
 import { glMatrix } from 'gl-matrix';
 
 interface LayerCacheItem {
@@ -14,22 +13,10 @@ interface LayerCacheItem {
     canvas: HTMLCanvasElement;
 }
 
-interface LayerRenderableData {
-    image: SizedCanvasImageSource;
-    frame: number;
-    render: [x: number, y: number, width: number, height: number][];
-}
-
-interface LayerMovingRenderable extends LayerRenderableData {
+interface LayerMovingRenderable extends RenderableData {
     zIndex: number;
     x: number;
     y: number;
-}
-
-interface BigImageData {
-    image: HTMLImageElement;
-    line: number;
-    totalLines: number;
 }
 
 interface NeedRenderData {
@@ -82,7 +69,7 @@ interface MovingBlock {
     /** 目标纵坐标 */
     y: number;
     /** 渲染信息 */
-    render: LayerRenderableData;
+    render: RenderableData | AutotileRenderable;
     /** 当前的纵深 */
     nowZ: number;
 }
@@ -124,10 +111,6 @@ export class Layer extends Container implements IRenderDestroyable {
     layer?: FloorLayer;
     /** 渲染数据 */
     renderData: number[] = [];
-    /** 可以直接被渲染的内容 */
-    renderable: Map<number, LayerRenderableData> = new Map();
-    /** 移动层中可以直接被渲染的内容 */
-    movingRenderable: LayerMovingRenderable[] = [];
     /** 自动元件的连接信息，键表示图块在渲染数据中的索引，值表示连接信息，是个8位二进制 */
     autotiles: Record<number, number> = {};
     /** 楼层宽度 */
@@ -136,8 +119,6 @@ export class Layer extends Container implements IRenderDestroyable {
     mapHeight: number = 0;
     /** 每个图块的大小 */
     cellSize: number = 32;
-    /** moving层的缓存信息，从低位到高位依次是第1帧至第4帧 */
-    movingCached: number = 0b0000;
 
     /** 背景图块 */
     background: AllNumbers = 0;
@@ -152,28 +133,33 @@ export class Layer extends Container implements IRenderDestroyable {
         restWidth: 0
     };
     blockSize: number = core._WIDTH_;
+
     /** 正在移动的图块 */
     moving: MovingBlock[] = [];
-    /** 大怪物（大图块）信息，键是图块在渲染数据中的索引，值是大怪物所用图片 */
-    bigImage: Map<number, BigImageData> = new Map();
+    /** 大怪物渲染信息 */
+    bigImages: Map<number, LayerMovingRenderable> = new Map();
+    /** 移动层的渲染信息 */
+    movingRenderable: LayerMovingRenderable[] = [];
+    /** 下一此渲染时是否需要更新移动层的渲染信息 */
+    needUpdateMoving: boolean = false;
 
     constructor() {
         super('absolute');
 
-        this.setHD(false);
+        // this.setHD(false);
         this.setAntiAliasing(false);
         this.size(core._PX_, core._PY_);
 
         this.staticMap.setHD(false);
-        this.staticMap.setAntiAliasing(false);
+        // this.staticMap.setAntiAliasing(false);
         this.staticMap.withGameScale(false);
         this.staticMap.size(core._PX_, core._PY_);
         this.movingMap.setHD(false);
-        this.movingMap.setAntiAliasing(false);
+        // this.movingMap.setAntiAliasing(false);
         this.movingMap.withGameScale(false);
         this.movingMap.size(core._PX_, core._PY_);
         this.backMap.setHD(false);
-        this.backMap.setAntiAliasing(false);
+        // this.backMap.setAntiAliasing(false);
         this.backMap.withGameScale(false);
         this.backMap.size(core._PX_, core._PY_);
         this.main.setAntiAliasing(false);
@@ -211,7 +197,7 @@ export class Layer extends Container implements IRenderDestroyable {
     generateBackground() {
         const num = this.background;
 
-        const data = this.getRenderableByNum(num);
+        const data = texture.getRenderable(num);
         this.backImage = [];
         if (!data) return;
 
@@ -231,7 +217,7 @@ export class Layer extends Container implements IRenderDestroyable {
             temp.withGameScale(false);
             temp.size(w, h);
 
-            const img = data.image;
+            const img = data.autotile ? data.image[0b11111111] : data.image;
             tempCtx.drawImage(img, sx, sy, w, h, 0, 0, w, h);
             const pattern = ctx.createPattern(temp.canvas, 'repeat');
             if (!pattern) continue;
@@ -256,8 +242,6 @@ export class Layer extends Container implements IRenderDestroyable {
         y: number = 0,
         calAutotile: boolean = true
     ) {
-        console.trace();
-
         if (data.length % width !== 0) {
             logger.warn(
                 8,
@@ -286,251 +270,38 @@ export class Layer extends Container implements IRenderDestroyable {
             }
         }
         if (calAutotile) this.calAutotiles(x, y, width, height);
-        this.updateBigImages(x, y, width, height);
-        this.updateRenderableData(x, y, width, height);
+        // this.updateBigImages(x, y, width, height);
+        // this.updateRenderableData(x, y, width, height);
         this.updateBlocks(x, y, width, height);
         this.update(this);
     }
 
     /**
-     * 更新给定区域内的大怪物信息
+     * 更新大怪物的渲染信息
      */
     updateBigImages(x: number, y: number, width: number, height: number) {
-        const ex = Math.min(x + width, this.mapWidth);
-        const ey = Math.min(y + height, this.mapHeight);
-        const size = this.blockSize;
-        const images = this.bigImage;
+        const ex = x + width;
+        const ey = y + height;
+        const w = this.mapWidth;
         const data = this.renderData;
-        const enemys = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80;
-        const icons = icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1;
-        const map = maps_90f36752_8815_4be8_b32b_d7fad1d0542e;
 
-        for (let nx = Math.max(x, 0); nx < ex; nx++) {
-            for (let ny = Math.max(y, 0); ny < ey; ny++) {
-                const index = ny * size + nx;
-                images.delete(index);
+        for (let nx = x; nx < ex; nx++) {
+            for (let ny = y; ny < ey; ny++) {
+                const index = ny * w + nx;
+                this.bigImages.delete(index);
                 const num = data[index];
-
-                // 如果不存在图块或图块是空气墙，跳过
-                if (num === 0 || num === 17 || num >= 10000) continue;
-
-                let { cls, id, bigImage, faceIds } =
-                    map[num as Exclude<AllNumbers, 0>];
-                if (cls === 'enemys' || cls === 'enemy48') {
-                    // 怪物需要特殊处理，因为它的大怪物信息不在 maps 里面
-                    ({ bigImage, faceIds } = enemys[id as EnemyIds]);
-                }
-                if (bigImage) {
-                    const image = core.material.images.images[bigImage];
-                    if (!image) {
-                        logger.warn(
-                            10,
-                            `Cannot resolve big image of enemy '${id}'.`
-                        );
-                        continue;
-                    }
-                    let line = 0;
-                    if (faceIds) {
-                        const arr = ['down', 'left', 'right', 'up'];
-                        for (let i = 0; i < arr.length; i++) {
-                            if (faceIds[arr[i] as Dir] === id) {
-                                line = i;
-                                break;
-                            }
-                        }
-                    }
-                    const totalLines = image.width / image.height >= 2 ? 1 : 4;
-                    images.set(index, {
-                        image,
-                        line,
-                        totalLines
-                    });
-                }
-                if (cls === 'enemy48' || cls === 'npc48') {
-                    // 32 * 48 视为大怪物
-                    const img = core.material.images[cls];
-                    const totalLines = Math.round(img.height / 48);
-                    // @ts-ignore
-                    const line = icons[cls][id];
-                    images.set(index, {
-                        image: img,
-                        line,
-                        totalLines
-                    });
-                }
+                const renderable = texture.getRenderable(num);
+                if (!renderable || !renderable.bigImage) continue;
+                this.bigImages.set(index, {
+                    ...renderable,
+                    x: nx,
+                    y: ny,
+                    zIndex: ny
+                });
             }
         }
-    }
 
-    /**
-     * 根据图块数字获取渲染信息
-     * @param num 图块数字
-     */
-    getRenderableByNum(num: number): LayerRenderableData | null {
-        const cell = this.cellSize;
-        const map = maps_90f36752_8815_4be8_b32b_d7fad1d0542e;
-        const icons = icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1;
-        const auto = texture.autotile;
-
-        if (num >= 10000) {
-            // 额外素材
-            const offset = core.getTilesetOffset(num);
-            if (!offset) return null;
-            const { image, x, y } = offset;
-            return {
-                image: core.material.images.tilesets[image],
-                frame: 1,
-                render: [[x * cell, y * cell, cell, cell]]
-            };
-        } else {
-            if (num === 0 || num === 17) return null;
-            const { cls, id } = map[num as Exclude<AllNumbers, 0>];
-            // 普通素材
-            if (cls !== 'autotile') {
-                const image =
-                    core.material.images[
-                        cls as Exclude<Cls, 'tileset' | 'autotile'>
-                    ];
-                const frame = core.getAnimateFrames(cls);
-                // @ts-ignore
-                const offset = (icons[cls][id] as number) * cell;
-                const render: [number, number, number, number][] = [
-                    [0, offset, cell, cell]
-                ];
-                if (frame === 2) {
-                    render.push([cell, offset, cell, cell]);
-                }
-                if (frame === 4) {
-                    render.push(
-                        [cell, offset, cell, cell],
-                        [cell * 2, offset, cell, cell],
-                        [cell * 3, offset, cell, cell]
-                    );
-                }
-                return {
-                    image,
-                    frame,
-                    render
-                };
-            } else {
-                // 自动元件
-                const tile = auto[num as AllNumbersOf<'autotile'>];
-                const image = tile.cache[0b11111111];
-                const frame = tile.frame;
-                const render: [number, number, number, number][] = [
-                    [0, 0, cell, cell]
-                ];
-                if (frame === 4) {
-                    render.push(
-                        [cell, 0, cell, cell],
-                        [cell * 2, 0, cell, cell],
-                        [cell * 3, 0, cell, cell]
-                    );
-                }
-                return {
-                    image,
-                    frame,
-                    render
-                };
-            }
-        }
-    }
-
-    /**
-     * 根据索引及横坐标获取对应的位置图块的渲染信息
-     * @param x 横坐标
-     * @param index 索引
-     */
-    getRenderableData(
-        x: number,
-        _y: number,
-        index: number
-    ): LayerRenderableData | LayerMovingRenderable | null {
-        const data = this.renderData;
-        const cell = this.cellSize;
-        const map = maps_90f36752_8815_4be8_b32b_d7fad1d0542e;
-        const icons = icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1;
-        const auto = texture.autotile;
-
-        const bigImage = this.bigImage.get(index);
-        if (bigImage) {
-            // 对于大怪物
-            const img = bigImage.image;
-            const w = Math.round(img.width / 4);
-            const h = Math.round(img.height / bigImage.totalLines);
-            const y = h * bigImage.line;
-            return {
-                image: bigImage.image,
-                frame: 4,
-                render: [
-                    [0, y, w, h],
-                    [w, y, w, h],
-                    [w * 2, y, w, h],
-                    [w * 3, y, w, h]
-                ],
-                x: x,
-                y: y,
-                zIndex: y
-            };
-        } else {
-            // 对于普通图块
-            const num = data[index];
-            if (num >= 10000) {
-                // 额外素材
-                return this.getRenderableByNum(num);
-            } else {
-                if (num === 0 || num === 17) return null;
-                const { cls } = map[num as Exclude<AllNumbers, 0>];
-                // 普通素材
-                if (cls !== 'autotile') {
-                    return this.getRenderableByNum(num);
-                } else {
-                    // 自动元件
-                    const tile = auto[num as AllNumbersOf<'autotile'>];
-                    const link = this.autotiles[index];
-                    const image = tile.cache[link];
-                    const frame = tile.frame;
-                    const render: [number, number, number, number][] = [
-                        [0, 0, cell, cell]
-                    ];
-                    if (frame === 4) {
-                        render.push(
-                            [cell, 0, cell, cell],
-                            [cell * 2, 0, cell, cell],
-                            [cell * 3, 0, cell, cell]
-                        );
-                    }
-                    return {
-                        image,
-                        frame,
-                        render
-                    };
-                }
-            }
-        }
-    }
-
-    /**
-     * 更新给定区域内的绘制信息
-     */
-    updateRenderableData(x: number, y: number, width: number, height: number) {
-        const ex = Math.min(x + width, this.mapWidth);
-        const ey = Math.min(y + height, this.mapHeight);
-        const size = this.blockSize;
-
-        for (let nx = Math.max(x, 0); nx < ex; nx++) {
-            for (let ny = Math.max(y, 0); ny < ey; ny++) {
-                const index = ny * size + nx;
-                const bigImage = this.bigImage.get(index);
-                const data = this.getRenderableData(nx, ny, index);
-                if (!data) continue;
-                if (bigImage) {
-                    this.movingRenderable.push(data as LayerMovingRenderable);
-                } else {
-                    this.renderable.set(index, data);
-                }
-            }
-        }
+        this.needUpdateMoving = true;
     }
 
     /**
@@ -590,12 +361,11 @@ export class Layer extends Container implements IRenderDestroyable {
 
         for (let nx = x; nx < ex; nx++) {
             for (let ny = y; ny < ey; ny++) {
-                if (nx > w || ny > w) continue;
-                const index = nx + ny * h;
+                if (nx > w || ny > h) continue;
+                const index = nx + ny * w;
                 const num = data[index];
                 // 特判空气墙与空图块
-                if (num === 17 || num >= 10000 || num <= 0) continue;
-                console.log(this);
+                if (num === 0 || num === 17 || num >= 10000) continue;
 
                 const info = map[num as Exclude<AllNumbers, 0>];
                 const { cls } = info;
@@ -683,8 +453,8 @@ export class Layer extends Container implements IRenderDestroyable {
         const size = this.blockSize;
 
         this.blockData = {
-            width: Math.floor(this.mapWidth / size),
-            height: Math.floor(this.mapHeight / size),
+            width: Math.ceil(this.mapWidth / size),
+            height: Math.ceil(this.mapHeight / size),
             restWidth: this.mapWidth % size,
             restHeight: this.mapHeight % size
         };
@@ -808,20 +578,30 @@ export class Layer extends Container implements IRenderDestroyable {
      * @param camera 摄像机
      */
     calNeedRender(camera: Camera): NeedRenderData {
-        const w = core._WIDTH_;
-        const h = core._HEIGHT_;
-        const size = this.blockSize;
-        const { width } = this.blockData;
         const cell = this.cellSize;
+        const w = (core._WIDTH_ * cell) / 2;
+        const h = (core._HEIGHT_ * cell) / 2;
+        const size = this.blockSize;
 
-        const [x1, y1] = Camera.transformed(camera, 0, 0);
-        const [x2, y2] = Camera.transformed(camera, w * cell, 0);
-        const [x3, y3] = Camera.transformed(camera, w * cell, h * cell);
-        const [x4, y4] = Camera.transformed(camera, 0, h * cell);
+        // -1是因为宽度是core._PX_，从0开始的话，末尾索引就是core._PX_ - 1
+        const [x1, y1] = Camera.untransformed(camera, -w, -h);
+        const [x2, y2] = Camera.untransformed(camera, w - 1, -h);
+        const [x3, y3] = Camera.untransformed(camera, w - 1, h - 1);
+        const [x4, y4] = Camera.untransformed(camera, -w, h - 1);
 
         const res: Set<number> = new Set();
         /** 一个纵坐标对应的所有横坐标，用于填充 */
         const xyMap: Map<number, number[]> = new Map();
+
+        const pushXY = (x: number, y: number) => {
+            let arr = xyMap.get(y);
+            if (!arr) {
+                arr = [];
+                xyMap.set(y, arr);
+            }
+            arr.push(x);
+            return arr;
+        };
 
         [
             [x1, y1, x2, y2],
@@ -837,43 +617,26 @@ export class Layer extends Container implements IRenderDestroyable {
             const dy = ty - fy;
             const k = dy / dx;
 
-            // console.log(fx, fy, tx, ty);
-
             // 斜率无限的时候，竖直
             if (!isFinite(k)) {
                 const min = k < 0 ? ty : fy;
                 const max = k < 0 ? fy : ty;
                 const [x, y] = this.getBlockXYByLoc(fx, min);
 
-                // 在地图左侧或右侧时，将每个纵坐标对应的横坐标填充为0
-
-                const p = x < 0 ? 0 : x >= width ? width - 1 : x;
                 const [, ey] = this.getBlockXYByLoc(fx, max);
                 for (let i = y; i <= ey; i++) {
-                    let arr = xyMap.get(i);
-                    if (!arr) {
-                        arr = [];
-                        xyMap.set(i, arr);
-                    }
-                    arr.push(p);
+                    pushXY(x, i);
                 }
-                // console.log(y, ey, p);
 
                 return;
             }
 
             const [fbx, fby] = this.getBlockXYByLoc(fx, fy);
+
             // 当斜率为0时
             if (glMatrix.equals(k, 0)) {
                 const [ex] = this.getBlockXYByLoc(tx, fy);
-                let arr = xyMap.get(fby);
-                if (!arr) {
-                    arr = [];
-                    xyMap.set(fby, arr);
-                }
-                arr.push(fbx, ex);
-                // console.log(fbx, ex);
-
+                pushXY(fby, fbx).push(ex);
                 return;
             }
 
@@ -881,54 +644,52 @@ export class Layer extends Container implements IRenderDestroyable {
             if (Math.abs(k) >= 1) {
                 // 斜率大于一，y方向递增
                 const d = Math.sign(dy) * size;
-                const f = dx > 0 ? fby * size : (fby + 1) * size;
+                const f = fby * size;
                 const dir = dy > 0;
+
+                const ex = Math.floor(tx / size);
+                const ey = Math.floor(ty / size);
+                pushXY(ex, ey);
 
                 let now = f;
                 let last = fbx;
                 let ny = fby;
                 do {
-                    const bx = Math.floor(fx + (now - fy) / k);
-                    let arr = xyMap.get(ny);
-                    if (!arr) {
-                        arr = [];
-                        xyMap.set(ny, arr);
-                    }
+                    const bx = Math.floor((fx + (now - fy) / k) / size);
+                    pushXY(bx, ny);
                     if (bx !== last) {
-                        arr.push(last);
+                        if (dir) pushXY(bx, ny - Math.sign(dy));
+                        else pushXY(last, ny);
                     }
-                    arr.push(bx);
+
                     last = bx;
-                    ny++;
-                } while (dir ? (now += d) < ty : (now += d) > ty);
+                    ny += Math.sign(dy);
+                    now += d;
+                } while (dir ? ny <= ey : ny >= ey);
             } else {
                 // 斜率小于一，x方向递增
                 const d = Math.sign(dx) * size;
-                const f = dx > 0 ? fbx * size : (fbx + 1) * size;
+                const f = fbx * size;
                 const dir = dx > 0;
+
+                const ex = Math.floor(tx / size);
+                const ey = Math.floor(ty / size);
+                pushXY(ex, ey);
 
                 let now = f;
                 let last = fby;
                 let nx = fbx;
                 do {
-                    const by = Math.floor(fy + k * (now - fx));
-
+                    const by = Math.floor((fy + k * (now - fx)) / size);
                     if (by !== last) {
-                        let arr = xyMap.get(last);
-                        if (!arr) {
-                            arr = [];
-                            xyMap.set(last, arr);
-                        }
-                        arr.push(nx);
+                        if (dir) pushXY(nx - Math.sign(dx), by);
+                        else pushXY(nx, last);
                     }
-                    let arr = xyMap.get(nx);
-                    if (!arr) {
-                        arr = [];
-                        xyMap.set(by, arr);
-                    }
-                    arr.push(nx);
-                    nx++;
-                } while (dir ? (now += d) < tx : (now += d) > tx);
+                    pushXY(nx, by);
+                    last = by;
+                    nx += Math.sign(dx);
+                    now += d;
+                } while (dir ? nx <= ex : nx >= ex);
             }
         });
 
@@ -939,7 +700,8 @@ export class Layer extends Container implements IRenderDestroyable {
             if (x.length === 1) {
                 const index = y * bw + x[0];
 
-                back.push([x[0], y]);
+                if (!back.some(v => v[0] === x[0] && v[1] === y))
+                    back.push([x[0], y]);
                 if (index < 0 || index >= bw * bh) return;
                 res.add(index);
             }
@@ -949,15 +711,42 @@ export class Layer extends Container implements IRenderDestroyable {
             for (let i = min; i <= max; i++) {
                 const index = y * bw + i;
 
-                back.push([i, y]);
+                if (!back.some(v => v[0] === i && v[1] === y))
+                    back.push([i, y]);
                 if (index < 0 || index >= bw * bh) continue;
                 res.add(index);
             }
         });
 
-        // console.log([...res], xyMap);
-
         return { res, back };
+    }
+
+    /**
+     * 更新移动层的渲染信息
+     */
+    updateMovingRenderable() {
+        this.movingRenderable = [];
+        this.movingRenderable.push(...this.bigImages.values());
+        this.moving.forEach(v => {
+            if (!v.render.autotile) {
+                this.movingRenderable.push({
+                    ...v.render,
+                    x: v.x,
+                    y: v.y,
+                    zIndex: v.nowZ
+                });
+            } else {
+                this.movingRenderable.push({
+                    ...v.render,
+                    x: v.x,
+                    y: v.y,
+                    zIndex: v.nowZ,
+                    image: v.render.image[0b00000000],
+                    autotile: false
+                });
+            }
+        });
+        this.movingRenderable.sort((a, b) => a.zIndex - b.zIndex);
     }
 
     /**
@@ -967,6 +756,8 @@ export class Layer extends Container implements IRenderDestroyable {
         this.staticMap.clear();
         this.movingMap.clear();
         this.backMap.clear();
+
+        if (this.needUpdateMoving) this.updateMovingRenderable();
 
         this.renderBack(camera, need);
         this.renderStatic(camera, need);
@@ -981,10 +772,9 @@ export class Layer extends Container implements IRenderDestroyable {
     protected renderBack(camera: Camera, need: NeedRenderData) {
         const cell = this.cellSize;
         const frame = (RenderItem.animatedFrame % 4) + 1;
-        const { width } = this.blockData;
         const blockSize = this.blockSize;
         const { back } = need;
-        const { ctx, canvas } = this.backMap;
+        const { ctx } = this.backMap;
 
         const mat = camera.mat;
         const a = mat[0];
@@ -1020,16 +810,14 @@ export class Layer extends Container implements IRenderDestroyable {
      */
     protected renderStatic(camera: Camera, need: NeedRenderData) {
         const cell = this.cellSize;
-        const renderable = this.renderable;
         const frame = (RenderItem.animatedFrame % 4) + 1;
         const { width } = this.blockData;
         const blockSize = this.blockSize;
-        const { ctx, canvas } = this.staticMap;
+        const { ctx } = this.staticMap;
 
         ctx.save();
 
         const { res: render } = need;
-        // console.log(render);
         const mat = camera.mat;
         const a = mat[0];
         const b = mat[1];
@@ -1061,8 +849,8 @@ export class Layer extends Container implements IRenderDestroyable {
                 return;
             }
 
-            const ex = sx + blockSize;
-            const ey = sy + blockSize;
+            const ex = Math.min(sx + blockSize, this.mapWidth);
+            const ey = Math.min(sy + blockSize, this.mapHeight);
 
             const temp = new MotaOffscreenCanvas2D();
             temp.setAntiAliasing(false);
@@ -1074,17 +862,28 @@ export class Layer extends Container implements IRenderDestroyable {
             for (let nx = sx; nx < ex; nx++) {
                 for (let ny = sy; ny < ey; ny++) {
                     const blockIndex = nx + ny * this.mapWidth;
-                    const data = renderable.get(blockIndex);
-                    if (!data) continue;
-
+                    const num = this.renderData[blockIndex];
+                    if (num === 0 || num === 17) continue;
+                    const data = texture.getRenderable(num);
+                    if (!data || data.bigImage) continue;
                     const f = frame % data.frame;
-                    const i = frame === 4 && data.frame === 3 ? 1 : f;
-                    const [sx, sy, w, h] = data.render[i];
-                    const px = nx * cell;
-                    const py = ny * cell;
-                    const image = data.image;
-
-                    temp.ctx.drawImage(image, sx, sy, w, h, px, py, w, h);
+                    const i =
+                        data.animate === -1
+                            ? frame === 4 && data.frame === 3
+                                ? 1
+                                : f
+                            : data.animate;
+                    const [isx, isy, w, h] = data.render[i];
+                    const px = (nx - sx) * cell;
+                    const py = (ny - sy) * cell;
+                    const { image, autotile } = data;
+                    if (!autotile) {
+                        temp.ctx.drawImage(image, isx, isy, w, h, px, py, w, h);
+                    } else {
+                        const link = this.autotiles[blockIndex];
+                        const i = image[link];
+                        temp.ctx.drawImage(i, isx, isy, w, h, px, py, w, h);
+                    }
                 }
             }
             ctx.drawImage(
@@ -1125,10 +924,6 @@ export class Layer extends Container implements IRenderDestroyable {
         ctx.transform(a, b, c, d, e, f);
         const r =
             Math.max(a, b, c, d) ** 2 * Math.max(core._PX_, core._PY_) * 2;
-
-        this.movingRenderable.sort((a, b) => {
-            return a.zIndex - b.zIndex;
-        });
 
         this.movingRenderable.forEach(v => {
             const { x, y, image, frame: blockFrame, render } = v;

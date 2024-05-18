@@ -149,11 +149,11 @@ Mota.require('var', 'hook').once('reset', () => {
     const camera = render.camera;
     render.mount();
 
-    layer.zIndex = 2;
-    bgLayer.zIndex = 1;
+    layer.setZIndex(2);
+    bgLayer.setZIndex(1);
     render.appendChild([layer, bgLayer]);
-    layer.bindThis('event', true);
-    bgLayer.bindThis('bg', true);
+    layer.bindThis('event');
+    bgLayer.bindThis('bg');
     bgLayer.setBackground(650);
 
     const ani = new Animation();
@@ -161,17 +161,35 @@ Mota.require('var', 'hook').once('reset', () => {
     ani.ticker.add(() => {
         camera.reset();
         camera.rotate((ani.angle / 180) * Math.PI);
-        camera.move(240, 240);
+        camera.move(ani.x, ani.y);
+        camera.scale(ani.size);
         render.update(render);
     });
 
+    camera.rotate(Math.PI * 1.23);
+    camera.move(230, 380);
+    camera.scale(0.7);
+    render.update();
+
+    // sleep(2000).then(() => {
+    //     render.update();
+    // });
+
     sleep(1000).then(() => {
-        ani.mode(hyper('sin', 'out')).time(100).absolute().rotate(30);
+        ani.mode(hyper('sin', 'out'))
+            .time(100)
+            .absolute()
+            .rotate(30)
+            .move(240, 240);
         sleep(100).then(() => {
             ani.time(3000).rotate(0);
         });
         sleep(3100).then(() => {
-            ani.time(5000).mode(hyper('tan', 'in-out')).rotate(3600);
+            ani.time(5000)
+                .mode(hyper('sin', 'in-out'))
+                .rotate(360)
+                .move(200, 480)
+                .scale(0.5);
         });
         // ani.mode(shake2(5, hyper('sin', 'in-out')), true)
         //     .time(5000)
