@@ -1417,10 +1417,9 @@ interface MapDataOf<T extends keyof NumberToId> {
     cls: ClsOf<NumberToId[T]>;
 
     bigImage?: ImageIds;
-
     faceIds?: Record<Dir, AllIds>;
-
     animate?: number;
+    autotileConnection?: (AllIds | AllNumbers)[];
 }
 
 /**

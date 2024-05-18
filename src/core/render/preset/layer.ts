@@ -314,6 +314,11 @@ export class Layer extends Container implements IRenderDestroyable {
         const tile = texture.autotile;
         const map = maps_90f36752_8815_4be8_b32b_d7fad1d0542e;
 
+        const w = this.mapWidth;
+        const h = this.mapHeight;
+
+        this.autotiles = {};
+
         /**
          * 检查连接信息
          * @param id 比较对象的id（就是正在检查周围的那个自动元件，九宫格中心的）
@@ -323,41 +328,48 @@ export class Layer extends Container implements IRenderDestroyable {
          * @param replace2 比较对象相对被比较对象应该处理的位数
          */
         const check = (
-            index1: number,
-            index2: number,
+            x1: number,
+            y1: number,
+            x2: number,
+            y2: number,
             replace1: number,
-            replace2: number
+            _replace2: number
         ) => {
+            const index1 = x1 + y1 * w;
+            const index2 = x2 + y2 * w;
+            this.autotiles[index1] ??= 0;
+            this.autotiles[index2] ??= 0;
+            // 与地图边缘，视为连接
+            if (x2 < 0 || y2 < 0 || x2 >= w || y2 >= h) {
+                this.autotiles[index1] |= replace1;
+                return;
+            }
             const num1 = data[index1] as AllNumbersOf<'autotile'>; // 这个一定是自动元件
             const num2 = data[index2] as AllNumbersOf<'autotile'>;
+            // 对于额外连接的情况
+            const autoConn = texture.getAutotileConnections(num1);
+            if (autoConn?.has(num2)) {
+                this.autotiles[index1] |= replace1;
+                return;
+            }
             const info = map[num2 as Exclude<AllNumbers, 0>];
-            if (info.cls !== 'autotile') {
+            if (!info || info.cls !== 'autotile') {
                 // 被比较对象不是自动元件
-                this.autotiles[num1] ??= 0;
-                this.autotiles[num1] &= ~replace1;
+                this.autotiles[index1] &= ~replace1;
             } else {
-                const parent1 = tile[num1].parent;
                 const parent2 = tile[num2].parent;
                 if (num2 === num1) {
                     // 二者一样，视为连接
                     this.autotiles[index1] |= replace1;
-                    this.autotiles[index2] |= replace2;
                 } else if (parent2?.has(num1)) {
                     // 被比较对象是比较对象的父元件，那么比较对象视为连接
                     this.autotiles[index1] |= replace1;
-                } else if (parent1?.has(num2)) {
-                    // 比较对象是被比较对象的父元件，那么被比较对象视为连接
-                    this.autotiles[index2] |= replace2;
                 } else {
                     // 上述条件都不满足，那么不连接
                     this.autotiles[index1] &= ~replace1;
-                    this.autotiles[index2] &= ~replace2;
                 }
             }
         };
-
-        const w = this.mapWidth;
-        const h = this.mapHeight;
 
         for (let nx = x; nx < ex; nx++) {
             for (let ny = y; ny < ey; ny++) {
@@ -371,26 +383,18 @@ export class Layer extends Container implements IRenderDestroyable {
                 const { cls } = info;
                 if (cls !== 'autotile') continue;
 
-                // 只有最左一列和最上一列需要计算一周，其他的只计算右 右下 下即可
                 // 太地狱了这个，看看就好
-                if (nx === x) {
-                    // 左上 左 左下
-                    check(index, index - w - 1, 0b10000000, 0b00001000);
-                    check(index, index - 1, 0b00000001, 0b00010000);
-                    check(index, index + w - 1, 0b00000010, 0b00100000);
-                }
-                if (ny === y) {
-                    if (nx !== x) {
-                        check(index, index - w - 1, 0b10000000, 0b00001000);
-                    }
-                    // 上 右上
-                    check(index, index - w, 0b01000000, 0b00000100);
-                    check(index, index - w + 1, 0b00100000, 0b00000010);
-                }
+                // 左上 左 左下
+                check(nx, ny, nx - 1, ny - 1, 0b10000000, 0b00001000);
+                check(nx, ny, nx - 1, ny, 0b00000001, 0b00010000);
+                check(nx, ny, nx - 1, ny + 1, 0b00000010, 0b00100000);
+                // 上 右上
+                check(nx, ny, nx, ny - 1, 0b01000000, 0b00000100);
+                check(nx, ny, nx + 1, ny - 1, 0b00100000, 0b00000010);
                 // 右 右下 下
-                check(index, index + 1, 0b00010000, 0b00000001);
-                check(index, index + w + 1, 0b00001000, 0b10000000);
-                check(index, index + w, 0b00000100, 0b01000000);
+                check(nx, ny, nx + 1, ny, 0b00010000, 0b00000001);
+                check(nx, ny, nx + 1, ny + 1, 0b00001000, 0b10000000);
+                check(nx, ny, nx, ny + 1, 0b00000100, 0b01000000);
             }
         }
     }

@@ -113,7 +113,7 @@ var maps_90f36752_8815_4be8_b32b_d7fad1d0542e =
 	"140": {"cls":"npcs","id":"blackTrader","faceIds":{"down":"blueTrader","left":"redMSNpc","right":"blackTrader","up":"N532"}},
 	"141": {"cls":"autotile","id":"autotile4","script":1},
 	"142": {"cls":"autotile","id":"autotile5"},
-	"143": {"cls":"autotile","id":"autotile6"},
+	"143": {"cls":"autotile","id":"autotile6","autotileConnection":["A492"]},
 	"144": {"cls":"autotile","id":"autotile7"},
 	"145": {"cls":"autotile","id":"autotile8"},
 	"146": {"cls":"autotile","id":"autotile9","canPass":true},

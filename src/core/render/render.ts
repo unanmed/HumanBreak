@@ -154,21 +154,21 @@ Mota.require('var', 'hook').once('reset', () => {
     render.appendChild([layer, bgLayer]);
     layer.bindThis('event');
     bgLayer.bindThis('bg');
-    bgLayer.setBackground(650);
+    bgLayer.setBackground(305);
 
     const ani = new Animation();
 
-    ani.ticker.add(() => {
-        camera.reset();
-        camera.rotate((ani.angle / 180) * Math.PI);
-        camera.move(ani.x, ani.y);
-        camera.scale(ani.size);
-        render.update(render);
-    });
+    // ani.ticker.add(() => {
+    //     camera.reset();
+    //     camera.rotate((ani.angle / 180) * Math.PI);
+    //     camera.move(ani.x, ani.y);
+    //     camera.scale(ani.size);
+    //     render.update(render);
+    // });
 
-    camera.rotate(Math.PI * 1.23);
-    camera.move(230, 380);
-    camera.scale(0.7);
+    // camera.rotate(Math.PI * 1.23);
+    camera.move(240, 240);
+    // camera.scale(0.7);
     render.update();
 
     // sleep(2000).then(() => {
@@ -176,21 +176,21 @@ Mota.require('var', 'hook').once('reset', () => {
     // });
 
     sleep(1000).then(() => {
-        ani.mode(hyper('sin', 'out'))
-            .time(100)
-            .absolute()
-            .rotate(30)
-            .move(240, 240);
-        sleep(100).then(() => {
-            ani.time(3000).rotate(0);
-        });
-        sleep(3100).then(() => {
-            ani.time(5000)
-                .mode(hyper('sin', 'in-out'))
-                .rotate(360)
-                .move(200, 480)
-                .scale(0.5);
-        });
+        // ani.mode(hyper('sin', 'out'))
+        //     .time(100)
+        //     .absolute()
+        //     .rotate(30)
+        //     .move(240, 240);
+        // sleep(100).then(() => {
+        //     ani.time(3000).rotate(0);
+        // });
+        // sleep(3100).then(() => {
+        //     ani.time(5000)
+        //         .mode(hyper('sin', 'in-out'))
+        //         .rotate(360)
+        //         .move(200, 480)
+        //         .scale(0.5);
+        // });
         // ani.mode(shake2(5, hyper('sin', 'in-out')), true)
         //     .time(5000)
         //     .shake(1, 0);

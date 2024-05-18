@@ -78,13 +78,13 @@ export class Logger {
             });
         }
         if (this.level <= LogLevel.ERROR && this.enabled) {
-            console.error(`[ERROR Code ${code}] ${text}`);
             if (!main.replayChecking) {
                 logTip.style.color = 'lightcoral';
                 logTip.style.display = 'block';
                 logTip.textContent = `Error thrown, please check in console.`;
                 hideTipText();
             }
+            throw `[ERROR Code ${code}] ${text}`;
         }
     }
 

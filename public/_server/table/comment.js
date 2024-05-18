@@ -528,6 +528,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					}).toString(),
 					"_docs": "绑定贴图",
 					"_data": "该图块绑定的贴图，用法详见文档"
+				},
+				"autotileConnection": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "自动元件连接",
+					"_data": "此属性对自动元件有效，是一个数组，可以填写一些图块id，从而让自动元件可以与这些图块连接，从而做到自动元件能连门等操作"
 				}
 			}
 		},

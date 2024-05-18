@@ -74,6 +74,8 @@ class TextureCache extends EventEmitter<TextureCacheEvent> {
 
     /** 渲染信息 */
     renderable: Map<number, RenderableData | AutotileRenderable> = new Map();
+    /** 自动元件额外连接信息，用于对非自身图块进行连接 */
+    autoConn: Map<number, Set<number>> = new Map();
 
     constructor() {
         super();
@@ -91,6 +93,7 @@ class TextureCache extends EventEmitter<TextureCacheEvent> {
             this.autotile = splitAutotiles(this.idNumberMap);
             this.images = core.material.images.images;
             this.calRenderable();
+            this.calAutotileConnections();
         });
     }
 
@@ -109,13 +112,17 @@ class TextureCache extends EventEmitter<TextureCacheEvent> {
     /**
      * 计算每个图块的可渲染信息
      */
-    calRenderable() {
+    private calRenderable() {
         const map = maps_90f36752_8815_4be8_b32b_d7fad1d0542e;
         for (const [key, data] of Object.entries(map)) {
             this.calRenderableByNum(parseInt(key));
         }
     }
 
+    /**
+     * 根据图块数字计算出它的渲染信息
+     * @param num 图块数字
+     */
     calRenderableByNum(
         num: number
     ): RenderableData | AutotileRenderable | null {
@@ -290,6 +297,38 @@ class TextureCache extends EventEmitter<TextureCacheEvent> {
     getRenderable(num: number) {
         return this.renderable.get(num) ?? this.calRenderableByNum(num);
     }
+
+    /**
+     * 计算自动元件的额外连接
+     */
+    private calAutotileConnections() {
+        const icons = icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1;
+        const maps = maps_90f36752_8815_4be8_b32b_d7fad1d0542e;
+
+        Object.keys(icons.autotile).forEach(v => {
+            const num = this.idNumberMap[v as AllIdsOf<'autotile'>];
+            const data = maps[num];
+            const { autotileConnection } = data;
+            if (!autotileConnection) return;
+            const list = new Set<AllNumbers>();
+            autotileConnection.forEach(v => {
+                if (typeof v === 'number') {
+                    list.add(v);
+                } else {
+                    list.add(this.idNumberMap[v]);
+                }
+            });
+            this.autoConn.set(num, list);
+        });
+    }
+
+    /**
+     * 获取自动元件的额外连接情况
+     * @param num 自动元件的图块数字
+     */
+    getAutotileConnections(num: number) {
+        return this.autoConn.get(num);
+    }
 }
 
 export const texture = new TextureCache();
@@ -302,7 +341,6 @@ const smallAutotile: Record<number, [number, number, number, number]> = {};
 function getAutotileIndices() {
     // 应当从 0 - 255 进行枚举
     // 二进制从高位到低位依次是 左上 上 右上 右 右下 下 左下 左
-    // 首先是3x4的
     // 有兴趣可以研究下这个算法
     const get = (
         target: Record<number, [number, number, number, number]>,
