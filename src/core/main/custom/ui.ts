@@ -1,10 +1,10 @@
 import { Component, shallowReactive } from 'vue';
-import { EmitableEvent, EventEmitter } from '../../common/eventEmitter';
+import { Callable, EventEmitter } from '../../common/eventEmitter';
 import { KeyCode } from '@/plugin/keyCodes';
 import { Hotkey } from './hotkey';
 import { generateBinary } from '@/plugin/utils';
 
-interface FocusEvent<T> extends EmitableEvent {
+interface FocusEvent<T> {
     focus: (before: T | null, after: T) => void;
     unfocus: (before: T | null) => void;
     add: (item: T) => void;
@@ -109,7 +109,7 @@ export class Focus<T = any> extends EventEmitter<FocusEvent<T>> {
     }
 }
 
-interface GameUiEvent extends EmitableEvent {
+interface GameUiEvent {
     close: () => void;
     open: () => void;
 }

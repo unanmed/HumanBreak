@@ -1,8 +1,4 @@
-import {
-    EmitableEvent,
-    EventEmitter,
-    Listener
-} from '@/core/common/eventEmitter';
+import { EventEmitter, Listener } from '@/core/common/eventEmitter';
 import { KeyCode } from '@/plugin/keyCodes';
 import { gameKey } from '../init/hotkey';
 import { unwarpBinary } from './hotkey';
@@ -36,7 +32,7 @@ type VirtualKeyEmitFn = (
     ev: VirtualKeyEmit
 ) => void;
 
-interface VirtualKeyboardEvent extends EmitableEvent {
+interface VirtualKeyboardEvent {
     add: (item: KeyboardItem) => void;
     remove: (item: KeyboardItem) => void;
     extend: (extended: Keyboard) => void;

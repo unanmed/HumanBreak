@@ -1,6 +1,6 @@
-import { EmitableEvent, EventEmitter } from './eventEmitter';
+import { EventEmitter } from './eventEmitter';
 
-interface DisposableEvent<T> extends EmitableEvent {
+interface DisposableEvent<T> {
     active: (value: T) => void;
     dispose: (value: T) => void;
     destroy: () => void;

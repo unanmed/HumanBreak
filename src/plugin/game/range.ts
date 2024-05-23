@@ -96,3 +96,31 @@ Range.registerRangeType(
         );
     }
 );
+Range.registerRangeType(
+    'rect',
+    (col, { x, y, w, h }) => {
+        const list = col.collection.list;
+        const ex = x + w;
+        const ey = y + h;
+
+        return list.filter(v => {
+            return (
+                has(v.x) &&
+                has(v.y) &&
+                v.x >= x &&
+                v.y >= y &&
+                v.x < ex &&
+                v.y < ey
+            );
+        });
+    },
+    (col, { x, y, w, h }, item) => {
+        const ex = x + w;
+        const ey = y + h;
+        const v = item;
+
+        return (
+            has(v.x) && has(v.y) && v.x >= x && v.y >= y && v.x < ex && v.y < ey
+        );
+    }
+);

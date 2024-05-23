@@ -2,7 +2,7 @@ import axios, { AxiosRequestConfig, ResponseType } from 'axios';
 import { Disposable } from './disposable';
 import { logger } from './logger';
 import JSZip from 'jszip';
-import { EmitableEvent, EventEmitter } from './eventEmitter';
+import { EventEmitter } from './eventEmitter';
 
 type ProgressFn = (now: number, total: number) => void;
 
@@ -305,7 +305,7 @@ export const resourceTypeMap = {
     zip: ZipResource
 };
 
-interface LoadEvent<T extends keyof ResourceType> extends EmitableEvent {
+interface LoadEvent<T extends keyof ResourceType> {
     progress: (
         type: keyof ResourceType,
         uri: string,

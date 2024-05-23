@@ -1,4 +1,4 @@
-import { EmitableEvent, EventEmitter } from '@/core/common/eventEmitter';
+import { EventEmitter } from '@/core/common/eventEmitter';
 import { deleteWith, has } from '@/plugin/utils';
 import { Component, nextTick, reactive, shallowReactive } from 'vue';
 import { fixedUi } from '../init/ui';
@@ -13,7 +13,7 @@ import type {
 } from '../init/toolbar';
 import { isMobile } from '@/plugin/use';
 
-interface CustomToolbarEvent extends EmitableEvent {
+interface CustomToolbarEvent {
     add: (item: ValueOf<ToolbarItemMap>) => void;
     delete: (item: ValueOf<ToolbarItemMap>) => void;
     set: (id: string, data: Partial<SettableItemData>) => void;

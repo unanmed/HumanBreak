@@ -1,10 +1,10 @@
 import { KeyCode } from '@/plugin/keyCodes';
 import { deleteWith, generateBinary, spliceBy } from '@/plugin/utils';
-import { EmitableEvent, EventEmitter } from '../../common/eventEmitter';
+import { EventEmitter } from '../../common/eventEmitter';
 
 // todo: 按下时触发，长按（单次/连续）触发，按下连续触发，按下节流触发，按下加速节流触发
 
-interface HotkeyEvent extends EmitableEvent {
+interface HotkeyEvent {
     set: (id: string, key: KeyCode, assist: number) => void;
     emit: (key: KeyCode, assist: number, type: KeyEmitType) => void;
 }

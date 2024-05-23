@@ -1,5 +1,7 @@
 import { debounce } from 'lodash-es';
 
+// todo: 使用格式化输出？
+
 export const enum LogLevel {
     /** 输出所有，包括日志 */
     LOG,
@@ -84,7 +86,7 @@ export class Logger {
                 logTip.textContent = `Error thrown, please check in console.`;
                 hideTipText();
             }
-            throw `[ERROR Code ${code}] ${text}`;
+            console.error(`[ERROR Code ${code}] ${text}`);
         }
     }
 

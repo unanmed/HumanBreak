@@ -1,8 +1,8 @@
 import { parseCss } from '@/plugin/utils';
-import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
+import { EventEmitter } from '../common/eventEmitter';
 import { CSSObj } from '../interface';
 
-interface OffscreenCanvasEvent extends EmitableEvent {
+interface OffscreenCanvasEvent {
     /** 当被动触发resize时（例如core.domStyle.scale变化、窗口大小变化）时触发，使用size函数并不会触发 */
     resize: () => void;
 }

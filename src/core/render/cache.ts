@@ -1,4 +1,4 @@
-import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
+import { EventEmitter } from '../common/eventEmitter';
 import { logger } from '../common/logger';
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
 import { SizedCanvasImageSource } from './preset/misc';
@@ -62,7 +62,7 @@ export interface AutotileRenderable extends RenderableDataBase {
     bigImage: false;
 }
 
-interface TextureCacheEvent extends EmitableEvent {}
+interface TextureCacheEvent {}
 
 class TextureCache extends EventEmitter<TextureCacheEvent> {
     tileset!: Record<string, HTMLImageElement>;
@@ -499,10 +499,10 @@ function splitAutotiles(map: IdToNumber): AutotileCaches {
             const ctx = canvas.ctx;
             for (let i = 0; i < frame; i++) {
                 const dx = 32 * i;
-                const sx1 = info[0][0];
-                const sx2 = info[1][0];
-                const sx3 = info[2][0];
-                const sx4 = info[3][0];
+                const sx1 = info[0][0] + (i * row * 32) / 2;
+                const sx2 = info[1][0] + (i * row * 32) / 2;
+                const sx3 = info[2][0] + (i * row * 32) / 2;
+                const sx4 = info[3][0] + (i * row * 32) / 2;
                 const sy1 = info[0][1];
                 const sy2 = info[1][1];
                 const sy3 = info[2][1];

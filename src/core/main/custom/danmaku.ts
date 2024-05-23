@@ -1,5 +1,5 @@
 import BoxAnimate from '@/components/boxAnimate.vue';
-import { EmitableEvent, EventEmitter } from '@/core/common/eventEmitter';
+import { EventEmitter } from '@/core/common/eventEmitter';
 import { logger } from '@/core/common/logger';
 import { ResponseBase } from '@/core/interface';
 import {
@@ -52,7 +52,7 @@ interface PostLikeResponse extends ResponseBase {
     liked: boolean;
 }
 
-interface DanmakuEvent extends EmitableEvent {
+interface DanmakuEvent {
     showStart: (danmaku: Danmaku) => void;
     showEnd: (danmaku: Danmaku) => void;
     like: (liked: boolean, danmaku: Danmaku) => void;

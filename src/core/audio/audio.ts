@@ -1,4 +1,4 @@
-import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
+import { EventEmitter } from '../common/eventEmitter';
 
 const ac = new AudioContext();
 
@@ -7,7 +7,7 @@ interface BaseNode {
     channel?: number;
 }
 
-interface AudioPlayerEvent extends EmitableEvent {
+interface AudioPlayerEvent {
     play: (node: AudioBufferSourceNode) => void;
     update: (audio: AudioBuffer) => void;
     end: (node: AudioBufferSourceNode) => void;

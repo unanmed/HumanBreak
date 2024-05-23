@@ -1,6 +1,6 @@
 import { Ticker } from 'mutate-animate';
 import { MotaCanvas2D } from '../fx/canvas2d';
-import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
+import { EventEmitter } from '../common/eventEmitter';
 import { debounce } from 'lodash-es';
 
 // 重写样板的勇士绘制
@@ -36,7 +36,7 @@ interface HeroDrawing extends HeroDrawItem {
     dir: Dir;
 }
 
-interface HeroRendererEvent extends EmitableEvent {
+interface HeroRendererEvent {
     beforeDraw: () => void;
     afterDraw: () => void;
 }

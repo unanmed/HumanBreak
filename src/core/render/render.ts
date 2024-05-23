@@ -2,10 +2,10 @@ import { Animation, hyper, sleep } from 'mutate-animate';
 import { MotaCanvas2D, MotaOffscreenCanvas2D } from '../fx/canvas2d';
 import { Camera } from './camera';
 import { Container } from './container';
-import { IRenderDestroyable, RenderItem, withCacheRender } from './item';
-import { Layer } from './preset/layer';
+import { RenderItem, transformCanvas, withCacheRender } from './item';
+import { Layer, LayerGroup } from './preset/layer';
 
-export class MotaRenderer extends Container implements IRenderDestroyable {
+export class MotaRenderer extends Container {
     static list: Set<MotaRenderer> = new Set();
 
     canvas: MotaOffscreenCanvas2D;
@@ -71,40 +71,33 @@ export class MotaRenderer extends Container implements IRenderDestroyable {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         withCacheRender(this, canvas, ctx, camera, canvas => {
             const { canvas: ca, ctx: ct, scale } = canvas;
-            const mat = camera.mat;
-            const a = mat[0] * scale;
-            const b = mat[1] * scale;
-            const c = mat[3] * scale;
-            const d = mat[4] * scale;
-            const e = mat[6] * scale;
-            const f = mat[7] * scale;
             this.sortedChildren.forEach(v => {
+                if (v.hidden) return;
                 if (v.type === 'absolute') {
                     ct.setTransform(scale, 0, 0, scale, 0, 0);
                 } else {
-                    ct.setTransform(1, 0, 0, 1, 0, 0);
-                    ct.translate(ca.width / 2, ca.height / 2);
-                    ct.transform(a, b, c, d, e, f);
+                    transformCanvas(canvas, camera, false);
                 }
+                ct.save();
                 if (!v.antiAliasing) {
                     ctx.imageSmoothingEnabled = false;
+                    ct.imageSmoothingEnabled = false;
                 } else {
                     ctx.imageSmoothingEnabled = true;
+                    ct.imageSmoothingEnabled = true;
                 }
                 v.render(ca, ct, camera);
+                ct.restore();
             });
         });
         this.emit('afterRender');
     }
 
-    /**
-     * 更新渲染，在下一个tick更新
-     */
     update(item?: RenderItem) {
         if (this.needUpdate) return;
         this.needUpdate = true;
         requestAnimationFrame(() => {
-            this.cache(this.writing);
+            this.cache(this.using);
             this.needUpdate = false;
             this.refresh(item);
         });
@@ -144,57 +137,15 @@ window.addEventListener('resize', () => {
 
 Mota.require('var', 'hook').once('reset', () => {
     const render = new MotaRenderer();
-    const layer = new Layer();
-    const bgLayer = new Layer();
     const camera = render.camera;
     render.mount();
 
-    layer.setZIndex(2);
-    bgLayer.setZIndex(1);
-    render.appendChild([layer, bgLayer]);
-    layer.bindThis('event');
-    bgLayer.bindThis('bg');
-    bgLayer.setBackground(305);
+    const layer = new LayerGroup();
+    layer.addDamage();
+    render.appendChild(layer);
 
-    const ani = new Animation();
-
-    // ani.ticker.add(() => {
-    //     camera.reset();
-    //     camera.rotate((ani.angle / 180) * Math.PI);
-    //     camera.move(ani.x, ani.y);
-    //     camera.scale(ani.size);
-    //     render.update(render);
-    // });
-
-    // camera.rotate(Math.PI * 1.23);
     camera.move(240, 240);
-    // camera.scale(0.7);
     render.update();
-
-    // sleep(2000).then(() => {
-    //     render.update();
-    // });
-
-    sleep(1000).then(() => {
-        // ani.mode(hyper('sin', 'out'))
-        //     .time(100)
-        //     .absolute()
-        //     .rotate(30)
-        //     .move(240, 240);
-        // sleep(100).then(() => {
-        //     ani.time(3000).rotate(0);
-        // });
-        // sleep(3100).then(() => {
-        //     ani.time(5000)
-        //         .mode(hyper('sin', 'in-out'))
-        //         .rotate(360)
-        //         .move(200, 480)
-        //         .scale(0.5);
-        // });
-        // ani.mode(shake2(5, hyper('sin', 'in-out')), true)
-        //     .time(5000)
-        //     .shake(1, 0);
-    });
 
     console.log(layer);
 });

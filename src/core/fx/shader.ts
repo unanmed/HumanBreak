@@ -1,8 +1,8 @@
 import { Animation, Ticker, hyper } from 'mutate-animate';
-import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
+import { EventEmitter } from '../common/eventEmitter';
 import { ensureArray } from '@/plugin/utils';
 
-interface ShaderEvent extends EmitableEvent {}
+interface ShaderEvent {}
 
 const isWebGLSupported = (() => {
     return !!document.createElement('canvas').getContext('webgl');

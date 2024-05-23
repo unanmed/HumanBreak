@@ -1,5 +1,5 @@
 import { FunctionalComponent, reactive } from 'vue';
-import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
+import { EventEmitter } from '../common/eventEmitter';
 import { GameStorage } from './storage';
 import { has, triggerFullscreen } from '@/plugin/utils';
 import { createSettingComponents } from './init/settings';
@@ -31,7 +31,7 @@ export interface MotaSettingItem<T extends MotaSettingType = MotaSettingType> {
     display?: (value: T) => string;
 }
 
-interface SettingEvent extends EmitableEvent {
+interface SettingEvent {
     valueChange: <T extends boolean | number>(
         key: string,
         newValue: T,
@@ -230,7 +230,7 @@ export class MotaSetting extends EventEmitter<SettingEvent> {
     }
 }
 
-interface SettingDisplayerEvent extends EmitableEvent {
+interface SettingDisplayerEvent {
     update: (stack: string[], display: SettingDisplayInfo[]) => void;
 }
 

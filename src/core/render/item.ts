@@ -1,9 +1,8 @@
 import { isNil } from 'lodash-es';
-import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
+import { EventEmitter } from '../common/eventEmitter';
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
 import { Camera } from './camera';
 import { Ticker } from 'mutate-animate';
-import type { Container } from './container';
 
 export type RenderFunction = (
     canvas: MotaOffscreenCanvas2D,
@@ -83,14 +82,28 @@ interface IRenderConfig {
     setAntiAliasing(anti: boolean): void;
 }
 
-export interface IRenderDestroyable {
+export interface IRenderChildable {
+    children: RenderItem[];
+
     /**
-     * 摧毁这个渲染对象，被摧毁后理应不被继续使用
+     * 向这个元素添加子元素
+     * @param child 添加的元素
      */
-    destroy(): void;
+    appendChild(...child: RenderItem[]): void;
+
+    /**
+     * 移除这个元素中的某个子元素
+     * @param child 要移除的元素
+     */
+    removeChild(...child: RenderItem[]): void;
+
+    /**
+     * 对子元素进行排序
+     */
+    sortChildren(): void;
 }
 
-interface RenderItemEvent extends EmitableEvent {
+interface RenderItemEvent {
     beforeUpdate: (item?: RenderItem) => void;
     afterUpdate: (item?: RenderItem) => void;
     beforeRender: () => void;
@@ -127,8 +140,10 @@ export abstract class RenderItem
     highResolution: boolean = true;
     /** 是否抗锯齿 */
     antiAliasing: boolean = true;
+    /** 是否被隐藏 */
+    hidden: boolean = false;
 
-    parent?: RenderItem;
+    parent?: RenderItem & IRenderChildable;
 
     protected needUpdate: boolean = false;
 
@@ -209,9 +224,48 @@ export abstract class RenderItem
 
     setZIndex(zIndex: number) {
         this.zIndex = zIndex;
-        (this.parent as Container)?.sortChildren?.();
+        this.parent?.sortChildren?.();
+    }
+
+    /**
+     * 隐藏这个元素
+     */
+    hide() {
+        if (this.hidden) return;
+        this.hidden = true;
+        this.update(this);
+    }
+
+    /**
+     * 显示这个元素
+     */
+    show() {
+        if (!this.hidden) return;
+        this.hidden = false;
+        this.update(this);
+    }
+
+    /**
+     * 从渲染树中移除这个节点
+     */
+    remove() {
+        this.parent?.removeChild(this);
+        this.parent = void 0;
+    }
+
+    /**
+     * 摧毁这个渲染元素，摧毁后不应继续使用
+     */
+    destroy(): void {
+        this.remove();
     }
 }
+
+interface RenderEvent {
+    animateFrame: (frame: number, time: number) => void;
+}
+
+export const renderEmits = new EventEmitter<RenderEvent>();
 
 Mota.require('var', 'hook').once('reset', () => {
     let lastTime = 0;
@@ -220,13 +274,14 @@ Mota.require('var', 'hook').once('reset', () => {
         if (time - lastTime > core.values.animateSpeed) {
             RenderItem.animatedFrame++;
             lastTime = time;
+            renderEmits.emit('animateFrame', RenderItem.animatedFrame, time);
         }
     });
 });
 
 export function withCacheRender(
     item: RenderItem & ICanvasCachedRenderItem,
-    canvas: HTMLCanvasElement,
+    _canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
     camera: Camera,
     fn: RenderFunction
@@ -263,4 +318,25 @@ export function withCacheRender(
     }
 
     ctx.drawImage(c, item.x - ax, item.y - ay, item.width, item.height);
+}
+
+export function transformCanvas(
+    canvas: MotaOffscreenCanvas2D,
+    camera: Camera,
+    clear: boolean = false
+) {
+    const { canvas: ca, ctx, scale } = canvas;
+    const mat = camera.mat;
+    const a = mat[0] * scale;
+    const b = mat[1] * scale;
+    const c = mat[3] * scale;
+    const d = mat[4] * scale;
+    const e = mat[6] * scale;
+    const f = mat[7] * scale;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    if (clear) {
+        ctx.clearRect(0, 0, ca.width, ca.height);
+    }
+    ctx.translate(ca.width / 2, ca.height / 2);
+    ctx.transform(a, b, c, d, e, f);
 }

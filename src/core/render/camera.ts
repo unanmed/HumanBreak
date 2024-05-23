@@ -1,7 +1,7 @@
 import { ReadonlyMat3, ReadonlyVec3, mat3, vec2, vec3 } from 'gl-matrix';
-import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
+import { EventEmitter } from '../common/eventEmitter';
 
-interface CameraEvent extends EmitableEvent {}
+interface CameraEvent {}
 
 export class Camera extends EventEmitter<CameraEvent> {
     mat: mat3 = mat3.create();

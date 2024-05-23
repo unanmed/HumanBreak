@@ -3296,8 +3296,8 @@ maps.prototype.setBlock = function (number, x, y, floorId, noredraw) {
         x,
         y,
         floorId,
-        originBlock?.id ?? 0,
-        number
+        number,
+        originBlock?.id ?? 0
     );
 };
 

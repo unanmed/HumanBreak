@@ -26,7 +26,7 @@ export class Sprite extends RenderItem implements ICanvasCachedRenderItem {
     ): void {
         this.emit('beforeRender');
         if (this.needUpdate) {
-            this.cache(this.writing);
+            this.cache(this.using);
             this.needUpdate = false;
         }
         withCacheRender(this, canvas, ctx, camera, canvas => {
@@ -40,7 +40,6 @@ export class Sprite extends RenderItem implements ICanvasCachedRenderItem {
         this.width = width;
         this.height = height;
         this.canvas.size(width, height);
-        this.writing = this.using;
         this.update(this);
     }
 

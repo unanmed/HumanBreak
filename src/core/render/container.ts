@@ -2,12 +2,16 @@ import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
 import { Camera } from './camera';
 import {
     ICanvasCachedRenderItem,
+    IRenderChildable,
     RenderItem,
     RenderItemPosition,
     withCacheRender
 } from './item';
 
-export class Container extends RenderItem implements ICanvasCachedRenderItem {
+export class Container
+    extends RenderItem
+    implements ICanvasCachedRenderItem, IRenderChildable
+{
     children: RenderItem[] = [];
     sortedChildren: RenderItem[] = [];
 
@@ -27,17 +31,20 @@ export class Container extends RenderItem implements ICanvasCachedRenderItem {
     ): void {
         this.emit('beforeRender');
         if (this.needUpdate) {
-            this.cache(this.writing);
+            this.cache(this.using);
             this.needUpdate = false;
         }
         withCacheRender(this, canvas, ctx, camera, c => {
             this.sortedChildren.forEach(v => {
+                if (v.hidden) return;
+                ctx.save();
                 if (!v.antiAliasing) {
                     ctx.imageSmoothingEnabled = false;
                 } else {
                     ctx.imageSmoothingEnabled = true;
                 }
                 v.render(c.canvas, c.ctx, camera);
+                ctx.restore();
             });
         });
         this.writing = void 0;
@@ -61,10 +68,21 @@ export class Container extends RenderItem implements ICanvasCachedRenderItem {
      * 添加子元素到这个容器上，然后在下一个tick执行更新
      * @param children 要添加的子元素
      */
-    appendChild(children: RenderItem[]) {
+    appendChild(...children: RenderItem[]) {
         children.forEach(v => (v.parent = this));
         this.children.push(...children);
         this.sortChildren();
+        this.update(this);
+    }
+
+    removeChild(...child: RenderItem[]): void {
+        child.forEach(v => {
+            const index = this.children.indexOf(v);
+            if (index === -1) return;
+            this.children.splice(index, 1);
+        });
+        this.sortChildren();
+        this.update(this);
     }
 
     sortChildren() {
@@ -83,5 +101,12 @@ export class Container extends RenderItem implements ICanvasCachedRenderItem {
         this.antiAliasing = anti;
         this.canvas.setAntiAliasing(anti);
         this.update(this);
+    }
+
+    destroy(): void {
+        super.destroy();
+        this.children.forEach(v => {
+            v.destroy();
+        });
     }
 }

@@ -43,7 +43,7 @@ export function has<T>(value: T): value is NonNullable<T> {
  * 根据伤害大小获取颜色
  * @param damage 伤害大小
  */
-export function getDamageColor(damage: number): Color {
+export function getDamageColor(damage: number): string {
     if (typeof damage !== 'number') return '#f00';
     if (damage === 0) return '#2f2';
     if (damage < 0) return '#7f7';

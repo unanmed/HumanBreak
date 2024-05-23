@@ -1,12 +1,13 @@
-import { EmitableEvent, EventEmitter } from '../core/common/eventEmitter';
+import { EventEmitter } from '../core/common/eventEmitter';
 import type { DamageEnemy } from './enemy/damage';
 
 // ----- 加载事件
-interface GameLoadEvent extends EmitableEvent {
+interface GameLoadEvent {
     coreLoaded: () => void;
     autotileLoaded: () => void;
     coreInit: () => void;
     loaded: () => void;
+    materialLoaded: () => void;
 }
 
 class GameLoading extends EventEmitter<GameLoadEvent> {
@@ -64,7 +65,7 @@ class GameLoading extends EventEmitter<GameLoadEvent> {
 
 export const loading = new GameLoading();
 
-export interface GameEvent extends EmitableEvent {
+export interface GameEvent {
     /** Emitted in libs/events.js resetGame. */
     reset: () => void;
     /** Emitted in src/App.vue setup. */
@@ -101,14 +102,14 @@ export interface GameEvent extends EmitableEvent {
         x: number,
         y: number,
         floorId: FloorIds,
-        oldBlock: AllNumbers,
-        newBlock: AllNumbers
+        newBlock: AllNumbers,
+        oldBlock: AllNumbers
     ) => void;
 }
 
 export const hook = new EventEmitter<GameEvent>();
 
-interface ListenerEvent extends EmitableEvent {
+interface ListenerEvent {
     // block
     hoverBlock: (block: Block, ev: MouseEvent) => void;
     leaveBlock: (block: Block, ev: MouseEvent, leaveGame: boolean) => void;

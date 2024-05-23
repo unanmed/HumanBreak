@@ -1,6 +1,6 @@
-import { EmitableEvent, EventEmitter } from '../common/eventEmitter';
+import { EventEmitter } from '../common/eventEmitter';
 
-interface ResourceControllerEvent<D = any, T = D> extends EmitableEvent {
+interface ResourceControllerEvent<D = any, T = D> {
     add: (uri: string, data: D) => void;
     delete: (uri: string, content: T) => void;
 }
@@ -25,6 +25,6 @@ export abstract class ResourceController<
     remove(uri: string) {
         const content = this.list[uri];
         delete this.list[uri];
-        this.emit(uri, content);
+        // this.emit(uri, content);
     }
 }

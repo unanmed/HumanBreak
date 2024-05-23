@@ -4347,7 +4347,7 @@ events.prototype._jumpHero_doJump = function (jumpInfo, callback) {
     var cb = function () {
         core.setHeroLoc('x', jumpInfo.ex);
         core.setHeroLoc('y', jumpInfo.ey);
-        render.move(false);
+        // render.move(false);
         core.status.heroMoving = 0;
         core.drawHero();
         if (callback) callback();
