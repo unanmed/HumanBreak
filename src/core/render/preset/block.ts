@@ -187,7 +187,16 @@ export class BlockCacher<T> extends EventEmitter<BlockCacherEvent> {
         height: number,
         deep: number = 2 ** 31 - 1
     ) {
-        const cleared = new Set<number>();
+        this.getIndexOf(x, y, width, height).forEach(v => {
+            this.clearCache(v, deep);
+        });
+    }
+
+    /**
+     * 获取一个区域内包含的所有分块索引
+     */
+    getIndexOf(x: number, y: number, width: number, height: number) {
+        const res = new Set<number>();
         const sx = Math.max(x, 0);
         const sy = Math.max(y, 0);
         const ex = Math.min(x + width, this.blockData.width);
@@ -196,10 +205,11 @@ export class BlockCacher<T> extends EventEmitter<BlockCacherEvent> {
         for (let nx = sx; nx < ex; nx++) {
             for (let ny = sy; ny < ey; ny++) {
                 const index = this.getIndexByLoc(nx, ny);
-                if (cleared.has(index)) continue;
-                this.clearCache(index, deep);
-                cleared.add(index);
+                if (res.has(index)) continue;
+                res.add(index);
             }
         }
+
+        return res;
     }
 }

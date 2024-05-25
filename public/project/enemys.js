@@ -122,7 +122,7 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"E549": {"name":"智慧之史","hp":1000,"atk":1000,"def":100,"money":1,"exp":35,"point":0,"special":[1],"crit":10000},
 	"E550": {"name":"智慧之兔","hp":1500,"atk":600,"def":200,"money":1,"exp":35,"point":0,"special":[8],"together":20},
 	"E556": {"name":"智慧之姆","hp":3000,"atk":800,"def":200,"money":1,"exp":45,"point":0,"special":[8],"together":20},
-	"E557": {"name":"智慧之神","hp":10000,"atk":2000,"def":800,"money":10,"exp":500,"point":0,"special":[]},
+	"E557": {"name":"智慧之神","hp":10000,"atk":2000,"def":1500,"money":10,"exp":500,"point":0,"special":[]},
 	"E561": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E562": {"name":"嘲讽剑客","hp":5000,"atk":1600,"def":500,"money":1,"exp":60,"point":0,"special":[19]},
 	"E563": {"name":"嘲讽剑圣","hp":15000,"atk":6000,"def":3000,"money":4,"exp":250,"point":0,"special":[19]},

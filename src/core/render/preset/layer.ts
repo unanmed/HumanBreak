@@ -10,6 +10,7 @@ import { glMatrix } from 'gl-matrix';
 import { BlockCacher } from './block';
 import { isNil } from 'lodash-es';
 import { getDamageColor } from '@/plugin/utils';
+import type { DamageEnemy, EnemyCollection } from '@/game/enemy/damage';
 
 type FloorLayer = 'bg' | 'bg2' | 'event' | 'fg' | 'fg2';
 type LayerGroupPreset = 'defaults' | 'noDamage';
@@ -296,7 +297,9 @@ hook.on('setBlock', (x, y, floorId, block) => {
 });
 hook.on('statusBarUpdate', () => {
     LayerGroup.list.forEach(v => {
-        if (v.floorId) v.damage?.bindFloor(v.floorId);
+        if (v.floorId) {
+            v.damage?.bindFloor(v.floorId);
+        }
     });
 });
 
@@ -1185,11 +1188,19 @@ export class Damage extends Sprite {
     /** 键表示格子索引，值表示在这个格子上的渲染信息（当然实际渲染位置可以不在这个格子上） */
     renderable: Map<number, DamageRenderable[]> = new Map();
     block: BlockCacher<LayerCacheItem>;
+    /** 记录所有需要重新计算伤害的分块，这样可以不用一次性计算全地图的伤害，从而优化性能 */
+    needUpdateBlock: Set<number> = new Set();
 
     cellSize: number = 32;
 
     /** 伤害渲染层，渲染至之后再渲染到目标层 */
     damageMap: MotaOffscreenCanvas2D = new MotaOffscreenCanvas2D();
+    /** 字体 */
+    font: string = "14px 'normal'";
+    /** 描边样式 */
+    strokeColor: CanvasStyle = '#000';
+    /** 描边粗细 */
+    strokeWidth: number = 1.5;
 
     constructor(floor?: FloorIds) {
         super();
@@ -1215,7 +1226,12 @@ export class Damage extends Sprite {
         });
     }
 
-    updateFloor(floor: FloorIds): void {
+    /**
+     * 更新楼层信息
+     */
+    updateFloor(): void {
+        const floor = this.floorId;
+        if (!floor) return;
         core.extractBlocks(floor);
         const f = core.status.maps[floor];
         this.updateRenderable(0, 0, f.width, f.height);
@@ -1232,7 +1248,92 @@ export class Damage extends Sprite {
         this.mapWidth = f.width;
         this.mapHeight = f.height;
         this.block.size(f.width, f.height);
-        this.updateFloor(floor);
+        this.updateFloor();
+    }
+
+    /**
+     * 根据需要更新的区域更新显示信息，注意调用前需要保证怪物信息是最新的，也就是要在计算过怪物信息后才能调用这个
+     * @param block 要更新的区域
+     */
+    updateRenderableBlock(block: Set<number>) {
+        if (!this.floorId) return;
+        const size = this.block.blockSize;
+
+        Mota.require('fn', 'ensureFloorDamage')(this.floorId);
+        const col = core.status.maps[this.floorId].enemy;
+        const obj = core.getMapBlocksObj(this.floorId);
+
+        if (block.size === 1) {
+            // 如果是单个分块，直接进行更新
+            const index = [...block.values()][0];
+            if (!this.needUpdateBlock.has(index)) return;
+            this.needUpdateBlock.delete(index);
+
+            const [x, y] = this.block.getBlockXYByIndex(index);
+            const sx = x * size;
+            const sy = y * size;
+            const ex = sx + size;
+            const ey = sy + size;
+
+            for (let ny = sy; ny < ey; ny++) {
+                for (let nx = sx; nx < ex; nx++) {
+                    const index = nx + ny * this.mapWidth;
+                    this.renderable.delete(index);
+                    this.pushMapDamage(obj, col, nx, ny);
+                }
+            }
+
+            col.range
+                .scan('rect', { x: sx, y: sy, w: size, h: size })
+                .forEach(v => {
+                    if (isNil(v.x) || isNil(v.y)) return;
+                    this.pushEnemyDamage(v, v.x, v.y);
+                });
+        } else {
+            // 否则使用 X 扫描线的方式，获取每个y坐标对应的最小最大x坐标，从而可以更快地找出在范围内的怪物
+            const xyMap: Map<number, LocArr> = new Map();
+            const toEmitArea: [number, number, number, number][] = [];
+
+            block.forEach(v => {
+                if (!this.needUpdateBlock.has(v)) return;
+                this.needUpdateBlock.delete(v);
+                const [x, y] = this.block.getBlockXYByIndex(v);
+                const sx = x * size;
+                const sy = y * size;
+                const ex = sx + size;
+                const ey = sy + size;
+                toEmitArea.push([sx, sy, size, size]);
+
+                for (let ny = sy; ny < ey; ny++) {
+                    let arr = xyMap.get(ny);
+                    if (!arr) {
+                        arr = [sx, ex];
+                        xyMap.set(ny, arr);
+                    } else {
+                        if (sx < arr[0]) arr[0] = sx;
+                        if (ex > arr[1]) arr[1] = ex;
+                    }
+                    for (let nx = sx; nx < ex; nx++) {
+                        const index = nx + ny * this.mapWidth;
+                        this.renderable.delete(index);
+                        this.pushMapDamage(obj, col, x, y);
+                    }
+                }
+            });
+
+            xyMap.forEach(([sx, ex], y) => {
+                col.list.forEach(v => {
+                    if (isNil(v.x) || isNil(v.y)) return;
+                    if (v.y !== y || v.x < sx || v.x >= ex) return;
+                    this.pushEnemyDamage(v, v.x, v.y);
+                });
+            });
+
+            toEmitArea.forEach(v => {
+                this.emit('dataUpdate', v[0], v[1], v[2], v[3]);
+            });
+            this.update(this);
+        }
     }
 
     /**
@@ -1240,82 +1341,11 @@ export class Damage extends Sprite {
      */
     updateRenderable(x: number, y: number, width: number, height: number) {
         if (!this.floorId) return;
-        this.block.updateArea(x, y, width, height, 1);
-        const sx = Math.max(0, x);
-        const sy = Math.max(0, y);
-        const ex = Math.min(this.mapWidth, x + width);
-        const ey = Math.min(this.mapHeight, y + height);
-        Mota.require('fn', 'ensureFloorDamage')(this.floorId);
-        const col = core.status.maps[this.floorId].enemy;
-        const obj = core.getMapBlocksObj(this.floorId);
-
-        for (let nx = sx; nx < ex; nx++) {
-            for (let ny = sy; ny < ey; ny++) {
-                const index = this.block.getPreciseIndexByLoc(nx, ny, 0);
-                this.renderable.delete(index);
-                const arr: DamageRenderable[] = [];
-                const loc = `${nx},${ny}` as LocString;
-                const dam = col.mapDamage[loc];
-
-                if (!dam || obj[loc]?.event.noPass) continue;
-                let text = '';
-                let color = '#fa3';
-                if (dam.damage > 0) {
-                    text = core.formatBigNumber(dam.damage, true);
-                } else if (dam.mockery) {
-                    dam.mockery.sort((a, b) =>
-                        a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]
-                    );
-                    const [tx, ty] = dam.mockery[0];
-                    const dir =
-                        x > tx ? '←' : x < tx ? '→' : y > ty ? '↑' : '↓';
-                    text = '嘲' + dir;
-                    color = '#fd4';
-                } else if (dam.hunt) {
-                    text = '猎';
-                    color = '#fd4';
-                } else {
-                    continue;
-                }
-
-                const mapDam: DamageRenderable = {
-                    align: 'center',
-                    baseline: 'middle',
-                    text,
-                    color,
-                    x: nx * this.cellSize + this.cellSize / 2,
-                    y: ny * this.cellSize + this.cellSize / 2
-                };
-                arr.push(mapDam);
-                this.renderable.set(index, arr);
-            }
-        }
-
-        col.range.scan('rect', { x, y, w: width, h: height }).forEach(v => {
-            if (isNil(v.x) || isNil(v.y)) return;
-
-            const dam = v.calDamage().damage;
-            const cri = v.calCritical(1)[0]?.atkDelta ?? Infinity;
-            const dam1: DamageRenderable = {
-                align: 'left',
-                baseline: 'alphabetic',
-                text: !isFinite(dam) ? '???' : core.formatBigNumber(dam, true),
-                color: getDamageColor(dam),
-                x: v.x * this.cellSize + 1,
-                y: v.y * this.cellSize + this.cellSize - 1
-            };
-            const dam2: DamageRenderable = {
-                align: 'left',
-                baseline: 'alphabetic',
-                text: !isFinite(cri) ? '?' : core.formatBigNumber(cri, true),
-                color: '#fff',
-                x: v.x * this.cellSize + 1,
-                y: v.y * this.cellSize + this.cellSize - 11
-            };
-            this.pushDamageRenderable(x, y, dam1, dam2);
+        this.block.getIndexOf(x, y, width, height).forEach(v => {
+            this.block.clearCache(v, 1);
+            this.needUpdateBlock.add(v);
         });
-
-        this.emit('dataUpdate', x, y, width, height);
+        this.update(this);
     }
 
     /**
@@ -1329,6 +1359,68 @@ export class Damage extends Sprite {
             this.renderable.set(index, arr);
         }
         arr.push(...data);
+    }
+
+    private pushMapDamage(
+        obj: Record<LocString, Block>,
+        col: EnemyCollection,
+        x: number,
+        y: number
+    ) {
+        const loc = `${x},${y}` as LocString;
+        const dam = col.mapDamage[loc];
+
+        if (!dam || obj[loc]?.event.noPass) return;
+        let text = '';
+        let color = '#fa3';
+        if (dam.damage > 0) {
+            text = core.formatBigNumber(dam.damage, true);
+        } else if (dam.mockery) {
+            dam.mockery.sort((a, b) =>
+                a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]
+            );
+            const [tx, ty] = dam.mockery[0];
+            const dir = x > tx ? '←' : x < tx ? '→' : y > ty ? '↑' : '↓';
+            text = '嘲' + dir;
+            color = '#fd4';
+        } else if (dam.hunt) {
+            text = '猎';
+            color = '#fd4';
+        } else {
+            return;
+        }
+
+        const mapDam: DamageRenderable = {
+            align: 'center',
+            baseline: 'middle',
+            text,
+            color,
+            x: x * this.cellSize + this.cellSize / 2,
+            y: y * this.cellSize + this.cellSize / 2
+        };
+        this.pushDamageRenderable(x, y, mapDam);
+    }
+
+    private pushEnemyDamage(enemy: DamageEnemy, x: number, y: number) {
+        const dam = enemy.calDamage().damage;
+        const cri = enemy.calCritical(1)[0]?.atkDelta ?? Infinity;
+        const dam1: DamageRenderable = {
+            align: 'left',
+            baseline: 'alphabetic',
+            text: !isFinite(dam) ? '???' : core.formatBigNumber(dam, true),
+            color: getDamageColor(dam),
+            x: x * this.cellSize + 1,
+            y: y * this.cellSize + this.cellSize - 1
+        };
+        const dam2: DamageRenderable = {
+            align: 'left',
+            baseline: 'alphabetic',
+            text: !isFinite(cri) ? '?' : core.formatBigNumber(cri, true),
+            color: '#fff',
+            x: x * this.cellSize + 1,
+            y: y * this.cellSize + this.cellSize - 11
+        };
+        this.pushDamageRenderable(x, y, dam1, dam2);
     }
 
     /**
@@ -1357,6 +1449,7 @@ export class Damage extends Sprite {
         transformCanvas(this.damageMap, camera, true);
 
         const { res: render } = this.calNeedRender(camera);
+        this.updateRenderableBlock(render);
         const block = this.block;
         const cell = this.cellSize;
         const size = cell * block.blockSize;
@@ -1381,8 +1474,9 @@ export class Damage extends Sprite {
             temp.withGameScale(true);
             temp.size(size, size);
             const { ctx: ct } = temp;
-            ct.font = "14px 'normal'";
-            ct.lineWidth = 1.5;
+            ct.font = this.font;
+            ct.strokeStyle = this.strokeColor;
+            ct.lineWidth = this.strokeWidth;
 
             const ex = bx + block.blockSize;
             const ey = by + block.blockSize;
@@ -1394,7 +1488,6 @@ export class Damage extends Sprite {
                     render?.forEach(v => {
                         if (!v) return;
                         ct.fillStyle = v.color;
-                        ct.strokeStyle = '#000';
                         ct.textAlign = v.align;
                         ct.textBaseline = v.baseline;
                         ct.strokeText(v.text, v.x, v.y);
