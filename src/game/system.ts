@@ -20,7 +20,7 @@ import type { Range } from '@/plugin/game/range';
 import type { KeyCode } from '@/plugin/keyCodes';
 import type { Ref } from 'vue';
 import type * as battle from './enemy/battle';
-import type * as hero from './hero';
+import type * as hero from './state/hero';
 import type * as damage from './enemy/damage';
 import type { Logger } from '@/core/common/logger';
 import type { Danmaku } from '@/core/main/custom/danmaku';

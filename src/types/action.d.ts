@@ -94,6 +94,7 @@ interface Actions extends VoidedActionFuncs {
     };
 
     /**
+     * @deprecated
      * 此函数将注册一个用户交互行为。
      * @param action 要注册的交互类型
      * @param name 自定义名称，可被注销使用
@@ -108,6 +109,7 @@ interface Actions extends VoidedActionFuncs {
     ): void;
 
     /**
+     * @deprecated
      * 注销一个用户交互行为
      * @param action 要注销的交互类型
      * @param name 要注销的自定义名称
@@ -115,6 +117,7 @@ interface Actions extends VoidedActionFuncs {
     unregisterAction(action: ActionKey, name: string): void;
 
     /**
+     * @deprecated
      * 执行一个用户交互行为
      */
     doRegisteredAction<K extends ActionKey>(
@@ -123,6 +126,7 @@ interface Actions extends VoidedActionFuncs {
     ): void;
 
     /**
+     * @deprecated
      * 判断一个横坐标是否在(_HX_ - 2, _HX_ + 2)范围外
      * @param x 要判断的横坐标
      */

@@ -14,6 +14,9 @@ dependencies:
   '@vueuse/core':
     specifier: ^10.4.1
     version: 10.4.1(vue@3.3.4)
+  anon-tokyo:
+    specifier: 0.0.0-alpha.0
+    version: 0.0.0-alpha.0
   ant-design-vue:
     specifier: ^3.2.20
     version: 3.2.20(vue@3.3.4)
@@ -23,6 +26,9 @@ dependencies:
   chart.js:
     specifier: ^4.4.0
     version: 4.4.0
+  eventemitter3:
+    specifier: ^5.0.1
+    version: 5.0.1
   gl-matrix:
     specifier: ^3.4.3
     version: 3.4.3
@@ -2695,6 +2701,12 @@ packages:
       clean-stack: 2.2.0
       indent-string: 4.0.0
     dev: true
+
+  /anon-tokyo@0.0.0-alpha.0:
+    resolution: {integrity: sha512-4kq9NOB56RUC6YqZAkkuA2mLhfzdLa39RSi+dUOk6geL4rldWspBZP2XbKv3hhG8nf+HDL2LSOTb7opSbqY/gg==}
+    dependencies:
+      lodash-es: 4.17.21
+    dev: false
 
   /ansi-regex@5.0.1:
     resolution: {integrity: sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==}

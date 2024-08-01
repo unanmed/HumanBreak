@@ -1200,7 +1200,7 @@ export class Damage extends Sprite {
     /** 描边样式 */
     strokeColor: CanvasStyle = '#000';
     /** 描边粗细 */
-    strokeWidth: number = 1.5;
+    strokeWidth: number = 2;
 
     constructor(floor?: FloorIds) {
         super();

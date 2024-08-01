@@ -22,7 +22,7 @@ type EmitFn<F extends (...params: any) => any> = (
 
 type Key = number | string | symbol;
 
-export class EventEmitter<T extends Record<keyof T, Callable>> {
+export class EventEmitter<T extends Record<keyof T, Callable> = {}> {
     protected events: {
         [x: Key]: Listener<Callable>[];
     } = {};

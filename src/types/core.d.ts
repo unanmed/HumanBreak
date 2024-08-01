@@ -1261,11 +1261,6 @@ interface Main extends MainData {
      */
     readonly __VERSION_CODE__: number;
 
-    readonly RESOURCE_INDEX: Record<string, string>;
-    readonly RESOURCE_URL: string;
-    readonly RESOURCE_SYMBOL: string;
-    readonly RESOURCE_TYPE: 'dev' | 'dist' | 'gh' | 'local';
-
     /**
      * 初始化游戏
      * @param mode 初始化游戏的模式，游玩还是编辑器
@@ -1316,6 +1311,7 @@ interface Main extends MainData {
     ): void;
 
     /**
+     * @deprecated
      * 设置加载界面的加载提示文字
      */
     setMainTipsText(text: string): void;
@@ -1334,23 +1330,27 @@ interface Main extends MainData {
     createOnChoiceAnimation(): void;
 
     /**
+     * @deprecated
      * 选中开始界面的一个按钮
      * @param index 要选中的按钮
      */
     selectButton(index: number): void;
 
     /**
+     * @deprecated
      * 加载一系列字体
      * @param fonts 要加载的字体列表
      */
     importFonts(fonts: FontIds[]): void;
 
     /**
+     * @deprecated
      * 执行样板的所有监听
      */
     listen(): void;
 
     /**
+     * @deprecated
      * 执行ts的插件转发
      */
     forward(): void;

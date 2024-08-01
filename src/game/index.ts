@@ -6,7 +6,7 @@ import { Range } from '@/plugin/game/range';
 import { specials } from './enemy/special';
 import { gameListener, hook, loading } from './game';
 import * as battle from './enemy/battle';
-import * as hero from './hero';
+import * as hero from './state/hero';
 import * as miscMechanism from './mechanism/misc';
 import * as study from './mechanism/study';
 

@@ -407,11 +407,13 @@ interface Control {
     addGameCanvasTranslate(x: number, y: number): void;
 
     /**
+     * @deprecated
      * 更新大地图的可见区域
      */
     updateViewport(): void;
 
     /**
+     * @deprecated
      * 设置视野范围
      * @param px 相对大地图左上角的偏移横坐标，单位像素
      * @param py 相对大地图左上角的偏移纵坐标，单位像素
@@ -419,6 +421,7 @@ interface Control {
     setViewport(px?: number, py?: number): void;
 
     /**
+     * @deprecated
      * 移动视野范围，这东西真的有人用吗...高级动画 + setViewport就完事了（
      * @param x 移动的横坐标，单位格子
      * @param y 移动的纵坐标，单位格子
@@ -481,6 +484,7 @@ interface Control {
     updateDamage(floorId?: FloorIds, ctx?: CtxRefer): void;
 
     /**
+     * @deprecated
      * 重绘地图显伤
      * @param ctx 绘制到的画布
      */
