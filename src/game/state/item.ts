@@ -100,7 +100,7 @@ export class ItemState<
         this.useItemEffectFn?.(state, hero);
         if (this.useItemEvent) core.insertAction(this.useItemEvent);
         if (!this.noRoute) {
-            state.get<string[]>('route')!.push(`item:${this.id}`);
+            core.status.route.push(`item:${this.id}`);
         }
 
         hero.addItem(this.id, -1);

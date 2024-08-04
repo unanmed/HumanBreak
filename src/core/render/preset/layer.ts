@@ -599,6 +599,47 @@ export class Layer extends Container {
     }
 
     /**
+     * 判断一个点是否在地图范围内
+     * @param x 横坐标
+     * @param y 纵坐标
+     */
+    isPointOutside(x: number, y: number) {
+        return x < 0 || y < 0 || x >= this.mapWidth || y >= this.mapHeight;
+    }
+
+    /**
+     * 判断一个矩形是否完全在地图之外
+     * @param x 矩形左上角横坐标
+     * @param y 矩形左上角纵坐标
+     * @param width 矩形长度
+     * @param height 矩形高度
+     */
+    isRectOutside(x: number, y: number, width: number, height: number) {
+        return (
+            x >= this.mapWidth ||
+            y >= this.mapHeight ||
+            x + width < 0 ||
+            y + height < 0
+        );
+    }
+
+    /**
+     * 判断一个矩形是否完全在地图之内
+     * @param x 矩形左上角横坐标
+     * @param y 矩形左上角纵坐标
+     * @param width 矩形长度
+     * @param height 矩形高度
+     */
+    containsRect(x: number, y: number, width: number, height: number) {
+        return (
+            x + width <= this.mapWidth &&
+            y + height <= this.mapHeight &&
+            x >= 0 &&
+            y >= 0
+        );
+    }
+
+    /**
      * 设置背景图块
      * @param background 背景图块
      */
@@ -674,21 +715,21 @@ export class Layer extends Container {
                 8,
                 `Incomplete render data is put. None will be filled to the lacked data.`
             );
-            data.push(...Array(data.length % width).fill(0));
+            data.push(...Array(width - (data.length % width)).fill(0));
         }
         const height = Math.round(data.length / width);
-        if (width + x > this.mapWidth || height + y > this.mapHeight) {
+        if (!this.containsRect(x, y, width, height)) {
             logger.warn(
                 9,
                 `Data transfered is partially (or totally) out of range. Overflowed data will be ignored.`
             );
-            if (x >= this.mapWidth || y >= this.mapHeight) return;
+            if (this.isRectOutside(x, y, width, height)) return;
         }
         for (let nx = 0; nx < width; nx++) {
             for (let ny = 0; ny < height; ny++) {
                 const dx = nx + x;
                 const dy = ny + y;
-                if (dx >= this.mapWidth || dy >= this.mapHeight) {
+                if (this.isPointOutside(dx, dy)) {
                     continue;
                 }
                 const index = nx + ny * width;
@@ -862,10 +903,6 @@ export class Layer extends Container {
             const map = core.maps._getBgFgMapArray(this.layer, this.floorId);
             this.putRenderData(map.flat(), floor.width, 0, 0);
         }
-    }
-
-    updateFloor(): void {
-        this.updateDataFromFloor();
     }
 
     /**
@@ -1147,7 +1184,7 @@ export class Layer extends Container {
      * @param fn 移动函数，传入一个完成度（范围0-1），返回一个三元素数组，表示横纵格子坐标，可以是小数。
      *           第三个元素表示图块纵深，一般图块的纵深就是其纵坐标，当地图上有大怪物时，此举可以辅助渲染，
      *           否则可能会导致移动过程中与大怪物的层级关系不正确，比如全在大怪物身后。注意不建议频繁改动这个值，
-     *           因为此举会导致层级的重新排序，降低渲染性能
+     *           因为此举会导致层级的重新排序，降低渲染性能。当移动结束时，会对最终位置取整得到移动后的坐标
      * @param time 移动总时长
      * @param relative 是否是相对模式
      */

@@ -1,9 +1,7 @@
 import { logger } from '@/core/common/logger';
 import { EventEmitter } from 'eventemitter3';
 import { cloneDeep, isNil } from 'lodash-es';
-import { GameState } from './state';
 import { ItemState } from './item';
-import { MonoStore } from '@/common/struct';
 
 /**
  * 获取勇士在某一点的属性
@@ -386,12 +384,6 @@ export class Hero<T extends object = IHeroStatusDefault>
         this.y = y;
         this.floorId = floorId;
         this.state = state;
-
-        // const list = gameState.get<MonoStore<Hero<any>>>('hero')!.list;
-        // if (list.has(id)) {
-        //     logger.warn(11, `Repeated hero: ${id}.`);
-        // }
-        // list.set(id, this);
     }
 
     /**
