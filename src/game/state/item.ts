@@ -1,10 +1,10 @@
 import EventEmitter from 'eventemitter3';
 import type { Hero } from './hero';
-import { GameState, gameStates, IGameState } from './state';
+import { GameState, gameStates } from './state';
 import { loading } from '../game';
 
-type EffectFn = (state: IGameState, hero: Hero<any>) => void;
-type CanUseEffectFn = (state: IGameState, hero: Hero<any>) => boolean;
+type EffectFn = (state: GameState, hero: Hero<any>) => void;
+type CanUseEffectFn = (state: GameState, hero: Hero<any>) => boolean;
 
 interface ItemStateEvent {
     use: [hero: Hero<any>];
@@ -91,16 +91,17 @@ export class ItemState<
 
     /**
      * 使用这个物品
-     * @param state 游戏状态
-     * @param num 使用的数量，仅对tools和items有效
+     * @param hero 使用物品的勇士
      */
     use(hero: Hero<any>): boolean {
         if (!this.canUse(hero)) return false;
         if (!gameStates.now) return false;
-        const state = gameStates.now.state;
+        const state = gameStates.now;
         this.useItemEffectFn?.(state, hero);
         if (this.useItemEvent) core.insertAction(this.useItemEvent);
-        if (!this.noRoute) state.route.push(`item:${this.id}`);
+        if (!this.noRoute) {
+            state.get<string[]>('route')!.push(`item:${this.id}`);
+        }
 
         hero.addItem(this.id, -1);
         this.emit('use', hero);
@@ -116,7 +117,7 @@ export class ItemState<
         if (num <= 0) return false;
         if (hero.itemCount(this.id) < num) return false;
         if (!gameStates.now) return false;
-        return !!this.canUseItemEffectFn?.(gameStates.now.state, hero);
+        return !!this.canUseItemEffectFn?.(gameStates.now, hero);
     }
 
     /**

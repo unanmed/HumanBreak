@@ -1,8 +1,9 @@
 import { logger } from '@/core/common/logger';
 import { EventEmitter } from 'eventemitter3';
 import { cloneDeep, isNil } from 'lodash-es';
-import { GameState, ISerializable } from './state';
+import { GameState } from './state';
 import { ItemState } from './item';
+import { MonoStore } from '@/common/struct';
 
 /**
  * 获取勇士在某一点的属性
@@ -128,7 +129,11 @@ interface HeroStateEvent {
     set: [key: string | number | symbol, value: any];
 }
 
-type HeroStatusCalculate<T> = <K extends keyof T>(key: K, value: T[K]) => T[K];
+type HeroStatusCalculate = (
+    hero: HeroState<any>,
+    key: string | number | symbol,
+    value: any
+) => any;
 
 export class HeroState<
     T extends object = IHeroStatusDefault
@@ -139,7 +144,7 @@ export class HeroState<
     readonly buffable: Set<keyof T> = new Set();
     readonly buffMap: Map<keyof T, number> = new Map();
 
-    private cal: HeroStatusCalculate<T> = (_, value) => value;
+    private static cal: HeroStatusCalculate = (_0, _1, value) => value;
 
     constructor(init: T) {
         super();
@@ -220,7 +225,7 @@ export class HeroState<
         if (!this.buffable.has(key) || typeof this.status[key] !== 'number') {
             logger.warn(
                 13,
-                `Cannot set buff non-number status. Key: ${String(key)}.`
+                `Cannot set buff of non-number status. Key: ${String(key)}.`
             );
             return false;
         }
@@ -238,7 +243,7 @@ export class HeroState<
         if (!this.buffable.has(key) || typeof this.status[key] !== 'number') {
             logger.warn(
                 13,
-                `Cannot set buff non-number status. Key: ${String(key)}.`
+                `Cannot set buff of non-number status. Key: ${String(key)}.`
             );
             return false;
         }
@@ -254,11 +259,11 @@ export class HeroState<
         if (key === void 0) {
             for (const [key, value] of Object.entries(this.status)) {
                 // @ts-ignore
-                this.computedStatus[key] = this.cal(key, value);
+                this.computedStatus[key] = HeroState.cal(this, key, value);
             }
             return true;
         }
-        this.computedStatus[key] = this.cal(key, this.status[key]);
+        this.computedStatus[key] = HeroState.cal(this, key, this.status[key]);
         return true;
     }
 
@@ -268,7 +273,11 @@ export class HeroState<
      */
     refreshBuffable(): boolean {
         for (const key of this.buffable) {
-            this.computedStatus[key] = this.cal(key, this.status[key]);
+            this.computedStatus[key] = HeroState.cal(
+                this,
+                key,
+                this.status[key]
+            );
         }
         return true;
     }
@@ -277,7 +286,7 @@ export class HeroState<
      * 复写属性计算函数，默认函数不进行计算，直接将原属性返回
      * @param fn 计算函数，传入两个参数，key表示属性名，value表示属性值，返回值表示计算结果
      */
-    overrideCalculate(fn: HeroStatusCalculate<T>) {
+    static overrideCalculate(fn: HeroStatusCalculate) {
         this.cal = fn;
     }
 }
@@ -353,23 +362,23 @@ interface HeroEvent {
 
 export class Hero<T extends object = IHeroStatusDefault>
     extends EventEmitter<HeroEvent>
-    implements IHeroItem, ISerializable
+    implements IHeroItem
 {
     x: number;
     y: number;
     floorId: FloorIds;
-    id: string;
+
+    readonly items: Map<AllIdsOf<'items'>, number> = new Map();
+    readonly id: string;
 
     state: HeroState<T>;
-    items: Map<AllIdsOf<'items'>, number> = new Map();
 
     constructor(
         id: string,
         x: number,
         y: number,
         floorId: FloorIds,
-        state: HeroState<T>,
-        gameState: GameState
+        state: HeroState<T>
     ) {
         super();
         this.id = id;
@@ -378,11 +387,11 @@ export class Hero<T extends object = IHeroStatusDefault>
         this.floorId = floorId;
         this.state = state;
 
-        const list = gameState.state.hero.list;
-        if (list.has(id)) {
-            logger.warn(11, `Repeated hero: ${id}.`);
-        }
-        list.set(id, this);
+        // const list = gameState.get<MonoStore<Hero<any>>>('hero')!.list;
+        // if (list.has(id)) {
+        //     logger.warn(11, `Repeated hero: ${id}.`);
+        // }
+        // list.set(id, this);
     }
 
     /**
@@ -466,9 +475,5 @@ export class Hero<T extends object = IHeroStatusDefault>
 
     hasItem(item: AllIdsOf<'items'>): boolean {
         return this.itemCount(item) > 0;
-    }
-
-    toJSON(): string {
-        return '';
     }
 }

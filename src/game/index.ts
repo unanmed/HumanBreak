@@ -9,6 +9,7 @@ import * as battle from './enemy/battle';
 import * as hero from './state/hero';
 import * as miscMechanism from './mechanism/misc';
 import * as study from './mechanism/study';
+import { registerPresetState } from './state/preset';
 
 // ----- 类注册
 Mota.register('class', 'DamageEnemy', damage.DamageEnemy);
@@ -37,3 +38,5 @@ main.loading = loading;
 loading.once('coreInit', () => {
     Mota.Plugin.init();
 });
+
+registerPresetState();
