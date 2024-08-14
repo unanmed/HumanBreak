@@ -3,7 +3,9 @@ import { MotaCanvas2D, MotaOffscreenCanvas2D } from '../fx/canvas2d';
 import { Camera } from './camera';
 import { Container } from './container';
 import { RenderItem, transformCanvas, withCacheRender } from './item';
-import { Layer, LayerGroup } from './preset/layer';
+import { FloorLayer, Layer, LayerGroup } from './preset/layer';
+import { LayerGroupFloorBinder } from './preset/floor';
+import { FloorDamageExtends } from './preset/damage';
 
 export class MotaRenderer extends Container {
     static list: Set<MotaRenderer> = new Set();
@@ -65,6 +67,7 @@ export class MotaRenderer extends Container {
      * 渲染游戏画面
      */
     render() {
+        console.time();
         const { canvas, ctx } = this.target;
         const camera = this.camera;
         this.emit('beforeRender');
@@ -91,12 +94,13 @@ export class MotaRenderer extends Container {
             });
         });
         this.emit('afterRender');
+        console.timeEnd();
     }
 
     update(item?: RenderItem) {
         if (this.needUpdate) return;
         this.needUpdate = true;
-        requestAnimationFrame(() => {
+        this.requestRenderFrame(() => {
             this.cache(this.using);
             this.needUpdate = false;
             this.refresh(item);
@@ -141,7 +145,16 @@ Mota.require('var', 'hook').once('reset', () => {
     render.mount();
 
     const layer = new LayerGroup();
-    layer.addDamage();
+
+    ['bg', 'bg2', 'event', 'fg', 'fg2'].forEach(v => {
+        layer.addLayer(v as FloorLayer);
+    });
+
+    const binder = new LayerGroupFloorBinder();
+    const damage = new FloorDamageExtends();
+    layer.extends(binder);
+    layer.extends(damage);
+    binder.bindThis();
     render.appendChild(layer);
 
     camera.move(240, 240);

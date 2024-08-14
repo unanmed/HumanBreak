@@ -103,6 +103,26 @@ export interface IRenderChildable {
     sortChildren(): void;
 }
 
+interface IRenderFrame {
+    /**
+     * 在下一帧渲染之前执行函数，常用于渲染前数据更新，理论上不应当用于渲染，不保证运行顺序
+     * @param fn 执行的函数
+     */
+    requestBeforeFrame(fn: () => void): void;
+
+    /**
+     * 在下一帧渲染之后执行函数，理论上不应当用于渲染，不保证运行顺序
+     * @param fn 执行的函数
+     */
+    requestAfterFrame(fn: () => void): void;
+
+    /**
+     * 在下一帧渲染时执行函数，理论上应当只用于渲染（即{@link RenderItem.update}方法），且不保证运行顺序
+     * @param fn 执行的函数
+     */
+    requestRenderFrame(fn: () => void): void;
+}
+
 interface RenderItemEvent {
     beforeUpdate: (item?: RenderItem) => void;
     afterUpdate: (item?: RenderItem) => void;
@@ -110,9 +130,18 @@ interface RenderItemEvent {
     afterRender: () => void;
 }
 
+const beforeFrame: (() => void)[] = [];
+const afterFrame: (() => void)[] = [];
+const renderFrame: (() => void)[] = [];
+
 export abstract class RenderItem
     extends EventEmitter<RenderItemEvent>
-    implements IRenderCache, IRenderUpdater, IRenderAnchor, IRenderConfig
+    implements
+        IRenderCache,
+        IRenderUpdater,
+        IRenderAnchor,
+        IRenderConfig,
+        IRenderFrame
 {
     /** 渲染的全局ticker */
     static ticker: Ticker = new Ticker();
@@ -227,6 +256,18 @@ export abstract class RenderItem
         this.parent?.sortChildren?.();
     }
 
+    requestBeforeFrame(fn: () => void): void {
+        beforeFrame.push(fn);
+    }
+
+    requestAfterFrame(fn: () => void): void {
+        afterFrame.push(fn);
+    }
+
+    requestRenderFrame(fn: () => void): void {
+        renderFrame.push(fn);
+    }
+
     /**
      * 隐藏这个元素
      */
@@ -260,6 +301,24 @@ export abstract class RenderItem
         this.remove();
     }
 }
+
+RenderItem.ticker.add(() => {
+    if (beforeFrame.length > 0) {
+        const toEmit = beforeFrame.slice();
+        beforeFrame.splice(0);
+        toEmit.forEach(v => v());
+    }
+    if (renderFrame.length > 0) {
+        const toEmit = renderFrame.slice();
+        renderFrame.splice(0);
+        toEmit.forEach(v => v());
+    }
+    if (afterFrame.length > 0) {
+        const toEmit = afterFrame.slice();
+        afterFrame.splice(0);
+        toEmit.forEach(v => v());
+    }
+});
 
 interface RenderEvent {
     animateFrame: (frame: number, time: number) => void;

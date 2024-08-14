@@ -16,6 +16,12 @@ interface BlockData {
     restHeight: number;
 }
 
+/**
+ * 简单分块缓存类，内容包含元素与分块两种，其中元素是最小单元，分块是缓存单元。
+ * 拿楼层举例，假如我将楼层按照13x13划分缓存，那么元素就是每个图块，而分块就是这13x13的缓存分块。
+ * 为方便区分，在相关函数的注释最后，都会有`xx -> yy`的说明，
+ * 其中xx说明传入的数据是元素还是分块的数据，而yy表示其返回值或转换为的值
+ */
 export class BlockCacher<T> extends EventEmitter<BlockCacherEvent> {
     /** 区域宽度 */
     width: number;
@@ -47,6 +53,7 @@ export class BlockCacher<T> extends EventEmitter<BlockCacherEvent> {
         this.height = height;
         this.blockSize = size;
         this.cacheDepth = depth;
+        this.split();
     }
 
     /**
@@ -103,7 +110,7 @@ export class BlockCacher<T> extends EventEmitter<BlockCacherEvent> {
     }
 
     /**
-     * 清除指定块的索引
+     * 清除指定块的索引（分块->void）
      * @param index 要清除的缓存索引
      * @param deep 清除哪些深度的缓存，至多31位二进制数，例如填0b111就是清除前三层的索引
      */
@@ -117,7 +124,7 @@ export class BlockCacher<T> extends EventEmitter<BlockCacherEvent> {
     }
 
     /**
-     * 清空指定索引的缓存，与 {@link clearCache} 不同的是，这里会直接清空对应索引的缓存，而不是指定分块的缓存
+     * 清空指定索引的缓存，与 {@link clearCache} 不同的是，这里会直接清空对应索引的缓存，而不是指定分块的缓存（分块->void）
      */
     clearCacheByIndex(index: number) {
         this.cache.delete(index);
@@ -131,14 +138,14 @@ export class BlockCacher<T> extends EventEmitter<BlockCacherEvent> {
     }
 
     /**
-     * 根据分块的横纵坐标获取其索引
+     * 根据分块的横纵坐标获取其索引（分块->分块）
      */
     getIndex(x: number, y: number) {
         return x + y * this.blockData.width;
     }
 
     /**
-     * 根据元素位置获取分块索引（注意是单个元素的位置，而不是分块的位置）
+     * 根据元素位置获取分块索引（注意是单个元素的位置，而不是分块的位置）（元素->分块）
      */
     getIndexByLoc(x: number, y: number) {
         return this.getIndex(
@@ -148,7 +155,7 @@ export class BlockCacher<T> extends EventEmitter<BlockCacherEvent> {
     }
 
     /**
-     * 根据块的索引获取其位置
+     * 根据块的索引获取其位置（分块->分块）
      */
     getBlockXYByIndex(index: number): LocArr {
         const width = this.blockData.width;
@@ -156,29 +163,47 @@ export class BlockCacher<T> extends EventEmitter<BlockCacherEvent> {
     }
 
     /**
-     * 获取一个元素位置所在的分块位置（即使它不在任何分块内）
+     * 获取一个元素位置所在的分块位置（即使它不在任何分块内）（元素->分块）
      */
     getBlockXY(x: number, y: number): LocArr {
         return [Math.floor(x / this.blockSize), Math.floor(y / this.blockSize)];
     }
 
     /**
-     * 根据分块坐标与deep获取一个分块的精确索引
+     * 根据分块坐标与deep获取一个分块的精确索引（分块->分块）
      */
     getPreciseIndex(x: number, y: number, deep: number) {
         return (x + y * this.blockSize) * this.cacheDepth + deep;
     }
 
     /**
-     * 根据元素坐标及deep获取元素所在块的精确索引
+     * 根据元素坐标及deep获取元素所在块的精确索引（元素->分块）
      */
     getPreciseIndexByLoc(x: number, y: number, deep: number) {
         return this.getPreciseIndex(...this.getBlockXY(x, y), deep);
     }
 
     /**
-     * 更新一个区域内的缓存
+     * 更新指定元素区域内的缓存（注意坐标是元素坐标，而非分块坐标）（元素->分块）
      * @param deep 缓存清除深度，默认全部清空
+     * @returns 更新区域内的所有有关分块索引
+     */
+    updateElementArea(
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+        deep: number = 2 ** 31 - 1
+    ) {
+        const [bx, by] = this.getBlockXY(x, y);
+        const [ex, ey] = this.getBlockXY(x + width, y + height);
+        return this.updateArea(bx, by, ex - bx, ey - by, deep);
+    }
+
+    /**
+     * 更新指定分块区域内的缓存（注意坐标是分块坐标，而非元素坐标）（分块->分块）
+     * @param deep 缓存清除深度，默认全部清空
+     * @returns 更新区域内的所有分块索引
      */
     updateArea(
         x: number,
@@ -187,13 +212,15 @@ export class BlockCacher<T> extends EventEmitter<BlockCacherEvent> {
         height: number,
         deep: number = 2 ** 31 - 1
     ) {
-        this.getIndexOf(x, y, width, height).forEach(v => {
+        const blocks = this.getIndexOf(x, y, width, height);
+        blocks.forEach(v => {
             this.clearCache(v, deep);
         });
+        return blocks;
     }
 
     /**
-     * 获取一个区域内包含的所有分块索引
+     * 传入分块坐标与范围，获取该区域内包含的所有分块索引（分块->分块）
      */
     getIndexOf(x: number, y: number, width: number, height: number) {
         const res = new Set<number>();
@@ -204,12 +231,43 @@ export class BlockCacher<T> extends EventEmitter<BlockCacherEvent> {
 
         for (let nx = sx; nx < ex; nx++) {
             for (let ny = sy; ny < ey; ny++) {
-                const index = this.getIndexByLoc(nx, ny);
-                if (res.has(index)) continue;
+                const index = this.getIndex(nx, ny);
                 res.add(index);
             }
         }
 
         return res;
+    }
+
+    /**
+     * 传入元素坐标与范围，获取该区域内包含的所有分块索引（元素->分块）
+     */
+    getIndexOfElement(x: number, y: number, width: number, height: number) {
+        const [bx, by] = this.getBlockXY(x, y);
+        const [ex, ey] = this.getBlockXY(x + width, y + height);
+        return this.getIndexOf(bx, by, ex - bx, ey - by);
+    }
+
+    /**
+     * 根据分块索引，获取这个分块所在区域的元素矩形范围（左上角横纵坐标及右下角横纵坐标）（分块->元素）
+     * @param block 分块索引
+     */
+    getRectOfIndex(block: number) {
+        const [x, y] = this.getBlockXYByIndex(block);
+        return this.getRectOfBlockXY(x, y);
+    }
+
+    /**
+     * 根据分块坐标，获取这个分块所在区域的元素矩形范围（左上角横纵坐标及右下角横纵坐标）（分块->元素）
+     * @param x 分块横坐标
+     * @param y 分块纵坐标
+     */
+    getRectOfBlockXY(x: number, y: number) {
+        return [
+            x * this.blockSize,
+            y * this.blockSize,
+            (x + 1) * this.blockSize,
+            (y + 1) * this.blockSize
+        ];
     }
 }

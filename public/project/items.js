@@ -1233,7 +1233,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "constants",
 		"name": "成就",
 		"canUseItemEffect": "true",
-		"useItemEffect": "Mota.require('var', 'mainUi')open('achievement');",
+		"useItemEffect": "Mota.require('var', 'mainUi').open('achievement');",
 		"text": "可以查看成就"
 	},
 	"I662": {

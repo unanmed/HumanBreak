@@ -1,4 +1,4 @@
-import { getHeroStatusOf, getHeroStatusOn } from '@/game/hero';
+import { getHeroStatusOf, getHeroStatusOn } from '@/game/state/hero';
 import { Range, RangeCollection } from '@/plugin/game/range';
 import {
     checkV2,
@@ -44,7 +44,7 @@ interface DamageInfo {
     skill?: number;
 }
 
-interface MapDamage {
+export interface MapDamage {
     damage: number;
     type: Set<string>;
     mockery?: LocArr[];
@@ -100,6 +100,7 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
     list: DamageEnemy[] = [];
 
     range: Range<DamageEnemy> = new Range(this);
+    // todo: 改成Map<number, MapDamage>
     mapDamage: Record<string, MapDamage> = {};
     haloList: HaloData[] = [];
 
@@ -353,7 +354,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
      * 伤害计算进度，0 -> 预平衡光环 -> 1 -> 计算没有光环的属性 -> 2 -> provide inject 光环
      * -> 3 -> 计算光环加成 -> 4 -> 计算完毕
      */
-    private progress: number = 0;
+    progress: number = 0;
 
     constructor(
         enemy: Enemy<T>,
@@ -656,6 +657,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
      * 计算怪物伤害
      */
     calDamage(hero: Partial<HeroStatus> = core.status.hero) {
+        // todo: 缓存怪物伤害
         const enemy = this.getRealInfo();
         return this.calEnemyDamageOf(hero, enemy);
     }
@@ -831,6 +833,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         num: number = 1,
         hero: Partial<HeroStatus> = core.status.hero
     ): CriticalDamageDelta[] {
+        // todo: 缓存临界
         const origin = this.calDamage(hero);
         const seckill = this.getSeckillAtk();
         return this.calCriticalWith(num, seckill, origin, hero);

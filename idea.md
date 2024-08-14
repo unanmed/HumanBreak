@@ -116,3 +116,4 @@ dam4.png ---- 存档 59
 [] 自定义状态栏，通过申请空间进行布局
 [x] 复写 api，rewrite()
 [x] 对 vnode 进行简单的包装，提供出显示文字、显示图片等 api 以及修改 css 的 api
+[] mapDamage 注册
