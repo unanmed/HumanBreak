@@ -3,6 +3,7 @@ import {
     ICanvasCachedRenderItem,
     RenderFunction,
     RenderItem,
+    RenderItemPosition,
     withCacheRender
 } from './item';
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
@@ -12,26 +13,35 @@ export class Sprite extends RenderItem implements ICanvasCachedRenderItem {
 
     canvas: MotaOffscreenCanvas2D;
 
-    constructor() {
+    private readonly enableCache: boolean;
+
+    /**
+     * 创建一个精灵，可以自由在上面渲染内容
+     * @param type 渲染模式，absolute表示绝对位置，static表示跟随摄像机移动，只对顶层元素有效
+     * @param cache 是否启用缓存机制
+     */
+    constructor(type: RenderItemPosition = 'static', cache: boolean = true) {
         super();
+        this.type = type;
+        this.enableCache = cache;
         this.renderFn = () => {};
         this.canvas = new MotaOffscreenCanvas2D();
         this.canvas.withGameScale(true);
     }
 
-    render(
-        canvas: HTMLCanvasElement,
-        ctx: CanvasRenderingContext2D,
-        camera: Camera
-    ): void {
+    render(canvas: MotaOffscreenCanvas2D, camera: Camera): void {
         this.emit('beforeRender');
         if (this.needUpdate) {
             this.cache(this.using);
             this.needUpdate = false;
         }
-        withCacheRender(this, canvas, ctx, camera, canvas => {
+        if (this.enableCache) {
+            withCacheRender(this, canvas.canvas, canvas.ctx, camera, canvas => {
+                this.renderFn(canvas, camera);
+            });
+        } else {
             this.renderFn(canvas, camera);
-        });
+        }
         this.writing = void 0;
         this.emit('afterRender');
     }

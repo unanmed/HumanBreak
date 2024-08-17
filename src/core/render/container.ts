@@ -17,36 +17,50 @@ export class Container
 
     canvas: MotaOffscreenCanvas2D;
 
-    constructor(type: RenderItemPosition = 'static') {
+    /** 是否启用缓存机制，对于特殊场景，内部已经包含了缓存机制，这时就不需要启用了 */
+    private readonly enableCache: boolean;
+
+    /**
+     * 创建一个容器，容器中可以包含其他渲染对象
+     * @param type 渲染模式，absolute表示绝对位置，static表示跟随摄像机移动，只对顶层元素有效
+     * @param cache 是否启用缓存机制
+     */
+    constructor(type: RenderItemPosition = 'static', cache: boolean = true) {
         super();
         this.canvas = new MotaOffscreenCanvas2D();
         this.type = type;
         this.canvas.withGameScale(true);
+        this.enableCache = cache;
     }
 
-    render(
-        canvas: HTMLCanvasElement,
-        ctx: CanvasRenderingContext2D,
-        camera: Camera
-    ): void {
+    private renderTo(canvas: MotaOffscreenCanvas2D, camera: Camera) {
+        const { ctx } = canvas;
+        this.sortedChildren.forEach(v => {
+            if (v.hidden) return;
+            ctx.save();
+            if (!v.antiAliasing) {
+                ctx.imageSmoothingEnabled = false;
+            } else {
+                ctx.imageSmoothingEnabled = true;
+            }
+            v.render(canvas, camera);
+            ctx.restore();
+        });
+    }
+
+    render(canvas: MotaOffscreenCanvas2D, camera: Camera): void {
         this.emit('beforeRender');
         if (this.needUpdate) {
             this.cache(this.using);
             this.needUpdate = false;
         }
-        withCacheRender(this, canvas, ctx, camera, c => {
-            this.sortedChildren.forEach(v => {
-                if (v.hidden) return;
-                ctx.save();
-                if (!v.antiAliasing) {
-                    ctx.imageSmoothingEnabled = false;
-                } else {
-                    ctx.imageSmoothingEnabled = true;
-                }
-                v.render(c.canvas, c.ctx, camera);
-                ctx.restore();
+        if (this.enableCache) {
+            withCacheRender(this, canvas.canvas, canvas.ctx, camera, c => {
+                this.renderTo(c, camera);
             });
-        });
+        } else {
+            this.renderTo(canvas, camera);
+        }
         this.writing = void 0;
         this.emit('afterRender');
     }

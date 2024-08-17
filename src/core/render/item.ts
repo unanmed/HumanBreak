@@ -185,14 +185,9 @@ export abstract class RenderItem
     /**
      * 渲染这个对象
      * @param canvas 渲染至的画布
-     * @param ctx 渲染至的画布的渲染上下文
      * @param camera 渲染时使用的摄像机
      */
-    abstract render(
-        canvas: HTMLCanvasElement,
-        ctx: CanvasRenderingContext2D,
-        camera: Camera
-    ): void;
+    abstract render(canvas: MotaOffscreenCanvas2D, camera: Camera): void;
 
     /**
      * 修改这个对象的大小
@@ -284,6 +279,14 @@ export abstract class RenderItem
         if (!this.hidden) return;
         this.hidden = false;
         this.update(this);
+    }
+
+    /**
+     * 将这个渲染元素添加到其他父元素上
+     * @param parent 父元素
+     */
+    append(parent: IRenderChildable) {
+        parent.appendChild(this);
     }
 
     /**

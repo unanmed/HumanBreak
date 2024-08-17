@@ -89,7 +89,7 @@ export class MotaRenderer extends Container {
                     ctx.imageSmoothingEnabled = true;
                     ct.imageSmoothingEnabled = true;
                 }
-                v.render(ca, ct, camera);
+                v.render(this.target, camera);
                 ct.restore();
             });
         });

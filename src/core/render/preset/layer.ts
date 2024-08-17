@@ -103,7 +103,7 @@ export class LayerGroup extends Container {
     private extend: Map<string, ILayerGroupRenderExtends> = new Map();
 
     constructor() {
-        super();
+        super('static', false);
 
         this.setHD(true);
         this.setAntiAliasing(false);
@@ -831,7 +831,7 @@ export class Layer extends Container {
     private extend: Map<string, ILayerRenderExtends> = new Map();
 
     constructor() {
-        super('absolute');
+        super('absolute', false);
 
         // this.setHD(false);
         this.setAntiAliasing(false);

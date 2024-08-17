@@ -135,7 +135,7 @@ export class Damage extends Sprite {
     private needUpdateBlocks: Set<number> = new Set();
 
     constructor() {
-        super();
+        super('absolute', false);
 
         this.block = new BlockCacher(0, 0, core._WIDTH_, 1);
         this.type = 'absolute';
@@ -386,6 +386,7 @@ export class Damage extends Sprite {
      * @param camera 摄像机
      */
     renderDamage(camera: Camera) {
+        console.time('damage');
         const { ctx } = this.damageMap;
         ctx.save();
         transformCanvas(this.damageMap, camera, true);
@@ -401,6 +402,7 @@ export class Damage extends Sprite {
             const px = bx * cell;
             const py = by * cell;
 
+            // todo: 是否真的需要缓存
             // 检查有没有缓存
             const cache = block.cache.get(v * block.cacheDepth);
             if (cache) {
@@ -408,7 +410,6 @@ export class Damage extends Sprite {
                 return;
             }
 
-            console.time('damage1');
             // 否则依次渲染并写入缓存
             const temp = new MotaOffscreenCanvas2D();
             temp.setHD(true);
@@ -416,9 +417,7 @@ export class Damage extends Sprite {
             temp.withGameScale(true);
             temp.size(size, size);
             const { ctx: ct } = temp;
-            console.timeEnd('damage1');
 
-            console.time('damage2');
             const render = this.renderable.get(v);
             render?.forEach(v => {
                 if (!v) return;
@@ -431,13 +430,11 @@ export class Damage extends Sprite {
                 ct.strokeText(v.text, v.x, v.y);
                 ct.fillText(v.text, v.x, v.y);
             });
-            console.timeEnd('damage2');
 
-            console.time('damage3');
             ctx.drawImage(temp.canvas, px, py, size, size);
             block.cache.set(v, temp.canvas);
-            console.timeEnd('damage3');
         });
         ctx.restore();
+        console.timeEnd('damage');
     }
 }
