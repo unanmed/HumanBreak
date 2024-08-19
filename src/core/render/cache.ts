@@ -44,7 +44,7 @@ interface TextureRequire {
 interface RenderableDataBase {
     /** 图块的总帧数 */
     frame: number;
-    /** 对应图块属性的动画帧数，-1表示没有设定 */
+    /** 对应图块属性的动画帧数，-1表示没有设定，0表示第一帧 */
     animate: number;
     /** 是否是大怪物 */
     bigImage: boolean;
@@ -76,6 +76,15 @@ class TextureCache extends EventEmitter<TextureCacheEvent> {
     renderable: Map<number, RenderableData | AutotileRenderable> = new Map();
     /** 自动元件额外连接信息，用于对非自身图块进行连接 */
     autoConn: Map<number, Set<number>> = new Map();
+    /** 行走图朝向绑定 */
+    characterDirection: Record<Dir, number> = {
+        down: 0,
+        left: 1,
+        right: 2,
+        up: 3
+    };
+    /** 行走图转向顺序 */
+    characterTurn: Dir[] = ['up', 'right', 'down', 'left'];
 
     constructor() {
         super();

@@ -365,6 +365,7 @@ export class Hero<T extends object = IHeroStatusDefault>
     x: number;
     y: number;
     floorId: FloorIds;
+    dir: Dir2;
 
     readonly items: Map<AllIdsOf<'items'>, number> = new Map();
     readonly id: string;
@@ -384,6 +385,7 @@ export class Hero<T extends object = IHeroStatusDefault>
         this.y = y;
         this.floorId = floorId;
         this.state = state;
+        this.dir = 'down';
     }
 
     /**

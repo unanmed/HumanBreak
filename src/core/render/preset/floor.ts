@@ -39,6 +39,7 @@ hook.on('changingFloor', floor => {
 interface LayerGroupBinderEvent {
     update: [floor: FloorIds];
     setBlock: [x: number, y: number, floor: FloorIds, block: AllNumbers];
+    floorChange: [floor: FloorIds];
 }
 
 /**
@@ -86,7 +87,7 @@ export class LayerGroupFloorBinder
      * 在下一帧进行绑定数据更新
      */
     updateBind() {
-        if (this.needUpdate) return;
+        if (this.needUpdate || !this.group) return;
         this.needUpdate = true;
         this.group.requestBeforeFrame(() => {
             this.needUpdate = false;
@@ -182,6 +183,7 @@ export class LayerFloorBinder implements ILayerRenderExtends {
     bindThis() {
         this.floor = void 0;
         this.bindThisFloor = true;
+        this.updateBind();
     }
 
     /**
@@ -191,6 +193,7 @@ export class LayerFloorBinder implements ILayerRenderExtends {
     bindFloor(floorId: FloorIds) {
         this.bindThisFloor = false;
         this.floor = floorId;
+        this.updateBind();
     }
 
     /**

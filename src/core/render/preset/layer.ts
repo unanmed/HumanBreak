@@ -169,29 +169,6 @@ export class LayerGroup extends Container {
     }
 
     /**
-     * 使用预设显示模式，注意切换后所有的旧Layer实例会被摧毁
-     * @param preset 预设名称
-     */
-    // usePreset(preset: LayerGroupPreset) {
-    //     this.emptyLayer();
-
-    //     const child = layers.map((v, i) => {
-    //         const layer = new Layer();
-    //         layer.bindLayer(v);
-    //         layer.setZIndex(i * 10);
-    //         this.layers.set(v, layer);
-    //         return layer;
-    //     });
-    //     this.appendChild(...child);
-    //     if (preset === 'defaults') {
-    //         const damage = new Damage(this.floorId);
-    //         this.appendChild(damage);
-    //         this.damage = damage;
-    //         damage.setZIndex(60);
-    //     }
-    // }
-
-    /**
      * 清空所有层
      */
     emptyLayer() {
@@ -291,45 +268,6 @@ export class LayerGroup extends Container {
     }
 
     /**
-     * 绑定当前楼层
-     */
-    // bindThis() {
-    //     this.bindThisFloor = true;
-    //     this.updateFloor();
-    // }
-
-    /**
-     * 绑定楼层信息
-     * @param floor 绑定楼层，不填时表示绑定为当前楼层
-     */
-    // bindFloor(floor?: FloorIds) {
-    //     if (!floor) {
-    //         this.bindThisFloor = true;
-    //     } else {
-    //         this.floorId = floor;
-    //     }
-    //     this.updateFloor();
-    // }
-
-    /**
-     * 更新地图信息
-     */
-    // updateFloor() {
-    //     if (this.bindThisFloor) {
-    //         this.floorId = core.status.floorId;
-    //     }
-    //     const floor = this.floorId;
-    //     if (!floor) return;
-    //     this.layers.forEach(v => {
-    //         v.bindData(floor);
-    //         if (v.layer === 'bg') {
-    //             v.bindBackground(floor);
-    //         }
-    //     });
-    //     // this.damage?.bindFloor(floor);
-    // }
-
-    /**
      * 缓存计算应该渲染的块
      * @param camera 摄像机
      * @param blockData 分块信息
@@ -347,37 +285,6 @@ export class LayerGroup extends Container {
     releaseNeedRender() {
         this.needRender = void 0;
     }
-
-    /**
-     * 添加伤害显示层，并将显示层返回，如果已经添加，则会返回已经添加的显示层
-     */
-    // addDamage() {
-    //     if (!this.damage) {
-    //         const damage = new Damage();
-    //         this.appendChild(damage);
-    //         this.damage = damage;
-    //         if (this.floorId) damage.bindFloor(this.floorId);
-    //         return damage;
-    //     }
-    //     return this.damage;
-    // }
-
-    /**
-     * 移除伤害显示层
-     */
-    // removeDamage() {
-    //     if (this.damage) {
-    //         this.removeChild(this.damage);
-    //         this.damage = void 0;
-    //     }
-    // }
-
-    /**
-     * 更新指定区域内的伤害渲染信息
-     */
-    // updateDamage(x: number, y: number, width: number, height: number) {
-    //     this.damage?.updateRenderable(x, y, width, height);
-    // }
 
     /**
      * 更新动画帧
@@ -404,31 +311,6 @@ export class LayerGroup extends Container {
 }
 
 const hook = Mota.require('var', 'hook');
-
-// hook.on('changingFloor', floorId => {
-//     LayerGroup.list.forEach(v => {
-//         if (v.floorId === floorId || v.bindThisFloor) v.updateFloor();
-//     });
-// });
-// hook.on('setBlock', (x, y, floorId, block) => {
-//     LayerGroup.list.forEach(v => {
-//         if (v.floorId === floorId) {
-//             v.updateDamage(x, y, 1, 1);
-//             v.layers.forEach(v => {
-//                 if (v.layer === 'event') {
-//                     v.putRenderData([block], 1, x, y);
-//                 }
-//             });
-//         }
-//     });
-// });
-// hook.on('statusBarUpdate', () => {
-//     LayerGroup.list.forEach(v => {
-//         if (v.floorId) {
-//             v.damage?.bindFloor(v.floorId);
-//         }
-//     });
-// });
 
 // todo: animate frame.
 // renderEmits.on('animateFrame', () => {
@@ -662,10 +544,6 @@ export interface ILayerRenderExtends {
         autotiles: Record<number, number>
     ): void;
 
-    // onDataBind?: (layer: Layer, floor: FloorIds, name?: FloorLayer) => void;
-    // onLayerBind?: (layer: Layer, name: FloorLayer) => void;
-    // onDataUpdate?: (layer: Layer, data: number[]) => void;
-
     /**
      * 当地图大小修改时执行的函数
      * @param layer 目标Layer实例
@@ -695,7 +573,7 @@ export interface ILayerRenderExtends {
     /**
      * 当更新移动层的渲染信息是执行的函数
      * @param layer 目标Layer实例
-     * @param renderable 移动层的渲染信息（包含大怪物）
+     * @param renderable 移动层的渲染信息（包含大怪物），未排序
      */
     onMovingUpdate?(layer: Layer, renderable: LayerMovingRenderable[]): void;
 
@@ -728,7 +606,7 @@ interface LayerCacheItem {
     canvas: HTMLCanvasElement;
 }
 
-interface LayerMovingRenderable extends RenderableData {
+export interface LayerMovingRenderable extends RenderableData {
     zIndex: number;
     x: number;
     y: number;
@@ -800,6 +678,7 @@ export class Layer extends Container {
     floorId?: FloorIds;
     /** 渲染的层 */
     layer?: FloorLayer;
+    // todo: renderable分块存储，优化循环绘制性能
     /** 渲染数据 */
     renderData: number[] = [];
     /** 自动元件的连接信息，键表示图块在渲染数据中的索引，值表示连接信息，是个8位二进制 */
@@ -823,6 +702,7 @@ export class Layer extends Container {
     moving: MovingBlock[] = [];
     /** 大怪物渲染信息 */
     bigImages: Map<number, LayerMovingRenderable> = new Map();
+    // todo: 是否需要桶排？
     /** 移动层的渲染信息 */
     movingRenderable: LayerMovingRenderable[] = [];
     /** 下一此渲染时是否需要更新移动层的渲染信息 */
@@ -1208,45 +1088,6 @@ export class Layer extends Container {
     }
 
     /**
-     * 绑定渲染楼层
-     * @param floor 楼层id
-     * @param layer 渲染的层数，例如是背景层还是事件层等
-     */
-    // bindData(floor: FloorIds, layer?: FloorLayer) {
-    //     this.floorId = floor;
-    //     if (layer) this.layer = layer;
-    //     const f = core.status.maps[floor];
-    //     this.mapWidth = f.width;
-    //     this.mapHeight = f.height;
-    //     this.block.size(f.width, f.height);
-    //     this.updateDataFromFloor();
-    // }
-
-    /**
-     * 绑定显示层
-     * @param layer 绑定的层
-     */
-    // bindLayer(layer: FloorLayer) {
-    //     this.layer = layer;
-    //     this.updateDataFromFloor();
-    // }
-
-    /**
-     * 从地图数据更新渲染数据，要求已经绑定渲染楼层，否则无事发生
-     */
-    // updateDataFromFloor() {
-    //     if (!this.floorId || !this.layer) return;
-    //     const floor = core.status.maps[this.floorId];
-    //     if (this.layer === 'event') {
-    //         const map = floor.map;
-    //         this.putRenderData(map.flat(), floor.width, 0, 0);
-    //     } else {
-    //         const map = core.maps._getBgFgMapArray(this.layer, this.floorId);
-    //         this.putRenderData(map.flat(), floor.width, 0, 0);
-    //     }
-    // }
-
-    /**
      * 设置地图大小，会清空渲染数据（且丢失引用），因此后面应当紧跟 putRenderData，以保证渲染正常进行
      * @param width 地图宽度
      * @param height 地图高度
@@ -1323,11 +1164,11 @@ export class Layer extends Container {
                 });
             }
         });
-        this.movingRenderable.sort((a, b) => a.zIndex - b.zIndex);
 
         for (const ex of this.extend.values()) {
             ex.onMovingUpdate?.(this, this.movingRenderable);
         }
+        this.movingRenderable.sort((a, b) => a.zIndex - b.zIndex);
     }
 
     /**
@@ -1499,26 +1340,34 @@ export class Layer extends Container {
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.translate(core._PX_ / 2, core._PY_ / 2);
         ctx.transform(a, b, c, d, e, f);
-        const r =
-            Math.max(a, b, c, d) ** 2 * Math.max(core._PX_, core._PY_) * 2;
+        const max1 = Math.max(a, b, c, d) ** 2;
+        const max2 = Math.max(core._PX_, core._PY_) * 2;
+        const r = (max1 * max2) ** 2;
 
         this.movingRenderable.forEach(v => {
-            const { x, y, image, frame: blockFrame, render } = v;
-            const f = frame % 4;
-            const i = frame === 4 && blockFrame === 3 ? 1 : f;
+            const { x, y, image, frame: blockFrame, render, animate } = v;
+            const ff = frame % 4;
+            const i =
+                animate === -1
+                    ? frame === 4 && blockFrame === 3
+                        ? 1
+                        : ff
+                    : animate;
             const [sx, sy, w, h] = render[i];
             const px = x * cell - w / 2 + halfCell;
             const py = y * cell - h + cell;
             const ex = px + w;
             const ey = py + h;
+
             if (
-                (px - e) ** 2 > r ||
-                (py - f) ** 2 > r ||
-                (ex - e) ** 2 > r ||
-                (ey - f) ** 2 > r
+                (px + e) ** 2 > r ||
+                (py + f) ** 2 > r ||
+                (ex + e) ** 2 > r ||
+                (ey + f) ** 2 > r
             ) {
                 return;
             }
+
             ctx.drawImage(image, sx, sy, w, h, px, py, w, h);
         });
 
@@ -1578,339 +1427,3 @@ export class Layer extends Container {
         super.destroy();
     }
 }
-
-// interface DamageRenderable {
-//     x: number;
-//     y: number;
-//     align: CanvasTextAlign;
-//     baseline: CanvasTextBaseline;
-//     text: string;
-//     color: CanvasStyle;
-// }
-
-// export class Damage extends Sprite {
-//     floorId?: FloorIds;
-
-//     mapWidth: number = 0;
-//     mapHeight: number = 0;
-
-//     /** 键表示格子索引，值表示在这个格子上的渲染信息（当然实际渲染位置可以不在这个格子上） */
-//     renderable: Map<number, DamageRenderable[]> = new Map();
-//     block: BlockCacher<LayerCacheItem>;
-//     /** 记录所有需要重新计算伤害的分块，这样可以不用一次性计算全地图的伤害，从而优化性能 */
-//     needUpdateBlock: Set<number> = new Set();
-
-//     cellSize: number = 32;
-
-//     /** 伤害渲染层，渲染至之后再渲染到目标层 */
-//     damageMap: MotaOffscreenCanvas2D = new MotaOffscreenCanvas2D();
-//     /** 字体 */
-//     font: string = "14px 'normal'";
-//     /** 描边样式 */
-//     strokeColor: CanvasStyle = '#000';
-//     /** 描边粗细 */
-//     strokeWidth: number = 2;
-
-//     constructor(floor?: FloorIds) {
-//         super();
-
-//         this.block = new BlockCacher(0, 0, core._WIDTH_, 1);
-//         this.type = 'absolute';
-//         if (floor) this.bindFloor(floor);
-//         this.size(core._PX_, core._PY_);
-//         this.damageMap.withGameScale(true);
-//         this.damageMap.setHD(true);
-//         this.damageMap.setAntiAliasing(true);
-//         this.damageMap.size(core._PX_, core._PY_);
-
-//         this.setRenderFn((canvas, camera) => {
-//             const { ctx } = canvas;
-//             const { width, height } = canvas.canvas;
-//             ctx.save();
-//             ctx.imageSmoothingEnabled = false;
-//             this.renderDamage(camera);
-//             ctx.setTransform(1, 0, 0, 1, 0, 0);
-//             ctx.drawImage(this.damageMap.canvas, 0, 0, width, height);
-//             ctx.restore();
-//         });
-//     }
-
-//     /**
-//      * 更新楼层信息
-//      */
-//     updateFloor(): void {
-//         const floor = this.floorId;
-//         if (!floor) return;
-//         core.extractBlocks(floor);
-//         const f = core.status.maps[floor];
-//         this.updateRenderable(0, 0, f.width, f.height);
-//     }
-
-//     /**
-//      * 绑定显示楼层
-//      * @param floor 绑定的楼层
-//      */
-//     bindFloor(floor: FloorIds) {
-//         this.floorId = floor;
-//         core.extractBlocks(this.floorId);
-//         const f = core.status.maps[this.floorId];
-//         this.mapWidth = f.width;
-//         this.mapHeight = f.height;
-//         this.block.size(f.width, f.height);
-//         this.updateFloor();
-//     }
-
-//     /**
-//      * 根据需要更新的区域更新显示信息，注意调用前需要保证怪物信息是最新的，也就是要在计算过怪物信息后才能调用这个
-//      * @param block 要更新的区域
-//      */
-//     updateRenderableBlock(block: Set<number>) {
-//         if (!this.floorId) return;
-//         const size = this.block.blockSize;
-
-//         Mota.require('fn', 'ensureFloorDamage')(this.floorId);
-//         const col = core.status.maps[this.floorId].enemy;
-//         const obj = core.getMapBlocksObj(this.floorId);
-
-//         if (block.size === 1) {
-//             // 如果是单个分块，直接进行更新
-//             const index = [...block.values()][0];
-//             if (!this.needUpdateBlock.has(index)) return;
-//             this.needUpdateBlock.delete(index);
-
-//             const [x, y] = this.block.getBlockXYByIndex(index);
-//             const sx = x * size;
-//             const sy = y * size;
-//             const ex = sx + size;
-//             const ey = sy + size;
-
-//             for (let ny = sy; ny < ey; ny++) {
-//                 for (let nx = sx; nx < ex; nx++) {
-//                     const index = nx + ny * this.mapWidth;
-//                     this.renderable.delete(index);
-//                     this.pushMapDamage(obj, col, nx, ny);
-//                 }
-//             }
-
-//             col.range
-//                 .scan('rect', { x: sx, y: sy, w: size, h: size })
-//                 .forEach(v => {
-//                     if (isNil(v.x) || isNil(v.y)) return;
-//                     this.pushEnemyDamage(v, v.x, v.y);
-//                 });
-//         } else {
-//             // 否则使用 X 扫描线的方式，获取每个y坐标对应的最小最大x坐标，从而可以更快地找出在范围内的怪物
-//             const xyMap: Map<number, LocArr> = new Map();
-//             const toEmitArea: [number, number, number, number][] = [];
-
-//             block.forEach(v => {
-//                 if (!this.needUpdateBlock.has(v)) return;
-//                 this.needUpdateBlock.delete(v);
-//                 const [x, y] = this.block.getBlockXYByIndex(v);
-//                 const sx = x * size;
-//                 const sy = y * size;
-//                 const ex = sx + size;
-//                 const ey = sy + size;
-//                 toEmitArea.push([sx, sy, size, size]);
-
-//                 for (let ny = sy; ny < ey; ny++) {
-//                     let arr = xyMap.get(ny);
-//                     if (!arr) {
-//                         arr = [sx, ex];
-//                         xyMap.set(ny, arr);
-//                     } else {
-//                         if (sx < arr[0]) arr[0] = sx;
-//                         if (ex > arr[1]) arr[1] = ex;
-//                     }
-//                     for (let nx = sx; nx < ex; nx++) {
-//                         const index = nx + ny * this.mapWidth;
-//                         this.renderable.delete(index);
-//                         this.pushMapDamage(obj, col, x, y);
-//                     }
-//                 }
-//             });
-
-//             xyMap.forEach(([sx, ex], y) => {
-//                 col.list.forEach(v => {
-//                     if (isNil(v.x) || isNil(v.y)) return;
-//                     if (v.y !== y || v.x < sx || v.x >= ex) return;
-//                     this.pushEnemyDamage(v, v.x, v.y);
-//                 });
-//             });
-
-//             toEmitArea.forEach(v => {
-//                 this.emit('dataUpdate', v[0], v[1], v[2], v[3]);
-//             });
-//             this.update(this);
-//         }
-//     }
-
-//     /**
-//      * 更新指定区域内的渲染信息，注意调用前需要保证怪物信息是最新的，也就是要在计算过怪物信息后才能调用这个
-//      */
-//     updateRenderable(x: number, y: number, width: number, height: number) {
-//         if (!this.floorId) return;
-//         this.block.getIndexOf(x, y, width, height).forEach(v => {
-//             this.block.clearCache(v, 1);
-//             this.needUpdateBlock.add(v);
-//         });
-//         this.update(this);
-//     }
-
-//     /**
-//      * 向渲染列表添加渲染内容，应当在 `dataUpdate` 的事件中进行调用，其他位置不应当直接调用
-//      */
-//     pushDamageRenderable(x: number, y: number, ...data: DamageRenderable[]) {
-//         const index = x + y * this.mapWidth;
-//         let arr = this.renderable.get(index);
-//         if (!arr) {
-//             arr = [];
-//             this.renderable.set(index, arr);
-//         }
-//         arr.push(...data);
-//     }
-
-//     private pushMapDamage(
-//         obj: Record<LocString, Block>,
-//         col: EnemyCollection,
-//         x: number,
-//         y: number
-//     ) {
-//         const loc = `${x},${y}` as LocString;
-//         const dam = col.mapDamage[loc];
-
-//         if (!dam || obj[loc]?.event.noPass) return;
-//         let text = '';
-//         let color = '#fa3';
-//         if (dam.damage > 0) {
-//             text = core.formatBigNumber(dam.damage, true);
-//         } else if (dam.mockery) {
-//             dam.mockery.sort((a, b) =>
-//                 a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]
-//             );
-//             const [tx, ty] = dam.mockery[0];
-//             const dir = x > tx ? '←' : x < tx ? '→' : y > ty ? '↑' : '↓';
-//             text = '嘲' + dir;
-//             color = '#fd4';
-//         } else if (dam.hunt) {
-//             text = '猎';
-//             color = '#fd4';
-//         } else {
-//             return;
-//         }
-
-//         const mapDam: DamageRenderable = {
-//             align: 'center',
-//             baseline: 'middle',
-//             text,
-//             color,
-//             x: x * this.cellSize + this.cellSize / 2,
-//             y: y * this.cellSize + this.cellSize / 2
-//         };
-//         this.pushDamageRenderable(x, y, mapDam);
-//     }
-
-//     private pushEnemyDamage(enemy: DamageEnemy, x: number, y: number) {
-//         const dam = enemy.calDamage().damage;
-//         const cri = enemy.calCritical(1)[0]?.atkDelta ?? Infinity;
-//         const dam1: DamageRenderable = {
-//             align: 'left',
-//             baseline: 'alphabetic',
-//             text: !isFinite(dam) ? '???' : core.formatBigNumber(dam, true),
-//             color: getDamageColor(dam),
-//             x: x * this.cellSize + 1,
-//             y: y * this.cellSize + this.cellSize - 1
-//         };
-//         const dam2: DamageRenderable = {
-//             align: 'left',
-//             baseline: 'alphabetic',
-//             text: !isFinite(cri) ? '?' : core.formatBigNumber(cri, true),
-//             color: '#fff',
-//             x: x * this.cellSize + 1,
-//             y: y * this.cellSize + this.cellSize - 11
-//         };
-//         this.pushDamageRenderable(x, y, dam1, dam2);
-//     }
-
-//     /**
-//      * 计算需要渲染哪些块
-//      */
-//     calNeedRender(camera: Camera) {
-//         if (this.parent instanceof LayerGroup) {
-//             // 如果处于地图组中，每个地图的渲染区域应该是一样的，因此可以缓存优化
-//             return this.parent.cacheNeedRender(camera, this.block);
-//         } else if (this.parent instanceof Layer) {
-//             // 如果是地图的子元素，直接调用Layer的计算函数
-//             return this.parent.calNeedRender(camera);
-//         } else {
-//             return calNeedRenderOf(camera, this.cellSize, this.block);
-//         }
-//     }
-
-//     /**
-//      * 渲染伤害值
-//      */
-//     renderDamage(camera: Camera) {
-//         if (!this.floorId) return;
-
-//         const { ctx } = this.damageMap;
-//         ctx.save();
-//         transformCanvas(this.damageMap, camera, true);
-
-//         const { res: render } = this.calNeedRender(camera);
-//         this.updateRenderableBlock(render);
-//         const block = this.block;
-//         const cell = this.cellSize;
-//         const size = cell * block.blockSize;
-//         render.forEach(v => {
-//             const [x, y] = block.getBlockXYByIndex(v);
-//             const bx = x * block.blockSize;
-//             const by = y * block.blockSize;
-//             const px = bx * cell;
-//             const py = by * cell;
-
-//             // 检查有没有缓存
-//             const cache = block.cache.get(v * block.cacheDepth);
-//             if (cache && cache.floorId === this.floorId) {
-//                 ctx.drawImage(cache.canvas, px, py, size, size);
-//                 return;
-//             }
-
-//             // 否则依次渲染并写入缓存
-//             const temp = new MotaOffscreenCanvas2D();
-//             temp.setHD(true);
-//             temp.setAntiAliasing(true);
-//             temp.withGameScale(true);
-//             temp.size(size, size);
-//             const { ctx: ct } = temp;
-//             ct.font = this.font;
-//             ct.strokeStyle = this.strokeColor;
-//             ct.lineWidth = this.strokeWidth;
-
-//             const ex = bx + block.blockSize;
-//             const ey = by + block.blockSize;
-//             for (let nx = bx; nx < ex; nx++) {
-//                 for (let ny = by; ny < ey; ny++) {
-//                     const index = nx + ny * block.blockSize;
-//                     const render = this.renderable.get(index);
-
-//                     render?.forEach(v => {
-//                         if (!v) return;
-//                         ct.fillStyle = v.color;
-//                         ct.textAlign = v.align;
-//                         ct.textBaseline = v.baseline;
-//                         ct.strokeText(v.text, v.x, v.y);
-//                         ct.fillText(v.text, v.x, v.y);
-//                     });
-//                 }
-//             }
-
-//             ct.drawImage(temp.canvas, px, py, size, size);
-//             block.cache.set(v * block.cacheDepth, {
-//                 canvas: temp.canvas,
-//                 floorId: this.floorId
-//             });
-//         });
-//         ctx.restore();
-//     }
-// }

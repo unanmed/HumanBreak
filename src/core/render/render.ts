@@ -6,6 +6,7 @@ import { RenderItem, transformCanvas, withCacheRender } from './item';
 import { FloorLayer, Layer, LayerGroup } from './preset/layer';
 import { LayerGroupFloorBinder } from './preset/floor';
 import { FloorDamageExtends } from './preset/damage';
+import { HeroRenderer } from './preset/hero';
 
 export class MotaRenderer extends Container {
     static list: Set<MotaRenderer> = new Set();
@@ -67,7 +68,7 @@ export class MotaRenderer extends Container {
      * 渲染游戏画面
      */
     render() {
-        console.time();
+        // console.time();
         const { canvas, ctx } = this.target;
         const camera = this.camera;
         this.emit('beforeRender');
@@ -94,7 +95,7 @@ export class MotaRenderer extends Container {
             });
         });
         this.emit('afterRender');
-        console.timeEnd();
+        // console.timeEnd();
     }
 
     update(item?: RenderItem) {
@@ -152,10 +153,19 @@ Mota.require('var', 'hook').once('reset', () => {
 
     const binder = new LayerGroupFloorBinder();
     const damage = new FloorDamageExtends();
+    const hero = new HeroRenderer();
     layer.extends(binder);
     layer.extends(damage);
+    layer.getLayer('event')?.extends(hero);
     binder.bindThis();
     render.appendChild(layer);
+
+    layer.requestAfterFrame(() => {
+        hero.setImage(core.material.images.images['hero2.png']);
+    });
+    layer.delegateTicker(() => {
+        hero.turn();
+    }, 10000);
 
     camera.move(240, 240);
     render.update();

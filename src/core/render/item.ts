@@ -2,7 +2,7 @@ import { isNil } from 'lodash-es';
 import { EventEmitter } from '../common/eventEmitter';
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
 import { Camera } from './camera';
-import { Ticker } from 'mutate-animate';
+import { Ticker, TickerFn } from 'mutate-animate';
 
 export type RenderFunction = (
     canvas: MotaOffscreenCanvas2D,
@@ -123,6 +123,25 @@ interface IRenderFrame {
     requestRenderFrame(fn: () => void): void;
 }
 
+interface IRenderTickerSupport {
+    /**
+     * 委托ticker，让其在指定时间范围内每帧执行对应函数，超过时间后自动删除
+     * @param fn 每帧执行的函数
+     * @param time 函数持续时间，不填代表不会自动删除，需要手动删除
+     * @param end 持续时间结束后执行的函数
+     * @returns 委托id，可用于删除
+     */
+    delegateTicker(fn: TickerFn, time?: number, end?: () => void): number;
+
+    /**
+     * 移除ticker函数
+     * @param id 函数id，也就是{@link IRenderTickerSupport.delegateTicker}的返回值
+     * @param callEnd 是否调用结束函数，即{@link IRenderTickerSupport.delegateTicker}的end参数
+     * @returns 是否删除成功，比如对应ticker不存在，就是删除失败
+     */
+    removeTicker(id: number, callEnd?: boolean): boolean;
+}
+
 interface RenderItemEvent {
     beforeUpdate: (item?: RenderItem) => void;
     afterUpdate: (item?: RenderItem) => void;
@@ -130,10 +149,16 @@ interface RenderItemEvent {
     afterRender: () => void;
 }
 
+interface TickerDelegation {
+    fn: TickerFn;
+    endFn?: () => void;
+}
+
 const beforeFrame: (() => void)[] = [];
 const afterFrame: (() => void)[] = [];
 const renderFrame: (() => void)[] = [];
 
+// todo: 添加模型变换
 export abstract class RenderItem
     extends EventEmitter<RenderItemEvent>
     implements
@@ -141,12 +166,17 @@ export abstract class RenderItem
         IRenderUpdater,
         IRenderAnchor,
         IRenderConfig,
-        IRenderFrame
+        IRenderFrame,
+        IRenderTickerSupport
 {
     /** 渲染的全局ticker */
     static ticker: Ticker = new Ticker();
     /** 包括但不限于怪物、npc、自动元件的动画帧数 */
     static animatedFrame: number = 0;
+    /** ticker委托映射 */
+    static tickerMap: Map<number, TickerDelegation> = new Map();
+    /** ticker委托id */
+    static tickerId: number = 0;
 
     zIndex: number = 0;
 
@@ -261,6 +291,32 @@ export abstract class RenderItem
 
     requestRenderFrame(fn: () => void): void {
         renderFrame.push(fn);
+    }
+
+    delegateTicker(fn: TickerFn, time?: number, end?: () => void): number {
+        const id = RenderItem.tickerId++;
+        if (typeof time === 'number' && time === 0) return id;
+        const delegation: TickerDelegation = {
+            fn,
+            endFn: end
+        };
+        RenderItem.tickerMap.set(id, delegation);
+        RenderItem.ticker.add(fn);
+        if (typeof time === 'number' && time < 2147438647 && time > 0) {
+            setTimeout(() => {
+                RenderItem.ticker.remove(fn);
+                end?.();
+            }, time);
+        }
+        return id;
+    }
+
+    removeTicker(id: number, callEnd: boolean = true): boolean {
+        const delegation = RenderItem.tickerMap.get(id);
+        if (!delegation) return false;
+        RenderItem.ticker.remove(delegation.fn);
+        if (callEnd) delegation.endFn?.();
+        return true;
     }
 
     /**

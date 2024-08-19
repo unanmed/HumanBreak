@@ -294,12 +294,14 @@ interface Control {
     setAutomaticRoute(destX: number, destY: number, stepPostfix: Loc[]): void;
 
     /**
+     * @deprecated
      * 连续行走
      * @param steps 压缩的步伐数组，每项表示朝某方向走多少步
      */
     setAutoHeroMove(steps: CompressedStep[]): void;
 
     /**
+     * @deprecated
      * 设置行走的效果动画
      */
     setHeroMoveInterval(callback?: () => any): void;
@@ -310,6 +312,7 @@ interface Control {
     moveOneStep(callback?: () => any): void;
 
     /**
+     * @deprecated
      * 尝试前进一步，如果面前不可被踏入就会直接触发该点事件
      * @example core.moveAction(core.doAction); // 尝试前进一步，然后继续事件处理
      * @param callback 走一步后的回调函数
@@ -317,6 +320,7 @@ interface Control {
     moveAction(callback?: () => void): void;
 
     /**
+     * @deprecated
      * 连续前进，不撞南墙不回头
      * @example core.moveHero(); // 连续前进
      * @param direction 移动的方向，不设置就是勇士当前的方向
@@ -325,11 +329,13 @@ interface Control {
     moveHero(direction?: Dir, callback?: () => void): void;
 
     /**
+     * @deprecated
      * 当前是否正在移动
      */
     isMoving(): boolean;
 
     /**
+     * @deprecated
      * 停止勇士的一切行动并等待勇士停下
      * @example core.waitHeroToStop(core.vibrate); // 等待勇士停下，然后视野左右抖动1秒
      * @param callback 勇士停止后的回调函数
@@ -337,6 +343,7 @@ interface Control {
     waitHeroToStop(callback?: () => void): void;
 
     /**
+     * @deprecated
      * 主角转向并计入录像，不会导致跟随者聚集，会导致视野重置到以主角为中心
      * @example core.turnHero(); // 主角顺时针旋转，即单击主角或按下Z键的效果
      * @param direction 主角的新朝向，可为up, down, left, right, :left, :right, :back七种之一，不填视为:right
@@ -360,6 +367,7 @@ interface Control {
     tryMoveDirectly(destX: number, destY: number): boolean;
 
     /**
+     * @deprecated
      * 绘制主角和跟随者并重置视野到以主角为中心
      * @example core.drawHero(); // 原地绘制主角的静止帧
      * @param status 绘制状态
@@ -373,6 +381,7 @@ interface Control {
     ): void;
 
     /**
+     * @deprecated
      * 改变勇士的不透明度
      * @param opacity 要设置成的不透明度
      * @param moveMode 动画的缓动模式

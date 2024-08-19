@@ -37,7 +37,6 @@ export class FloorDamageExtends implements ILayerGroupRenderExtends {
         this.sprite.setMapSize(map.width, map.height);
         ensureFloorDamage(floor);
         const enemy = core.status.maps[floor].enemy;
-        console.log(enemy);
 
         this.sprite.updateCollection(enemy);
     }
@@ -386,7 +385,7 @@ export class Damage extends Sprite {
      * @param camera 摄像机
      */
     renderDamage(camera: Camera) {
-        console.time('damage');
+        // console.time('damage');
         const { ctx } = this.damageMap;
         ctx.save();
         transformCanvas(this.damageMap, camera, true);
@@ -435,6 +434,6 @@ export class Damage extends Sprite {
             block.cache.set(v, temp.canvas);
         });
         ctx.restore();
-        console.timeEnd('damage');
+        // console.timeEnd('damage');
     }
 }
