@@ -233,38 +233,41 @@ export class HeroRenderer
      *           否则可能会导致移动过程中与大怪物的层级关系不正确，比如全在大怪物身后。注意不建议频繁改动这个值，
      *           因为此举会导致层级的重新排序，降低渲染性能。
      */
-    moveAs(x: number, y: number, time: number, fn: TimingFn<3>) {
-        if (this.status !== 'stop') return;
-        if (!this.renderable) return;
+    moveAs(x: number, y: number, time: number, fn: TimingFn<3>): Promise<void> {
+        if (this.status !== 'stop') return Promise.reject();
+        if (!this.renderable) return Promise.reject();
         this.status = 'moving-as';
         let nowZIndex = fn(0)[2];
         let startTime = Date.now();
-        this.layer.delegateTicker(
-            () => {
-                if (!this.renderable) return;
-                const now = Date.now();
-                const progress = (now - startTime) / time;
-                const [nx, ny, nz] = fn(progress);
-                this.renderable.x = nx;
-                this.renderable.y = ny;
-                this.renderable.zIndex = nz;
-                if (nz !== nowZIndex) {
-                    this.layer.movingRenderable.sort(
-                        (a, b) => a.zIndex - b.zIndex
-                    );
+        return new Promise(res => {
+            this.layer.delegateTicker(
+                () => {
+                    if (!this.renderable) return;
+                    const now = Date.now();
+                    const progress = (now - startTime) / time;
+                    const [nx, ny, nz] = fn(progress);
+                    this.renderable.x = nx;
+                    this.renderable.y = ny;
+                    this.renderable.zIndex = nz;
+                    if (nz !== nowZIndex) {
+                        this.layer.movingRenderable.sort(
+                            (a, b) => a.zIndex - b.zIndex
+                        );
+                    }
+                    this.layer.update(this.layer);
+                },
+                time,
+                () => {
+                    this.status = 'stop';
+                    if (!this.renderable) return res();
+                    this.renderable.animate = 0;
+                    this.renderable.x = x;
+                    this.renderable.y = y;
+                    this.layer.update(this.layer);
+                    res();
                 }
-                this.layer.update(this.layer);
-            },
-            time,
-            () => {
-                this.status = 'stop';
-                if (!this.renderable) return;
-                this.renderable.animate = 0;
-                this.renderable.x = x;
-                this.renderable.y = y;
-                this.layer.update(this.layer);
-            }
-        );
+            );
+        });
     }
 
     /**
@@ -309,3 +312,9 @@ adapter.recieve('move', (item, dir: Dir) => {
 adapter.recieve('endMove', item => {
     return item.endMove();
 });
+adapter.recieve(
+    'moveAs',
+    (item, x: number, y: number, time: number, fn: TimingFn<3>) => {
+        return item.moveAs(x, y, time, fn);
+    }
+);

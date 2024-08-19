@@ -639,12 +639,7 @@ interface MovingStepFunction {
     relative?: boolean;
 }
 
-type MovingStep = MovingStepFunction | MovingStepLinearSwap;
-
 interface MovingBlock {
-    steps: MovingStep[];
-    /** 当前正在执行哪一步 */
-    index: number;
     /** 当前横坐标 */
     x: number;
     /** 当前纵坐标 */
@@ -695,8 +690,6 @@ export class Layer extends Container {
     /** 分块信息 */
     block: BlockCacher<LayerCacheItem> = new BlockCacher(0, 0, core._WIDTH_, 4);
 
-    /** 正在移动的图块 */
-    moving: MovingBlock[] = [];
     /** 大怪物渲染信息 */
     bigImages: Map<number, LayerMovingRenderable> = new Map();
     // todo: 是否需要桶排？
@@ -706,6 +699,8 @@ export class Layer extends Container {
     needUpdateMoving: boolean = false;
 
     private extend: Map<string, ILayerRenderExtends> = new Map();
+    /** 正在移动的图块的渲染信息 */
+    private moving: Set<LayerMovingRenderable> = new Set();
 
     constructor() {
         super('absolute', false);
@@ -1142,25 +1137,7 @@ export class Layer extends Container {
     updateMovingRenderable() {
         this.movingRenderable = [];
         this.movingRenderable.push(...this.bigImages.values());
-        this.moving.forEach(v => {
-            if (!v.render.autotile) {
-                this.movingRenderable.push({
-                    ...v.render,
-                    x: v.x,
-                    y: v.y,
-                    zIndex: v.nowZ
-                });
-            } else {
-                this.movingRenderable.push({
-                    ...v.render,
-                    x: v.x,
-                    y: v.y,
-                    zIndex: v.nowZ,
-                    image: v.render.image[0b00000000],
-                    autotile: false
-                });
-            }
-        });
+        this.movingRenderable.push(...this.moving);
 
         for (const ex of this.extend.values()) {
             ex.onMovingUpdate?.(this, this.movingRenderable);
@@ -1202,12 +1179,7 @@ export class Layer extends Container {
         const { ctx } = this.backMap;
 
         const mat = camera.mat;
-        const a = mat[0];
-        const b = mat[1];
-        const c = mat[3];
-        const d = mat[4];
-        const e = mat[6];
-        const f = mat[7];
+        const [a, b, , c, d, , e, f] = mat;
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.translate(core._PX_ / 2, core._PY_ / 2);
         ctx.transform(a, b, c, d, e, f);
@@ -1322,12 +1294,7 @@ export class Layer extends Container {
 
         ctx.save();
         const mat = camera.mat;
-        const a = mat[0];
-        const b = mat[1];
-        const c = mat[3];
-        const d = mat[4];
-        const e = mat[6];
-        const f = mat[7];
+        const [a, b, , c, d, , e, f] = mat;
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.translate(core._PX_ / 2, core._PY_ / 2);
         ctx.transform(a, b, c, d, e, f);
@@ -1336,7 +1303,7 @@ export class Layer extends Container {
         const r = (max1 * max2) ** 2;
 
         this.movingRenderable.forEach(v => {
-            const { x, y, image, frame: blockFrame, render, animate } = v;
+            const { x, y, image, render, animate } = v;
             const ff = frame % 4;
             const i = animate === -1 ? ff : animate;
             const [sx, sy, w, h] = render[i];
@@ -1376,7 +1343,31 @@ export class Layer extends Container {
         x: number,
         y: number,
         time?: number
-    ): Promise<void>;
+    ): Promise<void> {
+        const block = this.renderData[index];
+        const fx = index % this.width;
+        const fy = Math.floor(index / this.width);
+
+        if (type === 'swap' || time === 0) {
+            this.putRenderData([0], 1, fx, fy);
+            this.putRenderData([block], 1, x, y);
+            return Promise.resolve();
+        } else {
+            if (!time) return Promise.reject();
+            const dx = x - fx;
+            const dy = y - fy;
+            return this.moveAs(
+                index,
+                x,
+                y,
+                progress => {
+                    return [dx * progress, dy * progress, Math.floor(dy + fy)];
+                },
+                time
+            );
+        }
+    }
+
     /**
      * 让图块按照一个函数进行移动
      * @param index 要移动的图块在渲染数据中的索引位置
@@ -1388,22 +1379,68 @@ export class Layer extends Container {
      * @param time 移动总时长
      * @param relative 是否是相对模式
      */
-    move(
+    moveAs(
         index: number,
-        type: 'fn',
+        x: number,
+        y: number,
         fn: TimingFn<3>,
-        time?: number,
-        relative?: boolean
-    ): Promise<void>;
-    move(
-        index: number,
-        type: 'linear' | 'swap' | 'fn',
-        x: number | TimingFn<3>,
-        y?: number,
-        time?: number | boolean
+        time: number,
+        relative: boolean = true
     ): Promise<void> {
-        // todo
-        return Promise.resolve();
+        const block = this.renderData[index];
+        const fx = index % this.width;
+        const fy = Math.floor(index / this.width);
+        const renderable = texture.getRenderable(block);
+        if (!renderable) return Promise.reject();
+
+        const image = renderable.autotile
+            ? renderable.image[0]
+            : renderable.image;
+
+        const moving: LayerMovingRenderable = {
+            x: fx,
+            y: fy,
+            zIndex: fy,
+            image: image,
+            autotile: false,
+            frame: renderable.frame,
+            bigImage: renderable.bigImage,
+            animate: -1,
+            render: renderable.render
+        };
+        this.moving.add(moving);
+
+        // 删除原始位置的图块
+        this.putRenderData([0], 1, fx, fy);
+
+        let nowZ = fy;
+        const startTime = Date.now();
+        return new Promise<void>(resolve => {
+            this.delegateTicker(
+                () => {
+                    const now = Date.now();
+                    const progress = (now - startTime) / time;
+                    const [nx, ny, nz] = fn(progress);
+                    const tx = relative ? nx + fx : nx;
+                    const ty = relative ? ny + fy : ny;
+                    moving.x = tx;
+                    moving.y = ty;
+                    moving.zIndex = nz;
+                    if (nz !== nowZ) {
+                        this.movingRenderable.sort(
+                            (a, b) => a.zIndex - b.zIndex
+                        );
+                    }
+                    this.update(this);
+                },
+                time,
+                () => {
+                    this.putRenderData([block], 1, x, y);
+                    this.moving.delete(moving);
+                    resolve();
+                }
+            );
+        });
     }
 
     destroy(): void {
