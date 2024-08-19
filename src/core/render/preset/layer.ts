@@ -602,7 +602,6 @@ export interface ILayerRenderExtends {
 
 interface LayerCacheItem {
     // todo: 删掉这个属性
-    floorId?: FloorIds;
     canvas: HTMLCanvasElement;
 }
 
@@ -674,8 +673,6 @@ export class Layer extends Container {
     /** 最终渲染至的Sprite */
     main: Sprite = new Sprite();
 
-    /** 渲染的楼层 */
-    floorId?: FloorIds;
     /** 渲染的层 */
     layer?: FloorLayer;
     // todo: renderable分块存储，优化循环绘制性能
@@ -1256,7 +1253,7 @@ export class Layer extends Container {
             const index = v * 4 + frame - 1;
 
             const cache = this.block.cache.get(index);
-            if (cache && cache.floorId === this.floorId) {
+            if (cache) {
                 ctx.drawImage(
                     cache.canvas,
                     sx * cell,
@@ -1285,12 +1282,7 @@ export class Layer extends Container {
                     const data = texture.getRenderable(num);
                     if (!data || data.bigImage) continue;
                     const f = (frame - 1) % data.frame;
-                    const i =
-                        data.animate === -1
-                            ? frame === 4 && data.frame === 3
-                                ? 1
-                                : f
-                            : data.animate;
+                    const i = data.animate === -1 ? f : data.animate;
                     const [isx, isy, w, h] = data.render[i];
                     const px = (nx - sx) * cell;
                     const py = (ny - sy) * cell;
@@ -1312,8 +1304,7 @@ export class Layer extends Container {
                 blockSize * cell
             );
             this.block.cache.set(index, {
-                canvas: temp.canvas,
-                floorId: this.floorId
+                canvas: temp.canvas
             });
         });
 
@@ -1347,12 +1338,7 @@ export class Layer extends Container {
         this.movingRenderable.forEach(v => {
             const { x, y, image, frame: blockFrame, render, animate } = v;
             const ff = frame % 4;
-            const i =
-                animate === -1
-                    ? frame === 4 && blockFrame === 3
-                        ? 1
-                        : ff
-                    : animate;
+            const i = animate === -1 ? ff : animate;
             const [sx, sy, w, h] = render[i];
             const px = x * cell - w / 2 + halfCell;
             const py = y * cell - h + cell;

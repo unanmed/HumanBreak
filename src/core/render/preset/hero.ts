@@ -4,8 +4,9 @@ import { RenderAdapter } from '../adapter';
 import { logger } from '@/core/common/logger';
 import EventEmitter from 'eventemitter3';
 import { texture } from '../cache';
+import { TimingFn } from 'mutate-animate';
 
-type HeroMovingStatus = 'stop' | 'moving';
+type HeroMovingStatus = 'stop' | 'moving' | 'moving-as';
 
 interface HeroRenderEvent {
     stepEnd: [];
@@ -220,6 +221,50 @@ export class HeroRenderer
         if (!this.renderable) return;
         this.renderable.render = this.getRenderFromDir(this.moveDir);
         this.layer.update(this.layer);
+    }
+
+    /**
+     * 按照指定函数移动勇士
+     * @param x 目标横坐标
+     * @param y 目标纵坐标
+     * @param time 移动时间
+     * @param fn 移动函数，传入一个完成度（范围0-1），返回一个三元素数组，表示横纵格子坐标，可以是小数。
+     *           第三个元素表示图块纵深，一般图块的纵深就是其纵坐标，当地图上有大怪物时，此举可以辅助渲染，
+     *           否则可能会导致移动过程中与大怪物的层级关系不正确，比如全在大怪物身后。注意不建议频繁改动这个值，
+     *           因为此举会导致层级的重新排序，降低渲染性能。
+     */
+    moveAs(x: number, y: number, time: number, fn: TimingFn<3>) {
+        if (this.status !== 'stop') return;
+        if (!this.renderable) return;
+        this.status = 'moving-as';
+        let nowZIndex = fn(0)[2];
+        let startTime = Date.now();
+        this.layer.delegateTicker(
+            () => {
+                if (!this.renderable) return;
+                const now = Date.now();
+                const progress = (now - startTime) / time;
+                const [nx, ny, nz] = fn(progress);
+                this.renderable.x = nx;
+                this.renderable.y = ny;
+                this.renderable.zIndex = nz;
+                if (nz !== nowZIndex) {
+                    this.layer.movingRenderable.sort(
+                        (a, b) => a.zIndex - b.zIndex
+                    );
+                }
+                this.layer.update(this.layer);
+            },
+            time,
+            () => {
+                this.status = 'stop';
+                if (!this.renderable) return;
+                this.renderable.animate = 0;
+                this.renderable.x = x;
+                this.renderable.y = y;
+                this.layer.update(this.layer);
+            }
+        );
     }
 
     /**
