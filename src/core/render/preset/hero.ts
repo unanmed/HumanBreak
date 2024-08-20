@@ -5,6 +5,7 @@ import { logger } from '@/core/common/logger';
 import EventEmitter from 'eventemitter3';
 import { texture } from '../cache';
 import { TimingFn } from 'mutate-animate';
+import { backDir } from '@/plugin/game/utils';
 
 type HeroMovingStatus = 'stop' | 'moving' | 'moving-as';
 
@@ -36,13 +37,15 @@ export class HeroRenderer
 
     /** 勇士移动速度 */
     speed: number = 100;
+    /** 当前勇士朝向 */
+    dir: Dir = 'down';
 
     /** 勇士移动定时器id */
     private moveId: number = -1;
     /** 上一次帧数切换的时间 */
     private lastFrameTime: number = 0;
     /** 当前的移动方向 */
-    private moveDir: Dir = 'down';
+    private moveDir: Move = 'down';
     /** 上一步走到格子上的时间 */
     private lastStepTime: number = 0;
     /** 是否已经执行了当前步移动 */
@@ -54,6 +57,8 @@ export class HeroRenderer
     private stepDir: Dir = 'down';
     /** 每步的格子增量 */
     private stepDelta: Loc = { x: 0, y: 1 };
+    /** 动画显示的方向，用于适配后退 */
+    private animateDir: Dir = 'down';
 
     /**
      * 设置勇士所用的图片资源
@@ -100,13 +105,19 @@ export class HeroRenderer
      * 根据方向获取勇士的裁切信息
      * @param dir 方向
      */
-    getRenderFromDir(dir: Dir): [number, number, number, number][] {
+    getRenderFromDir(dir: Move): [number, number, number, number][] {
         if (!this.cellWidth || !this.cellHeight) return [];
-        const index = texture.characterDirection[dir];
+        let resolved: Dir;
+        if (dir === 'forward') resolved = this.dir;
+        else if (dir === 'backward') resolved = backDir(this.dir);
+        else resolved = dir;
+        const index = texture.characterDirection[resolved];
         const y = index * this.cellHeight;
-        return [0, 1, 2, 3].map(v => {
+        const res: [number, number, number, number][] = [0, 1, 2, 3].map(v => {
             return [v * this.cellWidth!, y, this.cellWidth!, this.cellHeight!];
         });
+        if (dir === 'backward') return res.reverse();
+        else return res;
     }
 
     /**
@@ -161,7 +172,8 @@ export class HeroRenderer
      * 进行下一步的移动准备，设置移动信息
      */
     private step() {
-        this.stepDir = this.moveDir;
+        if (this.moveDir === 'backward') this.stepDir = backDir(this.stepDir);
+        else if (this.moveDir !== 'forward') this.stepDir = this.moveDir;
         this.lastStepTime = Date.now();
         this.stepDelta = core.utils.scan[this.stepDir];
         this.turn(this.stepDir);
@@ -170,7 +182,7 @@ export class HeroRenderer
     /**
      * 移动勇士
      */
-    move(dir: Dir): Promise<void> {
+    move(dir: Move): Promise<void> {
         if (this.status !== 'moving') {
             logger.error(
                 12,
@@ -215,7 +227,7 @@ export class HeroRenderer
      */
     turn(dir?: Dir): void {
         if (!dir) {
-            const index = texture.characterTurn.indexOf(this.moveDir) + 1;
+            const index = texture.characterTurn.indexOf(this.stepDir) + 1;
             const length = texture.characterTurn.length;
             const next = texture.characterTurn[index % length];
             return this.turn(next);
