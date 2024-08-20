@@ -62,7 +62,6 @@ import { Danmaku } from './main/custom/danmaku';
 import * as Shadow from './fx/shadow';
 import { MotaCanvas2D } from './fx/canvas2d';
 import * as portal from './fx/portal';
-import { heroRender } from './render/hero';
 import { MotaRenderer } from './render/render';
 import { Container } from './render/container';
 import { Sprite } from './render/sprite';
@@ -148,7 +147,6 @@ Mota.register('module', 'Effect', {
     Portal: portal
 });
 Mota.register('module', 'Render', {
-    heroRender,
     texture,
     MotaRenderer,
     Container,

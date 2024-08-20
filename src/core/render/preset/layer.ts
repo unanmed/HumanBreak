@@ -3,7 +3,12 @@ import { Container } from '../container';
 import { Sprite } from '../sprite';
 import { Camera } from '../camera';
 import { TimingFn } from 'mutate-animate';
-import { RenderItem, renderEmits, transformCanvas } from '../item';
+import {
+    IAnimateFrame,
+    renderEmits,
+    RenderItem,
+    transformCanvas
+} from '../item';
 import { logger } from '@/core/common/logger';
 import { AutotileRenderable, RenderableData, texture } from '../cache';
 import { glMatrix } from 'gl-matrix';
@@ -83,7 +88,7 @@ export interface ILayerGroupRenderExtends {
 
 export type FloorLayer = 'bg' | 'bg2' | 'event' | 'fg' | 'fg2';
 
-export class LayerGroup extends Container {
+export class LayerGroup extends Container implements IAnimateFrame {
     /** 地图组列表 */
     // static list: Set<LayerGroup> = new Set();
 
@@ -113,9 +118,7 @@ export class LayerGroup extends Container {
             this.releaseNeedRender();
         });
 
-        // this.usePreset('defaults');
-        // LayerGroup.list.add(this);
-        // this.bindFloor(floor);
+        renderEmits.addFramer(this);
     }
 
     /**
@@ -157,7 +160,6 @@ export class LayerGroup extends Container {
         this.layers.forEach(v => {
             v.block.setBlockSize(size);
         });
-        // this.damage?.block.setBlockSize(size);
     }
 
     /**
@@ -173,11 +175,8 @@ export class LayerGroup extends Container {
      */
     emptyLayer() {
         this.removeChild(...this.layers.values());
-        // if (this.damage) this.removeChild(this.damage);
-        // this.damage?.destroy();
         this.layers.forEach(v => v.destroy());
         this.layers.clear();
-        // this.damage = void 0;
 
         for (const ex of this.extend.values()) {
             ex.onEmptyLayer?.(this);
@@ -190,7 +189,6 @@ export class LayerGroup extends Container {
      */
     addLayer(layer: FloorLayer) {
         const l = new Layer();
-        // l.bindLayer(layer);
         l.layer = layer;
         if (l.layer) this.layers.set(l.layer, l);
         this.appendChild(l);
@@ -293,7 +291,6 @@ export class LayerGroup extends Container {
         this.layers.forEach(v => {
             v.cache(v.using);
         });
-        // this.damage?.cache(this.damage.using);
         this.update(this);
 
         for (const ex of this.extend.values()) {
@@ -306,18 +303,9 @@ export class LayerGroup extends Container {
             ex.onDestroy?.(this);
         }
         super.destroy();
-        // LayerGroup.list.delete(this);
+        renderEmits.removeFramer(this);
     }
 }
-
-const hook = Mota.require('var', 'hook');
-
-// todo: animate frame.
-// renderEmits.on('animateFrame', () => {
-//     LayerGroup.list.forEach(v => {
-//         v.updateFrameAnimate();
-//     });
-// });
 
 export function calNeedRenderOf(
     camera: Camera,
@@ -601,8 +589,8 @@ export interface ILayerRenderExtends {
 }
 
 interface LayerCacheItem {
-    // todo: 删掉这个属性
-    canvas: HTMLCanvasElement;
+    symbol: number;
+    canvas: MotaOffscreenCanvas2D;
 }
 
 export interface LayerMovingRenderable extends RenderableData {
@@ -1227,7 +1215,7 @@ export class Layer extends Container {
             const cache = this.block.cache.get(index);
             if (cache) {
                 ctx.drawImage(
-                    cache.canvas,
+                    cache.canvas.canvas,
                     sx * cell,
                     sy * cell,
                     blockSize * cell,
@@ -1276,7 +1264,8 @@ export class Layer extends Container {
                 blockSize * cell
             );
             this.block.cache.set(index, {
-                canvas: temp.canvas
+                canvas: temp,
+                symbol: temp.symbol
             });
         });
 

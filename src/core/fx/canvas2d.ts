@@ -25,6 +25,9 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
 
     scale: number = 1;
 
+    /** 更新标识符，如果发生变化则说明画布被动清空 */
+    symbol: number = 0;
+
     constructor() {
         super();
 
@@ -248,6 +251,7 @@ window.addEventListener('resize', () => {
         MotaOffscreenCanvas2D.list.forEach(v => {
             if (v.autoScale) {
                 v.size(v.width, v.height);
+                v.symbol++;
                 v.emit('resize');
             }
         });

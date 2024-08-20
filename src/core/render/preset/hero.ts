@@ -140,6 +140,7 @@ export class HeroRenderer
         }
 
         const progress = (time - this.lastStepTime) / this.speed;
+
         const { x: dx, y: dy } = this.stepDelta;
         const { x, y } = core.status.hero.loc;
         if (progress >= 1) {
@@ -184,8 +185,10 @@ export class HeroRenderer
         else {
             this.step();
             return (this.moveDetached = new Promise<void>(resolve => {
-                this.moveDetached = void 0;
-                this.once('stepEnd', resolve);
+                this.once('stepEnd', () => {
+                    this.moveDetached = void 0;
+                    resolve();
+                });
             }));
         }
     }

@@ -104,11 +104,16 @@ interface DamageRenderable {
     strokeWidth?: number;
 }
 
+interface DamageCache {
+    canvas: MotaOffscreenCanvas2D;
+    symbol: number;
+}
+
 export class Damage extends Sprite {
     mapWidth: number = 0;
     mapHeight: number = 0;
 
-    block: BlockCacher<HTMLCanvasElement>;
+    block: BlockCacher<DamageCache>;
     /** 键表示分块索引，值表示在这个分块上的渲染信息（当然实际渲染位置可以不在这个分块上） */
     renderable: Map<number, Set<DamageRenderable>> = new Map();
 
@@ -404,13 +409,14 @@ export class Damage extends Sprite {
             // todo: 是否真的需要缓存
             // 检查有没有缓存
             const cache = block.cache.get(v * block.cacheDepth);
-            if (cache) {
-                ctx.drawImage(cache, px, py, size, size);
+            if (cache && cache.symbol === cache.canvas.symbol) {
+                ctx.drawImage(cache.canvas.canvas, px, py, size, size);
                 return;
             }
 
             // 否则依次渲染并写入缓存
-            const temp = new MotaOffscreenCanvas2D();
+            const temp = cache?.canvas ?? new MotaOffscreenCanvas2D();
+            temp.clear();
             temp.setHD(true);
             temp.setAntiAliasing(true);
             temp.withGameScale(true);
@@ -431,7 +437,10 @@ export class Damage extends Sprite {
             });
 
             ctx.drawImage(temp.canvas, px, py, size, size);
-            block.cache.set(v, temp.canvas);
+            block.cache.set(v, {
+                canvas: temp,
+                symbol: temp.symbol
+            });
         });
         ctx.restore();
         // console.timeEnd('damage');
