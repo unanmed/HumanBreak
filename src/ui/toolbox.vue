@@ -205,35 +205,51 @@ async function toEquip() {
 
 gameKey.use(props.ui.symbol);
 gameKey
-    .realize('@toolbox_right', () => {
-        const constants = items.constants.length;
-        if (mode.value === 'tools') {
-            if (index.value >= constants) {
-                index.value = constants - 1;
+    .realize(
+        '@toolbox_right',
+        () => {
+            const constants = items.constants.length;
+            if (mode.value === 'tools') {
+                if (index.value >= constants) {
+                    index.value = constants - 1;
+                }
+                mode.value = 'constants';
             }
-            mode.value = 'constants';
-        }
-    })
-    .realize('@toolbox_left', () => {
-        const constants = items.tools.length;
-        if (mode.value === 'constants') {
-            if (index.value >= constants) {
-                index.value = constants - 1;
+        },
+        { type: 'down-repeat' }
+    )
+    .realize(
+        '@toolbox_left',
+        () => {
+            const constants = items.tools.length;
+            if (mode.value === 'constants') {
+                if (index.value >= constants) {
+                    index.value = constants - 1;
+                }
+                mode.value = 'tools';
             }
-            mode.value = 'tools';
-        }
-    })
-    .realize('@toolbox_up', () => {
-        if (index.value > 0) {
-            index.value--;
-        }
-    })
-    .realize('@toolbox_down', () => {
-        const total = items[mode.value].length;
-        if (index.value < total - 1) {
-            index.value++;
-        }
-    })
+        },
+        { type: 'down-repeat' }
+    )
+    .realize(
+        '@toolbox_up',
+        () => {
+            if (index.value > 0) {
+                index.value--;
+            }
+        },
+        { type: 'down-repeat' }
+    )
+    .realize(
+        '@toolbox_down',
+        () => {
+            const total = items[mode.value].length;
+            if (index.value < total - 1) {
+                index.value++;
+            }
+        },
+        { type: 'down-repeat' }
+    )
     .realize('exit', () => {
         exit();
     })

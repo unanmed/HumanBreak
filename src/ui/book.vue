@@ -151,34 +151,50 @@ function checkScroll() {
 setTimeout(() => {
     gameKey.use(props.ui.symbol);
     gameKey
-        .realize('@book_up', () => {
-            if (selected.value > 0) {
-                selected.value--;
-            }
-            checkScroll();
-        })
-        .realize('@book_down', () => {
-            if (selected.value < enemy.length - 1) {
-                selected.value++;
-            }
-            checkScroll();
-        })
-        .realize('@book_pageDown', () => {
-            if (selected.value <= 4) {
-                selected.value = 0;
-            } else {
-                selected.value -= 5;
-            }
-            checkScroll();
-        })
-        .realize('@book_pageUp', () => {
-            if (selected.value >= enemy.length - 5) {
-                selected.value = enemy.length - 1;
-            } else {
-                selected.value += 5;
-            }
-            checkScroll();
-        })
+        .realize(
+            '@book_up',
+            () => {
+                if (selected.value > 0) {
+                    selected.value--;
+                }
+                checkScroll();
+            },
+            { type: 'down-repeat' }
+        )
+        .realize(
+            '@book_down',
+            () => {
+                if (selected.value < enemy.length - 1) {
+                    selected.value++;
+                }
+                checkScroll();
+            },
+            { type: 'down-repeat' }
+        )
+        .realize(
+            '@book_pageDown',
+            () => {
+                if (selected.value <= 4) {
+                    selected.value = 0;
+                } else {
+                    selected.value -= 5;
+                }
+                checkScroll();
+            },
+            { type: 'down-repeat' }
+        )
+        .realize(
+            '@book_pageUp',
+            () => {
+                if (selected.value >= enemy.length - 5) {
+                    selected.value = enemy.length - 1;
+                } else {
+                    selected.value += 5;
+                }
+                checkScroll();
+            },
+            { type: 'down-repeat' }
+        )
         .realize('exit', () => {
             exit();
         })

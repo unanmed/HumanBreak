@@ -5,7 +5,6 @@ import { GameStorage } from './main/storage';
 import './main/init/';
 import './main/custom/toolbar';
 import { fixedUi, mainUi } from './main/init/ui';
-import { gameKey } from './main/init/hotkey';
 import {
     MotaSetting,
     SettingDisplayer,
@@ -22,7 +21,8 @@ import {
     Hotkey,
     checkAssist,
     isAssist,
-    unwarpBinary
+    unwarpBinary,
+    gameKey
 } from './main/custom/hotkey';
 import { Keyboard, generateKeyboardEvent } from './main/custom/keyboard';
 import './main/layout';

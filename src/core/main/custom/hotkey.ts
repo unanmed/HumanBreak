@@ -1,21 +1,26 @@
 import { KeyCode } from '@/plugin/keyCodes';
 import { deleteWith, generateBinary, keycode, spliceBy } from '@/plugin/utils';
-import { EventEmitter } from '../../common/eventEmitter';
+import { EventEmitter } from 'eventemitter3';
+import { isNil } from 'lodash-es';
 
 // todo: 按下时触发，长按（单次/连续）触发，按下连续触发，按下节流触发，按下加速节流触发
 
 interface HotkeyEvent {
-    set: (id: string, key: KeyCode, assist: number) => void;
-    emit: (key: KeyCode, assist: number, type: KeyEmitType) => void;
+    set: [id: string, key: KeyCode, assist: number];
+    emit: [key: KeyCode, assist: number, type: KeyEmitType];
+    press: [key: KeyCode];
+    release: [key: KeyCode];
 }
 
 type KeyEmitType =
-    | 'down'
     | 'up'
+    | 'down'
     | 'down-repeat'
     | 'down-throttle'
-    | 'down-accelerate'
+    // todo: | 'down-accelerate'
     | 'down-timeout';
+
+type KeyEventType = 'up' | 'down';
 
 interface AssistHoykey {
     ctrl: boolean;
@@ -27,23 +32,29 @@ interface RegisterHotkeyData extends Partial<AssistHoykey> {
     id: string;
     name: string;
     defaults: KeyCode;
-    type?: KeyEmitType;
 }
 
 interface HotkeyData extends Required<RegisterHotkeyData> {
     key: KeyCode;
-    func: Map<symbol, HotkeyFunc>;
+    emits: Map<symbol, HotkeyEmitData>;
     group?: string;
 }
 
 /**
  * @param id 此处的id包含数字后缀
+ * @returns 返回 `@void` 时，表示此次触发没有包含副作用，不会致使 `preventDefault` 被执行
  */
 type HotkeyFunc = (
     id: string,
     code: KeyCode,
     ev: KeyboardEvent
 ) => void | '@void';
+
+interface HotkeyEmitData {
+    func: HotkeyFunc;
+    onUp?: HotkeyFunc;
+    config?: HotkeyEmitConfig;
+}
 
 export interface HotkeyJSON {
     key: KeyCode;
@@ -64,8 +75,6 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
     name: string;
     data: Record<string, HotkeyData> = {};
     keyMap: Map<KeyCode, HotkeyData[]> = new Map();
-    /** 每个指令的配置信息 */
-    configData: Map<string, HotkeyEmitConfig> = new Map();
     /** id to name */
     groupName: Record<string, string> = {
         none: '未分类按键'
@@ -80,6 +89,13 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
     private scope: symbol = Symbol();
     private scopeStack: symbol[] = [];
     private grouping: string = 'none';
+
+    /** 当前正在按下的按键 */
+    private pressed: Set<KeyCode> = new Set();
+    /** 按键按下时的时间 */
+    private pressTime: Map<KeyCode, number> = new Map();
+    /** 按键节流时间 */
+    private throttleMap: Map<KeyCode, number> = new Map();
 
     constructor(id: string, name: string) {
         super();
@@ -98,9 +114,8 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
             shift: !!data.shift,
             alt: !!data.alt,
             key: data.defaults,
-            func: new Map(),
-            group: this.grouping,
-            type: data.type ?? 'up'
+            emits: new Map(),
+            group: this.grouping
         };
         this.ensureMap(d.key);
         if (d.id in this.data) {
@@ -117,7 +132,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * 实现一个按键按下时的操作
      * @param id 要实现的按键id，可以不包含数字后缀
      * @param func 按键按下时执行的函数
-     * @param config 按键触发配置，默认为按键抬起时触发
+     * @param config 按键的配置信息
      */
     realize(id: string, func: HotkeyFunc, config?: HotkeyEmitConfig) {
         const toSet = Object.values(this.data).filter(v => {
@@ -129,12 +144,24 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
             throw new Error(`Realize nonexistent key '${id}'.`);
         }
         for (const key of toSet) {
-            if (!key.func.has(this.scope)) {
-                throw new Error(
-                    `Cannot access using scope. Call use before calling realize.`
-                );
+            const data = key.emits.get(this.scope);
+            if (!data) {
+                key.emits.set(this.scope, { func, config });
+            } else {
+                // 同时注册抬起和按下
+                const dataType = data.config?.type ?? 'up';
+                const configType = config?.type ?? 'up';
+                if (dataType === 'up' && configType !== 'up') {
+                    data.onUp = func;
+                    data.config ??= { type: configType };
+                    data.config.type = configType;
+                } else if (dataType !== 'up' && configType === 'up') {
+                    data.onUp = func;
+                } else {
+                    data.config = config;
+                    data.func = func;
+                }
             }
-            key.func.set(this.scope, func);
         }
         return this;
     }
@@ -148,9 +175,6 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
         this.scopeStack.push(symbol);
         this.scope = symbol;
         this.conditionMap.set(symbol, () => true);
-        for (const key of Object.values(this.data)) {
-            key.func.set(symbol, () => '@void');
-        }
     }
 
     /**
@@ -159,7 +183,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      */
     dispose(symbol: symbol = this.scopeStack.at(-1) ?? Symbol()) {
         for (const key of Object.values(this.data)) {
-            key.func.delete(symbol);
+            key.emits.delete(symbol);
         }
         spliceBy(this.scopeStack, symbol);
         this.scope = this.scopeStack.at(-1) ?? Symbol();
@@ -196,29 +220,104 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
     emitKey(
         key: KeyCode,
         assist: number,
-        type: KeyEmitType,
+        type: KeyEventType,
         ev: KeyboardEvent
     ): boolean {
+        // 检查全局启用情况
         if (!this.enabled) return false;
         const when = this.conditionMap.get(this.scope)!;
         if (!when()) return false;
         const toEmit = this.keyMap.get(key);
         if (!toEmit) return false;
+
+        // 进行按键初始处理
         const { ctrl, shift, alt } = unwarpBinary(assist);
+
+        // 真正开始触发按键
         let emitted = false;
         toEmit.forEach(v => {
-            if (type !== v.type) return;
             if (ctrl === v.ctrl && shift === v.shift && alt === v.alt) {
-                const func = v.func.get(this.scope);
-                if (!func) {
-                    throw new Error(`Emit unknown scope keys.`);
+                const data = v.emits.get(this.scope);
+                if (!data) return;
+                if (type === 'up' && data.onUp) {
+                    data.onUp(v.id, key, ev);
+                    return;
                 }
-                const res = func(v.id, key, ev);
+                if (!this.canEmit(v.id, key, type, data)) return;
+                const res = data.func(v.id, key, ev);
                 if (res !== '@void') emitted = true;
             }
         });
         this.emit('emit', key, assist, type);
+
+        if (type === 'down') this.checkPress(key);
+        else this.checkPressEnd(key);
+
         return emitted;
+    }
+
+    /**
+     * 检查按键按下情况，如果没有按下则添加
+     * @param keyCode 按下的按键
+     */
+    private checkPress(keyCode: KeyCode) {
+        if (this.pressed.has(keyCode)) return;
+        this.pressed.add(keyCode);
+        this.pressTime.set(keyCode, Date.now());
+        this.emit('press', keyCode);
+    }
+
+    /**
+     * 当按键松开时，移除相应的按下配置
+     * @param keyCode 松开的按键
+     */
+    private checkPressEnd(keyCode: KeyCode) {
+        if (!this.pressed.has(keyCode)) return;
+        this.pressed.delete(keyCode);
+        this.pressTime.delete(keyCode);
+        this.emit('release', keyCode);
+    }
+
+    /**
+     * 检查一个按键是否可以被触发
+     * @param id 触发的按键id
+     * @param keyCode 按键码
+     */
+    private canEmit(
+        _id: string,
+        keyCode: KeyCode,
+        type: KeyEventType,
+        data: HotkeyEmitData
+    ) {
+        const config = data?.config;
+        // 这时默认为抬起触发，始终可触发
+        if (type === 'up') {
+            if (!config || config.type === 'up') return true;
+            else return false;
+        }
+        if (!config) return false;
+        // 按下单次触发
+        if (config.type === 'down') return !this.pressed.has(keyCode);
+        // 按下重复触发
+        if (config.type === 'down-repeat') return true;
+        if (config.type === 'down-timeout') {
+            const time = this.pressTime.get(keyCode);
+            if (isNil(time) || isNil(config.timeout)) return false;
+            return Date.now() - time >= config.timeout;
+        }
+        if (config.type === 'down-throttle') {
+            const thorttleTime = this.throttleMap.get(keyCode);
+            if (isNil(config.throttle)) return false;
+            if (isNil(thorttleTime)) {
+                this.throttleMap.set(keyCode, Date.now());
+                return true;
+            }
+            if (Date.now() - thorttleTime >= config.throttle) {
+                this.throttleMap.set(keyCode, Date.now());
+                return true;
+            }
+            return false;
+        }
     }
 
     /**
@@ -287,22 +386,6 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      */
     static get(id: string) {
         return this.list.find(v => v.id === id);
-    }
-}
-
-// todo
-/**
- * 热键控制器，用于控制按下时触发等操作
- */
-export class HotkeyController {
-    /** 所有按下的按键 */
-    private pressed: Set<KeyCode> = new Set();
-
-    /** 当前控制器管理的热键实例 */
-    hotkey: Hotkey;
-
-    constructor(hotkey: Hotkey) {
-        this.hotkey = hotkey;
     }
 }
 

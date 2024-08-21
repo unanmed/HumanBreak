@@ -1,6 +1,5 @@
 import type { RenderAdapter } from '@/core/render/adapter';
 import type { HeroRenderer } from '@/core/render/preset/hero';
-import { backDir } from './utils';
 
 interface Adapters {
     'hero-adapter'?: RenderAdapter<HeroRenderer>;
@@ -9,7 +8,7 @@ interface Adapters {
 const adapters: Adapters = {};
 
 export function init() {
-    if (!main.replayChecking) {
+    if (!main.replayChecking && main.mode === 'play') {
         const Adapter = Mota.require('module', 'Render').RenderAdapter;
         const hero = Adapter.get<HeroRenderer>('hero-adapter');
 

@@ -15,25 +15,21 @@ gameKey
     .group('game', '游戏按键')
     .register({
         id: 'moveUp',
-        type: 'down',
         name: '上移',
         defaults: KeyCode.UpArrow
     })
     .register({
         id: 'moveDown',
-        type: 'down',
         name: '下移',
         defaults: KeyCode.DownArrow
     })
     .register({
         id: 'moveLeft',
-        type: 'down',
         name: '左移',
         defaults: KeyCode.LeftArrow
     })
     .register({
         id: 'moveRight',
-        type: 'down',
         name: '右移',
         defaults: KeyCode.RightArrow
     })
@@ -293,78 +289,66 @@ gameKey
     .register({
         id: '@start_up',
         name: '上移光标',
-        defaults: KeyCode.UpArrow,
-        type: 'down'
+        defaults: KeyCode.UpArrow
     })
     .register({
         id: '@start_down',
         name: '下移光标',
-        defaults: KeyCode.DownArrow,
-        type: 'down'
+        defaults: KeyCode.DownArrow
     })
     // --------------------
     .group('@ui_book', '怪物手册')
     .register({
         id: '@book_up',
         name: '上移光标',
-        defaults: KeyCode.UpArrow,
-        type: 'down'
+        defaults: KeyCode.UpArrow
     })
     .register({
         id: '@book_down',
         name: '下移光标',
-        defaults: KeyCode.DownArrow,
-        type: 'down'
+        defaults: KeyCode.DownArrow
     })
     .register({
         id: '@book_pageDown_1',
         name: '下移5个怪物_1',
-        defaults: KeyCode.RightArrow,
-        type: 'down'
+        defaults: KeyCode.RightArrow
     })
     .register({
         id: '@book_pageDown_2',
         name: '下移5个怪物_2',
-        defaults: KeyCode.PageDown,
-        type: 'down'
+        defaults: KeyCode.PageDown
     })
     .register({
         id: '@book_pageUp_1',
         name: '上移5个怪物_1',
-        defaults: KeyCode.LeftArrow,
-        type: 'down'
+        defaults: KeyCode.LeftArrow
     })
     .register({
         id: '@book_pageUp_2',
         name: '上移5个怪物_2',
-        defaults: KeyCode.PageUp,
-        type: 'down'
+        defaults: KeyCode.PageUp
     })
     // --------------------
     .group('@ui_toolbox', '道具栏')
     .register({
         id: '@toolbox_right',
         name: '光标右移',
-        defaults: KeyCode.RightArrow,
-        type: 'down'
+        defaults: KeyCode.RightArrow
     })
     .register({
         id: '@toolbox_left',
         name: '光标左移',
-        defaults: KeyCode.LeftArrow,
-        type: 'down'
+        defaults: KeyCode.LeftArrow
     })
     .register({
         id: '@toolbox_up',
         name: '光标上移',
-        defaults: KeyCode.UpArrow,
-        type: 'down'
+        defaults: KeyCode.UpArrow
     })
     .register({
         id: '@toolbox_down',
         name: '光标下移',
-        defaults: KeyCode.DownArrow,
-        type: 'down'
+        defaults: KeyCode.DownArrow
     })
     // --------------------
     .group('@ui_shop', '商店')
@@ -381,14 +365,12 @@ gameKey
     .register({
         id: '@shop_add',
         name: '增加购买量',
-        defaults: KeyCode.RightArrow,
-        type: 'down'
+        defaults: KeyCode.RightArrow
     })
     .register({
         id: '@shop_min',
         name: '减少购买量',
-        defaults: KeyCode.LeftArrow,
-        type: 'down'
+        defaults: KeyCode.LeftArrow
     })
     // --------------------
     .group('@ui_fly', '楼层传送')

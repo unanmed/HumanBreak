@@ -17,7 +17,7 @@ import {
 } from 'ant-design-vue';
 import { MotaSettingItem, mainSetting } from '../setting';
 import Minimap from '@/components/minimap.vue';
-import { gameKey } from './hotkey';
+import { gameKey } from '../custom/hotkey';
 import { FunctionalComponent, StyleValue, h } from 'vue';
 import { mainUi } from './ui';
 import { isMobile } from '@/plugin/use';

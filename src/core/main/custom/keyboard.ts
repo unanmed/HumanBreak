@@ -1,6 +1,6 @@
 import { EventEmitter, Listener } from '@/core/common/eventEmitter';
 import { KeyCode } from '@/plugin/keyCodes';
-import { gameKey } from '../init/hotkey';
+import { gameKey } from './hotkey';
 import { unwarpBinary } from './hotkey';
 import { deleteWith, flipBinary } from '@/plugin/utils';
 import { cloneDeep } from 'lodash-es';

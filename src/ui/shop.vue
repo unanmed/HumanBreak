@@ -289,12 +289,20 @@ gameKey
             selected.value++;
         }
     })
-    .realize('@shop_add', () => {
-        count.value++;
-    })
-    .realize('@shop_min', () => {
-        count.value--;
-    })
+    .realize(
+        '@shop_add',
+        () => {
+            count.value++;
+        },
+        { type: 'down-repeat' }
+    )
+    .realize(
+        '@shop_min',
+        () => {
+            count.value--;
+        },
+        { type: 'down-repeat' }
+    )
     .realize('exit', () => {
         exit();
     })

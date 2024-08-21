@@ -1,7 +1,7 @@
 import type { SettingComponent, SettingComponentProps } from '../setting';
 import { Button, InputNumber, Radio } from 'ant-design-vue';
 import { mainUi } from './ui';
-import { gameKey } from './hotkey';
+import { gameKey } from '../custom/hotkey';
 
 interface Components {
     Default: SettingComponent;

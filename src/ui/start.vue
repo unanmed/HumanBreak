@@ -192,20 +192,28 @@ function movein(button: HTMLElement, i: number) {
 
 gameKey.use(props.ui.symbol);
 gameKey
-    .realize('@start_up', () => {
-        const i = toshow.indexOf(selected.value);
-        const next = toshow[i + 1];
-        if (!next) return;
-        selected.value = next;
-        setCursor(buttons[toshow.length - i - 2], toshow.length - i - 2);
-    })
-    .realize('@start_down', () => {
-        const i = toshow.indexOf(selected.value);
-        const next = toshow[i - 1];
-        if (!next) return;
-        selected.value = next;
-        setCursor(buttons[toshow.length - i], toshow.length - i);
-    })
+    .realize(
+        '@start_up',
+        () => {
+            const i = toshow.indexOf(selected.value);
+            const next = toshow[i + 1];
+            if (!next) return;
+            selected.value = next;
+            setCursor(buttons[toshow.length - i - 2], toshow.length - i - 2);
+        },
+        { type: 'down-repeat' }
+    )
+    .realize(
+        '@start_down',
+        () => {
+            const i = toshow.indexOf(selected.value);
+            const next = toshow[i - 1];
+            if (!next) return;
+            selected.value = next;
+            setCursor(buttons[toshow.length - i], toshow.length - i);
+        },
+        { type: 'down-repeat' }
+    )
     .realize('confirm', () => {
         clickStartButton(selected.value);
     });
