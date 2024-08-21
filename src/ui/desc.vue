@@ -23,7 +23,7 @@ import desc from '../data/desc.json';
 import { splitText } from '../plugin/utils';
 import Colomn from '../components/colomn.vue';
 import { GameUi } from '@/core/main/custom/ui';
-import { gameKey } from '@/core/main/init/hotkey';
+import { gameKey } from '@/core/main/custom/hotkey';
 import { mainUi } from '@/core/main/init/ui';
 
 const props = defineProps<{

@@ -1,4 +1,5 @@
 type AdapterFunction<T> = (item: T, ...params: any[]) => Promise<any>;
+type SyncAdapterFunction<T> = (item: T, ...params: any[]) => any;
 
 /**
  * 渲染适配器，用作渲染层与数据层沟通的桥梁，用于在数据层等待渲染层执行，常用与动画等。
@@ -14,6 +15,7 @@ export class RenderAdapter<T> {
     id: string;
 
     private execute: Map<string, AdapterFunction<T>> = new Map();
+    private syncExecutes: Map<string, SyncAdapterFunction<T>> = new Map();
 
     constructor(id: string) {
         this.id = id;
@@ -43,6 +45,14 @@ export class RenderAdapter<T> {
     }
 
     /**
+     * 设置同步执行函数
+     * @param fn 对于每个元素执行的函数
+     */
+    recieveSync(id: string, fn: SyncAdapterFunction<T>): void {
+        this.syncExecutes.set(id, fn);
+    }
+
+    /**
      * 对所有元素执行函数，当所有元素都运行完毕后兑现，类似于Promise.all
      * @returns 包含每个元素运行结果的数组
      */
@@ -69,6 +79,19 @@ export class RenderAdapter<T> {
             return Promise.any(
                 [...this.items].map(v => execute!(v, ...params))
             );
+        }
+    }
+
+    /**
+     * 对所有元素执行同步函数
+     * @returns 包含每个元素运行结果的数组
+     */
+    syncAll<R = any>(fn: string, ...params: any[]): R[] {
+        const execute = this.syncExecutes.get(fn);
+        if (!execute) {
+            return [];
+        } else {
+            return [...this.items].map(v => execute!(v, ...params));
         }
     }
 

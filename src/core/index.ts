@@ -69,6 +69,7 @@ import { Camera } from './render/camera';
 import { Image, Text } from './render/preset/misc';
 import { RenderItem } from './render/item';
 import { texture } from './render/cache';
+import { RenderAdapter } from './render/adapter';
 
 // ----- 类注册
 Mota.register('class', 'AudioPlayer', AudioPlayer);
@@ -154,7 +155,8 @@ Mota.register('module', 'Render', {
     Camera,
     Text,
     Image,
-    RenderItem
+    RenderItem,
+    RenderAdapter
 });
 
 main.renderLoaded = true;

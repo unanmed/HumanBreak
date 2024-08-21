@@ -195,7 +195,7 @@ import { has, tip, type } from '../plugin/utils';
 import { cancelGlobalDrag, isMobile, useDrag } from '../plugin/use';
 import { hyper } from 'mutate-animate';
 import { GameUi } from '@/core/main/custom/ui';
-import { gameKey } from '@/core/main/init/hotkey';
+import { gameKey } from '@/core/main/custom/hotkey';
 import { getStatusLabel } from '../plugin/utils';
 import { mainUi } from '@/core/main/init/ui';
 

@@ -44,7 +44,7 @@ import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
 import { KeyCode, KeyCodeUtils } from '@/plugin/keyCodes';
 import { generateBinary, keycode } from '@/plugin/utils';
 import { cloneDeep } from 'lodash-es';
-import { gameKey } from '@/core/main/init/hotkey';
+import { gameKey } from '@/core/main/custom/hotkey';
 
 interface HotkeyKeys {
     index: number;

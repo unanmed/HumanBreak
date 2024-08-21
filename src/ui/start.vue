@@ -69,7 +69,7 @@ import { doByInterval, keycode } from '../plugin/utils';
 import { triggerFullscreen } from '../plugin/utils';
 import { isMobile } from '../plugin/use';
 import { GameUi } from '@/core/main/custom/ui';
-import { gameKey } from '@/core/main/init/hotkey';
+import { gameKey } from '@/core/main/custom/hotkey';
 import { mainUi } from '@/core/main/init/ui';
 import { CustomToolbar } from '@/core/main/custom/toolbar';
 import { mainSetting } from '@/core/main/setting';

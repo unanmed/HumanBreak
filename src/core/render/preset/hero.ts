@@ -45,7 +45,7 @@ export class HeroRenderer
     /** 上一次帧数切换的时间 */
     private lastFrameTime: number = 0;
     /** 当前的移动方向 */
-    private moveDir: Move = 'down';
+    private moveDir: Move2 = 'down';
     /** 上一步走到格子上的时间 */
     private lastStepTime: number = 0;
     /** 是否已经执行了当前步移动 */
@@ -54,11 +54,11 @@ export class HeroRenderer
      * 这一步的移动方向，与{@link moveDir}不同的是，在这一步走完之前，它都不会变，
      * 当这一步走完之后，才会将其设置为{@link moveDir}的值
      */
-    private stepDir: Dir = 'down';
+    private stepDir: Dir2 = 'down';
     /** 每步的格子增量 */
     private stepDelta: Loc = { x: 0, y: 1 };
     /** 动画显示的方向，用于适配后退 */
-    private animateDir: Dir = 'down';
+    // private animateDir: Dir = 'down';
 
     /**
      * 设置勇士所用的图片资源
@@ -105,9 +105,9 @@ export class HeroRenderer
      * 根据方向获取勇士的裁切信息
      * @param dir 方向
      */
-    getRenderFromDir(dir: Move): [number, number, number, number][] {
+    getRenderFromDir(dir: Move2): [number, number, number, number][] {
         if (!this.cellWidth || !this.cellHeight) return [];
-        let resolved: Dir;
+        let resolved: Dir2;
         if (dir === 'forward') resolved = this.dir;
         else if (dir === 'backward') resolved = backDir(this.dir);
         else resolved = dir;
@@ -157,6 +157,8 @@ export class HeroRenderer
         if (progress >= 1) {
             this.renderable.x = x + dx;
             this.renderable.y = y + dy;
+            console.log(x, y, dx, dy, this.renderable.x, this.renderable.y);
+
             this.emit('stepEnd');
         } else {
             const rx = dx * progress + x;
@@ -175,14 +177,14 @@ export class HeroRenderer
         if (this.moveDir === 'backward') this.stepDir = backDir(this.stepDir);
         else if (this.moveDir !== 'forward') this.stepDir = this.moveDir;
         this.lastStepTime = Date.now();
-        this.stepDelta = core.utils.scan[this.stepDir];
+        this.stepDelta = core.utils.scan2[this.stepDir];
         this.turn(this.stepDir);
     }
 
     /**
      * 移动勇士
      */
-    move(dir: Move): Promise<void> {
+    move(dir: Move2): Promise<void> {
         if (this.status !== 'moving') {
             logger.error(
                 12,
@@ -225,12 +227,19 @@ export class HeroRenderer
      * 勇士转向，不填表示顺时针转一个方向
      * @param dir 移动方向
      */
-    turn(dir?: Dir): void {
+    turn(dir?: Dir2): void {
         if (!dir) {
-            const index = texture.characterTurn.indexOf(this.stepDir) + 1;
-            const length = texture.characterTurn.length;
-            const next = texture.characterTurn[index % length];
-            return this.turn(next);
+            const index = texture.characterTurn2.indexOf(this.stepDir);
+            if (index === -1) {
+                const length = texture.characterTurn.length;
+                const index = texture.characterTurn.indexOf(
+                    this.stepDir as Dir
+                );
+                const next = texture.characterTurn[index % length];
+                return this.turn(next);
+            } else {
+                return this.turn(texture.characterTurn[index]);
+            }
         }
         this.moveDir = dir;
         if (!this.renderable) return;
@@ -333,3 +342,7 @@ adapter.recieve(
         return item.moveAs(x, y, time, fn);
     }
 );
+adapter.recieve('setMoveSpeed', (item, speed: number) => {
+    item.setMoveSpeed(speed);
+    return Promise.resolve();
+});

@@ -116,9 +116,8 @@ import { isMobile } from '../plugin/use';
 import { type, keycode, has } from '../plugin/utils';
 import { hyper, sleep } from 'mutate-animate';
 import { message } from 'ant-design-vue';
-import { KeyCode } from '../plugin/keyCodes';
 import { GameUi } from '@/core/main/custom/ui';
-import { gameKey } from '@/core/main/init/hotkey';
+import { gameKey } from '@/core/main/custom/hotkey';
 import { mainUi } from '@/core/main/init/ui';
 
 const props = defineProps<{

@@ -83,7 +83,7 @@ import { LeftOutlined, RightOutlined } from '@ant-design/icons-vue';
 import EnemyCritical from '../panel/enemyCritical.vue';
 import EnemyTarget from '../panel/enemyTarget.vue';
 import { detailInfo } from '../plugin/ui/book';
-import { gameKey } from '@/core/main/init/hotkey';
+import { gameKey } from '@/core/main/custom/hotkey';
 
 const props = defineProps<{
     fromBook?: boolean;

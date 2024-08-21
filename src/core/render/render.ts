@@ -163,16 +163,16 @@ Mota.require('var', 'hook').once('reset', () => {
     layer.requestAfterFrame(() => {
         hero.setImage(core.material.images.images['hero2.png']);
     });
-    hero.readyMove();
-    layer.delegateTicker(
-        () => {
-            hero.move('right');
-        },
-        10000,
-        () => {
-            hero.endMove();
-        }
-    );
+    // hero.readyMove();
+    // layer.delegateTicker(
+    //     () => {
+    //         hero.move('right');
+    //     },
+    //     10000,
+    //     () => {
+    //         hero.endMove();
+    //     }
+    // );
 
     camera.move(240, 240);
     render.update();

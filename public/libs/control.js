@@ -900,6 +900,7 @@ control.prototype._moveHero_moving = function () {
     // ------ 我已经看不懂这个函数了，反正好用就行23333333
     core.status.heroStop = false;
     core.status.automaticRoute.moveDirectly = false;
+
     var move = function () {
         if (!core.status.heroStop) {
             if (core.hasFlag('debug') && core.status.ctrlDown) {

@@ -1,5 +1,5 @@
 import { KeyCode } from '@/plugin/keyCodes';
-import { deleteWith, generateBinary, spliceBy } from '@/plugin/utils';
+import { deleteWith, generateBinary, keycode, spliceBy } from '@/plugin/utils';
 import { EventEmitter } from '../../common/eventEmitter';
 
 // todo: 按下时触发，长按（单次/连续）触发，按下连续触发，按下节流触发，按下加速节流触发
@@ -9,7 +9,13 @@ interface HotkeyEvent {
     emit: (key: KeyCode, assist: number, type: KeyEmitType) => void;
 }
 
-type KeyEmitType = 'down' | 'up';
+type KeyEmitType =
+    | 'down'
+    | 'up'
+    | 'down-repeat'
+    | 'down-throttle'
+    | 'down-accelerate'
+    | 'down-timeout';
 
 interface AssistHoykey {
     ctrl: boolean;
@@ -44,6 +50,13 @@ export interface HotkeyJSON {
     assist: number;
 }
 
+export interface HotkeyEmitConfig {
+    type: KeyEmitType;
+    throttle?: number;
+    accelerate?: number;
+    timeout?: number;
+}
+
 export class Hotkey extends EventEmitter<HotkeyEvent> {
     static list: Hotkey[];
 
@@ -51,6 +64,8 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
     name: string;
     data: Record<string, HotkeyData> = {};
     keyMap: Map<KeyCode, HotkeyData[]> = new Map();
+    /** 每个指令的配置信息 */
+    configData: Map<string, HotkeyEmitConfig> = new Map();
     /** id to name */
     groupName: Record<string, string> = {
         none: '未分类按键'
@@ -102,8 +117,9 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * 实现一个按键按下时的操作
      * @param id 要实现的按键id，可以不包含数字后缀
      * @param func 按键按下时执行的函数
+     * @param config 按键触发配置，默认为按键抬起时触发
      */
-    realize(id: string, func: HotkeyFunc) {
+    realize(id: string, func: HotkeyFunc, config?: HotkeyEmitConfig) {
         const toSet = Object.values(this.data).filter(v => {
             const split = v.id.split('_');
             const last = !isNaN(Number(split.at(-1)));
@@ -175,6 +191,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * 触发一个按键
      * @param key 要触发的按键
      * @param assist 辅助按键，三位二进制数据，从低到高依次为`ctrl` `shift` `alt`
+     * @returns 是否有按键被触发
      */
     emitKey(
         key: KeyCode,
@@ -209,10 +226,11 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * @param id 组的id
      * @param name 组的名称
      */
-    group(id: string, name: string) {
+    group(id: string, name: string, keys?: RegisterHotkeyData[]) {
         this.grouping = id;
         this.groupName[id] = name;
         this.groups[id] ??= [];
+        keys?.forEach(v => this.register(v));
         return this;
     }
 
@@ -272,6 +290,22 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
     }
 }
 
+// todo
+/**
+ * 热键控制器，用于控制按下时触发等操作
+ */
+export class HotkeyController {
+    /** 所有按下的按键 */
+    private pressed: Set<KeyCode> = new Set();
+
+    /** 当前控制器管理的热键实例 */
+    hotkey: Hotkey;
+
+    constructor(hotkey: Hotkey) {
+        this.hotkey = hotkey;
+    }
+}
+
 export function unwarpBinary(bin: number): AssistHoykey {
     return {
         ctrl: !!(bin & (1 << 0)),
@@ -293,3 +327,67 @@ export function checkAssist(bin: number, key: KeyCode) {
 export function isAssist(key: KeyCode) {
     return key === KeyCode.Ctrl || key === KeyCode.Shift || key === KeyCode.Alt;
 }
+
+export const gameKey = new Hotkey('gameKey', '游戏按键');
+
+// ----- Listening
+document.addEventListener('keyup', e => {
+    const assist = generateBinary([e.ctrlKey, e.shiftKey, e.altKey]);
+    const code = keycode(e.keyCode);
+    if (gameKey.emitKey(code, assist, 'up', e)) {
+        e.preventDefault();
+    } else {
+        // polyfill样板
+        if (
+            main.dom.startPanel.style.display == 'block' &&
+            (main.dom.startButtons.style.display == 'block' ||
+                main.dom.levelChooseButtons.style.display == 'block')
+        ) {
+            if (e.keyCode == 38 || e.keyCode == 33)
+                // up/pgup
+                main.selectButton((main.selectedButton || 0) - 1);
+            else if (e.keyCode == 40 || e.keyCode == 34)
+                // down/pgdn
+                main.selectButton((main.selectedButton || 0) + 1);
+            else if (e.keyCode == 67 || e.keyCode == 13 || e.keyCode == 32)
+                // C/Enter/Space
+                main.selectButton(main.selectedButton);
+            else if (
+                e.keyCode == 27 &&
+                main.dom.levelChooseButtons.style.display == 'block'
+            ) {
+                // ESC
+                core.showStartAnimate(true);
+                e.preventDefault();
+            }
+            e.stopPropagation();
+            return;
+        }
+        if (main.dom.inputDiv.style.display == 'block') {
+            if (e.keyCode == 13) {
+                setTimeout(function () {
+                    main.dom.inputYes.click();
+                }, 50);
+            } else if (e.keyCode == 27) {
+                setTimeout(function () {
+                    main.dom.inputNo.click();
+                }, 50);
+            }
+            return;
+        }
+        if (
+            core &&
+            core.isPlaying &&
+            core.status &&
+            (core.isPlaying() || core.status.lockControl)
+        )
+            core.onkeyUp(e);
+    }
+});
+document.addEventListener('keydown', e => {
+    const assist = generateBinary([e.ctrlKey, e.shiftKey, e.altKey]);
+    const code = keycode(e.keyCode);
+    if (gameKey.emitKey(code, assist, 'down', e)) {
+        e.preventDefault();
+    }
+});

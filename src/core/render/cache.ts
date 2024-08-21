@@ -77,14 +77,19 @@ class TextureCache extends EventEmitter<TextureCacheEvent> {
     /** 自动元件额外连接信息，用于对非自身图块进行连接 */
     autoConn: Map<number, Set<number>> = new Map();
     /** 行走图朝向绑定 */
-    characterDirection: Record<Dir, number> = {
+    characterDirection: Record<Dir2, number> = {
         down: 0,
         left: 1,
         right: 2,
-        up: 3
+        up: 3,
+        leftup: 1,
+        leftdown: 1,
+        rightup: 2,
+        rightdown: 2
     };
     /** 行走图转向顺序 */
     characterTurn: Dir[] = ['up', 'right', 'down', 'left'];
+    characterTurn2: Dir2[] = ['leftup', 'rightup', 'rightdown', 'leftdown'];
 
     constructor() {
         super();

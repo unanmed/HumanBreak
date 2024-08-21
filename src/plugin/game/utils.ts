@@ -17,13 +17,19 @@ export function slide<T>(arr: T[], delta: number): T[] {
     return arr;
 }
 
-export function backDir(dir: Dir): Dir {
-    return {
-        up: 'down',
-        down: 'up',
-        left: 'right',
-        right: 'left'
-    }[dir] as Dir;
+const backDirMap: Record<Dir2, Dir2> = {
+    up: 'down',
+    down: 'up',
+    left: 'right',
+    right: 'left',
+    leftup: 'rightdown',
+    rightup: 'leftdown',
+    leftdown: 'rightup',
+    rightdown: 'leftup'
+};
+
+export function backDir(dir: Dir2): Dir2 {
+    return backDirMap[dir];
 }
 
 export function has<T>(v: T): v is NonNullable<T> {

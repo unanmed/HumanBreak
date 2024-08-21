@@ -1092,6 +1092,7 @@ interface Control {
         offset: Loc & { offset: number },
         frame?: number
     ): void;
+    _moveAction_popAutomaticRoute(): void;
 }
 
 declare const control: new () => Control;

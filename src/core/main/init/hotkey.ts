@@ -1,22 +1,42 @@
 import { KeyCode } from '@/plugin/keyCodes';
-import { Hotkey, HotkeyJSON } from '../custom/hotkey';
-import {
-    generateBinary,
-    keycode,
-    openDanmakuPoster,
-    tip
-} from '@/plugin/utils';
+import { gameKey, HotkeyJSON } from '../custom/hotkey';
+import { openDanmakuPoster, tip } from '@/plugin/utils';
 import { hovered } from './fixed';
 import { hasMarkedEnemy, markEnemy, unmarkEnemy } from '@/plugin/mark';
 import { mainUi } from './ui';
 import { GameStorage } from '../storage';
 
 export const mainScope = Symbol.for('@key_main');
-export const gameKey = new Hotkey('gameKey', '游戏按键');
 
 // todo: 读取上一个手动存档，存档至下一个存档栏
 // ----- Register
 gameKey
+    // --------------------
+    .group('game', '游戏按键')
+    .register({
+        id: 'moveUp',
+        type: 'down',
+        name: '上移',
+        defaults: KeyCode.UpArrow
+    })
+    .register({
+        id: 'moveDown',
+        type: 'down',
+        name: '下移',
+        defaults: KeyCode.DownArrow
+    })
+    .register({
+        id: 'moveLeft',
+        type: 'down',
+        name: '左移',
+        defaults: KeyCode.LeftArrow
+    })
+    .register({
+        id: 'moveRight',
+        type: 'down',
+        name: '右移',
+        defaults: KeyCode.RightArrow
+    })
     // --------------------
     .group('ui', 'ui界面')
     .register({
@@ -580,65 +600,3 @@ gameKey.on('set', (id, key, assist) => {
     keyStorage.setValue(id, { key, assist });
 });
 gameKey.fromJSON(keyStorage.toJSON());
-
-// ----- Listening
-document.addEventListener('keyup', e => {
-    const assist = generateBinary([e.ctrlKey, e.shiftKey, e.altKey]);
-    const code = keycode(e.keyCode);
-    if (gameKey.emitKey(code, assist, 'up', e)) {
-        e.preventDefault();
-    } else {
-        // polyfill样板
-        if (
-            main.dom.startPanel.style.display == 'block' &&
-            (main.dom.startButtons.style.display == 'block' ||
-                main.dom.levelChooseButtons.style.display == 'block')
-        ) {
-            if (e.keyCode == 38 || e.keyCode == 33)
-                // up/pgup
-                main.selectButton((main.selectedButton || 0) - 1);
-            else if (e.keyCode == 40 || e.keyCode == 34)
-                // down/pgdn
-                main.selectButton((main.selectedButton || 0) + 1);
-            else if (e.keyCode == 67 || e.keyCode == 13 || e.keyCode == 32)
-                // C/Enter/Space
-                main.selectButton(main.selectedButton);
-            else if (
-                e.keyCode == 27 &&
-                main.dom.levelChooseButtons.style.display == 'block'
-            ) {
-                // ESC
-                core.showStartAnimate(true);
-                e.preventDefault();
-            }
-            e.stopPropagation();
-            return;
-        }
-        if (main.dom.inputDiv.style.display == 'block') {
-            if (e.keyCode == 13) {
-                setTimeout(function () {
-                    main.dom.inputYes.click();
-                }, 50);
-            } else if (e.keyCode == 27) {
-                setTimeout(function () {
-                    main.dom.inputNo.click();
-                }, 50);
-            }
-            return;
-        }
-        if (
-            core &&
-            core.isPlaying &&
-            core.status &&
-            (core.isPlaying() || core.status.lockControl)
-        )
-            core.onkeyUp(e);
-    }
-});
-document.addEventListener('keydown', e => {
-    const assist = generateBinary([e.ctrlKey, e.shiftKey, e.altKey]);
-    const code = keycode(e.keyCode);
-    if (gameKey.emitKey(code, assist, 'down', e)) {
-        e.preventDefault();
-    }
-});

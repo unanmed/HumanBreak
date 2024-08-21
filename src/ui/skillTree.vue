@@ -84,7 +84,7 @@ import Scroll from '../components/scroll.vue';
 import { has, splitText, tip } from '../plugin/utils';
 import { isMobile } from '../plugin/use';
 import { sleep } from 'mutate-animate';
-import { gameKey } from '@/core/main/init/hotkey';
+import { gameKey } from '@/core/main/custom/hotkey';
 import { GameUi } from '@/core/main/custom/ui';
 import { mainUi } from '@/core/main/init/ui';
 

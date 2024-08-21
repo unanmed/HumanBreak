@@ -163,7 +163,7 @@ import { GameUi } from '@/core/main/custom/ui';
 import { sleep } from 'mutate-animate';
 import { fixedUi } from '@/core/main/init/ui';
 import { calStringSize, tip } from '@/plugin/utils';
-import { gameKey } from '@/core/main/init/hotkey';
+import { gameKey } from '@/core/main/custom/hotkey';
 import { isNil } from 'lodash-es';
 import { stringifyCSS, parseCss, getIconHeight } from '@/plugin/utils';
 import { logger, LogLevel } from '@/core/common/logger';

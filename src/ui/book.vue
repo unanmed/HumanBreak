@@ -48,7 +48,7 @@ import { LeftOutlined } from '@ant-design/icons-vue';
 import { ToShowEnemy, detailInfo } from '../plugin/ui/book';
 import { getDetailedEnemy } from '../plugin/ui/fixed';
 import { GameUi } from '@/core/main/custom/ui';
-import { gameKey } from '@/core/main/init/hotkey';
+import { gameKey } from '@/core/main/custom/hotkey';
 import { mainUi } from '@/core/main/init/ui';
 import { mainSetting } from '@/core/main/setting';
 import { isMobile } from '@/plugin/use';

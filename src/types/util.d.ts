@@ -604,6 +604,8 @@ type TextPosition = 'up' | 'center' | 'down';
  */
 type Move = 'forward' | 'backward' | Dir;
 
+type Move2 = Move | Dir2;
+
 /**
  * 缓动模式，不过在高级动画插件面前不堪一击（
  */

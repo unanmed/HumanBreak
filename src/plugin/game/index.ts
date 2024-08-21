@@ -16,6 +16,7 @@ import * as utils from './utils';
 import * as chase from './chase';
 import * as remainEnemy from './enemy/remainEnemy';
 import * as checkBlock from './enemy/checkblock';
+import * as fallback from './fallback';
 import './hook';
 
 Mota.Plugin.register('utils_g', utils);
@@ -37,6 +38,8 @@ Mota.Plugin.register('remainEnemy_g', remainEnemy);
 Mota.Plugin.register('checkBlock_g', checkBlock, checkBlock.init);
 // todo: 这几个不应该放到插件
 Mota.Plugin.register('ui_g', ui, ui.init);
+// 用于暂时向后兼容的插件，若干个版本后会删除
+Mota.Plugin.register('fallback_g', fallback, fallback.init);
 
 // export {
 //     halo,
