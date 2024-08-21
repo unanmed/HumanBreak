@@ -138,7 +138,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             core.maps.resizeMap(floorId);
             // 设置勇士的位置
             heroLoc.direction = core.turnDirection(heroLoc.direction);
-            core.status.hero.loc = heroLoc;
+            core.setHeroLoc('x', heroLoc.x);
+            core.setHeroLoc('y', heroLoc.y);
+            core.setHeroLoc('direction', heroLoc.direction);
 
             // ---------- 重绘新地图；这一步将会设置core.status.floorId ---------- //
             core.drawMap(floorId);
@@ -172,6 +174,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             else core.setWeather();
 
             checkLoopMap();
+            core.updateDamage();
 
             // ...可以新增一些其他内容，比如创建个画布在右上角显示什么内容等等
         },
