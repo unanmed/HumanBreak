@@ -977,6 +977,7 @@ control.prototype.moveDirectly = function (destX, destY, ignoreSteps) {
 
 ////// 尝试瞬间移动 //////
 control.prototype.tryMoveDirectly = function (destX, destY) {
+    // console.trace();
     if (this.nearHero(destX, destY)) return false;
     var canMoveArray = core.maps.generateMovableArray();
     var dirs = [

@@ -1,5 +1,6 @@
 import type { RenderAdapter } from '@/core/render/adapter';
 import type { HeroRenderer } from '@/core/render/preset/hero';
+import { hook } from '@/game/game';
 
 interface Adapters {
     'hero-adapter'?: RenderAdapter<HeroRenderer>;
@@ -77,7 +78,7 @@ export function init() {
             await adapter.all('readyMove');
             moving = true;
             stopChian = false;
-            return startHeroMoveChain();
+            startHeroMoveChain();
         }
     }
 
@@ -245,6 +246,38 @@ export function init() {
                 callback?.();
             });
         };
+
+        control.prototype.moveHero = async function (
+            direction: Dir,
+            callback: () => void
+        ) {
+            // 如果正在移动，直接return
+            if (core.status.heroMoving != 0) return;
+            if (core.isset(direction)) core.setHeroLoc('direction', direction);
+
+            const nx = core.nextX();
+            const ny = core.nextY();
+            if (core.status.thisMap.enemy.mapDamage[`${nx},${ny}`]?.mockery) {
+                core.autosave();
+            }
+
+            console.trace();
+
+            moveDir = direction;
+            stepDir = direction;
+            await readyMove();
+            stopChian = true;
+
+            callback?.();
+
+            // if (callback) return this.moveAction(callback);
+            // this._moveHero_moving();
+        };
+
+        hook.on('reset', () => {
+            moveDir = core.status.hero.loc.direction;
+            stepDir = moveDir;
+        });
     });
 
     return { readyMove, endMove, move };

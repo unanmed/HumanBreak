@@ -87,24 +87,6 @@ export function init() {
             core.fillBoldText(ctx, one.text, px, py, one.color as string);
         });
     };
-
-    control.prototype.moveHero = function (
-        direction: Dir,
-        callback: () => void
-    ) {
-        // 如果正在移动，直接return
-        if (core.status.heroMoving != 0) return;
-        if (core.isset(direction)) core.setHeroLoc('direction', direction);
-
-        const nx = core.nextX();
-        const ny = core.nextY();
-        if (core.status.thisMap.enemy.mapDamage[`${nx},${ny}`]?.mockery) {
-            core.autosave();
-        }
-
-        if (callback) return this.moveAction(callback);
-        this._moveHero_moving();
-    };
 }
 
 function checkMockery(loc: string, force: boolean = false) {
