@@ -7,6 +7,7 @@ import {
     has,
     manhattan
 } from '@/plugin/game/utils';
+import EventEmitter from 'eventemitter3';
 
 // todo: 光环划分优先级，从而可以实现光环的多级运算
 
@@ -95,7 +96,14 @@ specialValue
     .set(27, ['fireCore'])
     .set(28, ['paleShield']);
 
-export class EnemyCollection implements RangeCollection<DamageEnemy> {
+interface EnemyCollectionEvent {
+    extract: [];
+}
+
+export class EnemyCollection
+    extends EventEmitter<EnemyCollectionEvent>
+    implements RangeCollection<DamageEnemy>
+{
     floorId: FloorIds;
     list: DamageEnemy[] = [];
 
@@ -108,6 +116,7 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
     translation: [number, number] = [0, 0];
 
     constructor(floorId: FloorIds) {
+        super();
         this.floorId = floorId;
         this.extract();
     }
@@ -129,6 +138,7 @@ export class EnemyCollection implements RangeCollection<DamageEnemy> {
                 new DamageEnemy(enemy, v.x, v.y, this.floorId, this)
             );
         });
+        this.emit('extract');
     }
 
     /**

@@ -3,7 +3,7 @@ import { deleteWith, generateBinary, keycode, spliceBy } from '@/plugin/utils';
 import { EventEmitter } from 'eventemitter3';
 import { isNil } from 'lodash-es';
 
-// todo: 按下时触发，长按（单次/连续）触发，按下连续触发，按下节流触发，按下加速节流触发
+// todo: 按下加速节流触发
 
 interface HotkeyEvent {
     set: [id: string, key: KeyCode, assist: number];
@@ -235,12 +235,15 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
 
         // 真正开始触发按键
         let emitted = false;
+
         toEmit.forEach(v => {
             if (ctrl === v.ctrl && shift === v.shift && alt === v.alt) {
                 const data = v.emits.get(this.scope);
                 if (!data) return;
+
                 if (type === 'up' && data.onUp) {
                     data.onUp(v.id, key, ev);
+                    emitted = true;
                     return;
                 }
                 if (!this.canEmit(v.id, key, type, data)) return;
@@ -419,6 +422,7 @@ document.addEventListener('keyup', e => {
     const code = keycode(e.keyCode);
     if (gameKey.emitKey(code, assist, 'up', e)) {
         e.preventDefault();
+        deleteWith(core.status.holdingKeys, e.keyCode);
     } else {
         // polyfill样板
         if (

@@ -3146,6 +3146,14 @@ maps.prototype.removeBlockByIndex = function (index, floorId) {
         delete core.status.mapBlockObjs[floorId][block.x + ',' + block.y];
     core.setMapBlockDisabled(floorId, block.x, block.y, true);
     this._updateMapArray(floorId, block.x, block.y);
+    Mota.require('var', 'hook').emit(
+        'setBlock',
+        block.x,
+        block.y,
+        floorId,
+        0,
+        block?.id ?? 0
+    );
 };
 
 ////// 一次性删除多个block //////

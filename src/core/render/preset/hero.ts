@@ -6,6 +6,7 @@ import EventEmitter from 'eventemitter3';
 import { texture } from '../cache';
 import { TimingFn } from 'mutate-animate';
 import { backDir } from '@/plugin/game/utils';
+import { isNil } from 'lodash-es';
 
 type HeroMovingStatus = 'stop' | 'moving' | 'moving-as';
 
@@ -48,8 +49,10 @@ export class HeroRenderer
     private moveDir: Move2 = 'down';
     /** 上一步走到格子上的时间 */
     private lastStepTime: number = 0;
-    /** 是否已经执行了当前步移动 */
+    /** 执行当前步移动的Promise */
     private moveDetached?: Promise<void>;
+    /** endMove的Promise */
+    private moveEnding?: Promise<void>;
     /**
      * 这一步的移动方向，与{@link moveDir}不同的是，在这一步走完之前，它都不会变，
      * 当这一步走完之后，才会将其设置为{@link moveDir}的值
@@ -157,8 +160,6 @@ export class HeroRenderer
         if (progress >= 1) {
             this.renderable.x = x + dx;
             this.renderable.y = y + dy;
-            console.log(x, y, dx, dy, this.renderable.x, this.renderable.y);
-
             this.emit('stepEnd');
         } else {
             const rx = dx * progress + x;
@@ -212,15 +213,21 @@ export class HeroRenderer
      */
     endMove(): Promise<void> {
         if (this.status !== 'moving') return Promise.reject();
-        return new Promise<void>(resolve => {
-            this.once('stepEnd', () => {
-                this.status = 'stop';
-                this.movingFrame = 0;
-                this.layer.removeTicker(this.moveId);
-                this.render();
-                resolve();
+        if (this.moveEnding) return this.moveEnding;
+        else {
+            const promise = new Promise<void>(resolve => {
+                this.once('stepEnd', () => {
+                    this.moveEnding = void 0;
+                    this.status = 'stop';
+                    this.movingFrame = 0;
+                    const { x, y } = core.status.hero.loc;
+                    this.setHeroLoc(x, y);
+                    this.render();
+                    resolve();
+                });
             });
-        });
+            return (this.moveEnding = promise);
+        }
     }
 
     /**
@@ -242,8 +249,26 @@ export class HeroRenderer
             }
         }
         this.moveDir = dir;
+        this.stepDir = dir;
+
         if (!this.renderable) return;
         this.renderable.render = this.getRenderFromDir(this.moveDir);
+        this.layer.update(this.layer);
+    }
+
+    /**
+     * 设置勇士的坐标
+     * @param x 横坐标
+     * @param y 纵坐标
+     */
+    setHeroLoc(x?: number, y?: number) {
+        if (!this.renderable) return;
+        if (!isNil(x)) {
+            this.renderable.x = x;
+        }
+        if (!isNil(y)) {
+            this.renderable.y = y;
+        }
         this.layer.update(this.layer);
     }
 
@@ -313,6 +338,7 @@ export class HeroRenderer
         this.moveId = layer.delegateTicker(() => {
             this.moveTick(Date.now());
         });
+        console.log(this);
     }
 
     onDestroy(layer: Layer): void {
@@ -345,4 +371,19 @@ adapter.recieve(
 adapter.recieve('setMoveSpeed', (item, speed: number) => {
     item.setMoveSpeed(speed);
     return Promise.resolve();
+});
+adapter.recieve('setHeroLoc', (item, x?: number, y?: number) => {
+    item.setHeroLoc(x, y);
+    return Promise.resolve();
+});
+adapter.recieve('turn', (item, dir: Dir2) => {
+    item.turn(dir);
+    return Promise.resolve();
+});
+// 同步fallback，用于适配现在的样板，之后会删除
+adapter.recieveSync('setHeroLoc', (item, x?: number, y?: number) => {
+    item.setHeroLoc(x, y);
+});
+adapter.recieveSync('turn', (item, dir: Dir2) => {
+    item.turn(dir);
 });

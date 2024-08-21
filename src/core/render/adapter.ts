@@ -58,6 +58,7 @@ export class RenderAdapter<T> {
      */
     all<R = any>(fn: string, ...params: any[]): Promise<R[]> {
         const execute = this.execute.get(fn);
+
         if (!execute) {
             return Promise.reject();
         } else {
@@ -86,7 +87,7 @@ export class RenderAdapter<T> {
      * 对所有元素执行同步函数
      * @returns 包含每个元素运行结果的数组
      */
-    syncAll<R = any>(fn: string, ...params: any[]): R[] {
+    sync<R = any>(fn: string, ...params: any[]): R[] {
         const execute = this.syncExecutes.get(fn);
         if (!execute) {
             return [];

@@ -906,7 +906,7 @@ export class Layer extends Container {
             this.renderData.push(...data);
         } else if (data.length === 1) {
             // 特判单个图块的情况
-            const index = x + y + this.mapWidth;
+            const index = x + y * this.mapWidth;
             this.renderData[index] = data[0];
         } else {
             // 限定更新区域
@@ -929,7 +929,8 @@ export class Layer extends Container {
         if (calAutotile) this.calAutotiles(x, y, width, height);
         this.updateBlocks(x, y, width, height);
         this.updateBigImages(x, y, width, height);
-        this.update(this);
+
+        // this.update(this);
 
         for (const ex of this.extend.values()) {
             ex.onDataPut?.(this, data, width, x, y, calAutotile);
@@ -1099,6 +1100,7 @@ export class Layer extends Container {
             height,
             Layer.FRAME_ALL
         );
+
         this.update(this);
 
         for (const ex of this.extend.values()) {
@@ -1195,7 +1197,7 @@ export class Layer extends Container {
      */
     protected renderStatic(camera: Camera, need: NeedRenderData) {
         const cell = this.cellSize;
-        const frame = (RenderItem.animatedFrame % 4) + 1;
+        const frame = RenderItem.animatedFrame % 4;
         const { width } = this.block.blockData;
         const blockSize = this.block.blockSize;
         const { ctx } = this.staticMap;
@@ -1210,7 +1212,7 @@ export class Layer extends Container {
             const y = Math.floor(v / width);
             const sx = x * blockSize;
             const sy = y * blockSize;
-            const index = v * 4 + frame - 1;
+            const index = v * 4 + frame;
 
             const cache = this.block.cache.get(index);
             if (cache) {
@@ -1241,7 +1243,7 @@ export class Layer extends Container {
                     if (num === 0 || num === 17) continue;
                     const data = texture.getRenderable(num);
                     if (!data || data.bigImage) continue;
-                    const f = (frame - 1) % data.frame;
+                    const f = frame % data.frame;
                     const i = data.animate === -1 ? f : data.animate;
                     const [isx, isy, w, h] = data.render[i];
                     const px = (nx - sx) * cell;

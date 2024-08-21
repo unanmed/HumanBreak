@@ -186,7 +186,7 @@ export interface IMota {
      * 接口在渲染进程中引入，在游戏进程中不会polyfill，因此在游戏进程中使用时，
      * 应先使用main.replayChecking进行检查，保证该值不存在时才进行使用，否则会引起录像出错
      */
-    Package: IPackage;
+    // Package: IPackage;
 
     /**
      * 获取一个样板接口
@@ -409,7 +409,7 @@ class Mota {
     static r = r;
     static rf = rf;
     static Plugin = MPlugin;
-    static Package = MPackage;
+    // static Package = MPackage;
 
     constructor() {
         throw new Error(`System interface class cannot be constructed.`);
@@ -548,12 +548,8 @@ function rewrite<O, K extends SelectKey<O, _Func>, T = O>(
  * @param fn 要执行的函数，传入一个参数，表示所有的第三方库，也就是`Mota.Package.requireAll()`的内容
  * @param thisArg 函数的执行上下文，即函数中`this`指向
  */
-function r<T = undefined>(
-    fn: (this: T, packages: PackageInterface) => void,
-    thisArg?: T
-) {
-    if (!main.replayChecking && main.mode === 'play')
-        fn.call(thisArg as T, MPackage.requireAll());
+function r<T = undefined>(fn: (this: T) => void, thisArg?: T) {
+    if (!main.replayChecking && main.mode === 'play') fn.call(thisArg as T);
 }
 
 /**

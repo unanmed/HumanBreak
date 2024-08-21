@@ -117,6 +117,8 @@ export class LayerGroupFloorBinder
         if (!ex) return;
         ex.setBlock(block, x, y);
 
+        console.log(block, x, y);
+
         const floor = this.bindThisFloor ? core.status.floorId : this.floor!;
         this.emit('setBlock', x, y, floor, block);
     }

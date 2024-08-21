@@ -410,6 +410,7 @@ actions.prototype._sys_keyDown_lockControl = function (keyCode) {
 
 actions.prototype._sys_keyDown = function (keyCode) {
     if (!core.status.played) return true;
+    return true;
     switch (keyCode) {
         case 37:
             core.moveHero('left');

@@ -196,7 +196,8 @@ export class BlockCacher<T> extends EventEmitter<BlockCacherEvent> {
         deep: number = 2 ** 31 - 1
     ) {
         const [bx, by] = this.getBlockXY(x, y);
-        const [ex, ey] = this.getBlockXY(x + width, y + height);
+        const [ex, ey] = this.getBlockXY(x + width - 1, y + height - 1);
+
         return this.updateArea(bx, by, ex - bx, ey - by, deep);
     }
 
@@ -213,6 +214,7 @@ export class BlockCacher<T> extends EventEmitter<BlockCacherEvent> {
         deep: number = 2 ** 31 - 1
     ) {
         const blocks = this.getIndexOf(x, y, width, height);
+
         blocks.forEach(v => {
             this.clearCache(v, deep);
         });
@@ -229,8 +231,8 @@ export class BlockCacher<T> extends EventEmitter<BlockCacherEvent> {
         const ex = Math.min(x + width, this.blockData.width);
         const ey = Math.min(y + height, this.blockData.height);
 
-        for (let nx = sx; nx < ex; nx++) {
-            for (let ny = sy; ny < ey; ny++) {
+        for (let nx = sx; nx <= ex; nx++) {
+            for (let ny = sy; ny <= ey; ny++) {
                 const index = this.getIndex(nx, ny);
                 res.add(index);
             }

@@ -3022,6 +3022,7 @@ control.prototype.removeSwitch = function (x, y, floorId, name) {
 
 ////// 锁定状态栏，常常用于事件处理 //////
 control.prototype.lockControl = function () {
+    console.trace();
     core.status.lockControl = true;
 };
 

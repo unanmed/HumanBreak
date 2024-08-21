@@ -28,6 +28,8 @@ export class FloorDamageExtends implements ILayerGroupRenderExtends {
     group!: LayerGroup;
     sprite!: Damage;
 
+    static listenedDamage: Set<FloorDamageExtends> = new Set();
+
     /**
      * 立刻刷新伤害渲染
      */
@@ -52,12 +54,16 @@ export class FloorDamageExtends implements ILayerGroupRenderExtends {
     }
 
     private onUpdate = (floor: FloorIds) => {
-        this.update(floor);
+        this.sprite.requestBeforeFrame(() => {
+            this.update(floor);
+        });
     };
 
     private onSetBlock = (x: number, y: number, floor: FloorIds) => {
-        if (floor !== this.sprite.enemy?.floorId) return;
-        this.sprite.updateEnemyOn(x, y);
+        this.sprite.enemy?.once('extract', () => {
+            if (floor !== this.sprite.enemy?.floorId) return;
+            this.sprite.updateEnemyOn(x, y);
+        });
     };
 
     /**
@@ -83,12 +89,14 @@ export class FloorDamageExtends implements ILayerGroupRenderExtends {
                 );
                 group.removeExtends('floor-damage');
             }
+            FloorDamageExtends.listenedDamage.add(this);
         });
     }
 
     onDestroy(group: LayerGroup): void {
         this.floorBinder.off('update', this.onUpdate);
         this.floorBinder.off('setBlock', this.onSetBlock);
+        FloorDamageExtends.listenedDamage.delete(this);
     }
 }
 
@@ -242,15 +250,17 @@ export class Damage extends Sprite {
         } else {
             data.set(index, enemy);
         }
+
         this.update(this);
 
         // 渲染懒更新，优化性能表现
         if (!this.needUpdateBlock) {
+            this.needUpdateBlocks.add(block);
             this.requestBeforeFrame(() => {
                 this.needUpdateBlock = false;
                 this.needUpdateBlocks.forEach(v => this.updateBlock(v, false));
                 // todo: 阻击夹域等地图伤害检测是否必要更新，例如不包含阻击夹域的怪就不必要更新这个怪物信息
-                this.extractAllMapDamage();
+                // this.extractAllMapDamage();
             });
             this.needUpdateBlock = true;
         }
@@ -264,8 +274,10 @@ export class Damage extends Sprite {
     private updateBlock(block: number, map: boolean = true) {
         const data = this.blockData.get(block);
         if (!data) return;
+
         this.block.clearCache(block, 1);
         const renderable = this.renderable.get(block)!;
+        renderable.clear();
         data.forEach(v => this.extract(v, renderable));
         if (map) this.extractMapDamage(block, renderable);
     }
