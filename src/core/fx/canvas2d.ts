@@ -1,10 +1,10 @@
 import { parseCss } from '@/plugin/utils';
-import { EventEmitter } from '../common/eventEmitter';
+import { EventEmitter } from 'eventemitter3';
 import { CSSObj } from '../interface';
 
 interface OffscreenCanvasEvent {
     /** 当被动触发resize时（例如core.domStyle.scale变化、窗口大小变化）时触发，使用size函数并不会触发 */
-    resize: () => void;
+    resize: [];
 }
 
 export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {

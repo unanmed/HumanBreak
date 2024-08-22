@@ -35,6 +35,7 @@ import type { Camera } from '@/core/render/camera';
 import type { Image, Text } from '@/core/render/preset/misc';
 import type { RenderItem } from '@/core/render/item';
 import type { RenderAdapter } from '@/core/render/adapter';
+import type { ItemState } from './state/item';
 
 interface ClassInterface {
     // 渲染进程与游戏进程通用
@@ -114,6 +115,9 @@ interface ModuleInterface {
         Image: typeof Image;
         RenderItem: typeof RenderItem;
         RenderAdapter: typeof RenderAdapter;
+    };
+    State: {
+        ItemState: typeof ItemState;
     };
 }
 

@@ -1,19 +1,18 @@
-import { Camera } from './camera';
 import {
-    ICanvasCachedRenderItem,
+    ERenderItemEvent,
     RenderFunction,
     RenderItem,
-    RenderItemPosition,
-    withCacheRender
+    RenderItemPosition
 } from './item';
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
+import { Transform } from './transform';
 
-export class Sprite extends RenderItem implements ICanvasCachedRenderItem {
+export interface ESpriteEvent extends ERenderItemEvent {}
+
+export class Sprite<E extends ESpriteEvent = ESpriteEvent> extends RenderItem<
+    E | ESpriteEvent
+> {
     renderFn: RenderFunction;
-
-    canvas: MotaOffscreenCanvas2D;
-
-    private readonly enableCache: boolean;
 
     /**
      * 创建一个精灵，可以自由在上面渲染内容
@@ -21,56 +20,20 @@ export class Sprite extends RenderItem implements ICanvasCachedRenderItem {
      * @param cache 是否启用缓存机制
      */
     constructor(type: RenderItemPosition = 'static', cache: boolean = true) {
-        super();
+        super(cache);
         this.type = type;
-        this.enableCache = cache;
         this.renderFn = () => {};
-        this.canvas = new MotaOffscreenCanvas2D();
-        this.canvas.withGameScale(true);
     }
 
-    render(canvas: MotaOffscreenCanvas2D, camera: Camera): void {
-        this.emit('beforeRender');
-        if (this.needUpdate) {
-            this.cache(this.using);
-            this.needUpdate = false;
-        }
-        if (this.enableCache) {
-            withCacheRender(this, canvas.canvas, canvas.ctx, camera, canvas => {
-                this.renderFn(canvas, camera);
-            });
-        } else {
-            this.renderFn(canvas, camera);
-        }
-        this.writing = void 0;
-        this.emit('afterRender');
-    }
-
-    size(width: number, height: number) {
-        this.width = width;
-        this.height = height;
-        this.canvas.size(width, height);
-        this.update(this);
-    }
-
-    pos(x: number, y: number) {
-        this.x = x;
-        this.y = y;
+    protected render(
+        canvas: MotaOffscreenCanvas2D,
+        transform: Transform
+    ): void {
+        this.renderFn(canvas, transform);
     }
 
     setRenderFn(fn: RenderFunction) {
         this.renderFn = fn;
-    }
-
-    setHD(hd: boolean): void {
-        this.highResolution = hd;
-        this.canvas.setHD(hd);
-        this.update(this);
-    }
-
-    setAntiAliasing(anti: boolean): void {
-        this.antiAliasing = anti;
-        this.canvas.setAntiAliasing(anti);
         this.update(this);
     }
 }

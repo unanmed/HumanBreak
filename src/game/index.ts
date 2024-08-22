@@ -10,6 +10,7 @@ import * as hero from './state/hero';
 import * as miscMechanism from './mechanism/misc';
 import * as study from './mechanism/study';
 import { registerPresetState } from './state/preset';
+import { ItemState } from './state/item';
 
 // ----- 类注册
 Mota.register('class', 'DamageEnemy', damage.DamageEnemy);
@@ -31,6 +32,9 @@ Mota.register('var', 'loading', loading);
 Mota.register('module', 'Mechanism', {
     BluePalace: miscMechanism.BluePalace,
     Study: study
+});
+Mota.register('module', 'State', {
+    ItemState
 });
 
 main.loading = loading;

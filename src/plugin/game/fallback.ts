@@ -261,8 +261,6 @@ export function init() {
                 core.autosave();
             }
 
-            console.trace();
-
             moveDir = direction;
             stepDir = direction;
             await readyMove();

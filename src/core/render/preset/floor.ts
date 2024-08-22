@@ -107,6 +107,10 @@ export class LayerGroupFloorBinder
         this.emit('update', floor);
     }
 
+    getFloor() {
+        return this.bindThisFloor ? core.status.floorId : this.floor!;
+    }
+
     /**
      * 设置图块
      */

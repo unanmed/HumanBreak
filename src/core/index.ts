@@ -65,7 +65,6 @@ import * as portal from './fx/portal';
 import { MotaRenderer } from './render/render';
 import { Container } from './render/container';
 import { Sprite } from './render/sprite';
-import { Camera } from './render/camera';
 import { Image, Text } from './render/preset/misc';
 import { RenderItem } from './render/item';
 import { texture } from './render/cache';
@@ -152,7 +151,6 @@ Mota.register('module', 'Render', {
     MotaRenderer,
     Container,
     Sprite,
-    Camera,
     Text,
     Image,
     RenderItem,

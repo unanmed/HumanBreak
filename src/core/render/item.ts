@@ -1,42 +1,15 @@
 import { isNil } from 'lodash-es';
 import { EventEmitter } from 'eventemitter3';
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
-import { Camera } from './camera';
 import { Ticker, TickerFn } from 'mutate-animate';
+import { Transform } from './transform';
 
 export type RenderFunction = (
     canvas: MotaOffscreenCanvas2D,
-    camera: Camera
+    transform: Transform
 ) => void;
 
 export type RenderItemPosition = 'absolute' | 'static';
-
-interface IRenderCache {
-    /** 缓存列表 */
-    cacheList: Map<string, MotaOffscreenCanvas2D>;
-    /** 当前正在使用的缓存 */
-    using?: string;
-    /** 下次绘制需要写入的缓存 */
-    writing?: string;
-
-    /**
-     * 在之后的绘制中使用缓存，如果缓存不存在，那么就不使用缓存，并在下一次绘制结束后写入
-     * @param index 缓存的索引，不填时表示不使用缓存
-     */
-    useCache(index?: string): void;
-
-    /**
-     * 将下次绘制写入缓存并使用
-     * @param index 缓存的索引，不填时表示不进行缓存
-     */
-    cache(index?: string): void;
-
-    /**
-     * 清除指定或所有缓存
-     * @param index 要清除的缓存，不填代表清除所有
-     */
-    clearCache(index?: string): void;
-}
 
 export interface IRenderUpdater {
     /**
@@ -44,11 +17,6 @@ export interface IRenderUpdater {
      * @param item 触发更新事件的元素，可以是自身触发。如果不填表示手动触发，而非渲染内容发生变化而引起的触发
      */
     update(item?: RenderItem): void;
-}
-
-export interface ICanvasCachedRenderItem {
-    /** 离屏画布，首先渲染到它上面，然后由Renderer渲染到最终画布上 */
-    canvas: MotaOffscreenCanvas2D;
 }
 
 interface IRenderAnchor {
@@ -89,13 +57,13 @@ export interface IRenderChildable {
      * 向这个元素添加子元素
      * @param child 添加的元素
      */
-    appendChild(...child: RenderItem[]): void;
+    appendChild(...child: RenderItem<any>[]): void;
 
     /**
      * 移除这个元素中的某个子元素
      * @param child 要移除的元素
      */
-    removeChild(...child: RenderItem[]): void;
+    removeChild(...child: RenderItem<any>[]): void;
 
     /**
      * 对子元素进行排序
@@ -142,11 +110,11 @@ interface IRenderTickerSupport {
     removeTicker(id: number, callEnd?: boolean): boolean;
 }
 
-interface RenderItemEvent {
-    beforeUpdate: (item?: RenderItem) => void;
-    afterUpdate: (item?: RenderItem) => void;
-    beforeRender: () => void;
-    afterRender: () => void;
+export interface ERenderItemEvent {
+    beforeUpdate: [item?: RenderItem];
+    afterUpdate: [item?: RenderItem];
+    beforeRender: [transform: Transform];
+    afterRender: [transform: Transform];
 }
 
 interface TickerDelegation {
@@ -158,11 +126,9 @@ const beforeFrame: (() => void)[] = [];
 const afterFrame: (() => void)[] = [];
 const renderFrame: (() => void)[] = [];
 
-// todo: 添加模型变换
-export abstract class RenderItem
-    extends EventEmitter<RenderItemEvent>
+export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
+    extends EventEmitter<ERenderItemEvent | E>
     implements
-        IRenderCache,
         IRenderUpdater,
         IRenderAnchor,
         IRenderConfig,
@@ -178,22 +144,17 @@ export abstract class RenderItem
     /** ticker委托id */
     static tickerId: number = 0;
 
+    /** 元素纵深，表示了遮挡关系 */
     zIndex: number = 0;
 
-    x: number = 0;
-    y: number = 0;
     width: number = 200;
     height: number = 200;
 
-    cacheList: Map<string, MotaOffscreenCanvas2D> = new Map();
-
-    using?: string;
-    writing?: string;
-
+    // 渲染锚点，(0,0)表示左上角，(1,1)表示右下角
     anchorX: number = 0;
     anchorY: number = 0;
 
-    /** 渲染模式，absolute表示绝对位置，static表示跟随摄像机移动，只对顶层元素有效 */
+    /** 渲染模式，absolute表示绝对位置，static表示跟随摄像机移动 */
     type: 'absolute' | 'static' = 'static';
     /** 是否是高清画布 */
     highResolution: boolean = true;
@@ -202,57 +163,92 @@ export abstract class RenderItem
     /** 是否被隐藏 */
     hidden: boolean = false;
 
+    /** 当前元素的父元素 */
     parent?: RenderItem & IRenderChildable;
 
     protected needUpdate: boolean = false;
 
-    constructor() {
+    /** 该渲染元素的模型变换矩阵 */
+    transform: Transform = new Transform();
+
+    /** 渲染缓存信息 */
+    private cache: MotaOffscreenCanvas2D = new MotaOffscreenCanvas2D();
+    /** 是否需要更新缓存 */
+    private cacheDirty: boolean = true;
+    /** 是否启用缓存机制 */
+    readonly enableCache: boolean = true;
+
+    constructor(enableCache: boolean = true) {
         super();
 
-        // this.using = '@default';
+        this.enableCache = enableCache;
+        this.cache.withGameScale(true);
     }
 
     /**
-     * 渲染这个对象
+     * 渲染函数
      * @param canvas 渲染至的画布
-     * @param camera 渲染时使用的摄像机
+     * @param transform 当前变换矩阵的，渲染时已经进行变换处理，不需要对画布再次进行变换处理
+     *                  此参数可用于自己对元素进行变换处理，也会用于对子元素的处理。
+     *                  例如对于`absolute`类型的元素，同时有对视角改变的需求，就可以通过此参数进行变换。
+     *                  样板内置的`Layer`及`Damage`元素就是通过此方式实现的
      */
-    abstract render(canvas: MotaOffscreenCanvas2D, camera: Camera): void;
+    protected abstract render(
+        canvas: MotaOffscreenCanvas2D,
+        transform: Transform
+    ): void;
 
     /**
      * 修改这个对象的大小
      */
-    abstract size(width: number, height: number): void;
+    size(width: number, height: number): void {
+        this.width = width;
+        this.height = height;
+        this.cache.size(width, height);
+        this.cacheDirty = true;
+        this.update(this);
+    }
 
     /**
-     * 修改这个对象的位置
+     * 渲染当前对象
+     * @param canvas 渲染至的画布
+     * @param transform 父元素的变换矩阵
      */
-    abstract pos(x: number, y: number): void;
+    renderContent(canvas: MotaOffscreenCanvas2D, transform: Transform) {
+        if (this.hidden) return;
+        this.emit('beforeRender', transform);
+        this.needUpdate = false;
+        const tran = transform.multiply(this.transform);
+        const ax = -this.anchorX * this.width;
+        const ay = -this.anchorY * this.height;
+        if (this.enableCache) {
+            if (this.cacheDirty) {
+                const cache = this.cache;
+                this.render(cache, tran);
+                this.cache = cache;
+                this.cacheDirty = false;
+            }
 
-    useCache(index?: string): void {
-        if (isNil(index)) {
-            this.using = void 0;
-            return;
-        }
-        if (!this.cacheList.has(index)) {
-            this.writing = index;
-        }
-        this.using = index;
-    }
-
-    cache(index?: string): void {
-        this.writing = index;
-        this.using = index;
-    }
-
-    clearCache(index?: string): void {
-        if (isNil(index)) {
-            this.writing = void 0;
-            this.using = void 0;
-            this.cacheList.clear();
+            canvas.ctx.save();
+            if (this.type === 'static') transformCanvas(canvas, tran);
+            canvas.ctx.drawImage(this.cache.canvas, ax, ay);
+            canvas.ctx.restore();
         } else {
-            this.cacheList.delete(index);
+            canvas.ctx.save();
+            if (this.type === 'static') transformCanvas(canvas, tran);
+            this.render(canvas, tran);
+            canvas.ctx.restore();
         }
+        this.emit('afterRender', transform);
+    }
+
+    /**
+     * 设置这个元素的位置，等效于`transform.setTranslate(x, y)`
+     * @param x 横坐标
+     * @param y 纵坐标
+     */
+    pos(x: number, y: number) {
+        this.transform.setTranslate(x, y);
     }
 
     setAnchor(x: number, y: number): void {
@@ -260,19 +256,22 @@ export abstract class RenderItem
         this.anchorY = y;
     }
 
-    update(item?: RenderItem): void {
+    update(item?: RenderItem<any>): void {
         if (this.needUpdate) return;
         this.needUpdate = true;
+        this.cacheDirty = true;
         this.parent?.update(item);
     }
 
     setHD(hd: boolean): void {
         this.highResolution = hd;
+        this.cache.setHD(hd);
         this.update(this);
     }
 
     setAntiAliasing(anti: boolean): void {
         this.antiAliasing = anti;
+        this.cache.setAntiAliasing(anti);
         this.update(this);
     }
 
@@ -429,54 +428,13 @@ Mota.require('var', 'hook').once('reset', () => {
     });
 });
 
-export function withCacheRender(
-    item: RenderItem & ICanvasCachedRenderItem,
-    _canvas: HTMLCanvasElement,
-    ctx: CanvasRenderingContext2D,
-    camera: Camera,
-    fn: RenderFunction
-) {
-    const { width, height } = item;
-    const ax = width * item.anchorX;
-    const ay = height * item.anchorY;
-    let write = item.writing;
-    if (!isNil(item.using) && isNil(item.writing)) {
-        const cache = item.cacheList.get(item.using);
-        if (cache) {
-            ctx.drawImage(
-                cache.canvas,
-                item.x - ax,
-                item.y - ay,
-                item.width,
-                item.height
-            );
-            return;
-        }
-        write = item.using;
-    }
-    const { canvas: c, ctx: ct } = item.canvas;
-    ct.clearRect(0, 0, c.width, c.height);
-    fn(item.canvas, camera);
-    if (!isNil(write)) {
-        const cache = item.cacheList.get(write);
-        if (cache) {
-            const { canvas, ctx } = cache;
-            ctx.drawImage(c, 0, 0, canvas.width, canvas.height);
-        } else {
-            item.cacheList.set(write, MotaOffscreenCanvas2D.clone(item.canvas));
-        }
-    }
-
-    ctx.drawImage(c, item.x - ax, item.y - ay, item.width, item.height);
-}
-
 export function transformCanvas(
     canvas: MotaOffscreenCanvas2D,
-    camera: Camera,
+    transform: Transform,
     clear: boolean = false
 ) {
     const { canvas: ca, ctx, scale } = canvas;
-    const mat = camera.mat;
+    const mat = transform.mat;
     const a = mat[0] * scale;
     const b = mat[1] * scale;
     const c = mat[3] * scale;
@@ -487,6 +445,5 @@ export function transformCanvas(
     if (clear) {
         ctx.clearRect(0, 0, ca.width, ca.height);
     }
-    ctx.translate(ca.width / 2, ca.height / 2);
     ctx.transform(a, b, c, d, e, f);
 }

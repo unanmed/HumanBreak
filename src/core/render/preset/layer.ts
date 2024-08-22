@@ -1,18 +1,13 @@
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 import { Container } from '../container';
 import { Sprite } from '../sprite';
-import { Camera } from '../camera';
 import { TimingFn } from 'mutate-animate';
-import {
-    IAnimateFrame,
-    renderEmits,
-    RenderItem,
-    transformCanvas
-} from '../item';
+import { IAnimateFrame, renderEmits, RenderItem } from '../item';
 import { logger } from '@/core/common/logger';
-import { AutotileRenderable, RenderableData, texture } from '../cache';
+import { RenderableData, texture } from '../cache';
 import { glMatrix } from 'gl-matrix';
 import { BlockCacher } from './block';
+import { Transform } from '../transform';
 
 export interface ILayerGroupRenderExtends {
     /** 拓展的唯一标识符 */
@@ -59,25 +54,11 @@ export interface ILayerGroupRenderExtends {
     onEmptyLayer?(group: LayerGroup): void;
 
     /**
-     * 当渲染数据更新时执行的函数
-     * @param group 目标LayerGroup实例
-     * @param floor 数据更新的楼层
-     */
-    // onDataUpdate?: (group: LayerGroup, floor: FloorIds) => void;
-
-    /**
      * 当帧动画更新时执行的函数，例如从第一帧变成第二帧时
      * @param group 目标LayerGroup实例
      * @param frame 当前帧数
      */
     onFrameUpdate?(group: LayerGroup, frame: number): void;
-
-    /**
-     * 当绑定楼层时执行的函数
-     * @param group 目标LayerGroup实例
-     * @param floor 绑定的楼层id，为空时表示绑定为当前楼层
-     */
-    // onBindFloor?: (group: LayerGroup, floor?: FloorIds) => void;
 
     /**
      * 当拓展被取消挂载时执行的函数（LayerGroup被销毁，拓展被移除等）
@@ -267,13 +248,13 @@ export class LayerGroup extends Container implements IAnimateFrame {
 
     /**
      * 缓存计算应该渲染的块
-     * @param camera 摄像机
+     * @param transform 变换矩阵
      * @param blockData 分块信息
      */
-    cacheNeedRender(camera: Camera, block: BlockCacher<any>) {
+    cacheNeedRender(transform: Transform, block: BlockCacher<any>) {
         return (
             this.needRender ??
-            (this.needRender = calNeedRenderOf(camera, this.cellSize, block))
+            (this.needRender = calNeedRenderOf(transform, this.cellSize, block))
         );
     }
 
@@ -288,9 +269,6 @@ export class LayerGroup extends Container implements IAnimateFrame {
      * 更新动画帧
      */
     updateFrameAnimate() {
-        this.layers.forEach(v => {
-            v.cache(v.using);
-        });
         this.update(this);
 
         for (const ex of this.extend.values()) {
@@ -308,7 +286,7 @@ export class LayerGroup extends Container implements IAnimateFrame {
 }
 
 export function calNeedRenderOf(
-    camera: Camera,
+    transform: Transform,
     cell: number,
     block: BlockCacher<any>
 ): NeedRenderData {
@@ -317,10 +295,10 @@ export function calNeedRenderOf(
     const size = block.blockSize;
 
     // -1是因为宽度是core._PX_，从0开始的话，末尾索引就是core._PX_ - 1
-    const [x1, y1] = Camera.untransformed(camera, -w, -h);
-    const [x2, y2] = Camera.untransformed(camera, w - 1, -h);
-    const [x3, y3] = Camera.untransformed(camera, w - 1, h - 1);
-    const [x4, y4] = Camera.untransformed(camera, -w, h - 1);
+    const [x1, y1] = Transform.untransformed(transform, -w, -h);
+    const [x2, y2] = Transform.untransformed(transform, w - 1, -h);
+    const [x3, y3] = Transform.untransformed(transform, w - 1, h - 1);
+    const [x4, y4] = Transform.untransformed(transform, -w, h - 1);
 
     const res: Set<number> = new Set();
     /** 一个纵坐标对应的所有横坐标，用于填充 */
@@ -469,8 +447,6 @@ export interface ILayerRenderExtends {
      */
     onBackgroundSet?(layer: Layer, background: AllNumbers): void;
 
-    // onBackgroundBind?: (layer: Layer, floorId: FloorIds) => void;
-
     /**
      * 当背景图块图片被生成时执行的函数
      * @param layer 目标Layer实例
@@ -568,18 +544,26 @@ export interface ILayerRenderExtends {
     /**
      * 在地图渲染之前执行的函数
      * @param layer 目标Layer实例
-     * @param camera 渲染的摄像头信息
+     * @param transform 渲染的变换矩阵
      * @param need 需要渲染的分块信息
      */
-    onBeforeRender?(layer: Layer, camera: Camera, need: NeedRenderData): void;
+    onBeforeRender?(
+        layer: Layer,
+        transform: Transform,
+        need: NeedRenderData
+    ): void;
 
     /**
      * 在地图渲染之后执行的函数
      * @param layer 目标Layer实例
-     * @param camera 渲染的摄像头信息
+     * @param transform 渲染的变换矩阵
      * @param need 需要渲染的分块信息
      */
-    onAfterRender?(layer: Layer, camera: Camera, need: NeedRenderData): void;
+    onAfterRender?(
+        layer: Layer,
+        transform: Transform,
+        need: NeedRenderData
+    ): void;
 
     /**
      * 当拓展被取消挂载时执行的函数（Layer被销毁，拓展被移除等）
@@ -606,38 +590,6 @@ interface NeedRenderData {
     back: [x: number, y: number][];
 }
 
-interface MovingStepLinearSwap {
-    /** 线性差值移动（也就是平移）或者是瞬移 */
-    type: 'linear' | 'swap';
-    x: number;
-    y: number;
-    /** 这次移动的总时长，不是每格时长 */
-    time?: number;
-}
-
-interface MovingStepFunction {
-    /** 自定义移动方式 */
-    type: 'fn';
-    /**
-     * 移动函数，返回一个三元素数组，表示当前所在格子数，以及在纵向上的深度（一般图块的深度就是它的纵坐标），
-     * 注意不是像素数，可以是小数
-     */
-    fn: TimingFn<3>;
-    time?: number;
-    relative?: boolean;
-}
-
-interface MovingBlock {
-    /** 当前横坐标 */
-    x: number;
-    /** 当前纵坐标 */
-    y: number;
-    /** 渲染信息 */
-    render: RenderableData | AutotileRenderable;
-    /** 当前的纵深 */
-    nowZ: number;
-}
-
 export class Layer extends Container {
     // 一些会用到的常量
     static readonly FRAME_0 = 1;
@@ -654,7 +606,7 @@ export class Layer extends Container {
     protected backMap: MotaOffscreenCanvas2D = new MotaOffscreenCanvas2D();
 
     /** 最终渲染至的Sprite */
-    main: Sprite = new Sprite();
+    main: Sprite = new Sprite('static', false);
 
     /** 渲染的层 */
     layer?: FloorLayer;
@@ -714,13 +666,13 @@ export class Layer extends Container {
         this.main.size(core._PX_, core._PY_);
 
         this.appendChild(this.main);
-        this.main.setRenderFn((canvas, camera) => {
+        this.main.setRenderFn((canvas, transform) => {
             const { ctx } = canvas;
             const { width, height } = canvas.canvas;
             ctx.save();
             ctx.imageSmoothingEnabled = false;
-            const need = this.calNeedRender(camera);
-            this.renderMap(camera, need);
+            const need = this.calNeedRender(transform);
+            this.renderMap(transform, need);
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.drawImage(this.backMap.canvas, 0, 0, width, height);
             ctx.drawImage(this.staticMap.canvas, 0, 0, width, height);
@@ -930,8 +882,6 @@ export class Layer extends Container {
         this.updateBlocks(x, y, width, height);
         this.updateBigImages(x, y, width, height);
 
-        // this.update(this);
-
         for (const ex of this.extend.values()) {
             ex.onDataPut?.(this, data, width, x, y, calAutotile);
         }
@@ -1109,15 +1059,15 @@ export class Layer extends Container {
     }
 
     /**
-     * 计算在传入的摄像机的视角下，应该渲染哪些内容
-     * @param camera 摄像机
+     * 计算在传入的变换矩阵下，应该渲染哪些内容
+     * @param transform 变换矩阵
      */
-    calNeedRender(camera: Camera): NeedRenderData {
+    calNeedRender(transform: Transform): NeedRenderData {
         if (this.parent instanceof LayerGroup) {
             // 如果处于地图组中，每个地图的渲染区域应该是一样的，因此可以缓存优化
-            return this.parent.cacheNeedRender(camera, this.block);
+            return this.parent.cacheNeedRender(transform, this.block);
         } else {
-            return calNeedRenderOf(camera, this.cellSize, this.block);
+            return calNeedRenderOf(transform, this.cellSize, this.block);
         }
     }
 
@@ -1138,7 +1088,7 @@ export class Layer extends Container {
     /**
      * 渲染当前地图
      */
-    renderMap(camera: Camera, need: NeedRenderData) {
+    renderMap(transform: Transform, need: NeedRenderData) {
         this.staticMap.clear();
         this.movingMap.clear();
         this.backMap.clear();
@@ -1146,32 +1096,31 @@ export class Layer extends Container {
         if (this.needUpdateMoving) this.updateMovingRenderable();
 
         for (const ex of this.extend.values()) {
-            ex.onBeforeRender?.(this, camera, need);
+            ex.onBeforeRender?.(this, transform, need);
         }
-        this.renderBack(camera, need);
-        this.renderStatic(camera, need);
-        this.renderMoving(camera);
+        this.renderBack(transform, need);
+        this.renderStatic(transform, need);
+        this.renderMoving(transform);
         for (const ex of this.extend.values()) {
-            ex.onAfterRender?.(this, camera, need);
+            ex.onAfterRender?.(this, transform, need);
         }
     }
 
     /**
      * 渲染背景图
-     * @param camera 摄像机
+     * @param transform 变换矩阵
      * @param need 需要渲染的块
      */
-    protected renderBack(camera: Camera, need: NeedRenderData) {
+    protected renderBack(transform: Transform, need: NeedRenderData) {
         const cell = this.cellSize;
         const frame = (RenderItem.animatedFrame % 4) + 1;
         const blockSize = this.block.blockSize;
         const { back } = need;
         const { ctx } = this.backMap;
 
-        const mat = camera.mat;
+        const mat = transform.mat;
         const [a, b, , c, d, , e, f] = mat;
         ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.translate(core._PX_ / 2, core._PY_ / 2);
         ctx.transform(a, b, c, d, e, f);
 
         if (this.background !== 0) {
@@ -1195,7 +1144,7 @@ export class Layer extends Container {
     /**
      * 渲染静态层
      */
-    protected renderStatic(camera: Camera, need: NeedRenderData) {
+    protected renderStatic(transform: Transform, need: NeedRenderData) {
         const cell = this.cellSize;
         const frame = RenderItem.animatedFrame % 4;
         const { width } = this.block.blockData;
@@ -1205,7 +1154,9 @@ export class Layer extends Container {
         ctx.save();
 
         const { res: render } = need;
-        transformCanvas(this.staticMap, camera, false);
+        const [a, b, , c, d, , e, f] = transform.mat;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.transform(a, b, c, d, e, f);
 
         render.forEach(v => {
             const x = v % width;
@@ -1277,17 +1228,16 @@ export class Layer extends Container {
     /**
      * 渲染移动/大怪物层
      */
-    protected renderMoving(camera: Camera) {
+    protected renderMoving(transform: Transform) {
         const frame = (RenderItem.animatedFrame % 4) + 1;
         const cell = this.cellSize;
         const halfCell = cell / 2;
         const { ctx } = this.movingMap;
 
         ctx.save();
-        const mat = camera.mat;
+        const mat = transform.mat;
         const [a, b, , c, d, , e, f] = mat;
         ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.translate(core._PX_ / 2, core._PY_ / 2);
         ctx.transform(a, b, c, d, e, f);
         const max1 = Math.max(a, b, c, d) ** 2;
         const max2 = Math.max(core._PX_, core._PY_) * 2;

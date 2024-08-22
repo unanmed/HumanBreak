@@ -1,9 +1,6 @@
-import { ReadonlyMat3, ReadonlyVec3, mat3, vec2, vec3 } from 'gl-matrix';
-import { EventEmitter } from '../common/eventEmitter';
+import { mat3, ReadonlyMat3, ReadonlyVec3, vec2, vec3 } from 'gl-matrix';
 
-interface CameraEvent {}
-
-export class Camera extends EventEmitter<CameraEvent> {
+export class Transform {
     mat: mat3 = mat3.create();
 
     x: number = 0;
@@ -12,10 +9,11 @@ export class Camera extends EventEmitter<CameraEvent> {
     scaleY: number = 1;
     rad: number = 0;
 
-    private saveStack: number[][] = [];
+    /** 有没有对这个Transform进行过修改，用于优化常规表现 */
+    private modified: boolean = false;
 
     /**
-     * 重设摄像机的所有参数
+     * 重设所有参数
      */
     reset() {
         mat3.identity(this.mat);
@@ -24,28 +22,31 @@ export class Camera extends EventEmitter<CameraEvent> {
         this.scaleX = 1;
         this.scaleY = 1;
         this.rad = 0;
+        this.modified = false;
     }
 
     /**
-     * 修改摄像机的缩放，叠加关系
+     * 修改缩放，叠加关系
      */
     scale(x: number, y: number = x) {
         mat3.scale(this.mat, this.mat, [x, y]);
         this.scaleX *= x;
         this.scaleY *= y;
+        this.modified = true;
     }
 
     /**
-     * 移动摄像机，叠加关系
+     * 移动，叠加关系
      */
     move(x: number, y: number) {
         mat3.translate(this.mat, this.mat, [-x, -y]);
         this.x += x;
         this.y += y;
+        this.modified = true;
     }
 
     /**
-     * 旋转摄像机，叠加关系
+     * 旋转，叠加关系
      */
     rotate(rad: number) {
         mat3.rotate(this.mat, this.mat, rad);
@@ -54,36 +55,40 @@ export class Camera extends EventEmitter<CameraEvent> {
             const n = Math.floor(this.rad / Math.PI / 2);
             this.rad -= n * Math.PI * 2;
         }
+        this.modified = true;
     }
 
     /**
-     * 设置摄像机的缩放，非叠加关系
+     * 设置缩放，非叠加关系
      */
     setScale(x: number, y: number = x) {
         mat3.scale(this.mat, this.mat, [x / this.scaleX, y / this.scaleY]);
         this.scaleX = x;
         this.scaleY = y;
+        this.modified = true;
     }
 
     /**
-     * 设置摄像机的位置，非叠加关系
+     * 设置位置，非叠加关系
      */
     setTranslate(x: number, y: number) {
         mat3.translate(this.mat, this.mat, [this.x - x, this.y - y]);
         this.x = x;
         this.y = y;
+        this.modified = true;
     }
 
     /**
-     * 设置摄像机的旋转，非叠加关系
+     * 设置旋转，非叠加关系
      */
     setRotate(rad: number) {
         mat3.rotate(this.mat, this.mat, rad - this.rad);
         this.rad = rad;
+        this.modified = true;
     }
 
     /**
-     * 设置摄像机的变换矩阵，叠加模式
+     * 设置变换矩阵，叠加模式
      * @param a 水平缩放
      * @param b 垂直倾斜
      * @param c 水平倾斜
@@ -108,7 +113,7 @@ export class Camera extends EventEmitter<CameraEvent> {
     }
 
     /**
-     * 设置摄像机的变换矩阵，非叠加模式
+     * 设置变换矩阵，非叠加模式
      * @param a 水平缩放
      * @param b 垂直倾斜
      * @param c 水平倾斜
@@ -140,46 +145,62 @@ export class Camera extends EventEmitter<CameraEvent> {
         this.scaleX = scaleX;
         this.scaleY = scaleY;
         this.rad = rad;
+        if (x === 0 && y === 0 && scaleX === 1 && scaleY === 1 && rad === 0) {
+            this.modified = false;
+        } else {
+            this.modified = true;
+        }
     }
 
     /**
-     * 保存当前摄像机状态
+     * 与一个矩阵相乘，返回其计算结果（不改变原矩阵）
+     * @param transform 变换矩阵
      */
-    save() {
-        this.saveStack.push(Array.from(this.mat));
+    multiply(transform: Transform): Transform {
+        if (this.modified) {
+            const res = new Transform();
+            const mat = mat3.clone(this.mat);
+            mat3.multiply(mat, mat, transform.mat);
+            res.mat = mat;
+            return res;
+        } else {
+            return transform.clone();
+        }
     }
 
     /**
-     * 回退当前摄像机状态
+     * 复制这个变换矩阵
      */
-    restore() {
-        const data = this.saveStack.pop();
-        if (!data) return;
-        const [a, b, c, d, e, f, g, h, i] = data;
-        this.mat = mat3.fromValues(a, b, c, d, e, f, g, h, i);
+    clone() {
+        const transform = new Transform();
+        transform.mat = mat3.clone(this.mat);
+        return transform;
     }
 
     /**
      * 根据摄像机的信息，将一个点转换为计算后的位置
-     * @param camera 摄像机
+     * @param transform 摄像机
      * @param x 横坐标
      * @param y 纵坐标
      */
-    static transformed(camera: Camera, x: number, y: number) {
-        return multiplyVec3(camera.mat, [x, y, 1]);
+    static transformed(transform: Transform, x: number, y: number) {
+        return multiplyVec3(transform.mat, [x, y, 1]);
     }
 
     /**
      * 根据摄像机的信息，将一个计算后的位置逆转换为原位置
-     * @param camera 摄像机
+     * @param transform 摄像机
      * @param x 横坐标
      * @param y 纵坐标
      */
-    static untransformed(camera: Camera, x: number, y: number) {
+    static untransformed(transform: Transform, x: number, y: number) {
         const invert = mat3.create();
-        mat3.invert(invert, camera.mat);
+        mat3.invert(invert, transform.mat);
         return multiplyVec3(invert, [x, y, 1]);
     }
+
+    /** 单位矩阵 */
+    static readonly identity = new Transform();
 }
 
 function multiplyVec3(mat: ReadonlyMat3, vec: ReadonlyVec3) {

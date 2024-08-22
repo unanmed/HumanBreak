@@ -6,7 +6,7 @@ import {
     Layer,
     LayerGroup
 } from './layer';
-import { Sprite } from '../sprite';
+import { ESpriteEvent, Sprite } from '../sprite';
 import { BlockCacher } from './block';
 import type {
     DamageEnemy,
@@ -14,21 +14,27 @@ import type {
     MapDamage
 } from '@/game/enemy/damage';
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
-import { Camera } from '../camera';
 import { isNil } from 'lodash-es';
 import { getDamageColor } from '@/plugin/utils';
 import { transformCanvas } from '../item';
+import EventEmitter from 'eventemitter3';
+import { Transform } from '../transform';
 
 const ensureFloorDamage = Mota.require('fn', 'ensureFloorDamage');
 
-export class FloorDamageExtends implements ILayerGroupRenderExtends {
+interface EFloorDamageEvent {
+    update: [floor: FloorIds];
+}
+
+export class FloorDamageExtends
+    extends EventEmitter<EFloorDamageEvent>
+    implements ILayerGroupRenderExtends
+{
     id: string = 'floor-damage';
 
     floorBinder!: LayerGroupFloorBinder;
     group!: LayerGroup;
     sprite!: Damage;
-
-    static listenedDamage: Set<FloorDamageExtends> = new Set();
 
     /**
      * 立刻刷新伤害渲染
@@ -41,6 +47,7 @@ export class FloorDamageExtends implements ILayerGroupRenderExtends {
         const enemy = core.status.maps[floor].enemy;
 
         this.sprite.updateCollection(enemy);
+        this.emit('update', floor);
     }
 
     /**
@@ -89,18 +96,16 @@ export class FloorDamageExtends implements ILayerGroupRenderExtends {
                 );
                 group.removeExtends('floor-damage');
             }
-            FloorDamageExtends.listenedDamage.add(this);
         });
     }
 
     onDestroy(group: LayerGroup): void {
         this.floorBinder.off('update', this.onUpdate);
         this.floorBinder.off('setBlock', this.onSetBlock);
-        FloorDamageExtends.listenedDamage.delete(this);
     }
 }
 
-interface DamageRenderable {
+export interface DamageRenderable {
     x: number;
     y: number;
     align: CanvasTextAlign;
@@ -117,7 +122,12 @@ interface DamageCache {
     symbol: number;
 }
 
-export class Damage extends Sprite {
+interface EDamageEvent extends ESpriteEvent {
+    setMapSize: [width: number, height: number];
+    beforeDamageRender: [need: Set<number>, transform: Transform];
+}
+
+export class Damage extends Sprite<EDamageEvent> {
     mapWidth: number = 0;
     mapHeight: number = 0;
 
@@ -188,6 +198,8 @@ export class Damage extends Sprite {
             this.blockData.set(i, new Map());
             this.renderable.set(i, new Set());
         }
+
+        this.emit('setMapSize', width, height);
     }
 
     /**
@@ -385,32 +397,34 @@ export class Damage extends Sprite {
     /**
      * 计算需要渲染哪些块
      */
-    calNeedRender(camera: Camera) {
+    calNeedRender(transform: Transform) {
         if (this.parent instanceof LayerGroup) {
             // 如果处于地图组中，每个地图的渲染区域应该是一样的，因此可以缓存优化
-            return this.parent.cacheNeedRender(camera, this.block);
+            return this.parent.cacheNeedRender(transform, this.block);
         } else if (this.parent instanceof Layer) {
             // 如果是地图的子元素，直接调用Layer的计算函数
-            return this.parent.calNeedRender(camera);
+            return this.parent.calNeedRender(transform);
         } else {
-            return calNeedRenderOf(camera, this.cellSize, this.block);
+            return calNeedRenderOf(transform, this.cellSize, this.block);
         }
     }
 
     /**
      * 渲染伤害层
-     * @param camera 摄像机
+     * @param transform 变换矩阵
      */
-    renderDamage(camera: Camera) {
+    renderDamage(transform: Transform) {
         // console.time('damage');
         const { ctx } = this.damageMap;
         ctx.save();
-        transformCanvas(this.damageMap, camera, true);
+        transformCanvas(this.damageMap, transform, true);
 
-        const { res: render } = this.calNeedRender(camera);
+        const { res: render } = this.calNeedRender(transform);
         const block = this.block;
         const cell = this.cellSize;
         const size = cell * block.blockSize;
+
+        this.emit('beforeDamageRender', render, transform);
         render.forEach(v => {
             const [x, y] = block.getBlockXYByIndex(v);
             const bx = x * block.blockSize;

@@ -338,7 +338,6 @@ export class HeroRenderer
         this.moveId = layer.delegateTicker(() => {
             this.moveTick(Date.now());
         });
-        console.log(this);
     }
 
     onDestroy(layer: Layer): void {

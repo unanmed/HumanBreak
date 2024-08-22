@@ -422,7 +422,9 @@ document.addEventListener('keyup', e => {
     const code = keycode(e.keyCode);
     if (gameKey.emitKey(code, assist, 'up', e)) {
         e.preventDefault();
-        deleteWith(core.status.holdingKeys, e.keyCode);
+        if (core.status.holdingKeys) {
+            deleteWith(core.status.holdingKeys, e.keyCode);
+        }
     } else {
         // polyfill样板
         if (

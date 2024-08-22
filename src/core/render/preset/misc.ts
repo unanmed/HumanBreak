@@ -1,3 +1,4 @@
+import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 import { Sprite } from '../sprite';
 
 type CanvasStyle = string | CanvasGradient | CanvasPattern;
@@ -11,6 +12,8 @@ export class Text extends Sprite {
 
     private length: number = 0;
     private descent: number = 0;
+
+    private static measureCanvas = new MotaOffscreenCanvas2D();
 
     constructor(text: string = '') {
         super();
@@ -39,11 +42,10 @@ export class Text extends Sprite {
      * 获取文字的长度
      */
     measure() {
-        this.canvas.ctx.save();
-        this.canvas.ctx.textBaseline = 'bottom';
-        this.canvas.ctx.font = this.font ?? '';
-        const res = this.canvas.ctx.measureText(this.text);
-        this.canvas.ctx.restore();
+        const ctx = Text.measureCanvas.ctx;
+        ctx.textBaseline = 'bottom';
+        ctx.font = this.font ?? '';
+        const res = ctx.measureText(this.text);
         return res;
     }
 
@@ -53,8 +55,6 @@ export class Text extends Sprite {
      */
     setText(text: string) {
         this.text = text;
-        this.writing = this.using;
-        this.using = void 0;
         this.calBox();
         if (this.parent) this.update(this);
     }
@@ -101,8 +101,6 @@ export class Image extends Sprite {
     constructor(image: SizedCanvasImageSource) {
         super();
         this.image = image;
-        this.canvas.withGameScale(false);
-        this.canvas.setHD(false);
         this.size(image.width, image.height);
 
         this.renderFn = ({ canvas, ctx }) => {
@@ -117,8 +115,6 @@ export class Image extends Sprite {
     setImage(image: SizedCanvasImageSource) {
         this.image = image;
         this.size(image.width, image.height);
-        this.writing = this.using;
-        this.using = void 0;
         this.update(this);
     }
 }
