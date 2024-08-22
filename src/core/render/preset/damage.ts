@@ -170,12 +170,10 @@ export class Damage extends Sprite<EDamageEvent> {
         this.setRenderFn((canvas, camera) => {
             const { ctx } = canvas;
             const { width, height } = canvas.canvas;
-            ctx.save();
             ctx.imageSmoothingEnabled = false;
             this.renderDamage(camera);
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.drawImage(this.damageMap.canvas, 0, 0, width, height);
-            ctx.restore();
         });
     }
 

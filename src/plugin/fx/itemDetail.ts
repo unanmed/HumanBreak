@@ -1,6 +1,5 @@
 import { logger } from '@/core/common/logger';
 import { mainSetting } from '@/core/main/setting';
-import { Camera } from '@/core/render/camera';
 import {
     Damage,
     DamageRenderable,

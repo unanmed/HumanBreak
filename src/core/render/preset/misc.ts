@@ -9,6 +9,7 @@ export class Text extends Sprite {
     fillStyle?: CanvasStyle = '#fff';
     strokeStyle?: CanvasStyle;
     font?: string = '';
+    strokeWidth: number = 1;
 
     private length: number = 0;
     private descent: number = 0;
@@ -22,19 +23,18 @@ export class Text extends Sprite {
         if (text.length > 0) this.calBox();
 
         this.renderFn = ({ canvas, ctx }) => {
-            ctx.save();
             ctx.textBaseline = 'bottom';
             ctx.fillStyle = this.fillStyle ?? 'transparent';
             ctx.strokeStyle = this.strokeStyle ?? 'transparent';
             ctx.font = this.font ?? '';
+            ctx.lineWidth = this.strokeWidth;
 
-            if (this.fillStyle) {
-                ctx.fillText(this.text, 0, this.descent);
-            }
             if (this.strokeStyle) {
                 ctx.strokeText(this.text, 0, this.descent);
             }
-            ctx.restore();
+            if (this.fillStyle) {
+                ctx.fillText(this.text, 0, this.descent);
+            }
         };
     }
 
@@ -77,6 +77,14 @@ export class Text extends Sprite {
     setStyle(fill?: CanvasStyle, stroke?: CanvasStyle) {
         this.fillStyle = fill;
         this.strokeStyle = stroke;
+    }
+
+    /**
+     * 设置描边宽度
+     * @param width 宽度
+     */
+    setStrokeWidth(width: number) {
+        this.strokeWidth = width;
     }
 
     /**

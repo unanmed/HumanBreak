@@ -669,7 +669,6 @@ export class Layer extends Container {
         this.main.setRenderFn((canvas, transform) => {
             const { ctx } = canvas;
             const { width, height } = canvas.canvas;
-            ctx.save();
             ctx.imageSmoothingEnabled = false;
             const need = this.calNeedRender(transform);
             this.renderMap(transform, need);
@@ -677,7 +676,6 @@ export class Layer extends Container {
             ctx.drawImage(this.backMap.canvas, 0, 0, width, height);
             ctx.drawImage(this.staticMap.canvas, 0, 0, width, height);
             ctx.drawImage(this.movingMap.canvas, 0, 0, width, height);
-            ctx.restore();
         });
     }
 
