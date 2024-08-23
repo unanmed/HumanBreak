@@ -8,6 +8,7 @@ import { FloorDamageExtends } from './preset/damage';
 import { HeroRenderer } from './preset/hero';
 import { Transform } from './transform';
 import { Text } from './preset/misc';
+import { Shader } from './shader';
 
 export class MotaRenderer extends Container {
     static list: Set<MotaRenderer> = new Set();
@@ -74,6 +75,7 @@ Mota.require('var', 'hook').once('reset', () => {
     const transform = render.transform;
     render.mount();
 
+    const shader = new Shader();
     const layer = new LayerGroup();
 
     ['bg', 'bg2', 'event', 'fg', 'fg2'].forEach(v => {
@@ -87,7 +89,18 @@ Mota.require('var', 'hook').once('reset', () => {
     layer.extends(damage);
     layer.getLayer('event')?.extends(hero);
     binder.bindThis();
-    render.appendChild(layer);
+    render.appendChild(shader);
+    shader.appendChild(layer);
+    shader.size(480, 480);
+    shader.fs(`
+        void main() {
+            vec2 coord = v_texCoord;
+            if (coord.y > 0.25 && coord.y < 0.35) {
+                coord.y = sin((coord.y - 0.25) * 3.1415926535 / 0.2) * 0.1 + 0.25;
+            }
+            gl_FragColor = texture2D(u_sampler, coord);
+        }
+    `);
 
     layer.requestAfterFrame(() => {
         hero.setImage(core.material.images.images['hero2.png']);

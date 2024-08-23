@@ -1,8 +1,18 @@
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
-import { IRenderChildable, RenderItem, RenderItemPosition } from './item';
+import {
+    ERenderItemEvent,
+    IRenderChildable,
+    RenderItem,
+    RenderItemPosition
+} from './item';
 import { Transform } from './transform';
 
-export class Container extends RenderItem implements IRenderChildable {
+export interface EContainerEvent extends ERenderItemEvent {}
+
+export class Container<E extends EContainerEvent = EContainerEvent>
+    extends RenderItem<E | EContainerEvent>
+    implements IRenderChildable
+{
     children: RenderItem[] = [];
     sortedChildren: RenderItem[] = [];
 
@@ -23,7 +33,6 @@ export class Container extends RenderItem implements IRenderChildable {
         transform: Transform
     ): void {
         const { ctx } = canvas;
-        // console.log(ctx.getTransform());
 
         this.sortedChildren.forEach(v => {
             if (v.hidden) return;

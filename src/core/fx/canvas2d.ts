@@ -97,7 +97,7 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
      * 删除这个画布
      */
     delete() {
-        MotaCanvas2D.list.delete(this);
+        MotaOffscreenCanvas2D.list.delete(this);
     }
 
     /**

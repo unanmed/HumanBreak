@@ -155,7 +155,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     anchorY: number = 0;
 
     /** 渲染模式，absolute表示绝对位置，static表示跟随摄像机移动 */
-    type: 'absolute' | 'static' = 'static';
+    type: RenderItemPosition = 'static';
     /** 是否是高清画布 */
     highResolution: boolean = true;
     /** 是否抗锯齿 */
@@ -172,9 +172,9 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     transform: Transform = new Transform();
 
     /** 渲染缓存信息 */
-    private cache: MotaOffscreenCanvas2D = new MotaOffscreenCanvas2D();
+    protected cache: MotaOffscreenCanvas2D = new MotaOffscreenCanvas2D();
     /** 是否需要更新缓存 */
-    private cacheDirty: boolean = true;
+    protected cacheDirty: boolean = true;
     /** 是否启用缓存机制 */
     readonly enableCache: boolean = true;
 
@@ -183,6 +183,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
 
         this.enableCache = enableCache;
         this.type = type;
+
         this.cache.withGameScale(true);
     }
 
