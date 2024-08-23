@@ -70,6 +70,7 @@ export class LayerGroupFloorBinder
     bindThis() {
         this.floor = void 0;
         this.bindThisFloor = true;
+        this.layerBinders.forEach(v => v.bindThis());
         this.updateBind();
     }
 
@@ -80,6 +81,7 @@ export class LayerGroupFloorBinder
     bindFloor(floorId: FloorIds) {
         this.bindThisFloor = false;
         this.floor = floorId;
+        this.layerBinders.forEach(v => v.bindFloor(floorId));
         this.updateBind();
     }
 
@@ -103,7 +105,7 @@ export class LayerGroupFloorBinder
             v.updateBindData();
         });
 
-        const floor = this.bindThisFloor ? core.status.floorId : this.floor!;
+        const floor = this.getFloor();
         this.emit('update', floor);
     }
 
@@ -120,8 +122,6 @@ export class LayerGroupFloorBinder
             ?.getExtends('floor-binder') as LayerFloorBinder;
         if (!ex) return;
         ex.setBlock(block, x, y);
-
-        console.log(block, x, y);
 
         const floor = this.bindThisFloor ? core.status.floorId : this.floor!;
         this.emit('setBlock', x, y, floor, block);
@@ -202,6 +202,10 @@ export class LayerFloorBinder implements ILayerRenderExtends {
         this.updateBind();
     }
 
+    getFloor() {
+        return this.bindThisFloor ? core.status.floorId : this.floor!;
+    }
+
     /**
      * 设置这个拓展附属至的父拓展（LayerGroupFloorBinder拓展）
      * @param parent 父拓展
@@ -239,7 +243,7 @@ export class LayerFloorBinder implements ILayerRenderExtends {
      * 立刻更新绑定数据，而非下一帧
      */
     updateBindData() {
-        const floor = this.bindThisFloor ? core.status.floorId : this.floor;
+        const floor = this.getFloor();
         if (!floor) return;
         core.extractBlocks(floor);
         const map = core.status.maps[floor];
@@ -274,5 +278,15 @@ export class LayerFloorBinder implements ILayerRenderExtends {
     onDestroy(layer: Layer) {
         LayerFloorBinder.listenedBinder.delete(this);
         this.parent?.layerBinders.delete(this);
+    }
+}
+
+export class LayerOpenDoorAnimate implements ILayerRenderExtends {
+    id: string = 'open-door-animate';
+
+    layer!: Layer;
+
+    awake(layer: Layer) {
+        this.layer = layer;
     }
 }

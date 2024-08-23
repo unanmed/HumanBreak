@@ -17,7 +17,7 @@ export class Text extends Sprite {
     private static measureCanvas = new MotaOffscreenCanvas2D();
 
     constructor(text: string = '') {
-        super();
+        super('static', false);
 
         this.text = text;
         if (text.length > 0) this.calBox();

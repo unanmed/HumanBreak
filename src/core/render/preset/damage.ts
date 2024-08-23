@@ -62,6 +62,10 @@ export class FloorDamageExtends
 
     private onUpdate = (floor: FloorIds) => {
         this.sprite.requestBeforeFrame(() => {
+            if (!this.floorBinder.bindThisFloor) {
+                ensureFloorDamage(floor);
+                core.status.maps[floor].enemy.calRealAttribute();
+            }
             this.update(floor);
         });
     };
@@ -71,6 +75,9 @@ export class FloorDamageExtends
             if (floor !== this.sprite.enemy?.floorId) return;
             this.sprite.updateEnemyOn(x, y);
         });
+        if (!this.floorBinder.bindThisFloor) {
+            this.sprite.enemy?.extract();
+        }
     };
 
     /**
@@ -169,10 +176,9 @@ export class Damage extends Sprite<EDamageEvent> {
 
         this.setRenderFn((canvas, camera) => {
             const { ctx } = canvas;
-            const { width, height } = canvas.canvas;
+            const { width, height } = canvas;
             ctx.imageSmoothingEnabled = false;
             this.renderDamage(camera);
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.drawImage(this.damageMap.canvas, 0, 0, width, height);
         });
     }
@@ -415,7 +421,8 @@ export class Damage extends Sprite<EDamageEvent> {
         // console.time('damage');
         const { ctx } = this.damageMap;
         ctx.save();
-        transformCanvas(this.damageMap, transform, true);
+        this.damageMap.clear();
+        transformCanvas(this.damageMap, transform);
 
         const { res: render } = this.calNeedRender(transform);
         const block = this.block;

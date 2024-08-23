@@ -178,10 +178,11 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     /** 是否启用缓存机制 */
     readonly enableCache: boolean = true;
 
-    constructor(enableCache: boolean = true) {
+    constructor(type: RenderItemPosition, enableCache: boolean = true) {
         super();
 
         this.enableCache = enableCache;
+        this.type = type;
         this.cache.withGameScale(true);
     }
 
@@ -218,27 +219,31 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         if (this.hidden) return;
         this.emit('beforeRender', transform);
         this.needUpdate = false;
-        const tran = transform.multiply(this.transform);
+        const tran = this.transform;
+
         const ax = -this.anchorX * this.width;
         const ay = -this.anchorY * this.height;
+
+        canvas.ctx.save();
+        canvas.setAntiAliasing(this.antiAliasing);
+        if (this.type === 'static') transformCanvas(canvas, tran);
         if (this.enableCache) {
+            const { width, height, ctx } = this.cache;
             if (this.cacheDirty) {
-                const cache = this.cache;
-                this.render(cache, tran);
-                this.cache = cache;
+                const { canvas } = this.cache;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.save();
+                this.render(this.cache, tran);
+                ctx.restore();
                 this.cacheDirty = false;
             }
 
-            canvas.ctx.save();
-            if (this.type === 'static') transformCanvas(canvas, tran);
-            canvas.ctx.drawImage(this.cache.canvas, ax, ay);
-            canvas.ctx.restore();
+            canvas.ctx.drawImage(this.cache.canvas, ax, ay, width, height);
         } else {
-            canvas.ctx.save();
-            if (this.type === 'static') transformCanvas(canvas, tran);
+            canvas.ctx.translate(ax, ay);
             this.render(canvas, tran);
-            canvas.ctx.restore();
         }
+        canvas.ctx.restore();
         this.emit('afterRender', transform);
     }
 
@@ -430,20 +435,10 @@ Mota.require('var', 'hook').once('reset', () => {
 
 export function transformCanvas(
     canvas: MotaOffscreenCanvas2D,
-    transform: Transform,
-    clear: boolean = false
+    transform: Transform
 ) {
-    const { canvas: ca, ctx, scale } = canvas;
+    const { ctx } = canvas;
     const mat = transform.mat;
-    const a = mat[0] * scale;
-    const b = mat[1] * scale;
-    const c = mat[3] * scale;
-    const d = mat[4] * scale;
-    const e = mat[6] * scale;
-    const f = mat[7] * scale;
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    if (clear) {
-        ctx.clearRect(0, 0, ca.width, ca.height);
-    }
+    const [a, b, , c, d, , e, f] = mat;
     ctx.transform(a, b, c, d, e, f);
 }

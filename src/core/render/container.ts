@@ -6,13 +6,15 @@ export class Container extends RenderItem implements IRenderChildable {
     children: RenderItem[] = [];
     sortedChildren: RenderItem[] = [];
 
+    private needSort: boolean = false;
+
     /**
      * 创建一个容器，容器中可以包含其他渲染对象
      * @param type 渲染模式，absolute表示绝对位置，static表示跟随摄像机移动
      * @param cache 是否启用缓存机制
      */
     constructor(type: RenderItemPosition = 'static', cache: boolean = true) {
-        super(cache);
+        super(type, cache);
         this.type = type;
     }
 
@@ -21,14 +23,11 @@ export class Container extends RenderItem implements IRenderChildable {
         transform: Transform
     ): void {
         const { ctx } = canvas;
+        // console.log(ctx.getTransform());
+
         this.sortedChildren.forEach(v => {
             if (v.hidden) return;
             ctx.save();
-            if (v.antiAliasing) {
-                ctx.imageSmoothingEnabled = true;
-            } else {
-                ctx.imageSmoothingEnabled = false;
-            }
             v.renderContent(canvas, transform);
             ctx.restore();
         });
@@ -41,7 +40,13 @@ export class Container extends RenderItem implements IRenderChildable {
     appendChild(...children: RenderItem<any>[]) {
         children.forEach(v => (v.parent = this));
         this.children.push(...children);
-        this.sortChildren();
+        if (!this.needSort) {
+            this.needSort = true;
+            this.requestBeforeFrame(() => {
+                this.needSort = false;
+                this.sortChildren();
+            });
+        }
         this.update(this);
     }
 

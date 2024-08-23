@@ -668,11 +668,9 @@ export class Layer extends Container {
         this.appendChild(this.main);
         this.main.setRenderFn((canvas, transform) => {
             const { ctx } = canvas;
-            const { width, height } = canvas.canvas;
-            ctx.imageSmoothingEnabled = false;
+            const { width, height } = canvas;
             const need = this.calNeedRender(transform);
             this.renderMap(transform, need);
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.drawImage(this.backMap.canvas, 0, 0, width, height);
             ctx.drawImage(this.staticMap.canvas, 0, 0, width, height);
             ctx.drawImage(this.movingMap.canvas, 0, 0, width, height);
@@ -1096,6 +1094,7 @@ export class Layer extends Container {
         for (const ex of this.extend.values()) {
             ex.onBeforeRender?.(this, transform, need);
         }
+
         this.renderBack(transform, need);
         this.renderStatic(transform, need);
         this.renderMoving(transform);
@@ -1118,8 +1117,7 @@ export class Layer extends Container {
 
         const mat = transform.mat;
         const [a, b, , c, d, , e, f] = mat;
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.transform(a, b, c, d, e, f);
+        ctx.setTransform(a, b, c, d, e, f);
 
         if (this.background !== 0) {
             // 画背景图
@@ -1153,8 +1151,7 @@ export class Layer extends Container {
 
         const { res: render } = need;
         const [a, b, , c, d, , e, f] = transform.mat;
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.transform(a, b, c, d, e, f);
+        ctx.setTransform(a, b, c, d, e, f);
 
         render.forEach(v => {
             const x = v % width;
@@ -1235,8 +1232,7 @@ export class Layer extends Container {
         ctx.save();
         const mat = transform.mat;
         const [a, b, , c, d, , e, f] = mat;
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.transform(a, b, c, d, e, f);
+        ctx.setTransform(a, b, c, d, e, f);
         const max1 = Math.max(a, b, c, d) ** 2;
         const max2 = Math.max(core._PX_, core._PY_) * 2;
         const r = (max1 * max2) ** 2;

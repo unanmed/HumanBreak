@@ -20,7 +20,7 @@ export class Sprite<E extends ESpriteEvent = ESpriteEvent> extends RenderItem<
      * @param cache 是否启用缓存机制
      */
     constructor(type: RenderItemPosition = 'static', cache: boolean = true) {
-        super(cache);
+        super(type, cache);
         this.type = type;
         this.renderFn = () => {};
     }

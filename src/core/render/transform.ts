@@ -39,7 +39,7 @@ export class Transform {
      * 移动，叠加关系
      */
     move(x: number, y: number) {
-        mat3.translate(this.mat, this.mat, [-x, -y]);
+        mat3.translate(this.mat, this.mat, [x, y]);
         this.x += x;
         this.y += y;
         this.modified = true;
@@ -72,7 +72,7 @@ export class Transform {
      * 设置位置，非叠加关系
      */
     setTranslate(x: number, y: number) {
-        mat3.translate(this.mat, this.mat, [this.x - x, this.y - y]);
+        mat3.translate(this.mat, this.mat, [x - this.x, y - this.y]);
         this.x = x;
         this.y = y;
         this.modified = true;
