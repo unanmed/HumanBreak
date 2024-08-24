@@ -75,6 +75,8 @@ Mota.require('var', 'hook').once('reset', () => {
     const transform = render.transform;
     render.mount();
 
+    const ani = new Animation();
+
     const shader = new Shader();
     const layer = new LayerGroup();
 
@@ -93,14 +95,35 @@ Mota.require('var', 'hook').once('reset', () => {
     shader.appendChild(layer);
     shader.size(480, 480);
     shader.fs(`
+        uniform float u_offset;
+
         void main() {
-            vec2 coord = v_texCoord;
-            if (coord.y > 0.25 && coord.y < 0.35) {
-                coord.y = sin((coord.y - 0.25) * 3.1415926535 / 0.2) * 0.1 + 0.25;
-            }
-            gl_FragColor = texture2D(u_sampler, coord);
+            // 计算当前像素到爆炸中心的距离
+            vec2 coordToCenter = v_texCoord - vec2(0.5, 0.5);
+            float distance = length(coordToCenter);
+
+            // 根据时间计算当前距离上的波动相位
+            float wavePhase = 100.0 * (distance - u_offset);
+
+            // 计算波动的强度（正弦波）并结合衰减
+            float wave = sin(wavePhase) * 0.02 / (1.0 + 10.0 * distance);
+
+            // 将波动效果应用到纹理坐标上，造成扭曲
+            vec2 warpedCoords = v_texCoord + normalize(coordToCenter) * wave;
+
+            // 采样纹理并输出颜色
+            gl_FragColor = texture2D(u_sampler, warpedCoords);
         }
     `);
+    shader.compileShader();
+
+    const offset = shader.getUniform('u_offset');
+    shader.delegateTicker(() => {
+        shader.gl.uniform1f(offset, ani.value.offset);
+        shader.update();
+    }, 20000);
+    ani.value.offset = 0;
+    ani.mode(linear()).time(10000).absolute().apply('offset', 1);
 
     layer.requestAfterFrame(() => {
         hero.setImage(core.material.images.images['hero2.png']);

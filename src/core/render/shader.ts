@@ -1,8 +1,9 @@
+import { isNil } from 'lodash-es';
 import { logger } from '../common/logger';
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
 import { isWebGL2Supported } from '../fx/webgl';
 import { Container } from './container';
-import { ERenderItemEvent, RenderItemPosition } from './item';
+import { ERenderItemEvent, RenderItem, RenderItemPosition } from './item';
 import { Transform } from './transform';
 
 const SHADER_VERTEX_PREFIX_300 = /* glsl */ `#version 300 es
@@ -94,6 +95,8 @@ export class Shader extends Container<EShaderEvent> {
     private shaderModified: boolean = false;
     /** 需要重新编译的着色器 */
     private shaderDirty: boolean = true;
+    /** 是否需要重新渲染着色器 */
+    private shaderRanderDirty: boolean = true;
     /** 当前程序是否被外部调用过 */
     private programExterned: boolean = false;
 
@@ -141,7 +144,6 @@ export class Shader extends Container<EShaderEvent> {
             if (this.shaderDirty) {
                 this.cacheDirty = true;
                 this.compileShader();
-                this.shaderDirty = false;
             }
 
             if (this.cacheDirty) {
@@ -150,8 +152,12 @@ export class Shader extends Container<EShaderEvent> {
                 ctx.save();
                 super.render(this.cache, transform);
                 ctx.restore();
-                this.drawScene();
                 this.cacheDirty = false;
+            }
+
+            if (this.shaderRanderDirty) {
+                this.drawScene();
+                this.shaderRanderDirty = false;
             }
 
             canvas.ctx.drawImage(this.canvas, 0, 0, this.width, this.height);
@@ -175,9 +181,17 @@ export class Shader extends Container<EShaderEvent> {
         this.canvas.height = height * scale;
     }
 
+    update(item?: RenderItem<any>): void {
+        const isSelf = item === this && !this.cacheDirty;
+        super.update(item);
+        if (isSelf) this.cacheDirty = false;
+        this.shaderRanderDirty = true;
+    }
+
     drawScene() {
         const gl = this.gl;
         if (!this.uniform || !gl) return;
+
         // 清空画布
         gl.viewport(0, 0, this.canvas.width, this.canvas.height);
 
@@ -305,12 +319,39 @@ export class Shader extends Container<EShaderEvent> {
             Shader.deleteProgram(this, this.getProgram());
         }
         this.programExterned = false;
+        this.shaderDirty = false;
 
         this.program = program.program;
         this.shader = program.shader;
         this.uniform = program.uniform;
         this.attribute = program.attribute;
         this.gl?.useProgram(this.program);
+    }
+
+    /**
+     * 获取属性位置
+     * @param name 属性名称
+     */
+    getAttribute(name: string) {
+        if (!this.attribute || !this.gl || !this.program) return null;
+        if (!isNil(this.attribute[name])) return this.attribute[name];
+        return (this.attribute[name] = this.gl.getAttribLocation(
+            this.program,
+            name
+        ));
+    }
+
+    /**
+     * 获取uniform位置
+     * @param name 属性名称
+     */
+    getUniform(name: string) {
+        if (!this.uniform || !this.gl || !this.program) return null;
+        if (!isNil(this.uniform[name])) return this.uniform[name];
+        return (this.uniform[name] = this.gl.getUniformLocation(
+            this.program,
+            name
+        ));
     }
 
     // ----- 初始化部分
