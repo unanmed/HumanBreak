@@ -289,4 +289,8 @@ export class LayerOpenDoorAnimate implements ILayerRenderExtends {
     awake(layer: Layer) {
         this.layer = layer;
     }
+
+    openDoor(x: number, y: number) {}
+
+    closeDoor(x: number, y: number) {}
 }

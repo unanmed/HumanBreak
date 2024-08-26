@@ -25,45 +25,47 @@ export function init() {
     const pressedArrow: Set<Dir> = new Set();
     Mota.r(() => {
         const gameKey = Mota.require('var', 'gameKey');
-        gameKey
-            .realize('moveUp', onMoveKeyDown('up'), { type: 'down' })
-            .realize('moveUp', onMoveKeyUp('up'))
-            .realize('moveDown', onMoveKeyDown('down'), { type: 'down' })
-            .realize('moveDown', onMoveKeyUp('down'))
-            .realize('moveLeft', onMoveKeyDown('left'), { type: 'down' })
-            .realize('moveLeft', onMoveKeyUp('left'))
-            .realize('moveRight', onMoveKeyDown('right'), { type: 'down' })
-            .realize('moveRight', onMoveKeyUp('right'));
+        const { moveUp, moveDown, moveLeft, moveRight } = gameKey.data;
+        const symbol = Symbol.for('@key_main');
+        gameKey.on('press', code => {
+            if (core.status.lockControl || gameKey.scope !== symbol) return;
+            if (code === moveUp.key) onMoveKeyDown('up');
+            if (code === moveDown.key) onMoveKeyDown('down');
+            if (code === moveLeft.key) onMoveKeyDown('left');
+            if (code === moveRight.key) onMoveKeyDown('right');
+        });
+        gameKey.on('release', code => {
+            if (code === moveUp.key) onMoveKeyUp('up');
+            if (code === moveDown.key) onMoveKeyUp('down');
+            if (code === moveLeft.key) onMoveKeyUp('left');
+            if (code === moveRight.key) onMoveKeyUp('right');
+        });
     });
 
     function onMoveKeyDown(type: Dir) {
-        return () => {
-            pressedArrow.add(type);
-            moveDir = type;
+        pressedArrow.add(type);
+        moveDir = type;
+        if (!moving) {
+            stepDir = moveDir;
+            readyMove();
+        }
+        if (moving && stopChian) {
+            stopChian = false;
+        }
+    }
+
+    function onMoveKeyUp(type: Dir) {
+        pressedArrow.delete(type);
+        if (pressedArrow.size === 0) {
+            stopChian = true;
+        } else {
+            const arr = [...pressedArrow];
+            moveDir = arr[0];
             if (!moving) {
                 stepDir = moveDir;
                 readyMove();
             }
-            if (moving && stopChian) {
-                stopChian = false;
-            }
-        };
-    }
-
-    function onMoveKeyUp(type: Dir) {
-        return () => {
-            pressedArrow.delete(type);
-            if (pressedArrow.size === 0) {
-                stopChian = true;
-            } else {
-                const arr = [...pressedArrow];
-                moveDir = arr[0];
-                if (!moving) {
-                    stepDir = moveDir;
-                    readyMove();
-                }
-            }
-        };
+        }
     }
 
     async function readyMove() {
@@ -105,11 +107,6 @@ export function init() {
     function continueAfterEnd() {
         requestAnimationFrame(() => {
             if (pressedArrow.size === 0 || moving) {
-                stopChian = true;
-                return;
-            }
-            if (core.status.lockControl) {
-                pressedArrow.clear();
                 stopChian = true;
                 return;
             }
@@ -273,6 +270,10 @@ export function init() {
             const img = core.material.images.images[name];
             if (!img) return;
             adapters['hero-adapter']?.all('setImage', img);
+        };
+
+        control.prototype.isMoving = function () {
+            return moving;
         };
 
         hook.on('reset', () => {
