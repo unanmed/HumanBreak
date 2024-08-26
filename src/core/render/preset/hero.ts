@@ -145,7 +145,10 @@ export class HeroRenderer
      */
     private moveTick(time: number) {
         if (this.status !== 'moving') return;
-        if (!this.renderable) return;
+        if (!this.renderable) {
+            this.emit('stepEnd');
+            return;
+        }
 
         if (time - this.lastFrameTime > this.speed) {
             this.lastFrameTime = time;
@@ -377,6 +380,10 @@ adapter.recieve('setHeroLoc', (item, x?: number, y?: number) => {
 });
 adapter.recieve('turn', (item, dir: Dir2) => {
     item.turn(dir);
+    return Promise.resolve();
+});
+adapter.recieve('setImage', (item, image: SizedCanvasImageSource) => {
+    item.setImage(image);
     return Promise.resolve();
 });
 // 同步fallback，用于适配现在的样板，之后会删除

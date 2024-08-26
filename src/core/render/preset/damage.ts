@@ -40,7 +40,7 @@ export class FloorDamageExtends
      * 立刻刷新伤害渲染
      */
     update(floor: FloorIds) {
-        if (!this.sprite) return;
+        if (!this.sprite || !floor) return;
         const map = core.status.maps[floor];
         this.sprite.setMapSize(map.width, map.height);
         ensureFloorDamage(floor);
@@ -89,21 +89,19 @@ export class FloorDamageExtends
     }
 
     awake(group: LayerGroup): void {
-        group.requestBeforeFrame(() => {
-            const ex = group.getExtends('floor-binder');
-            if (ex instanceof LayerGroupFloorBinder) {
-                this.floorBinder = ex;
-                this.group = group;
-                this.create();
-                this.listen();
-            } else {
-                logger.warn(
-                    17,
-                    `Floor-damage extends needs 'floor-binder' extends as dependency.`
-                );
-                group.removeExtends('floor-damage');
-            }
-        });
+        const ex = group.getExtends('floor-binder');
+        if (ex instanceof LayerGroupFloorBinder) {
+            this.floorBinder = ex;
+            this.group = group;
+            this.create();
+            this.listen();
+        } else {
+            logger.warn(
+                17,
+                `Floor-damage extends needs 'floor-binder' extends as dependency.`
+            );
+            group.removeExtends('floor-damage');
+        }
     }
 
     onDestroy(group: LayerGroup): void {
@@ -132,6 +130,7 @@ interface DamageCache {
 interface EDamageEvent extends ESpriteEvent {
     setMapSize: [width: number, height: number];
     beforeDamageRender: [need: Set<number>, transform: Transform];
+    updateBlocks: [blocks: Set<number>];
 }
 
 export class Damage extends Sprite<EDamageEvent> {
@@ -241,13 +240,16 @@ export class Damage extends Sprite<EDamageEvent> {
     /**
      * 更新指定分块
      * @param blocks 要更新的分块集合
+     * @param map 是否更新地图伤害
      */
-    updateBlocks(blocks?: Set<number>) {
+    updateBlocks(blocks?: Set<number>, map: boolean = true) {
         if (blocks) {
-            blocks.forEach(v => this.updateBlock(v));
+            blocks.forEach(v => this.updateBlock(v, map));
+            this.emit('updateBlocks', blocks);
         } else {
             this.blockData.forEach((_, k) => this.updateBlock(k, false));
-            this.extractAllMapDamage();
+            if (map) this.extractAllMapDamage();
+            this.emit('updateBlocks', new Set(this.blockData.keys()));
         }
         this.update(this);
     }
@@ -274,7 +276,9 @@ export class Damage extends Sprite<EDamageEvent> {
             this.needUpdateBlocks.add(block);
             this.requestBeforeFrame(() => {
                 this.needUpdateBlock = false;
-                this.needUpdateBlocks.forEach(v => this.updateBlock(v, false));
+                this.updateBlocks(this.needUpdateBlocks, false);
+                this.needUpdateBlocks.clear();
+                // this.needUpdateBlocks.forEach(v => this.updateBlock(v, false));
                 // todo: 阻击夹域等地图伤害检测是否必要更新，例如不包含阻击夹域的怪就不必要更新这个怪物信息
                 // this.extractAllMapDamage();
             });
@@ -423,6 +427,7 @@ export class Damage extends Sprite<EDamageEvent> {
         ctx.save();
         this.damageMap.clear();
         transformCanvas(this.damageMap, transform);
+        // console.trace();
 
         const { res: render } = this.calNeedRender(transform);
         const block = this.block;

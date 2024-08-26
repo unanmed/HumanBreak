@@ -31,7 +31,6 @@ import type { texture } from '@/core/render/cache';
 import type { MotaRenderer } from '@/core/render/render';
 import type { Container } from '@/core/render/container';
 import type { Sprite } from '@/core/render/sprite';
-import type { Camera } from '@/core/render/camera';
 import type { Image, Text } from '@/core/render/preset/misc';
 import type { RenderItem } from '@/core/render/item';
 import type { RenderAdapter } from '@/core/render/adapter';
@@ -107,10 +106,10 @@ interface ModuleInterface {
     };
     Render: {
         texture: typeof texture;
+        main: MotaRenderer;
         MotaRenderer: typeof MotaRenderer;
         Container: typeof Container;
         Sprite: typeof Sprite;
-        Camera: typeof Camera;
         Text: typeof Text;
         Image: typeof Image;
         RenderItem: typeof RenderItem;

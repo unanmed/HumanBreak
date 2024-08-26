@@ -10,7 +10,6 @@ import {
     ILayerGroupRenderExtends,
     LayerGroup
 } from '@/core/render/preset/layer';
-import { cloneDeep } from 'lodash-es';
 
 interface ItemDetailData {
     x: number;
@@ -25,8 +24,13 @@ interface ItemData {
 }
 
 const ItemState = Mota.require('module', 'State').ItemState;
+Mota.require('var', 'hook').on('setBlock', (x, y, floorId, block) => {
+    FloorItemDetail.listened.forEach(v => {
+        v.setBlock(block, x, y);
+    });
+});
 
-class FloorItemDetail implements ILayerGroupRenderExtends {
+export class FloorItemDetail implements ILayerGroupRenderExtends {
     id: string = 'item-detail';
 
     group!: LayerGroup;
@@ -35,7 +39,12 @@ class FloorItemDetail implements ILayerGroupRenderExtends {
     sprite!: Damage;
 
     /** 每个分块中包含的物品信息 */
-    blockData: Map<number, Set<ItemData>> = new Map();
+    blockData: Map<number, Map<number, ItemData>> = new Map();
+
+    /** 需要更新的分块 */
+    private dirtyBlock: Set<number> = new Set();
+    /** 道具详细信息 */
+    private detailData: Map<number, Map<number, ItemDetailData>> = new Map();
 
     static detailColor: Record<string, CanvasStyle> = {
         atk: '#FF7A7A',
@@ -51,8 +60,15 @@ class FloorItemDetail implements ILayerGroupRenderExtends {
         manaper: '#c66'
     };
 
-    private onBeforeRender = (need: Set<number>) => {
+    static listened: Set<FloorItemDetail> = new Set();
+
+    private onBeforeDamageRender = (need: Set<number>) => {
         if (!mainSetting.getValue('screen.itemDetail')) return;
+        need.forEach(v => {
+            if (this.dirtyBlock.has(v)) {
+                this.sprite.block.clearCache(v, 1);
+            }
+        });
         this.render(need);
     };
 
@@ -60,9 +76,21 @@ class FloorItemDetail implements ILayerGroupRenderExtends {
         this.updateMapSize(width, height);
     };
 
+    private onUpdate = () => {
+        this.updateItems();
+    };
+
+    private onUpdateBlocks = (blocks: Set<number>) => {
+        blocks.forEach(v => {
+            this.dirtyBlock.add(v);
+        });
+    };
+
     private listen() {
-        this.sprite.on('beforeDamageRender', this.onBeforeRender);
+        this.sprite.on('beforeDamageRender', this.onBeforeDamageRender);
         this.sprite.on('setMapSize', this.onUpdateMapSize);
+        this.sprite.on('updateBlocks', this.onUpdateBlocks);
+        this.damage.on('update', this.onUpdate);
     }
 
     /**
@@ -72,9 +100,12 @@ class FloorItemDetail implements ILayerGroupRenderExtends {
         this.blockData.clear();
 
         // 预留blockData
-        const num = width * height;
+        const [x, y] = this.sprite.block.getBlockXY(width, height);
+        const num = x * y;
         for (let i = 0; i < num; i++) {
-            this.blockData.set(i, new Set());
+            this.blockData.set(i, new Map());
+            this.detailData.set(i, new Map());
+            this.dirtyBlock.add(i);
         }
     }
 
@@ -83,6 +114,7 @@ class FloorItemDetail implements ILayerGroupRenderExtends {
      */
     updateItems() {
         const floor = this.floorBinder.getFloor();
+        if (!floor) return;
         core.extractBlocks(floor);
 
         core.status.maps[floor].blocks.forEach(v => {
@@ -93,8 +125,35 @@ class FloorItemDetail implements ILayerGroupRenderExtends {
             const x = v.x;
             const y = v.y;
             const block = this.sprite.block.getIndexByLoc(x, y);
-            this.blockData.get(block)?.add({ x, y, id });
+            const index = x + y * this.sprite.mapWidth;
+            const blockData = this.blockData.get(block);
+            blockData?.set(index, { x, y, id });
         });
+    }
+
+    /**
+     * 设置图块
+     * @param block 图块数字
+     * @param x 横坐标
+     * @param y 纵坐标
+     */
+    setBlock(block: AllNumbers, x: number, y: number) {
+        const map = maps_90f36752_8815_4be8_b32b_d7fad1d0542e;
+        const index = this.sprite.block.getIndexByLoc(x, y);
+        const itemIndex = x + y * this.sprite.mapWidth;
+        const blockData = this.blockData.get(index);
+        this.dirtyBlock.add(index);
+        if (block === 0) {
+            blockData?.delete(itemIndex);
+            return;
+        }
+        const cls = map[block].cls;
+        if (cls !== 'items') {
+            blockData?.delete(itemIndex);
+            return;
+        }
+        const id = map[block].id;
+        blockData?.set(itemIndex, { x, y, id });
     }
 
     /**
@@ -102,9 +161,10 @@ class FloorItemDetail implements ILayerGroupRenderExtends {
      * @param block 要计算的分块
      */
     calAllItems(block: Set<number>) {
+        if (this.dirtyBlock.size === 0 || block.size === 0) return;
         let diff: Record<string | symbol, number | undefined> = {};
         const before = core.status.hero;
-        const hero = cloneDeep(core.status.hero);
+        const hero = structuredClone(core.status.hero);
         const handler: ProxyHandler<any> = {
             set(target, key, v) {
                 diff[key] = v - (target[key] || 0);
@@ -114,14 +174,16 @@ class FloorItemDetail implements ILayerGroupRenderExtends {
         };
         core.status.hero = new Proxy(hero, handler);
 
-        const res: Map<number, Set<ItemDetailData>> = new Map();
         core.setFlag('__statistics__', true);
         block.forEach(v => {
+            if (!this.dirtyBlock.has(v)) return;
             const data = this.blockData.get(v);
+            const detail = this.detailData.get(v);
+            detail?.clear();
             if (!data) return;
-            const info: Set<ItemDetailData> = new Set();
             data.forEach(v => {
-                const { x, y, id } = v;
+                const { id, x, y } = v;
+                const index = x + y * this.sprite.mapWidth;
                 diff = {};
 
                 const item = core.material.items[id];
@@ -135,21 +197,18 @@ class FloorItemDetail implements ILayerGroupRenderExtends {
                         const n = name as SelectKey<HeroStatus, number>;
                         diff[name + 'per'] = per[n].toString() + '%';
                     }
-                    info.add({ x, y, diff });
+                    detail?.set(index, { x, y, diff });
                     return;
                 }
 
                 // @ts-ignore
                 ItemState.item(id)?.itemEffectFn();
-                info.add({ x, y, diff });
+                detail?.set(index, { x, y, diff });
             });
-            res.set(v, info);
         });
         core.status.hero = before;
         window.hero = before;
         window.flags = before.flags;
-
-        return res;
     }
 
     /**
@@ -157,8 +216,13 @@ class FloorItemDetail implements ILayerGroupRenderExtends {
      * @param block 需要渲染的格子
      */
     render(block: Set<number>) {
-        const data = this.calAllItems(block);
-        data.forEach((info, k) => {
+        this.calAllItems(block);
+        const data = this.detailData;
+        block.forEach(v => {
+            if (!this.dirtyBlock.has(v)) return;
+            this.dirtyBlock.delete(v);
+            const info = data.get(v);
+            if (!info) return;
             info.forEach(({ x, y, diff }) => {
                 let n = 0;
                 for (const [key, value] of Object.entries(diff)) {
@@ -173,7 +237,7 @@ class FloorItemDetail implements ILayerGroupRenderExtends {
                         align: 'left',
                         baseline: 'alphabetic'
                     };
-                    this.sprite.renderable.get(k)?.add(renderable);
+                    this.sprite.renderable.get(v)?.add(renderable);
                     n++;
                 }
             });
@@ -181,32 +245,33 @@ class FloorItemDetail implements ILayerGroupRenderExtends {
     }
 
     awake(group: LayerGroup): void {
+        console.log(this);
+
         this.group = group;
-        group.requestBeforeFrame(() => {
-            const binder = group.getExtends('floor-binder');
-            const damage = group.getExtends('floor-damage');
-            if (
-                binder instanceof LayerGroupFloorBinder &&
-                damage instanceof FloorDamageExtends
-            ) {
-                this.floorBinder = binder;
-                this.damage = damage;
-                group.requestAfterFrame(() => {
-                    this.sprite = damage.sprite;
-                    this.listen();
-                });
-            } else {
-                logger.warn(
-                    1001,
-                    `Item-detail extends needs 'floor-binder' and 'floor-damage' as dependency`
-                );
-                group.removeExtends('item-detail');
-            }
-        });
+
+        const binder = group.getExtends('floor-binder');
+        const damage = group.getExtends('floor-damage');
+        if (
+            binder instanceof LayerGroupFloorBinder &&
+            damage instanceof FloorDamageExtends
+        ) {
+            this.floorBinder = binder;
+            this.damage = damage;
+            this.sprite = damage.sprite;
+            this.listen();
+            FloorItemDetail.listened.add(this);
+        } else {
+            logger.warn(
+                1001,
+                `Item-detail extends needs 'floor-binder' and 'floor-damage' as dependency`
+            );
+            group.removeExtends('item-detail');
+        }
     }
 
     onDestroy(group: LayerGroup): void {
-        this.sprite.off('beforeDamageRender', this.onBeforeRender);
+        this.sprite.off('beforeDamageRender', this.onBeforeDamageRender);
         this.sprite.off('setMapSize', this.onUpdateMapSize);
+        FloorItemDetail.listened.delete(this);
     }
 }

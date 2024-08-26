@@ -267,9 +267,12 @@ export function init() {
             stopChian = true;
 
             callback?.();
+        };
 
-            // if (callback) return this.moveAction(callback);
-            // this._moveHero_moving();
+        events.prototype.setHeroIcon = function (name: ImageIds) {
+            const img = core.material.images.images[name];
+            if (!img) return;
+            adapters['hero-adapter']?.all('setImage', img);
         };
 
         hook.on('reset', () => {

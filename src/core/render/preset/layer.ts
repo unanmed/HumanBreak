@@ -8,6 +8,7 @@ import { RenderableData, texture } from '../cache';
 import { glMatrix } from 'gl-matrix';
 import { BlockCacher } from './block';
 import { Transform } from '../transform';
+import { LayerFloorBinder, LayerGroupFloorBinder } from './floor';
 
 export interface ILayerGroupRenderExtends {
     /** 拓展的唯一标识符 */
@@ -61,6 +62,18 @@ export interface ILayerGroupRenderExtends {
     onFrameUpdate?(group: LayerGroup, frame: number): void;
 
     /**
+     * 在渲染之前执行的函数
+     * @param group 目标LayerGroup实例
+     */
+    onBeforeRender?(group: LayerGroup): void;
+
+    /**
+     * 在渲染之后执行的函数
+     * @param group 目标LayerGroup实例
+     */
+    onAfterRender?(group: LayerGroup): void;
+
+    /**
      * 当拓展被取消挂载时执行的函数（LayerGroup被销毁，拓展被移除等）
      * @param group 目标LayerGroup实例
      */
@@ -100,6 +113,10 @@ export class LayerGroup extends Container implements IAnimateFrame {
         });
 
         renderEmits.addFramer(this);
+
+        const binder = new LayerGroupFloorBinder();
+        this.extends(binder);
+        binder.bindThis();
     }
 
     /**
@@ -675,6 +692,8 @@ export class Layer extends Container {
             ctx.drawImage(this.staticMap.canvas, 0, 0, width, height);
             ctx.drawImage(this.movingMap.canvas, 0, 0, width, height);
         });
+
+        this.extends(new LayerFloorBinder());
     }
 
     /**

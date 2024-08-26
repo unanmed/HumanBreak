@@ -149,9 +149,9 @@ export class LayerGroupFloorBinder
         LayerGroupFloorBinder.activedBinder.add(this);
     }
 
-    onLayerAdd(group: LayerGroup, layer: Layer): void {
-        this.checkLayerExtends(layer);
-    }
+    // onLayerAdd(group: LayerGroup, layer: Layer): void {
+    //     this.checkLayerExtends(layer);
+    // }
 
     onDestroy(group: LayerGroup) {
         LayerGroupFloorBinder.activedBinder.delete(this);

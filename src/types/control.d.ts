@@ -312,7 +312,8 @@ interface Control {
     moveOneStep(callback?: () => any): void;
 
     /**
-     * @deprecated
+     * @deprecated 尽量不要使用！！如果需要无视地形使用代码来移动勇士，请使用 `eventMoveHero`
+     *             如果需要向前前进一格或撞击，请使用 `moveHero`
      * 尝试前进一步，如果面前不可被踏入就会直接触发该点事件
      * @example core.moveAction(core.doAction); // 尝试前进一步，然后继续事件处理
      * @param callback 走一步后的回调函数
@@ -320,8 +321,8 @@ interface Control {
     moveAction(callback?: () => void): void;
 
     /**
-     * @deprecated
-     * 连续前进，不撞南墙不回头
+     * @deprecated 尽量不要使用！！如果需要无视地形使用代码来移动勇士，请使用 `eventMoveHero`
+     * 向指定方向移动一格
      * @example core.moveHero(); // 连续前进
      * @param direction 移动的方向，不设置就是勇士当前的方向
      * @param callback 回调函数，设置了就只走一步
