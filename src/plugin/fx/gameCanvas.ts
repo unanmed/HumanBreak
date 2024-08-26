@@ -1,29 +1,18 @@
-export default function init() {
-    return {
-        setGameCanvasFilter,
-        getCanvasFilterByFloorId,
-        setCanvasFilterByFloorId
-    };
-}
+import { logger } from '@/core/common/logger';
+import { LayerGroupFloorBinder } from '@/core/render/preset/floor';
+import {
+    ILayerGroupRenderExtends,
+    LayerGroup
+} from '@/core/render/preset/layer';
 
-export function setGameCanvasFilter(filter: string) {
-    ['bg', 'bg2', 'event', 'event2', 'fg', 'fg2', 'hero'].forEach(v => {
-        core.canvas[v].canvas.style.filter = filter;
-    });
+export default function init() {
+    return {};
 }
 
 const filterMap: [FloorIds[], string][] = [];
 
-export function getCanvasFilterByFloorId(
-    floorId: FloorIds = core.status.floorId
-) {
+function getCanvasFilterByFloorId(floorId: FloorIds = core.status.floorId) {
     return filterMap.find(v => v[0].includes(floorId))?.[1] ?? '';
-}
-
-export function setCanvasFilterByFloorId(
-    floorId: FloorIds = core.status.floorId
-) {
-    setGameCanvasFilter(getCanvasFilterByFloorId(floorId));
 }
 
 Mota.require('var', 'loading').once('coreInit', () => {
@@ -31,7 +20,47 @@ Mota.require('var', 'loading').once('coreInit', () => {
         [['MT50', 'MT60', 'MT61'], 'brightness(80%)contrast(120%)'], // 童心佬的滤镜（
         [
             core.floorIds.slice(61, 70).concat(core.floorIds.slice(72)),
-            'brightness(90%)contrast(120%)'
+            'contrast(120%)'
         ] // 童心佬的滤镜（
     );
 });
+
+export class LayerGroupFilter implements ILayerGroupRenderExtends {
+    id: string = 'filter';
+
+    group!: LayerGroup;
+    binder!: LayerGroupFloorBinder;
+
+    setFilter(floorId: FloorIds) {
+        const filter = getCanvasFilterByFloorId(floorId);
+        this.group.setFilter(filter);
+        // console.log(filter);
+    }
+
+    private onFloorChange = (floor: FloorIds) => {
+        this.setFilter(floor);
+    };
+
+    private listen() {
+        this.binder.on('floorChange', this.onFloorChange);
+    }
+
+    awake(group: LayerGroup): void {
+        this.group = group;
+        const ex = group.getExtends('floor-binder');
+        if (ex instanceof LayerGroupFloorBinder) {
+            this.binder = ex;
+            this.listen();
+        } else {
+            logger.error(
+                1201,
+                `Floor-damage extends needs 'floor-binder' extends as dependency.`
+            );
+            group.removeExtends('floor-damage');
+        }
+    }
+
+    onDestroy(group: LayerGroup): void {
+        this.binder?.off('floorChange', this.onFloorChange);
+    }
+}

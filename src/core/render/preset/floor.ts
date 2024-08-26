@@ -33,6 +33,7 @@ hook.on('changingFloor', floor => {
     // 考虑到楼层转换一般不会同时执行很多次，因此这里改为立刻更新
     LayerGroupFloorBinder.activedBinder.forEach(v => {
         if (v.bindThisFloor) v.updateBindData();
+        v.emit('floorChange', floor);
     });
     LayerFloorBinder.listenedBinder.forEach(v => {
         if (v.bindThisFloor) v.updateBindData();

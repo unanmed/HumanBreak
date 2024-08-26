@@ -5,7 +5,6 @@ import {
     createProgram,
     isWebGL2Supported
 } from './webgl';
-import { setCanvasFilterByFloorId } from '@/plugin/fx/gameCanvas';
 import { ILayerRenderExtends, Layer } from '../render/preset/layer';
 import { HeroRenderer } from '../render/preset/hero';
 import { Sprite } from '../render/sprite';
@@ -81,14 +80,14 @@ hook.once('reset', () => {
         core.floorIds.slice(61, 70).concat(core.floorIds.slice(72, 81)).concat(core.floorIds.slice(85, 103)),
         103,
         { decay: 50, r: 300, color: [0.9333, 0.6, 0.333, 0.3] },
-        { background: [0, 0, 0, 0.26] },
+        { background: [0, 0, 0, 0.2] },
         { decay: 50, r: 250, color: [0, 0, 0, 0] }
     );
     addLightFromBlock(
         ['MT50', 'MT60', 'MT61', 'MT72', 'MT73', 'MT74', 'MT75'],
         103,
-        { decay: 20, r: 150, color: [0.9333, 0.6, 0.333, 0.4], noShelter: true },
-        { background: [0, 0, 0, 0.4] }
+        { decay: 20, r: 150, color: [0.9333, 0.6, 0.333, 0.3], noShelter: true },
+        { background: [0, 0, 0, 0.3] }
     );
     // Shadow.mount();
 
@@ -143,7 +142,7 @@ hook.on('setBlock', () => {
 hook.on('changingFloor', floorId => {        
     Shadow.clearBuffer();
     Shadow.update();
-    setCanvasFilterByFloorId(floorId);
+    // setCanvasFilterByFloorId(floorId);
     LayerShadowExtends.shadowList.forEach(v => v.update());
 })
 
@@ -1336,12 +1335,12 @@ export class LayerShadowExtends implements ILayerRenderExtends {
 
     awake(layer: Layer): void {
         const ex = layer.getExtends('floor-hero');
-        if (!ex) {
+        if (!(ex instanceof HeroRenderer)) {
             layer.removeExtends('shadow');
             logger.error(1101, `Shadow extends needs 'floor-hero' extends as dependency.`);
             return;
         }
-        this.hero = ex as HeroRenderer;
+        this.hero = ex;
         this.layer = layer;
         this.listen();
         LayerShadowExtends.shadowList.add(this);

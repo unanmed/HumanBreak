@@ -1014,6 +1014,7 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
 
 ////// 绘制勇士 //////
 control.prototype.drawHero = function (status, offset = 0, frame) {
+    return;
     if (!core.isPlaying() || !core.status.floorId || core.status.gameOver)
         return;
     var x = core.getHeroLoc('x'),
@@ -1488,6 +1489,7 @@ control.prototype._updateDamage_extraDamage = function (floorId, onMap) {
 
 ////// 重绘地图显伤 //////
 control.prototype.drawDamage = function (ctx, floorId = core.status.floorId) {
+    return;
     if (core.status.gameOver || !core.status.damage || main.mode != 'play')
         return;
     var onMap = false;

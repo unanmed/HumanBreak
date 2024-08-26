@@ -228,8 +228,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         const ay = -this.anchorY * this.height;
 
         canvas.ctx.save();
-        canvas.ctx.filter = this.filter;
         canvas.setAntiAliasing(this.antiAliasing);
+        if (this.enableCache) canvas.ctx.filter = this.filter;
         if (this.type === 'static') transformCanvas(canvas, tran);
         if (this.enableCache) {
             const { width, height, ctx } = this.cache;
@@ -264,7 +264,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      * 设置本元素的滤镜
      * @param filter 滤镜
      */
-    seyFilter(filter: string) {
+    setFilter(filter: string) {
         this.filter = filter;
         this.update(this);
     }

@@ -245,8 +245,6 @@ export class FloorItemDetail implements ILayerGroupRenderExtends {
     }
 
     awake(group: LayerGroup): void {
-        console.log(this);
-
         this.group = group;
 
         const binder = group.getExtends('floor-binder');

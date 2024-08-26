@@ -102,7 +102,7 @@ export class LayerGroup extends Container implements IAnimateFrame {
     private extend: Map<string, ILayerGroupRenderExtends> = new Map();
 
     constructor() {
-        super('static', false);
+        super('static');
 
         this.setHD(true);
         this.setAntiAliasing(false);
