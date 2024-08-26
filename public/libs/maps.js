@@ -1477,33 +1477,33 @@ maps.prototype.generateGroundPattern = function (floorId) {
 maps.prototype.drawMap = function (floorId) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return;
-    core.clearMap('all');
-    this.generateGroundPattern(floorId);
+    // core.clearMap('all');
+    // this.generateGroundPattern(floorId);
     core.status.floorId = floorId;
     core.extractBlocks(floorId);
     core.status.thisMap = core.status.maps[floorId];
 
-    this._drawMap_drawAll();
-    if (core.status.curtainColor) {
-        core.fillRect(
-            'curtain',
-            0,
-            0,
-            core._PX_,
-            core._PY_,
-            core.arrayToRGBA(core.status.curtainColor)
-        );
-    }
-    core.drawHero();
+    // this._drawMap_drawAll();
+    // if (core.status.curtainColor) {
+    //     core.fillRect(
+    //         'curtain',
+    //         0,
+    //         0,
+    //         core._PX_,
+    //         core._PY_,
+    //         core.arrayToRGBA(core.status.curtainColor)
+    //     );
+    // }
+    // core.drawHero();
     core.updateStatusBar();
 };
 
 ////// 重绘某张地图 //////
 maps.prototype.redrawMap = function () {
-    core.bigmap.canvas.forEach(function (one) {
-        core.clearMap(one);
-    });
-    this._drawMap_drawAll(null, { redraw: true });
+    // core.bigmap.canvas.forEach(function (one) {
+    //     core.clearMap(one);
+    // });
+    // this._drawMap_drawAll(null, { redraw: true });
     core.drawDamage();
 };
 

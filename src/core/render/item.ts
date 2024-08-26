@@ -162,6 +162,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     antiAliasing: boolean = true;
     /** 是否被隐藏 */
     hidden: boolean = false;
+    /** 滤镜 */
+    filter: string = 'none';
 
     /** 当前元素的父元素 */
     parent?: RenderItem & IRenderChildable;
@@ -226,6 +228,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         const ay = -this.anchorY * this.height;
 
         canvas.ctx.save();
+        canvas.ctx.filter = this.filter;
         canvas.setAntiAliasing(this.antiAliasing);
         if (this.type === 'static') transformCanvas(canvas, tran);
         if (this.enableCache) {
@@ -255,6 +258,15 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      */
     pos(x: number, y: number) {
         this.transform.setTranslate(x, y);
+    }
+
+    /**
+     * 设置本元素的滤镜
+     * @param filter 滤镜
+     */
+    seyFilter(filter: string) {
+        this.filter = filter;
+        this.update(this);
     }
 
     setAnchor(x: number, y: number): void {
