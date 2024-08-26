@@ -4,6 +4,7 @@ import { LayerDoorAnimate, LayerGroupFloorBinder } from './preset/floor';
 import { HeroRenderer } from './preset/hero';
 import { LayerGroup, FloorLayer } from './preset/layer';
 import { MotaRenderer } from './render';
+import { LayerShadowExtends } from '../fx/shadow';
 
 let main: MotaRenderer;
 
@@ -27,10 +28,12 @@ Mota.require('var', 'loading').once('loaded', () => {
     const hero = new HeroRenderer();
     const detail = new FloorItemDetail();
     const door = new LayerDoorAnimate();
+    const shadow = new LayerShadowExtends();
     layer.extends(damage);
     layer.extends(detail);
     layer.getLayer('event')?.extends(hero);
     layer.getLayer('event')?.extends(door);
+    layer.getLayer('event')?.extends(shadow);
 
     render.appendChild(layer);
 });

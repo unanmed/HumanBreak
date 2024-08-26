@@ -390,30 +390,6 @@ export function init() {
                 core.animateFrame.asyncId[animate] = cb;
                 this._openDoor_animate(block, x, y, callback);
             }
-
-            // var blockInfo = core.getBlockInfo(block);
-            // var speed = (doorInfo.time || 160) / 4;
-            // blockInfo.posX = 3;
-            // core.maps._drawBlockInfo(blockInfo, x, y);
-
-            // var animate = window.setInterval(
-            //     function () {
-            //         blockInfo.posX--;
-            //         if (blockInfo.posX < 0) {
-            //             clearInterval(animate);
-            //             delete core.animateFrame.asyncId[animate];
-            //             cb();
-            //             return;
-            //         }
-            //         core.maps._drawBlockInfo(blockInfo, x, y);
-            //     },
-            //     core.status.replay.speed == 24
-            //         ? 1
-            //         : speed / Math.max(core.status.replay.speed, 1)
-            // );
-
-            // core.animateFrame.lastAsyncId = animate;
-            // core.animateFrame.asyncId[animate] = cb;
         };
     });
 

@@ -12,6 +12,7 @@ type HeroMovingStatus = 'stop' | 'moving' | 'moving-as';
 
 interface HeroRenderEvent {
     stepEnd: [];
+    moveTick: [x: number, y: number];
 }
 
 export class HeroRenderer
@@ -170,6 +171,7 @@ export class HeroRenderer
             this.renderable.x = rx;
             this.renderable.y = ry;
         }
+        this.emit('moveTick', this.renderable.x, this.renderable.y);
         this.renderable.animate = this.movingFrame;
         this.layer.update(this.layer);
     }
@@ -272,6 +274,7 @@ export class HeroRenderer
         if (!isNil(y)) {
             this.renderable.y = y;
         }
+        this.emit('moveTick', this.renderable.x, this.renderable.y);
         this.layer.update(this.layer);
     }
 
@@ -306,6 +309,7 @@ export class HeroRenderer
                             (a, b) => a.zIndex - b.zIndex
                         );
                     }
+                    this.emit('moveTick', this.renderable.x, this.renderable.y);
                     this.layer.update(this.layer);
                 },
                 time,
@@ -315,6 +319,7 @@ export class HeroRenderer
                     this.renderable.animate = 0;
                     this.renderable.x = x;
                     this.renderable.y = y;
+                    this.emit('moveTick', this.renderable.x, this.renderable.y);
                     this.layer.update(this.layer);
                     res();
                 }

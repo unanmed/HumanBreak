@@ -6,6 +6,9 @@ import {
     isWebGL2Supported
 } from './webgl';
 import { setCanvasFilterByFloorId } from '@/plugin/fx/gameCanvas';
+import { ILayerRenderExtends, Layer } from '../render/preset/layer';
+import { HeroRenderer } from '../render/preset/hero';
+import { Sprite } from '../render/sprite';
 
 /** 
  * 最大光源数量，必须设置，且光源数不能超过这个值，这个值决定了会预留多少的缓冲区，因此最好尽可能小，同时游戏过程中不可修改
@@ -70,7 +73,9 @@ function addLightFromBlock(floors: FloorIds[], block: number, config: LightConfi
     })
 }
 
-Mota.require('var', 'hook').once('reset', () => {
+const hook = Mota.require('var', 'hook');
+
+hook.once('reset', () => {
     Shadow.init();
     addLightFromBlock(
         core.floorIds.slice(61, 70).concat(core.floorIds.slice(72, 81)).concat(core.floorIds.slice(85, 103)),
@@ -85,48 +90,62 @@ Mota.require('var', 'hook').once('reset', () => {
         { decay: 20, r: 150, color: [0.9333, 0.6, 0.333, 0.4], noShelter: true },
         { background: [0, 0, 0, 0.4] }
     );
-    Shadow.mount();
+    // Shadow.mount();
 
     // 勇士身上的光源
-    Mota.rewrite(core.control, 'drawHero', 'add', () => {
-        if (core.getFlag('__heroOpacity__') !== 0) {
-            const shadow = Shadow.now();
-            if (shadow) {
-                shadow.followHero.forEach(v => {
-                    shadow.modifyLight(v, {
-                        x: core.status.heroCenter.px, 
-                        y: core.status.heroCenter.py + 8
-                    });
-                });
-                if (shadow.followHero.size > 0) shadow.requestRefresh();
-            }
-        }
-    });
+    // Mota.rewrite(core.control, 'drawHero', 'add', () => {
+    //     if (core.getFlag('__heroOpacity__') !== 0) {
+    //         const shadow = Shadow.now();
+    //         if (shadow) {
+    //             shadow.followHero.forEach(v => {
+    //                 shadow.modifyLight(v, {
+    //                     x: core.status.heroCenter.px, 
+    //                     y: core.status.heroCenter.py + 8
+    //                 });
+    //             });
+    //             if (shadow.followHero.size > 0) shadow.requestRefresh();
+    //         }
+    //     }
+    // });
     // 更新地形数据
-    Mota.rewrite(core.maps, 'removeBlock', 'add', success => {
-        if (success && !main.replayChecking) {
-            Shadow.update(true);
-        }
-        return success;
-    });
-    Mota.rewrite(core.maps, 'setBlock', 'add', () => {
-        if (!main.replayChecking) {
-            Shadow.update(true);
-        }
-    });
+    // Mota.rewrite(core.maps, 'removeBlock', 'add', success => {
+    //     if (success && !main.replayChecking) {
+    //         Shadow.update(true);
+    //     }
+    //     return success;
+    // });
+    // Mota.rewrite(core.maps, 'setBlock', 'add', () => {
+    //     if (!main.replayChecking) {
+    //         Shadow.update(true);
+    //     }
+    // });
     Mota.rewrite(core.control, 'loadData', 'add', () => {
         if (!main.replayChecking) {
             Shadow.update(true);
         }
     });
-    Mota.require('var', 'hook').on('changingFloor', (floorId) => {
-        if (!main.replayChecking) {
-            Shadow.clearBuffer();
-            Shadow.update();
-            setCanvasFilterByFloorId(floorId);
-        }
-    })
+    // Mota.require('var', 'hook').on('changingFloor', (floorId) => {
+    //     if (!main.replayChecking) {
+    //         Shadow.clearBuffer();
+    //         Shadow.update();
+    //         setCanvasFilterByFloorId(floorId);
+    //     }
+    // })
 });
+hook.on('reset', () => {
+    Shadow.update(true);
+    LayerShadowExtends.shadowList.forEach(v => v.sprite.update(v.sprite));
+})
+hook.on('setBlock', () => {
+    Shadow.update(true);
+    LayerShadowExtends.shadowList.forEach(v => v.sprite.update(v.sprite));
+})
+hook.on('changingFloor', floorId => {
+    Shadow.clearBuffer();
+    Shadow.update();
+    setCanvasFilterByFloorId(floorId);
+    LayerShadowExtends.shadowList.forEach(v => v.sprite.update(v.sprite));
+})
 
 // 深度测试着色器
 
@@ -977,6 +996,7 @@ export class Shadow {
             color: this.create2DTexture(core._PX_),
             blur: this.create2DTexture(core._PX_)
         }
+        this.resizeCanvas();
     }
 
     static resize() {
@@ -1007,7 +1027,6 @@ export class Shadow {
     }
 
     static mount() {
-        this.resizeCanvas();
         core.dom.gameDraw.appendChild(this.canvas);
     }
 
@@ -1279,5 +1298,57 @@ export function calMapWalls(floor: FloorIds, nocache: boolean = false) {
         for (const [x, y, w, h] of p) {
             ctx.strokeRect(x, y, w, h);
         }
+    }
+}
+
+export class LayerShadowExtends implements ILayerRenderExtends {
+    static shadowList: Set<LayerShadowExtends> = new Set();
+    id: string = 'shadow';
+
+    hero!: HeroRenderer
+    sprite!: Sprite;
+
+    private onMoveTick = (x: number, y: number) => {
+        const now = Shadow.now();
+        if (!now) return;
+        if (now.followHero.size === 0) return;
+        now.followHero.forEach(v => {
+            now.modifyLight(v, {
+                x: x * 32 + 16,
+                y: y * 32 + 16
+            });
+        });
+        now.requestRefresh();
+        this.sprite.update(this.sprite);
+    }
+
+    private listen() {
+        this.hero.on('moveTick', this.onMoveTick);
+    }
+
+    awake(layer: Layer): void {
+        const ex = layer.getExtends('floor-hero');
+        if (!ex) {
+            layer.removeExtends('shadow');
+            logger.error(1101, `Shadow extends needs 'floor-hero' extends as dependency.`);
+            return;
+        }
+        this.hero = ex as HeroRenderer;
+        this.listen();
+        LayerShadowExtends.shadowList.add(this);
+        this.sprite = new Sprite('static', false);
+        this.sprite.setHD(true);
+        this.sprite.size(layer.width, layer.height);
+        this.sprite.setRenderFn((canvas, transform) => {            
+            canvas.ctx.drawImage(Shadow.canvas, 0, 0, layer.width, layer.height);
+        });
+
+        layer.appendChild(this.sprite);
+    }
+
+    onDestroy(layer: Layer): void {
+        this.hero.off('moveTick', this.onMoveTick);
+        this.sprite.destroy();
+        LayerShadowExtends.shadowList.delete(this);
     }
 }

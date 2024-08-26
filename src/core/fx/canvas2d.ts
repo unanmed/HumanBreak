@@ -1,6 +1,7 @@
 import { parseCss } from '@/plugin/utils';
 import { EventEmitter } from 'eventemitter3';
 import { CSSObj } from '../interface';
+import { isWebGL2Supported } from './webgl';
 
 interface OffscreenCanvasEvent {
     /** 当被动触发resize时（例如core.domStyle.scale变化、窗口大小变化）时触发，使用size函数并不会触发 */
@@ -35,8 +36,6 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
         this.ctx = this.canvas.getContext('2d')!;
         this.width = this.canvas.width / devicePixelRatio;
         this.height = this.canvas.height / devicePixelRatio;
-
-        this.canvas.style.position = 'absolute';
 
         MotaOffscreenCanvas2D.list.add(this);
     }
@@ -118,6 +117,74 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
             canvas.height
         );
         return newCanvas;
+    }
+}
+
+export class MotaOffscreenCanvasGL2 extends EventEmitter<OffscreenCanvasEvent> {
+    static support: boolean = isWebGL2Supported();
+    static list: Set<MotaOffscreenCanvasGL2> = new Set();
+
+    canvas: HTMLCanvasElement;
+    gl: WebGL2RenderingContext;
+
+    width: number;
+    height: number;
+
+    /** 是否自动跟随样板的core.domStyle.scale进行缩放 */
+    autoScale: boolean = false;
+    /** 是否是高清画布 */
+    highResolution: boolean = true;
+
+    scale: number = 1;
+
+    /** 更新标识符，如果发生变化则说明画布被动清空 */
+    symbol: number = 0;
+
+    constructor() {
+        super();
+
+        this.canvas = document.createElement('canvas');
+        this.gl = this.canvas.getContext('webgl2')!;
+        this.width = this.canvas.width / devicePixelRatio;
+        this.height = this.canvas.height / devicePixelRatio;
+    }
+
+    /**
+     * 设置画布的大小
+     */
+    size(width: number, height: number) {
+        let ratio = this.highResolution ? devicePixelRatio : 1;
+        if (this.autoScale && this.highResolution) {
+            ratio *= core.domStyle.scale;
+        }
+        this.scale = ratio;
+        this.canvas.width = width * ratio;
+        this.canvas.height = height * ratio;
+        this.width = width;
+        this.height = height;
+    }
+
+    /**
+     * 设置当前画布是否跟随样板的 core.domStyle.scale 一同进行缩放
+     */
+    withGameScale(auto: boolean) {
+        this.autoScale = auto;
+        this.size(this.width, this.height);
+    }
+
+    /**
+     * 设置当前画布是否为高清画布
+     */
+    setHD(hd: boolean) {
+        this.highResolution = hd;
+        this.size(this.width, this.height);
+    }
+
+    /**
+     * 删除这个画布
+     */
+    delete() {
+        MotaOffscreenCanvasGL2.list.delete(this);
     }
 }
 
@@ -249,6 +316,13 @@ export class MotaCanvas2D extends MotaOffscreenCanvas2D {
 window.addEventListener('resize', () => {
     requestAnimationFrame(() => {
         MotaOffscreenCanvas2D.list.forEach(v => {
+            if (v.autoScale) {
+                v.size(v.width, v.height);
+                v.symbol++;
+                v.emit('resize');
+            }
+        });
+        MotaOffscreenCanvasGL2.list.forEach(v => {
             if (v.autoScale) {
                 v.size(v.width, v.height);
                 v.symbol++;
