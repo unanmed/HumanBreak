@@ -134,17 +134,17 @@ hook.once('reset', () => {
 });
 hook.on('reset', () => {
     Shadow.update(true);
-    LayerShadowExtends.shadowList.forEach(v => v.sprite.update(v.sprite));
+    LayerShadowExtends.shadowList.forEach(v => v.update());
 })
 hook.on('setBlock', () => {
     Shadow.update(true);
-    LayerShadowExtends.shadowList.forEach(v => v.sprite.update(v.sprite));
+    LayerShadowExtends.shadowList.forEach(v => v.update());
 })
-hook.on('changingFloor', floorId => {
+hook.on('changingFloor', floorId => {        
     Shadow.clearBuffer();
     Shadow.update();
     setCanvasFilterByFloorId(floorId);
-    LayerShadowExtends.shadowList.forEach(v => v.sprite.update(v.sprite));
+    LayerShadowExtends.shadowList.forEach(v => v.update());
 })
 
 // 深度测试着色器
@@ -1305,21 +1305,29 @@ export class LayerShadowExtends implements ILayerRenderExtends {
     static shadowList: Set<LayerShadowExtends> = new Set();
     id: string = 'shadow';
 
+    layer!: Layer
     hero!: HeroRenderer
     sprite!: Sprite;
+
+    update() {
+        this.sprite.update(this.sprite);
+    }
 
     private onMoveTick = (x: number, y: number) => {
         const now = Shadow.now();
         if (!now) return;
-        if (now.followHero.size === 0) return;
+        if (now.followHero.size === 0) return;                
         now.followHero.forEach(v => {
             now.modifyLight(v, {
                 x: x * 32 + 16,
                 y: y * 32 + 16
             });
         });
-        now.requestRefresh();
-        this.sprite.update(this.sprite);
+        now.requestRefresh();        
+        
+        this.layer.requestAfterFrame(() => {
+            this.sprite.update(this.sprite);
+        });
     }
 
     private listen() {
@@ -1334,6 +1342,7 @@ export class LayerShadowExtends implements ILayerRenderExtends {
             return;
         }
         this.hero = ex as HeroRenderer;
+        this.layer = layer;
         this.listen();
         LayerShadowExtends.shadowList.add(this);
         this.sprite = new Sprite('static', false);

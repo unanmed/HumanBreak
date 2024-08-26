@@ -136,14 +136,15 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
 
             // 重置画布尺寸
             core.maps.resizeMap(floorId);
+
+            // ---------- 重绘新地图；这一步将会设置core.status.floorId ---------- //
+            core.drawMap(floorId);
+
             // 设置勇士的位置
             heroLoc.direction = core.turnDirection(heroLoc.direction);
             core.setHeroLoc('x', heroLoc.x);
             core.setHeroLoc('y', heroLoc.y);
             core.setHeroLoc('direction', heroLoc.direction);
-
-            // ---------- 重绘新地图；这一步将会设置core.status.floorId ---------- //
-            core.drawMap(floorId);
 
             // 切换楼层BGM
             if (core.status.maps[floorId].bgm) {
