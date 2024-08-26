@@ -275,7 +275,7 @@ interface AnimateFrame {
     /**
      * 上一个异步事件的id
      */
-    readonly lastAsyncId: number;
+    lastAsyncId: number;
 }
 
 interface Weather {

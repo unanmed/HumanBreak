@@ -661,7 +661,7 @@ interface InitGameStatus {
     /**
      * 当前的回放状态
      */
-    replay: DeepReadonly<ReplayStatus>;
+    replay: ReplayStatus;
 
     /**
      * 当前的所有全局商店

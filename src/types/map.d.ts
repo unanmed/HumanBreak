@@ -1403,6 +1403,8 @@ interface Maps {
         floorId: FloorIds,
         noCache?: boolean
     ): number[][];
+
+    _removeBlockFromMap(floorId: FloorIds, block: Block): void;
 }
 
 declare const maps: new () => Maps;

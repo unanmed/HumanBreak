@@ -1,19 +1,26 @@
 import type { RenderAdapter } from '@/core/render/adapter';
+import type { LayerDoorAnimate } from '@/core/render/preset/floor';
 import type { HeroRenderer } from '@/core/render/preset/hero';
 import { hook } from '@/game/game';
 
 interface Adapters {
     'hero-adapter'?: RenderAdapter<HeroRenderer>;
+    'door-animate'?: RenderAdapter<LayerDoorAnimate>;
 }
 
 const adapters: Adapters = {};
 
 export function init() {
+    const hook = Mota.require('var', 'hook');
+    let fallbackIds: number = 1e8;
+
     if (!main.replayChecking && main.mode === 'play') {
         const Adapter = Mota.require('module', 'Render').RenderAdapter;
         const hero = Adapter.get<HeroRenderer>('hero-adapter');
+        const doorAnimate = Adapter.get<LayerDoorAnimate>('door-animate');
 
         adapters['hero-adapter'] = hero;
+        adapters['door-animate'] = doorAnimate;
     }
 
     let moving: boolean = false;
@@ -280,6 +287,134 @@ export function init() {
             moveDir = core.status.hero.loc.direction;
             stepDir = moveDir;
         });
+
+        // ----- 开关门
+        events.prototype.openDoor = function (
+            x: number,
+            y: number,
+            needKey: boolean,
+            callback?: () => void
+        ) {
+            var block = core.getBlock(x, y);
+            core.saveAndStopAutomaticRoute();
+            if (!this._openDoor_check(block, x, y, needKey)) {
+                var locked = core.status.lockControl;
+                core.waitHeroToStop(function () {
+                    if (!locked) core.unlockControl();
+                    if (callback) callback();
+                });
+                return;
+            }
+            if (core.status.replay.speed === 24) {
+                core.status.replay.animate = true;
+                core.removeBlock(x, y);
+                setTimeout(function () {
+                    core.status.replay.animate = false;
+                    Mota.require('var', 'hook').emit(
+                        'afterOpenDoor',
+                        block.event.id,
+                        x,
+                        y
+                    );
+                    if (callback) callback();
+                }, 1); // +1是为了录像检测系统
+            } else {
+                const locked = core.status.lockControl;
+                core.lockControl();
+                core.status.replay.animate = true;
+                core.removeBlock(x, y);
+
+                const cb = () => {
+                    core.maps._removeBlockFromMap(core.status.floorId, block);
+                    if (!locked) core.unlockControl();
+                    core.status.replay.animate = false;
+                    hook.emit('afterOpenDoor', block.event.id, x, y);
+                    callback?.();
+                };
+
+                adapters['door-animate']?.all('openDoor', block).then(cb);
+
+                const animate = fallbackIds++;
+                core.animateFrame.lastAsyncId = animate;
+                core.animateFrame.asyncId[animate] = cb;
+                this._openDoor_animate(block, x, y, callback);
+            }
+        };
+
+        events.prototype.closeDoor = function (
+            x: number,
+            y: number,
+            id: AllIds,
+            callback?: () => void
+        ) {
+            id = id || '';
+            if (
+                // @ts-ignore
+                (core.material.icons.animates[id] == null &&
+                    // @ts-ignore
+                    core.material.icons.npc48[id] == null) ||
+                core.getBlock(x, y) != null
+            ) {
+                if (callback) callback();
+                return;
+            }
+            var block = core.getBlockById(id);
+            var doorInfo = (block.event || {}).doorInfo;
+            if (!doorInfo) {
+                if (callback) callback();
+                return;
+            }
+
+            core.playSound(doorInfo.closeSound);
+
+            const locked = core.status.lockControl;
+            core.lockControl();
+            core.status.replay.animate = true;
+            const cb = function () {
+                if (!locked) core.unlockControl();
+                core.status.replay.animate = false;
+                core.setBlock(id, x, y);
+                core.showBlock(x, y);
+                callback?.();
+            };
+
+            if (core.status.replay.speed === 24) {
+                cb();
+            } else {
+                adapters['door-animate']?.all('closeDoor', block).then(() => {
+                    cb();
+                });
+
+                const animate = fallbackIds++;
+                core.animateFrame.lastAsyncId = animate;
+                core.animateFrame.asyncId[animate] = cb;
+                this._openDoor_animate(block, x, y, callback);
+            }
+
+            // var blockInfo = core.getBlockInfo(block);
+            // var speed = (doorInfo.time || 160) / 4;
+            // blockInfo.posX = 3;
+            // core.maps._drawBlockInfo(blockInfo, x, y);
+
+            // var animate = window.setInterval(
+            //     function () {
+            //         blockInfo.posX--;
+            //         if (blockInfo.posX < 0) {
+            //             clearInterval(animate);
+            //             delete core.animateFrame.asyncId[animate];
+            //             cb();
+            //             return;
+            //         }
+            //         core.maps._drawBlockInfo(blockInfo, x, y);
+            //     },
+            //     core.status.replay.speed == 24
+            //         ? 1
+            //         : speed / Math.max(core.status.replay.speed, 1)
+            // );
+
+            // core.animateFrame.lastAsyncId = animate;
+            // core.animateFrame.asyncId[animate] = cb;
+        };
     });
 
     return { readyMove, endMove, move };

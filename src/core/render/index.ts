@@ -1,6 +1,6 @@
 import { FloorItemDetail } from '@/plugin/fx/itemDetail';
 import { FloorDamageExtends } from './preset/damage';
-import { LayerGroupFloorBinder } from './preset/floor';
+import { LayerDoorAnimate, LayerGroupFloorBinder } from './preset/floor';
 import { HeroRenderer } from './preset/hero';
 import { LayerGroup, FloorLayer } from './preset/layer';
 import { MotaRenderer } from './render';
@@ -26,9 +26,11 @@ Mota.require('var', 'loading').once('loaded', () => {
     const damage = new FloorDamageExtends();
     const hero = new HeroRenderer();
     const detail = new FloorItemDetail();
+    const door = new LayerDoorAnimate();
     layer.extends(damage);
     layer.extends(detail);
     layer.getLayer('event')?.extends(hero);
+    layer.getLayer('event')?.extends(door);
 
     render.appendChild(layer);
 });

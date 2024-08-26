@@ -4,9 +4,12 @@ import {
     ILayerGroupRenderExtends,
     ILayerRenderExtends,
     Layer,
-    LayerGroup
+    LayerGroup,
+    LayerMovingRenderable
 } from './layer';
 import { texture } from '../cache';
+import { sleep } from 'mutate-animate';
+import { RenderAdapter } from '../adapter';
 
 const hook = Mota.require('var', 'hook');
 
@@ -281,16 +284,105 @@ export class LayerFloorBinder implements ILayerRenderExtends {
     }
 }
 
-export class LayerOpenDoorAnimate implements ILayerRenderExtends {
-    id: string = 'open-door-animate';
+interface DoorAnimateRenderable {
+    renderable: LayerMovingRenderable;
+    count: number;
+    perTime: number;
+}
+
+export class LayerDoorAnimate implements ILayerRenderExtends {
+    id: string = 'door-animate';
 
     layer!: Layer;
 
-    awake(layer: Layer) {
-        this.layer = layer;
+    private moving: Set<LayerMovingRenderable> = new Set();
+
+    private getRenderable(block: Block): DoorAnimateRenderable | null {
+        const { x, y, id } = block;
+        const renderable = texture.getRenderable(id);
+        if (!renderable) return null;
+        const image = renderable.autotile
+            ? renderable.image[0]
+            : renderable.image;
+        const time = block.event.doorInfo?.time ?? 160;
+        const frame = renderable.render.length;
+        const perTime = time / frame;
+
+        const data: LayerMovingRenderable = {
+            x,
+            y,
+            zIndex: y,
+            image,
+            autotile: false,
+            animate: 0,
+            frame,
+            bigImage: false,
+            render: renderable.render
+        };
+        return { renderable: data, count: frame, perTime };
     }
 
-    openDoor(x: number, y: number) {}
+    /**
+     * 开门
+     * @param block 图块信息
+     */
+    async openDoor(block: Block) {
+        const renderable = this.getRenderable(block);
+        if (!renderable) return Promise.reject();
+        const { renderable: data, count: frame, perTime } = renderable;
+        data.animate = 0;
+        this.moving.add(data);
 
-    closeDoor(x: number, y: number) {}
+        let now = 0;
+        while (now < frame) {
+            await sleep(perTime);
+            data.animate = ++now;
+            this.layer.update(this.layer);
+        }
+
+        this.moving.delete(data);
+        return Promise.resolve();
+    }
+
+    /**
+     * 关门
+     * @param block 图块信息
+     */
+    async closeDoor(block: Block) {
+        const renderable = this.getRenderable(block);
+        if (!renderable) return Promise.reject();
+        const { renderable: data, count: frame, perTime } = renderable;
+        data.animate = frame - 1;
+        this.moving.add(data);
+
+        let now = 0;
+        while (now >= 0) {
+            await sleep(perTime);
+            data.animate = --now;
+            this.layer.update(this.layer);
+        }
+        this.moving.delete(data);
+        return Promise.resolve();
+    }
+
+    awake(layer: Layer) {
+        this.layer = layer;
+        doorAdapter.add(this);
+    }
+
+    onMovingUpdate(layer: Layer, renderable: LayerMovingRenderable[]): void {
+        renderable.push(...this.moving);
+    }
+
+    onDestroy(layer: Layer): void {
+        doorAdapter.remove(this);
+    }
 }
+
+const doorAdapter = new RenderAdapter<LayerDoorAnimate>('door-animate');
+doorAdapter.recieve('openDoor', (item, block: Block) => {
+    return item.openDoor(block);
+});
+doorAdapter.recieve('closeDoor', (item, block: Block) => {
+    return item.closeDoor(block);
+});
