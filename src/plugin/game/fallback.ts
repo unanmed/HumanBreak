@@ -1,26 +1,30 @@
 import type { RenderAdapter } from '@/core/render/adapter';
+import type { LayerGroupAnimate } from '@/core/render/preset/animate';
 import type { LayerDoorAnimate } from '@/core/render/preset/floor';
 import type { HeroRenderer } from '@/core/render/preset/hero';
-import { hook } from '@/game/game';
 
 interface Adapters {
     'hero-adapter'?: RenderAdapter<HeroRenderer>;
     'door-animate'?: RenderAdapter<LayerDoorAnimate>;
+    animate?: RenderAdapter<LayerGroupAnimate>;
 }
 
 const adapters: Adapters = {};
 
 export function init() {
     const hook = Mota.require('var', 'hook');
+    const loading = Mota.require('var', 'loading');
     let fallbackIds: number = 1e8;
 
     if (!main.replayChecking && main.mode === 'play') {
         const Adapter = Mota.require('module', 'Render').RenderAdapter;
         const hero = Adapter.get<HeroRenderer>('hero-adapter');
         const doorAnimate = Adapter.get<LayerDoorAnimate>('door-animate');
+        const animate = Adapter.get<LayerGroupAnimate>('animate');
 
         adapters['hero-adapter'] = hero;
         adapters['door-animate'] = doorAnimate;
+        adapters['animate'] = animate;
     }
 
     let moving: boolean = false;
@@ -391,6 +395,87 @@ export function init() {
                 this._openDoor_animate(block, x, y, callback);
             }
         };
+
+        // ----- animate & hero animate
+        ////// 绘制动画 //////
+        maps.prototype.drawAnimate = function (
+            name: AnimationIds,
+            x: number,
+            y: number,
+            alignWindow?: boolean,
+            callback?: () => void
+        ) {
+            // @ts-ignore
+            name = core.getMappedName(name);
+
+            // 正在播放录像：不显示动画
+            if (
+                core.isReplaying() ||
+                !core.material.animates[name] ||
+                x == null ||
+                y == null
+            ) {
+                if (callback) callback();
+                return -1;
+            }
+
+            adapters.animate
+                ?.all(
+                    'drawAnimate',
+                    name,
+                    x * 32 + 16,
+                    y * 32 + 16,
+                    alignWindow ?? false
+                )
+                .then(() => {
+                    callback?.();
+                });
+        };
+
+        maps.prototype.drawHeroAnimate = function (
+            name: AnimationIds,
+            callback?: () => void
+        ) {
+            // @ts-ignore
+            name = core.getMappedName(name);
+
+            // 正在播放录像或动画不存在：不显示动画
+            if (core.isReplaying() || !core.material.animates[name]) {
+                if (callback) callback();
+                return -1;
+            }
+
+            adapters.animate?.global('drawHeroAnimate', name).then(() => {
+                callback?.();
+            });
+
+            // 开始绘制
+            // var animate = core.material.animates[name];
+            // animate.se = animate.se || {};
+            // if (typeof animate.se == 'string') animate.se = { 1: animate.se };
+
+            // var id = setTimeout(null);
+            // core.status.animateObjs.push({
+            //     name: name,
+            //     id: id,
+            //     animate: animate,
+            //     hero: true,
+            //     index: 0,
+            //     callback: callback
+            // });
+
+            // return id;
+        };
+    });
+
+    loading.once('loaded', () => {
+        for (const animate of Object.values(core.material.animates)) {
+            animate.se ??= {};
+            if (typeof animate.se === 'string') {
+                animate.se = { 1: animate.se };
+            }
+            animate.pitch ??= {};
+        }
     });
 
     return { readyMove, endMove, move };

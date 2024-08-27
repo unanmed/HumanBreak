@@ -1,5 +1,6 @@
 type AdapterFunction<T> = (item: T, ...params: any[]) => Promise<any>;
 type SyncAdapterFunction<T> = (item: T, ...params: any[]) => any;
+type GlobalAdapterFunction = (...params: any[]) => Promise<any>;
 
 /**
  * 渲染适配器，用作渲染层与数据层沟通的桥梁，用于在数据层等待渲染层执行，常用与动画等。
@@ -16,6 +17,7 @@ export class RenderAdapter<T> {
 
     private execute: Map<string, AdapterFunction<T>> = new Map();
     private syncExecutes: Map<string, SyncAdapterFunction<T>> = new Map();
+    private globalExecutes: Map<string, GlobalAdapterFunction> = new Map();
 
     constructor(id: string) {
         this.id = id;
@@ -37,10 +39,19 @@ export class RenderAdapter<T> {
     }
 
     /**
+     * 定义一个类似于静态函数的函数，只会调用一次，不会对每个元素执行
+     * @param id 函数名称
+     * @param fn 执行的函数
+     */
+    receiveGlobal(id: string, fn: GlobalAdapterFunction) {
+        this.globalExecutes.set(id, fn);
+    }
+
+    /**
      * 设置执行函数
      * @param fn 对于每个元素执行的函数
      */
-    recieve(id: string, fn: AdapterFunction<T>): void {
+    receive(id: string, fn: AdapterFunction<T>): void {
         this.execute.set(id, fn);
     }
 
@@ -48,7 +59,7 @@ export class RenderAdapter<T> {
      * 设置同步执行函数
      * @param fn 对于每个元素执行的函数
      */
-    recieveSync(id: string, fn: SyncAdapterFunction<T>): void {
+    receiveSync(id: string, fn: SyncAdapterFunction<T>): void {
         this.syncExecutes.set(id, fn);
     }
 
@@ -93,6 +104,18 @@ export class RenderAdapter<T> {
             return [];
         } else {
             return [...this.items].map(v => execute!(v, ...params));
+        }
+    }
+
+    /**
+     * 调用一个全局函数
+     */
+    global<R = any>(id: string, ...params: any[]): Promise<R> {
+        const execute = this.globalExecutes.get(id);
+        if (!execute) {
+            return Promise.reject();
+        } else {
+            return execute(...params);
         }
     }
 

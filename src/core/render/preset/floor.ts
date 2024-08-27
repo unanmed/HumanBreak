@@ -381,9 +381,9 @@ export class LayerDoorAnimate implements ILayerRenderExtends {
 }
 
 const doorAdapter = new RenderAdapter<LayerDoorAnimate>('door-animate');
-doorAdapter.recieve('openDoor', (item, block: Block) => {
+doorAdapter.receive('openDoor', (item, block: Block) => {
     return item.openDoor(block);
 });
-doorAdapter.recieve('closeDoor', (item, block: Block) => {
+doorAdapter.receive('closeDoor', (item, block: Block) => {
     return item.closeDoor(block);
 });

@@ -753,7 +753,7 @@ type EventValuePreffix =
 
 interface Animate {
     /**
-     * 动画的帧数s
+     * 动画的帧数
      */
     frame: number;
 
@@ -775,7 +775,8 @@ interface Animate {
     /**
      * 音效
      */
-    se: string;
+    se: any;
+    pitch: any;
 }
 
 type Save = DeepReadonly<{

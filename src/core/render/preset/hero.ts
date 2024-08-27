@@ -359,42 +359,42 @@ export class HeroRenderer
 }
 
 const adapter = new RenderAdapter<HeroRenderer>('hero-adapter');
-adapter.recieve('readyMove', item => {
+adapter.receive('readyMove', item => {
     item.readyMove();
     return Promise.resolve();
 });
-adapter.recieve('move', (item, dir: Dir) => {
+adapter.receive('move', (item, dir: Dir) => {
     return item.move(dir);
 });
-adapter.recieve('endMove', item => {
+adapter.receive('endMove', item => {
     return item.endMove();
 });
-adapter.recieve(
+adapter.receive(
     'moveAs',
     (item, x: number, y: number, time: number, fn: TimingFn<3>) => {
         return item.moveAs(x, y, time, fn);
     }
 );
-adapter.recieve('setMoveSpeed', (item, speed: number) => {
+adapter.receive('setMoveSpeed', (item, speed: number) => {
     item.setMoveSpeed(speed);
     return Promise.resolve();
 });
-adapter.recieve('setHeroLoc', (item, x?: number, y?: number) => {
+adapter.receive('setHeroLoc', (item, x?: number, y?: number) => {
     item.setHeroLoc(x, y);
     return Promise.resolve();
 });
-adapter.recieve('turn', (item, dir: Dir2) => {
+adapter.receive('turn', (item, dir: Dir2) => {
     item.turn(dir);
     return Promise.resolve();
 });
-adapter.recieve('setImage', (item, image: SizedCanvasImageSource) => {
+adapter.receive('setImage', (item, image: SizedCanvasImageSource) => {
     item.setImage(image);
     return Promise.resolve();
 });
 // 同步fallback，用于适配现在的样板，之后会删除
-adapter.recieveSync('setHeroLoc', (item, x?: number, y?: number) => {
+adapter.receiveSync('setHeroLoc', (item, x?: number, y?: number) => {
     item.setHeroLoc(x, y);
 });
-adapter.recieveSync('turn', (item, dir: Dir2) => {
+adapter.receiveSync('turn', (item, dir: Dir2) => {
     item.turn(dir);
 });
