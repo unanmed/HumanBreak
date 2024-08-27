@@ -333,6 +333,7 @@ export class LayerDoorAnimate implements ILayerRenderExtends {
         const { renderable: data, count: frame, perTime } = renderable;
         data.animate = 0;
         this.moving.add(data);
+        this.layer.requestUpdateMoving();
 
         let now = 0;
         while (now < frame) {
@@ -342,6 +343,7 @@ export class LayerDoorAnimate implements ILayerRenderExtends {
         }
 
         this.moving.delete(data);
+        this.layer.requestUpdateMoving();
         return Promise.resolve();
     }
 
@@ -355,6 +357,7 @@ export class LayerDoorAnimate implements ILayerRenderExtends {
         const { renderable: data, count: frame, perTime } = renderable;
         data.animate = frame - 1;
         this.moving.add(data);
+        this.layer.requestUpdateMoving();
 
         let now = 0;
         while (now >= 0) {
@@ -363,6 +366,7 @@ export class LayerDoorAnimate implements ILayerRenderExtends {
             this.layer.update(this.layer);
         }
         this.moving.delete(data);
+        this.layer.requestUpdateMoving();
         return Promise.resolve();
     }
 

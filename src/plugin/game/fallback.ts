@@ -288,7 +288,7 @@ export function init() {
 
             const originFrom = structuredClone(v.renderable.render);
             const originTo = structuredClone(renderable.render);
-            v.layer.updateMovingRenderable();
+            v.layer.requestUpdateMoving();
             const append = (r: LayerMovingRenderable[]) => {
                 r.push(renderable);
             };
@@ -302,6 +302,7 @@ export function init() {
                     v.renderable!.render = originFrom;
                     v.off('moveTick', func);
                     v.off('append', append);
+                    v.layer.requestUpdateMoving();
                     return;
                 }
                 const clipWidth = cell * progress;
@@ -313,14 +314,14 @@ export function init() {
                 v.renderable!.y = y;
                 if (heroDir === 'left' || heroDir === 'right') {
                     v.renderable!.x = x + (clipWidth / 2 / cell) * dx;
-                    v.renderable?.render.forEach((v, i) => {
+                    v.renderable!.render.forEach((v, i) => {
                         v[2] = beforeWidth;
                         if (heroDir === 'left') {
                             v[0] = originFrom[i][0] + clipWidth;
                         }
                     });
                 } else {
-                    v.renderable?.render.forEach((v, i) => {
+                    v.renderable!.render.forEach((v, i) => {
                         v[3] = beforeHeight;
                         if (heroDir === 'up') {
                             v[1] = originFrom[i][1] + clipHeight + restHeight;

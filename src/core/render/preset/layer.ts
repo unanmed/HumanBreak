@@ -652,7 +652,7 @@ export class Layer extends Container {
     // todo: 是否需要桶排？
     /** 移动层的渲染信息 */
     movingRenderable: LayerMovingRenderable[] = [];
-    /** 下一此渲染时是否需要更新移动层的渲染信息 */
+    /** 下一次渲染时是否需要更新移动层的渲染信息 */
     needUpdateMoving: boolean = false;
 
     private extend: Map<string, ILayerRenderExtends> = new Map();
@@ -1101,6 +1101,13 @@ export class Layer extends Container {
     }
 
     /**
+     * 在下一帧更新moving层
+     */
+    requestUpdateMoving() {
+        this.needUpdateMoving = true;
+    }
+
+    /**
      * 渲染当前地图
      */
     renderMap(transform: Transform, need: NeedRenderData) {
@@ -1109,6 +1116,7 @@ export class Layer extends Container {
         this.backMap.clear();
 
         if (this.needUpdateMoving) this.updateMovingRenderable();
+        this.needUpdateMoving = false;
 
         for (const ex of this.extend.values()) {
             ex.onBeforeRender?.(this, transform, need);
