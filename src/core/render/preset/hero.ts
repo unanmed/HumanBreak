@@ -13,6 +13,7 @@ type HeroMovingStatus = 'stop' | 'moving' | 'moving-as';
 interface HeroRenderEvent {
     stepEnd: [];
     moveTick: [x: number, y: number];
+    append: [renderable: LayerMovingRenderable[]];
 }
 
 export class HeroRenderer
@@ -40,6 +41,7 @@ export class HeroRenderer
     /** 勇士移动速度 */
     speed: number = 100;
     /** 当前勇士朝向 */
+    // todo: 删了这个属性
     dir: Dir = 'down';
 
     /** 勇士移动定时器id */
@@ -47,7 +49,7 @@ export class HeroRenderer
     /** 上一次帧数切换的时间 */
     private lastFrameTime: number = 0;
     /** 当前的移动方向 */
-    private moveDir: Move2 = 'down';
+    moveDir: Move2 = 'down';
     /** 上一步走到格子上的时间 */
     private lastStepTime: number = 0;
     /** 执行当前步移动的Promise */
@@ -58,7 +60,7 @@ export class HeroRenderer
      * 这一步的移动方向，与{@link moveDir}不同的是，在这一步走完之前，它都不会变，
      * 当这一步走完之后，才会将其设置为{@link moveDir}的值
      */
-    private stepDir: Dir2 = 'down';
+    stepDir: Dir2 = 'down';
     /** 每步的格子增量 */
     private stepDelta: Loc = { x: 0, y: 1 };
     /** 动画显示的方向，用于适配后退 */
@@ -354,7 +356,10 @@ export class HeroRenderer
     }
 
     onMovingUpdate(layer: Layer, renderable: LayerMovingRenderable[]): void {
-        if (this.renderable) renderable.push(this.renderable);
+        if (this.renderable) {
+            renderable.push(this.renderable);
+            this.emit('append', renderable);
+        }
     }
 }
 

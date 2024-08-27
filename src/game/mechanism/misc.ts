@@ -1,4 +1,4 @@
-import { has } from '@/plugin/game/utils';
+import { backDir, has } from '@/plugin/game/utils';
 import { loading } from '../game';
 
 export namespace BluePalace {
@@ -90,6 +90,16 @@ export namespace BluePalace {
         toDir: Dir;
     }
 
+    export interface PortalTo {
+        x: number;
+        y: number;
+        dir: Dir;
+    }
+
+    type PortalMap = Map<FloorIds, Map<number, Partial<Record<Dir, PortalTo>>>>;
+
+    export const portalMap: PortalMap = new Map();
+
     export const portals: Partial<Record<FloorIds, Portal[]>> = {
         MT75: [
             { fx: 7, fy: 7, dir: 'left', tx: 9, ty: 9, toDir: 'down' },
@@ -101,7 +111,103 @@ export namespace BluePalace {
     };
     loading.once('coreInit', initPortals);
 
+    function generatePortalMap() {
+        const delta: Record<Dir, [[number, number], [number, number]]> = {
+            // 方向：[正向, 逆向]<进出>
+            left: [
+                [0, 0],
+                [-1, 0]
+            ],
+            down: [
+                [0, 0],
+                [0, -1]
+            ],
+            right: [
+                [0, 0],
+                [1, 0]
+            ],
+            up: [
+                [0, 0],
+                [0, 1]
+            ]
+        };
+        for (const [floor, p] of Object.entries(portals)) {
+            const width = core.floors[floor as FloorIds].width;
+            const map = new Map<number, Partial<Record<Dir, PortalTo>>>();
+            portalMap.set(floor as FloorIds, map);
+
+            // 正向映射
+            p.forEach(v => {
+                const [[fdx, fdy], [tdx, tdy]] = delta[v.dir];
+                const [[toFdx, toFdy], [toTdx, toTdy]] =
+                    delta[backDir(v.toDir)];
+                const fx = v.fx + fdx;
+                const fy = v.fy + fdy;
+                const tx = v.fx + tdx;
+                const ty = v.fy + tdy;
+                const index = fx + fy * width;
+                const backIndex = tx + ty * width;
+                let data = map.get(index);
+                let backData = map.get(backIndex);
+                if (!data) {
+                    data = {};
+                    map.set(index, data);
+                }
+                if (!backData) {
+                    backData = {};
+                    map.set(backIndex, backData);
+                }
+
+                data[v.dir] = {
+                    x: v.tx + toFdx,
+                    y: v.ty + toFdy,
+                    dir: backDir(v.toDir)
+                };
+                backData[backDir(v.dir)] = {
+                    x: v.tx + toTdx,
+                    y: v.ty + toTdy,
+                    dir: v.toDir
+                };
+            });
+            // 逆向映射
+            p.forEach(v => {
+                const [[fdx, fdy], [tdx, tdy]] = delta[backDir(v.toDir)];
+                const [[toFdx, toFdy], [toTdx, toTdy]] = delta[v.dir];
+                const fx = v.tx + fdx;
+                const fy = v.ty + fdy;
+                const tx = v.tx + tdx;
+                const ty = v.ty + tdy;
+                const index = fx + fy * width;
+                const backIndex = tx + ty * width;
+
+                let data = map.get(index);
+                let backData = map.get(backIndex);
+                if (!data) {
+                    data = {};
+                    map.set(index, data);
+                }
+                if (!backData) {
+                    backData = {};
+                    map.set(backIndex, backData);
+                }
+
+                data[v.toDir] = {
+                    x: v.fx + toFdx,
+                    y: v.fy + toFdy,
+                    dir: backDir(v.dir)
+                };
+                backData[backDir(v.toDir)] = {
+                    x: v.fx + toTdx,
+                    y: v.fy + toTdy,
+                    dir: v.dir
+                };
+            });
+        }
+    }
+
     function initPortals() {
         // 主要是复写勇士绘制以及传送判定，还有自动寻路
+        generatePortalMap();
+        console.log(portalMap);
     }
 }

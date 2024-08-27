@@ -28,6 +28,8 @@ const backDirMap: Record<Dir2, Dir2> = {
     rightdown: 'leftup'
 };
 
+export function backDir(dir: Dir): Dir;
+export function backDir(dir: Dir2): Dir2;
 export function backDir(dir: Dir2): Dir2 {
     return backDirMap[dir];
 }

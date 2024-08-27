@@ -2,6 +2,8 @@ import type { RenderAdapter } from '@/core/render/adapter';
 import type { LayerGroupAnimate } from '@/core/render/preset/animate';
 import type { LayerDoorAnimate } from '@/core/render/preset/floor';
 import type { HeroRenderer } from '@/core/render/preset/hero';
+import type { LayerMovingRenderable } from '@/core/render/preset/layer';
+import { BluePalace } from '@/game/mechanism/misc';
 
 interface Adapters {
     'hero-adapter'?: RenderAdapter<HeroRenderer>;
@@ -32,6 +34,11 @@ export function init() {
     let moveDir: Dir;
     let stepDir: Dir;
     let moveEnding: Promise<any[]>;
+
+    /** 传送门信息，下一步传送到哪 */
+    let portalData: BluePalace.PortalTo | undefined;
+    /** 下一步是否步入传送门 */
+    let portal: boolean = false;
 
     const pressedArrow: Set<Dir> = new Set();
     Mota.r(() => {
@@ -141,7 +148,7 @@ export function init() {
                 if (stopChian || core.status.lockControl) break;
                 stepDir = moveDir;
                 if (!checkCanMoveStatus(callback)) break;
-
+                if (portal) renderHeroSwap();
                 await adapter.all('move', moveDir);
                 onMoveEnd(false, callback);
             }
@@ -153,8 +160,9 @@ export function init() {
     function checkCanMoveStatus(callback?: () => void) {
         core.setHeroLoc('direction', stepDir);
         const { noPass, canMove } = checkCanMove();
+        checkPortal();
 
-        if (noPass || !canMove) {
+        if (!portal && (noPass || !canMove)) {
             onCannotMove(canMove, callback);
             if (moving) endMove();
             return false;
@@ -199,7 +207,13 @@ export function init() {
     }
 
     function onMoveEnd(noPass: boolean, callback?: () => void) {
-        if (!noPass) {
+        if (portal && portalData) {
+            const { x, y, dir } = portalData;
+            core.setHeroLoc('x', x);
+            core.setHeroLoc('y', y);
+            core.setHeroLoc('direction', dir);
+            portal = false;
+        } else if (!noPass) {
             const { nx, ny } = getNextLoc();
             core.setHeroLoc('x', nx, true);
             core.setHeroLoc('y', ny, true);
@@ -212,6 +226,130 @@ export function init() {
         core.moveOneStep();
         core.checkRouteFolding();
         callback?.();
+    }
+
+    // ----- 移动 - 传送门
+    function checkPortal() {
+        const map = BluePalace.portalMap.get(core.status.floorId);
+        if (!map) {
+            portal = false;
+            portalData = void 0;
+            return;
+        }
+        const width = core.status.thisMap.width;
+        const { x, y, direction } = core.status.hero.loc;
+        const index = x + y * width;
+        const data = map?.get(index);
+        if (!data) {
+            portal = false;
+            portalData = void 0;
+            return;
+        }
+        const to = data[direction];
+        if (to) {
+            portal = true;
+            portalData = to;
+        }
+    }
+
+    const end: Record<Dir, [number, number]> = {
+        left: [-1, 0],
+        right: [1, 0],
+        down: [0, 1],
+        up: [0, -1]
+    };
+
+    /**
+     * 对勇士进行切割渲染，分成两个renderable进行渲染
+     */
+    function renderHeroSwap() {
+        if (!portal || !portalData) return;
+        const list = adapters['hero-adapter']?.items;
+        if (!list) return;
+        const { x: tx, y: ty, dir: toDir } = portalData;
+        const { x, y, direction } = core.status.hero.loc;
+        const [dx, dy] = end[direction];
+        const [tdx] = end[toDir];
+        const checkX = x + dx;
+        const checkY = y + dy;
+
+        list.forEach(v => {
+            if (!v.renderable) return;
+            const renderable = { ...v.renderable };
+            renderable.render = v.getRenderFromDir(toDir);
+            renderable.zIndex = ty;
+            const heroDir = v.moveDir;
+
+            const width = v.renderable.render[0][2];
+            const height = v.renderable.render[0][3];
+            const cell = v.layer.cellSize;
+            const restHeight = height - cell;
+            if (!width || !height) return;
+
+            const originFrom = structuredClone(v.renderable.render);
+            const originTo = structuredClone(renderable.render);
+            v.layer.updateMovingRenderable();
+            const append = (r: LayerMovingRenderable[]) => {
+                r.push(renderable);
+            };
+            v.on('append', append);
+            v.on('moveTick', function func() {
+                const progress =
+                    heroDir === 'left' || heroDir === 'right'
+                        ? 1 - Math.abs(checkX - v.renderable!.x)
+                        : 1 - Math.abs(checkY - v.renderable!.y);
+                if (progress >= 1 || !portal) {
+                    v.renderable!.render = originFrom;
+                    v.off('moveTick', func);
+                    v.off('append', append);
+                    return;
+                }
+                const clipWidth = cell * progress;
+                const clipHeight = cell * progress;
+                const beforeWidth = width - clipWidth;
+                const beforeHeight = height - clipHeight;
+
+                v.renderable!.x = x;
+                v.renderable!.y = y;
+                if (heroDir === 'left' || heroDir === 'right') {
+                    v.renderable!.x = x + (clipWidth / 2 / cell) * dx;
+                    v.renderable?.render.forEach((v, i) => {
+                        v[2] = beforeWidth;
+                        if (heroDir === 'left') {
+                            v[0] = originFrom[i][0] + clipWidth;
+                        }
+                    });
+                } else {
+                    v.renderable?.render.forEach((v, i) => {
+                        v[3] = beforeHeight;
+                        if (heroDir === 'up') {
+                            v[1] = originFrom[i][1] + clipHeight + restHeight;
+                        }
+                    });
+                }
+
+                renderable.x = tx;
+                renderable.y = ty;
+                if (toDir === 'left' || toDir === 'right') {
+                    renderable.x = tx + (clipWidth / 2 / cell - 0.5) * tdx;
+                    renderable.render.forEach((v, i) => {
+                        v[2] = clipWidth;
+                        if (toDir === 'right') {
+                            v[0] = originTo[i][0] + beforeWidth;
+                        }
+                    });
+                } else {
+                    if (toDir === 'down') renderable.y = ty - 1 + progress;
+                    renderable.render.forEach((v, i) => {
+                        v[3] = clipHeight + restHeight;
+                        if (toDir === 'down') {
+                            v[1] = originTo[i][1] + clipHeight + restHeight;
+                            v[3] = clipHeight;
+                        }
+                    });
+                }
+            });
+        });
     }
 
     // ----- 勇士移动相关
