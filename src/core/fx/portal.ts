@@ -39,24 +39,24 @@ let ctx: CanvasRenderingContext2D;
 let particleSetting: MotaSettingItem;
 
 let lastTime = 0;
-Mota.require('var', 'loading').once('coreInit', () => {
-    canvas = MotaCanvas2D.for('@portal');
-    ctx = canvas.ctx;
-    canvas.mount();
-    canvas.css(`z-index: 51`);
-    canvas.withGameScale(true);
-    canvas.pos(0, 0);
-    canvas.size(480, 480);
-    canvas.on('resize', () => {
-        canvas.css(`z-index: 51`);
-    });
-    particleSetting = mainSetting.getSetting('fx.portalParticle')!;
-    ticker.add(tickPortal);
-});
+// Mota.require('var', 'loading').once('coreInit', () => {
+//     canvas = MotaCanvas2D.for('@portal');
+//     ctx = canvas.ctx;
+//     canvas.mount();
+//     canvas.css(`z-index: 51`);
+//     canvas.withGameScale(true);
+//     canvas.pos(0, 0);
+//     canvas.size(480, 480);
+//     canvas.on('resize', () => {
+//         canvas.css(`z-index: 51`);
+//     });
+//     particleSetting = mainSetting.getSetting('fx.portalParticle')!;
+//     ticker.add(tickPortal);
+// });
 
-Mota.require('var', 'hook').on('changingFloor', id => {
-    drawPortals(id);
-});
+// Mota.require('var', 'hook').on('changingFloor', id => {
+//     drawPortals(id);
+// });
 
 let needDraw = false;
 function tickPortal(time: number) {

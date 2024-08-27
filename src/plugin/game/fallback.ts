@@ -448,23 +448,6 @@ export function init() {
             adapters.animate?.global('drawHeroAnimate', name).then(() => {
                 callback?.();
             });
-
-            // 开始绘制
-            // var animate = core.material.animates[name];
-            // animate.se = animate.se || {};
-            // if (typeof animate.se == 'string') animate.se = { 1: animate.se };
-
-            // var id = setTimeout(null);
-            // core.status.animateObjs.push({
-            //     name: name,
-            //     id: id,
-            //     animate: animate,
-            //     hero: true,
-            //     index: 0,
-            //     callback: callback
-            // });
-
-            // return id;
         };
     });
 

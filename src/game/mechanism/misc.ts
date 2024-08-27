@@ -81,7 +81,7 @@ export namespace BluePalace {
 
     // ---------- 传送门部分
 
-    interface Portal {
+    export interface Portal {
         fx: number;
         fy: number;
         dir: Dir;

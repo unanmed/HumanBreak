@@ -16,7 +16,7 @@ export class Sprite<E extends ESpriteEvent = ESpriteEvent> extends RenderItem<
 
     /**
      * 创建一个精灵，可以自由在上面渲染内容
-     * @param type 渲染模式，absolute表示绝对位置，static表示跟随摄像机移动，只对顶层元素有效
+     * @param type 渲染模式，absolute表示绝对位置，不会跟随自身的Transform改变
      * @param cache 是否启用缓存机制
      */
     constructor(type: RenderItemPosition = 'static', cache: boolean = true) {

@@ -7,6 +7,7 @@ import { MotaRenderer } from './render';
 import { LayerShadowExtends } from '../fx/shadow';
 import { LayerGroupFilter } from '@/plugin/fx/gameCanvas';
 import { LayerGroupAnimate } from './preset/animate';
+import { LayerGroupPortal } from '@/plugin/fx/portal';
 
 let main: MotaRenderer;
 
@@ -33,9 +34,11 @@ Mota.require('var', 'loading').once('loaded', () => {
     const shadow = new LayerShadowExtends();
     const filter = new LayerGroupFilter();
     const animate = new LayerGroupAnimate();
+    const portal = new LayerGroupPortal();
     layer.extends(damage);
     layer.extends(detail);
     layer.extends(filter);
+    layer.extends(portal);
     layer.getLayer('event')?.extends(hero);
     layer.getLayer('event')?.extends(door);
     layer.getLayer('event')?.extends(shadow);
