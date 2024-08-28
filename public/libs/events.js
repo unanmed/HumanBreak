@@ -1858,7 +1858,7 @@ events.prototype._action_changePos = function (data, x, y, prefix) {
     core.clearMap('hero');
     if (!data.loc && data.direction) {
         core.setHeroLoc('direction', core.turnDirection(data.direction), true);
-        core.drawHero();
+        // core.drawHero();
         return core.doAction();
     }
 

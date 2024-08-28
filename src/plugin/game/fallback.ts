@@ -9,12 +9,20 @@ import type { Layer, LayerMovingRenderable } from '@/core/render/preset/layer';
 import { BluePalace } from '@/game/mechanism/misc';
 import { backDir } from './utils';
 import type { TimingFn } from 'mutate-animate';
+import EventEmitter from 'eventemitter3';
+
+// 向后兼容用，会充当两个版本间过渡的作用
 
 interface Adapters {
     'hero-adapter'?: RenderAdapter<HeroRenderer>;
     'door-animate'?: RenderAdapter<LayerDoorAnimate>;
     animate?: RenderAdapter<LayerGroupAnimate>;
     layer?: RenderAdapter<Layer>;
+}
+
+interface MoveEvent {
+    stepEnd: [];
+    moveEnd: [];
 }
 
 const adapters: Adapters = {};
@@ -42,6 +50,10 @@ export function init() {
     let moveDir: Dir;
     let stepDir: Dir;
     let moveEnding: Promise<any[]> = Promise.resolve([]);
+    let stepEnding: Promise<any[]> = Promise.resolve([]);
+
+    /** 移动事件 */
+    const moveEmit = new EventEmitter<MoveEvent>();
 
     /** 传送门信息，下一步传送到哪 */
     let portalData: BluePalace.PortalTo | undefined;
@@ -94,23 +106,34 @@ export function init() {
         }
     }
 
-    async function readyMove() {
+    async function readyMove(
+        ignoreTerrain: boolean = false,
+        noRoute: boolean = false,
+        inLockControl: boolean = false,
+        callback?: () => void
+    ) {
         const adapter = adapters['hero-adapter'];
         if (!adapter) {
             return Promise.resolve();
         } else {
-            if (!checkCanMoveStatus()) {
+            if (!ignoreTerrain && !checkCanMoveStatus(callback)) {
+                moveEmit.emit('stepEnd');
                 continueAfterEnd();
                 return Promise.resolve();
             }
             await adapter.all('readyMove');
             moving = true;
             stopChian = false;
-            startHeroMoveChain();
+
+            startHeroMoveChain(ignoreTerrain, noRoute, inLockControl, callback);
         }
     }
 
-    async function endMove() {
+    /**
+     * 结束移动
+     * @param tryContinue 是否会尝试继续移动，只有在按键操作条件下需要填true，其余填false，默认为true
+     */
+    async function endMove(tryContinue: boolean = true) {
         const adapter = adapters['hero-adapter'];
         if (!adapter) {
             return Promise.resolve();
@@ -119,8 +142,9 @@ export function init() {
                 stopChian = true;
                 moveEnding = adapter.all('endMove');
                 await moveEnding;
+                moveEmit.emit('moveEnd');
                 moving = false;
-                continueAfterEnd();
+                if (tryContinue) continueAfterEnd();
             }
             return Promise.resolve();
         }
@@ -147,19 +171,34 @@ export function init() {
         });
     }
 
-    async function startHeroMoveChain(callback?: () => void) {
+    async function startHeroMoveChain(
+        ignoreTerrain: boolean = false,
+        noRoute: boolean = false,
+        inLockControl: boolean = false,
+        callback?: () => void
+    ) {
         const adapter = adapters['hero-adapter'];
         if (!adapter) {
             return Promise.resolve();
         } else {
             while (moving || !stopChian) {
-                if (stopChian || core.status.lockControl) break;
+                if (stopChian || (!inLockControl && core.status.lockControl)) {
+                    break;
+                }
+
                 stepDir = moveDir;
-                if (!checkCanMoveStatus(callback)) break;
-                if (portal) renderHeroSwap();
-                await adapter.all('move', moveDir);
-                onMoveEnd(false, callback);
+                if (!ignoreTerrain) {
+                    if (!checkCanMoveStatus(callback)) break;
+                    if (portal) renderHeroSwap();
+                }
+
+                stepEnding = adapter.all('move', moveDir);
+                await stepEnding;
+
+                moveEmit.emit('stepEnd');
+                if (!ignoreTerrain) onMoveEnd(false, noRoute, callback);
             }
+
             endMove();
             stopChian = false;
         }
@@ -204,6 +243,7 @@ export function init() {
         core.status.automaticRoute.moveStepBeforeStop = [];
         // @ts-ignore
         core.status.automaticRoute.lastDirection = core.getHeroLoc('direction');
+
         if (canMove) core.trigger(nx, ny);
         core.drawHero();
 
@@ -214,7 +254,11 @@ export function init() {
         callback?.();
     }
 
-    function onMoveEnd(noPass: boolean, callback?: () => void) {
+    function onMoveEnd(
+        noPass: boolean,
+        noRoute: boolean = false,
+        callback?: () => void
+    ) {
         if (portal && portalData) {
             const { x, y, dir } = portalData;
             core.setHeroLoc('x', x);
@@ -229,7 +273,7 @@ export function init() {
 
         var direction = core.getHeroLoc('direction');
         core.control._moveAction_popAutomaticRoute();
-        core.status.route.push(direction);
+        if (!noRoute) core.status.route.push(direction);
 
         core.moveOneStep();
         core.checkRouteFolding();
@@ -376,7 +420,7 @@ export function init() {
             }
         });
 
-        const step0 = steps.find(v => !v.startsWith('speed')) as Dir2;
+        const step0 = steps.find(v => !v.startsWith('speed')) as Move2;
         return { steps, start: step0 };
     }
 
@@ -431,14 +475,104 @@ export function init() {
 
     Mota.r(() => {
         // ----- 勇士移动相关
+        control.prototype.moveAction = async function (callback?: () => void) {
+            // await endMove(false);
+            moveEmit.once('stepEnd', () => {
+                stopChian = true;
+                endMove(false);
+            });
+            readyMove(false, true, true, callback);
+        };
+
         control.prototype._moveAction_moving = function (
             callback?: () => void
         ) {};
+
+        events.prototype._action_moveAction = function (
+            data: any,
+            x: number,
+            y: number,
+            prefix: any
+        ) {
+            if (core.canMoveHero()) {
+                var nx = core.nextX(),
+                    ny = core.nextY();
+                // 检查noPass决定是撞击还是移动
+                if (core.noPass(nx, ny)) {
+                    core.insertAction([{ type: 'trigger', loc: [nx, ny] }]);
+                } else {
+                    // 先移动一格，然后尝试触发事件
+                    core.insertAction([
+                        {
+                            type: 'function',
+                            function:
+                                'function() { core.moveAction(core.doAction); }',
+                            async: true
+                        },
+                        { type: '_label' }
+                    ]);
+                }
+            }
+            core.doAction();
+        };
+
+        const validDir = new Set<string>(['left', 'right', 'up', 'down']);
         events.prototype.eventMoveHero = async function (
             steps: string[],
-            time?: number,
+            time: number = 500,
             callback?: () => void
-        ) {};
+        ) {
+            if (moving) return;
+            const { steps: moveSteps, start } = getMoveSteps(steps);
+            if (
+                moveSteps.some(v => !v.startsWith('speed') && !validDir.has(v))
+            ) {
+                callback?.();
+                return;
+            }
+            if (start !== 'backward' && start !== 'forward') {
+                moveDir = start as Dir;
+            }
+            core.setHeroLoc('direction', moveDir);
+
+            const speed = core.status.replay.speed;
+            time /= speed;
+            if (speed === 24) time = 1;
+
+            let pointer = -1;
+            const len = moveSteps.length;
+            const list = adapters['hero-adapter']?.items ?? [];
+            const speedMap: Map<HeroRenderer, number> = new Map();
+            list.forEach(v => {
+                speedMap.set(v, v.speed);
+                v.setMoveSpeed(time);
+            });
+
+            let nx = core.status.hero.loc.x;
+            let ny = core.status.hero.loc.y;
+            readyMove(true, true, true);
+            while (++pointer < len) {
+                const dir = moveSteps[pointer];
+                if (dir === 'backward') moveDir = backDir(moveDir);
+                else if (dir.startsWith('speed')) {
+                    const speed = parseInt(dir.slice(6));
+                    list.forEach(v => v.setMoveSpeed(speed));
+                } else if (dir !== 'forward') {
+                    moveDir = dir as Dir;
+                }
+                const { x, y } = core.utils.scan[moveDir];
+                nx += x;
+                ny += y;
+                await new Promise<void>(res => {
+                    moveEmit.once('stepEnd', res);
+                });
+            }
+            endMove(false);
+
+            core.setHeroLoc('x', nx);
+            core.setHeroLoc('y', ny);
+            callback?.();
+        };
 
         control.prototype.setHeroLoc = function (
             name: 'x' | 'y' | 'direction',
@@ -452,6 +586,8 @@ export function init() {
                 this.gatherFollowers();
             }
             if (name === 'direction') {
+                moveDir = value as Dir;
+                stepDir = value as Dir;
                 adapters['hero-adapter']?.sync('turn', value);
             } else if (name === 'x') {
                 adapters['hero-adapter']?.sync('setHeroLoc', value);
@@ -678,6 +814,7 @@ export function init() {
                 return;
             }
             const speed = core.status.replay.speed;
+            time /= speed;
             if (speed === 24) time = 1;
             const block = core.getBlock(x, y);
             if (!block) {
@@ -698,9 +835,11 @@ export function init() {
                 callback?.();
                 return;
             }
-            let stepDir: Dir2 = start;
+            let stepDir: Dir2;
             let nx = x;
             let ny = y;
+            if (start === 'backward' || start === 'forward') stepDir = 'down';
+            else stepDir = start;
 
             const { Layer } = Mota.require('module', 'Render');
             const moving = Layer.getMovingRenderable(block.id, x, y);
@@ -719,7 +858,7 @@ export function init() {
                 const { x, y } = core.utils.scan2[stepDir];
                 const tx = nx + x;
                 const ty = ny + y;
-                await moveRenderable(items[0], moving, time / speed, tx, ty);
+                await moveRenderable(items[0], moving, time, tx, ty);
                 nx = tx;
                 ny = ty;
                 moving.zIndex = ty;
@@ -787,6 +926,7 @@ export function init() {
             time: number = 500,
             callback?: () => void
         ) {
+            if (moving) return;
             const sx = core.getHeroLoc('x');
             const sy = core.getHeroLoc('y');
 
