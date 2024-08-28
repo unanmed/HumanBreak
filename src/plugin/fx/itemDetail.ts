@@ -227,7 +227,7 @@ export class FloorItemDetail implements ILayerGroupRenderExtends {
             for (const [key, value] of Object.entries(diff)) {
                 if (!value) continue;
                 const color = FloorItemDetail.detailColor[key] ?? '#fff';
-                const text = value.toString();
+                const text = Math.floor(value).toString();
                 const renderable: DamageRenderable = {
                     x: x * this.sprite.cellSize + 2,
                     y: y * this.sprite.cellSize + 31 - n * 10,

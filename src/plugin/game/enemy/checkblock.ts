@@ -1,5 +1,4 @@
 import { has, ofDir } from '@/plugin/game/utils';
-import { drawHalo } from '../fx/halo';
 
 export function init() {
     // 伤害弹出

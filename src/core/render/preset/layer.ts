@@ -83,6 +83,14 @@ export interface ILayerGroupRenderExtends {
 
 export type FloorLayer = 'bg' | 'bg2' | 'event' | 'fg' | 'fg2';
 
+const layerZIndex: Record<FloorLayer, number> = {
+    bg: 10,
+    bg2: 20,
+    event: 30,
+    fg: 40,
+    fg2: 50
+};
+
 export class LayerGroup extends Container implements IAnimateFrame {
     /** 地图组列表 */
     // static list: Set<LayerGroup> = new Set();
@@ -190,6 +198,7 @@ export class LayerGroup extends Container implements IAnimateFrame {
         const l = new Layer();
         l.layer = layer;
         if (l.layer) this.layers.set(l.layer, l);
+        l.setZIndex(layerZIndex[layer]);
         this.appendChild(l);
 
         for (const ex of this.extend.values()) {

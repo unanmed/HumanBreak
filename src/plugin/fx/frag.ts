@@ -1,6 +1,8 @@
 import { Animation, linear, sleep } from 'mutate-animate';
 import { has } from '../utils';
 
+// todo: 移植到渲染树
+
 interface SplittedImage {
     canvas: HTMLCanvasElement;
     x: number;

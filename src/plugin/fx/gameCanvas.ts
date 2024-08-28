@@ -5,10 +5,6 @@ import {
     LayerGroup
 } from '@/core/render/preset/layer';
 
-export default function init() {
-    return {};
-}
-
 const filterMap: [FloorIds[], string][] = [];
 
 function getCanvasFilterByFloorId(floorId: FloorIds = core.status.floorId) {

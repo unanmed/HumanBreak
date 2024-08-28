@@ -1,11 +1,9 @@
 /* @__PURE__ */ import './dev/hotReload'; // 仅开发会用到
 import * as fiveLayer from './fiveLayer';
-import * as heroFourFrames from './fx/heroFourFrames';
 import * as itemDetail from './fx/itemDetail';
 import * as replay from './replay';
 import * as ui from './ui';
 import * as rewrite from './fx/rewrite';
-import * as halo from './fx/halo';
 import * as loopMap from './loopMap';
 import * as removeMap from './removeMap';
 import * as shop from './shop';
@@ -29,10 +27,8 @@ Mota.Plugin.register('chase_g', chase);
 Mota.Plugin.register('skill_g', skill);
 Mota.Plugin.register('towerBoss_g', towerBoss);
 Mota.Plugin.register('fiveLayer_g', fiveLayer, fiveLayer.init);
-Mota.Plugin.register('heroFourFrames_g', heroFourFrames, heroFourFrames.init);
 Mota.Plugin.register('rewrite_g', rewrite, rewrite.init);
 Mota.Plugin.register('itemDetail_g', itemDetail, itemDetail.init);
-Mota.Plugin.register('halo_g', halo);
 // Mota.Plugin.register('study_g', study);
 Mota.Plugin.register('remainEnemy_g', remainEnemy);
 Mota.Plugin.register('checkBlock_g', checkBlock, checkBlock.init);

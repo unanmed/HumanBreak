@@ -56,6 +56,7 @@ export class FloorDamageExtends
     private create() {
         if (this.sprite) return;
         const sprite = new Damage();
+        sprite.setZIndex(80);
         this.group.appendChild(sprite);
         this.sprite = sprite;
     }

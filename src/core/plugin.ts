@@ -17,8 +17,6 @@
 // import frag from '@/plugin/fx/frag';
 // import { Mota } from '.';
 
-import * as shadow from '@/plugin/shadow/shadow';
-import * as gameShadow from '@/plugin/shadow/gameShadow';
 import * as fly from '@/plugin/ui/fly';
 import * as chase from '@/plugin/chase/chase';
 import * as completion from '@/plugin/completion';
@@ -29,8 +27,6 @@ import * as gameCanvas from '@/plugin/fx/gameCanvas';
 import * as smooth from '@/plugin/fx/smoothView';
 import * as animateController from '@/plugin/animateController';
 
-Mota.Plugin.register('shadow_r', shadow, shadow.init);
-Mota.Plugin.register('gameShadow_r', gameShadow, gameShadow.init);
 Mota.Plugin.register('fly_r', fly);
 Mota.Plugin.register('chase_r', chase);
 Mota.Plugin.register('completion_r', completion, completion.init);

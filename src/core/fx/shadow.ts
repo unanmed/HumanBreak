@@ -121,6 +121,7 @@ hook.once('reset', () => {
     Mota.rewrite(core.control, 'loadData', 'add', () => {
         if (!main.replayChecking) {
             Shadow.update(true);
+            LayerShadowExtends.shadowList.forEach(v => v.update());
         }
     });
     // Mota.require('var', 'hook').on('changingFloor', (floorId) => {
@@ -141,7 +142,7 @@ hook.on('setBlock', () => {
 })
 hook.on('changingFloor', floorId => {        
     Shadow.clearBuffer();
-    Shadow.update();
+    Shadow.update(true);
     // setCanvasFilterByFloorId(floorId);
     LayerShadowExtends.shadowList.forEach(v => v.update());
 })

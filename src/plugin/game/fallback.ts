@@ -986,11 +986,8 @@ export function init() {
                 core.setHeroLoc('y', ny);
                 core.setHeroLoc('direction', action);
             }
-            if (!main.replayChecking) {
-                setTimeout(core.replay, 100);
-            } else {
-                core.replay();
-            }
+
+            setTimeout(core.replay, 100);
 
             return true;
         } else {
