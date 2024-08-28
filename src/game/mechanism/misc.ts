@@ -197,8 +197,6 @@ export namespace BluePalace {
     }
 
     function initPortals() {
-        // 主要是复写勇士绘制以及传送判定，还有自动寻路
         generatePortalMap();
-        console.log(portalMap);
     }
 }

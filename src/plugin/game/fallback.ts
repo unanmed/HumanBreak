@@ -1,14 +1,20 @@
 import type { RenderAdapter } from '@/core/render/adapter';
 import type { LayerGroupAnimate } from '@/core/render/preset/animate';
-import type { LayerDoorAnimate } from '@/core/render/preset/floor';
+import type {
+    LayerDoorAnimate,
+    LayerFloorBinder
+} from '@/core/render/preset/floor';
 import type { HeroRenderer } from '@/core/render/preset/hero';
-import type { LayerMovingRenderable } from '@/core/render/preset/layer';
+import type { Layer, LayerMovingRenderable } from '@/core/render/preset/layer';
 import { BluePalace } from '@/game/mechanism/misc';
+import { backDir } from './utils';
+import type { TimingFn } from 'mutate-animate';
 
 interface Adapters {
     'hero-adapter'?: RenderAdapter<HeroRenderer>;
     'door-animate'?: RenderAdapter<LayerDoorAnimate>;
     animate?: RenderAdapter<LayerGroupAnimate>;
+    layer?: RenderAdapter<Layer>;
 }
 
 const adapters: Adapters = {};
@@ -23,17 +29,19 @@ export function init() {
         const hero = Adapter.get<HeroRenderer>('hero-adapter');
         const doorAnimate = Adapter.get<LayerDoorAnimate>('door-animate');
         const animate = Adapter.get<LayerGroupAnimate>('animate');
+        const layer = Adapter.get<Layer>('layer');
 
         adapters['hero-adapter'] = hero;
         adapters['door-animate'] = doorAnimate;
         adapters['animate'] = animate;
+        adapters['layer'] = layer;
     }
 
     let moving: boolean = false;
     let stopChian: boolean = false;
     let moveDir: Dir;
     let stepDir: Dir;
-    let moveEnding: Promise<any[]>;
+    let moveEnding: Promise<any[]> = Promise.resolve([]);
 
     /** 传送门信息，下一步传送到哪 */
     let portalData: BluePalace.PortalTo | undefined;
@@ -288,11 +296,8 @@ export function init() {
 
             const originFrom = structuredClone(v.renderable.render);
             const originTo = structuredClone(renderable.render);
+            v.layer.moving.add(renderable);
             v.layer.requestUpdateMoving();
-            const append = (r: LayerMovingRenderable[]) => {
-                r.push(renderable);
-            };
-            v.on('append', append);
             v.on('moveTick', function func() {
                 const progress =
                     heroDir === 'left' || heroDir === 'right'
@@ -301,7 +306,7 @@ export function init() {
                 if (progress >= 1 || !portal) {
                     v.renderable!.render = originFrom;
                     v.off('moveTick', func);
-                    v.off('append', append);
+                    v.layer.moving.delete(renderable);
                     v.layer.requestUpdateMoving();
                     return;
                 }
@@ -353,9 +358,79 @@ export function init() {
         });
     }
 
-    // ----- 勇士移动相关
+    // ----- 工具函数
+
+    /**
+     * 根据事件中给出的移动数组解析出全部的移动步骤
+     */
+    function getMoveSteps(steps: string[]) {
+        const moveSteps: string[] = [];
+        steps.forEach(v => {
+            const [type, number] = v.split(':');
+            if (!number) moveSteps.push(type);
+            else {
+                if (type === 'speed') moveSteps.push(v);
+                else {
+                    moveSteps.push(...Array(number).fill(type));
+                }
+            }
+        });
+
+        const step0 = steps.find(v => !v.startsWith('speed')) as Dir2;
+        return { steps, start: step0 };
+    }
+
+    /**
+     * 移动一个LayerMovingRenderable
+     */
+    function moveRenderable(
+        item: Layer,
+        data: LayerMovingRenderable,
+        time: number,
+        x: number,
+        y: number
+    ) {
+        const fx = data.x;
+        const fy = data.y;
+        const dx = x - fx;
+        const dy = y - fy;
+        const start = Date.now();
+        return new Promise<void>(res => {
+            item.delegateTicker(
+                () => {
+                    const now = Date.now() - start;
+                    const progress = now / time;
+                    data.x = fx + dx * progress;
+                    data.y = fy + dy * progress;
+                    item.update(item);
+                },
+                time,
+                () => {
+                    data.x = x;
+                    data.y = y;
+                    res();
+                }
+            );
+        });
+    }
+
+    /**
+     * 生成跳跃函数
+     */
+    function generateJumpFn(dx: number, dy: number): TimingFn<3> {
+        const distance = Math.hypot(dx, dy);
+        const peak = 3 + distance;
+        const k = dy / dx;
+
+        return (progress: number) => {
+            const x = dx * progress;
+            const y = k * x + (progress ** 2 - progress) * peak;
+            return [x, y, Math.ceil(y)];
+        };
+    }
 
     Mota.r(() => {
+        // ----- 勇士移动相关
         control.prototype._moveAction_moving = function (
             callback?: () => void
         ) {};
@@ -588,6 +663,157 @@ export function init() {
                 callback?.();
             });
         };
+
+        // 移动跳跃图块 & 跳跃勇士
+        maps.prototype.moveBlock = async function (
+            x: number,
+            y: number,
+            steps: string[],
+            time: number = 500,
+            keep: boolean = false,
+            callback?: () => void
+        ) {
+            if (!steps || steps.length === 0) {
+                callback?.();
+                return;
+            }
+            const speed = core.status.replay.speed;
+            if (speed === 24) time = 1;
+            const block = core.getBlock(x, y);
+            if (!block) {
+                callback?.();
+                return;
+            }
+            core.removeBlock(x, y);
+            const list = adapters.layer?.items ?? [];
+            const items = [...list].filter(v => {
+                if (v.layer !== 'event') return false;
+                const ex = v.getExtends('floor-binder') as LayerFloorBinder;
+                if (!ex) return false;
+                return ex.getFloor() === core.status.floorId;
+            });
+
+            const { steps: moveSteps, start } = getMoveSteps(steps);
+            if (!start || items.length === 0) {
+                callback?.();
+                return;
+            }
+            let stepDir: Dir2 = start;
+            let nx = x;
+            let ny = y;
+
+            const { Layer } = Mota.require('module', 'Render');
+            const moving = Layer.getMovingRenderable(block.id, x, y);
+            if (!moving) {
+                callback?.();
+                return;
+            }
+            items.forEach(v => v.moving.add(moving));
+
+            for (const step of moveSteps) {
+                if (step === 'backward') stepDir = backDir(stepDir);
+                if (step.startsWith('speed')) {
+                    time = parseInt(step.slice(6));
+                    continue;
+                }
+                const { x, y } = core.utils.scan2[stepDir];
+                const tx = nx + x;
+                const ty = ny + y;
+                await moveRenderable(items[0], moving, time / speed, tx, ty);
+                nx = tx;
+                ny = ty;
+                moving.zIndex = ty;
+            }
+
+            items.forEach(v => v.moving.delete(moving));
+            if (keep) {
+                core.setBlock(block.id, nx, ny);
+            }
+            callback?.();
+        };
+
+        ////// 显示跳跃某块的动画，达到{"type":"jump"}的效果 //////
+        maps.prototype.jumpBlock = async function (
+            sx: number,
+            sy: number,
+            ex: number,
+            ey: number,
+            time: number = 500,
+            keep: boolean = false,
+            callback?: () => void
+        ) {
+            const block = core.getBlock(sx, sy);
+            if (!block) {
+                callback?.();
+                return;
+            }
+            time /= core.status.replay.speed;
+            if (core.status.replay.speed === 24) time = 1;
+            const dx = ex - sx;
+            const dy = ey - sy;
+
+            const fn = generateJumpFn(dx, dy);
+
+            const list = adapters.layer?.items ?? [];
+            const items = [...list].filter(v => {
+                if (v.layer !== 'event') return false;
+                const ex = v.getExtends('floor-binder') as LayerFloorBinder;
+                if (!ex) return false;
+                return ex.getFloor() === core.status.floorId;
+            });
+            const width = core.status.thisMap.width;
+            const index = sx + sy * width;
+
+            const promise = Promise.all(
+                items.map(v => {
+                    return v.moveAs(index, ex, ey, fn, time);
+                })
+            );
+
+            core.removeBlock(sx, sy);
+            await promise;
+            if (keep) {
+                core.setBlock(block.id, ex, ey);
+            }
+
+            callback?.();
+        };
+
+        events.prototype.jumpHero = async function (
+            ex: number,
+            ey: number,
+            time: number = 500,
+            callback?: () => void
+        ) {
+            const sx = core.getHeroLoc('x');
+            const sy = core.getHeroLoc('y');
+
+            const locked = core.status.lockControl;
+            core.lockControl();
+            const list = adapters['hero-adapter']?.items ?? [];
+            const items = [...list];
+
+            time /= core.status.replay.speed;
+            if (core.status.replay.speed === 24) time = 1;
+            const fn = generateJumpFn(ex - sx, ey - sy);
+            await Promise.all(
+                items.map(v => {
+                    if (!v.renderable) return Promise.reject();
+                    return v.layer.moveRenderable(
+                        v.renderable,
+                        sx,
+                        sy,
+                        fn,
+                        time
+                    );
+                })
+            );
+
+            if (!locked) core.unlockControl();
+            core.setHeroLoc('x', ex);
+            core.setHeroLoc('y', ey);
+            callback?.();
+        };
     });
 
     loading.once('loaded', () => {
@@ -597,6 +823,36 @@ export function init() {
                 animate.se = { 1: animate.se };
             }
             animate.pitch ??= {};
+        }
+    });
+
+    // 复写录像的移动
+    core.registerReplayAction('move', action => {
+        if (
+            action === 'up' ||
+            action === 'down' ||
+            action === 'left' ||
+            action === 'right'
+        ) {
+            stepDir = action;
+            const { noPass, canMove } = checkCanMove();
+            const { nx, ny } = getNextLoc();
+            if (noPass || !canMove) {
+                if (canMove) core.trigger(nx, ny);
+            } else {
+                core.setHeroLoc('x', nx);
+                core.setHeroLoc('y', ny);
+                core.setHeroLoc('direction', action);
+            }
+            if (!main.replayChecking) {
+                setTimeout(core.replay, 100);
+            } else {
+                core.replay();
+            }
+
+            return true;
+        } else {
+            return false;
         }
     });
 

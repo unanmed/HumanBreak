@@ -9,6 +9,7 @@ import { glMatrix } from 'gl-matrix';
 import { BlockCacher } from './block';
 import { Transform } from '../transform';
 import { LayerFloorBinder, LayerGroupFloorBinder } from './floor';
+import { RenderAdapter } from '../adapter';
 
 export interface ILayerGroupRenderExtends {
     /** 拓展的唯一标识符 */
@@ -657,7 +658,7 @@ export class Layer extends Container {
 
     private extend: Map<string, ILayerRenderExtends> = new Map();
     /** 正在移动的图块的渲染信息 */
-    private moving: Set<LayerMovingRenderable> = new Set();
+    moving: Set<LayerMovingRenderable> = new Set();
 
     constructor() {
         super('absolute', false);
@@ -694,6 +695,7 @@ export class Layer extends Container {
         });
 
         this.extends(new LayerFloorBinder());
+        layerAdapter.add(this);
     }
 
     /**
@@ -1333,7 +1335,8 @@ export class Layer extends Container {
     /**
      * 让图块按照一个函数进行移动
      * @param index 要移动的图块在渲染数据中的索引位置
-     * @param type 函数式移动
+     * @param x 目标位置横坐标
+     * @param y 目标位置纵坐标
      * @param fn 移动函数，传入一个完成度（范围0-1），返回一个三元素数组，表示横纵格子坐标，可以是小数。
      *           第三个元素表示图块纵深，一般图块的纵深就是其纵坐标，当地图上有大怪物时，此举可以辅助渲染，
      *           否则可能会导致移动过程中与大怪物的层级关系不正确，比如全在大怪物身后。注意不建议频繁改动这个值，
@@ -1352,24 +1355,9 @@ export class Layer extends Container {
         const block = this.renderData[index];
         const fx = index % this.width;
         const fy = Math.floor(index / this.width);
-        const renderable = texture.getRenderable(block);
-        if (!renderable) return Promise.reject();
+        const moving = Layer.getMovingRenderable(block, fx, fy);
+        if (!moving) return Promise.reject();
 
-        const image = renderable.autotile
-            ? renderable.image[0]
-            : renderable.image;
-
-        const moving: LayerMovingRenderable = {
-            x: fx,
-            y: fy,
-            zIndex: fy,
-            image: image,
-            autotile: false,
-            frame: renderable.frame,
-            bigImage: renderable.bigImage,
-            animate: -1,
-            render: renderable.render
-        };
         this.moving.add(moving);
 
         // 删除原始位置的图块
@@ -1405,10 +1393,84 @@ export class Layer extends Container {
         });
     }
 
+    /**
+     * 移动一个可移动的renderable
+     * @param data 移动renderable
+     * @param x 起始横坐标，注意与`moveAs`的`x`区分
+     * @param y 起始纵坐标，注意与`moveAs`的`y`区分
+     * @param fn 移动函数
+     * @param time 移动时间
+     * @param relative 是否是相对模式，默认相对模式
+     */
+    moveRenderable(
+        data: LayerMovingRenderable,
+        x: number,
+        y: number,
+        fn: TimingFn<3>,
+        time: number,
+        relative: boolean = true
+    ) {
+        let nowZ = y;
+        const startTime = Date.now();
+        return new Promise<void>(resolve => {
+            this.delegateTicker(
+                () => {
+                    const now = Date.now();
+                    const progress = (now - startTime) / time;
+                    const [nx, ny, nz] = fn(progress);
+                    const tx = relative ? nx + x : nx;
+                    const ty = relative ? ny + y : ny;
+                    data.x = tx;
+                    data.y = ty;
+                    data.zIndex = nz;
+                    if (nz !== nowZ) {
+                        this.movingRenderable.sort(
+                            (a, b) => a.zIndex - b.zIndex
+                        );
+                    }
+                    this.update(this);
+                },
+                time,
+                () => {
+                    resolve();
+                }
+            );
+        });
+    }
+
     destroy(): void {
         for (const ex of this.extend.values()) {
             ex.onDestroy?.(this);
         }
         super.destroy();
+        layerAdapter.remove(this);
+    }
+
+    /**
+     * 根据图块信息初始化移动信息
+     * @param num 图块数字
+     * @param x 横坐标
+     * @param y 纵坐标
+     */
+    static getMovingRenderable(num: number, x: number, y: number) {
+        const renderable = texture.getRenderable(num);
+        if (!renderable) return null;
+        const image = renderable.autotile
+            ? renderable.image[0]
+            : renderable.image;
+        const moving: LayerMovingRenderable = {
+            x: x,
+            y: y,
+            zIndex: y,
+            image: image,
+            autotile: false,
+            frame: renderable.frame,
+            bigImage: renderable.bigImage,
+            animate: -1,
+            render: renderable.render
+        };
+        return moving;
     }
 }
+
+const layerAdapter = new RenderAdapter<Layer>('layer');
