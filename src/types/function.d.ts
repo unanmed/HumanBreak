@@ -1,5 +1,6 @@
 interface ActionData {
     /**
+     * @deprecated
      * 当按键弹起时
      * @param keyCode 按键的keyCode
      * @param altKey 当前是否按下了alt键
@@ -40,6 +41,7 @@ interface ControlData {
     moveDirectly(x: number, y: number, ignoreSteps?: number): boolean;
 
     /**
+     * @deprecated
      * 并行脚本
      * @param time 距离游戏加载完毕经过的时间
      */

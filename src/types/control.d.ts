@@ -218,6 +218,7 @@ interface Control {
     readonly controlData: ControlData;
 
     /**
+     * @deprecated
      * 注册一个animationFrame
      * @param name 名称，可用来作为注销使用
      * @param needPlaying 是否只在游戏运行时才执行（在标题界面不执行）
@@ -230,6 +231,7 @@ interface Control {
     ): void;
 
     /**
+     * @deprecated
      * 注销一个animationFrame
      * @param name 要注销的函数名称
      */
@@ -313,7 +315,7 @@ interface Control {
 
     /**
      * @deprecated 尽量不要使用！！如果需要无视地形使用代码来移动勇士，请使用 `eventMoveHero`
-     *             如果需要向前前进一格或撞击，请使用 `moveHero`
+     *             如果需要向前前进一格或撞击，再使用本函数
      * 尝试前进一步，如果面前不可被踏入就会直接触发该点事件
      * @example core.moveAction(core.doAction); // 尝试前进一步，然后继续事件处理
      * @param callback 走一步后的回调函数
@@ -397,6 +399,7 @@ interface Control {
     ): void;
 
     /**
+     * @deprecated
      * 设置游戏系统画布的偏移量
      * @param canvasId 字符串或数字，根据ts的说法应该只能填数字，但是浏览器会提高字符串的方式。
      * 但是还是建议填数字，排列顺序一般是纵深从低到高排列
@@ -410,6 +413,7 @@ interface Control {
     ): void;
 
     /**
+     * @deprecated
      * 加减所有游戏系统画布的偏移
      * @param x 增加的横坐标
      * @param y 增加的纵坐标
@@ -471,11 +475,13 @@ interface Control {
     nearHero(x: number, y: number, n?: number): boolean;
 
     /**
+     * @deprecated
      * 立刻聚集所有的跟随者
      */
     gatherFollowers(): void;
 
     /**
+     * @deprecated
      * 更新跟随者坐标
      */
     updateFollowers(): void;
@@ -942,6 +948,7 @@ interface Control {
     unregisterWeather(name: string): void;
 
     /**
+     * @deprecated
      * 更改画面色调，不计入存档。如需长期生效请使用core.events._action_setCurtain()函数
      * @example core.setCurtain(); // 恢复画面色调，用时四分之三秒
      * @param color 颜色数组，不填视为[0, 0, 0, 0]
@@ -957,6 +964,7 @@ interface Control {
     ): void;
 
     /**
+     * @deprecated
      * 画面闪烁
      * @example core.screenFlash([255, 0, 0, 1], 3); // 红屏一闪而过
      * @param color 颜色数组
@@ -974,6 +982,7 @@ interface Control {
     ): void;
 
     /**
+     * @deprecated
      * 播放背景音乐，中途开播但不计入存档且只会持续到下次场景切换。如需长期生效请将背景音乐的文件名赋值给flags.__bgm__
      * @example core.playBgm('bgm.mp3', 30); // 播放bgm.mp3，并跳过前半分钟
      * @param bgm 背景音乐的文件名，支持全塔属性中映射前的中文名
@@ -982,26 +991,31 @@ interface Control {
     playBgm(bgm: BgmIds | NameMapIn<BgmIds>, startTime?: number): void;
 
     /**
+     * @deprecated
      * 暂停背景音乐的播放
      */
     pauseBgm(): void;
 
     /**
+     * @deprecated
      * 恢复背景音乐的播放
      */
     resumeBgm(resumeTime?: number): void;
 
     /**
+     * @deprecated
      * 设置音乐图标的开启关闭状态
      */
     setMusicBtn(): void;
 
     /**
+     * @deprecated
      * 开启或关闭背景音乐的播放
      */
     triggerBgm(): void;
 
     /**
+     * @deprecated
      * 播放一个音效
      * @param sound 音效名
      * @param pitch 音调，同时会修改播放速度，100为原速
@@ -1015,18 +1029,21 @@ interface Control {
     ): number;
 
     /**
+     * @deprecated
      * 停止音频
      * @param id 停止的音频标识符，不填则停止所有
      */
     stopSound(id?: number): void;
 
     /**
+     * @deprecated
      * 获得正在播放的所有音效的id列表
      * @param name 要获得的音效名
      */
     getPlayingSounds(name?: SoundIds | NameMapIn<SoundIds>): number[];
 
     /**
+     * @deprecated
      * 检查bgm状态，没有播放的话就播放
      */
     checkBgm(): void;
@@ -1067,6 +1084,7 @@ interface Control {
     setToolbarButton(useButton?: boolean): void;
 
     /**
+     * @deprecated
      * 注册一个resize函数
      * @param name 名称，可供注销使用
      * @param func 游戏画面发生变化时执行的函数
@@ -1074,11 +1092,13 @@ interface Control {
     registerResize(name: string, func: ResizeFunc): void;
 
     /**
+     * @deprecated
      * 注销一个resize函数
      */
     unregisterResize(name: string): void;
 
     /**
+     * @deprecated
      * 屏幕分辨率改变后执行的函数
      */
     resize(): void;

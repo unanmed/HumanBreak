@@ -714,6 +714,7 @@ interface Events extends EventData {
     eventMoveHero(steps: Step[], time?: number, callback?: () => void): void;
 
     /**
+     * @deprecated
      * 主角跳跃，跳跃勇士。ex和ey为目标点的坐标，可以为null表示原地跳跃。time为总跳跃时间。
      * @example core.jumpHero(); // 主角原地跳跃半秒
      * @param ex 跳跃后的横坐标

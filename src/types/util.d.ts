@@ -68,6 +68,7 @@ interface Utils {
     decompress(value: string): any;
 
     /**
+     * @deprecated
      * 设置本地存储
      * @param key 本地存储的名称
      * @param value 本地存储的值，不填代表删除
@@ -75,6 +76,7 @@ interface Utils {
     setLocalStorage(key: string, value?: any): void;
 
     /**
+     * @deprecated
      * 获得本地存储
      * @param key 获取的本地存储的名称
      * @param defaultValue 当不存在的时候的默认值
@@ -82,6 +84,7 @@ interface Utils {
     getLocalStorage<T>(key: string, defaultValue?: T): T;
 
     /**
+     * @deprecated
      * 移除本地存储
      * @param key 要移除的本地存储的值
      */
@@ -168,6 +171,7 @@ interface Utils {
     getGlobal<T>(key: string, defaultValue?: T): T;
 
     /**
+     * @deprecated
      * 深拷贝一个对象(函数将原样返回)
      * @example core.clone(core.status.hero, (name, value) => (name == 'items' || typeof value == 'number'), false); // 深拷贝主角的属性和道具
      * @param data 待拷贝对象
@@ -182,6 +186,7 @@ interface Utils {
     ): T;
 
     /**
+     * @deprecated
      * 深拷贝一个1D或2D的数组
      * @param data 要拷贝的数据
      */
@@ -294,6 +299,7 @@ interface Utils {
     decodeRoute(route: string): string[];
 
     /**
+     * @deprecated
      * 判断一个值是否不为null，undefined和NaN
      * @example core.isset(0/0); // false，因为0/0等于NaN
      * @param v 待测值
@@ -334,6 +340,7 @@ interface Utils {
     getCookie(name: string): string;
 
     /**
+     * @deprecated
      * 填写非自绘状态栏
      * @example
      * // 更新状态栏中的主角生命，使用加载画面的宣传色

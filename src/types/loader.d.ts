@@ -3,6 +3,7 @@
  */
 interface Loader {
     /**
+     * @deprecated
      * 加载一系列图片
      * @param dir 图片所在目录
      * @param names 图片名称列表
@@ -17,6 +18,7 @@ interface Loader {
     ): void;
 
     /**
+     * @deprecated
      * 加载某一张图片
      * @param dir 图片所在目录
      * @param imgName 图片名称
@@ -29,6 +31,7 @@ interface Loader {
     ): void;
 
     /**
+     * @deprecated
      * 从zip中加载一系列图片
      * @param url 图片所在目录
      * @param names 图片名称列表
@@ -42,24 +45,28 @@ interface Loader {
     ): void;
 
     /**
+     * @deprecated
      * 加载一个音乐
      * @param name 要加载的音乐的名称
      */
     loadOneMusic(name: BgmIds): void;
 
     /**
+     * @deprecated
      * 加载一个音效
      * @param name 要加载的音效的名称
      */
     loadOneSound(name: SoundIds): void;
 
     /**
+     * @deprecated
      * 加载一个bgm
      * @param name 加载的bgm的id或名称
      */
     loadBgm(name: BgmIds | NameMapIn<BgmIds>): void;
 
     /**
+     * @deprecated
      * 释放一个bgm的缓存
      * @param name 要释放的bgm的id或名称
      */
