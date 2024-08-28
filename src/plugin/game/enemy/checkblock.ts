@@ -37,56 +37,6 @@ export function init() {
         checkMockery(loc, forceMockery);
         checkHunt(loc);
     };
-
-    control.prototype._drawDamage_draw = function (
-        ctx: CanvasRenderingContext2D,
-        onMap: boolean,
-        floorId: FloorIds
-    ) {
-        if (!core.hasItem('book')) return;
-        drawHalo(ctx, onMap, floorId);
-
-        core.setFont(ctx, "14px 'normal'");
-        core.setTextAlign(ctx, 'center');
-        core.setTextBaseline(ctx, 'middle');
-        core.status.damage.extraData.forEach(function (one) {
-            var px = one.px,
-                py = one.py;
-            if (onMap && core.bigmap.v2) {
-                px -= core.bigmap.posX * 32;
-                py -= core.bigmap.posY * 32;
-                if (
-                    px < -32 ||
-                    px > core._PX_ + 32 ||
-                    py < -32 ||
-                    py > core._PY_ + 32
-                )
-                    return;
-            }
-            var alpha = core.setAlpha(ctx, one.alpha);
-            core.fillBoldText(ctx, one.text, px, py, one.color as string);
-            core.setAlpha(ctx, alpha);
-        });
-
-        core.setTextAlign(ctx, 'left');
-        core.setTextBaseline(ctx, 'alphabetic');
-        core.status.damage.data.forEach(function (one) {
-            var px = one.px,
-                py = one.py;
-            if (onMap && core.bigmap.v2) {
-                px -= core.bigmap.posX * 32;
-                py -= core.bigmap.posY * 32;
-                if (
-                    px < -32 * 2 ||
-                    px > core._PX_ + 32 ||
-                    py < -32 ||
-                    py > core._PY_ + 32
-                )
-                    return;
-            }
-            core.fillBoldText(ctx, one.text, px, py, one.color as string);
-        });
-    };
 }
 
 function checkMockery(loc: string, force: boolean = false) {

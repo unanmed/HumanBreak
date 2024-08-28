@@ -1268,7 +1268,7 @@ export class Layer extends Container {
 
         this.movingRenderable.forEach(v => {
             const { x, y, image, render, animate } = v;
-            const ff = frame % 4;
+            const ff = frame % v.frame;
             const i = animate === -1 ? ff : animate;
             const [sx, sy, w, h] = render[i];
             const px = x * cell - w / 2 + halfCell;
@@ -1350,11 +1350,12 @@ export class Layer extends Container {
         y: number,
         fn: TimingFn<3>,
         time: number,
+        keep: boolean = false,
         relative: boolean = true
     ): Promise<void> {
         const block = this.renderData[index];
-        const fx = index % this.width;
-        const fy = Math.floor(index / this.width);
+        const fx = index % this.mapWidth;
+        const fy = Math.floor(index / this.mapWidth);
         const moving = Layer.getMovingRenderable(block, fx, fy);
         if (!moving) return Promise.reject();
 
@@ -1385,7 +1386,7 @@ export class Layer extends Container {
                 },
                 time,
                 () => {
-                    this.putRenderData([block], 1, x, y);
+                    if (keep) this.putRenderData([block], 1, x, y);
                     this.moving.delete(moving);
                     resolve();
                 }

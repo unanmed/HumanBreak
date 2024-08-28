@@ -98,6 +98,7 @@ specialValue
 
 interface EnemyCollectionEvent {
     extract: [];
+    calculated: [];
 }
 
 export class EnemyCollection
@@ -225,121 +226,121 @@ export class EnemyCollection
         });
     }
 
-    render(onMap: boolean = false, cal: boolean = false) {
-        if (cal) {
-            this.calMapDamage();
-        }
-        core.status.damage.data = [];
-        core.status.damage.extraData = [];
-        core.status.damage.dir = [];
+    // render(onMap: boolean = false, cal: boolean = false) {
+    //     if (cal) {
+    //         this.calMapDamage();
+    //     }
+    //     core.status.damage.data = [];
+    //     core.status.damage.extraData = [];
+    //     core.status.damage.dir = [];
 
-        // 怪物伤害
-        this.list.forEach(v => {
-            if (onMap && !checkV2(v.x, v.y)) return;
+    //     // 怪物伤害
+    //     this.list.forEach(v => {
+    //         if (onMap && !checkV2(v.x, v.y)) return;
 
-            const { damage } = v.calDamage();
+    //         const { damage } = v.calDamage();
 
-            // 伤害全部相等，绘制在怪物本身所在位置
-            const { damage: dam, color } = formatDamage(damage);
-            const critical = v.calCritical(1)[0];
-            core.status.damage.data.push({
-                text: dam,
-                px: 32 * v.x! + 1,
-                py: 32 * (v.y! + 1) - 1,
-                color: color
-            });
-            const setting = Mota.require('var', 'mainSetting');
-            const criGem = setting.getValue('screen.criticalGem', false);
-            const n = critical?.atkDelta ?? Infinity;
-            const ratio = core.status.maps[this.floorId].ratio;
-            const cri = criGem ? Math.ceil(n / ratio) : n;
+    //         // 伤害全部相等，绘制在怪物本身所在位置
+    //         const { damage: dam, color } = formatDamage(damage);
+    //         const critical = v.calCritical(1)[0];
+    //         core.status.damage.data.push({
+    //             text: dam,
+    //             px: 32 * v.x! + 1,
+    //             py: 32 * (v.y! + 1) - 1,
+    //             color: color
+    //         });
+    //         const setting = Mota.require('var', 'mainSetting');
+    //         const criGem = setting.getValue('screen.criticalGem', false);
+    //         const n = critical?.atkDelta ?? Infinity;
+    //         const ratio = core.status.maps[this.floorId].ratio;
+    //         const cri = criGem ? Math.ceil(n / ratio) : n;
 
-            core.status.damage.data.push({
-                text: isFinite(cri) ? cri.toString() : '?',
-                px: 32 * v.x! + 1,
-                py: 32 * (v.y! + 1) - 11,
-                color: '#fff'
-            });
-        });
+    //         core.status.damage.data.push({
+    //             text: isFinite(cri) ? cri.toString() : '?',
+    //             px: 32 * v.x! + 1,
+    //             py: 32 * (v.y! + 1) - 11,
+    //             color: '#fff'
+    //         });
+    //     });
 
-        // 地图伤害
-        const floor = core.status.maps[this.floorId];
-        const width = floor.width;
-        const height = floor.height;
-        const objs = core.getMapBlocksObj(this.floorId);
+    //     // 地图伤害
+    //     const floor = core.status.maps[this.floorId];
+    //     const width = floor.width;
+    //     const height = floor.height;
+    //     const objs = core.getMapBlocksObj(this.floorId);
 
-        const startX =
-            onMap && core.bigmap.v2
-                ? Math.max(0, core.bigmap.posX - core.bigmap.extend)
-                : 0;
-        const endX =
-            onMap && core.bigmap.v2
-                ? Math.min(
-                      width,
-                      core.bigmap.posX + core._WIDTH_ + core.bigmap.extend + 1
-                  )
-                : width;
-        const startY =
-            onMap && core.bigmap.v2
-                ? Math.max(0, core.bigmap.posY - core.bigmap.extend)
-                : 0;
-        const endY =
-            onMap && core.bigmap.v2
-                ? Math.min(
-                      height,
-                      core.bigmap.posY + core._HEIGHT_ + core.bigmap.extend + 1
-                  )
-                : height;
+    //     const startX =
+    //         onMap && core.bigmap.v2
+    //             ? Math.max(0, core.bigmap.posX - core.bigmap.extend)
+    //             : 0;
+    //     const endX =
+    //         onMap && core.bigmap.v2
+    //             ? Math.min(
+    //                   width,
+    //                   core.bigmap.posX + core._WIDTH_ + core.bigmap.extend + 1
+    //               )
+    //             : width;
+    //     const startY =
+    //         onMap && core.bigmap.v2
+    //             ? Math.max(0, core.bigmap.posY - core.bigmap.extend)
+    //             : 0;
+    //     const endY =
+    //         onMap && core.bigmap.v2
+    //             ? Math.min(
+    //                   height,
+    //                   core.bigmap.posY + core._HEIGHT_ + core.bigmap.extend + 1
+    //               )
+    //             : height;
 
-        for (let x = startX; x < endX; x++) {
-            for (let y = startY; y < endY; y++) {
-                const id = `${x},${y}` as LocString;
-                const dam = this.mapDamage[id];
-                if (!dam || objs[id]?.event.noPass) continue;
+    //     for (let x = startX; x < endX; x++) {
+    //         for (let y = startY; y < endY; y++) {
+    //             const id = `${x},${y}` as LocString;
+    //             const dam = this.mapDamage[id];
+    //             if (!dam || objs[id]?.event.noPass) continue;
 
-                // 地图伤害
-                if (dam.damage !== 0) {
-                    const damage = core.formatBigNumber(dam.damage, true);
-                    const color = dam.damage < 0 ? '#6eff6a' : '#fa3';
-                    core.status.damage.extraData.push({
-                        text: damage,
-                        px: 32 * x + 16,
-                        py: 32 * y + 16,
-                        color,
-                        alpha: 1
-                    });
-                }
+    //             // 地图伤害
+    //             if (dam.damage !== 0) {
+    //                 const damage = core.formatBigNumber(dam.damage, true);
+    //                 const color = dam.damage < 0 ? '#6eff6a' : '#fa3';
+    //                 core.status.damage.extraData.push({
+    //                     text: damage,
+    //                     px: 32 * x + 16,
+    //                     py: 32 * y + 16,
+    //                     color,
+    //                     alpha: 1
+    //                 });
+    //             }
 
-                // 电摇嘲讽
-                if (dam.mockery) {
-                    dam.mockery.sort((a, b) =>
-                        a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]
-                    );
-                    const [tx, ty] = dam.mockery[0];
-                    const dir =
-                        x > tx ? '←' : x < tx ? '→' : y > ty ? '↑' : '↓';
-                    core.status.damage.extraData.push({
-                        text: '嘲' + dir,
-                        px: 32 * x + 16,
-                        py: 32 * (y + 1) - 14,
-                        color: '#fd4',
-                        alpha: 1
-                    });
-                }
+    //             // 电摇嘲讽
+    //             if (dam.mockery) {
+    //                 dam.mockery.sort((a, b) =>
+    //                     a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]
+    //                 );
+    //                 const [tx, ty] = dam.mockery[0];
+    //                 const dir =
+    //                     x > tx ? '←' : x < tx ? '→' : y > ty ? '↑' : '↓';
+    //                 core.status.damage.extraData.push({
+    //                     text: '嘲' + dir,
+    //                     px: 32 * x + 16,
+    //                     py: 32 * (y + 1) - 14,
+    //                     color: '#fd4',
+    //                     alpha: 1
+    //                 });
+    //             }
 
-                // 追猎
-                if (dam.hunt) {
-                    core.status.damage.extraData.push({
-                        text: '猎',
-                        px: 32 * x + 16,
-                        py: 32 * (y + 1) - 14,
-                        color: '#fd4',
-                        alpha: 1
-                    });
-                }
-            }
-        }
-    }
+    //             // 追猎
+    //             if (dam.hunt) {
+    //                 core.status.damage.extraData.push({
+    //                     text: '猎',
+    //                     px: 32 * x + 16,
+    //                     py: 32 * (y + 1) - 14,
+    //                     color: '#fd4',
+    //                     alpha: 1
+    //                 });
+    //             }
+    //         }
+    //     }
+    // }
 }
 
 export class DamageEnemy<T extends EnemyIds = EnemyIds> {

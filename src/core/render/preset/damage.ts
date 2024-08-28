@@ -71,13 +71,13 @@ export class FloorDamageExtends
     };
 
     private onSetBlock = (x: number, y: number, floor: FloorIds) => {
-        this.sprite.enemy?.once('extract', () => {
-            if (floor !== this.sprite.enemy?.floorId) return;
-            this.sprite.updateEnemyOn(x, y);
-        });
-        if (!this.floorBinder.bindThisFloor) {
-            this.sprite.enemy?.extract();
-        }
+        // this.sprite.enemy?.once('extract', () => {
+        //     if (floor !== this.sprite.enemy?.floorId) return;
+        //     this.sprite.updateBlocks();
+        // });
+        // if (!this.floorBinder.bindThisFloor) {
+        //     this.sprite.enemy?.extract();
+        // }
     };
 
     /**
@@ -131,6 +131,7 @@ interface EDamageEvent extends ESpriteEvent {
     setMapSize: [width: number, height: number];
     beforeDamageRender: [need: Set<number>, transform: Transform];
     updateBlocks: [blocks: Set<number>];
+    dirtyUpdate: [block: number];
 }
 
 export class Damage extends Sprite<EDamageEvent> {
@@ -182,6 +183,10 @@ export class Damage extends Sprite<EDamageEvent> {
         });
     }
 
+    private onExtract = () => {
+        if (this.enemy) this.updateCollection(this.enemy);
+    };
+
     /**
      * 设置地图大小，后面应紧跟更新怪物列表
      */
@@ -210,7 +215,10 @@ export class Damage extends Sprite<EDamageEvent> {
      * @param enemy 怪物列表
      */
     updateCollection(enemy: EnemyCollection) {
-        if (this.enemy === enemy) return;
+        if (this.enemy !== enemy) {
+            this.enemy?.off('calculated', this.onExtract);
+            enemy.on('calculated', this.onExtract);
+        }
         this.enemy = enemy;
         this.blockData.forEach(v => v.clear());
         this.renderable.forEach(v => v.clear());
@@ -297,6 +305,7 @@ export class Damage extends Sprite<EDamageEvent> {
 
         this.block.clearCache(block, 1);
         const renderable = this.renderable.get(block)!;
+
         renderable.clear();
         data.forEach(v => this.extract(v, renderable));
         if (map) this.extractMapDamage(block, renderable);
@@ -313,6 +322,7 @@ export class Damage extends Sprite<EDamageEvent> {
         const y = enemy.y!;
         const { damage } = enemy.calDamage();
         const cri = enemy.calCritical(1)[0]?.atkDelta ?? Infinity;
+
         const dam1: DamageRenderable = {
             align: 'left',
             baseline: 'alphabetic',
@@ -449,6 +459,7 @@ export class Damage extends Sprite<EDamageEvent> {
                 ctx.drawImage(cache.canvas.canvas, px, py, size, size);
                 return;
             }
+            this.emit('dirtyUpdate', v);
 
             // 否则依次渲染并写入缓存
             const temp = cache?.canvas ?? new MotaOffscreenCanvas2D();
@@ -481,4 +492,11 @@ export class Damage extends Sprite<EDamageEvent> {
         ctx.restore();
         // console.timeEnd('damage');
     }
+
+    destroy(): void {
+        super.destroy();
+        this.enemy?.off('extract', this.onExtract);
+    }
 }
+
+// const adapter = new RenderAdapter<Damage>('damage');

@@ -62,14 +62,12 @@ export class FloorItemDetail implements ILayerGroupRenderExtends {
 
     static listened: Set<FloorItemDetail> = new Set();
 
-    private onBeforeDamageRender = (need: Set<number>) => {
+    private onBeforeDamageRender = (block: number) => {
         if (!mainSetting.getValue('screen.itemDetail')) return;
-        need.forEach(v => {
-            if (this.dirtyBlock.has(v)) {
-                this.sprite.block.clearCache(v, 1);
-            }
-        });
-        this.render(need);
+        if (this.dirtyBlock.has(block)) {
+            this.sprite.block.clearCache(block, 1);
+            this.render(block);
+        }
     };
 
     private onUpdateMapSize = (width: number, height: number) => {
@@ -87,7 +85,7 @@ export class FloorItemDetail implements ILayerGroupRenderExtends {
     };
 
     private listen() {
-        this.sprite.on('beforeDamageRender', this.onBeforeDamageRender);
+        this.sprite.on('dirtyUpdate', this.onBeforeDamageRender);
         this.sprite.on('setMapSize', this.onUpdateMapSize);
         this.sprite.on('updateBlocks', this.onUpdateBlocks);
         this.damage.on('update', this.onUpdate);
@@ -215,32 +213,32 @@ export class FloorItemDetail implements ILayerGroupRenderExtends {
      * 计算并渲染指定格子里面的物品
      * @param block 需要渲染的格子
      */
-    render(block: Set<number>) {
-        this.calAllItems(block);
+    render(block: number) {
+        this.calAllItems(new Set([block]));
         const data = this.detailData;
-        block.forEach(v => {
-            if (!this.dirtyBlock.has(v)) return;
-            this.dirtyBlock.delete(v);
-            const info = data.get(v);
-            if (!info) return;
-            info.forEach(({ x, y, diff }) => {
-                let n = 0;
-                for (const [key, value] of Object.entries(diff)) {
-                    if (!value) continue;
-                    const color = FloorItemDetail.detailColor[key] ?? '#fff';
-                    const text = value.toString();
-                    const renderable: DamageRenderable = {
-                        x: x * this.sprite.cellSize + 2,
-                        y: y * this.sprite.cellSize + 31 - n * 10,
-                        text,
-                        color,
-                        align: 'left',
-                        baseline: 'alphabetic'
-                    };
-                    this.sprite.renderable.get(v)?.add(renderable);
-                    n++;
-                }
-            });
+
+        if (!this.dirtyBlock.has(block)) return;
+        this.dirtyBlock.delete(block);
+        const info = data.get(block);
+        if (!info) return;
+
+        info.forEach(({ x, y, diff }) => {
+            let n = 0;
+            for (const [key, value] of Object.entries(diff)) {
+                if (!value) continue;
+                const color = FloorItemDetail.detailColor[key] ?? '#fff';
+                const text = value.toString();
+                const renderable: DamageRenderable = {
+                    x: x * this.sprite.cellSize + 2,
+                    y: y * this.sprite.cellSize + 31 - n * 10,
+                    text,
+                    color,
+                    align: 'left',
+                    baseline: 'alphabetic'
+                };
+                this.sprite.renderable.get(block)?.add(renderable);
+                n++;
+            }
         });
     }
 

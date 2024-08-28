@@ -420,11 +420,11 @@ export function init() {
     function generateJumpFn(dx: number, dy: number): TimingFn<3> {
         const distance = Math.hypot(dx, dy);
         const peak = 3 + distance;
-        const k = dy / dx;
 
         return (progress: number) => {
             const x = dx * progress;
-            const y = k * x + (progress ** 2 - progress) * peak;
+            const y = progress * dy + (progress ** 2 - progress) * peak;
+
             return [x, y, Math.ceil(y)];
         };
     }
@@ -766,15 +766,17 @@ export function init() {
 
             const promise = Promise.all(
                 items.map(v => {
-                    return v.moveAs(index, ex, ey, fn, time);
+                    return v.moveAs(index, ex, ey, fn, time, keep);
                 })
             );
 
+            core.updateStatusBar();
             core.removeBlock(sx, sy);
             await promise;
             if (keep) {
                 core.setBlock(block.id, ex, ey);
             }
+            core.updateStatusBar();
 
             callback?.();
         };

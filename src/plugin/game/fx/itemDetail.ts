@@ -22,12 +22,13 @@ export function init() {
         floor.enemy.extract();
         floor.enemy.calRealAttribute();
         floor.enemy.calMapDamage();
+        floor.enemy.emit('calculated');
         core.status.damage.data = [];
 
-        floor.enemy.render(true);
+        // floor.enemy.render(true);
 
         getItemDetail(floorId, onMap); // 宝石血瓶详细信息
-        this.drawDamage(ctx, floorId);
+        // this.drawDamage(ctx, floorId);
     };
 }
 

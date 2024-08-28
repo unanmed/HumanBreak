@@ -100,7 +100,9 @@ export class Portal extends Sprite {
         this.particleSetting = mainSetting.getSetting('fx.portalParticle')!;
 
         this.delegation = this.delegateTicker(() => {
-            if (this.particleSetting.value) this.update(this);
+            if (this.particleSetting.value && this.renderable.size > 0) {
+                this.update(this);
+            }
         });
 
         this.setRenderFn((canvas, transform) => {
