@@ -1,5 +1,6 @@
 import { backDir, has } from '@/plugin/game/utils';
 import { loading } from '../game';
+import type { LayerDoorAnimate } from '@/core/render/preset/floor';
 
 export namespace BluePalace {
     type DoorConvertInfo = [id: AllIds, x: number, y: number];
@@ -26,9 +27,6 @@ export namespace BluePalace {
         core.extractBlocks(floorId);
         const blocks = core.status.maps[floorId].blocks;
 
-        const ctx = core.createCanvas(`@doorConvert`, 0, 0, 480, 480, 35);
-        const time = core.values.animateSpeed / 3;
-
         const toConvert: DoorConvertInfo[] = [];
         blocks.forEach(v => {
             if (v.id === 492) {
@@ -52,31 +50,24 @@ export namespace BluePalace {
         core.lockControl();
         core.playSound('door.mp3');
 
-        new Promise<void>(res => {
-            drawDoors(ctx, toConvert, 0);
-            setTimeout(res, time);
-        })
-            .then(() => {
-                drawDoors(ctx, toConvert, 1);
-                return new Promise<void>(res => {
-                    setTimeout(res, time);
-                });
-            })
-            .then(() => {
-                drawDoors(ctx, toConvert, 2);
-                return new Promise<void>(res => {
-                    setTimeout(res, time);
-                });
-            })
-            .then(() => {
-                drawDoors(ctx, toConvert, 3);
-                return new Promise<void>(res => {
-                    core.unlockControl();
-                    core.deleteCanvas('@doorConvert');
-                    core.doAction();
-                    setTimeout(res, time);
-                });
+        const Adapter = Mota.require('module', 'Render').RenderAdapter;
+        const adapter = Adapter.get<LayerDoorAnimate>('door-animate');
+        const texture = Mota.require('module', 'Render').texture;
+        if (adapter) {
+            Promise.all(
+                toConvert.map(v => {
+                    const block = core.initBlock(
+                        v[1],
+                        v[2],
+                        texture.idNumberMap[v[0]]
+                    );
+                    return adapter.all('openDoor', block);
+                })
+            ).then(() => {
+                core.unlockControl();
+                core.doAction();
             });
+        }
     }
 
     // ---------- 传送门部分
