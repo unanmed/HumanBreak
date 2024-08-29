@@ -10,6 +10,7 @@ import { BluePalace } from '@/game/mechanism/misc';
 import { backDir } from './utils';
 import type { TimingFn } from 'mutate-animate';
 import EventEmitter from 'eventemitter3';
+import type { FloorViewport } from '@/core/render/preset/viewport';
 
 // 向后兼容用，会充当两个版本间过渡的作用
 
@@ -18,6 +19,7 @@ interface Adapters {
     'door-animate'?: RenderAdapter<LayerDoorAnimate>;
     animate?: RenderAdapter<LayerGroupAnimate>;
     layer?: RenderAdapter<Layer>;
+    viewport?: RenderAdapter<FloorViewport>;
 }
 
 interface MoveEvent {
@@ -38,11 +40,13 @@ export function init() {
         const doorAnimate = Adapter.get<LayerDoorAnimate>('door-animate');
         const animate = Adapter.get<LayerGroupAnimate>('animate');
         const layer = Adapter.get<Layer>('layer');
+        const viewport = Adapter.get<FloorViewport>('viewport');
 
         adapters['hero-adapter'] = hero;
         adapters['door-animate'] = doorAnimate;
         adapters['animate'] = animate;
         adapters['layer'] = layer;
+        adapters['viewport'] = viewport;
     }
 
     let moving: boolean = false;
@@ -193,6 +197,17 @@ export function init() {
                 }
 
                 stepEnding = adapter.all('move', moveDir);
+                if (portal && portalData) {
+                    adapters.viewport?.all(
+                        'mutateTo',
+                        portalData.x,
+                        portalData.y
+                    );
+                } else {
+                    const { nx, ny } = getNextLoc();
+                    adapters.viewport?.all('moveTo', nx, ny);
+                }
+
                 await stepEnding;
 
                 moveEmit.emit('stepEnd');
@@ -260,11 +275,13 @@ export function init() {
         callback?: () => void
     ) {
         if (portal && portalData) {
+            const before = moveDir;
             const { x, y, dir } = portalData;
             core.setHeroLoc('x', x);
             core.setHeroLoc('y', y);
             core.setHeroLoc('direction', dir);
             portal = false;
+            moveDir = before;
         } else if (!noPass) {
             const { nx, ny } = getNextLoc();
             core.setHeroLoc('x', nx, true);
@@ -929,6 +946,7 @@ export function init() {
             if (moving) return;
             const sx = core.getHeroLoc('x');
             const sy = core.getHeroLoc('y');
+            adapters.viewport?.all('mutateTo', ex, ey);
 
             const locked = core.status.lockControl;
             core.lockControl();
@@ -955,6 +973,18 @@ export function init() {
             core.setHeroLoc('x', ex);
             core.setHeroLoc('y', ey);
             callback?.();
+        };
+
+        // ----- 视角处理
+
+        ////// 瞬间移动 //////
+        control.prototype.moveDirectly = function (
+            destX: number,
+            destY: number,
+            ignoreSteps: number
+        ) {
+            adapters.viewport?.all('mutateTo', destX, destY);
+            return this.controldata.moveDirectly(destX, destY, ignoreSteps);
         };
     });
 

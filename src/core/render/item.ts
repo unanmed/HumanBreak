@@ -119,6 +119,7 @@ export interface ERenderItemEvent {
 
 interface TickerDelegation {
     fn: TickerFn;
+    timeout?: number;
     endFn?: () => void;
 }
 
@@ -179,11 +180,18 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     protected cacheDirty: boolean = true;
     /** 是否启用缓存机制 */
     readonly enableCache: boolean = true;
+    /** 是否启用transform下穿机制 */
+    readonly transformFallThrough: boolean = false;
 
-    constructor(type: RenderItemPosition, enableCache: boolean = true) {
+    constructor(
+        type: RenderItemPosition,
+        enableCache: boolean = true,
+        transformFallThrough: boolean = false
+    ) {
         super();
 
         this.enableCache = enableCache;
+        this.transformFallThrough = transformFallThrough;
         this.type = type;
 
         this.cache.withGameScale(true);
@@ -222,7 +230,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         if (this.hidden) return;
         this.emit('beforeRender', transform);
         this.needUpdate = false;
-        const tran = this.transform;
+        const tran = this.transformFallThrough ? transform : this.transform;
 
         const ax = -this.anchorX * this.width;
         const ay = -this.anchorY * this.height;
@@ -320,7 +328,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         RenderItem.tickerMap.set(id, delegation);
         RenderItem.ticker.add(fn);
         if (typeof time === 'number' && time < 2147438647 && time > 0) {
-            setTimeout(() => {
+            delegation.timeout = window.setTimeout(() => {
                 RenderItem.ticker.remove(fn);
                 end?.();
             }, time);
@@ -332,6 +340,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         const delegation = RenderItem.tickerMap.get(id);
         if (!delegation) return false;
         RenderItem.ticker.remove(delegation.fn);
+        window.clearTimeout(delegation.timeout);
         if (callEnd) delegation.endFn?.();
         return true;
     }

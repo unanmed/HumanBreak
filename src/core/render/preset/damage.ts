@@ -165,7 +165,7 @@ export class Damage extends Sprite<EDamageEvent> {
     private needUpdateBlocks: Set<number> = new Set();
 
     constructor() {
-        super('absolute', false);
+        super('absolute', false, true);
 
         this.block = new BlockCacher(0, 0, core._WIDTH_, 1);
         this.type = 'absolute';
@@ -175,11 +175,11 @@ export class Damage extends Sprite<EDamageEvent> {
         this.damageMap.setAntiAliasing(true);
         this.damageMap.size(core._PX_, core._PY_);
 
-        this.setRenderFn((canvas, camera) => {
+        this.setRenderFn((canvas, transform) => {
             const { ctx } = canvas;
             const { width, height } = canvas;
             ctx.imageSmoothingEnabled = false;
-            this.renderDamage(camera);
+            this.renderDamage(transform);
             ctx.drawImage(this.damageMap.canvas, 0, 0, width, height);
         });
     }

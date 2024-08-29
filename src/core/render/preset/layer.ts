@@ -107,11 +107,14 @@ export class LayerGroup extends Container implements IAnimateFrame {
     /** 地图显示层 */
     layers: Map<FloorLayer, Layer> = new Map();
 
+    /** 这个地图组的摄像机 */
+    camera: Transform = new Transform();
+
     private needRender?: NeedRenderData;
     private extend: Map<string, ILayerGroupRenderExtends> = new Map();
 
     constructor() {
-        super('static');
+        super('static', true);
 
         this.setHD(true);
         this.setAntiAliasing(false);
@@ -126,6 +129,17 @@ export class LayerGroup extends Container implements IAnimateFrame {
         const binder = new LayerGroupFloorBinder();
         this.extends(binder);
         binder.bindThis();
+    }
+
+    protected render(canvas: MotaOffscreenCanvas2D): void {
+        const { ctx } = canvas;
+
+        this.sortedChildren.forEach(v => {
+            if (v.hidden) return;
+            ctx.save();
+            v.renderContent(canvas, this.camera);
+            ctx.restore();
+        });
     }
 
     /**
@@ -633,7 +647,7 @@ export class Layer extends Container {
     protected backMap: MotaOffscreenCanvas2D = new MotaOffscreenCanvas2D();
 
     /** 最终渲染至的Sprite */
-    main: Sprite = new Sprite('static', false);
+    main: Sprite = new Sprite('absolute', false, true);
 
     /** 渲染的层 */
     layer?: FloorLayer;
@@ -670,7 +684,7 @@ export class Layer extends Container {
     moving: Set<LayerMovingRenderable> = new Set();
 
     constructor() {
-        super('absolute', false);
+        super('absolute', false, true);
 
         // this.setHD(false);
         this.setAntiAliasing(false);

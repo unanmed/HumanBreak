@@ -23,8 +23,12 @@ export class Container<E extends EContainerEvent = EContainerEvent>
      * @param type 渲染模式，absolute表示绝对位置，static表示跟随摄像机移动
      * @param cache 是否启用缓存机制
      */
-    constructor(type: RenderItemPosition = 'static', cache: boolean = true) {
-        super(type, cache);
+    constructor(
+        type: RenderItemPosition = 'static',
+        cache: boolean = true,
+        fall: boolean = false
+    ) {
+        super(type, cache, fall);
         this.type = type;
     }
 

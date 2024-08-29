@@ -9,6 +9,7 @@ import { LayerGroupFilter } from '@/plugin/fx/gameCanvas';
 import { LayerGroupAnimate } from './preset/animate';
 import { LayerGroupPortal } from '@/plugin/fx/portal';
 import { LayerGroupHalo } from '@/plugin/fx/halo';
+import { FloorViewport } from './preset/viewport';
 
 let main: MotaRenderer;
 
@@ -37,6 +38,7 @@ Mota.require('var', 'loading').once('loaded', () => {
     const animate = new LayerGroupAnimate();
     const portal = new LayerGroupPortal();
     const halo = new LayerGroupHalo();
+    const viewport = new FloorViewport();
     layer.extends(damage);
     layer.extends(detail);
     layer.extends(filter);
@@ -46,6 +48,7 @@ Mota.require('var', 'loading').once('loaded', () => {
     layer.getLayer('event')?.extends(door);
     layer.getLayer('event')?.extends(shadow);
     layer.extends(animate);
+    layer.extends(viewport);
 
     render.appendChild(layer);
     // console.log(render);

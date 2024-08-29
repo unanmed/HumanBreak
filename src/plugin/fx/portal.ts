@@ -95,7 +95,7 @@ export class Portal extends Sprite {
     private delegation: number;
 
     constructor() {
-        super('static', false);
+        super('static', false, true);
 
         this.particleSetting = mainSetting.getSetting('fx.portalParticle')!;
 
