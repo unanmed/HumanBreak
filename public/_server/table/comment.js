@@ -291,6 +291,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "乾坤挪移",
 					"_data": "乾坤挪移"
 				},
+				"hpHalo": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "再生光环",
+					"_data": "再生光环"
+				},
 				"specialHalo": {
 					"_leaf": true,
 					"_type": "popCheckboxSet",

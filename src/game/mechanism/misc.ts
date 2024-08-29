@@ -104,7 +104,7 @@ export namespace BluePalace {
             { fx: 6, fy: 5, dir: 'left', tx: 8, ty: 13, toDir: 'right' }
         ],
         MT77: [
-            { fx: 2, fy: 9, dir: 'down', tx: 9, ty: 13, toDir: 'right' },
+            { fx: 2, fy: 9, dir: 'up', tx: 10, ty: 13, toDir: 'right' },
             { fx: 10, fy: 8, dir: 'right', tx: 3, ty: 0, toDir: 'down' },
             { fx: 1, fy: 0, dir: 'down', tx: 8, ty: 1, toDir: 'left' }
         ]
@@ -120,7 +120,7 @@ export namespace BluePalace {
             ],
             down: [
                 [0, 0],
-                [0, -1]
+                [0, 1]
             ],
             right: [
                 [0, 0],
@@ -128,7 +128,7 @@ export namespace BluePalace {
             ],
             up: [
                 [0, 0],
-                [0, 1]
+                [0, -1]
             ]
         };
         for (const [floor, p] of Object.entries(portals)) {
@@ -142,9 +142,9 @@ export namespace BluePalace {
                 const [[toFdx, toFdy], [toTdx, toTdy]] =
                     delta[backDir(v.toDir)];
                 const fx = v.fx + fdx;
-                const fy = v.fy - fdy;
+                const fy = v.fy + fdy;
                 const tx = v.fx + tdx;
-                const ty = v.fy - tdy;
+                const ty = v.fy + tdy;
                 const index = fx + fy * width;
                 const backIndex = tx + ty * width;
                 if (index < 0 || backIndex < 0) return;
@@ -166,7 +166,7 @@ export namespace BluePalace {
                 };
                 backData[backDir(v.dir)] = {
                     x: v.tx - toTdx,
-                    y: v.ty + toTdy,
+                    y: v.ty - toTdy,
                     dir: v.toDir
                 };
             });
@@ -175,9 +175,9 @@ export namespace BluePalace {
                 const [[fdx, fdy], [tdx, tdy]] = delta[backDir(v.toDir)];
                 const [[toFdx, toFdy], [toTdx, toTdy]] = delta[v.dir];
                 const fx = v.tx - fdx;
-                const fy = v.ty + fdy;
+                const fy = v.ty - fdy;
                 const tx = v.tx - tdx;
-                const ty = v.ty + tdy;
+                const ty = v.ty - tdy;
                 const index = fx + fy * width;
                 const backIndex = tx + ty * width;
 
@@ -199,7 +199,7 @@ export namespace BluePalace {
                 };
                 backData[backDir(v.toDir)] = {
                     x: v.fx + toTdx,
-                    y: v.fy - toTdy,
+                    y: v.fy + toTdy,
                     dir: v.dir
                 };
             });
