@@ -131,8 +131,9 @@ export class LayerGroupFloorBinder
         this.emit('setBlock', x, y, floor, block);
     }
 
-    private checkLayerExtends(layer: Layer) {
+    checkLayerExtends(layer: Layer) {
         const ex = layer.getExtends('floor-binder');
+
         if (!ex) {
             const extend = new LayerFloorBinder(this);
             layer.extends(extend);
@@ -147,15 +148,16 @@ export class LayerGroupFloorBinder
 
     awake(group: LayerGroup) {
         this.group = group;
+
         for (const layer of group.layers.values()) {
             this.checkLayerExtends(layer);
         }
         LayerGroupFloorBinder.activedBinder.add(this);
     }
 
-    // onLayerAdd(group: LayerGroup, layer: Layer): void {
-    //     this.checkLayerExtends(layer);
-    // }
+    onLayerAdd(group: LayerGroup, layer: Layer): void {
+        this.checkLayerExtends(layer);
+    }
 
     onDestroy(group: LayerGroup) {
         LayerGroupFloorBinder.activedBinder.delete(this);
@@ -272,6 +274,7 @@ export class LayerFloorBinder implements ILayerRenderExtends {
             if (group instanceof LayerGroup) {
                 const ex = group.getExtends('floor-binder');
                 if (ex instanceof LayerGroupFloorBinder) {
+                    ex.checkLayerExtends(layer);
                     this.parent = ex;
                 }
             }

@@ -246,5 +246,12 @@ export const specials: SpecialDeclaration[] = [
             )}格。不同怪物间为加算叠加`;
         },
         color: '#FDCD0B'
+    },
+    {
+        code: 31,
+        name: '再生光环',
+        desc: enemy =>
+            `怪物周围7*7范围内的所有怪物（包括自身）生命值提高${enemy.hpHalo}%`,
+        color: '#85FF99'
     }
 ];

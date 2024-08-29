@@ -46,7 +46,8 @@ const haloColor: Record<number, string[]> = {
     25: ['purple'],
     26: ['blue'],
     27: ['red'],
-    29: ['#3CFF49']
+    29: ['#3CFF49'],
+    31: ['#51E9FF']
 };
 
 class Halo extends Sprite {

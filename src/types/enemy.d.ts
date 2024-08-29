@@ -29,7 +29,8 @@ type PartialNumbericEnemyProperty =
     | 'iceHalo'
     | 'day'
     | 'night'
-    | 'melt';
+    | 'melt'
+    | 'hpHalo';
 
 type BooleanEnemyProperty =
     | 'zoneSquare'
@@ -97,6 +98,38 @@ type Enemy<I extends EnemyIds = EnemyIds> = {
 } & {
     [P in BooleanEnemyProperty]?: boolean;
 } & EnemyInfoBase;
+
+interface EnemyInfoBase extends EnemySpecialBase {
+    /**
+     * 生命值
+     */
+    hp: number;
+
+    /**
+     * 攻击力
+     */
+    atk: number;
+
+    /**
+     * 防御力
+     */
+    def: number;
+
+    /**
+     * 金币
+     */
+    money: number;
+
+    /**
+     * 经验
+     */
+    exp: number;
+
+    /**
+     * 加点量
+     */
+    point: number;
+}
 
 /**
  * 怪物的特殊属性定义

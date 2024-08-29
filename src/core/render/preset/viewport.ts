@@ -326,15 +326,12 @@ export class FloorViewport implements ILayerGroupRenderExtends {
             const half = cell / 2;
             nx = this.nx;
             ny = this.ny;
-            const ox = nx * cell;
-            const oy = ny * cell;
+            const ox = this.nx * cell - halfWidth + half;
+            const oy = this.ny * cell - halfHeight + half;
             core.bigmap.offsetX = ox;
             core.bigmap.offsetY = oy;
 
-            this.group.camera.setTranslate(
-                -ox + halfWidth - half,
-                -oy + halfHeight - half
-            );
+            this.group.camera.setTranslate(-ox, -oy);
             this.group.update(this.group);
         });
         // this.createMoving();

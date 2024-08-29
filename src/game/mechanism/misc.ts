@@ -92,12 +92,21 @@ export namespace BluePalace {
     export const portalMap: PortalMap = new Map();
 
     export const portals: Partial<Record<FloorIds, Portal[]>> = {
-        MT75: [
-            { fx: 7, fy: 7, dir: 'left', tx: 9, ty: 9, toDir: 'down' },
-            { fx: 5, fy: 11, dir: 'right', tx: 7, ty: 9, toDir: 'up' },
-            { fx: 4, fy: 6, dir: 'right', tx: 9, ty: 4, toDir: 'up' },
-            { fx: 5, fy: 9, dir: 'right', tx: 3, ty: 7, toDir: 'up' },
-            { fx: 7, fy: 5, dir: 'right', tx: 4, ty: 9, toDir: 'up' }
+        // MT75: [
+        //     { fx: 7, fy: 7, dir: 'left', tx: 9, ty: 9, toDir: 'down' },
+        //     { fx: 5, fy: 11, dir: 'right', tx: 7, ty: 9, toDir: 'up' },
+        //     { fx: 4, fy: 6, dir: 'right', tx: 9, ty: 4, toDir: 'up' },
+        //     { fx: 5, fy: 9, dir: 'right', tx: 3, ty: 7, toDir: 'up' },
+        //     { fx: 7, fy: 5, dir: 'right', tx: 4, ty: 9, toDir: 'up' }
+        // ]
+        MT76: [
+            { fx: 11, fy: 7, dir: 'right', tx: 4, ty: 6, toDir: 'down' },
+            { fx: 6, fy: 5, dir: 'left', tx: 8, ty: 13, toDir: 'right' }
+        ],
+        MT77: [
+            { fx: 2, fy: 9, dir: 'down', tx: 9, ty: 13, toDir: 'right' },
+            { fx: 10, fy: 8, dir: 'right', tx: 3, ty: 0, toDir: 'down' },
+            { fx: 1, fy: 0, dir: 'down', tx: 8, ty: 1, toDir: 'left' }
         ]
     };
     loading.once('coreInit', initPortals);
@@ -133,11 +142,12 @@ export namespace BluePalace {
                 const [[toFdx, toFdy], [toTdx, toTdy]] =
                     delta[backDir(v.toDir)];
                 const fx = v.fx + fdx;
-                const fy = v.fy + fdy;
+                const fy = v.fy - fdy;
                 const tx = v.fx + tdx;
-                const ty = v.fy + tdy;
+                const ty = v.fy - tdy;
                 const index = fx + fy * width;
                 const backIndex = tx + ty * width;
+                if (index < 0 || backIndex < 0) return;
                 let data = map.get(index);
                 let backData = map.get(backIndex);
                 if (!data) {
@@ -155,7 +165,7 @@ export namespace BluePalace {
                     dir: backDir(v.toDir)
                 };
                 backData[backDir(v.dir)] = {
-                    x: v.tx + toTdx,
+                    x: v.tx - toTdx,
                     y: v.ty + toTdy,
                     dir: v.toDir
                 };
@@ -164,9 +174,9 @@ export namespace BluePalace {
             p.forEach(v => {
                 const [[fdx, fdy], [tdx, tdy]] = delta[backDir(v.toDir)];
                 const [[toFdx, toFdy], [toTdx, toTdy]] = delta[v.dir];
-                const fx = v.tx + fdx;
+                const fx = v.tx - fdx;
                 const fy = v.ty + fdy;
-                const tx = v.tx + tdx;
+                const tx = v.tx - tdx;
                 const ty = v.ty + tdy;
                 const index = fx + fy * width;
                 const backIndex = tx + ty * width;
@@ -189,7 +199,7 @@ export namespace BluePalace {
                 };
                 backData[backDir(v.toDir)] = {
                     x: v.fx + toTdx,
-                    y: v.fy + toTdy,
+                    y: v.fy - toTdy,
                     dir: v.dir
                 };
             });
@@ -198,5 +208,6 @@ export namespace BluePalace {
 
     function initPortals() {
         generatePortalMap();
+        console.log(portalMap);
     }
 }

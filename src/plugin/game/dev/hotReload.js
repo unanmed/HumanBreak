@@ -44,7 +44,6 @@ export {};
             delete core.status.mapBlockObjs[data];
             core.extractBlocks(data);
             if (data === core.status.floorId) {
-                core.drawMap(data);
                 let weather = core.getFlag('__weather__', null);
                 if (!weather && core.status.thisMap.weather)
                     weather = core.status.thisMap.weather;
@@ -54,6 +53,12 @@ export {};
             core.updateStatusBar(true, true);
         }
         Mota.require('module', 'Shadow').Shadow.update(true);
+        const Binder = Mota.require('module', 'Render').LayerGroupFloorBinder;
+        Binder.activedBinder.forEach(v => {
+            if (v.getFloor() === core.status.floorId) {
+                v.updateBindData();
+            }
+        });
         console.log(`Floor hot reload: ${data}`);
     }
 

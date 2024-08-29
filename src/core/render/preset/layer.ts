@@ -211,7 +211,7 @@ export class LayerGroup extends Container implements IAnimateFrame {
     addLayer(layer: FloorLayer) {
         const l = new Layer();
         l.layer = layer;
-        if (l.layer) this.layers.set(l.layer, l);
+        this.layers.set(layer, l);
         l.setZIndex(layerZIndex[layer]);
         this.appendChild(l);
 
@@ -1069,6 +1069,7 @@ export class Layer extends Container {
         this.renderData = Array(width * height).fill(0);
         this.autotiles = {};
         this.block.size(width, height);
+        this.block.clearAllCache();
 
         for (const ex of this.extend.values()) {
             ex.onMapResize?.(this, width, height);

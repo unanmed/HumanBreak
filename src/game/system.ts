@@ -36,6 +36,7 @@ import type { RenderItem } from '@/core/render/item';
 import type { RenderAdapter } from '@/core/render/adapter';
 import type { ItemState } from './state/item';
 import type { Layer } from '@/core/render/preset/layer';
+import type { LayerGroupFloorBinder } from '@/core/render/preset/floor';
 
 interface ClassInterface {
     // 渲染进程与游戏进程通用
@@ -116,6 +117,7 @@ interface ModuleInterface {
         RenderItem: typeof RenderItem;
         RenderAdapter: typeof RenderAdapter;
         Layer: typeof Layer;
+        LayerGroupFloorBinder: typeof LayerGroupFloorBinder;
     };
     State: {
         ItemState: typeof ItemState;
@@ -141,8 +143,8 @@ interface PluginInterface {
     fly_r: typeof import('../plugin/ui/fly');
     chase_r: typeof import('../plugin/chase/chase');
     // webglUtils: typeof import('../plugin/webgl/utils');
-    shadow_r: typeof import('../plugin/shadow/shadow');
-    gameShadow_r: typeof import('../plugin/shadow/gameShadow');
+    // shadow_r: typeof import('../plugin/shadow/shadow');
+    // gameShadow_r: typeof import('../plugin/shadow/gameShadow');
     // achievement: typeof import('../plugin/ui/achievement');
     completion_r: typeof import('../plugin/completion');
     // path: typeof import('../plugin/fx/path');
@@ -161,11 +163,11 @@ interface PluginInterface {
     chase_g: typeof import('../plugin/game/chase');
     skill_g: typeof import('../plugin/game/skill');
     towerBoss_g: typeof import('../plugin/game/towerBoss');
-    heroFourFrames_g: typeof import('../plugin/game/fx/heroFourFrames');
+    // heroFourFrames_g: typeof import('../plugin/game/fx/heroFourFrames');
     rewrite_g: typeof import('../plugin/game/fx/rewrite');
     itemDetail_g: typeof import('../plugin/game/fx/itemDetail');
     checkBlock_g: typeof import('../plugin/game/enemy/checkblock');
-    halo_g: typeof import('../plugin/game/fx/halo');
+    // halo_g: typeof import('../plugin/game/fx/halo');
     // study_g: typeof import('../plugin/game/study');
 }
 

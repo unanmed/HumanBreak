@@ -24,6 +24,8 @@ interface HaloType {
     };
 }
 
+type A = Enemy;
+
 export interface EnemyInfo extends Partial<Enemy> {
     atk: number;
     def: number;
@@ -74,7 +76,7 @@ interface CriticalDamageDelta extends Omit<DamageDelta, 'info'> {
 type HaloFn = (info: EnemyInfo, enemy: EnemyInfo) => void;
 
 /** 光环属性 */
-export const haloSpecials: Set<number> = new Set([8, 21, 25, 26, 27, 29]);
+export const haloSpecials: Set<number> = new Set([8, 21, 25, 26, 27, 29, 31]);
 /** 特殊属性对应 */
 export const specialValue: Map<number, SelectKey<Enemy, number | undefined>[]> =
     new Map();
@@ -639,6 +641,20 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                 type: 'square',
                 data: { x: this.x + dx, y: this.y + dy, d: 5 },
                 special: 27,
+                from: this
+            });
+        }
+
+        // 再生光环
+        if (special.includes(31)) {
+            square7.push(e => {
+                e.hpBuff_ += this.info.hpHalo ?? 0;
+            });
+            this.providedHalo.add(31);
+            col.haloList.push({
+                type: 'square',
+                data: { x: this.x + dx, y: this.y + dy, d: 7 },
+                special: 31,
                 from: this
             });
         }

@@ -71,6 +71,7 @@ import { texture } from './render/cache';
 import { RenderAdapter } from './render/adapter';
 import { getMainRenderer } from './render';
 import { Layer } from './render/preset/layer';
+import { LayerGroupFloorBinder } from './render/preset/floor';
 
 // ----- 类注册
 Mota.register('class', 'AudioPlayer', AudioPlayer);
@@ -158,7 +159,8 @@ Mota.register('module', 'Render', {
     Image,
     RenderItem,
     RenderAdapter,
-    Layer
+    Layer,
+    LayerGroupFloorBinder
 });
 
 main.renderLoaded = true;
