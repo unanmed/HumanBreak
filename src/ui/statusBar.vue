@@ -275,6 +275,7 @@ onUnmounted(() => {
     height: 2.8vw;
     margin-right: 10%;
     margin-left: 10%;
+    pointer-events: none;
 }
 
 .status-value {

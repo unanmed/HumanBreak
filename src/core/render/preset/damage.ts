@@ -323,6 +323,7 @@ export class Damage extends Sprite<EDamageEvent> {
         const y = enemy.y!;
         const { damage } = enemy.calDamage();
         const cri = enemy.calCritical(1)[0]?.atkDelta ?? Infinity;
+        const real = enemy.getRealInfo();
 
         const dam1: DamageRenderable = {
             align: 'left',
@@ -341,6 +342,19 @@ export class Damage extends Sprite<EDamageEvent> {
             y: y * this.cellSize + this.cellSize - 11
         };
         block.add(dam1).add(dam2);
+
+        if (real.special.includes(8) && real.togetherNum) {
+            const dam3: DamageRenderable = {
+                align: 'right',
+                baseline: 'top',
+                text: real.togetherNum.toString(),
+                color: '#09FF5B',
+                x: x * this.cellSize + this.cellSize - 1,
+                y: y * this.cellSize - 2,
+                strokeWidth: 3
+            };
+            block.add(dam3);
+        }
     }
 
     /**

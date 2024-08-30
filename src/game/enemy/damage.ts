@@ -24,8 +24,6 @@ interface HaloType {
     };
 }
 
-type A = Enemy;
-
 export interface EnemyInfo extends Partial<Enemy> {
     atk: number;
     def: number;
@@ -39,6 +37,7 @@ export interface EnemyInfo extends Partial<Enemy> {
     x?: number;
     y?: number;
     floorId?: FloorIds;
+    togetherNum?: number;
 }
 
 interface DamageInfo {
@@ -597,6 +596,8 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                     ) {
                         e.atkBuff_ += enemy.together ?? 0;
                         e.defBuff_ += enemy.together ?? 0;
+                        e.togetherNum ??= 0;
+                        e.togetherNum++;
                     }
                 }
             );

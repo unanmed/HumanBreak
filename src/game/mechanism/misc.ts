@@ -92,13 +92,6 @@ export namespace BluePalace {
     export const portalMap: PortalMap = new Map();
 
     export const portals: Partial<Record<FloorIds, Portal[]>> = {
-        // MT75: [
-        //     { fx: 7, fy: 7, dir: 'left', tx: 9, ty: 9, toDir: 'down' },
-        //     { fx: 5, fy: 11, dir: 'right', tx: 7, ty: 9, toDir: 'up' },
-        //     { fx: 4, fy: 6, dir: 'right', tx: 9, ty: 4, toDir: 'up' },
-        //     { fx: 5, fy: 9, dir: 'right', tx: 3, ty: 7, toDir: 'up' },
-        //     { fx: 7, fy: 5, dir: 'right', tx: 4, ty: 9, toDir: 'up' }
-        // ]
         MT76: [
             { fx: 11, fy: 7, dir: 'right', tx: 4, ty: 6, toDir: 'down' },
             { fx: 6, fy: 5, dir: 'left', tx: 8, ty: 13, toDir: 'right' }
