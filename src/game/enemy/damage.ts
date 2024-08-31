@@ -1053,6 +1053,8 @@ export function calDamageWith(
     let { atk, def, hpmax, mana } = hero as HeroStatus;
     let { hp: monHp, atk: monAtk, def: monDef, special, enemy } = info;
 
+    hpmax = Math.min(hpmax, def / 10);
+
     let damage = 0;
 
     // 饥渴

@@ -355,6 +355,18 @@ export class Damage extends Sprite<EDamageEvent> {
             };
             block.add(dam3);
         }
+        if (real.special.includes(30)) {
+            const dam4: DamageRenderable = {
+                align: 'left',
+                baseline: 'top',
+                text: '乾',
+                color: '#FDCD0B',
+                x: x * this.cellSize + 1,
+                y: y * this.cellSize - 2,
+                strokeWidth: 2
+            };
+            block.add(dam4);
+        }
     }
 
     /**

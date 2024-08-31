@@ -37,7 +37,9 @@
                         <span
                             id="status-hpmax"
                             class="status-extra status-item-bold"
-                            >+{{ format(hero.hpmax!) }}/t</span
+                            >+{{
+                                format(Math.min(hero.hpmax!, hero.def! / 10))
+                            }}/t</span
                         >
                         <span
                             v-if="has(jumpCnt)"

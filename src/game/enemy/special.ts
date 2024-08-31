@@ -69,7 +69,8 @@ export const specials: SpecialDeclaration[] = [
         code: 8,
         name: '抱团',
         desc: enemy =>
-            `怪物周围5×5范围内每有一个拥有该属性的怪物，自身攻防就增加${enemy.together}%（线性叠加）`,
+            `怪物周围5×5范围内每有一个拥有该属性的怪物（不包括自身），则对方攻防就增加${enemy.together}%（线性叠加）` +
+            `，受加成怪物会在右上角显示当前周围有多少个怪物`,
         color: '#fa4'
     },
     {

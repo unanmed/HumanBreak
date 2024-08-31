@@ -187,7 +187,7 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"E674": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E675": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E676": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
-	"E677": {"name":"骷髅巫师","hp":150000,"atk":2000,"def":5000,"money":5,"exp":600,"point":0,"special":[13]},
+	"E677": {"name":"骷髅巫师","hp":150000,"atk":2000,"def":5000,"money":5,"exp":600,"point":0,"special":[13],"crit":null},
 	"E678": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E679": {"name":"剑盾之卫","hp":30000,"atk":10000,"def":6000,"money":7,"exp":700,"point":0,"special":[1],"crit":600},
 	"E680": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
