@@ -41,7 +41,7 @@ export class LayerGroupPortal implements ILayerGroupRenderExtends {
             this.portal = new Portal();
             this.portal.setHD(true);
             this.portal.size(group.width, group.height);
-            group.getLayer('event')?.appendChild(this.portal);
+            group.appendChild(this.portal);
             this.listen();
         } else {
             logger.error(
@@ -105,10 +105,10 @@ export class Portal extends Sprite {
             }
         });
 
+        this.setZIndex(90);
+
         this.setRenderFn((canvas, transform) => {
-            // console.time();
             this.renderPortal(canvas);
-            // console.timeEnd();
         });
     }
 

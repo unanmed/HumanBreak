@@ -51,7 +51,7 @@ Mota.require('var', 'loading').once('loaded', () => {
     layer.extends(viewport);
 
     render.appendChild(layer);
-    // console.log(render);
+    console.log(render);
 });
 
 Mota.require('var', 'hook').on('reset', () => {

@@ -110,6 +110,21 @@ export namespace BluePalace {
             { fx: 2, fy: 2, dir: 'up', tx: 7, ty: 5, toDir: 'down' },
             { fx: 4, fy: 11, dir: 'up', tx: 5, ty: 7, toDir: 'right' },
             { fx: 7, fy: 11, dir: 'down', tx: 7, ty: 9, toDir: 'up' }
+        ],
+        MT80: [
+            { fx: 2, fy: 10, dir: 'right', tx: 1, ty: 2, toDir: 'down' },
+            { fx: 2, fy: 10, dir: 'left', tx: 13, ty: 5, toDir: 'up' }
+        ],
+        MT81: [
+            { fx: 4, fy: 8, dir: 'right', tx: 1, ty: 11, toDir: 'down' },
+            { fx: 7, fy: 13, dir: 'right', tx: 13, ty: 5, toDir: 'up' }
+        ],
+        MT82: [{ fx: 9, fy: 10, dir: 'left', tx: 6, ty: 5, toDir: 'left' }],
+        MT83: [
+            { fx: 5, fy: 11, dir: 'left', tx: 9, ty: 11, toDir: 'right' },
+            { fx: 5, fy: 3, dir: 'left', tx: 9, ty: 3, toDir: 'right' },
+            { fx: 2, fy: 2, dir: 'up', tx: 2, ty: 12, toDir: 'down' },
+            { fx: 12, fy: 2, dir: 'up', tx: 12, ty: 12, toDir: 'down' }
         ]
     };
     loading.once('coreInit', initPortals);
@@ -211,6 +226,5 @@ export namespace BluePalace {
 
     function initPortals() {
         generatePortalMap();
-        console.log(portalMap);
     }
 }

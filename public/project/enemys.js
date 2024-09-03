@@ -98,7 +98,7 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"E505": {"name":"勇气史塔茹","hp":3000,"atk":500,"def":250,"money":1,"exp":35,"point":0,"special":[8],"together":10},
 	"E511": {"name":"山野蝙蝠","hp":1500,"atk":300,"def":120,"money":1,"exp":37,"point":0,"special":[5]},
 	"E512": {"name":"专业盗贼","hp":1800,"atk":400,"def":170,"money":1,"exp":40,"point":0,"special":[5]},
-	"E513": {"name":"黑影剑客","hp":10000,"atk":20000,"def":null,"money":5,"exp":600,"point":null,"special":[6],"n":6},
+	"E513": {"name":"黑影剑客","hp":10000,"atk":20000,"def":0,"money":5,"exp":600,"point":null,"special":[6],"n":6},
 	"E514": {"name":"雪原剑客","hp":10000,"atk":3000,"def":500,"money":2,"exp":110,"point":0,"special":[5,19]},
 	"E515": {"name":"勇气之剑","hp":2500,"atk":550,"def":270,"money":2,"exp":40,"point":0,"special":[5,10],"courage":500},
 	"E517": {"name":"勇气之盾","hp":4000,"atk":400,"def":350,"money":1,"exp":30,"point":0,"special":[9]},
