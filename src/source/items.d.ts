@@ -191,4 +191,8 @@ interface ItemDeclaration {
     I663: 'equips';
     I664: 'items';
     I665: 'items';
+    I694: 'items';
+    I695: 'items';
+    I696: 'items';
+    I697: 'items';
 }

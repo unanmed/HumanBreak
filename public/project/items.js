@@ -1269,5 +1269,33 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "items",
 		"name": "新物品",
 		"canUseItemEffect": "true"
+	},
+	"I694": {
+		"cls": "items",
+		"name": "高级红血瓶",
+		"canUseItemEffect": "true",
+		"itemEffect": "core.status.hero.hp += Math.round(10000 * core.status.thisMap.ratio * (1 + Mota.Plugin.require('skillTree_g').getSkillLevel(13) / 50))",
+		"itemEffectTip": "，生命+${Math.round(10000 * core.status.thisMap.ratio * (1 + Mota.Plugin.require('skillTree_g').getSkillLevel(13) / 50))}"
+	},
+	"I695": {
+		"cls": "items",
+		"name": "高级蓝血瓶",
+		"canUseItemEffect": "true",
+		"itemEffect": "core.status.hero.hp += Math.round(20000 * core.status.thisMap.ratio * (1 + Mota.Plugin.require('skillTree_g').getSkillLevel(13) / 50))",
+		"itemEffectTip": "，生命+${Math.round(20000 * core.status.thisMap.ratio * (1 + Mota.Plugin.require('skillTree_g').getSkillLevel(13) / 50))}"
+	},
+	"I696": {
+		"cls": "items",
+		"name": "高级绿血瓶",
+		"canUseItemEffect": "true",
+		"itemEffect": "core.status.hero.hp += Math.round(40000 * core.status.thisMap.ratio * (1 + Mota.Plugin.require('skillTree_g').getSkillLevel(13) / 50))",
+		"itemEffectTip": "，生命+${Math.round(40000 * core.status.thisMap.ratio * (1 + Mota.Plugin.require('skillTree_g').getSkillLevel(13) / 50))}"
+	},
+	"I697": {
+		"cls": "items",
+		"name": "高级紫血瓶",
+		"canUseItemEffect": "true",
+		"itemEffect": "core.status.hero.hp += Math.round(80000 * core.status.thisMap.ratio * (1 + Mota.Plugin.require('skillTree_g').getSkillLevel(13) / 50))",
+		"itemEffectTip": "，生命+${Math.round(80000 * core.status.thisMap.ratio * (1 + Mota.Plugin.require('skillTree_g').getSkillLevel(13) / 50))}"
 	}
 }

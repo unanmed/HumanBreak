@@ -5,6 +5,7 @@ public/project/floors/*.js
 public/project/items.js
 public/project/floors/*.js
 public/project/maps.js
+public/project/icons.js
 public/_server/**/*.js
 script/**/*.js
 public/editor.html
