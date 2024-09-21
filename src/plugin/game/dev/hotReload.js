@@ -51,6 +51,7 @@ export {};
                 else core.setWeather();
             }
             core.status.maps[data].enemy?.extract();
+            core.status.maps[data].enemy?.calRealAttribute();
             core.updateStatusBar(true, true);
         }
         Mota.require('module', 'Shadow').Shadow.update(true);

@@ -75,7 +75,11 @@ interface CriticalDamageDelta extends Omit<DamageDelta, 'info'> {
 type HaloFn = (info: EnemyInfo, enemy: EnemyInfo) => void;
 
 /** 光环属性 */
-export const haloSpecials: Set<number> = new Set([8, 21, 25, 26, 27, 29, 31]);
+export const haloSpecials: Set<number> = new Set([
+    8, 21, 25, 26, 27, 29, 31, 32
+]);
+export const unassimilatable: Set<number> = new Set(haloSpecials);
+unassimilatable.add(8).add(30);
 /** 特殊属性对应 */
 export const specialValue: Map<number, SelectKey<Enemy, number | undefined>[]> =
     new Map();
@@ -95,7 +99,8 @@ specialValue
     .set(25, ['melt'])
     .set(26, ['iceCore'])
     .set(27, ['fireCore'])
-    .set(28, ['paleShield']);
+    .set(28, ['paleShield'])
+    .set(31, ['hpHalo']);
 
 interface EnemyCollectionEvent {
     extract: [];
@@ -508,6 +513,8 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         let [dx, dy] = [0, 0];
         if (col) [dx, dy] = col.translation;
 
+        // e 是被加成怪的属性，enemy 是施加光环的怪
+
         for (const halo of special) {
             switch (halo) {
                 case 29: {
@@ -656,6 +663,52 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                 type: 'square',
                 data: { x: this.x + dx, y: this.y + dy, d: 7 },
                 special: 31,
+                from: this
+            });
+        }
+
+        // 同化，它不会被光环类属性影响，因此放到这
+        if (special.includes(32)) {
+            const e = this.info;
+            const type = 'square';
+            const r = Math.floor(e.assimilateRange!);
+            const d = r * 2 + 1;
+            const range = { x: this.x, y: this.y, d };
+
+            col.applyHalo(type, range, this, (e, enemy) => {
+                // 如果是自身，就不进行特殊属性数值处理了
+                if (e === this.info) return;
+                const s = e.special;
+
+                for (const spe of s) {
+                    if (unassimilatable.has(spe)) continue;
+                    // 防止重复
+                    if (!enemy.special.includes(spe)) {
+                        enemy.special.push(spe);
+                    }
+                }
+                // 然后计算特殊属性数值
+                for (const spec of s) {
+                    if (unassimilatable.has(spec)) continue;
+                    const toChange = specialValue.get(spec);
+                    if (!toChange) continue;
+                    for (const key of toChange) {
+                        // 这种光环应该获取怪物的原始数值，而不是真实数值
+                        if (enemy.enemy.specialMultiply) {
+                            enemy[key] ??= 1;
+                            enemy[key] *= e[key] ?? 1;
+                        } else {
+                            enemy[key] ??= 0;
+                            enemy[key] += e[key] ?? 0;
+                        }
+                    }
+                }
+            });
+
+            col.haloList.push({
+                type: 'square',
+                data: range,
+                special: 32,
                 from: this
             });
         }
@@ -1120,7 +1173,7 @@ export function calDamageWith(
     // 连击
     if (special.includes(4)) enemyPerDamage *= 2;
     if (special.includes(5)) enemyPerDamage *= 3;
-    if (special.includes(6)) enemyPerDamage *= enemy.n!;
+    if (special.includes(6)) enemyPerDamage *= info.n!;
 
     // 勇士学习霜冻
     if (heroSpec.num.includes(20)) {
@@ -1192,7 +1245,7 @@ export function calDamageWith(
     if (flags.hard === 1) damage *= 0.9;
 
     if (flags.chapter > 1 && damage < 0) {
-        const dm = -enemy.hp * 0.25;
+        const dm = -info.hp * 0.25;
         if (damage < dm) damage = dm;
     }
 

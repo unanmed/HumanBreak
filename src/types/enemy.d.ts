@@ -30,7 +30,8 @@ type PartialNumbericEnemyProperty =
     | 'day'
     | 'night'
     | 'melt'
-    | 'hpHalo';
+    | 'hpHalo'
+    | 'assimilateRange';
 
 type BooleanEnemyProperty =
     | 'zoneSquare'

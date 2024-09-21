@@ -27,6 +27,7 @@ const MAX_ROTATE = 0.5;
 const FRAG_TIMING = linear();
 
 export function init() {
+    return;
     Mota.rewrite(core.events, 'afterBattle', 'add', (_, enemy, x, y) => {
         // 打怪特效
         const setting = Mota.require('var', 'mainSetting');

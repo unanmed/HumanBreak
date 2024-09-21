@@ -254,5 +254,13 @@ export const specials: SpecialDeclaration[] = [
         desc: enemy =>
             `怪物周围7*7范围内的所有怪物（包括自身）生命值提高${enemy.hpHalo}%`,
         color: '#85FF99'
+    },
+    {
+        code: 32,
+        name: '同化',
+        desc: enemy =>
+            `怪物会获得自身周围方形${enemy.assimilateRange}格范围内怪物的特殊属性（光环类属性除外），` +
+            `特殊属性数值间为${enemy.specialMultiply ? '乘算' : '加算'}关系`,
+        color: '#ffd366'
     }
 ];

@@ -300,7 +300,7 @@ interface Control {
      * 连续行走
      * @param steps 压缩的步伐数组，每项表示朝某方向走多少步
      */
-    setAutoHeroMove(steps: CompressedStep[]): void;
+    setAutoHeroMove(steps?: CompressedStep[]): void;
 
     /**
      * @deprecated

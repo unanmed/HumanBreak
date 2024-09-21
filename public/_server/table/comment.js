@@ -297,6 +297,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "再生光环",
 					"_data": "再生光环"
 				},
+				"assimilateRange": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "同化范围",
+					"_data": "同化范围"
+				},
 				"specialHalo": {
 					"_leaf": true,
 					"_type": "popCheckboxSet",
@@ -305,10 +311,10 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						var b = [],
 							c = [];
 						for (var index = 0; index < array.length; index++) {
-							b.push(index)
+							b.push(index);
 							var name = array[index].name;
 							if (name instanceof Function) name = name({});
-							c.push(name + "(" + index + ")")
+							c.push(name + "(" + index + ")");
 						}
 						return {
 							"prefix": c,
