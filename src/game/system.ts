@@ -125,6 +125,10 @@ interface ModuleInterface {
         ItemState: typeof ItemState;
         HeroMover: typeof HeroMover;
         ObjectMoverBase: typeof ObjectMoverBase;
+        heroMoveCollection: {
+            mover: HeroMover;
+            keyMover: HeroKeyMover;
+        };
     };
     Action: {
         HeroKeyMover: typeof HeroKeyMover;

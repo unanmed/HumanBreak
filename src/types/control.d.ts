@@ -193,6 +193,7 @@ interface Control {
     readonly noAutoEvent: boolean;
 
     /**
+     * @deprecated
      * 注册的帧动画
      */
     readonly renderFrameFunc: RenderFrame[];
@@ -203,11 +204,13 @@ interface Control {
     readonly replayActions: ReplayAction[];
 
     /**
+     * @deprecated
      * 注册的resize操作
      */
     readonly resizes: ResizeAction[];
 
     /**
+     * @deprecated
      * 注册的天气
      */
     readonly weathers: Record<string, WeatherAction>;
@@ -238,6 +241,7 @@ interface Control {
     unregisterAnimationFrame(name: string): void;
 
     /**
+     * @deprecated
      * 进入标题画面
      * @example core.showStartAnimate(); // 重启游戏但不重置bgm
      * @param noAnimate 是否不由黑屏淡入而是立即亮屏
@@ -246,6 +250,7 @@ interface Control {
     showStartAnimate(noAnimate?: boolean, callback?: () => void): void;
 
     /**
+     * @deprecated
      * 淡出标题画面
      * @example core.hideStartAnimate(core.startGame); // 淡出标题画面并开始新游戏，跳过难度选择
      * @param callback 标题画面完全淡出后的回调函数
@@ -309,13 +314,13 @@ interface Control {
     setHeroMoveInterval(callback?: () => any): void;
 
     /**
+     * @deprecated
      * 每移动一格后执行的函数
      */
     moveOneStep(callback?: () => any): void;
 
     /**
-     * @deprecated 尽量不要使用！！如果需要无视地形使用代码来移动勇士，请使用 `eventMoveHero`
-     *             如果需要向前前进一格或撞击，再使用本函数
+     * @deprecated 尽量不要使用！！可以使用HeroMover来实现
      * 尝试前进一步，如果面前不可被踏入就会直接触发该点事件
      * @example core.moveAction(core.doAction); // 尝试前进一步，然后继续事件处理
      * @param callback 走一步后的回调函数
@@ -323,11 +328,11 @@ interface Control {
     moveAction(callback?: () => void): void;
 
     /**
-     * @deprecated 尽量不要使用！！如果需要无视地形使用代码来移动勇士，请使用 `eventMoveHero`
+     * @deprecated 尽量不要使用！！可以使用HeroMover来实现
      * 向指定方向移动一格
      * @example core.moveHero(); // 连续前进
      * @param direction 移动的方向，不设置就是勇士当前的方向
-     * @param callback 回调函数，设置了就只走一步
+     * @param callback 回调函数
      */
     moveHero(direction?: Dir, callback?: () => void): void;
 

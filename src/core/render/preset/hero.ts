@@ -168,7 +168,6 @@ export class HeroRenderer
      */
     resetRenderable(getInfo: boolean) {
         this.movingFrame = 0;
-        console.trace();
 
         if (this.renderable) {
             this.renderable.animate = 0;

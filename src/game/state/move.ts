@@ -4,7 +4,7 @@ import { loading } from '../game';
 import type { RenderAdapter } from '@/core/render/adapter';
 import type { HeroRenderer } from '@/core/render/preset/hero';
 import type { FloorViewport } from '@/core/render/preset/viewport';
-import type { KeyCode } from '@/plugin/keyCodes';
+import type { HeroKeyMover } from '@/core/main/action/move';
 
 interface MoveStepDir {
     type: 'dir';
@@ -16,7 +16,7 @@ interface MoveStepSpeed {
     value: number;
 }
 
-type MoveStep = MoveStepDir | MoveStepSpeed;
+export type MoveStep = MoveStepDir | MoveStepSpeed;
 
 export interface IMoveController {
     /** 本次移动是否完成 */
@@ -54,6 +54,9 @@ export abstract class ObjectMoverBase extends EventEmitter<EObjectMovingEvent> {
     moveDir: Dir2 = 'down';
     /** 当前是否正在移动 */
     moving: boolean = false;
+
+    /** 当前的控制对象 */
+    controller?: IMoveController;
 
     /**
      * 当本次移动开始时执行的函数
@@ -133,7 +136,10 @@ export abstract class ObjectMoverBase extends EventEmitter<EObjectMovingEvent> {
             await this.onMoveEnd(controller);
         };
 
-        const onEnd = start();
+        const onEnd = start().then(() => {
+            this.controller = void 0;
+            controller.done = true;
+        });
         const controller: IMoveController = {
             done: false,
             onEnd,
@@ -146,6 +152,7 @@ export abstract class ObjectMoverBase extends EventEmitter<EObjectMovingEvent> {
                 return onEnd;
             }
         };
+        this.controller = controller;
 
         return controller;
     }
@@ -375,14 +382,23 @@ export class HeroMover extends ObjectMoverBase {
     }
 }
 
+interface HeroMoveCollection {
+    mover: HeroMover;
+    keyMover?: HeroKeyMover;
+}
+
 // 初始化基础勇士移动实例
-export const heroMover = new HeroMover();
+const heroMover = new HeroMover();
+export const heroMoveCollection: HeroMoveCollection = {
+    mover: heroMover
+};
 loading.once('coreInit', () => {
     // 注册按键操作
     Mota.r(() => {
         const { HeroKeyMover } = Mota.require('module', 'Action');
         const gameKey = Mota.require('var', 'gameKey');
         const keyMover = new HeroKeyMover(gameKey, heroMover);
+        heroMoveCollection.keyMover = keyMover;
     });
 });
 
