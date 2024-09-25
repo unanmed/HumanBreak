@@ -50,7 +50,7 @@ export function init() {
     }
 
     let moving: boolean = false;
-    let stopChian: boolean = false;
+    let stopChain: boolean = false;
     let moveDir: Dir;
     let stepDir: Dir;
     let moveEnding: Promise<any[]> = Promise.resolve([]);
@@ -65,24 +65,24 @@ export function init() {
     let portal: boolean = false;
 
     const pressedArrow: Set<Dir> = new Set();
-    Mota.r(() => {
-        const gameKey = Mota.require('var', 'gameKey');
-        const { moveUp, moveDown, moveLeft, moveRight } = gameKey.data;
-        const symbol = Symbol.for('@key_main');
-        gameKey.on('press', code => {
-            if (core.status.lockControl || gameKey.scope !== symbol) return;
-            if (code === moveUp.key) onMoveKeyDown('up');
-            if (code === moveDown.key) onMoveKeyDown('down');
-            if (code === moveLeft.key) onMoveKeyDown('left');
-            if (code === moveRight.key) onMoveKeyDown('right');
-        });
-        gameKey.on('release', code => {
-            if (code === moveUp.key) onMoveKeyUp('up');
-            if (code === moveDown.key) onMoveKeyUp('down');
-            if (code === moveLeft.key) onMoveKeyUp('left');
-            if (code === moveRight.key) onMoveKeyUp('right');
-        });
-    });
+    // Mota.r(() => {
+    //     const gameKey = Mota.require('var', 'gameKey');
+    //     const { moveUp, moveDown, moveLeft, moveRight } = gameKey.data;
+    //     const symbol = Symbol.for('@key_main');
+    //     gameKey.on('press', code => {
+    //         if (core.status.lockControl || gameKey.scope !== symbol) return;
+    //         if (code === moveUp.key) onMoveKeyDown('up');
+    //         if (code === moveDown.key) onMoveKeyDown('down');
+    //         if (code === moveLeft.key) onMoveKeyDown('left');
+    //         if (code === moveRight.key) onMoveKeyDown('right');
+    //     });
+    //     gameKey.on('release', code => {
+    //         if (code === moveUp.key) onMoveKeyUp('up');
+    //         if (code === moveDown.key) onMoveKeyUp('down');
+    //         if (code === moveLeft.key) onMoveKeyUp('left');
+    //         if (code === moveRight.key) onMoveKeyUp('right');
+    //     });
+    // });
 
     function onMoveKeyDown(type: Dir) {
         pressedArrow.add(type);
@@ -91,15 +91,15 @@ export function init() {
             stepDir = moveDir;
             readyMove();
         }
-        if (moving && stopChian) {
-            stopChian = false;
+        if (moving && stopChain) {
+            stopChain = false;
         }
     }
 
     function onMoveKeyUp(type: Dir) {
         pressedArrow.delete(type);
         if (pressedArrow.size === 0) {
-            stopChian = true;
+            stopChain = true;
         } else {
             const arr = [...pressedArrow];
             moveDir = arr[0];
@@ -127,7 +127,7 @@ export function init() {
             }
             await adapter.all('readyMove');
             moving = true;
-            stopChian = false;
+            stopChain = false;
 
             startHeroMoveChain(ignoreTerrain, noRoute, inLockControl, callback);
         }
@@ -143,7 +143,7 @@ export function init() {
             return Promise.resolve();
         } else {
             if (moving) {
-                stopChian = true;
+                stopChain = true;
                 moveEnding = adapter.all('endMove');
                 await moveEnding;
                 moveEmit.emit('moveEnd');
@@ -161,7 +161,9 @@ export function init() {
     function continueAfterEnd() {
         requestAnimationFrame(() => {
             if (pressedArrow.size === 0 || moving) {
-                stopChian = true;
+                // console.log(6);
+
+                stopChain = true;
                 return;
             }
             if (checkCanMoveStatus()) {
@@ -185,8 +187,8 @@ export function init() {
         if (!adapter) {
             return Promise.resolve();
         } else {
-            while (moving || !stopChian) {
-                if (stopChian || (!inLockControl && core.status.lockControl)) {
+            while (moving || !stopChain) {
+                if (stopChain || (!inLockControl && core.status.lockControl)) {
                     break;
                 }
 
@@ -215,7 +217,7 @@ export function init() {
             }
 
             endMove();
-            stopChian = false;
+            stopChain = false;
         }
     }
 
@@ -295,6 +297,30 @@ export function init() {
         core.moveOneStep();
         core.checkRouteFolding();
         callback?.();
+    }
+
+    async function moveHeroAs(step: DiredLoc[]) {
+        if (moving) return;
+        // console.log(step);
+
+        let now = step.shift();
+        if (!now) return;
+
+        stepDir = now.direction;
+        await readyMove();
+        while (now) {
+            if (!moving) break;
+            stepDir = now.direction;
+
+            await new Promise<void>(res => {
+                moveEmit.once('stepEnd', () => {
+                    now = step.shift();
+                    if (!now) endMove();
+                    console.log(now?.direction);
+                    res();
+                });
+            });
+        }
     }
 
     // ----- 移动 - 传送门
@@ -437,8 +463,8 @@ export function init() {
             }
         });
 
-        const step0 = steps.find(v => !v.startsWith('speed')) as Move2;
-        return { steps, start: step0 };
+        const step0 = moveSteps.find(v => !v.startsWith('speed')) as Move2;
+        return { steps: moveSteps, start: step0 };
     }
 
     /**
@@ -495,7 +521,7 @@ export function init() {
         control.prototype.moveAction = async function (callback?: () => void) {
             // await endMove(false);
             moveEmit.once('stepEnd', () => {
-                stopChian = true;
+                stopChain = true;
                 endMove(false);
             });
             readyMove(false, true, true, callback);
@@ -570,14 +596,14 @@ export function init() {
             readyMove(true, true, true);
             while (++pointer < len) {
                 const dir = moveSteps[pointer];
-                if (dir === 'backward') moveDir = backDir(moveDir);
+                if (dir === 'backward') stepDir = backDir(stepDir);
                 else if (dir.startsWith('speed')) {
                     const speed = parseInt(dir.slice(6));
                     list.forEach(v => v.setMoveSpeed(speed));
                 } else if (dir !== 'forward') {
-                    moveDir = dir as Dir;
+                    stepDir = dir as Dir;
                 }
-                const { x, y } = core.utils.scan[moveDir];
+                const { x, y } = core.utils.scan[stepDir];
                 nx += x;
                 ny += y;
                 await new Promise<void>(res => {
@@ -617,7 +643,9 @@ export function init() {
         control.prototype.waitHeroToStop = function (callback?: () => void) {
             core.stopAutomaticRoute();
             core.clearContinueAutomaticRoute();
-            moveEnding.then(() => {
+
+            stopChain = true;
+            stepEnding.then(() => {
                 callback?.();
             });
         };
@@ -639,7 +667,8 @@ export function init() {
             moveDir = direction;
             stepDir = direction;
             await readyMove();
-            stopChian = true;
+
+            stopChain = true;
 
             callback?.();
         };
@@ -647,11 +676,50 @@ export function init() {
         events.prototype.setHeroIcon = function (name: ImageIds) {
             const img = core.material.images.images[name];
             if (!img) return;
-            adapters['hero-adapter']?.all('setImage', img);
+            adapters['hero-adapter']?.sync('setImage', img);
         };
 
         control.prototype.isMoving = function () {
             return moving;
+        };
+
+        ////// 设置自动寻路路线 //////
+        control.prototype.setAutomaticRoute = function (
+            destX: number,
+            destY: number,
+            stepPostfix: DiredLoc[]
+        ) {
+            if (!core.status.played || core.status.lockControl) return;
+            if (this._setAutomaticRoute_isMoving(destX, destY)) return;
+            if (this._setAutomaticRoute_isTurning(destX, destY, stepPostfix))
+                return;
+            if (
+                this._setAutomaticRoute_clickMoveDirectly(
+                    destX,
+                    destY,
+                    stepPostfix
+                )
+            )
+                return;
+            // 找寻自动寻路路线
+            const moveStep = core.automaticRoute(destX, destY);
+            if (
+                moveStep.length == 0 &&
+                (destX != core.status.hero.loc.x ||
+                    destY != core.status.hero.loc.y ||
+                    stepPostfix.length == 0)
+            )
+                return;
+            moveStep.push(...stepPostfix);
+            core.status.automaticRoute.destX = destX;
+            core.status.automaticRoute.destY = destY;
+            this._setAutomaticRoute_drawRoute(moveStep);
+            this._setAutomaticRoute_setAutoSteps(moveStep);
+            // 立刻移动
+            // core.setAutoHeroMove();
+            console.log(moveStep);
+
+            moveHeroAs(moveStep.slice());
         };
 
         hook.on('reset', () => {
@@ -868,10 +936,11 @@ export function init() {
 
             for (const step of moveSteps) {
                 if (step === 'backward') stepDir = backDir(stepDir);
-                if (step.startsWith('speed')) {
+                else if (step.startsWith('speed')) {
                     time = parseInt(step.slice(6));
                     continue;
-                }
+                } else stepDir = step as Dir2;
+
                 const { x, y } = core.utils.scan2[stepDir];
                 const tx = nx + x;
                 const ty = ny + y;
@@ -983,8 +1052,10 @@ export function init() {
             destY: number,
             ignoreSteps: number
         ) {
-            adapters.viewport?.all('mutateTo', destX, destY);
-            return this.controldata.moveDirectly(destX, destY, ignoreSteps);
+            const data = this.controldata;
+            const success = data.moveDirectly(destX, destY, ignoreSteps);
+            if (success) adapters.viewport?.all('mutateTo', destX, destY);
+            return success;
         };
     });
 

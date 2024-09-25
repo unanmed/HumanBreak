@@ -1123,6 +1123,13 @@ export class Layer extends Container {
         for (const ex of this.extend.values()) {
             ex.onMovingUpdate?.(this, this.movingRenderable);
         }
+        this.sortMovingRenderable();
+    }
+
+    /**
+     * 对移动层按照z坐标排序
+     */
+    sortMovingRenderable() {
         this.movingRenderable.sort((a, b) => a.zIndex - b.zIndex);
     }
 
@@ -1277,7 +1284,7 @@ export class Layer extends Container {
      * 渲染移动/大怪物层
      */
     protected renderMoving(transform: Transform) {
-        const frame = (RenderItem.animatedFrame % 4) + 1;
+        const frame = RenderItem.animatedFrame;
         const cell = this.cellSize;
         const halfCell = cell / 2;
         const { ctx } = this.movingMap;

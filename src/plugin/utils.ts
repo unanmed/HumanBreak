@@ -2,7 +2,7 @@ import { message } from 'ant-design-vue';
 import { MessageApi } from 'ant-design-vue/lib/message';
 import { isNil } from 'lodash-es';
 import { Animation, sleep, TimingFn } from 'mutate-animate';
-import { ref } from 'vue';
+import { Ref, ref } from 'vue';
 import { EVENT_KEY_CODE_MAP, KeyCode } from './keyCodes';
 import axios from 'axios';
 import { decompressFromBase64 } from 'lz-string';

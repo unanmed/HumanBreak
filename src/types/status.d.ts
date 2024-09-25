@@ -641,7 +641,7 @@ interface InitGameStatus {
     /**
      * 自动寻路状态
      */
-    automaticRoute: DeepReadonly<AutomaticRouteStatus>;
+    automaticRoute: AutomaticRouteStatus;
 
     /**
      * 按键按下的时间，用于判定双击

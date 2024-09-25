@@ -251,7 +251,7 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
         } else {
             logger.error(
                 8,
-                `Post not allowed css danmaku. Allow info: ${allow.join(',')}`
+                `Post danmaku with not allowed css. Info: ${allow.join(',')}`
             );
         }
     }

@@ -34,7 +34,7 @@ interface RegisterHotkeyData extends Partial<AssistHoykey> {
     defaults: KeyCode;
 }
 
-interface HotkeyData extends Required<RegisterHotkeyData> {
+export interface HotkeyData extends Required<RegisterHotkeyData> {
     key: KeyCode;
     emits: Map<symbol, HotkeyEmitData>;
     group?: string;

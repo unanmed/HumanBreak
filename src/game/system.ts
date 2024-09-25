@@ -37,6 +37,8 @@ import type { RenderAdapter } from '@/core/render/adapter';
 import type { ItemState } from './state/item';
 import type { Layer } from '@/core/render/preset/layer';
 import type { LayerGroupFloorBinder } from '@/core/render/preset/floor';
+import type { HeroKeyMover } from '@/core/main/action/move';
+import type { HeroMover, ObjectMoverBase } from './state/move';
 
 interface ClassInterface {
     // 渲染进程与游戏进程通用
@@ -121,6 +123,11 @@ interface ModuleInterface {
     };
     State: {
         ItemState: typeof ItemState;
+        HeroMover: typeof HeroMover;
+        ObjectMoverBase: typeof ObjectMoverBase;
+    };
+    Action: {
+        HeroKeyMover: typeof HeroKeyMover;
     };
 }
 

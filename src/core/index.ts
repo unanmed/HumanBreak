@@ -72,6 +72,7 @@ import { RenderAdapter } from './render/adapter';
 import { getMainRenderer } from './render';
 import { Layer } from './render/preset/layer';
 import { LayerGroupFloorBinder } from './render/preset/floor';
+import { HeroKeyMover } from './main/action/move';
 
 // ----- 类注册
 Mota.register('class', 'AudioPlayer', AudioPlayer);
@@ -161,6 +162,9 @@ Mota.register('module', 'Render', {
     RenderAdapter,
     Layer,
     LayerGroupFloorBinder
+});
+Mota.register('module', 'Action', {
+    HeroKeyMover
 });
 
 main.renderLoaded = true;

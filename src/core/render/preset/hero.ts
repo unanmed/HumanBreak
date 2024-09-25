@@ -5,10 +5,10 @@ import { logger } from '@/core/common/logger';
 import EventEmitter from 'eventemitter3';
 import { texture } from '../cache';
 import { TimingFn } from 'mutate-animate';
-import { backDir } from '@/plugin/game/utils';
 import { isNil } from 'lodash-es';
 
-type HeroMovingStatus = 'stop' | 'moving' | 'moving-as';
+// type HeroMovingStatus = 'stop' | 'moving' | 'moving-as';
+// export const enum HeroMovingStatus {}
 
 interface HeroRenderEvent {
     stepEnd: [];
@@ -31,25 +31,27 @@ export class HeroRenderer
     renderable?: LayerMovingRenderable;
     layer!: Layer;
 
-    // hero?: Hero;
-
-    /** 勇士移动状态 */
-    status: HeroMovingStatus = 'stop';
     /** 当前移动帧数 */
     movingFrame: number = 0;
+    /** 是否正在移动 */
+    moving: boolean = false;
+    /** 是否正在播放动画，与移动分开以实现原地踏步 */
+    animate: boolean = false;
 
     /** 勇士移动速度 */
     speed: number = 100;
-    /** 当前勇士朝向 */
-    // todo: 删了这个属性
-    dir: Dir = 'down';
+
+    /** 当前的移动方向 */
+    moveDir: Dir2 = 'down';
+    /** 当前移动的勇士显示方向 */
+    showDir: Dir = 'down';
+    /** 帧动画是否反向播放，例如后退时就应该设为true */
+    animateReverse: boolean = false;
 
     /** 勇士移动定时器id */
     private moveId: number = -1;
     /** 上一次帧数切换的时间 */
     private lastFrameTime: number = 0;
-    /** 当前的移动方向 */
-    moveDir: Move2 = 'down';
     /** 上一步走到格子上的时间 */
     private lastStepTime: number = 0;
     /** 执行当前步移动的Promise */
@@ -63,8 +65,6 @@ export class HeroRenderer
     stepDir: Dir2 = 'down';
     /** 每步的格子增量 */
     private stepDelta: Loc = { x: 0, y: 1 };
-    /** 动画显示的方向，用于适配后退 */
-    // private animateDir: Dir = 'down';
 
     /**
      * 设置勇士所用的图片资源
@@ -76,6 +76,10 @@ export class HeroRenderer
         this.layer.update(this.layer);
     }
 
+    /**
+     * 设置移动的移动速度
+     * @param speed 移动速度
+     */
     setMoveSpeed(speed: number) {
         this.speed = speed;
     }
@@ -102,7 +106,7 @@ export class HeroRenderer
             zIndex: core.status.hero.loc.y,
             autotile: false,
             bigImage: true,
-            render: this.getRenderFromDir(this.moveDir),
+            render: this.getRenderFromDir(this.showDir),
             animate: 0
         };
     }
@@ -111,53 +115,90 @@ export class HeroRenderer
      * 根据方向获取勇士的裁切信息
      * @param dir 方向
      */
-    getRenderFromDir(dir: Move2): [number, number, number, number][] {
+    getRenderFromDir(dir: Dir): [number, number, number, number][] {
         if (!this.cellWidth || !this.cellHeight) return [];
-        let resolved: Dir2;
-        if (dir === 'forward') resolved = this.dir;
-        else if (dir === 'backward') resolved = backDir(this.dir);
-        else resolved = dir;
-        const index = texture.characterDirection[resolved];
+        const index = texture.characterDirection[dir];
         const y = index * this.cellHeight;
         const res: [number, number, number, number][] = [0, 1, 2, 3].map(v => {
             return [v * this.cellWidth!, y, this.cellWidth!, this.cellHeight!];
         });
-        if (dir === 'backward') return res.reverse();
+        if (this.animateReverse) return res.reverse();
         else return res;
     }
 
     /**
-     * 设置当前勇士
-     * @param hero 绑定的勇士
+     * 开始勇士帧动画
      */
-    // setHero(hero: Hero) {
-    //     this.hero = hero;
-    // }
+    startAnimate() {
+        this.animate = true;
+        this.lastFrameTime = Date.now();
+    }
 
     /**
-     * 准备开始移动
+     * 结束勇士帧动画
      */
-    readyMove() {
-        if (this.status !== 'stop') return;
-        this.status = 'moving';
-        this.lastFrameTime = Date.now();
+    endAnimate() {
+        this.animate = false;
+        this.resetRenderable(false);
+    }
+
+    /**
+     * 设置帧动画是否反向播放
+     * @param reverse 帧动画是否反向播放
+     */
+    setAnimateReversed(reverse: boolean) {
+        this.animateReverse = reverse;
+        this.resetRenderable(true);
+    }
+
+    /**
+     * 设置勇士的动画显示朝向
+     * @param dir 显示朝向
+     */
+    setAnimateDir(dir: Dir) {
+        if (dir !== this.showDir) {
+            this.showDir = dir;
+            this.resetRenderable(true);
+        }
+    }
+
+    /**
+     * 重置renderable状态，恢复至第一帧状态
+     * @param getInfo 是否重新获取渲染信息
+     */
+    resetRenderable(getInfo: boolean) {
+        this.movingFrame = 0;
+        console.trace();
+
+        if (this.renderable) {
+            this.renderable.animate = 0;
+            if (getInfo) {
+                this.renderable.render = this.getRenderFromDir(this.showDir);
+            }
+        }
+        this.layer.update(this.layer);
+    }
+
+    /**
+     * 勇士帧动画定时器
+     */
+    private animateTick(time: number) {
+        if (!this.animate) return;
+        if (time - this.lastFrameTime > this.speed) {
+            this.lastFrameTime = time;
+            this.movingFrame++;
+            this.movingFrame %= 4;
+            if (this.renderable) this.renderable.animate = this.movingFrame;
+        }
+        this.layer.update(this.layer);
     }
 
     /**
      * 勇士移动定时器
      */
     private moveTick(time: number) {
-        if (this.status !== 'moving') return;
-        if (!this.renderable) {
-            this.emit('stepEnd');
-            return;
-        }
-
-        if (time - this.lastFrameTime > this.speed) {
-            this.lastFrameTime = time;
-            this.movingFrame++;
-            this.movingFrame %= 4;
-        }
+        if (!this.moving) return;
+        if (!this.renderable) return;
 
         const progress = (time - this.lastStepTime) / this.speed;
 
@@ -174,7 +215,6 @@ export class HeroRenderer
             this.renderable.y = ry;
         }
         this.emit('moveTick', this.renderable.x, this.renderable.y);
-        this.renderable.animate = this.movingFrame;
         this.layer.update(this.layer);
     }
 
@@ -182,18 +222,23 @@ export class HeroRenderer
      * 进行下一步的移动准备，设置移动信息
      */
     private step() {
-        if (this.moveDir === 'backward') this.stepDir = backDir(this.stepDir);
-        else if (this.moveDir !== 'forward') this.stepDir = this.moveDir;
         this.lastStepTime = Date.now();
         this.stepDelta = core.utils.scan2[this.stepDir];
         this.turn(this.stepDir);
     }
 
     /**
+     * 准备开始移动
+     */
+    readyMove() {
+        this.moving = true;
+    }
+
+    /**
      * 移动勇士
      */
-    move(dir: Move2): Promise<void> {
-        if (this.status !== 'moving') {
+    move(dir: Dir2): Promise<void> {
+        if (!this.moving) {
             logger.error(
                 12,
                 `Cannot move while status is not 'moving'. Call 'readyMove' first.`
@@ -202,16 +247,16 @@ export class HeroRenderer
         }
 
         this.moveDir = dir;
-
         if (this.moveDetached) return this.moveDetached;
         else {
             this.step();
-            return (this.moveDetached = new Promise<void>(resolve => {
+            this.moveDetached = new Promise(res => {
                 this.once('stepEnd', () => {
                     this.moveDetached = void 0;
-                    resolve();
+                    res();
                 });
-            }));
+            });
+            return this.moveDetached;
         }
     }
 
@@ -219,14 +264,13 @@ export class HeroRenderer
      * 结束勇士的移动过程
      */
     endMove(): Promise<void> {
-        if (this.status !== 'moving') return Promise.reject();
+        if (!this.moving) return Promise.reject();
         if (this.moveEnding) return this.moveEnding;
         else {
             const promise = new Promise<void>(resolve => {
                 this.once('stepEnd', () => {
                     this.moveEnding = void 0;
-                    this.status = 'stop';
-                    this.movingFrame = 0;
+                    this.moving = false;
                     const { x, y } = core.status.hero.loc;
                     this.setHeroLoc(x, y);
                     this.render();
@@ -259,7 +303,7 @@ export class HeroRenderer
         this.stepDir = dir;
 
         if (!this.renderable) return;
-        this.renderable.render = this.getRenderFromDir(this.moveDir);
+        this.renderable.render = this.getRenderFromDir(this.showDir);
         this.layer.update(this.layer);
     }
 
@@ -291,9 +335,8 @@ export class HeroRenderer
      *           因为此举会导致层级的重新排序，降低渲染性能。
      */
     moveAs(x: number, y: number, time: number, fn: TimingFn<3>): Promise<void> {
-        if (this.status !== 'stop') return Promise.reject();
+        if (!this.moving) return Promise.reject();
         if (!this.renderable) return Promise.reject();
-        this.status = 'moving-as';
         let nowZIndex = fn(0)[2];
         let startTime = Date.now();
         return new Promise(res => {
@@ -307,18 +350,15 @@ export class HeroRenderer
                     this.renderable.y = ny;
                     this.renderable.zIndex = nz;
                     if (nz !== nowZIndex) {
-                        this.layer.movingRenderable.sort(
-                            (a, b) => a.zIndex - b.zIndex
-                        );
+                        this.layer.sortMovingRenderable();
                     }
                     this.emit('moveTick', this.renderable.x, this.renderable.y);
                     this.layer.update(this.layer);
                 },
                 time,
                 () => {
-                    this.status = 'stop';
+                    this.moving = false;
                     if (!this.renderable) return res();
-                    this.renderable.animate = 0;
                     this.renderable.x = x;
                     this.renderable.y = y;
                     this.emit('moveTick', this.renderable.x, this.renderable.y);
@@ -334,7 +374,7 @@ export class HeroRenderer
      */
     render() {
         if (!this.renderable) return;
-        if (this.status === 'stop') {
+        if (!this.animate) {
             this.renderable.animate = -1;
         } else {
             this.renderable.animate = this.movingFrame;
@@ -346,7 +386,9 @@ export class HeroRenderer
         this.layer = layer;
         adapter.add(this);
         this.moveId = layer.delegateTicker(() => {
-            this.moveTick(Date.now());
+            const time = Date.now();
+            this.animateTick(time);
+            this.moveTick(time);
         });
     }
 
@@ -380,10 +422,6 @@ adapter.receive(
         return item.moveAs(x, y, time, fn);
     }
 );
-adapter.receive('setMoveSpeed', (item, speed: number) => {
-    item.setMoveSpeed(speed);
-    return Promise.resolve();
-});
 adapter.receive('setHeroLoc', (item, x?: number, y?: number) => {
     item.setHeroLoc(x, y);
     return Promise.resolve();
@@ -392,11 +430,28 @@ adapter.receive('turn', (item, dir: Dir2) => {
     item.turn(dir);
     return Promise.resolve();
 });
-adapter.receive('setImage', (item, image: SizedCanvasImageSource) => {
+
+// 同步适配函数，这些函数用于同步设置信息等
+adapter.receiveSync('setImage', (item, image: SizedCanvasImageSource) => {
     item.setImage(image);
-    return Promise.resolve();
 });
-// 同步fallback，用于适配现在的样板，之后会删除
+adapter.receiveSync('setMoveSpeed', (item, speed: number) => {
+    item.setMoveSpeed(speed);
+});
+adapter.receiveSync('setAnimateReversed', (item, reverse: boolean) => {
+    item.setAnimateReversed(reverse);
+});
+adapter.receiveSync('startAnimate', item => {
+    item.startAnimate();
+});
+adapter.receiveSync('endAnimate', item => {
+    item.endAnimate();
+});
+adapter.receiveSync('setAnimateDir', (item, dir: Dir) => {
+    item.setAnimateDir(dir);
+});
+
+// 不分同步fallback，用于适配现在的样板，之后会删除
 adapter.receiveSync('setHeroLoc', (item, x?: number, y?: number) => {
     item.setHeroLoc(x, y);
 });
