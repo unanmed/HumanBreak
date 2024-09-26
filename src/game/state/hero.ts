@@ -170,10 +170,7 @@ export class HeroState<
      */
     addStatus<K extends SelectKey<T, number>>(key: K, value: number): boolean {
         if (typeof this.status[key] !== 'number') {
-            logger.warn(
-                14,
-                `Cannot add status of non-number status. Key: ${String(key)}`
-            );
+            logger.warn(14, String(key));
             return false;
         }
         return this.setStatus<K>(key, (this.status[key] + value) as T[K]);
@@ -201,12 +198,7 @@ export class HeroState<
      */
     markBuffable(key: SelectKey<T, number>): void {
         if (typeof this.status[key] !== 'number') {
-            logger.warn(
-                12,
-                `Cannot mark buffable with a non-number status. Key: ${String(
-                    key
-                )}.`
-            );
+            logger.warn(12, String(key));
             return;
         }
         this.buffable.add(key);
@@ -221,10 +213,7 @@ export class HeroState<
      */
     setBuff(key: SelectKey<T, number>, value: number): boolean {
         if (!this.buffable.has(key) || typeof this.status[key] !== 'number') {
-            logger.warn(
-                13,
-                `Cannot set buff of non-number status. Key: ${String(key)}.`
-            );
+            logger.warn(13, String(key));
             return false;
         }
         this.buffMap.set(key, value);
@@ -239,10 +228,7 @@ export class HeroState<
      */
     addBuff(key: SelectKey<T, number>, value: number): boolean {
         if (!this.buffable.has(key) || typeof this.status[key] !== 'number') {
-            logger.warn(
-                13,
-                `Cannot set buff of non-number status. Key: ${String(key)}.`
-            );
+            logger.warn(13, String(key));
             return false;
         }
         return this.setBuff(key, this.buffMap.get(key)! + value);
@@ -452,10 +438,7 @@ export class Hero<T extends object = IHeroStatusDefault>
             const id = block.event.id as AllIdsOf<'items'>;
             const cls = core.material.items[id]?.cls;
             if (cls === void 0) {
-                logger.warn(
-                    15,
-                    `Cannot get item of a non-item block on loc: ${item},${y},${floorId}`
-                );
+                logger.warn(15, item.toString(), y.toString(), floorId);
                 return false;
             }
             return this.addItem(id, num!);

@@ -872,18 +872,12 @@ export class Layer extends Container {
         calAutotile: boolean = true
     ) {
         if (data.length % width !== 0) {
-            logger.warn(
-                8,
-                `Incomplete render data is put. None will be filled to the lacked data.`
-            );
+            logger.warn(8);
             data.push(...Array(width - (data.length % width)).fill(0));
         }
         const height = Math.round(data.length / width);
         if (!this.containsRect(x, y, width, height)) {
-            logger.warn(
-                9,
-                `Data transfered is partially (or totally) out of range. Overflowed data will be ignored.`
-            );
+            logger.warn(9);
             if (this.isRectOutside(x, y, width, height)) return;
         }
         // 特判特殊情况-全地图更新

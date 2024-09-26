@@ -44,10 +44,7 @@ export class LayerGroupPortal implements ILayerGroupRenderExtends {
             group.appendChild(this.portal);
             this.listen();
         } else {
-            logger.error(
-                1301,
-                `Portal extends need 'floor-binder' extends as dependency.`
-            );
+            logger.error(1301);
             group.removeExtends('portal');
         }
     }

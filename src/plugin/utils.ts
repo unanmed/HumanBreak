@@ -108,10 +108,7 @@ export function parseCss(css: string): Partial<Record<CanParseCss, string>> {
 
         if (char === ':') {
             if (!inProp) {
-                logger.error(
-                    3,
-                    `Syntax error in parsing CSS: Unexpected ':'. Col: ${pointer}. CSS string: '${css}'`
-                );
+                logger.error(3, pointer.toString(), css);
                 return res;
             }
             inProp = false;
@@ -121,10 +118,7 @@ export function parseCss(css: string): Partial<Record<CanParseCss, string>> {
         if (char === ';') {
             if (prop.length === 0) continue;
             if (inProp) {
-                logger.error(
-                    4,
-                    `Syntax error in parsing CSS: Unexpected ';'. Col: ${pointer}. CSS string: '${css}'`
-                );
+                logger.error(4, pointer.toString(), css);
                 return res;
             }
             res[prop as CanParseCss] = value.trim();
@@ -136,10 +130,7 @@ export function parseCss(css: string): Partial<Record<CanParseCss, string>> {
 
         if (upper) {
             if (!inProp) {
-                logger.error(
-                    5,
-                    `Syntax error in parsing CSS: Missing property name after '-'. Col: ${pointer}. CSS string: '${css}'`
-                );
+                logger.error(5, pointer.toString(), css);
             }
             prop += char.toUpperCase();
             upper = false;
@@ -149,17 +140,11 @@ export function parseCss(css: string): Partial<Record<CanParseCss, string>> {
         }
     }
     if (inProp && prop.length > 0) {
-        logger.error(
-            6,
-            `Syntax error in parsing CSS: Unexpected end of css, expecting ':'. Col: ${pointer}. CSS string: '${css}'`
-        );
+        logger.error(6, pointer.toString(), css);
         return res;
     }
     if (!inProp && value.trim().length === 0) {
-        logger.error(
-            7,
-            `Syntax error in parsing CSS: Unexpected end of css, expecting property value. Col: ${pointer}. CSS string: '${css}'`
-        );
+        logger.error(7, pointer.toString(), css);
         return res;
     }
     if (prop.length > 0) res[prop as CanParseCss] = value.trim();

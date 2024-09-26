@@ -81,7 +81,7 @@ export class BlockCacher<T> extends EventEmitter<BlockCacherEvent> {
      */
     setCacheDepth(depth: number) {
         if (depth > 31) {
-            logger.error(11, `Cache depth cannot larger than 31.`);
+            logger.error(11);
             return;
         }
         const old = this.cache;

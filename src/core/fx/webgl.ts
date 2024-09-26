@@ -184,12 +184,7 @@ abstract class WebGLBase {
         gl.linkProgram(program);
 
         if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-            logger.error(
-                9,
-                `Cannot initialize shader program. Error info: ${gl.getProgramInfoLog(
-                    program
-                )}`
-            );
+            logger.error(9, gl.getProgramInfoLog(program) ?? '');
         }
 
         return program;
@@ -263,9 +258,8 @@ export function loadShader(
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
         logger.error(
             10,
-            `Cannot compile ${
-                type === gl.VERTEX_SHADER ? 'vertex' : 'fragment'
-            } shader. Error info: ${gl.getShaderInfoLog(shader)}`
+            type === gl.VERTEX_SHADER ? 'vertex' : 'fragment',
+            gl.getShaderInfoLog(shader) ?? ''
         );
     }
 
@@ -286,12 +280,7 @@ export function createProgram(
     gl.linkProgram(program);
 
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-        logger.error(
-            9,
-            `Cannot initialize shader program. Error info: ${gl.getProgramInfoLog(
-                program
-            )}`
-        );
+        logger.error(9, gl.getProgramInfoLog(program) ?? '');
     }
 
     return program;

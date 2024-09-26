@@ -97,10 +97,7 @@ export class FloorDamageExtends
             this.create();
             this.listen();
         } else {
-            logger.warn(
-                17,
-                `Floor-damage extends needs 'floor-binder' extends as dependency.`
-            );
+            logger.warn(17);
             group.removeExtends('floor-damage');
         }
     }

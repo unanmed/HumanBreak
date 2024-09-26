@@ -28,10 +28,7 @@ export class LayerGroupHalo implements ILayerGroupRenderExtends {
             this.halo.binder = ex;
             group.appendChild(this.halo);
         } else {
-            logger.error(
-                1401,
-                `Halo extends needs 'floor-binder' extends as dependency.`
-            );
+            logger.error(1401);
             group.removeExtends('halo');
         }
     }

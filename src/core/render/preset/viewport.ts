@@ -351,10 +351,7 @@ export class FloorViewport implements ILayerGroupRenderExtends {
             this.create();
             adapter.add(this);
         } else {
-            logger.error(
-                15,
-                `Viewport extends needs 'floor-hero' extends as dependency.`
-            );
+            logger.error(15);
             group.removeExtends('viewport');
         }
     }

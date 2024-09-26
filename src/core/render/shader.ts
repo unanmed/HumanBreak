@@ -505,9 +505,8 @@ export class Shader extends Container<EShaderEvent> {
         if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
             logger.error(
                 13,
-                `Cannot compile ${
-                    type === gl.VERTEX_SHADER ? 'vertex' : 'fragment'
-                } shader. Error info: ${gl.getShaderInfoLog(shader)}`
+                type === gl.VERTEX_SHADER ? 'vertex' : 'fragment',
+                gl.getShaderInfoLog(shader) ?? ''
             );
         }
 

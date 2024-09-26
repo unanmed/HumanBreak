@@ -123,7 +123,7 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
      */
     async post(): Promise<AxiosResponse<PostDanmakuResponse>> {
         if (this.posted || this.posting) {
-            logger.warn(5, `Repeat post danmaku.`);
+            logger.warn(5);
             return Promise.reject();
         }
 
@@ -159,10 +159,7 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
         } catch (e) {
             this.posted = false;
             this.posting = false;
-            logger.error(
-                1,
-                `Unexpected error when posting danmaku. Error info: ${e}`
-            );
+            logger.error(1, String(e));
             return Promise.reject();
         }
     }
@@ -197,7 +194,7 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
                 this.y = parseInt(y);
                 this.floor = f as FloorIds;
             } else {
-                logger.warn(3, `Unknown danmaku tag: ${v}`);
+                logger.warn(3, v);
             }
         });
     }
@@ -249,10 +246,7 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
                 this.style = { ...this.style, ...res };
             }
         } else {
-            logger.error(
-                8,
-                `Post danmaku with not allowed css. Info: ${allow.join(',')}`
-            );
+            logger.error(8, allow.join(','));
         }
     }
 
@@ -305,7 +299,7 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
 
             if (char === ']') {
                 if (!spec) {
-                    logger.warn(4, `Ignored a mismatched ']' in danmaku.`);
+                    logger.warn(4);
                     str += char;
                 } else {
                     spec = false;
@@ -390,10 +384,7 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
 
         const res = await axios.post<PostLikeResponse>(Danmaku.backend, form);
         if (res.data.code !== 0) {
-            logger.severe(
-                2,
-                `Uncaught error in posting like info for danmaku. Danmaku id: ${this.id}.`
-            );
+            logger.warn(18, this.id.toString());
             tip('error', `Error ${res.data.code}. ${res.data.message}`);
         } else {
             tip('success', res.data.message);
@@ -429,7 +420,7 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
         if (Danmaku.specList[type]) {
             return Danmaku.specList[type](content, type);
         } else {
-            logger.severe(1, `Unknown special danmaku element: ${type}.`);
+            logger.warn(7, type);
         }
 
         return h('span');
@@ -496,7 +487,7 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
      */
     static registerSpecContent(type: string, fn: SpecContentFn) {
         if (this.specList[type]) {
-            logger.warn(6, `Registered special danmaku element: ${type}`);
+            logger.warn(6, type);
         }
         this.specList[type] = fn;
     }

@@ -481,7 +481,7 @@ export class Shadow {
      */
     addLight(info: LightInfo) {
         if (this.originLightInfo[info.id]) {
-            logger.warn(7, `Repeated light id.`);
+            logger.warn(19, info.id);
             return;
         }
         this.originLightInfo[info.id] = info;
@@ -1338,7 +1338,7 @@ export class LayerShadowExtends implements ILayerRenderExtends {
         const ex = layer.getExtends('floor-hero');
         if (!(ex instanceof HeroRenderer)) {
             layer.removeExtends('shadow');
-            logger.error(1101, `Shadow extends needs 'floor-hero' extends as dependency.`);
+            logger.error(1101);
             return;
         }
         this.hero = ex;

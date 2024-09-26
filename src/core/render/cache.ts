@@ -175,10 +175,7 @@ class TextureCache extends EventEmitter<TextureCacheEvent> {
             if (bigImage) {
                 const image = core.material.images.images[bigImage];
                 if (!image) {
-                    logger.warn(
-                        10,
-                        `Cannot resolve big image of enemy '${id}'.`
-                    );
+                    logger.warn(10, id);
                     return null;
                 }
                 let line = 0;
@@ -296,10 +293,7 @@ class TextureCache extends EventEmitter<TextureCacheEvent> {
                 return data;
             }
         } else {
-            logger.warn(
-                11,
-                `Cannot resolve material ${num}. Material not exists.`
-            );
+            logger.warn(11, num.toString());
             return null;
         }
     }

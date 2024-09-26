@@ -64,10 +64,7 @@ export class LayerGroupAnimate implements ILayerGroupRenderExtends {
             LayerGroupAnimate.animateList.add(this);
             this.listen();
         } else {
-            logger.error(
-                14,
-                `Animate extends needs 'floor-hero' extends as dependency.`
-            );
+            logger.error(14);
             group.removeExtends('animate');
         }
     }

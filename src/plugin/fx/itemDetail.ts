@@ -257,10 +257,7 @@ export class FloorItemDetail implements ILayerGroupRenderExtends {
             this.listen();
             FloorItemDetail.listened.add(this);
         } else {
-            logger.warn(
-                1001,
-                `Item-detail extends needs 'floor-binder' and 'floor-damage' as dependency`
-            );
+            logger.warn(1001);
             group.removeExtends('item-detail');
         }
     }

@@ -238,10 +238,7 @@ export class HeroRenderer
      */
     move(dir: Dir2): Promise<void> {
         if (!this.moving) {
-            logger.error(
-                12,
-                `Cannot move while status is not 'moving'. Call 'readyMove' first.`
-            );
+            logger.error(12);
             return Promise.reject();
         }
 

@@ -67,7 +67,7 @@ export abstract class Resource<T = any> extends Disposable<string> {
         this.uri = uri;
 
         if (this.type === 'none') {
-            logger.warn(1, `Resource with type of 'none' is loaded.`);
+            logger.warn(1);
         }
     }
 
@@ -367,10 +367,7 @@ export class LoadTask<
      */
     async load(): Promise<ResourceType[T]> {
         if (this.loadingStarted) {
-            logger.warn(
-                2,
-                `Repeat load of resource '${this.resource.type}/${this.resource.uri}'`
-            );
+            logger.warn(2, this.resource.type, this.resource.uri);
             return new Promise<void>(res => res());
         }
         this.loadingStarted = true;
@@ -388,10 +385,7 @@ export class LoadTask<
             })
             .catch(reason => {
                 LoadTask.errorTask++;
-                logger.error(
-                    2,
-                    `Unexpected loading error in loading resource '${this.resource.type}/${this.resource.uri}'. Error info: ${reason}`
-                );
+                logger.error(2, this.resource.type, this.resource.uri);
             });
         this.emit('loadStart', this.resource);
         const value = await load;

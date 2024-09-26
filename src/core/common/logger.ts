@@ -1,4 +1,5 @@
 import { debounce } from 'lodash-es';
+import logInfo from '@/data/logger.json';
 
 // todo: 使用格式化输出？
 
@@ -7,8 +8,6 @@ export const enum LogLevel {
     LOG,
     /** 报错、严重警告和警告 */
     WARNING,
-    /** 报错和严重警告 */
-    SEVERE_WARNING,
     /** 仅报错 */
     ERROR
 }
@@ -47,6 +46,11 @@ const hideTipText = debounce(() => {
     logTip.style.display = 'none';
 }, 5000);
 
+const nums = new Set(['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']);
+
+const logError = logInfo.error as Record<number, string>;
+const logWarn = logInfo.warn as Record<number, string>;
+
 export class Logger {
     level: LogLevel = LogLevel.LOG;
     enabled: boolean = true;
@@ -56,6 +60,37 @@ export class Logger {
 
     constructor(logLevel: LogLevel) {
         this.level = logLevel;
+    }
+
+    private parseInfo(text: string, ...params: string[]) {
+        let pointer = -1;
+        let str = '';
+
+        let inParam = false;
+        let paramNum = '';
+        while (++pointer < text.length) {
+            const char = text[pointer];
+
+            if (char === '$' && text[pointer - 1] !== '\\') {
+                inParam = true;
+                continue;
+            }
+
+            if (inParam) {
+                if (nums.has(char)) {
+                    paramNum += char;
+                } else {
+                    inParam = false;
+                    const num = Number(paramNum);
+                    str += params[num] ?? '[not delivered]';
+                }
+                continue;
+            }
+
+            str += char;
+        }
+
+        return str;
     }
 
     /**
@@ -69,9 +104,10 @@ export class Logger {
     /**
      * 输出报错信息
      * @param code 错误代码，每个错误都应当使用唯一的错误代码
-     * @param text 错误信息
+     * @param params 参数
      */
-    error(code: number, text: string) {
+    error(code: number, ...params: string[]) {
+        const text = this.parseInfo(logError[code], ...params);
         if (this.catching) {
             this.catchedInfo.push({
                 level: LogLevel.ERROR,
@@ -91,35 +127,12 @@ export class Logger {
     }
 
     /**
-     * 输出严重警告信息
-     * @param code 警告代码
-     * @param text 警告信息
-     */
-    severe(code: number, text: string) {
-        if (this.catching) {
-            this.catchedInfo.push({
-                level: LogLevel.ERROR,
-                message: text,
-                code
-            });
-        }
-        if (this.level <= LogLevel.SEVERE_WARNING && this.enabled) {
-            console.warn(`[SEVERE WARNING Code ${code}] ${text}`);
-            if (!main.replayChecking) {
-                logTip.style.color = 'goldenrod';
-                logTip.style.display = 'block';
-                logTip.textContent = `Severe warning thrown, please check in console.`;
-                hideTipText();
-            }
-        }
-    }
-
-    /**
      * 输出警告信息
      * @param code 警告代码
      * @param text 警告信息
      */
-    warn(code: number, text: string) {
+    warn(code: number, ...params: string[]) {
+        const text = this.parseInfo(logWarn[code], ...params);
         if (this.catching) {
             this.catchedInfo.push({
                 level: LogLevel.ERROR,

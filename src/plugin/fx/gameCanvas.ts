@@ -48,10 +48,7 @@ export class LayerGroupFilter implements ILayerGroupRenderExtends {
             this.binder = ex;
             this.listen();
         } else {
-            logger.error(
-                1201,
-                `Floor-damage extends needs 'floor-binder' extends as dependency.`
-            );
+            logger.error(1201);
             group.removeExtends('floor-damage');
         }
     }

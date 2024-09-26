@@ -56,7 +56,7 @@ export class GameState {
         fromJSON?: FromJSONFunction<T>
     ) {
         if (this.states.has(key)) {
-            logger.warn(16, `Override repeated state key: ${key}.`);
+            logger.warn(16, key);
         }
 
         if (toJSON) {
