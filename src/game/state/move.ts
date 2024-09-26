@@ -11,6 +11,7 @@ import type {
     LayerMovingRenderable
 } from '@/core/render/preset/layer';
 import type { LayerFloorBinder } from '@/core/render/preset/floor';
+import { BluePalace } from '../mechanism/misc';
 
 interface MoveStepDir {
     type: 'dir';
@@ -369,6 +370,13 @@ interface CanMoveStatus {
     noPass: boolean;
 }
 
+interface PortalStatus {
+    /** 下一步是否会步入传送门 */
+    portal: boolean;
+    /** 传送门会传到哪 */
+    data?: BluePalace.PortalTo;
+}
+
 const enum HeroMoveCode {
     Step,
     Stop,
@@ -392,6 +400,9 @@ export class HeroMover extends ObjectMoverBase {
     private noRoute: boolean = false;
     /** 当前移动是否是在lockControl条件下开始的 */
     private inLockControl: boolean = false;
+
+    /** 这一步的传送门信息 */
+    private portalData?: BluePalace.PortalTo;
 
     override startMove(
         ignoreTerrain: boolean = false,
@@ -439,6 +450,16 @@ export class HeroMover extends ObjectMoverBase {
             this.moveDir = showDir;
         }
 
+        // 检查传送门
+        if (!this.ignoreTerrain) {
+            const { portal, data } = this.checkPortal(x, y, showDir);
+            if (portal && data) {
+                this.portalData = data;
+                await this.renderHeroSwap(data);
+                return HeroMoveCode.Portal;
+            }
+        }
+
         const dir = this.moveDir;
         if (!this.ignoreTerrain) {
             const { noPass, canMove } = this.checkCanMove(x, y, showDir);
@@ -482,9 +503,17 @@ export class HeroMover extends ObjectMoverBase {
         }
 
         // 本次移动正常完成
-        if (code === HeroMoveCode.Step) {
-            core.setHeroLoc('x', nx, true);
-            core.setHeroLoc('y', ny, true);
+        if (code === HeroMoveCode.Step || code === HeroMoveCode.Portal) {
+            if (code === HeroMoveCode.Portal) {
+                const data = this.portalData;
+                if (!data) return;
+                core.setHeroLoc('x', data.x);
+                core.setHeroLoc('y', data.y);
+                core.setHeroLoc('direction', data.dir);
+            } else {
+                core.setHeroLoc('x', nx, true);
+                core.setHeroLoc('y', ny, true);
+            }
 
             const direction = core.getHeroLoc('direction');
             core.control._moveAction_popAutomaticRoute();
@@ -554,6 +583,121 @@ export class HeroMover extends ObjectMoverBase {
         const nx = x + dx;
         const ny = y + dy;
         return { x: nx, y: ny };
+    }
+
+    /**
+     * 检查前方一格是否会步入传送门
+     * @param x 横坐标
+     * @param y 纵坐标
+     * @param dir 移动方向
+     */
+    private checkPortal(x: number, y: number, dir: Dir): PortalStatus {
+        const map = BluePalace.portalMap.get(core.status.floorId);
+        if (!map) {
+            return { portal: false };
+        }
+        const width = core.status.thisMap.width;
+        const index = x + y * width;
+        const data = map?.get(index);
+        if (!data) {
+            return { portal: false };
+        }
+        const to = data[dir];
+        if (to) {
+            return { portal: true, data: to };
+        }
+        return { portal: false };
+    }
+
+    private renderHeroSwap(data: BluePalace.PortalTo) {
+        const adapter = HeroMover.adapter;
+        if (!adapter) return;
+        const list = adapter.items;
+        const { x: tx, y: ty, dir: toDir } = data;
+        const { x, y, direction } = core.status.hero.loc;
+        const { x: dx, y: dy } = core.utils.scan[direction];
+        const { x: tdx } = core.utils.scan[toDir];
+
+        const promises = [...list].map(v => {
+            if (!v.renderable) return;
+            const renderable = { ...v.renderable };
+            renderable.render = v.getRenderFromDir(toDir);
+            renderable.zIndex = ty;
+            const heroDir = v.moveDir;
+
+            const width = v.renderable.render[0][2];
+            const height = v.renderable.render[0][3];
+            const cell = v.layer.cellSize;
+            const restHeight = height - cell;
+            if (!width || !height) return;
+
+            const originFrom = structuredClone(v.renderable.render);
+            const originTo = structuredClone(renderable.render);
+            v.layer.moving.add(renderable);
+            v.layer.requestUpdateMoving();
+
+            const start = Date.now();
+            return new Promise<void>(res => {
+                const tick = () => {
+                    const now = Date.now();
+                    const progress = (now - start) / this.moveSpeed;
+                    const clipWidth = cell * progress;
+                    const clipHeight = cell * progress;
+                    const beforeWidth = width - clipWidth;
+                    const beforeHeight = height - clipHeight;
+
+                    v.renderable!.x = x;
+                    v.renderable!.y = y;
+                    if (heroDir === 'left' || heroDir === 'right') {
+                        v.renderable!.x = x + (clipWidth / 2 / cell) * dx;
+                        v.renderable!.render.forEach((v, i) => {
+                            v[2] = beforeWidth;
+                            if (heroDir === 'left') {
+                                v[0] = originFrom[i][0] + clipWidth;
+                            }
+                        });
+                    } else {
+                        v.renderable!.render.forEach((v, i) => {
+                            v[3] = beforeHeight;
+                            if (heroDir === 'up') {
+                                v[1] =
+                                    originFrom[i][1] + clipHeight + restHeight;
+                            }
+                        });
+                    }
+
+                    renderable.x = tx;
+                    renderable.y = ty;
+                    if (toDir === 'left' || toDir === 'right') {
+                        renderable.x = tx + (clipWidth / 2 / cell - 0.5) * tdx;
+                        renderable.render.forEach((v, i) => {
+                            v[2] = clipWidth;
+                            if (toDir === 'right') {
+                                v[0] = originTo[i][0] + beforeWidth;
+                            }
+                        });
+                    } else {
+                        if (toDir === 'down') renderable.y = ty - 1 + progress;
+                        renderable.render.forEach((v, i) => {
+                            v[3] = clipHeight + restHeight;
+                            if (toDir === 'down') {
+                                v[1] = originTo[i][1] + clipHeight + restHeight;
+                                v[3] = clipHeight;
+                            }
+                        });
+                    }
+                };
+                v.layer.delegateTicker(tick, this.moveSpeed, () => {
+                    v.renderable!.render = originFrom;
+                    v.setAnimateDir(data.dir);
+                    v.layer.moving.delete(renderable);
+                    v.layer.requestUpdateMoving();
+                    res();
+                });
+            });
+        });
+
+        return Promise.all(promises);
     }
 }
 
