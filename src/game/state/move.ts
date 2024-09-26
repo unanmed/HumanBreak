@@ -375,7 +375,9 @@ const enum HeroMoveCode {
     /** 不能移动，并撞击前面一格的图块，触发其触发器 */
     Hit,
     /** 不能移动，同时当前格有CannotOut，或目标格有CannotIn，不会触发前面一格的触发器 */
-    CannotMove
+    CannotMove,
+    /** 进入传送门 */
+    Portal
 }
 
 export class HeroMover extends ObjectMoverBase {
