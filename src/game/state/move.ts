@@ -5,6 +5,12 @@ import type { RenderAdapter } from '@/core/render/adapter';
 import type { HeroRenderer } from '@/core/render/preset/hero';
 import type { FloorViewport } from '@/core/render/preset/viewport';
 import type { HeroKeyMover } from '@/core/main/action/move';
+import type {
+    FloorLayer,
+    Layer,
+    LayerMovingRenderable
+} from '@/core/render/preset/layer';
+import type { LayerFloorBinder } from '@/core/render/preset/floor';
 
 interface MoveStepDir {
     type: 'dir';
@@ -115,8 +121,8 @@ export abstract class ObjectMoverBase extends EventEmitter<EObjectMovingEvent> {
         const start = async () => {
             // 等待宏任务执行完成，不然controller会在首次调用中未定义
             await new Promise<void>(res => res());
-            this.emit('moveStart', queue);
             await this.onMoveStart(controller);
+            this.emit('moveStart', queue);
             while (queue.length > 0) {
                 if (stopMove || !this.moving) break;
                 const step = queue.shift();
@@ -126,7 +132,9 @@ export abstract class ObjectMoverBase extends EventEmitter<EObjectMovingEvent> {
                     const code = await this.onStepStart(step, controller);
                     await this.onStepEnd(step, code, controller);
                 } else {
-                    this.moveSpeed = step.value;
+                    const replay = core.status.replay.speed;
+                    const speed = replay === 24 ? 1 : step.value / replay;
+                    this.moveSpeed = speed;
                 }
                 this.emit('stepEnd', step);
             }
@@ -186,6 +194,171 @@ export abstract class ObjectMoverBase extends EventEmitter<EObjectMovingEvent> {
      */
     moveAs(steps: MoveStep[]) {
         this.moveQueue.push(...steps);
+    }
+}
+
+const enum BlockMoveCode {
+    Step
+}
+
+export class BlockMover extends ObjectMoverBase {
+    /** 楼层渲染适配器，用于显示动画 */
+    static adapter?: RenderAdapter<Layer>;
+
+    x: number;
+    y: number;
+    floorId: FloorIds;
+    layer: FloorLayer;
+
+    /** 本次移动中需要进行动画移动的楼层渲染组件 */
+    private layerItems: Layer[] = [];
+    /** 本次移动过程中的移动renderable实例 */
+    private renderable?: LayerMovingRenderable;
+    /** 本次移动的图块id */
+    private blockNum: number = 0;
+
+    constructor(
+        x: number,
+        y: number,
+        floorId: FloorIds,
+        layer: FloorLayer,
+        dir: Dir = 'down'
+    ) {
+        super();
+
+        this.x = x;
+        this.y = y;
+        this.floorId = floorId;
+        this.moveDir = dir;
+        this.layer = layer;
+    }
+
+    /**
+     * 绑定移动点
+     * @param x 绑定点横坐标
+     * @param y 绑定点纵坐标
+     * @param floorId 绑定点楼层
+     * @returns 是否绑定成功，例如如果当前绑定点正在移动，那么就会绑定失败
+     */
+    bind(
+        x: number,
+        y: number,
+        floorId: FloorIds,
+        layer: FloorLayer,
+        dir: Dir = 'down'
+    ) {
+        if (this.moving) return false;
+        this.x = x;
+        this.y = y;
+        this.floorId = floorId;
+        this.moveDir = dir;
+        this.layer = layer;
+        return true;
+    }
+
+    protected async onMoveStart(controller: IMoveController): Promise<void> {
+        const adapter = BlockMover.adapter;
+        if (adapter) {
+            const list = adapter.items;
+            const items = [...list].filter(v => {
+                if (v.layer !== this.layer) return false;
+                const ex = v.getExtends('floor-binder') as LayerFloorBinder;
+                if (!ex) return false;
+                return ex.getFloor() === core.status.floorId;
+            });
+            this.layerItems = items;
+        }
+
+        let blockNum: number = 0;
+        if (this.layer === 'event') {
+            blockNum = core.status.maps[this.floorId].map[this.y][this.x];
+        } else {
+            const array = core.maps._getBgFgMapArray(this.layer, this.floorId);
+            blockNum = array[this.y][this.x];
+        }
+        this.blockNum = blockNum;
+
+        Mota.r(() => {
+            const { Layer } = Mota.require('module', 'Render');
+            const r = Layer.getMovingRenderable(blockNum, this.x, this.y);
+
+            if (r) {
+                this.renderable = r;
+                this.layerItems.forEach(v => {
+                    v.moving.add(r);
+                });
+            }
+        });
+
+        if (this.layer === 'event') {
+            core.removeBlock(this.x, this.y, this.floorId);
+        }
+    }
+
+    protected async onMoveEnd(controller: IMoveController): Promise<void> {
+        if (this.renderable) {
+            this.layerItems.forEach(v => {
+                v.moving.delete(this.renderable!);
+            });
+        }
+
+        this.layerItems = [];
+        this.renderable = void 0;
+
+        if (this.layer === 'event') {
+            core.setBlock(this.blockNum as AllNumbers, this.x, this.y);
+        }
+    }
+
+    protected async onStepStart(
+        step: MoveStepDir,
+        controller: IMoveController
+    ): Promise<BlockMoveCode> {
+        await this.moveAnimate(step);
+        const { x: dx, y: dy } = core.utils.scan2[this.moveDir];
+        this.x += dx;
+        this.y += dy;
+
+        return BlockMoveCode.Step;
+    }
+
+    protected async onStepEnd(
+        step: MoveStepDir,
+        code: BlockMoveCode,
+        controller: IMoveController
+    ): Promise<void> {}
+
+    private moveAnimate(step: MoveStepDir) {
+        const layer = this.layerItems[0];
+        if (!layer) return;
+        if (!this.renderable) return;
+        const data = this.renderable;
+        const fx = this.x;
+        const fy = this.y;
+        const { x: dx, y: dy } = core.utils.scan2[this.moveDir];
+        const start = Date.now();
+        const time = this.moveSpeed;
+
+        return new Promise<void>(res => {
+            layer.delegateTicker(
+                () => {
+                    const now = Date.now() - start;
+                    const progress = now / time;
+                    data.x = fx + dx * progress;
+                    data.y = fy + dy * progress;
+                    this.layerItems.forEach(v => {
+                        v.update(v);
+                    });
+                },
+                this.moveSpeed,
+                () => {
+                    data.x = fx + dx;
+                    data.y = fy + dy;
+                    data.zIndex = fy + dy;
+                    res();
+                }
+            );
+        });
     }
 }
 
@@ -408,6 +581,8 @@ loading.once('coreInit', () => {
     const Adapter = Mota.require('module', 'Render').RenderAdapter;
     const adapter = Adapter.get<HeroRenderer>('hero-adapter');
     const viewport = Adapter.get<FloorViewport>('viewport');
+    const layerAdapter = Adapter.get<Layer>('layer');
     HeroMover.adapter = adapter;
     HeroMover.viewport = viewport;
+    BlockMover.adapter = layerAdapter;
 });

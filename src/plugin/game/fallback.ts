@@ -9,8 +9,7 @@ import type { Layer, LayerMovingRenderable } from '@/core/render/preset/layer';
 import { BluePalace } from '@/game/mechanism/misc';
 import { backDir } from './utils';
 import type { TimingFn } from 'mutate-animate';
-import EventEmitter from 'eventemitter3';
-import { heroMoveCollection, MoveStep } from '@/game/state/move';
+import { BlockMover, heroMoveCollection, MoveStep } from '@/game/state/move';
 import type { FloorViewport } from '@/core/render/preset/viewport';
 
 // 向后兼容用，会充当两个版本间过渡的作用
@@ -21,11 +20,6 @@ interface Adapters {
     animate?: RenderAdapter<LayerGroupAnimate>;
     layer?: RenderAdapter<Layer>;
     viewport?: RenderAdapter<FloorViewport>;
-}
-
-interface MoveEvent {
-    stepEnd: [];
-    moveEnd: [];
 }
 
 const adapters: Adapters = {};
@@ -62,15 +56,15 @@ export function init() {
         noRoute: boolean = false,
         callback?: () => void
     ) {
-        if (portal && portalData) {
-            const before = moveDir;
-            const { x, y, dir } = portalData;
-            core.setHeroLoc('x', x);
-            core.setHeroLoc('y', y);
-            core.setHeroLoc('direction', dir);
-            portal = false;
-            moveDir = before;
-        }
+        // if (portal && portalData) {
+        //     const before = moveDir;
+        //     const { x, y, dir } = portalData;
+        //     core.setHeroLoc('x', x);
+        //     core.setHeroLoc('y', y);
+        //     core.setHeroLoc('direction', dir);
+        //     portal = false;
+        //     moveDir = before;
+        // }
 
         var direction = core.getHeroLoc('direction');
         core.control._moveAction_popAutomaticRoute();
@@ -619,61 +613,30 @@ export function init() {
                 callback?.();
                 return;
             }
-            const speed = core.status.replay.speed;
-            time /= speed;
-            if (speed === 24) time = 1;
             const block = core.getBlock(x, y);
             if (!block) {
                 callback?.();
                 return;
             }
-            core.removeBlock(x, y);
-            const list = adapters.layer?.items ?? [];
-            const items = [...list].filter(v => {
-                if (v.layer !== 'event') return false;
-                const ex = v.getExtends('floor-binder') as LayerFloorBinder;
-                if (!ex) return false;
-                return ex.getFloor() === core.status.floorId;
+            const mover = new BlockMover(x, y, core.status.floorId, 'event');
+            const moveSteps = getMoveSteps(steps);
+            const resolved = moveSteps.map<MoveStep>(v => {
+                if (v.startsWith('speed')) {
+                    return { type: 'speed', value: Number(v.slice(6)) };
+                } else {
+                    return { type: 'dir', value: v as Move2 };
+                }
             });
+            const start: MoveStep = { type: 'speed', value: time };
+            mover.insertMove(...[start, ...resolved]);
+            const controller = mover.startMove();
 
-            const { steps: moveSteps, start } = getMoveSteps(steps);
-            if (!start || items.length === 0) {
-                callback?.();
-                return;
-            }
-            let stepDir: Dir2;
-            let nx = x;
-            let ny = y;
-            if (start === 'backward' || start === 'forward') stepDir = 'down';
-            else stepDir = start;
-
-            const { Layer } = Mota.require('module', 'Render');
-            const moving = Layer.getMovingRenderable(block.id, x, y);
-            if (!moving) {
-                callback?.();
-                return;
-            }
-            items.forEach(v => v.moving.add(moving));
-
-            for (const step of moveSteps) {
-                if (step === 'backward') stepDir = backDir(stepDir);
-                else if (step.startsWith('speed')) {
-                    time = parseInt(step.slice(6));
-                    continue;
-                } else stepDir = step as Dir2;
-
-                const { x, y } = core.utils.scan2[stepDir];
-                const tx = nx + x;
-                const ty = ny + y;
-                await moveRenderable(items[0], moving, time, tx, ty);
-                nx = tx;
-                ny = ty;
-                moving.zIndex = ty;
+            if (controller) {
+                await controller.onEnd;
             }
 
-            items.forEach(v => v.moving.delete(moving));
-            if (keep) {
-                core.setBlock(block.id, nx, ny);
+            if (!keep) {
+                core.removeBlock(mover.x, mover.y);
             }
             callback?.();
         };

@@ -11,7 +11,12 @@ import * as miscMechanism from './mechanism/misc';
 import * as study from './mechanism/study';
 import { registerPresetState } from './state/preset';
 import { ItemState } from './state/item';
-import { heroMoveCollection, HeroMover, ObjectMoverBase } from './state/move';
+import {
+    BlockMover,
+    heroMoveCollection,
+    HeroMover,
+    ObjectMoverBase
+} from './state/move';
 
 // ----- 类注册
 Mota.register('class', 'DamageEnemy', damage.DamageEnemy);
@@ -37,6 +42,7 @@ Mota.register('module', 'Mechanism', {
 Mota.register('module', 'State', {
     ItemState,
     HeroMover,
+    BlockMover,
     ObjectMoverBase,
     heroMoveCollection
 });
