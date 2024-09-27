@@ -799,11 +799,13 @@ interface Ui {
     drawBook(index: number): void;
 
     /**
+     * @deprecated
      * 绘制楼层传送器
      */
     drawFly(page: number): void;
 
     /**
+     * @deprecated
      * 获得所有应该在道具栏显示的某个类型道具
      */
     getToolboxItems<T extends Exclude<ItemCls, 'items'>>(cls: T): ItemIdOf<T>[];

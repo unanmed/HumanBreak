@@ -16,6 +16,7 @@ import EventEmitter from 'events';
 import { WebSocket, WebSocketServer } from 'ws';
 import chokidar from 'chokidar';
 import commonjs from '@rollup/plugin-commonjs';
+import json from '@rollup/plugin-json';
 
 const base = './public';
 
@@ -151,7 +152,8 @@ async function getEsmFile(
             plugins: [
                 typescript({ sourceMap: true }),
                 nodeResolve(),
-                commonjs()
+                commonjs(),
+                json()
             ],
             onwarn() {}
         });

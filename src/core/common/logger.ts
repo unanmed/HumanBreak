@@ -1,5 +1,5 @@
 import { debounce } from 'lodash-es';
-import logInfo from '@/data/logger.json';
+import logInfo from '../../data/logger.json';
 
 // todo: 使用格式化输出？
 

@@ -65,6 +65,10 @@ export function init() {
         return moveSteps;
     }
 
+    function setHeroDirection(dir: Dir) {
+        if (!heroMover.moving) heroMover.moveDir = dir;
+    }
+
     /**
      * 生成跳跃函数
      */
@@ -164,6 +168,7 @@ export function init() {
             }
             if (name === 'direction') {
                 adapters['hero-adapter']?.sync('turn', value);
+                setHeroDirection(value as Dir);
             } else if (name === 'x') {
                 adapters['hero-adapter']?.sync('setHeroLoc', value);
             } else {
