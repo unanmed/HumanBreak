@@ -105,6 +105,7 @@ export function jumpSkill() {
         (bgId.startsWith('X') && !ignoreInJump.bg.includes(bgId))
     )
         return core.drawTip('当前无法使用技能');
+    // debugger;
     // 不是怪物且不可以通行
     if (noPass && !(cls == 'enemys' || cls == 'enemy48')) {
         var toLoc = checkNoPass(direction, checkLoc.x, checkLoc.y, true);

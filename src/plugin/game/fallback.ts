@@ -514,7 +514,10 @@ export function init() {
             time: number = 500,
             callback?: () => void
         ) {
+            console.log(heroMover.moving);
+
             if (heroMover.moving) return;
+
             const sx = core.getHeroLoc('x');
             const sy = core.getHeroLoc('y');
             adapters.viewport?.all('mutateTo', ex, ey);
@@ -539,6 +542,7 @@ export function init() {
                     );
                 })
             );
+            console.log(ex, ey);
 
             if (!locked) core.unlockControl();
             core.setHeroLoc('x', ex);

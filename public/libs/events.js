@@ -1833,6 +1833,8 @@ events.prototype._action_jumpHero = function (data, x, y, prefix) {
     } else {
         loc = this.__action_getHeroLoc(data.loc, prefix);
     }
+    console.log(1);
+
     this.__action_doAsyncFunc(
         data.async,
         core.jumpHero,

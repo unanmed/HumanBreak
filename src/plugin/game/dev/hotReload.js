@@ -44,6 +44,7 @@ export {};
             delete core.status.mapBlockObjs[data];
             core.extractBlocks(data);
             if (data === core.status.floorId) {
+                core.status.thisMap = core.status.maps[data];
                 let weather = core.getFlag('__weather__', null);
                 if (!weather && core.status.thisMap.weather)
                     weather = core.status.thisMap.weather;

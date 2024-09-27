@@ -110,8 +110,13 @@ function checkHunt(loc: string) {
     const { x: hx, y: hy } = core.status.hero.loc;
 
     const action: any = [];
+    hunt.sort((a, b) => {
+        return a[0] === b[0] ? a[1] - b[1] : a[0] - b[0];
+    });
 
     for (const [x, y, dir] of hunt) {
+        const [tx, ty] = ofDir(x, y, dir);
+        if (core.noPass(tx, ty)) continue;
         action.push(
             {
                 type: 'move',
@@ -124,8 +129,6 @@ function checkHunt(loc: string) {
                 type: 'update'
             }
         );
-        const [tx, ty] = ofDir(x, y, dir);
-        if (core.noPass(tx, ty)) return;
 
         if (has(hy) && x === hx) {
             if (Math.abs(y - hy) <= 2) {
