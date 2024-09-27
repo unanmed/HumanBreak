@@ -18,16 +18,19 @@ interface Events extends EventData {
     eventdata: EventData;
 
     /**
+     * @deprecated
      * 公共事件信息
      */
     commonEvent: Record<EventDeclaration, MotaEvent>;
 
     /**
+     * @deprecated
      * 所有的系统事件
      */
     systemEvent: Record<string, SystemEventFunc>;
 
     /**
+     * @deprecated
      * 注册的自定义事件
      */
     actions: Record<string, EventFunc>;
@@ -67,6 +70,7 @@ interface Events extends EventData {
     confirmRestart(): void;
 
     /**
+     * @deprecated
      * 注册一个系统事件
      * @param type 事件名
      * @param func 为事件的处理函数，可接受(data,callback)参数
@@ -74,12 +78,14 @@ interface Events extends EventData {
     registerSystemEvent(type: string, func: SystemEventFunc): void;
 
     /**
+     * @deprecated
      * 注销一个系统事件
      * @param type 事件名
      */
     unregisterSystemEvent(type: string): void;
 
     /**
+     * @deprecated
      * 执行一个系统事件
      * @param type 执行的事件名
      * @param data 数据信息
@@ -115,6 +121,7 @@ interface Events extends EventData {
     ): void;
 
     /**
+     * @deprecated
      * 获得道具并提示，如果填写了坐标就会删除该点的该道具
      * @example core.getItem('book'); // 获得敌人手册并提示
      * @param id 道具id，必填
@@ -132,6 +139,7 @@ interface Events extends EventData {
     ): void;
 
     /**
+     * @deprecated
      * 轻按获得面前的物品或周围唯一物品
      * @param noRoute 若为true则不计入录像
      */
@@ -178,6 +186,7 @@ interface Events extends EventData {
     onSki(number?: number): boolean;
 
     /**
+     * @deprecated
      * 注册一个自定义事件
      * @param type 事件类型
      * @param func 事件的处理函数，可接受(data, x, y, prefix)参数
@@ -186,12 +195,14 @@ interface Events extends EventData {
     registerEvent(type: string, func: EventFunc): void;
 
     /**
+     * @deprecated
      * 注销一个自定义事件
      * @param type 事件类型
      */
     unregisterEvent(type: string): void;
 
     /**
+     * @deprecated
      * 执行一个自定义事件
      * @param data 事件信息
      * @param x 事件横坐标
@@ -201,6 +212,7 @@ interface Events extends EventData {
     doEvent(data: any, x?: number, y?: number, prefix?: string): void;
 
     /**
+     * @deprecated
      * 直接设置事件列表
      * @param list 事件信息
      * @param x 横坐标
@@ -215,6 +227,7 @@ interface Events extends EventData {
     ): void;
 
     /**
+     * @deprecated
      * 开始执行一系列自定义事件
      * @param list 事件信息
      * @param x 横坐标
@@ -229,6 +242,7 @@ interface Events extends EventData {
     ): void;
 
     /**
+     * @deprecated
      * 执行下一个事件指令，常作为回调
      * @example
      * // 事件中的原生脚本，配合勾选“不自动执行下一个事件”来达到此改变色调只持续到下次场景切换的效果
@@ -237,6 +251,7 @@ interface Events extends EventData {
     doAction(): void;
 
     /**
+     * @deprecated
      * 插入一段事件；此项不可插入公共事件，请用 core.insertCommonEvent
      * @example core.insertAction('一段文字'); // 插入一个显示文章
      * @param action 单个事件指令，或事件指令数组
@@ -254,6 +269,7 @@ interface Events extends EventData {
     ): void;
 
     /**
+     * @deprecated
      * 插入一个公共事件
      * @example core.insertCommonEvent('加点事件', [3]);
      * @param name 公共事件名；如果公共事件不存在则直接忽略
@@ -273,23 +289,27 @@ interface Events extends EventData {
     ): void;
 
     /**
+     * @deprecated
      * 获得一个公共事件
      * @param name 公共事件名称
      */
     getCommonEvent(name: EventDeclaration): any;
 
     /**
+     * @deprecated
      * 恢复一个事件
      * @param data 事件信息
      */
     recoverEvents(data?: any): boolean;
 
     /**
+     * @deprecated
      * 检测自动事件
      */
     checkAutoEvents(): void;
 
     /**
+     * @deprecated
      * 当前是否在执行某个自动事件
      * @param symbol 自动事件的标识符
      * @param value 不太清楚有什么用
@@ -297,6 +317,7 @@ interface Events extends EventData {
     autoEventExecuting(symbol?: string, value?: any): boolean;
 
     /**
+     * @deprecated
      * 当前是否执行过某个自动事件
      * @param symbol 自动事件的标识符
      * @param value 不太清楚有什么用
@@ -304,94 +325,113 @@ interface Events extends EventData {
     autoEventExecuted(symbol?: string, value?: any): boolean;
 
     /**
+     * @deprecated
      * 将当前点坐标入栈
      */
     pushEventLoc(x: number, y: number, floorId?: FloorIds): void;
 
     /**
+     * @deprecated
      * 弹出事件坐标点
      */
     popEventLoc(): void;
 
     /**
+     * @deprecated
      * 预编辑事件
      * @param data 事件信息
      */
     precompile(data?: any): any;
 
     /**
+     * @deprecated
      * 点击怪物手册时的打开操作
      * @param fromUserAction 是否是用户开启的
      */
     openBook(fromUserAction?: boolean): void;
 
     /**
+     * @deprecated
      * 点击楼层传送器时的打开操作
      * @param fromUserAction 是否是用户开启的
      */
     useFly(fromUserAction?: boolean): void;
 
-    /** 点击装备栏时的打开操作 */
+    /**
+     * @deprecated
+     * 点击装备栏时的打开操作
+     */
     openEquipbox(fromUserAction?: boolean): void;
 
     /**
+     * @deprecated
      * 点击工具栏时的打开操作
      * @param fromUserAction 是否是用户开启的
      */
     openToolbox(fromUserAction?: boolean): void;
 
     /**
+     * @deprecated
      * 点击快捷商店按钮时的打开操作
      * @param fromUserAction 是否是用户开启的
      */
     openQuickShop(fromUserAction?: boolean): void;
 
     /**
+     * @deprecated
      * 点击虚拟键盘时的打开操作
      * @param fromUserAction 是否是用户开启的
      */
     openKeyBoard(fromUserAction?: boolean): void;
 
     /**
+     * @deprecated
      * 点击存档按钮时的打开操作
      * @param fromUserAction 是否是用户开启的
      */
     save(fromUserAction?: boolean): void;
 
     /**
+     * @deprecated
      * 点击读档按钮时的打开操作
      * @param fromUserAction 是否是用户开启的
      */
     load(fromUserAction?: boolean): void;
 
     /**
+     * @deprecated
      * 点击设置按钮时的操作
      * @param fromUserAction 是否是用户开启的
      */
     openSettings(fromUserAction?: boolean): void;
 
     /**
+     * @deprecated
      * 当前是否有未处理完毕的异步事件（不包含动画和音效）
      */
     hasAsync(): boolean;
 
     /**
+     * @deprecated
      * 立刻停止所有异步事件
      */
     stopAsync(): void;
 
     /**
+     * @deprecated
      * 是否有异步动画
      */
     hasAsyncAnimate(): boolean;
 
     /**
+     * @deprecated
      * 跟随
      * @param name 要跟随的一个合法的4x4的行走图名称，需要在全塔属性注册
      */
     follow(name: ImageIds | NameMapIn<ImageIds>): void;
 
     /**
+     * @deprecated
      * 取消跟随
      * @param name 取消跟随的行走图，不填则取消全部跟随者
      */
@@ -525,6 +565,7 @@ interface Events extends EventData {
     ): void;
 
     /**
+     * @deprecated
      * 设置文件别名
      * @param name 别名
      * @param value 别名对应的文件名
@@ -532,11 +573,13 @@ interface Events extends EventData {
     setNameMap(name: string, value?: SourceIds): void;
 
     /**
+     * @deprecated
      * 设置剧情文本的属性
      */
     setTextAttribute(data: Partial<TextAttribute>): void;
 
     /**
+     * @deprecated
      * 移动对话框
      * @param code 对话框的代码
      * @param loc 目标位置
@@ -555,6 +598,7 @@ interface Events extends EventData {
     ): void;
 
     /**
+     * @deprecated
      * 清除对话框
      * @param code 对话框的代码
      * @param callback 回调函数
@@ -577,6 +621,7 @@ interface Events extends EventData {
     ): void;
 
     /**
+     * @deprecated
      * 显示一张图片
      * @example
      * // 裁剪winskin.png的最左边128×128px，放大到铺满整个视野，1秒内淡入到50%透明，编号为1
@@ -600,6 +645,7 @@ interface Events extends EventData {
     ): void;
 
     /**
+     * @deprecated
      * 隐藏一张图片
      * @example core.hideImage(1, 1000, core.jumpHero); // 1秒内淡出1号图片，然后主角原地跳跃半秒
      * @param code 图片编号
@@ -609,6 +655,7 @@ interface Events extends EventData {
     hideImage(code: number, time?: number, callback?: () => void): void;
 
     /**
+     * @deprecated
      * 移动一张图片并/或改变其透明度
      * @example core.moveImage(1, null, 0.5); // 1秒内把1号图片变为50%透明
      * @param code 图片编号
@@ -628,6 +675,7 @@ interface Events extends EventData {
     ): void;
 
     /**
+     * @deprecated
      * 旋转一张图片
      * @param code 图片编号
      * @param center 旋转中心像素（以屏幕为基准）；不填视为图片本身中心
@@ -646,6 +694,7 @@ interface Events extends EventData {
     ): void;
 
     /**
+     * @deprecated
      * 放缩一张图片
      * @param code 图片编号
      * @param center 旋转中心像素（以屏幕为基准）；不填视为图片本身中心
@@ -664,6 +713,7 @@ interface Events extends EventData {
     ): void;
 
     /**
+     * @deprecated
      * 绘制一张动图或擦除所有动图
      * @example core.showGif(); // 擦除所有动图
      * @param name 动图文件名，可以是全塔属性中映射前的中文名
@@ -679,6 +729,7 @@ interface Events extends EventData {
     ): void;
 
     /**
+     * @deprecated
      * 调节bgm的音量
      * @example core.setVolume(0, 100, core.jumpHero); // 0.1秒内淡出bgm，然后主角原地跳跃半秒
      * @param value 新的音量，为0或不大于1的正数。注意系统设置中是这个值的平方根的十倍
@@ -688,6 +739,7 @@ interface Events extends EventData {
     setVolume(value: number, time?: number, callback?: () => void): void;
 
     /**
+     * @deprecated
      * 视野抖动
      * @example core.vibrate(); // 视野左右抖动1秒
      * @param direction 抖动方向
@@ -705,6 +757,7 @@ interface Events extends EventData {
     ): void;
 
     /**
+     * @deprecated
      * 强制移动主角（包括后退），这个函数的作者已经看不懂这个函数了
      * @example core.eventMoveHero(['forward'], 125, core.jumpHero); // 主角强制前进一步，用时1/8秒，然后主角原地跳跃半秒
      * @param steps 步伐数组，注意后退时跟随者的行为会很难看
@@ -730,6 +783,7 @@ interface Events extends EventData {
     ): void;
 
     /**
+     * @deprecated
      * 更改主角行走图
      * @example core.setHeroIcon('npc48.png', true); // 把主角从阳光变成样板0层左下角的小姐姐，但不立即刷新
      * @param name 新的行走图文件名，可以是全塔属性中映射前的中文名。映射后会被存入core.status.hero.image

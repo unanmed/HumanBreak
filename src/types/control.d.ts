@@ -457,6 +457,7 @@ interface Control {
     ): void;
 
     /**
+     * @deprecated
      * 获取主角面前第n格的横坐标
      * @example core.closeDoor(core.nextX(), core.nextY(), 'yellowDoor', core.turnHero); // 在主角面前关上一扇黄门，然后主角顺时针旋转90°
      * @param n 目标格与主角的距离，面前为正数，背后为负数，脚下为0，不填视为1
@@ -464,6 +465,7 @@ interface Control {
     nextX(n?: number): number;
 
     /**
+     * @deprecated
      * 获取主角面前第n格的纵坐标
      * @example core.jumpHero(core.nextX(2), core.nextY(2)); // 主角向前跃过一格，即跳跃靴道具的使用效果
      * @param n 目标格与主角的距离，面前为正数，背后为负数，脚下为0，不填视为1
@@ -471,6 +473,7 @@ interface Control {
     nextY(n?: number): number;
 
     /**
+     * @deprecated
      * 判定主角是否身处某个点的锯齿领域(取曼哈顿距离)
      * @example core.nearHero(6, 6, 6); // 判定主角是否身处点（6，6）的半径为6的锯齿领域
      * @param x 领域的中心横坐标
@@ -492,6 +495,7 @@ interface Control {
     updateFollowers(): void;
 
     /**
+     * @deprecated
      * 检查并执行领域、夹击、阻击事件
      */
     checkBlock(): void;
@@ -664,6 +668,7 @@ interface Control {
     removeSave(index: number, callback?: () => void): void;
 
     /**
+     * @deprecated
      * 设置主角的某个属性
      * @example core.setStatus('loc', {x : 0, y : 0, direction : 'up'}); // 设置主角位置为地图左上角，脸朝上
      * @param name 属性名
@@ -672,6 +677,7 @@ interface Control {
     setStatus<K extends keyof HeroStatus>(name: K, value: HeroStatus[K]): void;
 
     /**
+     * @deprecated
      * 增减主角的某个属性，等价于core.setStatus(name, core.getStatus(name) + value)
      * @example core.addStatus('name', '酱'); // 在主角的名字后加一个“酱”字
      * @param name 属性名
@@ -683,6 +689,7 @@ interface Control {
     ): void;
 
     /**
+     * @deprecated
      * 读取主角的某个属性，不包括百分比修正
      * @example core.getStatus('loc'); // 读取主角的坐标和朝向
      * @param name 属性名
@@ -691,6 +698,7 @@ interface Control {
     getStatus<K extends keyof HeroStatus>(name: K): HeroStatus[K];
 
     /**
+     * @deprecated
      * 从status中获得属性，如果不存在则从勇士属性中获取
      * @param status 要从中获取的属性对象
      * @param name 属性名
@@ -701,6 +709,7 @@ interface Control {
     ): HeroStatus[K];
 
     /**
+     * @deprecated
      * 计算主角的某个属性，包括百分比修正
      * @example core.getRealStatus('atk'); // 计算主角的攻击力，包括百分比修正。战斗使用的就是这个值
      * @param name 属性名，注意只能用于数值类属性
@@ -708,6 +717,7 @@ interface Control {
     getRealStatus<K extends keyof NumbericHeroStatus>(name: K): number;
 
     /**
+     * @deprecated
      * 从status中获得增幅后的属性，如果不存在则从勇士属性中获取
      * @param status 要从中获取的属性对象
      * @param name 属性名
@@ -718,12 +728,14 @@ interface Control {
     ): number;
 
     /**
+     * @deprecated
      * 获得勇士原始属性（无装备和衰弱影响）
      * @param name 获取的属性名
      */
     getNakedStatus(name?: keyof NumbericHeroStatus): number;
 
     /**
+     * @deprecated
      * 设置主角某个属性的百分比修正倍率，初始值为1，
      * 倍率存放在flag: `__${name}_${buff}__` 中
      * @example core.setBuff('atk', 0.5); // 主角能发挥出的攻击力减半
@@ -733,6 +745,7 @@ interface Control {
     setBuff<K extends keyof NumbericHeroStatus>(name: K, value?: number): void;
 
     /**
+     * @deprecated
      * 增减主角某个属性的百分比修正倍率，加减法叠加和抵消。等价于 core.setBuff(name, core.getBuff(name) + value)
      * @example core.addBuff('atk', -0.1); // 主角获得一层“攻击力减一成”的负面效果
      * @param name 属性名，注意只能用于数值类属性
@@ -741,6 +754,7 @@ interface Control {
     addBuff<K extends keyof NumbericHeroStatus>(name: K, value: number): void;
 
     /**
+     * @deprecated
      * 读取主角某个属性的百分比修正倍率，初始值为1
      * @example core.getBuff('atk'); // 主角当前能发挥出多大比例的攻击力
      * @param name 属性的英文名
@@ -748,6 +762,7 @@ interface Control {
     getBuff(name: keyof NumbericHeroStatus): number;
 
     /**
+     * @deprecated
      * 设置勇士位置
      * 值得注意的是，这句话虽然会使勇士改变位置，但并不会使界面重新绘制；
      * 如需立刻重新绘制地图还需调用：core.clearMap('hero'); core.drawHero(); 来对界面进行更新。
@@ -760,6 +775,7 @@ interface Control {
     setHeroLoc(name: 'direction', value: Dir, noGather?: boolean): void;
 
     /**
+     * @deprecated
      * 获取主角的位置，朝向
      * @example core.getHeroLoc(); // 获取主角的位置和朝向
      * @param name 要读取横坐标还是纵坐标还是朝向还是都读取
@@ -768,6 +784,7 @@ interface Control {
     getHeroLoc<K extends keyof DiredLoc>(name: K): DiredLoc[K];
 
     /**
+     * @deprecated
      * 根据级别的数字获取对应的名称，后者定义在全塔属性
      * @example core.getLvName(); // 获取主角当前级别的名称，如“下级佣兵”
      * @param lv 级别的数字，不填则视为主角当前的级别
@@ -776,6 +793,7 @@ interface Control {
     getLvName(lv?: number): string;
 
     /**
+     * @deprecated
      * 获得下次升级需要的经验值。
      * 升级扣除模式下会返回经验差值；非扣除模式下会返回总共需要的经验值。
      * 如果无法进行下次升级，返回null。
@@ -783,6 +801,7 @@ interface Control {
     getNextLvUpNeed(): number | null;
 
     /**
+     * @deprecated
      * 设置一个flag变量
      * @example core.setFlag('poison', true); // 令主角中毒
      * @param name 变量名，支持中文，这东西用中文就是不规范（
@@ -791,6 +810,7 @@ interface Control {
     setFlag(name: string, value?: any): void;
 
     /**
+     * @deprecated
      * 增减一个flag变量，等价于 core.setFlag(name, core.getFlag(name, 0) + value)
      * @example core.addFlag('hatred', 1); // 增加1点仇恨值
      * @param name 变量名，支持中文
@@ -799,6 +819,7 @@ interface Control {
     addFlag(name: string, value: number | string): void;
 
     /**
+     * @deprecated
      * 获取一个flag变量
      * @param name 变量名，支持中文，这东西用中文就是不规范（
      * @param defaultValue 当变量不存在时的返回值，可选（事件流中默认填0）。
@@ -807,6 +828,7 @@ interface Control {
     getFlag<T>(name: string, defaultValue?: T): T;
 
     /**
+     * @deprecated
      * 判定一个flag变量是否不为falsy
      * @example core.hasFlag('poison'); // 判断主角当前是否中毒
      * @param name 变量名，支持中文，这东西用中文就是不规范（
@@ -814,12 +836,14 @@ interface Control {
     hasFlag(name: string): boolean;
 
     /**
+     * @deprecated
      * 删除某个flag
      * @param name 要删除的变量名
      */
     removeFlag(name: string): void;
 
     /**
+     * @deprecated
      * 设置某个独立开关
      * @param x 横坐标
      * @param y 纵坐标
@@ -836,6 +860,7 @@ interface Control {
     ): void;
 
     /**
+     * @deprecated
      * 获得某个独立开关
      * @param x 横坐标
      * @param y 纵坐标
@@ -852,6 +877,7 @@ interface Control {
     ): T;
 
     /**
+     * @deprecated
      * 增加某个独立开关
      * @param x 横坐标
      * @param y 纵坐标
@@ -868,6 +894,7 @@ interface Control {
     ): void;
 
     /**
+     * @deprecated
      * 是否存在某个独立开关
      * @param x 横坐标
      * @param y 纵坐标
@@ -882,6 +909,7 @@ interface Control {
     ): boolean;
 
     /**
+     * @deprecated
      * 删除某个独立开关
      * @param x 横坐标
      * @param y 纵坐标
@@ -927,6 +955,7 @@ interface Control {
     getMappedName<K extends keyof NameMap>(name: K): NameMap[K];
 
     /**
+     * @deprecated
      * 设置天气，不计入存档。如需长期生效请使用core.events._action_setWeather()函数
      * @example core.setWeather('fog', 10); // 设置十级大雾天
      * @param type 新天气的类型，不填视为无天气
@@ -935,6 +964,7 @@ interface Control {
     setWeather(type?: string, level?: WeatherLevel): void;
 
     /**
+     * @deprecated
      * 注册一个天气
      * @param name 天气的名称
      * @param initFunc 初始化函数
@@ -947,6 +977,7 @@ interface Control {
     ): void;
 
     /**
+     * @deprecated
      * 注销一个天气
      * @param name 要注销的天气名称
      */
@@ -1054,17 +1085,20 @@ interface Control {
     checkBgm(): void;
 
     /**
+     * @deprecated
      * 设置屏幕放缩
      * @param delta 在所有可用放缩数组中增加的下标数
      */
     setDisplayScale(delta: number): void;
 
     /**
+     * @deprecated
      * 清空状态栏
      */
     clearStatusBar(): void;
 
     /**
+     * @deprecated
      * 更新状态栏和地图显伤，会在下一个动画帧更新
      * @param doNotCheckAutoEvents 是否不检查自动事件
      * @param immediate 是否立刻刷新，而非延迟到下一动画帧刷新
@@ -1072,17 +1106,20 @@ interface Control {
     updateStatusBar(doNotCheckAutoEvents?: boolean, immediate?: boolean): void;
 
     /**
+     * @deprecated
      * 显示状态栏
      */
     showStatusBar(): void;
 
     /**
+     * @deprecated
      * 隐藏状态栏
      * @param showToolbox 是否显示工具栏
      */
     hideStatusBar(showToolbox?: boolean): void;
 
     /**
+     * @deprecated
      * 改变工具栏为按钮1-8
      * @param useButton 是否显示为按钮1-8
      */

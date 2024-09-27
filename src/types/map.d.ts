@@ -996,6 +996,7 @@ interface Maps {
     ): Cls | null;
 
     /**
+     * @deprecated
      * 获取图块的不透明度
      * @param x 横坐标
      * @param y 纵坐标
@@ -1010,6 +1011,7 @@ interface Maps {
     ): number | null;
 
     /**
+     * @deprecated
      * 获取图块的滤镜
      * @param x 横坐标
      * @param y 纵坐标
@@ -1123,6 +1125,7 @@ interface Maps {
     removeBlockByIndexes(indexes: number[], floorId?: FloorIds): void;
 
     /**
+     * @deprecated
      * 显示前景/背景地图
      * @param name 图层名
      * @param loc 要显示的坐标列表
@@ -1137,6 +1140,7 @@ interface Maps {
     ): void;
 
     /**
+     * @deprecated
      * 隐藏前景/背景地图
      * @param name 图层名
      * @param loc 要显示的坐标列表
@@ -1151,6 +1155,7 @@ interface Maps {
     ): void;
 
     /**
+     * @deprecated
      * 显示一个楼层贴图
      * @param loc 楼层贴图的位置
      * @param floorId 楼层id
@@ -1163,6 +1168,7 @@ interface Maps {
     ): void;
 
     /**
+     * @deprecated
      * 隐藏一个楼层贴图
      * @param loc 楼层贴图的位置
      * @param floorId 楼层id
@@ -1192,6 +1198,7 @@ interface Maps {
     ): void;
 
     /**
+     * @deprecated
      * 动画形式转变某点图块
      * @param number 要转变成的图块的数字或id
      * @param x 横坐标
@@ -1210,6 +1217,7 @@ interface Maps {
     ): void;
 
     /**
+     * @deprecated
      * 动画形式转变若干点图块
      * @param number 要转变成的图块的数字或id
      * @param locs 坐标数组
@@ -1318,6 +1326,7 @@ interface Maps {
     ): void;
 
     /**
+     * @deprecated
      * 显示/隐藏某个块时的动画效果
      * @param loc 要显示或隐藏的坐标数组
      * @param type 显示还是隐藏还是移除，填数字表示设置不透明度
@@ -1332,16 +1341,19 @@ interface Maps {
     ): void;
 
     /**
+     * @deprecated
      * 添加一个全局动画
      * @param block 图块信息
      */
     addGlobalAnimate(block?: Block): void;
 
     /**
+     * @deprecated
      * 删除所有全局动画
      */
     removeGlobalAnimate(): void;
     /**
+     * @deprecated
      * 删除一个全局动画
      * @param x 横坐标
      * @param y 纵坐标
@@ -1349,6 +1361,7 @@ interface Maps {
     removeGlobalAnimate(x?: number, y?: number): void;
 
     /**
+     * @deprecated
      * 绘制UI层的box动画
      */
     drawBoxAnimate(): void;
@@ -1385,6 +1398,7 @@ interface Maps {
     ): void;
 
     /**
+     * @deprecated
      * 获得当前正在播放的所有（指定）动画的id列表
      * @param name 指定名称
      */

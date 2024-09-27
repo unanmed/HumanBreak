@@ -216,6 +216,7 @@ interface Enemys {
     };
 
     /**
+     * @deprecated
      * 获得所有怪物原始数据的一个副本
      */
     getEnemys(): {
@@ -223,6 +224,7 @@ interface Enemys {
     };
 
     /**
+     * @deprecated
      * 判定主角当前能否打败某只敌人
      * @example core.canBattle('greenSlime',0,0,'MT0') // 能否打败主塔0层左上角的绿头怪（假设有）
      * @param enemy 敌人id或敌人对象

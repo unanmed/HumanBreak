@@ -1181,6 +1181,7 @@ interface Main extends MainData {
     readonly savePages: number;
 
     /**
+     * @deprecated
      * 循环临界的分界
      */
     readonly criticalUseLoop: number;
@@ -1325,6 +1326,7 @@ interface Main extends MainData {
     log(e: string | Error, error?: boolean): void;
 
     /**
+     * @deprecated
      * 生成选择光标的keyframes
      */
     createOnChoiceAnimation(): void;

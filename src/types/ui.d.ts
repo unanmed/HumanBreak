@@ -622,6 +622,7 @@ interface Ui {
     ): void;
 
     /**
+     * @deprecated
      * 在某个canvas上绘制一个图标
      * @param frame 图标的第几帧
      */
@@ -641,11 +642,13 @@ interface Ui {
     closePanel(): void;
 
     /**
+     * @deprecated
      * 清空UI层内容
      */
     clearUI(): void;
 
     /**
+     * @deprecated
      * 左上角绘制一段提示
      * @param text 要提示的文字内容
      * @param id 要绘制的图标ID
@@ -654,11 +657,13 @@ interface Ui {
     drawTip(text: string, id?: AllIds, frame?: number): void;
 
     /**
+     * @deprecated
      * 地图中间绘制一段文字
      */
     drawText(contents?: string, callback?: () => void): void;
 
     /**
+     * @deprecated
      * 自绘选择光标
      */
     drawUIEventSelector(
@@ -672,12 +677,14 @@ interface Ui {
     ): void;
 
     /**
+     * @deprecated
      * 清除一个或多个选择光标
      * @param code 要清除的选择光标，不填表示清除所有
      */
     clearUIEventSelector(code?: number | number[]): void;
 
     /**
+     * @deprecated
      * 绘制WindowSkin
      * @param direction 指向箭头的方向
      */
@@ -694,6 +701,7 @@ interface Ui {
     ): void;
 
     /**
+     * @deprecated
      * 绘制一个背景图，可绘制winskin或纯色背景；支持小箭头绘制
      */
     drawBackground(
@@ -705,6 +713,7 @@ interface Ui {
     ): void;
 
     /**
+     * @deprecated
      * 绘制一段文字到某个画布上面
      * @param ctx 要绘制到的画布
      * @param content 要绘制的内容；转义字符只允许保留 \n, \r[...], \i[...], \c[...], \d, \e
@@ -718,6 +727,7 @@ interface Ui {
     ): ReturnedTextContentConfig;
 
     /**
+     * @deprecated
      * 获得某段文字的预计绘制高度
      */
     getTextContentHeight(
@@ -726,11 +736,13 @@ interface Ui {
     ): number;
 
     /**
+     * @deprecated
      * 绘制一个对话框
      */
     drawTextBox(content: string, config?: TextBoxConfig): void;
 
     /**
+     * @deprecated
      * 绘制滚动字幕
      */
     drawScrollText(
@@ -741,11 +753,13 @@ interface Ui {
     ): void;
 
     /**
+     * @deprecated
      * 文本图片化
      */
     textImage(content: string, lineHeight?: number): HTMLCanvasElement;
 
     /**
+     * @deprecated
      * 绘制一个选项界面
      */
     drawChoices(
@@ -756,6 +770,7 @@ interface Ui {
     ): void;
 
     /**
+     * @deprecated
      * 绘制一个确认框
      */
     drawConfirmBox(
@@ -766,16 +781,19 @@ interface Ui {
     ): void;
 
     /**
+     * @deprecated
      * 绘制等待界面
      */
     drawWaiting(text: string): void;
 
     /**
+     * @deprecated
      * 绘制分页
      */
     drawPagination(page: number, totalPage: number, y?: number): void;
 
     /**
+     * @deprecated
      * 绘制怪物手册
      */
     drawBook(index: number): void;
@@ -860,6 +878,7 @@ interface Ui {
     deleteAllCanvas(): void;
 
     /**
+     * @deprecated
      * 绘制浏览地图
      */
     _drawViewMaps(): void;

@@ -11,6 +11,7 @@ interface Utils {
     readonly scan2: DeepReadonly<Scan2>;
 
     /**
+     * @deprecated
      * 将一段文字中的${}（表达式）进行替换。很多情况下可以用模板字符串替代
      * @example
      * // 把主角的生命值和持有的黄钥匙数量代入这句话
@@ -22,6 +23,7 @@ interface Utils {
     replaceText(text: string, prefix?: string): string;
 
     /**
+     * @deprecated
      * 对一个表达式中的特殊规则进行替换，如status:xxx等。
      * 其中变量和全局存储会替换中文冒号，其余的不会替换
      * @example
@@ -33,6 +35,7 @@ interface Utils {
     replaceValue(value: string): string;
 
     /**
+     * @deprecated
      * 计算一个表达式的值，支持status:xxx等的计算。
      * @example core.calValue('status:hp + status:def'); // 计算主角的生命值加防御力
      * @param value 待求值的表达式
@@ -193,6 +196,7 @@ interface Utils {
     cloneArray<T extends any[]>(data: T): T;
 
     /**
+     * @deprecated
      * 等比例切分一张图片
      * @example core.splitImage(core.material.images.images['npc48.png'], 32, 48); // 把npc48.png切分成若干32×48px的小人
      * @param image 图片名（支持映射前的中文名）或图片对象（参见上面的例子），获取不到时返回[]
@@ -265,6 +269,7 @@ interface Utils {
     applyEasing(mode?: EaseMode): (x: number) => number;
 
     /**
+     * @deprecated
      * 颜色数组转十六进制
      * @example core.arrayToRGB([102, 204, 255]); // "#66ccff"，加载画面的宣传色
      * @param color 一行三列的数组，各元素必须为不大于255的自然数
@@ -273,6 +278,7 @@ interface Utils {
     arrayToRGB(color: RGBArray): _RGBA;
 
     /**
+     * @deprecated
      * 颜色数组转字符串
      * @example core.arrayToRGBA([102, 204, 255]); // "rgba(102,204,255,1)"
      * @param color 一行三列或一行四列的数组，前三个元素必须为不大于255的自然数。
@@ -308,6 +314,7 @@ interface Utils {
     isset(v?: any): boolean;
 
     /**
+     * @deprecated
      * 判定一个数组是否为另一个数组的前缀，用于录像接续播放
      * @example core.subarray(['ad', '米库', '小精灵', '小破草', '小艾'], ['ad', '米库', '小精灵']); // ['小破草', '小艾']
      * @param a 可能的母数组，不填或比b短将返回null
@@ -326,6 +333,7 @@ interface Utils {
     inArray(array?: any, element?: any): boolean;
 
     /**
+     * @deprecated
      * 将x限定在[a,b]区间内，注意a和b可交换
      * @example core.clamp(1200, 1, 1000); // 1000
      * @param x 原始值，!x为true时x一律视为0
@@ -364,6 +372,7 @@ interface Utils {
     strlen(str: string): number;
 
     /**
+     * @deprecated
      * 计算应当转向某个方向
      * @param turn 转向的方向
      * @param direction 当前方向，不填视为当前方向
@@ -371,6 +380,7 @@ interface Utils {
     turnDirection(turn: HeroTurnDir, direction?: Dir): string;
 
     /**
+     * @deprecated
      * 通配符匹配，用于搜索图块等批量处理。
      * @example core.playSound(core.matchWildcard('*Key', itemId) ? 'item.mp3' : 'door.mp3'); // 判断捡到的是钥匙还是别的道具，从而播放不同的音效
      * @param pattern 模式串，每个星号表示任意多个（0个起）字符
@@ -380,6 +390,7 @@ interface Utils {
     matchWildcard(pattern: string, string: string): boolean;
 
     /**
+     * @deprecated
      * 是否满足正则表达式，一般可以直接用/RegExp/.test(str)代替
      * @param pattern 正则表达式
      * @param string 要匹配的字符串
@@ -457,6 +468,7 @@ interface Utils {
     copy(data: string): void;
 
     /**
+     * @deprecated
      * 显示确认框，类似core.drawConfirmBox()
      * @example core.myconfirm('重启游戏？', core.restart); // 弹窗询问玩家是否重启游戏
      * @param hint 弹窗的内容
@@ -470,6 +482,7 @@ interface Utils {
     ): void;
 
     /**
+     * @deprecated
      * 让用户输入一段文字
      */
     myprompt(
@@ -510,6 +523,7 @@ interface Utils {
     hashCode(obj: any): number;
 
     /**
+     * @deprecated
      * 判定深层相等, 会逐层比较每个元素
      * @example core.same(['1', 2], ['1', 2]); // true
      */

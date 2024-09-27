@@ -618,6 +618,7 @@ interface InitGameStatus {
     mapBlockObjs: Record<FloorIds, Record<LocString, Block>>;
 
     /**
+     * @deprecated
      * 伤害显示信息
      */
     damage: DamageStatus;
@@ -634,6 +635,7 @@ interface InitGameStatus {
     heroMoving: number;
 
     /**
+     * @deprecated
      * 勇士是否停下了
      */
     heroStop: boolean;
@@ -689,11 +691,13 @@ interface InitGameStatus {
     globalAttribute: GlobalAttribute;
 
     /**
+     * @deprecated
      * 色调的颜色
      */
     curtainColor: Color;
 
     /**
+     * @deprecated
      * 全局动画对象
      */
     globalAnimateObjs: Block<
@@ -701,26 +705,31 @@ interface InitGameStatus {
     >[];
 
     /**
+     * @deprecated
      * 楼层贴图
      */
     floorAnimateObjs: FloorAnimate[];
 
     /**
+     * @deprecated
      * 所有的BoxAnimate信息
      */
     boxAnimateObjs: (BoxAnimate | BigImageBoxAnimate)[];
 
     /**
+     * @deprecated
      * 所有的自动元件动画
      */
     autotileAnimateObjs: Block<IdToNumber[AllIdsOf<'autotile'>]>[];
 
     /**
+     * @deprecated
      * 全局动画状态，每经过一个全局动画时间便加一
      */
     globalAnimateStatus: number;
 
     /**
+     * @deprecated
      * 所有绘制的动画
      */
     animateObjs: AnimateObj[];
@@ -731,6 +740,7 @@ interface InitGameStatus {
     hard: string;
 
     /**
+     * @deprecated
      * 勇士的中心
      */
     heroCenter: Record<'px' | 'py', number>;
@@ -753,6 +763,7 @@ interface InitGameStatus {
     };
 
     /**
+     * @deprecated
      * 大地图中的拖拽处理
      */
     preview: ActionsPreview;
@@ -778,6 +789,7 @@ interface GameStatus extends InitGameStatus {
     thisMap: Floor;
 
     /**
+     * @deprecated
      * 地图伤害
      */
     checkBlock: Readonly<CheckBlockStatus>;
@@ -947,18 +959,24 @@ interface HeroStatus {
     loc: DiredLoc;
 
     /**
+     * @deprecated
      * 当前的变量
      */
     flags: Flags;
 
     /**
+     * @deprecated
      * 勇士的跟随者
      */
     followers: Follower[];
 
+    /**
+     * @deprecated
+     */
     statistics: HeroStatistics;
 
     /**
+     * @deprecated
      * 勇士拥有的道具
      */
     items: {
