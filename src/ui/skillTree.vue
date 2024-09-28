@@ -87,6 +87,7 @@ import { sleep } from 'mutate-animate';
 import { gameKey } from '@/core/main/custom/hotkey';
 import { GameUi } from '@/core/main/custom/ui';
 import { mainUi } from '@/core/main/init/ui';
+import type { Chapter } from '@/plugin/game/skillTree';
 
 const props = defineProps<{
     num: number;
@@ -143,19 +144,10 @@ const desc = computed(() => {
 
 const effect = computed(() => {
     return [0, 1].map(v => {
-        return eval(
-            '`' +
-                `${v === 0 ? '当前效果：' : '下一级效果：'}` +
-                skill.value.effect
-                    .join('')
-                    .replace(/level(:\d+)?/g, (str, $1) => {
-                        if ($1)
-                            return `(skillTree.getSkillLevel(${$1}) + ${v})`;
-                        else
-                            return `(skillTree.getSkillLevel(${skill.value.index}) + ${v})`;
-                    }) +
-                '`'
-        );
+        const prefix = v === 0 ? '当前效果：' : '下一级效果：';
+        const level = skillTree.getSkillLevel(skill.value.index);
+        const content = skill.value.effect(level);
+        return prefix + content.join('');
     }) as [string, string];
 });
 

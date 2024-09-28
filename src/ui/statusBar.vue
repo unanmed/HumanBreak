@@ -62,6 +62,12 @@
                     <div id="status-def" class="status-item status-item-bold">
                         <img :src="imgs['def.png'].src" class="status-icon" />
                         <span>{{ format(hero.def!) }}</span>
+                        <span
+                            v-if="hero.magicDef! > 0"
+                            id="status-magic-def"
+                            class="status-extra status-item-bold"
+                            >+{{ format(hero.magicDef!) }}</span
+                        >
                     </div>
                     <div id="status-mdef" class="status-item status-item-bold">
                         <img :src="imgs['IQ.png'].src" class="status-icon" />
@@ -167,7 +173,8 @@ const toShow: (keyof NumbericHeroStatus)[] = [
     'mana', // 额外攻击
     'money', // 金币
     'exp', // 经验
-    'lv' // 等级
+    'lv', // 等级
+    'magicDef' // 魔法防御
 ];
 
 watch(status, update);
@@ -324,6 +331,11 @@ onUnmounted(() => {
 #status-mana {
     line-height: 0;
     color: rgb(255, 211, 211);
+}
+
+#status-magic-def {
+    line-height: 0;
+    color: rgb(176, 189, 255);
 }
 
 #status-hpmax {
