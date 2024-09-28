@@ -400,6 +400,8 @@ export class HeroMover extends ObjectMoverBase {
     private noRoute: boolean = false;
     /** 当前移动是否是在lockControl条件下开始的 */
     private inLockControl: boolean = false;
+    /** 是否会在特殊时刻进行自动存档 */
+    private autoSave: boolean = false;
 
     /** 这一步的传送门信息 */
     private portalData?: BluePalace.PortalTo;
@@ -407,12 +409,25 @@ export class HeroMover extends ObjectMoverBase {
     override startMove(
         ignoreTerrain: boolean = false,
         noRoute: boolean = false,
-        inLockControl: boolean = false
+        inLockControl: boolean = false,
+        autoSave: boolean = false
     ): IMoveController | null {
         this.ignoreTerrain = ignoreTerrain;
         this.noRoute = noRoute;
         this.inLockControl = inLockControl;
+        this.autoSave = autoSave;
         return super.startMove();
+    }
+
+    private checkAutoSave(x: number, y: number) {
+        const index = `${x},${y}`;
+        const map = core.status.thisMap.enemy.mapDamage;
+        const dam = map[index];
+        if (!dam) return false;
+        if (dam.mockery || dam.hunt) {
+            core.autosave();
+            return true;
+        }
     }
 
     protected async onMoveStart(controller: IMoveController): Promise<void> {
@@ -440,6 +455,8 @@ export class HeroMover extends ObjectMoverBase {
 
         const { x, y } = core.status.hero.loc;
         const { x: nx, y: ny } = this.nextLoc(x, y, this.moveDir);
+
+        this.checkAutoSave(nx, ny);
 
         if (!this.inLockControl && core.status.lockControl) {
             controller.stop();

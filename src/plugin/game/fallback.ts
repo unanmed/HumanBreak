@@ -168,6 +168,7 @@ export function init() {
             }
             if (name === 'direction') {
                 adapters['hero-adapter']?.sync('turn', value);
+                adapters['hero-adapter']?.sync('setAnimateDir', value);
                 setHeroDirection(value as Dir);
             } else if (name === 'x') {
                 adapters['hero-adapter']?.sync('setHeroLoc', value);
@@ -181,9 +182,13 @@ export function init() {
             core.stopAutomaticRoute();
             core.clearContinueAutomaticRoute();
 
-            heroMover.controller?.stop().then(() => {
+            if (heroMover.controller) {
+                heroMover.controller.stop().then(() => {
+                    callback?.();
+                });
+            } else {
                 callback?.();
-            });
+            }
         };
 
         control.prototype.moveHero = async function (
@@ -191,11 +196,6 @@ export function init() {
             callback?: () => void
         ) {
             if (heroMover.moving) return;
-            // const nx = core.nextX();
-            // const ny = core.nextY();
-            // if (core.status.thisMap.enemy.mapDamage[`${nx},${ny}`]?.mockery) {
-            //     core.autosave();
-            // }
             heroMover.clearMoveQueue();
             heroMover.oneStep(direction ?? 'forward');
             const lock = core.status.lockControl;

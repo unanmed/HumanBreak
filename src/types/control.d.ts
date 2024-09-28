@@ -772,6 +772,9 @@ interface Control {
      * @param noGather 是否聚集跟随者
      */
     setHeroLoc(name: 'x' | 'y', value: number, noGather?: boolean): void;
+    /**
+     * @deprecated
+     */
     setHeroLoc(name: 'direction', value: Dir, noGather?: boolean): void;
 
     /**
@@ -781,6 +784,10 @@ interface Control {
      * @param name 要读取横坐标还是纵坐标还是朝向还是都读取
      */
     getHeroLoc(): DiredLoc;
+    /**
+     * @deprecated
+     * @param name 要读取横坐标还是纵坐标还是朝向还是都读取
+     */
     getHeroLoc<K extends keyof DiredLoc>(name: K): DiredLoc[K];
 
     /**

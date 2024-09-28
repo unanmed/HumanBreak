@@ -111,7 +111,7 @@ export class HeroKeyMover {
         if (this.moving || core.status.lockControl) return false;
 
         this.mover.oneStep(this.moveDir);
-        const controller = this.mover.startMove();
+        const controller = this.mover.startMove(false, false, false, true);
         if (!controller) return;
 
         this.controller = controller;
