@@ -31,6 +31,13 @@ main.floors.MT88=
                 7,
                 14
             ]
+        },
+        "14,11": {
+            "floorId": "MT90",
+            "loc": [
+                0,
+                11
+            ]
         }
     },
     "beforeBattle": {},

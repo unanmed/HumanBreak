@@ -784,7 +784,7 @@ control.prototype.setAutoHeroMove = function (steps) {
     core.status.automaticRoute.autoHeroMove = true;
     core.status.automaticRoute.autoStep = 1;
     core.status.automaticRoute.destStep = steps[0].step;
-    core.moveHero(steps[0].direction);
+    // core.moveHero(steps[0].direction);
 };
 
 ////// 设置行走的效果动画 //////
@@ -977,7 +977,6 @@ control.prototype.moveDirectly = function (destX, destY, ignoreSteps) {
 
 ////// 尝试瞬间移动 //////
 control.prototype.tryMoveDirectly = function (destX, destY) {
-    // console.trace();
     if (this.nearHero(destX, destY)) return false;
     var canMoveArray = core.maps.generateMovableArray();
     var dirs = [
@@ -1015,37 +1014,6 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
 ////// 绘制勇士 //////
 control.prototype.drawHero = function (status, offset = 0, frame) {
     return;
-    if (!core.isPlaying() || !core.status.floorId || core.status.gameOver)
-        return;
-    var x = core.getHeroLoc('x'),
-        y = core.getHeroLoc('y'),
-        direction = core.getHeroLoc('direction');
-    status = status || 'stop';
-    if (!offset) offset = 0;
-
-    var way = core.utils.scan2[direction];
-    var dx = way.x,
-        dy = way.y;
-    var offsetX = typeof offset == 'number' ? dx * offset : offset.x || 0;
-    var offsetY = typeof offset == 'number' ? dy * offset : offset.y || 0;
-    offset = { x: offsetX, y: offsetY, offset: offset };
-
-    core.clearAutomaticRouteNode(x + dx, y + dy);
-    core.clearMap('hero');
-    core.status.heroCenter.px = 32 * x + offsetX + 16;
-    core.status.heroCenter.py =
-        32 * y + offsetY + 32 - core.material.icons.hero.height / 2;
-
-    // 重置hero层画布
-    core.setGameCanvasTranslate('hero', 0, 0);
-    delete core.canvas.hero._px;
-    delete core.canvas.hero._py;
-    core.status.preview.enabled = false;
-    if (!core.hasFlag('__lockViewport__')) {
-        this._drawHero_updateViewport(x, y, offset);
-    }
-
-    this._drawHero_draw(direction, x, y, status, offset, frame);
 };
 
 control.prototype._drawHero_updateViewport = function (x, y, offset) {

@@ -29,7 +29,7 @@ main.floors.MT85=
             "floorId": "MT86",
             "loc": [
                 0,
-                4
+                3
             ]
         },
         "10,14": {

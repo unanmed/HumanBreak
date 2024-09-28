@@ -193,13 +193,14 @@ export function init() {
 
         control.prototype.moveHero = async function (
             direction?: Dir,
-            callback?: () => void
+            callback?: () => void,
+            noRoute: boolean = false
         ) {
             if (heroMover.moving) return;
             heroMover.clearMoveQueue();
             heroMover.oneStep(direction ?? 'forward');
             const lock = core.status.lockControl;
-            const controller = heroMover.startMove(false, true, lock);
+            const controller = heroMover.startMove(false, noRoute, lock);
             controller?.onEnd.then(() => {
                 callback?.();
             });
@@ -250,6 +251,9 @@ export function init() {
             core.status.automaticRoute.destY = destY;
             this._setAutomaticRoute_drawRoute(moveStep);
             this._setAutomaticRoute_setAutoSteps(moveStep);
+
+            // ???
+            core.setAutoHeroMove();
 
             // 执行移动
             const steps: MoveStep[] = moveStep.map(v => {

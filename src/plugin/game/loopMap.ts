@@ -184,7 +184,7 @@ export function init() {
                 return _executeCallback();
             // @ts-ignore
             core.status.automaticRoute.moveDirectly = false;
-            this.doSystemEvent(trigger, block, core.doAction);
+            this.doSystemEvent(trigger, block);
         }
         return _executeCallback();
     };

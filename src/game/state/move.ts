@@ -419,12 +419,14 @@ export class HeroMover extends ObjectMoverBase {
         return super.startMove();
     }
 
-    private checkAutoSave(x: number, y: number) {
+    private checkAutoSave(x: number, y: number, nx: number, ny: number) {
         const index = `${x},${y}`;
+        const nIndex = `${nx},${ny}`;
         const map = core.status.thisMap.enemy.mapDamage;
         const dam = map[index];
+        const nextDam = map[nIndex];
         if (!dam) return false;
-        if (dam.mockery || dam.hunt) {
+        if (nextDam.mockery || (!dam.hunt && nextDam.hunt)) {
             core.autosave();
             return true;
         }
@@ -442,6 +444,8 @@ export class HeroMover extends ObjectMoverBase {
         if (!adapter) return;
         await adapter.all('endMove');
         adapter.sync('endAnimate');
+        core.clearContinueAutomaticRoute();
+        core.stopAutomaticRoute();
     }
 
     protected async onStepStart(
@@ -456,7 +460,7 @@ export class HeroMover extends ObjectMoverBase {
         const { x, y } = core.status.hero.loc;
         const { x: nx, y: ny } = this.nextLoc(x, y, this.moveDir);
 
-        this.checkAutoSave(nx, ny);
+        if (this.autoSave) this.checkAutoSave(x, y, nx, ny);
 
         if (!this.inLockControl && core.status.lockControl) {
             controller.stop();
@@ -515,6 +519,8 @@ export class HeroMover extends ObjectMoverBase {
 
         // 本次移动停止
         if (code === HeroMoveCode.Stop) {
+            core.clearContinueAutomaticRoute();
+            core.stopAutomaticRoute();
             controller.stop();
             return;
         }
