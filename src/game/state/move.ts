@@ -425,8 +425,7 @@ export class HeroMover extends ObjectMoverBase {
         const map = core.status.thisMap.enemy.mapDamage;
         const dam = map[index];
         const nextDam = map[nIndex];
-        if (!dam) return false;
-        if (nextDam.mockery || (!dam.hunt && nextDam.hunt)) {
+        if (nextDam?.mockery || (!dam?.hunt && nextDam?.hunt)) {
             core.autosave();
             return true;
         }
