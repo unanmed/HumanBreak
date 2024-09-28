@@ -1207,6 +1207,9 @@ export class Layer extends Container {
         const [a, b, , c, d, , e, f] = transform.mat;
         ctx.setTransform(a, b, c, d, e, f);
 
+        const extend = this.getExtends('floor-binder') as LayerFloorBinder;
+        const floor = extend ? extend.getFloor() : void 0;
+        const map = floor ? core.status.mapBlockObjs[floor] : void 0;
         render.forEach(v => {
             const x = v % width;
             const y = Math.floor(v / width);
@@ -1238,6 +1241,11 @@ export class Layer extends Container {
             // 先画到临时画布，用于缓存
             for (let nx = sx; nx < ex; nx++) {
                 for (let ny = sy; ny < ey; ny++) {
+                    if (map) {
+                        const indexLoc = `${nx},${ny}`;
+                        const block = map[indexLoc as LocString];
+                        if (block?.disable) continue;
+                    }
                     const blockIndex = nx + ny * this.mapWidth;
                     const num = this.renderData[blockIndex];
                     if (num === 0 || num === 17) continue;

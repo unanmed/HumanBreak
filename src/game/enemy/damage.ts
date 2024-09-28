@@ -964,7 +964,13 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
 /**
  * 计算伤害时会用到的勇士属性，攻击防御，其余的不会有buff加成，直接从core.status.hero取
  */
-const realStatus: (keyof HeroStatus)[] = ['atk', 'def', 'hpmax', 'mana'];
+const realStatus: (keyof HeroStatus)[] = [
+    'atk',
+    'def',
+    'hpmax',
+    'mana',
+    'magicDef'
+];
 /**
  * 主动技能列表
  */
@@ -987,7 +993,7 @@ export function calDamageWith(
         mdef,
         special: heroSpec = { num: [], last: [] }
     } = core.status.hero;
-    let { atk, def, hpmax, mana } = hero as HeroStatus;
+    let { atk, def, hpmax, mana, magicDef } = hero as HeroStatus;
     let { hp: monHp, atk: monAtk, def: monDef, special, enemy } = info;
 
     hpmax = Math.min(hpmax, def / 10);
@@ -1041,17 +1047,9 @@ export function calDamageWith(
     // 魔攻
     if (special.includes(2) || special.includes(13)) {
         enemyPerDamage = monAtk;
-        if (core.hasEquip('I663')) {
-            enemyPerDamage = Math.max(0, enemyPerDamage - 500);
-        }
+        enemyPerDamage -= magicDef;
     } else {
         enemyPerDamage = monAtk - def;
-        if (enemyPerDamage < 0) enemyPerDamage = 0;
-    }
-
-    // 先攻
-    if (special.includes(17)) {
-        damage += enemyPerDamage;
     }
 
     // 连击
@@ -1068,6 +1066,8 @@ export function calDamageWith(
     if (heroSpec.num.includes(28)) {
         enemyPerDamage *= 1 - heroSpec.paleShield / 100;
     }
+
+    if (enemyPerDamage < 0) enemyPerDamage = 0;
 
     // 苍蓝刻
     if (special.includes(28)) {
@@ -1117,6 +1117,11 @@ export function calDamageWith(
     if (special.includes(11) && !hasCharge) {
         damage += (info.charge! / 100) * enemyPerDamage;
         turn += 5;
+    }
+
+    // 先攻
+    if (special.includes(17)) {
+        damage += enemyPerDamage;
     }
 
     damage += (turn - 1) * enemyPerDamage;

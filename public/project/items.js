@@ -1256,7 +1256,9 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"text": "一个用大地之力制造出的饰品，貌似对魔法攻击有抵抗作用。装备后，对魔攻怪会有500点防御力",
 		"equip": {
 			"type": "首饰",
-			"value": {},
+			"value": {
+				"magicDef": 500
+			},
 			"percentage": {}
 		}
 	},

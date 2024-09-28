@@ -276,6 +276,16 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"_type": "textarea",
 							"_data": "初始护盾"
 						},
+						"magicDef": {
+							"_leaf": true,
+							"_type": "textarea",
+							"_data": "初始魔法防御"
+						},
+						"magicRed": {
+							"_leaf": true,
+							"_type": "textarea",
+							"_data": "初始魔法减免"
+						},
 						"money": {
 							"_leaf": true,
 							"_type": "textarea",

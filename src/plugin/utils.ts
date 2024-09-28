@@ -426,6 +426,7 @@ export function getStatusLabel(name: string) {
             point: '加点',
             steps: '步数',
             up: '升级',
+            magicDef: '魔法防御',
             none: '无'
         }[name] || name
     );

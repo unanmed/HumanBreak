@@ -56,6 +56,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             } else {
                 flags.autoSkill ??= true;
             }
+
+            // 兼容性调整
+            const h = core.status.hero;
+            if (h.magicDef === void 0 || h.magicDef === null) {
+                h.magicDef = 0;
+            }
         },
         win: function (reason, norank, noexit) {
             // 游戏获胜事件
