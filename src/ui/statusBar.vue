@@ -212,9 +212,7 @@ function update() {
     studyOpened.value = skillTree.getSkillLevel(11) > 0;
     jumpCnt.value =
         flags.skill2 &&
-        !Mota.Plugin.require('skill_g').jumpIgnoreFloor.includes(
-            core.status.floorId
-        )
+        !Mota.Plugin.require('skill_g').jumpIgnoreFloor.has(core.status.floorId)
             ? 3 - (flags[`jump_${core.status.floorId}`] ?? 0)
             : void 0;
 }

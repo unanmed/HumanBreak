@@ -1263,14 +1263,32 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		}
 	},
 	"I664": {
-		"cls": "items",
-		"name": "新物品",
-		"canUseItemEffect": "true"
+		"cls": "equips",
+		"name": "极昼剑",
+		"canUseItemEffect": "true",
+		"text": "吸收白日之精华锻造而成。攻击+500，额外攻击+50",
+		"equip": {
+			"type": "武器",
+			"value": {
+				"mana": 50,
+				"atk": 500
+			},
+			"percentage": {}
+		}
 	},
 	"I665": {
-		"cls": "items",
-		"name": "新物品",
-		"canUseItemEffect": "true"
+		"cls": "equips",
+		"name": "永夜盾",
+		"canUseItemEffect": "true",
+		"text": "集月光之精华锻造而成。防御+400，生命回复+25。",
+		"equip": {
+			"type": "盾牌",
+			"value": {
+				"def": 400,
+				"hpmax": 25
+			},
+			"percentage": {}
+		}
 	},
 	"I694": {
 		"cls": "items",

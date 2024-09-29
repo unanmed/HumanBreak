@@ -19,7 +19,7 @@ var ignoreInJump = {
     ]
 };
 
-export const jumpIgnoreFloor: FloorIds[] = [
+export const jumpIgnoreFloor: Set<FloorIds> = new Set([
     'MT31',
     'snowTown',
     'MT36',
@@ -45,14 +45,15 @@ export const jumpIgnoreFloor: FloorIds[] = [
     'MT73',
     'MT74',
     'MT75',
-    'MT84'
-];
+    'MT84',
+    'MT93'
+]);
 // 跳跃
 export function jumpSkill() {
     if (core.status.floorId.startsWith('tower')) {
         return core.drawTip('当前无法使用该技能');
     }
-    if (jumpIgnoreFloor.includes(core.status.floorId) || flags.onChase) {
+    if (jumpIgnoreFloor.has(core.status.floorId) || flags.onChase) {
         return core.drawTip('当前楼层无法使用该技能');
     }
     if (!flags.skill2) return;

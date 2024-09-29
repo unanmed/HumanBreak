@@ -150,7 +150,7 @@ export class Damage extends Sprite<EDamageEvent> {
     /** 伤害渲染层 */
     damageMap: MotaOffscreenCanvas2D = new MotaOffscreenCanvas2D();
     /** 默认伤害字体 */
-    font: string = "14px 'normal'";
+    font: string = '300 9px Verdana';
     /** 默认描边样式，当伤害文字不存在描边属性时会使用此属性 */
     strokeStyle: CanvasStyle = '#000';
     /** 默认描边宽度 */
@@ -347,7 +347,7 @@ export class Damage extends Sprite<EDamageEvent> {
                 text: real.togetherNum.toString(),
                 color: '#09FF5B',
                 x: x * this.cellSize + this.cellSize - 1,
-                y: y * this.cellSize - 2,
+                y: y * this.cellSize + 2,
                 strokeWidth: 3
             };
             block.add(dam3);
@@ -359,8 +359,9 @@ export class Damage extends Sprite<EDamageEvent> {
                 text: '乾',
                 color: '#FDCD0B',
                 x: x * this.cellSize + 1,
-                y: y * this.cellSize - 2,
-                strokeWidth: 2
+                y: y * this.cellSize + 2,
+                strokeWidth: 2,
+                font: '500 10px Verdana'
             };
             block.add(dam4);
         }
@@ -408,6 +409,7 @@ export class Damage extends Sprite<EDamageEvent> {
         // todo: 这个应当可以自定义，通过地图伤害注册实现
         let text = '';
         let color = '#fa3';
+        let font = '300 9px Verdana';
         if (dam.damage > 0) {
             text = core.formatBigNumber(dam.damage, true);
         } else if (dam.mockery) {
@@ -418,9 +420,11 @@ export class Damage extends Sprite<EDamageEvent> {
             const dir = x > tx ? '←' : x < tx ? '→' : y > ty ? '↑' : '↓';
             text = '嘲' + dir;
             color = '#fd4';
+            font = '500 11px Verdana';
         } else if (dam.hunt) {
             text = '猎';
             color = '#fd4';
+            font = '500 11px Verdana';
         } else {
             return;
         }
@@ -430,6 +434,7 @@ export class Damage extends Sprite<EDamageEvent> {
             baseline: 'middle',
             text,
             color,
+            font,
             x: x * this.cellSize + this.cellSize / 2,
             y: y * this.cellSize + this.cellSize / 2
         };

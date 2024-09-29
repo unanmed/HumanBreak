@@ -146,7 +146,7 @@ const effect = computed(() => {
     return [0, 1].map(v => {
         const prefix = v === 0 ? '当前效果：' : '下一级效果：';
         const level = skillTree.getSkillLevel(skill.value.index);
-        const content = skill.value.effect(level);
+        const content = skill.value.effect(level + v);
         return prefix + content.join('');
     }) as [string, string];
 });

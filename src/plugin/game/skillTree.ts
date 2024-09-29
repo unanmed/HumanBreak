@@ -157,7 +157,7 @@ export const skills: Record<Chapter, Skill[]> = {
             ],
             loc: [4, 1],
             max: 10,
-            effect: level => [`学习怪物技能，持续${level * 3 + 2}场战斗`]
+            effect: level => [`魔法防御 + ${level * 100}`]
         },
         {
             index: 12,

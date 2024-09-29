@@ -1506,7 +1506,7 @@ maps.prototype.redrawMap = function () {
     //     core.clearMap(one);
     // });
     // this._drawMap_drawAll(null, { redraw: true });
-    core.drawDamage();
+    // core.drawDamage();
 };
 
 maps.prototype._drawMap_drawAll = function (floorId, config) {
@@ -2609,7 +2609,7 @@ maps.prototype._drawThumbnail_realDrawTempCanvas = function (
     options.ctx.imageSmoothingEnabled = true;
     // 缩略图：显伤
     if (options.damage && core.hasItem('book')) {
-        core.control.updateDamage(floorId, options.ctx);
+        core.control.updateDamage(floorId, options.ctx, true);
     }
 };
 

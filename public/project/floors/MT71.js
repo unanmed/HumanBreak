@@ -33,19 +33,25 @@ main.floors.MT71=
                 "type": "openDoor",
                 "loc": [
                     10,
-                    1
+                    13
                 ]
             },
             {
                 "type": "openDoor",
                 "loc": [
                     10,
-                    13
+                    1
                 ]
             },
             {
                 "type": "setValue",
                 "name": "flag:door_palaceSouth",
+                "operator": "+=",
+                "value": "1"
+            },
+            {
+                "type": "setValue",
+                "name": "flag:door_palace",
                 "operator": "+=",
                 "value": "1"
             },
@@ -91,6 +97,50 @@ main.floors.MT71=
                         "value": "null"
                     },
                     "入口处的机关门已开启"
+                ]
+            },
+            {
+                "type": "if",
+                "condition": "(flag:door_palace===4)",
+                "true": [
+                    {
+                        "type": "openDoor",
+                        "loc": [
+                            7,
+                            4
+                        ],
+                        "floorId": "MT72"
+                    },
+                    {
+                        "type": "openDoor",
+                        "loc": [
+                            4,
+                            7
+                        ],
+                        "floorId": "MT72"
+                    },
+                    {
+                        "type": "openDoor",
+                        "loc": [
+                            7,
+                            10
+                        ],
+                        "floorId": "MT72"
+                    },
+                    {
+                        "type": "openDoor",
+                        "loc": [
+                            10,
+                            7
+                        ],
+                        "floorId": "MT72"
+                    },
+                    {
+                        "type": "setValue",
+                        "name": "flag:door_palace",
+                        "value": "null"
+                    },
+                    "苍蓝之殿中心处的机关门已经开启，进入后会到达本章最后一个小区域"
                 ]
             }
         ]

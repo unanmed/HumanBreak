@@ -139,6 +139,7 @@ export class EnemyCollection
         this.list = [];
         core.extractBlocks(this.floorId);
         core.status.maps[this.floorId].blocks.forEach(v => {
+            if (v.disable) return;
             if (v.event.cls !== 'enemy48' && v.event.cls !== 'enemys') return;
             const enemy = core.material.enemys[v.event.id as EnemyIds];
             this.list.push(

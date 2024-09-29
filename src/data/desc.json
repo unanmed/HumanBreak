@@ -284,7 +284,7 @@
             "<br>",
             "5. <span style=\"color: lightcoral\">当前勇士的攻击</span>，右方偏下为勇士的额外攻击",
             "<br>",
-            "6. <span style=\"color: lightblue\">当前勇士的防御</span>",
+            "6. <span style=\"color: lightblue\">当前勇士的防御</span>，当有魔法防御时，右方偏下为勇士的魔法防御",
             "<br>",
             "7. <span style=\"color: lightgreen\">当前勇士的智慧</span>，可以用于智慧加点等",
             "<br>",
