@@ -966,7 +966,7 @@ export class Layer extends Container {
         const w = this.mapWidth;
         const h = this.mapHeight;
 
-        this.autotiles = {};
+        // this.autotiles = {};
 
         /**
          * 检查连接信息
