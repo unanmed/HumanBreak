@@ -181,7 +181,7 @@ export const skills: Record<Chapter, Skill[]> = {
                 level > 5 ? 100 * level ** 2 : 250 * level + 1250,
             front: [[10, 3]],
             loc: [4, 5],
-            max: 20,
+            max: 10,
             effect: level => [`增加${level * 2}%的血瓶回血量`]
         },
         {

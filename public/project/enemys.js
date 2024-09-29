@@ -203,5 +203,5 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"E690": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E691": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E692": {"name":"苍蓝之灵-圣","hp":150000,"atk":15000,"def":5000,"money":20,"exp":5000,"point":0,"special":[4,28],"paleShield":25},
-	"E693": {"name":"苍蓝之灵-战","hp":150000,"atk":15000,"def":4000,"money":20,"exp":5000,"point":0,"special":[32],"assimilateRange":6}
+	"E693": {"name":"苍蓝之灵-战","hp":250000,"atk":25000,"def":6000,"money":20,"exp":5000,"point":0,"special":[32],"assimilateRange":6}
 }

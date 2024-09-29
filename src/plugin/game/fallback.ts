@@ -313,7 +313,7 @@ export function init() {
                 const animate = fallbackIds++;
                 core.animateFrame.lastAsyncId = animate;
                 core.animateFrame.asyncId[animate] = cb;
-                this._openDoor_animate(block, x, y, callback);
+                // this._openDoor_animate(block, x, y, callback);
             }
         };
 
@@ -518,8 +518,6 @@ export function init() {
             time: number = 500,
             callback?: () => void
         ) {
-            console.log(heroMover.moving);
-
             if (heroMover.moving) return;
 
             const sx = core.getHeroLoc('x');
@@ -546,7 +544,6 @@ export function init() {
                     );
                 })
             );
-            console.log(ex, ey);
 
             if (!locked) core.unlockControl();
             core.setHeroLoc('x', ex);

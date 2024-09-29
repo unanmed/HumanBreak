@@ -1209,7 +1209,10 @@ export class Layer extends Container {
 
         const extend = this.getExtends('floor-binder') as LayerFloorBinder;
         const floor = extend ? extend.getFloor() : void 0;
-        const map = floor ? core.status.mapBlockObjs[floor] : void 0;
+        const map =
+            this.layer === 'event' && floor
+                ? core.status.mapBlockObjs[floor]
+                : void 0;
         render.forEach(v => {
             const x = v % width;
             const y = Math.floor(v / width);

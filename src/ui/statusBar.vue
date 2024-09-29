@@ -108,17 +108,6 @@
                             >查看技能</span
                         >
                     </div>
-                    <div v-if="studyOpened" class="status-item">
-                        <span
-                            id="status-study"
-                            class="button-text"
-                            @click.stop="openStudy"
-                            >学习</span
-                        >
-                    </div>
-                    <div v-if="studyOpened" class="status-item">
-                        <!-- 当前学习的技能 -->
-                    </div>
                 </div>
             </Scroll>
         </Box>
@@ -137,8 +126,6 @@ import { has } from '@/plugin/utils';
 let main: HTMLDivElement;
 
 const imgs = core.material.images.images;
-
-const skillTree = Mota.Plugin.require('skillTree_g');
 
 const width = ref(
     isMobile ? window.innerWidth - 60 : window.innerWidth * 0.175
@@ -159,7 +146,6 @@ const skill = ref<string>(flags.autoSkill ? '自动切换' : '无');
 const up = ref(0);
 const spring = ref<number>();
 const skillOpened = ref(core.getFlag('chapter', 0) > 0);
-const studyOpened = ref(skillTree.getSkillLevel(11) > 0);
 const jumpCnt = ref<number>();
 /**
  * 要展示的勇士属性
@@ -209,7 +195,6 @@ function update() {
         spring.value = void 0;
     }
     skillOpened.value = core.getFlag('chapter', 0) > 0;
-    studyOpened.value = skillTree.getSkillLevel(11) > 0;
     jumpCnt.value =
         flags.skill2 &&
         !Mota.Plugin.require('skill_g').jumpIgnoreFloor.has(core.status.floorId)

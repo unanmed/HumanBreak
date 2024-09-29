@@ -116,7 +116,7 @@ function checkHunt(loc: string) {
 
     for (const [x, y, dir] of hunt) {
         const [tx, ty] = ofDir(x, y, dir);
-        if (core.noPass(tx, ty)) continue;
+        if (core.getBlock(tx, ty)) continue;
         action.push(
             {
                 type: 'move',

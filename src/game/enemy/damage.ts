@@ -989,11 +989,7 @@ export function calDamageWith(
     info: EnemyInfo,
     hero: Partial<HeroStatus>
 ): number | null {
-    const {
-        hp,
-        mdef,
-        special: heroSpec = { num: [], last: [] }
-    } = core.status.hero;
+    const { hp, mdef } = core.status.hero;
     let { atk, def, hpmax, mana, magicDef } = hero as HeroStatus;
     let { hp: monHp, atk: monAtk, def: monDef, special, enemy } = info;
 
@@ -1006,13 +1002,6 @@ export function calDamageWith(
         const delta = Math.floor((atk * info.hungry!) / 100);
         atk -= delta;
         monAtk += delta;
-    }
-
-    // 勇士学习的饥渴
-    if (heroSpec.num.includes(7)) {
-        const delta = Math.floor((monAtk * heroSpec.hungry!) / 100);
-        atk += delta;
-        monAtk -= delta;
     }
 
     let heroPerDamage: number;
@@ -1038,11 +1027,6 @@ export function calDamageWith(
 
     heroPerDamage *= 1 - info.damageDecline / 100;
 
-    // 勇士学习勇气之刃
-    if (heroSpec.num.includes(10)) {
-        monHp -= (heroSpec.courage / 100 - 1) * heroPerDamage;
-    }
-
     let enemyPerDamage: number;
 
     // 魔攻
@@ -1058,16 +1042,6 @@ export function calDamageWith(
     if (special.includes(5)) enemyPerDamage *= 3;
     if (special.includes(6)) enemyPerDamage *= info.n!;
 
-    // 勇士学习霜冻
-    if (heroSpec.num.includes(20)) {
-        enemyPerDamage *= 1 - heroSpec.ice / 100;
-    }
-
-    // 勇士学习苍蓝刻
-    if (heroSpec.num.includes(28)) {
-        enemyPerDamage *= 1 - heroSpec.paleShield / 100;
-    }
-
     if (enemyPerDamage < 0) enemyPerDamage = 0;
 
     // 苍蓝刻
@@ -1075,33 +1049,7 @@ export function calDamageWith(
         heroPerDamage *= 1 - info.paleShield! / 100;
     }
 
-    // 勇士学习的连击
-    if (heroSpec.num.includes(4)) heroPerDamage *= 2;
-    if (heroSpec.num.includes(5)) heroPerDamage *= 3;
-    if (heroSpec.num.includes(6)) heroPerDamage *= heroSpec.n;
-
-    // 勇士学习勇气冲锋
-    const hasCharge = heroSpec.num.includes(11);
-    if (hasCharge) {
-        monHp -= (heroSpec.charge / 100) * heroPerDamage;
-    }
-
     let turn = Math.ceil(monHp / heroPerDamage);
-
-    // 勇士学习致命一击
-    if (heroSpec.num.includes(1)) {
-        const five =
-            4 * heroPerDamage + (heroPerDamage * (info.crit! - 100)) / 100;
-        const fTurn = Math.floor(monHp / five);
-        const last = monHp - fTurn * five;
-        const lastTurn = Math.min(last / heroPerDamage, 5);
-        turn = fTurn * 5 + lastTurn;
-    }
-
-    if (hasCharge) {
-        turn -= 5;
-        if (turn < 0) turn = 0;
-    }
 
     // 致命一击
     if (special.includes(1)) {
@@ -1115,7 +1063,7 @@ export function calDamageWith(
     }
 
     // 勇气冲锋
-    if (special.includes(11) && !hasCharge) {
+    if (special.includes(11)) {
         damage += (info.charge! / 100) * enemyPerDamage;
         turn += 5;
     }
