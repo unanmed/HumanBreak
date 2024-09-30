@@ -13,12 +13,7 @@ export function getEnemy(
     y: number,
     floorId: FloorIds = core.status.floorId
 ) {
-    const enemy = core.status.maps[floorId].enemy.list.find(v => {
-        return v.x === x && v.y === y;
-    });
-    if (!enemy) {
-        return null;
-    }
+    const enemy = core.status.maps[floorId].enemy.get(x, y);
     return enemy;
 }
 

@@ -16,7 +16,6 @@ import type { MotaSetting, SettingDisplayer } from '@/core/main/setting';
 import type { GameStorage } from '@/core/main/storage';
 import type { DamageEnemy, EnemyCollection } from './enemy/damage';
 import type { specials } from './enemy/special';
-import type { Range } from '@/plugin/game/range';
 import type { KeyCode } from '@/plugin/keyCodes';
 import type { Ref } from 'vue';
 import type * as battle from './enemy/battle';
@@ -63,7 +62,6 @@ interface ClassInterface {
     Danmaku: typeof Danmaku;
     // todo: 放到插件 ShaderEffect: typeof ShaderEffect;
     // 定义于游戏进程，渲染进程依然可用
-    Range: typeof Range;
     EnemyCollection: typeof EnemyCollection;
     DamageEnemy: typeof DamageEnemy;
 }

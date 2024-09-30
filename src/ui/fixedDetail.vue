@@ -28,9 +28,7 @@ detailInfo.pos = 0;
 
 if (hovered) {
     const { x, y } = hovered;
-    const enemy = core.status.thisMap.enemy.list.find(v => {
-        return v.x === x && v.y === y;
-    });
+    const enemy = core.status.thisMap.enemy.get(x, y);
     if (enemy) {
         const detail = getDetailedEnemy(enemy);
         detailInfo.enemy = detail;

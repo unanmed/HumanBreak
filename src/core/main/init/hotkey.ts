@@ -506,18 +506,14 @@ gameKey
     .realize('special', () => {
         if (hovered) {
             const { x, y } = hovered;
-            const enemy = core.status.thisMap.enemy.list.find(v => {
-                return v.x === x && v.y === y;
-            });
+            const enemy = core.status.thisMap.enemy.get(x, y);
             if (enemy) mainUi.open('fixedDetail', { panel: 'special' });
         }
     })
     .realize('critical', () => {
         if (hovered) {
             const { x, y } = hovered;
-            const enemy = core.status.thisMap.enemy.list.find(v => {
-                return v.x === x && v.y === y;
-            });
+            const enemy = core.status.thisMap.enemy.get(x, y);
             if (enemy) mainUi.open('fixedDetail', { panel: 'critical' });
         }
     })

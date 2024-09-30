@@ -524,7 +524,7 @@ export class MinimapDrawer {
             ctx.fillRect(x - 6, y - 2, 12, 4);
             ctx.fillStyle = 'white';
             const enemy = core.status.maps[floorId].enemy.list;
-            if (enemy.length === 0) {
+            if (enemy.size === 0) {
                 ctx.strokeStyle = 'lightgreen';
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
@@ -533,8 +533,12 @@ export class MinimapDrawer {
                 ctx.lineTo(x - 0.5, y + 1);
                 ctx.lineTo(x + 1.5, y - 1);
                 ctx.stroke();
-            } else if (enemy.length <= 2) {
-                const ids = [...new Set(enemy.map(v => v.id))];
+            } else if (enemy.size <= 2) {
+                const idSet = new Set<EnemyIds>();
+                enemy.forEach(v => {
+                    idSet.add(v.id);
+                });
+                const ids: EnemyIds[] = [...idSet];
                 if (ids.length === 1) {
                     core.drawIcon(ctx, ids[0], x - 2, y - 2, 4, 4);
                 } else if (ids.length === 2) {
@@ -552,7 +556,7 @@ export class MinimapDrawer {
                 ctx.fillStyle = 'white';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(`+${enemy.length}`, x, y);
+                ctx.fillText(`+${enemy.size}`, x, y);
             }
 
             ctx.restore();

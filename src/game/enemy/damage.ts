@@ -1,5 +1,5 @@
 import { getHeroStatusOf, getHeroStatusOn } from '@/game/state/hero';
-import { Range, RangeCollection } from '@/plugin/game/range';
+import { Range } from '../util/range';
 import { ensureArray, has, manhattan } from '@/plugin/game/utils';
 import EventEmitter from 'eventemitter3';
 
@@ -72,6 +72,7 @@ type HaloFn = (info: EnemyInfo, enemy: EnemyInfo) => void;
 export const haloSpecials: Set<number> = new Set([
     8, 21, 25, 26, 27, 29, 31, 32
 ]);
+/** 不可被同化的属性 */
 export const unassimilatable: Set<number> = new Set(haloSpecials);
 unassimilatable.add(8).add(30);
 /** 特殊属性对应 */
@@ -101,17 +102,19 @@ interface EnemyCollectionEvent {
     calculated: [];
 }
 
-export class EnemyCollection
-    extends EventEmitter<EnemyCollectionEvent>
-    implements RangeCollection<DamageEnemy>
-{
+export class EnemyCollection extends EventEmitter<EnemyCollectionEvent> {
     floorId: FloorIds;
-    list: DamageEnemy[] = [];
+    list: Map<number, DamageEnemy> = new Map();
 
-    range: Range<DamageEnemy> = new Range(this);
-    // todo: 改成Map<number, MapDamage>
+    range: Range = new Range();
+    /** 地图伤害 */
     mapDamage: Record<string, MapDamage> = {};
     haloList: HaloData[] = [];
+
+    /** 楼层宽度 */
+    width: number = 0;
+    /** 楼层高度 */
+    height: number = 0;
 
     /** 乾坤挪移属性 */
     translation: [number, number] = [0, 0];
@@ -123,20 +126,27 @@ export class EnemyCollection
     }
 
     get(x: number, y: number) {
-        return this.list.find(v => v.x === x && v.y === y);
+        const index = x + y * this.width;
+        return this.list.get(index);
     }
 
     /**
      * 解析本地图的怪物信息
      */
     extract() {
-        this.list = [];
+        this.list.clear();
         core.extractBlocks(this.floorId);
-        core.status.maps[this.floorId].blocks.forEach(v => {
+        const floor = core.status.maps[this.floorId];
+        this.width = floor.width;
+        this.height = floor.height;
+        floor.blocks.forEach(v => {
             if (v.disable) return;
             if (v.event.cls !== 'enemy48' && v.event.cls !== 'enemys') return;
+            const { x, y } = v;
+            const index = x + y * this.width;
             const enemy = core.material.enemys[v.event.id as EnemyIds];
-            this.list.push(
+            this.list.set(
+                index,
                 new DamageEnemy(enemy, v.x, v.y, this.floorId, this)
             );
         });
@@ -201,7 +211,7 @@ export class EnemyCollection
         recursion: boolean = false
     ) {
         const arr = ensureArray(halo);
-        const enemys = this.range.scan(type, data);
+        const enemys = this.range.type(type).scan(this.list.values(), data);
         if (!recursion) {
             arr.forEach(v => {
                 enemys.forEach(e => {

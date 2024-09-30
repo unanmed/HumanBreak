@@ -1,6 +1,4 @@
-import { canStudySkill, studySkill } from '@/game/mechanism/study';
 import { upgradeSkill } from './skillTree';
-import { ensureFloorDamage } from '@/game/enemy/damage';
 
 const replayableSettings = ['autoSkill'];
 
