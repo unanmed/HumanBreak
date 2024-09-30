@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUpdated, ref, watch } from 'vue';
+import { onMounted, onUpdated, Ref, ref, watch } from 'vue';
 import Box from '../components/box.vue';
 import { GameUi } from '@/core/main/custom/ui';
 import type { DamageEnemy, EnemyInfo } from '@/game/enemy/damage';

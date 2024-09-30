@@ -10,6 +10,7 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import { splitResource } from './resource.js';
 import compressing from 'compressing';
+import json from '@rollup/plugin-json';
 
 const type = process.argv[2];
 const map = false;
@@ -137,7 +138,8 @@ const compress = type === 'dist';
                 }),
                 terser(),
                 resolve(),
-                commonjs()
+                commonjs(),
+                json()
             ]
         });
         await build.write({

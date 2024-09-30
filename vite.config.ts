@@ -4,7 +4,6 @@ import legacy from '@vitejs/plugin-legacy';
 import components from 'unplugin-vue-components/vite';
 import vuejsx from '@vitejs/plugin-vue-jsx'
 import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers';
-import motaConfig from './mota.config';
 import { resolve } from 'path';
 import postcssPresetEnv from 'postcss-preset-env';
 

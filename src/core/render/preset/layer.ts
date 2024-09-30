@@ -966,6 +966,7 @@ export class Layer extends Container {
         const w = this.mapWidth;
         const h = this.mapHeight;
 
+        // todo: 如何定向优化？
         // this.autotiles = {};
 
         /**
