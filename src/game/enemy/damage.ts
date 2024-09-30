@@ -1,12 +1,6 @@
 import { getHeroStatusOf, getHeroStatusOn } from '@/game/state/hero';
 import { Range, RangeCollection } from '@/plugin/game/range';
-import {
-    checkV2,
-    ensureArray,
-    formatDamage,
-    has,
-    manhattan
-} from '@/plugin/game/utils';
+import { ensureArray, has, manhattan } from '@/plugin/game/utils';
 import EventEmitter from 'eventemitter3';
 
 // todo: 光环划分优先级，从而可以实现光环的多级运算
@@ -24,11 +18,11 @@ interface HaloType {
     };
 }
 
-export interface EnemyInfo extends Partial<Enemy> {
+export interface EnemyInfo extends Partial<Omit<Enemy, 'special'>> {
     atk: number;
     def: number;
     hp: number;
-    special: number[];
+    special: Set<number>;
     damageDecline: number;
     atkBuff_: number;
     defBuff_: number;
@@ -280,7 +274,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
             hp: enemy.hp,
             atk: enemy.atk,
             def: enemy.def,
-            special: enemy.special.slice(),
+            special: new Set(enemy.special),
             damageDecline: 0,
             atkBuff_: 0,
             defBuff_: 0,
@@ -323,7 +317,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         }
 
         // 智慧之源
-        if (flags.hard === 2 && special.includes(14)) {
+        if (flags.hard === 2 && special.has(14)) {
             info.atk += flags[`inte_${floorId}`] ?? 0;
         }
 
@@ -368,21 +362,17 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         return this.info;
     }
 
-    getHaloSpecials(): number[] {
-        if (!this.floorId) return [];
-        if (!has(this.x) || !has(this.y)) return [];
+    getHaloSpecials(): Set<number> {
+        if (!this.floorId) return new Set();
+        if (!has(this.x) || !has(this.y)) return new Set();
         const special = this.info.special ?? this.enemy.special;
-        const filter = special.filter(v => {
-            return haloSpecials.has(v) && !this.providedHalo.has(v);
+        const res = new Set<number>();
+        special.forEach(v => {
+            if (haloSpecials.has(v) && !this.providedHalo.has(v)) {
+                res.add(v);
+            }
         });
-        if (filter.length === 0) return [];
-        const collection = this.col ?? core.status.maps[this.floorId].enemy;
-        if (!collection) {
-            throw new Error(
-                `Unexpected undefined of enemy collection in floor ${this.floorId}.`
-            );
-        }
-        return filter;
+        return res;
     }
 
     /**
@@ -421,9 +411,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                             const s = enemy.specialHalo!;
 
                             for (const spe of s) {
-                                // 防止重复
-                                if (!e.special.includes(spe))
-                                    e.special.push(spe);
+                                e.special.add(spe);
                             }
                             // 如果是自身，就不进行特殊属性数值处理了
                             if (e === this.info) return;
@@ -476,14 +464,14 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         // e 是被加成怪的属性，enemy 是施加光环的怪
 
         // 抱团
-        if (special.includes(8)) {
+        if (special.has(8)) {
             col.applyHalo(
                 'square',
                 { x: this.x, y: this.y, d: 5 },
                 this,
                 (e, enemy) => {
                     if (
-                        e.special.includes(8) &&
+                        e.special.has(8) &&
                         (e.x !== this.x || this.y !== e.y)
                     ) {
                         e.atkBuff_ += enemy.together ?? 0;
@@ -497,7 +485,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         }
 
         // 冰封光环
-        if (special.includes(21)) {
+        if (special.has(21)) {
             square7.push(e => {
                 e.damageDecline += this.info.iceHalo ?? 0;
             });
@@ -511,7 +499,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         }
 
         // 冰封之核
-        if (special.includes(26)) {
+        if (special.has(26)) {
             square5.push(e => {
                 e.defBuff_ += this.info.iceCore ?? 0;
             });
@@ -525,7 +513,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         }
 
         // 火焰之核
-        if (special.includes(27)) {
+        if (special.has(27)) {
             square5.push(e => {
                 e.atkBuff_ += this.info.fireCore ?? 0;
             });
@@ -539,7 +527,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         }
 
         // 再生光环
-        if (special.includes(31)) {
+        if (special.has(31)) {
             square7.push(e => {
                 e.hpBuff_ += this.info.hpHalo ?? 0;
             });
@@ -553,7 +541,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         }
 
         // 同化，它不会被光环类属性影响，因此放到这
-        if (special.includes(32)) {
+        if (special.has(32)) {
             const e = this.info;
             const type = 'square';
             const r = Math.floor(e.assimilateRange!);
@@ -567,10 +555,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
 
                 for (const spe of s) {
                     if (unassimilatable.has(spe)) continue;
-                    // 防止重复
-                    if (!enemy.special.includes(spe)) {
-                        enemy.special.push(spe);
-                    }
+                    enemy.special.add(spe);
                 }
                 // 然后计算特殊属性数值
                 for (const spec of s) {
@@ -643,7 +628,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         const h = floor.height;
 
         // 突刺
-        if (this.info.special.includes(15)) {
+        if (this.info.special.has(15)) {
             const range = enemy.range ?? 1;
             const startX = Math.max(0, this.x - range);
             const startY = Math.max(0, this.y - range);
@@ -666,7 +651,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         }
 
         // 射击
-        if (this.info.special.includes(24)) {
+        if (this.info.special.has(24)) {
             const dirs: Dir[] = ['left', 'down', 'up', 'right'];
             const dam = Math.max((enemy.atk ?? 0) - hero.def!, 0);
             const objs = core.getMapBlocksObj(this.floorId);
@@ -683,8 +668,6 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                     if (
                         block &&
                         block.event.noPass &&
-                        block.event.cls !== 'enemys' &&
-                        block.event.cls !== 'enemy48' &&
                         block.id !== 141 &&
                         block.id !== 151
                     ) {
@@ -696,7 +679,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         }
 
         // 电摇嘲讽
-        if (this.info.special.includes(19)) {
+        if (this.info.special.has(19)) {
             const objs = core.getMapBlocksObj(this.floorId);
             for (let nx = 0; nx < w; nx++) {
                 const loc = `${nx},${this.y}` as LocString;
@@ -719,7 +702,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         }
 
         // 追猎
-        if (this.info.special.includes(12)) {
+        if (this.info.special.has(12)) {
             const objs = core.getMapBlocksObj(this.floorId);
             for (let nx = 0; nx < w; nx++) {
                 const loc = `${nx},${this.y}` as LocString;
@@ -922,13 +905,13 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         const add = info.def + info.hp - core.status.hero.mana;
 
         // 坚固，不可能通过攻击秒杀
-        if (info.special.includes(3)) {
+        if (info.special.has(3)) {
             return Infinity;
         }
 
         // 列方程求解，拿笔算一下就知道了
         // 饥渴，会偷取勇士攻击
-        if (info.special.includes(7)) {
+        if (info.special.has(7)) {
             if (info.damageDecline === 0) {
                 return add / (1 - this.enemy.hungry! / 100);
             } else {
@@ -942,7 +925,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         }
 
         // 霜冻
-        if (info.special.includes(20) && !core.hasEquip('I589')) {
+        if (info.special.has(20) && !core.hasEquip('I589')) {
             return (
                 info.def +
                 info.hp / (1 - this.enemy.ice! / 100) -
@@ -998,7 +981,7 @@ export function calDamageWith(
     let damage = 0;
 
     // 饥渴
-    if (special.includes(7)) {
+    if (special.has(7)) {
         const delta = Math.floor((atk * info.hungry!) / 100);
         atk -= delta;
         monAtk += delta;
@@ -1007,10 +990,10 @@ export function calDamageWith(
     let heroPerDamage: number;
 
     // 绝对防御
-    if (special.includes(9)) {
+    if (special.has(9)) {
         heroPerDamage = atk + mana - monDef;
         if (heroPerDamage <= 0) return null;
-    } else if (special.includes(3)) {
+    } else if (special.has(3)) {
         // 由于坚固的特性，只能放到这来计算了
         if (atk > enemy.def) heroPerDamage = 1 + mana;
         else return null;
@@ -1021,7 +1004,7 @@ export function calDamageWith(
     }
 
     // 霜冻
-    if (special.includes(20) && !core.hasEquip('I589')) {
+    if (special.has(20) && !core.hasEquip('I589')) {
         heroPerDamage *= 1 - info.ice! / 100;
     }
 
@@ -1030,7 +1013,7 @@ export function calDamageWith(
     let enemyPerDamage: number;
 
     // 魔攻
-    if (special.includes(2) || special.includes(13)) {
+    if (special.has(2) || special.has(13)) {
         enemyPerDamage = monAtk;
         enemyPerDamage -= magicDef;
     } else {
@@ -1038,38 +1021,38 @@ export function calDamageWith(
     }
 
     // 连击
-    if (special.includes(4)) enemyPerDamage *= 2;
-    if (special.includes(5)) enemyPerDamage *= 3;
-    if (special.includes(6)) enemyPerDamage *= info.n!;
+    if (special.has(4)) enemyPerDamage *= 2;
+    if (special.has(5)) enemyPerDamage *= 3;
+    if (special.has(6)) enemyPerDamage *= info.n!;
 
     if (enemyPerDamage < 0) enemyPerDamage = 0;
 
     // 苍蓝刻
-    if (special.includes(28)) {
+    if (special.has(28)) {
         heroPerDamage *= 1 - info.paleShield! / 100;
     }
 
     let turn = Math.ceil(monHp / heroPerDamage);
 
     // 致命一击
-    if (special.includes(1)) {
+    if (special.has(1)) {
         const times = Math.floor(turn / 5);
         damage += ((times * (info.crit! - 100)) / 100) * enemyPerDamage;
     }
 
     // 勇气之刃
-    if (turn > 1 && special.includes(10)) {
+    if (turn > 1 && special.has(10)) {
         damage += (info.courage! / 100 - 1) * enemyPerDamage;
     }
 
     // 勇气冲锋
-    if (special.includes(11)) {
+    if (special.has(11)) {
         damage += (info.charge! / 100) * enemyPerDamage;
         turn += 5;
     }
 
     // 先攻
-    if (special.includes(17)) {
+    if (special.has(17)) {
         damage += enemyPerDamage;
     }
 

@@ -73,7 +73,7 @@ const detail = ((): [number, string, string][] => {
     ];
 })();
 const special = (() => {
-    const s = enemy.info.special;
+    const s = [...enemy.info.special];
 
     const fromFunc = (
         func: string | ((enemy: EnemyInfo) => string),

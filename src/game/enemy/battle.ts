@@ -192,7 +192,7 @@ function init() {
         core.status.hero.statistics.battle++;
 
         // 智慧之源
-        if (special.includes(14) && flags.hard === 2) {
+        if (special.has(14) && flags.hard === 2) {
             core.addFlag(
                 'inte_' + floorId,
                 Math.ceil((core.status.hero.mdef / 10) * 0.3) * 10
@@ -202,11 +202,11 @@ function init() {
         }
 
         // 极昼永夜
-        if (special.includes(22)) {
+        if (special.has(22)) {
             flags[`night_${floorId}`] ??= 0;
             flags[`night_${floorId}`] -= enemy.info.night!;
         }
-        if (special.includes(23)) {
+        if (special.has(23)) {
             flags[`night_${floorId}`] ??= 0;
             flags[`night_${floorId}`] += enemy.info.day;
         }
@@ -216,7 +216,7 @@ function init() {
         // }
 
         // 如果是融化怪，需要特殊标记一下
-        if (special.includes(25) && has(x) && has(y)) {
+        if (special.has(25) && has(x) && has(y)) {
             flags[`melt_${floorId}`] ??= {};
             flags[`melt_${floorId}`][`${x},${y}`] = enemy.info.melt;
         }

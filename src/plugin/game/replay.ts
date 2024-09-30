@@ -45,25 +45,6 @@ export function init() {
         return true;
     });
 
-    core.registerReplayAction('study', name => {
-        if (!name.startsWith('study:')) return false;
-        const [num, x, y] = name
-            .slice(6)
-            .split(',')
-            .map(v => parseInt(v));
-        if (!canStudySkill(num)) return false;
-        const id = core.getBlockId(x, y);
-        ensureFloorDamage(core.status.floorId);
-        const col = core.status.thisMap.enemy;
-        col.calRealAttribute();
-        const enemy = col.list.find(v => v.x === x && v.y === y)!.info;
-        if (!enemy.special.includes(num)) return false;
-        studySkill(enemy, num);
-        core.status.route.push(name);
-        core.replay();
-        return true;
-    });
-
     // 商店
     let shopOpened = false;
     let openedShopId = '';

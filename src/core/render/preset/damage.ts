@@ -340,7 +340,7 @@ export class Damage extends Sprite<EDamageEvent> {
         };
         block.add(dam1).add(dam2);
 
-        if (real.special.includes(8) && real.togetherNum) {
+        if (real.special.has(8) && real.togetherNum) {
             const dam3: DamageRenderable = {
                 align: 'right',
                 baseline: 'top',
@@ -352,7 +352,7 @@ export class Damage extends Sprite<EDamageEvent> {
             };
             block.add(dam3);
         }
-        if (real.special.includes(30)) {
+        if (real.special.has(30)) {
             const dam4: DamageRenderable = {
                 align: 'left',
                 baseline: 'top',

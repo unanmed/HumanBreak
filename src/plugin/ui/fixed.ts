@@ -28,7 +28,7 @@ export function getDetailedEnemy(
     ) => {
         return typeof func === 'string' ? func : func(enemy);
     };
-    const special: [string, string, string][] = enemy.info.special
+    const special: [string, string, string][] = [...enemy.info.special]
         .filter(v => !enemy.info.specialHalo?.includes(v))
         .map(vv => {
             const s = Mota.require('var', 'enemySpecials')[vv];
