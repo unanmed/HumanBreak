@@ -262,5 +262,19 @@ export const specials: SpecialDeclaration[] = [
             `怪物会获得自身周围方形${enemy.assimilateRange}格范围内怪物的特殊属性（光环类属性除外），` +
             `特殊属性数值间为${enemy.specialMultiply ? '乘算' : '加算'}关系`,
         color: '#ffd366'
+    },
+    {
+        code: 33,
+        name: '战争号角',
+        desc: enemy => {
+            const [hp, atk, def] = enemy.horn ?? [];
+            let str = '地图上每存在一个怪物（包括自身），自身';
+            if (hp) str += `生命值增加${hp}%，`;
+            if (atk) str += `攻击增加${atk}%，`;
+            if (def) str += `防御增加${def}%，`;
+            str += '线性叠加';
+            return str;
+        },
+        color: '#fff866'
     }
 ];

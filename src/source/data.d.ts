@@ -103,6 +103,10 @@ type FloorIds =
     | 'MT91'
     | 'MT92'
     | 'MT93'
+    | 'MT94'
+    | 'MT95'
+    | 'MT96'
+    | 'MT97'
 
 type ImageIds =
     | 'IQ.png'

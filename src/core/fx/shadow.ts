@@ -77,7 +77,7 @@ const hook = Mota.require('var', 'hook');
 hook.once('reset', () => {
     Shadow.init();
     addLightFromBlock(
-        core.floorIds.slice(61, 70).concat(core.floorIds.slice(72, 81)).concat(core.floorIds.slice(85, 103)),
+        core.floorIds.slice(61, 70).concat(core.floorIds.slice(72, 81)).concat(core.floorIds.slice(85, 107)),
         103,
         { decay: 50, r: 300, color: [0.9333, 0.6, 0.333, 0.3] },
         { background: [0, 0, 0, 0.2] },
@@ -89,48 +89,12 @@ hook.once('reset', () => {
         { decay: 20, r: 150, color: [0.9333, 0.6, 0.333, 0.3], noShelter: true },
         { background: [0, 0, 0, 0.3] }
     );
-    // Shadow.mount();
-
-    // 勇士身上的光源
-    // Mota.rewrite(core.control, 'drawHero', 'add', () => {
-    //     if (core.getFlag('__heroOpacity__') !== 0) {
-    //         const shadow = Shadow.now();
-    //         if (shadow) {
-    //             shadow.followHero.forEach(v => {
-    //                 shadow.modifyLight(v, {
-    //                     x: core.status.heroCenter.px, 
-    //                     y: core.status.heroCenter.py + 8
-    //                 });
-    //             });
-    //             if (shadow.followHero.size > 0) shadow.requestRefresh();
-    //         }
-    //     }
-    // });
-    // 更新地形数据
-    // Mota.rewrite(core.maps, 'removeBlock', 'add', success => {
-    //     if (success && !main.replayChecking) {
-    //         Shadow.update(true);
-    //     }
-    //     return success;
-    // });
-    // Mota.rewrite(core.maps, 'setBlock', 'add', () => {
-    //     if (!main.replayChecking) {
-    //         Shadow.update(true);
-    //     }
-    // });
     Mota.rewrite(core.control, 'loadData', 'add', () => {
         if (!main.replayChecking) {
             Shadow.update(true);
             LayerShadowExtends.shadowList.forEach(v => v.update());
         }
     });
-    // Mota.require('var', 'hook').on('changingFloor', (floorId) => {
-    //     if (!main.replayChecking) {
-    //         Shadow.clearBuffer();
-    //         Shadow.update();
-    //         setCanvasFilterByFloorId(floorId);
-    //     }
-    // })
 });
 hook.on('reset', () => {
     Shadow.update(true);
@@ -1015,7 +979,6 @@ export class Shadow {
      */
     static clearBuffer() {
         const gl = this.gl;
-        const canvas = this.canvas;
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer.depth.position);
         gl.bufferData(gl.ARRAY_BUFFER, 0, gl.STATIC_DRAW);
@@ -1037,11 +1000,6 @@ export class Shadow {
     static update(nocache: boolean = false) {
         const floor = core.status.floorId;
         this.map[floor]?.requestRefresh(nocache);
-        if (!this.map[floor]) {
-            this.canvas.style.display = 'none';
-        } else {
-            this.canvas.style.display = 'block';
-        }
     }
 
     static now() {
@@ -1348,8 +1306,10 @@ export class LayerShadowExtends implements ILayerRenderExtends {
         this.sprite = new Sprite('static', false);
         this.sprite.setHD(true);
         this.sprite.size(layer.width, layer.height);
-        this.sprite.setRenderFn((canvas, transform) => {            
-            canvas.ctx.drawImage(Shadow.canvas, 0, 0, layer.width, layer.height);
+        this.sprite.setRenderFn((canvas, transform) => {   
+            if (Shadow.map[core.status.floorId]) {
+                canvas.ctx.drawImage(Shadow.canvas, 0, 0, layer.width, layer.height);
+            }
         });
 
         layer.appendChild(this.sprite);

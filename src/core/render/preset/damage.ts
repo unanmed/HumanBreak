@@ -365,6 +365,18 @@ export class Damage extends Sprite<EDamageEvent> {
             };
             block.add(dam4);
         }
+        if (enemy.col && real.special.has(33)) {
+            const dam5: DamageRenderable = {
+                align: 'right',
+                baseline: 'top',
+                text: enemy.col.list.size.toString(),
+                color: '#fff866',
+                x: x * this.cellSize + this.cellSize - 1,
+                y: y * this.cellSize + 2,
+                strokeWidth: 3
+            };
+            block.add(dam5);
+        }
     }
 
     /**

@@ -74,7 +74,7 @@ export const haloSpecials: Set<number> = new Set([
 ]);
 /** 不可被同化的属性 */
 export const unassimilatable: Set<number> = new Set(haloSpecials);
-unassimilatable.add(8).add(30);
+unassimilatable.add(8).add(30).add(33);
 /** 特殊属性对应 */
 export const specialValue: Map<number, SelectKey<Enemy, number | undefined>[]> =
     new Map();
@@ -95,7 +95,8 @@ specialValue
     .set(26, ['iceCore'])
     .set(27, ['fireCore'])
     .set(28, ['paleShield'])
-    .set(31, ['hpHalo']);
+    .set(31, ['hpHalo'])
+    .set(32, ['assimilateRange']);
 
 interface EnemyCollectionEvent {
     extract: [];
@@ -364,6 +365,14 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
 
         // 此时已经inject光环，因此直接计算真实属性
         const info = this.info;
+
+        if (info.special.has(33)) {
+            const count = this.col?.list.size ?? 0;
+            const [hp, atk, def] = this.enemy.horn ?? [0, 0, 0];
+            info.hpBuff_ += hp * count;
+            info.atkBuff_ += atk * count;
+            info.defBuff_ += def * count;
+        }
 
         info.atk = Math.floor(info.atk * (info.atkBuff_ / 100 + 1));
         info.def = Math.floor(info.def * (info.defBuff_ / 100 + 1));

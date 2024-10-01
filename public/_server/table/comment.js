@@ -303,6 +303,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "同化范围",
 					"_data": "同化范围"
 				},
+				"horn": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "战争号角",
+					"_data": "战争号角"
+				},
 				"specialHalo": {
 					"_leaf": true,
 					"_type": "popCheckboxSet",

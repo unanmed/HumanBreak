@@ -13,9 +13,9 @@ function getCanvasFilterByFloorId(floorId: FloorIds = core.status.floorId) {
 
 Mota.require('var', 'loading').once('coreInit', () => {
     filterMap.push(
-        [['MT50', 'MT60', 'MT61'], 'brightness(80%)contrast(120%)'], // 童心佬的滤镜（
+        [['MT50', 'MT60', 'MT61'], 'contrast(120%)'], // 童心佬的滤镜（
         [
-            core.floorIds.slice(61, 70).concat(core.floorIds.slice(72)),
+            core.floorIds.slice(61, 70).concat(core.floorIds.slice(72, 107)),
             'contrast(120%)'
         ] // 童心佬的滤镜（
     );
