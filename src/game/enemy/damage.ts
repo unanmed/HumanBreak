@@ -2,6 +2,7 @@ import { getHeroStatusOf, getHeroStatusOn } from '@/game/state/hero';
 import { Range } from '../util/range';
 import { ensureArray, has, manhattan } from '@/plugin/game/utils';
 import EventEmitter from 'eventemitter3';
+import { hook } from '../game';
 
 // todo: 光环划分优先级，从而可以实现光环的多级运算
 
@@ -152,6 +153,7 @@ export class EnemyCollection extends EventEmitter<EnemyCollectionEvent> {
             );
         });
         this.emit('extract');
+        hook.emit('enemyExtract', this);
     }
 
     /**

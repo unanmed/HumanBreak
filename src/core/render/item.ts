@@ -180,7 +180,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     protected cacheDirty: boolean = true;
     /** 是否启用缓存机制 */
     readonly enableCache: boolean = true;
-    /** 是否启用transform下穿机制 */
+    /** 是否启用transform下穿机制，即画布的变换是否会继续作用到下一层画布 */
     readonly transformFallThrough: boolean = false;
 
     constructor(

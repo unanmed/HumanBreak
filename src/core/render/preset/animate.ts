@@ -104,6 +104,12 @@ export class Animate extends Sprite {
 
         this.setRenderFn((canvas, transform) => {
             const { ctx } = canvas;
+            if (
+                this.absoluteAnimates.size === 0 &&
+                this.staticAnimates.size === 0
+            ) {
+                return;
+            }
             ctx.save();
             this.drawAnimates(this.absoluteAnimates, canvas);
             transformCanvas(canvas, transform);

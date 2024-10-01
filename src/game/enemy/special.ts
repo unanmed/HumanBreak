@@ -70,7 +70,7 @@ export const specials: SpecialDeclaration[] = [
         name: '抱团',
         desc: enemy =>
             `怪物周围5×5范围内每有一个拥有该属性的怪物（不包括自身），则对方攻防就增加${enemy.together}%（线性叠加）` +
-            `，受加成怪物会在右上角显示当前周围有多少个怪物`,
+            `，受加成怪物会在右上角以绿色字体显示当前周围有多少个怪物`,
         color: '#fa4'
     },
     {
@@ -240,11 +240,15 @@ export const specials: SpecialDeclaration[] = [
         name: '乾坤挪移',
         desc: enemy => {
             const [dx, dy] = enemy.translation!;
-            return `此怪物在场时，所有光环向${
-                dx < 0 ? '左' : '右'
-            }平移${Math.abs(dx)}格，向${dy < 0 ? '上' : '下'}平移${Math.abs(
-                dy
-            )}格。不同怪物间为加算叠加`;
+            let str = `此怪物在场时，所有光环`;
+            if (dx !== 0) {
+                str += `向${dx < 0 ? '左' : '右'}平移${Math.abs(dx)}格，`;
+            }
+            if (dy !== 0) {
+                str += `向${dy < 0 ? '上' : '下'}平移${Math.abs(dy)}格，`;
+            }
+            str += `不同怪物间为加算叠加`;
+            return str;
         },
         color: '#FDCD0B'
     },
@@ -272,7 +276,7 @@ export const specials: SpecialDeclaration[] = [
             if (hp) str += `生命值增加${hp}%，`;
             if (atk) str += `攻击增加${atk}%，`;
             if (def) str += `防御增加${def}%，`;
-            str += '线性叠加';
+            str += '线性叠加。该怪物会在右上角以黄色字体显示当前地图有多少怪物';
             return str;
         },
         color: '#fff866'

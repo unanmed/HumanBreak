@@ -340,7 +340,8 @@ export class Damage extends Sprite<EDamageEvent> {
         };
         block.add(dam1).add(dam2);
 
-        if (real.special.has(8) && real.togetherNum) {
+        const hasHorn = real.special.has(33);
+        if (real.special.has(8) && real.togetherNum && !hasHorn) {
             const dam3: DamageRenderable = {
                 align: 'right',
                 baseline: 'top',
@@ -365,7 +366,7 @@ export class Damage extends Sprite<EDamageEvent> {
             };
             block.add(dam4);
         }
-        if (enemy.col && real.special.has(33)) {
+        if (enemy.col && hasHorn) {
             const dam5: DamageRenderable = {
                 align: 'right',
                 baseline: 'top',
