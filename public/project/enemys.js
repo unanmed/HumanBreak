@@ -185,7 +185,7 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"E672": {"name":"坚固骑士","hp":7500,"atk":10000,"def":0,"money":8,"exp":800,"point":0,"special":[29],"specialHalo":[3],"haloRange":2},
 	"E673": {"name":"苍蓝之灵-域","hp":250000,"atk":12000,"def":3000,"money":10,"exp":2500,"point":0,"special":[]},
 	"E674": {"name":"进攻亡灵","hp":80000,"atk":14000,"def":5000,"money":7,"exp":700,"point":0,"special":[29,30],"specialHalo":[12],"haloRange":3,"translation":[0,-1]},
-	"E675": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E675": {"name":"双刃骷髅","hp":50000,"atk":13000,"def":6000,"money":0,"exp":0,"point":0,"special":[5]},
 	"E676": {"name":"冲锋骷髅","hp":50000,"atk":8000,"def":4000,"money":6,"exp":500,"point":0,"special":[12]},
 	"E677": {"name":"骷髅巫师","hp":150000,"atk":2000,"def":5000,"money":5,"exp":600,"point":0,"special":[13],"crit":null},
 	"E678": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
@@ -201,7 +201,7 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"E688": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E689": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E690": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
-	"E691": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E691": {"name":"游离之魂","hp":60000,"atk":12000,"def":8000,"money":0,"exp":0,"point":0,"special":[29],"specialHalo":[8],"together":10,"haloRange":3},
 	"E692": {"name":"苍蓝之灵-圣","hp":150000,"atk":15000,"def":5000,"money":20,"exp":5000,"point":0,"special":[4,28],"paleShield":25},
 	"E693": {"name":"苍蓝之灵-战","hp":250000,"atk":25000,"def":6000,"money":20,"exp":5000,"point":0,"special":[32],"assimilateRange":6},
 	"E698": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
@@ -209,7 +209,11 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"E700": {"name":"亡语之魂","hp":75000,"atk":10000,"def":9000,"money":8,"exp":800,"point":0,"special":[29,30],"haloRange":3,"specialHalo":[25],"melt":15,"translation":[-1,0]},
 	"E701": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"E702": {"name":"防守之魂","hp":10000,"atk":12000,"def":4000,"money":0,"exp":0,"point":0,"special":[3,29,30],"specialHalo":[26],"iceCore":10,"translation":[1,0],"haloRange":3},
-	"E703": {"name":"新敌人","hp":40000,"atk":16000,"def":6000,"money":8,"exp":800,"point":0,"special":[29,30],"specialHalo":[27],"haloRange":3,"iceCore":null,"fireCore":10,"translation":[1,0],"displayIdInBook":null},
+	"E703": {"name":"呐喊之魂","hp":40000,"atk":16000,"def":6000,"money":8,"exp":800,"point":0,"special":[29],"specialHalo":[27],"haloRange":3,"iceCore":null,"fireCore":10,"translation":null,"displayIdInBook":null},
 	"E704": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
-	"E705": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]}
+	"E705": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E707": {"name":"宝箱之灵","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[19,34],"description":"前身似乎是...宝箱怪？不知受到了什么法术，变成了这幅鬼样子。闪亮闪亮的，让人欲罢不能，看到他就想要立刻冲过去拿下他。这里的造物主似乎喜欢开玩笑，总是在那些关键位置放置些这些东西，然后在沿途放上物资。这样，那些胜利者，或者说...正在征战四方这位无名开国者，便能够在这稍作休息，恢复精力。"},
+	"E708": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E709": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
+	"E710": {"name":"新敌人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]}
 }

@@ -129,7 +129,15 @@ export namespace BluePalace {
         MT84: [
             { fx: 2, fy: 3, dir: 'right', tx: 12, ty: 3, toDir: 'left' },
             { fx: 2, fy: 11, dir: 'right', tx: 12, ty: 11, toDir: 'left' }
-        ]
+        ],
+        MT94: [{ fx: 12, fy: 11, dir: 'left', tx: 5, ty: 1, toDir: 'left' }],
+        MT95: [
+            { fx: 13, fy: 14, dir: 'up', tx: 7, ty: 8, toDir: 'left' },
+            { fx: 0, fy: 1, dir: 'right', tx: 14, ty: 1, toDir: 'left' },
+            { fx: 6, fy: 13, dir: 'right', tx: 6, ty: 0, toDir: 'down' }
+        ],
+        MT96: [{ fx: 6, fy: 11, dir: 'down', tx: 4, ty: 14, toDir: 'up' }],
+        MT97: [{ fx: 0, fy: 1, dir: 'right', tx: 8, ty: 9, toDir: 'right' }]
     };
     loading.once('coreInit', initPortals);
 

@@ -423,38 +423,34 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
 
                     // 这一句必须放到applyHalo之前
                     this.providedHalo.add(29);
+                    const halo = (e: EnemyInfo, enemy: EnemyInfo) => {
+                        const s = enemy.specialHalo!;
 
-                    col.applyHalo(
-                        type,
-                        range,
-                        this,
-                        (e, enemy) => {
-                            const s = enemy.specialHalo!;
-
-                            for (const spe of s) {
-                                e.special.add(spe);
-                            }
-                            // 如果是自身，就不进行特殊属性数值处理了
-                            if (e === this.info) return;
-                            // 然后计算特殊属性数值
-                            for (const spec of s) {
-                                const toChange = specialValue.get(spec);
-                                if (!toChange) continue;
-                                for (const key of toChange) {
-                                    // 这种光环应该获取怪物的原始数值，而不是真实数值
-                                    if (enemy.enemy.specialMultiply) {
-                                        e[key] ??= 1;
-                                        e[key] *= enemy[key] ?? 1;
-                                    } else {
-                                        e[key] ??= 0;
-                                        e[key] += enemy[key] ?? 0;
-                                    }
+                        for (const spe of s) {
+                            e.special.add(spe);
+                        }
+                        // 如果是自身，就不进行特殊属性数值处理了
+                        if (e === this.info) return;
+                        // 然后计算特殊属性数值
+                        for (const spec of s) {
+                            // 如果目标怪物拥有杀戮光环，且光环会加成此属性，则忽略
+                            if (e.specialHalo?.includes(spec)) continue;
+                            const toChange = specialValue.get(spec);
+                            if (!toChange) continue;
+                            for (const key of toChange) {
+                                // 这种光环应该获取怪物的原始数值，而不是真实数值
+                                if (enemy.enemy.specialMultiply) {
+                                    e[key] ??= 1;
+                                    e[key] *= enemy[key] ?? 1;
+                                } else {
+                                    e[key] ??= 0;
+                                    e[key] += enemy[key] ?? 0;
                                 }
                             }
-                        },
-                        // true表示递归计算，视为第一类光环
-                        true
-                    );
+                        }
+                    };
+
+                    col.applyHalo(type, range, this, halo, true);
                     col.haloList.push({
                         type: 'square',
                         data: { x: this.x + dx, y: this.y + dy, d },
