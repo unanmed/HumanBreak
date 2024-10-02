@@ -295,6 +295,17 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				],
 				"action": [
 					{
+						"type": "setCurtain",
+						"color": [
+							0,
+							0,
+							0,
+							1
+						],
+						"time": 0,
+						"keep": true
+					},
+					{
 						"type": "setValue",
 						"name": "status:atk",
 						"operator": "+=",
@@ -319,7 +330,19 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 					0,
 					1
 				],
-				"action": []
+				"action": [
+					{
+						"type": "setCurtain",
+						"color": [
+							0,
+							0,
+							0,
+							1
+						],
+						"time": 0,
+						"keep": true
+					}
+				]
 			}
 		],
 		"equipName": [
@@ -521,11 +544,6 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			}
 		],
 		"startText": [
-			{
-				"type": "setValue",
-				"name": "flag:itemDetail",
-				"value": "true"
-			},
 			{
 				"type": "hideStatusBar"
 			},

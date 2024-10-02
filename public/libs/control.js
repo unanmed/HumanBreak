@@ -500,7 +500,9 @@ control.prototype._showStartAnimate_finished = function (start, callback) {
 
 ////// 隐藏游戏开始界面 //////
 control.prototype.hideStartAnimate = function (callback) {
-    core.hideWithAnimate(core.dom.startPanel, 20, callback);
+    core.dom.startPanel.style.display = 'none';
+    callback?.();
+    // core.hideWithAnimate(core.dom.startPanel, 20, callback);
 };
 
 ////// 游戏是否已经开始 //////
