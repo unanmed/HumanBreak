@@ -9,12 +9,16 @@ import {
 import { Sprite } from '@/core/render/sprite';
 import { Transform } from '@/core/render/transform';
 
+const gameListener = Mota.require('var', 'gameListener');
+
 export class LayerGroupHalo implements ILayerGroupRenderExtends {
     id: string = 'halo';
 
     group!: LayerGroup;
     binder!: LayerGroupFloorBinder;
     halo!: Halo;
+
+    static sprites: Set<Halo> = new Set();
 
     awake(group: LayerGroup): void {
         this.group = group;
@@ -27,6 +31,7 @@ export class LayerGroupHalo implements ILayerGroupRenderExtends {
             this.halo.setZIndex(75);
             this.halo.binder = ex;
             group.appendChild(this.halo);
+            LayerGroupHalo.sprites.add(this.halo);
         } else {
             logger.error(1401);
             group.removeExtends('halo');
@@ -35,6 +40,7 @@ export class LayerGroupHalo implements ILayerGroupRenderExtends {
 
     onDestroy(group: LayerGroup): void {
         this.halo?.destroy();
+        LayerGroupHalo.sprites.delete(this.halo);
     }
 }
 
@@ -55,7 +61,7 @@ class Halo extends Sprite {
     binder!: LayerGroupFloorBinder;
 
     constructor() {
-        super('static', false);
+        super('static', true);
 
         this.setRenderFn((canvas, transform) => {
             this.drawHalo(canvas, transform);
@@ -89,17 +95,48 @@ class Halo extends Sprite {
         for (const halo of list) {
             if (halo.type === 'square') {
                 const { x, y, d } = halo.data;
-                const [color, border] = haloColor[halo.special];
+                let [color, border] = haloColor[halo.special];
+                let alpha = 0.1;
+                let borderAlpha = 0.6;
+                const { mouseX, mouseY } = gameListener;
+                if (mouseX === halo.from?.x && mouseY === halo.from?.y) {
+                    alpha = 0.3;
+                    borderAlpha = 0.8;
+                    color = '#ff0';
+                    border = '#ff0';
+                }
                 const r = Math.floor(d / 2);
                 const left = x - r;
                 const top = y - r;
                 ctx.fillStyle = color;
                 ctx.strokeStyle = border ?? color;
-                ctx.globalAlpha = 0.1;
+                ctx.globalAlpha = alpha;
                 ctx.fillRect(left * cell, top * cell, d * cell, d * cell);
-                ctx.globalAlpha = 0.6;
+                ctx.globalAlpha = borderAlpha;
                 ctx.strokeRect(left * cell, top * cell, d * cell, d * cell);
             }
         }
     }
 }
+
+function updateHalo(block: Block) {
+    if (block.event.cls === 'enemys' || block.event.cls === 'enemy48') {
+        LayerGroupHalo.sprites.forEach(v => {
+            const floor = v.binder.getFloor();
+            if (floor === core.status.floorId) {
+                v.update();
+            }
+        });
+    }
+}
+
+Mota.require('var', 'hook').on('enemyExtract', col => {
+    LayerGroupHalo.sprites.forEach(v => {
+        const floor = v.binder.getFloor();
+        if (col.floorId === floor) {
+            v.update();
+        }
+    });
+});
+gameListener.on('hoverBlock', updateHalo);
+gameListener.on('leaveBlock', updateHalo);

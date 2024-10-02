@@ -280,5 +280,11 @@ export const specials: SpecialDeclaration[] = [
             return str;
         },
         color: '#fff866'
+    },
+    {
+        code: 34,
+        name: '赏金',
+        desc: `怪物没有任何能力，也没有任何战利品，也无法让勇士恢复生命值，战斗伤害恒为0`,
+        color: '#faff33'
     }
 ];

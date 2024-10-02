@@ -997,6 +997,9 @@ export function calDamageWith(
     let { atk, def, hpmax, mana, magicDef } = hero as HeroStatus;
     let { hp: monHp, atk: monAtk, def: monDef, special, enemy } = info;
 
+    // 赏金，优先级最高
+    if (special.has(34)) return 0;
+
     hpmax = Math.min(hpmax, def / 10);
 
     let damage = 0;

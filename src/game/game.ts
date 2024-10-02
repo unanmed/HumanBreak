@@ -1,5 +1,5 @@
 import { EventEmitter } from '../core/common/eventEmitter';
-import type { DamageEnemy } from './enemy/damage';
+import type { DamageEnemy, EnemyCollection } from './enemy/damage';
 
 // ----- 加载事件
 interface GameLoadEvent {
@@ -91,12 +91,6 @@ export interface GameEvent {
     afterBattle: (enemy: DamageEnemy, x?: number, y?: number) => void;
     /** Emitted in libs/events.js changingFloor */
     changingFloor: (floorId: FloorIds, heroLoc: Loc) => void;
-
-    drawHero: (
-        status?: Exclude<keyof MaterialIcon['hero']['down'], 'loc'>,
-        offset?: number,
-        frame?: number
-    ) => void;
     /** Emitted in libs/maps.js setBlock */
     setBlock: (
         x: number,
@@ -105,6 +99,8 @@ export interface GameEvent {
         newBlock: AllNumbers,
         oldBlock: AllNumbers
     ) => void;
+    /** Emitted in game/enemy/damage.ts */
+    enemyExtract: (col: EnemyCollection) => void;
 }
 
 export const hook = new EventEmitter<GameEvent>();
@@ -123,6 +119,9 @@ class GameListener extends EventEmitter<ListenerEvent> {
 
     num: number = GameListener.num++;
 
+    mouseX: number = -1;
+    mouseY: number = -1;
+
     constructor() {
         super();
         if (main.replayChecking) return;
@@ -137,8 +136,6 @@ class GameListener extends EventEmitter<ListenerEvent> {
 
     private init() {
         // ----- block
-        let lastHoverX = -1;
-        let lastHoverY = -1;
 
         const data = core.canvas.data.canvas;
 
@@ -165,19 +162,19 @@ class GameListener extends EventEmitter<ListenerEvent> {
             } = core.actions._getClickLoc(e.clientX, e.clientY);
             const [bx, by] = getBlockLoc(px, py, size);
             const blocks = core.getMapBlocksObj();
-            if (lastHoverX !== bx || lastHoverY !== by) {
-                const lastBlock = blocks[`${lastHoverX},${lastHoverY}`];
+            if (this.mouseX !== bx || this.mouseY !== by) {
+                const lastBlock = blocks[`${this.mouseX},${this.mouseY}`];
                 const block = blocks[`${bx},${by}`];
                 if (!!lastBlock) {
                     this.emit('leaveBlock', lastBlock, e, false);
                 }
                 if (!!block) {
                     this.emit('hoverBlock', block, e);
-                    lastHoverX = bx;
-                    lastHoverY = by;
+                    this.mouseX = bx;
+                    this.mouseY = by;
                 } else {
-                    lastHoverX = -1;
-                    lastHoverY = -1;
+                    this.mouseX = -1;
+                    this.mouseY = -1;
                 }
             }
         });
@@ -189,12 +186,12 @@ class GameListener extends EventEmitter<ListenerEvent> {
             )
                 return;
             const blocks = core.getMapBlocksObj();
-            const lastBlock = blocks[`${lastHoverX},${lastHoverY}`];
+            const lastBlock = blocks[`${this.mouseX},${this.mouseY}`];
             if (!!lastBlock) {
                 this.emit('leaveBlock', lastBlock, e, true);
             }
-            lastHoverX = -1;
-            lastHoverY = -1;
+            this.mouseX = -1;
+            this.mouseY = -1;
         });
         // click
         data.addEventListener('click', e => {
