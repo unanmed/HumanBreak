@@ -1090,7 +1090,7 @@ export function calDamageWith(
         if (damage < dm) damage = dm;
     }
 
-    return damage;
+    return Math.floor(damage);
 }
 
 export function ensureFloorDamage(floorId: FloorIds) {

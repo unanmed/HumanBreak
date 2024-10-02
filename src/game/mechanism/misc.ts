@@ -7,17 +7,6 @@ export namespace BluePalace {
 
     // ---------- 黄蓝门转换
 
-    function drawDoors(
-        ctx: CanvasRenderingContext2D,
-        convert: DoorConvertInfo[],
-        frame: number
-    ) {
-        ctx.clearRect(0, 0, 480, 480);
-        convert.forEach(v => {
-            core.drawIcon(ctx, v[0], v[1] * 32, v[2] * 32, 32, 32, frame);
-        });
-    }
-
     export function doorConvert(
         x?: number,
         y?: number,
