@@ -652,6 +652,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
             const endX = Math.min(floor.width - 1, this.x + range);
             const endY = Math.min(floor.height - 1, this.y + range);
             const dam = Math.max((enemy.value ?? 0) - hero.def!, 0);
+            const objs = core.getMapBlocksObj(this.floorId);
 
             for (let x = startX; x <= endX; x++) {
                 for (let y = startY; y <= endY; y++) {
@@ -661,7 +662,8 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                     ) {
                         continue;
                     }
-                    const loc = `${x},${y}`;
+                    const loc = `${x},${y}` as LocString;
+                    if (objs[loc]?.event.noPass) continue;
                     this.setMapDamage(damage, loc, dam, '突刺');
                 }
             }
