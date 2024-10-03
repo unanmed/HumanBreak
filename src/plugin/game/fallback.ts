@@ -620,35 +620,6 @@ export function init() {
                 callback?.();
             }, animateTime + 50);
 
-            // time /= Math.max(core.status.replay.speed, 1);
-            // var per_time = 10,
-            //     step = 0,
-            //     steps = parseInt(time / per_time);
-            // if (steps <= 0) {
-            //     this.setViewport(32 * x, 32 * y);
-            //     if (callback) callback();
-            //     return;
-            // }
-            // var px = core.clamp(32 * x, 0, 32 * core.bigmap.width - core._PX_);
-            // var py = core.clamp(32 * y, 0, 32 * core.bigmap.height - core._PY_);
-            // var cx = core.bigmap.offsetX;
-            // var cy = core.bigmap.offsetY;
-            // var moveFunc = core.applyEasing(moveMode);
-
-            // var animate = window.setInterval(function () {
-            //     step++;
-            //     core.setViewport(
-            //         cx + moveFunc(step / steps) * (px - cx),
-            //         cy + moveFunc(step / steps) * (py - cy)
-            //     );
-            //     if (step == steps) {
-            //         delete core.animateFrame.asyncId[animate];
-            //         clearInterval(animate);
-            //         core.setViewport(px, py);
-            //         if (callback) callback();
-            //     }
-            // }, per_time);
-
             const id = fallbackIds++;
             core.animateFrame.lastAsyncId = id;
             core.animateFrame.asyncId[id] = () => {

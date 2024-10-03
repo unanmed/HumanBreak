@@ -405,6 +405,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this.remove();
         this.emit('destroy');
         this.removeAllListeners();
+        RenderItem.itemMap.delete(this._id);
     }
 }
 
