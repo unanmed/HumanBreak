@@ -496,11 +496,13 @@ export class Damage extends Sprite<EDamageEvent> {
 
             // todo: 是否真的需要缓存
             // 检查有没有缓存
-            const cache = block.cache.get(v * block.cacheDepth);
+            const cache = block.cache.get(v);
             if (cache && cache.symbol === cache.canvas.symbol) {
                 ctx.drawImage(cache.canvas.canvas, px, py, size, size);
                 return;
             }
+
+            this.updateBlock(v, true);
             this.emit('dirtyUpdate', v);
 
             // 否则依次渲染并写入缓存
@@ -512,7 +514,10 @@ export class Damage extends Sprite<EDamageEvent> {
             temp.size(size, size);
             const { ctx: ct } = temp;
 
+            ct.translate(-px, -py);
+
             const render = this.renderable.get(v);
+
             render?.forEach(v => {
                 if (!v) return;
                 ct.fillStyle = v.color;

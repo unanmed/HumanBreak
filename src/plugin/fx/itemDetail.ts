@@ -100,7 +100,7 @@ export class FloorItemDetail implements ILayerGroupRenderExtends {
         // 预留blockData
         const [x, y] = this.sprite.block.getBlockXY(width, height);
         const num = x * y;
-        for (let i = 0; i < num; i++) {
+        for (let i = 0; i <= num; i++) {
             this.blockData.set(i, new Map());
             this.detailData.set(i, new Map());
             this.dirtyBlock.add(i);

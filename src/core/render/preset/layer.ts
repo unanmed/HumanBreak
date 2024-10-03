@@ -341,8 +341,8 @@ export function calNeedRenderOf(
     const [px3, py3] = Transform.untransformed(transform, w - 1, h - 1);
     const [px4, py4] = Transform.untransformed(transform, 0, h - 1);
 
-    const maxX = block.width * cell;
-    const maxY = block.height * cell;
+    const maxX = block.width * cell - 1;
+    const maxY = block.height * cell - 1;
 
     const res: Set<number> = new Set();
     // 实际上不太可能一次性渲染非常多的图块，因此不需要非常细致地算出所有的格点，整体包含即可

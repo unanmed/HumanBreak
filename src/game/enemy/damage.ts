@@ -690,6 +690,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                     if (
                         block &&
                         block.event.noPass &&
+                        block.event.cls !== 'enemys' &&
                         block.id !== 141 &&
                         block.id !== 151
                     ) {
