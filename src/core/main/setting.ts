@@ -384,6 +384,7 @@ function handleActionSetting<T extends number | boolean>(
     if (key === 'autoSkill') {
         // 自动切换技能
         flags.autoSkill = n;
+        core.status.route.push(`set:autoSkill:${n}`)
     }
 }
 

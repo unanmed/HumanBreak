@@ -89,7 +89,7 @@ main.floors.MT16=
                 "no": [
                     {
                         "type": "function",
-                        "function": "function(){\ncore.plugin.replay.readyClip();\n}"
+                        "function": "function(){\nMota.Plugin.require('replay_g').readyClip();\n}"
                     },
                     {
                         "type": "choices",

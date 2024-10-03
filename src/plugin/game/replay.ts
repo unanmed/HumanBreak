@@ -5,8 +5,6 @@ const replayableSettings = ['autoSkill'];
 let cliping = false;
 let startIndex = 0;
 
-export function ready() {}
-
 export function readyClip() {
     cliping = true;
     return (startIndex = core.status.route.length - 1);
