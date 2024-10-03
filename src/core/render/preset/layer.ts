@@ -5,7 +5,6 @@ import { TimingFn } from 'mutate-animate';
 import { IAnimateFrame, renderEmits, RenderItem } from '../item';
 import { logger } from '@/core/common/logger';
 import { RenderableData, texture } from '../cache';
-import { glMatrix } from 'gl-matrix';
 import { BlockCacher } from './block';
 import { Transform } from '../transform';
 import { LayerFloorBinder, LayerGroupFloorBinder } from './floor';
@@ -110,7 +109,7 @@ export class LayerGroup extends Container implements IAnimateFrame {
     /** 这个地图组的摄像机 */
     camera: Transform = new Transform();
 
-    private needRender?: NeedRenderData;
+    private needRender?: Set<number>;
     private extend: Map<string, ILayerGroupRenderExtends> = new Map();
 
     constructor() {
@@ -330,145 +329,41 @@ export function calNeedRenderOf(
     transform: Transform,
     cell: number,
     block: BlockCacher<any>
-): NeedRenderData {
-    const w = (core._WIDTH_ * cell) / 2;
-    const h = (core._HEIGHT_ * cell) / 2;
+): Set<number> {
+    const w = core._WIDTH_ * cell;
+    const h = core._HEIGHT_ * cell;
     const size = block.blockSize;
+    const width = block.blockData.width;
 
     // -1是因为宽度是core._PX_，从0开始的话，末尾索引就是core._PX_ - 1
-    const [x1, y1] = Transform.untransformed(transform, -w, -h);
-    const [x2, y2] = Transform.untransformed(transform, w - 1, -h);
-    const [x3, y3] = Transform.untransformed(transform, w - 1, h - 1);
-    const [x4, y4] = Transform.untransformed(transform, -w, h - 1);
+    const [px1, py1] = Transform.untransformed(transform, 0, 0);
+    const [px2, py2] = Transform.untransformed(transform, w - 1, 0);
+    const [px3, py3] = Transform.untransformed(transform, w - 1, h - 1);
+    const [px4, py4] = Transform.untransformed(transform, 0, h - 1);
+
+    const maxX = block.width * cell;
+    const maxY = block.height * cell;
 
     const res: Set<number> = new Set();
-    /** 一个纵坐标对应的所有横坐标，用于填充 */
-    const xyMap: Map<number, number[]> = new Map();
+    // 实际上不太可能一次性渲染非常多的图块，因此不需要非常细致地算出所有的格点，整体包含即可
+    // 因此直接算其最小外接矩形即可
+    const left = Math.max(0, Math.min(px1, px2, px3, px4));
+    const right = Math.min(maxX, Math.max(px1, px2, px3, px4));
+    const top = Math.max(0, Math.min(py1, py2, py3, py4));
+    const bottom = Math.max(maxY, Math.max(py1, py2, py3, py4));
 
-    const pushXY = (x: number, y: number) => {
-        let arr = xyMap.get(y);
-        if (!arr) {
-            arr = [];
-            xyMap.set(y, arr);
+    const blockLeft = Math.floor(left / cell / size);
+    const blockRight = Math.floor(right / cell / size);
+    const blockTop = Math.floor(top / cell / size);
+    const blockBottom = Math.floor(bottom / cell / size);
+
+    for (let y = blockTop; y <= blockBottom; y++) {
+        for (let x = blockLeft; x <= blockRight; x++) {
+            res.add(x + y * width);
         }
-        arr.push(x);
-        return arr;
-    };
+    }
 
-    [
-        [x1, y1, x2, y2],
-        [x2, y2, x3, y3],
-        [x3, y3, x4, y4],
-        [x4, y4, x1, y1]
-    ].forEach(([fx0, fy0, tx0, ty0]) => {
-        const fx = Math.floor(fx0 / cell);
-        const fy = Math.floor(fy0 / cell);
-        const tx = Math.floor(tx0 / cell);
-        const ty = Math.floor(ty0 / cell);
-        const dx = tx - fx;
-        const dy = ty - fy;
-        const k = dy / dx;
-
-        // 斜率无限的时候，竖直
-        if (!isFinite(k)) {
-            const min = k < 0 ? ty : fy;
-            const max = k < 0 ? fy : ty;
-            const [x, y] = block.getBlockXY(fx, min);
-            const [, ey] = block.getBlockXY(fx, max);
-            for (let i = y; i <= ey; i++) {
-                pushXY(x, i);
-            }
-
-            return;
-        }
-
-        const [fbx, fby] = block.getBlockXY(fx, fy);
-
-        // 当斜率为0时
-        if (glMatrix.equals(k, 0)) {
-            const [ex] = block.getBlockXY(tx, fy);
-            pushXY(fby, fbx).push(ex);
-            return;
-        }
-
-        // 否则使用 Bresenham 直线算法
-        if (Math.abs(k) >= 1) {
-            // 斜率大于一，y方向递增
-            const d = Math.sign(dy) * size;
-            const f = fby * size;
-            const dir = dy > 0;
-
-            const ex = Math.floor(tx / size);
-            const ey = Math.floor(ty / size);
-            pushXY(ex, ey);
-
-            let now = f;
-            let last = fbx;
-            let ny = fby;
-            do {
-                const bx = Math.floor((fx + (now - fy) / k) / size);
-                pushXY(bx, ny);
-                if (bx !== last) {
-                    if (dir) pushXY(bx, ny - Math.sign(dy));
-                    else pushXY(last, ny);
-                }
-
-                last = bx;
-                ny += Math.sign(dy);
-                now += d;
-            } while (dir ? ny <= ey : ny >= ey);
-        } else {
-            // 斜率小于一，x方向递增
-            const d = Math.sign(dx) * size;
-            const f = fbx * size;
-            const dir = dx > 0;
-
-            const ex = Math.floor(tx / size);
-            const ey = Math.floor(ty / size);
-            pushXY(ex, ey);
-
-            let now = f;
-            let last = fby;
-            let nx = fbx;
-            do {
-                const by = Math.floor((fy + k * (now - fx)) / size);
-                if (by !== last) {
-                    if (dir) pushXY(nx - Math.sign(dx), by);
-                    else pushXY(nx, last);
-                }
-                pushXY(nx, by);
-                last = by;
-                nx += Math.sign(dx);
-                now += d;
-            } while (dir ? nx <= ex : nx >= ex);
-        }
-    });
-
-    // 然后进行填充
-    const { width: bw, height: bh } = block.blockData;
-    const back: [number, number][] = [];
-    xyMap.forEach((x, y) => {
-        if (x.length === 1) {
-            const index = y * bw + x[0];
-
-            if (!back.some(v => v[0] === x[0] && v[1] === y))
-                back.push([x[0], y]);
-            if (index < 0 || index >= bw * bh) return;
-            res.add(index);
-        }
-        const max = Math.max(...x);
-        const min = Math.min(...x);
-
-        for (let i = min; i <= max; i++) {
-            const index = y * bw + i;
-
-            if (!back.some(v => v[0] === i && v[1] === y)) back.push([i, y]);
-            if (index < 0 || index >= bw * bh) continue;
-            res.add(index);
-        }
-    });
-
-    return { res, back };
+    return res;
 }
 
 export interface ILayerRenderExtends {
@@ -591,7 +486,7 @@ export interface ILayerRenderExtends {
     onBeforeRender?(
         layer: Layer,
         transform: Transform,
-        need: NeedRenderData
+        need: Set<number>
     ): void;
 
     /**
@@ -600,11 +495,7 @@ export interface ILayerRenderExtends {
      * @param transform 渲染的变换矩阵
      * @param need 需要渲染的分块信息
      */
-    onAfterRender?(
-        layer: Layer,
-        transform: Transform,
-        need: NeedRenderData
-    ): void;
+    onAfterRender?(layer: Layer, transform: Transform, need: Set<number>): void;
 
     /**
      * 当拓展被取消挂载时执行的函数（Layer被销毁，拓展被移除等）
@@ -622,13 +513,6 @@ export interface LayerMovingRenderable extends RenderableData {
     zIndex: number;
     x: number;
     y: number;
-}
-
-interface NeedRenderData {
-    /** 需要渲染的分块索引 */
-    res: Set<number>;
-    /** 需要渲染的背景的左上角横纵坐标，因为背景是可能渲染在地图之外的，所以不能使用分块索引的形式存储 */
-    back: [x: number, y: number][];
 }
 
 export class Layer extends Container {
@@ -1098,7 +982,7 @@ export class Layer extends Container {
      * 计算在传入的变换矩阵下，应该渲染哪些内容
      * @param transform 变换矩阵
      */
-    calNeedRender(transform: Transform): NeedRenderData {
+    calNeedRender(transform: Transform): Set<number> {
         if (this.parent instanceof LayerGroup) {
             // 如果处于地图组中，每个地图的渲染区域应该是一样的，因此可以缓存优化
             return this.parent.cacheNeedRender(transform, this.block);
@@ -1138,7 +1022,7 @@ export class Layer extends Container {
     /**
      * 渲染当前地图
      */
-    renderMap(transform: Transform, need: NeedRenderData) {
+    renderMap(transform: Transform, need: Set<number>) {
         this.staticMap.clear();
         this.movingMap.clear();
         this.backMap.clear();
@@ -1163,12 +1047,12 @@ export class Layer extends Container {
      * @param transform 变换矩阵
      * @param need 需要渲染的块
      */
-    protected renderBack(transform: Transform, need: NeedRenderData) {
+    protected renderBack(transform: Transform, need: Set<number>) {
         const cell = this.cellSize;
         const frame = (RenderItem.animatedFrame % 4) + 1;
         const blockSize = this.block.blockSize;
-        const { back } = need;
         const { ctx } = this.backMap;
+        const { width } = this.block.blockData;
 
         const mat = transform.mat;
         const [a, b, , c, d, , e, f] = mat;
@@ -1178,7 +1062,9 @@ export class Layer extends Container {
             // 画背景图
             const length = this.backImage.length;
             const img = this.backImage[frame % length];
-            back.forEach(([x, y]) => {
+            need.forEach(index => {
+                const x = index % width;
+                const y = Math.floor(index / width);
                 const sx = x * blockSize;
                 const sy = y * blockSize;
                 ctx.drawImage(
@@ -1195,7 +1081,7 @@ export class Layer extends Container {
     /**
      * 渲染静态层
      */
-    protected renderStatic(transform: Transform, need: NeedRenderData) {
+    protected renderStatic(transform: Transform, need: Set<number>) {
         const cell = this.cellSize;
         const frame = RenderItem.animatedFrame % 4;
         const { width } = this.block.blockData;
@@ -1204,7 +1090,6 @@ export class Layer extends Container {
 
         ctx.save();
 
-        const { res: render } = need;
         const [a, b, , c, d, , e, f] = transform.mat;
         ctx.setTransform(a, b, c, d, e, f);
 
@@ -1214,7 +1099,7 @@ export class Layer extends Container {
             this.layer === 'event' && floor
                 ? core.status.mapBlockObjs[floor]
                 : void 0;
-        render.forEach(v => {
+        need.forEach(v => {
             const x = v % width;
             const y = Math.floor(v / width);
             const sx = x * blockSize;

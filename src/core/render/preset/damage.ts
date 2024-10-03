@@ -481,7 +481,7 @@ export class Damage extends Sprite<EDamageEvent> {
         transformCanvas(this.damageMap, transform);
         // console.trace();
 
-        const { res: render } = this.calNeedRender(transform);
+        const render = this.calNeedRender(transform);
         const block = this.block;
         const cell = this.cellSize;
         const size = cell * block.blockSize;
