@@ -1533,7 +1533,7 @@ control.prototype.chooseReplayFile = function () {
         function (obj) {
             if (obj.name != core.firstData.name)
                 return alert('存档和游戏不一致！');
-            if (!obj.route) return alert('无效的录像！');
+            if (!obj.route) return core.drawTip('无效的录像！');
             var _replay = function () {
                 core.startGame(
                     core.flags.startUsingCanvas ? '' : obj.hard || '',
@@ -2370,7 +2370,7 @@ control.prototype._doSL_load = function (id, callback) {
             },
             function (err) {
                 console.error(err);
-                alert('无效的存档');
+                core.drawTip('无效的存档');
             }
         );
     }
@@ -2393,7 +2393,7 @@ control.prototype._doSL_reload = function (id, callback) {
 };
 
 control.prototype._doSL_load_afterGet = function (id, data) {
-    if (!data) return alert('无效的存档');
+    if (!data) return core.drawTip('无效的存档');
     var _replay = function () {
         core.startGame(
             data.hard,

@@ -161,15 +161,12 @@ main.floors.MT16=
             },
             {
                 "type": "animate",
-                "name": "amazed",
-                "async": true
+                "name": "amazed"
             },
             {
                 "type": "sleep",
-                "time": 1000
-            },
-            {
-                "type": "waitAsync"
+                "time": 1000,
+                "noSkip": true
             },
             {
                 "type": "moveHero",

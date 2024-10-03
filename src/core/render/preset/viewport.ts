@@ -128,6 +128,7 @@ export class FloorViewport implements ILayerGroupRenderExtends {
      * @param y 目标图格纵坐标
      */
     setPosition(x: number, y: number) {
+        if (!this.enabled) return;
         const { x: nx, y: ny } = this.getBoundedPosition(x, y);
         this.group.removeTicker(this.transition, false);
         this.nx = nx;
@@ -140,6 +141,7 @@ export class FloorViewport implements ILayerGroupRenderExtends {
      * @param y 目标图格纵坐标
      */
     moveTo(x: number, y: number) {
+        if (!this.enabled) return;
         const { x: nx, y: ny } = this.getBoundedPosition(x, y);
         if (this.inTransition) {
             const distance = Math.hypot(this.nx - nx, this.ny - ny);
@@ -176,6 +178,7 @@ export class FloorViewport implements ILayerGroupRenderExtends {
      * @param y 目标图格纵坐标
      */
     mutateTo(x: number, y: number) {
+        if (!this.enabled) return;
         const { x: nx, y: ny } = this.getBoundedPosition(x, y);
         this.createTransition(nx, ny, this.transitionTime);
     }
@@ -321,6 +324,7 @@ export class FloorViewport implements ILayerGroupRenderExtends {
         const halfWidth = core._PX_ / 2;
         const halfHeight = core._PY_ / 2;
         this.delegation = this.group.delegateTicker(() => {
+            if (!this.enabled) return;
             if (this.nx === nx && this.ny === ny) return;
             const cell = this.group.cellSize;
             const half = cell / 2;

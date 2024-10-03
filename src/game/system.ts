@@ -38,6 +38,8 @@ import type { Layer } from '@/core/render/preset/layer';
 import type { LayerGroupFloorBinder } from '@/core/render/preset/floor';
 import type { HeroKeyMover } from '@/core/main/action/move';
 import type { BlockMover, HeroMover, ObjectMoverBase } from './state/move';
+import type { Camera } from '@/core/render/camera';
+import type * as Animation from 'mutate-animate';
 
 interface ClassInterface {
     // 渲染进程与游戏进程通用
@@ -119,6 +121,7 @@ interface ModuleInterface {
         RenderAdapter: typeof RenderAdapter;
         Layer: typeof Layer;
         LayerGroupFloorBinder: typeof LayerGroupFloorBinder;
+        Camera: typeof Camera;
     };
     State: {
         ItemState: typeof ItemState;
@@ -133,6 +136,7 @@ interface ModuleInterface {
     Action: {
         HeroKeyMover: typeof HeroKeyMover;
     };
+    Animation: typeof Animation;
 }
 
 interface SystemInterfaceMap {
@@ -148,20 +152,10 @@ interface PluginInterface {
     // 渲染进程定义的插件
     pop_r: typeof import('../plugin/pop');
     use_r: typeof import('../plugin/use');
-    // animate: typeof import('../plugin/animateController');
-    // utils: typeof import('../plugin/utils');
-    // status: typeof import('../plugin/ui/statusBar');
     fly_r: typeof import('../plugin/ui/fly');
     chase_r: typeof import('../plugin/chase/chase');
-    // webglUtils: typeof import('../plugin/webgl/utils');
-    // shadow_r: typeof import('../plugin/shadow/shadow');
-    // gameShadow_r: typeof import('../plugin/shadow/gameShadow');
-    // achievement: typeof import('../plugin/ui/achievement');
     completion_r: typeof import('../plugin/completion');
-    // path: typeof import('../plugin/fx/path');
     gameCanvas_r: typeof import('../plugin/fx/gameCanvas');
-    // noise: typeof import('../plugin/fx/noise');
-    smooth_r: typeof import('../plugin/fx/smoothView');
     frag_r: typeof import('../plugin/fx/frag');
     // 游戏进程定义的插件
     utils_g: typeof import('../plugin/game/utils');
@@ -174,12 +168,9 @@ interface PluginInterface {
     chase_g: typeof import('../plugin/game/chase');
     skill_g: typeof import('../plugin/game/skill');
     towerBoss_g: typeof import('../plugin/game/towerBoss');
-    // heroFourFrames_g: typeof import('../plugin/game/fx/heroFourFrames');
     rewrite_g: typeof import('../plugin/game/fx/rewrite');
     itemDetail_g: typeof import('../plugin/game/fx/itemDetail');
     checkBlock_g: typeof import('../plugin/game/enemy/checkblock');
-    // halo_g: typeof import('../plugin/game/fx/halo');
-    // study_g: typeof import('../plugin/game/study');
 }
 
 interface PackageInterface {

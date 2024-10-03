@@ -5,7 +5,7 @@ import type {
     LayerFloorBinder
 } from '@/core/render/preset/floor';
 import type { HeroRenderer } from '@/core/render/preset/hero';
-import type { Layer } from '@/core/render/preset/layer';
+import type { Layer, LayerGroup } from '@/core/render/preset/layer';
 import type { TimingFn } from 'mutate-animate';
 import { BlockMover, heroMoveCollection, MoveStep } from '@/game/state/move';
 import type { FloorViewport } from '@/core/render/preset/viewport';
@@ -85,6 +85,11 @@ export function init() {
     }
 
     Mota.r(() => {
+        // ----- 引入
+        const Camera = Mota.require('module', 'Render').Camera;
+        const Renderer = Mota.require('module', 'Render').MotaRenderer;
+        const Animation = Mota.require('module', 'Animation');
+
         // ----- 勇士移动相关
         control.prototype.moveAction = async function (callback?: () => void) {
             heroMover.clearMoveQueue();
@@ -577,6 +582,79 @@ export function init() {
             const success = data.moveDirectly(destX, destY, ignoreSteps);
             if (success) adapters.viewport?.all('mutateTo', destX, destY);
             return success;
+        };
+
+        control.prototype.moveViewport = function (
+            x: number,
+            y: number,
+            _moveMode: EaseMode,
+            time: number = 0,
+            callback?: () => void
+        ) {
+            const main = Renderer.get('render-main');
+            const layer = main?.getElementById('layer-main') as LayerGroup;
+            if (!layer) return;
+            const camera = Camera.for(layer);
+            camera.clearOperation();
+            const translate = camera.addTranslate();
+
+            const animateTime = time / Math.max(core.status.replay.speed, 1);
+            const animate = new Animation.Animation();
+            animate
+                .absolute()
+                .time(1)
+                .mode(Animation.linear())
+                .move(-core.bigmap.offsetX, -core.bigmap.offsetY);
+            animate.time(animateTime).move(-x * 32, -y * 32);
+
+            camera.applyTranslateAnimation(
+                translate,
+                animate,
+                animateTime + 50
+            );
+            camera.transform = layer.camera;
+
+            const timeout = window.setTimeout(() => {
+                core.bigmap.offsetX = x * 32;
+                core.bigmap.offsetY = y * 32;
+                callback?.();
+            }, animateTime + 50);
+
+            // time /= Math.max(core.status.replay.speed, 1);
+            // var per_time = 10,
+            //     step = 0,
+            //     steps = parseInt(time / per_time);
+            // if (steps <= 0) {
+            //     this.setViewport(32 * x, 32 * y);
+            //     if (callback) callback();
+            //     return;
+            // }
+            // var px = core.clamp(32 * x, 0, 32 * core.bigmap.width - core._PX_);
+            // var py = core.clamp(32 * y, 0, 32 * core.bigmap.height - core._PY_);
+            // var cx = core.bigmap.offsetX;
+            // var cy = core.bigmap.offsetY;
+            // var moveFunc = core.applyEasing(moveMode);
+
+            // var animate = window.setInterval(function () {
+            //     step++;
+            //     core.setViewport(
+            //         cx + moveFunc(step / steps) * (px - cx),
+            //         cy + moveFunc(step / steps) * (py - cy)
+            //     );
+            //     if (step == steps) {
+            //         delete core.animateFrame.asyncId[animate];
+            //         clearInterval(animate);
+            //         core.setViewport(px, py);
+            //         if (callback) callback();
+            //     }
+            // }, per_time);
+
+            const id = fallbackIds++;
+            core.animateFrame.lastAsyncId = id;
+            core.animateFrame.asyncId[id] = () => {
+                callback?.();
+                clearTimeout(timeout);
+            };
         };
     });
 

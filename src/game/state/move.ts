@@ -443,6 +443,9 @@ export class HeroMover extends ObjectMoverBase {
     /** 是否会在特殊时刻进行自动存档 */
     private autoSave: boolean = false;
 
+    /** 本次移动开始时的移动速度 */
+    private beforeMoveSpeed: number = 100;
+
     /** 这一步的传送门信息 */
     private portalData?: BluePalace.PortalTo;
 
@@ -452,6 +455,7 @@ export class HeroMover extends ObjectMoverBase {
         inLockControl: boolean = false,
         autoSave: boolean = false
     ): IMoveController | null {
+        if (this.moving) return null;
         this.ignoreTerrain = ignoreTerrain;
         this.noRoute = noRoute;
         this.inLockControl = inLockControl;
@@ -472,6 +476,7 @@ export class HeroMover extends ObjectMoverBase {
     }
 
     protected async onMoveStart(controller: IMoveController): Promise<void> {
+        this.beforeMoveSpeed = this.moveSpeed;
         const adapter = HeroMover.adapter;
         if (!adapter) return;
         await adapter.all('readyMove');
@@ -479,6 +484,8 @@ export class HeroMover extends ObjectMoverBase {
     }
 
     protected async onMoveEnd(controller: IMoveController): Promise<void> {
+        this.moveSpeed = this.beforeMoveSpeed;
+        this.onSetMoveSpeed(this.moveSpeed, controller);
         const adapter = HeroMover.adapter;
         if (!adapter) return;
         await adapter.all('endMove');

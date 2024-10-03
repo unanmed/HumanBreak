@@ -69,10 +69,12 @@ import { Image, Text } from './render/preset/misc';
 import { RenderItem } from './render/item';
 import { texture } from './render/cache';
 import { RenderAdapter } from './render/adapter';
-import { getMainRenderer } from './render';
 import { Layer } from './render/preset/layer';
 import { LayerGroupFloorBinder } from './render/preset/floor';
 import { HeroKeyMover } from './main/action/move';
+import { Camera } from './render/camera';
+import * as Animation from 'mutate-animate';
+import './render/index';
 
 // ----- 类注册
 Mota.register('class', 'AudioPlayer', AudioPlayer);
@@ -152,7 +154,6 @@ Mota.register('module', 'Effect', {
 });
 Mota.register('module', 'Render', {
     texture,
-    getMainRenderer: getMainRenderer,
     MotaRenderer,
     Container,
     Sprite,
@@ -161,11 +162,13 @@ Mota.register('module', 'Render', {
     RenderItem,
     RenderAdapter,
     Layer,
-    LayerGroupFloorBinder
+    LayerGroupFloorBinder,
+    Camera
 });
 Mota.register('module', 'Action', {
     HeroKeyMover
 });
+Mota.register('module', 'Animation', Animation);
 
 main.renderLoaded = true;
 Mota.require('var', 'hook').emit('renderLoaded');

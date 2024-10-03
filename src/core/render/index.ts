@@ -1,6 +1,6 @@
 import { FloorItemDetail } from '@/plugin/fx/itemDetail';
 import { FloorDamageExtends } from './preset/damage';
-import { LayerDoorAnimate, LayerGroupFloorBinder } from './preset/floor';
+import { LayerDoorAnimate } from './preset/floor';
 import { HeroRenderer } from './preset/hero';
 import { LayerGroup, FloorLayer } from './preset/layer';
 import { MotaRenderer } from './render';
@@ -14,10 +14,6 @@ import { Container } from './container';
 
 let main: MotaRenderer;
 
-export function getMainRenderer() {
-    return main;
-}
-
 Mota.require('var', 'loading').once('loaded', () => {
     const render = new MotaRenderer();
     main = render;
@@ -28,6 +24,10 @@ Mota.require('var', 'loading').once('loaded', () => {
     const layer = new LayerGroup();
     mapDraw.id = 'map-draw';
     layer.id = 'layer-main';
+
+    mapDraw.setHD(true);
+    mapDraw.setAntiAliasing(false);
+    mapDraw.size(core._PX_, core._PY_);
 
     ['bg', 'bg2', 'event', 'fg', 'fg2'].forEach(v => {
         layer.addLayer(v as FloorLayer);

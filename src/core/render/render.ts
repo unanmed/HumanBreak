@@ -4,7 +4,7 @@ import { RenderItem } from './item';
 import { Transform } from './transform';
 
 export class MotaRenderer extends Container {
-    static list: Set<MotaRenderer> = new Set();
+    static list: Map<string, MotaRenderer> = new Map();
 
     target: MotaCanvas2D;
 
@@ -13,18 +13,17 @@ export class MotaRenderer extends Container {
     constructor(id: string = 'render-main') {
         super('static', false);
 
-        this.id = id;
-
         this.target = new MotaCanvas2D(id);
         this.size(core._PX_, core._PY_);
         this.target.withGameScale(true);
         this.target.size(core._PX_, core._PY_);
         this.target.css(`z-index: 100`);
+        this.target.setAntiAliasing(false);
 
         this.setAnchor(0.5, 0.5);
         this.transform.translate(240, 240);
 
-        MotaRenderer.list.add(this);
+        MotaRenderer.list.set(id, this);
     }
 
     update(item?: RenderItem) {
@@ -80,7 +79,11 @@ export class MotaRenderer extends Container {
     }
 
     destroy() {
-        MotaRenderer.list.delete(this);
+        MotaRenderer.list.delete(this.id);
+    }
+
+    static get(id: string) {
+        return this.list.get(id);
     }
 }
 
