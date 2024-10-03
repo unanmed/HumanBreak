@@ -626,7 +626,7 @@ interface Control {
     /**
      * 存档到本地
      */
-    saveData(): Save;
+    saveData(fromAutosave: boolean): Save;
 
     /**
      * 从本地读档

@@ -248,7 +248,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
         }
     },
     control: {
-        saveData: function () {
+        saveData: function (fromAutosave) {
             // 存档操作，此函数应该返回“具体要存档的内容”
 
             // 差异化存储values
@@ -264,7 +264,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 hero: core.clone(core.status.hero, name => name !== 'chase'),
                 hard: core.status.hard,
                 maps: core.clone(core.maps.saveMap()),
-                route: core.encodeRoute(core.status.route),
+                route: core.encodeRoute(core.status.route, !fromAutosave),
                 values: values,
                 version: core.firstData.version,
                 guid: core.getGuid(),

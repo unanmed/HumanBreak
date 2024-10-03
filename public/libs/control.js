@@ -1906,7 +1906,7 @@ control.prototype._replay_save = function () {
         if (core.status.replay.save.length == 30)
             core.status.replay.save.shift();
         core.status.replay.save.push({
-            data: core.saveData(),
+            data: core.saveData(true),
             replay: {
                 totalList: core.cloneArray(core.status.replay.totalList),
                 toReplay: core.cloneArray(core.status.replay.toReplay),
@@ -2242,7 +2242,7 @@ control.prototype.autosave = function (removeLast) {
     core.saves.autosave.data.splice(
         core.saves.autosave.now,
         0,
-        core.saveData()
+        core.saveData(true)
     );
     core.saves.autosave.now += 1;
     if (core.saves.autosave.data.length > core.saves.autosave.max) {
@@ -2648,8 +2648,8 @@ control.prototype._syncLoad_write = function (data) {
 };
 
 ////// 存档到本地 //////
-control.prototype.saveData = function () {
-    return this.controldata.saveData();
+control.prototype.saveData = function (fromAutosave) {
+    return this.controldata.saveData(fromAutosave);
 };
 
 ////// 从本地读档 //////

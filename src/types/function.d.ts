@@ -12,7 +12,7 @@ interface ControlData {
     /**
      * 获取保存信息
      */
-    saveData(): Save;
+    saveData(fromAutosave: boolean): Save;
 
     /**
      * 读取一个存档

@@ -638,7 +638,7 @@ utils.prototype.arrayToRGBA = function (color) {
 };
 
 ////// 加密路线 //////
-utils.prototype.encodeRoute = function (route) {
+utils.prototype.encodeRoute = function (route, compress = true) {
     var ans = '',
         lastMove = '',
         cnt = 0;
@@ -665,7 +665,11 @@ utils.prototype.encodeRoute = function (route) {
         ans += lastMove.substring(0, 1).toUpperCase();
         if (cnt > 1) ans += cnt;
     }
-    return LZString.compressToBase64(ans);
+    if (!compress) {
+        return '!!' + ans;
+    } else {
+        return LZString.compressToBase64(ans);
+    }
 };
 
 utils.prototype._encodeRoute_id2number = function (id) {
@@ -704,21 +708,23 @@ utils.prototype._encodeRoute_encodeOne = function (t) {
 utils.prototype.decodeRoute = function (route) {
     if (!route) return route;
 
-    // 解压缩
-    try {
+    var decodeObj = { index: 0, ans: [] };
+    if (route.startsWith('!!')) decodeObj.index = 2;
+    else {
         var v = LZString.decompressFromBase64(route);
         if (v != null && /^[-_a-zA-Z0-9+\/=:()]*$/.test(v)) {
             if (v != '' || route.length < 8) route = v;
         }
-    } catch (e) {}
+    }
+    decodeObj.route = route;
 
-    var decodeObj = { route: route, index: 0, ans: [] };
     while (decodeObj.index < decodeObj.route.length) {
         this._decodeRoute_decodeOne(
             decodeObj,
             decodeObj.route.charAt(decodeObj.index++)
         );
     }
+
     return decodeObj.ans;
 };
 
