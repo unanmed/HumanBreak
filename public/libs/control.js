@@ -229,8 +229,7 @@ control.prototype._animationFrame_globalAnimate = function (timestamp) {
         if (
             (core.status.hero || {}).animate &&
             core.status.heroMoving == 0 &&
-            main.mode == 'play' &&
-            !core.status.preview.enabled
+            main.mode == 'play'
         ) {
             core.drawHero('stop', null, core.status.globalAnimateStatus);
         }

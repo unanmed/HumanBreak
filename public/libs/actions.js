@@ -660,24 +660,6 @@ actions.prototype._sys_ondown = function (x, y, px, py) {
 
     clearTimeout(core.timeout.onDownTimeout);
     core.timeout.onDownTimeout = null;
-    core.status.preview.prepareDragging = false;
-    if (
-        !core.hasFlag('__lockViewport__') &&
-        (core.status.thisMap.width > core._WIDTH_ ||
-            core.status.thisMap.height > core._HEIGHT_)
-    ) {
-        core.status.preview.prepareDragging = true;
-        core.status.preview.px = px;
-        core.status.preview.py = py;
-        core.timeout.onDownTimeout = setTimeout(function () {
-            core.clearMap('ui');
-            core.status.preview.prepareDragging = false;
-            core.status.preview.enabled = true;
-            core.status.preview.dragging = true;
-            core.drawTip('已进入预览模式，可直接拖动大地图');
-            core.status.stepPostfix = [];
-        }, 500);
-    }
 };
 
 ////// 当在触摸屏上滑动时 //////
@@ -729,24 +711,6 @@ actions.prototype._sys_onmove_choices = function (x, y, px, py) {
 
 actions.prototype._sys_onmove = function (x, y, px, py) {
     if (core.status.lockControl) return false;
-
-    if (core.status.preview?.dragging) {
-        core.setViewport(
-            core.bigmap.offsetX - px + core.status.preview.px,
-            core.bigmap.offsetY - py + core.status.preview.py
-        );
-        core.status.preview.px = px;
-        core.status.preview.py = py;
-        return true;
-    }
-    if (core.status.preview?.prepareDragging) {
-        if (
-            Math.abs(px - core.status.preview.px) <= 20 &&
-            Math.abs(py - core.status.preview.py) <= 20
-        )
-            return true;
-        else core.status.preview.prepareDragging = false;
-    }
 
     clearTimeout(core.timeout.onDownTimeout);
     core.timeout.onDownTimeout = null;
@@ -809,14 +773,6 @@ actions.prototype._sys_onup = function (x, y, px, py) {
     core.timeout.onDownTimeout = null;
     clearInterval(core.interval.onDownInterval);
     core.interval.onDownInterval = null;
-
-    if (core.isPlaying()) {
-        core.status.preview.prepareDragging = false;
-        if (core.status.preview.dragging) {
-            core.status.preview.dragging = false;
-            return true;
-        }
-    }
 
     if ((core.status.stepPostfix || []).length == 0) return false;
 

@@ -542,33 +542,6 @@ interface AnimateObj {
     callback: () => void;
 }
 
-interface ActionsPreview {
-    /**
-     * 大地图中当前是否正在拖拽
-     */
-    dragging: boolean;
-
-    /**
-     * 大地图中是否允许拖拽
-     */
-    enabled: boolean;
-
-    /**
-     * 大地图中当前是否已经按下了鼠标
-     */
-    prepareDragging: boolean;
-
-    /**
-     * 当前鼠标的横坐标
-     */
-    px: number;
-
-    /**
-     * 当前鼠标的纵坐标
-     */
-    py: number;
-}
-
 interface RouteFolding {
     /**
      * 录像折叠信息中的勇士信息
@@ -761,12 +734,6 @@ interface InitGameStatus {
     number2block: {
         [P in keyof NumberToId]: Block<P>;
     };
-
-    /**
-     * @deprecated
-     * 大地图中的拖拽处理
-     */
-    preview: ActionsPreview;
 
     /**
      * 录像折叠信息

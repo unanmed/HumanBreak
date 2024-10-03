@@ -171,8 +171,12 @@ export function init() {
                 adapters['hero-adapter']?.sync('setAnimateDir', value);
                 setHeroDirection(value as Dir);
             } else if (name === 'x') {
+                // 为了防止逆天样板出问题
+                core.bigmap.posX = value as number;
                 adapters['hero-adapter']?.sync('setHeroLoc', value);
             } else {
+                // 为了防止逆天样板出问题
+                core.bigmap.posY = value as number;
                 adapters['hero-adapter']?.sync('setHeroLoc', void 0, value);
             }
         };
