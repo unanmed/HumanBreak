@@ -3,6 +3,7 @@ import { EventEmitter } from 'eventemitter3';
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
 import { Ticker, TickerFn } from 'mutate-animate';
 import { Transform } from './transform';
+import { logger } from '../common/logger';
 
 export type RenderFunction = (
     canvas: MotaOffscreenCanvas2D,
@@ -104,7 +105,7 @@ interface IRenderTickerSupport {
     /**
      * 移除ticker函数
      * @param id 函数id，也就是{@link IRenderTickerSupport.delegateTicker}的返回值
-     * @param callEnd 是否调用结束函数，即{@link IRenderTickerSupport.delegateTicker}的end参数
+     * @param callEnd 是否调用结束函数，即{@link IRenderTickerSupport.delegateTicker}的end参数，默认调用
      * @returns 是否删除成功，比如对应ticker不存在，就是删除失败
      */
     removeTicker(id: number, callEnd?: boolean): boolean;
@@ -115,6 +116,7 @@ export interface ERenderItemEvent {
     afterUpdate: [item?: RenderItem];
     beforeRender: [transform: Transform];
     afterRender: [transform: Transform];
+    destroy: [];
 }
 
 interface TickerDelegation {
@@ -144,6 +146,23 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     static tickerMap: Map<number, TickerDelegation> = new Map();
     /** ticker委托id */
     static tickerId: number = 0;
+
+    /** id到渲染元素的映射 */
+    static itemMap: Map<string, RenderItem> = new Map();
+
+    private _id: string = '';
+
+    get id(): string {
+        return this._id;
+    }
+    set id(v: string) {
+        if (RenderItem.itemMap.has(this._id)) {
+            logger.warn(23);
+            RenderItem.itemMap.delete(this._id);
+        }
+        RenderItem.itemMap.set(v, this);
+        this._id = v;
+    }
 
     /** 元素纵深，表示了遮挡关系 */
     zIndex: number = 0;
@@ -384,6 +403,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      */
     destroy(): void {
         this.remove();
+        this.emit('destroy');
+        this.removeAllListeners();
     }
 }
 

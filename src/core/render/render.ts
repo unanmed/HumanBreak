@@ -7,8 +7,6 @@ export class MotaRenderer extends Container {
     static list: Set<MotaRenderer> = new Set();
 
     target: MotaCanvas2D;
-    /** 这个渲染对象的id */
-    id: string;
 
     protected needUpdate: boolean = false;
 
@@ -24,7 +22,7 @@ export class MotaRenderer extends Container {
         this.target.css(`z-index: 100`);
 
         this.setAnchor(0.5, 0.5);
-        this.transform.move(240, 240);
+        this.transform.translate(240, 240);
 
         MotaRenderer.list.add(this);
     }
@@ -45,6 +43,33 @@ export class MotaRenderer extends Container {
         this.renderContent(this.target, Transform.identity);
         // console.timeEnd();
         this.emit('afterUpdate', item);
+    }
+
+    /**
+     * 根据渲染元素的id获取一个渲染元素
+     * @param id 要获取的渲染元素id
+     * @returns
+     */
+    getElementById(id: string): RenderItem | undefined {
+        const map = RenderItem.itemMap;
+        const item = map.get(id);
+        if (item) return item;
+        else {
+            const item = this.searchElement(this, id);
+            if (item) {
+                map.set(id, item);
+                return item;
+            }
+        }
+    }
+
+    private searchElement(ele: Container, id: string): RenderItem | undefined {
+        for (const child of ele.children) {
+            if (child.id === id) return child;
+            if (child instanceof Container) {
+                return this.searchElement(child, id);
+            }
+        }
     }
 
     /**

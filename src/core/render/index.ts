@@ -10,6 +10,7 @@ import { LayerGroupAnimate } from './preset/animate';
 import { LayerGroupPortal } from '@/plugin/fx/portal';
 import { LayerGroupHalo } from '@/plugin/fx/halo';
 import { FloorViewport } from './preset/viewport';
+import { Container } from './container';
 
 let main: MotaRenderer;
 
@@ -23,7 +24,10 @@ Mota.require('var', 'loading').once('loaded', () => {
     render.mount();
     render.hide();
 
+    const mapDraw = new Container();
     const layer = new LayerGroup();
+    mapDraw.id = 'map-draw';
+    layer.id = 'layer-main';
 
     ['bg', 'bg2', 'event', 'fg', 'fg2'].forEach(v => {
         layer.addLayer(v as FloorLayer);
@@ -50,7 +54,8 @@ Mota.require('var', 'loading').once('loaded', () => {
     layer.extends(animate);
     layer.extends(viewport);
 
-    render.appendChild(layer);
+    render.appendChild(mapDraw);
+    mapDraw.appendChild(layer);
     console.log(render);
 });
 
