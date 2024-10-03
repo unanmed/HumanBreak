@@ -100,7 +100,7 @@ export class Animate extends Sprite {
     private lastTime: number = 0;
 
     constructor() {
-        super('absolute', false);
+        super('absolute', false, true);
 
         this.setRenderFn((canvas, transform) => {
             const { ctx } = canvas;

@@ -9,9 +9,9 @@ import { Transform } from './transform';
 
 export interface ESpriteEvent extends ERenderItemEvent {}
 
-export class Sprite<E extends ESpriteEvent = ESpriteEvent> extends RenderItem<
-    E | ESpriteEvent
-> {
+export class Sprite<
+    E extends ESpriteEvent = ESpriteEvent
+> extends RenderItem<E> {
     renderFn: RenderFunction;
 
     /**
