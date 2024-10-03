@@ -225,6 +225,7 @@ export function init() {
         events.prototype.setHeroIcon = function (name: ImageIds) {
             const img = core.material.images.images[name];
             if (!img) return;
+            core.status.hero.image = name;
             adapters['hero-adapter']?.sync('setImage', img);
         };
 
