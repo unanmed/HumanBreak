@@ -174,10 +174,10 @@ setTimeout(() => {
         .realize(
             '@book_pageDown',
             () => {
-                if (selected.value <= 4) {
-                    selected.value = 0;
+                if (selected.value >= enemy.length - 5) {
+                    selected.value = enemy.length - 1;
                 } else {
-                    selected.value -= 5;
+                    selected.value += 5;
                 }
                 checkScroll();
             },
@@ -186,10 +186,10 @@ setTimeout(() => {
         .realize(
             '@book_pageUp',
             () => {
-                if (selected.value >= enemy.length - 5) {
-                    selected.value = enemy.length - 1;
+                if (selected.value <= 4) {
+                    selected.value = 0;
                 } else {
-                    selected.value += 5;
+                    selected.value -= 5;
                 }
                 checkScroll();
             },

@@ -24,7 +24,6 @@ import * as pop from '@/plugin/pop';
 import * as frag from '@/plugin/fx/frag';
 import * as use from '@/plugin/use';
 import * as gameCanvas from '@/plugin/fx/gameCanvas';
-import * as smooth from '@/plugin/fx/smoothView';
 import * as animateController from '@/plugin/animateController';
 
 Mota.Plugin.register('fly_r', fly);
@@ -34,7 +33,6 @@ Mota.Plugin.register('pop_r', pop, pop.init);
 Mota.Plugin.register('frag_r', frag, frag.init);
 Mota.Plugin.register('use_r', use);
 Mota.Plugin.register('gameCanvas_r', gameCanvas);
-Mota.Plugin.register('smooth_r', smooth, smooth.init);
 Mota.Plugin.register(
     'animateController_r',
     animateController,

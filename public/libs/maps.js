@@ -1485,28 +1485,32 @@ maps.prototype.drawMap = function (floorId) {
     core.extractBlocks(floorId);
     core.status.thisMap = core.status.maps[floorId];
 
-    // this._drawMap_drawAll();
-    // if (core.status.curtainColor) {
-    //     core.fillRect(
-    //         'curtain',
-    //         0,
-    //         0,
-    //         core._PX_,
-    //         core._PY_,
-    //         core.arrayToRGBA(core.status.curtainColor)
-    //     );
-    // }
-    // core.drawHero();
+    if (main.mode === 'editor') {
+        this._drawMap_drawAll();
+        if (core.status.curtainColor) {
+            core.fillRect(
+                'curtain',
+                0,
+                0,
+                core._PX_,
+                core._PY_,
+                core.arrayToRGBA(core.status.curtainColor)
+            );
+        }
+        core.drawHero();
+    }
     core.updateStatusBar();
 };
 
 ////// 重绘某张地图 //////
 maps.prototype.redrawMap = function () {
-    // core.bigmap.canvas.forEach(function (one) {
-    //     core.clearMap(one);
-    // });
-    // this._drawMap_drawAll(null, { redraw: true });
-    // core.drawDamage();
+    if (main.mode === 'editor') {
+        core.bigmap.canvas.forEach(function (one) {
+            core.clearMap(one);
+        });
+        this._drawMap_drawAll(null, { redraw: true });
+        core.drawDamage();
+    }
 };
 
 maps.prototype._drawMap_drawAll = function (floorId, config) {
