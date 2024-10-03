@@ -61,6 +61,8 @@ export abstract class ObjectMoverBase extends EventEmitter<EObjectMovingEvent> {
     moveDir: Dir2 = 'down';
     /** 当前是否正在移动 */
     moving: boolean = false;
+    /** 面朝方向 */
+    faceDir: Dir2 = 'down';
 
     /** 当前的控制对象 */
     controller?: IMoveController;
@@ -101,10 +103,41 @@ export abstract class ObjectMoverBase extends EventEmitter<EObjectMovingEvent> {
         controller: IMoveController
     ): Promise<void>;
 
+    /**
+     * 当移动速度被设置时执行的函数
+     * @param speed 设置为的移动速度
+     * @param controller 本次移动的控制对象
+     */
+    protected abstract onSetMoveSpeed(
+        speed: number,
+        controller: IMoveController
+    ): void;
+
     private getMoveDir(move: Move2): Dir2 {
         if (move === 'forward') return this.moveDir;
-        if (move === 'backward') return backDir(this.moveDir);
+        if (move === 'backward') return backDir(this.faceDir);
         return move;
+    }
+
+    private getFaceDir(move: Move2): Dir2 {
+        if (move === 'forward' || move === 'backward') return this.faceDir;
+        return move;
+    }
+
+    /**
+     * 设置当前面朝方向，移动中设置无效
+     * @param dir 面朝方向
+     */
+    setFaceDir(dir: Dir2) {
+        if (!this.moving) this.faceDir = dir;
+    }
+
+    /**
+     * 设置当前移动方向，移动中设置无效
+     * @param dir 移动方向
+     */
+    setMoveDir(dir: Dir2) {
+        if (!this.moving) this.moveDir = dir;
     }
 
     /**
@@ -130,12 +163,14 @@ export abstract class ObjectMoverBase extends EventEmitter<EObjectMovingEvent> {
                 if (!step) break;
                 if (step.type === 'dir') {
                     this.moveDir = this.getMoveDir(step.value);
+                    this.faceDir = this.getFaceDir(step.value);
                     const code = await this.onStepStart(step, controller);
                     await this.onStepEnd(step, code, controller);
                 } else {
                     const replay = core.status.replay.speed;
                     const speed = replay === 24 ? 1 : step.value / replay;
                     this.moveSpeed = speed;
+                    this.onSetMoveSpeed(speed, controller);
                 }
                 this.emit('stepEnd', step);
             }
@@ -329,6 +364,11 @@ export class BlockMover extends ObjectMoverBase {
         controller: IMoveController
     ): Promise<void> {}
 
+    protected onSetMoveSpeed(
+        speed: number,
+        controller: IMoveController
+    ): void {}
+
     private moveAnimate(step: MoveStepDir) {
         const layer = this.layerItems[0];
         if (!layer) return;
@@ -451,15 +491,15 @@ export class HeroMover extends ObjectMoverBase {
         step: MoveStepDir,
         controller: IMoveController
     ): Promise<HeroMoveCode> {
-        const showDir = toDir(this.moveDir);
+        const showDir = toDir(this.faceDir);
         core.setHeroLoc('direction', showDir);
-        const adapter = HeroMover.adapter;
-        adapter?.sync('setAnimateDir', showDir);
 
         const { x, y } = core.status.hero.loc;
         const { x: nx, y: ny } = this.nextLoc(x, y, this.moveDir);
 
-        if (this.autoSave) this.checkAutoSave(x, y, nx, ny);
+        if (this.autoSave && !this.ignoreTerrain) {
+            this.checkAutoSave(x, y, nx, ny);
+        }
 
         if (!this.inLockControl && core.status.lockControl) {
             controller.stop();
@@ -537,13 +577,21 @@ export class HeroMover extends ObjectMoverBase {
                 core.setHeroLoc('y', ny, true);
             }
 
-            const direction = core.getHeroLoc('direction');
-            core.control._moveAction_popAutomaticRoute();
-            if (!this.noRoute) core.status.route.push(direction);
+            if (!this.ignoreTerrain) {
+                const direction = core.getHeroLoc('direction');
+                core.control._moveAction_popAutomaticRoute();
+                if (!this.noRoute) core.status.route.push(direction);
 
-            core.moveOneStep();
-            core.checkRouteFolding();
+                core.moveOneStep();
+                core.checkRouteFolding();
+            }
         }
+    }
+
+    protected onSetMoveSpeed(speed: number, controller: IMoveController): void {
+        const adapter = HeroMover.adapter;
+        if (!adapter) return;
+        adapter.sync('setMoveSpeed', speed);
     }
 
     /**
@@ -563,6 +611,7 @@ export class HeroMover extends ObjectMoverBase {
         const viewport = HeroMover.viewport;
         if (!adapter || !viewport) return;
         viewport.all('moveTo', x, y);
+        adapter.sync('setAnimateDir', showDir);
         await adapter.all('move', moveDir);
     }
 

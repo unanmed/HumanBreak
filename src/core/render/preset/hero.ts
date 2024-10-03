@@ -222,6 +222,7 @@ export class HeroRenderer
      * 进行下一步的移动准备，设置移动信息
      */
     private step() {
+        this.stepDir = this.moveDir;
         this.lastStepTime = Date.now();
         this.stepDelta = core.utils.scan2[this.stepDir];
         this.turn(this.stepDir);

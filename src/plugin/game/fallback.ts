@@ -57,7 +57,7 @@ export function init() {
             else {
                 if (type === 'speed') moveSteps.push(v);
                 else {
-                    moveSteps.push(...Array(number).fill(type));
+                    moveSteps.push(...Array(Number(number)).fill(type));
                 }
             }
         });
@@ -149,10 +149,19 @@ export function init() {
             const start: MoveStep = { type: 'speed', value: time };
 
             heroMover.insertMove(...[start, ...resolved]);
-            const controller = heroMover.startMove();
-            controller?.onEnd.then(() => {
+            const controller = heroMover.startMove(true, true, true, false);
+            if (!controller) {
+                callback?.();
+                return;
+            }
+            controller.onEnd.then(() => {
                 callback?.();
             });
+
+            const animate = fallbackIds++;
+
+            core.animateFrame.lastAsyncId = animate;
+            core.animateFrame.asyncId[animate] = controller.stop;
         };
 
         control.prototype.setHeroLoc = function (
