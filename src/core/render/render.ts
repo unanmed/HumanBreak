@@ -13,7 +13,7 @@ export class MotaRenderer extends Container {
     constructor(id: string = 'render-main') {
         super('static', false);
 
-        this.target = new MotaCanvas2D(id);
+        this.target = new MotaCanvas2D(id, true, false);
         this.size(core._PX_, core._PY_);
         this.target.withGameScale(true);
         this.target.size(core._PX_, core._PY_);

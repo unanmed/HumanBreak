@@ -29,11 +29,11 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
     /** 更新标识符，如果发生变化则说明画布被动清空 */
     symbol: number = 0;
 
-    constructor() {
+    constructor(alpha: boolean = true) {
         super();
 
         this.canvas = document.createElement('canvas');
-        this.ctx = this.canvas.getContext('2d')!;
+        this.ctx = this.canvas.getContext('2d', { alpha })!;
         this.width = this.canvas.width / devicePixelRatio;
         this.height = this.canvas.height / devicePixelRatio;
 
@@ -203,14 +203,18 @@ export class MotaCanvas2D extends MotaOffscreenCanvas2D {
     /** 是否是高清画布 */
     highResolution: boolean = true;
 
-    constructor(id: string = '', setTarget: boolean = true) {
+    constructor(
+        id: string = '',
+        setTarget: boolean = true,
+        alpha: boolean = true
+    ) {
         super();
 
         this.id = id;
         if (setTarget) this.target = core.dom.gameDraw;
         this.canvas = document.createElement('canvas');
         this.canvas.id = id;
-        this.ctx = this.canvas.getContext('2d')!;
+        this.ctx = this.canvas.getContext('2d', { alpha })!;
         this.width = this.canvas.width / devicePixelRatio;
         this.height = this.canvas.height / devicePixelRatio;
 
