@@ -73,7 +73,8 @@ export class HeroRenderer
     setImage(image: SizedCanvasImageSource) {
         this.image = image;
         this.split();
-        this.layer.update(this.layer);
+        this.resetRenderable(true);
+        this.layer.requestUpdateMoving();
     }
 
     /**
