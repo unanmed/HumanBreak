@@ -3,6 +3,7 @@ import { Range } from '../util/range';
 import { ensureArray, has, manhattan } from '@/plugin/game/utils';
 import EventEmitter from 'eventemitter3';
 import { hook } from '../game';
+import { NightSpecial } from '../mechanism/misc';
 
 // todo: 光环划分优先级，从而可以实现光环的多级运算
 
@@ -335,12 +336,14 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         }
 
         // 极昼永夜
-        info.atk -= flags[`night_${floorId}`] ?? 0;
-        info.def -= flags[`night_${floorId}`] ?? 0;
+        const night = NightSpecial.getNight(floorId);
+        info.atk -= night;
+        info.def -= night;
 
         // 融化，融化不属于怪物光环，因此不能用provide和inject计算，需要在这里计算
-        if (has(flags[`melt_${floorId}`]) && has(this.x) && has(this.y)) {
-            for (const [loc, per] of Object.entries(flags[`melt_${floorId}`])) {
+        const melt = flags[`melt_${floorId}`];
+        if (has(melt) && has(this.x) && has(this.y)) {
+            for (const [loc, per] of Object.entries(melt)) {
                 const [mx, my] = loc.split(',').map(v => parseInt(v));
                 if (
                     Math.abs(mx + dx - this.x) <= 1 &&

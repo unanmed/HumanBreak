@@ -2,6 +2,34 @@ import { backDir, has } from '@/plugin/game/utils';
 import { loading } from '../game';
 import type { LayerDoorAnimate } from '@/core/render/preset/floor';
 
+/**
+ * 永夜/极昼
+ */
+export namespace NightSpecial {
+    let nightMap = new Map<FloorIds, number>();
+
+    export function getNight(floor: FloorIds) {
+        return nightMap.get(floor) ?? 0;
+    }
+
+    export function addNight(floor: FloorIds, value: number) {
+        const num = nightMap.get(floor) ?? 0;
+        nightMap.set(floor, num + value);
+    }
+
+    export function saveNight() {
+        return nightMap.entries();
+    }
+
+    export function loadNight(night: IterableIterator<[FloorIds, number]>) {
+        nightMap = new Map(night);
+    }
+
+    export function getAll() {
+        return nightMap;
+    }
+}
+
 export namespace BluePalace {
     type DoorConvertInfo = [id: AllIds, x: number, y: number];
 

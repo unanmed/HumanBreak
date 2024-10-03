@@ -102,6 +102,7 @@ interface VariableInterface {
 interface ModuleInterface {
     Mechanism: {
         BluePalace: typeof misc.BluePalace;
+        NightSpecial: typeof misc.NightSpecial;
     };
     Effect: {
         Portal: typeof portal;

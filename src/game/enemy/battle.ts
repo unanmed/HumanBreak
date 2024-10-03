@@ -1,6 +1,7 @@
 import { DamageEnemy, ensureFloorDamage, getSingleEnemy } from './damage';
 import { findDir, has } from '../../plugin/game/utils';
 import { hook, loading } from '../game';
+import { NightSpecial } from '../mechanism/misc';
 
 export interface CurrentEnemy {
     enemy: DamageEnemy;
@@ -198,17 +199,11 @@ function init() {
 
         // 极昼永夜
         if (special.has(22)) {
-            flags[`night_${floorId}`] ??= 0;
-            flags[`night_${floorId}`] -= enemy.info.night!;
+            NightSpecial.addNight(floorId, -enemy.info.night!);
         }
         if (special.has(23)) {
-            flags[`night_${floorId}`] ??= 0;
-            flags[`night_${floorId}`] += enemy.info.day;
+            NightSpecial.addNight(floorId, enemy.info.day!);
         }
-
-        // if (core.plugin.skillTree.getSkillLevel(11) > 0) {
-        //     core.plugin.study.declineStudiedSkill();
-        // }
 
         // 如果是融化怪，需要特殊标记一下
         if (special.has(25) && has(x) && has(y)) {

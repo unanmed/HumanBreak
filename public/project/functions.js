@@ -269,7 +269,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 version: core.firstData.version,
                 guid: core.getGuid(),
                 time: new Date().getTime(),
-                skills: Mota.Plugin.require('skillTree_g').saveSkillTree()
+                skills: Mota.Plugin.require('skillTree_g').saveSkillTree(),
+                night: [
+                    ...Mota.require(
+                        'module',
+                        'Mechanism'
+                    ).NightSpecial.saveNight()
+                ]
             };
 
             return data;
@@ -318,6 +324,19 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             core.setFlag('__fromLoad__', true);
 
             Mota.Plugin.require('skillTree_g').loadSkillTree(data.skills);
+            const Night = Mota.require('module', 'Mechanism').NightSpecial;
+
+            if (!data.night) {
+                // 兼容旧版
+                Night.loadNight([]);
+                for (const [key, value] of Object.entries(data.hero.flags)) {
+                    if (key.startsWith('night_')) {
+                        const [, floorId] = key.split('_');
+                        Night.addNight(floorId, value);
+                        delete data.hero.flags[key];
+                    }
+                }
+            }
 
             // 切换到对应的楼层
             core.changeFloor(data.floorId, null, data.hero.loc, 0, function () {

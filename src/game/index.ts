@@ -33,7 +33,8 @@ Mota.register('var', 'gameListener', gameListener);
 Mota.register('var', 'loading', loading);
 // ----- 模块注册
 Mota.register('module', 'Mechanism', {
-    BluePalace: miscMechanism.BluePalace
+    BluePalace: miscMechanism.BluePalace,
+    NightSpecial: miscMechanism.NightSpecial
 });
 Mota.register('module', 'State', {
     ItemState,

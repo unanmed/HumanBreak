@@ -2,6 +2,7 @@ import { logger } from '@/core/common/logger';
 import { EventEmitter } from 'eventemitter3';
 import { cloneDeep, isNil } from 'lodash-es';
 import { ItemState } from './item';
+import { NightSpecial } from '../mechanism/misc';
 
 /**
  * 获取勇士在某一点的属性
@@ -85,7 +86,7 @@ function getRealStatus(
 
     // 永夜、极昼
     if (name === 'atk' || name === 'def') {
-        s += window.flags?.[`night_${floorId}`] ?? 0;
+        s += NightSpecial.getNight(floorId);
     }
 
     // 技能
@@ -93,8 +94,7 @@ function getRealStatus(
         const level = getSkillLevel(2);
         if (name === 'atk') {
             s *= 1 + 0.1 * level;
-        }
-        if (name === 'def') {
+        } else if (name === 'def') {
             s *= 1 - 0.1 * level;
         }
     }
@@ -102,18 +102,17 @@ function getRealStatus(
         const level = getSkillLevel(10);
         if (name === 'atk') {
             s *= 1 - 0.1 * level;
-        }
-        if (name === 'def') {
+        } else if (name === 'def') {
             s *= 1 + 0.1 * level;
         }
     }
 
     // buff
-    if (typeof s === 'number')
+    if (typeof s === 'number') {
         s *= core.getBuff(name as keyof NumbericHeroStatus);
+        s = Math.floor(s);
+    }
 
-    // 取整
-    if (typeof s === 'number') s = Math.floor(s);
     return s;
 }
 
