@@ -45,8 +45,8 @@ dependencies:
     specifier: ^1.5.0
     version: 1.5.0
   mutate-animate:
-    specifier: ^1.4.0
-    version: 1.4.0
+    specifier: ^1.4.2
+    version: 1.4.2
   vue:
     specifier: ^3.4.38
     version: 3.4.38(typescript@5.5.4)
@@ -4802,8 +4802,8 @@ packages:
     resolution: {integrity: sha512-VNTrAak/KhO2i8dqqnqnAHOa3cYBwXEZe9h+D5h/1ZqFSTEFHdM65lR7RoIqq3tBBYavsOXV84NoHXZ0AkPyqQ==}
     dev: true
 
-  /mutate-animate@1.4.0:
-    resolution: {integrity: sha512-sMPX9xFYlN3iivVa1IwVrzDTjdISrLnU/IorUK3cFkIWZbk0RU6iEfMA98AtUqOGX3YDWh6HS8hWdPQ4nsbIQg==}
+  /mutate-animate@1.4.2:
+    resolution: {integrity: sha512-Ioy3fMZ+lW3ua+BKsbfM8S8dCpGxKucVnM+Llq+rCuhnVrv8rOPXDJ2qe/vk5FemFFp9lmtw1QPsFNx8sE0VAA==}
     dev: false
 
   /nan@2.20.0:

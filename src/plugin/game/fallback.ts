@@ -588,7 +588,7 @@ export function init() {
             x: number,
             y: number,
             _moveMode: EaseMode,
-            time: number = 0,
+            time: number = 1,
             callback?: () => void
         ) {
             const main = Renderer.get('render-main');

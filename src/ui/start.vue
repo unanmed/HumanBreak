@@ -64,7 +64,6 @@ import {
     FullscreenExitOutlined
 } from '@ant-design/icons-vue';
 import { sleep } from 'mutate-animate';
-import { Matrix4 } from '../plugin/webgl/matrix';
 import { doByInterval, keycode } from '../plugin/utils';
 import { triggerFullscreen } from '../plugin/utils';
 import { isMobile } from '../plugin/use';
@@ -74,6 +73,7 @@ import { mainUi } from '@/core/main/init/ui';
 import { CustomToolbar } from '@/core/main/custom/toolbar';
 import { mainSetting } from '@/core/main/setting';
 import { bgm as mainBgm } from '@/core/audio/bgm';
+import { mat4 } from 'gl-matrix';
 
 const props = defineProps<{
     num: number;
@@ -106,6 +106,8 @@ const text = ref(text1);
 const toshow = reactive<string[]>([]);
 
 const selected = ref('start-game');
+
+const perspective = mat4.create();
 
 function resize() {
     if (!window.core) return;
@@ -175,11 +177,12 @@ function onmove(e: MouseEvent) {
     const dx = (offsetX - cx) / cx;
     const dy = (offsetY - cy) / cy;
 
-    const matrix = new Matrix4();
+    const matrix = mat4.identity(perspective);
+    mat4.scale(matrix, matrix, [1.2, 1.2, 1]);
+    mat4.rotateX(matrix, matrix, -(dy * 10 * Math.PI) / 180);
+    mat4.rotateY(matrix, matrix, (dx * 10 * Math.PI) / 180);
 
-    matrix.scale(1.2, 1.2, 1);
-    matrix.rotate((dy * 10 * Math.PI) / 180, -(dx * 10 * Math.PI) / 180);
-    const end = Array.from(matrix.transpose()).flat().join(',');
+    const end = matrix.join(',');
     background.style.transform = `perspective(${
         1000 * core.domStyle.scale
     }px)matrix3d(${end})`;
