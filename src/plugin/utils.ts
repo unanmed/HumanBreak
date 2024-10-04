@@ -6,7 +6,6 @@ import { Ref, ref } from 'vue';
 import { EVENT_KEY_CODE_MAP, KeyCode } from './keyCodes';
 import axios from 'axios';
 import { decompressFromBase64 } from 'lz-string';
-import { parseColor } from './webgl/utils';
 import { Keyboard, KeyboardEmits } from '@/core/main/custom/keyboard';
 import { fixedUi, mainUi } from '@/core/main/init/ui';
 import { isAssist } from '@/core/main/custom/hotkey';
@@ -339,12 +338,6 @@ export async function swapChapter(chapter: number, hard: number) {
 export function ensureArray<T>(arr: T): T extends any[] ? T : T[] {
     // @ts-ignore
     return arr instanceof Array ? arr : [arr];
-}
-
-export function pColor(color: string) {
-    const arr = parseColor(color);
-    arr[3] ??= 1;
-    return `rgba(${arr.join(',')})` as Color;
 }
 
 /**

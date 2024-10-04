@@ -1,5 +1,5 @@
 import { EnemyCollection, ensureFloorDamage } from '@/game/enemy/damage';
-import { checkV2, formatDamage } from '../utils';
+import { formatDamage } from '../utils';
 
 export function init() {
     core.control.updateDamage = function (
