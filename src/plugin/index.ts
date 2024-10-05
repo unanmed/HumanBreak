@@ -1,5 +1,5 @@
 import * as fly from './ui/fly';
-import * as chase from './chase/chase';
+import * as chase from './chase';
 import * as completion from './completion';
 import * as pop from './pop';
 import * as frag from './fx/frag';
@@ -19,3 +19,4 @@ Mota.Plugin.register(
     animateController,
     animateController.default
 );
+Mota.Plugin.register('chase_r', chase);

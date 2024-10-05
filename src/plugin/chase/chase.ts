@@ -1,256 +1,305 @@
-import { Animation, circle, hyper, sleep, TimingFn } from 'mutate-animate';
-import { completeAchievement } from '../ui/achievement';
-import { has } from '../utils';
-import { ChaseCameraData, ChasePath, getChaseDataByIndex } from './data';
+import { logger } from '@/core/common/logger';
+import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
+import { CameraAnimation } from '@/core/render/camera';
+import { LayerGroup } from '@/core/render/preset/layer';
+import { MotaRenderer } from '@/core/render/render';
+import { Sprite } from '@/core/render/sprite';
+import { disableViewport, enableViewport } from '@/core/render/utils';
+import type { HeroMover, MoveStep } from '@/game/state/move';
+import EventEmitter from 'eventemitter3';
 
-// todo: 优化，可以继承自EventEmitter
-
-export function shake2(power: number, timing: TimingFn): TimingFn {
-    let r = 0;
-    return t => {
-        r += Math.PI / 2;
-        return Math.sin(r) * power * timing(t);
-    };
+export interface ChaseData {
+    path: Partial<Record<FloorIds, LocArr[]>>;
+    camera: Partial<Record<FloorIds, CameraAnimation>>;
 }
 
-export class Chase {
-    /**
-     * 动画实例
-     */
-    ani: Animation = new Animation();
+interface TimeListener {
+    fn: (emitTime: number) => void;
+    time: number;
+}
 
-    /**
-     * 追逐战的路径
-     */
-    path: ChasePath;
+interface LocListener {
+    fn: (x: number, y: number) => void;
+    floorId: FloorIds;
+    once: boolean;
+}
 
-    /**
-     * 是否展示路径
-     */
-    showPath: boolean = false;
+interface ChaseEvent {
+    changeFloor: [floor: FloorIds];
+    end: [success: boolean];
+    start: [];
+    step: [x: number, y: number];
+    frame: [totalTime: number, floorTime: number];
+}
 
-    endFn?: (lose: boolean) => void;
+export class Chase extends EventEmitter<ChaseEvent> {
+    /** 本次追逐战的数据 */
+    private readonly data: ChaseData;
 
-    /**
-     * 开始一个追逐战
-     * @param index 追逐战索引
-     * @param path 追逐战的路线
-     * @param fn 开始时执行的函数
-     */
-    constructor(
-        path: ChasePath,
-        fns: ((chase: Chase) => void)[],
-        camera: ChaseCameraData[],
-        showPath: boolean = false
-    ) {
-        this.path = path;
-        flags.__lockViewport__ = true;
-        flags.onChase = true;
-        flags.chaseTime = {
-            [core.status.floorId]: Date.now()
-        };
-        this.ani
-            .absolute()
-            .time(0)
-            .move(core.bigmap.offsetX / 32, core.bigmap.offsetY / 32);
-        fns.forEach(v => v(this));
-        const added: FloorIds[] = [];
-        const ctx = core.createCanvas('chasePath', 0, 0, 0, 0, 35);
+    /** 是否显示路线 */
+    private showPath: boolean = false;
+    /** 每层的路线显示 */
+    private pathMap: Map<FloorIds, MotaOffscreenCanvas2D> = new Map();
+    /** 当前的摄像机动画 */
+    private nowCamera?: CameraAnimation;
+    /** 当前楼层 */
+    private nowFloor?: FloorIds;
 
-        for (const [id, x, y, start, time, mode, path] of camera) {
-            if (!added.includes(id)) {
-                this.on(
-                    id,
-                    0,
-                    () => {
-                        flags.__lockViewport__ = false;
-                        core.drawHero();
-                        flags.__lockViewport__ = true;
-                        this.ani
-                            .time(0)
-                            .move(
-                                core.bigmap.offsetX / 32,
-                                core.bigmap.offsetY / 32
-                            );
-                    },
-                    true
-                );
-                added.push(id);
-            }
-            if (!has(path)) {
-                this.on(id, start, () => {
-                    this.ani.time(time).mode(mode).move(x, y);
-                });
-            } else {
-                this.on(id, start, () => {
-                    this.ani.time(time).mode(mode).moveAs(path);
-                });
-            }
-        }
+    /** 开始时刻 */
+    private startTime: number = 0;
+    /** 进入当前楼层的时刻 */
+    private nowFloorTime: number = 0;
+    /** 是否正在进行追逐战 */
+    private started: boolean = false;
 
-        this.ani.ticker.add(() => {
-            if (!flags.floorChanging) {
-                core.setViewport(this.ani.x * 32, this.ani.y * 32);
-                core.relocateCanvas(ctx, -this.ani.x * 32, -this.ani.y * 32);
+    /** 路径显示的sprite */
+    private pathSprite?: Sprite;
+    /** 当前 LayerGroup 渲染元素 */
+    private layer: LayerGroup;
+    /** 委托ticker的id */
+    private delegation: number = -1;
+
+    /** 时间监听器 */
+    private onTimeListener: TimeListener[] = [];
+    /** 楼层时间监听器 */
+    private onFloorTimeListener: Partial<Record<FloorIds, TimeListener[]>> = {};
+    /** 勇士位置监听器 */
+    private onHeroLocListener: Map<number, Set<LocListener>> = new Map();
+
+    /** 勇士移动实例 */
+    private heroMove: HeroMover;
+
+    constructor(data: ChaseData, showPath: boolean = false) {
+        super();
+
+        this.data = data;
+        this.showPath = showPath;
+
+        const render = MotaRenderer.get('render-main')!;
+        const layer = render.getElementById('layer-main')! as LayerGroup;
+        this.layer = layer;
+
+        const mover = Mota.require('module', 'State').heroMoveCollection.mover;
+        this.heroMove = mover;
+
+        mover.on('stepEnd', this.onStepEnd);
+    }
+
+    private onStepEnd = (step: MoveStep) => {
+        if (step.type === 'speed') return;
+        const { x, y } = core.status.hero.loc;
+        this.emitHeroLoc(x, y);
+        this.emit('step', x, y);
+    };
+
+    private emitHeroLoc(x: number, y: number) {
+        if (!this.nowFloor) return;
+        const floor = core.status.maps[this.nowFloor];
+        const width = floor.width;
+        const index = x + y * width;
+        const list = this.onHeroLocListener.get(index);
+        if (!list) return;
+        const toDelete = new Set<LocListener>();
+        list.forEach(v => {
+            if (v.floorId === this.nowFloor) {
+                v.fn(x, y);
+                if (v.once) toDelete.add(v);
             }
         });
+        toDelete.forEach(v => list.delete(v));
+    }
 
-        if (showPath) {
-            for (const [id, p] of Object.entries(path) as [
-                FloorIds,
-                LocArr[]
-            ][]) {
-                this.on(id, 0, () => {
-                    const floor = core.status.maps[id];
-                    core.resizeCanvas(ctx, floor.width * 32, floor.height * 32);
-                    ctx.beginPath();
-                    ctx.moveTo(p[0][0] * 32 + 16, p[1][1] * 32 + 24);
-                    ctx.lineJoin = 'round';
-                    ctx.lineWidth = 4;
-                    ctx.strokeStyle = 'cyan';
-                    ctx.globalAlpha = 0.3;
-                    p.forEach((v, i, a) => {
-                        if (i === 0) return;
-                        const [x, y] = v;
-                        ctx.lineTo(x * 32 + 16, y * 32 + 24);
-                    });
-                    ctx.stroke();
-                });
+    private emitTime() {
+        const now = Date.now();
+        const nTime = now - this.startTime;
+        const fTime = now - this.nowFloorTime;
+
+        this.emit('frame', nTime, fTime);
+
+        while (1) {
+            const time = this.onTimeListener[0];
+            if (!time) break;
+            if (time.time <= nTime) {
+                time.fn(nTime);
+                this.onTimeListener.shift();
+            } else {
+                break;
+            }
+        }
+
+        if (!this.nowFloor) return;
+        const floor = this.onFloorTimeListener[this.nowFloor];
+        if (!floor) return;
+
+        while (1) {
+            const time = floor[0];
+            if (!time) break;
+            if (time.time <= fTime) {
+                time.fn(nTime);
+                floor.shift();
+            } else {
+                break;
             }
         }
     }
 
-    /**
-     * 在追逐战的某个时刻执行函数
-     * @param floorId 楼层id
-     * @param time 该楼层中经过的时间
-     * @param fn 执行的函数
-     */
-    on(
-        floorId: FloorIds,
-        time: number,
-        fn: (chase: Chase) => void,
-        first: boolean = false
-    ) {
-        const func = () => {
-            if (!flags.chaseTime?.[floorId]) return;
-            if (
-                Date.now() - (flags.chaseTime?.[floorId] ?? Date.now()) >=
-                time
-            ) {
-                fn(this);
-                this.ani.ticker.remove(func);
-            }
-        };
-        this.ani.ticker.add(func, first);
+    private tick = () => {
+        if (!this.started) return;
+        const floor = core.status.floorId;
+        if (floor !== this.nowFloor) {
+            this.changeFloor(floor);
+        }
+        this.emitTime();
+    };
+
+    private readyPath() {
+        for (const [key, nodes] of Object.entries(this.data.path)) {
+            if (nodes.length === 0) return;
+            const floor = key as FloorIds;
+            const canvas = new MotaOffscreenCanvas2D();
+            const ctx = canvas.ctx;
+            const cell = 32;
+            const { width, height } = core.status.maps[floor];
+            canvas.setHD(true);
+            canvas.size(width * cell, height * cell);
+            const [fx, fy] = nodes.shift()!;
+            ctx.beginPath();
+            ctx.moveTo(fx, fy);
+            nodes.forEach(([x, y]) => {
+                ctx.lineTo(x, y);
+            });
+            ctx.strokeStyle = '#0ff';
+            ctx.globalAlpha = 0.6;
+            ctx.stroke();
+            this.pathMap.set(floor, canvas);
+        }
+        this.pathSprite = new Sprite('absolute', false, true);
+        this.layer.appendChild(this.pathSprite);
     }
 
     /**
-     * 当勇士移动到某个点上时执行函数
-     * @param x 横坐标
-     * @param y 纵坐标
-     * @param floorId 楼层id
-     * @param fn 执行的函数
-     * @param mode 为0时，当传入数组时表示勇士在任意一个位置都执行，否则是每个位置执行一次
+     * 当到达某个时间时触发函数
+     * @param time 触发时刻
+     * @param fn 触发时执行的函数，函数的参数表示实际触发时间
      */
-    onHeroLoc(
-        floorId: FloorIds,
-        fn: (chase: Chase) => void,
-        x?: number | number[],
-        y?: number | number[],
-        mode: 0 | 1 = 0
-    ) {
-        if (mode === 1) {
-            if (typeof x === 'number') x = [x];
-            if (typeof y === 'number') y = [y];
-            x!.forEach(v => {
-                (y as number[]).forEach(vv => {
-                    this.onHeroLoc(floorId, fn, v, vv);
-                });
-            });
+    onTime(time: number, fn: (emitTime: number) => void) {
+        if (this.started) {
+            logger.error(1501);
             return;
         }
-        const judge = () => {
-            if (core.status.floorId !== floorId) return false;
-            if (has(x)) {
-                if (typeof x === 'number') {
-                    if (core.status.hero.loc.x !== x) return false;
-                } else {
-                    if (!x.includes(core.status.hero.loc.x)) return false;
-                }
-            }
-            if (has(y)) {
-                if (typeof y === 'number') {
-                    if (core.status.hero.loc.y !== y) return false;
-                } else {
-                    if (!y.includes(core.status.hero.loc.y)) return false;
-                }
-            }
-            return true;
-        };
-        const func = () => {
-            if (judge()) {
-                fn(this);
-                try {
-                    this.ani.ticker.remove(func);
-                } catch {}
-            }
-        };
-        this.ani.ticker.add(func);
+        this.onTimeListener.push({ time, fn });
     }
 
     /**
-     * 设置路径显示状态
-     * @param show 是否显示路径
+     * 当在某个楼层中到达某个时间时触发函数
+     * @param floor 触发楼层
+     * @param time 从进入该楼层开始计算的触发时刻
+     * @param fn 触发时执行的函数
      */
-    setPathShowStatus(show: boolean) {
-        this.showPath = show;
-    }
-
-    /**
-     * 当追逐战结束后执行函数
-     * @param fn 执行的函数
-     */
-    onEnd(fn: (lose: boolean) => void) {
-        this.endFn = fn;
-    }
-
-    /**
-     * 结束这个追逐战
-     */
-    end(lose: boolean = false) {
-        this.ani.ticker.destroy();
-        delete flags.onChase;
-        delete flags.chase;
-        delete flags.chaseTime;
-        delete flags.chaseHard;
-        delete flags.chaseIndex;
-        flags.__lockViewport__ = false;
-        core.deleteCanvas('chasePath');
-        if (this.endFn) this.endFn(lose);
-    }
-}
-
-export async function startChase(index: number) {
-    const data = getChaseDataByIndex(index);
-    flags.chaseIndex = index;
-    flags.onChase = true;
-    await sleep(20);
-    const chase = new Chase(
-        data.path,
-        data.fns,
-        data.camera,
-        flags.chaseHard === 0
-    );
-    flags.chase = chase;
-    const hard = flags.chaseHard;
-
-    // 成就
-    chase.onEnd(lose => {
-        if (hard === 1) {
-            if (index === 1 && !lose) {
-                completeAchievement('challenge', 0);
-            }
+    onFloorTime(floor: FloorIds, time: number, fn: (emitTime: number) => void) {
+        if (this.started) {
+            logger.error(1501);
+            return;
         }
-    });
+        this.onFloorTimeListener[floor] ??= [];
+        const list = this.onFloorTimeListener[floor];
+        list.push({ time, fn });
+    }
+
+    private ensureLocListener(index: number) {
+        const listener = this.onHeroLocListener.get(index);
+        if (listener) return listener;
+        else {
+            const set = new Set<LocListener>();
+            this.onHeroLocListener.set(index, set);
+            return set;
+        }
+    }
+
+    /**
+     * 当勇士走到某一层的某一格时执行函数
+     * @param x 触发横坐标
+     * @param y 触发纵坐标
+     * @param floor 触发楼层
+     * @param fn 触发函数
+     * @param once 是否只执行一次
+     */
+    onLoc(
+        x: number,
+        y: number,
+        floor: FloorIds,
+        fn: (x: number, y: number) => void,
+        once: boolean = false
+    ) {
+        if (this.started) {
+            logger.error(1501);
+            return;
+        }
+        const map = core.status.maps[floor];
+        const { width } = map;
+        const index = x + y * width;
+        const set = this.ensureLocListener(index);
+        set.add({ floorId: floor, fn, once });
+    }
+
+    /**
+     * 当勇士走到某一层的某一格时执行函数，且只执行一次
+     * @param x 触发横坐标
+     * @param y 触发纵坐标
+     * @param floor 触发楼层
+     * @param fn 触发函数
+     */
+    onceLoc(
+        x: number,
+        y: number,
+        floor: FloorIds,
+        fn: (x: number, y: number) => void
+    ) {
+        this.onLoc(x, y, floor, fn, true);
+    }
+
+    /**
+     * 切换楼层
+     * @param floor 目标楼层
+     */
+    changeFloor(floor: FloorIds) {
+        if (floor === this.nowFloor) return;
+        this.nowFloor = floor;
+        if (this.nowCamera) {
+            this.nowCamera.destroy();
+        }
+        const camera = this.data.camera[floor];
+        if (camera) {
+            camera.start();
+            this.nowCamera = camera;
+        }
+        this.nowFloorTime = Date.now();
+        this.emit('changeFloor', floor);
+    }
+
+    start() {
+        disableViewport();
+        if (this.showPath) this.readyPath();
+        this.changeFloor(core.status.floorId);
+        this.startTime = Date.now();
+        this.delegation = this.layer.delegateTicker(this.tick);
+        this.started = true;
+        for (const floorTime of Object.values(this.onFloorTimeListener)) {
+            floorTime.sort((a, b) => a.time - b.time);
+        }
+        this.onTimeListener.sort((a, b) => a.time - b.time);
+        this.emit('start');
+    }
+
+    /**
+     * 结束这次追逐战
+     * @param success 是否成功逃脱
+     */
+    end(success: boolean) {
+        enableViewport();
+        this.layer.removeTicker(this.delegation);
+        this.pathSprite?.destroy();
+        this.heroMove.off('stepEnd', this.onStepEnd);
+        this.emit('end', success);
+    }
 }

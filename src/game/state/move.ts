@@ -617,7 +617,7 @@ export class HeroMover extends ObjectMoverBase {
         const adapter = HeroMover.adapter;
         const viewport = HeroMover.viewport;
         if (!adapter || !viewport) return;
-        viewport.all('moveTo', x, y);
+        viewport.all('moveTo', x, y, this.moveSpeed * 2);
         adapter.sync('setAnimateDir', showDir);
         await adapter.all('move', moveDir);
     }

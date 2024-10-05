@@ -18,7 +18,8 @@
         "1101": "Shadow extension needs 'floor-hero' extension as dependency.",
         "1201": "Floor-damage extension needs 'floor-binder' extension as dependency.",
         "1301": "Portal extension need 'floor-binder' extension as dependency.",
-        "1401": "Halo extension needs 'floor-binder' extension as dependency."
+        "1401": "Halo extension needs 'floor-binder' extension as dependency.",
+        "1501": "Cannot add listener to started chase."
     },
     "warn": {
         "1": "Resource with type of 'none' is loaded.",

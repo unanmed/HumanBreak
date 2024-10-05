@@ -145,15 +145,15 @@ export class FloorViewport implements ILayerGroupRenderExtends {
      * @param x 目标图格横坐标
      * @param y 目标图格纵坐标
      */
-    moveTo(x: number, y: number) {
+    moveTo(x: number, y: number, time: number = 200) {
         if (!this.enabled) return;
         const { x: nx, y: ny } = this.getBoundedPosition(x, y);
         if (this.inTransition) {
             const distance = Math.hypot(this.nx - nx, this.ny - ny);
-            const time = core.clamp(distance * 200, 200, 600);
-            this.createTransition(nx, ny, time);
+            const t = core.clamp(distance * time, time, time * 3);
+            this.createTransition(nx, ny, t);
         } else {
-            this.createTransition(nx, ny, 200);
+            this.createTransition(nx, ny, time);
             // const moveSpeed = 1000 / this.hero.speed;
             // this.speedX = moveSpeed;
             // this.speedY = moveSpeed;
@@ -182,10 +182,10 @@ export class FloorViewport implements ILayerGroupRenderExtends {
      * @param x 目标图格横坐标
      * @param y 目标图格纵坐标
      */
-    mutateTo(x: number, y: number) {
+    mutateTo(x: number, y: number, time: number = this.transitionTime) {
         if (!this.enabled) return;
         const { x: nx, y: ny } = this.getBoundedPosition(x, y);
-        this.createTransition(nx, ny, this.transitionTime);
+        this.createTransition(nx, ny, time);
     }
 
     private createTransition(x: number, y: number, time: number) {
@@ -374,12 +374,12 @@ export class FloorViewport implements ILayerGroupRenderExtends {
 }
 
 const adapter = new RenderAdapter<FloorViewport>('viewport');
-adapter.receive('mutateTo', (item, x, y) => {
-    item.mutateTo(x, y);
+adapter.receive('mutateTo', (item, x, y, time) => {
+    item.mutateTo(x, y, time);
     return Promise.resolve();
 });
-adapter.receive('moveTo', (item, x, y) => {
-    item.moveTo(x, y);
+adapter.receive('moveTo', (item, x, y, time) => {
+    item.moveTo(x, y, time);
     return Promise.resolve();
 });
 adapter.receive('setPosition', (item, x, y) => {

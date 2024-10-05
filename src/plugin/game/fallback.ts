@@ -541,7 +541,7 @@ export function init() {
 
             const sx = core.getHeroLoc('x');
             const sy = core.getHeroLoc('y');
-            adapters.viewport?.all('mutateTo', ex, ey);
+            adapters.viewport?.all('mutateTo', ex, ey, time);
 
             const locked = core.status.lockControl;
             core.lockControl();

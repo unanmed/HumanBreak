@@ -155,7 +155,7 @@ interface PluginInterface {
     pop_r: typeof import('../plugin/pop');
     use_r: typeof import('../plugin/use');
     fly_r: typeof import('../plugin/ui/fly');
-    chase_r: typeof import('../plugin/chase/chase');
+    chase_r: typeof import('../plugin/chase');
     completion_r: typeof import('../plugin/completion');
     gameCanvas_r: typeof import('../plugin/fx/gameCanvas');
     frag_r: typeof import('../plugin/fx/frag');

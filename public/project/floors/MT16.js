@@ -400,7 +400,7 @@ main.floors.MT16=
             },
             {
                 "type": "function",
-                "function": "function(){\ncore.startChase(1);\n}"
+                "function": "function(){\nMota.Plugin.require('chase_r').startChase(0);\n}"
             },
             {
                 "type": "autoSave"
