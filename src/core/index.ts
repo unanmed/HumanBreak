@@ -75,6 +75,7 @@ import { HeroKeyMover } from './main/action/move';
 import { Camera } from './render/camera';
 import * as Animation from 'mutate-animate';
 import './render/index';
+import * as RenderUtils from './render/utils';
 
 // ----- 类注册
 Mota.register('class', 'AudioPlayer', AudioPlayer);
@@ -163,7 +164,8 @@ Mota.register('module', 'Render', {
     RenderAdapter,
     Layer,
     LayerGroupFloorBinder,
-    Camera
+    Camera,
+    Utils: RenderUtils
 });
 Mota.register('module', 'Action', {
     HeroKeyMover

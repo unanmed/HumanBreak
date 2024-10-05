@@ -102,6 +102,11 @@ export class FloorViewport implements ILayerGroupRenderExtends {
      */
     enable() {
         this.enabled = true;
+        const { x, y } = core.status.hero.loc;
+        const { x: nx, y: ny } = this.transform;
+        this.nx = nx;
+        this.ny = ny;
+        this.mutateTo(x, y);
     }
 
     /**
@@ -380,6 +385,12 @@ adapter.receive('moveTo', (item, x, y) => {
 adapter.receive('setPosition', (item, x, y) => {
     item.setPosition(x, y);
     return Promise.resolve();
+});
+adapter.receiveSync('disable', item => {
+    item.disable();
+});
+adapter.receiveSync('enable', item => {
+    item.enable();
 });
 
 const hook = Mota.require('var', 'hook');

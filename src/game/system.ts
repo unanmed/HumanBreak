@@ -40,6 +40,7 @@ import type { HeroKeyMover } from '@/core/main/action/move';
 import type { BlockMover, HeroMover, ObjectMoverBase } from './state/move';
 import type { Camera } from '@/core/render/camera';
 import type * as Animation from 'mutate-animate';
+import type * as RenderUtils from '@/core/render/utils';
 
 interface ClassInterface {
     // 渲染进程与游戏进程通用
@@ -122,6 +123,7 @@ interface ModuleInterface {
         Layer: typeof Layer;
         LayerGroupFloorBinder: typeof LayerGroupFloorBinder;
         Camera: typeof Camera;
+        Utils: typeof RenderUtils;
     };
     State: {
         ItemState: typeof ItemState;
@@ -130,7 +132,7 @@ interface ModuleInterface {
         ObjectMoverBase: typeof ObjectMoverBase;
         heroMoveCollection: {
             mover: HeroMover;
-            keyMover: HeroKeyMover;
+            keyMover?: HeroKeyMover;
         };
     };
     Action: {
@@ -168,7 +170,6 @@ interface PluginInterface {
     chase_g: typeof import('../plugin/game/chase');
     skill_g: typeof import('../plugin/game/skill');
     towerBoss_g: typeof import('../plugin/game/towerBoss');
-    rewrite_g: typeof import('../plugin/game/fx/rewrite');
     itemDetail_g: typeof import('../plugin/game/fx/itemDetail');
     checkBlock_g: typeof import('../plugin/game/enemy/checkblock');
 }
