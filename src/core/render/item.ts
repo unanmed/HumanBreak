@@ -296,6 +296,18 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this.update(this);
     }
 
+    /**
+     * 获取当前元素的绝对位置（不建议使用，因为应当很少会有获取绝对位置的需求）
+     */
+    getAbsolutePosition(): LocArr {
+        const { x, y } = this.transform;
+        if (!this.parent) return [x, y];
+        else {
+            const [px, py] = this.parent.getAbsolutePosition();
+            return [x + px, y + py];
+        }
+    }
+
     setAnchor(x: number, y: number): void {
         this.anchorX = x;
         this.anchorY = y;
