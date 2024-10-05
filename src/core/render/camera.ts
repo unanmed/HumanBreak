@@ -597,5 +597,9 @@ export class CameraAnimation extends EventEmitter<CameraAnimationEvent> {
     destroy() {
         this.camera.binded.removeTicker(this.delegation);
         this.camera.stopAllAnimates();
+        this.animateMap.forEach(v => {
+            v.animation.ticker.destroy();
+        });
+        this.animateMap.clear();
     }
 }
