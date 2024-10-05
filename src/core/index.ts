@@ -13,7 +13,7 @@ import {
 } from './main/setting';
 import { KeyCode, ScanCode } from '@/plugin/keyCodes';
 import { status } from '@/plugin/ui/statusBar';
-import './plugin';
+import '@/plugin';
 import './package';
 import { AudioPlayer } from './audio/audio';
 import { CustomToolbar } from './main/custom/toolbar';
