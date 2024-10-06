@@ -107,6 +107,11 @@ export class Logger {
      * @param params 参数
      */
     error(code: number, ...params: string[]) {
+        const info = logError[code];
+        if (!info) {
+            logger.error(16, 'error', code.toString());
+            return;
+        }
         const text = this.parseInfo(logError[code], ...params);
         if (this.catching) {
             this.catchedInfo.push({
@@ -132,6 +137,11 @@ export class Logger {
      * @param text 警告信息
      */
     warn(code: number, ...params: string[]) {
+        const info = logWarn[code];
+        if (!info) {
+            logger.error(16, 'warn', code.toString());
+            return;
+        }
         const text = this.parseInfo(logWarn[code], ...params);
         if (this.catching) {
             this.catchedInfo.push({

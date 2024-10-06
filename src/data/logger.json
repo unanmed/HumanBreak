@@ -15,11 +15,11 @@
         "13": "Cannot compile $1 shader. Error info: $2",
         "14": "Animate extension needs 'floor-hero' extension as dependency.",
         "15": "Viewport extension needs 'floor-hero' extension as dependency.",
+        "16": "Cannot find log message for $1 code $2.",
         "1101": "Shadow extension needs 'floor-hero' extension as dependency.",
         "1201": "Floor-damage extension needs 'floor-binder' extension as dependency.",
         "1301": "Portal extension need 'floor-binder' extension as dependency.",
-        "1401": "Halo extension needs 'floor-binder' extension as dependency.",
-        "1501": "Cannot add listener to started chase."
+        "1401": "Halo extension needs 'floor-binder' extension as dependency."
     },
     "warn": {
         "1": "Resource with type of 'none' is loaded.",
