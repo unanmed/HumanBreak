@@ -194,11 +194,10 @@ export class Chase extends EventEmitter<ChaseEvent> {
      * @param fn 触发时执行的函数，函数的参数表示实际触发时间
      */
     onTime(time: number, fn: (emitTime: number) => void) {
-        if (this.started) {
-            logger.error(1501);
-            return;
-        }
         this.onTimeListener.push({ time, fn });
+        if (this.started) {
+            this.onTimeListener.sort((a, b) => a.time - b.time);
+        }
     }
 
     /**
@@ -208,13 +207,12 @@ export class Chase extends EventEmitter<ChaseEvent> {
      * @param fn 触发时执行的函数
      */
     onFloorTime(floor: FloorIds, time: number, fn: (emitTime: number) => void) {
-        if (this.started) {
-            logger.error(1501);
-            return;
-        }
         this.onFloorTimeListener[floor] ??= [];
         const list = this.onFloorTimeListener[floor];
         list.push({ time, fn });
+        if (this.started) {
+            list.sort((a, b) => a.time - b.time);
+        }
     }
 
     private ensureLocListener(index: number) {
@@ -242,10 +240,6 @@ export class Chase extends EventEmitter<ChaseEvent> {
         fn: (x: number, y: number) => void,
         once: boolean = false
     ) {
-        if (this.started) {
-            logger.error(1501);
-            return;
-        }
         const map = core.status.maps[floor];
         const { width } = map;
         const index = x + y * width;
