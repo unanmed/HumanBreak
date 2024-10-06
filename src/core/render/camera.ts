@@ -89,7 +89,7 @@ export class Camera extends EventEmitter<CameraEvent> {
         trans.reset();
         for (const o of this.operation) {
             if (o.type === 'translate') {
-                trans.translate(o.x, o.y);
+                trans.translate(-o.x, -o.y);
             } else if (o.type === 'rotate') {
                 trans.rotate(o.angle);
             } else {
@@ -436,12 +436,13 @@ export class CameraAnimation extends EventEmitter<CameraAnimationEvent> {
             const data = exe.data;
             if (data.length === 0) return;
             const item = data[0];
-            if (item.time < time) {
+            if (item.start < time) {
                 this.executeAnimate(exe, item);
                 data.shift();
                 this.emit('animate', ope, exe, item);
             }
         });
+        this.camera.requestUpdate();
     };
 
     private executeAnimate(
@@ -507,8 +508,8 @@ export class CameraAnimation extends EventEmitter<CameraAnimationEvent> {
         const data: TranslateAnimation = {
             type: 'translate',
             timing,
-            x,
-            y,
+            x: x * 32,
+            y: y * 32,
             time,
             start
         };
@@ -592,6 +593,7 @@ export class CameraAnimation extends EventEmitter<CameraAnimationEvent> {
             }
         });
         this.endTime = endTime + this.startTime;
+        this.tick();
     }
 
     destroy() {

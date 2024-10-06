@@ -11,7 +11,7 @@ export function disableViewport() {
 export function enableViewport() {
     const adapter = RenderAdapter.get<FloorViewport>('viewport');
     if (!adapter) return;
-    adapter.sync('disable');
+    adapter.sync('enable');
 }
 
 /**

@@ -46,11 +46,11 @@ export class Chase extends EventEmitter<ChaseEvent> {
     private nowFloor?: FloorIds;
 
     /** 开始时刻 */
-    private startTime: number = 0;
+    startTime: number = 0;
     /** 进入当前楼层的时刻 */
-    private nowFloorTime: number = 0;
+    nowFloorTime: number = 0;
     /** 是否正在进行追逐战 */
-    private started: boolean = false;
+    started: boolean = false;
 
     /** 路径显示的sprite */
     private pathSprite?: Sprite;
@@ -159,22 +159,33 @@ export class Chase extends EventEmitter<ChaseEvent> {
             const canvas = new MotaOffscreenCanvas2D();
             const ctx = canvas.ctx;
             const cell = 32;
+            const half = cell / 2;
             const { width, height } = core.status.maps[floor];
             canvas.setHD(true);
             canvas.size(width * cell, height * cell);
             const [fx, fy] = nodes.shift()!;
             ctx.beginPath();
-            ctx.moveTo(fx, fy);
+            ctx.moveTo(fx * cell + half, fy * cell + half);
             nodes.forEach(([x, y]) => {
-                ctx.lineTo(x, y);
+                ctx.lineTo(x * cell + half, y * cell + half);
             });
             ctx.strokeStyle = '#0ff';
             ctx.globalAlpha = 0.6;
             ctx.stroke();
             this.pathMap.set(floor, canvas);
         }
-        this.pathSprite = new Sprite('absolute', false, true);
+        this.pathSprite = new Sprite('static', false, true);
+        this.pathSprite.size(480, 480);
+        this.pathSprite.pos(0, 0);
+        this.pathSprite.setZIndex(120);
+        this.pathSprite.setAntiAliasing(false);
         this.layer.appendChild(this.pathSprite);
+        this.pathSprite.setRenderFn(canvas => {
+            const ctx = canvas.ctx;
+            const path = this.pathMap.get(core.status.floorId);
+            if (!path) return;
+            ctx.drawImage(path.canvas, 0, 0, path.width, path.height);
+        });
     }
 
     /**

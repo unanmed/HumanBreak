@@ -110,6 +110,7 @@ export function initChase() {
 
     const camera = Camera.for(layer);
     camera.clearOperation();
+    camera.transform = layer.camera;
     const animation16 = new CameraAnimation(camera);
     const animation15 = new CameraAnimation(camera);
     const animation14 = new CameraAnimation(camera);
@@ -128,9 +129,13 @@ export function initChase() {
     const translate = camera.addTranslate();
     const rotate = camera.addRotate();
 
+    translate.x = 10;
+    translate.y = 10;
     // MT16 摄像机动画
+    animation16.translate(translate, 10, 10, 1, 0, linear());
     animation16.translate(translate, 0, 10, 1600, 0, hyper('sin', 'in'));
     // MT15 摄像机动画
+    animation15.translate(translate, 49, 0, 1, 0, linear());
     animation15.translate(translate, 45, 0, 2324, 0, hyper('sin', 'in'));
     animation15.translate(translate, 40, 0, 1992, 2324, hyper('sin', 'out'));
     animation15.translate(translate, 41, 0, 498, 5312, hyper('sin', 'in-out'));
@@ -140,6 +145,7 @@ export function initChase() {
     animation15.translate(translate, 12, 0, 996, 12450, linear());
     animation15.translate(translate, 0, 0, 1470, 13446, hyper('sin', 'out'));
     // MT14 摄像机动画
+    animation14.translate(translate, 113, 0, 1, 0, hyper('sin', 'in'));
     animation14.translate(translate, 109, 0, 1328, 0, hyper('sin', 'in'));
     animation14.translate(translate, 104, 0, 332, 1328, hyper('sin', 'out'));
     animation14.translate(translate, 92, 0, 2822, 5478, hyper('sin', 'in'));
@@ -151,7 +157,15 @@ export function initChase() {
     animation14.translate(translate, 36, 0, 3320, 21580, linear());
     animation14.translate(translate, 0, 0, 9960, 24900, linear());
 
-    judgeFail1(chase, ani);
+    chase.on('end', () => {
+        animation16.destroy();
+        animation15.destroy();
+        animation14.destroy();
+        camera.destroy();
+        back?.destroy();
+    });
+
+    judgeFail1(chase, ani, camera);
     drawBack(chase, ani);
     para1(chase);
     para2(chase);
@@ -176,11 +190,16 @@ async function wolfMove(chase: Chase) {
     core.setBlock(508, 23, 23);
 }
 
-function judgeFail1(chase: Chase, ani: Animation) {
+function judgeFail1(chase: Chase, ani: Animation, camera: Camera) {
     chase.on('frame', () => {
-        if (core.status.hero.loc.x > core.bigmap.offsetX / 32 + 17) {
+        const now = Date.now();
+        const time = now - chase.nowFloorTime;
+        if (time < 500) return;
+        if (core.status.hero.loc.x > -camera.transform.x / 32 + 22) {
             chase.end(false);
-            ani.time(750).apply('rect', 0);
+            if (ani.value.rect !== void 0) {
+                ani.time(750).apply('rect', 0);
+            }
             core.lose('逃跑失败');
         }
     });
@@ -194,6 +213,7 @@ function drawBack(chase: Chase, ani: Animation) {
         const render = MotaRenderer.get('render-main')!;
         const layer = render.getElementById('layer-main')! as LayerGroup;
         back = new Sprite('absolute', false);
+        back.setZIndex(100);
         back.size(480, 480);
         back.pos(0, 0);
         back.append(layer);
@@ -264,7 +284,6 @@ function para2(chase: Chase) {
     });
     chase.onceLoc(35, 3, 'MT15', () => {
         core.drawAnimate('explosion3', 37, 7);
-        core.vibrate('vertical', 1000, 25, 10);
         for (let tx = 36; tx < 42; tx++) {
             for (let ty = 4; ty < 11; ty++) {
                 core.setBlock(336, tx, ty);
@@ -272,7 +291,6 @@ function para2(chase: Chase) {
         }
     });
     chase.onceLoc(31, 5, 'MT15', () => {
-        core.vibrate('vertical', 10000, 25, 1);
         core.removeBlock(34, 8);
         core.removeBlock(33, 8);
         core.drawAnimate('explosion1', 34, 8);
@@ -438,7 +456,6 @@ function para3(chase: Chase, ani: Animation) {
             }
         }
         core.drawAnimate('explosion2', 79, 7);
-        core.vibrate('vertical', 4000, 25, 15);
     });
     chase.onceLoc(68, 5, 'MT14', () => {
         core.setBlock(336, 68, 4);

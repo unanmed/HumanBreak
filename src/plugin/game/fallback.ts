@@ -604,8 +604,8 @@ export function init() {
                 .absolute()
                 .time(1)
                 .mode(Animation.linear())
-                .move(-core.bigmap.offsetX, -core.bigmap.offsetY);
-            animate.time(animateTime).move(-x * 32, -y * 32);
+                .move(core.bigmap.offsetX, core.bigmap.offsetY);
+            animate.time(animateTime).move(x * 32, y * 32);
 
             camera.applyTranslateAnimation(
                 translate,
@@ -614,16 +614,19 @@ export function init() {
             );
             camera.transform = layer.camera;
 
-            const timeout = window.setTimeout(() => {
+            const end = () => {
                 core.bigmap.offsetX = x * 32;
                 core.bigmap.offsetY = y * 32;
+                camera.destroy();
                 callback?.();
-            }, animateTime + 50);
+            };
+
+            const timeout = window.setTimeout(end, animateTime + 50);
 
             const id = fallbackIds++;
             core.animateFrame.lastAsyncId = id;
             core.animateFrame.asyncId[id] = () => {
-                callback?.();
+                end();
                 clearTimeout(timeout);
             };
         };

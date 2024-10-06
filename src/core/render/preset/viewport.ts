@@ -3,7 +3,7 @@ import { HeroRenderer } from './hero';
 import { ILayerGroupRenderExtends, LayerGroup } from './layer';
 import { Transform } from '../transform';
 import { LayerGroupFloorBinder } from './floor';
-import { hyper, TimingFn } from 'mutate-animate';
+import { hyper, inverseTrigo, power, TimingFn, trigo } from 'mutate-animate';
 import { RenderAdapter } from '../adapter';
 
 export class FloorViewport implements ILayerGroupRenderExtends {
@@ -11,14 +11,13 @@ export class FloorViewport implements ILayerGroupRenderExtends {
 
     group!: LayerGroup;
     hero!: HeroRenderer;
-    transform!: Transform;
     binder!: LayerGroupFloorBinder;
 
     /** 是否启用视角控制拓展 */
     enabled: boolean = true;
 
     /** 渐变的速率曲线 */
-    transitionFn: TimingFn = hyper('sin', 'out');
+    transitionFn: TimingFn = hyper('sec', 'out');
     /** 加减速的速率曲线 */
     movingEaseFn: TimingFn = t => t ** 2;
 
@@ -103,9 +102,13 @@ export class FloorViewport implements ILayerGroupRenderExtends {
     enable() {
         this.enabled = true;
         const { x, y } = core.status.hero.loc;
-        const { x: nx, y: ny } = this.transform;
-        this.nx = nx;
-        this.ny = ny;
+        const { x: nx, y: ny } = this.group.camera;
+        const halfWidth = core._PX_ / 2;
+        const halfHeight = core._PY_ / 2;
+        const cell = this.group.cellSize;
+        const half = cell / 2;
+        this.nx = -(nx - halfWidth + half) / this.group.cellSize;
+        this.ny = -(ny - halfHeight + half) / this.group.cellSize;
         this.mutateTo(x, y);
     }
 
@@ -348,7 +351,6 @@ export class FloorViewport implements ILayerGroupRenderExtends {
 
     awake(group: LayerGroup): void {
         this.group = group;
-        this.transform = group.transform;
         const ex1 = group.getLayer('event')?.getExtends('floor-hero');
         const ex2 = group.getExtends('floor-binder');
         if (
