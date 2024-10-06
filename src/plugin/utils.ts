@@ -446,7 +446,7 @@ export function getVitualKeyOnce(
         const key = Keyboard.get('full')!;
         key.withAssist(assist);
         const id = mainUi.open('virtualKey', { keyboard: key });
-        key.on('emit', (item, assist, index, ev) => {
+        key.once('emit', (item, assist, index, ev) => {
             ev.preventDefault();
             if (emitAssist) {
                 if (emittable.length === 0 || emittable.includes(item.key)) {
