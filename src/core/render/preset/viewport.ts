@@ -18,61 +18,13 @@ export class FloorViewport implements ILayerGroupRenderExtends {
 
     /** 渐变的速率曲线 */
     transitionFn: TimingFn = hyper('sec', 'out');
+    /** 瞬移的速率曲线 */
+    mutateFn: TimingFn = hyper('sin', 'out');
     /** 加减速的速率曲线 */
     movingEaseFn: TimingFn = t => t ** 2;
 
     /** 突变时的渐变时长 */
     transitionTime: number = 600;
-
-    /** 当前视角移动速度 */
-    private speedX: number = 0;
-    private speedY: number = 0;
-    /** X方向移动状态，0表示静止，1表示加速过程，2表示匀速过程，3表示减速过程 */
-    private movingStatusX: 0 | 1 | 2 | 3 = 0;
-    /** X方向加减速过程进度 */
-    private movingEaseProgressX: number = 0;
-    /** Y方向移动状态，0表示静止，1表示加速过程，2表示匀速过程，3表示减速过程 */
-    private movingStatusY: 0 | 1 | 2 | 3 = 0;
-    /** Y方向加减速过程进度 */
-    private movingEaseProgressY: number = 0;
-    /** X方向移动结束坐标 */
-    private movingEndX: number = 0;
-    /** X方向移动结束坐标 */
-    private movingEndY: number = 0;
-    /** X方向进入第一阶段的时刻 */
-    private movingAccX: number = 0;
-    /** Y方向进入第一阶段的时刻 */
-    private movingAccY: number = 0;
-    /** X方向进入第二阶段的时刻 */
-    private movingConstantX: number = 0;
-    /** Y方向进入第二阶段的时刻 */
-    private movingConstantY: number = 0;
-    /** X方向进入第三阶段的时刻 */
-    private movingDeaccX: number = 0;
-    /** Y方向进入第三阶段的时刻 */
-    private movingDeaccY: number = 0;
-    /** X方向进入第一阶段的横坐标 */
-    private movingAccPosX: number = 0;
-    /** Y方向进入第一阶段的横坐标 */
-    private movingAccPosY: number = 0;
-    /** X方向进入第二阶段的横坐标 */
-    private movingConstantPosX: number = 0;
-    /** Y方向进入第二阶段的横坐标 */
-    private movingConstantPosY: number = 0;
-    /** X方向进入第三阶段的横坐标 */
-    private movingDeaccPosX: number = 0;
-    /** Y方向进入第三阶段的横坐标 */
-    private movingDeaccPosY: number = 0;
-    /** X方向进入第一阶段的进度 */
-    private movingAccProgressX: number = 0;
-    /** Y方向进入第一阶段的进度 */
-    private movingAccProgressY: number = 0;
-    /** X方向进入第三阶段的进度 */
-    private movingDeaccProgressX: number = 0;
-    /** Y方向进入第三阶段的进度 */
-    private movingDeaccProgressY: number = 0;
-    /** 移动的加减速时长 */
-    private movingEaseTime: number = 0;
 
     /** 当前视角位置 */
     private nx: number = 0;
@@ -154,29 +106,9 @@ export class FloorViewport implements ILayerGroupRenderExtends {
         if (this.inTransition) {
             const distance = Math.hypot(this.nx - nx, this.ny - ny);
             const t = core.clamp(distance * time, time, time * 3);
-            this.createTransition(nx, ny, t);
+            this.createTransition(nx, ny, t, this.transitionFn);
         } else {
-            this.createTransition(nx, ny, time);
-            // const moveSpeed = 1000 / this.hero.speed;
-            // this.speedX = moveSpeed;
-            // this.speedY = moveSpeed;
-            // this.movingEndX = x;
-            // this.movingEndY = y;
-            // this.movingEaseTime = moveSpeed * 2;
-            // this.processMoving(x, y);
-        }
-    }
-
-    private processMoving(x: number, y: number) {
-        this.movingEndX = x;
-        this.movingEndY = y;
-        if (!this.inMoving) {
-            this.movingStatusX = 0;
-            this.movingEaseProgressX = 0;
-            this.movingStatusY = 0;
-            this.movingEaseProgressY = 0;
-            this.inMoving = true;
-        } else {
+            this.createTransition(nx, ny, time, this.transitionFn);
         }
     }
 
@@ -188,18 +120,16 @@ export class FloorViewport implements ILayerGroupRenderExtends {
     mutateTo(x: number, y: number, time: number = this.transitionTime) {
         if (!this.enabled) return;
         const { x: nx, y: ny } = this.getBoundedPosition(x, y);
-        this.createTransition(nx, ny, time);
+        this.createTransition(nx, ny, time, this.mutateFn);
     }
 
-    private createTransition(x: number, y: number, time: number) {
+    private createTransition(x: number, y: number, time: number, fn: TimingFn) {
         const start = Date.now();
         const end = start + time;
         const sx = this.nx;
         const sy = this.ny;
         const dx = x - sx;
         const dy = y - sy;
-        this.speedX = 0;
-        this.speedY = 0;
 
         this.inTransition = true;
         this.group.removeTicker(this.transition, false);
@@ -210,7 +140,7 @@ export class FloorViewport implements ILayerGroupRenderExtends {
                     this.group.removeTicker(this.transition, true);
                     return;
                 }
-                const progress = this.transitionFn((now - start) / time);
+                const progress = fn((now - start) / time);
                 const tx = dx * progress;
                 const ty = dy * progress;
                 this.nx = tx + sx;
@@ -223,107 +153,6 @@ export class FloorViewport implements ILayerGroupRenderExtends {
                 this.inTransition = false;
             }
         );
-    }
-
-    private createMoving() {
-        this.moving = this.group.delegateTicker(() => {
-            const nx = this.nx;
-            const ny = this.ny;
-            const now = Date.now();
-            const dx = Math.sign(this.movingEndX - nx);
-            const dy = Math.sign(this.movingEndY - ny);
-            const fn = this.movingEaseFn;
-            // 进行进度判断
-            if (this.movingEndX !== nx && this.movingStatusX === 0) {
-                this.movingStatusX = 1;
-                this.movingAccX = now;
-                this.movingAccProgressX = this.movingEaseProgressX;
-                this.movingAccPosX = nx - fn(this.movingAccProgressX) * dx;
-            }
-            if (this.movingEndY !== ny && this.movingStatusY === 0) {
-                this.movingEaseProgressY = 1;
-                this.movingAccY = now;
-                this.movingAccProgressY = this.movingEaseProgressY;
-                this.movingAccPosY = ny - fn(this.movingAccProgressY) * dy;
-            }
-            if (
-                Math.abs(this.movingEndX - nx) <= 1 &&
-                this.movingStatusX !== 3
-            ) {
-                this.movingStatusX = 3;
-                this.movingDeaccX = now;
-                this.movingDeaccProgressX = this.movingEaseProgressX;
-                this.movingDeaccPosX =
-                    nx - (fn(this.movingDeaccProgressX) + 1) * dx;
-            }
-            if (
-                Math.abs(this.movingEndY - ny) <= 1 &&
-                this.movingStatusY !== 3
-            ) {
-                this.movingStatusY = 3;
-                this.movingDeaccY = now;
-                this.movingDeaccProgressY = this.movingEaseProgressY;
-                this.movingDeaccPosY =
-                    ny - (fn(this.movingDeaccProgressY) + 1) * dy;
-            }
-            if (this.movingEaseProgressX >= 1 && this.movingStatusX === 1) {
-                this.movingStatusX = 2;
-                this.movingConstantX = now;
-                this.movingConstantPosX = nx;
-            }
-            if (this.movingEaseProgressY >= 1 && this.movingStatusY === 1) {
-                this.movingStatusY = 2;
-                this.movingConstantY = now;
-                this.movingConstantPosY = ny;
-            }
-            if (this.movingEaseProgressX <= 0 && this.movingStatusX === 3) {
-                this.nx = this.movingEndX;
-                this.movingStatusX = 0;
-                this.movingEaseProgressX = 0;
-            }
-            if (this.movingEaseProgressY <= 0 && this.movingStatusY === 3) {
-                this.ny = this.movingEndY;
-                this.movingStatusY = 0;
-                this.movingEaseProgressY = 0;
-            }
-
-            // 平滑视角位置计算
-            if (this.movingEaseProgressX === 1) {
-                // 加速阶段
-                this.movingEaseProgressX =
-                    (now - this.movingAccX) / this.movingEaseTime;
-                const tx = fn(this.movingEaseProgressX) * dx;
-                this.nx = this.movingAccPosX + tx;
-            } else if (this.movingEaseProgressX === 2) {
-                // 匀速阶段
-                const time = now - this.movingConstantX;
-                this.nx = this.movingConstantPosX + time * this.speedX * dx;
-            } else if (this.movingEaseProgressX === 3) {
-                // 减速阶段
-                this.movingEaseProgressX =
-                    1 - (now - this.movingDeaccX) / this.movingEaseTime;
-                const tx = fn(this.movingEaseProgressX) * dx;
-                this.nx = this.movingDeaccPosX + tx;
-            }
-
-            if (this.movingEaseProgressY === 1) {
-                // 加速阶段
-                this.movingEaseProgressY =
-                    (now - this.movingAccY) / this.movingEaseTime;
-                const ty = fn(this.movingEaseProgressY) * dy;
-                this.ny = this.movingAccPosY + ty;
-            } else if (this.movingEaseProgressY === 2) {
-                // 匀速阶段
-                const time = now - this.movingConstantY;
-                this.ny = this.movingConstantPosY + time * this.speedY * dy;
-            } else if (this.movingEaseProgressY === 3) {
-                // 减速阶段
-                this.movingEaseProgressY =
-                    1 - (now - this.movingDeaccY) / this.movingEaseTime;
-                const ty = fn(this.movingEaseProgressY) * dy;
-                this.ny = this.movingDeaccPosY + ty;
-            }
-        });
     }
 
     private create() {
