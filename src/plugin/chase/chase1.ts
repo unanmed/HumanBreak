@@ -1,7 +1,20 @@
-import { Animation, bezier, hyper, linear, shake, sleep } from 'mutate-animate';
+import {
+    Animation,
+    bezier,
+    hyper,
+    linear,
+    power,
+    shake,
+    sleep
+} from 'mutate-animate';
 import { Chase, ChaseData } from './chase';
 import { completeAchievement } from '../ui/achievement';
-import { Camera, CameraAnimation } from '@/core/render/camera';
+import {
+    Camera,
+    CameraAnimation,
+    CameraRotate,
+    CameraScale
+} from '@/core/render/camera';
 import { LayerGroup } from '@/core/render/preset/layer';
 import { MotaRenderer } from '@/core/render/render';
 import { Sprite } from '@/core/render/sprite';
@@ -126,15 +139,30 @@ export function initChase() {
 
     const chase = new Chase(data, flags.chaseHard === 0);
 
-    const translate = camera.addTranslate();
+    // 旋转在前，平移在后
+    const translate1 = camera.addTranslate();
+    const scale = camera.addScale();
     const rotate = camera.addRotate();
+    const translate2 = camera.addTranslate();
+    const translate = camera.addTranslate();
 
-    translate.x = 10;
-    translate.y = 10;
+    translate1.x = -7 * 32;
+    translate1.y = -7 * 32;
+    translate2.x = 7 * 32;
+    translate2.y = 7 * 32;
+
+    translate.x = 10 * 32;
+    translate.y = 10 * 32;
+
+    const inOut = hyper('sin', 'in-out');
     // MT16 摄像机动画
     animation16.translate(translate, 10, 10, 1, 0, linear());
     animation16.translate(translate, 0, 10, 1600, 0, hyper('sin', 'in'));
     // MT15 摄像机动画
+    animation15.rotate(rotate, -Math.PI / 30, 4000, 0, inOut);
+    animation15.rotate(rotate, 0, 3000, 5000, inOut);
+    animation15.rotate(rotate, -Math.PI / 40, 1800, 11000, inOut);
+    animation15.rotate(rotate, 0, 2000, 13000, inOut);
     animation15.translate(translate, 49, 0, 1, 0, linear());
     animation15.translate(translate, 45, 0, 2324, 0, hyper('sin', 'in'));
     animation15.translate(translate, 40, 0, 1992, 2324, hyper('sin', 'out'));
@@ -145,6 +173,8 @@ export function initChase() {
     animation15.translate(translate, 12, 0, 996, 12450, linear());
     animation15.translate(translate, 0, 0, 1470, 13446, hyper('sin', 'out'));
     // MT14 摄像机动画
+    animation14.rotate(rotate, -Math.PI / 70, 1000, 0, inOut);
+    animation14.rotate(rotate, 0, 4000, 2000, inOut);
     animation14.translate(translate, 113, 0, 1, 0, hyper('sin', 'in'));
     animation14.translate(translate, 109, 0, 1328, 0, hyper('sin', 'in'));
     animation14.translate(translate, 104, 0, 332, 1328, hyper('sin', 'out'));
@@ -158,11 +188,17 @@ export function initChase() {
     animation14.translate(translate, 0, 0, 9960, 24900, linear());
 
     chase.on('end', () => {
+        camera.transform.reset();
+        camera.transform.translate(
+            -translate.x * 32 - 7 * 32,
+            -translate.y * 32 - 7 * 32
+        );
         animation16.destroy();
         animation15.destroy();
         animation14.destroy();
         camera.destroy();
         back?.destroy();
+        back = void 0;
     });
 
     judgeFail1(chase, ani, camera);
@@ -170,6 +206,7 @@ export function initChase() {
     para1(chase);
     para2(chase);
     para3(chase, ani);
+    processScale(chase, ani, scale, camera);
 
     Mota.Plugin.require('chase_g').chaseInit1();
 
@@ -183,6 +220,31 @@ export function initChase() {
 //         .time(50000)
 //         .shake(1, 0);
 // }
+
+function processScale(
+    chase: Chase,
+    ani: Animation,
+    scale: CameraScale,
+    camera: Camera
+) {
+    chase.onceLoc(35, 3, 'MT15', () => {
+        camera.applyScaleAnimation(scale, ani, 2200);
+        ani.mode(linear()).time(1).scale(1.2);
+        sleep(150).then(() => {
+            ani.mode(hyper('sin', 'out')).time(2000).scale(1);
+        });
+    });
+    chase.onFloorTime('MT14', 100, () => {
+        camera.applyScaleAnimation(scale, ani, 30000);
+        ani.mode(hyper('sin', 'in-out')).time(3000).scale(0.8);
+    });
+    chase.onceLoc(57, 10, 'MT14', () => {
+        ani.mode(power(6, 'in')).time(200).scale(1.1);
+        sleep(200).then(() => {
+            ani.mode(hyper('sin', 'in-out')).time(3000).scale(1);
+        });
+    });
+}
 
 async function wolfMove(chase: Chase) {
     core.moveBlock(23, 17, Array(6).fill('down'), 80);
@@ -489,13 +551,16 @@ function para3(chase: Chase, ani: Animation) {
         }
         core.drawAnimate('explosion2', 61, 7);
     });
+    const exploded: Set<number> = new Set();
     chase.on('step', (x, y) => {
         if (core.status.floorId !== 'MT14') return;
+        if (exploded.has(x)) return;
         if (x > 20 && x < 49) {
             for (let ty = 3; ty <= 11; ty++) {
                 core.setBlock(336, x + 4, ty);
                 core.drawAnimate('explosion1', x + 4, ty);
             }
+            exploded.add(x);
         }
     });
     chase.onceLoc(21, 7, 'MT14', async () => {

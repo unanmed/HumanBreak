@@ -4,21 +4,21 @@ import { logger } from '../common/logger';
 import { Transform } from './transform';
 import EventEmitter from 'eventemitter3';
 
-interface CameraTranslate {
+export interface CameraTranslate {
     readonly type: 'translate';
     readonly from: Camera;
     x: number;
     y: number;
 }
 
-interface CameraRotate {
+export interface CameraRotate {
     readonly type: 'rotate';
     readonly from: Camera;
     /** 旋转角，单位弧度 */
     angle: number;
 }
 
-interface CameraScale {
+export interface CameraScale {
     readonly type: 'scale';
     readonly from: Camera;
     x: number;
@@ -160,8 +160,8 @@ export class Camera extends EventEmitter<CameraEvent> {
     addScale(): CameraScale {
         const item: CameraScale = {
             type: 'scale',
-            x: 0,
-            y: 0,
+            x: 1,
+            y: 1,
             from: this
         };
         this.operation.push(item);

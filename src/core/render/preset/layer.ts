@@ -1184,7 +1184,7 @@ export class Layer extends Container {
         const mat = transform.mat;
         const [a, b, , c, d, , e, f] = mat;
         ctx.setTransform(a, b, c, d, e, f);
-        const max1 = Math.max(a, b, c, d) ** 2;
+        const max1 = 1 / Math.min(a, b, c, d) ** 2;
         const max2 = Math.max(core._PX_, core._PY_) * 2;
         const r = (max1 * max2) ** 2;
 
