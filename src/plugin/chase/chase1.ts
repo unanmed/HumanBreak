@@ -5,7 +5,6 @@ import { Camera, CameraAnimation, CameraScale } from '@/core/render/camera';
 import { LayerGroup } from '@/core/render/preset/layer';
 import { MotaRenderer } from '@/core/render/render';
 import { Sprite } from '@/core/render/sprite';
-import { AudioPlayer } from '@/core/audio/audio';
 import { bgm } from '@/core/audio/bgm';
 
 const path: Partial<Record<FloorIds, LocArr[]>> = {
@@ -177,7 +176,7 @@ export function initChase(): IChaseController {
     animation14.translate(translate, 36, 0, 3320, 21580, linear());
     animation14.translate(translate, 0, 0, 9960, 24900, linear());
 
-    chase.on('end', () => {
+    chase.on('end', success => {
         camera.transform.reset();
         camera.transform.translate(
             -translate.x * 32 - 7 * 32,
@@ -191,6 +190,10 @@ export function initChase(): IChaseController {
         back = void 0;
         core.removeFlag('onChase');
         core.removeFlag('chaseId');
+
+        if (success) {
+            completeAchievement('challenge', 0);
+        }
     });
 
     judgeFail1(chase, ani, camera);

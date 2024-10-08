@@ -1,4 +1,3 @@
-import { logger } from '@/core/common/logger';
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 import { CameraAnimation } from '@/core/render/camera';
 import { LayerGroup } from '@/core/render/preset/layer';
