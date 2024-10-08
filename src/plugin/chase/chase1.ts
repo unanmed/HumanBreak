@@ -217,6 +217,7 @@ export function initChase(): IChaseController {
         },
         end(success) {
             chase.end(success);
+            camera.destroy();
         },
         initAudio(fromSave) {
             if (fromSave) initFromSave(chase);
