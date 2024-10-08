@@ -1,9 +1,8 @@
 import { logger } from '@/core/common/logger';
 import { HeroRenderer } from './hero';
 import { ILayerGroupRenderExtends, LayerGroup } from './layer';
-import { Transform } from '../transform';
 import { LayerGroupFloorBinder } from './floor';
-import { hyper, inverseTrigo, power, TimingFn, trigo } from 'mutate-animate';
+import { hyper, TimingFn } from 'mutate-animate';
 import { RenderAdapter } from '../adapter';
 
 export class FloorViewport implements ILayerGroupRenderExtends {

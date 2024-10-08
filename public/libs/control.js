@@ -2412,6 +2412,10 @@ control.prototype._doSL_load_afterGet = function (id, data) {
         core.myconfirm('此存档可能存在风险，你想要播放录像么？', _replay);
         return;
     }
+    // 追逐战
+    Mota.r(() => {
+        Mota.Plugin.require('chase_r').end(false);
+    });
     core.ui.closePanel();
     core.loadData(data, function () {
         core.removeFlag('__fromLoad__');

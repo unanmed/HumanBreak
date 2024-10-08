@@ -44,6 +44,8 @@ export class Camera extends EventEmitter<CameraEvent> {
 
     /** 是否需要更新视角 */
     private needUpdate: boolean = false;
+    /** 是否启用摄像机 */
+    private enabled: boolean = true;
 
     /** 变换操作列表，因为矩阵乘法跟顺序有关，因此需要把各个操作拆分成列表进行 */
     protected operation: CameraOperation[] = [];
@@ -84,7 +86,7 @@ export class Camera extends EventEmitter<CameraEvent> {
     }
 
     private tick = () => {
-        if (!this.needUpdate) return;
+        if (!this.needUpdate || !this.enabled) return;
         const trans = this.transform;
         trans.reset();
         for (const o of this.operation) {
@@ -99,6 +101,20 @@ export class Camera extends EventEmitter<CameraEvent> {
         this.binded.update(this.binded);
         this.needUpdate = false;
     };
+
+    /**
+     * 禁用这个摄像机
+     */
+    disable() {
+        this.enabled = false;
+    }
+
+    /**
+     * 启用这个摄像机
+     */
+    enable() {
+        this.enabled = true;
+    }
 
     /**
      * 在下一帧进行强制更新

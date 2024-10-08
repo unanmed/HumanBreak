@@ -1,23 +1,12 @@
-import {
-    Animation,
-    bezier,
-    hyper,
-    linear,
-    power,
-    shake,
-    sleep
-} from 'mutate-animate';
-import { Chase, ChaseData } from './chase';
+import { Animation, hyper, linear, power, sleep } from 'mutate-animate';
+import { Chase, ChaseData, IChaseController } from './chase';
 import { completeAchievement } from '../ui/achievement';
-import {
-    Camera,
-    CameraAnimation,
-    CameraRotate,
-    CameraScale
-} from '@/core/render/camera';
+import { Camera, CameraAnimation, CameraScale } from '@/core/render/camera';
 import { LayerGroup } from '@/core/render/preset/layer';
 import { MotaRenderer } from '@/core/render/render';
 import { Sprite } from '@/core/render/sprite';
+import { AudioPlayer } from '@/core/audio/audio';
+import { bgm } from '@/core/audio/bgm';
 
 const path: Partial<Record<FloorIds, LocArr[]>> = {
     MT16: [
@@ -115,15 +104,16 @@ let back: Sprite | undefined;
 /**
  * 初始化并开始这个追逐战
  */
-export function initChase() {
+export function initChase(): IChaseController {
     const ani = new Animation();
 
     const render = MotaRenderer.get('render-main')!;
     const layer = render.getElementById('layer-main')! as LayerGroup;
 
-    const camera = Camera.for(layer);
+    const camera = new Camera(layer);
     camera.clearOperation();
     camera.transform = layer.camera;
+    camera.disable();
     const animation16 = new CameraAnimation(camera);
     const animation15 = new CameraAnimation(camera);
     const animation14 = new CameraAnimation(camera);
@@ -199,6 +189,8 @@ export function initChase() {
         camera.destroy();
         back?.destroy();
         back = void 0;
+        core.removeFlag('onChase');
+        core.removeFlag('chaseId');
     });
 
     judgeFail1(chase, ani, camera);
@@ -210,8 +202,45 @@ export function initChase() {
 
     Mota.Plugin.require('chase_g').chaseInit1();
 
-    chase.start();
-    wolfMove(chase);
+    const controller: IChaseController = {
+        chase,
+        start(fromSave) {
+            core.setFlag('onChase', true);
+            core.setFlag('chaseId', 1);
+            core.autosave();
+            chase.start();
+            camera.enable();
+            wolfMove(chase);
+            if (fromSave) {
+                initFromSave(chase);
+            }
+        },
+        end(success) {
+            chase.end(success);
+        },
+        initAudio(fromSave) {
+            if (fromSave) initFromSave(chase);
+            else initAudio(chase);
+        }
+    };
+    return controller;
+}
+
+function initAudio(chase: Chase) {
+    playAudio(0, chase);
+}
+
+function initFromSave(chase: Chase) {
+    playAudio(43.5, chase);
+}
+
+function playAudio(from: number, chase: Chase) {
+    bgm.changeTo('escape.mp3', from);
+    bgm.blockChange();
+    chase.on('end', () => {
+        bgm.unblockChange();
+        bgm.undo();
+    });
 }
 
 // function chaseShake(chase: Chase) {

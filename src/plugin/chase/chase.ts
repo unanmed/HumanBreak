@@ -8,6 +8,29 @@ import { disableViewport, enableViewport } from '@/core/render/utils';
 import type { HeroMover, MoveStep } from '@/game/state/move';
 import EventEmitter from 'eventemitter3';
 
+export interface IChaseController {
+    /** 本次追逐战实例 */
+    readonly chase: Chase;
+
+    /**
+     * 开始这个追逐战
+     * @param fromSave 是否是从存档开始
+     */
+    start(fromSave: boolean): void;
+
+    /**
+     * 结束这个追逐战
+     * @param success 是否逃脱成功
+     */
+    end(success: boolean): void;
+
+    /**
+     * 初始化这次追逐战的音频
+     * @param fromSave 是否从存档开始
+     */
+    initAudio(fromSave: boolean): void;
+}
+
 export interface ChaseData {
     path: Partial<Record<FloorIds, LocArr[]>>;
     camera: Partial<Record<FloorIds, CameraAnimation>>;

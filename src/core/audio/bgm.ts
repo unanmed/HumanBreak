@@ -37,6 +37,22 @@ export class BgmController
 
     private transitionData: Map<BgmIds, AnimatingBgm> = new Map();
 
+    private canChange: boolean = true;
+
+    /**
+     * 屏蔽音乐修改
+     */
+    blockChange() {
+        this.canChange = false;
+    }
+
+    /**
+     * 取消屏蔽音乐修改
+     */
+    unblockChange() {
+        this.canChange = true;
+    }
+
     /**
      * 添加一个bgm
      * @param uri bgm的`uri`，由于bgm是一类资源，因此`uri`为`bgms.xxx`的形式
@@ -67,6 +83,7 @@ export class BgmController
      * @param when 切换至的歌从什么时候开始播放，默认-1，表示不改变，整数表示设置为目标值
      */
     changeTo(id: BgmIds, when: number = -1, noStack: boolean = false) {
+        if (!this.canChange) return;
         if (id === this.now) return this.resume();
         let prevent = false;
         const preventDefault = () => {
@@ -98,6 +115,7 @@ export class BgmController
      * @param transition 是否使用渐变效果，默认使用
      */
     pause(transition: boolean = true) {
+        if (!this.canChange) return;
         if (!this.now) return;
         let prevent = false;
         const preventDefault = () => {
@@ -120,6 +138,7 @@ export class BgmController
      * @param transition 是否使用渐变效果，默认使用
      */
     resume(transition: boolean = true) {
+        if (!this.canChange) return;
         if (!this.now) return;
         let prevent = false;
         const preventDefault = () => {
@@ -147,6 +166,7 @@ export class BgmController
      * @param when 从bgm的何时开始播放
      */
     play(id: BgmIds, when: number = 0, noStack: boolean = false) {
+        if (!this.canChange) return;
         if (id === this.now) return;
         let prevent = false;
         const preventDefault = () => {
@@ -184,6 +204,7 @@ export class BgmController
      * 撤销当前播放，改为播放前一个bgm
      */
     undo(transition: boolean = true, when: number = 0) {
+        if (!this.canChange) return;
         if (this.stack.length === 0) return;
         else {
             const to = this.stack.pop()!;
@@ -200,6 +221,7 @@ export class BgmController
      * 取消上一次的撤销，改为播放上一次撤销的bgm
      */
     redo(transition: boolean = true, when: number = 0) {
+        if (!this.canChange) return;
         if (this.redoStack.length === 0) return;
         else {
             const to = this.redoStack.pop()!;

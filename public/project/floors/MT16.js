@@ -145,6 +145,10 @@ main.floors.MT16=
                 "forbid": true
             },
             {
+                "type": "function",
+                "function": "function(){\nconst controller = Mota.Plugin.require('chase_r').initChase(0);\ncontroller.initAudio(false);\n}"
+            },
+            {
                 "type": "show",
                 "loc": [
                     [
@@ -153,11 +157,6 @@ main.floors.MT16=
                     ]
                 ],
                 "floorId": "MT14"
-            },
-            {
-                "type": "playBgm",
-                "name": "escape.mp3",
-                "keep": true
             },
             {
                 "type": "animate",
@@ -400,10 +399,7 @@ main.floors.MT16=
             },
             {
                 "type": "function",
-                "function": "function(){\nMota.Plugin.require('chase_r').startChase(0);\n}"
-            },
-            {
-                "type": "autoSave"
+                "function": "function(){\nMota.Plugin.require('chase_r').start(false);\n}"
             }
         ],
         "2,23": [
