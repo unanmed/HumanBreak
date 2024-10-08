@@ -80,7 +80,8 @@ export class Camera extends EventEmitter<CameraEvent> {
             this.destroy();
         });
 
-        if (Camera.cameraMap.has(item)) {
+        const ca = Camera.cameraMap.get(item);
+        if (ca && !ca.enabled) {
             logger.warn(22);
         }
     }
