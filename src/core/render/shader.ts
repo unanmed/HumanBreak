@@ -767,10 +767,10 @@ class ShaderProgram {
     constructor(shader: Shader, vs?: string, fs?: string) {
         if (vs) this.vs(vs);
         if (fs) this.fs(fs);
-        this.requestCompile();
         this.element = shader;
         this.gl = shader.gl;
         this.version = shader.VERSION_ES_100;
+        this.requestCompile();
     }
 
     /**
@@ -872,6 +872,7 @@ class ShaderProgram {
                 fn(gl, location, ...params);
             }
         };
+        this.uniform.set(uniform, obj);
         return obj;
     }
 
@@ -898,6 +899,7 @@ class ShaderProgram {
                 fn(gl, location, transpose, data, srcOffset, srcLength);
             }
         };
+        this.matrix.set(uniform, obj);
         return obj;
     }
 
@@ -934,6 +936,7 @@ class ShaderProgram {
                 gl.vertexAttribDivisor(location, divisor);
             }
         };
+        this.attribute.set(attrib, obj);
         return obj;
     }
 
@@ -966,6 +969,7 @@ class ShaderProgram {
                 gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, buffer);
             }
         };
+        this.block.set(block, obj);
         return obj;
     }
 
@@ -977,6 +981,7 @@ class ShaderProgram {
     }
 
     private clearProgram() {
+        if (!this.gl) return;
         this.uniform.clear();
         this.attribute.clear();
         this.matrix.clear();
