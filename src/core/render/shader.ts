@@ -69,26 +69,6 @@ interface ShaderBuffer {
     indices: WebGLBuffer;
 }
 
-// interface ShaderUniform {
-//     u_sampler: WebGLUniformLocation;
-
-//     [x: string]: WebGLUniformLocation | null;
-// }
-
-// interface ShaderAttribute {
-//     a_texCoord: number;
-//     a_position: number;
-
-//     [x: string]: number;
-// }
-
-// interface ShaderProgram {
-//     program: WebGLProgram | null;
-//     shader: CompiledShader | null;
-//     uniform: ShaderUniform | null;
-//     attribute: ShaderAttribute | null;
-// }
-
 const enum ShaderVersion {
     ES_100,
     ES_300
@@ -868,8 +848,9 @@ class ShaderProgram {
         const obj: ShaderUniform<T> = {
             location,
             type,
-            set: (...params: Parameters<UniformSetFn[T]>) => {
-                fn(gl, location, ...params);
+            set: (p0, p1, p2, p3) => {
+                // @ts-ignore
+                fn(gl, location, p0, p1, p2, p3);
             }
         };
         this.uniform.set(uniform, obj);
@@ -923,8 +904,9 @@ class ShaderProgram {
         const obj: ShaderAttrib<T> = {
             location,
             type,
-            set: (...params: Parameters<AttribSetFn[T]>) => {
-                fn(gl, location, ...params);
+            set: (p0, p1, p2, p3) => {
+                // @ts-ignore
+                fn(gl, location, p0, p1, p2, p3);
             },
             pointer: (p0, p1, p2, p3, p4) => {
                 gl.vertexAttribPointer(location, p0, p1, p2, p3, p4);
