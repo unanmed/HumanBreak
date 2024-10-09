@@ -7,6 +7,14 @@ import { ERenderItemEvent, RenderItem, RenderItemPosition } from './item';
 import { Transform } from './transform';
 
 const SHADER_VERTEX_PREFIX_300 = /* glsl */ `#version 300 es
+#ifdef GL_ES
+    precision highp float;
+#endif
+
+in vec4 a_position;
+in vec2 a_texCoord;
+
+out highp vec2 v_texCoord;
 `;
 const SHADER_VERTEX_PREFIX_100 = /* glsl */ `
 #ifdef GL_ES
@@ -20,6 +28,13 @@ varying highp vec2 v_texCoord;
 `;
 
 const SHADER_FRAGMENT_PREFIX_300 = /* glsl */ `#version 300 es
+#ifdef GL_ES
+    precision highp float;
+#endif
+
+in highp vec2 v_texCoord;
+
+uniform sampler2D u_sampler;
 `;
 const SHADER_FRAGMENT_PREFIX_100 = /* glsl */ `
 #ifdef GL_ES
@@ -43,8 +58,6 @@ void main() {
 }
 `;
 
-export type ShaderGLSLVersion = '100' | '300';
-
 interface CompiledShader {
     vertex: WebGLShader;
     fragment: WebGLShader;
@@ -56,24 +69,83 @@ interface ShaderBuffer {
     indices: WebGLBuffer;
 }
 
-interface ShaderUniform {
-    u_sampler: WebGLUniformLocation;
+// interface ShaderUniform {
+//     u_sampler: WebGLUniformLocation;
 
-    [x: string]: WebGLUniformLocation | null;
+//     [x: string]: WebGLUniformLocation | null;
+// }
+
+// interface ShaderAttribute {
+//     a_texCoord: number;
+//     a_position: number;
+
+//     [x: string]: number;
+// }
+
+// interface ShaderProgram {
+//     program: WebGLProgram | null;
+//     shader: CompiledShader | null;
+//     uniform: ShaderUniform | null;
+//     attribute: ShaderAttribute | null;
+// }
+
+const enum ShaderVersion {
+    ES_100,
+    ES_300
 }
 
-interface ShaderAttribute {
-    a_texCoord: number;
-    a_position: number;
-
-    [x: string]: number;
+export const enum UniformType {
+    Uniform1f,
+    Uniform1fv,
+    Uniform1i,
+    Uniform1iv,
+    Uniform1ui,
+    Uniform1uiv,
+    Uniform2f,
+    Uniform2fv,
+    Uniform2i,
+    Uniform2iv,
+    Uniform2ui,
+    Uniform2uiv,
+    Uniform3f,
+    Uniform3fv,
+    Uniform3i,
+    Uniform3iv,
+    Uniform3ui,
+    Uniform3uiv,
+    Uniform4f,
+    Uniform4fv,
+    Uniform4i,
+    Uniform4iv,
+    Uniform4ui,
+    Uniform4uiv
 }
 
-interface ShaderProgram {
-    program: WebGLProgram | null;
-    shader: CompiledShader | null;
-    uniform: ShaderUniform | null;
-    attribute: ShaderAttribute | null;
+export const enum UniformMatrix {
+    UMatrix2x2,
+    UMatrix2x3,
+    UMatrix2x4,
+    UMatrix3x2,
+    UMatrix3x3,
+    UMatrix3x4,
+    UMatrix4x2,
+    UMatrix4x3,
+    UMatrix4x4
+}
+
+export const enum AttribType {
+    Attrib1f,
+    Attrib1fv,
+    Attrib2f,
+    Attrib2fv,
+    Attrib3f,
+    Attrib3fv,
+    Attrib4f,
+    Attrib4fv,
+    AttribI4i,
+    AttribI4iv,
+    AttribI4ui,
+    AttribI4uiv
 }
 
 interface EShaderEvent extends ERenderItemEvent {}
@@ -82,55 +154,85 @@ export class Shader extends Container<EShaderEvent> {
     /** 是否支持此组件 */
     static readonly support: boolean = isWebGL2Supported();
 
-    // 会用到的静态常量
-    static readonly VERTEX_SHADER: number = 0b1;
-    static readonly FRAGMENT_SHADER: number = 0b10;
-
-    private version: ShaderGLSLVersion = '100';
+    // 会用到的一些常量
+    // 着色器版本
+    readonly VERSION_ES_100: ShaderVersion.ES_100 = 0;
+    readonly VERSION_ES_300: ShaderVersion.ES_300 = 1;
+    // uniform 类型
+    readonly UNIFORM_1f: UniformType.Uniform1f = UniformType.Uniform1f;
+    readonly UNIFORM_1fv: UniformType.Uniform1fv = UniformType.Uniform1fv;
+    readonly UNIFORM_1i: UniformType.Uniform1i = UniformType.Uniform1i;
+    readonly UNIFORM_1iv: UniformType.Uniform1iv = UniformType.Uniform1iv;
+    readonly UNIFORM_1ui: UniformType.Uniform1ui = UniformType.Uniform1ui;
+    readonly UNIFORM_1uiv: UniformType.Uniform1uiv = UniformType.Uniform1uiv;
+    readonly UNIFORM_2f: UniformType.Uniform2f = UniformType.Uniform2f;
+    readonly UNIFORM_2fv: UniformType.Uniform2fv = UniformType.Uniform2fv;
+    readonly UNIFORM_2i: UniformType.Uniform2i = UniformType.Uniform2i;
+    readonly UNIFORM_2iv: UniformType.Uniform2iv = UniformType.Uniform2iv;
+    readonly UNIFORM_2ui: UniformType.Uniform2ui = UniformType.Uniform2ui;
+    readonly UNIFORM_2uiv: UniformType.Uniform2uiv = UniformType.Uniform2uiv;
+    readonly UNIFORM_3f: UniformType.Uniform3f = UniformType.Uniform3f;
+    readonly UNIFORM_3fv: UniformType.Uniform3fv = UniformType.Uniform3fv;
+    readonly UNIFORM_3i: UniformType.Uniform3i = UniformType.Uniform3i;
+    readonly UNIFORM_3iv: UniformType.Uniform3iv = UniformType.Uniform3iv;
+    readonly UNIFORM_3ui: UniformType.Uniform3ui = UniformType.Uniform3ui;
+    readonly UNIFORM_3uiv: UniformType.Uniform3uiv = UniformType.Uniform3uiv;
+    readonly UNIFORM_4f: UniformType.Uniform4f = UniformType.Uniform4f;
+    readonly UNIFORM_4fv: UniformType.Uniform4fv = UniformType.Uniform4fv;
+    readonly UNIFORM_4i: UniformType.Uniform4i = UniformType.Uniform4i;
+    readonly UNIFORM_4iv: UniformType.Uniform4iv = UniformType.Uniform4iv;
+    readonly UNIFORM_4ui: UniformType.Uniform4ui = UniformType.Uniform4ui;
+    readonly UNIFORM_4uiv: UniformType.Uniform4uiv = UniformType.Uniform4uiv;
+    // uniform matrix 类型
+    readonly U_MATRIX_2x2: UniformMatrix.UMatrix2x2 = UniformMatrix.UMatrix2x2;
+    readonly U_MATRIX_2x3: UniformMatrix.UMatrix2x3 = UniformMatrix.UMatrix2x3;
+    readonly U_MATRIX_2x4: UniformMatrix.UMatrix2x4 = UniformMatrix.UMatrix2x4;
+    readonly U_MATRIX_3x2: UniformMatrix.UMatrix3x2 = UniformMatrix.UMatrix3x2;
+    readonly U_MATRIX_3x3: UniformMatrix.UMatrix3x3 = UniformMatrix.UMatrix3x3;
+    readonly U_MATRIX_3x4: UniformMatrix.UMatrix3x4 = UniformMatrix.UMatrix3x4;
+    readonly U_MATRIX_4x2: UniformMatrix.UMatrix4x2 = UniformMatrix.UMatrix4x2;
+    readonly U_MATRIX_4x3: UniformMatrix.UMatrix4x3 = UniformMatrix.UMatrix4x3;
+    readonly U_MATRIX_4x4: UniformMatrix.UMatrix4x4 = UniformMatrix.UMatrix4x4;
+    // attribute 类型
+    readonly ATTRIB_1f: AttribType.Attrib1f = AttribType.Attrib1f;
+    readonly ATTRIB_1fv: AttribType.Attrib1fv = AttribType.Attrib1fv;
+    readonly ATTRIB_2f: AttribType.Attrib2f = AttribType.Attrib2f;
+    readonly ATTRIB_2fv: AttribType.Attrib2fv = AttribType.Attrib2fv;
+    readonly ATTRIB_3f: AttribType.Attrib3f = AttribType.Attrib3f;
+    readonly ATTRIB_3fv: AttribType.Attrib3fv = AttribType.Attrib3fv;
+    readonly ATTRIB_4f: AttribType.Attrib4f = AttribType.Attrib4f;
+    readonly ATTRIB_4fv: AttribType.Attrib4fv = AttribType.Attrib4fv;
+    readonly ATTRIB_I4i: AttribType.AttribI4i = AttribType.AttribI4i;
+    readonly ATTRIB_I4iv: AttribType.AttribI4iv = AttribType.AttribI4iv;
+    readonly ATTRIB_I4ui: AttribType.AttribI4ui = AttribType.AttribI4ui;
+    readonly ATTRIB_I4uiv: AttribType.AttribI4uiv = AttribType.AttribI4uiv;
 
     canvas: HTMLCanvasElement;
     gl: WebGL2RenderingContext;
 
-    /** 是否修改过着色器，用于特定场景优化 */
-    private shaderModified: boolean = false;
-    /** 需要重新编译的着色器 */
-    private shaderDirty: boolean = true;
     /** 是否需要重新渲染着色器 */
-    private shaderRanderDirty: boolean = true;
-    /** 当前程序是否被外部调用过 */
-    private programExterned: boolean = false;
-
-    /** 顶点着色器 */
-    private vertex: string = DEFAULT_VS;
-    /** 片元着色器 */
-    private fragment: string = DEFAULT_FS;
+    private shaderRenderDirty: boolean = true;
 
     /** webgl使用的程序 */
-    private program: WebGLProgram | null = null;
+    private program: ShaderProgram | null = null;
     /** 子元素构成的纹理 */
     private texture: WebGLTexture | null = null;
-    /** 编译过的着色器，在切换着色器时会被删除 */
-    private shader: CompiledShader | null = null;
     /** 缓冲区 */
     private buffer: ShaderBuffer | null = null;
-    /** uniform */
-    private uniform: ShaderUniform | null = null;
-    /** attribute */
-    private attribute: ShaderAttribute | null = null;
 
-    constructor(
-        type: RenderItemPosition = 'static',
-        version: ShaderGLSLVersion = '100'
-    ) {
+    /** 当前渲染实例的所有着色器程序 */
+    private programs: Set<ShaderProgram> = new Set();
+
+    constructor(type: RenderItemPosition = 'static') {
         super(type, !Shader.support);
 
         this.canvas = document.createElement('canvas');
         this.gl = this.canvas.getContext('webgl2')!;
-        this.setVersion(version);
         if (!Shader.support) {
             this.canvas.width = 0;
             this.canvas.height = 0;
         }
+
         this.init();
     }
 
@@ -138,12 +240,12 @@ export class Shader extends Container<EShaderEvent> {
         canvas: MotaOffscreenCanvas2D,
         transform: Transform
     ): void {
-        if (!Shader.support || !this.shaderModified) {
+        if (!Shader.support || !this.program || !this.program.modified) {
             super.render(canvas, transform);
         } else {
-            if (this.shaderDirty) {
-                this.cacheDirty = true;
-                this.compileShader();
+            const compile = this.program.requestCompile();
+            if (compile) {
+                this.gl.useProgram(this.program.program);
             }
 
             if (this.cacheDirty) {
@@ -155,9 +257,9 @@ export class Shader extends Container<EShaderEvent> {
                 this.cacheDirty = false;
             }
 
-            if (this.shaderRanderDirty) {
+            if (this.shaderRenderDirty) {
                 this.drawScene();
-                this.shaderRanderDirty = false;
+                this.shaderRenderDirty = false;
             }
 
             canvas.ctx.drawImage(this.canvas, 0, 0, this.width, this.height);
@@ -179,18 +281,23 @@ export class Shader extends Container<EShaderEvent> {
         const scale = ratio * core.domStyle.scale;
         this.canvas.width = width * scale;
         this.canvas.height = height * scale;
+        this.shaderRenderDirty = true;
     }
 
     update(item?: RenderItem<any>): void {
         const isSelf = item === this && !this.cacheDirty;
         super.update(item);
         if (isSelf) this.cacheDirty = false;
-        this.shaderRanderDirty = true;
+        this.shaderRenderDirty = true;
     }
 
     drawScene() {
         const gl = this.gl;
-        if (!this.uniform || !gl) return;
+        const program = this.program;
+        if (!gl || !program) return;
+
+        const uSampler = program.getUniform<UniformType.Uniform1i>('u_sampler');
+        if (!uSampler) return;
 
         // 清空画布
         gl.viewport(0, 0, this.canvas.width, this.canvas.height);
@@ -219,7 +326,7 @@ export class Shader extends Container<EShaderEvent> {
             gl.UNSIGNED_BYTE,
             this.cache.canvas
         );
-        gl.uniform1i(this.uniform.uSampler, 0);
+        gl.uniform1i(uSampler.location, 0);
 
         // 绘制
         gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
@@ -230,135 +337,55 @@ export class Shader extends Container<EShaderEvent> {
      * @param program 着色器程序
      */
     useProgram(program: ShaderProgram) {
-        this.program = program.program;
-        this.shader = program.shader;
-        this.uniform = program.uniform;
-        this.attribute = program.attribute;
-        this.gl?.useProgram(this.program);
-        this.programExterned = true;
+        if (!this.gl) return;
+        if (program.element !== this) {
+            logger.error(17);
+            return;
+        }
+        this.program = program;
+        this.gl.useProgram(program.program);
+        this.shaderRenderDirty = true;
     }
 
     /**
-     * 获取当前的着色器程序
+     * 创建一个着色器程序
+     * @param vs 顶点着色器，可选
+     * @param fs 片元着色器，可选
      */
-    getProgram(): ShaderProgram {
-        this.programExterned = true;
-        return {
-            program: this.program,
-            shader: this.shader,
-            uniform: this.uniform,
-            attribute: this.attribute
-        };
+    createProgram(vs?: string, fs?: string) {
+        const program = new ShaderProgram(this, vs, fs);
+        this.programs.add(program);
+        return program;
     }
 
     /**
-     * 删除指定的着色器程序
-     * @param program 着色器程序
+     * 删除一个着色器程序
+     * @param program 要删除的着色器程序
      */
     deleteProgram(program: ShaderProgram) {
-        if (!this.gl) return;
-        if (this.program === program.program) {
-            this.gl.useProgram(null);
-            this.program = null;
-            this.shader = null;
-            this.uniform = null;
-            this.attribute = null;
+        if (program.element !== this) {
+            logger.error(18);
+            return;
         }
-        if (program.program) {
-            this.gl.deleteProgram(program.program);
+        program.destroy();
+        this.programs.delete(program);
+    }
+
+    destroy(): void {
+        this.gl.deleteTexture(this.texture);
+        if (this.buffer) {
+            this.gl.deleteBuffer(this.buffer.indices);
+            this.gl.deleteBuffer(this.buffer.position);
+            this.gl.deleteBuffer(this.buffer.texture);
         }
-        if (program.shader) {
-            this.gl.deleteShader(program.shader.vertex);
-            this.gl.deleteShader(program.shader.fragment);
-        }
-    }
-
-    /**
-     * 设置着色器使用的glsl版本，默认使用100版本
-     */
-    setVersion(version: ShaderGLSLVersion) {
-        this.version = version;
-    }
-
-    /**
-     * 设置顶点着色器
-     * @param shader 着色器
-     */
-    vs(shader: string) {
-        this.vertex = shader;
-        this.shaderModified = true;
-        this.shaderDirty = true;
-    }
-
-    /**
-     * 设置片元着色器
-     * @param shader 着色器
-     */
-    fs(shader: string) {
-        this.fragment = shader;
-        this.shaderModified = true;
-        this.shaderDirty = true;
-    }
-
-    /**
-     * 编译指定着色器并附加到新程序，老程序可以在调用此函数之前通过 {@link Shader.getProgram} 获取，
-     * 否则，老程序将会被删除
-     */
-    compileShader() {
-        if (!Shader.support) return;
-
-        const program = Shader.compileProgram(
-            this,
-            this.version,
-            this.vertex,
-            this.fragment
-        );
-        if (!program) return;
-
-        if (!this.programExterned) {
-            Shader.deleteProgram(this, this.getProgram());
-        }
-        this.programExterned = false;
-        this.shaderDirty = false;
-
-        this.program = program.program;
-        this.shader = program.shader;
-        this.uniform = program.uniform;
-        this.attribute = program.attribute;
-        this.gl?.useProgram(this.program);
-    }
-
-    /**
-     * 获取属性位置
-     * @param name 属性名称
-     */
-    getAttribute(name: string) {
-        if (!this.attribute || !this.gl || !this.program) return null;
-        if (!isNil(this.attribute[name])) return this.attribute[name];
-        return (this.attribute[name] = this.gl.getAttribLocation(
-            this.program,
-            name
-        ));
-    }
-
-    /**
-     * 获取uniform位置
-     * @param name 属性名称
-     */
-    getUniform(name: string) {
-        if (!this.uniform || !this.gl || !this.program) return null;
-        if (!isNil(this.uniform[name])) return this.uniform[name];
-        return (this.uniform[name] = this.gl.getUniformLocation(
-            this.program,
-            name
-        ));
+        this.programs.forEach(v => v.destroy());
+        super.destroy();
     }
 
     // ----- 初始化部分
 
     private init() {
         if (!this.gl) return;
-        this.program = this.gl.createProgram();
         this.initTexture();
         this.initBuffers();
     }
@@ -383,18 +410,22 @@ export class Shader extends Container<EShaderEvent> {
     }
 
     private setTextureAttrib() {
-        if (!this.attribute) return;
+        if (!this.program) return;
+        const aTexCoord = this.program.getAttribute('a_texCoord');
+        if (!aTexCoord) return;
         const gl = this.gl;
-        const pos = this.attribute.a_texCoord;
+        const pos = aTexCoord.location;
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer!.texture);
         gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(pos);
     }
 
     private setPositionAttrib() {
-        if (!this.attribute) return;
+        if (!this.program) return;
+        const aPosition = this.program.getAttribute('a_position');
+        if (!aPosition) return;
         const gl = this.gl;
-        const pos = this.attribute.a_position;
+        const pos = aPosition.location;
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer!.position);
         gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(pos);
@@ -432,71 +463,582 @@ export class Shader extends Container<EShaderEvent> {
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
         return buffer;
     }
+}
 
-    // ----- 静态api部分
+type _U1 = (x0: number) => void;
+type _U2 = (x0: number, x1: number) => void;
+type _U3 = (x0: number, x1: number, x2: number) => void;
+type _U4 = (x0: number, x1: number, x2: number, x3: number) => void;
+type _UV<T> = (data: T, srcOffset?: number, srcLength?: number) => void;
+type _A<T> = (data: T) => void;
+type _UMatrix = (
+    gl: WebGL2RenderingContext,
+    location: WebGLUniformLocation | null,
+    transpose: GLboolean,
+    data: Iterable<GLfloat>,
+    srcOffset?: number,
+    srcLength?: GLuint
+) => void;
+
+interface UniformSetFn {
+    [UniformType.Uniform1f]: _U1;
+    [UniformType.Uniform1fv]: _UV<Float32List>;
+    [UniformType.Uniform1i]: _U1;
+    [UniformType.Uniform1iv]: _UV<Int32List>;
+    [UniformType.Uniform1ui]: _U1;
+    [UniformType.Uniform1uiv]: _UV<Uint32List>;
+    [UniformType.Uniform2f]: _U2;
+    [UniformType.Uniform2fv]: _UV<Float32List>;
+    [UniformType.Uniform2i]: _U2;
+    [UniformType.Uniform2iv]: _UV<Int32List>;
+    [UniformType.Uniform2ui]: _U2;
+    [UniformType.Uniform2uiv]: _UV<Uint32List>;
+    [UniformType.Uniform3f]: _U3;
+    [UniformType.Uniform3fv]: _UV<Float32List>;
+    [UniformType.Uniform3i]: _U3;
+    [UniformType.Uniform3iv]: _UV<Int32List>;
+    [UniformType.Uniform3ui]: _U3;
+    [UniformType.Uniform3uiv]: _UV<Uint32List>;
+    [UniformType.Uniform4f]: _U4;
+    [UniformType.Uniform4fv]: _UV<Float32List>;
+    [UniformType.Uniform4i]: _U4;
+    [UniformType.Uniform4iv]: _UV<Int32List>;
+    [UniformType.Uniform4ui]: _U4;
+    [UniformType.Uniform4uiv]: _UV<Uint32List>;
+}
+
+interface AttribSetFn {
+    [AttribType.Attrib1f]: _U1;
+    [AttribType.Attrib1fv]: _A<Float32List>;
+    [AttribType.Attrib2f]: _U2;
+    [AttribType.Attrib2fv]: _A<Float32List>;
+    [AttribType.Attrib3f]: _U3;
+    [AttribType.Attrib3fv]: _A<Float32List>;
+    [AttribType.Attrib4f]: _U4;
+    [AttribType.Attrib4fv]: _A<Float32List>;
+    [AttribType.AttribI4i]: _U4;
+    [AttribType.AttribI4iv]: _A<Int32List>;
+    [AttribType.AttribI4ui]: _U4;
+    [AttribType.AttribI4uiv]: _A<Uint32List>;
+}
+
+interface ShaderUniform<T extends UniformType> {
+    location: WebGLUniformLocation;
+    type: T;
+    set: UniformSetFn[T];
+}
+
+interface ShaderAttrib<T extends AttribType> {
+    location: number;
+    type: T;
+    set: AttribSetFn[T];
+    pointer: (
+        size: GLint,
+        type: GLenum,
+        normalized: GLboolean,
+        stride: GLsizei,
+        offset: GLintptr
+    ) => void;
+    pointerI: (
+        size: GLint,
+        type: GLenum,
+        stride: GLsizei,
+        offset: GLintptr
+    ) => void;
+    divisor: (divisor: GLuint) => void;
+}
+
+interface ShaderUniformMatrix {
+    location: WebGLUniformLocation;
+    type: UniformMatrix;
+    set: (
+        transpose: GLboolean,
+        data: Float32List,
+        srcOffset?: number,
+        srcLength?: number
+    ) => void;
+}
+
+interface ShaderUniformBlock {
+    location: GLuint;
+    buffer: WebGLBuffer;
+    set(srcData: AllowSharedBufferSource | null, usage: GLenum): void;
+    set(
+        srcData: ArrayBufferView,
+        usage: GLenum,
+        srcOffset: number,
+        length?: GLuint
+    ): void;
+}
+
+type UniformDefineFn = {
+    [P in UniformType]: (
+        gl: WebGL2RenderingContext,
+        location: WebGLUniformLocation,
+        ...params: Parameters<UniformSetFn[P]>
+    ) => void;
+};
+
+type AttribDefineFn = {
+    [P in AttribType]: (
+        gl: WebGL2RenderingContext,
+        location: number,
+        ...params: Parameters<AttribSetFn[P]>
+    ) => void;
+};
+
+type UniformMatrixSetFn = Record<UniformMatrix, _UMatrix>;
+
+const uniformDefine: UniformDefineFn = {
+    [UniformType.Uniform1f]: (gl, location, x0) => {
+        gl.uniform1f(location, x0);
+    },
+    [UniformType.Uniform1fv]: (gl, location, data, srcOffset, srcLength) => {
+        gl.uniform1fv(location, data, srcOffset, srcLength);
+    },
+    [UniformType.Uniform1i]: (gl, location, x0) => {
+        gl.uniform1i(location, x0);
+    },
+    [UniformType.Uniform1iv]: (gl, location, data, srcOffset, srcLength) => {
+        gl.uniform1iv(location, data, srcOffset, srcLength);
+    },
+    [UniformType.Uniform1ui]: (gl, location, x0) => {
+        gl.uniform1ui(location, x0);
+    },
+    [UniformType.Uniform1uiv]: (gl, location, data, srcOffset, srcLength) => {
+        gl.uniform1uiv(location, data, srcOffset, srcLength);
+    },
+    [UniformType.Uniform2f]: (gl, location, x0, x1) => {
+        gl.uniform2f(location, x0, x1);
+    },
+    [UniformType.Uniform2fv]: (gl, location, data, srcOffset, srcLength) => {
+        gl.uniform2fv(location, data, srcOffset, srcLength);
+    },
+    [UniformType.Uniform2i]: (gl, location, x0, x1) => {
+        gl.uniform2i(location, x0, x1);
+    },
+    [UniformType.Uniform2iv]: (gl, location, data, srcOffset, srcLength) => {
+        gl.uniform2iv(location, data, srcOffset, srcLength);
+    },
+    [UniformType.Uniform2ui]: (gl, location, x0, x1) => {
+        gl.uniform2ui(location, x0, x1);
+    },
+    [UniformType.Uniform2uiv]: (gl, location, data, srcOffset, srcLength) => {
+        gl.uniform2uiv(location, data, srcOffset, srcLength);
+    },
+    [UniformType.Uniform3f]: (gl, location, x0, x1, x2) => {
+        gl.uniform3f(location, x0, x1, x2);
+    },
+    [UniformType.Uniform3fv]: (gl, location, data, srcOffset, srcLength) => {
+        gl.uniform3fv(location, data, srcOffset, srcLength);
+    },
+    [UniformType.Uniform3i]: (gl, location, x0, x1, x2) => {
+        gl.uniform3i(location, x0, x1, x2);
+    },
+    [UniformType.Uniform3iv]: (gl, location, data, srcOffset, srcLength) => {
+        gl.uniform3iv(location, data, srcOffset, srcLength);
+    },
+    [UniformType.Uniform3ui]: (gl, location, x0, x1, x2) => {
+        gl.uniform3ui(location, x0, x1, x2);
+    },
+    [UniformType.Uniform3uiv]: (gl, location, data, srcOffset, srcLength) => {
+        gl.uniform3uiv(location, data, srcOffset, srcLength);
+    },
+    [UniformType.Uniform4f]: (gl, location, x0, x1, x2, x3) => {
+        gl.uniform4f(location, x0, x1, x2, x3);
+    },
+    [UniformType.Uniform4fv]: (gl, location, data, srcOffset, srcLength) => {
+        gl.uniform4fv(location, data, srcOffset, srcLength);
+    },
+    [UniformType.Uniform4i]: (gl, location, x0, x1, x2, x3) => {
+        gl.uniform4i(location, x0, x1, x2, x3);
+    },
+    [UniformType.Uniform4iv]: (gl, location, data, srcOffset, srcLength) => {
+        gl.uniform4iv(location, data, srcOffset, srcLength);
+    },
+    [UniformType.Uniform4ui]: (gl, location, x0, x1, x2, x3) => {
+        gl.uniform4ui(location, x0, x1, x2, x3);
+    },
+    [UniformType.Uniform4uiv]: (gl, location, data, srcOffset, srcLength) => {
+        gl.uniform4uiv(location, data, srcOffset, srcLength);
+    }
+};
+
+const uniformMatrix: UniformMatrixSetFn = {
+    [UniformMatrix.UMatrix2x2]: (gl, x1, x2, x3, x4, x5) => {
+        gl.uniformMatrix2fv(x1, x2, x3, x4, x5);
+    },
+    [UniformMatrix.UMatrix2x3]: (gl, x1, x2, x3, x4, x5) => {
+        gl.uniformMatrix2x3fv(x1, x2, x3, x4, x5);
+    },
+    [UniformMatrix.UMatrix2x4]: (gl, x1, x2, x3, x4, x5) => {
+        gl.uniformMatrix2x4fv(x1, x2, x3, x4, x5);
+    },
+    [UniformMatrix.UMatrix3x2]: (gl, x1, x2, x3, x4, x5) => {
+        gl.uniformMatrix3x2fv(x1, x2, x3, x4, x5);
+    },
+    [UniformMatrix.UMatrix3x3]: (gl, x1, x2, x3, x4, x5) => {
+        gl.uniformMatrix3fv(x1, x2, x3, x4, x5);
+    },
+    [UniformMatrix.UMatrix3x4]: (gl, x1, x2, x3, x4, x5) => {
+        gl.uniformMatrix3x4fv(x1, x2, x3, x4, x5);
+    },
+    [UniformMatrix.UMatrix4x2]: (gl, x1, x2, x3, x4, x5) => {
+        gl.uniformMatrix4x2fv(x1, x2, x3, x4, x5);
+    },
+    [UniformMatrix.UMatrix4x3]: (gl, x1, x2, x3, x4, x5) => {
+        gl.uniformMatrix4x3fv(x1, x2, x3, x4, x5);
+    },
+    [UniformMatrix.UMatrix4x4]: (gl, x1, x2, x3, x4, x5) => {
+        gl.uniformMatrix4fv(x1, x2, x3, x4, x5);
+    }
+};
+
+const attribDefine: AttribDefineFn = {
+    [AttribType.Attrib1f]: (gl, location, x0) => {
+        gl.vertexAttrib1f(location, x0);
+    },
+    [AttribType.Attrib1fv]: (gl, location, data) => {
+        gl.vertexAttrib1fv(location, data);
+    },
+    [AttribType.Attrib2f]: (gl, location, x0, x1) => {
+        gl.vertexAttrib2f(location, x0, x1);
+    },
+    [AttribType.Attrib2fv]: (gl, location, data) => {
+        gl.vertexAttrib2fv(location, data);
+    },
+    [AttribType.Attrib3f]: (gl, location, x0, x1, x2) => {
+        gl.vertexAttrib3f(location, x0, x1, x2);
+    },
+    [AttribType.Attrib3fv]: (gl, location, data) => {
+        gl.vertexAttrib3fv(location, data);
+    },
+    [AttribType.Attrib4f]: (gl, location, x0, x1, x2, x3) => {
+        gl.vertexAttrib4f(location, x0, x1, x2, x3);
+    },
+    [AttribType.Attrib4fv]: (gl, location, data) => {
+        gl.vertexAttrib4fv(location, data);
+    },
+    [AttribType.AttribI4i]: (gl, location, x0, x1, x2, x3) => {
+        gl.vertexAttribI4i(location, x0, x1, x2, x3);
+    },
+    [AttribType.AttribI4iv]: (gl, location, data) => {
+        gl.vertexAttribI4iv(location, data);
+    },
+    [AttribType.AttribI4ui]: (gl, location, x0, x1, x2, x3) => {
+        gl.vertexAttribI4ui(location, x0, x1, x2, x3);
+    },
+    [AttribType.AttribI4uiv]: (gl, location, data) => {
+        gl.vertexAttribI4uiv(location, data);
+    }
+};
+
+class ShaderProgram {
+    /** 顶点着色器 */
+    private vertex: string = DEFAULT_VS;
+    /** 片元着色器 */
+    private fragment: string = DEFAULT_FS;
+    /** glsl版本 */
+    version: ShaderVersion;
+    /** webgl2上下文 */
+    gl: WebGL2RenderingContext;
+    /** 当前着色器程序的着色器渲染元素 */
+    element: Shader;
+
+    /** uniform存放地址 */
+    private uniform: Map<string, ShaderUniform<UniformType>> = new Map();
+    /** attribute存放地址，300版本里面叫做in */
+    private attribute: Map<string, ShaderAttrib<AttribType>> = new Map();
+    /** uniform矩阵存放地址 */
+    private matrix: Map<string, ShaderUniformMatrix> = new Map();
+    /** uniform block 存放地址 */
+    private block: Map<string, ShaderUniformBlock> = new Map();
+    /** 当前编译完成的shader程序 */
+    private shader: CompiledShader | null = null;
+    /** 当前的webgl程序 */
+    program: WebGLProgram | null = null;
+
+    /** 着色器内容是否是默认内容，可以用于优化空着色器 */
+    modified: boolean = false;
+
+    /** 是否需要重新编译着色器 */
+    private shaderDirty: boolean = true;
+
+    constructor(shader: Shader, vs?: string, fs?: string) {
+        if (vs) this.vs(vs);
+        if (fs) this.fs(fs);
+        this.requestCompile();
+        this.element = shader;
+        this.gl = shader.gl;
+        this.version = shader.VERSION_ES_100;
+    }
 
     /**
-     * 传入着色器，编译出对应的程序，可以直接通过 {@link Shader.useProgram} 用于Shader组件
+     * 设置着色器使用的glsl版本，默认使用100版本，注意切换后一定要重新设置着色器内容
+     * @param version glsl版本，可选 {@link Shader.VERSION_ES_100} 或 {@link Shader.VERSION_ES_300}
+     */
+    setVersion(version: ShaderVersion) {
+        this.version = version;
+    }
+
+    /**
+     * 检查当前是否需要重新编译着色器，如果需要，则重新编译
+     * @param force 是否强制重新编译
+     */
+    requestCompile(force: boolean = false): boolean {
+        if (!force && !this.shaderDirty) return false;
+        return this.compile();
+    }
+
+    /**
+     * 设置顶点着色器内容
      * @param vs 顶点着色器
+     */
+    vs(vs: string) {
+        this.vertex = vs;
+        this.shaderDirty = true;
+        this.modified = true;
+    }
+
+    /**
+     * 设置片元着色器内容
      * @param fs 片元着色器
      */
-    static compileProgram(
-        shader: Shader,
-        version: ShaderGLSLVersion,
-        vs: string,
-        fs: string
-    ): ShaderProgram | null {
+    fs(fs: string) {
+        this.fragment = fs;
+        this.shaderDirty = true;
+        this.modified = true;
+    }
+
+    /**
+     * 获取一个uniform，需要事先定义，否则返回null
+     * @param uniform uniform名称
+     */
+    getUniform<T extends UniformType = UniformType>(
+        uniform: string
+    ): ShaderUniform<T> | null {
+        return (this.uniform.get(uniform) as ShaderUniform<T>) ?? null;
+    }
+
+    /**
+     * 获取一个attribute，需要事先定义，否则返回null
+     * @param attrib attribute名称
+     */
+    getAttribute<T extends AttribType = AttribType>(
+        attrib: string
+    ): ShaderAttrib<T> | null {
+        return (this.attribute.get(attrib) as ShaderAttrib<T>) ?? null;
+    }
+
+    /**
+     * 获取一个 uniform matrix，需要事先定义，否则返回null
+     * @param matrix uniform matrix 的名称
+     * @returns
+     */
+    getMatrix(matrix: string): ShaderUniformMatrix | null {
+        return this.matrix.get(matrix) ?? null;
+    }
+
+    /**
+     * 获取一个 uniform block，例如 UBO VAO VBO，需要事先定义，否则返回null
+     * @param block uniform block 的名称
+     * @returns
+     */
+    getUniformBlock(block: string): ShaderUniformBlock | null {
+        return this.block.get(block) ?? null;
+    }
+
+    /**
+     * 定义一个 uniform 变量，并存入本着色器程序的 uniform 变量映射
+     * @param uniform uniform 变量名
+     * @param type uniform 类型，可选 {@link Shader.UNIFORM_1f} 至 {@link Shader.UNIFORM_4uiv}
+     * @returns uniform 变量的操作对象，可用于设置其值
+     */
+    defineUniform<T extends UniformType>(
+        uniform: string,
+        type: T
+    ): ShaderUniform<T> | null {
+        const program = this.program;
+        const gl = this.element.gl;
+        if (!program || !gl) return null;
+        const location = gl.getUniformLocation(program, uniform);
+        if (!location) return null;
+        const fn = uniformDefine[type];
+        // @ts-ignore
+        const obj: ShaderUniform<T> = {
+            location,
+            type,
+            set: (...params: Parameters<UniformSetFn[T]>) => {
+                fn(gl, location, ...params);
+            }
+        };
+        return obj;
+    }
+
+    /**
+     * 定义一个 uniform 矩阵变量，并存入本着色器程序的 uniform 矩阵变量映射
+     * @param uniform uniform 矩阵变量名
+     * @param type uniform 矩阵类型，可选 {@link Shader.U_MATRIX_2x2} 至 {@link Shader.U_MATRIX_4x4}
+     * @returns uniform 矩阵变量的操作对象，可用于设置其值
+     */
+    defineUniformMatrix(
+        uniform: string,
+        type: UniformMatrix
+    ): ShaderUniformMatrix | null {
+        const program = this.program;
+        const gl = this.element.gl;
+        if (!program || !gl) return null;
+        const location = gl.getUniformLocation(program, uniform);
+        if (!location) return null;
+        const fn = uniformMatrix[type];
+        const obj: ShaderUniformMatrix = {
+            location,
+            type,
+            set: (transpose, data, srcOffset, srcLength) => {
+                fn(gl, location, transpose, data, srcOffset, srcLength);
+            }
+        };
+        return obj;
+    }
+
+    /**
+     * 定义一个 attribute 常量，并存入本着色器程序的 attribute 常量映射，在 es 300 版本中叫做 in
+     * @param attrib attribute 常量名
+     * @param type attribute 类型，可选 {@link Shader.Attrib1f} 至 {@link Shader.AttribI4uiv}
+     * @returns attribute 常量的操作对象，可用于设置其值
+     */
+    defineAttribute<T extends AttribType>(
+        attrib: string,
+        type: T
+    ): ShaderAttrib<T> | null {
+        const program = this.program;
+        const gl = this.element.gl;
+        if (!program || !gl) return null;
+        const location = gl.getAttribLocation(program, attrib);
+        if (location === -1) return null;
+        const fn = attribDefine[type];
+        // @ts-ignore
+        const obj: ShaderAttrib<T> = {
+            location,
+            type,
+            set: (...params: Parameters<AttribSetFn[T]>) => {
+                fn(gl, location, ...params);
+            },
+            pointer: (p0, p1, p2, p3, p4) => {
+                gl.vertexAttribPointer(location, p0, p1, p2, p3, p4);
+            },
+            pointerI: (size, type, stride, offset) => {
+                gl.vertexAttribIPointer(location, size, type, stride, offset);
+            },
+            divisor: divisor => {
+                gl.vertexAttribDivisor(location, divisor);
+            }
+        };
+        return obj;
+    }
+
+    /**
+     * 定义一个 uniform block，例如 UBO VAO VBO，并存入本着色器程序的 uniform block 映射
+     * 用于一次性向着色器传输大量数据
+     * @param uniform uniform block 名称
+     * @returns uniform block 的操作对象，可用于设置其值
+     */
+    defineUniformBlock(block: string): ShaderUniformBlock | null {
+        if (this.version === this.element.VERSION_ES_100) {
+            logger.warn(24);
+            return null;
+        }
+        const program = this.program;
+        const gl = this.element.gl;
+        if (!program || !gl) return null;
+        const location = gl.getUniformBlockIndex(program, block);
+        if (!location) return null;
+        const buffer = gl.createBuffer();
+        if (!buffer) return null;
+        const obj: ShaderUniformBlock = {
+            location,
+            buffer,
+            set: (srcData, usage, o?: number, l?: number) => {
+                gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
+                // @ts-ignore
+                gl.bufferData(gl.UNIFORM_BUFFER, srcData, usage, o, l);
+                gl.uniformBlockBinding(program, location, 0);
+                gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, buffer);
+            }
+        };
+        return obj;
+    }
+
+    /**
+     * 摧毁这个着色器程序，不要直接调用，请使用 {@link Shader.deleteProgram} 来删除一个着色器程序
+     */
+    destroy() {
+        this.clearProgram();
+    }
+
+    private clearProgram() {
+        this.uniform.clear();
+        this.attribute.clear();
+        this.matrix.clear();
+        this.gl.deleteProgram(this.program);
+        if (this.shader) {
+            this.gl.deleteShader(this.shader.vertex);
+            this.gl.deleteShader(this.shader.fragment);
+        }
+        this.block.forEach(v => {
+            this.gl.deleteBuffer(v.buffer);
+        });
+        this.block.clear();
+    }
+
+    private compile() {
+        this.shaderDirty = true;
+        this.clearProgram();
+
+        const shader = this.element;
         const gl = shader.gl;
-        if (!gl) return null;
+        if (!gl) return false;
 
         const program = gl.createProgram();
-        if (!program) return null;
+        if (!program) return false;
 
         const vsPrefix =
-            version === '100'
+            this.version === shader.VERSION_ES_100
                 ? SHADER_VERTEX_PREFIX_100
                 : SHADER_VERTEX_PREFIX_300;
         const fsPrefix =
-            version === '100'
+            this.version === shader.VERSION_ES_100
                 ? SHADER_FRAGMENT_PREFIX_100
                 : SHADER_FRAGMENT_PREFIX_300;
 
         const vertexShader = this.compileShader(
-            gl,
             gl.VERTEX_SHADER,
-            vsPrefix + vs
+            vsPrefix + this.vertex
         );
         const fragmentShader = this.compileShader(
-            gl,
             gl.FRAGMENT_SHADER,
-            fsPrefix + fs
+            fsPrefix + this.fragment
         );
 
-        if (!vertexShader || !fragmentShader) return null;
+        if (!vertexShader || !fragmentShader) return false;
 
         gl.attachShader(program, vertexShader);
         gl.attachShader(program, fragmentShader);
         gl.linkProgram(program);
 
-        const aTexCoord = gl.getAttribLocation(program, 'a_texCoord');
-        const aPosition = gl.getAttribLocation(program, 'a_position');
-        const uSampler = gl.getUniformLocation(program, 'u_sampler');
-
-        if (!uSampler) return null;
-
-        return {
-            program,
-            attribute: { a_position: aPosition, a_texCoord: aTexCoord },
-            uniform: { u_sampler: uSampler },
-            shader: { vertex: vertexShader, fragment: fragmentShader }
-        };
+        this.program = program;
+        this.shader = { vertex: vertexShader, fragment: fragmentShader };
+        const tex = this.defineAttribute('a_texCoord', shader.ATTRIB_2fv);
+        const position = this.defineAttribute('a_position', shader.ATTRIB_4fv);
+        const sampler = this.defineUniform('u_sampler', shader.UNIFORM_1i);
+        if (!tex || !position || !sampler) {
+            return false;
+        }
+        return true;
     }
 
-    private static compileShader(
-        gl: WebGL2RenderingContext,
-        type: number,
-        source: string
-    ): WebGLShader | null {
+    private compileShader(type: number, source: string): WebGLShader | null {
+        const gl = this.element.gl;
         const shader = gl.createShader(type);
         if (!shader) return null;
         gl.shaderSource(shader, source);
@@ -511,51 +1053,5 @@ export class Shader extends Container<EShaderEvent> {
         }
 
         return shader;
-    }
-
-    /**
-     * 删除着色器程序
-     * @param program 要删除的程序
-     */
-    static deleteProgram(shader: Shader, program: ShaderProgram) {
-        const gl = shader.gl;
-        if (!gl) return;
-        gl.deleteProgram(program.program);
-        gl.deleteShader(program.shader?.vertex ?? null);
-        gl.deleteShader(program.shader?.fragment ?? null);
-    }
-
-    /**
-     * 获取一个程序中对应属性名的位置
-     * @param program 要获取的程序
-     * @param name 要获取的属性名
-     */
-    static getAttribute(
-        shader: Shader,
-        program: ShaderProgram,
-        name: string
-    ): number | null {
-        const gl = shader.gl;
-        if (!gl || !program.program || !program.attribute) return null;
-        if (program.attribute[name]) return program.attribute[name];
-        const loc = gl.getAttribLocation(program.program, name);
-        return (program.attribute[name] = loc);
-    }
-
-    /**
-     * 获取一个程序中对应uniform变量名的位置
-     * @param program 要获取的程序
-     * @param name 要获取的uniform变量名
-     */
-    static getUniform(
-        shader: Shader,
-        program: ShaderProgram,
-        name: string
-    ): WebGLUniformLocation | null {
-        const gl = shader.gl;
-        if (!gl || !program.program || !program.uniform) return null;
-        if (name in program.uniform) return program.uniform[name];
-        const loc = gl.getUniformLocation(program.program, name);
-        return (program.uniform[name] = loc);
     }
 }

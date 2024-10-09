@@ -639,7 +639,7 @@ export class Shadow {
 
         const lightsBuffer = Shadow.buffer.color.lights;
         gl.bindBuffer(gl.UNIFORM_BUFFER, lightsBuffer);
-        gl.bufferData(gl.UNIFORM_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
+        gl.bufferData(gl.UNIFORM_BUFFER, new Float32Array(data), gl.DYNAMIC_DRAW);
         gl.uniformBlockBinding(Shadow.program.color, blockIndex, 0);
         gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, lightsBuffer);
 
