@@ -13,7 +13,7 @@ export class Container<E extends EContainerEvent = EContainerEvent>
     extends RenderItem<E | EContainerEvent>
     implements IRenderChildable
 {
-    children: RenderItem[] = [];
+    children: Set<RenderItem> = new Set();
     sortedChildren: RenderItem[] = [];
 
     private needSort: boolean = false;
@@ -46,13 +46,7 @@ export class Container<E extends EContainerEvent = EContainerEvent>
         });
     }
 
-    /**
-     * 添加子元素到这个容器上，然后在下一个tick执行更新
-     * @param children 要添加的子元素
-     */
-    appendChild(...children: RenderItem<any>[]) {
-        children.forEach(v => (v.parent = this));
-        this.children.push(...children);
+    private requestSort() {
         if (!this.needSort) {
             this.needSort = true;
             this.requestBeforeFrame(() => {
@@ -60,23 +54,38 @@ export class Container<E extends EContainerEvent = EContainerEvent>
                 this.sortChildren();
             });
         }
+    }
+
+    /**
+     * 添加子元素到这个容器上，然后在下一个tick执行更新
+     * @param children 要添加的子元素
+     */
+    appendChild(...children: RenderItem<any>[]) {
+        children.forEach(v => {
+            v.remove();
+            this.children.add(v);
+            v.parent = this;
+        });
+        children.forEach(v => (v.parent = this));
+        this.requestSort();
         this.update(this);
     }
 
     removeChild(...child: RenderItem<any>[]): void {
+        let changed = false;
         child.forEach(v => {
-            const index = this.children.indexOf(v);
-            if (index === -1) return;
-            this.children.splice(index, 1);
+            const success = this.children.delete(v);
+            if (success) changed = true;
+            v.parent = void 0;
         });
-        this.sortChildren();
+        if (changed) this.requestSort();
         this.update(this);
     }
 
     sortChildren() {
-        this.sortedChildren = this.children
-            .slice()
-            .sort((a, b) => a.zIndex - b.zIndex);
+        this.sortedChildren = [...this.children].sort(
+            (a, b) => a.zIndex - b.zIndex
+        );
     }
 
     destroy(): void {

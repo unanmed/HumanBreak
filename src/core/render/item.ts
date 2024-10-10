@@ -52,7 +52,7 @@ interface IRenderConfig {
 }
 
 export interface IRenderChildable {
-    children: RenderItem[];
+    children: Set<RenderItem>;
 
     /**
      * 向这个元素添加子元素
@@ -407,7 +407,6 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      */
     remove() {
         this.parent?.removeChild(this);
-        this.parent = void 0;
     }
 
     /**

@@ -813,16 +813,14 @@ class ShaderProgram {
     /**
      * 获取一个 uniform matrix，需要事先定义，否则返回null
      * @param matrix uniform matrix 的名称
-     * @returns
      */
     getMatrix(matrix: string): ShaderUniformMatrix | null {
         return this.matrix.get(matrix) ?? null;
     }
 
     /**
-     * 获取一个 uniform block，例如 UBO VAO VBO，需要事先定义，否则返回null
+     * 获取一个 uniform block，例如 UBO，需要事先定义，否则返回null
      * @param block uniform block 的名称
-     * @returns
      */
     getUniformBlock(block: string): ShaderUniformBlock | null {
         return this.block.get(block) ?? null;
@@ -923,7 +921,7 @@ class ShaderProgram {
     }
 
     /**
-     * 定义一个 uniform block，例如 UBO VAO VBO，并存入本着色器程序的 uniform block 映射
+     * 定义一个 uniform block，例如 UBO，并存入本着色器程序的 uniform block 映射
      * 用于一次性向着色器传输大量数据
      * @param uniform uniform block 名称
      * @returns uniform block 的操作对象，可用于设置其值
