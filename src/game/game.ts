@@ -1,13 +1,12 @@
-import { EventEmitter } from '../core/common/eventEmitter';
+import { EventEmitter } from 'eventemitter3';
 import type { DamageEnemy, EnemyCollection } from './enemy/damage';
 
 // ----- 加载事件
 interface GameLoadEvent {
-    coreLoaded: () => void;
-    autotileLoaded: () => void;
-    coreInit: () => void;
-    loaded: () => void;
-    materialLoaded: () => void;
+    coreLoaded: [];
+    autotileLoaded: [];
+    coreInit: [];
+    loaded: [];
 }
 
 class GameLoading extends EventEmitter<GameLoadEvent> {
@@ -17,17 +16,8 @@ class GameLoading extends EventEmitter<GameLoadEvent> {
 
     constructor() {
         super();
-        this.on(
-            'coreInit',
-            () => {
-                this.autotileNum = Object.keys(
-                    core.material.icons.autotile
-                ).length;
-            },
-            { immediate: true }
-        );
-        this.on('materialLoaded', () => {
-            core.loader._loadMaterials_afterLoad();
+        this.on('coreInit', () => {
+            this.autotileNum = Object.keys(core.material.icons.autotile).length;
         });
     }
 
@@ -67,51 +57,51 @@ export const loading = new GameLoading();
 
 export interface GameEvent {
     /** Emitted in libs/events.js resetGame. */
-    reset: () => void;
+    reset: [];
     /** Emitted in src/App.vue setup. */
-    mounted: () => void;
+    mounted: [];
     /** Emitted in plugin/game/ui.ts updateStatusBar_update */
-    statusBarUpdate: () => void;
+    statusBarUpdate: [];
     /** Emitted in core/index.ts */
-    renderLoaded: () => void;
+    renderLoaded: [];
     /** Emitted in libs/events.js getItem */
-    afterGetItem: (
+    afterGetItem: [
         itemId: AllIdsOf<'items'>,
         x: number,
         y: number,
         isGentleClick: boolean
-    ) => void;
+    ];
     /** Emitted in libs/events.js _openDoor_animate */
-    afterOpenDoor: (doorId: AllIdsOf<'animates'>, x: number, y: number) => void;
+    afterOpenDoor: [doorId: AllIdsOf<'animates'>, x: number, y: number];
     /** Emitted in project/functions.js afterChangeFloor */
-    afterChangeFloor: (floorId: FloorIds) => void;
+    afterChangeFloor: [floorId: FloorIds];
     /** Emitted in project/functions.js moveOneStep */
-    moveOneStep: (x: number, y: number, floorId: FloorIds) => void;
+    moveOneStep: [x: number, y: number, floorId: FloorIds];
     /** Emitted in src/game/enemy/battle.ts afterBattle */
-    afterBattle: (enemy: DamageEnemy, x?: number, y?: number) => void;
+    afterBattle: [enemy: DamageEnemy, x?: number, y?: number];
     /** Emitted in libs/events.js changingFloor */
-    changingFloor: (floorId: FloorIds, heroLoc: Loc) => void;
+    changingFloor: [floorId: FloorIds, heroLoc: Loc];
     /** Emitted in libs/maps.js setBlock */
-    setBlock: (
+    setBlock: [
         x: number,
         y: number,
         floorId: FloorIds,
         newBlock: AllNumbers,
         oldBlock: AllNumbers
-    ) => void;
+    ];
     /** Emitted in game/enemy/damage.ts */
-    enemyExtract: (col: EnemyCollection) => void;
+    enemyExtract: [col: EnemyCollection];
 }
 
 export const hook = new EventEmitter<GameEvent>();
 
 interface ListenerEvent {
     // block
-    hoverBlock: (block: Block, ev: MouseEvent) => void;
-    leaveBlock: (block: Block, ev: MouseEvent, leaveGame: boolean) => void;
-    clickBlock: (block: Block, ev: MouseEvent) => void;
+    hoverBlock: [block: Block, ev: MouseEvent];
+    leaveBlock: [block: Block, ev: MouseEvent, leaveGame: boolean];
+    clickBlock: [block: Block, ev: MouseEvent];
     // mouse
-    mouseMove: (ev: MouseEvent) => void;
+    mouseMove: [ev: MouseEvent];
 }
 
 class GameListener extends EventEmitter<ListenerEvent> {
