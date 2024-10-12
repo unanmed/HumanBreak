@@ -79,10 +79,12 @@ export class Logger {
             if (inParam) {
                 if (nums.has(char)) {
                     paramNum += char;
-                } else {
+                }
+                if (!nums.has(text[pointer + 1])) {
                     inParam = false;
                     const num = Number(paramNum);
-                    str += params[num] ?? '[not delivered]';
+                    paramNum = '';
+                    str += params[num - 1] ?? '[not delivered]';
                 }
                 continue;
             }
