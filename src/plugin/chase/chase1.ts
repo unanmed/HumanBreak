@@ -104,7 +104,7 @@ let back: Sprite | undefined;
 const effect = new PointEffect();
 
 Mota.require('var', 'loading').once('loaded', () => {
-    effect.create(Chase.shader, 10);
+    effect.create(Chase.shader, 30);
 });
 
 /**
@@ -218,6 +218,14 @@ export function initChase(): IChaseController {
         camera.destroy();
     });
 
+    chase.on('frame', () => {
+        effect.requestUpdate();
+    });
+
+    chase.on('changeFloor', () => {
+        effect.clearEffect();
+    });
+
     const controller: IChaseController = {
         chase,
         start(fromSave) {
@@ -231,7 +239,7 @@ export function initChase(): IChaseController {
             if (fromSave) {
                 initFromSave(chase);
             }
-            testEffect(chase);
+            // testEffect();
         },
         end(success) {
             chase.end(success);
@@ -244,7 +252,7 @@ export function initChase(): IChaseController {
     return controller;
 }
 
-function testEffect(chase: Chase) {
+function testEffect() {
     // effect.addEffect(
     //     PointEffectType.CircleContrast,
     //     Date.now(),
@@ -253,15 +261,16 @@ function testEffect(chase: Chase) {
     //     [1, 0, 0, 0]
     // );
     effect.addEffect(
-        PointEffectType.CircleWarpTangetial,
+        PointEffectType.CircleWarp,
         Date.now(),
         100000,
-        [7 * 32 + 16, 17 * 32 + 16, 150, 120],
-        [Math.PI / 2, 0, 0, 0]
+        [7 * 32 + 16, 17 * 32 + 16, 200, 20],
+        [1 / 20, 1, 0.5, 0],
+        [0, Math.PI * 2, 0, 0]
     );
-    chase.on('frame', () => {
-        effect.requestUpdate();
-    });
+    // chase.on('frame', () => {
+    //     effect.requestUpdate();
+    // });
 }
 
 function initAudio(chase: Chase) {
@@ -355,6 +364,23 @@ function drawBack(chase: Chase, ani: Animation) {
     });
 }
 
+function addCommonWarp(x: number, y: number) {
+    effect.addEffect(
+        PointEffectType.CircleWarp,
+        Date.now(),
+        1000,
+        [x * 32 + 16, y * 32 + 16, 96, 16],
+        [1 / 20, 1, 0.5, 0],
+        [0, Math.PI * 2, 0, 0]
+    );
+}
+
+function explode1(x: number, y: number) {
+    core.setBlock(336, x, y);
+    core.drawAnimate('explosion1', x, y);
+    addCommonWarp(x, y);
+}
+
 function para1(chase: Chase) {
     chase.onFloorTime('MT15', 830, () => {
         for (let tx = 53; tx < 58; tx++) {
@@ -366,50 +392,39 @@ function para1(chase: Chase) {
         core.drawAnimate('stone', 55, 5);
     });
     chase.onFloorTime('MT15', 1080, () => {
-        core.setBlock(336, 58, 9);
-        core.setBlock(336, 59, 9);
-        core.drawAnimate('explosion1', 58, 9);
-        core.drawAnimate('explosion1', 59, 9);
+        explode1(58, 9);
+        explode1(59, 9);
     });
     chase.onFloorTime('MT15', 1190, () => {
-        core.setBlock(336, 53, 8);
-        core.setBlock(336, 52, 8);
-        core.drawAnimate('explosion1', 53, 8);
-        core.drawAnimate('explosion1', 52, 8);
+        explode1(53, 8);
+        explode1(52, 8);
     });
     chase.onFloorTime('MT15', 1580, () => {
-        core.setBlock(336, 51, 7);
-        core.drawAnimate('explosion1', 51, 7);
+        explode1(51, 7);
     });
     chase.onFloorTime('MT15', 1830, () => {
-        core.setBlock(336, 47, 7);
-        core.setBlock(336, 49, 9);
-        core.drawAnimate('explosion1', 49, 9);
-        core.drawAnimate('explosion1', 47, 7);
+        explode1(47, 7);
+        explode1(49, 9);
     });
 }
 
 function para2(chase: Chase) {
     let emitted32x9 = false;
     chase.onceLoc(45, 8, 'MT15', () => {
-        core.setBlock(336, 45, 9);
-        core.drawAnimate('explosion1', 45, 9);
+        explode1(45, 9);
     });
     chase.onceLoc(45, 6, 'MT15', () => {
-        core.setBlock(336, 44, 6);
-        core.drawAnimate('explosion1', 44, 6);
+        explode1(44, 6);
     });
     chase.onceLoc(45, 4, 'MT15', () => {
-        core.setBlock(336, 44, 4);
-        core.drawAnimate('explosion1', 44, 4);
+        explode1(44, 4);
         core.drawAnimate('explosion1', 48, 6);
         core.removeBlock(48, 6);
+        addCommonWarp(48, 6);
     });
     chase.onceLoc(41, 3, 'MT15', () => {
-        core.setBlock(336, 41, 4);
-        core.setBlock(336, 32, 6);
-        core.drawAnimate('explosion1', 41, 4);
-        core.drawAnimate('explosion1', 32, 6);
+        explode1(41, 4);
+        explode1(32, 6);
     });
     chase.onceLoc(35, 3, 'MT15', () => {
         core.drawAnimate('explosion3', 37, 7);
@@ -424,28 +439,32 @@ function para2(chase: Chase) {
         core.removeBlock(33, 8);
         core.drawAnimate('explosion1', 34, 8);
         core.drawAnimate('explosion1', 33, 8);
+        addCommonWarp(34, 8);
+        addCommonWarp(33, 8);
     });
     chase.onceLoc(33, 7, 'MT15', () => {
-        core.setBlock(336, 32, 9);
-        core.drawAnimate('explosion1', 32, 9);
+        explode1(32, 9);
     });
     chase.onceLoc(33, 9, 'MT15', () => {
         if (emitted32x9) return;
         emitted32x9 = true;
         core.removeBlock(32, 9);
         core.drawAnimate('explosion1', 32, 9);
+        addCommonWarp(32, 9);
     });
     chase.onceLoc(34, 9, 'MT15', () => {
         if (emitted32x9) return;
         emitted32x9 = true;
         core.removeBlock(32, 9);
         core.drawAnimate('explosion1', 32, 9);
+        addCommonWarp(32, 9);
     });
     chase.onceLoc(35, 9, 'MT15', () => {
         if (emitted32x9) return;
         emitted32x9 = true;
         core.removeBlock(32, 9);
         core.drawAnimate('explosion1', 32, 9);
+        addCommonWarp(32, 9);
     });
     for (let x = 19; x < 31; x++) {
         const xx = x;
@@ -458,14 +477,10 @@ function para2(chase: Chase) {
 
 function para3(chase: Chase, ani: Animation) {
     chase.onceLoc(126, 7, 'MT14', () => {
-        core.setBlock(336, 126, 6);
-        core.setBlock(336, 124, 6);
-        core.setBlock(336, 124, 9);
-        core.setBlock(336, 126, 9);
-        core.drawAnimate('explosion1', 126, 6);
-        core.drawAnimate('explosion1', 124, 6);
-        core.drawAnimate('explosion1', 124, 9);
-        core.drawAnimate('explosion1', 126, 9);
+        explode1(126, 6);
+        explode1(124, 6);
+        explode1(124, 9);
+        explode1(126, 9);
     });
     chase.onceLoc(123, 7, 'MT14', () => {
         core.setBlock(508, 127, 7);
@@ -474,24 +489,19 @@ function para3(chase: Chase, ani: Animation) {
             core.setBlock(509, 112, 7);
         }, 520);
         core.drawHeroAnimate('amazed');
-        core.setBlock(336, 121, 6);
-        core.setBlock(336, 122, 6);
-        core.setBlock(336, 120, 8);
-        core.setBlock(336, 121, 8);
-        core.setBlock(336, 122, 8);
-        core.drawAnimate('explosion1', 121, 6);
-        core.drawAnimate('explosion1', 122, 6);
-        core.drawAnimate('explosion1', 120, 8);
-        core.drawAnimate('explosion1', 121, 8);
-        core.drawAnimate('explosion1', 122, 8);
+        explode1(121, 6);
+        explode1(122, 6);
+        explode1(120, 8);
+        explode1(121, 8);
+        explode1(122, 8);
     });
     let emitted110x10 = false;
     let emitted112x8 = false;
     chase.onceLoc(110, 10, 'MT14', () => {
-        core.setBlock(336, 109, 11);
+        explode1(109, 11);
         core.removeBlock(112, 8);
-        core.drawAnimate('explosion1', 109, 11);
         core.drawAnimate('explosion1', 112, 8);
+        addCommonWarp(112, 8);
         core.insertAction([
             { type: 'moveHero', time: 400, steps: ['backward:1'] }
         ]);
@@ -507,32 +517,22 @@ function para3(chase: Chase, ani: Animation) {
         emitted112x8 = true;
     });
     chase.onceLoc(118, 7, 'MT14', () => {
-        core.setBlock(336, 117, 6);
-        core.setBlock(336, 116, 6);
-        core.setBlock(336, 115, 6);
-        core.setBlock(336, 114, 6);
-        core.setBlock(336, 117, 8);
-        core.setBlock(336, 116, 8);
-        core.drawAnimate('explosion1', 117, 6);
-        core.drawAnimate('explosion1', 116, 6);
-        core.drawAnimate('explosion1', 115, 6);
-        core.drawAnimate('explosion1', 114, 6);
-        core.drawAnimate('explosion1', 116, 8);
-        core.drawAnimate('explosion1', 117, 8);
+        explode1(117, 6);
+        explode1(116, 6);
+        explode1(115, 6);
+        explode1(114, 6);
+        explode1(117, 8);
+        explode1(116, 8);
     });
     chase.onceLoc(112, 7, 'MT14', () => {
-        core.setBlock(336, 112, 8);
-        core.setBlock(336, 113, 7);
-        core.drawAnimate('explosion1', 112, 8);
-        core.drawAnimate('explosion1', 113, 7);
+        explode1(112, 8);
+        explode1(113, 7);
     });
     chase.onceLoc(115, 7, 'MT14', () => {
         for (let tx = 111; tx <= 115; tx++) {
-            core.setBlock(336, tx, 10);
-            core.drawAnimate('explosion1', tx, 10);
+            explode1(tx, 10);
         }
-        core.setBlock(336, 112, 8);
-        core.drawAnimate('explosion1', 112, 8);
+        explode1(112, 8);
     });
     chase.onceLoc(110, 7, 'MT14', () => {
         core.jumpBlock(97, 4, 120, -3, 2000);
@@ -545,38 +545,28 @@ function para3(chase: Chase, ani: Animation) {
         core.drawAnimate('explosion2', 119, 7);
         core.removeBlock(105, 7);
         core.drawAnimate('explosion1', 105, 7);
+        addCommonWarp(105, 7);
     });
     chase.onceLoc(97, 3, 'MT14', () => {
-        core.setBlock(336, 95, 3);
-        core.setBlock(336, 93, 6);
-        core.drawAnimate('explosion1', 95, 3);
-        core.drawAnimate('explosion1', 93, 6);
+        explode1(95, 3);
+        explode1(93, 6);
     });
     chase.onceLoc(88, 6, 'MT14', () => {
-        core.setBlock(336, 87, 4);
-        core.setBlock(336, 88, 5);
-        core.drawAnimate('explosion1', 87, 4);
-        core.drawAnimate('explosion1', 88, 5);
+        explode1(87, 4);
+        explode1(88, 5);
     });
     chase.onceLoc(86, 6, 'MT14', () => {
-        core.setBlock(336, 84, 6);
-        core.setBlock(336, 85, 5);
-        core.setBlock(336, 86, 8);
-        core.drawAnimate('explosion1', 84, 6);
-        core.drawAnimate('explosion1', 85, 5);
-        core.drawAnimate('explosion1', 86, 8);
+        explode1(84, 6);
+        explode1(85, 5);
+        explode1(86, 8);
     });
     chase.onceLoc(81, 9, 'MT14', () => {
-        core.setBlock(336, 81, 8);
-        core.setBlock(336, 82, 11);
-        core.drawAnimate('explosion1', 81, 8);
-        core.drawAnimate('explosion1', 82, 11);
+        explode1(81, 8);
+        explode1(82, 11);
     });
     chase.onceLoc(72, 11, 'MT14', () => {
-        core.setBlock(336, 73, 8);
-        core.setBlock(336, 72, 4);
-        core.drawAnimate('explosion1', 73, 8);
-        core.drawAnimate('explosion1', 72, 4);
+        explode1(73, 8);
+        explode1(72, 4);
     });
     chase.onceLoc(71, 7, 'MT14', () => {
         for (let tx = 74; tx < 86; tx++) {
@@ -587,10 +577,8 @@ function para3(chase: Chase, ani: Animation) {
         core.drawAnimate('explosion2', 79, 7);
     });
     chase.onceLoc(68, 5, 'MT14', () => {
-        core.setBlock(336, 68, 4);
-        core.setBlock(336, 67, 6);
-        core.drawAnimate('explosion1', 68, 4);
-        core.drawAnimate('explosion1', 67, 6);
+        explode1(68, 4);
+        explode1(67, 6);
     });
     chase.onceLoc(67, 10, 'MT14', () => {
         for (let tx = 65; tx <= 72; tx++) {
@@ -603,12 +591,9 @@ function para3(chase: Chase, ani: Animation) {
         core.drawAnimate('explosion3', 69, 5);
     });
     chase.onceLoc(64, 11, 'MT14', () => {
-        core.setBlock(336, 63, 9);
-        core.setBlock(336, 60, 8);
-        core.setBlock(336, 56, 11);
-        core.drawAnimate('explosion1', 63, 9);
-        core.drawAnimate('explosion1', 60, 8);
-        core.drawAnimate('explosion1', 56, 11);
+        explode1(63, 9);
+        explode1(60, 8);
+        explode1(56, 11);
     });
     chase.onceLoc(57, 9, 'MT14', () => {
         for (let tx = 58; tx <= 64; tx++) {

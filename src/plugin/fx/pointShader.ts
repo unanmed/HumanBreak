@@ -176,9 +176,9 @@ export class PointEffect {
         const id = this.effectId++;
         // 第三项为特效的进度
         const data = [type, id, 0, time, ...data1, ...data2, ...data3];
-        this.startTime.set(id, now);
+        this.startTime.set(id, startTime);
 
-        if (now > startTime) {
+        if (now >= startTime) {
             this.addEffectToList(data);
         } else {
             // 如果还没开始，那么添加至预备队列
@@ -194,6 +194,15 @@ export class PointEffect {
      */
     deleteEffect(id: number) {
         this.removeEffect(this.findIndexById(id));
+    }
+
+    /**
+     * 清除所有特性
+     */
+    clearEffect() {
+        this.dataList.fill(0);
+        this.dataPointer = 0;
+        this.needUpdateData = true;
     }
 
     /**
@@ -248,13 +257,13 @@ export class PointEffect {
         }
         const type = data[0];
         const list = this.dataList;
-        const id = data[1];
         if (warpEffect.has(type)) {
-            list.copyWithin(16, 0, 16);
+            list.copyWithin(16, 0);
             list.set(data, 0);
             this.dataPointer++;
             this.idIndexMap.clear();
         } else {
+            const id = data[1];
             list.set(data, this.dataPointer * 16);
             this.idIndexMap.set(id, this.dataPointer);
             this.dataPointer++;
@@ -331,7 +340,10 @@ export class PointEffect {
                 if (type === PointEffectType.None) continue;
                 const id = list[i * 16 + 1];
                 const start = this.startTime.get(id);
-                if (!start) continue;
+                if (!start) {
+                    toRemove.push(i);
+                    continue;
+                }
                 const time = list[i * 16 + 3];
                 const progress = (now - start) / time;
                 if (progress > 1) toRemove.push(i);
@@ -375,12 +387,13 @@ export class PointEffect {
         const count = this.effectCount;
         const list = this.dataList;
         const transformed = this.transformed;
-        let scale = transform.scaleX * core.domStyle.scale;
-        if (this.shader?.highResolution) scale *= devicePixelRatio;
+        let ratio = core.domStyle.scale;
+        if (this.shader?.highResolution) ratio *= devicePixelRatio;
+        const scale = transform.scaleX * ratio;
         const scaleTransform = new Transform();
-        scaleTransform.scale(scale, scale);
+        scaleTransform.scale(ratio, ratio);
         const scaled = scaleTransform.multiply(transform);
-        const fixedHeight = core._PY_ * scale;
+        const fixedHeight = core._PY_ * ratio;
 
         const transformXY = (index: number) => {
             const x = list[index + 4];
@@ -532,8 +545,6 @@ void main() {
         vec4 data3 = effect.info3;
         if (effectType == ${PointEffectType.None}) break;
         float progress = timeInfo.x;
-        // 我草了这句continue，调试的时候直接硬控我俩小时
-        // if (now < 0.0 || now > end) continue;
 
         // 下面开始实施对应的着色器特效
 
