@@ -6,7 +6,6 @@ import { LayerGroup } from '@/core/render/preset/layer';
 import { MotaRenderer } from '@/core/render/render';
 import { Sprite } from '@/core/render/sprite';
 import { bgm } from '@/core/audio/bgm';
-import { Shader, ShaderProgram, UniformType } from '@/core/render/shader';
 import { PointEffect, PointEffectType } from '../fx/pointShader';
 
 const path: Partial<Record<FloorIds, LocArr[]>> = {
@@ -369,8 +368,30 @@ function addCommonWarp(x: number, y: number) {
         PointEffectType.CircleWarp,
         Date.now(),
         1000,
-        [x * 32 + 16, y * 32 + 16, 96, 16],
+        [x * 32 + 16, y * 32 + 16, 96, 20],
         [1 / 20, 1, 0.5, 0],
+        [0, Math.PI * 2, 0, 0]
+    );
+}
+
+function addMediuWarp(x: number, y: number) {
+    effect.addEffect(
+        PointEffectType.CircleWarp,
+        Date.now(),
+        5000,
+        [x * 32 + 16, y * 32 + 16, 480, 24],
+        [1 / 20, 1, 0.5, 0],
+        [0, Math.PI * 2, 0, 0]
+    );
+}
+
+function addLargeWarp(x: number, y: number) {
+    effect.addEffect(
+        PointEffectType.CircleWarp,
+        Date.now(),
+        10000,
+        [x * 32 + 16, y * 32 + 16, 1080, 32],
+        [1 / 15, 1, 0.5, 0],
         [0, Math.PI * 2, 0, 0]
     );
 }
@@ -389,7 +410,7 @@ function para1(chase: Chase) {
             }
         }
         core.drawAnimate('explosion3', 55, 5);
-        core.drawAnimate('stone', 55, 5);
+        addMediuWarp(55, 5);
     });
     chase.onFloorTime('MT15', 1080, () => {
         explode1(58, 9);
@@ -428,6 +449,7 @@ function para2(chase: Chase) {
     });
     chase.onceLoc(35, 3, 'MT15', () => {
         core.drawAnimate('explosion3', 37, 7);
+        addMediuWarp(37, 7);
         for (let tx = 36; tx < 42; tx++) {
             for (let ty = 4; ty < 11; ty++) {
                 core.setBlock(336, tx, ty);
@@ -543,6 +565,7 @@ function para3(chase: Chase, ani: Animation) {
             }
         }
         core.drawAnimate('explosion2', 119, 7);
+        addLargeWarp(119, 7);
         core.removeBlock(105, 7);
         core.drawAnimate('explosion1', 105, 7);
         addCommonWarp(105, 7);
@@ -568,13 +591,14 @@ function para3(chase: Chase, ani: Animation) {
         explode1(73, 8);
         explode1(72, 4);
     });
-    chase.onceLoc(71, 7, 'MT14', () => {
+    chase.onceLoc(72, 7, 'MT14', () => {
         for (let tx = 74; tx < 86; tx++) {
             for (let ty = 3; ty < 12; ty++) {
                 core.setBlock(336, tx, ty);
             }
         }
         core.drawAnimate('explosion2', 79, 7);
+        addLargeWarp(79, 7);
     });
     chase.onceLoc(68, 5, 'MT14', () => {
         explode1(68, 4);
@@ -589,6 +613,7 @@ function para3(chase: Chase, ani: Animation) {
         core.setBlock(336, 72, 10);
         core.setBlock(336, 72, 11);
         core.drawAnimate('explosion3', 69, 5);
+        addMediuWarp(69, 5);
     });
     chase.onceLoc(64, 11, 'MT14', () => {
         explode1(63, 9);
@@ -602,6 +627,7 @@ function para3(chase: Chase, ani: Animation) {
             }
         }
         core.drawAnimate('explosion2', 61, 7);
+        addLargeWarp(61, 7);
     });
     const exploded: Set<number> = new Set();
     chase.on('step', (x, y) => {

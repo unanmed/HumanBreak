@@ -69,7 +69,9 @@ export const enum PointEffectType {
 type EffectData = [x0: number, x1: number, x2: number, x3: number];
 
 const warpEffect = new Set<PointEffectType>();
-warpEffect.add(PointEffectType.CircleWarp);
+warpEffect
+    .add(PointEffectType.CircleWarp)
+    .add(PointEffectType.CircleWarpTangetial);
 
 export class PointEffect {
     /** 着色器程序 */
