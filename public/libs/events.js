@@ -318,6 +318,7 @@ events.prototype.restart = function () {
     core.hideStatusBar();
     core.showStartAnimate();
     core.playBgm(main.startBgm);
+    Mota.require('var', 'hook').emit('restart');
 };
 
 ////// 询问是否需要重新开始 //////

@@ -1,4 +1,3 @@
-import { isNil } from 'lodash-es';
 import { logger } from '../common/logger';
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
 import { isWebGL2Supported } from '../fx/webgl';
@@ -7,9 +6,7 @@ import { ERenderItemEvent, RenderItem, RenderItemPosition } from './item';
 import { Transform } from './transform';
 
 const SHADER_VERTEX_PREFIX_300 = /* glsl */ `#version 300 es
-#ifdef GL_ES
-    precision highp float;
-#endif
+precision highp float;
 
 in vec4 a_position;
 in vec2 a_texCoord;
@@ -17,9 +14,7 @@ in vec2 a_texCoord;
 out highp vec2 v_texCoord;
 `;
 const SHADER_VERTEX_PREFIX_100 = /* glsl */ `
-#ifdef GL_ES
-    precision highp float;
-#endif
+precision highp float;
 
 attribute vec4 a_position;
 attribute vec2 a_texCoord;
@@ -28,18 +23,14 @@ varying highp vec2 v_texCoord;
 `;
 
 const SHADER_FRAGMENT_PREFIX_300 = /* glsl */ `#version 300 es
-#ifdef GL_ES
-    precision highp float;
-#endif
+precision highp float;
 
 in highp vec2 v_texCoord;
 
 uniform sampler2D u_sampler;
 `;
 const SHADER_FRAGMENT_PREFIX_100 = /* glsl */ `
-#ifdef GL_ES
-    precision highp float;
-#endif
+precision highp float;
 
 varying highp vec2 v_texCoord;
 
@@ -288,6 +279,12 @@ export class Shader extends Container<EShaderEvent> {
         gl.depthFunc(gl.LEQUAL);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+        const pre = this.preDraw();
+        if (!pre) {
+            this.postDraw();
+            return;
+        }
+
         // 设置顶点信息
         this.setPositionAttrib();
         this.setTextureAttrib();
@@ -310,7 +307,23 @@ export class Shader extends Container<EShaderEvent> {
 
         // 绘制
         gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+
+        this.postDraw();
     }
+
+    /**
+     * 在本着色器内部渲染之前执行的渲染，如果返回false，则表示不进行内部渲染，但依然会执行 {@link postDraw}
+     * 继承本类，并复写此方法即可实现前置渲染功能
+     */
+    protected preDraw(): boolean {
+        return true;
+    }
+
+    /**
+     * 在本着色器内部渲染之后执行的渲染，即使preDraw返回false，本函数也会执行
+     * 继承本类，并复写此方法即可实现后置渲染功能
+     */
+    protected postDraw() {}
 
     /**
      * 切换着色器程序
@@ -542,13 +555,9 @@ interface ShaderUniformMatrix {
 interface ShaderUniformBlock {
     location: GLuint;
     buffer: WebGLBuffer;
-    set(srcData: AllowSharedBufferSource | null, usage: GLenum): void;
-    set(
-        srcData: ArrayBufferView,
-        usage: GLenum,
-        srcOffset: number,
-        length?: GLuint
-    ): void;
+    size: number;
+    set(srcData: AllowSharedBufferSource | null): void;
+    set(srcData: ArrayBufferView, srcOffset: number, length?: GLuint): void;
 }
 
 type UniformDefineFn = {
@@ -713,7 +722,7 @@ const attribDefine: AttribDefineFn = {
     }
 };
 
-class ShaderProgram {
+export class ShaderProgram {
     /** 顶点着色器 */
     private vertex: string = DEFAULT_VS;
     /** 片元着色器 */
@@ -923,10 +932,20 @@ class ShaderProgram {
     /**
      * 定义一个 uniform block，例如 UBO，并存入本着色器程序的 uniform block 映射
      * 用于一次性向着色器传输大量数据
-     * @param uniform uniform block 名称
+     * @param block uniform block 名称
+     * @param size 数据量，即数据长度，例如一个vec4就是4个长度
+     * @param usage 缓冲区用途，例如 gl.STATIC_DRAW 是指会频繁读取但不会频繁写入
+     *              参考 https://developer.mozilla.org/zh-CN/docs/Web/API/WebGLRenderingContext/bufferData
+     *              的 `usage` 参数
+     * @param binding uniform block 的索引，例如这是你设置的第一个uniform block，就可以填0，第二个填1，以此类推
      * @returns uniform block 的操作对象，可用于设置其值
      */
-    defineUniformBlock(block: string): ShaderUniformBlock | null {
+    defineUniformBlock(
+        block: string,
+        size: number,
+        usage: number,
+        binding: number
+    ): ShaderUniformBlock | null {
         if (this.version === this.element.VERSION_ES_100) {
             logger.warn(24);
             return null;
@@ -935,18 +954,33 @@ class ShaderProgram {
         const gl = this.element.gl;
         if (!program || !gl) return null;
         const location = gl.getUniformBlockIndex(program, block);
-        if (!location) return null;
+        if (location === -1) return null;
         const buffer = gl.createBuffer();
         if (!buffer) return null;
+        const data = new Float32Array(size);
+        data.fill(0);
+        gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
+        gl.bufferData(gl.UNIFORM_BUFFER, data, usage);
+        gl.uniformBlockBinding(program, location, binding);
+        gl.bindBufferBase(gl.UNIFORM_BUFFER, binding, buffer);
         const obj: ShaderUniformBlock = {
             location,
             buffer,
-            set: (srcData, usage, o?: number, l?: number) => {
+            size,
+            set: (data, o?: number, l?: number) => {
                 gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
-                // @ts-ignore
-                gl.bufferData(gl.UNIFORM_BUFFER, srcData, usage, o, l);
-                gl.uniformBlockBinding(program, location, 0);
-                gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, buffer);
+                if (o !== void 0) {
+                    // @ts-ignore
+                    gl.bufferSubData(gl.UNIFORM_BUFFER, 0, data, o, l);
+                } else {
+                    // @ts-ignore
+                    gl.bufferSubData(gl.UNIFORM_BUFFER, 0, data);
+                }
+                // gl.uniformBlockBinding(program, location, binding);
+                gl.bindBufferBase(gl.UNIFORM_BUFFER, binding, buffer);
+                // const array = new Float32Array(160);
+                // gl.getBufferSubData(gl.UNIFORM_BUFFER, 0, array);
+                // console.log(array[0]);
             }
         };
         this.block.set(block, obj);
@@ -977,7 +1011,7 @@ class ShaderProgram {
     }
 
     private compile() {
-        this.shaderDirty = true;
+        this.shaderDirty = false;
         this.clearProgram();
 
         const shader = this.element;

@@ -6,6 +6,8 @@ import { LayerGroup } from '@/core/render/preset/layer';
 import { MotaRenderer } from '@/core/render/render';
 import { Sprite } from '@/core/render/sprite';
 import { bgm } from '@/core/audio/bgm';
+import { Shader, ShaderProgram, UniformType } from '@/core/render/shader';
+import { PointEffect, PointEffectType } from '../fx/pointShader';
 
 const path: Partial<Record<FloorIds, LocArr[]>> = {
     MT16: [
@@ -99,6 +101,11 @@ const path: Partial<Record<FloorIds, LocArr[]>> = {
 };
 
 let back: Sprite | undefined;
+const effect = new PointEffect();
+
+Mota.require('var', 'loading').once('loaded', () => {
+    effect.create(Chase.shader, 10);
+});
 
 /**
  * 初始化并开始这个追逐战
@@ -116,6 +123,7 @@ export function initChase(): IChaseController {
     const animation16 = new CameraAnimation(camera);
     const animation15 = new CameraAnimation(camera);
     const animation14 = new CameraAnimation(camera);
+    effect.setTransform(layer.camera);
 
     const data: ChaseData = {
         path,
@@ -205,22 +213,28 @@ export function initChase(): IChaseController {
 
     Mota.Plugin.require('chase_g').chaseInit1();
 
+    chase.on('end', () => {
+        effect.end();
+        camera.destroy();
+    });
+
     const controller: IChaseController = {
         chase,
         start(fromSave) {
             core.setFlag('onChase', true);
             core.setFlag('chaseId', 1);
-            core.autosave();
             chase.start();
             camera.enable();
             wolfMove(chase);
+            effect.use();
+            effect.start();
             if (fromSave) {
                 initFromSave(chase);
             }
+            testEffect(chase);
         },
         end(success) {
             chase.end(success);
-            camera.destroy();
         },
         initAudio(fromSave) {
             if (fromSave) initFromSave(chase);
@@ -228,6 +242,26 @@ export function initChase(): IChaseController {
         }
     };
     return controller;
+}
+
+function testEffect(chase: Chase) {
+    // effect.addEffect(
+    //     PointEffectType.CircleContrast,
+    //     Date.now(),
+    //     100000,
+    //     [7 * 32 + 16, 17 * 32 + 16, 200, 150],
+    //     [1, 0, 0, 0]
+    // );
+    effect.addEffect(
+        PointEffectType.CircleWarpTangetial,
+        Date.now(),
+        100000,
+        [7 * 32 + 16, 17 * 32 + 16, 150, 120],
+        [Math.PI / 2, 0, 0, 0]
+    );
+    chase.on('frame', () => {
+        effect.requestUpdate();
+    });
 }
 
 function initAudio(chase: Chase) {

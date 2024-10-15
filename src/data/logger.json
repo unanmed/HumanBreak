@@ -48,6 +48,7 @@
         "22": "There is already an active camera for delivered render item. Consider using 'Camera.for' or diable the active camera to avoid some exceptions.",
         "23": "Render item with id of '$1' has already exists.",
         "24": "Uniform block can only be used in glsl version es 300.",
-        "1001": "Item-detail extension needs 'floor-binder' and 'floor-damage' extension as dependency."
+        "1001": "Item-detail extension needs 'floor-binder' and 'floor-damage' extension as dependency.",
+        "1101": "Cannot add new effect to point effect instance, for there's no more reserve space for it. Please increase the max count of the instance."
     }
 }

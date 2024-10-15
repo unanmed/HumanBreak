@@ -203,12 +203,15 @@ export class Transform {
     static readonly identity = new Transform();
 }
 
-function multiplyVec3(mat: ReadonlyMat3, vec: ReadonlyVec3) {
-    return vec3.fromValues(
-        mat[0] * vec[0] + mat[3] * vec[1] + mat[6] * vec[2],
-        mat[1] * vec[0] + mat[4] * vec[1] + mat[7] * vec[2],
-        mat[2] * vec[0] + mat[5] * vec[1] + mat[8] * vec[2]
-    );
+function multiplyVec3(mat: ReadonlyMat3, vec: ReadonlyVec3): vec3 {
+    const v0 = vec[0];
+    const v1 = vec[1];
+    const v2 = vec[2];
+    return [
+        mat[0] * v0 + mat[3] * v1 + mat[6] * v2,
+        mat[1] * v0 + mat[4] * v1 + mat[7] * v2,
+        mat[2] * v0 + mat[5] * v1 + mat[8] * v2
+    ];
 }
 
 function getTranslation(mat: ReadonlyMat3): vec2 {

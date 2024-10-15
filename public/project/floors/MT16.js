@@ -130,6 +130,7 @@ main.floors.MT16=
                         ]
                     },
                     "追逐战后录像会进行自动修复，不用担心录像问题",
+                    "如果逃脱失败，或者想重新开始追逐战，直接读取自动存档即可，会跳过前奏",
                     {
                         "type": "hideStatusBar",
                         "toolbox": true
@@ -400,6 +401,9 @@ main.floors.MT16=
             {
                 "type": "function",
                 "function": "function(){\nMota.Plugin.require('chase_r').start(false);\n}"
+            },
+            {
+                "type": "autoSave"
             }
         ],
         "2,23": [

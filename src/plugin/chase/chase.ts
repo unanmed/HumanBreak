@@ -2,6 +2,7 @@ import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 import { CameraAnimation } from '@/core/render/camera';
 import { LayerGroup } from '@/core/render/preset/layer';
 import { MotaRenderer } from '@/core/render/render';
+import { Shader } from '@/core/render/shader';
 import { Sprite } from '@/core/render/sprite';
 import { disableViewport, enableViewport } from '@/core/render/utils';
 import type { HeroMover, MoveStep } from '@/game/state/move';
@@ -55,6 +56,8 @@ interface ChaseEvent {
 }
 
 export class Chase extends EventEmitter<ChaseEvent> {
+    static shader: Shader;
+
     /** 本次追逐战的数据 */
     private readonly data: ChaseData;
 
@@ -315,6 +318,11 @@ export class Chase extends EventEmitter<ChaseEvent> {
             floorTime.sort((a, b) => a.time - b.time);
         }
         this.onTimeListener.sort((a, b) => a.time - b.time);
+        const render = MotaRenderer.get('render-main')!;
+        const mapDraw = render.getElementById('map-draw')!;
+        render.appendChild(Chase.shader);
+        mapDraw.remove();
+        mapDraw.append(Chase.shader);
         this.emit('start');
     }
 
@@ -327,6 +335,19 @@ export class Chase extends EventEmitter<ChaseEvent> {
         this.layer.removeTicker(this.delegation);
         this.pathSprite?.destroy();
         this.heroMove.off('stepEnd', this.onStepEnd);
+        const render = MotaRenderer.get('render-main')!;
+        const mapDraw = render.getElementById('map-draw')!;
+        mapDraw.remove();
+        Chase.shader.remove();
+        mapDraw.append(render);
         this.emit('end', success);
+        this.removeAllListeners();
     }
 }
+
+Mota.require('var', 'loading').once('coreInit', () => {
+    const shader = new Shader();
+    Chase.shader = shader;
+    shader.size(480, 480);
+    shader.setHD(true);
+});

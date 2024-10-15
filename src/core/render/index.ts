@@ -14,7 +14,7 @@ import { Container } from './container';
 
 let main: MotaRenderer;
 
-Mota.require('var', 'loading').once('loaded', () => {
+Mota.require('var', 'loading').once('coreInit', () => {
     const render = new MotaRenderer();
     main = render;
     render.mount();

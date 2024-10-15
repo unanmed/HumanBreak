@@ -600,13 +600,14 @@ export class CameraAnimation extends EventEmitter<CameraAnimationEvent> {
             if (!end) return;
             const t = end.start + end.time;
             if (t > endTime) endTime = t;
+            const cam = this.camera;
 
             if (ope.type === 'translate') {
-                this.camera.applyTranslateAnimation(ope, exe.animation, t + 50);
+                cam.applyTranslateAnimation(ope, exe.animation, t + 100);
             } else if (ope.type === 'rotate') {
-                this.camera.applyRotateAnimation(ope, exe.animation, t + 50);
+                cam.applyRotateAnimation(ope, exe.animation, t + 100);
             } else {
-                this.camera.applyScaleAnimation(ope, exe.animation, t + 50);
+                cam.applyScaleAnimation(ope, exe.animation, t + 100);
             }
         });
         this.endTime = endTime + this.startTime;

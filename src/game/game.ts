@@ -91,6 +91,8 @@ export interface GameEvent {
     ];
     /** Emitted in game/enemy/damage.ts */
     enemyExtract: [col: EnemyCollection];
+    /** Emitted in lib/events.js restart */
+    restart: [];
 }
 
 export const hook = new EventEmitter<GameEvent>();
