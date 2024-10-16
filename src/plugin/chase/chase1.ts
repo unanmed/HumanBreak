@@ -100,10 +100,11 @@ const path: Partial<Record<FloorIds, LocArr[]>> = {
 };
 
 let back: Sprite | undefined;
+let contrastId: number = 0;
 const effect = new PointEffect();
 
 Mota.require('var', 'loading').once('loaded', () => {
-    effect.create(Chase.shader, 30);
+    effect.create(Chase.shader, 40);
 });
 
 /**
@@ -205,8 +206,8 @@ export function initChase(): IChaseController {
 
     judgeFail1(chase, ani, camera);
     drawBack(chase, ani);
-    para1(chase);
-    para2(chase);
+    para1(chase, ani);
+    para2(chase, ani);
     para3(chase, ani);
     processScale(chase, ani, scale, camera);
 
@@ -367,20 +368,20 @@ function addCommonWarp(x: number, y: number) {
     effect.addEffect(
         PointEffectType.CircleWarp,
         Date.now(),
-        1000,
-        [x * 32 + 16, y * 32 + 16, 96, 20],
-        [1 / 20, 1, 0.5, 0],
-        [0, Math.PI * 2, 0, 0]
+        500,
+        [x * 32 + 16, y * 32 + 16, 48, 32],
+        [1 / 10, 6, 0.8, 0],
+        [0, -Math.PI, 0, 0]
     );
 }
 
-function addMediuWarp(x: number, y: number) {
+function addMediumWarp(x: number, y: number) {
     effect.addEffect(
         PointEffectType.CircleWarp,
         Date.now(),
         5000,
-        [x * 32 + 16, y * 32 + 16, 480, 24],
-        [1 / 20, 1, 0.5, 0],
+        [x * 32 + 16, y * 32 + 16, 480, 64],
+        [1 / 40, 1, 0.5, 0],
         [0, Math.PI * 2, 0, 0]
     );
 }
@@ -390,19 +391,97 @@ function addLargeWarp(x: number, y: number) {
         PointEffectType.CircleWarp,
         Date.now(),
         10000,
-        [x * 32 + 16, y * 32 + 16, 1080, 32],
-        [1 / 15, 1, 0.5, 0],
+        [x * 32 + 16, y * 32 + 16, 1080, 96],
+        [1 / 25, 1, 0.5, 0],
         [0, Math.PI * 2, 0, 0]
     );
 }
 
-function explode1(x: number, y: number) {
+function addCommonContrast(x: number, y: number, ani: Animation, chase: Chase) {
+    const id = contrastId++;
+    const name = 'contrast' + id;
+    ani.register(name, 1);
+    sleep(500).then(() => {
+        ani.mode(linear()).absolute().time(1500).apply(name, 0);
+    });
+    const fx = effect.addEffect(
+        PointEffectType.CircleContrast,
+        Date.now(),
+        2000,
+        [x * 32 + 16, y * 32 + 16, 48, 8],
+        [1, 0, 0, 0]
+    );
+    const fn = () => {
+        effect.setEffect(fx, void 0, [ani.value[name], 0, 0, 0]);
+    };
+    chase.on('frame', fn);
+    sleep(2000).then(() => {
+        chase.off('frame', fn);
+    });
+}
+
+function addMediumContrast(x: number, y: number, ani: Animation, chase: Chase) {
+    const id = contrastId++;
+    const name = 'contrast' + id;
+    ani.register(name, 1);
+    sleep(1500).then(() => {
+        ani.mode(linear()).absolute().time(5000).apply(name, 0);
+    });
+    const fx = effect.addEffect(
+        PointEffectType.CircleContrast,
+        Date.now(),
+        7500,
+        [x * 32 + 16, y * 32 + 16, 144, 32],
+        [1, 0, 0, 0]
+    );
+    const fn = () => {
+        effect.setEffect(
+            fx,
+            [x * 32 + 16, y * 32 + 16, 144 + (1 - ani.value[name]) * 240, 32],
+            [ani.value[name], 0, 0, 0]
+        );
+    };
+    chase.on('frame', fn);
+    sleep(7500).then(() => {
+        chase.off('frame', fn);
+    });
+}
+
+function addLargeContrast(x: number, y: number, ani: Animation, chase: Chase) {
+    const id = contrastId++;
+    const name = 'contrast' + id;
+    ani.register(name, 1);
+    sleep(500).then(() => {
+        ani.mode(linear()).absolute().time(9500).apply(name, 0);
+    });
+    const fx = effect.addEffect(
+        PointEffectType.CircleContrast,
+        Date.now(),
+        7500,
+        [x * 32 + 16, y * 32 + 16, 324, 240],
+        [1, 0, 0, 0]
+    );
+    const fn = () => {
+        effect.setEffect(
+            fx,
+            [x * 32 + 16, y * 32 + 16, 324 + (1 - ani.value[name]) * 720, 240],
+            [ani.value[name], 0, 0, 0]
+        );
+    };
+    chase.on('frame', fn);
+    sleep(10000).then(() => {
+        chase.off('frame', fn);
+    });
+}
+
+function explode1(x: number, y: number, ani: Animation, chase: Chase) {
     core.setBlock(336, x, y);
     core.drawAnimate('explosion1', x, y);
     addCommonWarp(x, y);
+    addCommonContrast(x, y, ani, chase);
 }
 
-function para1(chase: Chase) {
+function para1(chase: Chase, ani: Animation) {
     chase.onFloorTime('MT15', 830, () => {
         for (let tx = 53; tx < 58; tx++) {
             for (let ty = 3; ty < 8; ty++) {
@@ -410,46 +489,49 @@ function para1(chase: Chase) {
             }
         }
         core.drawAnimate('explosion3', 55, 5);
-        addMediuWarp(55, 5);
+        addMediumWarp(55, 5);
+        addMediumContrast(55, 5, ani, chase);
     });
     chase.onFloorTime('MT15', 1080, () => {
-        explode1(58, 9);
-        explode1(59, 9);
+        explode1(58, 9, ani, chase);
+        explode1(59, 9, ani, chase);
     });
     chase.onFloorTime('MT15', 1190, () => {
-        explode1(53, 8);
-        explode1(52, 8);
+        explode1(53, 8, ani, chase);
+        explode1(52, 8, ani, chase);
     });
     chase.onFloorTime('MT15', 1580, () => {
-        explode1(51, 7);
+        explode1(51, 7, ani, chase);
     });
     chase.onFloorTime('MT15', 1830, () => {
-        explode1(47, 7);
-        explode1(49, 9);
+        explode1(47, 7, ani, chase);
+        explode1(49, 9, ani, chase);
     });
 }
 
-function para2(chase: Chase) {
+function para2(chase: Chase, ani: Animation) {
     let emitted32x9 = false;
     chase.onceLoc(45, 8, 'MT15', () => {
-        explode1(45, 9);
+        explode1(45, 9, ani, chase);
     });
     chase.onceLoc(45, 6, 'MT15', () => {
-        explode1(44, 6);
+        explode1(44, 6, ani, chase);
     });
     chase.onceLoc(45, 4, 'MT15', () => {
-        explode1(44, 4);
+        explode1(44, 4, ani, chase);
         core.drawAnimate('explosion1', 48, 6);
         core.removeBlock(48, 6);
         addCommonWarp(48, 6);
+        addCommonContrast(48, 6, ani, chase);
     });
     chase.onceLoc(41, 3, 'MT15', () => {
-        explode1(41, 4);
-        explode1(32, 6);
+        explode1(41, 4, ani, chase);
+        explode1(32, 6, ani, chase);
     });
     chase.onceLoc(35, 3, 'MT15', () => {
         core.drawAnimate('explosion3', 37, 7);
-        addMediuWarp(37, 7);
+        addMediumWarp(37, 7);
+        addMediumContrast(37, 7, ani, chase);
         for (let tx = 36; tx < 42; tx++) {
             for (let ty = 4; ty < 11; ty++) {
                 core.setBlock(336, tx, ty);
@@ -463,9 +545,11 @@ function para2(chase: Chase) {
         core.drawAnimate('explosion1', 33, 8);
         addCommonWarp(34, 8);
         addCommonWarp(33, 8);
+        addCommonContrast(34, 8, ani, chase);
+        addCommonContrast(33, 8, ani, chase);
     });
     chase.onceLoc(33, 7, 'MT15', () => {
-        explode1(32, 9);
+        explode1(32, 9, ani, chase);
     });
     chase.onceLoc(33, 9, 'MT15', () => {
         if (emitted32x9) return;
@@ -473,6 +557,7 @@ function para2(chase: Chase) {
         core.removeBlock(32, 9);
         core.drawAnimate('explosion1', 32, 9);
         addCommonWarp(32, 9);
+        addCommonContrast(32, 9, ani, chase);
     });
     chase.onceLoc(34, 9, 'MT15', () => {
         if (emitted32x9) return;
@@ -480,6 +565,7 @@ function para2(chase: Chase) {
         core.removeBlock(32, 9);
         core.drawAnimate('explosion1', 32, 9);
         addCommonWarp(32, 9);
+        addCommonContrast(32, 9, ani, chase);
     });
     chase.onceLoc(35, 9, 'MT15', () => {
         if (emitted32x9) return;
@@ -499,10 +585,10 @@ function para2(chase: Chase) {
 
 function para3(chase: Chase, ani: Animation) {
     chase.onceLoc(126, 7, 'MT14', () => {
-        explode1(126, 6);
-        explode1(124, 6);
-        explode1(124, 9);
-        explode1(126, 9);
+        explode1(126, 6, ani, chase);
+        explode1(124, 6, ani, chase);
+        explode1(124, 9, ani, chase);
+        explode1(126, 9, ani, chase);
     });
     chase.onceLoc(123, 7, 'MT14', () => {
         core.setBlock(508, 127, 7);
@@ -511,19 +597,20 @@ function para3(chase: Chase, ani: Animation) {
             core.setBlock(509, 112, 7);
         }, 520);
         core.drawHeroAnimate('amazed');
-        explode1(121, 6);
-        explode1(122, 6);
-        explode1(120, 8);
-        explode1(121, 8);
-        explode1(122, 8);
+        explode1(121, 6, ani, chase);
+        explode1(122, 6, ani, chase);
+        explode1(120, 8, ani, chase);
+        explode1(121, 8, ani, chase);
+        explode1(122, 8, ani, chase);
     });
     let emitted110x10 = false;
     let emitted112x8 = false;
     chase.onceLoc(110, 10, 'MT14', () => {
-        explode1(109, 11);
+        explode1(109, 11, ani, chase);
         core.removeBlock(112, 8);
         core.drawAnimate('explosion1', 112, 8);
         addCommonWarp(112, 8);
+        addCommonContrast(112, 8, ani, chase);
         core.insertAction([
             { type: 'moveHero', time: 400, steps: ['backward:1'] }
         ]);
@@ -539,22 +626,22 @@ function para3(chase: Chase, ani: Animation) {
         emitted112x8 = true;
     });
     chase.onceLoc(118, 7, 'MT14', () => {
-        explode1(117, 6);
-        explode1(116, 6);
-        explode1(115, 6);
-        explode1(114, 6);
-        explode1(117, 8);
-        explode1(116, 8);
+        explode1(117, 6, ani, chase);
+        explode1(116, 6, ani, chase);
+        explode1(115, 6, ani, chase);
+        explode1(114, 6, ani, chase);
+        explode1(117, 8, ani, chase);
+        explode1(116, 8, ani, chase);
     });
     chase.onceLoc(112, 7, 'MT14', () => {
-        explode1(112, 8);
-        explode1(113, 7);
+        explode1(112, 8, ani, chase);
+        explode1(113, 7, ani, chase);
     });
     chase.onceLoc(115, 7, 'MT14', () => {
         for (let tx = 111; tx <= 115; tx++) {
-            explode1(tx, 10);
+            explode1(tx, 10, ani, chase);
         }
-        explode1(112, 8);
+        explode1(112, 8, ani, chase);
     });
     chase.onceLoc(110, 7, 'MT14', () => {
         core.jumpBlock(97, 4, 120, -3, 2000);
@@ -566,30 +653,32 @@ function para3(chase: Chase, ani: Animation) {
         }
         core.drawAnimate('explosion2', 119, 7);
         addLargeWarp(119, 7);
+        addLargeContrast(119, 7, ani, chase);
         core.removeBlock(105, 7);
         core.drawAnimate('explosion1', 105, 7);
         addCommonWarp(105, 7);
+        addCommonContrast(105, 7, ani, chase);
     });
     chase.onceLoc(97, 3, 'MT14', () => {
-        explode1(95, 3);
-        explode1(93, 6);
+        explode1(95, 3, ani, chase);
+        explode1(93, 6, ani, chase);
     });
     chase.onceLoc(88, 6, 'MT14', () => {
-        explode1(87, 4);
-        explode1(88, 5);
+        explode1(87, 4, ani, chase);
+        explode1(88, 5, ani, chase);
     });
     chase.onceLoc(86, 6, 'MT14', () => {
-        explode1(84, 6);
-        explode1(85, 5);
-        explode1(86, 8);
+        explode1(84, 6, ani, chase);
+        explode1(85, 5, ani, chase);
+        explode1(86, 8, ani, chase);
     });
     chase.onceLoc(81, 9, 'MT14', () => {
-        explode1(81, 8);
-        explode1(82, 11);
+        explode1(81, 8, ani, chase);
+        explode1(82, 11, ani, chase);
     });
     chase.onceLoc(72, 11, 'MT14', () => {
-        explode1(73, 8);
-        explode1(72, 4);
+        explode1(73, 8, ani, chase);
+        explode1(72, 4, ani, chase);
     });
     chase.onceLoc(72, 7, 'MT14', () => {
         for (let tx = 74; tx < 86; tx++) {
@@ -599,10 +688,11 @@ function para3(chase: Chase, ani: Animation) {
         }
         core.drawAnimate('explosion2', 79, 7);
         addLargeWarp(79, 7);
+        addLargeContrast(79, 7, ani, chase);
     });
     chase.onceLoc(68, 5, 'MT14', () => {
-        explode1(68, 4);
-        explode1(67, 6);
+        explode1(68, 4, ani, chase);
+        explode1(67, 6, ani, chase);
     });
     chase.onceLoc(67, 10, 'MT14', () => {
         for (let tx = 65; tx <= 72; tx++) {
@@ -613,12 +703,13 @@ function para3(chase: Chase, ani: Animation) {
         core.setBlock(336, 72, 10);
         core.setBlock(336, 72, 11);
         core.drawAnimate('explosion3', 69, 5);
-        addMediuWarp(69, 5);
+        addMediumWarp(69, 5);
+        addMediumContrast(69, 5, ani, chase);
     });
     chase.onceLoc(64, 11, 'MT14', () => {
-        explode1(63, 9);
-        explode1(60, 8);
-        explode1(56, 11);
+        explode1(63, 9, ani, chase);
+        explode1(60, 8, ani, chase);
+        explode1(56, 11, ani, chase);
     });
     chase.onceLoc(57, 9, 'MT14', () => {
         for (let tx = 58; tx <= 64; tx++) {
@@ -628,6 +719,7 @@ function para3(chase: Chase, ani: Animation) {
         }
         core.drawAnimate('explosion2', 61, 7);
         addLargeWarp(61, 7);
+        addLargeContrast(61, 7, ani, chase);
     });
     const exploded: Set<number> = new Set();
     chase.on('step', (x, y) => {

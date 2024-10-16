@@ -221,6 +221,7 @@ export class PointEffect {
         data3?: EffectData
     ) {
         const index = this.findIndexById(id);
+        if (index >= this.dataPointer || index === -1) return;
         const list = this.dataList;
         if (data1) {
             list.set(data1, index * 16 + 4);
