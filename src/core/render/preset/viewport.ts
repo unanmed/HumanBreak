@@ -163,8 +163,8 @@ export class FloorViewport implements ILayerGroupRenderExtends {
         const setTargetX = (x: number, time: number) => {
             if (x === xTarget) return;
             xTarget = x;
-            xStart = this.ox;
             xStartTime = time;
+            xStart = this.ox;
         };
         const setTargetY = (y: number, time: number) => {
             if (y === yTarget) return;
@@ -186,8 +186,8 @@ export class FloorViewport implements ILayerGroupRenderExtends {
             if (!ending) {
                 const dir = this.hero.stepDir;
                 const { x, y } = core.utils.scan2[dir];
-                if (x !== 0) setTargetX(-x * this.maxOffset, now);
-                if (y !== 0) setTargetY(-y * this.maxOffset, now);
+                setTargetX(-x * this.maxOffset, now);
+                setTargetY(-y * this.maxOffset, now);
             }
 
             if (!this.hero.renderable) return;
@@ -202,7 +202,8 @@ export class FloorViewport implements ILayerGroupRenderExtends {
                 }
             }
             if (this.ox !== xTarget) {
-                const progress = (now - xStartTime) / transitionTime;
+                const time = transitionTime * Math.abs(xStart - xTarget);
+                const progress = (now - xStartTime) / time;
                 if (progress > 1) {
                     this.ox = xTarget;
                 } else {
@@ -211,7 +212,8 @@ export class FloorViewport implements ILayerGroupRenderExtends {
                 }
             }
             if (this.oy !== yTarget) {
-                const progress = (now - yStartTime) / transitionTime;
+                const time = transitionTime * Math.abs(yStart - yTarget);
+                const progress = (now - yStartTime) / time;
                 if (progress > 1) {
                     this.oy = yTarget;
                 } else {
