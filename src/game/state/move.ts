@@ -428,7 +428,9 @@ const enum HeroMoveCode {
     /** 进入传送门 */
     Portal,
     /** 循环式地图 */
-    Loop
+    Loop,
+    /** 循环式地图撞击 */
+    LoopHit
 }
 
 export class HeroMover extends ObjectMoverBase {
@@ -546,29 +548,37 @@ export class HeroMover extends ObjectMoverBase {
         if (!this.ignoreTerrain) {
             const { noPass, canMove } = this.checkCanMove(x, y, showDir);
 
-            // 不能移动
-            if (noPass || !canMove) {
-                if (!canMove) return HeroMoveCode.CannotMove;
-                else return HeroMoveCode.Hit;
+            if (!canMove) {
+                return HeroMoveCode.CannotMove;
             }
-
+            // 循环式地图
             const floorId = core.status.floorId;
             if (MiscData.loopMaps.has(core.status.floorId)) {
                 const floor = core.status.maps[floorId];
                 const width = floor.width;
                 if (x === 0 && dir === 'left') {
+                    if (noPass) {
+                        return HeroMoveCode.LoopHit;
+                    }
                     await Promise.all([
                         this.renderHeroLoop(),
                         this.moveAnimate(nx, ny, showDir, dir)
                     ]);
                     return HeroMoveCode.Loop;
                 } else if (x === width - 1 && dir === 'right') {
+                    if (noPass) {
+                        return HeroMoveCode.LoopHit;
+                    }
                     await Promise.all([
                         this.renderHeroLoop(),
                         this.moveAnimate(nx, ny, showDir, dir)
                     ]);
                     return HeroMoveCode.Loop;
                 }
+            }
+            // 不能移动
+            if (noPass) {
+                return HeroMoveCode.Hit;
             }
         }
 
@@ -588,11 +598,19 @@ export class HeroMover extends ObjectMoverBase {
         const showDir = toDir(this.moveDir);
 
         // 前方不能移动
-        if (code === HeroMoveCode.CannotMove || code === HeroMoveCode.Hit) {
+        if (
+            code === HeroMoveCode.CannotMove ||
+            code === HeroMoveCode.Hit ||
+            code === HeroMoveCode.LoopHit
+        ) {
             controller.stop();
             this.onCannotMove(showDir);
             if (code === HeroMoveCode.Hit) {
                 core.trigger(nx, ny);
+            } else if (code === HeroMoveCode.LoopHit) {
+                const floor = core.status.thisMap;
+                if (x === 0) core.trigger(floor.width - 1, y);
+                else core.trigger(0, y);
             }
             return;
         }
