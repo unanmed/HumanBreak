@@ -156,10 +156,8 @@ export class Damage extends Sprite<EDamageEvent> {
     /** 默认描边宽度 */
     strokeWidth: number = 2;
 
-    /** 单个点的懒更新 */
-    private needUpdateBlock: boolean = false;
     /** 要懒更新的所有分块 */
-    private needUpdateBlocks: Set<number> = new Set();
+    private dirtyBlocks: Set<number> = new Set();
 
     constructor() {
         super('absolute', false, true);
@@ -203,6 +201,7 @@ export class Damage extends Sprite<EDamageEvent> {
         for (let i = 0; i < num; i++) {
             this.blockData.set(i, new Map());
             this.renderable.set(i, new Set());
+            this.dirtyBlocks.add(i);
         }
 
         this.emit('setMapSize', width, height);
@@ -221,13 +220,19 @@ export class Damage extends Sprite<EDamageEvent> {
         this.blockData.forEach(v => v.clear());
         this.renderable.forEach(v => v.clear());
         this.block.clearAllCache();
+        const w = this.block.blockData.width;
+        const h = this.block.blockData.height;
+        const num = w * h;
+        for (let i = 0; i < num; i++) {
+            this.dirtyBlocks.add(i);
+        }
 
         enemy.list.forEach(v => {
             if (isNil(v.x) || isNil(v.y)) return;
             const index = this.block.getIndexByLoc(v.x, v.y);
             this.blockData.get(index)?.set(v.y * this.mapWidth + v.x, v);
         });
-        this.updateBlocks();
+        // this.updateBlocks();
 
         this.update(this);
     }
@@ -248,13 +253,14 @@ export class Damage extends Sprite<EDamageEvent> {
      * @param blocks 要更新的分块集合
      * @param map 是否更新地图伤害
      */
-    updateBlocks(blocks?: Set<number>, map: boolean = true) {
+    updateBlocks(blocks?: Set<number>) {
         if (blocks) {
-            blocks.forEach(v => this.updateBlock(v, map));
+            blocks.forEach(v => this.dirtyBlocks.add(v));
             this.emit('updateBlocks', blocks);
         } else {
-            this.blockData.forEach((_, k) => this.updateBlock(k, false));
-            if (map) this.extractAllMapDamage();
+            this.blockData.forEach((v, i) => {
+                this.dirtyBlocks.add(i);
+            });
             this.emit('updateBlocks', new Set(this.blockData.keys()));
         }
         this.update(this);
@@ -278,18 +284,7 @@ export class Damage extends Sprite<EDamageEvent> {
         this.update(this);
 
         // 渲染懒更新，优化性能表现
-        if (!this.needUpdateBlock) {
-            this.needUpdateBlocks.add(block);
-            this.requestBeforeFrame(() => {
-                this.needUpdateBlock = false;
-                this.updateBlocks(this.needUpdateBlocks, false);
-                this.needUpdateBlocks.clear();
-                // this.needUpdateBlocks.forEach(v => this.updateBlock(v, false));
-                // todo: 阻击夹域等地图伤害检测是否必要更新，例如不包含阻击夹域的怪就不必要更新这个怪物信息
-                // this.extractAllMapDamage();
-            });
-            this.needUpdateBlock = true;
-        }
+        this.dirtyBlocks.add(block);
     }
 
     /**
@@ -487,6 +482,7 @@ export class Damage extends Sprite<EDamageEvent> {
         const size = cell * block.blockSize;
 
         this.emit('beforeDamageRender', render, transform);
+
         render.forEach(v => {
             const [x, y] = block.getBlockXYByIndex(v);
             const bx = x * block.blockSize;
@@ -502,7 +498,9 @@ export class Damage extends Sprite<EDamageEvent> {
                 return;
             }
 
-            this.updateBlock(v, true);
+            if (this.dirtyBlocks.has(v)) {
+                this.updateBlock(v, true);
+            }
             this.emit('dirtyUpdate', v);
 
             // 否则依次渲染并写入缓存

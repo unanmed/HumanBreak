@@ -431,8 +431,7 @@ events.prototype.trigger = function (x, y, callback) {
         if (
             trigger == 'changeFloor' &&
             !noPass &&
-            this._trigger_ignoreChangeFloor(block) &&
-            !loop
+            this._trigger_ignoreChangeFloor(block)
         )
             return _executeCallback();
         // @ts-ignore

@@ -62,19 +62,19 @@ function getRealStatus(
 ): any {
     const { getSkillLevel } = Mota.Plugin.require('skillTree_g');
     if (name instanceof Array) {
-        return Object.fromEntries(
-            name.map(v => [v, getRealStatus(status, v, floorId)])
-        );
+        const res: any = {};
+        name.forEach(v => {
+            res[v] = getRealStatus(status, v, floorId);
+        });
+        return res;
     }
 
     if (name === 'all') {
-        return Object.fromEntries(
-            Object.keys(core.status.hero).map(v => [
-                v,
-                v !== 'all' &&
-                    getRealStatus(status, v as keyof HeroStatus, floorId)
-            ])
-        );
+        const res: any = {};
+        Object.keys(core.status.hero).forEach(v => {
+            res[v] = getRealStatus(status, v as keyof HeroStatus, floorId);
+        });
+        return res;
     }
 
     let s = (status?.[name] ?? core.status.hero[name]) as number;
@@ -109,7 +109,7 @@ function getRealStatus(
 
     // buff
     if (typeof s === 'number') {
-        s *= core.getBuff(name as keyof NumbericHeroStatus);
+        s *= flags[`__${name}_buff__`] ?? 1;
         s = Math.floor(s);
     }
 

@@ -217,10 +217,9 @@ export function getSkillFromIndex(index: number) {
 
 /**
  * 获取技能等级
- * @param {number} skill
  */
 export function getSkillLevel(skill: number) {
-    return (levels[skill] ??= 0);
+    return levels[skill] ?? 0;
 }
 
 export function getSkillConsume(skill: number) {

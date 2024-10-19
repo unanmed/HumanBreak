@@ -66,8 +66,8 @@ export class FloorItemDetail implements ILayerGroupRenderExtends {
         if (!mainSetting.getValue('screen.itemDetail')) return;
         if (this.dirtyBlock.has(block)) {
             this.sprite.block.clearCache(block, 1);
-            this.render(block);
         }
+        this.render(block);
     };
 
     private onUpdateMapSize = (width: number, height: number) => {
@@ -216,14 +216,13 @@ export class FloorItemDetail implements ILayerGroupRenderExtends {
      * @param block 需要渲染的格子
      */
     render(block: number) {
-        this.calAllItems(new Set([block]));
+        if (this.dirtyBlock.has(block)) {
+            this.calAllItems(new Set([block]));
+        }
         const data = this.detailData;
-
-        if (!this.dirtyBlock.has(block)) return;
         this.dirtyBlock.delete(block);
         const info = data.get(block);
         if (!info) return;
-
         info.forEach(({ x, y, diff }) => {
             let n = 0;
             for (const [key, value] of Object.entries(diff)) {
