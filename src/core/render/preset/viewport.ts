@@ -14,13 +14,14 @@ export class FloorViewport implements ILayerGroupRenderExtends {
 
     /** 是否启用视角控制拓展 */
     enabled: boolean = true;
+    /** 是否自动限定视角范围至地图范围 */
+    boundX: boolean = true;
+    boundY: boolean = true;
 
     /** 渐变的速率曲线 */
-    transitionFn: TimingFn = hyper('sec', 'out');
+    transitionFn: TimingFn = hyper('sin', 'out');
     /** 瞬移的速率曲线 */
     mutateFn: TimingFn = hyper('sin', 'out');
-    /** 加减速的速率曲线 */
-    movingEaseFn: TimingFn = t => t ** 2;
 
     /** 突变时的渐变时长 */
     transitionTime: number = 600;
@@ -28,17 +29,27 @@ export class FloorViewport implements ILayerGroupRenderExtends {
     /** 当前视角位置 */
     private nx: number = 0;
     private ny: number = 0;
+    /** 移动时的偏移位置 */
+    private ox: number = 0;
+    private oy: number = 0;
+    /** 移动时的偏移最大值 */
+    private maxOffset: number = 1;
 
     /** 委托ticker */
     private delegation: number = -1;
     /** 渐变委托ticker */
     private transition: number = -1;
+    /** 移动的委托ticker */
+    private moveDelegation: number = -1;
     /** 移动委托ticker */
     private moving: number = -1;
     /** 是否在渐变过程中 */
     private inTransition: boolean = false;
     /** 是否在移动过程中 */
     private inMoving: boolean = false;
+
+    /** 移动的监听函数 */
+    private movingFramer?: () => void;
 
     /**
      * 禁用自动视角控制
@@ -64,11 +75,22 @@ export class FloorViewport implements ILayerGroupRenderExtends {
     }
 
     /**
+     * 设置是否自动限定视角范围至地图范围
+     * @param boundX 是否自动限定水平视角范围
+     * @param boundY 是否自动限定竖直视角范围
+     */
+    setAutoBound(boundX: boolean = this.boundX, boundY: boolean = this.boundY) {
+        this.boundX = boundX;
+        this.boundY = boundY;
+    }
+
+    /**
      * 传入视角的目标位置，将其限定在地图范围内后返回
      * @param x 图格横坐标
      * @param y 图格纵坐标
      */
     getBoundedPosition(x: number, y: number) {
+        if (!this.boundX && !this.boundY) return { x, y };
         const width = core._WIDTH_;
         const height = core._HEIGHT_;
         const minX = (width - 1) / 2;
@@ -77,8 +99,10 @@ export class FloorViewport implements ILayerGroupRenderExtends {
         const maxX = floor.width - minX - 1;
         const maxY = floor.height - minY - 1;
 
-        // return { x, y };
-        return { x: core.clamp(x, minX, maxX), y: core.clamp(y, minY, maxY) };
+        return {
+            x: this.boundX ? core.clamp(x, minX, maxX) : x,
+            y: this.boundY ? core.clamp(y, minY, maxY) : y
+        };
     }
 
     /**
@@ -95,6 +119,22 @@ export class FloorViewport implements ILayerGroupRenderExtends {
     }
 
     /**
+     * 开始移动
+     */
+    startMove() {
+        if (this.inMoving) return;
+        this.inMoving = true;
+        this.createMoveTransition();
+    }
+
+    /**
+     * 结束移动
+     */
+    endMove() {
+        this.inMoving = false;
+    }
+
+    /**
      * 当勇士通过移动改变至指定位置时移动视角
      * @param x 目标图格横坐标
      * @param y 目标图格纵坐标
@@ -106,9 +146,81 @@ export class FloorViewport implements ILayerGroupRenderExtends {
             const distance = Math.hypot(this.nx - nx, this.ny - ny);
             const t = core.clamp(distance * time, time, time * 3);
             this.createTransition(nx, ny, t, this.transitionFn);
-        } else {
-            this.createTransition(nx, ny, time, this.transitionFn);
         }
+    }
+
+    private createMoveTransition() {
+        let xTarget: number = 0;
+        let yTarget: number = 0;
+        let xStart: number = this.ox;
+        let yStart: number = this.oy;
+        let xStartTime: number = Date.now();
+        let yStartTime: number = Date.now();
+        let ending: boolean = false;
+        // 这个数等于 sinh(2)，用这个数的话，可以正好在刚开始移动的时候达到1的斜率，效果会比较好
+        const transitionTime = this.hero.speed * 3.626860407847019;
+
+        const setTargetX = (x: number, time: number) => {
+            if (x === xTarget) return;
+            xTarget = x;
+            xStart = this.ox;
+            xStartTime = time;
+        };
+        const setTargetY = (y: number, time: number) => {
+            if (y === yTarget) return;
+            yTarget = y;
+            yStart = this.oy;
+            yStartTime = time;
+        };
+
+        if (this.movingFramer) {
+            this.hero.off('moveTick', this.movingFramer);
+        }
+        this.movingFramer = () => {
+            const now = Date.now();
+            if (!this.inMoving && !ending) {
+                setTargetX(0, now);
+                setTargetY(0, now);
+                ending = true;
+            }
+            if (!ending) {
+                const dir = this.hero.stepDir;
+                const { x, y } = core.utils.scan2[dir];
+                if (x !== 0) setTargetX(-x * this.maxOffset, now);
+                if (y !== 0) setTargetY(-y * this.maxOffset, now);
+            }
+
+            if (!this.hero.renderable) return;
+
+            this.nx = this.hero.renderable.x;
+            this.ny = this.hero.renderable.y;
+
+            if (ending) {
+                if (this.ox === xTarget && this.oy == yTarget) {
+                    this.group.removeTicker(this.moveDelegation);
+                    return;
+                }
+            }
+            if (this.ox !== xTarget) {
+                const progress = (now - xStartTime) / transitionTime;
+                if (progress > 1) {
+                    this.ox = xTarget;
+                } else {
+                    const p = this.transitionFn(progress);
+                    this.ox = (xTarget - xStart) * p + xStart;
+                }
+            }
+            if (this.oy !== yTarget) {
+                const progress = (now - yStartTime) / transitionTime;
+                if (progress > 1) {
+                    this.oy = yTarget;
+                } else {
+                    const p = this.transitionFn(progress);
+                    this.oy = (yTarget - yStart) * p + yStart;
+                }
+            }
+        };
+        this.hero.on('moveTick', this.movingFramer);
     }
 
     /**
@@ -157,21 +269,33 @@ export class FloorViewport implements ILayerGroupRenderExtends {
     private create() {
         let nx = this.nx;
         let ny = this.ny;
+        let ox = this.ox;
+        let oy = this.oy;
         const halfWidth = core._PX_ / 2;
         const halfHeight = core._PY_ / 2;
         this.delegation = this.group.delegateTicker(() => {
             if (!this.enabled) return;
-            if (this.nx === nx && this.ny === ny) return;
+            if (
+                this.nx === nx &&
+                this.ny === ny &&
+                this.ox === ox &&
+                this.oy === oy
+            ) {
+                return;
+            }
             const cell = this.group.cellSize;
             const half = cell / 2;
             nx = this.nx;
             ny = this.ny;
-            const ox = this.nx * cell - halfWidth + half;
-            const oy = this.ny * cell - halfHeight + half;
-            core.bigmap.offsetX = ox;
-            core.bigmap.offsetY = oy;
+            ox = this.ox;
+            oy = this.oy;
+            const { x: bx, y: by } = this.getBoundedPosition(nx + ox, ny + oy);
+            const rx = bx * cell - halfWidth + half;
+            const ry = by * cell - halfHeight + half;
+            core.bigmap.offsetX = rx;
+            core.bigmap.offsetY = ry;
 
-            this.group.camera.setTranslate(-ox, -oy);
+            this.group.camera.setTranslate(-rx, -ry);
             this.group.update(this.group);
         });
         // this.createMoving();
@@ -221,6 +345,12 @@ adapter.receiveSync('disable', item => {
 });
 adapter.receiveSync('enable', item => {
     item.enable();
+});
+adapter.receiveSync('startMove', item => {
+    item.startMove();
+});
+adapter.receiveSync('endMove', item => {
+    item.endMove();
 });
 
 const hook = Mota.require('var', 'hook');
