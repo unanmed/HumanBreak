@@ -98,8 +98,9 @@ export class FloorItemDetail implements ILayerGroupRenderExtends {
         this.blockData.clear();
 
         // 预留blockData
-        const [x, y] = this.sprite.block.getBlockXY(width, height);
-        const num = x * y;
+        this.sprite.block.size(width, height);
+        const data = this.sprite.block.blockData;
+        const num = data.width * data.height;
         for (let i = 0; i <= num; i++) {
             this.blockData.set(i, new Map());
             this.detailData.set(i, new Map());
@@ -159,6 +160,7 @@ export class FloorItemDetail implements ILayerGroupRenderExtends {
      * @param block 要计算的分块
      */
     calAllItems(block: Set<number>) {
+        if (!core.status.thisMap) return;
         if (this.dirtyBlock.size === 0 || block.size === 0) return;
         let diff: Record<string | symbol, number | undefined> = {};
         const before = core.status.hero;

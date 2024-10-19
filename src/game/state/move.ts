@@ -867,12 +867,6 @@ export class HeroMover extends ObjectMoverBase {
                     const dx = delta * progress;
                     loopHero.x = dx + from;
                     layer.update(layer);
-                    console.log(
-                        loopHero.x,
-                        loopHero.y,
-                        renderable.x,
-                        renderable.y
-                    );
                 },
                 this.moveSpeed,
                 () => {
