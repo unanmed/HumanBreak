@@ -806,6 +806,8 @@ maps.prototype.generateMovableArray = function (floorId) {
     for (var x = 0; x < width; ++x) {
         array[x] = Array(height).fill([]);
     }
+    const loopMaps = Mota.require('module', 'Mechanism').MiscData.loopMaps;
+    const isLoop = loopMaps.has(floorId);
     var v2 = floorId == core.status.floorId && core.bigmap.v2;
     var startX = v2 ? Math.max(0, core.bigmap.posX - core.bigmap.extend) : 0;
     var endX = v2
@@ -821,6 +823,11 @@ maps.prototype.generateMovableArray = function (floorId) {
               core.bigmap.posY + core._HEIGHT_ + core.bigmap.extend + 1
           )
         : height;
+
+    if (isLoop) {
+        startX = 0;
+        endX = core.status.maps[floorId].width;
+    }
 
     for (var x = startX; x < endX; x++) {
         for (var y = startY; y < endY; y++) {
@@ -875,6 +882,12 @@ maps.prototype._canMoveHero_checkPoint = function (
 
     var nx = x + core.utils.scan[direction].x,
         ny = y + core.utils.scan[direction].y;
+
+    const loopMaps = Mota.require('module', 'Mechanism').MiscData.loopMaps;
+    if (loopMaps.has(floorId)) {
+        if (nx < 0) nx = floor.width - 1;
+        if (nx >= floor.width) nx = 0;
+    }
     if (
         nx < 0 ||
         ny < 0 ||
@@ -1110,6 +1123,9 @@ maps.prototype.automaticRoute = function (destX, destY) {
     // BFS找寻最短路径
     var route = this._automaticRoute_bfs(startX, startY, destX, destY);
     if (route[destX + ',' + destY] == null) return [];
+    const floor = core.status.thisMap;
+    const loopMaps = Mota.require('module', 'Mechanism').MiscData.loopMaps;
+
     // 路径数组转换
     var ans = [],
         nowX = destX,
@@ -1119,6 +1135,10 @@ maps.prototype.automaticRoute = function (destX, destY) {
         ans.push({ direction: dir, x: nowX, y: nowY });
         nowX -= core.utils.scan[dir].x;
         nowY -= core.utils.scan[dir].y;
+        if (loopMaps.has(core.status.floorId)) {
+            if (nowX < 0) nowX += floor.width;
+            if (nowX >= floor.width) nowX -= floor.width;
+        }
     }
     ans.reverse();
     return ans;
@@ -1136,6 +1156,9 @@ maps.prototype._automaticRoute_bfs = function (startX, startY, destX, destY) {
     route[startX + ',' + startY] = '';
     queue.queue({ depth: 0, x: startX, y: startY });
     var blocks = core.getMapBlocksObj();
+    const floor = core.status.thisMap;
+    const loopMaps = Mota.require('module', 'Mechanism').MiscData.loopMaps;
+
     while (queue.length != 0) {
         var curr = queue.dequeue(),
             deep = curr.depth,
@@ -1145,14 +1168,22 @@ maps.prototype._automaticRoute_bfs = function (startX, startY, destX, destY) {
             if (!core.inArray(canMoveArray[nowX][nowY], direction)) continue;
             var nx = nowX + core.utils.scan[direction].x;
             var ny = nowY + core.utils.scan[direction].y;
-            if (
-                nx < 0 ||
-                nx >= core.bigmap.width ||
-                ny < 0 ||
-                ny >= core.bigmap.height ||
-                route[nx + ',' + ny] != null
-            )
-                continue;
+            if (loopMaps.has(core.status.floorId)) {
+                if (nx < 0) nx = floor.width - 1;
+                if (nx >= floor.width) nx = 0;
+                if (route[nx + ',' + ny] || ny < 0 || ny >= floor.height) {
+                    continue;
+                }
+            } else {
+                if (
+                    nx < 0 ||
+                    nx >= core.bigmap.width ||
+                    ny < 0 ||
+                    ny >= core.bigmap.height ||
+                    route[nx + ',' + ny] != null
+                )
+                    continue;
+            }
             // 重点
             if (nx == destX && ny == destY) {
                 route[nx + ',' + ny] = direction;

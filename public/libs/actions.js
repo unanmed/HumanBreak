@@ -644,9 +644,17 @@ actions.prototype._sys_ondown = function (x, y, px, py) {
     core.status.downTime = new Date();
     core.deleteCanvas('route');
     var pos = {
-        x: parseInt((px + core.bigmap.offsetX) / 32),
-        y: parseInt((py + core.bigmap.offsetY) / 32)
+        x: Math.floor((px + core.bigmap.offsetX) / 32),
+        y: Math.floor((py + core.bigmap.offsetY) / 32)
     };
+
+    const loopMaps = Mota.require('module', 'Mechanism').MiscData.loopMaps;
+    if (loopMaps.has(core.status.floorId)) {
+        const floor = core.status.thisMap;
+        if (pos.x < 0) pos.x += floor.width;
+        if (pos.x >= floor.width) pos.x -= floor.width;
+    }
+
     core.status.stepPostfix = [];
     core.status.stepPostfix.push(pos);
     core.fillRect(
