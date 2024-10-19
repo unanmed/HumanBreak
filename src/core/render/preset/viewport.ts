@@ -39,8 +39,6 @@ export class FloorViewport implements ILayerGroupRenderExtends {
     private delegation: number = -1;
     /** 渐变委托ticker */
     private transition: number = -1;
-    /** 移动的委托ticker */
-    private moveDelegation: number = -1;
     /** 移动委托ticker */
     private moving: number = -1;
     /** 是否在渐变过程中 */
@@ -82,6 +80,9 @@ export class FloorViewport implements ILayerGroupRenderExtends {
     setAutoBound(boundX: boolean = this.boundX, boundY: boolean = this.boundY) {
         this.boundX = boundX;
         this.boundY = boundY;
+        this.group.requestBeforeFrame(() => {
+            this.setPosition(this.nx, this.ny);
+        });
     }
 
     /**
@@ -116,6 +117,7 @@ export class FloorViewport implements ILayerGroupRenderExtends {
         this.group.removeTicker(this.transition, false);
         this.nx = nx;
         this.ny = ny;
+        console.log(nx, ny);
     }
 
     /**
@@ -197,7 +199,7 @@ export class FloorViewport implements ILayerGroupRenderExtends {
 
             if (ending) {
                 if (this.ox === xTarget && this.oy == yTarget) {
-                    this.group.removeTicker(this.moveDelegation);
+                    this.hero.off('moveTick', this.movingFramer);
                     return;
                 }
             }
@@ -296,7 +298,6 @@ export class FloorViewport implements ILayerGroupRenderExtends {
             const ry = by * cell - halfHeight + half;
             core.bigmap.offsetX = rx;
             core.bigmap.offsetY = ry;
-
             this.group.camera.setTranslate(-rx, -ry);
             this.group.update(this.group);
         });
