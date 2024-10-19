@@ -109,6 +109,12 @@ interface IRenderTickerSupport {
      * @returns 是否删除成功，比如对应ticker不存在，就是删除失败
      */
     removeTicker(id: number, callEnd?: boolean): boolean;
+
+    /**
+     * 检查是否包含一个委托函数
+     * @param id 函数id
+     */
+    hasTicker(id: number): boolean;
 }
 
 export interface ERenderItemEvent {
@@ -373,7 +379,12 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         RenderItem.ticker.remove(delegation.fn);
         window.clearTimeout(delegation.timeout);
         if (callEnd) delegation.endFn?.();
+        RenderItem.tickerMap.delete(id);
         return true;
+    }
+
+    hasTicker(id: number): boolean {
+        return RenderItem.tickerMap.has(id);
     }
 
     /**

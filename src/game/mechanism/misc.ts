@@ -3,6 +3,14 @@ import { loading } from '../game';
 import type { LayerDoorAnimate } from '@/core/render/preset/floor';
 
 /**
+ * 一些零散机制的数据
+ */
+export namespace MiscData {
+    /** 循环式地图 */
+    export const loopMaps: Set<FloorIds> = new Set(['tower6']);
+}
+
+/**
  * 永夜/极昼
  */
 export namespace NightSpecial {

@@ -370,7 +370,76 @@ events.prototype.doSystemEvent = function (type, data, callback) {
 
 ////// 触发(x,y)点的事件 //////
 events.prototype.trigger = function (x, y, callback) {
-    // see src/plugin/game/loopMap.js
+    var _executeCallback = function () {
+        // 因为trigger之后还有可能触发其他同步脚本（比如阻激夹域检测）
+        // 所以这里强制callback被异步触发
+        if (callback) {
+            setTimeout(callback, 1); // +1是为了录像检测系统
+        }
+        return;
+    };
+    if (core.status.gameOver) return _executeCallback();
+    if (core.status.event.id == 'action') {
+        core.insertAction(
+            {
+                type: 'function',
+                function:
+                    'function () { core.events._trigger_inAction(' +
+                    x +
+                    ',' +
+                    y +
+                    '); }',
+                async: true
+            },
+            void 0,
+            void 0,
+            void 0,
+            true
+        );
+        return _executeCallback();
+    }
+    if (core.status.event.id) return _executeCallback();
+
+    let block = core.getBlock(x, y);
+
+    if (block == null) return _executeCallback();
+
+    // 执行该点的脚本
+    if (block.event.script) {
+        core.clearRouteFolding();
+        try {
+            eval(block.event.script);
+        } catch (ee) {
+            console.error(ee);
+        }
+    }
+
+    // 碰触事件
+    if (block.event.event) {
+        core.clearRouteFolding();
+        core.insertAction(block.event.event, block.x, block.y);
+        // 不再执行该点的系统事件
+        return _executeCallback();
+    }
+
+    if (block.event.trigger && block.event.trigger !== 'null') {
+        var noPass = block.event.noPass,
+            trigger = block.event.trigger;
+        if (noPass) core.clearAutomaticRouteNode(x, y);
+
+        // 转换楼层能否穿透
+        if (
+            trigger == 'changeFloor' &&
+            !noPass &&
+            this._trigger_ignoreChangeFloor(block) &&
+            !loop
+        )
+            return _executeCallback();
+        // @ts-ignore
+        core.status.automaticRoute.moveDirectly = false;
+        this.doSystemEvent(trigger, block);
+    }
+    return _executeCallback();
 };
 
 events.prototype._trigger_inAction = function (x, y) {
@@ -687,7 +756,16 @@ events.prototype._getNextItem = function (direction, noRoute) {
 };
 
 events.prototype._sys_changeFloor = function (data, callback) {
-    // see src/plugin/game/loopMap.js
+    data = data.event.data;
+    let heroLoc = {};
+    if (data.loc) heroLoc = { x: data.loc[0], y: data.loc[1] };
+    if (data.direction) heroLoc.direction = data.direction;
+    // @ts-ignore
+    if (core.status.event.id != 'action') core.status.event.id = null;
+    core.changeFloor(data.floorId, data.stair, heroLoc, data.time, function () {
+        core.replay();
+        if (callback) callback();
+    });
 };
 
 ////// 楼层切换 //////

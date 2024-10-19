@@ -252,9 +252,19 @@ interface ResolvedFloor<T extends FloorIds = FloorIds> extends FloorBase<T> {
     bgmap: number[][];
 
     /**
+     * 背景2层
+     */
+    bg2map: number[][];
+
+    /**
      * 前景层
      */
     fgmap: number[][];
+
+    /**
+     * 前景2层
+     */
+    fg2map: number[][];
 
     /**
      * 楼层切换

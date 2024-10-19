@@ -120,8 +120,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 正在切换楼层过程中执行的操作；此函数的执行时间是“屏幕完全变黑“的那一刻
             // floorId为要切换到的楼层ID；heroLoc表示勇士切换到的位置
 
-            const { checkLoopMap } = Mota.Plugin.require('loopMap_g');
-
             // ---------- 此时还没有进行切换，当前floorId还是原来的 ---------- //
             var currentId = core.status.floorId || null; // 获得当前的floorId，可能为null
             var fromLoad = core.hasFlag('__fromLoad__'); // 是否是读档造成的切换
@@ -178,7 +176,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             if (weather) core.setWeather(weather[0], weather[1]);
             else core.setWeather();
 
-            checkLoopMap();
             core.updateDamage();
 
             // ...可以新增一些其他内容，比如创建个画布在右上角显示什么内容等等
@@ -385,8 +382,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 2, 将楼层属性中的cannotMoveDirectly这个开关勾上，即禁止在该层楼使用瞬移。
             // 3. 将flag:cannotMoveDirectly置为true，即可使用flag控制在某段剧情范围内禁止瞬移。
 
-            const { checkLoopMap } = Mota.Plugin.require('loopMap_g');
-
             // 增加步数
             core.status.hero.steps++;
             // 更新跟随者状态，并绘制
@@ -432,8 +427,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     true
                 );
             }
-
-            checkLoopMap();
 
             // 如需强行终止行走可以在这里条件判定：
             // core.stopAutomaticRoute();

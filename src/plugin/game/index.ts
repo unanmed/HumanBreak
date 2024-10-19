@@ -3,7 +3,6 @@ import * as fiveLayer from './fiveLayer';
 import * as itemDetail from './fx/itemDetail';
 import * as replay from './replay';
 import * as ui from './ui';
-import * as loopMap from './loopMap';
 import * as removeMap from './removeMap';
 import * as shop from './shop';
 import * as skill from './skill';
@@ -17,7 +16,6 @@ import * as fallback from './fallback';
 import './hook';
 
 Mota.Plugin.register('utils_g', utils);
-Mota.Plugin.register('loopMap_g', loopMap, loopMap.init);
 Mota.Plugin.register('shop_g', shop);
 Mota.Plugin.register('replay_g', replay, replay.init);
 Mota.Plugin.register('skillTree_g', skillTree);

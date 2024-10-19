@@ -6,6 +6,7 @@ import * as frag from './fx/frag';
 import * as use from './use';
 import * as gameCanvas from './fx/gameCanvas';
 import * as animateController from './animateController';
+import './loopMap';
 
 Mota.Plugin.register('fly_r', fly);
 Mota.Plugin.register('chase_r', chase);

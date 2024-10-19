@@ -1,5 +1,5 @@
 import EventEmitter from 'eventemitter3';
-import { backDir, toDir } from './utils';
+import { backDir, checkCanMoveExtended, toDir } from './utils';
 import { loading } from '../game';
 import type { RenderAdapter } from '@/core/render/adapter';
 import type { HeroRenderer } from '@/core/render/preset/hero';
@@ -8,10 +8,11 @@ import type { HeroKeyMover } from '@/core/main/action/move';
 import type {
     FloorLayer,
     Layer,
+    LayerGroup,
     LayerMovingRenderable
 } from '@/core/render/preset/layer';
 import type { LayerFloorBinder } from '@/core/render/preset/floor';
-import { BluePalace } from '../mechanism/misc';
+import { BluePalace, MiscData } from '../mechanism/misc';
 
 interface MoveStepDir {
     type: 'dir';
@@ -425,7 +426,9 @@ const enum HeroMoveCode {
     /** 不能移动，同时当前格有CannotOut，或目标格有CannotIn，不会触发前面一格的触发器 */
     CannotMove,
     /** 进入传送门 */
-    Portal
+    Portal,
+    /** 循环式地图 */
+    Loop
 }
 
 export class HeroMover extends ObjectMoverBase {
@@ -478,8 +481,10 @@ export class HeroMover extends ObjectMoverBase {
     protected async onMoveStart(controller: IMoveController): Promise<void> {
         this.beforeMoveSpeed = this.moveSpeed;
         const adapter = HeroMover.adapter;
-        if (!adapter) return;
+        const viewport = HeroMover.viewport;
+        if (!adapter || !viewport) return;
         await adapter.all('readyMove');
+        viewport.sync('startMove');
         adapter.sync('startAnimate');
     }
 
@@ -487,8 +492,10 @@ export class HeroMover extends ObjectMoverBase {
         this.moveSpeed = this.beforeMoveSpeed;
         this.onSetMoveSpeed(this.moveSpeed, controller);
         const adapter = HeroMover.adapter;
-        if (!adapter) return;
+        const viewport = HeroMover.viewport;
+        if (!adapter || !viewport) return;
         await adapter.all('endMove');
+        viewport.sync('endMove');
         adapter.sync('endAnimate');
         core.clearContinueAutomaticRoute();
         core.stopAutomaticRoute();
@@ -536,6 +543,25 @@ export class HeroMover extends ObjectMoverBase {
                 if (!canMove) return HeroMoveCode.CannotMove;
                 else return HeroMoveCode.Hit;
             }
+
+            const floorId = core.status.floorId;
+            if (MiscData.loopMaps.has(core.status.floorId)) {
+                const floor = core.status.maps[floorId];
+                const width = floor.width;
+                if (x === 0 && dir === 'left') {
+                    await Promise.all([
+                        this.renderHeroLoop(),
+                        this.moveAnimate(nx, ny, showDir, dir)
+                    ]);
+                    return HeroMoveCode.Loop;
+                } else if (x === width - 1 && dir === 'right') {
+                    await Promise.all([
+                        this.renderHeroLoop(),
+                        this.moveAnimate(nx, ny, showDir, dir)
+                    ]);
+                    return HeroMoveCode.Loop;
+                }
+            }
         }
 
         // 可以移动，显示移动动画
@@ -572,13 +598,21 @@ export class HeroMover extends ObjectMoverBase {
         }
 
         // 本次移动正常完成
-        if (code === HeroMoveCode.Step || code === HeroMoveCode.Portal) {
+        if (
+            code === HeroMoveCode.Step ||
+            code === HeroMoveCode.Portal ||
+            code === HeroMoveCode.Loop
+        ) {
             if (code === HeroMoveCode.Portal) {
                 const data = this.portalData;
                 if (!data) return;
                 core.setHeroLoc('x', data.x);
                 core.setHeroLoc('y', data.y);
                 core.setHeroLoc('direction', data.dir);
+            } else if (code === HeroMoveCode.Loop) {
+                const map = core.status.thisMap;
+                if (x === 0) core.setHeroLoc('x', map.width - 1);
+                else core.setHeroLoc('x', 0);
             } else {
                 core.setHeroLoc('x', nx, true);
                 core.setHeroLoc('y', ny, true);
@@ -644,6 +678,21 @@ export class HeroMover extends ObjectMoverBase {
      * @param dir 移动方向
      */
     private checkCanMove(x: number, y: number, dir: Dir): CanMoveStatus {
+        // 如果是循环式地图
+        const floorId = core.status.floorId;
+        if (MiscData.loopMaps.has(floorId)) {
+            const floor = core.status.maps[floorId];
+            const width = floor.width;
+            if (x === 0 && dir === 'left') {
+                const noPass = core.noPass(width - 1, y);
+                const move = checkCanMoveExtended(0, y, width - 1, y, 'left');
+                return { noPass, canMove: move };
+            } else if (x === width - 1 && dir === 'right') {
+                const noPass = core.noPass(0, y);
+                const move = checkCanMoveExtended(width - 1, y, 0, y, 'right');
+                return { noPass, canMove: move };
+            }
+        }
         const { x: nx, y: ny } = this.nextLoc(x, y, dir);
         const noPass = core.noPass(nx, ny);
         const canMove = core.canMoveHero(x, y, dir);
@@ -776,6 +825,64 @@ export class HeroMover extends ObjectMoverBase {
         });
 
         return Promise.all(promises);
+    }
+
+    private renderHeroLoop() {
+        const adapter = HeroMover.adapter;
+        const viewport = HeroMover.viewport;
+        if (!adapter || !viewport) return;
+        const MotaRenderer = Mota.require('module', 'Render').MotaRenderer;
+        const render = MotaRenderer.get('render-main');
+        const group = render?.getElementById('layer-loop') as LayerGroup;
+        const layer = group?.getLayer('event');
+        const mainGroup = render?.getElementById('layer-main') as LayerGroup;
+        const mainLayer = mainGroup?.getLayer('event');
+        const hero = mainLayer?.getExtends('floor-hero') as HeroRenderer;
+        const renderable = hero?.renderable;
+        if (!layer || !hero || !renderable) return;
+        const { x, y } = core.status.hero.loc;
+        const width = core.status.thisMap.width;
+        const loopHero = { ...renderable };
+        layer.moving.add(loopHero);
+
+        let target: number;
+        let from: number;
+        if (x === 0) {
+            from = width;
+            target = width - 1;
+        } else {
+            from = -1;
+            target = 0;
+        }
+        const delta = target - from;
+        loopHero.x = from;
+
+        layer.requestUpdateMoving();
+
+        const startTime = Date.now();
+        return new Promise<void>(res => {
+            layer.delegateTicker(
+                () => {
+                    const progress = (Date.now() - startTime) / this.moveSpeed;
+                    const dx = delta * progress;
+                    loopHero.x = dx + from;
+                    layer.update(layer);
+                    console.log(
+                        loopHero.x,
+                        loopHero.y,
+                        renderable.x,
+                        renderable.y
+                    );
+                },
+                this.moveSpeed,
+                () => {
+                    layer.moving.delete(loopHero);
+                    layer.requestUpdateMoving();
+                    viewport.all('setPosition', x === 0 ? width - 1 : 0, y);
+                    res();
+                }
+            );
+        });
     }
 }
 

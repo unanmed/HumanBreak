@@ -715,8 +715,59 @@ maps.prototype.getMapBlocksObj = function (floorId, noCache) {
 };
 
 ////// 将背景前景层变成二维数组的形式 //////
+
 maps.prototype._getBgFgMapArray = function (name, floorId, noCache) {
-    // see src/plugin/game/loopMap.js
+    floorId = floorId || core.status.floorId;
+    if (!floorId) return [];
+    var width = core.floors[floorId].width;
+    var height = core.floors[floorId].height;
+
+    // @ts-ignore
+    if (!noCache && core.status[name + 'maps'][floorId])
+        // @ts-ignore
+        return core.status[name + 'maps'][floorId];
+
+    var arr =
+        main.mode == 'editor' &&
+        // @ts-ignore
+        !(window.editor && editor.uievent && editor.uievent.isOpen)
+            ? // @ts-ignore
+              core.cloneArray(editor[name + 'map'])
+            : null;
+    if (arr == null)
+        // @ts-ignore
+        arr = core.cloneArray(core.floors[floorId][name + 'map'] || []);
+
+    for (var y = 0; y < height; ++y) {
+        if (arr[y] == null) arr[y] = Array(width).fill(0);
+    }
+    // @ts-ignore
+    (core.getFlag('__' + name + 'v__', {})[floorId] || []).forEach(
+        // @ts-ignore
+        function (one) {
+            arr[one[1]][one[0]] = one[2] || 0;
+        }
+    );
+    // @ts-ignore
+    (core.getFlag('__' + name + 'd__', {})[floorId] || []).forEach(
+        // @ts-ignore
+        function (one) {
+            arr[one[1]][one[0]] = 0;
+        }
+    );
+    if (main.mode == 'editor') {
+        for (var x = 0; x < width; x++) {
+            for (var y = 0; y < height; y++) {
+                // @ts-ignore
+                arr[y][x] = arr[y][x].idnum || arr[y][x] || 0;
+            }
+        }
+    }
+    // @ts-ignore
+    if (core.status[name + 'maps'])
+        // @ts-ignore
+        core.status[name + 'maps'][floorId] = arr;
+    return arr;
 };
 
 maps.prototype.getBgMapArray = function (floorId) {

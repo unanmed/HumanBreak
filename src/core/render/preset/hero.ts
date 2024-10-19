@@ -197,25 +197,26 @@ export class HeroRenderer
      * 勇士移动定时器
      */
     private moveTick(time: number) {
-        if (!this.moving) return;
         if (!this.renderable) return;
 
-        const progress = (time - this.lastStepTime) / this.speed;
+        if (this.moving) {
+            const progress = (time - this.lastStepTime) / this.speed;
 
-        const { x: dx, y: dy } = this.stepDelta;
-        const { x, y } = core.status.hero.loc;
-        if (progress >= 1) {
-            this.renderable.x = x + dx;
-            this.renderable.y = y + dy;
-            this.emit('stepEnd');
-        } else {
-            const rx = dx * progress + x;
-            const ry = dy * progress + y;
-            this.renderable.x = rx;
-            this.renderable.y = ry;
+            const { x: dx, y: dy } = this.stepDelta;
+            const { x, y } = core.status.hero.loc;
+            if (progress >= 1) {
+                this.renderable.x = x + dx;
+                this.renderable.y = y + dy;
+                this.emit('stepEnd');
+            } else {
+                const rx = dx * progress + x;
+                const ry = dy * progress + y;
+                this.renderable.x = rx;
+                this.renderable.y = ry;
+            }
+            this.layer.update(this.layer);
         }
         this.emit('moveTick', this.renderable.x, this.renderable.y);
-        this.layer.update(this.layer);
     }
 
     /**

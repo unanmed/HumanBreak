@@ -1422,6 +1422,8 @@ interface MapDataOf<T extends keyof NumberToId> {
     faceIds?: Record<Dir, AllIds>;
     animate?: number;
     autotileConnection?: (AllIds | AllNumbers)[];
+    cannotOut?: Dir[];
+    cannotIn?: Dir[];
 }
 
 /**

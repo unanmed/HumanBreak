@@ -106,13 +106,13 @@ interface ModuleInterface {
     Mechanism: {
         BluePalace: typeof misc.BluePalace;
         NightSpecial: typeof misc.NightSpecial;
+        MiscData: typeof misc.MiscData;
     };
     Effect: {
         Portal: typeof portal;
     };
     Render: {
         texture: typeof texture;
-        main: MotaRenderer;
         MotaRenderer: typeof MotaRenderer;
         Container: typeof Container;
         Sprite: typeof Sprite;
@@ -161,7 +161,6 @@ interface PluginInterface {
     frag_r: typeof import('../plugin/fx/frag');
     // 游戏进程定义的插件
     utils_g: typeof import('../plugin/game/utils');
-    loopMap_g: typeof import('../plugin/game/loopMap');
     shop_g: typeof import('../plugin/game/shop');
     replay_g: typeof import('../plugin/game/replay');
     skillTree_g: typeof import('../plugin/game/skillTree');
