@@ -117,7 +117,6 @@ export class FloorViewport implements ILayerGroupRenderExtends {
         this.group.removeTicker(this.transition, false);
         this.nx = nx;
         this.ny = ny;
-        console.log(nx, ny);
     }
 
     /**
