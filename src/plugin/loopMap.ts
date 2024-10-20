@@ -1,7 +1,6 @@
 import { Container } from '@/core/render/container';
 import { FloorDamageExtends } from '@/core/render/preset/damage';
 import { LayerGroupFloorBinder } from '@/core/render/preset/floor';
-import { HeroRenderer } from '@/core/render/preset/hero';
 import { FloorLayer, LayerGroup } from '@/core/render/preset/layer';
 import { FloorViewport } from '@/core/render/preset/viewport';
 import { MotaRenderer } from '@/core/render/render';
