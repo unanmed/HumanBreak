@@ -505,7 +505,7 @@ onUnmounted(() => {
     color: white;
     transition: color 0.2s linear;
     margin-right: 7px;
-    font-family: 'Fira Code', 'Arial';
+    font-family: 'FiraCode', 'Arial';
 }
 
 .danmaku-tool[open='true'],
@@ -529,7 +529,7 @@ onUnmounted(() => {
     flex-direction: row;
     align-items: center;
     white-space: nowrap;
-    font-family: 'Fira Code', 'Arial';
+    font-family: 'FiraCode', 'Arial';
 
     #danmaku-css-input {
         width: 100%;
@@ -550,7 +550,7 @@ onUnmounted(() => {
     font-size: 80%;
     white-space: nowrap;
     justify-content: space-between;
-    font-family: 'Fira Code', 'Arial';
+    font-family: 'FiraCode', 'Arial';
 
     .danmaku-icon-scroll {
         width: calc(90% - 200px);
@@ -600,7 +600,7 @@ onUnmounted(() => {
     align-items: center;
     white-space: nowrap;
     justify-content: space-between;
-    font-family: 'Fira Code', 'Arial';
+    font-family: 'FiraCode', 'Arial';
     font-size: 75%;
 
     #danmaku-color-container {

@@ -66,7 +66,7 @@
                     }}</span
                 >
                 <span class="changable" :change="nowDamageChangable"
-                    ><span style="font-family: 'Fira Code'">{{
+                    ><span style="font-family: 'FiraCode'">{{
                         (nowDamage[0] as number) < 0 && !has(enemy.damage)
                             ? '=>'
                             : ''
