@@ -307,7 +307,7 @@ export function init() {
                     core.status.replay.animate = false;
                     Mota.require('var', 'hook').emit(
                         'afterOpenDoor',
-                        block.event.id,
+                        block.event.id as AllIdsOf<'animates'>,
                         x,
                         y
                     );
@@ -323,7 +323,12 @@ export function init() {
                     core.maps._removeBlockFromMap(core.status.floorId, block);
                     if (!locked) core.unlockControl();
                     core.status.replay.animate = false;
-                    hook.emit('afterOpenDoor', block.event.id, x, y);
+                    hook.emit(
+                        'afterOpenDoor',
+                        block.event.id as AllIdsOf<'animates'>,
+                        x,
+                        y
+                    );
                     callback?.();
                 };
 

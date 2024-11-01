@@ -1,3 +1,4 @@
+import EventEmitter from 'eventemitter3';
 import { logger } from '../common/logger';
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
 import { isWebGL2Supported } from '../fx/webgl';
@@ -52,12 +53,6 @@ void main() {
 interface CompiledShader {
     vertex: WebGLShader;
     fragment: WebGLShader;
-}
-
-interface ShaderBuffer {
-    position: WebGLBuffer;
-    texture: WebGLBuffer;
-    indices: WebGLBuffer;
 }
 
 const enum ShaderVersion {
@@ -177,6 +172,8 @@ export class Shader extends Container<EShaderEvent> {
     readonly ATTRIB_I4iv: AttribType.AttribI4iv = AttribType.AttribI4iv;
     readonly ATTRIB_I4ui: AttribType.AttribI4ui = AttribType.AttribI4ui;
     readonly ATTRIB_I4uiv: AttribType.AttribI4uiv = AttribType.AttribI4uiv;
+    // 其他常量
+    readonly MAX_TEXTURE_COUNT: number = 0;
 
     canvas: HTMLCanvasElement;
     gl: WebGL2RenderingContext;
@@ -186,10 +183,6 @@ export class Shader extends Container<EShaderEvent> {
 
     /** webgl使用的程序 */
     private program: ShaderProgram | null = null;
-    /** 子元素构成的纹理 */
-    private texture: WebGLTexture | null = null;
-    /** 缓冲区 */
-    private buffer: ShaderBuffer | null = null;
 
     /** 当前渲染实例的所有着色器程序 */
     private programs: Set<ShaderProgram> = new Set();
@@ -202,6 +195,11 @@ export class Shader extends Container<EShaderEvent> {
         if (!Shader.support) {
             this.canvas.width = 0;
             this.canvas.height = 0;
+        } else {
+            const num = this.gl.getParameter(this.gl.MAX_TEXTURE_IMAGE_UNITS);
+            if (typeof num === 'number') {
+                this.MAX_TEXTURE_COUNT = num;
+            }
         }
 
         this.init();
@@ -266,17 +264,15 @@ export class Shader extends Container<EShaderEvent> {
         const gl = this.gl;
         const program = this.program;
         if (!gl || !program) return;
-
-        const uSampler = program.getUniform<UniformType.Uniform1i>('u_sampler');
-        if (!uSampler) return;
+        const ready = this.defaultReady() && program.ready();
+        if (!ready) return;
+        const indices = program.usingIndices;
+        if (!indices) return;
 
         // 清空画布
         gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-
         gl.clearColor(0, 0, 0, 0);
         gl.clearDepth(1);
-        gl.enable(gl.DEPTH_TEST);
-        gl.depthFunc(gl.LEQUAL);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         const pre = this.preDraw();
@@ -285,25 +281,8 @@ export class Shader extends Container<EShaderEvent> {
             return;
         }
 
-        // 设置顶点信息
-        this.setPositionAttrib();
-        this.setTextureAttrib();
-
-        // 准备绘制
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.buffer!.indices);
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, this.texture);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        gl.texImage2D(
-            gl.TEXTURE_2D,
-            0,
-            gl.RGBA,
-            gl.RGBA,
-            gl.UNSIGNED_BYTE,
-            this.cache.canvas
-        );
-        gl.uniform1i(uSampler.location, 0);
+        // 准备顶点索引
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indices.data);
 
         // 绘制
         gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
@@ -312,7 +291,7 @@ export class Shader extends Container<EShaderEvent> {
     }
 
     /**
-     * 在本着色器内部渲染之前执行的渲染，如果返回false，则表示不进行内部渲染，但依然会执行 {@link postDraw}
+     * 在本着色器内部渲染之前执行的渲染，如果返回false，则表示不进行内部渲染，但依然会执行 {@link postDraw}。
      * 继承本类，并复写此方法即可实现前置渲染功能
      */
     protected preDraw(): boolean {
@@ -325,6 +304,20 @@ export class Shader extends Container<EShaderEvent> {
      */
     protected postDraw() {}
 
+    private defaultReady(): boolean {
+        const program = this.program;
+        if (!program) return false;
+        const tex = program.getTexture('u_sampler');
+        if (!tex) return false;
+        const canvas = this.cache.canvas;
+        if (tex.width === canvas.width && tex.height === canvas.height) {
+            tex.sub(canvas, 0, 0, canvas.width, canvas.height);
+        } else {
+            tex.set(canvas);
+        }
+        return true;
+    }
+
     /**
      * 切换着色器程序
      * @param program 着色器程序
@@ -335,8 +328,12 @@ export class Shader extends Container<EShaderEvent> {
             logger.error(17);
             return;
         }
-        this.program = program;
-        this.gl.useProgram(program.program);
+        if (this.program !== program) {
+            this.program?.unload();
+            this.program = program;
+            this.gl.useProgram(program.program);
+            program.load();
+        }
         this.shaderRenderDirty = true;
     }
 
@@ -365,12 +362,6 @@ export class Shader extends Container<EShaderEvent> {
     }
 
     destroy(): void {
-        this.gl.deleteTexture(this.texture);
-        if (this.buffer) {
-            this.gl.deleteBuffer(this.buffer.indices);
-            this.gl.deleteBuffer(this.buffer.position);
-            this.gl.deleteBuffer(this.buffer.texture);
-        }
         this.programs.forEach(v => v.destroy());
         super.destroy();
     }
@@ -378,100 +369,19 @@ export class Shader extends Container<EShaderEvent> {
     // ----- 初始化部分
 
     private init() {
-        if (!this.gl) return;
-        this.initTexture();
-        this.initBuffers();
-    }
-
-    private initTexture() {
         const gl = this.gl;
         if (!gl) return;
-
-        const texture = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texImage2D(
-            gl.TEXTURE_2D,
-            0,
-            gl.RGBA,
-            gl.RGBA,
-            gl.UNSIGNED_BYTE,
-            this.cache.canvas
-        );
-        gl.generateMipmap(gl.TEXTURE_2D);
-
-        this.texture = texture;
-    }
-
-    private setTextureAttrib() {
-        if (!this.program) return;
-        const aTexCoord = this.program.getAttribute('a_texCoord');
-        if (!aTexCoord) return;
-        const gl = this.gl;
-        const pos = aTexCoord.location;
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer!.texture);
-        gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(pos);
-    }
-
-    private setPositionAttrib() {
-        if (!this.program) return;
-        const aPosition = this.program.getAttribute('a_position');
-        if (!aPosition) return;
-        const gl = this.gl;
-        const pos = aPosition.location;
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer!.position);
-        gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(pos);
-    }
-
-    private initBuffers() {
-        const positions = new Float32Array([1, -1, -1, -1, 1, 1, -1, 1]);
-        const posBuffer = this.initBuffer(positions);
-        const textureCoord = new Float32Array([1, 1, 0, 1, 1, 0, 0, 0]);
-        const textureBuffer = this.initBuffer(textureCoord);
-
-        this.buffer = {
-            position: posBuffer!,
-            texture: textureBuffer!,
-            indices: this.initIndexBuffer()!
-        };
-    }
-
-    private initBuffer(pos: Float32Array) {
-        const gl = this.gl;
-        if (!gl) return;
-        const posBuffer = gl.createBuffer()!;
-        gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, pos, gl.STATIC_DRAW);
-
-        return posBuffer;
-    }
-
-    private initIndexBuffer() {
-        const gl = this.gl;
-        if (!gl) return;
-        const buffer = gl.createBuffer()!;
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer);
-        const indices = new Uint16Array([0, 1, 2, 2, 3, 1]);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
-        return buffer;
+        gl.enable(gl.DEPTH_TEST);
+        gl.depthFunc(gl.LEQUAL);
     }
 }
 
-type _U1 = (x0: number) => void;
-type _U2 = (x0: number, x1: number) => void;
-type _U3 = (x0: number, x1: number, x2: number) => void;
-type _U4 = (x0: number, x1: number, x2: number, x3: number) => void;
-type _UV<T> = (data: T, srcOffset?: number, srcLength?: number) => void;
-type _A<T> = (data: T) => void;
-type _UMatrix = (
-    gl: WebGL2RenderingContext,
-    location: WebGLUniformLocation | null,
-    transpose: GLboolean,
-    data: Iterable<GLfloat>,
-    srcOffset?: number,
-    srcLength?: GLuint
-) => void;
+type _U1 = [x0: number];
+type _U2 = [x0: number, x1: number];
+type _U3 = [x0: number, x1: number, x2: number];
+type _U4 = [x0: number, x1: number, x2: number, x3: number];
+type _UV<T> = [data: T, srcOffset?: number, srcLength?: number];
+type _A<T> = [data: T];
 
 interface UniformSetFn {
     [UniformType.Uniform1f]: _U1;
@@ -515,214 +425,644 @@ interface AttribSetFn {
     [AttribType.AttribI4uiv]: _A<Uint32List>;
 }
 
-interface ShaderUniform<T extends UniformType> {
-    location: WebGLUniformLocation;
-    type: T;
-    set: UniformSetFn[T];
+interface IShaderUniform<T extends UniformType> {
+    /** 这个 uniform 变量的内存位置 */
+    readonly location: WebGLUniformLocation;
+    /** 这个 uniform 变量的类型 */
+    readonly type: T;
+    /**
+     * 设置这个 uniform 变量的值，
+     * 参考 https://developer.mozilla.org/zh-CN/docs/Web/API/WebGL2RenderingContext/uniform
+     * @param params 要传递的参数，例如 uniform2f 就要传递 x0 x1 两个参数等，可以参考 mdn 文档
+     */
+    set(...params: UniformSetFn[T]): void;
 }
 
-interface ShaderAttrib<T extends AttribType> {
-    location: number;
-    type: T;
-    set: AttribSetFn[T];
-    pointer: (
+interface IShaderAttrib<T extends AttribType> {
+    /** 这个 attribute 常量的内存位置 */
+    readonly location: number;
+    /** 这个 attribute 常量的类型 */
+    readonly type: T;
+    /**
+     * 设置这个 attribute 常量的值，
+     * 浮点数参考 https://developer.mozilla.org/zh-CN/docs/Web/API/WebGLRenderingContext/vertexAttrib
+     * 整数参考 https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/vertexAttribI
+     * @param params 要传递的参数
+     */
+    set(...params: AttribSetFn[T]): void;
+}
+
+interface IShaderAttribArray {
+    /** 这个 attribute 常量的内存位置 */
+    readonly location: number;
+    /** 这个 attribute 所用的缓冲区信息 */
+    readonly data: WebGLBuffer;
+    /**
+     * 修改缓冲区数据，会更改数据大小，重新分配内存，不更改数据大小的情况下建议使用 {@link sub} 代替。
+     * 参考 https://developer.mozilla.org/zh-CN/docs/Web/API/WebGLRenderingContext/bufferData
+     * @param data 数据
+     * @param usage 用途
+     */
+    buffer(data: AllowSharedBufferSource | null, usage: GLenum): void;
+    /**
+     * 修改缓冲区数据，会更改数据大小，重新分配内存，不更改数据大小的情况下建议使用 {@link sub} 代替。
+     * 参考 https://developer.mozilla.org/zh-CN/docs/Web/API/WebGLRenderingContext/bufferData
+     * @param data 数据
+     * @param usage 用途
+     * @param srcOffset 数据偏移量
+     * @param length 数据长度
+     */
+    buffer(
+        data: ArrayBufferView,
+        usage: GLenum,
+        srcOffset: number,
+        length?: number
+    ): void;
+    /**
+     * 修改缓冲区数据，但是不修改数据大小，不重新分配内存。
+     * 参考 https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/bufferSubData
+     * @param dstByteOffset 数据修改的起始位置
+     * @param srcData 数据
+     */
+    sub(dstByteOffset: GLintptr, srcData: AllowSharedBufferSource): void;
+    /**
+     * 修改缓冲区数据，但是不修改数据大小，不重新分配内存。
+     * 参考 https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/bufferSubData
+     * @param dstByteOffset 数据修改的起始位置
+     * @param srcData 数据
+     * @param srcOffset 数据偏移量
+     * @param length 数据长度
+     */
+    sub(
+        dstByteOffset: GLintptr,
+        srcData: ArrayBufferView,
+        srcOffset: number,
+        length?: GLuint
+    ): void;
+    /**
+     * 告诉 gpu 将读取此 attribute 数据
+     * 参考 https://developer.mozilla.org/zh-CN/docs/Web/API/WebGLRenderingContext/vertexAttribPointer
+     * @param size 单个数据大小
+     * @param type 数据类型
+     * @param normalized 是否要经过归一化处理
+     * @param stride 每一部分字节偏移量
+     * @param offset 第一部分字节偏移量
+     */
+    pointer(
         size: GLint,
         type: GLenum,
         normalized: GLboolean,
         stride: GLsizei,
         offset: GLintptr
-    ) => void;
-    pointerI: (
+    ): void;
+    /**
+     * 告诉 gpu 将由整数类型读取此 attribute 数据
+     * 参考 https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/vertexAttribIPointer
+     * @param size 单个数据大小
+     * @param type 数据类型
+     * @param stride 每一部分字节偏移量
+     * @param offset 第一部分字节偏移量
+     */
+    pointerI(
         size: GLint,
         type: GLenum,
         stride: GLsizei,
         offset: GLintptr
-    ) => void;
-    divisor: (divisor: GLuint) => void;
+    ): void;
+    /**
+     * 启用这个顶点数据
+     */
+    enable(): void;
+    /**
+     * 禁用这个顶点数据
+     */
+    disable(): void;
 }
 
-interface ShaderUniformMatrix {
-    location: WebGLUniformLocation;
-    type: UniformMatrix;
-    set: (
+interface IShaderIndices {
+    /** 这个顶点索引所用的缓冲区信息 */
+    readonly data: WebGLBuffer;
+    /**
+     * 修改缓冲区数据，会更改数据大小，重新分配内存，不更改数据大小的情况下建议使用 {@link sub} 代替。
+     * 参考 https://developer.mozilla.org/zh-CN/docs/Web/API/WebGLRenderingContext/bufferData
+     * @param data 数据
+     * @param usage 用途
+     */
+    buffer(data: AllowSharedBufferSource | null, usage: GLenum): void;
+    /**
+     * 修改缓冲区数据，会更改数据大小，重新分配内存，不更改数据大小的情况下建议使用 {@link sub} 代替。
+     * 参考 https://developer.mozilla.org/zh-CN/docs/Web/API/WebGLRenderingContext/bufferData
+     * @param data 数据
+     * @param usage 用途
+     * @param srcOffset 数据偏移量
+     * @param length 数据长度
+     */
+    buffer(
+        data: ArrayBufferView,
+        usage: GLenum,
+        srcOffset: number,
+        length?: number
+    ): void;
+    /**
+     * 修改缓冲区数据，但是不修改数据大小，不重新分配内存。
+     * 参考 https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/bufferSubData
+     * @param dstByteOffset 数据修改的起始位置
+     * @param srcData 数据
+     */
+    sub(dstByteOffset: GLintptr, srcData: AllowSharedBufferSource): void;
+    /**
+     * 修改缓冲区数据，但是不修改数据大小，不重新分配内存。
+     * 参考 https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/bufferSubData
+     * @param dstByteOffset 数据修改的起始位置
+     * @param srcData 数据
+     * @param srcOffset 数据偏移量
+     * @param length 数据长度
+     */
+    sub(
+        dstByteOffset: GLintptr,
+        srcData: ArrayBufferView,
+        srcOffset: number,
+        length?: GLuint
+    ): void;
+}
+
+interface IShaderUniformMatrix {
+    /** 矩阵的内存位置 */
+    readonly location: WebGLUniformLocation;
+    /** 矩阵类型 */
+    readonly type: UniformMatrix;
+    /**
+     * 设置矩阵的值，参考 https://developer.mozilla.org/zh-CN/docs/Web/API/WebGL2RenderingContext/uniformMatrix
+     * @param transpose 是否转置矩阵
+     * @param data 矩阵数据，列主序
+     * @param srcOffset 数据偏移量
+     * @param srcLength 数据长度
+     */
+    set(
         transpose: GLboolean,
         data: Float32List,
         srcOffset?: number,
         srcLength?: number
-    ) => void;
+    ): void;
 }
 
-interface ShaderUniformBlock {
+interface IShaderUniformBlock {
+    /** 这个 uniform block 的内存地址 */
     location: GLuint;
+    /** 与这个 uniform block 所绑定的缓冲区 */
     buffer: WebGLBuffer;
+    /** 这个 uniform block 的大小 */
     size: number;
+    /**
+     * 参考 https://developer.mozilla.org/zh-CN/docs/Web/API/WebGL2RenderingContext/bindBufferBase
+     * @param srcData 要设置为的值
+     */
     set(srcData: AllowSharedBufferSource | null): void;
-    set(srcData: ArrayBufferView, srcOffset: number, length?: GLuint): void;
+    /**
+     * 参考 https://developer.mozilla.org/zh-CN/docs/Web/API/WebGL2RenderingContext/bindBufferBase
+     * @param srcData 要设置为的值
+     * @param srcOffset 数据偏移量
+     * @param length 数据长度
+     */
+    set(srcData: ArrayBufferView, srcOffset: number, length?: number): void;
 }
 
-type UniformDefineFn = {
-    [P in UniformType]: (
-        gl: WebGL2RenderingContext,
-        location: WebGLUniformLocation,
-        ...params: Parameters<UniformSetFn[P]>
-    ) => void;
-};
+interface IShaderTexture2D {
+    /** 纹理对象 */
+    readonly texture: WebGLTexture;
+    /** 宽度 */
+    readonly width: number;
+    /** 高度 */
+    readonly height: number;
+    /** 纹理所属索引 */
+    readonly index: number;
+    /**
+     * 设置这个纹理的图像，不建议使用，会修改宽高
+     * @param source 要设置成的图像源
+     */
+    set(source: TexImageSource): void;
+    /**
+     * 设置纹理的一部分信息，不会修改宽高
+     * @param source 要设置的图像源
+     * @param x 要设置到的起始点横坐标
+     * @param y 要设置到的起始点纵坐标
+     * @param width 宽度
+     * @param height 高度
+     */
+    sub(
+        source: TexImageSource,
+        x: number,
+        y: number,
+        width: number,
+        height: number
+    ): void;
+}
 
-type AttribDefineFn = {
-    [P in AttribType]: (
-        gl: WebGL2RenderingContext,
-        location: number,
-        ...params: Parameters<AttribSetFn[P]>
-    ) => void;
-};
+class ShaderUniform<T extends UniformType> implements IShaderUniform<T> {
+    constructor(
+        readonly type: T,
+        readonly location: WebGLUniformLocation,
+        readonly gl: WebGL2RenderingContext
+    ) {}
 
-type UniformMatrixSetFn = Record<UniformMatrix, _UMatrix>;
-
-const uniformDefine: UniformDefineFn = {
-    [UniformType.Uniform1f]: (gl, location, x0) => {
-        gl.uniform1f(location, x0);
-    },
-    [UniformType.Uniform1fv]: (gl, location, data, srcOffset, srcLength) => {
-        gl.uniform1fv(location, data, srcOffset, srcLength);
-    },
-    [UniformType.Uniform1i]: (gl, location, x0) => {
-        gl.uniform1i(location, x0);
-    },
-    [UniformType.Uniform1iv]: (gl, location, data, srcOffset, srcLength) => {
-        gl.uniform1iv(location, data, srcOffset, srcLength);
-    },
-    [UniformType.Uniform1ui]: (gl, location, x0) => {
-        gl.uniform1ui(location, x0);
-    },
-    [UniformType.Uniform1uiv]: (gl, location, data, srcOffset, srcLength) => {
-        gl.uniform1uiv(location, data, srcOffset, srcLength);
-    },
-    [UniformType.Uniform2f]: (gl, location, x0, x1) => {
-        gl.uniform2f(location, x0, x1);
-    },
-    [UniformType.Uniform2fv]: (gl, location, data, srcOffset, srcLength) => {
-        gl.uniform2fv(location, data, srcOffset, srcLength);
-    },
-    [UniformType.Uniform2i]: (gl, location, x0, x1) => {
-        gl.uniform2i(location, x0, x1);
-    },
-    [UniformType.Uniform2iv]: (gl, location, data, srcOffset, srcLength) => {
-        gl.uniform2iv(location, data, srcOffset, srcLength);
-    },
-    [UniformType.Uniform2ui]: (gl, location, x0, x1) => {
-        gl.uniform2ui(location, x0, x1);
-    },
-    [UniformType.Uniform2uiv]: (gl, location, data, srcOffset, srcLength) => {
-        gl.uniform2uiv(location, data, srcOffset, srcLength);
-    },
-    [UniformType.Uniform3f]: (gl, location, x0, x1, x2) => {
-        gl.uniform3f(location, x0, x1, x2);
-    },
-    [UniformType.Uniform3fv]: (gl, location, data, srcOffset, srcLength) => {
-        gl.uniform3fv(location, data, srcOffset, srcLength);
-    },
-    [UniformType.Uniform3i]: (gl, location, x0, x1, x2) => {
-        gl.uniform3i(location, x0, x1, x2);
-    },
-    [UniformType.Uniform3iv]: (gl, location, data, srcOffset, srcLength) => {
-        gl.uniform3iv(location, data, srcOffset, srcLength);
-    },
-    [UniformType.Uniform3ui]: (gl, location, x0, x1, x2) => {
-        gl.uniform3ui(location, x0, x1, x2);
-    },
-    [UniformType.Uniform3uiv]: (gl, location, data, srcOffset, srcLength) => {
-        gl.uniform3uiv(location, data, srcOffset, srcLength);
-    },
-    [UniformType.Uniform4f]: (gl, location, x0, x1, x2, x3) => {
-        gl.uniform4f(location, x0, x1, x2, x3);
-    },
-    [UniformType.Uniform4fv]: (gl, location, data, srcOffset, srcLength) => {
-        gl.uniform4fv(location, data, srcOffset, srcLength);
-    },
-    [UniformType.Uniform4i]: (gl, location, x0, x1, x2, x3) => {
-        gl.uniform4i(location, x0, x1, x2, x3);
-    },
-    [UniformType.Uniform4iv]: (gl, location, data, srcOffset, srcLength) => {
-        gl.uniform4iv(location, data, srcOffset, srcLength);
-    },
-    [UniformType.Uniform4ui]: (gl, location, x0, x1, x2, x3) => {
-        gl.uniform4ui(location, x0, x1, x2, x3);
-    },
-    [UniformType.Uniform4uiv]: (gl, location, data, srcOffset, srcLength) => {
-        gl.uniform4uiv(location, data, srcOffset, srcLength);
+    set(...params: UniformSetFn[T]): void {
+        this.gl.vertexAttribIPointer;
+        // 因为ts类型推导的限制，类型肯定正确，但是推导不出，所以这里直接 as any 屏蔽掉类型推导
+        const x0 = params[0] as any;
+        const x1 = params[1] as any;
+        const x2 = params[2] as any;
+        const x3 = params[3] as any;
+        switch (this.type) {
+            case UniformType.Uniform1f:
+                this.gl.uniform1f(this.location, x0);
+                break;
+            case UniformType.Uniform1fv:
+                this.gl.uniform1fv(this.location, x0, x1, x2);
+                break;
+            case UniformType.Uniform1i:
+                this.gl.uniform1i(this.location, x0);
+                break;
+            case UniformType.Uniform1iv:
+                this.gl.uniform1iv(this.location, x0, x1, x2);
+                break;
+            case UniformType.Uniform1ui:
+                this.gl.uniform1ui(this.location, x0);
+                break;
+            case UniformType.Uniform1uiv:
+                this.gl.uniform1uiv(this.location, x0, x1, x2);
+                break;
+            case UniformType.Uniform2f:
+                this.gl.uniform2f(this.location, x0, x1);
+                break;
+            case UniformType.Uniform2fv:
+                this.gl.uniform2fv(this.location, x0, x1, x2);
+                break;
+            case UniformType.Uniform2i:
+                this.gl.uniform2i(this.location, x0, x1);
+                break;
+            case UniformType.Uniform2iv:
+                this.gl.uniform2iv(this.location, x0, x1, x2);
+                break;
+            case UniformType.Uniform2ui:
+                this.gl.uniform2ui(this.location, x0, x1);
+                break;
+            case UniformType.Uniform2uiv:
+                this.gl.uniform2uiv(this.location, x0, x1, x2);
+                break;
+            case UniformType.Uniform3f:
+                this.gl.uniform3f(this.location, x0, x1, x2);
+                break;
+            case UniformType.Uniform3fv:
+                this.gl.uniform3fv(this.location, x0, x1, x2);
+                break;
+            case UniformType.Uniform3i:
+                this.gl.uniform3i(this.location, x0, x1, x2);
+                break;
+            case UniformType.Uniform3iv:
+                this.gl.uniform3iv(this.location, x0, x1, x2);
+                break;
+            case UniformType.Uniform3ui:
+                this.gl.uniform3ui(this.location, x0, x1, x2);
+                break;
+            case UniformType.Uniform3uiv:
+                this.gl.uniform3uiv(this.location, x0, x1, x2);
+                break;
+            case UniformType.Uniform4f:
+                this.gl.uniform4f(this.location, x0, x1, x2, x3);
+                break;
+            case UniformType.Uniform4fv:
+                this.gl.uniform4fv(this.location, x0, x1, x2);
+                break;
+            case UniformType.Uniform4i:
+                this.gl.uniform4i(this.location, x0, x1, x2, x3);
+                break;
+            case UniformType.Uniform4iv:
+                this.gl.uniform4iv(this.location, x0, x1, x2);
+                break;
+            case UniformType.Uniform4ui:
+                this.gl.uniform4ui(this.location, x0, x1, x2, x3);
+                break;
+            case UniformType.Uniform4uiv:
+                this.gl.uniform4uiv(this.location, x0, x1, x2);
+                break;
+        }
     }
-};
+}
 
-const uniformMatrix: UniformMatrixSetFn = {
-    [UniformMatrix.UMatrix2x2]: (gl, x1, x2, x3, x4, x5) => {
-        gl.uniformMatrix2fv(x1, x2, x3, x4, x5);
-    },
-    [UniformMatrix.UMatrix2x3]: (gl, x1, x2, x3, x4, x5) => {
-        gl.uniformMatrix2x3fv(x1, x2, x3, x4, x5);
-    },
-    [UniformMatrix.UMatrix2x4]: (gl, x1, x2, x3, x4, x5) => {
-        gl.uniformMatrix2x4fv(x1, x2, x3, x4, x5);
-    },
-    [UniformMatrix.UMatrix3x2]: (gl, x1, x2, x3, x4, x5) => {
-        gl.uniformMatrix3x2fv(x1, x2, x3, x4, x5);
-    },
-    [UniformMatrix.UMatrix3x3]: (gl, x1, x2, x3, x4, x5) => {
-        gl.uniformMatrix3fv(x1, x2, x3, x4, x5);
-    },
-    [UniformMatrix.UMatrix3x4]: (gl, x1, x2, x3, x4, x5) => {
-        gl.uniformMatrix3x4fv(x1, x2, x3, x4, x5);
-    },
-    [UniformMatrix.UMatrix4x2]: (gl, x1, x2, x3, x4, x5) => {
-        gl.uniformMatrix4x2fv(x1, x2, x3, x4, x5);
-    },
-    [UniformMatrix.UMatrix4x3]: (gl, x1, x2, x3, x4, x5) => {
-        gl.uniformMatrix4x3fv(x1, x2, x3, x4, x5);
-    },
-    [UniformMatrix.UMatrix4x4]: (gl, x1, x2, x3, x4, x5) => {
-        gl.uniformMatrix4fv(x1, x2, x3, x4, x5);
+class ShaderAttrib<T extends AttribType> implements IShaderAttrib<T> {
+    constructor(
+        readonly type: T,
+        readonly location: number,
+        readonly gl: WebGL2RenderingContext
+    ) {}
+
+    set(...params: AttribSetFn[T]) {
+        // 因为ts类型推导的限制，类型肯定正确，但是推导不出，所以这里直接 as any 屏蔽掉类型推导
+        const x0 = params[0] as any;
+        const x1 = params[1] as any;
+        const x2 = params[2] as any;
+        const x3 = params[3] as any;
+        switch (this.type) {
+            case AttribType.Attrib1f:
+                this.gl.vertexAttrib1f(this.location, x0);
+                break;
+            case AttribType.Attrib1fv:
+                this.gl.vertexAttrib1fv(this.location, x0);
+                break;
+            case AttribType.Attrib2f:
+                this.gl.vertexAttrib2f(this.location, x0, x1);
+                break;
+            case AttribType.Attrib2fv:
+                this.gl.vertexAttrib2fv(this.location, x0);
+                break;
+            case AttribType.Attrib3f:
+                this.gl.vertexAttrib3f(this.location, x0, x1, x2);
+                break;
+            case AttribType.Attrib3fv:
+                this.gl.vertexAttrib3fv(this.location, x0);
+                break;
+            case AttribType.Attrib4f:
+                this.gl.vertexAttrib4f(this.location, x0, x1, x2, x3);
+                break;
+            case AttribType.Attrib4fv:
+                this.gl.vertexAttrib4fv(this.location, x0);
+                break;
+            case AttribType.AttribI4i:
+                this.gl.vertexAttribI4i(this.location, x0, x1, x2, x3);
+                break;
+            case AttribType.AttribI4iv:
+                this.gl.vertexAttribI4iv(this.location, x0);
+                break;
+            case AttribType.AttribI4ui:
+                this.gl.vertexAttribI4ui(this.location, x0, x1, x2, x3);
+                break;
+            case AttribType.AttribI4uiv:
+                this.gl.vertexAttribI4uiv(this.location, x0);
+                break;
+            default: {
+                logger.warn(26);
+                return;
+            }
+        }
     }
-};
+}
 
-const attribDefine: AttribDefineFn = {
-    [AttribType.Attrib1f]: (gl, location, x0) => {
-        gl.vertexAttrib1f(location, x0);
-    },
-    [AttribType.Attrib1fv]: (gl, location, data) => {
-        gl.vertexAttrib1fv(location, data);
-    },
-    [AttribType.Attrib2f]: (gl, location, x0, x1) => {
-        gl.vertexAttrib2f(location, x0, x1);
-    },
-    [AttribType.Attrib2fv]: (gl, location, data) => {
-        gl.vertexAttrib2fv(location, data);
-    },
-    [AttribType.Attrib3f]: (gl, location, x0, x1, x2) => {
-        gl.vertexAttrib3f(location, x0, x1, x2);
-    },
-    [AttribType.Attrib3fv]: (gl, location, data) => {
-        gl.vertexAttrib3fv(location, data);
-    },
-    [AttribType.Attrib4f]: (gl, location, x0, x1, x2, x3) => {
-        gl.vertexAttrib4f(location, x0, x1, x2, x3);
-    },
-    [AttribType.Attrib4fv]: (gl, location, data) => {
-        gl.vertexAttrib4fv(location, data);
-    },
-    [AttribType.AttribI4i]: (gl, location, x0, x1, x2, x3) => {
-        gl.vertexAttribI4i(location, x0, x1, x2, x3);
-    },
-    [AttribType.AttribI4iv]: (gl, location, data) => {
-        gl.vertexAttribI4iv(location, data);
-    },
-    [AttribType.AttribI4ui]: (gl, location, x0, x1, x2, x3) => {
-        gl.vertexAttribI4ui(location, x0, x1, x2, x3);
-    },
-    [AttribType.AttribI4uiv]: (gl, location, data) => {
-        gl.vertexAttribI4uiv(location, data);
+class ShaderAttribArray implements IShaderAttribArray {
+    constructor(
+        readonly data: WebGLBuffer,
+        readonly location: number,
+        readonly gl: WebGL2RenderingContext
+    ) {}
+
+    buffer(data: AllowSharedBufferSource | null, usage: GLenum): void;
+    buffer(
+        data: ArrayBufferView,
+        usage: GLenum,
+        srcOffset: number,
+        length?: number
+    ): void;
+    buffer(data: any, usage: any, srcOffset?: any, length?: any): void {
+        const gl = this.gl;
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.data);
+        if (typeof srcOffset === 'number') {
+            gl.bufferData(gl.ARRAY_BUFFER, data, usage, srcOffset, length);
+        } else {
+            gl.bufferData(gl.ARRAY_BUFFER, data, usage);
+        }
     }
-};
 
-export class ShaderProgram {
+    sub(dstByteOffset: GLintptr, srcData: AllowSharedBufferSource): void;
+    sub(
+        dstByteOffset: GLintptr,
+        srcData: ArrayBufferView,
+        srcOffset: number,
+        length?: GLuint
+    ): void;
+    sub(dstOffset: any, data: any, offset?: any, length?: any): void {
+        const gl = this.gl;
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.data);
+        if (typeof offset === 'number') {
+            gl.bufferSubData(gl.ARRAY_BUFFER, dstOffset, data, offset, length);
+        } else {
+            gl.bufferSubData(gl.ARRAY_BUFFER, dstOffset, data);
+        }
+    }
+
+    pointer(
+        p0: GLint,
+        p1: GLenum,
+        p2: GLboolean,
+        p3: GLsizei,
+        p4: GLintptr
+    ): void {
+        const gl = this.gl;
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.data);
+        gl.vertexAttribPointer(this.location, p0, p1, p2, p3, p4);
+    }
+
+    pointerI(
+        size: GLint,
+        type: GLenum,
+        stride: GLsizei,
+        offset: GLintptr
+    ): void {
+        const gl = this.gl;
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.data);
+        gl.vertexAttribIPointer(this.location, size, type, stride, offset);
+    }
+
+    enable(): void {
+        this.gl.enableVertexAttribArray(this.location);
+    }
+
+    disable(): void {
+        this.gl.disableVertexAttribArray(this.location);
+    }
+}
+
+class ShaderIndices implements IShaderIndices {
+    constructor(
+        readonly data: WebGLBuffer,
+        readonly gl: WebGL2RenderingContext
+    ) {}
+
+    buffer(data: AllowSharedBufferSource | null, usage: GLenum): void;
+    buffer(
+        data: ArrayBufferView,
+        usage: GLenum,
+        srcOffset: number,
+        length?: number
+    ): void;
+    buffer(p0: any, p1: any, p2?: any, p3?: any): void {
+        const gl = this.gl;
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.data);
+        if (typeof p2 === 'number') {
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, p0, p1, p2, p3);
+        } else {
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, p0, p1);
+        }
+    }
+
+    sub(dstByteOffset: GLintptr, srcData: AllowSharedBufferSource): void;
+    sub(
+        dstByteOffset: GLintptr,
+        srcData: ArrayBufferView,
+        srcOffset: number,
+        length?: GLuint
+    ): void;
+    sub(p0: any, p1: any, p2?: any, p3?: any): void {
+        const gl = this.gl;
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.data);
+        if (typeof p2 === 'number') {
+            gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, p0, p1, p2, p3);
+        } else {
+            gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, p0, p1);
+        }
+    }
+}
+
+class ShaderUniformMatrix implements IShaderUniformMatrix {
+    constructor(
+        readonly type: UniformMatrix,
+        readonly location: WebGLUniformLocation,
+        readonly gl: WebGL2RenderingContext
+    ) {}
+
+    set(x2: GLboolean, x3: Float32List, x4?: number, x5?: number): void {
+        switch (this.type) {
+            case UniformMatrix.UMatrix2x2:
+                this.gl.uniformMatrix2fv(this.location, x2, x3, x4, x5);
+                break;
+            case UniformMatrix.UMatrix2x3:
+                this.gl.uniformMatrix2x3fv(this.location, x2, x3, x4, x5);
+                break;
+            case UniformMatrix.UMatrix2x4:
+                this.gl.uniformMatrix2x4fv(this.location, x2, x3, x4, x5);
+                break;
+            case UniformMatrix.UMatrix3x2:
+                this.gl.uniformMatrix3x2fv(this.location, x2, x3, x4, x5);
+                break;
+            case UniformMatrix.UMatrix3x3:
+                this.gl.uniformMatrix3fv(this.location, x2, x3, x4, x5);
+                break;
+            case UniformMatrix.UMatrix3x4:
+                this.gl.uniformMatrix3x4fv(this.location, x2, x3, x4, x5);
+                break;
+            case UniformMatrix.UMatrix4x2:
+                this.gl.uniformMatrix4x2fv(this.location, x2, x3, x4, x5);
+                break;
+            case UniformMatrix.UMatrix4x3:
+                this.gl.uniformMatrix4x3fv(this.location, x2, x3, x4, x5);
+                break;
+            case UniformMatrix.UMatrix4x4:
+                this.gl.uniformMatrix4fv(this.location, x2, x3, x4, x5);
+                break;
+        }
+    }
+}
+
+class ShaderUniformBlock implements IShaderUniformBlock {
+    constructor(
+        readonly location: number,
+        readonly size: number,
+        readonly buffer: WebGLBuffer,
+        readonly binding: number,
+        readonly gl: WebGL2RenderingContext
+    ) {}
+
+    set(srcData: AllowSharedBufferSource | null): void;
+    set(srcData: ArrayBufferView, srcOffset: number, length?: number): void;
+    set(srcData: unknown, srcOffset?: unknown, length?: unknown): void {
+        const gl = this.gl;
+        const buffer = this.buffer;
+        gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
+        if (srcOffset !== void 0) {
+            // @ts-ignore
+            gl.bufferSubData(gl.UNIFORM_BUFFER, 0, srcData, srcOffset, length);
+        } else {
+            // @ts-ignore
+            gl.bufferSubData(gl.UNIFORM_BUFFER, 0, srcData);
+        }
+        gl.bindBufferBase(gl.UNIFORM_BUFFER, this.binding, buffer);
+    }
+}
+
+class ShaderTexture2D implements IShaderTexture2D {
+    constructor(
+        readonly texture: WebGLTexture,
+        readonly index: number,
+        readonly uniform: IShaderUniform<UniformType.Uniform1i>,
+        readonly gl: WebGL2RenderingContext,
+        public width: number = 0,
+        public height: number = 0
+    ) {
+        uniform.set(index);
+    }
+
+    set(source: TexImageSource): void {
+        const gl = this.gl;
+        gl.activeTexture(gl.TEXTURE0 + this.index);
+        gl.bindTexture(gl.TEXTURE_2D, this.texture);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            gl.RGBA,
+            gl.RGBA,
+            gl.UNSIGNED_BYTE,
+            source
+        );
+        if (source instanceof VideoFrame) {
+            this.width = source.codedWidth;
+            this.height = source.codedHeight;
+        } else {
+            this.width = source.width;
+            this.height = source.height;
+        }
+    }
+
+    sub(
+        source: TexImageSource,
+        x: number,
+        y: number,
+        width: number,
+        height: number
+    ): void {
+        const gl = this.gl;
+        gl.activeTexture(gl.TEXTURE0 + this.index);
+        gl.bindTexture(gl.TEXTURE_2D, this.texture);
+
+        // 进行边界检查，避免超出纹理边界
+        if (x + width > this.width || y + height > this.height) {
+            logger.warn(32);
+            width = Math.min(width, this.width - x);
+            height = Math.min(height, this.height - y);
+        }
+        console.log(1);
+
+        gl.texSubImage2D(
+            gl.TEXTURE_2D,
+            0,
+            x,
+            y,
+            width,
+            height,
+            gl.RGBA,
+            gl.UNSIGNED_BYTE,
+            source
+        );
+    }
+}
+
+interface ShaderProgramEvent {
+    load: [];
+    unload: [];
+}
+
+export class ShaderProgram extends EventEmitter<ShaderProgramEvent> {
     /** 顶点着色器 */
     private vertex: string = DEFAULT_VS;
     /** 片元着色器 */
@@ -735,17 +1075,27 @@ export class ShaderProgram {
     element: Shader;
 
     /** uniform存放地址 */
-    private uniform: Map<string, ShaderUniform<UniformType>> = new Map();
+    private uniform: Map<string, IShaderUniform<UniformType>> = new Map();
     /** attribute存放地址，300版本里面叫做in */
-    private attribute: Map<string, ShaderAttrib<AttribType>> = new Map();
+    private attribute: Map<string, IShaderAttrib<AttribType>> = new Map();
+    /** attribute array 存放地址 */
+    private attribArray: Map<string, IShaderAttribArray> = new Map();
+    /** 顶点索引存放地址 */
+    private indices: Map<string, IShaderIndices> = new Map();
     /** uniform矩阵存放地址 */
-    private matrix: Map<string, ShaderUniformMatrix> = new Map();
+    private matrix: Map<string, IShaderUniformMatrix> = new Map();
     /** uniform block 存放地址 */
-    private block: Map<string, ShaderUniformBlock> = new Map();
+    private block: Map<string, IShaderUniformBlock> = new Map();
+    /** 纹理存放地址 */
+    private texture: Map<string, IShaderTexture2D> = new Map();
     /** 当前编译完成的shader程序 */
     private shader: CompiledShader | null = null;
     /** 当前的webgl程序 */
     program: WebGLProgram | null = null;
+    /** 准备函数 */
+    private readyFn?: () => boolean;
+    /** 当前正在使用的顶点索引数组 */
+    usingIndices: IShaderIndices | null = null;
 
     /** 着色器内容是否是默认内容，可以用于优化空着色器 */
     modified: boolean = false;
@@ -754,12 +1104,51 @@ export class ShaderProgram {
     private shaderDirty: boolean = true;
 
     constructor(shader: Shader, vs?: string, fs?: string) {
+        super();
         if (vs) this.vs(vs);
         if (fs) this.fs(fs);
         this.element = shader;
         this.gl = shader.gl;
         this.version = shader.VERSION_ES_100;
-        this.requestCompile();
+        if (vs || fs) this.requestCompile();
+    }
+
+    /**
+     * 使用这个着色器程序时，在渲染之前执行的准备函数
+     * @param fn 准备函数，返回 false 时将不执行绘制
+     */
+    setReady(fn: () => boolean) {
+        this.readyFn = fn;
+    }
+
+    /**
+     * 执行准备函数
+     */
+    ready(): boolean {
+        return this.readyFn?.() ?? true;
+    }
+
+    /**
+     * 切换渲染时使用的顶点索引
+     * @param name 要使用的顶点索引名称
+     */
+    useIndices(name: string): void;
+    useIndices(name: IShaderIndices): void;
+    useIndices(name: string | IShaderIndices) {
+        if (typeof name === 'string') {
+            const indices = this.getIndices(name);
+            if (!indices) {
+                logger.warn(30, name);
+                return;
+            }
+            this.usingIndices = indices;
+        } else {
+            if ([...this.indices.values()].includes(name)) {
+                this.usingIndices = name;
+            } else {
+                logger.warn(31);
+            }
+        }
     }
 
     /**
@@ -800,13 +1189,33 @@ export class ShaderProgram {
     }
 
     /**
+     * 当这个程序被卸载时执行的函数
+     */
+    unload() {
+        this.attribArray.forEach(v => {
+            v.disable();
+        });
+        this.emit('load');
+    }
+
+    /**
+     * 当这个程序被加载（使用）时执行的函数
+     */
+    load() {
+        this.attribArray.forEach(v => {
+            v.enable();
+        });
+        this.emit('unload');
+    }
+
+    /**
      * 获取一个uniform，需要事先定义，否则返回null
      * @param uniform uniform名称
      */
     getUniform<T extends UniformType = UniformType>(
         uniform: string
-    ): ShaderUniform<T> | null {
-        return (this.uniform.get(uniform) as ShaderUniform<T>) ?? null;
+    ): IShaderUniform<T> | null {
+        return (this.uniform.get(uniform) as IShaderUniform<T>) ?? null;
     }
 
     /**
@@ -815,15 +1224,31 @@ export class ShaderProgram {
      */
     getAttribute<T extends AttribType = AttribType>(
         attrib: string
-    ): ShaderAttrib<T> | null {
-        return (this.attribute.get(attrib) as ShaderAttrib<T>) ?? null;
+    ): IShaderAttrib<T> | null {
+        return (this.attribute.get(attrib) as IShaderAttrib<T>) ?? null;
+    }
+
+    /**
+     * 获取一个attribute array，需要事先定义，否则返回null
+     * @param name attribute array名称
+     */
+    getAttribArray(name: string): IShaderAttribArray | null {
+        return this.attribArray.get(name) ?? null;
+    }
+
+    /**
+     * 获取一个顶点索引数组，需要提前定义，否则返回null
+     * @param name 顶点索引数组的名称
+     */
+    getIndices(name: string): IShaderIndices | null {
+        return this.indices.get(name) ?? null;
     }
 
     /**
      * 获取一个 uniform matrix，需要事先定义，否则返回null
      * @param matrix uniform matrix 的名称
      */
-    getMatrix(matrix: string): ShaderUniformMatrix | null {
+    getMatrix(matrix: string): IShaderUniformMatrix | null {
         return this.matrix.get(matrix) ?? null;
     }
 
@@ -831,8 +1256,16 @@ export class ShaderProgram {
      * 获取一个 uniform block，例如 UBO，需要事先定义，否则返回null
      * @param block uniform block 的名称
      */
-    getUniformBlock(block: string): ShaderUniformBlock | null {
+    getUniformBlock(block: string): IShaderUniformBlock | null {
         return this.block.get(block) ?? null;
+    }
+
+    /**
+     * 获取一个 texture，需要事先定义，否则返回null
+     * @param name texture 的名称
+     */
+    getTexture(name: string): IShaderTexture2D | null {
+        return this.texture.get(name) ?? null;
     }
 
     /**
@@ -844,22 +1277,21 @@ export class ShaderProgram {
     defineUniform<T extends UniformType>(
         uniform: string,
         type: T
-    ): ShaderUniform<T> | null {
+    ): IShaderUniform<T> | null {
+        const u = this.getUniform<T>(uniform);
+        if (u) {
+            if (u.type === type) return u;
+            else {
+                logger.warn(28, 'uniform', uniform);
+                return null;
+            }
+        }
         const program = this.program;
         const gl = this.element.gl;
         if (!program || !gl) return null;
         const location = gl.getUniformLocation(program, uniform);
         if (!location) return null;
-        const fn = uniformDefine[type];
-        // @ts-ignore
-        const obj: ShaderUniform<T> = {
-            location,
-            type,
-            set: (p0, p1, p2, p3) => {
-                // @ts-ignore
-                fn(gl, location, p0, p1, p2, p3);
-            }
-        };
+        const obj = new ShaderUniform(type, location, gl);
         this.uniform.set(uniform, obj);
         return obj;
     }
@@ -873,20 +1305,21 @@ export class ShaderProgram {
     defineUniformMatrix(
         uniform: string,
         type: UniformMatrix
-    ): ShaderUniformMatrix | null {
+    ): IShaderUniformMatrix | null {
+        const u = this.getMatrix(uniform);
+        if (u) {
+            if (u.type === type) return u;
+            else {
+                logger.warn(28, 'uniform matrix', uniform);
+                return null;
+            }
+        }
         const program = this.program;
         const gl = this.element.gl;
         if (!program || !gl) return null;
         const location = gl.getUniformLocation(program, uniform);
         if (!location) return null;
-        const fn = uniformMatrix[type];
-        const obj: ShaderUniformMatrix = {
-            location,
-            type,
-            set: (transpose, data, srcOffset, srcLength) => {
-                fn(gl, location, transpose, data, srcOffset, srcLength);
-            }
-        };
+        const obj = new ShaderUniformMatrix(type, location, gl);
         this.matrix.set(uniform, obj);
         return obj;
     }
@@ -900,32 +1333,57 @@ export class ShaderProgram {
     defineAttribute<T extends AttribType>(
         attrib: string,
         type: T
-    ): ShaderAttrib<T> | null {
+    ): IShaderAttrib<T> | null {
+        const u = this.getAttribute<T>(attrib);
+        if (u) {
+            if (u.type === type) return u;
+            else {
+                logger.warn(28, 'attribute', attrib);
+                return null;
+            }
+        }
         const program = this.program;
         const gl = this.element.gl;
         if (!program || !gl) return null;
         const location = gl.getAttribLocation(program, attrib);
         if (location === -1) return null;
-        const fn = attribDefine[type];
-        // @ts-ignore
-        const obj: ShaderAttrib<T> = {
-            location,
-            type,
-            set: (p0, p1, p2, p3) => {
-                // @ts-ignore
-                fn(gl, location, p0, p1, p2, p3);
-            },
-            pointer: (p0, p1, p2, p3, p4) => {
-                gl.vertexAttribPointer(location, p0, p1, p2, p3, p4);
-            },
-            pointerI: (size, type, stride, offset) => {
-                gl.vertexAttribIPointer(location, size, type, stride, offset);
-            },
-            divisor: divisor => {
-                gl.vertexAttribDivisor(location, divisor);
-            }
-        };
+        const obj = new ShaderAttrib(type, location, gl);
         this.attribute.set(attrib, obj);
+        return obj;
+    }
+
+    /**
+     * 定义一个顶点数组
+     * @param name 顶点数组名称
+     */
+    defineAttribArray(name: string) {
+        const u = this.getAttribArray(name);
+        if (u) return u;
+        const program = this.program;
+        const gl = this.element.gl;
+        if (!program || !gl) return null;
+        const buffer = gl.createBuffer();
+        if (!buffer) return null;
+        const location = gl.getAttribLocation(program, name);
+        const obj = new ShaderAttribArray(buffer, location, gl);
+        this.attribArray.set(name, obj);
+        return obj;
+    }
+
+    /**
+     * 定义一个顶点索引数组
+     * @param name 顶点索引数组的名称
+     */
+    defineIndices(name: string) {
+        const u = this.getIndices(name);
+        if (u) return u;
+        const program = this.program;
+        const gl = this.element.gl;
+        if (!program || !gl) return null;
+        const buffer = gl.createBuffer();
+        if (!buffer) return null;
+        const obj = new ShaderIndices(buffer, gl);
+        this.indices.set(name, obj);
         return obj;
     }
 
@@ -945,10 +1403,18 @@ export class ShaderProgram {
         size: number,
         usage: number,
         binding: number
-    ): ShaderUniformBlock | null {
+    ): IShaderUniformBlock | null {
         if (this.version === this.element.VERSION_ES_100) {
             logger.warn(24);
             return null;
+        }
+        const u = this.getUniformBlock(block);
+        if (u) {
+            if (u.size === size) return u;
+            else {
+                logger.warn(28, 'uniform block', block);
+                return null;
+            }
         }
         const program = this.program;
         const gl = this.element.gl;
@@ -963,27 +1429,47 @@ export class ShaderProgram {
         gl.bufferData(gl.UNIFORM_BUFFER, data, usage);
         gl.uniformBlockBinding(program, location, binding);
         gl.bindBufferBase(gl.UNIFORM_BUFFER, binding, buffer);
-        const obj: ShaderUniformBlock = {
-            location,
-            buffer,
-            size,
-            set: (data, o?: number, l?: number) => {
-                gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
-                if (o !== void 0) {
-                    // @ts-ignore
-                    gl.bufferSubData(gl.UNIFORM_BUFFER, 0, data, o, l);
-                } else {
-                    // @ts-ignore
-                    gl.bufferSubData(gl.UNIFORM_BUFFER, 0, data);
-                }
-                // gl.uniformBlockBinding(program, location, binding);
-                gl.bindBufferBase(gl.UNIFORM_BUFFER, binding, buffer);
-                // const array = new Float32Array(160);
-                // gl.getBufferSubData(gl.UNIFORM_BUFFER, 0, array);
-                // console.log(array[0]);
-            }
-        };
+        const obj = new ShaderUniformBlock(location, size, buffer, binding, gl);
         this.block.set(block, obj);
+        return obj;
+    }
+
+    /**
+     * 定义一个材质
+     * @param name 纹理名称
+     * @param index 纹理索引，根据不同浏览器，其最大数量不一定相等，根据标准其数量应该大于等于 8 个，
+     *              因此考虑到兼容性，不建议纹理数量超过 8 个。
+     * @param width 纹理的宽度
+     * @param height 纹理的高度
+     * @returns 这个 texture 的操作对象，可以用于设置其内容
+     */
+    defineTexture(
+        name: string,
+        index: number,
+        width?: number,
+        height?: number
+    ): IShaderTexture2D | null {
+        const u = this.getTexture(name);
+        if (u) {
+            if (u.index === index) return u;
+            else {
+                logger.warn(28, 'texture', name);
+                return null;
+            }
+        }
+        if (index > this.element.MAX_TEXTURE_COUNT) {
+            logger.warn(29);
+            return null;
+        }
+        const uniform = this.defineUniform(name, UniformType.Uniform1i);
+        if (!uniform) return null;
+        const program = this.program;
+        const gl = this.element.gl;
+        if (!program || !gl) return null;
+        const tex = gl.createTexture();
+        if (!tex) return null;
+        const obj = new ShaderTexture2D(tex, index, uniform, gl, width, height);
+        this.texture.set(name, obj);
         return obj;
     }
 
@@ -1007,6 +1493,18 @@ export class ShaderProgram {
         this.block.forEach(v => {
             this.gl.deleteBuffer(v.buffer);
         });
+        this.attribArray.forEach(v => {
+            this.gl.deleteBuffer(v.data);
+        });
+        this.texture.forEach(v => {
+            this.gl.deleteTexture(v.texture);
+        });
+        this.indices.forEach(v => {
+            this.gl.deleteBuffer(v.data);
+        });
+        this.texture.clear();
+        this.indices.clear();
+        this.attribArray.clear();
         this.block.clear();
     }
 
@@ -1044,15 +1542,29 @@ export class ShaderProgram {
         gl.attachShader(program, vertexShader);
         gl.attachShader(program, fragmentShader);
         gl.linkProgram(program);
+        gl.useProgram(program);
 
         this.program = program;
         this.shader = { vertex: vertexShader, fragment: fragmentShader };
-        const tex = this.defineAttribute('a_texCoord', shader.ATTRIB_2fv);
-        const position = this.defineAttribute('a_position', shader.ATTRIB_4fv);
-        const sampler = this.defineUniform('u_sampler', shader.UNIFORM_1i);
-        if (!tex || !position || !sampler) {
+        const tex = this.defineAttribArray('a_texCoord');
+        const position = this.defineAttribArray('a_position');
+        const sampler = this.defineTexture('u_sampler', 0);
+        const indices = this.defineIndices('defalutIndices');
+        if (!tex || !position || !sampler || !indices) {
             return false;
         }
+        position.buffer(
+            new Float32Array([1, -1, -1, -1, 1, 1, -1, 1]),
+            gl.STATIC_DRAW
+        );
+        position.pointer(2, gl.FLOAT, false, 0, 0);
+        position.enable();
+        tex.buffer(new Float32Array([1, 1, 0, 1, 1, 0, 0, 0]), gl.STATIC_DRAW);
+        tex.pointer(2, gl.FLOAT, false, 0, 0);
+        tex.enable();
+        indices.buffer(new Uint16Array([0, 1, 2, 2, 3, 1]), gl.STATIC_DRAW);
+        this.useIndices(indices);
+
         return true;
     }
 

@@ -487,12 +487,16 @@ export class HeroMover extends ObjectMoverBase {
         if (!adapter || !viewport) return;
         await adapter.all('readyMove');
         // 这里要检查前面那一格能不能走，不能走则不触发平滑视角，以避免撞墙上视角卡住
-        const { x, y } = core.status.hero.loc;
-        const firstDir = controller.queue.find(v => v.type === 'dir')?.value;
-        if (firstDir) {
-            const data = this.checkCanMove(x, y, toDir(firstDir as Dir));
-            if (data.canMove && !data.noPass) {
-                viewport.sync('startMove');
+        if (!this.ignoreTerrain) {
+            const { x, y } = core.status.hero.loc;
+            const firstDir = controller.queue.find(
+                v => v.type === 'dir'
+            )?.value;
+            if (firstDir && firstDir !== 'backward' && firstDir !== 'forward') {
+                const data = this.checkCanMove(x, y, toDir(firstDir as Dir));
+                if (data.canMove && !data.noPass) {
+                    viewport.sync('startMove');
+                }
             }
         }
         adapter.sync('startAnimate');

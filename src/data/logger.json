@@ -48,6 +48,14 @@
         "22": "There is already an active camera for delivered render item. Consider using 'Camera.for' or diable the active camera to avoid some exceptions.",
         "23": "Render item with id of '$1' has already exists.",
         "24": "Uniform block can only be used in glsl version es 300.",
+        "25": "Cannot activate weather since there's no weather with id of '$1'.",
+        "26": "Cannot set attribute when only element number specified. Use 'pointer' or 'pointerI' instead.",
+        "27": "Cannot vertex attribute integer point when specified as float. Use 'set' or 'pointer' instead.",
+        "28": "Redefinition of shader $1: '$2'",
+        "29": "Cannot define new texture since texture index is larger than max texture count.",
+        "30": "Cannot use indices named $1 since no definition for it. Please define it in advance.",
+        "31": "Cannot use indices since the indices instance is not belongs to the program.",
+        "32": "Sub-image exceeds texture dimensions, auto adjusting size.",
         "1001": "Item-detail extension needs 'floor-binder' and 'floor-damage' extension as dependency.",
         "1101": "Cannot add new effect to point effect instance, for there's no more reserve space for it. Please increase the max count of the instance."
     }

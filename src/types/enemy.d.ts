@@ -164,7 +164,7 @@ interface EnemySpecialBase {
     special: number[];
 }
 
-interface BookEnemyInfo extends Enemy, EnemyInfo {
+interface BookEnemyInfo extends Enemy {
     /**
      * 怪物的坐标列表
      */
