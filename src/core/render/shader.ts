@@ -60,6 +60,13 @@ const enum ShaderVersion {
     ES_300
 }
 
+const enum RenderMode {
+    Arrays,
+    Elements,
+    ArraysInstanced,
+    ElementsInstanced
+}
+
 export const enum UniformType {
     Uniform1f,
     Uniform1fv,
@@ -172,6 +179,11 @@ export class Shader extends Container<EShaderEvent> {
     readonly ATTRIB_I4iv: AttribType.AttribI4iv = AttribType.AttribI4iv;
     readonly ATTRIB_I4ui: AttribType.AttribI4ui = AttribType.AttribI4ui;
     readonly ATTRIB_I4uiv: AttribType.AttribI4uiv = AttribType.AttribI4uiv;
+    // 渲染模式
+    readonly DRAW_ARRAYS = RenderMode.Arrays;
+    readonly DRAW_ELEMENTS = RenderMode.Elements;
+    readonly DRAW_ARRAYS_INSTANCED = RenderMode.ArraysInstanced;
+    readonly DRAW_ELEMENTS_INSTANCED = RenderMode.ElementsInstanced;
     // 其他常量
     readonly MAX_TEXTURE_COUNT: number = 0;
 
@@ -264,10 +276,14 @@ export class Shader extends Container<EShaderEvent> {
         const gl = this.gl;
         const program = this.program;
         if (!gl || !program) return;
-        const ready = this.defaultReady() && program.ready();
+        const useDefault = program.defaultReady;
+        const dr = useDefault ? this.defaultReady() : true;
+        const ready = dr && program.ready();
         if (!ready) return;
         const indices = program.usingIndices;
         if (!indices) return;
+        const param = program.getDrawParams(program.renderMode);
+        if (!param) return;
 
         // 清空画布
         gl.viewport(0, 0, this.canvas.width, this.canvas.height);
@@ -281,11 +297,34 @@ export class Shader extends Container<EShaderEvent> {
             return;
         }
 
-        // 准备顶点索引
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indices.data);
-
-        // 绘制
-        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+        switch (program.renderMode) {
+            case RenderMode.Arrays: {
+                const { mode, first, count } = param as DrawArraysParam;
+                gl.drawArrays(mode, first, count);
+            }
+            case RenderMode.Elements: {
+                const { mode, count, type, offset } =
+                    param as DrawElementsParam;
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indices.data);
+                gl.drawElements(mode, count, type, offset);
+            }
+            case RenderMode.ArraysInstanced: {
+                const { mode, first, count, instanceCount } =
+                    param as DrawArraysInstancedParam;
+                gl.drawArraysInstanced(mode, first, count, instanceCount);
+            }
+            case RenderMode.ElementsInstanced: {
+                const {
+                    mode,
+                    count,
+                    type,
+                    offset,
+                    instanceCount: ins
+                } = param as DrawElementsInstancedParam;
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indices.data);
+                gl.drawElementsInstanced(mode, count, type, offset, ins);
+            }
+        }
 
         this.postDraw();
     }
@@ -529,6 +568,12 @@ interface IShaderAttribArray {
         stride: GLsizei,
         offset: GLintptr
     ): void;
+    /**
+     * 设置顶点指针更新时刻。
+     * 参考 https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/vertexAttribDivisor
+     * @param divisor 每多少个实例更新一次，0表示每个顶点都更新
+     */
+    divisor(divisor: number): void;
     /**
      * 启用这个顶点数据
      */
@@ -871,6 +916,11 @@ class ShaderAttribArray implements IShaderAttribArray {
         gl.vertexAttribIPointer(this.location, size, type, stride, offset);
     }
 
+    divisor(divisor: number): void {
+        const gl = this.gl;
+        gl.vertexAttribDivisor(this.location, divisor);
+    }
+
     enable(): void {
         this.gl.enableVertexAttribArray(this.location);
     }
@@ -1041,7 +1091,6 @@ class ShaderTexture2D implements IShaderTexture2D {
             width = Math.min(width, this.width - x);
             height = Math.min(height, this.height - y);
         }
-        console.log(1);
 
         gl.texSubImage2D(
             gl.TEXTURE_2D,
@@ -1055,6 +1104,41 @@ class ShaderTexture2D implements IShaderTexture2D {
             source
         );
     }
+}
+
+interface DrawArraysParam {
+    mode: GLenum;
+    first: number;
+    count: number;
+}
+
+interface DrawElementsParam {
+    mode: GLenum;
+    count: number;
+    type: GLenum;
+    offset: GLintptr;
+}
+
+interface DrawArraysInstancedParam {
+    mode: GLenum;
+    first: number;
+    count: number;
+    instanceCount: number;
+}
+
+interface DrawElementsInstancedParam {
+    mode: GLenum;
+    count: number;
+    type: GLenum;
+    offset: GLintptr;
+    instanceCount: number;
+}
+
+interface DrawParamsMap {
+    [RenderMode.Arrays]: DrawArraysParam;
+    [RenderMode.ArraysInstanced]: DrawArraysInstancedParam;
+    [RenderMode.Elements]: DrawElementsParam;
+    [RenderMode.ElementsInstanced]: DrawElementsInstancedParam;
 }
 
 interface ShaderProgramEvent {
@@ -1099,6 +1183,15 @@ export class ShaderProgram extends EventEmitter<ShaderProgramEvent> {
 
     /** 着色器内容是否是默认内容，可以用于优化空着色器 */
     modified: boolean = false;
+    /** 是否使用默认内容 */
+    defaultReady: boolean = true;
+    /** 渲染模式 */
+    renderMode: RenderMode = RenderMode.Elements;
+
+    private arraysParams: DrawArraysParam | null = null;
+    private elementsParams: DrawElementsParam | null = null;
+    private arraysInstancedParams: DrawArraysInstancedParam | null = null;
+    private elementsInstancedParams: DrawElementsInstancedParam | null = null;
 
     /** 是否需要重新编译着色器 */
     private shaderDirty: boolean = true;
@@ -1126,6 +1219,131 @@ export class ShaderProgram extends EventEmitter<ShaderProgramEvent> {
      */
     ready(): boolean {
         return this.readyFn?.() ?? true;
+    }
+
+    /**
+     * 设置是否使用默认内容，设为 false 后，将不再将子元素的内容绑定到纹理上
+     */
+    useDefault(use: boolean) {
+        this.defaultReady = use;
+    }
+
+    /**
+     * 设置渲染模式，目前可选 {@link Shader.DRAW_ARRAYS} 至 {@link Shader.DRAW_INSTANCED}
+     */
+    mode(mode: RenderMode) {
+        this.renderMode = mode;
+    }
+
+    /**
+     * 获取指定渲染模式的渲染参数
+     * @param param 渲染模式
+     */
+    getDrawParams<T extends RenderMode>(param: T): DrawParamsMap[T] | null {
+        switch (param) {
+            case RenderMode.Arrays:
+                return this.arraysParams as DrawParamsMap[T];
+            case RenderMode.ArraysInstanced:
+                return this.arraysInstancedParams as DrawParamsMap[T];
+            case RenderMode.Elements:
+                return this.elementsParams as DrawParamsMap[T];
+            case RenderMode.ElementsInstanced:
+                return this.elementsInstancedParams as DrawParamsMap[T];
+        }
+        return null;
+    }
+
+    /**
+     * 设置 DRAW_ARRAYS 模式下的渲染参数
+     * 参考 https://developer.mozilla.org/zh-CN/docs/Web/API/WebGLRenderingContext/drawArrays
+     * @param mode 渲染模式
+     * @param first 第一个元素的位置
+     * @param count 渲染多少个元素
+     */
+    paramArrays(mode: GLenum, first: number, count: number) {
+        if (!this.arraysParams) {
+            this.arraysParams = { mode, first, count };
+        } else {
+            this.arraysParams.mode = mode;
+            this.arraysParams.first = first;
+            this.arraysParams.count = count;
+        }
+    }
+
+    /**
+     * 设置 DRAW_ARRAYS_INSTANCED 模式下的渲染参数
+     * 参考 https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/drawArraysInstanced
+     * @param mode 渲染模式
+     * @param first 第一个元素的位置
+     * @param count 渲染多少个元素
+     * @param instanceCount 渲染实例数量
+     */
+    paramArraysInstanced(
+        mode: GLenum,
+        first: number,
+        count: number,
+        instanceCount: number
+    ) {
+        if (!this.arraysInstancedParams) {
+            this.arraysInstancedParams = { mode, first, count, instanceCount };
+        } else {
+            this.arraysInstancedParams.mode = mode;
+            this.arraysInstancedParams.first = first;
+            this.arraysInstancedParams.count = count;
+            this.arraysInstancedParams.instanceCount = instanceCount;
+        }
+    }
+
+    /**
+     * 设置 DRAW_ELEMENTS 模式下的渲染参数
+     * 参考 https://developer.mozilla.org/zh-CN/docs/Web/API/WebGLRenderingContext/drawElements
+     * @param mode 渲染模式
+     * @param count 渲染元素数量
+     * @param type 数据类型
+     * @param offset 偏移量
+     */
+    paramElements(mode: GLenum, count: number, type: GLenum, offset: number) {
+        if (!this.elementsParams) {
+            this.elementsParams = { mode, count, type, offset };
+        } else {
+            this.elementsParams.mode = mode;
+            this.elementsParams.count = count;
+            this.elementsParams.type = type;
+            this.elementsParams.offset = offset;
+        }
+    }
+
+    /**
+     * 设置 DRAW_ELEMENTS 模式下的渲染参数
+     * 参考 https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/drawElementsInstanced
+     * @param mode 渲染模式
+     * @param count 渲染元素数量
+     * @param type 数据类型
+     * @param offset 偏移量
+     * @param instanceCount 渲染实例数量
+     */
+    paramElementsInstanced(
+        mode: GLenum,
+        count: number,
+        type: GLenum,
+        offset: number,
+        instanceCount: number
+    ) {
+        if (!this.elementsInstancedParams) {
+            this.elementsInstancedParams = {
+                mode,
+                count,
+                type,
+                offset,
+                instanceCount
+            };
+        } else {
+            this.elementsInstancedParams.mode = mode;
+            this.elementsInstancedParams.count = count;
+            this.elementsInstancedParams.type = type;
+            this.elementsInstancedParams.offset = offset;
+            this.elementsInstancedParams.instanceCount = instanceCount;
+        }
     }
 
     /**
@@ -1564,6 +1782,7 @@ export class ShaderProgram extends EventEmitter<ShaderProgramEvent> {
         tex.enable();
         indices.buffer(new Uint16Array([0, 1, 2, 2, 3, 1]), gl.STATIC_DRAW);
         this.useIndices(indices);
+        this.paramElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
 
         return true;
     }
