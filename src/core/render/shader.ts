@@ -198,6 +198,8 @@ export class Shader extends Container<EShaderEvent> {
 
     /** 当前渲染实例的所有着色器程序 */
     private programs: Set<ShaderProgram> = new Set();
+    /** framebuffer 映射 */
+    private framebufferMap: Map<string, WebGLFramebuffer> = new Map();
 
     constructor(type: RenderItemPosition = 'static') {
         super(type, !Shader.support);
@@ -297,6 +299,17 @@ export class Shader extends Container<EShaderEvent> {
             return;
         }
 
+        this.draw(gl, program, param, indices);
+
+        this.postDraw();
+    }
+
+    private draw(
+        gl: WebGL2RenderingContext,
+        program: ShaderProgram,
+        param: DrawParamsMap[keyof DrawParamsMap],
+        indices: IShaderIndices
+    ) {
         switch (program.renderMode) {
             case RenderMode.Arrays: {
                 const { mode, first, count } = param as DrawArraysParam;
@@ -325,8 +338,6 @@ export class Shader extends Container<EShaderEvent> {
                 gl.drawElementsInstanced(mode, count, type, offset, ins);
             }
         }
-
-        this.postDraw();
     }
 
     /**
@@ -355,6 +366,75 @@ export class Shader extends Container<EShaderEvent> {
             tex.set(canvas);
         }
         return true;
+    }
+
+    /**
+     * 将画面渲染至帧缓冲
+     * @param name 帧缓冲名称
+     * @param texture 渲染至的纹理
+     * @param clear 是否先清空画布再渲染
+     */
+    framebuffer(
+        name: string,
+        texture: IShaderTexture2D,
+        clear: boolean = true
+    ) {
+        const gl = this.gl;
+        const buffer = this.framebufferMap.get(name);
+        const program = this.program;
+        if (!gl || !buffer || !program) return;
+        const indices = program.usingIndices;
+        if (!indices) return;
+        const param = program.getDrawParams(program.renderMode);
+        if (!param) return;
+
+        const tex = texture.texture;
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, buffer);
+        if (clear) {
+            gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+            gl.clearColor(0, 0, 0, 0);
+            gl.clearDepth(1);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        }
+        gl.framebufferTexture2D(
+            gl.FRAMEBUFFER,
+            gl.COLOR_ATTACHMENT0,
+            gl.TEXTURE_2D,
+            tex,
+            0
+        );
+        this.draw(gl, program, param, indices);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+    }
+
+    /**
+     * 创建一个帧缓冲对象
+     * @param name 帧缓冲名称
+     * @returns 是否创建成功
+     */
+    createFramebuffer(name: string): boolean {
+        const gl = this.gl;
+        if (!gl) return false;
+        const buffer = gl.createFramebuffer();
+        if (!buffer) return false;
+        this.framebufferMap.set(name, buffer);
+        return true;
+    }
+
+    /**
+     * 删除一个帧缓冲对象
+     * @param name 帧缓冲名称
+     * @returns 是否删除成功
+     */
+    deleteFramebuffer(name: string): boolean {
+        const gl = this.gl;
+        if (!gl) return false;
+        const buffer = this.framebufferMap.get(name);
+        if (!buffer) return false;
+        gl.deleteFramebuffer(buffer);
+        return this.framebufferMap.delete(name);
     }
 
     /**
@@ -469,6 +549,8 @@ interface IShaderUniform<T extends UniformType> {
     readonly location: WebGLUniformLocation;
     /** 这个 uniform 变量的类型 */
     readonly type: T;
+    /** 这个量所处的着色器程序 */
+    readonly program: ShaderProgram;
     /**
      * 设置这个 uniform 变量的值，
      * 参考 https://developer.mozilla.org/zh-CN/docs/Web/API/WebGL2RenderingContext/uniform
@@ -482,6 +564,8 @@ interface IShaderAttrib<T extends AttribType> {
     readonly location: number;
     /** 这个 attribute 常量的类型 */
     readonly type: T;
+    /** 这个量所处的着色器程序 */
+    readonly program: ShaderProgram;
     /**
      * 设置这个 attribute 常量的值，
      * 浮点数参考 https://developer.mozilla.org/zh-CN/docs/Web/API/WebGLRenderingContext/vertexAttrib
@@ -496,6 +580,8 @@ interface IShaderAttribArray {
     readonly location: number;
     /** 这个 attribute 所用的缓冲区信息 */
     readonly data: WebGLBuffer;
+    /** 这个量所处的着色器程序 */
+    readonly program: ShaderProgram;
     /**
      * 修改缓冲区数据，会更改数据大小，重新分配内存，不更改数据大小的情况下建议使用 {@link sub} 代替。
      * 参考 https://developer.mozilla.org/zh-CN/docs/Web/API/WebGLRenderingContext/bufferData
@@ -587,6 +673,8 @@ interface IShaderAttribArray {
 interface IShaderIndices {
     /** 这个顶点索引所用的缓冲区信息 */
     readonly data: WebGLBuffer;
+    /** 这个量所处的着色器程序 */
+    readonly program: ShaderProgram;
     /**
      * 修改缓冲区数据，会更改数据大小，重新分配内存，不更改数据大小的情况下建议使用 {@link sub} 代替。
      * 参考 https://developer.mozilla.org/zh-CN/docs/Web/API/WebGLRenderingContext/bufferData
@@ -636,6 +724,8 @@ interface IShaderUniformMatrix {
     readonly location: WebGLUniformLocation;
     /** 矩阵类型 */
     readonly type: UniformMatrix;
+    /** 这个量所处的着色器程序 */
+    readonly program: ShaderProgram;
     /**
      * 设置矩阵的值，参考 https://developer.mozilla.org/zh-CN/docs/Web/API/WebGL2RenderingContext/uniformMatrix
      * @param transpose 是否转置矩阵
@@ -653,11 +743,13 @@ interface IShaderUniformMatrix {
 
 interface IShaderUniformBlock {
     /** 这个 uniform block 的内存地址 */
-    location: GLuint;
+    readonly location: GLuint;
     /** 与这个 uniform block 所绑定的缓冲区 */
-    buffer: WebGLBuffer;
+    readonly buffer: WebGLBuffer;
     /** 这个 uniform block 的大小 */
-    size: number;
+    readonly size: number;
+    /** 这个量所处的着色器程序 */
+    readonly program: ShaderProgram;
     /**
      * 参考 https://developer.mozilla.org/zh-CN/docs/Web/API/WebGL2RenderingContext/bindBufferBase
      * @param srcData 要设置为的值
@@ -681,6 +773,8 @@ interface IShaderTexture2D {
     readonly height: number;
     /** 纹理所属索引 */
     readonly index: number;
+    /** 这个量所处的着色器程序 */
+    readonly program: ShaderProgram;
     /**
      * 设置这个纹理的图像，不建议使用，会修改宽高
      * @param source 要设置成的图像源
@@ -707,7 +801,8 @@ class ShaderUniform<T extends UniformType> implements IShaderUniform<T> {
     constructor(
         readonly type: T,
         readonly location: WebGLUniformLocation,
-        readonly gl: WebGL2RenderingContext
+        readonly gl: WebGL2RenderingContext,
+        readonly program: ShaderProgram
     ) {}
 
     set(...params: UniformSetFn[T]): void {
@@ -798,7 +893,8 @@ class ShaderAttrib<T extends AttribType> implements IShaderAttrib<T> {
     constructor(
         readonly type: T,
         readonly location: number,
-        readonly gl: WebGL2RenderingContext
+        readonly gl: WebGL2RenderingContext,
+        readonly program: ShaderProgram
     ) {}
 
     set(...params: AttribSetFn[T]) {
@@ -856,7 +952,8 @@ class ShaderAttribArray implements IShaderAttribArray {
     constructor(
         readonly data: WebGLBuffer,
         readonly location: number,
-        readonly gl: WebGL2RenderingContext
+        readonly gl: WebGL2RenderingContext,
+        readonly program: ShaderProgram
     ) {}
 
     buffer(data: AllowSharedBufferSource | null, usage: GLenum): void;
@@ -933,7 +1030,8 @@ class ShaderAttribArray implements IShaderAttribArray {
 class ShaderIndices implements IShaderIndices {
     constructor(
         readonly data: WebGLBuffer,
-        readonly gl: WebGL2RenderingContext
+        readonly gl: WebGL2RenderingContext,
+        readonly program: ShaderProgram
     ) {}
 
     buffer(data: AllowSharedBufferSource | null, usage: GLenum): void;
@@ -975,7 +1073,8 @@ class ShaderUniformMatrix implements IShaderUniformMatrix {
     constructor(
         readonly type: UniformMatrix,
         readonly location: WebGLUniformLocation,
-        readonly gl: WebGL2RenderingContext
+        readonly gl: WebGL2RenderingContext,
+        readonly program: ShaderProgram
     ) {}
 
     set(x2: GLboolean, x3: Float32List, x4?: number, x5?: number): void {
@@ -1017,7 +1116,8 @@ class ShaderUniformBlock implements IShaderUniformBlock {
         readonly size: number,
         readonly buffer: WebGLBuffer,
         readonly binding: number,
-        readonly gl: WebGL2RenderingContext
+        readonly gl: WebGL2RenderingContext,
+        readonly program: ShaderProgram
     ) {}
 
     set(srcData: AllowSharedBufferSource | null): void;
@@ -1043,6 +1143,7 @@ class ShaderTexture2D implements IShaderTexture2D {
         readonly index: number,
         readonly uniform: IShaderUniform<UniformType.Uniform1i>,
         readonly gl: WebGL2RenderingContext,
+        readonly program: ShaderProgram,
         public width: number = 0,
         public height: number = 0
     ) {
@@ -1509,7 +1610,7 @@ export class ShaderProgram extends EventEmitter<ShaderProgramEvent> {
         if (!program || !gl) return null;
         const location = gl.getUniformLocation(program, uniform);
         if (!location) return null;
-        const obj = new ShaderUniform(type, location, gl);
+        const obj = new ShaderUniform(type, location, gl, this);
         this.uniform.set(uniform, obj);
         return obj;
     }
@@ -1537,7 +1638,7 @@ export class ShaderProgram extends EventEmitter<ShaderProgramEvent> {
         if (!program || !gl) return null;
         const location = gl.getUniformLocation(program, uniform);
         if (!location) return null;
-        const obj = new ShaderUniformMatrix(type, location, gl);
+        const obj = new ShaderUniformMatrix(type, location, gl, this);
         this.matrix.set(uniform, obj);
         return obj;
     }
@@ -1565,7 +1666,7 @@ export class ShaderProgram extends EventEmitter<ShaderProgramEvent> {
         if (!program || !gl) return null;
         const location = gl.getAttribLocation(program, attrib);
         if (location === -1) return null;
-        const obj = new ShaderAttrib(type, location, gl);
+        const obj = new ShaderAttrib(type, location, gl, this);
         this.attribute.set(attrib, obj);
         return obj;
     }
@@ -1583,7 +1684,7 @@ export class ShaderProgram extends EventEmitter<ShaderProgramEvent> {
         const buffer = gl.createBuffer();
         if (!buffer) return null;
         const location = gl.getAttribLocation(program, name);
-        const obj = new ShaderAttribArray(buffer, location, gl);
+        const obj = new ShaderAttribArray(buffer, location, gl, this);
         this.attribArray.set(name, obj);
         return obj;
     }
@@ -1600,7 +1701,7 @@ export class ShaderProgram extends EventEmitter<ShaderProgramEvent> {
         if (!program || !gl) return null;
         const buffer = gl.createBuffer();
         if (!buffer) return null;
-        const obj = new ShaderIndices(buffer, gl);
+        const obj = new ShaderIndices(buffer, gl, this);
         this.indices.set(name, obj);
         return obj;
     }
@@ -1637,17 +1738,17 @@ export class ShaderProgram extends EventEmitter<ShaderProgramEvent> {
         const program = this.program;
         const gl = this.element.gl;
         if (!program || !gl) return null;
-        const location = gl.getUniformBlockIndex(program, block);
-        if (location === -1) return null;
-        const buffer = gl.createBuffer();
-        if (!buffer) return null;
+        const loc = gl.getUniformBlockIndex(program, block);
+        if (loc === -1) return null;
+        const buf = gl.createBuffer();
+        if (!buf) return null;
         const data = new Float32Array(size);
         data.fill(0);
-        gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
+        gl.bindBuffer(gl.UNIFORM_BUFFER, buf);
         gl.bufferData(gl.UNIFORM_BUFFER, data, usage);
-        gl.uniformBlockBinding(program, location, binding);
-        gl.bindBufferBase(gl.UNIFORM_BUFFER, binding, buffer);
-        const obj = new ShaderUniformBlock(location, size, buffer, binding, gl);
+        gl.uniformBlockBinding(program, loc, binding);
+        gl.bindBufferBase(gl.UNIFORM_BUFFER, binding, buf);
+        const obj = new ShaderUniformBlock(loc, size, buf, binding, gl, this);
         this.block.set(block, obj);
         return obj;
     }
@@ -1657,15 +1758,15 @@ export class ShaderProgram extends EventEmitter<ShaderProgramEvent> {
      * @param name 纹理名称
      * @param index 纹理索引，根据不同浏览器，其最大数量不一定相等，根据标准其数量应该大于等于 8 个，
      *              因此考虑到兼容性，不建议纹理数量超过 8 个。
-     * @param width 纹理的宽度
-     * @param height 纹理的高度
+     * @param w 纹理的宽度
+     * @param h 纹理的高度
      * @returns 这个 texture 的操作对象，可以用于设置其内容
      */
     defineTexture(
         name: string,
         index: number,
-        width?: number,
-        height?: number
+        w?: number,
+        h?: number
     ): IShaderTexture2D | null {
         const u = this.getTexture(name);
         if (u) {
@@ -1679,14 +1780,14 @@ export class ShaderProgram extends EventEmitter<ShaderProgramEvent> {
             logger.warn(29);
             return null;
         }
-        const uniform = this.defineUniform(name, UniformType.Uniform1i);
-        if (!uniform) return null;
+        const uni = this.defineUniform(name, UniformType.Uniform1i);
+        if (!uni) return null;
         const program = this.program;
         const gl = this.element.gl;
         if (!program || !gl) return null;
         const tex = gl.createTexture();
         if (!tex) return null;
-        const obj = new ShaderTexture2D(tex, index, uniform, gl, width, height);
+        const obj = new ShaderTexture2D(tex, index, uni, gl, this, w, h);
         this.texture.set(name, obj);
         return obj;
     }
