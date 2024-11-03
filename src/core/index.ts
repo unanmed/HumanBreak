@@ -1,3 +1,5 @@
+import { WeatherController } from './../module/weather/weather';
+import '@/module/weather/snow';
 import { BgmController, bgm } from './audio/bgm';
 import { SoundController, SoundEffect, sound } from './audio/sound';
 import { Focus, GameUi, UiController } from './main/custom/ui';
@@ -174,3 +176,8 @@ Mota.register('module', 'Animation', Animation);
 
 main.renderLoaded = true;
 Mota.require('var', 'hook').emit('renderLoaded');
+
+const weather = new WeatherController();
+Mota.require('var', 'hook').once('reset', () => {
+    weather.activate('snow');
+});
