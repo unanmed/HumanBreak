@@ -12,7 +12,7 @@ precision highp float;
 in vec4 a_position;
 in vec2 a_texCoord;
 
-out highp vec2 v_texCoord;
+out vec2 v_texCoord;
 `;
 const SHADER_VERTEX_PREFIX_100 = /* glsl */ `
 precision highp float;
@@ -20,20 +20,20 @@ precision highp float;
 attribute vec4 a_position;
 attribute vec2 a_texCoord;
 
-varying highp vec2 v_texCoord;
+varying vec2 v_texCoord;
 `;
 
 const SHADER_FRAGMENT_PREFIX_300 = /* glsl */ `#version 300 es
 precision highp float;
 
-in highp vec2 v_texCoord;
+in vec2 v_texCoord;
 
 uniform sampler2D u_sampler;
 `;
 const SHADER_FRAGMENT_PREFIX_100 = /* glsl */ `
 precision highp float;
 
-varying highp vec2 v_texCoord;
+varying vec2 v_texCoord;
 
 uniform sampler2D u_sampler;
 `;
@@ -268,9 +268,7 @@ export class Shader extends Container<EShaderEvent> {
     }
 
     update(item?: RenderItem<any>): void {
-        const isSelf = item === this && !this.cacheDirty;
         super.update(item);
-        if (isSelf) this.cacheDirty = false;
         this.shaderRenderDirty = true;
     }
 
@@ -283,7 +281,6 @@ export class Shader extends Container<EShaderEvent> {
         const ready = dr && program.ready();
         if (!ready) return;
         const indices = program.usingIndices;
-        if (!indices) return;
         const param = program.getDrawParams(program.renderMode);
         if (!param) return;
 
@@ -293,22 +290,22 @@ export class Shader extends Container<EShaderEvent> {
         gl.clearDepth(1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        const pre = this.preDraw();
+        const pre = this.preDraw(gl, program, param, indices);
         if (!pre) {
-            this.postDraw();
+            this.postDraw(gl, program, param, indices);
             return;
         }
 
         this.draw(gl, program, param, indices);
 
-        this.postDraw();
+        this.postDraw(gl, program, param, indices);
     }
 
-    private draw(
+    draw(
         gl: WebGL2RenderingContext,
         program: ShaderProgram,
         param: DrawParamsMap[keyof DrawParamsMap],
-        indices: IShaderIndices
+        indices: IShaderIndices | null
     ) {
         switch (program.renderMode) {
             case RenderMode.Arrays: {
@@ -316,6 +313,7 @@ export class Shader extends Container<EShaderEvent> {
                 gl.drawArrays(mode, first, count);
             }
             case RenderMode.Elements: {
+                if (!indices) return;
                 const { mode, count, type, offset } =
                     param as DrawElementsParam;
                 gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indices.data);
@@ -327,6 +325,7 @@ export class Shader extends Container<EShaderEvent> {
                 gl.drawArraysInstanced(mode, first, count, instanceCount);
             }
             case RenderMode.ElementsInstanced: {
+                if (!indices) return;
                 const {
                     mode,
                     count,
@@ -344,7 +343,12 @@ export class Shader extends Container<EShaderEvent> {
      * 在本着色器内部渲染之前执行的渲染，如果返回false，则表示不进行内部渲染，但依然会执行 {@link postDraw}。
      * 继承本类，并复写此方法即可实现前置渲染功能
      */
-    protected preDraw(): boolean {
+    protected preDraw(
+        gl: WebGL2RenderingContext,
+        program: ShaderProgram,
+        param: DrawParamsMap[keyof DrawParamsMap],
+        indices: IShaderIndices | null
+    ): boolean {
         return true;
     }
 
@@ -352,9 +356,18 @@ export class Shader extends Container<EShaderEvent> {
      * 在本着色器内部渲染之后执行的渲染，即使preDraw返回false，本函数也会执行
      * 继承本类，并复写此方法即可实现后置渲染功能
      */
-    protected postDraw() {}
+    protected postDraw(
+        gl: WebGL2RenderingContext,
+        program: ShaderProgram,
+        param: DrawParamsMap[keyof DrawParamsMap],
+        indices: IShaderIndices | null
+    ) {}
 
-    private defaultReady(): boolean {
+    /**
+     * 默认的准备函数
+     * @returns 是否准备成功
+     */
+    protected defaultReady(): boolean {
         const program = this.program;
         if (!program) return false;
         const tex = program.getTexture('u_sampler');
@@ -491,6 +504,8 @@ export class Shader extends Container<EShaderEvent> {
         const gl = this.gl;
         if (!gl) return;
         gl.enable(gl.DEPTH_TEST);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
         gl.depthFunc(gl.LEQUAL);
     }
 }
@@ -544,7 +559,7 @@ interface AttribSetFn {
     [AttribType.AttribI4uiv]: _A<Uint32List>;
 }
 
-interface IShaderUniform<T extends UniformType> {
+export interface IShaderUniform<T extends UniformType> {
     /** 这个 uniform 变量的内存位置 */
     readonly location: WebGLUniformLocation;
     /** 这个 uniform 变量的类型 */
@@ -559,7 +574,7 @@ interface IShaderUniform<T extends UniformType> {
     set(...params: UniformSetFn[T]): void;
 }
 
-interface IShaderAttrib<T extends AttribType> {
+export interface IShaderAttrib<T extends AttribType> {
     /** 这个 attribute 常量的内存位置 */
     readonly location: number;
     /** 这个 attribute 常量的类型 */
@@ -575,7 +590,7 @@ interface IShaderAttrib<T extends AttribType> {
     set(...params: AttribSetFn[T]): void;
 }
 
-interface IShaderAttribArray {
+export interface IShaderAttribArray {
     /** 这个 attribute 常量的内存位置 */
     readonly location: number;
     /** 这个 attribute 所用的缓冲区信息 */
@@ -670,7 +685,7 @@ interface IShaderAttribArray {
     disable(): void;
 }
 
-interface IShaderIndices {
+export interface IShaderIndices {
     /** 这个顶点索引所用的缓冲区信息 */
     readonly data: WebGLBuffer;
     /** 这个量所处的着色器程序 */
@@ -719,7 +734,7 @@ interface IShaderIndices {
     ): void;
 }
 
-interface IShaderUniformMatrix {
+export interface IShaderUniformMatrix {
     /** 矩阵的内存位置 */
     readonly location: WebGLUniformLocation;
     /** 矩阵类型 */
@@ -741,7 +756,7 @@ interface IShaderUniformMatrix {
     ): void;
 }
 
-interface IShaderUniformBlock {
+export interface IShaderUniformBlock {
     /** 这个 uniform block 的内存地址 */
     readonly location: GLuint;
     /** 与这个 uniform block 所绑定的缓冲区 */
@@ -764,7 +779,7 @@ interface IShaderUniformBlock {
     set(srcData: ArrayBufferView, srcOffset: number, length?: number): void;
 }
 
-interface IShaderTexture2D {
+export interface IShaderTexture2D {
     /** 纹理对象 */
     readonly texture: WebGLTexture;
     /** 宽度 */
@@ -1235,7 +1250,7 @@ interface DrawElementsInstancedParam {
     instanceCount: number;
 }
 
-interface DrawParamsMap {
+export interface DrawParamsMap {
     [RenderMode.Arrays]: DrawArraysParam;
     [RenderMode.ArraysInstanced]: DrawArraysInstancedParam;
     [RenderMode.Elements]: DrawElementsParam;
@@ -1684,6 +1699,7 @@ export class ShaderProgram extends EventEmitter<ShaderProgramEvent> {
         const buffer = gl.createBuffer();
         if (!buffer) return null;
         const location = gl.getAttribLocation(program, name);
+        if (location === -1) return null;
         const obj = new ShaderAttribArray(buffer, location, gl, this);
         this.attribArray.set(name, obj);
         return obj;
@@ -1870,7 +1886,7 @@ export class ShaderProgram extends EventEmitter<ShaderProgramEvent> {
         const sampler = this.defineTexture('u_sampler', 0);
         const indices = this.defineIndices('defalutIndices');
         if (!tex || !position || !sampler || !indices) {
-            return false;
+            return true;
         }
         position.buffer(
             new Float32Array([1, -1, -1, -1, 1, 1, -1, 1]),
