@@ -200,6 +200,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
     set(id: string, key: KeyCode, assist: number, emit: boolean = true) {
         const { ctrl, shift, alt } = unwarpBinary(assist);
         const data = this.data[id];
+        if (!data) return;
         const before = this.keyMap.get(data?.key ?? KeyCode.Unknown)! ?? [];
         deleteWith(before, data);
         this.ensureMap(key);
