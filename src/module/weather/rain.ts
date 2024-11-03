@@ -1,6 +1,4 @@
 import {
-    DrawParamsMap,
-    IShaderIndices,
     IShaderUniform,
     Shader,
     ShaderProgram,
@@ -72,12 +70,6 @@ float random(vec2 uv) {
 }
 
 void main() {
-    float dis = distance(v_pos, v_center);
-    float alpha = 1.0;
-    float decay = v_data.y * 0.5 * 0.5;
-    if (dis > decay) {
-        alpha = 2.0 * (dis - decay) / decay;
-    }
     float ran = random(v_pos);
     vec2 pos = vec2(v_pos.x + ran * 0.01, v_pos.y);
     vec2 texPos = (pos + 1.0) / 2.0;
@@ -159,7 +151,6 @@ export class RainWeather implements IWeather {
         RainWeather.shader.update(RainWeather.shader);
         const time = 5000 - 400 * this.level;
         const progress = (Date.now() % time) / time;
-        // console.log(progress);
 
         RainWeather.shader.useProgram(RainShader.rainProgram);
         this.progress?.set(progress);
