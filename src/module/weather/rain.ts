@@ -234,7 +234,7 @@ class RainShader extends Shader {
 
         this.draw(gl, back, param, back.usingIndices);
         this.useProgram(rain);
-        this.draw(gl, rain, rainParam, null);
+        if (this.defaultReady()) this.draw(gl, rain, rainParam, null);
 
         return false;
     }
