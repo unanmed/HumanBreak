@@ -238,8 +238,8 @@ export function initChase(): IChaseController {
             effect.start();
             if (fromSave) {
                 initFromSave(chase);
+                core.autosave();
             }
-            // testEffect();
         },
         end(success) {
             chase.end(success);
@@ -250,27 +250,6 @@ export function initChase(): IChaseController {
         }
     };
     return controller;
-}
-
-function testEffect() {
-    // effect.addEffect(
-    //     PointEffectType.CircleContrast,
-    //     Date.now(),
-    //     100000,
-    //     [7 * 32 + 16, 17 * 32 + 16, 200, 150],
-    //     [1, 0, 0, 0]
-    // );
-    effect.addEffect(
-        PointEffectType.CircleWarp,
-        Date.now(),
-        100000,
-        [7 * 32 + 16, 17 * 32 + 16, 200, 20],
-        [1 / 20, 1, 0.5, 0],
-        [0, Math.PI * 2, 0, 0]
-    );
-    // chase.on('frame', () => {
-    //     effect.requestUpdate();
-    // });
 }
 
 function initAudio(chase: Chase) {
@@ -289,13 +268,6 @@ function playAudio(from: number, chase: Chase) {
         bgm.undo();
     });
 }
-
-// function chaseShake(chase: Chase) {
-//     chase.ani
-//         .mode(shake2(2 / 32, bezier(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)), true)
-//         .time(50000)
-//         .shake(1, 0);
-// }
 
 function processScale(
     chase: Chase,
