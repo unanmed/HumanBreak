@@ -46,7 +46,7 @@ export class Container<E extends EContainerEvent = EContainerEvent>
         });
     }
 
-    private requestSort() {
+    requestSort() {
         if (!this.needSort) {
             this.needSort = true;
             this.requestBeforeFrame(() => {
@@ -62,11 +62,8 @@ export class Container<E extends EContainerEvent = EContainerEvent>
      */
     appendChild(...children: RenderItem<any>[]) {
         children.forEach(v => {
-            v.remove();
-            this.children.add(v);
-            v.parent = this;
+            v.append(this);
         });
-        children.forEach(v => (v.parent = this));
         this.requestSort();
         this.update(this);
     }
@@ -74,15 +71,16 @@ export class Container<E extends EContainerEvent = EContainerEvent>
     removeChild(...child: RenderItem<any>[]): void {
         let changed = false;
         child.forEach(v => {
-            const success = this.children.delete(v);
-            if (success) changed = true;
-            v.parent = void 0;
+            const success = v.remove();
+            if (success) {
+                changed = true;
+            }
         });
         if (changed) this.requestSort();
         this.update(this);
     }
 
-    sortChildren() {
+    private sortChildren() {
         this.sortedChildren = [...this.children].sort(
             (a, b) => a.zIndex - b.zIndex
         );

@@ -67,9 +67,9 @@ export interface IRenderChildable {
     removeChild(...child: RenderItem<any>[]): void;
 
     /**
-     * 对子元素进行排序
+     * 在下一个tick的渲染前对子元素进行排序
      */
-    sortChildren(): void;
+    requestSort(): void;
 }
 
 interface IRenderFrame {
@@ -162,11 +162,13 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         return this._id;
     }
     set id(v: string) {
-        if (RenderItem.itemMap.has(this._id)) {
-            logger.warn(23);
-            RenderItem.itemMap.delete(this._id);
+        if (this.isRoot || this.findRoot()) {
+            if (RenderItem.itemMap.has(this._id)) {
+                logger.warn(23);
+                RenderItem.itemMap.delete(this._id);
+            }
+            RenderItem.itemMap.set(v, this);
         }
-        RenderItem.itemMap.set(v, this);
         this._id = v;
     }
 
@@ -193,6 +195,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
 
     /** 当前元素的父元素 */
     parent?: RenderItem & IRenderChildable;
+    /** 当前元素是否为根元素 */
+    readonly isRoot: boolean = false;
 
     protected needUpdate: boolean = false;
 
@@ -220,6 +224,18 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this.type = type;
 
         this.cache.withGameScale(true);
+    }
+
+    private findRoot() {
+        let ele: RenderItem = this;
+        while (!ele.isRoot) {
+            if (!ele.parent) {
+                return null;
+            } else {
+                ele = ele.parent;
+            }
+        }
+        return ele;
     }
 
     /**
@@ -338,7 +354,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
 
     setZIndex(zIndex: number) {
         this.zIndex = zIndex;
-        this.parent?.sortChildren?.();
+        this.parent?.requestSort();
     }
 
     requestBeforeFrame(fn: () => void): void {
@@ -407,15 +423,27 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      * 将这个渲染元素添加到其他父元素上
      * @param parent 父元素
      */
-    append(parent: IRenderChildable) {
-        parent.appendChild(this);
+    append(parent: IRenderChildable & RenderItem) {
+        this.remove();
+        parent.children.add(this);
+        this.parent = parent;
+        if (this._id !== '') {
+            const root = this.findRoot();
+            if (!root) return;
+            RenderItem.itemMap.set(this._id, this);
+        }
     }
 
     /**
      * 从渲染树中移除这个节点
      */
-    remove() {
-        this.parent?.removeChild(this);
+    remove(): boolean {
+        if (!this.parent) return false;
+        const success = this.parent.children.delete(this);
+        this.parent = void 0;
+        if (!success) return false;
+        RenderItem.itemMap.delete(this._id);
+        return true;
     }
 
     /**
@@ -431,19 +459,16 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
 
 RenderItem.ticker.add(() => {
     if (beforeFrame.length > 0) {
-        const toEmit = beforeFrame.slice();
+        beforeFrame.forEach(v => v());
         beforeFrame.splice(0);
-        toEmit.forEach(v => v());
     }
     if (renderFrame.length > 0) {
-        const toEmit = renderFrame.slice();
+        renderFrame.forEach(v => v());
         renderFrame.splice(0);
-        toEmit.forEach(v => v());
     }
     if (afterFrame.length > 0) {
-        const toEmit = afterFrame.slice();
+        afterFrame.forEach(v => v());
         afterFrame.splice(0);
-        toEmit.forEach(v => v());
     }
 });
 

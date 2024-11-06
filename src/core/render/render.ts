@@ -9,6 +9,7 @@ export class MotaRenderer extends Container {
     target: MotaCanvas2D;
 
     protected needUpdate: boolean = false;
+    readonly isRoot: boolean = true;
 
     constructor(id: string = 'render-main') {
         super('static', false);
@@ -37,10 +38,8 @@ export class MotaRenderer extends Container {
 
     protected refresh(item?: RenderItem): void {
         this.emit('beforeUpdate', item);
-        // console.time();
         this.target.clear();
         this.renderContent(this.target, Transform.identity);
-        // console.timeEnd();
         this.emit('afterUpdate', item);
     }
 
