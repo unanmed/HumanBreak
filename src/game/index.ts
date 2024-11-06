@@ -52,3 +52,10 @@ loading.once('coreInit', () => {
 });
 
 registerPresetState();
+
+window.addEventListener('beforeunload', () => {
+    core.checkAutosave();
+});
+hook.on('restart', () => {
+    core.checkAutosave();
+});

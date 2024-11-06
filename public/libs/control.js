@@ -186,9 +186,9 @@ control.prototype._animationFrame_totalTime = function (timestamp) {
 };
 
 control.prototype._animationFrame_autoSave = function (timestamp) {
-    if (timestamp - core.saves.autosave.time <= 5000) return;
-    core.control.checkAutosave();
-    core.saves.autosave.time = timestamp;
+    // if (timestamp - core.saves.autosave.time <= 5000) return;
+    // core.control.checkAutosave();
+    // core.saves.autosave.time = timestamp;
 };
 
 control.prototype._animationFrame_globalAnimate = function (timestamp) {
