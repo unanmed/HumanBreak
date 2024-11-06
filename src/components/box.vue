@@ -9,11 +9,15 @@
             class="box-move"
             :selected="moveSelected"
         >
-            <drag-outlined
-                :id="`box-drag-${id}`"
-                class="box-drag"
-                style="right: 0; bottom: 0; position: absolute"
-            />
+            <drag-outlined :id="`box-drag-${id}`" class="box-drag" />
+        </div>
+        <div
+            v-if="resizable"
+            :id="`box-size-${id}`"
+            class="box-size"
+            :selected="moveSelected"
+        >
+            <ArrowsAltOutlined :id="`box-resize-${id}`" class="box-resize" />
         </div>
         <div
             class="border border-vertical border-left"
@@ -44,7 +48,7 @@
 
 <script lang="ts" setup>
 import { onMounted, onUnmounted, onUpdated, ref, watch } from 'vue';
-import { DragOutlined } from '@ant-design/icons-vue';
+import { ArrowsAltOutlined, DragOutlined } from '@ant-design/icons-vue';
 import { isMobile, useDrag, cancelGlobalDrag } from '../plugin/use';
 import { has, requireUniqueSymbol } from '../plugin/utils';
 import { sleep } from 'mutate-animate';
@@ -75,6 +79,7 @@ let rightB: HTMLDivElement;
 let topB: HTMLDivElement;
 let bottomB: HTMLDivElement;
 let drag: HTMLElement;
+let size: HTMLElement;
 
 const width = ref(
     isMobile ? window.innerWidth - 100 : window.innerWidth * 0.175
@@ -99,9 +104,8 @@ let lastX = 0;
 let lastY = 0;
 
 function dragFn(x: number, y: number) {
-    const style = getComputedStyle(main);
-    const ox = parseFloat(style.left);
-    const oy = parseFloat(style.top);
+    const ox = main.offsetLeft;
+    const oy = main.offsetTop;
     left.value = ox + x - lastX;
     top.value = oy + y - lastY;
     main.style.left = `${left.value}px`;
@@ -130,14 +134,19 @@ function topDrag(x: number, y: number) {
 }
 
 function rightDrag(x: number, y: number) {
-    const style = getComputedStyle(main);
-    width.value = x - parseFloat(style.left);
+    width.value = x - main.offsetLeft;
     main.style.width = `${width.value}px`;
 }
 
 function bottomDrag(x: number, y: number) {
-    const style = getComputedStyle(main);
-    height.value = y - parseFloat(style.top);
+    height.value = y - main.offsetTop;
+    main.style.height = `${height.value}px`;
+}
+
+function resizeBox(x: number, y: number) {
+    width.value = x - main.offsetLeft;
+    height.value = y - main.offsetTop;
+    main.style.width = `${width.value}px`;
     main.style.height = `${height.value}px`;
 }
 
@@ -148,6 +157,7 @@ function resize() {
     rightB = document.getElementById(`border-right-${id}`) as HTMLDivElement;
     bottomB = document.getElementById(`border-bottom-${id}`) as HTMLDivElement;
     drag = document.getElementById(`box-drag-${id}`) as HTMLElement;
+    size = document.getElementById(`box-resize-${id}`) as HTMLElement;
 
     if (!main) return;
 
@@ -207,6 +217,7 @@ onMounted(async () => {
 
         useDrag(rightB, rightDrag, void 0, void 0, true);
         useDrag(bottomB, bottomDrag, void 0, void 0, true);
+        useDrag(size, resizeBox, void 0, void 0, true);
     }
 });
 
@@ -217,6 +228,7 @@ onUnmounted(() => {
         cancelGlobalDrag(topDrag);
         cancelGlobalDrag(rightDrag);
         cancelGlobalDrag(bottomDrag);
+        cancelGlobalDrag(resizeBox);
     }
 });
 </script>
@@ -247,16 +259,37 @@ onUnmounted(() => {
     height: 32px;
 }
 
+.box-size {
+    transition: font-size 0.3s ease-out;
+    position: absolute;
+    left: 100%;
+    top: 100%;
+}
+
 .box-drag {
     cursor: all-scroll;
     user-select: none;
+    right: 0;
+    bottom: 0;
+    position: absolute;
 }
 
-.box-move[selected='false'] {
-    font-size: 8px;
+.box-resize {
+    left: 0;
+    top: 0;
+    position: absolute;
+    transform: rotateX(180deg);
+    user-select: none;
+    cursor: nwse-resize;
 }
 
-.box-move[selected='true'] {
+.box-move[selected='false'],
+.box-size[selected='false'] {
+    font-size: 16px;
+}
+
+.box-move[selected='true'],
+.box-size[selected='true'] {
     font-size: 32px;
 }
 
