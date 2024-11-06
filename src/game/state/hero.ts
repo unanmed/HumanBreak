@@ -71,18 +71,29 @@ function getRealStatus(
 
     if (name === 'all') {
         const res: any = {};
-        Object.keys(core.status.hero).forEach(v => {
-            res[v] = getRealStatus(status, v as keyof HeroStatus, floorId);
-        });
+        for (const [key, value] of Object.entries(core.status.hero)) {
+            if (typeof value === 'number') {
+                res[key] = getRealStatus(
+                    status,
+                    key as keyof HeroStatus,
+                    floorId
+                );
+            } else {
+                res[key] = value;
+            }
+        }
+
         return res;
     }
 
-    let s = (status?.[name] ?? core.status.hero[name]) as number;
+    let s = (status[name] ?? core.status.hero[name]) as number;
     if (s === null || s === void 0) {
         throw new ReferenceError(
             `Wrong hero status property name is delivered: ${name}`
         );
     }
+
+    if (typeof s !== 'number') return s;
 
     // 永夜、极昼
     if (name === 'atk' || name === 'def') {
@@ -108,10 +119,8 @@ function getRealStatus(
     }
 
     // buff
-    if (typeof s === 'number') {
-        s *= flags[`__${name}_buff__`] ?? 1;
-        s = Math.floor(s);
-    }
+    s *= core.status.hero.buff[name] ?? 1;
+    s = Math.floor(s);
 
     return s;
 }

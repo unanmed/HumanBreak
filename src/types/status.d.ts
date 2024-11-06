@@ -965,4 +965,6 @@ interface HeroStatus {
     x?: number;
     y?: number;
     floorId?: FloorIds;
+
+    buff: Partial<Record<keyof NumbericHeroStatus, number>>;
 }

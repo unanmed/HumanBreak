@@ -2896,22 +2896,17 @@ control.prototype.getStatusLabel = function (name) {
 
 ////// 设置某个属性的增幅值 //////
 control.prototype.setBuff = function (name, value) {
-    // 仅保留三位有效buff值
-    value = parseFloat(value.toFixed(3));
-    this.setFlag('__' + name + '_buff__', value);
+    core.status.hero.buff[name] = value;
 };
 
 ////// 加减某个属性的增幅值 //////
 control.prototype.addBuff = function (name, value) {
-    var buff = this.getBuff(name) + value;
-    // 仅保留三位有效buff值
-    buff = parseFloat(buff.toFixed(3));
-    this.setFlag('__' + name + '_buff__', buff);
+    core.status.hero.buff[name] += value;
 };
 
 ////// 获得某个属性的增幅值 //////
 control.prototype.getBuff = function (name) {
-    return core.getFlag('__' + name + '_buff__', 1);
+    return core.status.hero.buff[name] ?? 1;
 };
 
 ////// 设置勇士的位置 //////

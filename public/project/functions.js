@@ -62,6 +62,21 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             if (h.magicDef === void 0 || h.magicDef === null) {
                 h.magicDef = 0;
             }
+            if (!core.status.hero.buff) {
+                const buff = {};
+                core.status.hero.buff = buff;
+                const toDelete = [];
+                for (const [key, value] of Object.entries(flags)) {
+                    if (/__\w+_buff__/.test(key)) {
+                        const name = key.slice(2, -7);
+                        buff[name] = value;
+                        toDelete.push(key);
+                    }
+                }
+                toDelete.forEach(v => {
+                    delete flags[v];
+                });
+            }
         },
         win: function (reason, norank, noexit) {
             // 游戏获胜事件
