@@ -102,7 +102,7 @@ export class Portal extends Sprite {
             }
         });
 
-        this.setZIndex(90);
+        this.setZIndex(35);
 
         this.setRenderFn((canvas, transform) => {
             this.renderPortal(canvas);
