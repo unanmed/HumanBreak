@@ -92,22 +92,30 @@ async function calHeight(first: boolean = false) {
     if (!first) {
         await sleep(20);
     }
+
     const canvas = ctx.canvas;
     const style2 = getComputedStyle(canvas);
-    canvas.style.width = `${width}px`;
-    canvas.width = width * scale;
-    canvas.height = parseFloat(style2.height) * scale;
-    if (props.noScroll) canvas.style.width = `0px`;
-
-    if (props.type === 'horizontal') {
+    if (!props.type || props.type === 'vertical') {
+        if (props.noScroll) {
+            canvas.style.width = `0px`;
+        } else {
+            canvas.style.width = `${width}px`;
+            canvas.width = width * scale;
+            canvas.height = parseFloat(style2.height) * scale;
+        }
+    } else {
         main.style.flexDirection = 'column';
-        canvas.style.height = `${width}px`;
-        canvas.style.width = '98%';
-        canvas.style.margin = '0 1% 0 1%';
-        canvas.width = parseFloat(style2.width) * scale;
-        canvas.height = width * scale;
-        if (props.noScroll) canvas.style.height = `0px`;
+        if (props.noScroll) {
+            canvas.style.height = `0px`;
+        } else {
+            canvas.style.height = `${width}px`;
+            canvas.style.width = '98%';
+            canvas.style.margin = '0 1% 0 1%';
+            canvas.width = parseFloat(style2.width) * scale;
+            canvas.height = width * scale;
+        }
     }
+
     await new Promise<void>(res => {
         requestAnimationFrame(() => {
             total =
