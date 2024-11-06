@@ -33,9 +33,7 @@ export class Sprite<
         canvas: MotaOffscreenCanvas2D,
         transform: Transform
     ): void {
-        canvas.ctx.save();
         this.renderFn(canvas, transform);
-        canvas.ctx.restore();
     }
 
     setRenderFn(fn: RenderFunction) {

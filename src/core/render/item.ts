@@ -269,9 +269,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
             if (this.cacheDirty) {
                 const { canvas } = this.cache;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.save();
                 this.render(this.cache, tran);
-                ctx.restore();
                 this.cacheDirty = false;
             }
 
