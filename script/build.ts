@@ -136,7 +136,6 @@ const compress = type === 'dist';
                     babelHelpers: 'bundled',
                     sourceType: 'module'
                 }),
-                terser(),
                 resolve(),
                 commonjs(),
                 json()
