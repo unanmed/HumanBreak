@@ -81,10 +81,11 @@ let bottomB: HTMLDivElement;
 let drag: HTMLElement;
 let size: HTMLElement;
 
-const width = ref(
-    isMobile ? window.innerWidth - 100 : window.innerWidth * 0.175
-);
-const height = ref(isMobile ? 250 : window.innerHeight - 100);
+const maxWidth = window.innerWidth;
+const maxHeight = window.innerHeight;
+
+const width = ref(isMobile ? maxWidth - 100 : maxHeight * 0.175);
+const height = ref(isMobile ? 250 : maxHeight - 100);
 const left = ref(isMobile ? 30 : 50);
 const top = ref(isMobile ? 30 : 50);
 
@@ -103,13 +104,48 @@ async function click() {
 let lastX = 0;
 let lastY = 0;
 
+function clampX(x: number) {
+    if (x < 16) x = 16;
+    const mx = maxWidth - 16 - main.offsetWidth;
+    if (x > mx) x = mx;
+    return x;
+}
+
+function clampY(y: number) {
+    if (y < 16) y = 16;
+    const my = maxHeight - 16 - main.offsetHeight;
+    if (y > my) y = my;
+    return y;
+}
+
+function clampPos(x: number, y: number) {
+    return { x: clampX(x), y: clampY(y) };
+}
+
+function clampWidth(w: number) {
+    if (w < 16) w = 16;
+    const mw = maxWidth - 16 - main.offsetLeft;
+    if (w > mw) w = mw;
+    return w;
+}
+
+function clampHeight(h: number) {
+    if (h < 16) h = 16;
+    const mh = maxHeight - 16 - main.offsetTop;
+    if (h > mh) h = mh;
+    return h;
+}
+
+function clampSize(w: number, h: number) {
+    return { w: clampWidth(w), h: clampHeight(h) };
+}
+
 function dragFn(x: number, y: number) {
-    const ox = main.offsetLeft;
-    const oy = main.offsetTop;
-    left.value = ox + x - lastX;
-    top.value = oy + y - lastY;
-    main.style.left = `${left.value}px`;
-    main.style.top = `${top.value}px`;
+    const { x: tx, y: ty } = clampPos(x, y);
+    left.value = tx;
+    top.value = ty;
+    main.style.left = `${tx}px`;
+    main.style.top = `${ty}px`;
 
     moveSelected.value = true;
     clearTimeout(moveTimeout);
@@ -119,35 +155,40 @@ function dragFn(x: number, y: number) {
 
 let right = left.value + width.value;
 function leftDrag(x: number, y: number) {
-    main.style.left = `${x}px`;
-    width.value = right - x;
-    left.value = x;
+    const tx = clampX(x);
+    main.style.left = `${tx}px`;
+    width.value = right - tx;
+    left.value = tx;
     main.style.width = `${width.value}px`;
 }
 
 let bottom = top.value + height.value;
 function topDrag(x: number, y: number) {
-    main.style.top = `${y}px`;
-    height.value = bottom - y;
-    top.value = y;
+    const ty = clampY(y);
+    main.style.top = `${ty}px`;
+    height.value = bottom - ty;
+    top.value = ty;
     main.style.height = `${height.value}px`;
 }
 
 function rightDrag(x: number, y: number) {
-    width.value = x - main.offsetLeft;
-    main.style.width = `${width.value}px`;
+    const w = clampWidth(x - main.offsetLeft);
+    width.value = w;
+    main.style.width = `${w}px`;
 }
 
 function bottomDrag(x: number, y: number) {
-    height.value = y - main.offsetTop;
-    main.style.height = `${height.value}px`;
+    const h = clampHeight(y - main.offsetTop);
+    height.value = h;
+    main.style.height = `${h}px`;
 }
 
 function resizeBox(x: number, y: number) {
-    width.value = x - main.offsetLeft;
-    height.value = y - main.offsetTop;
-    main.style.width = `${width.value}px`;
-    main.style.height = `${height.value}px`;
+    const { w, h } = clampSize(x - main.offsetLeft, y - main.offsetTop);
+    width.value = w;
+    height.value = h;
+    main.style.width = `${w}px`;
+    main.style.height = `${h}px`;
 }
 
 function resize() {
