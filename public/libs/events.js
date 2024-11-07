@@ -2947,15 +2947,15 @@ events.prototype.__action_wait_getValue = function (value) {
     value %= 1e8;
     if (value >= 1000000) {
         core.setFlag('type', 1);
-        var px = parseInt((value - 1000000) / 1000),
+        var px = Math.floor((value - 1000000) / 1000),
             py = value % 1000;
         core.setFlag('px', px);
         core.setFlag('py', py);
-        core.setFlag('x', parseInt(px / 32));
-        core.setFlag('y', parseInt(py / 32));
+        core.setFlag('x', Math.floor(px / 32));
+        core.setFlag('y', Math.floor(py / 32));
     } else if (value >= 10000) {
         core.setFlag('type', 1);
-        var x = parseInt((value - 10000) / 100),
+        var x = Math.floor((value - 10000) / 100),
             y = value % 100;
         core.setFlag('px', 32 * x + 16);
         core.setFlag('py', 32 * y + 16);
@@ -3404,7 +3404,7 @@ events.prototype.save = function (fromUserAction) {
         return;
     if (!this._checkStatus('save', fromUserAction)) return;
     var saveIndex = core.saves.saveIndex;
-    var page = parseInt((saveIndex - 1) / 5),
+    var page = Math.floor((saveIndex - 1) / 5),
         offset = saveIndex - 5 * page;
     core.playSound('打开界面');
     core.ui._drawSLPanel(10 * page + offset);
@@ -3414,7 +3414,7 @@ events.prototype.save = function (fromUserAction) {
 events.prototype.load = function (fromUserAction) {
     if (core.isReplaying()) return;
     var saveIndex = core.saves.saveIndex;
-    var page = parseInt((saveIndex - 1) / 5),
+    var page = Math.floor((saveIndex - 1) / 5),
         offset = saveIndex - 5 * page;
     // 游戏开始前读档
     if (!core.isPlaying()) {
@@ -3788,8 +3788,8 @@ events.prototype._moveTextBox_moving = function (ctx, moveInfo, callback) {
         var dy = moveInfo.dy * moveFunc(step / steps);
         core.relocateCanvas(
             ctx,
-            parseInt(moveInfo.ox + dx),
-            parseInt(moveInfo.oy + dy)
+            Math.floor(moveInfo.ox + dx),
+            Math.floor(moveInfo.oy + dy)
         );
         ctx.canvas.setAttribute('_text_left', moveInfo.sx + dx);
         ctx.canvas.setAttribute('_text_top', moveInfo.sy + dy);
@@ -4018,7 +4018,7 @@ events.prototype.moveImage = function (
 events.prototype._moveImage_moving = function (name, moveInfo, callback) {
     var per_time = 10,
         step = 0,
-        steps = parseInt(moveInfo.time / per_time);
+        steps = Math.floor(moveInfo.time / per_time);
     if (steps <= 0) steps = 1;
     var fromX = moveInfo.fromX,
         fromY = moveInfo.fromY,
@@ -4033,8 +4033,8 @@ events.prototype._moveImage_moving = function (name, moveInfo, callback) {
     var animate = setInterval(function () {
         step++;
         currOpacity = opacity + (toOpacity - opacity) * moveFunc(step / steps);
-        currX = parseInt(fromX + (toX - fromX) * moveFunc(step / steps));
-        currY = parseInt(fromY + (toY - fromY) * moveFunc(step / steps));
+        currX = Math.floor(fromX + (toX - fromX) * moveFunc(step / steps));
+        currY = Math.floor(fromY + (toY - fromY) * moveFunc(step / steps));
         core.setOpacity(name, currOpacity);
         core.relocateCanvas(name, currX, currY);
         if (step == steps) {
@@ -4089,7 +4089,7 @@ events.prototype.rotateImage = function (
 events.prototype._rotateImage_rotating = function (name, rotateInfo, callback) {
     var per_time = 10,
         step = 0,
-        steps = parseInt(rotateInfo.time / per_time);
+        steps = Math.floor(rotateInfo.time / per_time);
     if (steps <= 0) steps = 1;
     var moveFunc = core.applyEasing(rotateInfo.moveMode);
     var animate = setInterval(function () {
@@ -4183,7 +4183,7 @@ events.prototype._scaleImage_scale = function (ctx, scaleInfo, callback) {
 
     var per_time = 10,
         step = 0,
-        steps = parseInt(scaleInfo.time / per_time);
+        steps = Math.floor(scaleInfo.time / per_time);
     if (steps <= 0) steps = 1;
     var moveFunc = core.applyEasing(scaleInfo.moveMode);
 
@@ -4239,7 +4239,7 @@ events.prototype.setVolume = function (value, time, callback) {
     time /= Math.max(core.status.replay.speed, 1);
     var per_time = 10,
         step = 0,
-        steps = parseInt(time / per_time);
+        steps = Math.floor(time / per_time);
     if (steps <= 0) steps = 1;
     var animate = setInterval(function () {
         step++;
@@ -4265,7 +4265,7 @@ events.prototype.vibrate = function (direction, time, speed, power, callback) {
     speed = speed || 10;
     power = power || 10;
     var shakeInfo = {
-        duration: parseInt(time / 10),
+        duration: Math.floor(time / 10),
         speed: speed,
         power: power,
         direction: 1,

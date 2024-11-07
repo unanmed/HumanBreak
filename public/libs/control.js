@@ -905,7 +905,7 @@ control.prototype.setHeroOpacity = function (
 
     var fromOpacity = core.getFlag('__heroOpacity__', 1);
     var step = 0,
-        steps = parseInt(time / 10);
+        steps = Math.floor(time / 10);
     if (steps <= 0) steps = 1;
     var moveFunc = core.applyEasing(moveMode);
 
@@ -996,8 +996,8 @@ control.prototype.updateViewport = function () {
             core.bigmap.offsetY >= core.bigmap.posY * 32 + 32 ||
             core.bigmap.offsetY <= core.bigmap.posY * 32 - 32
         ) {
-            core.bigmap.posX = parseInt(core.bigmap.offsetX / 32);
-            core.bigmap.posY = parseInt(core.bigmap.offsetY / 32);
+            core.bigmap.posX = Math.floor(core.bigmap.offsetX / 32);
+            core.bigmap.posY = Math.floor(core.bigmap.offsetY / 32);
             core.redrawMap();
         }
     } else {
@@ -1027,8 +1027,8 @@ control.prototype.updateViewport = function () {
             if (ox != null && oy != null) {
                 core.relocateCanvas(
                     one,
-                    parseInt(ox) - core.bigmap.offsetX,
-                    parseInt(oy) - core.bigmap.offsetY
+                    Number(ox) - core.bigmap.offsetX,
+                    Number(oy) - core.bigmap.offsetY
                 );
             }
         }
@@ -1062,7 +1062,7 @@ control.prototype.moveViewport = function (x, y, moveMode, time, callback) {
     time /= Math.max(core.status.replay.speed, 1);
     var per_time = 10,
         step = 0,
-        steps = parseInt(time / per_time);
+        steps = Math.floor(time / per_time);
     if (steps <= 0) {
         this.setViewport(32 * x, 32 * y);
         if (callback) callback();
@@ -1499,7 +1499,7 @@ control.prototype._replay_SL = function () {
     core.lockControl();
     core.status.event.id = 'save';
     var saveIndex = core.saves.saveIndex;
-    var page = parseInt((saveIndex - 1) / 5),
+    var page = Math.floor((saveIndex - 1) / 5),
         offset = saveIndex - 5 * page;
 
     core.ui._drawSLPanel(10 * page + offset);
@@ -2259,7 +2259,7 @@ control.prototype._doSL_replayRemain_afterGet = function (id, data) {
             core.status.event.id = 'replayRemain';
             core.lockControl();
             var saveIndex = core.saves.saveIndex;
-            var page = parseInt((saveIndex - 1) / 5),
+            var page = Math.floor((saveIndex - 1) / 5),
                 offset = saveIndex - 5 * page;
             core.ui._drawSLPanel(10 * page + offset);
         }
@@ -2959,7 +2959,7 @@ control.prototype._setCurtain_animate = function (
     time /= Math.max(core.status.replay.speed, 1);
     var per_time = 10,
         step = 0,
-        steps = parseInt(time / per_time);
+        steps = Math.floor(time / per_time);
     if (steps <= 0) steps = 1;
     var curr = nowColor;
     var moveFunc = core.applyEasing(moveMode);

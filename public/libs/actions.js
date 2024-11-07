@@ -365,22 +365,6 @@ actions.prototype._sys_keyDown_lockControl = function (keyCode) {
 };
 
 actions.prototype._sys_keyDown = function (keyCode) {
-    if (!core.status.played) return true;
-    return true;
-    switch (keyCode) {
-        case 37:
-            core.moveHero('left');
-            break;
-        case 38:
-            core.moveHero('up');
-            break;
-        case 39:
-            core.moveHero('right');
-            break;
-        case 40:
-            core.moveHero('down');
-            break;
-    }
     return true;
 };
 
@@ -496,10 +480,10 @@ actions.prototype._sys_keyUp = function (keyCode, altKey) {
 
 ////// 点击（触摸）事件按下时 //////
 actions.prototype.ondown = function (loc) {
-    var x = parseInt(loc.x / loc.size),
-        y = parseInt(loc.y / loc.size);
-    var px = parseInt(loc.x / core.domStyle.scale),
-        py = parseInt(loc.y / core.domStyle.scale);
+    var x = Math.floor(loc.x / loc.size),
+        y = Math.floor(loc.y / loc.size);
+    var px = Math.floor(loc.x / core.domStyle.scale),
+        py = Math.floor(loc.y / core.domStyle.scale);
     this.doRegisteredAction('ondown', x, y, px, py);
 };
 
@@ -628,10 +612,10 @@ actions.prototype._sys_ondown = function (x, y, px, py) {
 
 ////// 当在触摸屏上滑动时 //////
 actions.prototype.onmove = function (loc) {
-    var x = parseInt(loc.x / loc.size),
-        y = parseInt(loc.y / loc.size);
-    var px = parseInt(loc.x / core.domStyle.scale),
-        py = parseInt(loc.y / core.domStyle.scale);
+    var x = Math.floor(loc.x / loc.size),
+        y = Math.floor(loc.y / loc.size);
+    var px = Math.floor(loc.x / core.domStyle.scale),
+        py = Math.floor(loc.y / core.domStyle.scale);
     this.doRegisteredAction('onmove', x, y, px, py);
 };
 
@@ -681,8 +665,8 @@ actions.prototype._sys_onmove = function (x, y, px, py) {
 
     if ((core.status.stepPostfix || []).length > 0) {
         var pos = {
-            x: parseInt((px + core.bigmap.offsetX) / 32),
-            y: parseInt((py + core.bigmap.offsetY) / 32)
+            x: Math.floor((px + core.bigmap.offsetX) / 32),
+            y: Math.floor((py + core.bigmap.offsetY) / 32)
         };
         var pos0 = core.status.stepPostfix[core.status.stepPostfix.length - 1];
         var directionDistance = [
@@ -725,10 +709,10 @@ actions.prototype._sys_onmove = function (x, y, px, py) {
 
 ////// 当点击（触摸）事件放开时 //////
 actions.prototype.onup = function (loc) {
-    var x = parseInt(loc.x / loc.size),
-        y = parseInt(loc.y / loc.size);
-    var px = parseInt(loc.x / core.domStyle.scale),
-        py = parseInt(loc.y / core.domStyle.scale);
+    var x = Math.floor(loc.x / loc.size),
+        y = Math.floor(loc.y / loc.size);
+    var px = Math.floor(loc.x / core.domStyle.scale),
+        py = Math.floor(loc.y / core.domStyle.scale);
     this.doRegisteredAction('onup', x, y, px, py);
 };
 
@@ -962,7 +946,7 @@ actions.prototype._sys_longClick_lockControl = function (x, y, px, py) {
 actions.prototype._getChoicesTopIndex = function (length) {
     return (
         this._HY_ -
-        parseInt((length - 1) / 2) +
+        Math.floor((length - 1) / 2) +
         (core.status.event.ui.offset || 0)
     );
 };
@@ -1546,7 +1530,7 @@ actions.prototype._clickQuickShop = function (x, y) {
     if (this._out(x)) return;
     var topIndex =
         this._HY_ -
-        parseInt(shopIds.length / 2) +
+        Math.floor(shopIds.length / 2) +
         (core.status.event.ui.offset || 0);
     if (y >= topIndex && y < topIndex + shopIds.length) {
         var shopId = shopIds[y - topIndex];
@@ -1625,7 +1609,7 @@ actions.prototype._clickSL = function (x, y) {
             if (core.status.event.data.mode == 'fav')
                 core.ui._drawSLPanel(1, true);
             else {
-                page = parseInt((core.saves.saveIndex - 1) / 5);
+                page = Math.floor((core.saves.saveIndex - 1) / 5);
                 offset = core.saves.saveIndex - 5 * page;
                 core.ui._drawSLPanel(10 * page + offset, true);
             }
@@ -1633,8 +1617,8 @@ actions.prototype._clickSL = function (x, y) {
         return;
     }
     // 点存档名
-    var xLeft = parseInt(core._WIDTH_ / 3),
-        xRight = parseInt((core._WIDTH_ * 2) / 3);
+    var xLeft = Math.floor(core._WIDTH_ / 3),
+        xRight = Math.floor((core._WIDTH_ * 2) / 3);
     var topY1 = 0,
         topY2 = this._HY_;
     if (y >= topY1 && y <= topY1 + 1) {
@@ -1884,8 +1868,8 @@ actions.prototype._clickSwitchs_sounds = function (x, y) {
         var width = choices[selection].width;
         var leftPos = (core._PX_ - width) / 2,
             rightPos = (core._PX_ + width) / 2;
-        var leftGrid = parseInt(leftPos / 32),
-            rightGrid = parseInt(rightPos / 32) - 1;
+        var leftGrid = Math.floor(leftPos / 32),
+            rightGrid = Math.floor(rightPos / 32) - 1;
         core.status.event.selection = selection;
         switch (selection) {
             case 0:
@@ -1977,8 +1961,8 @@ actions.prototype._clickSwitchs_display = function (x, y) {
         var width = choices[selection].width;
         var leftPos = (core._PX_ - width) / 2,
             rightPos = (core._PX_ + width) / 2;
-        var leftGrid = parseInt(leftPos / 32),
-            rightGrid = parseInt(rightPos / 32) - 1;
+        var leftGrid = Math.floor(leftPos / 32),
+            rightGrid = Math.floor(rightPos / 32) - 1;
         core.status.event.selection = selection;
         switch (selection) {
             case 0:
@@ -2113,8 +2097,8 @@ actions.prototype._clickSwitchs_action = function (x, y) {
         var width = choices[selection].width;
         var leftPos = (core._PX_ - width) / 2,
             rightPos = (core._PX_ + width) / 2;
-        var leftGrid = parseInt(leftPos / 32),
-            rightGrid = parseInt(rightPos / 32) - 1;
+        var leftGrid = Math.floor(leftPos / 32),
+            rightGrid = Math.floor(rightPos / 32) - 1;
         core.status.event.selection = selection;
         switch (selection) {
             case 0:
@@ -2789,7 +2773,7 @@ actions.prototype._clickReplay_fromLoad = function () {
     core.status.event.selection = null;
     core.clearUI();
     var saveIndex = core.saves.saveIndex;
-    var page = parseInt((saveIndex - 1) / 5),
+    var page = Math.floor((saveIndex - 1) / 5),
         offset = saveIndex - 5 * page;
     core.ui._drawSLPanel(10 * page + offset);
 };
@@ -2807,7 +2791,7 @@ actions.prototype._clickReplay_replayRemain = function () {
             core.status.event.id = 'replayRemain';
             core.lockControl();
             var saveIndex = core.saves.saveIndex;
-            var page = parseInt((saveIndex - 1) / 5),
+            var page = Math.floor((saveIndex - 1) / 5),
                 offset = saveIndex - 5 * page;
             core.ui._drawSLPanel(10 * page + offset);
         }
@@ -2828,7 +2812,7 @@ actions.prototype._clickReplay_replaySince = function () {
             core.status.event.id = 'replaySince';
             core.lockControl();
             var saveIndex = core.saves.saveIndex;
-            var page = parseInt((saveIndex - 1) / 5),
+            var page = Math.floor((saveIndex - 1) / 5),
                 offset = saveIndex - 5 * page;
             core.ui._drawSLPanel(10 * page + offset);
         }

@@ -535,17 +535,18 @@ utils.prototype.formatDate2 = function (date) {
 
 utils.prototype.formatTime = function (time) {
     return (
-        core.setTwoDigits(parseInt(time / 3600000)) +
+        core.setTwoDigits(Math.floor(time / 3600000)) +
         ':' +
-        core.setTwoDigits(parseInt(time / 60000) % 60) +
+        core.setTwoDigits(Math.floor(time / 60000) % 60) +
         ':' +
-        core.setTwoDigits(parseInt(time / 1000) % 60)
+        core.setTwoDigits(Math.floor(time / 1000) % 60)
     );
 };
 
 ////// 两位数显示 //////
 utils.prototype.setTwoDigits = function (x) {
-    return parseInt(x) < 10 && parseInt(x) >= 0 ? '0' + x : x;
+    const num = Number(x);
+    return num < 10 && num >= 0 ? '0' + x : x;
 };
 
 utils.prototype.formatSize = function (size) {

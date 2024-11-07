@@ -1686,7 +1686,7 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
         Math.round(config.fontSize / 4),
         config.lineHeight - config.fontSize
     );
-    config.topMargin = parseInt(config.lineMargin / 2);
+    config.topMargin = Math.floor(config.lineMargin / 2);
     config.lineMaxHeight = config.lineMargin + config.fontSize;
     config.offsetX = 0;
     config.offsetY = 0;
@@ -2359,10 +2359,10 @@ ui.prototype._drawTextBox_getVerticalPosition = function (
     } else if (titleInfo.image) height = Math.max(height, 90);
 
     var yoffset = 16;
-    var top = parseInt((core._PY_ - height) / 2);
+    var top = Math.floor((core._PY_ - height) / 2);
     switch (posInfo.position) {
         case 'center':
-            top = parseInt((core._PY_ - height) / 2);
+            top = Math.floor((core._PY_ - height) / 2);
             break;
         case 'up':
             if (posInfo.px == null || posInfo.py == null)
@@ -2933,7 +2933,7 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback, ctx) {
         var strokeLeft =
             core._PX_ / 2 +
             (76 * core.status.event.selection - 38) -
-            parseInt(len / 2) -
+            Math.floor(len / 2) -
             5;
 
         if (isWindowSkin) {
@@ -2973,7 +2973,7 @@ ui.prototype._drawConfirmBox_getRect = function (contents, ctx) {
     var max_width = contents.reduce(function (pre, curr) {
         return Math.max(pre, core.calWidth(ctx, curr));
     }, 0);
-    var left = Math.min(core._PX_ / 2 - 40 - parseInt(max_width / 2), 100),
+    var left = Math.min(core._PX_ / 2 - 40 - Math.floor(max_width / 2), 100),
         right = core._PX_ - left;
     var top = core._PY_ / 2 - 68 - (contents.length - 1) * 30,
         bottom = core._PY_ / 2 + 68;
@@ -2995,7 +2995,7 @@ ui.prototype.drawWaiting = function (text) {
     text = core.replaceText(text || '');
     var text_length = core.calWidth('ui', text, this._buildFont(19, true));
     var width = Math.max(text_length + 80, 220),
-        left = core._PX_ / 2 - parseInt(width / 2),
+        left = core._PX_ / 2 - Math.floor(width / 2),
         right = left + width;
     var top = core._PY_ / 2 - 48,
         height = 96,
@@ -3204,7 +3204,7 @@ ui.prototype.drawPagination = function (page, totalPage, y) {
     core.fillText(
         'ui',
         page + ' / ' + totalPage,
-        parseInt((core._PX_ - length) / 2),
+        Math.floor((core._PX_ - length) / 2),
         y * 32 + 19
     );
 
@@ -3434,8 +3434,8 @@ ui.prototype._drawViewMaps_buildData = function (index, x, y) {
     var floorId = core.floorIds[index],
         mw = core.floors[floorId].width,
         mh = core.floors[floorId].height;
-    if (x == null) x = parseInt(mw / 2);
-    if (y == null) y = parseInt(mh / 2);
+    if (x == null) x = Math.floor(mw / 2);
+    if (y == null) y = Math.floor(mh / 2);
     x = core.clamp(x, core._HALF_WIDTH_, mw - core._HALF_WIDTH_ - 1);
     y = core.clamp(y, core._HALF_HEIGHT_, mh - core._HALF_HEIGHT_ - 1);
 
@@ -3473,7 +3473,7 @@ ui.prototype._drawSLPanel = function (index, refresh) {
     if (index == null) index = 1;
     if (index < 0) index = 0;
 
-    var page = parseInt(index / 10),
+    var page = Math.floor(index / 10),
         offset = index % 10;
     var max_page = main.savePages || 30;
     if (core.status.event.data && core.status.event.data.mode == 'fav')
@@ -3617,7 +3617,7 @@ ui.prototype._drawSLPanel_drawRecord = function (
                 'ui',
                 data.hard,
                 x,
-                parseInt(y + 22 + h / 2),
+                Math.floor(y + 22 + h / 2),
                 data.hero.flags.__hardColor__ || 'white',
                 this._buildFont(30, true)
             );
@@ -3695,7 +3695,7 @@ ui.prototype._drawSLPanel_drawRecord = function (
             'ui',
             '空',
             x,
-            parseInt(y + 22 + h / 2),
+            Math.floor(y + 22 + h / 2),
             '#FFFFFF',
             this._buildFont(30, true)
         );
@@ -3729,10 +3729,10 @@ ui.prototype._drawSLPanel_drawRecords = function (n) {
             title = (core.saves.favoriteName[real_id] || name + real_id) + ' ✐';
         }
         var charSize = 32; // 字体占用像素范围
-        var topSpan = parseInt(
+        var topSpan = Math.floor(
             (core._PY_ - charSize - 2 * (charSize * 2 + size * core._PY_)) / 3
         ); // Margin
-        var yTop1 = topSpan + parseInt(charSize / 2) + 8; // 文字的中心
+        var yTop1 = topSpan + Math.floor(charSize / 2) + 8; // 文字的中心
         var yTop2 = yTop1 + charSize * 2 + size * core._PY_ + topSpan;
         if (i < 3) {
             this._drawSLPanel_drawRecord(

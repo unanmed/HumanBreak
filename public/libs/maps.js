@@ -2069,7 +2069,7 @@ maps.prototype._drawAutotile = function (
         yy = block.y;
     var autotile = core.material.images['autotile'][block.event.id];
     status = status || 0;
-    status %= parseInt(autotile.width / 96);
+    status %= Math.floor(autotile.width / 96);
     var done = {};
     var isGrass = function (x, y) {
         if (
@@ -2341,7 +2341,7 @@ maps.prototype._drawAutotile_renderCut = function (
             16,
             16,
             x + ((i % 2) * size) / 2,
-            y + (parseInt(i / 2) * size) / 2,
+            y + (Math.floor(i / 2) * size) / 2,
             size / 2,
             size / 2
         );
@@ -2361,7 +2361,7 @@ maps.prototype._drawAutotile_drawBlockByIndex = function (
     var sx = 16 * ((index - 1) % 6),
         sy = 16 * ~~((index - 1) / 6);
     status = status || 0;
-    status %= parseInt(autotileImg.width / 96);
+    status %= Math.floor(autotileImg.width / 96);
     core.drawImage(
         ctx,
         autotileImg,
@@ -3339,7 +3339,8 @@ maps.prototype.setBlock = function (number, x, y, floorId, noredraw) {
     )
         return;
     if (typeof number == 'string') {
-        if (/^\d+$/.test(number)) number = parseInt(number);
+        const num = Number(number);
+        if (!isNaN(num)) number = num;
         else number = core.getNumberById(number);
     }
 
@@ -3414,7 +3415,8 @@ maps.prototype.animateSetBlock = function (
         return;
     }
     if (typeof number == 'string') {
-        if (/^\d+$/.test(number)) number = parseInt(number);
+        const num = Number(number);
+        if (!isNaN(num)) number = num;
         else number = core.getNumberById(number);
     }
     var originBlock = core.getBlock(x, y, floorId, true);
@@ -3606,7 +3608,8 @@ maps.prototype.setBgFgBlock = function (name, number, x, y, floorId) {
     if (!name || (!name.startsWith('bg') && !name.startsWith('fg'))) return;
 
     if (typeof number == 'string') {
-        if (/^\d+$/.test(number)) number = parseInt(number);
+        const num = Number(number);
+        if (!isNaN(num)) number = num;
         else number = core.getNumberById(number);
     }
 
@@ -4151,7 +4154,7 @@ maps.prototype._animateBlock_doAnimate = function (
     callback
 ) {
     var step = 0,
-        steps = Math.max(parseInt(time / 10), 1);
+        steps = Math.max(Math.floor(time / 10), 1);
     var cb = function () {
         list.forEach(function (t) {
             if (t.blockInfo) core.maps._deleteDetachedBlock(t.canvases);
