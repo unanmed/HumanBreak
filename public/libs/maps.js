@@ -188,24 +188,24 @@ maps.prototype.extractBlocksForUI = function (map, flags) {
 ////// 从ID获得数字 //////
 maps.prototype.getNumberById = function (id) {
     id = this.getIdOfThis(id);
-    core.status.id2number = core.status.id2number || {};
+    core.status.id2number ??= {};
     if (core.status.id2number[id] != null) return core.status.id2number[id];
     return (core.status.id2number[id] = this._getNumberById(id));
 };
 
 maps.prototype._getNumberById = function (id) {
     for (var number in this.blocksInfo) {
-        if ((this.blocksInfo[number] || {}).id == id)
-            return parseInt(number) || 0;
+        if ((this.blocksInfo[number] || {}).id === id)
+            return Number(number) || 0;
     }
     // tilesets
-    if (/^X\d+$/.test(id)) {
-        if (core.icons.getTilesetOffset(id)) return parseInt(id.substring(1));
+    if (id[0] === 'X' && !isNaN(Number(id.slice(1)))) {
+        if (core.icons.getTilesetOffset(id)) return Number(id.slice(1));
     }
     // 特殊ID
-    if (id == 'none') return 0;
-    if (id == 'airwall') return 17;
-    return 0;
+    if (id === 'none') return 0;
+    else if (id === 'airwall') return 17;
+    else return 0;
 };
 
 maps.prototype.getBlockByNumber = function (number) {

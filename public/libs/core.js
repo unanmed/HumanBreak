@@ -697,13 +697,4 @@ core.prototype._forwardFunc = function (name, funcname) {
     );
 };
 
-core.prototype.doFunc = function (func, _this) {
-    if (typeof func == 'string') {
-        throw new Error('Parameter func must be a function.');
-        // func = core.plugin[func];
-        // _this = core.plugin;
-    }
-    return func.apply(_this, Array.prototype.slice.call(arguments, 2));
-};
-
 var core = new core();

@@ -166,20 +166,13 @@ actions.prototype.unregisterAction = function (action, name) {
 };
 
 ////// 执行一个用户交互行为 //////
-actions.prototype.doRegisteredAction = function (action) {
+actions.prototype.doRegisteredAction = function (action, ...params) {
     var actions = this.actions[action];
     if (!actions) return false;
     for (var i = 0; i < actions.length; ++i) {
         try {
-            if (
-                core.doFunc.apply(
-                    core,
-                    [actions[i].func, this].concat(
-                        Array.prototype.slice.call(arguments, 1)
-                    )
-                )
-            )
-                return true;
+            const res = actions[i].func.apply(this, params);
+            if (res) return true;
         } catch (e) {
             console.error(e);
             console.error('ERROR in actions[' + actions[i].name + '].');

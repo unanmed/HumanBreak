@@ -1075,19 +1075,6 @@ interface Core extends Pick<Main, CoreDataFromMain> {
      */
     init(coreData: MainData, callback?: () => void): Promise<void>;
 
-    /**
-     * @deprecated
-     * 在一个上下文下执行函数（真的有人会用这个东西吗？
-     * @param func 要执行的函数
-     * @param _this 执行函数的上下文
-     * @param params 函数的参数
-     */
-    doFunc<F extends (...args: any) => any>(
-        func: F,
-        _this: any,
-        ...params: Parameters<F>
-    ): ReturnType<F>;
-
     _afterLoadResources(callback?: () => void): void;
 }
 

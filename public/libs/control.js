@@ -27,49 +27,11 @@ control.prototype._init = function () {
         this._animationFrame_totalTime
     );
     this.registerAnimationFrame(
-        'autoSave',
-        true,
-        this._animationFrame_autoSave
-    );
-    this.registerAnimationFrame(
         'globalAnimate',
         true,
         this._animationFrame_globalAnimate
     );
-    this.registerAnimationFrame('animate', true, this._animationFrame_animate);
-    this.registerAnimationFrame(
-        'heroMoving',
-        true,
-        this._animationFrame_heroMoving
-    );
-    this.registerAnimationFrame('weather', true, this._animationFrame_weather);
     this.registerAnimationFrame('tip', true, this._animateFrame_tip);
-    // --- 注册系统的天气
-    this.registerWeather(
-        'rain',
-        this._weather_rain,
-        this._animationFrame_weather_rain
-    );
-    this.registerWeather(
-        'snow',
-        this._weather_snow,
-        this._animationFrame_weather_snow
-    );
-    this.registerWeather(
-        'fog',
-        this._weather_fog,
-        this.__animateFrame_weather_image
-    );
-    this.registerWeather(
-        'cloud',
-        this._weather_cloud,
-        this.__animateFrame_weather_image
-    );
-    this.registerWeather(
-        'sun',
-        this._weather_sun,
-        this._animationFrame_weather_sun
-    );
     // --- 注册系统的replay
     this.registerReplayAction('move', this._replayAction_move);
     this.registerReplayAction('item', this._replayAction_item);
@@ -122,7 +84,7 @@ control.prototype._setRequestAnimationFrame = function () {
             if (b.func) {
                 try {
                     if (core.isPlaying() || !b.needPlaying)
-                        core.doFunc(b.func, core.control, timestamp);
+                        b.func.call(core.control, timestamp);
                 } catch (e) {
                     console.error(e);
                     console.error(
@@ -185,11 +147,7 @@ control.prototype._animationFrame_totalTime = function (timestamp) {
     }
 };
 
-control.prototype._animationFrame_autoSave = function (timestamp) {
-    // if (timestamp - core.saves.autosave.time <= 5000) return;
-    // core.control.checkAutosave();
-    // core.saves.autosave.time = timestamp;
-};
+control.prototype._animationFrame_autoSave = function (timestamp) {};
 
 control.prototype._animationFrame_globalAnimate = function (timestamp) {
     if (timestamp - core.animateFrame.globalTime <= core.values.animateSpeed)
@@ -239,201 +197,19 @@ control.prototype._animationFrame_globalAnimate = function (timestamp) {
     core.animateFrame.globalTime = timestamp;
 };
 
-control.prototype._animationFrame_animate = function (timestamp) {
-    if (
-        timestamp - core.animateFrame.animateTime < 50 ||
-        !core.status.animateObjs ||
-        core.status.animateObjs.length == 0
-    )
-        return;
-    core.clearMap('animate');
-    // 更新帧
-    for (var i = 0; i < core.status.animateObjs.length; i++) {
-        var obj = core.status.animateObjs[i];
-        if (obj.index == obj.animate.frames.length) {
-            (function (callback) {
-                setTimeout(function () {
-                    if (callback) callback();
-                });
-            })(obj.callback);
-        }
-    }
-    core.status.animateObjs = core.status.animateObjs.filter(function (obj) {
-        return obj.index < obj.animate.frames.length;
-    });
-    core.status.animateObjs.forEach(function (obj) {
-        if (obj.hero) {
-            core.maps._drawAnimateFrame(
-                'animate',
-                obj.animate,
-                core.status.heroCenter.px,
-                core.status.heroCenter.py,
-                obj.index++
-            );
-        } else {
-            core.maps._drawAnimateFrame(
-                'animate',
-                obj.animate,
-                obj.centerX,
-                obj.centerY,
-                obj.index++
-            );
-        }
-    });
-    core.animateFrame.animateTime = timestamp;
-};
+control.prototype._animationFrame_animate = function (timestamp) {};
 
-control.prototype._animationFrame_heroMoving = function (timestamp) {
-    // Deprecated. See src/plugin/game/heroFourFrames.js
-};
+control.prototype._animationFrame_heroMoving = function (timestamp) {};
 
-control.prototype._animationFrame_weather = function (timestamp) {
-    var weather = core.animateFrame.weather,
-        type = weather.type;
-    if (
-        !core.dymCanvas.weather ||
-        !core.control.weathers[type] ||
-        !core.control.weathers[type].frameFunc
-    )
-        return;
-    try {
-        core.doFunc(
-            core.control.weathers[type].frameFunc,
-            core.control,
-            timestamp,
-            core.animateFrame.weather.level
-        );
-    } catch (e) {
-        console.error(e);
-        console.error('ERROR in weather[' + type + ']：已自动注销该项。');
-        core.unregisterWeather(type);
-    }
-};
+control.prototype._animationFrame_weather = function (timestamp) {};
 
-control.prototype._animationFrame_weather_rain = function (timestamp, level) {
-    if (timestamp - core.animateFrame.weather.time < 30) return;
-    var ctx = core.dymCanvas.weather,
-        ox = core.bigmap.offsetX,
-        oy = core.bigmap.offsetY;
-    core.clearMap('weather');
-    ctx.strokeStyle = 'rgba(174,194,224,0.8)';
-    ctx.lineWidth = 1;
-    ctx.lineCap = 'round';
+control.prototype._animationFrame_weather_rain = function (timestamp, level) {};
 
-    core.animateFrame.weather.nodes.forEach(function (p) {
-        ctx.beginPath();
-        ctx.moveTo(p.x - ox, p.y - oy);
-        ctx.lineTo(p.x + p.l * p.xs - ox, p.y + p.l * p.ys - oy);
-        ctx.stroke();
+control.prototype._animationFrame_weather_snow = function (timestamp, level) {};
 
-        p.x += p.xs;
-        p.y += p.ys;
-        if (p.x > core.bigmap.width * 32 || p.y > core.bigmap.height * 32) {
-            p.x = Math.random() * core.bigmap.width * 32;
-            p.y = -10;
-        }
-    });
+control.prototype.__animateFrame_weather_image = function (timestamp, level) {};
 
-    ctx.fill();
-    core.animateFrame.weather.time = timestamp;
-};
-
-control.prototype._animationFrame_weather_snow = function (timestamp, level) {
-    if (timestamp - core.animateFrame.weather.time < 30) return;
-    var ctx = core.dymCanvas.weather,
-        ox = core.bigmap.offsetX,
-        oy = core.bigmap.offsetY;
-    core.clearMap('weather');
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.beginPath();
-    core.animateFrame.weather.data = core.animateFrame.weather.data || 0;
-    core.animateFrame.weather.data += 0.01;
-
-    var angle = core.animateFrame.weather.data;
-    core.animateFrame.weather.nodes.forEach(function (p) {
-        ctx.moveTo(p.x - ox, p.y - oy);
-        ctx.arc(p.x - ox, p.y - oy, p.r, 0, Math.PI * 2, true);
-        // update
-        p.x += Math.sin(angle) * core.animateFrame.weather.level;
-        p.y += Math.cos(angle + p.d) + 1 + p.r / 2;
-        if (
-            p.x > core.bigmap.width * 32 + 5 ||
-            p.x < -5 ||
-            p.y > core.bigmap.height * 32
-        ) {
-            if (Math.random() > 1 / 3) {
-                p.x = Math.random() * core.bigmap.width * 32;
-                p.y = -10;
-            } else {
-                if (Math.sin(angle) > 0) p.x = -5;
-                else p.x = core.bigmap.width * 32 + 5;
-                p.y = Math.random() * core.bigmap.height * 32;
-            }
-        }
-    });
-    ctx.fill();
-    core.animateFrame.weather.time = timestamp;
-};
-
-control.prototype.__animateFrame_weather_image = function (timestamp, level) {
-    if (timestamp - core.animateFrame.weather.time < 30) return;
-    var node = core.animateFrame.weather.nodes[0];
-    var image = node.image;
-    if (!image) return;
-    core.clearMap('weather');
-    core.setAlpha('weather', node.level / 500);
-    var wind = 1.5;
-    var width = image.width,
-        height = image.height;
-    node.x += node.dx * wind;
-    node.y += (2 * node.dy - 1) * wind;
-    if (node.x + 3 * width <= core._PX_) {
-        node.x += 4 * width;
-        while (node.x > 0) node.x -= width;
-    }
-    node.dy += node.delta;
-    if (node.dy >= 1) {
-        node.delta = -0.001;
-    } else if (node.dy <= 0) {
-        node.delta = 0.001;
-    }
-    if (node.y + 3 * height <= core._PY_) {
-        node.y += 4 * height;
-        while (node.y > 0) node.y -= height;
-    } else if (node.y >= 0) {
-        node.y -= height;
-    }
-    for (var i = 0; i < 3; ++i) {
-        for (var j = 0; j < 3; ++j) {
-            if (
-                node.x + (i + 1) * width <= 0 ||
-                node.x + i * width >= core._PX_ ||
-                node.y + (j + 1) * height <= 0 ||
-                node.y + j * height >= core._PY_
-            )
-                continue;
-            core.drawImage(
-                'weather',
-                image,
-                node.x + i * width,
-                node.y + j * height
-            );
-        }
-    }
-    core.setAlpha('weather', 1);
-    core.animateFrame.weather.time = timestamp;
-};
-
-control.prototype._animationFrame_weather_sun = function (timestamp, level) {
-    if (timestamp - core.animateFrame.weather.time < 30) return;
-    var node = core.animateFrame.weather.nodes[0];
-    var opacity = node.opacity + node.delta;
-    if (opacity > level / 10 + 0.3 || opacity < level / 10 - 0.3)
-        node.delta = -node.delta;
-    node.opacity = opacity;
-    core.setOpacity('weather', core.clamp(opacity, 0, 1));
-    core.animateFrame.weather.time = timestamp;
-};
+control.prototype._animationFrame_weather_sun = function (timestamp, level) {};
 
 control.prototype._animateFrame_tip = function (timestamp) {
     if (core.animateFrame.tip == null) return;
@@ -1859,8 +1635,7 @@ control.prototype.unregisterReplayAction = function (name) {
 control.prototype._doReplayAction = function (action) {
     for (var i in this.replayActions) {
         try {
-            if (core.doFunc(this.replayActions[i].func, this, action))
-                return true;
+            if (this.replayActions[i].func.call(this, action)) return true;
         } catch (e) {
             console.error(e);
             console.error(
@@ -3118,138 +2893,27 @@ control.prototype.getMappedName = function (name) {
 
 ////// 更改天气效果 //////
 control.prototype.setWeather = function (type, level) {
-    // 非雨雪
-    if (type == null || !this.weathers[type]) {
-        core.deleteCanvas('weather');
-        core.animateFrame.weather.type = null;
-        core.animateFrame.weather.nodes = [];
-        return;
-    }
-    if (level == null) level = core.animateFrame.weather.level;
-    level = core.clamp(parseInt(level) || 5, 1, 10);
-    // 当前天气：则忽略
-    if (
-        type == core.animateFrame.weather.type &&
-        level == core.animateFrame.weather.level
-    )
-        return;
-
-    // 计算当前的宽高
-    core.createCanvas('weather', 0, 0, core._PX_, core._PY_, 80);
-    core.setOpacity('weather', 1.0);
-    core.animateFrame.weather.type = type;
-    core.animateFrame.weather.level = level;
-    core.animateFrame.weather.nodes = [];
-    try {
-        core.doFunc(this.weathers[type].initFunc, this, level);
-    } catch (e) {
-        console.error(e);
-        console.error('ERROR in weather[' + type + ']：已自动注销该项。');
-        core.unregisterWeather(type);
-    }
+    // Deprecated. Use WeatherController API instead.
 };
 
 ////// 注册一个天气 //////
 // name为天气类型，如 sun, rain, snow 等
 // initFunc 为设置为此天气时的初始化，接受level参数
 // frameFunc 为该天气下每帧的效果，接受和timestamp参数（从页面加载完毕到当前经过的时间）
-control.prototype.registerWeather = function (name, initFunc, frameFunc) {
-    this.unregisterWeather(name);
-    this.weathers[name] = { initFunc: initFunc, frameFunc: frameFunc };
-};
+control.prototype.registerWeather = function (name, initFunc, frameFunc) {};
 
 ////// 取消注册一个天气 //////
-control.prototype.unregisterWeather = function (name) {
-    delete this.weathers[name];
-    if (core.animateFrame.weather.type == name) {
-        this.setWeather(null);
-    }
-};
+control.prototype.unregisterWeather = function (name) {};
 
-control.prototype._weather_rain = function (level) {
-    var number =
-        level *
-        parseInt(
-            (20 * core.bigmap.width * core.bigmap.height) /
-                (core._WIDTH_ * core._HEIGHT_)
-        );
-    for (var a = 0; a < number; a++) {
-        core.animateFrame.weather.nodes.push({
-            x: Math.random() * core.bigmap.width * 32,
-            y: Math.random() * core.bigmap.height * 32,
-            l: Math.random() * 2.5,
-            xs: -4 + Math.random() * 4 + 2,
-            ys: Math.random() * 10 + 10
-        });
-    }
-};
+control.prototype._weather_rain = function (level) {};
 
-control.prototype._weather_snow = function (level) {
-    var number =
-        level *
-        parseInt(
-            (20 * core.bigmap.width * core.bigmap.height) /
-                (core._WIDTH_ * core._HEIGHT_)
-        );
-    for (var a = 0; a < number; a++) {
-        core.animateFrame.weather.nodes.push({
-            x: Math.random() * core.bigmap.width * 32,
-            y: Math.random() * core.bigmap.height * 32,
-            r: Math.random() * 5 + 1,
-            d: Math.random() * Math.min(level, 200)
-        });
-    }
-};
+control.prototype._weather_snow = function (level) {};
 
-control.prototype._weather_fog = function (level) {
-    if (!core.animateFrame.weather.fog) return;
-    core.animateFrame.weather.nodes = [
-        {
-            image: core.animateFrame.weather.fog,
-            level: 40 * level,
-            x: 0,
-            y: -core._PY_ / 2,
-            dx: -Math.random() * 1.5,
-            dy: Math.random(),
-            delta: 0.001
-        }
-    ];
-};
+control.prototype._weather_fog = function (level) {};
 
-control.prototype._weather_cloud = function (level) {
-    if (!core.animateFrame.weather.cloud) return;
-    core.animateFrame.weather.nodes = [
-        {
-            image: core.animateFrame.weather.cloud,
-            level: 40 * level,
-            x: 0,
-            y: -core._PY_ / 2,
-            dx: -Math.random() * 1.5,
-            dy: Math.random(),
-            delta: 0.001
-        }
-    ];
-};
+control.prototype._weather_cloud = function (level) {};
 
-control.prototype._weather_sun = function (level) {
-    if (!core.animateFrame.weather.sun) return;
-    // 直接绘制
-    core.clearMap('weather');
-    core.drawImage(
-        'weather',
-        core.animateFrame.weather.sun,
-        0,
-        0,
-        core.animateFrame.weather.sun.width,
-        core.animateFrame.weather.sun.height,
-        0,
-        0,
-        core._PX_,
-        core._PY_
-    );
-    core.setOpacity('weather', level / 10);
-    core.animateFrame.weather.nodes = [{ opacity: level / 10, delta: 0.01 }];
-};
+control.prototype._weather_sun = function (level) {};
 
 ////// 更改画面色调 //////
 control.prototype.setCurtain = function (color, time, moveMode, callback) {
@@ -3466,46 +3130,7 @@ control.prototype.updateStatusBar_update = function () {
     // see src/plugin/game/ui.js
 };
 
-control.prototype._updateStatusBar_setToolboxIcon = function () {
-    if (core.isReplaying()) {
-        core.statusBar.image.book.src = core.status.replay.pausing
-            ? core.statusBar.icons.play.src
-            : core.statusBar.icons.pause.src;
-        core.statusBar.image.book.style.opacity = 1;
-        core.statusBar.image.fly.src = core.statusBar.icons.stop.src;
-        core.statusBar.image.fly.style.opacity = 1;
-        core.statusBar.image.toolbox.src = core.statusBar.icons.rewind.src;
-        core.statusBar.image.keyboard.src = core.statusBar.icons.book.src;
-        core.statusBar.image.shop.src = core.statusBar.icons.floor.src;
-        core.statusBar.image.save.src = core.statusBar.icons.speedDown.src;
-        core.statusBar.image.save.style.opacity = 1;
-        core.statusBar.image.load.src = core.statusBar.icons.speedUp.src;
-        core.statusBar.image.settings.src = core.statusBar.icons.save.src;
-    } else {
-        core.statusBar.image.book.src = core.statusBar.icons.book.src;
-        core.statusBar.image.book.style.opacity = core.hasItem('book')
-            ? 1
-            : 0.3;
-        if (!core.flags.equipboxButton) {
-            core.statusBar.image.fly.src = core.statusBar.icons.fly.src;
-            core.statusBar.image.fly.style.opacity = core.hasItem('fly')
-                ? 1
-                : 0.3;
-        } else {
-            core.statusBar.image.fly.src = core.statusBar.icons.equipbox.src;
-            core.statusBar.image.fly.style.opacity = 1;
-        }
-        core.statusBar.image.toolbox.src = core.statusBar.icons.toolbox.src;
-        core.statusBar.image.keyboard.src = core.statusBar.icons.keyboard.src;
-        core.statusBar.image.shop.src = core.statusBar.icons.shop.src;
-        core.statusBar.image.save.src = core.statusBar.icons.save.src;
-        core.statusBar.image.save.style.opacity = core.hasFlag('__forbidSave__')
-            ? 0.3
-            : 1;
-        core.statusBar.image.load.src = core.statusBar.icons.load.src;
-        core.statusBar.image.settings.src = core.statusBar.icons.settings.src;
-    }
-};
+control.prototype._updateStatusBar_setToolboxIcon = function () {};
 
 control.prototype.showStatusBar = function () {
     // see src/plugin/game/ui.js
@@ -3540,7 +3165,7 @@ control.prototype.unregisterResize = function (name) {
 control.prototype._doResize = function (obj) {
     for (var i in this.resizes) {
         try {
-            if (core.doFunc(this.resizes[i].func, this, obj)) return true;
+            if (this.resizes[i].func.call(this, obj)) return true;
         } catch (e) {
             console.error(e);
             console.error(

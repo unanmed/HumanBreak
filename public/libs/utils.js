@@ -644,17 +644,23 @@ utils.prototype.encodeRoute = function (route, compress = true) {
         cnt = 0;
 
     route.forEach(function (t) {
-        if (t == 'up' || t == 'down' || t == 'left' || t == 'right') {
-            if (t != lastMove && cnt > 0) {
-                ans += lastMove.substring(0, 1).toUpperCase();
+        if (t === 'up' || t === 'down' || t === 'left' || t === 'right') {
+            if (t !== lastMove && cnt > 0) {
+                const char = lastMove[0];
+                if (char) {
+                    ans += char.toUpperCase();
+                }
                 if (cnt > 1) ans += cnt;
                 cnt = 0;
+                lastMove = t;
             }
-            lastMove = t;
             cnt++;
         } else {
             if (cnt > 0) {
-                ans += lastMove.substring(0, 1).toUpperCase();
+                const char = lastMove[0];
+                if (char) {
+                    ans += char.toUpperCase();
+                }
                 if (cnt > 1) ans += cnt;
                 cnt = 0;
             }
@@ -662,7 +668,7 @@ utils.prototype.encodeRoute = function (route, compress = true) {
         }
     });
     if (cnt > 0) {
-        ans += lastMove.substring(0, 1).toUpperCase();
+        ans += lastMove[0].toUpperCase();
         if (cnt > 1) ans += cnt;
     }
     if (!compress) {
@@ -674,33 +680,32 @@ utils.prototype.encodeRoute = function (route, compress = true) {
 
 utils.prototype._encodeRoute_id2number = function (id) {
     var number = core.maps.getNumberById(id);
-    return number == 0 ? id : number;
+    return number === 0 ? id : number;
 };
 
 utils.prototype._encodeRoute_encodeOne = function (t) {
-    if (t.indexOf('item:') == 0)
-        return 'I' + this._encodeRoute_id2number(t.substring(5)) + ':';
-    else if (t.indexOf('unEquip:') == 0) return 'u' + t.substring(8);
-    else if (t.indexOf('equip:') == 0)
-        return 'e' + this._encodeRoute_id2number(t.substring(6)) + ':';
-    else if (t.indexOf('saveEquip:') == 0) return 's' + t.substring(10);
-    else if (t.indexOf('loadEquip:') == 0) return 'l' + t.substring(10);
-    else if (t.indexOf('fly:') == 0) return 'F' + t.substring(4) + ':';
-    else if (t == 'choices:none') return 'c';
-    else if (t.indexOf('choices:') == 0) return 'C' + t.substring(8);
-    else if (t.indexOf('shop:') == 0) return 'S' + t.substring(5) + ':';
-    else if (t == 'turn') return 'T';
-    else if (t.indexOf('turn:') == 0)
-        return 't' + t.substring(5).substring(0, 1).toUpperCase() + ':';
-    else if (t == 'getNext') return 'G';
-    else if (t == 'input:none') return 'p';
-    else if (t.indexOf('input:') == 0) return 'P' + t.substring(6);
-    else if (t.indexOf('input2:') == 0) return 'Q' + t.substring(7) + ':';
-    else if (t == 'no') return 'N';
-    else if (t.indexOf('move:') == 0) return 'M' + t.substring(5);
-    else if (t.indexOf('key:') == 0) return 'K' + t.substring(4);
-    else if (t.indexOf('click:') == 0) return 'k' + t.substring(6);
-    else if (t.indexOf('random:') == 0) return 'X' + t.substring(7);
+    if (t.startsWith('item:'))
+        return 'I' + this._encodeRoute_id2number(t.slice(5)) + ':';
+    else if (t.startsWith('unEquip:')) return 'u' + t.slice(8);
+    else if (t.startsWith('equip:'))
+        return 'e' + this._encodeRoute_id2number(t.slice(6)) + ':';
+    else if (t.startsWith('saveEquip:')) return 's' + t.slice(10);
+    else if (t.startsWith('loadEquip:')) return 'l' + t.slice(10);
+    else if (t.startsWith('fly:')) return 'F' + t.slice(4) + ':';
+    else if (t === 'choices:none') return 'c';
+    else if (t.startsWith('choices:')) return 'C' + t.slice(8);
+    else if (t.startsWith('shop:')) return 'S' + t.slice(5) + ':';
+    else if (t === 'turn') return 'T';
+    else if (t.startsWith('turn:')) return 't' + t[5].toUpperCase() + ':';
+    else if (t === 'getNext') return 'G';
+    else if (t === 'input:none') return 'p';
+    else if (t.startsWith('input:')) return 'P' + t.slice(6);
+    else if (t.startsWith('input2:')) return 'Q' + t.slice(7) + ':';
+    else if (t === 'no') return 'N';
+    else if (t.startsWith('move:')) return 'M' + t.slice(5);
+    else if (t.startsWith('key:')) return 'K' + t.slice(4);
+    else if (t.startsWith('click:')) return 'k' + t.slice(6);
+    else if (t.startsWith('random:')) return 'X' + t.slice(7);
     return '(' + t + ')';
 };
 
@@ -1350,22 +1355,19 @@ utils.prototype.hashCode = function (obj) {
 };
 
 utils.prototype.same = function (a, b) {
-    if (a == null && b == null) return true;
-    if (a == null || b == null) return false;
     if (a === b) return true;
+    if (a == null || b == null) return false;
     if (a instanceof Array && b instanceof Array) {
-        if (a.length != b.length) return false;
+        if (a.length !== b.length) return false;
         for (var i = 0; i < a.length; i++) {
             if (!this.same(a[i], b[i])) return false;
         }
         return true;
     }
     if (a instanceof Object && b instanceof Object) {
-        var obj = {};
-        for (var i in a) obj[i] = true;
-        for (var i in b) obj[i] = true;
-        for (var i in obj) {
-            if (!this.same(a[i], b[i])) return false;
+        const toCompare = new Set([...Object.keys(a), ...Object.keys(b)]);
+        for (const key of toCompare) {
+            if (!this.same(a[key], b[key])) return false;
         }
         return true;
     }

@@ -85,7 +85,7 @@ export class SoundEffect extends AudioPlayer {
      * @returns 音频的唯一id
      */
     playSE() {
-        if (SoundEffect.disable) return;
+        if (SoundEffect.disable || this.volumn === 0) return;
         const node = this.play();
         if (!node) return;
         const index = SoundEffect.playIndex++;

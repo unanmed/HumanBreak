@@ -2138,10 +2138,6 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
                 '!doc': '初始化core',
                 '!type': 'fn(coreData: ?, callback: fn())'
             },
-            doFunc: {
-                '!doc': '执行一个函数；如果函数名是字符串则转发到插件中',
-                '!type': 'fn(func: name|fn(), _this?: ?)'
-            },
             control: {
                 '!doc': '负责整个游戏的核心控制系统，分为如下几个部分：<br/>- requestAnimationFrame相关<br/>- 标题界面，开始和重新开始游戏<br/>- 自动寻路和人物行走相关<br/>- 画布、位置、阻激夹域、显伤等相关<br/>- 录像的回放相关<br/>- 存读档，自动存档，同步存档等相关<br/>- 人物属性和状态、位置、变量等相关<br/>- 天气、色调、音乐和音效的播放<br/>- 状态栏和工具栏相关<br/>- 界面resize相关',
                 showStatusBar: {

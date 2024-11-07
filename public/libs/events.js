@@ -357,7 +357,7 @@ events.prototype.doSystemEvent = function (type, data, callback) {
     core.clearRouteFolding();
     if (this.systemEvents[type]) {
         try {
-            return core.doFunc(this.systemEvents[type], this, data, callback);
+            return this.systemEvents[type].call(this, data, callback);
         } catch (e) {
             console.error(e);
             console.error('ERROR in systemEvents[' + type + ']');
@@ -1035,7 +1035,7 @@ events.prototype.doEvent = function (data, x, y, prefix) {
     var type = data.type;
     if (this.actions[type]) {
         try {
-            return core.doFunc(this.actions[type], this, data, x, y, prefix);
+            return this.actions[type].call(this, data, x, y, prefix);
         } catch (e) {
             console.error(e);
             console.error('ERROR in actions[' + type + ']');

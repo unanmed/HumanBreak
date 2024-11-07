@@ -159,6 +159,7 @@ export class Portal extends Sprite {
     }
 
     private renderPortal(canvas: MotaOffscreenCanvas2D) {
+        if (this.renderable.size === 0) return;
         const { ctx } = canvas;
 
         const p = this.particleSetting.value;
