@@ -33,24 +33,43 @@ utils.prototype._init = function () {
 
 ////// 将文字中的${和}（表达式）进行替换 //////
 utils.prototype.replaceText = function (text, prefix) {
-    if (typeof text != 'string') return text;
-    var index = text.indexOf('${');
-    if (index < 0) return text;
-    var cnt = 0,
-        curr = index;
-    while (++curr < text.length) {
-        if (text.charAt(curr) == '{') cnt++;
-        if (text.charAt(curr) == '}') cnt--;
-        if (cnt == 0) break;
+    if (typeof text !== 'string') return text;
+    let pointer = -1;
+    let res = '';
+    let expression = '';
+    let blockDepth = 0;
+    let inExpression = false;
+
+    while (++pointer < text.length) {
+        const char = text[pointer];
+
+        if (inExpression) {
+            if (char === '}') {
+                blockDepth--;
+            } else if (char === '{') {
+                blockDepth++;
+            }
+            if (blockDepth === 0) {
+                inExpression = false;
+                res += String(core.utils.calValue(expression, prefix));
+                expression = '';
+            } else {
+                expression += char;
+            }
+            continue;
+        }
+
+        if (char === '$' && text[pointer + 1] === '{') {
+            pointer++;
+            inExpression = true;
+            blockDepth++;
+            continue;
+        }
+
+        res += char;
     }
-    if (cnt != 0) return text;
-    var value = core.calValue(text.substring(index + 2, curr), prefix);
-    if (value == null) value = '';
-    return (
-        text.substring(0, index) +
-        value +
-        core.replaceText(text.substring(curr + 1), prefix)
-    );
+
+    return res;
 };
 
 utils.prototype.replaceValue = function (value) {
