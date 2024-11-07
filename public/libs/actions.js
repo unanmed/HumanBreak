@@ -205,32 +205,7 @@ actions.prototype._sys_checkReplay = function () {
 
 ////// 检查左手模式
 actions.prototype.__checkLeftHandPrefer = function (e) {
-    if (!core.flags.leftHandPrefer) return e;
-    var map = {
-        87: 38, // W -> up
-        83: 40, // S -> down
-        65: 37, // A -> left
-        68: 39, // D -> right
-        73: 87, // I -> W
-        74: 65, // J -> A
-        75: 83, // K -> S
-        76: 68 // L -> D
-    };
-    var newEvent = {};
-    for (var one in e) {
-        if (!(e[one] instanceof Function)) {
-            newEvent[one] = e[one];
-        }
-    }
-    ['stopPropagation', 'stopImmediatePropagation', 'preventDefault'].forEach(
-        function (one) {
-            newEvent[one] = function () {
-                return e[one]();
-            };
-        }
-    );
-    newEvent.keyCode = map[e.keyCode] || e.keyCode;
-    return newEvent;
+    return e;
 };
 
 ////// 按下某个键时 //////
@@ -240,20 +215,8 @@ actions.prototype.onkeyDown = function (e) {
 
 actions.prototype._sys_onkeyDown = function (e) {
     core.status.holdingKeys = core.status.holdingKeys || [];
-    var isArrow = { 37: true, 38: true, 39: true, 40: true }[e.keyCode];
-    if (isArrow && !core.status.lockControl) {
-        for (var ii = 0; ii < core.status.holdingKeys.length; ii++) {
-            if (core.status.holdingKeys[ii] === e.keyCode) {
-                return;
-            }
-        }
-        if (e.preventDefault) e.preventDefault();
-        core.status.holdingKeys.push(e.keyCode);
-        this.pressKey(e.keyCode);
-    } else {
-        if (e.keyCode == 17) core.status.ctrlDown = true;
-        this.keyDown(e.keyCode);
-    }
+    if (e.keyCode == 17) core.status.ctrlDown = true;
+    this.keyDown(e.keyCode);
 };
 
 ////// 放开某个键时 //////
