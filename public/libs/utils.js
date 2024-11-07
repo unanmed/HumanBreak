@@ -25,6 +25,35 @@ function utils() {
         rightup: { x: 1, y: -1 },
         rightdown: { x: 1, y: 1 }
     };
+    const tokenSplit = new Set([
+        ' ',
+        '(',
+        ')',
+        '<',
+        '>',
+        ',',
+        '.',
+        '/',
+        "'",
+        '"',
+        '[',
+        ']',
+        '{',
+        '}',
+        '-',
+        '+',
+        '=',
+        '!',
+        '`',
+        '~',
+        ';',
+        ':',
+        '&',
+        '*',
+        '^',
+        '|',
+        '%'
+    ]);
 }
 
 utils.prototype._init = function () {
@@ -34,13 +63,14 @@ utils.prototype._init = function () {
 ////// 将文字中的${和}（表达式）进行替换 //////
 utils.prototype.replaceText = function (text, prefix) {
     if (typeof text !== 'string') return text;
+    const length = text.length;
     let pointer = -1;
     let res = '';
     let expression = '';
     let blockDepth = 0;
     let inExpression = false;
 
-    while (++pointer < text.length) {
+    while (++pointer < length) {
         const char = text[pointer];
 
         if (inExpression) {
@@ -73,62 +103,60 @@ utils.prototype.replaceText = function (text, prefix) {
 };
 
 utils.prototype.replaceValue = function (value) {
+    if (typeof value !== 'string') return value;
     if (
-        typeof value == 'string' &&
-        (value.indexOf(':') >= 0 ||
-            value.indexOf('flag：') >= 0 ||
-            value.indexOf('global：') >= 0)
+        value.includes(':') ||
+        value.includes('flag：') ||
+        value.includes('global：')
     ) {
-        if (value.indexOf('status:') >= 0)
+        if (value.includes('status:'))
             value = value.replace(
                 /status:([a-zA-Z0-9_]+)/g,
                 "core.getStatus('$1')"
             );
-        if (value.indexOf('buff:') >= 0)
+        if (value.includes('buff:'))
             value = value.replace(
                 /buff:([a-zA-Z0-9_]+)/g,
                 "core.getBuff('$1')"
             );
-        if (value.indexOf('item:') >= 0)
+        if (value.includes('item:'))
             value = value.replace(
                 /item:([a-zA-Z0-9_]+)/g,
                 "core.itemCount('$1')"
             );
-        if (value.indexOf('flag:') >= 0 || value.indexOf('flag：') >= 0)
+        if (value.includes('flag:') || value.includes('flag：'))
             value = value.replace(
                 /flag[:：]([a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]+)/g,
                 "core.getFlag('$1', 0)"
             );
-        //if (value.indexOf('switch:' >= 0))
-        //    value = value.replace(/switch:([a-zA-Z0-9_]+)/g, "core.getFlag('" + (prefix || ":f@x@y") + "@$1', 0)");
-        if (value.indexOf('global:') >= 0 || value.indexOf('global：') >= 0)
+        if (value.includes('global:') || value.includes('global：'))
             value = value.replace(
                 /global[:：]([a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]+)/g,
                 "core.getGlobal('$1', 0)"
             );
-        if (value.indexOf('enemy:') >= 0)
+        if (value.includes('enemy:'))
             value = value.replace(
                 /enemy:([a-zA-Z0-9_]+)[\.:]([a-zA-Z0-9_]+)/g,
                 "core.material.enemys['$1'].$2"
             );
-        if (value.indexOf('blockId:') >= 0)
+        if (value.includes('blockId:'))
             value = value.replace(
                 /blockId:(\d+),(\d+)/g,
                 'core.getBlockId($1, $2)'
             );
-        if (value.indexOf('blockNumber:') >= 0)
+        if (value.includes('blockNumber:'))
             value = value.replace(
                 /blockNumber:(\d+),(\d+)/g,
                 'core.getBlockNumber($1, $2)'
             );
-        if (value.indexOf('blockCls:') >= 0)
+        if (value.includes('blockCls:'))
             value = value.replace(
                 /blockCls:(\d+),(\d+)/g,
                 'core.getBlockCls($1, $2)'
             );
-        if (value.indexOf('equip:') >= 0)
+        if (value.includes('equip:'))
             value = value.replace(/equip:(\d)/g, 'core.getEquip($1)');
-        if (value.indexOf('temp:') >= 0)
+        if (value.includes('temp:'))
             value = value.replace(
                 /temp:([a-zA-Z0-9_]+)/g,
                 "core.getFlag('@temp@$1', 0)"
