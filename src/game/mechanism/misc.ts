@@ -14,7 +14,7 @@ export namespace MiscData {
  * 永夜/极昼
  */
 export namespace NightSpecial {
-    let nightMap = new Map<FloorIds, number>();
+    const nightMap = new Map<FloorIds, number>();
 
     export function getNight(floor: FloorIds) {
         return nightMap.get(floor) ?? 0;
@@ -25,16 +25,105 @@ export namespace NightSpecial {
         nightMap.set(floor, num + value);
     }
 
+    export function clearNight(floors: Iterable<FloorIds>) {
+        for (const floor of floors) {
+            nightMap.delete(floor);
+        }
+    }
+
     export function saveNight() {
         return nightMap.entries();
     }
 
-    export function loadNight(night: IterableIterator<[FloorIds, number]>) {
-        nightMap = new Map(night);
+    export function loadNight(night: Iterable<[FloorIds, number]>) {
+        nightMap.clear();
+        for (const [floor, num] of night) {
+            nightMap.set(floor, num);
+        }
     }
 
     export function getAll() {
         return nightMap;
+    }
+}
+
+export namespace HeroSkill {
+    export const enum Skill {
+        None,
+        /** 断灭之刃 */
+        Blade,
+        /** 铸剑为盾 */
+        Shield,
+        /** 跳跃 */
+        Jump
+    }
+
+    export const Blade = Skill.Blade;
+    export const Shield = Skill.Shield;
+    export const Jump = Skill.Jump;
+
+    interface SkillSave {
+        autoSkill: boolean;
+        learned: Skill[];
+    }
+
+    const learned = new Set<Skill>();
+    let autoSkill = true;
+    let enabled: Skill = Skill.None;
+
+    export function setAutoSkill(auto: boolean) {
+        autoSkill = auto;
+    }
+
+    export function getAutoSkill() {
+        return autoSkill;
+    }
+
+    export function learnedSkill(skill: Skill) {
+        return learned.has(skill);
+    }
+
+    export function learnSkill(skill: Skill) {
+        learned.add(skill);
+    }
+
+    export function forgetSkill(skill: Skill) {
+        learned.delete(skill);
+    }
+
+    export function saveSkill(): SkillSave {
+        return { autoSkill, learned: [...learned] };
+    }
+
+    export function loadSkill(skills: SkillSave) {
+        learned.clear();
+        for (const skill of skills.learned) {
+            learned.add(skill);
+        }
+        autoSkill = skills.autoSkill;
+    }
+
+    export function getAll() {
+        return learned;
+    }
+
+    export function toggleSkill(skill: Skill) {
+        if (!learned.has(skill)) return;
+        if (enabled !== skill) enabled = skill;
+        else enabled = Skill.None;
+    }
+
+    export function enableSkill(skill: Skill) {
+        if (!learned.has(skill)) return;
+        enabled = skill;
+    }
+
+    export function disableSkill() {
+        enabled = Skill.None;
+    }
+
+    export function getEnabled() {
+        return enabled;
     }
 }
 

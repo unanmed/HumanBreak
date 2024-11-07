@@ -1,3 +1,5 @@
+import { HeroSkill } from '@/game/mechanism/misc';
+
 let levels: number[] = [];
 
 export type Chapter = 'chapter1' | 'chapter2';
@@ -263,7 +265,7 @@ export function upgradeSkill(skill: number) {
             core.status.hero.mana += 5;
             break;
         case 2: // 断灭之刃
-            core.setFlag('bladeOn', true);
+            HeroSkill.learnSkill(HeroSkill.Blade);
             break;
         case 3: // 坚韧 +2防御
             core.status.hero.def += 2;
@@ -287,7 +289,7 @@ export function upgradeSkill(skill: number) {
             core.addBuff('def', 0.01);
             break;
         case 10: // 铸剑为盾
-            core.setFlag('shieldOn', true);
+            HeroSkill.learnSkill(HeroSkill.Shield);
             break;
         case 11: // 学习
             core.status.hero.magicDef += 100;

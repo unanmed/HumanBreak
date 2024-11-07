@@ -138,11 +138,13 @@ watch(width, n => (updateStatus.value = !updateStatus.value));
 watch(height, n => (updateStatus.value = !updateStatus.value));
 watch(fontSize, n => (main.style.fontSize = `${isMobile ? n * 1.5 : n}%`));
 
+const HeroSkill = Mota.require('module', 'Mechanism').HeroSkill;
+
 const hero = shallowReactive<Partial<HeroStatus>>({});
 const keys = shallowReactive<number[]>([]);
 const floor = ref<string>();
 const lvName = ref<string>();
-const skill = ref<string>(flags.autoSkill ? '自动切换' : '无');
+const skill = ref<string>(HeroSkill.getAutoSkill() ? '自动切换' : '无');
 const up = ref(0);
 const spring = ref<number>();
 const skillOpened = ref(core.getFlag('chapter', 0) > 0);
@@ -150,7 +152,7 @@ const jumpCnt = ref<number>();
 /**
  * 要展示的勇士属性
  */
-const toShow: (keyof NumbericHeroStatus)[] = [
+const toShow: (keyof HeroStatus)[] = [
     'hp', // 生命
     'atk', // 攻击
     'def', // 防御
@@ -177,17 +179,24 @@ function update() {
     keys[2] = core.itemCount('redKey');
     floor.value = core.status.thisMap?.title;
     lvName.value = core.getLvName(hero.lv);
-    if (flags.autoSkill) {
+
+    if (HeroSkill.getAutoSkill()) {
         skill.value = '自动切换';
     } else {
-        if (flags.blade && flags.bladeOn) {
-            skill.value = '断灭之刃';
-        } else if (flags.shield && flags.shieldOn) {
-            skill.value = '铸剑为盾';
-        } else {
-            skill.value = '无';
+        const enabled = HeroSkill.getEnabled();
+        switch (enabled) {
+            case HeroSkill.Blade:
+                skill.value = '断灭之刃';
+                break;
+            case HeroSkill.Shield:
+                skill.value = '铸剑为盾';
+                break;
+            default:
+                skill.value = '无';
+                break;
         }
     }
+
     up.value = core.getNextLvUpNeed() ?? 0;
     if (core.hasFlag('spring')) {
         spring.value = 50 - (flags.springCount ?? 0);
@@ -195,8 +204,9 @@ function update() {
         spring.value = void 0;
     }
     skillOpened.value = core.getFlag('chapter', 0) > 0;
+
     jumpCnt.value =
-        flags.skill2 &&
+        HeroSkill.learnedSkill(HeroSkill.Jump) &&
         !Mota.Plugin.require('skill_g').jumpIgnoreFloor.has(core.status.floorId)
             ? 3 - (flags[`jump_${core.status.floorId}`] ?? 0)
             : void 0;

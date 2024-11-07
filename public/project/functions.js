@@ -261,6 +261,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     values[key] = core.clone(core.values[key]);
             }
 
+            const { NightSpecial, HeroSkill } = Mota.require(
+                'module',
+                'Mechanism'
+            );
+
             // 要存档的内容
             var data = {
                 floorId: core.status.floorId,
@@ -273,12 +278,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 guid: core.getGuid(),
                 time: new Date().getTime(),
                 skills: Mota.Plugin.require('skillTree_g').saveSkillTree(),
-                night: [
-                    ...Mota.require(
-                        'module',
-                        'Mechanism'
-                    ).NightSpecial.saveNight()
-                ]
+                night: [...NightSpecial.saveNight()],
+                skill: HeroSkill.saveSkill()
             };
 
             return data;
@@ -323,18 +324,47 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             core.setFlag('__fromLoad__', true);
 
             Mota.Plugin.require('skillTree_g').loadSkillTree(data.skills);
-            const Night = Mota.require('module', 'Mechanism').NightSpecial;
+            const { NightSpecial, HeroSkill } = Mota.require(
+                'module',
+                'Mechanism'
+            );
 
             if (!data.night) {
                 // 兼容旧版
-                Night.loadNight([]);
+                NightSpecial.loadNight([]);
                 for (const [key, value] of Object.entries(data.hero.flags)) {
                     if (key.startsWith('night_')) {
                         const [, floorId] = key.split('_');
-                        Night.addNight(floorId, value);
+                        NightSpecial.addNight(floorId, value);
                         delete data.hero.flags[key];
                     }
                 }
+            }
+
+            if (!data.skill) {
+                HeroSkill.loadSkill({ autoSkill: true, learned: [] });
+                if (flags.bladeOn) {
+                    HeroSkill.learnSkill(HeroSkill.Blade);
+                    if (flags.blade) {
+                        HeroSkill.enableSkill(HeroSkill.Blade);
+                    }
+                    delete flags.bladeOn;
+                    delete flags.blade;
+                }
+                if (flags.shieldOn) {
+                    HeroSkill.learnSkill(HeroSkill.Shield);
+                    if (flags.shield) {
+                        HeroSkill.enableSkill(HeroSkill.Shield);
+                    }
+                    delete flags.shieldOn;
+                    delete flags.shield;
+                }
+                if (flags.skill2) {
+                    HeroSkill.learnSkill(HeroSkill.Jump);
+                    delete flags.skill2;
+                }
+                HeroSkill.setAutoSkill(!!flags.autoSkill);
+                delete flags.autoSkill;
             }
 
             // 切换到对应的楼层

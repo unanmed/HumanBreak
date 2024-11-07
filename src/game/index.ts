@@ -35,7 +35,8 @@ Mota.register('var', 'loading', loading);
 Mota.register('module', 'Mechanism', {
     BluePalace: miscMechanism.BluePalace,
     NightSpecial: miscMechanism.NightSpecial,
-    MiscData: miscMechanism.MiscData
+    MiscData: miscMechanism.MiscData,
+    HeroSkill: miscMechanism.HeroSkill
 });
 Mota.register('module', 'State', {
     ItemState,

@@ -1,5 +1,7 @@
 // @ts-nocheck
 
+import { HeroSkill } from '@/game/mechanism/misc';
+
 // 所有的主动技能效果
 var ignoreInJump = {
     event: ['X20007', 'X20001', 'X20006', 'X20014', 'X20010', 'X20007'],
@@ -56,7 +58,7 @@ export function jumpSkill() {
     if (jumpIgnoreFloor.has(core.status.floorId) || flags.onChase) {
         return core.drawTip('当前楼层无法使用该技能');
     }
-    if (!flags.skill2) return;
+    if (!HeroSkill.learnedSkill(HeroSkill.Jump)) return;
     if (!flags['jump_' + core.status.floorId])
         flags['jump_' + core.status.floorId] = 0;
     if (core.status.floorId == 'MT14') {

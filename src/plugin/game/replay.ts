@@ -1,3 +1,4 @@
+import { HeroSkill } from '@/game/mechanism/misc';
 import { upgradeSkill } from './skillTree';
 
 const replayableSettings = ['autoSkill'];
@@ -99,15 +100,22 @@ export function init() {
     });
 
     function skillAction(skill: string) {
+        let toEmit = skill;
+
+        // 兼容性处理
         if (skill === '1') {
-            if (flags.autoSkill || !flags.bladeOn) return true;
-            if (flags.blade) flags.blade = false;
-            else flags.blade = true;
+            toEmit = 'Blade';
         } else if (skill === '2') {
+            toEmit = 'Jump';
+        } else if (skill === '3') {
+            toEmit = 'Shield';
+        }
+
+        if (toEmit === 'Jump') {
             if (
-                !flags.chase &&
+                !flags.onChase &&
                 !core.status.floorId.startsWith('tower') &&
-                flags.skill2
+                HeroSkill.learnedSkill(HeroSkill.Jump)
             ) {
                 Mota.Plugin.require('skill_g').jumpSkill();
             } else {
@@ -115,10 +123,22 @@ export function init() {
                     core.useItem('pickaxe');
                 }
             }
-        } else if (skill === '3') {
-            if (flags.autoSkill || !flags.shieldOn) return true;
-            if (flags.shield) flags.shield = false;
-            else flags.shield = true;
+        } else {
+            if (HeroSkill.getAutoSkill()) {
+                core.replay();
+                core.updateStatusBar();
+                return true;
+            }
+            let num = HeroSkill.Skill.None;
+            switch (toEmit) {
+                case 'Blade':
+                    num = HeroSkill.Blade;
+                    break;
+                case 'Shield':
+                    num = HeroSkill.Shield;
+                    break;
+            }
+            HeroSkill.toggleSkill(num);
         }
         core.updateStatusBar();
         core.replay();

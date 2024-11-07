@@ -1,7 +1,7 @@
 import { DamageEnemy, ensureFloorDamage, getSingleEnemy } from './damage';
 import { findDir, has } from '../../plugin/game/utils';
 import { hook, loading } from '../game';
-import { NightSpecial } from '../mechanism/misc';
+import { HeroSkill, NightSpecial } from '../mechanism/misc';
 
 export interface CurrentEnemy {
     enemy: DamageEnemy;
@@ -225,12 +225,7 @@ function init() {
             '打败 ' + enemy.enemy.name + '，金币+' + money + '，经验+' + exp;
         core.drawTip(hint, enemy.id);
 
-        if (core.getFlag('bladeOn') && core.getFlag('blade')) {
-            core.setFlag('blade', false);
-        }
-        if (core.getFlag('shieldOn') && core.getFlag('shield')) {
-            core.setFlag('shield', false);
-        }
+        HeroSkill.disableSkill();
 
         // 事件的处理
         const todo: MotaEvent = [];

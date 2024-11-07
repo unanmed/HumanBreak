@@ -527,25 +527,26 @@ gameKey
         core.actions._clickGameInfo_openComments();
     })
     .realize('skill1', () => {
-        if (!flags.bladeOn) return;
-        if (flags.autoSkill) {
+        const HeroSkill = Mota.require('module', 'Mechanism').HeroSkill;
+        if (!HeroSkill.learnedSkill(HeroSkill.Blade)) return;
+        if (HeroSkill.getAutoSkill()) {
             tip('error', '已开启自动切换技能！');
             return;
         }
         core.playSound('光标移动');
-        if (flags.blade) flags.blade = false;
-        else flags.blade = true;
-        core.status.route.push('skill:1');
+        HeroSkill.toggleSkill(HeroSkill.Blade);
+        core.status.route.push('skill:Blade');
         core.updateStatusBar();
     })
     .realize('skill2', () => {
+        const HeroSkill = Mota.require('module', 'Mechanism').HeroSkill;
         if (
-            !flags.chase &&
+            !flags.onChase &&
             !core.status.floorId.startsWith('tower') &&
-            flags.skill2
+            HeroSkill.learnedSkill(HeroSkill.Jump)
         ) {
             Mota.Plugin.require('skill_g').jumpSkill();
-            core.status.route.push('skill:2');
+            core.status.route.push('skill:Jump');
         } else {
             if (core.hasItem('pickaxe')) {
                 core.useItem('pickaxe');
@@ -553,15 +554,15 @@ gameKey
         }
     })
     .realize('skill3', () => {
-        if (!flags.shieldOn) return;
-        if (flags.autoSkill) {
+        const HeroSkill = Mota.require('module', 'Mechanism').HeroSkill;
+        if (!HeroSkill.learnedSkill(HeroSkill.Shield)) return;
+        if (HeroSkill.getAutoSkill()) {
             tip('error', '已开启自动切换技能！');
             return;
         }
         core.playSound('光标移动');
-        if (flags.shield) flags.shield = false;
-        else flags.shield = true;
-        core.status.route.push('skill:3');
+        HeroSkill.toggleSkill(HeroSkill.Shield);
+        core.status.route.push('skill:Shield');
         core.updateStatusBar();
     })
     .realize('debug', () => {

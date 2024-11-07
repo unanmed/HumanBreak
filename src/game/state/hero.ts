@@ -2,7 +2,7 @@ import { logger } from '@/core/common/logger';
 import { EventEmitter } from 'eventemitter3';
 import { cloneDeep, isNil } from 'lodash-es';
 import { ItemState } from './item';
-import { NightSpecial } from '../mechanism/misc';
+import { HeroSkill, NightSpecial } from '../mechanism/misc';
 
 /**
  * 获取勇士在某一点的属性
@@ -100,16 +100,16 @@ function getRealStatus(
         s += NightSpecial.getNight(floorId);
     }
 
+    const enabled = HeroSkill.getEnabled();
     // 技能
-    if (flags.bladeOn && flags.blade) {
+    if (enabled === HeroSkill.Blade) {
         const level = getSkillLevel(2);
         if (name === 'atk') {
             s *= 1 + 0.1 * level;
         } else if (name === 'def') {
             s *= 1 - 0.1 * level;
         }
-    }
-    if (flags.shield && flags.shieldOn) {
+    } else if (enabled === HeroSkill.Shield) {
         const level = getSkillLevel(10);
         if (name === 'atk') {
             s *= 1 - 0.1 * level;

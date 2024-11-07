@@ -38,9 +38,8 @@ main.floors.MT12=
             "去南方那个之前过不去的地方推进游戏剧情",
             "手机端可以点击右下角的难度来切换下方工具栏至数字键",
             {
-                "type": "setValue",
-                "name": "flag:skill2",
-                "value": "true"
+                "type": "function",
+                "function": "function(){\nconst HeroSkill = Mota.require('module', 'Mechanism').HeroSkill;\nHeroSkill.learnSkill(HeroSkill.Jump);\n}"
             },
             {
                 "type": "hide",

@@ -3,7 +3,7 @@ import { Range } from '../util/range';
 import { ensureArray, has, manhattan } from '@/plugin/game/utils';
 import EventEmitter from 'eventemitter3';
 import { hook } from '../game';
-import { NightSpecial } from '../mechanism/misc';
+import { HeroSkill, NightSpecial } from '../mechanism/misc';
 
 // todo: 光环划分优先级，从而可以实现光环的多级运算
 
@@ -772,27 +772,26 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     private calEnemyDamageOf(hero: Partial<HeroStatus>, enemy: EnemyInfo) {
         const status = getHeroStatusOf(hero, realStatus, this.floorId);
         let damage = calDamageWith(enemy, status) ?? Infinity;
-        let skill = -1;
+        let bestSkill = -1;
 
         // 自动切换技能
-        if (flags.autoSkill) {
-            for (let i = 0; i < skills.length; i++) {
-                const [unlock, condition] = skills[i];
-                if (!flags[unlock]) continue;
-                flags[condition] = true;
+        if (HeroSkill.getAutoSkill()) {
+            for (const skill of skills) {
+                if (!HeroSkill.learnedSkill(skill)) continue;
+                HeroSkill.enableSkill(skill);
                 const status = getHeroStatusOf(hero, realStatus);
 
                 const d = calDamageWith(enemy, status) ?? Infinity;
 
                 if (d < damage) {
                     damage = d;
-                    skill = i;
+                    bestSkill = skill;
                 }
-                flags[condition] = false;
+                HeroSkill.disableSkill();
             }
         }
 
-        return { damage, skill };
+        return { damage, skill: bestSkill };
     }
 
     /**
@@ -838,8 +837,11 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         let end = seckill;
         let ori = origin.damage;
 
+        const status = { atk: curr, def };
+
         const calDam = () => {
-            return this.calEnemyDamageOf({ atk: curr, def }, enemy).damage;
+            status.atk = curr;
+            return this.calEnemyDamageOf(status, enemy).damage;
         };
 
         let i = 0;
@@ -981,10 +983,7 @@ const realStatus: (keyof HeroStatus)[] = [
 /**
  * 主动技能列表
  */
-const skills: [unlock: string, condition: string][] = [
-    ['bladeOn', 'blade'],
-    ['shieldOn', 'shield']
-];
+const skills: HeroSkill.Skill[] = [HeroSkill.Blade, HeroSkill.Shield];
 
 /**
  * 计算怪物伤害

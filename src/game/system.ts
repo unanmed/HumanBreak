@@ -107,6 +107,7 @@ interface ModuleInterface {
         BluePalace: typeof misc.BluePalace;
         NightSpecial: typeof misc.NightSpecial;
         MiscData: typeof misc.MiscData;
+        HeroSkill: typeof misc.HeroSkill;
     };
     Effect: {
         Portal: typeof portal;

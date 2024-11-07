@@ -383,7 +383,8 @@ function handleActionSetting<T extends number | boolean>(
 ) {
     if (key === 'autoSkill') {
         // 自动切换技能
-        flags.autoSkill = n;
+        const HeroSkill = Mota.require('module', 'Mechanism').HeroSkill;
+        HeroSkill.setAutoSkill(n as boolean);
         core.status.route.push(`set:autoSkill:${n}`)
     }
 }
@@ -535,8 +536,9 @@ loading.once('coreInit', () => {
 
 const { hook } = Mota.requireAll('var');
 hook.on('reset', () => {
+    const HeroSkill = Mota.require('module', 'Mechanism').HeroSkill;
     mainSetting.reset({
-        'action.autoSkill': flags.autoSkill ?? true
+        'action.autoSkill': HeroSkill.getAutoSkill()
     });
 });
 
