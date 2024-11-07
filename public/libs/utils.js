@@ -25,35 +25,6 @@ function utils() {
         rightup: { x: 1, y: -1 },
         rightdown: { x: 1, y: 1 }
     };
-    const tokenSplit = new Set([
-        ' ',
-        '(',
-        ')',
-        '<',
-        '>',
-        ',',
-        '.',
-        '/',
-        "'",
-        '"',
-        '[',
-        ']',
-        '{',
-        '}',
-        '-',
-        '+',
-        '=',
-        '!',
-        '`',
-        '~',
-        ';',
-        ':',
-        '&',
-        '*',
-        '^',
-        '|',
-        '%'
-    ]);
 }
 
 utils.prototype._init = function () {
@@ -187,11 +158,7 @@ utils.prototype.calValue = function (value, prefix) {
 utils.prototype.unshift = function (a, b) {
     if (!(a instanceof Array) || b == null) return;
     if (b instanceof Array) {
-        core.clone(b)
-            .reverse()
-            .forEach(function (e) {
-                a.unshift(e);
-            });
+        a.unshift(...b);
     } else a.unshift(b);
     return a;
 };
@@ -200,9 +167,7 @@ utils.prototype.unshift = function (a, b) {
 utils.prototype.push = function (a, b) {
     if (!(a instanceof Array) || b == null) return;
     if (b instanceof Array) {
-        core.clone(b).forEach(function (e) {
-            a.push(e);
-        });
+        a.push(...b);
     } else a.push(b);
     return a;
 };
@@ -471,16 +436,11 @@ utils.prototype.clone = function (data, filter, recursion) {
     }
     // array
     if (data instanceof Array) {
-        var copy = [];
-        for (var i in data) {
-            if (!filter || filter(i, data[i]))
-                copy[i] = core.clone(
-                    data[i],
-                    recursion ? filter : null,
-                    recursion
-                );
-        }
-        return copy;
+        return data.map((v, i) => {
+            if (!filter || filter(String(i), v)) {
+                return this.clone(v, recursion ? filter : null, recursion);
+            }
+        });
     }
     // 函数
     if (data instanceof Function) {
@@ -489,13 +449,14 @@ utils.prototype.clone = function (data, filter, recursion) {
     // object
     if (data instanceof Object) {
         var copy = {};
-        for (var i in data) {
-            if (data.hasOwnProperty(i) && (!filter || filter(i, data[i])))
-                copy[i] = core.clone(
-                    data[i],
+        for (const [key, value] of Object.entries(data)) {
+            if (!filter || filter(key, value)) {
+                copy[key] = this.clone(
+                    value,
                     recursion ? filter : null,
                     recursion
                 );
+            }
         }
         return copy;
     }
@@ -664,8 +625,7 @@ utils.prototype.arrayToRGB = function (color) {
         nowG = this.clamp(parseInt(color[1]), 0, 255),
         nowB = this.clamp(parseInt(color[2]), 0, 255);
     return (
-        '#' +
-        ((1 << 24) + (nowR << 16) + (nowG << 8) + nowB).toString(16).slice(1)
+        '#' + ((nowR << 16) + (nowG << 8) + nowB).toString(16).padStart(6, '0')
     );
 };
 
@@ -920,7 +880,7 @@ utils.prototype.subarray = function (a, b) {
 };
 
 utils.prototype.inArray = function (array, element) {
-    return array instanceof Array && array.indexOf(element) >= 0;
+    return array instanceof Array && array.includes(element);
 };
 
 utils.prototype.clamp = function (x, a, b) {
@@ -935,32 +895,7 @@ utils.prototype.getCookie = function (name) {
 };
 
 ////// 设置statusBar的innerHTML，会自动斜体和放缩，也可以增加自定义css //////
-utils.prototype.setStatusBarInnerHTML = function (name, value, css) {
-    if (!core.statusBar[name]) return;
-    if (typeof value == 'number') value = this.formatBigNumber(value);
-    var italic = /^[-a-zA-Z0-9`~!@#$%^&*()_=+\[{\]}\\|;:'",<.>\/?]*$/.test(
-        value
-    );
-    var style = 'font-style: ' + (italic ? 'italic' : 'normal') + '; ';
-    style +=
-        'text-shadow: #000 1px 0 0, #000 0 1px 0, #000 -1px 0 0, #000 0 -1px 0; ';
-    // 判定是否需要缩放
-    var length = this.strlen(value) || 1;
-    style += 'font-size: ' + Math.min(1, 7 / length) + 'em; ';
-    if (css) style += css;
-    var _style = core.statusBar[name].getAttribute('_style');
-    var _value = core.statusBar[name].getAttribute('_value');
-    if (_style == style) {
-        if (value == _value) return;
-        core.statusBar[name].children[0].innerText = value;
-    } else {
-        core.statusBar[name].innerHTML =
-            "<span class='_status' style='" + style + "'></span>";
-        core.statusBar[name].children[0].innerText = value;
-        core.statusBar[name].setAttribute('_style', style);
-    }
-    core.statusBar[name].setAttribute('_value', value);
-};
+utils.prototype.setStatusBarInnerHTML = function (name, value, css) {};
 
 utils.prototype.strlen = function (str) {
     var count = 0;

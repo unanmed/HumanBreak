@@ -1,11 +1,13 @@
 /** 工具类 主要用来进行一些辅助函数的计算 */
 interface Utils {
     /**
+     * @deprecated
      * 四个方向的坐标增量
      */
     readonly scan: DeepReadonly<Scan>;
 
     /**
+     * @deprecated
      * 八个方向的坐标增量
      */
     readonly scan2: DeepReadonly<Scan2>;
@@ -65,6 +67,7 @@ interface Utils {
     push<A extends any[], B extends any[]>(a: A, b: B): [...A, ...B];
 
     /**
+     * @deprecated
      * 解压缩一个数据，我也不知道这个解压的是什么
      * @param 要解压的内容，字符串
      */
@@ -94,6 +97,7 @@ interface Utils {
     removeLocalStorage(key: string): void;
 
     /**
+     * @deprecated
      * 异步写入localforage
      * @param key 写入的键
      * @param value 写入的值
@@ -108,6 +112,7 @@ interface Utils {
     ): void;
 
     /**
+     * @deprecated
      * 从localforage读出一段数据
      */
     getLocalForage<T>(
@@ -118,6 +123,7 @@ interface Utils {
     ): void;
 
     /**
+     * @deprecated
      * 移除localforage的数据
      */
     removeLocalForage(
@@ -127,12 +133,14 @@ interface Utils {
     ): void;
 
     /**
+     * @deprecated
      * 清除localforage所有的数据
      * @param callback 清除完毕的回调函数
      */
     clearLocalForage(callback?: (err?: Error) => void): void;
 
     /**
+     * @deprecated
      * 迭代localforage的数据
      * @param iteratee 迭代器
      * @param callback 迭代完毕的回调函数
@@ -143,12 +151,14 @@ interface Utils {
     ): void;
 
     /**
+     * @deprecated
      * 获取localforage数据的所有的键
      * @param callback 回调函数
      */
     keysLocalForage(callback?: (err: any, keys: string[]) => void): void;
 
     /**
+     * @deprecated
      * 获取localforage数据的数据量
      * @param callback 回调函数
      */
@@ -157,6 +167,7 @@ interface Utils {
     ): void;
 
     /**
+     * @deprecated
      * 设置一个全局存储，适用于global:xxx，录像播放时将忽略此函数。
      * @example core.setBlobal('一周目已通关', true); // 设置全局存储“一周目已通关”为true，方便二周目游戏中的新要素。
      * @param key 全局变量名称，支持中文
@@ -165,6 +176,7 @@ interface Utils {
     setGlobal(key: string, value?: any): void;
 
     /**
+     * @deprecated
      * 读取一个全局存储，适用于global:xxx，支持录像。
      * @example if (core.getGlobal('一周目已通关', false) === true) core.getItem('dagger'); // 二周目游戏进行到此处时会获得一把屠龙匕首
      * @param key 全局变量名称，支持中文
@@ -211,6 +223,7 @@ interface Utils {
     ): HTMLImageElement[];
 
     /**
+     * @deprecated
      * 格式化日期为字符串
      * @param date 时间，不填代表当前时间
      * @returns 格式: yyyy-mm-dd hh:mm:ss
@@ -218,6 +231,7 @@ interface Utils {
     formatDate(date?: Date): string;
 
     /**
+     * @deprecated
      * 格式化日期为最简字符串
      * @param date 时间，不填代表当前时间
      * @returns 格式: yyyymmddhhmmss
@@ -225,6 +239,7 @@ interface Utils {
     formatDate2(date?: Date): string;
 
     /**
+     * @deprecated
      * 格式化时间
      * @param time 时间
      * @returns 格式: hh:mm:ss
@@ -238,6 +253,7 @@ interface Utils {
     setTwoDigits(x: number): string;
 
     /**
+     * @deprecated
      * 设置一个数为n位数显示
      * @param x 要设置的数
      * @param n 设置成的位数
@@ -245,6 +261,7 @@ interface Utils {
     setDigits(x: number, n: number): string;
 
     /**
+     * @deprecated
      * 格式化文件大小
      * @param size 大小，字节数
      * @returns 格式为xx.xxB KB MB
@@ -252,6 +269,7 @@ interface Utils {
     formatSize(size: number): string;
 
     /**
+     * @deprecated
      * 大数字格式化，单位为10000的倍数（w,e,z,j,g），末尾四舍五入
      * @example core.formatBigNumber(123456789); // "12346w"
      * @param x 原数字
@@ -259,6 +277,9 @@ interface Utils {
      * @returns 格式化结果
      */
     formatBigNumber<T extends string>(x: T, onMap?: number): T;
+    /**
+     * @deprecated
+     */
     formatBigNumber(x: number | string, onMap?: number | boolean): string;
 
     /**
@@ -288,6 +309,7 @@ interface Utils {
     arrayToRGBA(color: Color): _RGBA;
 
     /**
+     * @deprecated
      * 录像一压，其结果会被再次base64压缩
      * @example core.encodeRoute(core.status.route); // 一压当前录像
      * @param route 原始录像，自定义内容（不予压缩，原样写入）必须由0-9A-Za-z和下划线、冒号组成，
@@ -297,6 +319,7 @@ interface Utils {
     encodeRoute(route: string[]): string;
 
     /**
+     * @deprecated
      * 录像解压的最后一步，即一压的逆过程
      * @example core.decodeRoute(core.encodeRoute(core.status.route)); // 一压当前录像再解压-_-|
      * @param route 录像解压倒数第二步的结果，即一压的结果
@@ -343,27 +366,13 @@ interface Utils {
     clamp(x: number, a: number, b: number): number;
 
     /**
+     * @deprecated
      * 访问浏览器cookie
      */
     getCookie(name: string): string;
 
     /**
      * @deprecated
-     * 填写非自绘状态栏
-     * @example
-     * // 更新状态栏中的主角生命，使用加载画面的宣传色
-     * core.setStatusBarInnerHTML('hp', core.status.hero.hp, 'color: #66CCFF');
-     * @param name 状态栏项的名称，如'hp', 'atk', 'def'等。必须是core.statusBar中的一个合法项
-     * @param value 要填写的内容，大数字会被格式化为至多6个字符，无中文的内容会被自动设为斜体
-     * @param css 额外的css样式，可选。如更改颜色等
-     */
-    setStatusBarInnerHTML(
-        name: string,
-        value: string | number,
-        css?: string
-    ): void;
-
-    /**
      * 求字符串的国标码字节数，也可用于等宽字体下文本的宽度测算。请注意样板的默认字体Verdana不是等宽字体
      * @example core.strlen('无敌ad'); // 6
      * @param str 待测字符串
@@ -398,6 +407,7 @@ interface Utils {
     matchRegex(pattern: string, string: string): string;
 
     /**
+     * @deprecated
      * base64加密
      * @example
      * core.encodeBase64('If you found this note in a small wooden box with a heart on it');
@@ -408,6 +418,7 @@ interface Utils {
     encodeBase64(str: string): string;
 
     /**
+     * @deprecated
      * base64解密
      * @example
      * core.decodeBase64('SWYgeW91IGZvdW5kIHRoaXMgbm90ZSBpbiBhIHNtYWxsIHdvb2RlbiBib3ggd2l0aCBhIGhlYXJ0IG9uIGl0');
@@ -418,6 +429,7 @@ interface Utils {
     decodeBase64(str: string): string;
 
     /**
+     * @deprecated
      * 不支持SL的随机数
      * @exmaple 1 + core.rand(6); // 随机生成一个小于7的正整数，模拟骰子的效果
      * @param num 填正数表示生成小于num的随机自然数，否则生成小于1的随机正数
@@ -426,6 +438,7 @@ interface Utils {
     rand(num?: number): number;
 
     /**
+     * @deprecated
      * 支持SL的随机数，并计入录像
      * @exmaple 1 + core.rand2(6); // 随机生成一个小于7的正整数，模拟骰子的效果
      * @param num 正整数，0或不填会被视为2147483648
@@ -434,6 +447,7 @@ interface Utils {
     rand2(num?: number): number;
 
     /**
+     * @deprecated
      * 尝试请求读取一个本地文件内容 [异步]
      * @param success 成功后的回调
      * @param error 失败后的回调
@@ -448,12 +462,14 @@ interface Utils {
     ): void;
 
     /**
+     * @deprecated
      * 文件读取完毕后的内容处理 [异步]
      * @param content 读取的内容
      */
     readFileContent(content: string): void;
 
     /**
+     * @deprecated
      * 弹窗请求下载一个文本文件
      * @example core.download('route.txt', core.status.route); // 弹窗请求下载录像
      * @param filename 文件名
@@ -462,6 +478,7 @@ interface Utils {
     download(filename: string, content: string | string[]): void;
 
     /**
+     * @deprecated
      * 尝试复制一段文本到剪切板
      * @param data 赋值的东西
      */
@@ -512,11 +529,13 @@ interface Utils {
     ): void;
 
     /**
+     * @deprecated
      * 获得浏览器唯一的guid
      */
     getGuid(): string;
 
     /**
+     * @deprecated
      * 获取一个对象的哈希值
      * @param obj 要获取的对象
      */
@@ -530,6 +549,7 @@ interface Utils {
     same(a: any, b: any): boolean;
 
     /**
+     * @deprecated
      * 解压一段内容
      */
     unzip(
@@ -541,6 +561,7 @@ interface Utils {
     ): void;
 
     /**
+     * @deprecated
      * 发送一个HTTP请求 [异步]
      * @param type 请求类型
      * @param url 目标地址
