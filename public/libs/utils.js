@@ -161,6 +161,11 @@ utils.prototype.replaceValue = function (value) {
                 /temp:([a-zA-Z0-9_]+)/g,
                 "core.getFlag('@temp@$1', 0)"
             );
+        if (value.indexOf('switch:') >= 0)
+            value = value.replace(
+                /switch:([a-zA-Z0-9_]+)/g,
+                "core.getFlag('" + (prefix || ':f@x@y') + "@$1', 0)"
+            );
     }
     return value;
 };
@@ -169,18 +174,7 @@ utils.prototype.replaceValue = function (value) {
 utils.prototype.calValue = function (value, prefix) {
     if (!core.isset(value)) return null;
     if (typeof value === 'string') {
-        if (
-            value.indexOf(':') >= 0 ||
-            value.indexOf('flag：') >= 0 ||
-            value.indexOf('global：') >= 0
-        ) {
-            if (value.indexOf('switch:') >= 0)
-                value = value.replace(
-                    /switch:([a-zA-Z0-9_]+)/g,
-                    "core.getFlag('" + (prefix || ':f@x@y') + "@$1', 0)"
-                );
-            value = this.replaceValue(value);
-        }
+        value = this.replaceValue(value);
         return eval(value);
     }
     if (value instanceof Function) {
