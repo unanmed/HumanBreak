@@ -27,7 +27,7 @@ export class MotaRenderer extends Container {
         MotaRenderer.list.set(id, this);
     }
 
-    update(item?: RenderItem) {
+    update(item: RenderItem = this) {
         if (this.needUpdate) return;
         this.needUpdate = true;
         this.requestRenderFrame(() => {
@@ -36,7 +36,7 @@ export class MotaRenderer extends Container {
         });
     }
 
-    protected refresh(item?: RenderItem): void {
+    protected refresh(item: RenderItem = this): void {
         this.emit('beforeUpdate', item);
         this.target.clear();
         this.renderContent(this.target, Transform.identity);
@@ -48,7 +48,7 @@ export class MotaRenderer extends Container {
      * @param id 要获取的渲染元素id
      * @returns
      */
-    getElementById(id: string): RenderItem | undefined {
+    getElementById(id: string): RenderItem | null {
         const map = RenderItem.itemMap;
         const item = map.get(id);
         if (item) return item;
@@ -56,18 +56,19 @@ export class MotaRenderer extends Container {
             const item = this.searchElement(this, id);
             if (item) {
                 map.set(id, item);
-                return item;
             }
+            return item;
         }
     }
 
-    private searchElement(ele: Container, id: string): RenderItem | undefined {
+    private searchElement(ele: Container, id: string): RenderItem | null {
         for (const child of ele.children) {
             if (child.id === id) return child;
             if (child instanceof Container) {
                 return this.searchElement(child, id);
             }
         }
+        return null;
     }
 
     /**

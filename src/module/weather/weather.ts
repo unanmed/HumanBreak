@@ -18,9 +18,9 @@ export interface IWeather {
     deactivate(): void;
 }
 
-interface Weather {
+interface Weather<T extends IWeather = IWeather> {
     id: string;
-    new (level?: number): IWeather;
+    new (level?: number): T;
 }
 
 export class WeatherController {
@@ -37,7 +37,15 @@ export class WeatherController {
     };
 
     /**
-     * 添加一个天气，如果天气不存在则抛出警告。注意虽然原则上允许天气重复，但一些天气在实现时，并不允许重复
+     * 获取一个天气
+     * @param weather 要获取的天气
+     */
+    getWeather<T extends IWeather>(weather: Weather<T>): T | null {
+        return ([...this.active].find(v => v instanceof weather) as T) ?? null;
+    }
+
+    /**
+     * 添加一个天气，如果天气不存在则抛出警告。注意虽然原则上不允许天气重复。
      * @param id 天气的id
      * @param level 天气的等级
      * @returns 天气实例，可以操作天气的效果，也可以用来删除

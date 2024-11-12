@@ -15,7 +15,7 @@ export type RenderItemPosition = 'absolute' | 'static';
 export interface IRenderUpdater {
     /**
      * 更新这个渲染元素
-     * @param item 触发更新事件的元素，可以是自身触发。如果不填表示手动触发，而非渲染内容发生变化而引起的触发
+     * @param item 触发更新事件的元素，不填默认为元素自身触发
      */
     update(item?: RenderItem): void;
 }
@@ -333,7 +333,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this.anchorY = y;
     }
 
-    update(item?: RenderItem<any>): void {
+    update(item: RenderItem<any> = this): void {
         if (this.needUpdate) return;
         this.needUpdate = true;
         this.cacheDirty = true;

@@ -38,6 +38,15 @@ export abstract class BarrageBoss {
     }
 
     /**
+     * 结束这个弹幕战
+     */
+    end() {
+        if (this.ticker.funcs.has(this.tick)) {
+            this.ticker.remove(this.tick);
+        }
+    }
+
+    /**
      * 摧毁传入的弹幕
      */
     destroyProjectile(projectile: Projectile) {
