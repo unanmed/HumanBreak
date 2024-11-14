@@ -19,17 +19,6 @@ main.floors.MT5=
     "events": {
         "14,7": [
             {
-                "type": "confirm",
-                "text": "是否提交序章成绩？",
-                "yes": [
-                    {
-                        "type": "win",
-                        "reason": "踏上旅途"
-                    }
-                ],
-                "no": []
-            },
-            {
                 "type": "if",
                 "condition": "(flag:cave==1)",
                 "true": [
@@ -49,6 +38,20 @@ main.floors.MT5=
                     }
                 ],
                 "false": [
+                    {
+                        "type": "confirm",
+                        "text": "是否提交序章成绩？",
+                        "yes": [
+                            {
+                                "type": "win",
+                                "reason": "踏上旅途"
+                            },
+                            {
+                                "type": "exit"
+                            }
+                        ],
+                        "no": []
+                    },
                     {
                         "type": "setCurtain",
                         "color": [

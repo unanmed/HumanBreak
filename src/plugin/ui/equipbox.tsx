@@ -23,7 +23,9 @@ export function getAddStatus(equip: Equip) {
             {keys.map(v => {
                 const value = Math.floor(
                     (equip.value[v] ?? 0) * core.getBuff(v) +
-                        (core.status.hero[v] * (equip.percentage[v] ?? 0)) / 100
+                        (core.status.hero[v as keyof HeroStatus] *
+                            (equip.percentage[v] ?? 0)) /
+                            100
                 );
 
                 return (
