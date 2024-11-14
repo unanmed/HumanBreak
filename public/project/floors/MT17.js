@@ -56,7 +56,7 @@ main.floors.MT17=
         "12,6": [
             {
                 "type": "function",
-                "function": "function(){\nif (core.status.hero.hp - flags.hphphp >= 150000) {\n\tcore.completeAchievement('normal', 1);\n}\ndelete flags.hphphp;\n}"
+                "function": "function(){\nif (core.status.hero.hp - flags.hphphp >= 150000) {\n\tMota.Plugin.require('achievement_r').completeAchievement('normal', 1);\n}\ndelete flags.hphphp;\n}"
             }
         ]
     },

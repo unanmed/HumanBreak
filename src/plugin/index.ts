@@ -6,6 +6,7 @@ import * as frag from './fx/frag';
 import * as use from './use';
 import * as gameCanvas from './fx/gameCanvas';
 import * as animateController from './animateController';
+import * as achievement from './ui/achievement';
 import './loopMap';
 
 Mota.Plugin.register('fly_r', fly);
@@ -21,3 +22,4 @@ Mota.Plugin.register(
     animateController.default
 );
 Mota.Plugin.register('chase_r', chase);
+Mota.Plugin.register('achievement_r', achievement);
