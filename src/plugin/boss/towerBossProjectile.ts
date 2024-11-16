@@ -31,6 +31,7 @@ export class ArrowProjectile extends Projectile<TowerBoss> {
     direction: ProjectileDirection = ProjectileDirection.Horizontal;
 
     private damaged: boolean = false;
+    private sounded: boolean = false;
 
     /**
      * boss战开始时初始化
@@ -103,6 +104,10 @@ export class ArrowProjectile extends Projectile<TowerBoss> {
 
     ai(boss: TowerBoss, time: number, frame: number): void {
         if (time > 3000) {
+            if (!this.sounded) {
+                core.playSound('arrow.mp3');
+                this.sounded = true;
+            }
             const progress = (time - 3000) / 2000;
             const res = ArrowProjectile.easing!(progress);
             const dx = res * 640;
@@ -319,6 +324,7 @@ export class ThunderProjectile extends Projectile<TowerBoss> {
     private power: number = 0;
     private damaged: boolean = false;
     private cached: boolean = false;
+    private sounded: boolean = false;
 
     private effect?: PointEffect;
     private effectId?: number;
@@ -380,6 +386,12 @@ export class ThunderProjectile extends Projectile<TowerBoss> {
     }
 
     ai(boss: TowerBoss, time: number, frame: number): void {
+        if (time > 1000) {
+            if (!this.sounded) {
+                core.playSound('thunder.mp3');
+                this.sounded = true;
+            }
+        }
         if (time > 2000) {
             this.destroy();
         }
@@ -413,7 +425,11 @@ export class ThunderProjectile extends Projectile<TowerBoss> {
                 );
                 effect.setEffect(id, void 0, [effectRatio, 0, 0, 0]);
             }
-            ctx.globalAlpha = 1 - progress;
+            if (progress < 0.5) {
+                ctx.globalAlpha = 1;
+            } else {
+                ctx.globalAlpha = 1 - (progress - 0.5) * 2;
+            }
             ctx.drawImage(ThunderProjectile.cache.canvas, x - 60, 0);
             ctx.globalAlpha = before;
         }
@@ -457,6 +473,7 @@ export class ThunderBallProjectile extends Projectile<TowerBoss> {
     private cx: number = 0;
     private cy: number = 0;
     private damaged: boolean = false;
+    private sounded: boolean = false;
 
     /**
      * boss战开始时初始化
@@ -528,6 +545,10 @@ export class ThunderBallProjectile extends Projectile<TowerBoss> {
 
     ai(boss: TowerBoss, time: number, frame: number): void {
         if (time > 3000) {
+            if (!this.sounded) {
+                core.playSound('electron.mp3');
+                this.sounded = true;
+            }
             const dt = time - 3000;
             const dis = dt * 0.2;
             const cx = this.cx * 32 + 16;

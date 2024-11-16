@@ -319,14 +319,9 @@ export namespace Hitbox {
      * 检查两条线段是否有交叉
      */
     export function checkLineLine(line1: Line, line2: Line) {
-        const x1 = line1.x1;
-        const y1 = line1.y1;
-        const x2 = line1.x2;
-        const y2 = line1.y2;
-        const x3 = line2.x1;
-        const y3 = line2.y1;
-        const x4 = line2.x2;
-        const y4 = line2.y2;
+        const { x1, y1, x2, y2 } = line1;
+        const { x1: x3, y1: y3, x2: x4, y2: y4 } = line2;
+
         if (
             Math.max(x1, x2) < Math.min(x3, x4) ||
             Math.min(x1, x2) < Math.max(x3, x4) ||
