@@ -17,8 +17,11 @@ import {
 import { Container } from '@/core/render/container';
 import {
     ArrowProjectile,
+    IceProjectile,
     PortalProjectile,
-    ProjectileDirection
+    ProjectileDirection,
+    ThunderBallProjectile,
+    ThunderProjectile
 } from './towerBossProjectile';
 import { IStateDamageable } from '@/game/state/interface';
 
@@ -39,10 +42,8 @@ const enum TowerBossStage {
     Stage2,
     Dialogue2,
     Stage3,
-    Dialogue3,
     Stage4,
     Stage5,
-    Stage6,
 
     End
 }
@@ -171,6 +172,7 @@ export class TowerBoss extends BarrageBoss {
 
         ArrowProjectile.init();
         PortalProjectile.init();
+        ThunderProjectile.init();
     }
 
     override end() {
@@ -183,6 +185,7 @@ export class TowerBoss extends BarrageBoss {
 
         ArrowProjectile.end();
         PortalProjectile.end();
+        ThunderProjectile.end();
     }
 
     /**
@@ -208,11 +211,11 @@ export class TowerBoss extends BarrageBoss {
         this.hp -= damage;
         this.healthBar.set(this.hp);
         // 先用drawAnimate凑活一下，等下个版本提供更好的 api
-        if (this.stage === TowerBossStage.Stage4) {
+        if (this.stage === TowerBossStage.Stage3) {
             core.drawAnimate('hand', 7, 2);
-        } else if (this.stage === TowerBossStage.Stage5) {
+        } else if (this.stage === TowerBossStage.Stage4) {
             core.drawAnimate('hand', 7, 3);
-        } else if (this.stage === TowerBossStage.Stage6) {
+        } else if (this.stage === TowerBossStage.Stage5) {
             core.drawAnimate('hand', 7, 4);
         } else {
             core.drawAnimate('hand', 7, 1);
@@ -227,13 +230,13 @@ export class TowerBoss extends BarrageBoss {
     addAttackCircle(last: number, damage: number) {
         let nx = 0;
         let ny = 0;
-        if (this.stage === TowerBossStage.Stage4) {
+        if (this.stage === TowerBossStage.Stage3) {
             nx = Math.floor(Math.random() * 11 + 2);
             ny = Math.floor(Math.random() * 11 + 2);
-        } else if (this.stage === TowerBossStage.Stage5) {
+        } else if (this.stage === TowerBossStage.Stage4) {
             nx = Math.floor(Math.random() * 9 + 3);
             ny = Math.floor(Math.random() * 9 + 3);
-        } else if (this.stage === TowerBossStage.Stage6) {
+        } else if (this.stage === TowerBossStage.Stage5) {
             nx = Math.floor(Math.random() * 7 + 4);
             ny = Math.floor(Math.random() * 7 + 4);
         } else {
@@ -301,17 +304,11 @@ export class TowerBoss extends BarrageBoss {
             case TowerBossStage.Stage3:
                 this.aiStage3(fixedTime, frame);
                 break;
-            case TowerBossStage.Dialogue3:
-                this.aiDialogue3(fixedTime, frame);
-                break;
             case TowerBossStage.Stage4:
                 this.aiStage4(fixedTime, frame);
                 break;
             case TowerBossStage.Stage5:
                 this.aiStage5(fixedTime, frame);
-                break;
-            case TowerBossStage.Stage6:
-                this.aiStage6(fixedTime, frame);
                 break;
             case TowerBossStage.End:
                 this.aiEnd(fixedTime, frame);
@@ -376,7 +373,20 @@ export class TowerBoss extends BarrageBoss {
         proj.createEffect(TowerBoss.effect);
     }
 
-    async releaseSkill3() {}
+    async releaseSkill3() {
+        const count = Math.floor(Math.random() * 100);
+        const used = new Set<number>();
+        for (let i = 0; i < count; i++) {
+            const x = Math.floor(Math.random() * 13 + 1);
+            const y = Math.floor(Math.random() * 13 + 1);
+            const index = x + y * 13;
+            if (used.has(index)) continue;
+            used.add(index);
+            const proj = this.createProjectile(IceProjectile, x * 32, y * 32);
+            proj.setPos(x, y);
+            await sleep(20);
+        }
+    }
 
     private aiStage1(time: number, frame: number) {
         // stageProgress:
@@ -410,21 +420,118 @@ export class TowerBoss extends BarrageBoss {
         }
     }
 
-    private aiDialogue1(time: number, frame: number) {}
+    private aiDialogue1(time: number, frame: number) {
+        this.changeStage(TowerBossStage.Stage2, time);
+        this.attackTime = 3;
+        this.skill4Time = 5;
+        this.skill5Time = 3;
+    }
 
-    private aiStage2(time: number, frame: number) {}
+    releaseSkill4() {
+        const x = Math.floor(Math.random() * 11 + 2);
+        const y = Math.floor(Math.random() * 11 + 2);
+        const power = Math.floor(Math.random() * 6 + 1);
+        const proj = this.createProjectile(ThunderProjectile, 0, 0);
+        proj.setData(x, y, power);
+        proj.createEffect(TowerBoss.effect);
+    }
 
-    private aiDialogue2(time: number, frame: number) {}
+    async releaseSkill5() {
+        const count = Math.floor(Math.random() * 12 + 6);
+        const used = new Set<number>();
+        let i = 0;
+        while (i < count) {
+            const x = Math.floor(Math.random() * 13 + 1);
+            const y = Math.floor(Math.random() * 13 + 1);
+            const index = x + y * 13;
+            if (used.has(index)) continue;
+            i++;
+            used.add(index);
+            const px = x * 32 + 16;
+            const py = y * 32 + 16;
+            const proj1 = this.createProjectile(ThunderBallProjectile, 0, 0);
+            const proj2 = this.createProjectile(ThunderBallProjectile, 0, 0);
+            const proj3 = this.createProjectile(ThunderBallProjectile, 0, 0);
+            const proj4 = this.createProjectile(ThunderBallProjectile, 0, 0);
+            proj1.setData(ProjectileDirection.BottomToTop, x, y);
+            proj2.setData(ProjectileDirection.LeftToRight, x, y);
+            proj3.setData(ProjectileDirection.RightToLeft, x, y);
+            proj4.setData(ProjectileDirection.TopToBottom, x, y);
+            proj1.setPosition(px, py);
+            proj2.setPosition(px, py);
+            proj3.setPosition(px, py);
+            proj4.setPosition(px, py);
+            await sleep(200);
+        }
+    }
+
+    private aiStage2(time: number, frame: number) {
+        const skill4Release = this.skill4Time * this.skill4Interval;
+        const skill5Release = this.skill5Time * this.skill5Interval;
+        const attack = this.attackTime * this.attackInterval;
+
+        if (time > skill4Release) {
+            this.releaseSkill4();
+            this.skill4Time++;
+        }
+        if (time > skill5Release) {
+            this.releaseSkill5();
+            this.skill5Time++;
+        }
+        if (time > attack) {
+            this.addAttackCircle(3000, 500);
+            this.attackTime++;
+        }
+
+        if (this.hp <= 3500) {
+            this.changeStage(TowerBossStage.Dialogue2, time);
+            this.attackTime = 1;
+        }
+    }
+
+    /**
+     * 压缩地形，将地形向内压缩一格
+     */
+    terrainClose(n: number) {
+        for (let nx = n - 1; nx < 15 - n + 1; nx++) {
+            core.removeBlock(nx, n - 1);
+            core.removeBlock(nx, 15 - n + 1);
+            core.setBgFgBlock('bg', 0, nx, n - 1);
+            core.setBgFgBlock('bg', 0, nx, 15 - n + 1);
+        }
+        for (let ny = n; ny < 15 - n; ny++) {
+            core.removeBlock(n - 1, ny);
+            core.removeBlock(15 - n + 1, ny);
+            core.setBgFgBlock('bg', 0, n - 1, ny);
+            core.setBgFgBlock('bg', 0, 15 - n + 1, ny);
+        }
+        for (let nx = n; nx < 15 - n; nx++) {
+            core.setBlock(527, nx, n);
+            core.setBlock(527, nx, 15 - n);
+        }
+        for (let ny = n + 1; ny < 15 - n - 1; ny++) {
+            core.setBlock(527, n, ny);
+            core.setBlock(527, 15 - n, ny);
+        }
+    }
+
+    private aiDialogue2(time: number, frame: number) {
+        this.changeStage(TowerBossStage.Stage3, time);
+        this.attackTime = 3;
+        this.terrainClose(1);
+        this.skill6Time = 30;
+        this.skill7Time = 2;
+    }
+
+    releaseSkill6() {}
+
+    releaseSkill7() {}
 
     private aiStage3(time: number, frame: number) {}
-
-    private aiDialogue3(time: number, frame: number) {}
 
     private aiStage4(time: number, frame: number) {}
 
     private aiStage5(time: number, frame: number) {}
-
-    private aiStage6(time: number, frame: number) {}
 
     private aiEnd(time: number, frame: number) {}
 }

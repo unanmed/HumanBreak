@@ -43,7 +43,7 @@ export const enum PointEffectType {
      */
     CircleHue,
     /**
-     * 圆形扭曲特效，注意此特效会导致在此之前的所有非扭曲类特效失效，在添加时，系统会自动排序以保证特效正常显示\
+     * 圆形扭曲特效\
      * 参数分别为：\
      * `data1: x, y, maxRaius, waveRadius` | 中心横坐标，中心纵坐标，波纹最大传播距离，波纹环的半径\
      * `data2: amplitude, attenuation, linear, tangential` \
@@ -63,7 +63,14 @@ export const enum PointEffectType {
      *         （1表示扭曲了相位角的程度，例如Math.PI的相位，幅度为1，表示旋转整整一圈）\
      * `data2: startPhase, endPhase, _, _` 起始位置相位（靠近波纹中心的位置），终止位置相位（远离波纹中心的位置），空，空
      */
-    CircleWarpTangetial
+    CircleWarpTangetial,
+    /**
+     * 圆形亮度特效，可与任何特效叠加\
+     * 参数分别为：\
+     * `data1: x, y, radius, decay` | 中心横坐标，中心纵坐标，半径，衰减开始半径\
+     * `data2: ratio, _, _, _` | 亮度（0表示不变，1表示2倍亮度），空，空，空
+     */
+    CircleBrightness
 }
 
 type EffectData = [x0: number, x1: number, x2: number, x3: number];
@@ -566,6 +573,13 @@ void main() {
                 float gray = dot(color.rgb, vec3(0.2126, 0.7125, 0.0722));
                 vec3 grayed = color.rgb - gray;
                 color = vec4(color.rgb - grayed * ratio, 1.0);
+            }
+        }
+        // 亮度，data1: x y radius decay；data2: ratio _ _ _
+        else if (effectType == ${PointEffectType.CircleBrightness}) {
+            float ratio = data2.x * calCircleDecay(data1) + 1.0;
+            if (ratio > 0.0) {
+                color.rgb *= ratio;
             }
         }
         // 对比度，data1: x y radius decay；data2: ratio _ _ _

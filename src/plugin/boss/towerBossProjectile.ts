@@ -9,7 +9,12 @@ import { isNil } from 'lodash-es';
 
 export const enum ProjectileDirection {
     Vertical,
-    Horizontal
+    Horizontal,
+
+    LeftToRight,
+    RightToLeft,
+    TopToBottom,
+    BottomToTop
 }
 
 export class ArrowProjectile extends Projectile<TowerBoss> {
@@ -38,6 +43,7 @@ export class ArrowProjectile extends Projectile<TowerBoss> {
         const hor = this.horizontal;
         hor.size(480 - 64, 32);
         hor.setHD(true);
+        hor.withGameScale(true);
         const ctxHor = hor.ctx;
         ctxHor.fillStyle = '#f00';
         ctxHor.globalAlpha = 0.6;
@@ -47,6 +53,7 @@ export class ArrowProjectile extends Projectile<TowerBoss> {
         const ver = this.vertical;
         ver.size(480 - 64, 32);
         ver.setHD(true);
+        ver.withGameScale(true);
         const ctxVer = ver.ctx;
         ctxVer.fillStyle = '#f00';
         ctxVer.globalAlpha = 0.6;
@@ -118,25 +125,24 @@ export class ArrowProjectile extends Projectile<TowerBoss> {
             if (this.time < 2000) {
                 begin = ArrowProjectile.dangerEasing!(this.time / 2000);
             }
-            ctx.beginPath();
             const len = begin * 13 * 32;
             const x1 = 480 - 32 - len;
 
             if (this.direction === ProjectileDirection.Horizontal) {
                 const canvas = ArrowProjectile.horizontal!.canvas;
-                ctx.drawImage(canvas, x1, this.y, len, 32);
+                ctx.drawImage(canvas, x1, 0, len, 32, x1, this.y, len, 32);
             } else {
                 const canvas = ArrowProjectile.vertical!.canvas;
-                ctx.drawImage(canvas, this.y, x1, 32, len);
+                ctx.drawImage(canvas, 0, x1, 32, len, this.y, x1, 32, len);
             }
         } else {
             const len = Math.max(this.y - 32, 0);
             if (this.direction === ProjectileDirection.Horizontal) {
                 const canvas = ArrowProjectile.horizontal!.canvas;
-                ctx.drawImage(canvas, 32, this.y, len, 32);
+                ctx.drawImage(canvas, 32, 0, len, 32, 32, this.y, len, 32);
             } else {
                 const canvas = ArrowProjectile.vertical!.canvas;
-                ctx.drawImage(canvas, this.y, 32, 32, len);
+                ctx.drawImage(canvas, 0, 32, 32, len, this.y, 32, 32, len);
             }
         }
         const img = core.material.images.images['arrow.png'];
@@ -232,15 +238,21 @@ export class IceProjectile extends Projectile<TowerBoss> {
     hitbox: Hitbox.Rect = new Hitbox.Rect(0, 0, 32, 32);
 
     private damaged: boolean = false;
+    /** 是否已经播放冰冻动画 */
     private animated: boolean = false;
+    /** 是否已经转换成滑冰图块 */
     private converted: boolean = false;
 
     private bx: number = 0;
     private by: number = 0;
 
+    /**
+     * 设置这个寒冰弹幕的攻击位置
+     */
     setPos(x: number, y: number) {
         this.bx = x;
         this.by = y;
+        this.updateHitbox(x * 32, y * 32);
     }
 
     isIntersect(hitbox: Hitbox.HitboxType): boolean {
@@ -291,5 +303,407 @@ export class IceProjectile extends Projectile<TowerBoss> {
                 core.drawAnimate('ice', this.bx, this.by);
             }
         }
+    }
+}
+
+export class ThunderProjectile extends Projectile<TowerBoss> {
+    /** 闪电缓存画布 */
+    static cache: MotaOffscreenCanvas2D | null = null;
+
+    damage: number = 0;
+    hitbox: Hitbox.Rect = new Hitbox.Rect(0, 0, 96, 96);
+
+    private bx: number = 0;
+    private by: number = 0;
+    /** 闪电的强度 */
+    private power: number = 0;
+    private damaged: boolean = false;
+    private cached: boolean = false;
+
+    private effect?: PointEffect;
+    private effectId?: number;
+
+    static init() {
+        this.cache = new MotaOffscreenCanvas2D();
+        this.cache.setHD(true);
+        this.cache.withGameScale(true);
+    }
+
+    static end() {
+        this.cache?.clear();
+        this.cache = null;
+    }
+
+    /**
+     * 创建着色器特效
+     */
+    createEffect(effect: PointEffect) {
+        this.effect = effect;
+        this.effectId = effect.addEffect(
+            PointEffectType.CircleBrightness,
+            Date.now() + 1000,
+            400,
+            [this.bx * 32 + 32, this.by * 32 + 32, 128, 32]
+        );
+    }
+
+    /**
+     * 设置闪电的信息
+     */
+    setData(x: number, y: number, power: number) {
+        this.bx = x;
+        this.by = y;
+        this.power = power;
+        this.damage = power * 3000;
+        this.updateHitbox(x * 32 - 32, y * 32 - 32);
+    }
+
+    isIntersect(hitbox: Hitbox.HitboxType): boolean {
+        if (this.damaged) return false;
+        if (this.time < 1000) return false;
+        if (hitbox instanceof Hitbox.Rect) {
+            return Hitbox.checkRectRect(hitbox, this.hitbox);
+        } else {
+            return false;
+        }
+    }
+
+    updateHitbox(x: number, y: number): void {
+        this.hitbox.setPosition(x, y);
+    }
+
+    doDamage(target: IStateDamageable): boolean {
+        if (this.damaged) return false;
+        this.damaged = true;
+        target.hp -= this.damage;
+        return true;
+    }
+
+    ai(boss: TowerBoss, time: number, frame: number): void {
+        if (time > 2000) {
+            this.destroy();
+        }
+    }
+
+    render(canvas: MotaOffscreenCanvas2D, transform: Transform): void {
+        const ctx = canvas.ctx;
+        if (this.time < 1000) {
+            const before = ctx.fillStyle;
+            ctx.fillStyle = '#fff';
+            for (let dx = -1; dx < 2; dx++) {
+                for (let dy = -1; dy < 2; dy++) {
+                    const x = (this.bx + dx) * 32 + 2;
+                    const y = (this.by + dy) * 32 + 2;
+                    ctx.fillRect(x, y, 28, 28);
+                }
+            }
+            ctx.fillStyle = before;
+        } else {
+            if (!this.cached) this.cacheThunder();
+            if (!ThunderProjectile.cache) return;
+            const x = this.bx * 32;
+            const before = ctx.globalAlpha;
+            const progress = (this.time - 1000) / 1000;
+            if (progress < 0.4) {
+                const effect = this.effect;
+                const id = this.effectId;
+                if (!effect || isNil(id)) return;
+                const effectRatio = ArrowProjectile.dangerEasing!(
+                    progress * 2.5
+                );
+                effect.setEffect(id, void 0, [effectRatio, 0, 0, 0]);
+            }
+            ctx.globalAlpha = 1 - progress;
+            ctx.drawImage(ThunderProjectile.cache.canvas, x - 60, 0);
+            ctx.globalAlpha = before;
+        }
+    }
+
+    private cacheThunder() {
+        const cache = ThunderProjectile.cache;
+        if (!cache) return;
+        const bottom = this.by * 32 + 32;
+        cache.size(120, bottom);
+        const ctx = cache.ctx;
+        ctx.beginPath();
+        for (let i = 0; i < this.power; i++) {
+            let x = this.bx * 32;
+            let y = this.by * 32;
+            ctx.moveTo(x, y);
+            while (y > 0) {
+                x += Math.floor(Math.random() * 30 - 15);
+                y -= Math.floor(Math.random() * 80);
+                ctx.lineTo(x, y);
+            }
+        }
+        ctx.shadowBlur = 3;
+        ctx.shadowColor = '#62c8f4';
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = 0.6;
+        ctx.stroke();
+    }
+}
+
+export class ThunderBallProjectile extends Projectile<TowerBoss> {
+    static dangerEasing?: TimingFn;
+
+    static horizontal: MotaOffscreenCanvas2D | null = null;
+    static vertical: MotaOffscreenCanvas2D | null = null;
+
+    damage: number = 3000;
+    hitbox: Hitbox.Rect = new Hitbox.Rect(0, 0, 16, 16);
+
+    private direction: ProjectileDirection = ProjectileDirection.BottomToTop;
+    private cx: number = 0;
+    private cy: number = 0;
+    private damaged: boolean = false;
+
+    /**
+     * boss战开始时初始化
+     */
+    static init() {
+        this.dangerEasing = power(3, 'out');
+        this.horizontal = new MotaOffscreenCanvas2D();
+        this.vertical = new MotaOffscreenCanvas2D();
+        const hor = this.horizontal;
+        hor.size(480 - 64, 32);
+        hor.setHD(true);
+        hor.withGameScale(true);
+        const ctxHor = hor.ctx;
+        ctxHor.fillStyle = '#fff';
+        ctxHor.globalAlpha = 0.6;
+        for (let i = 0; i < 13; i++) {
+            ctxHor.fillRect(i * 32 + 2, 2, 28, 28);
+        }
+        const ver = this.vertical;
+        ver.size(480 - 64, 32);
+        ver.setHD(true);
+        ver.withGameScale(true);
+        const ctxVer = ver.ctx;
+        ctxVer.fillStyle = '#fff';
+        ctxVer.globalAlpha = 0.6;
+        for (let i = 0; i < 13; i++) {
+            ctxVer.fillRect(2, i * 32 + 2, 28, 28);
+        }
+    }
+
+    /**
+     * boss战结束后清理
+     */
+    static end() {
+        this.dangerEasing = void 0;
+        this.horizontal?.clear();
+        this.horizontal = null;
+        this.vertical?.clear();
+        this.vertical = null;
+    }
+
+    setData(direction: ProjectileDirection, cx: number, cy: number) {
+        this.cx = cx;
+        this.cy = cy;
+        this.direction = direction;
+        this.setPosition(cx * 32 + 16, cy * 32 + 16);
+    }
+
+    isIntersect(hitbox: Hitbox.HitboxType): boolean {
+        if (this.damaged) return false;
+        if (this.time < 3000) return false;
+        if (hitbox instanceof Hitbox.Rect) {
+            return Hitbox.checkRectRect(this.hitbox, hitbox);
+        } else {
+            return false;
+        }
+    }
+
+    updateHitbox(x: number, y: number): void {
+        this.hitbox.setPosition(x, y);
+    }
+
+    doDamage(target: IStateDamageable): boolean {
+        if (this.damaged) return false;
+        this.damaged = true;
+        target.hp -= this.damage;
+        return true;
+    }
+
+    ai(boss: TowerBoss, time: number, frame: number): void {
+        if (time > 3000) {
+            const dt = time - 3000;
+            const dis = dt * 0.2;
+            const cx = this.cx * 32 + 16;
+            const cy = this.cy * 32 + 16;
+
+            switch (this.direction) {
+                case ProjectileDirection.BottomToTop:
+                    this.setPosition(cx, cy - dis);
+                    break;
+                case ProjectileDirection.LeftToRight:
+                    this.setPosition(cx + dis, cy);
+                    break;
+                case ProjectileDirection.RightToLeft:
+                    this.setPosition(cx - dis, cy);
+                    break;
+                case ProjectileDirection.TopToBottom:
+                    this.setPosition(cx, cy + dis);
+                    break;
+            }
+
+            if (this.x < -16 || this.x > 496 || this.y < -16 || this.y > 496) {
+                this.destroy();
+            }
+        }
+    }
+
+    render(canvas: MotaOffscreenCanvas2D, transform: Transform): void {
+        const ctx = canvas.ctx;
+        const cx = this.cx * 32 + 16;
+        const cy = this.cy * 32 + 16;
+        let left = 0;
+        let right = 0;
+        let top = 0;
+        let bottom = 0;
+        if (this.time < 3000) {
+            let begin = 1;
+            if (this.time < 2000) {
+                begin = ArrowProjectile.dangerEasing!(this.time / 2000);
+            }
+
+            switch (this.direction) {
+                case ProjectileDirection.BottomToTop: {
+                    const height = (cy - 48) * begin;
+                    left = cx - 16;
+                    right = cx + 16;
+                    bottom = cy + 16;
+                    top = cy - height - 16;
+                    break;
+                }
+                case ProjectileDirection.LeftToRight: {
+                    const width = (432 - cx) * begin;
+                    left = cx - 16;
+                    right = cx + 16 + width;
+                    bottom = cy + 16;
+                    top = cy - 16;
+                    break;
+                }
+                case ProjectileDirection.RightToLeft: {
+                    const width = (cx - 48) * begin;
+                    left = cx - width - 16;
+                    right = cx + 16;
+                    bottom = cy + 16;
+                    top = cy - 16;
+                    break;
+                }
+                case ProjectileDirection.TopToBottom: {
+                    const height = (432 - cy) * begin;
+                    left = cx - 16;
+                    right = cx + 16;
+                    bottom = cy + 16;
+                    top = cy + 16 + height;
+                    break;
+                }
+            }
+        } else {
+            switch (this.direction) {
+                case ProjectileDirection.BottomToTop: {
+                    left = cx - 16;
+                    right = cx + 16;
+                    bottom = this.y;
+                    top = 32;
+                    break;
+                }
+                case ProjectileDirection.LeftToRight: {
+                    left = this.x;
+                    right = 448;
+                    bottom = cy + 16;
+                    top = cy - 16;
+                    break;
+                }
+                case ProjectileDirection.RightToLeft: {
+                    left = 32;
+                    right = this.x;
+                    bottom = cy + 16;
+                    top = cy - 16;
+                    break;
+                }
+                case ProjectileDirection.TopToBottom: {
+                    left = cx - 16;
+                    right = cx + 16;
+                    bottom = 448;
+                    top = this.y;
+                    break;
+                }
+            }
+        }
+        const w = right - left;
+        const h = bottom - top;
+        const hor = ThunderBallProjectile.horizontal!.canvas;
+        const ver = ThunderBallProjectile.vertical!.canvas;
+        switch (this.direction) {
+            case ProjectileDirection.BottomToTop:
+            case ProjectileDirection.TopToBottom: {
+                ctx.drawImage(hor, 0, top, 32, h, left, top, w, h);
+                break;
+            }
+            case ProjectileDirection.LeftToRight:
+            case ProjectileDirection.RightToLeft: {
+                ctx.drawImage(ver, left, 0, w, 32, left, top, w, h);
+            }
+        }
+        ctx.fillStyle = '#fff';
+        ctx.globalAlpha = 0.9;
+        ctx.beginPath();
+        const radius = 9 + Math.floor(Math.random() * 8 - 4);
+        ctx.arc(this.x, this.y, radius, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+export class BoomProjectile extends Projectile<TowerBoss> {
+    damage: number = 3000;
+    hitbox: Hitbox.Rect = new Hitbox.Rect(0, 0, 32, 32);
+
+    isIntersect(hitbox: Hitbox.HitboxType): boolean {
+        throw new Error('Method not implemented.');
+    }
+
+    updateHitbox(x: number, y: number): void {
+        throw new Error('Method not implemented.');
+    }
+
+    doDamage(target: IStateDamageable): boolean {
+        throw new Error('Method not implemented.');
+    }
+
+    ai(boss: TowerBoss, time: number, frame: number): void {
+        throw new Error('Method not implemented.');
+    }
+
+    render(canvas: MotaOffscreenCanvas2D, transform: Transform): void {
+        throw new Error('Method not implemented.');
+    }
+}
+
+export class ChainProjectile extends Projectile<TowerBoss> {
+    damage: number = 4000;
+    hitbox: Hitbox.Line = new Hitbox.Line(0, 0, 0, 0);
+
+    isIntersect(hitbox: Hitbox.HitboxType): boolean {
+        throw new Error('Method not implemented.');
+    }
+
+    updateHitbox(x: number, y: number): void {
+        throw new Error('Method not implemented.');
+    }
+
+    doDamage(target: IStateDamageable): boolean {
+        throw new Error('Method not implemented.');
+    }
+
+    ai(boss: TowerBoss, time: number, frame: number): void {
+        throw new Error('Method not implemented.');
+    }
+
+    render(canvas: MotaOffscreenCanvas2D, transform: Transform): void {
+        throw new Error('Method not implemented.');
     }
 }
