@@ -1,12 +1,34 @@
 import { Shader } from '@/core/render/shader';
 import { PointEffect } from '../fx/pointShader';
-import { BarrageBoss } from './barrage';
+import { BarrageBoss, BossSprite, Hitbox } from './barrage';
 import { MotaRenderer } from '@/core/render/render';
 import { LayerGroup } from '@/core/render/preset/layer';
 import { RenderItem } from '@/core/render/item';
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 import { Transform } from '@/core/render/transform';
-import { Animation, hyper, power, sleep, Transition } from 'mutate-animate';
+import {
+    Animation,
+    hyper,
+    power,
+    sleep,
+    TimingFn,
+    Transition
+} from 'mutate-animate';
+import { Container } from '@/core/render/container';
+import {
+    ArrowProjectile,
+    PortalProjectile,
+    ProjectileDirection
+} from './towerBossProjectile';
+import { IStateDamageable } from '@/game/state/interface';
+
+Mota.require('var', 'loading').once('coreInit', () => {
+    const shader = new Shader();
+    shader.size(480, 480);
+    shader.setHD(true);
+    TowerBoss.shader = shader;
+    TowerBoss.effect.create(shader, 40);
+});
 
 const enum TowerBossStage {
     /** 开场白阶段 */
@@ -19,6 +41,8 @@ const enum TowerBossStage {
     Stage3,
     Dialogue3,
     Stage4,
+    Stage5,
+    Stage6,
 
     End
 }
@@ -29,22 +53,40 @@ const enum HealthBarStatus {
     End
 }
 
-Mota.require('var', 'loading').once('coreInit', () => {
-    const shader = new Shader();
-    shader.size(480, 480);
-    shader.setHD(true);
-    TowerBoss.shader = shader;
-    TowerBoss.effect.create(shader, 40);
-});
+interface TowerBossAttack {
+    x: number;
+    y: number;
+    damage: number;
+    /** 生成时刻 */
+    spwan: number;
+    /** 持续时长 */
+    last: number;
+}
 
-class TowerBoss extends BarrageBoss {
+interface AttackCircleRenderable {
+    cx: number;
+    cy: number;
+    alpha: number;
+    lineOffset: number;
+}
+
+export class TowerBoss extends BarrageBoss {
     static effect: PointEffect = new PointEffect();
     static shader: Shader;
 
     /** boss战阶段 */
     stage: TowerBossStage = TowerBossStage.Prologue;
+    /** 当前boss血量 */
+    hp: number = 10000;
+    /** 当前时刻 */
+    time: number = 0;
 
-    private hp: number = 10000;
+    readonly hitbox: Hitbox.Rect;
+    readonly state: IStateDamageable;
+    readonly main: BossEffect;
+
+    /** 攻击位点 */
+    private attackLoc: Set<TowerBossAttack> = new Set();
 
     /** 血条显示元素 */
     private healthBar: HealthBar;
@@ -52,20 +94,398 @@ class TowerBoss extends BarrageBoss {
     private word: Word;
     /** 楼层渲染元素 */
     private group: LayerGroup;
+    /** 楼层渲染容器 */
+    private mapDraw: Container;
+
+    /** 每个阶段的进度，具体定义参考 ai 函数开头 */
+    private stageProgress: number = 0;
+    /** 当前阶段的开始时刻 */
+    private stageStartTime: number = 0;
+    /** 每一阶段的攻击boss次数 */
+    private attackTime: number = 0;
+    /** 攻击boss的红圈间隔时长 */
+    private attackInterval: number = 7000;
+    private attackIn: TimingFn = hyper('sin', 'out');
+    private attackOut: TimingFn = hyper('sin', 'in');
+
+    /** 使用技能1 智慧之矢 的次数 */
+    private skill1Time: number = 0;
+    /** 使用技能2 随机传送 的次数 */
+    private skill2Time: number = 0;
+    /** 使用技能3 冰锥 的次数 */
+    private skill3Time: number = 0;
+    /** 技能1的释放间隔 */
+    private skill1Interval: number = 10000;
+    /** 技能2的释放间隔 */
+    private skill2Interval: number = 7000;
+    /** 技能3的释放间隔 */
+    private skill3Interval: number = 13000;
+
+    /** 使用技能4 随机闪电 的次数 */
+    private skill4Time: number = 0;
+    /** 使用技能5 球形闪电 的次数 */
+    private skill5Time: number = 0;
+    /** 技能4的释放间隔 */
+    private skill4Interval: number = 4000;
+    /** 技能5的释放间隔 */
+    private skill5Interval: number = 12000;
+
+    /** 使用技能6 炸弹 的次数 */
+    private skill6Time: number = 0;
+    /** 使用技能7 连锁闪电 的次数 */
+    private skill7Time: number = 0;
+    /** 技能6的释放间隔 */
+    private skill6Interval: number = 500;
+    /** 技能7的释放间隔 */
+    private skill7Interval: number = 10000;
 
     constructor() {
         super();
 
         this.healthBar = new HealthBar('absolute');
         this.word = new Word('absolute');
+        this.main = new BossEffect('absolute', this);
         const render = MotaRenderer.get('render-main')!;
         this.group = render.getElementById('layer-main') as LayerGroup;
+        this.mapDraw = render.getElementById('map-draw') as Container;
 
         this.healthBar.init();
         this.word.init();
+        this.main.init();
+
+        this.healthBar.append(this.group);
+        this.word.append(this.group);
+        this.main.append(this.group);
+
+        const { x, y } = core.status.hero.loc;
+        const cell = 32;
+        this.hitbox = new Hitbox.Rect(x * cell + 4, y * cell + 16, 24, 32);
+        this.state = core.status.hero;
     }
 
-    ai(time: number, frame: number): void {}
+    override start() {
+        super.start();
+        this.group.remove();
+        this.group.append(TowerBoss.shader);
+        TowerBoss.shader.append(this.mapDraw);
+
+        ArrowProjectile.init();
+        PortalProjectile.init();
+    }
+
+    override end() {
+        super.end();
+        TowerBoss.shader.remove();
+        this.group.append(this.mapDraw);
+        this.healthBar.remove();
+        this.word.remove();
+        this.main.remove();
+
+        ArrowProjectile.end();
+        PortalProjectile.end();
+    }
+
+    /**
+     * 用于全局检测，例如受伤、攻击boss等
+     */
+    check(time: number) {
+        this.checkLose();
+    }
+
+    private checkLose() {
+        if (core.status.hero.hp < 0) {
+            core.lose();
+            core.updateStatusBar();
+            this.end();
+        }
+    }
+
+    /**
+     * 攻击boss
+     * @param damage 造成的伤害
+     */
+    attackBoss(damage: number) {
+        this.hp -= damage;
+        this.healthBar.set(this.hp);
+        // 先用drawAnimate凑活一下，等下个版本提供更好的 api
+        if (this.stage === TowerBossStage.Stage4) {
+            core.drawAnimate('hand', 7, 2);
+        } else if (this.stage === TowerBossStage.Stage5) {
+            core.drawAnimate('hand', 7, 3);
+        } else if (this.stage === TowerBossStage.Stage6) {
+            core.drawAnimate('hand', 7, 4);
+        } else {
+            core.drawAnimate('hand', 7, 1);
+        }
+    }
+
+    /**
+     * 添加攻击boss的圆圈
+     * @param last 持续时长
+     * @param damage 造成的伤害
+     */
+    addAttackCircle(last: number, damage: number) {
+        let nx = 0;
+        let ny = 0;
+        if (this.stage === TowerBossStage.Stage4) {
+            nx = Math.floor(Math.random() * 11 + 2);
+            ny = Math.floor(Math.random() * 11 + 2);
+        } else if (this.stage === TowerBossStage.Stage5) {
+            nx = Math.floor(Math.random() * 9 + 3);
+            ny = Math.floor(Math.random() * 9 + 3);
+        } else if (this.stage === TowerBossStage.Stage6) {
+            nx = Math.floor(Math.random() * 7 + 4);
+            ny = Math.floor(Math.random() * 7 + 4);
+        } else {
+            nx = Math.floor(Math.random() * 13 + 1);
+            ny = Math.floor(Math.random() * 13 + 1);
+        }
+        const obj: TowerBossAttack = {
+            x: nx,
+            y: ny,
+            spwan: this.time,
+            damage,
+            last
+        };
+        this.attackLoc.add(obj);
+    }
+
+    private getAttackCircleRenderable(): AttackCircleRenderable[] {
+        return [...this.attackLoc].map(v => {
+            const progress = (this.time - v.spwan) / v.last;
+            let alpha = 1;
+            let offset = 0;
+            if (progress < 0.1) {
+                alpha = progress * 10;
+                offset = 32 * this.attackIn(10 * (0.1 - progress));
+            } else if (progress > 0.9) {
+                alpha = 10 * (1 - progress);
+                offset = 32 * this.attackOut(10 * (progress - 0.9));
+            }
+            return {
+                cx: v.x * 32,
+                cy: v.y * 32,
+                alpha,
+                lineOffset: offset
+            };
+        });
+    }
+
+    private renderAttack() {
+        const renderable = this.getAttackCircleRenderable();
+        this.main.setAttackCircle(renderable);
+    }
+
+    ai(time: number, frame: number): void {
+        this.time = time;
+        const fixedTime = time - this.stageStartTime;
+        this.main.update();
+        this.renderAttack();
+        this.check(time);
+        switch (this.stage) {
+            case TowerBossStage.Prologue:
+                this.aiPrologue(fixedTime, frame);
+                break;
+            case TowerBossStage.Stage1:
+                this.aiStage1(fixedTime, frame);
+                break;
+            case TowerBossStage.Dialogue1:
+                this.aiDialogue1(fixedTime, frame);
+                break;
+            case TowerBossStage.Stage2:
+                this.aiStage2(fixedTime, frame);
+                break;
+            case TowerBossStage.Dialogue2:
+                this.aiDialogue2(fixedTime, frame);
+                break;
+            case TowerBossStage.Stage3:
+                this.aiStage3(fixedTime, frame);
+                break;
+            case TowerBossStage.Dialogue3:
+                this.aiDialogue3(fixedTime, frame);
+                break;
+            case TowerBossStage.Stage4:
+                this.aiStage4(fixedTime, frame);
+                break;
+            case TowerBossStage.Stage5:
+                this.aiStage5(fixedTime, frame);
+                break;
+            case TowerBossStage.Stage6:
+                this.aiStage6(fixedTime, frame);
+                break;
+            case TowerBossStage.End:
+                this.aiEnd(fixedTime, frame);
+                break;
+        }
+    }
+
+    /**
+     * 切换boss阶段
+     * @param stage 切换至的阶段
+     * @param time 在当前阶段经过的时间
+     */
+    private changeStage(stage: TowerBossStage, time: number) {
+        this.stage = stage;
+        this.stageStartTime += time;
+        this.stageProgress = 0;
+    }
+
+    private aiPrologue(time: number, frame: number) {
+        // stageProgress:
+        // 0: 开始; 1: 开始血条动画
+
+        this.healthBar.showStart();
+        this.stageProgress = 1;
+
+        if (time > 1500) {
+            this.changeStage(TowerBossStage.Stage1, time);
+            this.attackTime = 2;
+            this.skill1Time = 1;
+            this.skill2Time = 1;
+            this.skill3Time = 1;
+        }
+    }
+
+    async releaseSkill1() {
+        const locs = new Set<number>();
+        const count = Math.ceil(Math.random() * 8) + 4;
+        let i = 0;
+        while (i < count) {
+            const dir = Math.floor(Math.random() * 2);
+            const pos = Math.floor(Math.random() * 13 + 1);
+            const loc = pos + dir * 13;
+            if (!locs.has(loc)) continue;
+            i++;
+            locs.add(loc);
+            const proj = this.createProjectile(ArrowProjectile, 0, 0);
+            proj.setData(dir);
+            if (dir === ProjectileDirection.Horizontal) {
+                proj.setPosition(480 - 32, pos * 32 + 32);
+            } else {
+                proj.setPosition(pos * 32 + 32, 480 - 32);
+            }
+            await sleep(200);
+        }
+    }
+
+    releaseSkill2() {
+        const x = Math.floor(Math.random() * 13 + 1);
+        const y = Math.floor(Math.random() * 13 + 1);
+        const proj = this.createProjectile(PortalProjectile, 0, 0);
+        proj.setTarget(x, y);
+        proj.createEffect(TowerBoss.effect);
+    }
+
+    async releaseSkill3() {}
+
+    private aiStage1(time: number, frame: number) {
+        // stageProgress:
+        // 0: 开始; 1,2,3,4: 对应对话
+
+        const skill1Release = this.skill1Time * this.skill1Interval;
+        const skill2Release = this.skill2Time * this.skill2Interval;
+        const skill3Release = this.skill3Time * this.skill3Interval;
+        const attack = this.attackTime * this.attackInterval;
+
+        if (time > skill1Release) {
+            this.releaseSkill1();
+            this.skill1Time++;
+        }
+        if (time > skill2Release) {
+            this.releaseSkill2();
+            this.skill2Time++;
+        }
+        if (time > skill3Release) {
+            this.releaseSkill3();
+            this.skill3Time++;
+        }
+        if (time > attack) {
+            this.addAttackCircle(3000, 500);
+            this.attackTime++;
+        }
+
+        if (this.hp <= 7000) {
+            this.changeStage(TowerBossStage.Dialogue1, time);
+            this.attackTime = 1;
+        }
+    }
+
+    private aiDialogue1(time: number, frame: number) {}
+
+    private aiStage2(time: number, frame: number) {}
+
+    private aiDialogue2(time: number, frame: number) {}
+
+    private aiStage3(time: number, frame: number) {}
+
+    private aiDialogue3(time: number, frame: number) {}
+
+    private aiStage4(time: number, frame: number) {}
+
+    private aiStage5(time: number, frame: number) {}
+
+    private aiStage6(time: number, frame: number) {}
+
+    private aiEnd(time: number, frame: number) {}
+}
+
+class BossEffect extends BossSprite<TowerBoss> {
+    private attackCircle: AttackCircleRenderable[] = [];
+
+    /**
+     * 初始化
+     */
+    init() {
+        this.size(480, 480);
+        this.setHD(true);
+        this.setZIndex(80);
+    }
+
+    /**
+     * 设置攻击boss圆圈的渲染信息
+     */
+    setAttackCircle(renderable: AttackCircleRenderable[]) {
+        this.attackCircle = renderable;
+    }
+
+    protected preDraw(
+        canvas: MotaOffscreenCanvas2D,
+        transform: Transform
+    ): boolean {
+        this.renderAttackCircle(canvas);
+        return true;
+    }
+
+    protected postDraw(
+        canvas: MotaOffscreenCanvas2D,
+        transform: Transform
+    ): void {}
+
+    private renderAttackCircle(canvas: MotaOffscreenCanvas2D) {
+        const ctx = canvas.ctx;
+        ctx.strokeStyle = '#ffe229';
+        ctx.fillStyle = '#ffe229';
+        ctx.lineWidth = 2;
+        this.attackCircle.forEach(({ cx, cy, lineOffset, alpha }) => {
+            ctx.globalAlpha = alpha;
+            ctx.beginPath();
+            const offset = lineOffset + 8;
+            ctx.arc(cx, cy, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(cx, cy, offset, 0, Math.PI * 2);
+            ctx.moveTo(cx + offset, cy);
+            ctx.lineTo(cx + offset + 16, cy);
+            ctx.moveTo(cx, cy + offset);
+            ctx.lineTo(cx, cy + offset + 16);
+            ctx.moveTo(cx - offset, cy);
+            ctx.lineTo(cx - offset - 16, cy);
+            ctx.moveTo(cx, cy - offset);
+            ctx.lineTo(cx, cy - offset - 16);
+            ctx.stroke();
+        });
+        ctx.globalAlpha = 1;
+    }
 }
 
 interface TextRenderable {
@@ -80,8 +500,6 @@ class Word extends RenderItem {
 
     /** 当前正在显示的文字 */
     private showing: string = '';
-    /** 是否已经显示完毕 */
-    private showEnd: boolean = true;
     /** 文字显示时间间隔 */
     private showInterval: number = 100;
     /** 文字显示的虚化时长 */
@@ -128,7 +546,6 @@ class Word extends RenderItem {
      * @param text 要显示的文字
      */
     showText(text: string) {
-        this.showEnd = false;
         this.showStartTime = Date.now();
         this.showing = text;
     }

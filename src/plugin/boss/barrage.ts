@@ -1,3 +1,7 @@
+import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
+import { RenderItem, RenderItemPosition } from '@/core/render/item';
+import { Transform } from '@/core/render/transform';
+import { IStateDamageable } from '@/game/state/interface';
 import { Ticker } from 'mutate-animate';
 
 export abstract class BarrageBoss {
@@ -8,7 +12,14 @@ export abstract class BarrageBoss {
     /** 开始时刻 */
     private startTime: number = 0;
     /** 当前帧数 */
-    private frame: number = 0;
+    frame: number = 0;
+
+    /** 这个boss战的主渲染元素，所有弹幕都会在此之上渲染 */
+    abstract readonly main: BossSprite;
+    /** 这个boss战中勇士的碰撞箱 */
+    abstract readonly hitbox: Hitbox.HitboxType;
+    /** 勇士的状态 */
+    abstract readonly state: IStateDamageable;
 
     /**
      * boss的ai，战斗开始后，每帧执行一次
@@ -19,9 +30,19 @@ export abstract class BarrageBoss {
 
     private tick = () => {
         const now = Date.now();
-        this.ai(now - this.startTime, this.frame++);
+        this.ai(now - this.startTime, this.frame);
+        this.frame++;
         this.projectiles.forEach(v => {
-            v.ai(this, now - v.startTime, v.frame++);
+            const time = now - v.startTime;
+            v.time = time;
+            v.ai(this, time, v.frame);
+            v.frame++;
+            if (time > 60_000) {
+                this.destroyProjectile(v);
+            }
+            if (v.isIntersect(this.hitbox)) {
+                v.doDamage(this.state);
+            }
         });
     };
 
@@ -59,32 +80,135 @@ export abstract class BarrageBoss {
      * @param x 弹幕的横坐标
      * @param y 弹幕的纵坐标
      */
-    createProjectile(
-        Proj: new (boss: BarrageBoss) => Projectile,
+    createProjectile<T extends Projectile>(
+        Proj: new (boss: this) => T,
         x: number,
         y: number
-    ) {
+    ): T {
         const projectile = new Proj(this);
         projectile.setPosition(x, y);
         return projectile;
     }
 }
 
-export abstract class Projectile {
+export abstract class BossSprite<
+    T extends BarrageBoss = BarrageBoss
+> extends RenderItem {
+    /** 这个sprite所属的boss */
+    readonly boss: T;
+
+    constructor(type: RenderItemPosition, boss: T) {
+        super(type, false);
+        this.boss = boss;
+    }
+
+    /**
+     * 在内置渲染函数执行前渲染内容，返回false会阻止内置渲染函数执行
+     * @param canvas 渲染至的画布
+     * @param transform 渲染时的变换矩阵
+     */
+    protected abstract preDraw(
+        canvas: MotaOffscreenCanvas2D,
+        transform: Transform
+    ): boolean;
+
+    /**
+     * 在内置渲染函数执行后渲染内容，如果preDraw返回false，也会执行本函数
+     * @param canvas 渲染至的画布
+     * @param transform 渲染时的变换矩阵
+     */
+    protected abstract postDraw(
+        canvas: MotaOffscreenCanvas2D,
+        transform: Transform
+    ): void;
+
+    protected render(
+        canvas: MotaOffscreenCanvas2D,
+        transform: Transform
+    ): void {
+        const pre = this.preDraw(canvas, transform);
+        if (!pre) {
+            this.postDraw(canvas, transform);
+            return;
+        }
+        this.renderProjectiles(canvas, transform);
+        this.postDraw(canvas, transform);
+    }
+
+    /**
+     * 渲染所有弹幕
+     * @param canvas 渲染至的画布
+     * @param transform 渲染时的变换矩阵
+     */
+    protected renderProjectiles(
+        canvas: MotaOffscreenCanvas2D,
+        transform: Transform
+    ) {
+        this.boss.projectiles.forEach(v => {
+            v.render(canvas, transform);
+        });
+    }
+}
+
+export abstract class Projectile<T extends BarrageBoss = BarrageBoss> {
     /** 这个弹幕从属的boss */
-    boss: BarrageBoss;
-    x: number = 0;
-    y: number = 0;
+    boss: T;
+    /** 这个弹幕的伤害 */
+    abstract damage: number;
+
+    private _x: number = 0;
+    get x(): number {
+        return this._x;
+    }
+    set x(v: number) {
+        this._x = v;
+        this.updateHitbox(v, this._y);
+    }
+
+    private _y: number = 0;
+    get y(): number {
+        return this._y;
+    }
+    set y(v: number) {
+        this._y = v;
+        this.updateHitbox(this._x, v);
+    }
 
     /** 弹幕的生成时刻 */
     startTime: number = Date.now();
     /** 弹幕当前帧数 */
     frame: number = 0;
+    /** 当前弹幕持续时长 */
+    time: number = 0;
 
-    constructor(boss: BarrageBoss) {
+    /** 这个弹幕的碰撞箱 */
+    abstract hitbox: Hitbox.HitboxType;
+
+    constructor(boss: T) {
         this.boss = boss;
         boss.projectiles.add(this);
     }
+
+    /**
+     * 判断一个碰撞箱是否与本弹幕的碰撞箱有交叉。
+     * 此判断应该具有对称性，如果用A检测B发生碰撞，那么用B检测A也应该发生碰撞。
+     * @param hitbox 要检测的碰撞箱
+     */
+    abstract isIntersect(hitbox: Hitbox.HitboxType): boolean;
+
+    /**
+     * 当弹幕的横纵坐标改变时，更新碰撞箱
+     * @param x 弹幕的横坐标
+     * @param y 弹幕的纵坐标
+     */
+    abstract updateHitbox(x: number, y: number): void;
+
+    /**
+     * 对一个目标造成伤害
+     * @param target 伤害目标
+     * @returns 是否成功对目标造成伤害
+     */
+    abstract doDamage(target: IStateDamageable): boolean;
 
     /**
      * 设置这个弹幕的位置
@@ -92,15 +216,23 @@ export abstract class Projectile {
     setPosition(x: number, y: number) {
         this.x = x;
         this.y = y;
+        this.updateHitbox(x, y);
     }
 
     /**
-     * 这个弹幕的ai，每帧执行一次，直至被销毁
+     * 这个弹幕的ai，每帧执行一次，直至被销毁，在1分钟后会强制被摧毁
      * @param boss 从属的boss
      * @param time 从弹幕生成开始算起至现在经过了多长时间
      * @param frame 从弹幕生成开始算起至现在经过了多少帧，即当前是第几帧
      */
-    abstract ai(boss: BarrageBoss, time: number, frame: number): void;
+    abstract ai(boss: T, time: number, frame: number): void;
+
+    /**
+     * 这个弹幕的渲染函数，原则上一个boss的弹幕应该全部画在同一层，而且渲染前画布不进行矩阵变换
+     * @param canvas 渲染至的画布
+     * @param transform 渲染时的变换矩阵
+     */
+    abstract render(canvas: MotaOffscreenCanvas2D, transform: Transform): void;
 
     /**
      * 摧毁这个弹幕
@@ -111,18 +243,15 @@ export abstract class Projectile {
 }
 
 export namespace Hitbox {
-    export class Line {
-        x1: number;
-        y1: number;
-        x2: number;
-        y2: number;
+    export type HitboxType = Line | Rect | Circle;
 
-        constructor(x1: number, y1: number, x2: number, y2: number) {
-            this.x1 = x1;
-            this.x2 = x2;
-            this.y1 = y1;
-            this.y2 = y2;
-        }
+    export class Line {
+        constructor(
+            public x1: number,
+            public y1: number,
+            public x2: number,
+            public y2: number
+        ) {}
 
         setPoint1(x: number, y: number) {
             this.x1 = x;
@@ -136,15 +265,11 @@ export namespace Hitbox {
     }
 
     export class Circle {
-        x: number;
-        y: number;
-        radius: number;
-
-        constructor(x: number, y: number, radius: number) {
-            this.x = x;
-            this.y = y;
-            this.radius = radius;
-        }
+        constructor(
+            public x: number,
+            public y: number,
+            public radius: number
+        ) {}
 
         setRadius(radius: number) {
             this.radius = radius;
@@ -157,17 +282,12 @@ export namespace Hitbox {
     }
 
     export class Rect {
-        x: number;
-        y: number;
-        w: number;
-        h: number;
-
-        constructor(x: number, y: number, w: number, h: number) {
-            this.x = x;
-            this.y = y;
-            this.w = w;
-            this.h = h;
-        }
+        constructor(
+            public x: number,
+            public y: number,
+            public w: number,
+            public h: number
+        ) {}
 
         setPosition(x: number, y: number) {
             this.x = x;
