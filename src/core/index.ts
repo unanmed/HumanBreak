@@ -76,6 +76,7 @@ import { Camera } from './render/camera';
 import * as Animation from 'mutate-animate';
 import './render/index';
 import * as RenderUtils from './render/utils';
+import '@/module';
 
 // ----- 类注册
 Mota.register('class', 'AudioPlayer', AudioPlayer);

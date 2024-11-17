@@ -37,6 +37,16 @@ export class WeatherController {
     };
 
     /**
+     * 清空所有天气
+     */
+    clearWeather() {
+        this.active.forEach(v => {
+            v.deactivate();
+        });
+        this.active.clear();
+    }
+
+    /**
      * 获取一个天气
      * @param weather 要获取的天气
      */

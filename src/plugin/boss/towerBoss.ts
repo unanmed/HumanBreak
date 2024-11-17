@@ -21,6 +21,7 @@ import {
 } from './towerBossProjectile';
 import { IStateDamageable } from '@/game/state/interface';
 import { HeroRenderer } from '@/core/render/preset/hero';
+import { controller } from '@/module/weather';
 
 Mota.require('var', 'loading').once('coreInit', () => {
     const shader = new Shader();
@@ -426,6 +427,8 @@ export class TowerBoss extends BarrageBoss {
         const skill4Release = this.skill4Time * this.skill4Interval;
         const skill5Release = this.skill5Time * this.skill5Interval;
         const attack = this.attackTime * this.attackInterval;
+
+        controller.activate('rain', 6);
 
         if (time > skill4Release) {
             this.releaseSkill4();

@@ -41,6 +41,7 @@ import type { BlockMover, HeroMover, ObjectMoverBase } from './state/move';
 import type { Camera } from '@/core/render/camera';
 import type * as Animation from 'mutate-animate';
 import type * as RenderUtils from '@/core/render/utils';
+import type { WeatherController } from '@/module/weather/weather';
 
 interface ClassInterface {
     // 渲染进程与游戏进程通用
@@ -140,6 +141,10 @@ interface ModuleInterface {
         HeroKeyMover: typeof HeroKeyMover;
     };
     Animation: typeof Animation;
+    Weather: {
+        controller: WeatherController;
+        WeatherController: typeof WeatherController;
+    };
 }
 
 interface SystemInterfaceMap {
