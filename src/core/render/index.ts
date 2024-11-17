@@ -11,6 +11,7 @@ import { LayerGroupPortal } from '@/plugin/fx/portal';
 import { LayerGroupHalo } from '@/plugin/fx/halo';
 import { FloorViewport } from './preset/viewport';
 import { Container } from './container';
+import { PopText } from '@/plugin/fx/pop';
 
 let main: MotaRenderer;
 
@@ -22,13 +23,16 @@ Mota.require('var', 'loading').once('coreInit', () => {
 
     const mapDraw = new Container();
     const layer = new LayerGroup();
+    const pop = new PopText('static');
     mapDraw.id = 'map-draw';
     layer.id = 'layer-main';
+    pop.id = 'pop-main';
 
     mapDraw.setHD(true);
     mapDraw.setAntiAliasing(false);
     mapDraw.size(core._PX_, core._PY_);
 
+    pop.setZIndex(80);
     ['bg', 'bg2', 'event', 'fg', 'fg2'].forEach(v => {
         layer.addLayer(v as FloorLayer);
     });
@@ -56,6 +60,7 @@ Mota.require('var', 'loading').once('coreInit', () => {
 
     render.appendChild(mapDraw);
     mapDraw.appendChild(layer);
+    layer.appendChild(pop);
     console.log(render);
 });
 
