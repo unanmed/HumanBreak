@@ -414,7 +414,7 @@ export namespace Hitbox {
         const { x: cx, y: cy, radius: r } = circle;
         const { x, y, w, h } = rect;
 
-        if (cx > x && cx < x + w && cy > y && cy < y + h) return false;
+        if (cx > x && cx < x + w && cy > y && cy < y + h) return true;
 
         // 找到圆心到矩形的最近点
         const closestX = Math.max(x, Math.min(cx, x + w));
