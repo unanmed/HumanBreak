@@ -113,11 +113,10 @@ main.floors.tower7=
             ],
             "no": [
                 "屏幕上方有boss血条和提示等，请注意阅读",
-                "注意：重新开始特殊战需要刷新页面！！！！！！！！！！！！",
                 "下面，就让我们开始吧！",
                 {
                     "type": "function",
-                    "function": "function(){\ncore.plugin.replay.readyClip();\n}"
+                    "function": "function(){\nMota.Plugin.require('replay_g').readyClip();\n}"
                 }
             ]
         },
@@ -153,7 +152,7 @@ main.floors.tower7=
         },
         {
             "type": "function",
-            "function": "function(){\ncore.drawWarning(7, 2, \"智慧之神\");\n}"
+            "function": "function(){\n// core.drawWarning(7, 2, \"智慧之神\");\n}"
         },
         {
             "type": "sleep",
@@ -162,7 +161,7 @@ main.floors.tower7=
         },
         {
             "type": "function",
-            "function": "function(){\ncore.plugin.towerBoss.initTowerBoss();\n}"
+            "function": "function(){\nMota.Plugin.require('boss_r').startTowerBoss();\n}"
         }
     ],
     "eachArrive": [],

@@ -138,6 +138,7 @@ export class PointEffect {
         this.effectCount = itemCount;
         this.dataList = new Float32Array(itemCount * 16);
         this.transformed = new Float32Array(itemCount * 16);
+        this.transform = shader.transform;
 
         return program;
     }
@@ -146,7 +147,9 @@ export class PointEffect {
      * 在下一帧更新特效数据
      */
     requestUpdate() {
-        this.needUpdateData = true;
+        if (this.dataList[0] !== PointEffectType.None) {
+            this.needUpdateData = true;
+        }
         if (this.shader) this.shader.update(this.shader);
     }
 
@@ -369,6 +372,7 @@ export class PointEffect {
                 transformed.set(list);
                 this.transformData();
                 block.set(transformed);
+                this.needUpdateData = false;
             }
         });
     }

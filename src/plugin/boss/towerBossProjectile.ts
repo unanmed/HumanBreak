@@ -17,6 +17,88 @@ export const enum ProjectileDirection {
     BottomToTop
 }
 
+export class AttackProjectile extends Projectile<TowerBoss> {
+    static easeIn?: TimingFn;
+    static easeOut?: TimingFn;
+
+    damage: number = 500;
+    hitbox: Hitbox.Rect = new Hitbox.Rect(0, 0, 32, 32);
+
+    static init() {
+        this.easeIn = hyper('sin', 'out');
+        this.easeOut = hyper('sin', 'in');
+    }
+
+    static end() {
+        this.easeIn = void 0;
+        this.easeOut = void 0;
+    }
+
+    isIntersect(hitbox: Hitbox.HitboxType): boolean {
+        if (hitbox instanceof Hitbox.Rect) {
+            return Hitbox.checkRectRect(this.hitbox, hitbox);
+        } else {
+            return false;
+        }
+    }
+
+    updateHitbox(x: number, y: number): void {
+        this.hitbox.setPosition(x, y);
+    }
+
+    doDamage(target: IStateDamageable): boolean {
+        this.boss.attackBoss(this.damage);
+        this.destroy();
+        return true;
+    }
+
+    ai(boss: TowerBoss, time: number, frame: number): void {
+        if (time > 4000) {
+            this.destroy();
+        }
+    }
+
+    render(canvas: MotaOffscreenCanvas2D, transform: Transform): void {
+        const progress = this.time / 4000;
+        let alpha = 1;
+        let offset = 0;
+        if (progress < 0.1) {
+            alpha = progress * 10;
+            offset = 24 * AttackProjectile.easeIn!(10 * (0.1 - progress));
+        } else if (progress > 0.9) {
+            alpha = 10 * (1 - progress);
+            offset = 24 * AttackProjectile.easeOut!(10 * (progress - 0.9));
+        } else {
+            alpha = 1;
+            offset = 0;
+        }
+        const ctx = canvas.ctx;
+        ctx.save();
+        ctx.strokeStyle = '#ffe229';
+        ctx.fillStyle = '#ffe229';
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = alpha;
+        ctx.beginPath();
+        const o = offset + 16;
+        const cx = this.x + 16;
+        const cy = this.y + 16;
+        ctx.arc(cx, cy, 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(cx, cy, o, 0, Math.PI * 2);
+        ctx.moveTo(cx + o, cy);
+        ctx.lineTo(cx + o + 16, cy);
+        ctx.moveTo(cx, cy + o);
+        ctx.lineTo(cx, cy + o + 16);
+        ctx.moveTo(cx - o, cy);
+        ctx.lineTo(cx - o - 16, cy);
+        ctx.moveTo(cx, cy - o);
+        ctx.lineTo(cx, cy - o - 16);
+        ctx.stroke();
+        ctx.restore();
+    }
+}
+
 export class ArrowProjectile extends Projectile<TowerBoss> {
     static easing?: TimingFn;
     static dangerEasing?: TimingFn;
@@ -42,23 +124,23 @@ export class ArrowProjectile extends Projectile<TowerBoss> {
         this.horizontal = new MotaOffscreenCanvas2D();
         this.vertical = new MotaOffscreenCanvas2D();
         const hor = this.horizontal;
-        hor.size(480 - 64, 32);
+        hor.size(480, 32);
         hor.setHD(true);
         hor.withGameScale(true);
         const ctxHor = hor.ctx;
         ctxHor.fillStyle = '#f00';
         ctxHor.globalAlpha = 0.6;
-        for (let i = 0; i < 13; i++) {
+        for (let i = 0; i < 15; i++) {
             ctxHor.fillRect(i * 32 + 2, 2, 28, 28);
         }
         const ver = this.vertical;
-        ver.size(480 - 64, 32);
+        ver.size(32, 480);
         ver.setHD(true);
         ver.withGameScale(true);
         const ctxVer = ver.ctx;
         ctxVer.fillStyle = '#f00';
         ctxVer.globalAlpha = 0.6;
-        for (let i = 0; i < 13; i++) {
+        for (let i = 0; i < 15; i++) {
             ctxVer.fillRect(2, i * 32 + 2, 28, 28);
         }
     }
@@ -113,9 +195,9 @@ export class ArrowProjectile extends Projectile<TowerBoss> {
             const dx = res * 640;
             const x = 480 - 32 - dx;
             if (this.direction === ProjectileDirection.Horizontal) {
-                this.setPosition(this.x, x);
-            } else {
                 this.setPosition(x, this.y);
+            } else {
+                this.setPosition(this.x, x);
             }
         } else if (time > 5000) {
             this.destroy();
@@ -125,6 +207,9 @@ export class ArrowProjectile extends Projectile<TowerBoss> {
     render(canvas: MotaOffscreenCanvas2D, transform: Transform): void {
         const ctx = canvas.ctx;
         ctx.globalAlpha = 1;
+        const ratio = devicePixelRatio * core.domStyle.scale;
+        const cell = 32 * ratio;
+        ctx.save();
 
         if (this.time < 3000) {
             let begin = 1;
@@ -132,27 +217,39 @@ export class ArrowProjectile extends Projectile<TowerBoss> {
                 begin = ArrowProjectile.dangerEasing!(this.time / 2000);
             }
             const len = begin * 13 * 32;
+            const fl = len * ratio;
             const x1 = 480 - 32 - len;
+            const fx1 = x1 * ratio;
 
             if (this.direction === ProjectileDirection.Horizontal) {
                 const canvas = ArrowProjectile.horizontal!.canvas;
-                ctx.drawImage(canvas, x1, 0, len, 32, x1, this.y, len, 32);
+                ctx.drawImage(canvas, fx1, 0, fl, cell, x1, this.y, len, 32);
             } else {
                 const canvas = ArrowProjectile.vertical!.canvas;
-                ctx.drawImage(canvas, 0, x1, 32, len, this.y, x1, 32, len);
+                ctx.drawImage(canvas, 0, fx1, cell, fl, this.x, x1, 32, len);
             }
         } else {
-            const len = Math.max(this.y - 32, 0);
             if (this.direction === ProjectileDirection.Horizontal) {
+                const len = Math.max(this.x - 32, 0);
+                const fl = len * ratio;
                 const canvas = ArrowProjectile.horizontal!.canvas;
-                ctx.drawImage(canvas, 32, 0, len, 32, 32, this.y, len, 32);
+                ctx.drawImage(canvas, cell, 0, fl, cell, 32, this.y, len, 32);
             } else {
+                const len = Math.max(this.y - 32, 0);
+                const fl = len * ratio;
                 const canvas = ArrowProjectile.vertical!.canvas;
-                ctx.drawImage(canvas, 0, 32, 32, len, this.y, 32, 32, len);
+                ctx.drawImage(canvas, 0, cell, cell, fl, this.x, 32, 32, len);
             }
         }
         const img = core.material.images.images['arrow.png'];
-        ctx.drawImage(img, this.x, this.y, 102, 32);
+        if (this.direction === ProjectileDirection.Vertical) {
+            ctx.translate(this.x + 32, this.y);
+            ctx.rotate(Math.PI / 2);
+            ctx.drawImage(img, 0, 0, 102, 32);
+        } else {
+            ctx.drawImage(img, this.x, this.y, 102, 32);
+        }
+        ctx.restore();
     }
 }
 
@@ -170,7 +267,8 @@ export class PortalProjectile extends Projectile<TowerBoss> {
     private transfered: boolean = false;
 
     private effect?: PointEffect;
-    private effectId?: number;
+    private effectId1?: number;
+    private effectId2?: number;
 
     static init() {
         this.easing = hyper('sin', 'out');
@@ -182,13 +280,20 @@ export class PortalProjectile extends Projectile<TowerBoss> {
 
     createEffect(effect: PointEffect) {
         this.effect = effect;
-        const id = effect.addEffect(
+        const id1 = effect.addEffect(
             PointEffectType.CircleWarpTangetial,
             Date.now(),
             4000,
-            [this.tx * 32, this.ty * 32, 12, 20]
+            [this.tx * 32 + 16, this.ty * 32 + 16, 0, 32]
         );
-        this.effectId = id;
+        const id2 = effect.addEffect(
+            PointEffectType.CircleContrast,
+            Date.now(),
+            4000,
+            [this.tx * 32 + 16, this.ty * 32 + 16, 32, 24]
+        );
+        this.effectId1 = id1;
+        this.effectId2 = id2;
     }
 
     /**
@@ -225,16 +330,21 @@ export class PortalProjectile extends Projectile<TowerBoss> {
 
     render(canvas: MotaOffscreenCanvas2D, transform: Transform): void {
         const effect = this.effect;
-        const id = this.effectId;
-        if (!effect || isNil(id)) return;
+        const id1 = this.effectId1;
+        const id2 = this.effectId2;
+        if (!effect || isNil(id1) || isNil(id2)) return;
         const time = this.time;
-        const max = Math.PI * 8;
+        const max = Math.PI * 2;
         if (time < 2000) {
             const progress = PortalProjectile.easing!(time / 2000);
-            effect.setEffect(id, void 0, [0, max * progress, 0, 0]);
+            const ratio = Math.min(progress * 3, 1);
+            effect.setEffect(id1, void 0, [0, max * progress, 0, 0]);
+            effect.setEffect(id2, void 0, [ratio, 0, 0, 0]);
         } else {
             const progress = PortalProjectile.easing!((time - 2000) / 2000);
-            effect.setEffect(id, void 0, [max * progress, max, 0, 0]);
+            const ratio = Math.min((1 - progress) * 3, 1);
+            effect.setEffect(id1, void 0, [max * progress, max, 0, 0]);
+            effect.setEffect(id2, void 0, [ratio, 0, 0, 0]);
         }
     }
 }

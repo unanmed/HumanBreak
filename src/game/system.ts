@@ -160,6 +160,7 @@ interface PluginInterface {
     completion_r: typeof import('../plugin/completion');
     gameCanvas_r: typeof import('../plugin/fx/gameCanvas');
     frag_r: typeof import('../plugin/fx/frag');
+    boss_r: typeof import('../plugin/boss');
     // 游戏进程定义的插件
     utils_g: typeof import('../plugin/game/utils');
     shop_g: typeof import('../plugin/game/shop');

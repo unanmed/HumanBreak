@@ -17,6 +17,7 @@ import {
 import { Container } from '@/core/render/container';
 import {
     ArrowProjectile,
+    AttackProjectile,
     BoomProjectile,
     ChainProjectile,
     IceProjectile,
@@ -56,23 +57,6 @@ const enum HealthBarStatus {
     End
 }
 
-interface TowerBossAttack {
-    x: number;
-    y: number;
-    damage: number;
-    /** 生成时刻 */
-    spwan: number;
-    /** 持续时长 */
-    last: number;
-}
-
-interface AttackCircleRenderable {
-    cx: number;
-    cy: number;
-    alpha: number;
-    lineOffset: number;
-}
-
 export class TowerBoss extends BarrageBoss {
     static effect: PointEffect = new PointEffect();
     static shader: Shader;
@@ -87,9 +71,6 @@ export class TowerBoss extends BarrageBoss {
     readonly hitbox: Hitbox.Rect;
     readonly state: IStateDamageable;
     readonly main: BossEffect;
-
-    /** 攻击位点 */
-    private attackLoc: Set<TowerBossAttack> = new Set();
 
     /** 血条显示元素 */
     private healthBar: HealthBar;
@@ -108,8 +89,6 @@ export class TowerBoss extends BarrageBoss {
     private attackTime: number = 0;
     /** 攻击boss的红圈间隔时长 */
     private attackInterval: number = 7000;
-    private attackIn: TimingFn = hyper('sin', 'out');
-    private attackOut: TimingFn = hyper('sin', 'in');
 
     /** 使用技能1 智慧之矢 的次数 */
     private skill1Time: number = 0;
@@ -156,9 +135,7 @@ export class TowerBoss extends BarrageBoss {
         this.word.init();
         this.main.init();
 
-        this.healthBar.append(this.group);
-        this.word.append(this.group);
-        this.main.append(this.group);
+        TowerBoss.effect.setTransform(this.group.camera);
 
         const { x, y } = core.status.hero.loc;
         const cell = 32;
@@ -171,10 +148,17 @@ export class TowerBoss extends BarrageBoss {
         this.group.remove();
         this.group.append(TowerBoss.shader);
         TowerBoss.shader.append(this.mapDraw);
+        this.healthBar.append(this.group);
+        this.word.append(this.group);
+        this.main.append(this.group);
 
         ArrowProjectile.init();
         PortalProjectile.init();
         ThunderProjectile.init();
+        AttackProjectile.init();
+
+        TowerBoss.effect.start();
+        TowerBoss.effect.use();
     }
 
     override end() {
@@ -188,6 +172,9 @@ export class TowerBoss extends BarrageBoss {
         ArrowProjectile.end();
         PortalProjectile.end();
         ThunderProjectile.end();
+        AttackProjectile.end();
+
+        TowerBoss.effect.end();
     }
 
     /**
@@ -229,64 +216,20 @@ export class TowerBoss extends BarrageBoss {
      * @param last 持续时长
      * @param damage 造成的伤害
      */
-    addAttackCircle(last: number, damage: number) {
-        let nx = 0;
-        let ny = 0;
-        if (this.stage === TowerBossStage.Stage3) {
-            nx = Math.floor(Math.random() * 11 + 2);
-            ny = Math.floor(Math.random() * 11 + 2);
-        } else if (this.stage === TowerBossStage.Stage4) {
-            nx = Math.floor(Math.random() * 9 + 3);
-            ny = Math.floor(Math.random() * 9 + 3);
-        } else if (this.stage === TowerBossStage.Stage5) {
-            nx = Math.floor(Math.random() * 7 + 4);
-            ny = Math.floor(Math.random() * 7 + 4);
-        } else {
-            nx = Math.floor(Math.random() * 13 + 1);
-            ny = Math.floor(Math.random() * 13 + 1);
-        }
-        const obj: TowerBossAttack = {
-            x: nx,
-            y: ny,
-            spwan: this.time,
-            damage,
-            last
-        };
-        this.attackLoc.add(obj);
-    }
-
-    private getAttackCircleRenderable(): AttackCircleRenderable[] {
-        return [...this.attackLoc].map(v => {
-            const progress = (this.time - v.spwan) / v.last;
-            let alpha = 1;
-            let offset = 0;
-            if (progress < 0.1) {
-                alpha = progress * 10;
-                offset = 32 * this.attackIn(10 * (0.1 - progress));
-            } else if (progress > 0.9) {
-                alpha = 10 * (1 - progress);
-                offset = 32 * this.attackOut(10 * (progress - 0.9));
-            }
-            return {
-                cx: v.x * 32,
-                cy: v.y * 32,
-                alpha,
-                lineOffset: offset
-            };
-        });
-    }
-
-    private renderAttack() {
-        const renderable = this.getAttackCircleRenderable();
-        this.main.setAttackCircle(renderable);
+    addAttackCircle(damage: number, n: number) {
+        const s = 13 - n * 2;
+        const nx = Math.floor(Math.random() * s + n + 1);
+        const ny = Math.floor(Math.random() * s + n + 1);
+        const proj = this.createProjectile(AttackProjectile, nx * 32, ny * 32);
+        proj.damage = damage;
     }
 
     ai(time: number, frame: number): void {
         this.time = time;
         const fixedTime = time - this.stageStartTime;
         this.main.update();
-        this.renderAttack();
         this.check(time);
+        TowerBoss.effect.requestUpdate();
         switch (this.stage) {
             case TowerBossStage.Prologue:
                 this.aiPrologue(fixedTime, frame);
@@ -351,9 +294,9 @@ export class TowerBoss extends BarrageBoss {
         let i = 0;
         while (i < count) {
             const dir = Math.floor(Math.random() * 2);
-            const pos = Math.floor(Math.random() * 13 + 1);
+            const pos = Math.floor(Math.random() * 13);
             const loc = pos + dir * 13;
-            if (!locs.has(loc)) continue;
+            if (locs.has(loc)) continue;
             i++;
             locs.add(loc);
             const proj = this.createProjectile(ArrowProjectile, 0, 0);
@@ -412,7 +355,7 @@ export class TowerBoss extends BarrageBoss {
             this.skill3Time++;
         }
         if (time > attack) {
-            this.addAttackCircle(3000, 500);
+            this.addAttackCircle(500, 0);
             this.attackTime++;
         }
 
@@ -481,7 +424,7 @@ export class TowerBoss extends BarrageBoss {
             this.skill5Time++;
         }
         if (time > attack) {
-            this.addAttackCircle(3000, 500);
+            this.addAttackCircle(500, 0);
             this.attackTime++;
         }
 
@@ -575,7 +518,7 @@ export class TowerBoss extends BarrageBoss {
             this.skill7Time++;
         }
         if (time > attack) {
-            this.addAttackCircle(3000, 500);
+            this.addAttackCircle(500, 1);
             this.attackTime++;
         }
 
@@ -603,7 +546,7 @@ export class TowerBoss extends BarrageBoss {
             this.skill7Time++;
         }
         if (time > attack) {
-            this.addAttackCircle(3000, 500);
+            this.addAttackCircle(500, 2);
             this.attackTime++;
         }
 
@@ -631,7 +574,7 @@ export class TowerBoss extends BarrageBoss {
             this.skill7Time++;
         }
         if (time > attack) {
-            this.addAttackCircle(3000, 500);
+            this.addAttackCircle(500, 3);
             this.attackTime++;
         }
 
@@ -644,9 +587,6 @@ export class TowerBoss extends BarrageBoss {
 }
 
 class BossEffect extends BossSprite<TowerBoss> {
-    private attackCircle: AttackCircleRenderable[] = [];
-    private chainPath: LocArr[] = [];
-
     /**
      * 初始化
      */
@@ -656,18 +596,10 @@ class BossEffect extends BossSprite<TowerBoss> {
         this.setZIndex(80);
     }
 
-    /**
-     * 设置攻击boss圆圈的渲染信息
-     */
-    setAttackCircle(renderable: AttackCircleRenderable[]) {
-        this.attackCircle = renderable;
-    }
-
     protected preDraw(
         canvas: MotaOffscreenCanvas2D,
         transform: Transform
     ): boolean {
-        this.renderAttackCircle(canvas);
         return true;
     }
 
@@ -675,32 +607,6 @@ class BossEffect extends BossSprite<TowerBoss> {
         canvas: MotaOffscreenCanvas2D,
         transform: Transform
     ): void {}
-
-    private renderAttackCircle(canvas: MotaOffscreenCanvas2D) {
-        const ctx = canvas.ctx;
-        ctx.strokeStyle = '#ffe229';
-        ctx.fillStyle = '#ffe229';
-        ctx.lineWidth = 2;
-        this.attackCircle.forEach(({ cx, cy, lineOffset, alpha }) => {
-            ctx.globalAlpha = alpha;
-            ctx.beginPath();
-            const offset = lineOffset + 8;
-            ctx.arc(cx, cy, 2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(cx, cy, offset, 0, Math.PI * 2);
-            ctx.moveTo(cx + offset, cy);
-            ctx.lineTo(cx + offset + 16, cy);
-            ctx.moveTo(cx, cy + offset);
-            ctx.lineTo(cx, cy + offset + 16);
-            ctx.moveTo(cx - offset, cy);
-            ctx.lineTo(cx - offset - 16, cy);
-            ctx.moveTo(cx, cy - offset);
-            ctx.lineTo(cx, cy - offset - 16);
-            ctx.stroke();
-        });
-        ctx.globalAlpha = 1;
-    }
 }
 
 interface TextRenderable {

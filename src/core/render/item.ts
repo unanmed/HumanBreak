@@ -427,6 +427,9 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this.remove();
         parent.children.add(this);
         this.parent = parent;
+        parent.requestSort();
+        this.needUpdate = false;
+        this.update();
         if (this._id !== '') {
             const root = this.findRoot();
             if (!root) return;
@@ -439,8 +442,11 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      */
     remove(): boolean {
         if (!this.parent) return false;
-        const success = this.parent.children.delete(this);
+        const parent = this.parent;
+        const success = parent.children.delete(this);
         this.parent = void 0;
+        parent.requestSort();
+        parent.update();
         if (!success) return false;
         RenderItem.itemMap.delete(this._id);
         return true;

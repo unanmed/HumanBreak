@@ -31,12 +31,13 @@ export class MotaRenderer extends Container {
         if (this.needUpdate) return;
         this.needUpdate = true;
         this.requestRenderFrame(() => {
-            this.needUpdate = false;
             this.refresh(item);
         });
     }
 
     protected refresh(item: RenderItem = this): void {
+        if (!this.needUpdate) return;
+        this.needUpdate = false;
         this.emit('beforeUpdate', item);
         this.target.clear();
         this.renderContent(this.target, Transform.identity);
