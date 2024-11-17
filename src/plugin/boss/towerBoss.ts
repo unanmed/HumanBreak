@@ -22,6 +22,7 @@ import {
 import { IStateDamageable } from '@/game/state/interface';
 import { HeroRenderer } from '@/core/render/preset/hero';
 import { controller } from '@/module/weather';
+import { PopText } from '../fx/pop';
 
 Mota.require('var', 'loading').once('coreInit', () => {
     const shader = new Shader();
@@ -75,6 +76,8 @@ export class TowerBoss extends BarrageBoss {
     private group: LayerGroup;
     /** 楼层渲染容器 */
     private mapDraw: Container;
+    /** 伤害弹出 */
+    pop: PopText;
 
     /** 每个阶段的进度，具体定义参考 ai 函数开头 */
     private stageProgress: number = 0;
@@ -125,6 +128,7 @@ export class TowerBoss extends BarrageBoss {
         const render = MotaRenderer.get('render-main')!;
         this.group = render.getElementById('layer-main') as LayerGroup;
         this.mapDraw = render.getElementById('map-draw') as Container;
+        this.pop = render.getElementById('pop-main') as PopText;
 
         this.healthBar.init();
         this.word.init();
@@ -185,6 +189,8 @@ export class TowerBoss extends BarrageBoss {
         AttackProjectile.end();
 
         TowerBoss.effect.end();
+
+        Mota.Plugin.require('replay_g').clip('choice:0');
     }
 
     /**
@@ -213,12 +219,16 @@ export class TowerBoss extends BarrageBoss {
         // 先用drawAnimate凑活一下，等下个版本提供更好的 api
         if (this.stage === TowerBossStage.Stage3) {
             core.drawAnimate('hand', 7, 2);
+            this.pop.addPop((-damage).toString(), 1000, 240, 80, '#dafc1d');
         } else if (this.stage === TowerBossStage.Stage4) {
             core.drawAnimate('hand', 7, 3);
+            this.pop.addPop((-damage).toString(), 1000, 240, 112, '#dafc1d');
         } else if (this.stage === TowerBossStage.Stage5) {
             core.drawAnimate('hand', 7, 4);
+            this.pop.addPop((-damage).toString(), 1000, 240, 144, '#dafc1d');
         } else {
             core.drawAnimate('hand', 7, 1);
+            this.pop.addPop((-damage).toString(), 1000, 240, 172, '#dafc1d');
         }
     }
 
@@ -293,11 +303,12 @@ export class TowerBoss extends BarrageBoss {
         }
 
         if (time > 1500) {
-            this.changeStage(TowerBossStage.Dialogue2, time);
+            this.changeStage(TowerBossStage.Stage1, time);
             this.attackTime = 2;
             this.skill1Time = 1;
             this.skill2Time = 1;
             this.skill3Time = 1;
+            core.playBgm('towerBoss.mp3');
         }
     }
 
@@ -383,6 +394,8 @@ export class TowerBoss extends BarrageBoss {
         this.attackTime = 3;
         this.skill4Time = 5;
         this.skill5Time = 3;
+        core.playBgm('towerBoss2.mp3');
+        controller.activate('rain', 6);
     }
 
     releaseSkill4() {
@@ -427,8 +440,6 @@ export class TowerBoss extends BarrageBoss {
         const skill4Release = this.skill4Time * this.skill4Interval;
         const skill5Release = this.skill5Time * this.skill5Interval;
         const attack = this.attackTime * this.attackInterval;
-
-        controller.activate('rain', 6);
 
         if (time > skill4Release) {
             this.releaseSkill4();
@@ -486,6 +497,7 @@ export class TowerBoss extends BarrageBoss {
         this.terrainClose(1);
         this.skill6Time = 30;
         this.skill7Time = 2;
+        core.playBgm('towerBoss3.mp3');
     }
 
     releaseSkill6(n: number, last: number) {
@@ -601,7 +613,16 @@ export class TowerBoss extends BarrageBoss {
         }
     }
 
-    private aiEnd(time: number, frame: number) {}
+    private aiEnd(time: number, frame: number) {
+        this.end();
+        core.insertAction([
+            { type: 'openDoor', loc: [13, 6], floorId: 'MT19' },
+            { type: 'setValue', name: 'flag:boss1', value: 'true' },
+            { type: 'changeFloor', floorId: 'MT20', loc: [7, 9] },
+            { type: 'forbidSave' },
+            { type: 'showStatusBar' }
+        ]);
+    }
 }
 
 class BossEffect extends BossSprite<TowerBoss> {

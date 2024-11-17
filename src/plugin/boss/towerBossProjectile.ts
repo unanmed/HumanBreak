@@ -17,6 +17,17 @@ export const enum ProjectileDirection {
     BottomToTop
 }
 
+function popDamage(damage: number, boss: TowerBoss, color: string) {
+    const { x, y } = core.status.hero.loc;
+    boss.pop.addPop(
+        (-damage).toString(),
+        1000,
+        x * 32 + 16,
+        y * 32 + 16,
+        color
+    );
+}
+
 export class AttackProjectile extends Projectile<TowerBoss> {
     static easeIn?: TimingFn;
     static easeOut?: TimingFn;
@@ -187,6 +198,7 @@ export class ArrowProjectile extends Projectile<TowerBoss> {
         target.hp -= this.damage;
         this.damaged = true;
         core.drawHeroAnimate('hand');
+        popDamage(this.damage, this.boss, '#ff8180');
         return true;
     }
 
@@ -395,6 +407,7 @@ export class IceProjectile extends Projectile<TowerBoss> {
         if (!this.damaged) return false;
         target.hp -= this.damage;
         this.damaged = true;
+        popDamage(this.damage, this.boss, '#6bf8ff');
         return true;
     }
 
@@ -506,6 +519,7 @@ export class ThunderProjectile extends Projectile<TowerBoss> {
         if (this.damaged) return false;
         this.damaged = true;
         target.hp -= this.damage;
+        popDamage(this.damage, this.boss, '#cfe6fc');
         return true;
     }
 
@@ -665,6 +679,7 @@ export class ThunderBallProjectile extends Projectile<TowerBoss> {
         this.damaged = true;
         target.hp -= this.damage;
         core.playSound('electron.mp3');
+        popDamage(this.damage, this.boss, '#cfe6fc');
         return true;
     }
 
@@ -854,6 +869,7 @@ export class BoomProjectile extends Projectile<TowerBoss> {
         if (this.damaged) return false;
         target.hp -= this.damage;
         this.damaged = true;
+        popDamage(this.damage, this.boss, '#e08aff');
         return true;
     }
 
@@ -929,6 +945,7 @@ export class ChainProjectile extends Projectile<TowerBoss> {
         target.hp -= this.damage;
         this.damaged = true;
         core.playSound('electron.mp3');
+        popDamage(this.damage, this.boss, '#8affd6');
         return true;
     }
 

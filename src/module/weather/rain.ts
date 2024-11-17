@@ -128,11 +128,11 @@ export class RainWeather implements IWeather {
 
     activate(): void {
         const render = MotaRenderer.get('render-main');
-        const layer = render?.getElementById('layer-main');
         const draw = render?.getElementById('map-draw') as Container;
+        const layer = draw.children;
         if (!layer || !draw) return;
         const shader = RainWeather.shader;
-        layer.append(shader);
+        shader.appendChild(...layer);
         shader.append(draw);
 
         const gl = shader.gl;
@@ -158,11 +158,11 @@ export class RainWeather implements IWeather {
 
     deactivate(): void {
         const render = MotaRenderer.get('render-main');
-        const layer = render?.getElementById('layer-main');
         const draw = render?.getElementById('map-draw') as Container;
+        const layer = draw.children;
         if (!layer || !draw) return;
         const shader = RainWeather.shader;
-        layer.append(draw);
+        draw.appendChild(...layer);
         shader.remove();
     }
 }
