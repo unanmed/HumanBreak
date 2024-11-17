@@ -124,6 +124,7 @@ export class ArrowProjectile extends Projectile<TowerBoss> {
 
     render(canvas: MotaOffscreenCanvas2D, transform: Transform): void {
         const ctx = canvas.ctx;
+        ctx.globalAlpha = 1;
 
         if (this.time < 3000) {
             let begin = 1;
@@ -295,13 +296,9 @@ export class IceProjectile extends Projectile<TowerBoss> {
     render(canvas: MotaOffscreenCanvas2D, transform: Transform): void {
         const ctx = canvas.ctx;
         if (this.time < 2000) {
-            const fill = ctx.fillStyle;
-            const alpha = ctx.globalAlpha;
             ctx.fillStyle = 'rgb(150,150,255)';
             ctx.globalAlpha = 0.6;
             ctx.fillRect(this.x + 2, this.y + 2, 28, 28);
-            ctx.fillStyle = fill;
-            ctx.globalAlpha = alpha;
         } else {
             if (!this.animated) {
                 this.animated = true;
@@ -683,24 +680,79 @@ export class BoomProjectile extends Projectile<TowerBoss> {
     damage: number = 3000;
     hitbox: Hitbox.Rect = new Hitbox.Rect(0, 0, 32, 32);
 
+    private bx: number = 0;
+    private by: number = 0;
+    private last: number = 500;
+
+    private damaged: boolean = false;
+    private animated: boolean = false;
+
+    setData(x: number, y: number, last: number) {
+        this.bx = x;
+        this.by = y;
+        this.last = last;
+        this.setPosition(x * 32, y * 32);
+    }
+
     isIntersect(hitbox: Hitbox.HitboxType): boolean {
-        throw new Error('Method not implemented.');
+        if (this.time < this.last + 1000) return false;
+        if (this.damaged) return false;
+        if (hitbox instanceof Hitbox.Rect) {
+            return Hitbox.checkRectRect(this.hitbox, hitbox);
+        } else {
+            return false;
+        }
     }
 
     updateHitbox(x: number, y: number): void {
-        throw new Error('Method not implemented.');
+        this.hitbox.setPosition(x, y);
     }
 
     doDamage(target: IStateDamageable): boolean {
-        throw new Error('Method not implemented.');
+        if (this.damaged) return false;
+        target.hp -= this.damage;
+        this.damaged = true;
+        return true;
     }
 
     ai(boss: TowerBoss, time: number, frame: number): void {
-        throw new Error('Method not implemented.');
+        if (!this.animated && time > this.last + 1000) {
+            core.drawAnimate('explosion1', this.bx, this.by);
+        }
+        if (time > this.last + 1100) {
+            this.destroy();
+        }
     }
 
     render(canvas: MotaOffscreenCanvas2D, transform: Transform): void {
-        throw new Error('Method not implemented.');
+        const ctx = canvas.ctx;
+        const end = this.last + 1000;
+        const r = 12;
+        const mr = 27;
+        if (this.time < end) {
+            const angle = this.time / 30;
+            const sin = Math.sin(angle);
+            const cos = Math.cos(angle);
+            ctx.fillStyle = 'rgb(255,50,50)';
+            ctx.strokeStyle = 'rgb(255,50,50)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(this.x + r * cos, this.y + r * sin);
+            ctx.lineTo(this.x + mr * cos, this.y + mr * sin);
+            ctx.moveTo(this.x - r * cos, this.y - r * sin);
+            ctx.lineTo(this.x - mr * cos, this.y - mr * sin);
+            ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        if (this.time > end - 500) {
+            const dt = this.time - end + 500;
+            const pos = this.y - (1 - dt / 500) * 480;
+            const img = core.material.images.images['boom.png'];
+            ctx.drawImage(img, this.x - 16, pos - 80, 36, 80);
+        }
     }
 }
 
@@ -708,23 +760,53 @@ export class ChainProjectile extends Projectile<TowerBoss> {
     damage: number = 4000;
     hitbox: Hitbox.Line = new Hitbox.Line(0, 0, 0, 0);
 
+    private damaged: boolean = false;
+
     isIntersect(hitbox: Hitbox.HitboxType): boolean {
-        throw new Error('Method not implemented.');
+        if (this.time < 1000) return false;
+        if (this.damaged) return false;
+        if (hitbox instanceof Hitbox.Rect) {
+            return Hitbox.checkLineRect(this.hitbox, hitbox);
+        } else {
+            return false;
+        }
     }
 
     updateHitbox(x: number, y: number): void {
-        throw new Error('Method not implemented.');
+        this.hitbox.setPoint1(x, y);
     }
 
     doDamage(target: IStateDamageable): boolean {
-        throw new Error('Method not implemented.');
+        if (this.damaged) return false;
+        target.hp -= this.damage;
+        this.damaged = true;
+        return true;
     }
 
     ai(boss: TowerBoss, time: number, frame: number): void {
-        throw new Error('Method not implemented.');
+        if (time > 2000) {
+            this.destroy();
+        }
     }
 
     render(canvas: MotaOffscreenCanvas2D, transform: Transform): void {
-        throw new Error('Method not implemented.');
+        const ctx = canvas.ctx;
+        ctx.beginPath();
+        ctx.moveTo(this.hitbox.x1, this.hitbox.y1);
+        ctx.lineTo(this.hitbox.x2, this.hitbox.y2);
+
+        if (this.time < 1000) {
+            ctx.globalAlpha = 0.6;
+            ctx.strokeStyle = 'rgb(220,100,255)';
+            ctx.stroke();
+        } else {
+            ctx.strokeStyle = '#fff';
+            ctx.shadowBlur = 3;
+            ctx.shadowColor = '#62c8f4';
+            ctx.globalAlpha = 0.6;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = '';
+        }
     }
 }

@@ -17,6 +17,8 @@ import {
 import { Container } from '@/core/render/container';
 import {
     ArrowProjectile,
+    BoomProjectile,
+    ChainProjectile,
     IceProjectile,
     PortalProjectile,
     ProjectileDirection,
@@ -513,6 +515,10 @@ export class TowerBoss extends BarrageBoss {
             core.setBlock(527, n, ny);
             core.setBlock(527, 15 - n, ny);
         }
+        core.setHeroLoc('x', 7);
+        core.setHeroLoc('y', 7);
+        core.setHeroLoc('direction', 'up');
+        core.setBlock(557, 7, n + 1);
     }
 
     private aiDialogue2(time: number, frame: number) {
@@ -523,21 +529,123 @@ export class TowerBoss extends BarrageBoss {
         this.skill7Time = 2;
     }
 
-    releaseSkill6() {}
+    releaseSkill6(n: number, last: number) {
+        const s = 13 - n * 2;
+        const x = Math.floor(Math.random() * s + n);
+        const y = Math.floor(Math.random() * s + n);
+        const proj = this.createProjectile(BoomProjectile, 0, 0);
+        proj.setData(x, y, last);
+    }
 
-    releaseSkill7() {}
+    async releaseSkill7(n: number) {
+        const count = Math.floor(Math.random() * 6 + 3);
+        const nodes: LocArr[] = [];
+        const s = 13 - n * 2;
+        const used = new Set<number>();
+        let i = 0;
+        while (i < count) {
+            const x = Math.floor(Math.random() * s + n);
+            const y = Math.floor(Math.random() * s + n);
+            const index = x + y * s;
+            if (used.has(index)) continue;
+            i++;
+            used.add(index);
+            nodes.push([x, y]);
+            if (nodes.length > 1) {
+                const [lx, ly] = nodes[i - 1];
+                const proj = this.createProjectile(ChainProjectile, 0, 0);
+                proj.hitbox.setPoint1(lx, ly);
+                proj.hitbox.setPoint2(x, y);
+            }
+            await sleep(200);
+        }
+    }
 
-    private aiStage3(time: number, frame: number) {}
+    private aiStage3(time: number, frame: number) {
+        const skill6Release = this.skill6Time * this.skill6Interval;
+        const skill7Release = this.skill7Time * this.skill7Interval;
+        const attack = this.attackTime * this.attackInterval;
 
-    private aiStage4(time: number, frame: number) {}
+        if (time > skill6Release) {
+            this.releaseSkill6(2, 500);
+            this.skill6Time++;
+        }
+        if (time > skill7Release) {
+            this.releaseSkill7(2);
+            this.skill7Time++;
+        }
+        if (time > attack) {
+            this.addAttackCircle(3000, 500);
+            this.attackTime++;
+        }
 
-    private aiStage5(time: number, frame: number) {}
+        if (this.hp <= 2000) {
+            this.changeStage(TowerBossStage.Stage4, time);
+            this.terrainClose(2);
+            this.attackTime = 1;
+            this.skill6Time = 12;
+            this.skill6Interval = 400;
+            this.skill7Time = 1;
+        }
+    }
+
+    private aiStage4(time: number, frame: number) {
+        const skill6Release = this.skill6Time * this.skill6Interval;
+        const skill7Release = this.skill7Time * this.skill7Interval;
+        const attack = this.attackTime * this.attackInterval;
+
+        if (time > skill6Release) {
+            this.releaseSkill6(3, 500);
+            this.skill6Time++;
+        }
+        if (time > skill7Release) {
+            this.releaseSkill7(3);
+            this.skill7Time++;
+        }
+        if (time > attack) {
+            this.addAttackCircle(3000, 500);
+            this.attackTime++;
+        }
+
+        if (this.hp <= 1000) {
+            this.changeStage(TowerBossStage.Stage5, time);
+            this.terrainClose(3);
+            this.attackTime = 1;
+            this.skill6Time = 17;
+            this.skill6Interval = 300;
+            this.skill7Time = 1;
+        }
+    }
+
+    private aiStage5(time: number, frame: number) {
+        const skill6Release = this.skill6Time * this.skill6Interval;
+        const skill7Release = this.skill7Time * this.skill7Interval;
+        const attack = this.attackTime * this.attackInterval;
+
+        if (time > skill6Release) {
+            this.releaseSkill6(4, 500);
+            this.skill6Time++;
+        }
+        if (time > skill7Release) {
+            this.releaseSkill7(4);
+            this.skill7Time++;
+        }
+        if (time > attack) {
+            this.addAttackCircle(3000, 500);
+            this.attackTime++;
+        }
+
+        if (this.hp <= 1000) {
+            this.changeStage(TowerBossStage.End, time);
+        }
+    }
 
     private aiEnd(time: number, frame: number) {}
 }
 
 class BossEffect extends BossSprite<TowerBoss> {
     private attackCircle: AttackCircleRenderable[] = [];
+    private chainPath: LocArr[] = [];
 
     /**
      * 初始化
