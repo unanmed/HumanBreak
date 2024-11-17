@@ -163,6 +163,11 @@ export class ArrowProjectile extends Projectile<TowerBoss> {
      */
     setData(direction: ProjectileDirection) {
         this.direction = direction;
+        if (direction === ProjectileDirection.Horizontal) {
+            this.hitbox.setSize(102, 32);
+        } else {
+            this.hitbox.setSize(32, 102);
+        }
     }
 
     isIntersect(hitbox: Hitbox.HitboxType): boolean {
@@ -181,6 +186,7 @@ export class ArrowProjectile extends Projectile<TowerBoss> {
         if (this.damaged) return false;
         target.hp -= this.damage;
         this.damaged = true;
+        core.drawHeroAnimate('hand');
         return true;
     }
 
@@ -647,6 +653,7 @@ export class ThunderBallProjectile extends Projectile<TowerBoss> {
         if (this.damaged) return false;
         this.damaged = true;
         target.hp -= this.damage;
+        core.playSound('electron.mp3');
         return true;
     }
 
@@ -890,6 +897,7 @@ export class ChainProjectile extends Projectile<TowerBoss> {
         if (this.damaged) return false;
         target.hp -= this.damage;
         this.damaged = true;
+        core.playSound('electron.mp3');
         return true;
     }
 

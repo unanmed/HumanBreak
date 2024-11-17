@@ -305,6 +305,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      */
     pos(x: number, y: number) {
         this.transform.setTranslate(x, y);
+        this.update();
     }
 
     /**

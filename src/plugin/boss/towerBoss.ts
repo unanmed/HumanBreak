@@ -6,14 +6,7 @@ import { LayerGroup } from '@/core/render/preset/layer';
 import { RenderItem } from '@/core/render/item';
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 import { Transform } from '@/core/render/transform';
-import {
-    Animation,
-    hyper,
-    power,
-    sleep,
-    TimingFn,
-    Transition
-} from 'mutate-animate';
+import { Animation, hyper, power, sleep, Transition } from 'mutate-animate';
 import { Container } from '@/core/render/container';
 import {
     ArrowProjectile,
@@ -139,26 +132,28 @@ export class TowerBoss extends BarrageBoss {
 
         const { x, y } = core.status.hero.loc;
         const cell = 32;
-        this.hitbox = new Hitbox.Rect(x * cell + 4, y * cell + 16, 24, 32);
+        this.hitbox = new Hitbox.Rect(x * cell + 2, y * cell + 2, 28, 28);
         this.state = core.status.hero;
     }
 
     override start() {
         super.start();
-        this.group.remove();
-        this.group.append(TowerBoss.shader);
-        TowerBoss.shader.append(this.mapDraw);
-        this.healthBar.append(this.group);
-        this.word.append(this.group);
-        this.main.append(this.group);
+        requestAnimationFrame(() => {
+            this.group.remove();
+            this.group.append(TowerBoss.shader);
+            TowerBoss.shader.append(this.mapDraw);
+            this.healthBar.append(this.group);
+            this.word.append(this.group);
+            this.main.append(this.group);
 
-        ArrowProjectile.init();
-        PortalProjectile.init();
-        ThunderProjectile.init();
-        AttackProjectile.init();
+            ArrowProjectile.init();
+            PortalProjectile.init();
+            ThunderProjectile.init();
+            AttackProjectile.init();
 
-        TowerBoss.effect.start();
-        TowerBoss.effect.use();
+            TowerBoss.effect.start();
+            TowerBoss.effect.use();
+        });
     }
 
     override end() {
@@ -276,8 +271,10 @@ export class TowerBoss extends BarrageBoss {
         // stageProgress:
         // 0: 开始; 1: 开始血条动画
 
-        this.healthBar.showStart();
-        this.stageProgress = 1;
+        if (this.stageProgress === 0) {
+            this.healthBar.showStart();
+            this.stageProgress = 1;
+        }
 
         if (time > 1500) {
             this.changeStage(TowerBossStage.Stage1, time);
@@ -726,7 +723,6 @@ class Word extends RenderItem {
 
 class HealthBar extends RenderItem {
     private trans: Transition = new Transition();
-    private ani: Animation = new Animation();
     /** 当前血条状态 */
     private status: HealthBarStatus = HealthBarStatus.Start;
 
@@ -734,12 +730,12 @@ class HealthBar extends RenderItem {
      * 初始化
      */
     init() {
-        this.trans.time(600).absolute().mode(power(4, 'out'));
+        this.trans.time(2000).absolute().mode(power(3, 'out'));
         this.trans.value.hp = 0;
-        this.ani.register('opacity', 0);
-        this.ani.time(0).move(0, -24);
+        this.trans.value.x = 0;
+        this.trans.value.y = -16;
 
-        this.size(480, 24);
+        this.size(480, 16);
         this.setHD(true);
         this.setZIndex(100);
     }
@@ -748,7 +744,10 @@ class HealthBar extends RenderItem {
      * 设置剩余血量
      */
     set(value: number) {
-        this.trans.transition('hp', value);
+        this.trans.time(2000).mode(power(3, 'out')).transition('hp', value);
+        this.delegateTicker(() => {
+            this.update();
+        }, 800);
     }
 
     /**
@@ -757,12 +756,15 @@ class HealthBar extends RenderItem {
     async showStart() {
         if (this.status !== HealthBarStatus.Start) return;
         this.delegateTicker(() => {
-            this.pos(this.ani.x, this.ani.y);
-        }, 1000);
-        this.ani.time(600).mode(hyper('sin', 'out')).absolute().move(0, 0);
-        await sleep(300);
-        this.trans.transition('hp', 10000);
-        await sleep(700);
+            this.update();
+        }, 2500);
+        this.trans
+            .time(600)
+            .mode(hyper('sin', 'out'))
+            .absolute()
+            .transition('y', 0);
+        this.trans.time(2000).mode(power(3, 'out')).transition('hp', 10000);
+        await sleep(1700);
         this.status = HealthBarStatus.Running;
     }
 
@@ -772,9 +774,13 @@ class HealthBar extends RenderItem {
     async showEnd() {
         if (this.status !== HealthBarStatus.Running) return;
         this.delegateTicker(() => {
-            this.pos(this.ani.x, this.ani.y);
-        }, 700);
-        this.ani.time(600).mode(hyper('sin', 'in')).absolute().move(0, -24);
+            this.update();
+        }, 2500);
+        this.trans
+            .time(600)
+            .mode(hyper('sin', 'in'))
+            .absolute()
+            .transition('y', -16);
         await sleep(700);
         this.status = HealthBarStatus.End;
     }
@@ -790,18 +796,29 @@ class HealthBar extends RenderItem {
         const r = Math.min(255 * 2 - ratio * 2 * 255, 255);
         const g = Math.min(ratio * 2 * 255, 255);
 
+        ctx.save();
+        ctx.translate(this.trans.value.x, this.trans.value.y);
+        ctx.fillStyle = '#bbb';
+        ctx.fillRect(2, 2, 480 - 4, 16 - 4);
+
         const color = `rgb(${Math.floor(r)},${Math.floor(g)},0)`;
-        ctx.globalAlpha = this.ani.value.opacity;
         ctx.fillStyle = color;
-        ctx.fillRect(2, 2, 480 - 4, 24 - 4);
+        ctx.fillRect(2, 2, (480 - 4) * ratio, 16 - 4);
+
+        ctx.font = '12px "normal"';
+        ctx.textBaseline = 'middle';
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#fff';
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        ctx.strokeText(`${Math.floor(hp)} / 10000`, 472, 8);
+        ctx.fillText(`${Math.floor(hp)} / 10000`, 472, 8);
 
         ctx.lineWidth = 4;
         ctx.strokeStyle = '#fff';
-        ctx.strokeRect(0, 0, 480, 24);
-
-        ctx.font = '16px "normal';
-        ctx.textBaseline = 'middle';
-        ctx.textAlign = 'right';
-        ctx.fillText(`${hp} / 10000`, 472, 12);
+        ctx.shadowBlur = 4;
+        ctx.shadowColor = '#000';
+        ctx.strokeRect(0, 0, 480, 16);
+        ctx.restore();
     }
 }
