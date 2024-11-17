@@ -519,7 +519,7 @@ export class HeroMover extends ObjectMoverBase {
         step: MoveStepDir,
         controller: IMoveController
     ): Promise<HeroMoveCode> {
-        const showDir = toDir(this.faceDir);
+        const showDir = toDir(this.moveDir);
         core.setHeroLoc('direction', showDir);
 
         const { x, y } = core.status.hero.loc;
