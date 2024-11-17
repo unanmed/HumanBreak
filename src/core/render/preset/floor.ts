@@ -39,6 +39,21 @@ hook.on('changingFloor', floor => {
         if (v.bindThisFloor) v.updateBindData();
     });
 });
+hook.on('setBgFgBlock', (name, number, x, y, floor) => {
+    const isNow = floor === core.status.floorId;
+    LayerGroupFloorBinder.activedBinder.forEach(v => {
+        if (floor === v.floor || (isNow && v.bindThisFloor)) {
+            v.setBlock(name, number, x, y);
+        }
+    });
+    LayerFloorBinder.listenedBinder.forEach(v => {
+        if (v.layer.layer === name) {
+            if (v.floor === floor || (isNow && v.bindThisFloor)) {
+                v.setBlock(number, x, y);
+            }
+        }
+    });
+});
 
 interface LayerGroupBinderEvent {
     update: [floor: FloorIds];
@@ -254,6 +269,7 @@ export class LayerFloorBinder implements ILayerRenderExtends {
         core.extractBlocks(floor);
         const map = core.status.maps[floor];
         this.layer.setMapSize(map.width, map.height);
+        const image = core.status.maps[this.getFloor()].images;
         if (this.layer.layer === 'event') {
             const m = map.map;
             this.layer.putRenderData(m.flat(), map.width, 0, 0);
@@ -265,6 +281,8 @@ export class LayerFloorBinder implements ILayerRenderExtends {
             // 别忘了背景图块
             this.layer.setBackground(texture.idNumberMap[map.defaultGround]);
         }
+        const toDraw = image?.filter(v => v.canvas === this.layer.layer);
+        this.layer.setFloorImage(toDraw ?? []);
     }
 
     awake(layer: Layer) {

@@ -125,7 +125,7 @@ interface FloorBase<T extends FloorIds = FloorIds> {
     /**
      * 楼层贴图
      */
-    image: FloorAnimate[];
+    images: FloorAnimate[];
 
     /**
      * 楼层名称

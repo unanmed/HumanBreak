@@ -551,6 +551,8 @@ export class Layer extends Container {
     background: AllNumbers = 0;
     /** 背景图块画布 */
     backImage: HTMLCanvasElement[] = [];
+    /** 背景贴图 */
+    floorImage: FloorAnimate[] = [];
 
     /** 分块信息 */
     block: BlockCacher<LayerCacheItem> = new BlockCacher(0, 0, core._WIDTH_, 4);
@@ -674,6 +676,14 @@ export class Layer extends Container {
             x >= 0 &&
             y >= 0
         );
+    }
+
+    /**
+     * 设置楼层贴图
+     */
+    setFloorImage(image: FloorAnimate[]) {
+        this.floorImage = image;
+        this.update();
     }
 
     /**
@@ -1076,6 +1086,16 @@ export class Layer extends Container {
                 );
             });
         }
+
+        if (this.floorImage.length > 0) {
+            const images = core.material.images.images;
+            this.floorImage.forEach(v => {
+                if (v.disable) return;
+                const { x, y } = v;
+                ctx.fillRect(0, 0, 480, 480);
+                ctx.drawImage(images[v.name], x, y);
+            });
+        }
     }
 
     /**
@@ -1087,8 +1107,6 @@ export class Layer extends Container {
         const { width } = this.block.blockData;
         const blockSize = this.block.blockSize;
         const { ctx } = this.staticMap;
-
-        ctx.save();
 
         const [a, b, , c, d, , e, f] = transform.mat;
         ctx.setTransform(a, b, c, d, e, f);
@@ -1167,8 +1185,6 @@ export class Layer extends Container {
                 symbol: temp.symbol
             });
         });
-
-        ctx.restore();
     }
 
     /**
@@ -1180,7 +1196,6 @@ export class Layer extends Container {
         const halfCell = cell / 2;
         const { ctx } = this.movingMap;
 
-        ctx.save();
         const mat = transform.mat;
         const [a, b, , c, d, , e, f] = mat;
         ctx.setTransform(a, b, c, d, e, f);
@@ -1209,8 +1224,6 @@ export class Layer extends Container {
 
             ctx.drawImage(image, sx, sy, w, h, px, py, w, h);
         });
-
-        ctx.restore();
     }
 
     /**

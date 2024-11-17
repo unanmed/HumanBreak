@@ -93,6 +93,14 @@ export interface GameEvent {
     enemyExtract: [col: EnemyCollection];
     /** Emitted in lib/events.js restart */
     restart: [];
+    /** Emitted in lib/maps.js setBgFgBlock */
+    setBgFgBlock: [
+        name: 'bg' | 'fg' | 'bg2' | 'fg2',
+        number: AllNumbers,
+        x: number,
+        y: number,
+        floorId: FloorIds
+    ];
 }
 
 export const hook = new EventEmitter<GameEvent>();

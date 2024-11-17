@@ -3629,6 +3629,15 @@ maps.prototype.setBgFgBlock = function (name, number, x, y, floorId) {
         if (name.startsWith('bg')) core.drawBg(floorId);
         else core.drawFg(floorId);
     }
+
+    Mota.require('var', 'hook').emit(
+        'setBgFgBlock',
+        name,
+        number,
+        x,
+        y,
+        floorId
+    );
 };
 
 ////// 重置地图 //////
