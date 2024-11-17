@@ -20,6 +20,7 @@ import {
     ThunderProjectile
 } from './towerBossProjectile';
 import { IStateDamageable } from '@/game/state/interface';
+import { HeroRenderer } from '@/core/render/preset/hero';
 
 Mota.require('var', 'loading').once('coreInit', () => {
     const shader = new Shader();
@@ -136,24 +137,32 @@ export class TowerBoss extends BarrageBoss {
         this.state = core.status.hero;
     }
 
+    private moveTick = (x: number, y: number) => {
+        this.hitbox.setPosition(x * 32 + 2, y * 32 + 2);
+    };
+
     override start() {
         super.start();
-        requestAnimationFrame(() => {
-            this.group.remove();
-            this.group.append(TowerBoss.shader);
-            TowerBoss.shader.append(this.mapDraw);
-            this.healthBar.append(this.group);
-            this.word.append(this.group);
-            this.main.append(this.group);
 
-            ArrowProjectile.init();
-            PortalProjectile.init();
-            ThunderProjectile.init();
-            AttackProjectile.init();
+        this.group.remove();
+        this.group.append(TowerBoss.shader);
+        TowerBoss.shader.append(this.mapDraw);
+        this.healthBar.append(this.group);
+        this.word.append(this.group);
+        this.main.append(this.group);
 
-            TowerBoss.effect.start();
-            TowerBoss.effect.use();
-        });
+        const event = this.group.getLayer('event');
+        const hero = event?.getExtends('floor-hero') as HeroRenderer;
+        hero?.on('moveTick', this.moveTick);
+
+        ArrowProjectile.init();
+        PortalProjectile.init();
+        ThunderProjectile.init();
+        ThunderBallProjectile.init();
+        AttackProjectile.init();
+
+        TowerBoss.effect.start();
+        TowerBoss.effect.use();
     }
 
     override end() {
@@ -164,9 +173,14 @@ export class TowerBoss extends BarrageBoss {
         this.word.remove();
         this.main.remove();
 
+        const event = this.group.getLayer('event');
+        const hero = event?.getExtends('floor-hero') as HeroRenderer;
+        hero?.off('moveTick', this.moveTick);
+
         ArrowProjectile.end();
         PortalProjectile.end();
         ThunderProjectile.end();
+        ThunderBallProjectile.end();
         AttackProjectile.end();
 
         TowerBoss.effect.end();
@@ -211,12 +225,12 @@ export class TowerBoss extends BarrageBoss {
      * @param last 持续时长
      * @param damage 造成的伤害
      */
-    addAttackCircle(damage: number, n: number) {
+    addAttackCircle(_: number, n: number) {
         const s = 13 - n * 2;
         const nx = Math.floor(Math.random() * s + n + 1);
         const ny = Math.floor(Math.random() * s + n + 1);
         const proj = this.createProjectile(AttackProjectile, nx * 32, ny * 32);
-        proj.damage = damage;
+        proj.damage = 250 + Math.floor(Math.random() * 500);
     }
 
     ai(time: number, frame: number): void {
@@ -277,7 +291,7 @@ export class TowerBoss extends BarrageBoss {
         }
 
         if (time > 1500) {
-            this.changeStage(TowerBossStage.Stage1, time);
+            this.changeStage(TowerBossStage.Dialogue1, time);
             this.attackTime = 2;
             this.skill1Time = 1;
             this.skill2Time = 1;
@@ -747,7 +761,7 @@ class HealthBar extends RenderItem {
         this.trans.time(2000).mode(power(3, 'out')).transition('hp', value);
         this.delegateTicker(() => {
             this.update();
-        }, 800);
+        }, 2500);
     }
 
     /**

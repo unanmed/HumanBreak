@@ -440,12 +440,14 @@ export class ThunderProjectile extends Projectile<TowerBoss> {
     private sounded: boolean = false;
 
     private effect?: PointEffect;
-    private effectId?: number;
+    private effectId1?: number;
+    private effectId2?: number;
 
     static init() {
         this.cache = new MotaOffscreenCanvas2D();
         this.cache.setHD(true);
         this.cache.withGameScale(true);
+        this.cache.size(480, 480);
     }
 
     static end() {
@@ -458,11 +460,20 @@ export class ThunderProjectile extends Projectile<TowerBoss> {
      */
     createEffect(effect: PointEffect) {
         this.effect = effect;
-        this.effectId = effect.addEffect(
+        this.effectId1 = effect.addEffect(
             PointEffectType.CircleBrightness,
             Date.now() + 1000,
-            400,
-            [this.bx * 32 + 32, this.by * 32 + 32, 128, 32]
+            600,
+            [this.bx * 32 + 16, this.by * 32 + 16, 128, 32],
+            [1, 0, 0, 0]
+        );
+        this.effectId2 = effect.addEffect(
+            PointEffectType.CircleWarp,
+            Date.now() + 1000,
+            600,
+            [this.bx * 32 + 16, this.by * 32 + 16, 240 + this.power * 32, 32],
+            [0.1, 6, 0.8, 0],
+            [0, Math.PI, 0, 0]
         );
     }
 
@@ -499,7 +510,7 @@ export class ThunderProjectile extends Projectile<TowerBoss> {
     }
 
     ai(boss: TowerBoss, time: number, frame: number): void {
-        if (time > 1000) {
+        if (time > 500) {
             if (!this.sounded) {
                 core.playSound('thunder.mp3');
                 this.sounded = true;
@@ -513,8 +524,8 @@ export class ThunderProjectile extends Projectile<TowerBoss> {
     render(canvas: MotaOffscreenCanvas2D, transform: Transform): void {
         const ctx = canvas.ctx;
         if (this.time < 1000) {
-            const before = ctx.fillStyle;
             ctx.fillStyle = '#fff';
+            ctx.globalAlpha = 0.6;
             for (let dx = -1; dx < 2; dx++) {
                 for (let dy = -1; dy < 2; dy++) {
                     const x = (this.bx + dx) * 32 + 2;
@@ -522,42 +533,41 @@ export class ThunderProjectile extends Projectile<TowerBoss> {
                     ctx.fillRect(x, y, 28, 28);
                 }
             }
-            ctx.fillStyle = before;
         } else {
             if (!this.cached) this.cacheThunder();
             if (!ThunderProjectile.cache) return;
-            const x = this.bx * 32;
-            const before = ctx.globalAlpha;
             const progress = (this.time - 1000) / 1000;
-            if (progress < 0.4) {
-                const effect = this.effect;
-                const id = this.effectId;
-                if (!effect || isNil(id)) return;
-                const effectRatio = ArrowProjectile.dangerEasing!(
-                    progress * 2.5
+            const effect = this.effect;
+            const id = this.effectId1;
+            if (!effect || isNil(id)) return;
+            if (progress < 0.6) {
+                const x = this.bx * 32 + 16;
+                const y = this.by * 32 + 16;
+                effect.setEffect(
+                    id,
+                    [x, y, 32 + progress * 256, 32],
+                    [(0.6 - progress) / 0.6, 0, 0, 0]
                 );
-                effect.setEffect(id, void 0, [effectRatio, 0, 0, 0]);
             }
             if (progress < 0.5) {
                 ctx.globalAlpha = 1;
             } else {
                 ctx.globalAlpha = 1 - (progress - 0.5) * 2;
             }
-            ctx.drawImage(ThunderProjectile.cache.canvas, x - 60, 0);
-            ctx.globalAlpha = before;
+            ctx.drawImage(ThunderProjectile.cache.canvas, 0, 0, 480, 480);
         }
     }
 
     private cacheThunder() {
         const cache = ThunderProjectile.cache;
         if (!cache) return;
-        const bottom = this.by * 32 + 32;
-        cache.size(120, bottom);
+        this.cached = true;
+        cache.clear();
         const ctx = cache.ctx;
         ctx.beginPath();
         for (let i = 0; i < this.power; i++) {
-            let x = this.bx * 32;
-            let y = this.by * 32;
+            let x = this.bx * 32 + 16;
+            let y = this.by * 32 + 16;
             ctx.moveTo(x, y);
             while (y > 0) {
                 x += Math.floor(Math.random() * 30 - 15);
@@ -565,10 +575,11 @@ export class ThunderProjectile extends Projectile<TowerBoss> {
                 ctx.lineTo(x, y);
             }
         }
-        ctx.shadowBlur = 3;
+        ctx.shadowBlur = 5;
         ctx.shadowColor = '#62c8f4';
         ctx.lineWidth = 2;
         ctx.globalAlpha = 0.6;
+        ctx.strokeStyle = '#fff';
         ctx.stroke();
     }
 }
@@ -596,23 +607,23 @@ export class ThunderBallProjectile extends Projectile<TowerBoss> {
         this.horizontal = new MotaOffscreenCanvas2D();
         this.vertical = new MotaOffscreenCanvas2D();
         const hor = this.horizontal;
-        hor.size(480 - 64, 32);
+        hor.size(480, 32);
         hor.setHD(true);
         hor.withGameScale(true);
         const ctxHor = hor.ctx;
         ctxHor.fillStyle = '#fff';
         ctxHor.globalAlpha = 0.6;
-        for (let i = 0; i < 13; i++) {
+        for (let i = 0; i < 15; i++) {
             ctxHor.fillRect(i * 32 + 2, 2, 28, 28);
         }
         const ver = this.vertical;
-        ver.size(480 - 64, 32);
+        ver.size(32, 480);
         ver.setHD(true);
         ver.withGameScale(true);
         const ctxVer = ver.ctx;
         ctxVer.fillStyle = '#fff';
         ctxVer.globalAlpha = 0.6;
-        for (let i = 0; i < 13; i++) {
+        for (let i = 0; i < 15; i++) {
             ctxVer.fillRect(2, i * 32 + 2, 28, 28);
         }
     }
@@ -732,8 +743,8 @@ export class ThunderBallProjectile extends Projectile<TowerBoss> {
                     const height = (432 - cy) * begin;
                     left = cx - 16;
                     right = cx + 16;
-                    bottom = cy + 16;
-                    top = cy + 16 + height;
+                    bottom = cy + 16 + height;
+                    top = cy + 16;
                     break;
                 }
             }
@@ -769,27 +780,41 @@ export class ThunderBallProjectile extends Projectile<TowerBoss> {
                 }
             }
         }
+        const ratio = devicePixelRatio * core.domStyle.scale;
         const w = right - left;
         const h = bottom - top;
+        const fw = w * ratio;
+        const fh = h * ratio;
+        const fl = left * ratio;
+        const ft = top * ratio;
+        const cell = 32 * ratio;
         const hor = ThunderBallProjectile.horizontal!.canvas;
         const ver = ThunderBallProjectile.vertical!.canvas;
-        switch (this.direction) {
-            case ProjectileDirection.BottomToTop:
-            case ProjectileDirection.TopToBottom: {
-                ctx.drawImage(hor, 0, top, 32, h, left, top, w, h);
-                break;
-            }
-            case ProjectileDirection.LeftToRight:
-            case ProjectileDirection.RightToLeft: {
-                ctx.drawImage(ver, left, 0, w, 32, left, top, w, h);
+        ctx.save();
+        ctx.globalAlpha = 1;
+        if (w > 0 && h > 0) {
+            switch (this.direction) {
+                case ProjectileDirection.BottomToTop:
+                case ProjectileDirection.TopToBottom: {
+                    ctx.drawImage(ver, 0, ft, cell, fh, left, top, w, h);
+                    break;
+                }
+                case ProjectileDirection.LeftToRight:
+                case ProjectileDirection.RightToLeft: {
+                    ctx.drawImage(hor, fl, 0, fw, cell, left, top, w, h);
+                    break;
+                }
             }
         }
         ctx.fillStyle = '#fff';
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = '#62c8f4';
         ctx.globalAlpha = 0.9;
         ctx.beginPath();
-        const radius = 9 + Math.floor(Math.random() * 8 - 4);
+        const radius = 7 + Math.floor(Math.random() * 2);
         ctx.arc(this.x, this.y, radius, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
     }
 }
 

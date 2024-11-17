@@ -427,6 +427,7 @@ export class PointEffect {
                 case PointEffectType.CircleContrast:
                 case PointEffectType.CircleSaturate:
                 case PointEffectType.CircleHue:
+                case PointEffectType.CircleBrightness:
                 case PointEffectType.CircleWarpTangetial: {
                     transformXY(index);
                     transformed[index + 6] *= scale;
