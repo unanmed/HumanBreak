@@ -9,7 +9,14 @@ main.floors.tower7=
     "canFlyFrom": false,
     "canUseQuickShop": true,
     "cannotViewMap": true,
-    "images": [],
+    "images": [
+        {
+            "name": "tower7.jpeg",
+            "canvas": "bg",
+            "x": 0,
+            "y": 0
+        }
+    ],
     "ratio": 2,
     "defaultGround": "T526",
     "bgm": "tower.mp3",

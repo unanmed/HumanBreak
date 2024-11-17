@@ -324,9 +324,9 @@ export namespace Hitbox {
 
         if (
             Math.max(x1, x2) < Math.min(x3, x4) ||
-            Math.min(x1, x2) < Math.max(x3, x4) ||
+            Math.min(x1, x2) > Math.max(x3, x4) ||
             Math.max(y1, y2) < Math.min(y3, y4) ||
-            Math.min(y1, y2) < Math.max(y3, y4)
+            Math.min(y1, y2) > Math.max(y3, y4)
         ) {
             return false;
         }
@@ -334,7 +334,7 @@ export namespace Hitbox {
         const d1 = cross(x1, y1, x2, y2, x3, y3);
         const d2 = cross(x1, y1, x2, y2, x4, y4);
         const d3 = cross(x3, y3, x4, y4, x1, y1);
-        const d4 = cross(x3, y3, x4, y4, x2, y3);
+        const d4 = cross(x3, y3, x4, y4, x2, y2);
 
         return d1 * d2 < 0 && d3 * d4 < 0;
     }

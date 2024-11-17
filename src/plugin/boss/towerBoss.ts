@@ -207,6 +207,7 @@ export class TowerBoss extends BarrageBoss {
      */
     attackBoss(damage: number) {
         this.hp -= damage;
+        if (this.hp < 0) this.hp = 0;
         this.healthBar.set(this.hp);
         // 先用drawAnimate凑活一下，等下个版本提供更好的 api
         if (this.stage === TowerBossStage.Stage3) {
@@ -291,7 +292,7 @@ export class TowerBoss extends BarrageBoss {
         }
 
         if (time > 1500) {
-            this.changeStage(TowerBossStage.Dialogue1, time);
+            this.changeStage(TowerBossStage.Dialogue2, time);
             this.attackTime = 2;
             this.skill1Time = 1;
             this.skill2Time = 1;
@@ -451,24 +452,25 @@ export class TowerBoss extends BarrageBoss {
     terrainClose(n: number) {
         for (let nx = n - 1; nx < 15 - n + 1; nx++) {
             core.removeBlock(nx, n - 1);
-            core.removeBlock(nx, 15 - n + 1);
+            core.removeBlock(nx, 15 - n);
             core.setBgFgBlock('bg', 0, nx, n - 1);
-            core.setBgFgBlock('bg', 0, nx, 15 - n + 1);
+            core.setBgFgBlock('bg', 0, nx, 15 - n);
         }
         for (let ny = n; ny < 15 - n; ny++) {
             core.removeBlock(n - 1, ny);
-            core.removeBlock(15 - n + 1, ny);
+            core.removeBlock(15 - n, ny);
             core.setBgFgBlock('bg', 0, n - 1, ny);
-            core.setBgFgBlock('bg', 0, 15 - n + 1, ny);
+            core.setBgFgBlock('bg', 0, 15 - n, ny);
         }
         for (let nx = n; nx < 15 - n; nx++) {
             core.setBlock(527, nx, n);
-            core.setBlock(527, nx, 15 - n);
+            core.setBlock(527, nx, 15 - n - 1);
         }
         for (let ny = n + 1; ny < 15 - n - 1; ny++) {
             core.setBlock(527, n, ny);
-            core.setBlock(527, 15 - n, ny);
+            core.setBlock(527, 15 - n - 1, ny);
         }
+        core.stopAutomaticRoute();
         core.setHeroLoc('x', 7);
         core.setHeroLoc('y', 7);
         core.setHeroLoc('direction', 'up');
@@ -484,7 +486,7 @@ export class TowerBoss extends BarrageBoss {
     }
 
     releaseSkill6(n: number, last: number) {
-        const s = 13 - n * 2;
+        const s = 15 - n * 2;
         const x = Math.floor(Math.random() * s + n);
         const y = Math.floor(Math.random() * s + n);
         const proj = this.createProjectile(BoomProjectile, 0, 0);
@@ -494,7 +496,9 @@ export class TowerBoss extends BarrageBoss {
     async releaseSkill7(n: number) {
         const count = Math.floor(Math.random() * 6 + 3);
         const nodes: LocArr[] = [];
-        const s = 13 - n * 2;
+        let lastX = -1;
+        let lastY = -1;
+        const s = 15 - n * 2;
         const used = new Set<number>();
         let i = 0;
         while (i < count) {
@@ -505,13 +509,13 @@ export class TowerBoss extends BarrageBoss {
             i++;
             used.add(index);
             nodes.push([x, y]);
-            if (nodes.length > 1) {
-                const [lx, ly] = nodes[i - 1];
+            if (lastX !== -1 && lastY !== -1) {
                 const proj = this.createProjectile(ChainProjectile, 0, 0);
-                proj.hitbox.setPoint1(lx, ly);
-                proj.hitbox.setPoint2(x, y);
+                proj.hitbox.setPoint1(lastX * 32 + 16, lastY * 32 + 16);
+                proj.hitbox.setPoint2(x * 32 + 16, y * 32 + 16);
             }
-            await sleep(200);
+            lastX = x;
+            lastY = y;
         }
     }
 
@@ -589,7 +593,7 @@ export class TowerBoss extends BarrageBoss {
             this.attackTime++;
         }
 
-        if (this.hp <= 1000) {
+        if (this.hp <= 0) {
             this.changeStage(TowerBossStage.End, time);
         }
     }

@@ -859,6 +859,7 @@ export class BoomProjectile extends Projectile<TowerBoss> {
 
     ai(boss: TowerBoss, time: number, frame: number): void {
         if (!this.animated && time > this.last + 1000) {
+            this.animated = true;
             core.drawAnimate('explosion1', this.bx, this.by);
         }
         if (time > this.last + 1100) {
@@ -871,30 +872,35 @@ export class BoomProjectile extends Projectile<TowerBoss> {
         const end = this.last + 1000;
         const r = 12;
         const mr = 27;
+        ctx.save();
         if (this.time < end) {
-            const angle = this.time / 30;
+            const angle = this.time / 500;
             const sin = Math.sin(angle);
             const cos = Math.cos(angle);
             ctx.fillStyle = 'rgb(255,50,50)';
             ctx.strokeStyle = 'rgb(255,50,50)';
-            ctx.lineWidth = 1;
+            ctx.lineWidth = 1.5;
+            ctx.globalAlpha = 0.8;
+            const cx = this.x + 16;
+            const cy = this.y + 16;
             ctx.beginPath();
-            ctx.moveTo(this.x + r * cos, this.y + r * sin);
-            ctx.lineTo(this.x + mr * cos, this.y + mr * sin);
-            ctx.moveTo(this.x - r * cos, this.y - r * sin);
-            ctx.lineTo(this.x - mr * cos, this.y - mr * sin);
-            ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
+            ctx.arc(cx, cy, r, 0, Math.PI * 2);
+            ctx.moveTo(cx + r * cos, cy + r * sin);
+            ctx.lineTo(cx + mr * cos, cy + mr * sin);
+            ctx.moveTo(cx - r * cos, cy - r * sin);
+            ctx.lineTo(cx - mr * cos, cy - mr * sin);
             ctx.stroke();
             ctx.beginPath();
-            ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+            ctx.arc(cx, cy, 2, 0, Math.PI * 2);
             ctx.fill();
         }
         if (this.time > end - 500) {
             const dt = this.time - end + 500;
             const pos = this.y - (1 - dt / 500) * 480;
             const img = core.material.images.images['boom.png'];
-            ctx.drawImage(img, this.x - 16, pos - 80, 36, 80);
+            ctx.drawImage(img, this.x, pos - 80, 36, 80);
         }
+        ctx.restore();
     }
 }
 
@@ -934,22 +940,25 @@ export class ChainProjectile extends Projectile<TowerBoss> {
 
     render(canvas: MotaOffscreenCanvas2D, transform: Transform): void {
         const ctx = canvas.ctx;
+        ctx.save();
         ctx.beginPath();
         ctx.moveTo(this.hitbox.x1, this.hitbox.y1);
         ctx.lineTo(this.hitbox.x2, this.hitbox.y2);
+
+        const progress = (this.time - 1000) / 1000;
 
         if (this.time < 1000) {
             ctx.globalAlpha = 0.6;
             ctx.strokeStyle = 'rgb(220,100,255)';
             ctx.stroke();
         } else {
+            ctx.lineWidth = 2;
             ctx.strokeStyle = '#fff';
-            ctx.shadowBlur = 3;
+            ctx.shadowBlur = 12;
             ctx.shadowColor = '#62c8f4';
-            ctx.globalAlpha = 0.6;
+            ctx.globalAlpha = 1 - progress;
             ctx.stroke();
-            ctx.shadowBlur = 0;
-            ctx.shadowColor = '';
         }
+        ctx.restore();
     }
 }
