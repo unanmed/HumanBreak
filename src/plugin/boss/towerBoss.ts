@@ -119,6 +119,8 @@ export class TowerBoss extends BarrageBoss {
     /** 技能7的释放间隔 */
     private skill7Interval: number = 10000;
 
+    private heroHp: number = 0;
+
     constructor() {
         super();
 
@@ -168,6 +170,8 @@ export class TowerBoss extends BarrageBoss {
 
         TowerBoss.effect.start();
         TowerBoss.effect.use();
+
+        this.heroHp = core.status.hero.hp;
     }
 
     override end() {
@@ -189,6 +193,7 @@ export class TowerBoss extends BarrageBoss {
         AttackProjectile.end();
 
         TowerBoss.effect.end();
+        core.status.hero.hp = this.heroHp;
 
         Mota.Plugin.require('replay_g').clip('choice:0');
     }
