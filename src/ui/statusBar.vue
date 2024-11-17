@@ -42,7 +42,7 @@
                             }}/t</span
                         >
                         <span
-                            v-if="has(jumpCnt)"
+                            v-if="jumpCnt !== -1"
                             id="status-jump"
                             class="status-extra"
                             >跳跃剩余{{ jumpCnt }}</span
@@ -207,9 +207,9 @@ function update() {
 
     jumpCnt.value =
         HeroSkill.learnedSkill(HeroSkill.Jump) &&
-        !Mota.Plugin.require('skill_g').jumpIgnoreFloor.has(core.status.floorId)
-            ? 3 - (flags[`jump_${core.status.floorId}`] ?? 0)
-            : void 0;
+        Mota.Plugin.require('skill_g').jumpIgnoreFloor.has(core.status.floorId)
+            ? -1
+            : 3 - (flags[`jump_${core.status.floorId}`] ?? 0);
 }
 
 function openSkillTree() {
