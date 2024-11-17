@@ -339,6 +339,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                         delete data.hero.flags[key];
                     }
                 }
+            } else {
+                NightSpecial.loadNight(data.night);
             }
 
             if (!data.skill) {
@@ -365,6 +367,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 }
                 HeroSkill.setAutoSkill(!!flags.autoSkill);
                 delete flags.autoSkill;
+            } else {
+                HeroSkill.loadSkill(data.skill);
             }
 
             // 切换到对应的楼层
