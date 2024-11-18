@@ -806,8 +806,12 @@ export class ThunderBallProjectile extends Projectile<TowerBoss> {
         const hor = ThunderBallProjectile.horizontal!.canvas;
         const ver = ThunderBallProjectile.vertical!.canvas;
         ctx.save();
-        ctx.globalAlpha = 1;
-        if (w > 0 && h > 0) {
+        if (this.time > 1000 && this.time < 3000) {
+            ctx.globalAlpha = (3000 - this.time) / 2000;
+        } else {
+            ctx.globalAlpha = 1;
+        }
+        if (w > 0 && h > 0 && this.time < 3000) {
             switch (this.direction) {
                 case ProjectileDirection.BottomToTop:
                 case ProjectileDirection.TopToBottom: {
@@ -821,6 +825,7 @@ export class ThunderBallProjectile extends Projectile<TowerBoss> {
                 }
             }
         }
+        ctx.globalAlpha = 1;
         ctx.fillStyle = '#fff';
         ctx.shadowBlur = 8;
         ctx.shadowColor = '#62c8f4';
