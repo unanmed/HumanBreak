@@ -958,14 +958,6 @@ Mota.require('var', 'hook').once('reset', () => {
         },
         h(LayoutOutlined)
     );
-    // CustomToolbar.misc.register(
-    //     'drag',
-    //     '地图拖动',
-    //     () => {
-    //         // todo
-    //     },
-    //     h('span', '拖动地图')
-    // );
 
     CustomToolbar.misc.bindActivable('minimap', true, () => minimapTool);
 });

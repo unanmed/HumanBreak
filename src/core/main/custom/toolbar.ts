@@ -78,6 +78,12 @@ interface Misc {
         display: Component
     ): void;
 
+    /**
+     * 为一类杂项工具设置激活信息
+     * @param id 杂项工具的id
+     * @param activable 是否可激活
+     * @param actived 获取当前是否激活的函数
+     */
     bindActivable(id: string, activable: boolean, actived?: ActivedFn): void;
 
     /**
@@ -383,7 +389,7 @@ Mota.require('var', 'hook').on('reset', () => {
 Mota.require('var', 'hook').once('reset', () => {
     const mainStorage = GameStorage.for(GameStorage.fromGame('main'));
     mainStorage.read();
-    if (mainStorage.getValue('played', false)) {
+    if (!mainStorage.getValue('played', false)) {
         mainStorage.setValue('played', true);
         const defaultsTool =
             CustomToolbar.list.find(v => v.id === '@defaults') ??
