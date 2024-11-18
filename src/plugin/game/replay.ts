@@ -141,13 +141,14 @@ export function init() {
             HeroSkill.toggleSkill(num);
         }
         core.updateStatusBar();
+        core.status.route.push(`skill:${toEmit}`);
         core.replay();
         return true;
     }
 
     core.registerReplayAction('skill', name => {
         if (!name.startsWith('skill:')) return false;
-        const [type, skill] = name.split(':');
+        const [, skill] = name.split(':');
         return skillAction(skill);
     });
 
@@ -157,13 +158,10 @@ export function init() {
         const key = parseInt(name.slice(4));
 
         if (key === 49) {
-            core.status.route.push(`skill:1`);
             return skillAction('1');
         } else if (key === 50) {
-            core.status.route.push(`skill:2`);
             return skillAction('2');
         } else if (key === 51) {
-            core.status.route.push(`skill:3`);
             return skillAction('3');
         }
 
