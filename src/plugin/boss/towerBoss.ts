@@ -338,8 +338,8 @@ export class TowerBoss extends BarrageBoss {
     }
 
     releaseSkill2() {
-        const x = Math.floor(Math.random() * 13 + 1);
-        const y = Math.floor(Math.random() * 13 + 1);
+        const x = Math.floor(Math.random() * 11 + 2);
+        const y = Math.floor(Math.random() * 11 + 2);
         const proj = this.createProjectile(PortalProjectile, 0, 0);
         proj.setTarget(x, y);
         proj.createEffect(TowerBoss.effect);
