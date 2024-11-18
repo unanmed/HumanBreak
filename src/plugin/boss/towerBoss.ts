@@ -28,6 +28,7 @@ Mota.require('var', 'loading').once('coreInit', () => {
     const shader = new Shader();
     shader.size(480, 480);
     shader.setHD(true);
+    shader.setZIndex(120);
     TowerBoss.shader = shader;
     TowerBoss.effect.create(shader, 40);
 });
@@ -151,8 +152,6 @@ export class TowerBoss extends BarrageBoss {
     override start() {
         super.start();
 
-        this.group.remove();
-        this.group.append(TowerBoss.shader);
         TowerBoss.shader.append(this.mapDraw);
         this.healthBar.append(this.group);
         this.word.append(this.group);
@@ -177,7 +176,6 @@ export class TowerBoss extends BarrageBoss {
     override end() {
         super.end();
         TowerBoss.shader.remove();
-        this.group.append(this.mapDraw);
         this.healthBar.remove();
         this.word.remove();
         this.main.remove();

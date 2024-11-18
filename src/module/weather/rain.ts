@@ -1,12 +1,10 @@
-import {
-    IShaderUniform,
-    Shader,
-    ShaderProgram,
-    UniformType
-} from '@/core/render/shader';
+import { Shader, ShaderProgram } from '@/core/render/shader';
 import { IWeather, WeatherController } from './weather';
 import { MotaRenderer } from '@/core/render/render';
 import { Container } from '@/core/render/container';
+import { GL2Program, IShaderUniform, UniformType } from '@/core/render/gl2';
+import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
+import { Transform } from '@/core/render/transform';
 
 const rainVs = /* glsl */ `
 in vec2 a_rainVertex;
@@ -87,13 +85,12 @@ Mota.require('var', 'loading').once('coreInit', () => {
     const gl = shader.gl;
     shader.size(480, 480);
     shader.setHD(true);
+    shader.setZIndex(100);
     RainWeather.shader = shader;
-    const program = shader.createProgram();
-    program.setVersion(shader.VERSION_ES_300);
+    const program = shader.createProgram(ShaderProgram);
     program.fs(rainFs);
     program.vs(rainVs);
     program.requestCompile();
-    program.useDefault(false);
     const pos = program.defineAttribArray('a_rainVertex');
     program.defineAttribArray('a_offset');
     program.defineAttribArray('a_data');
@@ -108,13 +105,6 @@ Mota.require('var', 'loading').once('coreInit', () => {
         pos.pointer(2, gl.FLOAT, false, 0, 0);
         pos.enable();
     }
-
-    const back = shader.createProgram();
-    back.requestCompile();
-    back.modified = true;
-    back.useDefault(false);
-    RainShader.backProgram = back;
-    shader.useProgram(back);
 });
 
 export class RainWeather implements IWeather {
@@ -129,10 +119,8 @@ export class RainWeather implements IWeather {
     activate(): void {
         const render = MotaRenderer.get('render-main');
         const draw = render?.getElementById('map-draw') as Container;
-        const layer = draw.children;
-        if (!layer || !draw) return;
+        if (!draw) return;
         const shader = RainWeather.shader;
-        shader.appendChild(...layer);
         shader.append(draw);
 
         const gl = shader.gl;
@@ -221,21 +209,5 @@ class RainShader extends Shader {
 
         program.paramArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, num);
         color?.set(1, 1, 1, 0.1);
-    }
-
-    protected override preDraw(gl: WebGL2RenderingContext): boolean {
-        const back = RainShader.backProgram;
-        const rain = RainShader.rainProgram;
-        this.useProgram(back);
-        const ready = this.defaultReady();
-        const param = back.getDrawParams(this.DRAW_ELEMENTS);
-        const rainParam = rain.getDrawParams(this.DRAW_ARRAYS_INSTANCED);
-        if (!ready || !param || !rainParam) return false;
-
-        this.draw(gl, back, param, back.usingIndices);
-        this.useProgram(rain);
-        if (this.defaultReady()) this.draw(gl, rain, rainParam, null);
-
-        return false;
     }
 }

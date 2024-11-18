@@ -7,7 +7,12 @@ import type {
 import type { HeroRenderer } from '@/core/render/preset/hero';
 import type { Layer, LayerGroup } from '@/core/render/preset/layer';
 import type { TimingFn } from 'mutate-animate';
-import { BlockMover, heroMoveCollection, MoveStep } from '@/game/state/move';
+import {
+    BlockMover,
+    heroMoveCollection,
+    IMoveController,
+    MoveStep
+} from '@/game/state/move';
 import type { FloorViewport } from '@/core/render/preset/viewport';
 
 // 向后兼容用，会充当两个版本间过渡的作用
@@ -647,26 +652,30 @@ export function init() {
         }
     });
 
+    const moveAction = new Set<string>(['up', 'down', 'left', 'right']);
+    let controller: IMoveController | null = null;
     // 复写录像的移动
     core.registerReplayAction('move', action => {
-        if (
-            action === 'up' ||
-            action === 'down' ||
-            action === 'left' ||
-            action === 'right'
-        ) {
-            // const { noPass, canMove } = checkCanMove();
-            // const { nx, ny } = getNextLoc();
-            // if (noPass || !canMove) {
-            //     if (canMove) core.trigger(nx, ny);
-            // } else {
-            //     core.setHeroLoc('x', nx);
-            //     core.setHeroLoc('y', ny);
-            //     core.setHeroLoc('direction', action);
-            // }
-
-            // setTimeout(core.replay, 100);
-
+        if (moveAction.has(action)) {
+            const next = core.status.replay.toReplay[1];
+            if (!heroMover.moving) {
+                controller = heroMover.startMove();
+            }
+            if (!controller) {
+                return false;
+            }
+            controller.push({
+                type: 'dir',
+                value: action as Dir
+            });
+            if (moveAction.has(next)) {
+                core.replay();
+            } else {
+                controller.onEnd.then(() => {
+                    core.replay();
+                    controller = null;
+                });
+            }
             return true;
         } else {
             return false;

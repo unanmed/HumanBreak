@@ -1,12 +1,10 @@
-import {
-    IShaderUniform,
-    Shader,
-    ShaderProgram,
-    UniformType
-} from '@/core/render/shader';
+import { Shader, ShaderProgram } from '@/core/render/shader';
 import { IWeather, WeatherController } from './weather';
 import { MotaRenderer } from '@/core/render/render';
 import { Container } from '@/core/render/container';
+import { GL2Program, IShaderUniform, UniformType } from '@/core/render/gl2';
+import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
+import { Transform } from '@/core/render/transform';
 
 const snowVs = /* glsl */ `
 in vec2 a_snowVertex;
@@ -108,12 +106,10 @@ Mota.require('var', 'loading').once('coreInit', () => {
     shader.size(480, 480);
     shader.setHD(true);
     SnowWeather.shader = shader;
-    const program = shader.createProgram();
-    program.setVersion(shader.VERSION_ES_300);
+    const program = shader.createProgram(ShaderProgram);
     program.fs(snowFs);
     program.vs(snowVs);
     program.requestCompile();
-    program.useDefault(false);
     const pos = program.defineAttribArray('a_snowVertex');
     program.defineAttribArray('a_offset');
     program.defineAttribArray('a_data');
@@ -128,13 +124,6 @@ Mota.require('var', 'loading').once('coreInit', () => {
         pos.pointer(2, gl.FLOAT, false, 0, 0);
         pos.enable();
     }
-
-    const back = shader.createProgram();
-    back.requestCompile();
-    back.modified = true;
-    back.useDefault(false);
-    SnowShader.backProgram = back;
-    shader.useProgram(back);
 });
 
 export class SnowWeather implements IWeather {
@@ -148,11 +137,9 @@ export class SnowWeather implements IWeather {
 
     activate(): void {
         const render = MotaRenderer.get('render-main');
-        const layer = render?.getElementById('layer-main');
         const draw = render?.getElementById('map-draw') as Container;
-        if (!layer || !draw) return;
+        if (!draw) return;
         const shader = SnowWeather.shader;
-        layer.append(shader);
         shader.append(draw);
 
         const gl = shader.gl;
@@ -243,19 +230,18 @@ class SnowShader extends Shader {
         color?.set(1, 1, 1, 0.1);
     }
 
-    protected override preDraw(gl: WebGL2RenderingContext): boolean {
-        const back = SnowShader.backProgram;
+    protected preDraw(
+        canvas: MotaOffscreenCanvas2D,
+        transform: Transform,
+        gl: WebGL2RenderingContext,
+        program: GL2Program
+    ): boolean {
         const snow = SnowShader.snowProgram;
-        this.useProgram(back);
-        const ready = this.defaultReady();
-        const param = back.getDrawParams(this.DRAW_ELEMENTS);
         const snowParam = snow.getDrawParams(this.DRAW_ARRAYS_INSTANCED);
-        if (!ready || !param || !snowParam) return false;
-
-        this.draw(gl, back, param, back.usingIndices);
+        if (!snowParam) return false;
         this.useProgram(snow);
-        this.draw(gl, snow, snowParam, null);
-
+        if (!snow.ready()) return false;
+        this.draw(gl, snow);
         return false;
     }
 }

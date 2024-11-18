@@ -1,5 +1,6 @@
 import { logger } from '@/core/common/logger';
-import { Shader, ShaderProgram, UniformType } from '@/core/render/shader';
+import { UniformType } from '@/core/render/gl2';
+import { Shader, ShaderProgram } from '@/core/render/shader';
 import { Transform } from '@/core/render/transform';
 
 export const enum PointEffectType {
@@ -118,8 +119,7 @@ export class PointEffect {
      */
     create(shader: Shader, itemCount: number) {
         if (this.program || this.shader || this.started) return;
-        const program = shader.createProgram();
-        program.setVersion(shader.VERSION_ES_300);
+        const program = shader.createProgram(ShaderProgram);
         program.fs(generateFragment(itemCount));
         program.requestCompile();
 
