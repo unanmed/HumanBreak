@@ -2,9 +2,15 @@ import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 import { RenderItem, RenderItemPosition } from '@/core/render/item';
 import { Transform } from '@/core/render/transform';
 import { IStateDamageable } from '@/game/state/interface';
+import EventEmitter from 'eventemitter3';
 import { Ticker } from 'mutate-animate';
 
-export abstract class BarrageBoss {
+interface BarrageBossEvent {
+    end: [];
+    start: [];
+}
+
+export abstract class BarrageBoss extends EventEmitter<BarrageBossEvent> {
     ticker: Ticker = new Ticker();
     /** 这个boss的所有弹幕 */
     projectiles: Set<Projectile> = new Set();
