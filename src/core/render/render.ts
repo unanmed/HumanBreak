@@ -1,4 +1,5 @@
-import { MotaCanvas2D } from '../fx/canvas2d';
+import { logger } from '../common/logger';
+import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
 import { Container } from './container';
 import { RenderItem } from './item';
 import { Transform } from './transform';
@@ -6,7 +7,7 @@ import { Transform } from './transform';
 export class MotaRenderer extends Container {
     static list: Map<string, MotaRenderer> = new Map();
 
-    target: MotaCanvas2D;
+    target!: MotaOffscreenCanvas2D;
 
     protected needUpdate: boolean = false;
     readonly isRoot: boolean = true;
@@ -14,11 +15,15 @@ export class MotaRenderer extends Container {
     constructor(id: string = 'render-main') {
         super('static', false);
 
-        this.target = new MotaCanvas2D(id);
+        const canvas = document.getElementById(id) as HTMLCanvasElement;
+        if (!canvas) {
+            logger.error(19);
+            return;
+        }
+        this.target = new MotaOffscreenCanvas2D(true, canvas);
         this.size(core._PX_, core._PY_);
         this.target.withGameScale(true);
         this.target.size(core._PX_, core._PY_);
-        this.target.css(`z-index: 100`);
         this.target.setAntiAliasing(false);
 
         this.setAnchor(0.5, 0.5);
@@ -70,13 +75,6 @@ export class MotaRenderer extends Container {
             }
         }
         return null;
-    }
-
-    /**
-     * 添加至游戏画面
-     */
-    mount() {
-        this.target.mount();
     }
 
     destroy() {

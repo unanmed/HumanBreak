@@ -24,8 +24,6 @@ import type * as damage from './enemy/damage';
 import type { Logger } from '@/core/common/logger';
 import type { Danmaku } from '@/core/main/custom/danmaku';
 import type * as misc from './mechanism/misc';
-import type { MotaCanvas2D } from '@/core/fx/canvas2d';
-import type * as portal from '@/core/fx/portal';
 import type { texture } from '@/core/render/cache';
 import type { MotaRenderer } from '@/core/render/render';
 import type { Container } from '@/core/render/container';
@@ -42,6 +40,7 @@ import type { Camera } from '@/core/render/camera';
 import type * as Animation from 'mutate-animate';
 import type * as RenderUtils from '@/core/render/utils';
 import type { WeatherController } from '@/module/weather/weather';
+import type { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 
 interface ClassInterface {
     // 渲染进程与游戏进程通用
@@ -62,7 +61,6 @@ interface ClassInterface {
     SoundEffect: typeof SoundEffect;
     SoundController: typeof SoundController;
     BgmController: typeof BgmController;
-    MotaCanvas2D: typeof MotaCanvas2D;
     Danmaku: typeof Danmaku;
     // todo: 放到插件 ShaderEffect: typeof ShaderEffect;
     // 定义于游戏进程，渲染进程依然可用
@@ -110,9 +108,7 @@ interface ModuleInterface {
         MiscData: typeof misc.MiscData;
         HeroSkill: typeof misc.HeroSkill;
     };
-    Effect: {
-        Portal: typeof portal;
-    };
+    Effect: {};
     Render: {
         texture: typeof texture;
         MotaRenderer: typeof MotaRenderer;
@@ -125,6 +121,7 @@ interface ModuleInterface {
         Layer: typeof Layer;
         LayerGroupFloorBinder: typeof LayerGroupFloorBinder;
         Camera: typeof Camera;
+        MotaOffscreenCanvas2D: typeof MotaOffscreenCanvas2D;
         Utils: typeof RenderUtils;
     };
     State: {

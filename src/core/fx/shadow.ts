@@ -990,7 +990,7 @@ export class Shadow {
     }
 
     static mount() {
-        core.dom.gameDraw.appendChild(this.canvas);
+        // core.dom.gameDraw.appendChild(this.canvas);
     }
 
     /**

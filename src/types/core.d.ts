@@ -939,21 +939,25 @@ interface Core extends Pick<Main, CoreDataFromMain> {
     readonly material: Material;
 
     /**
+     * @deprecated
      * 计时器（样板的神秘操作
      */
     readonly timeout: Timeout;
 
     /**
+     * @deprecated
      * 定时器
      */
     readonly interval: Interval;
 
     /**
+     * @deprecated
      * 全局动画信息
      */
     readonly animateFrame: AnimateFrame;
 
     /**
+     * @deprecated
      * 音乐状态
      */
     readonly musicStatus: Readonly<MusicStatus>;
@@ -964,11 +968,13 @@ interface Core extends Pick<Main, CoreDataFromMain> {
     readonly platform: Readonly<CorePlatform>;
 
     /**
+     * @deprecated
      * dom样式
      */
     readonly domStyle: Readonly<DomStyle>;
 
     /**
+     * @deprecated
      * 大地图信息
      */
     readonly bigmap: CoreBigmap;
@@ -989,6 +995,7 @@ interface Core extends Pick<Main, CoreDataFromMain> {
     readonly initStatus: DeepReadonly<InitGameStatus>;
 
     /**
+     * @deprecated
      * 所有的自定义画布
      */
     readonly dymCanvas: Record<string, CanvasRenderingContext2D>;

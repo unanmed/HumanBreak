@@ -1,7 +1,4 @@
-import { parseCss } from '@/plugin/utils';
 import { EventEmitter } from 'eventemitter3';
-import { CSSObj } from '../interface';
-import { isWebGL2Supported } from './webgl';
 
 interface OffscreenCanvasEvent {
     /** 当被动触发resize时（例如core.domStyle.scale变化、窗口大小变化）时触发，使用size函数并不会触发 */
@@ -29,10 +26,15 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
     /** 更新标识符，如果发生变化则说明画布被动清空 */
     symbol: number = 0;
 
-    constructor(alpha: boolean = true) {
+    /**
+     * 创建一个新的离屏画布
+     * @param alpha 是否启用透明度通道
+     * @param canvas 指定画布，不指定时会自动创建一个新画布
+     */
+    constructor(alpha: boolean = true, canvas?: HTMLCanvasElement) {
         super();
 
-        this.canvas = document.createElement('canvas');
+        this.canvas = canvas ?? document.createElement('canvas');
         this.ctx = this.canvas.getContext('2d', { alpha })!;
         this.width = this.canvas.width / devicePixelRatio;
         this.height = this.canvas.height / devicePixelRatio;
@@ -45,8 +47,9 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
      */
     size(width: number, height: number) {
         let ratio = this.highResolution ? devicePixelRatio : 1;
-        if (this.autoScale && this.highResolution) {
-            ratio *= core.domStyle.scale;
+        const scale = core.domStyle.scale;
+        if (this.autoScale) {
+            ratio *= scale;
         }
         this.scale = ratio;
         this.canvas.width = width * ratio;
@@ -56,6 +59,10 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         this.ctx.scale(ratio, ratio);
         this.ctx.imageSmoothingEnabled = this.antiAliasing;
+        if (this.canvas.isConnected) {
+            this.canvas.style.width = `${width * scale}px`;
+            this.canvas.style.height = `${height * scale}px`;
+        }
     }
 
     /**
@@ -100,7 +107,7 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
     }
 
     /**
-     * 复制一个离屏Canvas2D对象或Canvas2D对象，一般用于缓存等操作
+     * 复制一个离屏Canvas2D对象，一般用于缓存等操作
      * @param canvas 被复制的MotaOffscreenCanvas2D对象
      * @returns 复制结果
      */
@@ -118,220 +125,20 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
         );
         return newCanvas;
     }
-}
 
-export class MotaOffscreenCanvasGL2 extends EventEmitter<OffscreenCanvasEvent> {
-    static support: boolean = isWebGL2Supported();
-    static list: Set<MotaOffscreenCanvasGL2> = new Set();
-
-    canvas: HTMLCanvasElement;
-    gl: WebGL2RenderingContext;
-
-    width: number;
-    height: number;
-
-    /** 是否自动跟随样板的core.domStyle.scale进行缩放 */
-    autoScale: boolean = false;
-    /** 是否是高清画布 */
-    highResolution: boolean = true;
-
-    scale: number = 1;
-
-    /** 更新标识符，如果发生变化则说明画布被动清空 */
-    symbol: number = 0;
-
-    constructor() {
-        super();
-
-        this.canvas = document.createElement('canvas');
-        this.gl = this.canvas.getContext('webgl2')!;
-        this.width = this.canvas.width / devicePixelRatio;
-        this.height = this.canvas.height / devicePixelRatio;
-    }
-
-    /**
-     * 设置画布的大小
-     */
-    size(width: number, height: number) {
-        let ratio = this.highResolution ? devicePixelRatio : 1;
-        if (this.autoScale && this.highResolution) {
-            ratio *= core.domStyle.scale;
-        }
-        this.scale = ratio;
-        this.canvas.width = width * ratio;
-        this.canvas.height = height * ratio;
-        this.width = width;
-        this.height = height;
-    }
-
-    /**
-     * 设置当前画布是否跟随样板的 core.domStyle.scale 一同进行缩放
-     */
-    withGameScale(auto: boolean) {
-        this.autoScale = auto;
-        this.size(this.width, this.height);
-    }
-
-    /**
-     * 设置当前画布是否为高清画布
-     */
-    setHD(hd: boolean) {
-        this.highResolution = hd;
-        this.size(this.width, this.height);
-    }
-
-    /**
-     * 删除这个画布
-     */
-    delete() {
-        MotaOffscreenCanvasGL2.list.delete(this);
-    }
-}
-
-export class MotaCanvas2D extends MotaOffscreenCanvas2D {
-    static map: Map<string, MotaCanvas2D> = new Map();
-
-    id: string = '';
-
-    x: number = 0;
-    y: number = 0;
-
-    private mounted: boolean = false;
-    private target!: HTMLElement;
-    /** 是否自动跟随样板的core.domStyle.scale进行缩放 */
-    autoScale: boolean = false;
-    /** 是否是高清画布 */
-    highResolution: boolean = true;
-
-    constructor(
-        id: string = '',
-        setTarget: boolean = true,
-        alpha: boolean = true
-    ) {
-        super();
-
-        this.id = id;
-        if (setTarget) this.target = core.dom.gameDraw;
-        this.canvas = document.createElement('canvas');
-        this.canvas.id = id;
-        this.ctx = this.canvas.getContext('2d', { alpha })!;
-        this.width = this.canvas.width / devicePixelRatio;
-        this.height = this.canvas.height / devicePixelRatio;
-
-        this.canvas.style.position = 'absolute';
-
-        MotaCanvas2D.map.set(this.id, this);
-    }
-
-    /**
-     * 修改画布的挂载目标，如果已经被挂载，那么会被重新挂载至新的目标元素
-     * @param target 画布将被挂载的目标
-     */
-    setTarget(target: HTMLElement) {
-        this.target = target;
-        if (this.mounted) {
-            this.unmount();
-            this.mount();
-        }
-    }
-
-    /**
-     * 设置画布的大小
-     */
-    size(width: number, height: number) {
-        let ratio = this.highResolution ? devicePixelRatio : 1;
-        if (this.autoScale) {
-            const scale = core.domStyle.scale;
-            if (this.highResolution) ratio *= scale;
-            this.canvas.style.width = `${width * scale}px`;
-            this.canvas.style.height = `${height * scale}px`;
-        } else {
-            this.canvas.style.width = `${width}px`;
-            this.canvas.style.height = `${height}px`;
-        }
-        this.scale = ratio;
-        this.canvas.width = width * ratio;
-        this.canvas.height = height * ratio;
-        this.width = width;
-        this.height = height;
-        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-        this.ctx.scale(ratio, ratio);
-    }
-
-    /**
-     * 设置画布的位置
-     */
-    pos(x: number, y: number) {
-        this.canvas.style.left = `${x}px`;
-        this.canvas.style.top = `${y}px`;
-        this.x = x;
-        this.y = y;
-    }
-
-    /**
-     * 设置画布的css
-     * @param css 要设置成的css
-     */
-    css(css: string | CSSObj) {
-        const s = typeof css === 'string' ? parseCss(css) : css;
-        for (const [key, value] of Object.entries(s)) {
-            this.canvas.style[key as CanParseCss] = value;
-        }
-    }
-
-    /**
-     * 删除这个画布
-     */
-    delete() {
-        super.delete();
-        this.unmount();
-        MotaCanvas2D.map.delete(this.id);
-    }
-
-    /**
-     * 将这个画布添加至游戏画布
-     */
-    mount() {
-        if (!this.mounted) {
-            this.mounted = true;
-            this.target.appendChild(this.canvas);
-        }
-    }
-
-    /**
-     * 将这个画布从页面上移除
-     */
-    unmount() {
-        if (this.mounted) {
-            this.mounted = false;
-            this.canvas.remove();
-        }
-    }
-
-    /**
-     * 类似于 Symbol.for
-     */
-    static for(id: string, setTarget?: boolean) {
-        const canvas = this.map.get(id);
-        return canvas ?? new MotaCanvas2D(id, setTarget);
+    static refreshAll() {
+        this.list.forEach(v => {
+            if (v.autoScale) {
+                v.size(v.width, v.height);
+                v.symbol++;
+                v.emit('resize');
+            }
+        });
     }
 }
 
 window.addEventListener('resize', () => {
     requestAnimationFrame(() => {
-        MotaOffscreenCanvas2D.list.forEach(v => {
-            if (v.autoScale) {
-                v.size(v.width, v.height);
-                v.symbol++;
-                v.emit('resize');
-            }
-        });
-        MotaOffscreenCanvasGL2.list.forEach(v => {
-            if (v.autoScale) {
-                v.size(v.width, v.height);
-                v.symbol++;
-                v.emit('resize');
-            }
-        });
+        MotaOffscreenCanvas2D.refreshAll();
     });
 });

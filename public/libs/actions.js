@@ -763,26 +763,17 @@ actions.prototype._sys_onup = function (x, y, px, py) {
 };
 
 ////// 获得点击事件相对左上角的坐标 //////
-actions.prototype._getClickLoc = function (x, y) {
-    var statusBar = { x: 0, y: 0 };
-    var size = 32;
-    size = size * core.domStyle.scale;
+actions.prototype._getClickLoc = function (x, y, isClient = false) {
+    var size = 32 * core.domStyle.scale;
 
-    if (core.domStyle.isVertical) {
-        statusBar.x = 3;
-        statusBar.y =
-            core.dom.statusBar.offsetHeight +
-            3 +
-            32 * core.values.statusCanvasRowsOnMobile;
+    if (!isClient) {
+        return { x, y, size };
     } else {
-        statusBar.x = core.dom.statusBar.offsetWidth + 3;
-        statusBar.y = 3;
+        const ele = core.dom.gameDraw;
+        const left = ele.offsetLeft;
+        const top = ele.offsetTop;
+        return { x: x - left, y: y - top, size };
     }
-
-    var left = core.dom.gameGroup.offsetLeft + statusBar.x;
-    var top = core.dom.gameGroup.offsetTop + statusBar.y;
-    var loc = { x: Math.max(x - left), y: Math.max(y - top, 0), size: size };
-    return loc;
 };
 
 ////// 滑动鼠标滚轮时的操作 //////

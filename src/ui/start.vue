@@ -155,7 +155,6 @@ async function clickStartButton(id: string) {
         core.startGame(id === 'easy' ? 'easy' : 'hard');
     }
     if (id === 'load-game') {
-        core.dom.gameGroup.style.display = 'block';
         start.style.top = '200vh';
         core.load();
     }

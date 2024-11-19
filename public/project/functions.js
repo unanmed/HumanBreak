@@ -102,7 +102,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 if (!noexit) {
                     core.clearMap('all'); // 清空全地图
                     core.deleteAllCanvas(); // 删除所有创建的画布
-                    core.dom.gif2.innerHTML = '';
                 }
                 reason = core.replaceText(reason);
                 core.drawText(
@@ -391,37 +390,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             });
         },
         updateStatusBar: function () {
-            // 更新状态栏
-
             // 检查等级
             core.events.checkLvUp();
-
-            // 如果是自定义添加的状态栏，也需要在这里进行设置显示的数值
-
-            // 难度
-            if (core.statusBar.hard.innerText != core.status.hard) {
-                core.statusBar.hard.innerText = core.status.hard;
-            }
-            var hardColor = core.getFlag('__hardColor__', 'red');
-            if (core.statusBar.hard.getAttribute('_style') != hardColor) {
-                core.statusBar.hard.style.color = hardColor;
-                core.statusBar.hard.setAttribute('_style', hardColor);
-            }
-
             // 更新全地图显伤
             core.updateDamage();
-
-            if (main.replayChecking) return;
-
-            // 已学习的技能
-            // if (
-            //     core.plugin.skillTree.getSkillLevel(11) > 0 &&
-            //     (core.status.hero.special?.num ?? []).length > 0
-            // ) {
-            //     mota.plugin.ui.showStudiedSkill.value = true;
-            // } else {
-            //     mota.plugin.ui.showStudiedSkill.value = false;
-            // }
         },
         moveOneStep: function (callback) {
             // 勇士每走一步后执行的操作。callback为行走完毕后的回调
@@ -433,10 +405,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
 
             // 增加步数
             core.status.hero.steps++;
-            // 更新跟随者状态，并绘制
-            core.updateFollowers();
-            core.drawHero();
-
             // 从v2.7开始，每一步行走不会再刷新状态栏。
             // 如果有特殊要求（如每走一步都加buff之类），可手动取消注释下面这一句：
             // core.updateStatusBar(true);

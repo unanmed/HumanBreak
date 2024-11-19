@@ -111,7 +111,7 @@ function core() {
         hdCanvas: ['damage', 'ui', 'data']
     };
     this.bigmap = {
-        canvas: ['bg', 'event', 'event2', 'fg', 'damage'],
+        canvas: [],
         offsetX: 0, // in pixel
         offsetY: 0,
         posX: 0, //
@@ -376,8 +376,6 @@ core.prototype._init_flags = function () {
     core.firstData = core.clone(core.data.firstData);
     this._init_sys_flags();
 
-    core.dom.versionLabel.innerText = core.firstData.version;
-    core.dom.logoLabel.innerText = core.firstData.title;
     document.title = core.firstData.title + ' - HTML5魔塔';
     (core.firstData.shops || []).forEach(function (t) {
         core.initStatus.shops[t.id] = t;

@@ -123,6 +123,8 @@ export interface ERenderItemEvent {
     beforeRender: [transform: Transform];
     afterRender: [transform: Transform];
     destroy: [];
+    /** 当这个元素被点击时触发 */
+    clickCapture: [x: number, y: number, type: number, ev: MouseEvent];
 }
 
 interface TickerDelegation {

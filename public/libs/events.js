@@ -24,7 +24,6 @@ events.prototype.resetGame = function (hero, hard, floorId, maps, values) {
 ////// 游戏开始事件 //////
 events.prototype.startGame = function (hard, seed, route, callback) {
     hard = hard || '';
-    core.dom.gameGroup.style.display = 'block';
     if (!main.replayChecking) {
         Mota.require('var', 'fixedUi').closeByName('start');
     }
@@ -34,7 +33,6 @@ events.prototype.startGame = function (hard, seed, route, callback) {
 
     // 无动画的开始游戏
     if (core.flags.startUsingCanvas || route != null) {
-        core.dom.startPanel.style.display = 'none';
         this._startGame_start(hard, seed, route, callback);
     } else {
         core.hideStartAnimate(function () {
@@ -62,7 +60,6 @@ events.prototype._startGame_start = function (hard, seed, route, callback) {
     var todo = [];
     if (core.flags.startUsingCanvas) {
         core.hideStatusBar();
-        core.dom.musicBtn.style.display = 'block';
         core.push(todo, core.firstData.startCanvas);
     }
     core.push(todo, {
@@ -146,7 +143,6 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
     if (!core.status.extraEvent) {
         core.clearMap('all');
         core.deleteAllCanvas();
-        core.dom.gif2.innerHTML = '';
         core.setWeather();
     }
     core.ui.closePanel();
@@ -783,7 +779,6 @@ events.prototype.changeFloor = function (
     floorId = info.floorId;
     info.locked = core.status.lockControl;
 
-    core.dom.floorNameLabel.innerText = core.status.maps[floorId].title;
     core.lockControl();
     core.stopAutomaticRoute();
     core.clearContinueAutomaticRoute();
@@ -820,7 +815,6 @@ events.prototype._changeFloor_getInfo = function (
 
     if (main.mode != 'play' || core.isReplaying()) time = 0;
     if (time == null) time = core.values.floorChangeTime;
-    time /= 20;
 
     return {
         floorId: floorId,
@@ -869,15 +863,17 @@ events.prototype._changeFloor_beforeChange = function (info, callback) {
     this._changeFloor_playSound();
     // 需要 setTimeout 执行，不然会出错
     window.setTimeout(function () {
-        if (info.time == 0) core.events._changeFloor_changing(info, callback);
-        else
-            core.showWithAnimate(
-                core.dom.floorMsgGroup,
-                info.time / 2,
-                function () {
-                    core.events._changeFloor_changing(info, callback);
-                }
-            );
+        if (info.time === 0 || main.replayChecking) {
+            core.events._changeFloor_changing(info, callback);
+        } else {
+            const Render = Mota.require('module', 'Render').MotaRenderer;
+            const main = Render.get('render-main');
+            const change = main.getElementById('floor-change');
+            change.setTitle(core.floors[info.floorId]?.title ?? '');
+            change.showChange(info.time / 2).then(() => {
+                core.events._changeFloor_changing(info, callback);
+            });
+        }
     }, 25);
 };
 
@@ -900,15 +896,16 @@ events.prototype._changeFloor_changing = function (info, callback) {
     core.drawHero();
     core.setFlag('__lockViewport__', __lockViewport__);
 
-    if (info.time == 0) this._changeFloor_afterChange(info, callback);
-    else
-        core.hideWithAnimate(
-            core.dom.floorMsgGroup,
-            info.time / 4,
-            function () {
-                core.events._changeFloor_afterChange(info, callback);
-            }
-        );
+    if (info.time === 0 || main.replayChecking) {
+        this._changeFloor_afterChange(info, callback);
+    } else {
+        const Render = Mota.require('module', 'Render').MotaRenderer;
+        const main = Render.get('render-main');
+        const change = main.getElementById('floor-change');
+        change.hideChange(info.time / 2).then(() => {
+            core.events._changeFloor_afterChange(info, callback);
+        });
+    }
 };
 
 events.prototype._changeFloor_afterChange = function (info, callback) {
@@ -3418,7 +3415,6 @@ events.prototype.load = function (fromUserAction) {
         offset = saveIndex - 5 * page;
     // 游戏开始前读档
     if (!core.isPlaying()) {
-        core.dom.startPanel.style.display = 'none';
         core.clearStatus();
         core.clearMap('all');
         core.status.event = { id: 'load', data: null };
@@ -4206,20 +4202,7 @@ events.prototype._scaleImage_scale = function (ctx, scaleInfo, callback) {
 
 ////// 绘制或取消一张gif图片 //////
 events.prototype.showGif = function (name, x, y) {
-    name = core.getMappedName(name);
-    var image = core.material.images.images[name];
-    if (image) {
-        var gif = new Image();
-        gif.src = image.src;
-        gif.style.position = 'absolute';
-        gif.style.left = x * core.domStyle.scale + 'px';
-        gif.style.top = y * core.domStyle.scale + 'px';
-        gif.style.width = image.width * core.domStyle.scale + 'px';
-        gif.style.height = image.height * core.domStyle.scale + 'px';
-        core.dom.gif2.appendChild(gif);
-    } else {
-        core.dom.gif2.innerHTML = '';
-    }
+    // Deprecated.
 };
 
 ////// 淡入淡出音乐 //////

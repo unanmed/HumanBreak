@@ -389,11 +389,13 @@ Mota.require('var', 'hook').on('reset', () => {
 Mota.require('var', 'hook').once('reset', () => {
     const mainStorage = GameStorage.for(GameStorage.fromGame('main'));
     mainStorage.read();
-    if (!mainStorage.getValue('played', false)) {
+    if (mainStorage.getValue('played', false)) {
         mainStorage.setValue('played', true);
-        const defaultsTool =
-            CustomToolbar.list.find(v => v.id === '@defaults') ??
-            new CustomToolbar('@defaults', true);
+        let defaultsTool = CustomToolbar.list.find(v => v.id === '@defaults');
+        const hasDefaults = !!defaultsTool;
+        if (!defaultsTool) {
+            defaultsTool = new CustomToolbar('@defaults', true);
+        }
         defaultsTool.closeAll();
         defaultsTool.items = reactive([]);
         defaultsTool.add({
@@ -417,38 +419,25 @@ Mota.require('var', 'hook').once('reset', () => {
                 'minimap'
             ]
         });
-        // 计算位置
-        if (isMobile) {
-            // 手机端显示在最下方
-            defaultsTool.setPos(25, window.innerHeight - 100);
-            defaultsTool.setSize(window.innerWidth - 50, 100);
-        } else {
-            // 电脑显示在屏幕右方
-            const x = window.innerWidth / 2 + core.domStyle.scale * 240 + 75;
-            defaultsTool.setPos(x, window.innerHeight / 2 + 100);
-            defaultsTool.setSize(window.innerWidth - x - 75, 200);
-        }
+        // 计算位置，显示在游戏画面下方
+        // if (!hasDefaults) {
+        // const gameGroup = core.dom.gameGroup;
+        // const bottom = gameGroup.offsetTop + gameGroup.offsetHeight - 3;
+        // const left = gameGroup.offsetLeft + 3;
+        // const width = gameGroup.offsetWidth - 6;
+
+        // if (isMobile) {
+        //     // 手机端显示在最下方
+        //     defaultsTool.setPos(16, window.innerHeight - 32);
+        //     defaultsTool.setSize(bottom, 35);
+        // } else {
+        //     // 电脑显示在屏幕右方
+        //     defaultsTool.setPos(left, bottom);
+        //     defaultsTool.setSize(width, 70);
+        // }
+        // }
 
         defaultsTool.show();
         CustomToolbar.save();
     }
-});
-
-window.addEventListener('resize', () => {
-    requestAnimationFrame(() => {
-        const defaultsTool = CustomToolbar.list.find(v => v.id === '@defaults');
-        if (!defaultsTool) return;
-        // 计算位置
-        if (isMobile) {
-            // 手机端显示在最下方
-            defaultsTool.setPos(25, window.innerHeight - 100);
-            defaultsTool.setSize(window.innerWidth - 50, 100);
-        } else {
-            // 电脑显示在屏幕右方
-            const x = window.innerWidth / 2 + core.domStyle.scale * 240 + 75;
-            defaultsTool.setPos(x, window.innerHeight / 2 + 100);
-            defaultsTool.setSize(window.innerWidth - x - 75, 200);
-        }
-        defaultsTool.refresh(true);
-    });
 });

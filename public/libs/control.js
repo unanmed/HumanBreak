@@ -47,7 +47,6 @@ control.prototype._init = function () {
     this.registerReplayAction('ignoreInput', this._replayAction_ignoreInput);
     this.registerReplayAction('no', this._replayAction_no);
     // --- 注册系统的resize
-    this.registerResize('gameGroup', this._resize_gameGroup);
     this.registerResize('canvas', this._resize_canvas);
 };
 
@@ -251,14 +250,10 @@ control.prototype.showStartAnimate = function (noAnimate, callback) {
     Mota.r(() => {
         Mota.require('var', 'fixedUi').open('start');
     });
-    // core.hideWithAnimate(core.dom.startTop, 20, function () {
-    //     core.control._showStartAnimate_finished(false, callback);
-    // });
 };
 
 control.prototype._showStartAnimate_resetDom = function () {
     core.status.played = false;
-    core.dom.gameGroup.style.display = 'none';
     core.clearStatus();
     core.clearMap('all');
     // 重置音量
@@ -267,7 +262,6 @@ control.prototype._showStartAnimate_resetDom = function () {
 };
 
 control.prototype._showStartAnimate_finished = function (start, callback) {
-    core.dom.startTop.style.display = 'none';
     main.selectedButton = null;
     if (start) core.startGame();
     if (callback) callback();
@@ -275,9 +269,7 @@ control.prototype._showStartAnimate_finished = function (start, callback) {
 
 ////// 隐藏游戏开始界面 //////
 control.prototype.hideStartAnimate = function (callback) {
-    core.dom.startPanel.style.display = 'none';
     callback?.();
-    // core.hideWithAnimate(core.dom.startPanel, 20, callback);
 };
 
 ////// 游戏是否已经开始 //////
@@ -931,6 +923,7 @@ control.prototype.setHeroOpacity = function (
 
 ////// 设置画布偏移
 control.prototype.setGameCanvasTranslate = function (canvas, x, y) {
+    // Deprecated. Use RenderItem.transform instead.
     var c = core.dom.gameCanvas[canvas];
     x = x * core.domStyle.scale;
     y = y * core.domStyle.scale;
@@ -968,22 +961,7 @@ control.prototype.setGameCanvasTranslate = function (canvas, x, y) {
 
 ////// 加减画布偏移
 control.prototype.addGameCanvasTranslate = function (x, y) {
-    for (var ii = 0, canvas; (canvas = core.dom.gameCanvas[ii]); ii++) {
-        var id = canvas.getAttribute('id');
-        if (id == 'ui' || id == 'data') continue; // UI层和data层不移动
-        var offsetX = x,
-            offsetY = y;
-        if (core.bigmap.canvas.indexOf(id) >= 0) {
-            if (core.bigmap.v2) {
-                offsetX -= core.bigmap.offsetX - 32 * core.bigmap.posX + 32;
-                offsetY -= core.bigmap.offsetY - 32 * core.bigmap.posY + 32;
-            } else {
-                offsetX -= core.bigmap.offsetX;
-                offsetY -= core.bigmap.offsetY;
-            }
-        }
-        core.control.setGameCanvasTranslate(id, offsetX, offsetY);
-    }
+    // Deprecated. Use RenderItem.transform instead.
 };
 
 ////// 更新视野范围 //////
@@ -2670,11 +2648,13 @@ control.prototype.getStatusLabel = function (name) {
 
 ////// 设置某个属性的增幅值 //////
 control.prototype.setBuff = function (name, value) {
+    core.status.hero.buff[name] ??= 1;
     core.status.hero.buff[name] = value;
 };
 
 ////// 加减某个属性的增幅值 //////
 control.prototype.addBuff = function (name, value) {
+    core.status.hero.buff[name] ??= 1;
     core.status.hero.buff[name] += value;
 };
 
@@ -2893,9 +2873,11 @@ control.prototype.getMappedName = function (name) {
 ////// 更改天气效果 //////
 control.prototype.setWeather = function (type, level) {
     // Deprecated. Use WeatherController API instead.
-    const controller = Mota.require('module', 'Weather').controller;
-    controller.clearWeather();
-    if (type !== null && type !== void 0) controller.activate(type, level);
+    Mota.r(() => {
+        const controller = Mota.require('module', 'Weather').controller;
+        controller.clearWeather();
+        if (type !== null && type !== void 0) controller.activate(type, level);
+    });
 };
 
 ////// 注册一个天气 //////
@@ -3101,17 +3083,7 @@ control.prototype.setDisplayScale = function (delta) {
 
 ////// 清空状态栏 //////
 control.prototype.clearStatusBar = function () {
-    if (main.mode === 'editor') return;
-    Object.keys(core.statusBar).forEach(function (e) {
-        if (core.statusBar[e].innerHTML != null) {
-            core.statusBar[e].innerHTML = '&nbsp;';
-            core.statusBar[e].removeAttribute('_style');
-            core.statusBar[e].removeAttribute('_value');
-        }
-    });
-    core.statusBar.image.book.style.opacity = 0.3;
-    if (!core.flags.equipboxButton)
-        core.statusBar.image.fly.style.opacity = 0.3;
+    // Deprecated.
 };
 
 ////// 更新状态栏 //////
@@ -3183,110 +3155,54 @@ control.prototype._doResize = function (obj) {
 
 ////// 屏幕分辨率改变后重新自适应 //////
 control.prototype.resize = function () {
-    if (main.mode == 'editor') return;
-    var clientWidth = main.dom.body.clientWidth,
-        clientHeight = main.dom.body.clientHeight;
-    var BORDER = 3;
-    var extendToolbar = core.flags.extendToolbar;
-    var BAR_WIDTH = extendToolbar ? 0 : Math.round(core._PY_ * 0.31);
+    if (main.mode === 'editor') return;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
 
-    var horizontalMaxRatio =
-        (clientHeight - 2 * BORDER - (extendToolbar ? BORDER : 0)) /
-        (core._PY_ + (extendToolbar ? 38 : 0));
+    const auto = Mota.require('var', 'mainSetting').getValue('autoScale', true);
 
-    if (
-        clientWidth - 3 * BORDER >= core._PX_ + BAR_WIDTH ||
-        (clientWidth > clientHeight && horizontalMaxRatio < 1)
-    ) {
+    if (window.innerWidth >= 600) {
         // 横屏
         core.domStyle.isVertical = false;
-
         core.domStyle.availableScale = [];
+        const maxScale = Math.min(width / core._PX_, height / core._PY_);
         [1, 1.25, 1.5, 1.75, 2, 2.25, 2.5].forEach(function (v) {
-            if (
-                clientWidth - 3 * BORDER >= v * (core._PX_ + BAR_WIDTH) &&
-                horizontalMaxRatio >= v
-            ) {
+            if (v < maxScale) {
                 core.domStyle.availableScale.push(v);
             }
         });
-        if (core.domStyle.availableScale.indexOf(core.domStyle.scale) < 0) {
-            core.domStyle.scale = Math.min(1, horizontalMaxRatio);
+        if (!core.domStyle.availableScale.includes(core.domStyle.scale)) {
+            core.domStyle.scale = 1;
         }
+        core.dom.gameDraw.style.top = '0';
     } else {
         // 竖屏
         core.domStyle.isVertical = true;
-        core.domStyle.scale = Math.min((clientWidth - 2 * BORDER) / core._PX_);
+        core.domStyle.scale = window.innerWidth / core._PX_;
         core.domStyle.availableScale = [];
-        extendToolbar = false;
-        BAR_WIDTH = Math.round(core._PX_ * 0.3);
+        core.dom.gameDraw.style.top = '10vh';
     }
 
-    var statusCanvas = core.flags.statusCanvas,
-        statusCanvasRows = core.values.statusCanvasRowsOnMobile || 3;
-    var col = statusCanvas ? statusCanvasRows : Math.ceil(5 / 3);
+    if (!core.domStyle.isVertical) {
+        const height = window.innerHeight;
+        const width = window.innerWidth;
+        const maxScale = Math.min(height / core._PY_, width / core._PX_);
+        const target = Number((Math.floor(maxScale * 4) / 4).toFixed(2));
+        core.domStyle.scale = target - 0.25;
+    }
 
-    var globalAttribute =
-        core.status.globalAttribute || core.initStatus.globalAttribute;
+    const pw = core._PX_ * core.domStyle.scale;
+    const ph = core._PY_ * core.domStyle.scale;
+    core.dom.gameDraw.style.width = `${pw}px`;
+    core.dom.gameDraw.style.height = `${ph}px`;
 
-    var obj = {
-        clientWidth: clientWidth,
-        clientHeight: clientHeight,
-        BORDER: BORDER,
-        BAR_WIDTH: BAR_WIDTH,
-        TOOLBAR_HEIGHT: 38,
-        outerWidth: core._PX_ * core.domStyle.scale + 2 * BORDER,
-        outerHeight: core._PY_ * core.domStyle.scale + 2 * BORDER,
-        globalAttribute: globalAttribute,
-        border:
-            '3px ' + core.arrayToRGBA(globalAttribute.borderColor) + ' solid',
-        col: col,
-        statusBarHeightInVertical: core.domStyle.isVertical
-            ? (32 * col + 6) * core.domStyle.scale + 2 * BORDER
-            : 0,
-        toolbarHeightInVertical: core.domStyle.isVertical
-            ? 38 * core.domStyle.scale + 2 * BORDER
-            : 0,
-        extendToolbar: extendToolbar,
-        is15x15: false
-    };
-
-    this._doResize(obj);
+    this._doResize({});
     this.setToolbarButton();
     core.updateStatusBar();
 };
 
 control.prototype._resize_gameGroup = function (obj) {
-    var gameGroup = core.dom.gameGroup;
-    var totalWidth, totalHeight;
-    if (core.domStyle.isVertical) {
-        totalWidth = obj.outerWidth;
-        totalHeight =
-            obj.outerHeight +
-            obj.statusBarHeightInVertical +
-            obj.toolbarHeightInVertical;
-    } else {
-        totalWidth =
-            obj.outerWidth +
-            obj.BAR_WIDTH * core.domStyle.scale +
-            (obj.extendToolbar ? 0 : obj.BORDER);
-        totalHeight = obj.outerHeight;
-    }
-    gameGroup.style.width = totalWidth + 'px';
-    gameGroup.style.height = totalHeight + 'px';
-    gameGroup.style.left = (obj.clientWidth - totalWidth) / 2 + 'px';
-    gameGroup.style.top =
-        (obj.clientHeight - totalHeight) / 2 +
-        (core.domStyle.isVertical ? totalHeight / 8 : 0) +
-        'px';
-    // floorMsgGroup
-    var floorMsgGroup = core.dom.floorMsgGroup;
-    floorMsgGroup.style = obj.globalAttribute.floorChangingStyle;
-    floorMsgGroup.style.width = obj.outerWidth - 2 * obj.BORDER + 'px';
-    floorMsgGroup.style.height = totalHeight - 2 * obj.BORDER + 'px';
-    floorMsgGroup.style.fontSize = 16 * core.domStyle.scale + 'px';
-    // startPanel
-    core.dom.startPanel.style.fontSize = 16 * core.domStyle.scale + 'px';
+    // Deprecated.
 };
 
 control.prototype._resize_canvas = function (obj) {
@@ -3300,26 +3216,6 @@ control.prototype._resize_canvas = function (obj) {
         core.resizeCanvas(ctx, core._PX_, core._PY_);
     }
 
-    core.dom.gif.style.width = innerWidth;
-    core.dom.gif.style.height = innerHeight;
-    core.dom.gif2.style.width = innerWidth;
-    core.dom.gif2.style.height = innerHeight;
-    core.dom.gameDraw.style.width = innerWidth;
-    core.dom.gameDraw.style.height = innerHeight;
-    core.dom.gameDraw.style.top = obj.statusBarHeightInVertical + 'px';
-    core.dom.gameDraw.style.right = 0;
-    core.dom.gameDraw.style.boxSizing = 'content-box';
-    // resize bigmap
-    core.bigmap.canvas.forEach(function (cn) {
-        var ratio = core.canvas[cn].canvas.hasAttribute('isHD')
-            ? core.domStyle.scale * devicePixelRatio
-            : 1;
-        core.canvas[cn].canvas.style.width =
-            (core.canvas[cn].canvas.width / ratio) * core.domStyle.scale + 'px';
-        core.canvas[cn].canvas.style.height =
-            (core.canvas[cn].canvas.height / ratio) * core.domStyle.scale +
-            'px';
-    });
     // resize dynamic canvas
     if (!core.isPlaying()) {
         for (var name in core.dymCanvas) {

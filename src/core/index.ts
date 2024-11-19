@@ -60,8 +60,6 @@ import { ResourceController } from './loader/controller';
 import { logger } from './common/logger';
 import { Danmaku } from './main/custom/danmaku';
 import * as Shadow from './fx/shadow';
-import { MotaCanvas2D } from './fx/canvas2d';
-import * as portal from './fx/portal';
 import { MotaRenderer } from './render/render';
 import { Container } from './render/container';
 import { Sprite } from './render/sprite';
@@ -77,6 +75,7 @@ import * as Animation from 'mutate-animate';
 import './render/index';
 import * as RenderUtils from './render/utils';
 import '@/module';
+import { MotaOffscreenCanvas2D } from './fx/canvas2d';
 
 // ----- 类注册
 Mota.register('class', 'AudioPlayer', AudioPlayer);
@@ -95,7 +94,6 @@ Mota.register('class', 'UiController', UiController);
 Mota.register('class', 'MComponent', MComponent);
 Mota.register('class', 'ResourceController', ResourceController);
 Mota.register('class', 'Danmaku', Danmaku);
-Mota.register('class', 'MotaCanvas2D', MotaCanvas2D);
 // ----- 函数注册
 Mota.register('fn', 'm', m);
 Mota.register('fn', 'unwrapBinary', unwarpBinary);
@@ -151,9 +149,7 @@ Mota.register('module', 'UIComponents', {
 });
 Mota.register('module', 'MCGenerator', MCGenerator);
 Mota.register('module', 'Shadow', Shadow);
-Mota.register('module', 'Effect', {
-    Portal: portal
-});
+Mota.register('module', 'Effect', {});
 Mota.register('module', 'Render', {
     texture,
     MotaRenderer,
@@ -166,6 +162,7 @@ Mota.register('module', 'Render', {
     Layer,
     LayerGroupFloorBinder,
     Camera,
+    MotaOffscreenCanvas2D,
     Utils: RenderUtils
 });
 Mota.register('module', 'Action', {

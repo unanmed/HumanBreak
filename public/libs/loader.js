@@ -13,14 +13,10 @@ function loader() {
 loader.prototype._init = function () {};
 
 ////// 设置加载进度条进度 //////
-loader.prototype._setStartProgressVal = function (val) {
-    core.dom.startTopProgress.style.width = val + '%';
-};
+loader.prototype._setStartProgressVal = function (val) {};
 
 ////// 设置加载进度条提示文字 //////
-loader.prototype._setStartLoadTipText = function (text) {
-    core.dom.startTopLoadTips.innerText = text;
-};
+loader.prototype._setStartLoadTipText = function (text) {};
 
 loader.prototype._load = function (callback) {
     if (main.useCompress) {

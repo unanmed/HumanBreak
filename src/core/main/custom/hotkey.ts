@@ -428,31 +428,6 @@ document.addEventListener('keyup', e => {
         }
     } else {
         // polyfill样板
-        if (
-            main.dom.startPanel.style.display == 'block' &&
-            (main.dom.startButtons.style.display == 'block' ||
-                main.dom.levelChooseButtons.style.display == 'block')
-        ) {
-            if (e.keyCode == 38 || e.keyCode == 33)
-                // up/pgup
-                main.selectButton((main.selectedButton || 0) - 1);
-            else if (e.keyCode == 40 || e.keyCode == 34)
-                // down/pgdn
-                main.selectButton((main.selectedButton || 0) + 1);
-            else if (e.keyCode == 67 || e.keyCode == 13 || e.keyCode == 32)
-                // C/Enter/Space
-                main.selectButton(main.selectedButton);
-            else if (
-                e.keyCode == 27 &&
-                main.dom.levelChooseButtons.style.display == 'block'
-            ) {
-                // ESC
-                core.showStartAnimate(true);
-                e.preventDefault();
-            }
-            e.stopPropagation();
-            return;
-        }
         if (main.dom.inputDiv.style.display == 'block') {
             if (e.keyCode == 13) {
                 setTimeout(function () {

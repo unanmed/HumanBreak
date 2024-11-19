@@ -50,7 +50,6 @@ ui.prototype.clearMap = function (name, x, y, width, height) {
                 core.canvas[m].canvas.height + 32
             );
         }
-        core.dom.gif.innerHTML = '';
         core.removeGlobalAnimate();
         core.deleteCanvas(function (one) {
             return one.startsWith('_bigImage_');
@@ -3759,85 +3758,7 @@ ui.prototype._drawSLPanel_drawRecords = function (n) {
 };
 
 ui.prototype._drawKeyBoard = function () {
-    core.lockControl();
-    core.status.event.id = 'keyBoard';
-    core.clearUI();
-    core.playSound('打开界面');
-
-    var offset = core._WIDTH_ % 2 == 0 ? 16 : 0;
-
-    var width = 384,
-        height = 320;
-    var left = (core._PX_ - width) / 2 + offset,
-        right = left + width;
-    var top = (core._PY_ - height) / 2 + (core._HEIGHT_ % 2 == 0 ? 16 : 0),
-        bottom = top + height;
-
-    var isWindowSkin = this.drawBackground(left, top, right, bottom);
-    core.setTextAlign('ui', 'center');
-    core.setFillStyle('ui', core.arrayToRGBA(core.status.textAttribute.title));
-    core.fillText(
-        'ui',
-        '虚拟键盘',
-        core._PX_ / 2 + offset,
-        top + 35,
-        null,
-        this._buildFont(22, true)
-    );
-    core.setFont('ui', this._buildFont(17, false));
-    core.setFillStyle('ui', core.arrayToRGBA(core.status.textAttribute.text));
-    var now = core._PY_ / 2 - 89 + (core._HEIGHT_ % 2 == 0 ? 16 : 0);
-
-    var lines = [
-        ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', '10', '11'],
-        ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
-        ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
-        ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-        ['Z', 'X', 'C', 'V', 'B', 'N', 'M'],
-        ['-', '=', '[', ']', '\\', ';', "'", ',', '.', '/', '`'],
-        ['ES', 'TA', 'CA', 'SH', 'CT', 'AL', 'SP', 'BS', 'EN', 'DE']
-    ];
-
-    lines.forEach(function (line) {
-        for (var i = 0; i < line.length; i++) {
-            core.fillText(
-                'ui',
-                line[i],
-                core._PX_ / 2 + 32 * (i - 5) + offset,
-                now
-            );
-        }
-        now += 32;
-    });
-
-    core.fillText(
-        'ui',
-        '返回游戏',
-        core._PX_ / 2 + 128 + offset,
-        now - 3,
-        '#FFFFFF',
-        this._buildFont(15, true)
-    );
-
-    if (isWindowSkin)
-        this._drawWindowSelector(
-            core.status.textAttribute.background,
-            core._PX_ / 2 + 92 + offset,
-            now - 22,
-            72,
-            27
-        );
-    else
-        core.strokeRoundRect(
-            'ui',
-            core._PX_ / 2 + 92 + offset,
-            now - 22,
-            72,
-            27,
-            6,
-            core.status.globalAttribute.selectColor,
-            2
-        );
+    // Deprecated.
 };
 
 ////// 绘制“数据统计”界面 //////
@@ -4145,7 +4066,7 @@ ui.prototype.createCanvas = function (name, x, y, width, height, z) {
     newCanvas.style.pointerEvents = 'none';
     core.dymCanvas[name] = newCanvas.getContext('2d');
     core.maps._setHDCanvasSize(core.dymCanvas[name], width, height);
-    core.dom.gameDraw.appendChild(newCanvas);
+    // core.dom.gameDraw.appendChild(newCanvas);
     return core.dymCanvas[name];
 };
 
@@ -4223,7 +4144,7 @@ ui.prototype.deleteCanvas = function (name) {
     }
 
     if (!core.dymCanvas[name]) return null;
-    core.dom.gameDraw.removeChild(core.dymCanvas[name].canvas);
+    // core.dom.gameDraw.removeChild(core.dymCanvas[name].canvas);
     delete core.dymCanvas[name];
 };
 

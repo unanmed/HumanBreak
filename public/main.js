@@ -22,55 +22,10 @@ function main() {
 
     this.dom = {
         body: document.body,
-        gameGroup: document.getElementById('gameGroup'),
-        mainTips: document.getElementById('mainTips'),
-        musicBtn: document.getElementById('musicBtn'),
-        enlargeBtn: document.createElement('img'),
-        startPanel: document.getElementById('startPanel'),
-        startTop: document.getElementById('startTop'),
-        startTopProgressBar: document.getElementById('startTopProgressBar'),
-        startTopProgress: document.getElementById('startTopProgress'),
-        startTopLoadTips: document.getElementById('startTopLoadTips'),
-        floorMsgGroup: document.getElementById('floorMsgGroup'),
-        logoLabel: document.getElementById('logoLabel'),
-        versionLabel: document.getElementById('versionLabel'),
-        floorNameLabel: document.getElementById('floorNameLabel'),
-        statusBar: document.getElementById('statusBar'),
-        status: document.getElementsByClassName('status'),
-        tools: document.getElementsByClassName('tools'),
+        game: document.getElementById('game'),
+        gameDraw: document.getElementById('game-draw'),
         gameCanvas: document.getElementsByClassName('gameCanvas'),
-        gif: document.getElementById('gif'),
-        gif2: document.getElementById('gif2'),
-        gameDraw: document.getElementById('gameDraw'),
-        startButtons: document.getElementById('startButtons'),
-        playGame: document.getElementById('playGame'),
-        loadGame: document.getElementById('loadGame'),
-        replayGame: document.getElementById('replayGame'),
-        levelChooseButtons: document.getElementById('levelChooseButtons'),
         data: document.getElementById('data'),
-        statusLabels: document.getElementsByClassName('statusLabel'),
-        statusTexts: document.getElementsByClassName('statusText'),
-        floorCol: document.getElementById('floorCol'),
-        nameCol: document.getElementById('nameCol'),
-        lvCol: document.getElementById('lvCol'),
-        hpmaxCol: document.getElementById('hpmaxCol'),
-        hpCol: document.getElementById('hpCol'),
-        manaCol: document.getElementById('manaCol'),
-        atkCol: document.getElementById('atkCol'),
-        defCol: document.getElementById('defCol'),
-        mdefCol: document.getElementById('mdefCol'),
-        moneyCol: document.getElementById('moneyCol'),
-        expCol: document.getElementById('expCol'),
-        upCol: document.getElementById('upCol'),
-        keyCol: document.getElementById('keyCol'),
-        pzfCol: document.getElementById('pzfCol'),
-        debuffCol: document.getElementById('debuffCol'),
-        skillCol: document.getElementById('skillCol'),
-        hard: document.getElementById('hard'),
-        statusCanvas: document.getElementById('statusCanvas'),
-        statusCanvasCtx: document
-            .getElementById('statusCanvas')
-            .getContext('2d'),
         inputDiv: document.getElementById('inputDiv'),
         inputMessage: document.getElementById('inputMessage'),
         inputBox: document.getElementById('inputBox'),
@@ -115,37 +70,7 @@ function main() {
     ];
 
     this.statusBar = {
-        image: {
-            floor: document.getElementById('img-floor'),
-            name: document.getElementById('img-name'),
-            lv: document.getElementById('img-lv'),
-            hpmax: document.getElementById('img-hpmax'),
-            hp: document.getElementById('img-hp'),
-            mana: document.getElementById('img-mana'),
-            atk: document.getElementById('img-atk'),
-            def: document.getElementById('img-def'),
-            mdef: document.getElementById('img-mdef'),
-            money: document.getElementById('img-money'),
-            exp: document.getElementById('img-exp'),
-            up: document.getElementById('img-up'),
-            skill: document.getElementById('img-skill'),
-            book: document.getElementById('img-book'),
-            fly: document.getElementById('img-fly'),
-            toolbox: document.getElementById('img-toolbox'),
-            keyboard: document.getElementById('img-keyboard'),
-            shop: document.getElementById('img-shop'),
-            save: document.getElementById('img-save'),
-            load: document.getElementById('img-load'),
-            settings: document.getElementById('img-settings'),
-            btn1: document.getElementById('img-btn1'),
-            btn2: document.getElementById('img-btn2'),
-            btn3: document.getElementById('img-btn3'),
-            btn4: document.getElementById('img-btn4'),
-            btn5: document.getElementById('img-btn5'),
-            btn6: document.getElementById('img-btn6'),
-            btn7: document.getElementById('img-btn7'),
-            btn8: document.getElementById('img-btn8')
-        },
+        image: {},
         icons: {
             floor: 0,
             name: null,
@@ -183,31 +108,7 @@ function main() {
             btn6: 32,
             btn7: 33,
             btn8: 34
-        },
-        floor: document.getElementById('floor'),
-        name: document.getElementById('name'),
-        lv: document.getElementById('lv'),
-        hpmax: document.getElementById('hpmax'),
-        hp: document.getElementById('hp'),
-        mana: document.getElementById('mana'),
-        atk: document.getElementById('atk'),
-        def: document.getElementById('def'),
-        mdef: document.getElementById('mdef'),
-        money: document.getElementById('money'),
-        exp: document.getElementById('exp'),
-        up: document.getElementById('up'),
-        skill: document.getElementById('skill'),
-        yellowKey: document.getElementById('yellowKey'),
-        blueKey: document.getElementById('blueKey'),
-        redKey: document.getElementById('redKey'),
-        greenKey: document.getElementById('greenKey'),
-        poison: document.getElementById('poison'),
-        weak: document.getElementById('weak'),
-        curse: document.getElementById('curse'),
-        pickaxe: document.getElementById('pickaxe'),
-        bomb: document.getElementById('bomb'),
-        fly: document.getElementById('fly'),
-        hard: document.getElementById('hard')
+        }
     };
     this.floors = {};
     this.canvas = {};
@@ -353,7 +254,6 @@ main.prototype.loadAsync = async function (mode, callback) {
     main.setMainTipsText('正在加载楼层文件...');
     if (main.useCompress) {
         await main.loadScript(`project/floors.min.js?v=${main.version}`);
-        main.dom.mainTips.style.display = 'none';
     } else {
         await new Promise(res => {
             main.loadScript(
@@ -362,7 +262,6 @@ main.prototype.loadAsync = async function (mode, callback) {
                 }&id=${main.floorIds.join(',')}`
             ).then(
                 () => {
-                    main.dom.mainTips.style.display = 'none';
                     main.supportBunch = true;
                     res();
                 },
@@ -372,7 +271,6 @@ main.prototype.loadAsync = async function (mode, callback) {
                             main.loadScript(`project/floors/${v}.js`)
                         )
                     );
-                    main.dom.mainTips.style.display = 'none';
                     res();
                 }
             );
@@ -419,78 +317,27 @@ main.prototype.loadAsync = async function (mode, callback) {
     let auto = Mota.require('var', 'mainSetting').getValue('autoScale', true);
 
     if (auto && !core.domStyle.isVertical) {
-        try {
-            Mota.Plugin.require('utils_g').maxGameScale(1);
-            requestAnimationFrame(() => {
-                var style = getComputedStyle(main.dom.gameGroup);
-                var height = parseFloat(style.height);
-                if (height > window.innerHeight * 0.95) {
-                    core.control.setDisplayScale(-1);
-                    if (!core.isPlaying() && core.flags.enableHDCanvas) {
-                        core.domStyle.ratio = Math.max(
-                            window.devicePixelRatio || 1,
-                            core.domStyle.scale
-                        );
-                        core.resize();
-                    }
-                }
-            });
-        } catch {}
+        const height = window.innerHeight;
+        const width = window.innerWidth;
+        const maxScale = Math.min(height / core._PY_, width / core._PX_);
+        const target = Number((Math.floor(maxScale * 4) / 4).toFixed(2));
+        core.domStyle.scale = target - 0.25;
     }
+    if (core.domStyle.isVertical) {
+        core.domStyle.scale = window.innerWidth / core._PX_;
+    }
+    Mota.r(() => {
+        Mota.require('module', 'Render').MotaOffscreenCanvas2D.refreshAll();
+    });
 };
 
 ////// 加载过程提示 //////
-main.prototype.setMainTipsText = function (text) {
-    main.dom.mainTips.innerHTML = text;
-};
+main.prototype.setMainTipsText = function (text) {};
 
-main.prototype.createOnChoiceAnimation = function () {
-    var borderColor =
-        main.dom.startButtonGroup.style.caretColor || 'rgb(255, 215, 0)';
-    // get rgb value
-    var rgb =
-        /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(,\s*\d+\s*)?\)$/.exec(
-            borderColor
-        );
-    if (rgb != null) {
-        var value = rgb[1] + ', ' + rgb[2] + ', ' + rgb[3];
-        var style = document.createElement('style');
-        style.type = 'text/css';
-        var keyFrames =
-            'onChoice { ' +
-            '0% { border-color: rgba(' +
-            value +
-            ', 0.9); } ' +
-            '50% { border-color: rgba(' +
-            value +
-            ', 0.3); } ' +
-            '100% { border-color: rgba(' +
-            value +
-            ', 0.9); } ' +
-            '}';
-        style.innerHTML =
-            '@-webkit-keyframes ' + keyFrames + ' @keyframes ' + keyFrames;
-        document.body.appendChild(style);
-    }
-};
+main.prototype.createOnChoiceAnimation = function () {};
 
 ////// 创建字体 //////
-main.prototype.importFonts = function (fonts) {
-    if (!(fonts instanceof Array) || fonts.length == 0) return;
-    var style = document.createElement('style');
-    style.type = 'text/css';
-    var html = '';
-    fonts.forEach(function (font) {
-        html +=
-            '@font-face { font-family: "' +
-            font +
-            '"; src: url("project/fonts/' +
-            font +
-            '.ttf") format("truetype"); }';
-    });
-    style.innerHTML = html;
-    document.body.appendChild(style);
-};
+main.prototype.importFonts = function (fonts) {};
 
 main.prototype.listen = function () {
     ////// 窗口大小变化时 //////
@@ -515,9 +362,6 @@ main.prototype.listen = function () {
         }
     };
 
-    ////// 在界面上放开某按键时 //////
-    main.dom.body.addEventListener('keyup', function (e) {});
-
     ////// 开始选择时 //////
     main.dom.body.onselectstart = function () {
         return false;
@@ -527,7 +371,7 @@ main.prototype.listen = function () {
     main.dom.data.onmousedown = function (e) {
         try {
             e.stopPropagation();
-            var loc = core.actions._getClickLoc(e.clientX, e.clientY);
+            var loc = core.actions._getClickLoc(e.offsetX, e.offsetY);
             if (loc == null) return;
             core.ondown(loc);
         } catch (ee) {
@@ -538,7 +382,7 @@ main.prototype.listen = function () {
     ////// 鼠标移动时 //////
     main.dom.data.onmousemove = function (e) {
         try {
-            var loc = core.actions._getClickLoc(e.clientX, e.clientY);
+            var loc = core.actions._getClickLoc(e.offsetX, e.offsetY);
             if (loc == null) return;
             core.onmove(loc);
         } catch (ee) {
@@ -549,7 +393,7 @@ main.prototype.listen = function () {
     ////// 鼠标放开时 //////
     main.dom.data.onmouseup = function (e) {
         try {
-            var loc = core.actions._getClickLoc(e.clientX, e.clientY);
+            var loc = core.actions._getClickLoc(e.offsetX, e.offsetY);
             if (loc == null) return;
             core.onup(loc);
         } catch (ee) {
@@ -573,7 +417,8 @@ main.prototype.listen = function () {
             e.preventDefault();
             var loc = core.actions._getClickLoc(
                 e.targetTouches[0].clientX,
-                e.targetTouches[0].clientY
+                e.targetTouches[0].clientY,
+                true
             );
             if (loc == null) return;
             main.lastTouchLoc = loc;
@@ -589,7 +434,8 @@ main.prototype.listen = function () {
             e.preventDefault();
             var loc = core.actions._getClickLoc(
                 e.targetTouches[0].clientX,
-                e.targetTouches[0].clientY
+                e.targetTouches[0].clientY,
+                true
             );
             if (loc == null) return;
             main.lastTouchLoc = loc;
@@ -611,218 +457,6 @@ main.prototype.listen = function () {
             console.error(e);
         }
     };
-
-    ////// 点击状态栏中的怪物手册时 //////
-    main.statusBar.image.book.onclick = function (e) {
-        e.stopPropagation();
-
-        if (core.isReplaying()) {
-            core.triggerReplay();
-            return;
-        }
-
-        if (core.isPlaying()) core.openBook(true);
-    };
-
-    ////// 点击状态栏中的楼层传送器/装备栏时 //////
-    main.statusBar.image.fly.onclick = function (e) {
-        e.stopPropagation();
-
-        // 播放录像时
-        if (core.isReplaying()) {
-            core.stopReplay();
-            return;
-        }
-
-        if (core.isPlaying()) {
-            if (!core.flags.equipboxButton) {
-                core.useFly(true);
-            } else {
-                core.openEquipbox(true);
-            }
-        }
-    };
-
-    ////// 点击状态栏中的工具箱时 //////
-    main.statusBar.image.toolbox.onclick = function (e) {
-        e.stopPropagation();
-
-        if (core.isReplaying()) {
-            core.rewindReplay();
-            return;
-        }
-
-        if (core.isPlaying()) {
-            core.openToolbox(core.status.event.id != 'equipbox');
-        }
-    };
-
-    ////// 双击状态栏中的工具箱时 //////
-    main.statusBar.image.toolbox.ondblclick = function (e) {
-        e.stopPropagation();
-
-        if (core.isReplaying()) {
-            return;
-        }
-
-        if (core.isPlaying()) core.openEquipbox(true);
-    };
-
-    ////// 点击状态栏中的虚拟键盘时 //////
-    main.statusBar.image.keyboard.onclick = function (e) {
-        e.stopPropagation();
-
-        if (core.isReplaying()) {
-            core.control._replay_book();
-            return;
-        }
-
-        if (core.isPlaying()) core.openKeyBoard(true);
-    };
-
-    ////// 点击状态栏中的快捷商店时 //////
-    main.statusBar.image.shop.onclick = function (e) {
-        e.stopPropagation();
-
-        if (core.isReplaying()) {
-            core.control._replay_viewMap();
-            return;
-        }
-
-        if (core.isPlaying()) core.openQuickShop(true);
-    };
-
-    ////// 点击金币时也可以开启快捷商店 //////
-    main.statusBar.image.money.onclick = function (e) {
-        e.stopPropagation();
-
-        if (core.isPlaying()) core.openQuickShop(true);
-    };
-
-    ////// 点击楼梯图标也可以浏览地图 //////
-    main.statusBar.image.floor.onclick = function (e) {
-        e.stopPropagation();
-
-        if (
-            core &&
-            core.isPlaying() &&
-            !core.isMoving() &&
-            !core.status.lockControl
-        ) {
-            core.ui._drawViewMaps();
-        }
-    };
-
-    ////// 点击状态栏中的存档按钮时 //////
-    main.statusBar.image.save.onclick = function (e) {
-        e.stopPropagation();
-
-        if (core.isReplaying()) {
-            core.speedDownReplay();
-            return;
-        }
-
-        if (core.isPlaying()) core.save(true);
-    };
-
-    ////// 点击状态栏中的读档按钮时 //////
-    main.statusBar.image.load.onclick = function (e) {
-        e.stopPropagation();
-
-        if (core.isReplaying()) {
-            core.speedUpReplay();
-            return;
-        }
-
-        if (core.isPlaying()) core.load(true);
-    };
-
-    ////// 点击状态栏中的系统菜单时 //////
-    main.statusBar.image.settings.onclick = function (e) {
-        e.stopPropagation();
-
-        if (core.isReplaying()) {
-            core.control._replay_SL();
-            return;
-        }
-
-        if (core.isPlaying()) core.openSettings(true);
-    };
-
-    ////// 点击工具栏时 //////
-    main.dom.hard.onclick = function () {
-        core.control.setToolbarButton(!core.domStyle.toolbarBtn);
-    };
-
-    ////// 手机端的按钮1-7 //////
-    // main.statusBar.image.btn1.onclick = function (e) {
-    //     e.stopPropagation();
-    //     core.onkeyUp({
-    //         keyCode: 49,
-    //         altKey: core.getLocalStorage('altKey')
-    //     });
-    // };
-
-    // main.statusBar.image.btn2.onclick = function (e) {
-    //     e.stopPropagation();
-    //     core.onkeyUp({
-    //         keyCode: 50,
-    //         altKey: core.getLocalStorage('altKey')
-    //     });
-    // };
-
-    // main.statusBar.image.btn3.onclick = function (e) {
-    //     e.stopPropagation();
-    //     core.onkeyUp({
-    //         keyCode: 51,
-    //         altKey: core.getLocalStorage('altKey')
-    //     });
-    // };
-
-    // main.statusBar.image.btn4.onclick = function (e) {
-    //     e.stopPropagation();
-    //     core.onkeyUp({
-    //         keyCode: 52,
-    //         altKey: core.getLocalStorage('altKey')
-    //     });
-    // };
-
-    // main.statusBar.image.btn5.onclick = function (e) {
-    //     e.stopPropagation();
-    //     core.onkeyUp({
-    //         keyCode: 53,
-    //         altKey: core.getLocalStorage('altKey')
-    //     });
-    // };
-
-    // main.statusBar.image.btn6.onclick = function (e) {
-    //     e.stopPropagation();
-    //     core.onkeyUp({
-    //         keyCode: 54,
-    //         altKey: core.getLocalStorage('altKey')
-    //     });
-    // };
-
-    // main.statusBar.image.btn7.onclick = function (e) {
-    //     e.stopPropagation();
-    //     core.onkeyUp({
-    //         keyCode: 55,
-    //         altKey: core.getLocalStorage('altKey')
-    //     });
-    // };
-
-    // main.statusBar.image.btn8.onclick = function (e) {
-    //     e.stopPropagation();
-    //     if (core.getLocalStorage('altKey')) {
-    //         core.removeLocalStorage('altKey');
-    //         core.drawTip('Alt模式已关闭。');
-    //         main.statusBar.image.btn8.style.filter = '';
-    //     } else {
-    //         core.setLocalStorage('altKey', true);
-    //         core.drawTip('Alt模式已开启；此模式下1~7按钮视为Alt+1~7。');
-    //         main.statusBar.image.btn8.style.filter = 'sepia(1) contrast(1.5)';
-    //     }
-    // };
 
     window.onblur = function () {
         if (core && core.control) {

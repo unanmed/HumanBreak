@@ -1960,16 +1960,7 @@ maps.prototype._getFloorImages = function (floorId) {
 };
 
 maps.prototype._drawFloorImages_gif = function (image, dx, dy) {
-    core.dom.gif.innerHTML = '';
-    var gif = new Image();
-    gif.src = image.src;
-    gif.style.position = 'absolute';
-    gif.style.left = dx * core.domStyle.scale + 'px';
-    gif.style.top = dy * core.domStyle.scale + 'px';
-    gif.style.width = image.width * core.domStyle.scale + 'px';
-    gif.style.height = image.height * core.domStyle.scale + 'px';
-    core.dom.gif.appendChild(gif);
-    return;
+    // Deprecated.
 };
 
 maps.prototype._drawFloorImage = function (

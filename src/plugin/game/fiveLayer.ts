@@ -17,22 +17,23 @@ function createCanvas(name, zIndex) {
 }
 
 export function init() {
-    var bg2Canvas = createCanvas('bg2', 20);
-    var fg2Canvas = createCanvas('fg2', 63);
     // 大地图适配
-    core.bigmap.canvas = [
-        'bg2',
-        'fg2',
-        'bg',
-        'event',
-        'event2',
-        'fg',
-        'damage'
-    ];
+
     core.initStatus.bg2maps = {};
     core.initStatus.fg2maps = {};
 
     if (main.mode == 'editor') {
+        var bg2Canvas = createCanvas('bg2', 20);
+        var fg2Canvas = createCanvas('fg2', 63);
+        core.bigmap.canvas = [
+            'bg2',
+            'fg2',
+            'bg',
+            'event',
+            'event2',
+            'fg',
+            'damage'
+        ];
         /*插入编辑器的图层 不做此步新增图层无法在编辑器显示*/
         // 编辑器图层覆盖优先级 eui > efg > fg(前景层) > event2(48*32图块的事件层) > event(事件层) > bg(背景层)
         // 背景层2(bg2) 插入事件层(event)之前(即bg与event之间)

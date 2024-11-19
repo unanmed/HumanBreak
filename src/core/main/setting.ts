@@ -355,16 +355,6 @@ function handleScreenSetting<T extends number | boolean>(
     } else if (key === 'heroDetail') {
         // 勇士显伤
         core.drawHero();
-    } else if (key === 'antiAlias') {
-        // 抗锯齿
-        for (const canvas of core.dom.gameCanvas) {
-            if (core.domStyle.hdCanvas.includes(canvas.id)) continue;
-            if (n) {
-                canvas.classList.remove('no-anti-aliasing');
-            } else {
-                canvas.classList.add('no-anti-aliasing');
-            }
-        }
     } else if (key === 'fontSize') {
         // 字体大小
         root.style.fontSize = `${n}px`;
@@ -434,9 +424,8 @@ mainSetting
             .register('itemDetail', '宝石血瓶显伤', true, COM.Boolean)
             .register('heroDetail', '勇士显伤', false, COM.Boolean)
             .register('transition', '界面动画', false, COM.Boolean)
-            .register('antiAlias', '抗锯齿', false, COM.Boolean)
             .register('fontSize', '字体大小', 16, COM.Number, [2, 48, 1])
-            .register('fontSizeStatus', '状态栏字体', 16, COM.Number, [2, 48, 1])
+            .register('fontSizeStatus', '状态栏字体', 16, COM.Number, [10, 300, 10])
             .register('smoothView', '平滑镜头', true, COM.Boolean)
             .register('criticalGem', '临界显示方式', false, COM.Boolean)
             .setDisplayFunc('criticalGem', value => (value ? '宝石数' : '攻击'))
@@ -501,7 +490,6 @@ loading.once('coreInit', () => {
         'screen.itemDetail': !!storage.getValue('screen.itemDetail', true),
         'screen.heroDetail': !!storage.getValue('screen.heroDetail', false),
         'screen.transition': !!storage.getValue('screen.transition', false),
-        'screen.antiAlias': !!storage.getValue('screen.antiAlias', false),
         'screen.fontSize': storage.getValue('screen.fontSize', isMobile ? 9 : 16),
         'screen.smoothView': !!storage.getValue('screen.smoothView', true),
         'screen.criticalGem': !!storage.getValue('screen.criticalGem', false),
