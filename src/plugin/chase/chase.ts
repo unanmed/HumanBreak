@@ -1,5 +1,6 @@
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 import { CameraAnimation } from '@/core/render/camera';
+import { Container } from '@/core/render/container';
 import { LayerGroup } from '@/core/render/preset/layer';
 import { MotaRenderer } from '@/core/render/render';
 import { Shader } from '@/core/render/shader';
@@ -319,10 +320,8 @@ export class Chase extends EventEmitter<ChaseEvent> {
         }
         this.onTimeListener.sort((a, b) => a.time - b.time);
         const render = MotaRenderer.get('render-main')!;
-        const mapDraw = render.getElementById('map-draw')!;
-        render.appendChild(Chase.shader);
-        mapDraw.remove();
-        mapDraw.append(Chase.shader);
+        const mapDraw = render.getElementById('map-draw') as Container;
+        Chase.shader.append(mapDraw);
         this.emit('start');
     }
 
@@ -335,11 +334,7 @@ export class Chase extends EventEmitter<ChaseEvent> {
         this.layer.removeTicker(this.delegation);
         this.pathSprite?.destroy();
         this.heroMove.off('stepEnd', this.onStepEnd);
-        const render = MotaRenderer.get('render-main')!;
-        const mapDraw = render.getElementById('map-draw')!;
-        mapDraw.remove();
         Chase.shader.remove();
-        mapDraw.append(render);
         this.emit('end', success);
         this.removeAllListeners();
     }
