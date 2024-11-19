@@ -409,6 +409,12 @@ function handleUiSetting<T extends number | boolean>(key: string, n: T, o: T) {
         } else {
             fixedUi.closeByName('danmaku');
         }
+    } else if (key === 'tips') {
+        if (n && core.isPlaying()) {
+            fixedUi.open('tips');
+        } else {
+            fixedUi.closeByName('tips')
+        }
     }
 }
 
@@ -480,6 +486,7 @@ mainSetting
             .setDisplayFunc('bookScale', value => `${value}%`)
             .register('danmaku', '显示弹幕', true, COM.Boolean)
             .register('danmakuSpeed', '弹幕速度', 60, COM.Number, [10, 1000, 5])
+            .register('tips', '小贴士', true,  COM.Boolean)
     );
 
 const loading = Mota.require('var', 'loading');
@@ -519,6 +526,7 @@ loading.once('coreInit', () => {
             'ui.danmakuSpeed', 
             Math.floor(window.innerWidth / 30) * 5
         ),
+        'ui.tips': storage.getValue('ui.tips', true)
     });
 });
 
@@ -557,9 +565,10 @@ mainSetting
     .setDescription('ui.bookScale', `怪物手册界面中每个怪物框体的高度缩放，最小值限定为 20% 屏幕高度`)
     .setDescription('ui.danmaku', '是否显示弹幕')
     .setDescription('ui.danmakuSpeed', '弹幕速度，刷新或开关弹幕显示后起效')
+    .setDescription('ui.tips', `是否在游戏画面右上角常亮显示小贴士`)
     .setDescription('screen.fontSizeStatus', `修改状态栏的字体大小`)
     .setDescription('screen.blur', '打开任意ui界面时是否有背景虚化效果，移动端打开后可能会有掉帧或者发热现象。关闭ui后生效')
-    .setDescription('fx.portalParticle', '是否启用苍蓝之殿的传送门粒子特效，启用后可能对性能及设备发热有所影响');
+    .setDescription('fx.portalParticle', '是否启用苍蓝之殿的传送门粒子特效，启用后可能对性能及设备发热有所影响')
 
 function setFontSize() {
     const absoluteSize = storage.getValue(

@@ -35,7 +35,8 @@ fixedUi.register(
     new GameUi('toolbar', UI.Toolbar),
     new GameUi('load', UI.Load),
     new GameUi('danmaku', UI.Danmaku),
-    new GameUi('danmakuEditor', UI.DanmakuEditor)
+    new GameUi('danmakuEditor', UI.DanmakuEditor),
+    new GameUi('tips', UI.Tips)
 );
 fixedUi.showAll();
 

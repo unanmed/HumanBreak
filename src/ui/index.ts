@@ -23,3 +23,4 @@ export { default as ToolEditor } from './toolEditor.vue';
 export { default as Load } from './load.vue';
 export { default as Danmaku } from './danmaku.vue';
 export { default as DanmakuEditor } from './danmakuEditor.vue';
+export { default as Tips } from './tips.vue';
