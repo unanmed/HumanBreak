@@ -106,14 +106,14 @@ let lastY = 0;
 
 function clampX(x: number) {
     if (x < 16) x = 16;
-    const mx = window.innerWidth - 16 - main.offsetWidth;
+    const mx = window.innerWidth - 16 - width.value;
     if (x > mx) x = mx;
     return x;
 }
 
 function clampY(y: number) {
     if (y < 16) y = 16;
-    const my = window.innerHeight - 16 - main.offsetHeight;
+    const my = window.innerHeight - 16 - height.value;
     if (y > my) y = my;
     return y;
 }
@@ -124,14 +124,14 @@ function clampPos(x: number, y: number) {
 
 function clampWidth(w: number) {
     if (w < 16) w = 16;
-    const mw = window.innerWidth - 16 - main.offsetLeft;
+    const mw = window.innerWidth - 16 - left.value;
     if (w > mw) w = mw;
     return w;
 }
 
 function clampHeight(h: number) {
     if (h < 16) h = 16;
-    const mh = window.innerHeight - 16 - main.offsetTop;
+    const mh = window.innerHeight - 16 - top.value;
     if (h > mh) h = mh;
     return h;
 }
@@ -205,15 +205,20 @@ function resize() {
     if (has(props.left)) left.value = props.left;
     if (has(props.top)) top.value = props.top;
 
-    width.value = clampWidth(width.value);
-    height.value = clampHeight(height.value);
-    main.style.width = `${width.value}px`;
-    main.style.height = `${height.value}px`;
+    const beforeWidth = width.value;
+    const beforeHeight = height.value;
+    width.value = 16;
+    height.value = 16;
 
     left.value = clampX(left.value);
     top.value = clampY(top.value);
     main.style.left = `${left.value}px`;
     main.style.top = `${top.value}px`;
+
+    width.value = clampWidth(beforeWidth);
+    height.value = clampHeight(beforeHeight);
+    main.style.width = `${width.value}px`;
+    main.style.height = `${height.value}px`;
 }
 
 onUpdated(resize);

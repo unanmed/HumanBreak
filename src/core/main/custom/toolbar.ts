@@ -389,7 +389,7 @@ Mota.require('var', 'hook').on('reset', () => {
 Mota.require('var', 'hook').once('reset', () => {
     const mainStorage = GameStorage.for(GameStorage.fromGame('main'));
     mainStorage.read();
-    if (mainStorage.getValue('played', false)) {
+    if (!mainStorage.getValue('played', false)) {
         mainStorage.setValue('played', true);
         let defaultsTool = CustomToolbar.list.find(v => v.id === '@defaults');
         const hasDefaults = !!defaultsTool;
@@ -420,22 +420,22 @@ Mota.require('var', 'hook').once('reset', () => {
             ]
         });
         // 计算位置，显示在游戏画面下方
-        // if (!hasDefaults) {
-        // const gameGroup = core.dom.gameGroup;
-        // const bottom = gameGroup.offsetTop + gameGroup.offsetHeight - 3;
-        // const left = gameGroup.offsetLeft + 3;
-        // const width = gameGroup.offsetWidth - 6;
+        if (!hasDefaults) {
+            const game = core.dom.gameDraw;
+            const bottom = game.offsetTop + game.offsetHeight;
+            const left = game.offsetLeft;
+            const width = game.offsetWidth;
 
-        // if (isMobile) {
-        //     // 手机端显示在最下方
-        //     defaultsTool.setPos(16, window.innerHeight - 32);
-        //     defaultsTool.setSize(bottom, 35);
-        // } else {
-        //     // 电脑显示在屏幕右方
-        //     defaultsTool.setPos(left, bottom);
-        //     defaultsTool.setSize(width, 70);
-        // }
-        // }
+            if (isMobile) {
+                // 手机端显示在最下方
+                defaultsTool.setPos(16, bottom);
+                defaultsTool.setSize(window.innerWidth - 32, 85);
+            } else {
+                // 电脑显示在屏幕右方
+                defaultsTool.setPos(left, bottom);
+                defaultsTool.setSize(width, 70);
+            }
+        }
 
         defaultsTool.show();
         CustomToolbar.save();
