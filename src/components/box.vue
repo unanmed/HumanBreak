@@ -51,7 +51,8 @@ import { onMounted, onUnmounted, onUpdated, ref, watch } from 'vue';
 import { ArrowsAltOutlined, DragOutlined } from '@ant-design/icons-vue';
 import { isMobile, useDrag, cancelGlobalDrag } from '../plugin/use';
 import { has, requireUniqueSymbol } from '../plugin/utils';
-import { sleep } from 'mutate-animate';
+
+// todo: 重写
 
 const props = defineProps<{
     dragable?: boolean;
@@ -81,11 +82,10 @@ let bottomB: HTMLDivElement;
 let drag: HTMLElement;
 let size: HTMLElement;
 
-const maxWidth = window.innerWidth;
-const maxHeight = window.innerHeight;
-
-const width = ref(isMobile ? maxWidth - 100 : maxHeight * 0.175);
-const height = ref(isMobile ? 250 : maxHeight - 100);
+const width = ref(
+    isMobile ? window.innerWidth - 100 : window.innerHeight * 0.175
+);
+const height = ref(isMobile ? 250 : window.innerHeight - 100);
 const left = ref(isMobile ? 30 : 50);
 const top = ref(isMobile ? 30 : 50);
 
@@ -106,14 +106,14 @@ let lastY = 0;
 
 function clampX(x: number) {
     if (x < 16) x = 16;
-    const mx = maxWidth - 16 - main.offsetWidth;
+    const mx = window.innerWidth - 16 - main.offsetWidth;
     if (x > mx) x = mx;
     return x;
 }
 
 function clampY(y: number) {
     if (y < 16) y = 16;
-    const my = maxHeight - 16 - main.offsetHeight;
+    const my = window.innerHeight - 16 - main.offsetHeight;
     if (y > my) y = my;
     return y;
 }
@@ -124,14 +124,14 @@ function clampPos(x: number, y: number) {
 
 function clampWidth(w: number) {
     if (w < 16) w = 16;
-    const mw = maxWidth - 16 - main.offsetLeft;
+    const mw = window.innerWidth - 16 - main.offsetLeft;
     if (w > mw) w = mw;
     return w;
 }
 
 function clampHeight(h: number) {
     if (h < 16) h = 16;
-    const mh = maxHeight - 16 - main.offsetTop;
+    const mh = window.innerHeight - 16 - main.offsetTop;
     if (h > mh) h = mh;
     return h;
 }
@@ -141,13 +141,11 @@ function clampSize(w: number, h: number) {
 }
 
 function dragFn(x: number, y: number) {
-    const { x: tx, y: ty } = clampPos(x, y);
+    const { x: tx, y: ty } = clampPos(x + 8, y + 8);
     left.value = tx;
     top.value = ty;
     main.style.left = `${tx}px`;
     main.style.top = `${ty}px`;
-
-    moveSelected.value = true;
     clearTimeout(moveTimeout);
     lastX = x;
     lastY = y;
@@ -184,7 +182,7 @@ function bottomDrag(x: number, y: number) {
 }
 
 function resizeBox(x: number, y: number) {
-    const { w, h } = clampSize(x - main.offsetLeft, y - main.offsetTop);
+    const { w, h } = clampSize(x - main.offsetLeft - 8, y - main.offsetTop - 8);
     width.value = w;
     height.value = h;
     main.style.width = `${w}px`;
@@ -202,15 +200,20 @@ function resize() {
 
     if (!main) return;
 
-    if (has(props.left)) left.value = props.left;
-    if (has(props.top)) top.value = props.top;
     if (has(props.width)) width.value = props.width;
     if (has(props.height)) height.value = props.height;
+    if (has(props.left)) left.value = props.left;
+    if (has(props.top)) top.value = props.top;
 
-    main.style.left = `${left.value}px`;
-    main.style.top = `${top.value}px`;
+    width.value = clampWidth(width.value);
+    height.value = clampHeight(height.value);
     main.style.width = `${width.value}px`;
     main.style.height = `${height.value}px`;
+
+    left.value = clampX(left.value);
+    top.value = clampY(top.value);
+    main.style.left = `${left.value}px`;
+    main.style.top = `${top.value}px`;
 }
 
 onUpdated(resize);
@@ -260,9 +263,11 @@ onMounted(async () => {
         useDrag(bottomB, bottomDrag, void 0, void 0, true);
         useDrag(size, resizeBox, void 0, void 0, true);
     }
+    window.addEventListener('resize', resize);
 });
 
 onUnmounted(() => {
+    window.removeEventListener('resize', resize);
     if (props.dragable) cancelGlobalDrag(dragFn);
     if (props.resizable) {
         cancelGlobalDrag(leftDrag);
