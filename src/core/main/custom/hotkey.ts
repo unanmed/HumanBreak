@@ -229,8 +229,8 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
         if (!this.enabled) return false;
         const when = this.conditionMap.get(this.scope)!;
         if (type === 'up') this.checkPressEnd(key);
+        else if (type === 'down') this.checkPress(key);
         if (!when()) return false;
-        if (type === 'down') this.checkPress(key);
         const toEmit = this.keyMap.get(key);
         if (!toEmit) return false;
 
