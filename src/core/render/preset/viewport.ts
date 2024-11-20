@@ -193,8 +193,13 @@ export class FloorViewport implements ILayerGroupRenderExtends {
 
             if (!this.hero.renderable) return;
 
-            this.nx = this.hero.renderable.x;
-            this.ny = this.hero.renderable.y;
+            const { x, y } = this.hero.renderable;
+            const { x: nx, y: ny } = this.getBoundedPosition(
+                x + this.ox,
+                y + this.oy
+            );
+            this.nx = nx;
+            this.ny = ny;
 
             if (ending) {
                 if (this.ox === xTarget && this.oy == yTarget) {
@@ -272,27 +277,18 @@ export class FloorViewport implements ILayerGroupRenderExtends {
     private create() {
         let nx = this.nx;
         let ny = this.ny;
-        let ox = this.ox;
-        let oy = this.oy;
         const halfWidth = core._PX_ / 2;
         const halfHeight = core._PY_ / 2;
         this.delegation = this.group.delegateTicker(() => {
             if (!this.enabled) return;
-            if (
-                this.nx === nx &&
-                this.ny === ny &&
-                this.ox === ox &&
-                this.oy === oy
-            ) {
+            if (this.nx === nx && this.ny === ny) {
                 return;
             }
             const cell = this.group.cellSize;
             const half = cell / 2;
             nx = this.nx;
             ny = this.ny;
-            ox = this.ox;
-            oy = this.oy;
-            const { x: bx, y: by } = this.getBoundedPosition(nx + ox, ny + oy);
+            const { x: bx, y: by } = this.getBoundedPosition(nx, ny);
             const rx = bx * cell - halfWidth + half;
             const ry = by * cell - halfHeight + half;
             core.bigmap.offsetX = rx;
