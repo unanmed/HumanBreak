@@ -809,18 +809,23 @@ maps.prototype.generateMovableArray = function (floorId) {
     const loopMaps = Mota.require('module', 'Mechanism').MiscData.loopMaps;
     const isLoop = loopMaps.has(floorId);
     var v2 = floorId == core.status.floorId && core.bigmap.v2;
-    var startX = v2 ? Math.max(0, core.bigmap.posX - core.bigmap.extend) : 0;
+    const half = core._HALF_WIDTH_;
+    var startX = v2
+        ? Math.max(0, core.bigmap.posX - half - core.bigmap.extend)
+        : 0;
     var endX = v2
         ? Math.min(
               width,
-              core.bigmap.posX + core._WIDTH_ + core.bigmap.extend + 1
+              core.bigmap.posX + core._WIDTH_ - half + core.bigmap.extend + 1
           )
         : width;
-    var startY = v2 ? Math.max(0, core.bigmap.posY - core.bigmap.extend) : 0;
+    var startY = v2
+        ? Math.max(0, core.bigmap.posY - half - core.bigmap.extend)
+        : 0;
     var endY = v2
         ? Math.min(
               height,
-              core.bigmap.posY + core._HEIGHT_ + core.bigmap.extend + 1
+              core.bigmap.posY + core._HEIGHT_ - half + core.bigmap.extend + 1
           )
         : height;
 
