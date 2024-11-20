@@ -292,7 +292,7 @@ function MiscTool(props: CustomToolbarProps<'misc'>) {
                                     style={style}
                                     onClick={() => info.emit(v, toolbar, item)}
                                 >
-                                    {info.display}
+                                    {info.display()}
                                 </div>
                             );
                     })}
@@ -759,10 +759,7 @@ Mota.require('var', 'hook').once('reset', () => {
         MotaSettingItem<number>
     >;
 
-    CustomToolbar.misc.register(
-        'danmaku',
-        '发弹幕',
-        openDanmakuPoster,
+    CustomToolbar.misc.register('danmaku', '发弹幕', openDanmakuPoster, () =>
         h(MessageOutlined)
     );
     CustomToolbar.misc.register(
@@ -771,13 +768,15 @@ Mota.require('var', 'hook').once('reset', () => {
         () => {
             core.useItem('book', true);
         },
-        <img
-            src={core.statusBar.icons.book.src}
-            style={{
-                'object-fit': 'contain',
-                width: `${(scale.value / 100) * 32}px`
-            }}
-        ></img>
+        () => (
+            <img
+                src={core.statusBar.icons.book.src}
+                style={{
+                    'object-fit': 'contain',
+                    width: `${(scale.value / 100) * 32}px`
+                }}
+            ></img>
+        )
     );
     CustomToolbar.misc.register(
         'fly',
@@ -785,13 +784,15 @@ Mota.require('var', 'hook').once('reset', () => {
         () => {
             core.useItem('fly', true);
         },
-        <img
-            src={core.statusBar.icons.fly.src}
-            style={{
-                'object-fit': 'contain',
-                width: `${(scale.value / 100) * 32}px`
-            }}
-        ></img>
+        () => (
+            <img
+                src={core.statusBar.icons.fly.src}
+                style={{
+                    'object-fit': 'contain',
+                    width: `${(scale.value / 100) * 32}px`
+                }}
+            ></img>
+        )
     );
     CustomToolbar.misc.register(
         'toolbox',
@@ -799,13 +800,15 @@ Mota.require('var', 'hook').once('reset', () => {
         () => {
             mainUi.open('toolbox');
         },
-        <img
-            src={core.statusBar.icons.toolbox.src}
-            style={{
-                'object-fit': 'contain',
-                width: `${(scale.value / 100) * 32}px`
-            }}
-        ></img>
+        () => (
+            <img
+                src={core.statusBar.icons.toolbox.src}
+                style={{
+                    'object-fit': 'contain',
+                    width: `${(scale.value / 100) * 32}px`
+                }}
+            ></img>
+        )
     );
     CustomToolbar.misc.register(
         'equipbox',
@@ -813,13 +816,15 @@ Mota.require('var', 'hook').once('reset', () => {
         () => {
             mainUi.open('equipbox');
         },
-        <img
-            src={core.statusBar.icons.equipbox.src}
-            style={{
-                'object-fit': 'contain',
-                width: `${(scale.value / 100) * 32}px`
-            }}
-        ></img>
+        () => (
+            <img
+                src={core.statusBar.icons.equipbox.src}
+                style={{
+                    'object-fit': 'contain',
+                    width: `${(scale.value / 100) * 32}px`
+                }}
+            ></img>
+        )
     );
     CustomToolbar.misc.register(
         'virtualKey',
@@ -834,13 +839,15 @@ Mota.require('var', 'hook').once('reset', () => {
                 );
             });
         },
-        <img
-            src={core.statusBar.icons.keyboard.src}
-            style={{
-                'object-fit': 'contain',
-                width: `${(scale.value / 100) * 32}px`
-            }}
-        ></img>
+        () => (
+            <img
+                src={core.statusBar.icons.keyboard.src}
+                style={{
+                    'object-fit': 'contain',
+                    width: `${(scale.value / 100) * 32}px`
+                }}
+            ></img>
+        )
     );
     CustomToolbar.misc.register(
         'shop',
@@ -848,13 +855,15 @@ Mota.require('var', 'hook').once('reset', () => {
         () => {
             core.openQuickShop(true);
         },
-        <img
-            src={core.statusBar.icons.shop.src}
-            style={{
-                'object-fit': 'contain',
-                width: `${(scale.value / 100) * 32}px`
-            }}
-        ></img>
+        () => (
+            <img
+                src={core.statusBar.icons.shop.src}
+                style={{
+                    'object-fit': 'contain',
+                    width: `${(scale.value / 100) * 32}px`
+                }}
+            ></img>
+        )
     );
     CustomToolbar.misc.register(
         'save',
@@ -862,13 +871,15 @@ Mota.require('var', 'hook').once('reset', () => {
         () => {
             core.save(true);
         },
-        <img
-            src={core.statusBar.icons.save.src}
-            style={{
-                'object-fit': 'contain',
-                width: `${(scale.value / 100) * 32}px`
-            }}
-        ></img>
+        () => (
+            <img
+                src={core.statusBar.icons.save.src}
+                style={{
+                    'object-fit': 'contain',
+                    width: `${(scale.value / 100) * 32}px`
+                }}
+            ></img>
+        )
     );
     CustomToolbar.misc.register(
         'load',
@@ -876,13 +887,15 @@ Mota.require('var', 'hook').once('reset', () => {
         () => {
             core.load(true);
         },
-        <img
-            src={core.statusBar.icons.load.src}
-            style={{
-                'object-fit': 'contain',
-                width: `${(scale.value / 100) * 32}px`
-            }}
-        ></img>
+        () => (
+            <img
+                src={core.statusBar.icons.load.src}
+                style={{
+                    'object-fit': 'contain',
+                    width: `${(scale.value / 100) * 32}px`
+                }}
+            ></img>
+        )
     );
     CustomToolbar.misc.register(
         'undo',
@@ -890,7 +903,7 @@ Mota.require('var', 'hook').once('reset', () => {
         () => {
             core.doSL('autoSave', 'load');
         },
-        h(RollbackOutlined)
+        () => h(RollbackOutlined)
     );
     CustomToolbar.misc.register(
         'redo',
@@ -898,7 +911,7 @@ Mota.require('var', 'hook').once('reset', () => {
         () => {
             core.doSL('autoSave', 'reload');
         },
-        h(RetweetOutlined)
+        () => h(RetweetOutlined)
     );
     CustomToolbar.misc.register(
         'setting',
@@ -906,13 +919,15 @@ Mota.require('var', 'hook').once('reset', () => {
         () => {
             core.openSettings(true);
         },
-        <img
-            src={core.statusBar.icons.settings.src}
-            style={{
-                'object-fit': 'contain',
-                width: `${(scale.value / 100) * 32}px`
-            }}
-        ></img>
+        () => (
+            <img
+                src={core.statusBar.icons.settings.src}
+                style={{
+                    'object-fit': 'contain',
+                    width: `${(scale.value / 100) * 32}px`
+                }}
+            ></img>
+        )
     );
     CustomToolbar.misc.register(
         'minimap',
@@ -956,7 +971,7 @@ Mota.require('var', 'hook').once('reset', () => {
             }
             tool.refresh();
         },
-        h(LayoutOutlined)
+        () => h(LayoutOutlined)
     );
 
     CustomToolbar.misc.bindActivable('minimap', true, () => minimapTool);

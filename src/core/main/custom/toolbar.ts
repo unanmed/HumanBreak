@@ -54,7 +54,7 @@ interface MiscInfo {
     id: string;
     name: string;
     emit: MiscEmitFn;
-    display: Component;
+    display: () => Component;
     activable?: boolean;
     actived?: ActivedFn;
 }
@@ -75,7 +75,7 @@ interface Misc {
         id: string,
         name: string,
         emit: MiscEmitFn,
-        display: Component
+        display: () => Component
     ): void;
 
     /**
