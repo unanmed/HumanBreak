@@ -161,7 +161,7 @@ class GameListener extends EventEmitter<ListenerEvent> {
                 x: px,
                 y: py,
                 size
-            } = core.actions._getClickLoc(e.clientX, e.clientY);
+            } = core.actions._getClickLoc(e.offsetX, e.offsetY);
             const [bx, by] = getBlockLoc(px, py, size);
             const blocks = core.getMapBlocksObj();
             if (this.mouseX !== bx || this.mouseY !== by) {
@@ -207,7 +207,7 @@ class GameListener extends EventEmitter<ListenerEvent> {
                 x: px,
                 y: py,
                 size
-            } = core.actions._getClickLoc(e.clientX, e.clientY);
+            } = core.actions._getClickLoc(e.offsetX, e.offsetY);
             const [bx, by] = getBlockLoc(px, py, size);
             const blocks = core.getMapBlocksObj();
             const block = blocks[`${bx},${by}`];

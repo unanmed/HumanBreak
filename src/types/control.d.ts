@@ -1165,6 +1165,7 @@ interface Control {
     _moveAction_popAutomaticRoute(): void;
     _replay_SL(): void;
     _replay_viewMap(): void;
+    _replay_error(action: string): void;
 }
 
 declare const control: new () => Control;

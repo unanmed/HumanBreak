@@ -218,10 +218,11 @@ export function init() {
             (core.flags.flyNearStair && !core.nearStair())
         )
             return false;
-        if (core.flyTo(floorId, core.replay)) {
-            tipAndWait(`飞往：${floorId}`, 1000);
-            return true;
-        }
-        return false;
+        tipAndWait(`飞往：${floorId}`, 1000).then(() => {
+            if (!core.flyTo(floorId, core.replay)) {
+                core.control._replay_error(action);
+            }
+        });
+        return true;
     });
 }
