@@ -13,6 +13,7 @@ import type {
 } from '@/core/render/preset/layer';
 import type { LayerFloorBinder } from '@/core/render/preset/floor';
 import { BluePalace, MiscData } from '../mechanism/misc';
+import { sleep } from 'mutate-animate';
 
 interface MoveStepDir {
     type: 'dir';
@@ -168,8 +169,7 @@ export abstract class ObjectMoverBase extends EventEmitter<EObjectMovingEvent> {
                     const code = await this.onStepStart(step, controller);
                     await this.onStepEnd(step, code, controller);
                 } else {
-                    const replay = core.status.replay.speed;
-                    const speed = replay === 24 ? 1 : step.value / replay;
+                    const speed = step.value;
                     this.moveSpeed = speed;
                     this.onSetMoveSpeed(speed, controller);
                 }
@@ -379,7 +379,8 @@ export class BlockMover extends ObjectMoverBase {
         const fy = this.y;
         const { x: dx, y: dy } = core.utils.scan2[this.moveDir];
         const start = Date.now();
-        const time = this.moveSpeed;
+        const replay = core.status.replay.speed ?? 1;
+        const time = replay === 24 ? 1 : this.moveSpeed / replay;
 
         return new Promise<void>(res => {
             layer.delegateTicker(
@@ -485,7 +486,10 @@ export class HeroMover extends ObjectMoverBase {
         const adapter = HeroMover.adapter;
         const viewport = HeroMover.viewport;
         if (!adapter || !viewport) return;
-        await adapter.all('readyMove');
+        if (!core.isReplaying()) {
+            adapter.sync('startAnimate');
+            await adapter.all('readyMove');
+        }
         // 这里要检查前面那一格能不能走，不能走则不触发平滑视角，以避免撞墙上视角卡住
         if (!this.ignoreTerrain) {
             const { x, y } = core.status.hero.loc;
@@ -499,7 +503,6 @@ export class HeroMover extends ObjectMoverBase {
                 }
             }
         }
-        adapter.sync('startAnimate');
     }
 
     protected async onMoveEnd(controller: IMoveController): Promise<void> {
@@ -508,9 +511,11 @@ export class HeroMover extends ObjectMoverBase {
         const adapter = HeroMover.adapter;
         const viewport = HeroMover.viewport;
         if (!adapter || !viewport) return;
-        await adapter.all('endMove');
+        if (!core.isReplaying()) {
+            await adapter.all('endMove');
+            adapter.sync('endAnimate');
+        }
         viewport.sync('endMove');
-        adapter.sync('endAnimate');
         core.clearContinueAutomaticRoute();
         core.stopAutomaticRoute();
     }
@@ -560,16 +565,10 @@ export class HeroMover extends ObjectMoverBase {
             if (MiscData.loopMaps.has(core.status.floorId)) {
                 const floor = core.status.maps[floorId];
                 const width = floor.width;
-                if (x === 0 && dir === 'left') {
-                    if (noPass) {
-                        return HeroMoveCode.LoopHit;
-                    }
-                    await Promise.all([
-                        this.renderHeroLoop(),
-                        this.moveAnimate(nx, ny, showDir, dir)
-                    ]);
-                    return HeroMoveCode.Loop;
-                } else if (x === width - 1 && dir === 'right') {
+                if (
+                    (x === 0 && dir === 'left') ||
+                    (x === width - 1 && dir === 'right')
+                ) {
                     if (noPass) {
                         return HeroMoveCode.LoopHit;
                     }
@@ -587,6 +586,7 @@ export class HeroMover extends ObjectMoverBase {
         }
 
         // 可以移动，显示移动动画
+
         await this.moveAnimate(nx, ny, showDir, dir);
 
         return HeroMoveCode.Step;
@@ -681,9 +681,16 @@ export class HeroMover extends ObjectMoverBase {
         const adapter = HeroMover.adapter;
         const viewport = HeroMover.viewport;
         if (!adapter || !viewport) return;
-        viewport.all('moveTo', x, y, this.moveSpeed * 1.6);
+        const replay = core.status.replay.speed;
+        const speed = replay === 24 ? 1 : this.moveSpeed / replay;
+        viewport.all('moveTo', x, y, speed * 1.6);
         adapter.sync('setAnimateDir', showDir);
-        await adapter.all('move', moveDir);
+        if (core.isReplaying()) {
+            await sleep(speed);
+            await adapter.all('setHeroLoc', x, y);
+        } else {
+            await adapter.all('move', moveDir);
+        }
     }
 
     /**
