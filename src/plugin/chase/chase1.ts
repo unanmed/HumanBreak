@@ -1,7 +1,7 @@
 import { Animation, hyper, linear, power, sleep } from 'mutate-animate';
 import { Chase, ChaseData, IChaseController } from './chase';
 import { completeAchievement } from '../ui/achievement';
-import { Camera, CameraAnimation, CameraScale } from '@/core/render/camera';
+import { Camera, CameraAnimation, ICameraScale } from '@/core/render/camera';
 import { LayerGroup } from '@/core/render/preset/layer';
 import { MotaRenderer } from '@/core/render/render';
 import { Sprite } from '@/core/render/sprite';
@@ -272,7 +272,7 @@ function playAudio(from: number, chase: Chase) {
 function processScale(
     chase: Chase,
     ani: Animation,
-    scale: CameraScale,
+    scale: ICameraScale,
     camera: Camera
 ) {
     chase.onceLoc(35, 3, 'MT15', () => {

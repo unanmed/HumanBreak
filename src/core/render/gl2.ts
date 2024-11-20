@@ -385,6 +385,7 @@ export abstract class GL2 extends RenderItem {
 
     destroy(): void {
         this.programs.forEach(v => v.destroy());
+        this.canvas.remove();
         super.destroy();
     }
 

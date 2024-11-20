@@ -17,7 +17,7 @@ export function enableViewport() {
 /**
  * 将两个缓动函数做加法
  */
-export function AddTiming(timing1: TimingFn, timing2: TimingFn): TimingFn {
+export function addTiming(timing1: TimingFn, timing2: TimingFn): TimingFn {
     return (p: number) => timing1(p) + timing2(p);
 }
 

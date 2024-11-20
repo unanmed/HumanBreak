@@ -78,7 +78,9 @@ export class MotaRenderer extends Container {
     }
 
     destroy() {
+        super.destroy();
         MotaRenderer.list.delete(this.id);
+        this.target.delete();
     }
 
     static get(id: string) {

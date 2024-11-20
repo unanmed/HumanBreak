@@ -163,8 +163,10 @@ export class ArrowProjectile extends Projectile<TowerBoss> {
         this.easing = void 0;
         this.dangerEasing = void 0;
         this.horizontal?.clear();
+        this.horizontal?.delete();
         this.horizontal = null;
         this.vertical?.clear();
+        this.vertical?.delete();
         this.vertical = null;
     }
 
@@ -465,6 +467,7 @@ export class ThunderProjectile extends Projectile<TowerBoss> {
 
     static end() {
         this.cache?.clear();
+        this.cache?.delete();
         this.cache = null;
     }
 
@@ -648,8 +651,10 @@ export class ThunderBallProjectile extends Projectile<TowerBoss> {
     static end() {
         this.dangerEasing = void 0;
         this.horizontal?.clear();
+        this.horizontal?.delete();
         this.horizontal = null;
         this.vertical?.clear();
+        this.vertical?.delete();
         this.vertical = null;
     }
 

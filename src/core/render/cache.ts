@@ -480,6 +480,7 @@ function splitAutotiles(map: IdToNumber): AutotileCaches {
         master.size(32, 32);
         master.ctx.drawImage(img, 0, 0, 32, 32, 0, 0, 32, 32);
         masterMap[auto] = master.canvas.toDataURL('image/png');
+        master.delete();
 
         // 自动图块的绘制信息
         for (let i = 0; i <= 0b11111111; i++) {
@@ -504,6 +505,7 @@ function splitAutotiles(map: IdToNumber): AutotileCaches {
             canvas.setAntiAliasing(false);
             canvas.withGameScale(false);
             canvas.size(32 * frame, 32);
+            canvas.freeze();
             const ctx = canvas.ctx;
             for (let i = 0; i < frame; i++) {
                 const dx = 32 * i;
@@ -525,16 +527,17 @@ function splitAutotiles(map: IdToNumber): AutotileCaches {
         }
     }
 
+    const judge = new MotaOffscreenCanvas2D();
+    judge.setHD(false);
+    judge.setAntiAliasing(false);
+    judge.withGameScale(false);
+    judge.size(32, 32);
     // 进行父子关系判断
     for (const [key, img] of Object.entries(core.material.images.autotile)) {
         const auto = map[key as AllIdsOf<'autotile'>];
 
         // 只针对3*4的图块进行，截取第一行中间的，然后判断
-        const judge = new MotaOffscreenCanvas2D();
-        judge.setHD(false);
-        judge.setAntiAliasing(false);
-        judge.withGameScale(false);
-        judge.size(32, 32);
+        judge.clear();
         judge.ctx.drawImage(img, 32, 0, 32, 32, 0, 0, 32, 32);
         const data = judge.canvas.toDataURL('image/png');
 
@@ -547,6 +550,7 @@ function splitAutotiles(map: IdToNumber): AutotileCaches {
             }
         }
     }
+    judge.delete();
 
     return cache as AutotileCaches;
 }

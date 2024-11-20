@@ -5,7 +5,12 @@ import { TimingFn } from 'mutate-animate';
 import { IAnimateFrame, renderEmits, RenderItem } from '../item';
 import { logger } from '@/core/common/logger';
 import { RenderableData, texture } from '../cache';
-import { BlockCacher } from './block';
+import {
+    BlockCacher,
+    CanvasCacheItem,
+    IBlockCacheable,
+    ICanvasCacheItem
+} from './block';
 import { Transform } from '../transform';
 import { LayerFloorBinder, LayerGroupFloorBinder } from './floor';
 import { RenderAdapter } from '../adapter';
@@ -388,7 +393,7 @@ export interface ILayerRenderExtends {
      * @param layer 目标Layer实例
      * @param images 生成出的背景图块的单个分块图像，数组是因为背景图块可能是多帧图块
      */
-    onBackgroundGenerated?(layer: Layer, images: HTMLCanvasElement[]): void;
+    onBackgroundGenerated?(layer: Layer, images: MotaOffscreenCanvas2D[]): void;
 
     /**
      * 当修改渲染数据时执行的函数，参见 {@link Layer.putRenderData}
@@ -504,11 +509,6 @@ export interface ILayerRenderExtends {
     onDestroy?(layer: Layer): void;
 }
 
-interface LayerCacheItem {
-    symbol: number;
-    canvas: MotaOffscreenCanvas2D;
-}
-
 export interface LayerMovingRenderable extends RenderableData {
     zIndex: number;
     x: number;
@@ -550,12 +550,17 @@ export class Layer extends Container {
     /** 背景图块 */
     background: AllNumbers = 0;
     /** 背景图块画布 */
-    backImage: HTMLCanvasElement[] = [];
+    backImage: MotaOffscreenCanvas2D[] = [];
     /** 背景贴图 */
     floorImage: FloorAnimate[] = [];
 
     /** 分块信息 */
-    block: BlockCacher<LayerCacheItem> = new BlockCacher(0, 0, core._WIDTH_, 4);
+    block: BlockCacher<ICanvasCacheItem> = new BlockCacher(
+        0,
+        0,
+        core._WIDTH_,
+        4
+    );
 
     /** 大怪物渲染信息 */
     bigImages: Map<number, LayerMovingRenderable> = new Map();
@@ -717,13 +722,17 @@ export class Layer extends Container {
         const num = this.background;
 
         const data = texture.getRenderable(num);
+        this.backImage.forEach(v => v.delete());
         this.backImage = [];
         if (!data) return;
 
         const frame = data.frame;
+        const temp = new MotaOffscreenCanvas2D();
+        temp.setHD(false);
+        temp.setAntiAliasing(false);
+        temp.withGameScale(false);
         for (let i = 0; i < frame; i++) {
             const canvas = new MotaOffscreenCanvas2D();
-            const temp = new MotaOffscreenCanvas2D();
             const ctx = canvas.ctx;
             const tempCtx = temp.ctx;
             const [sx, sy, w, h] = data.render[i];
@@ -731,9 +740,6 @@ export class Layer extends Container {
             canvas.setAntiAliasing(false);
             canvas.withGameScale(false);
             canvas.size(core._PX_, core._PY_);
-            temp.setHD(false);
-            temp.setAntiAliasing(false);
-            temp.withGameScale(false);
             temp.size(w, h);
 
             const img = data.autotile ? data.image[0b11111111] : data.image;
@@ -743,8 +749,9 @@ export class Layer extends Container {
             ctx.fillStyle = pattern;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            this.backImage.push(canvas.canvas);
+            this.backImage.push(canvas);
         }
+        temp.delete();
 
         for (const ex of this.extend.values()) {
             ex.onBackgroundGenerated?.(this, this.backImage);
@@ -1078,7 +1085,7 @@ export class Layer extends Container {
                 const sx = x * blockSize;
                 const sy = y * blockSize;
                 ctx.drawImage(
-                    img,
+                    img.canvas,
                     sx * cell,
                     sy * cell,
                     blockSize * cell,
@@ -1180,10 +1187,7 @@ export class Layer extends Container {
                 blockSize * cell,
                 blockSize * cell
             );
-            this.block.cache.set(index, {
-                canvas: temp,
-                symbol: temp.symbol
-            });
+            this.block.cache.set(index, new CanvasCacheItem(temp, temp.symbol));
         });
     }
 
@@ -1379,6 +1383,12 @@ export class Layer extends Container {
             ex.onDestroy?.(this);
         }
         super.destroy();
+        this.staticMap.delete();
+        this.movingMap.delete();
+        this.backMap.delete();
+        this.backImage.forEach(v => v.delete());
+        this.block.destroy();
+        this.main.destroy();
         layerAdapter.remove(this);
     }
 

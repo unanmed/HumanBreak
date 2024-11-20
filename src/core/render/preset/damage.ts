@@ -7,7 +7,12 @@ import {
     LayerGroup
 } from './layer';
 import { ESpriteEvent, Sprite } from '../sprite';
-import { BlockCacher } from './block';
+import {
+    BlockCacher,
+    CanvasCacheItem,
+    IBlockCacheable,
+    ICanvasCacheItem
+} from './block';
 import type {
     DamageEnemy,
     EnemyCollection,
@@ -16,7 +21,7 @@ import type {
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 import { isNil } from 'lodash-es';
 import { getDamageColor } from '@/plugin/utils';
-import { transformCanvas } from '../item';
+import { RenderItem, transformCanvas } from '../item';
 import EventEmitter from 'eventemitter3';
 import { Transform } from '../transform';
 
@@ -120,11 +125,6 @@ export interface DamageRenderable {
     strokeWidth?: number;
 }
 
-interface DamageCache {
-    canvas: MotaOffscreenCanvas2D;
-    symbol: number;
-}
-
 interface EDamageEvent extends ESpriteEvent {
     setMapSize: [width: number, height: number];
     beforeDamageRender: [need: Set<number>, transform: Transform];
@@ -132,11 +132,11 @@ interface EDamageEvent extends ESpriteEvent {
     dirtyUpdate: [block: number];
 }
 
-export class Damage extends Sprite<EDamageEvent> {
+export class Damage extends RenderItem<EDamageEvent> {
     mapWidth: number = 0;
     mapHeight: number = 0;
 
-    block: BlockCacher<DamageCache>;
+    block: BlockCacher<ICanvasCacheItem>;
     /** 键表示分块索引，值表示在这个分块上的渲染信息（当然实际渲染位置可以不在这个分块上） */
     renderable: Map<number, Set<DamageRenderable>> = new Map();
 
@@ -147,8 +147,6 @@ export class Damage extends Sprite<EDamageEvent> {
     /** 单元格大小 */
     cellSize: number = 32;
 
-    /** 伤害渲染层 */
-    damageMap: MotaOffscreenCanvas2D = new MotaOffscreenCanvas2D();
     /** 默认伤害字体 */
     font: string = '300 9px Verdana';
     /** 默认描边样式，当伤害文字不存在描边属性时会使用此属性 */
@@ -165,18 +163,15 @@ export class Damage extends Sprite<EDamageEvent> {
         this.block = new BlockCacher(0, 0, core._WIDTH_, 1);
         this.type = 'absolute';
         this.size(core._PX_, core._PY_);
-        this.damageMap.withGameScale(true);
-        this.damageMap.setHD(true);
-        this.damageMap.setAntiAliasing(true);
-        this.damageMap.size(core._PX_, core._PY_);
+        this.setHD(true);
+        this.setAntiAliasing(true);
+    }
 
-        this.setRenderFn((canvas, transform) => {
-            const { ctx } = canvas;
-            const { width, height } = canvas;
-            ctx.imageSmoothingEnabled = false;
-            this.renderDamage(transform);
-            ctx.drawImage(this.damageMap.canvas, 0, 0, width, height);
-        });
+    protected render(
+        canvas: MotaOffscreenCanvas2D,
+        transform: Transform
+    ): void {
+        this.renderDamage(canvas, transform);
     }
 
     private onExtract = () => {
@@ -468,12 +463,10 @@ export class Damage extends Sprite<EDamageEvent> {
      * 渲染伤害层
      * @param transform 变换矩阵
      */
-    renderDamage(transform: Transform) {
+    renderDamage(canvas: MotaOffscreenCanvas2D, transform: Transform) {
         // console.time('damage');
-        const { ctx } = this.damageMap;
-        ctx.save();
-        this.damageMap.clear();
-        transformCanvas(this.damageMap, transform);
+        const { ctx } = canvas;
+        transformCanvas(canvas, transform);
         // console.trace();
 
         const render = this.calNeedRender(transform);
@@ -529,10 +522,7 @@ export class Damage extends Sprite<EDamageEvent> {
             });
 
             ctx.drawImage(temp.canvas, px, py, size, size);
-            block.cache.set(v, {
-                canvas: temp,
-                symbol: temp.symbol
-            });
+            block.cache.set(v, new CanvasCacheItem(temp, temp.symbol));
         });
         ctx.restore();
         // console.timeEnd('damage');
@@ -540,6 +530,7 @@ export class Damage extends Sprite<EDamageEvent> {
 
     destroy(): void {
         super.destroy();
+        this.block.destroy();
         this.enemy?.off('extract', this.onExtract);
     }
 }

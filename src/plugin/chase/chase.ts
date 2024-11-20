@@ -337,6 +337,8 @@ export class Chase extends EventEmitter<ChaseEvent> {
         Chase.shader.remove();
         this.emit('end', success);
         this.removeAllListeners();
+        this.pathMap.forEach(v => v.delete());
+        this.pathMap.clear();
     }
 }
 

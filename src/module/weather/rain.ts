@@ -2,9 +2,7 @@ import { Shader, ShaderProgram } from '@/core/render/shader';
 import { IWeather, WeatherController } from './weather';
 import { MotaRenderer } from '@/core/render/render';
 import { Container } from '@/core/render/container';
-import { GL2Program, IShaderUniform, UniformType } from '@/core/render/gl2';
-import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
-import { Transform } from '@/core/render/transform';
+import { IShaderUniform, UniformType } from '@/core/render/gl2';
 
 const rainVs = /* glsl */ `
 in vec2 a_rainVertex;

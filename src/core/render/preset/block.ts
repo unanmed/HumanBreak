@@ -1,5 +1,6 @@
 import { EventEmitter } from '@/core/common/eventEmitter';
 import { logger } from '@/core/common/logger';
+import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 
 interface BlockCacherEvent {
     split: () => void;
@@ -16,13 +17,22 @@ interface BlockData {
     restHeight: number;
 }
 
+export interface IBlockCacheable {
+    /**
+     * 摧毁这个缓存元素
+     */
+    destroy(): void;
+}
+
 /**
  * 简单分块缓存类，内容包含元素与分块两种，其中元素是最小单元，分块是缓存单元。
  * 拿楼层举例，假如我将楼层按照13x13划分缓存，那么元素就是每个图块，而分块就是这13x13的缓存分块。
  * 为方便区分，在相关函数的注释最后，都会有`xx -> yy`的说明，
  * 其中xx说明传入的数据是元素还是分块的数据，而yy表示其返回值或转换为的值
  */
-export class BlockCacher<T> extends EventEmitter<BlockCacherEvent> {
+export class BlockCacher<
+    T extends IBlockCacheable
+> extends EventEmitter<BlockCacherEvent> {
     /** 区域宽度 */
     width: number;
     /** 区域高度 */
@@ -118,7 +128,12 @@ export class BlockCacher<T> extends EventEmitter<BlockCacherEvent> {
         const depth = this.cacheDepth;
         for (let i = 0; i < depth; i++) {
             if (deep & (1 << i)) {
-                this.cache.delete(index * this.cacheDepth + i);
+                const nowIndex = index * this.cacheDepth + i;
+                const item = this.cache.get(nowIndex);
+                if (item) {
+                    item.destroy();
+                    this.cache.delete(nowIndex);
+                }
             }
         }
     }
@@ -126,14 +141,19 @@ export class BlockCacher<T> extends EventEmitter<BlockCacherEvent> {
     /**
      * 清空指定索引的缓存，与 {@link clearCache} 不同的是，这里会直接清空对应索引的缓存，而不是指定分块的缓存（分块->void）
      */
-    clearCacheByIndex(index: number) {
-        this.cache.delete(index);
+    clearCacheByIndex(index: number, func: (item: T) => void) {
+        const item = this.cache.get(index);
+        if (item) {
+            item.destroy();
+            this.cache.delete(index);
+        }
     }
 
     /**
      * 清空所有缓存
      */
     clearAllCache() {
+        this.cache.forEach(v => v.destroy());
         this.cache.clear();
     }
 
@@ -271,5 +291,25 @@ export class BlockCacher<T> extends EventEmitter<BlockCacherEvent> {
             (x + 1) * this.blockSize,
             (y + 1) * this.blockSize
         ];
+    }
+
+    /**
+     * 摧毁这个块缓存
+     */
+    destroy() {
+        this.clearAllCache();
+    }
+}
+
+export interface ICanvasCacheItem extends IBlockCacheable {
+    readonly canvas: MotaOffscreenCanvas2D;
+    symbol: number;
+}
+
+export class CanvasCacheItem implements ICanvasCacheItem {
+    constructor(public canvas: MotaOffscreenCanvas2D, public symbol: number) {}
+
+    destroy(): void {
+        this.canvas.delete();
     }
 }

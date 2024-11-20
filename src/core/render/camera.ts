@@ -4,28 +4,28 @@ import { logger } from '../common/logger';
 import { Transform } from './transform';
 import EventEmitter from 'eventemitter3';
 
-export interface CameraTranslate {
+export interface ICameraTranslate {
     readonly type: 'translate';
     readonly from: Camera;
     x: number;
     y: number;
 }
 
-export interface CameraRotate {
+export interface ICameraRotate {
     readonly type: 'rotate';
     readonly from: Camera;
     /** 旋转角，单位弧度 */
     angle: number;
 }
 
-export interface CameraScale {
+export interface ICameraScale {
     readonly type: 'scale';
     readonly from: Camera;
     x: number;
     y: number;
 }
 
-type CameraOperation = CameraTranslate | CameraScale | CameraRotate;
+type CameraOperation = ICameraTranslate | ICameraScale | ICameraRotate;
 
 interface CameraEvent {
     destroy: [];
@@ -145,8 +145,8 @@ export class Camera extends EventEmitter<CameraEvent> {
      * 添加一个平移操作
      * @returns 添加的平移变换操作
      */
-    addTranslate(): CameraTranslate {
-        const item: CameraTranslate = {
+    addTranslate(): ICameraTranslate {
+        const item: ICameraTranslate = {
             type: 'translate',
             x: 0,
             y: 0,
@@ -160,8 +160,8 @@ export class Camera extends EventEmitter<CameraEvent> {
      * 添加一个旋转操作
      * @returns 添加的旋转变换操作
      */
-    addRotate(): CameraRotate {
-        const item: CameraRotate = {
+    addRotate(): ICameraRotate {
+        const item: ICameraRotate = {
             type: 'rotate',
             angle: 0,
             from: this
@@ -174,8 +174,8 @@ export class Camera extends EventEmitter<CameraEvent> {
      * 添加一个放缩操作
      * @returns 添加的放缩变换操作
      */
-    addScale(): CameraScale {
-        const item: CameraScale = {
+    addScale(): ICameraScale {
+        const item: ICameraScale = {
             type: 'scale',
             x: 1,
             y: 1,
@@ -213,7 +213,7 @@ export class Camera extends EventEmitter<CameraEvent> {
      * @param time 动画时长
      */
     applyTranslateAnimation(
-        operation: CameraTranslate,
+        operation: ICameraTranslate,
         animate: Animation,
         time: number
     ) {
@@ -237,7 +237,7 @@ export class Camera extends EventEmitter<CameraEvent> {
      * @param time 动画时长
      */
     applyRotateAnimation(
-        operation: CameraRotate,
+        operation: ICameraRotate,
         animate: Animation,
         time: number
     ) {
@@ -260,7 +260,7 @@ export class Camera extends EventEmitter<CameraEvent> {
      * @param time 动画时长
      */
     applyScaleAnimation(
-        operation: CameraScale,
+        operation: ICameraScale,
         animate: Animation,
         time: number
     ) {
@@ -284,7 +284,7 @@ export class Camera extends EventEmitter<CameraEvent> {
      * @param time 渐变时长
      */
     applyTranslateTransition(
-        operation: CameraTranslate,
+        operation: ICameraTranslate,
         animate: Transition,
         time: number
     ) {
@@ -308,7 +308,7 @@ export class Camera extends EventEmitter<CameraEvent> {
      * @param time 渐变时长
      */
     applyRotateTransition(
-        operation: CameraRotate,
+        operation: ICameraRotate,
         animate: Transition,
         time: number
     ) {
@@ -331,7 +331,7 @@ export class Camera extends EventEmitter<CameraEvent> {
      * @param time 渐变时长
      */
     applyScaleTransition(
-        operation: CameraScale,
+        operation: ICameraScale,
         animate: Transition,
         time: number
     ) {
@@ -514,7 +514,7 @@ export class CameraAnimation extends EventEmitter<CameraAnimationEvent> {
      * @param timing 动画的缓动函数
      */
     translate(
-        operation: CameraTranslate,
+        operation: ICameraTranslate,
         x: number,
         y: number,
         time: number,
@@ -542,7 +542,7 @@ export class CameraAnimation extends EventEmitter<CameraAnimationEvent> {
      * @param timing 动画的缓动函数
      */
     rotate(
-        operation: CameraRotate,
+        operation: ICameraRotate,
         angle: number,
         time: number,
         start: number,
@@ -568,7 +568,7 @@ export class CameraAnimation extends EventEmitter<CameraAnimationEvent> {
      * @param timing 动画的缓动函数
      */
     scale(
-        operation: CameraScale,
+        operation: ICameraScale,
         scale: number,
         time: number,
         start: number,
