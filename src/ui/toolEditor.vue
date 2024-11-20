@@ -292,6 +292,10 @@ function exit() {
 }
 
 function deleteTool(id: string) {
+    if (id === '@defaults') {
+        tip('warn', '该工具栏不能删除！');
+        return;
+    }
     Modal.confirm({
         title: '确定要删除这个自定义工具栏吗？',
         onOk() {
