@@ -19,6 +19,7 @@ body {
 
 #game-draw {
     position: relative;
+    overflow: hidden;
 }
 
 #game-draw > * {

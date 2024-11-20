@@ -228,9 +228,9 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
         // 检查全局启用情况
         if (!this.enabled) return false;
         const when = this.conditionMap.get(this.scope)!;
+        if (type === 'up') this.checkPressEnd(key);
         if (!when()) return false;
         if (type === 'down') this.checkPress(key);
-        else this.checkPressEnd(key);
         const toEmit = this.keyMap.get(key);
         if (!toEmit) return false;
 
