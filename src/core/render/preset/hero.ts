@@ -40,6 +40,8 @@ export class HeroRenderer
 
     /** 勇士移动速度 */
     speed: number = 100;
+    /** 勇士移动的真正速度，经过录像修正 */
+    realSpeed: number = 100;
 
     /** 当前的移动方向 */
     moveDir: Dir2 = 'down';
@@ -83,6 +85,7 @@ export class HeroRenderer
      */
     setMoveSpeed(speed: number) {
         this.speed = speed;
+        this.fixMoveSpeed();
     }
 
     /**
@@ -200,13 +203,14 @@ export class HeroRenderer
         if (!this.renderable) return;
 
         if (this.moving) {
-            const progress = (time - this.lastStepTime) / this.speed;
+            const progress = (time - this.lastStepTime) / this.realSpeed;
 
             const { x: dx, y: dy } = this.stepDelta;
             const { x, y } = core.status.hero.loc;
             if (progress >= 1) {
                 this.renderable.x = x + dx;
                 this.renderable.y = y + dy;
+                this.fixMoveSpeed();
                 this.emit('stepEnd');
             } else {
                 const rx = dx * progress + x;
@@ -227,6 +231,15 @@ export class HeroRenderer
         this.lastStepTime = Date.now();
         this.stepDelta = core.utils.scan2[this.stepDir];
         this.turn(this.stepDir);
+    }
+
+    private fixMoveSpeed() {
+        if (!core.isReplaying()) {
+            this.realSpeed = this.speed;
+        } else {
+            const replay = core.status.replay.speed;
+            this.realSpeed = replay === 24 ? 1 : this.speed / replay;
+        }
     }
 
     /**
