@@ -443,7 +443,10 @@ gameKey.use(mainScope);
 // ----- Realization
 
 gameKey
-    .when(() => !core.status.lockControl && !core.isMoving())
+    .when(
+        () =>
+            !core.status.lockControl && !core.isMoving() && !core.isReplaying()
+    )
     .realize('book', () => {
         core.openBook(true);
     })

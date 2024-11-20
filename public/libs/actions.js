@@ -253,12 +253,6 @@ actions.prototype._sys_onkeyUp_replay = function (e) {
         else if (e.keyCode == 78)
             // N
             core.stepReplay();
-        else if (e.keyCode == 84)
-            // T
-            core.control._replay_toolbox();
-        else if (e.keyCode == 81)
-            // Q_sys_onkeyUp
-            core.control._replay_equipbox();
         else if (e.keyCode == 66)
             // B
             core.ui._drawStatistics();
