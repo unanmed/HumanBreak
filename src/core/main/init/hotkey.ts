@@ -535,7 +535,7 @@ gameKey
         }
         core.playSound('光标移动');
         HeroSkill.toggleSkill(HeroSkill.Blade);
-        core.status.route.push('skill:Blade');
+        core.status.route.push('useSkill:Blade');
         core.updateStatusBar();
     })
     .realize('skill2', () => {
@@ -546,7 +546,7 @@ gameKey
             HeroSkill.learnedSkill(HeroSkill.Jump)
         ) {
             Mota.Plugin.require('skill_g').jumpSkill();
-            core.status.route.push('skill:Jump');
+            core.status.route.push('useSkill:Jump');
         } else {
             if (core.hasItem('pickaxe')) {
                 core.useItem('pickaxe');
@@ -562,7 +562,7 @@ gameKey
         }
         core.playSound('光标移动');
         HeroSkill.toggleSkill(HeroSkill.Shield);
-        core.status.route.push('skill:Shield');
+        core.status.route.push('useSkill:Shield');
         core.updateStatusBar();
     })
     .realize('debug', () => {

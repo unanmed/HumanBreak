@@ -654,8 +654,8 @@ utils.prototype.encodeRoute = function (route, compress = true) {
                 }
                 if (cnt > 1) ans += cnt;
                 cnt = 0;
-                lastMove = t;
             }
+            lastMove = t;
             cnt++;
         } else {
             if (cnt > 0) {

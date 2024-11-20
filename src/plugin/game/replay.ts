@@ -184,12 +184,12 @@ export function init() {
         } else {
             core.replay();
         }
-        core.status.route.push(`skill:${toEmit}`);
+        core.status.route.push(`useSkill:${toEmit}`);
         return true;
     }
 
-    core.registerReplayAction('skill', name => {
-        if (!name.startsWith('skill:')) return false;
+    core.registerReplayAction('useSkill', name => {
+        if (!name.startsWith('useSkill:')) return false;
         const [, skill] = name.split(':');
         return skillAction(skill);
     });
@@ -213,7 +213,6 @@ export function init() {
     core.registerReplayAction('fly', action => {
         if (!action.startsWith('fly:')) return false;
         const floorId = action.slice(4) as FloorIds;
-        const toIndex = core.floorIds.indexOf(floorId);
         if (
             !core.canUseItem('fly') ||
             (core.flags.flyNearStair && !core.nearStair())

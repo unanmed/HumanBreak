@@ -487,8 +487,10 @@ export class HeroMover extends ObjectMoverBase {
         const viewport = HeroMover.viewport;
         if (!adapter || !viewport) return;
         // if (!core.isReplaying()) {
-        adapter.sync('startAnimate');
-        await adapter.all('readyMove');
+        if (!core.isReplaying() || core.status.replay.speed <= 3) {
+            adapter.sync('startAnimate');
+            await adapter.all('readyMove');
+        }
         // }
         // 这里要检查前面那一格能不能走，不能走则不触发平滑视角，以避免撞墙上视角卡住
         if (!this.ignoreTerrain) {
@@ -512,8 +514,10 @@ export class HeroMover extends ObjectMoverBase {
         const viewport = HeroMover.viewport;
         if (!adapter || !viewport) return;
         // if (!core.isReplaying()) {
-        await adapter.all('endMove');
-        adapter.sync('endAnimate');
+        if (!core.isReplaying() || core.status.replay.speed <= 3) {
+            await adapter.all('endMove');
+            adapter.sync('endAnimate');
+        }
         // }
         viewport.sync('endMove');
         core.clearContinueAutomaticRoute();
@@ -685,12 +689,12 @@ export class HeroMover extends ObjectMoverBase {
         const speed = replay === 24 ? 1 : this.moveSpeed / replay;
         viewport.all('moveTo', x, y, speed * 1.6);
         adapter.sync('setAnimateDir', showDir);
-        // if (core.isReplaying()) {
-        // await sleep(speed);
-        // await adapter.all('setHeroLoc', x, y);
-        // } else {
-        await adapter.all('move', moveDir);
-        // }
+        if (core.isReplaying() && core.status.replay.speed > 3) {
+            await sleep(speed);
+            await adapter.all('setHeroLoc', x, y);
+        } else {
+            await adapter.all('move', moveDir);
+        }
     }
 
     /**
