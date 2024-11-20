@@ -4066,7 +4066,7 @@ ui.prototype.createCanvas = function (name, x, y, width, height, z) {
     newCanvas.style.pointerEvents = 'none';
     core.dymCanvas[name] = newCanvas.getContext('2d');
     core.maps._setHDCanvasSize(core.dymCanvas[name], width, height);
-    // core.dom.gameDraw.appendChild(newCanvas);
+    core.dom.gameDraw.appendChild(newCanvas);
     return core.dymCanvas[name];
 };
 
@@ -4144,7 +4144,7 @@ ui.prototype.deleteCanvas = function (name) {
     }
 
     if (!core.dymCanvas[name]) return null;
-    // core.dom.gameDraw.removeChild(core.dymCanvas[name].canvas);
+    core.dymCanvas[name].canvas.remove();
     delete core.dymCanvas[name];
 };
 
