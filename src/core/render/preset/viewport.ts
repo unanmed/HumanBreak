@@ -159,7 +159,7 @@ export class FloorViewport implements ILayerGroupRenderExtends {
         let yStartTime: number = Date.now();
         let ending: boolean = false;
         // 这个数等于 sinh(2)，用这个数的话，可以正好在刚开始移动的时候达到1的斜率，效果会比较好
-        const transitionTime = this.hero.speed * 3.626860407847019;
+        let transitionTime = this.hero.speed * 3.626860407847019;
 
         const setTargetX = (x: number, time: number) => {
             if (x === xTarget) return;
@@ -178,6 +178,7 @@ export class FloorViewport implements ILayerGroupRenderExtends {
             this.hero.off('moveTick', this.movingFramer);
         }
         this.movingFramer = () => {
+            if (this.inTransition) return;
             const now = Date.now();
             if (!this.inMoving && !ending) {
                 setTargetX(0, now);
@@ -194,10 +195,7 @@ export class FloorViewport implements ILayerGroupRenderExtends {
             if (!this.hero.renderable) return;
 
             const { x, y } = this.hero.renderable;
-            const { x: nx, y: ny } = this.getBoundedPosition(
-                x + this.ox,
-                y + this.oy
-            );
+            const { x: nx, y: ny } = this.getBoundedPosition(x, y);
             this.nx = nx;
             this.ny = ny;
 
@@ -207,6 +205,8 @@ export class FloorViewport implements ILayerGroupRenderExtends {
                     return;
                 }
             }
+            // todo: 效果太差了，需要优化
+            return;
             if (this.ox !== xTarget) {
                 const time = transitionTime * Math.abs(xStart - xTarget);
                 const progress = (now - xStartTime) / time;

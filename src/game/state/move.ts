@@ -504,6 +504,8 @@ export class HeroMover extends ObjectMoverBase {
                     viewport.sync('startMove');
                 }
             }
+        } else {
+            viewport.sync('startMove');
         }
     }
 
@@ -528,7 +530,8 @@ export class HeroMover extends ObjectMoverBase {
         step: MoveStepDir,
         controller: IMoveController
     ): Promise<HeroMoveCode> {
-        const showDir = toDir(this.moveDir);
+        const showDir = toDir(this.faceDir);
+        const dir4Move = toDir(this.moveDir);
         core.setHeroLoc('direction', showDir);
 
         const { x, y } = core.status.hero.loc;
@@ -549,7 +552,7 @@ export class HeroMover extends ObjectMoverBase {
 
         // 检查传送门
         if (!this.ignoreTerrain) {
-            const { portal, data } = this.checkPortal(x, y, showDir);
+            const { portal, data } = this.checkPortal(x, y, dir4Move);
             if (portal && data) {
                 this.portalData = data;
                 await this.renderHeroSwap(data);
@@ -559,7 +562,7 @@ export class HeroMover extends ObjectMoverBase {
 
         const dir = this.moveDir;
         if (!this.ignoreTerrain) {
-            const { noPass, canMove } = this.checkCanMove(x, y, showDir);
+            const { noPass, canMove } = this.checkCanMove(x, y, dir4Move);
 
             if (!canMove) {
                 return HeroMoveCode.CannotMove;
@@ -603,7 +606,7 @@ export class HeroMover extends ObjectMoverBase {
     ): Promise<void> {
         const { x, y } = core.status.hero.loc;
         const { x: nx, y: ny } = this.nextLoc(x, y, this.moveDir);
-        const showDir = toDir(this.moveDir);
+        const showDir = toDir(this.faceDir);
 
         // 前方不能移动
         if (
