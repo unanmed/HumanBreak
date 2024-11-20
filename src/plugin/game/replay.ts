@@ -1,5 +1,5 @@
 import { HeroSkill } from '@/game/mechanism/misc';
-import { upgradeSkill } from './skillTree';
+import { getSkillFromIndex, upgradeSkill } from './skillTree';
 
 const replayableSettings = ['autoSkill'];
 
@@ -20,8 +20,20 @@ export function clip(...replace: string[]) {
 }
 
 export function init() {
-    const { HeroSkill } = Mota.require('module', 'Mechanism');
+    function tipAndWait(content: string, time: number) {
+        const speed = core.status.replay.speed;
+        if (main.replayChecking || speed === 24) return Promise.resolve();
+        const { tip } = Mota.Plugin.require('utils_r');
+        tip('info', '录像播放操作：' + content);
+        return new Promise<void>(res => {
+            setTimeout(res, time / speed);
+        });
+    }
+
     // 注册修改设置的录像操作
+    const settingNameMap: Record<string, string> = {
+        autoSkill: '自动切换技能'
+    };
     core.registerReplayAction('settings', name => {
         if (!name.startsWith('set:')) return false;
         const [, setting, value] = name.split(':');
@@ -33,8 +45,15 @@ export function init() {
                 HeroSkill.setAutoSkill(v);
                 break;
         }
+        const settingName = settingNameMap[setting];
+        if (settingName) {
+            tipAndWait(`切换设置：${settingName}`, 1000).then(() => {
+                core.replay();
+            });
+        } else {
+            core.replay();
+        }
         core.status.route.push(name);
-        core.replay();
         return true;
     });
 
@@ -42,8 +61,12 @@ export function init() {
         if (!name.startsWith('skill:')) return false;
         const skill = parseInt(name.slice(6));
         upgradeSkill(skill);
+        const s = getSkillFromIndex(skill);
+        const skillName = s?.title;
+        tipAndWait(`升级技能：${skillName}`, 1000).then(() => {
+            core.replay();
+        });
         core.status.route.push(name);
-        core.replay();
         return true;
     });
 
@@ -89,8 +112,11 @@ export function init() {
             id as AllIdsOf<'items'>,
             (type === 'buy' ? num : -num) as number
         );
+        const { name: itemName } = core.material.items[id as AllIdsOf<'items'>];
+        tipAndWait(`购买物品：${itemName}`, 1000).then(() => {
+            core.replay();
+        });
         core.status.route.push(name);
-        core.replay();
         return true;
     });
 
@@ -104,6 +130,10 @@ export function init() {
         return true;
     });
 
+    const skillNameMap: Record<string, string> = {
+        Blade: '断灭之刃',
+        Shield: '铸剑为盾'
+    };
     function skillAction(skill: string) {
         let toEmit = skill;
 
@@ -146,8 +176,15 @@ export function init() {
             HeroSkill.toggleSkill(num);
         }
         core.updateStatusBar();
+        const name = skillNameMap[toEmit];
+        if (name) {
+            tipAndWait(`切换技能：${name}`, 1000).then(() => {
+                core.replay();
+            });
+        } else {
+            core.replay();
+        }
         core.status.route.push(`skill:${toEmit}`);
-        core.replay();
         return true;
     }
 
@@ -170,6 +207,22 @@ export function init() {
             return skillAction('3');
         }
 
+        return false;
+    });
+
+    core.registerReplayAction('fly', action => {
+        if (!action.startsWith('fly:')) return false;
+        const floorId = action.slice(4) as FloorIds;
+        const toIndex = core.floorIds.indexOf(floorId);
+        if (
+            !core.canUseItem('fly') ||
+            (core.flags.flyNearStair && !core.nearStair())
+        )
+            return false;
+        if (core.flyTo(floorId, core.replay)) {
+            tipAndWait(`飞往：${floorId}`, 1000);
+            return true;
+        }
         return false;
     });
 }
