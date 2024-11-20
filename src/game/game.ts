@@ -101,6 +101,8 @@ export interface GameEvent {
         y: number,
         floorId: FloorIds
     ];
+    /** Emitted in lib/control.js */
+    replayStatus: [replaying: boolean];
 }
 
 export const hook = new EventEmitter<GameEvent>();

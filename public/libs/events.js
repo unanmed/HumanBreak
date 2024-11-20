@@ -4492,19 +4492,27 @@ events.prototype._checkLvUp_check = function () {
 
 ////// 尝试使用道具 //////
 events.prototype.tryUseItem = function (itemId, noRoute, callback) {
-    if (itemId == 'book') {
-        core.ui.closePanel();
-        core.openBook(false);
+    if (itemId === 'book') {
+        if (core.isReplaying()) {
+            core.control._replay_book();
+        } else {
+            core.ui.closePanel();
+            core.openBook(false);
+            callback?.();
+        }
+        return;
+    }
+    if (core.isReplaying()) {
         callback?.();
         return;
     }
-    if (itemId == 'fly') {
+    if (itemId === 'fly') {
         core.ui.closePanel();
         core.useFly(false);
         callback?.();
         return;
     }
-    if (itemId == 'centerFly') {
+    if (itemId === 'centerFly') {
         core.ui.closePanel();
         core.ui._drawCenterFly();
         callback?.();

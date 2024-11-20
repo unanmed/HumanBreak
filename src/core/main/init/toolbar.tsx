@@ -18,18 +18,24 @@ import {
 import { MotaSettingItem, mainSetting } from '../setting';
 import Minimap from '@/components/minimap.vue';
 import { gameKey } from '../custom/hotkey';
-import { FunctionalComponent, StyleValue, h } from 'vue';
+import { FunctionalComponent, StyleValue, h, ref } from 'vue';
 import { mainUi } from './ui';
 import { isMobile } from '@/plugin/use';
 import {
+    BackwardFilled,
     BackwardOutlined,
+    BorderOuterOutlined,
+    CaretRightOutlined,
     EllipsisOutlined,
     FolderOpenOutlined,
+    ForwardOutlined,
     LayoutOutlined,
     MessageOutlined,
+    PauseOutlined,
     RetweetOutlined,
     RollbackOutlined,
-    SwapOutlined
+    StepBackwardOutlined,
+    StepForwardOutlined
 } from '@ant-design/icons-vue';
 import { generateKeyboardEvent } from '../custom/keyboard';
 
@@ -758,6 +764,10 @@ Mota.require('var', 'hook').once('reset', () => {
     const scale = mainSetting.getSetting('ui.toolbarScale') as Readonly<
         MotaSettingItem<number>
     >;
+    const replaying = ref(false);
+    Mota.require('var', 'hook').on('replayStatus', re => {
+        replaying.value = re;
+    });
 
     CustomToolbar.misc.register('danmaku', '发弹幕', openDanmakuPoster, () =>
         h(MessageOutlined)
@@ -869,7 +879,11 @@ Mota.require('var', 'hook').once('reset', () => {
         'save',
         '存档',
         () => {
-            core.save(true);
+            if (core.isReplaying()) {
+                core.control._replay_SL();
+            } else {
+                core.save(true);
+            }
         },
         () => (
             <img
@@ -972,6 +986,86 @@ Mota.require('var', 'hook').once('reset', () => {
             tool.refresh();
         },
         () => h(LayoutOutlined)
+    );
+    CustomToolbar.misc.register(
+        'startReplay',
+        '播放录像',
+        () => {
+            core.triggerReplay();
+        },
+        () => (
+            <span>
+                {replaying.value ? <PauseOutlined /> : <CaretRightOutlined />}
+            </span>
+        )
+    );
+    CustomToolbar.misc.register(
+        'stopReplay',
+        '停止录像',
+        () => {
+            core.stopReplay();
+        },
+        () => (
+            <svg
+                width="1em"
+                height="1em"
+                fill="currentColor"
+                viewBox="0 0 512 512"
+                focusable="false"
+            >
+                <rect x="128" y="128" width="256" height="256"></rect>
+            </svg>
+        )
+    );
+    CustomToolbar.misc.register(
+        'rewindReplay',
+        '回退录像',
+        () => {
+            core.rewindReplay();
+        },
+        () => <StepBackwardOutlined />
+    );
+    CustomToolbar.misc.register(
+        'stepReplay',
+        '单步前进录像',
+        () => {
+            core.stepReplay();
+        },
+        () => <StepForwardOutlined />
+    );
+    CustomToolbar.misc.register(
+        'speedDownReplay',
+        '录像减速',
+        () => {
+            core.speedDownReplay();
+        },
+        () => <BackwardOutlined />
+    );
+    CustomToolbar.misc.register(
+        'speedUpReplay',
+        '录像加速',
+        () => {
+            core.speedUpReplay();
+        },
+        () => <ForwardOutlined />
+    );
+    CustomToolbar.misc.register(
+        'viewMap',
+        '浏览地图',
+        () => {
+            if (core.isReplaying()) {
+                core.control._replay_viewMap();
+            } else {
+                if (
+                    core.isPlaying() &&
+                    !core.isMoving() &&
+                    !core.status.lockControl
+                ) {
+                    core.ui._drawViewMaps();
+                }
+            }
+        },
+        () => <BorderOuterOutlined />
     );
 
     CustomToolbar.misc.bindActivable('minimap', true, () => minimapTool);

@@ -127,6 +127,48 @@ const misc: Misc = {
     }
 };
 
+const playingDefaultTool: MiscToolbar = {
+    id: '@defaults_misc',
+    type: 'misc',
+    folded: false,
+    noDefaultAction: true,
+    items: [
+        'book',
+        'fly',
+        'save',
+        'load',
+        'toolbox',
+        'equipbox',
+        'shop',
+        'virtualKey',
+        'setting',
+        'undo',
+        'redo',
+        'viewMap',
+        'danmaku',
+        'minimap'
+    ]
+};
+const replayingDefaultTool: MiscToolbar = {
+    id: '@defaults_misc',
+    type: 'misc',
+    folded: false,
+    noDefaultAction: true,
+    items: [
+        'startReplay',
+        'stopReplay',
+        'rewindReplay',
+        'stepReplay',
+        'book',
+        'speedDownReplay',
+        'speedUpReplay',
+        'save',
+        'viewMap',
+        'danmaku',
+        'minimap'
+    ]
+};
+
 export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
     static num: number = 0;
     static list: CustomToolbar[] = shallowReactive([]);
@@ -369,6 +411,44 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
     static closeAll() {
         this.list.forEach(v => v.closeAll());
     }
+
+    /**
+     * 设置默认工具栏的内容
+     */
+    static setDefaultTool(replaying: boolean) {
+        const mainStorage = GameStorage.for(GameStorage.fromGame('main'));
+        mainStorage.read();
+        let defaultsTool = CustomToolbar.list.find(v => v.id === '@defaults');
+        const hasDefaults = !!defaultsTool;
+        if (!defaultsTool) {
+            defaultsTool = new CustomToolbar('@defaults', true);
+        }
+        defaultsTool.closeAll();
+        defaultsTool.items.splice(0);
+        defaultsTool.add(replaying ? replayingDefaultTool : playingDefaultTool);
+        if (!mainStorage.getValue('played', false)) {
+            mainStorage.setValue('played', true);
+
+            // 计算位置，显示在游戏画面下方
+            if (!hasDefaults) {
+                const game = core.dom.gameDraw;
+                const bottom = game.offsetTop + game.offsetHeight;
+                const left = game.offsetLeft;
+                const width = game.offsetWidth;
+
+                if (isMobile) {
+                    // 手机端显示在最下方
+                    defaultsTool.setPos(16, bottom);
+                    defaultsTool.setSize(window.innerWidth - 32, 85);
+                } else {
+                    // 电脑显示在屏幕右方
+                    defaultsTool.setPos(left, bottom);
+                    defaultsTool.setSize(width, 70);
+                }
+            }
+        }
+        defaultsTool.show();
+    }
 }
 
 Mota.require('var', 'loading').once('coreInit', () => {
@@ -387,57 +467,6 @@ Mota.require('var', 'hook').on('reset', () => {
 });
 
 Mota.require('var', 'hook').once('reset', () => {
-    const mainStorage = GameStorage.for(GameStorage.fromGame('main'));
-    mainStorage.read();
-    if (!mainStorage.getValue('played', false)) {
-        mainStorage.setValue('played', true);
-        let defaultsTool = CustomToolbar.list.find(v => v.id === '@defaults');
-        const hasDefaults = !!defaultsTool;
-        if (!defaultsTool) {
-            defaultsTool = new CustomToolbar('@defaults', true);
-        }
-        defaultsTool.closeAll();
-        defaultsTool.items = reactive([]);
-        defaultsTool.add({
-            id: '@defaults_misc',
-            type: 'misc',
-            folded: false,
-            noDefaultAction: true,
-            items: [
-                'book',
-                'fly',
-                'save',
-                'load',
-                'toolbox',
-                'equipbox',
-                'shop',
-                'virtualKey',
-                'setting',
-                'undo',
-                'redo',
-                'danmaku',
-                'minimap'
-            ]
-        });
-        // 计算位置，显示在游戏画面下方
-        if (!hasDefaults) {
-            const game = core.dom.gameDraw;
-            const bottom = game.offsetTop + game.offsetHeight;
-            const left = game.offsetLeft;
-            const width = game.offsetWidth;
-
-            if (isMobile) {
-                // 手机端显示在最下方
-                defaultsTool.setPos(16, bottom);
-                defaultsTool.setSize(window.innerWidth - 32, 85);
-            } else {
-                // 电脑显示在屏幕右方
-                defaultsTool.setPos(left, bottom);
-                defaultsTool.setSize(width, 70);
-            }
-        }
-
-        defaultsTool.show();
-        CustomToolbar.save();
-    }
+    CustomToolbar.setDefaultTool(false);
+    CustomToolbar.save();
 });

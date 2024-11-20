@@ -1163,6 +1163,8 @@ interface Control {
         frame?: number
     ): void;
     _moveAction_popAutomaticRoute(): void;
+    _replay_SL(): void;
+    _replay_viewMap(): void;
 }
 
 declare const control: new () => Control;

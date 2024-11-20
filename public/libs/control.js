@@ -1325,6 +1325,8 @@ control.prototype.startReplay = function (list) {
     this._replay_drawProgress();
     core.updateStatusBar(false, true);
     core.drawTip('开始播放');
+    Mota.require('var', 'hook').emit('replayStatus', false);
+    Mota.require('class', 'CustomToolbar').setDefaultTool(true);
     this.replay();
 };
 
@@ -1340,6 +1342,7 @@ control.prototype.pauseReplay = function () {
     core.status.replay.pausing = true;
     core.updateStatusBar(false, true);
     core.drawTip('暂停播放');
+    Mota.require('var', 'hook').emit('replayStatus', false);
 };
 
 ////// 恢复播放 //////
@@ -1353,6 +1356,7 @@ control.prototype.resumeReplay = function () {
     core.updateStatusBar(false, true);
     core.drawTip('恢复播放');
     core.replay();
+    Mota.require('var', 'hook').emit('replayStatus', true);
 };
 
 ////// 单步播放 //////
@@ -1417,6 +1421,8 @@ control.prototype.stopReplay = function (force) {
     core.deleteCanvas('replay');
     core.updateStatusBar(false, true);
     core.drawTip('停止播放并恢复游戏');
+    Mota.require('var', 'hook').emit('replayStatus', true);
+    Mota.require('class', 'CustomToolbar').setDefaultTool(false);
 };
 
 ////// 回退 //////
@@ -1453,6 +1459,7 @@ control.prototype.rewindReplay = function () {
         core.control._replay_drawProgress();
         core.updateStatusBar(false, true);
         core.drawTip('成功回退到上一个节点');
+        Mota.require('class', 'CustomToolbar').setDefaultTool(true);
     });
 };
 
@@ -1686,6 +1693,7 @@ control.prototype._replay_error = function (action, callback) {
             if (core.status.replay.save.length > 0) {
                 core.status.replay.replaying = true;
                 core.status.replay.pausing = true;
+                Mota.require('var', 'hook').emit('replayStatus', false);
                 core.rewindReplay();
             } else {
                 core.playSound('操作失败');
