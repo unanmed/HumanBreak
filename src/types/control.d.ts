@@ -348,7 +348,7 @@ interface Control {
      * @example core.waitHeroToStop(core.vibrate); // 等待勇士停下，然后视野左右抖动1秒
      * @param callback 勇士停止后的回调函数
      */
-    waitHeroToStop(callback?: () => void): void;
+    waitHeroToStop(callback?: () => void, waitOnly?: boolean): void;
 
     /**
      * @deprecated

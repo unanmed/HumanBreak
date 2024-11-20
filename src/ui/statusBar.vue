@@ -206,7 +206,7 @@ function update() {
     skillOpened.value = core.getFlag('chapter', 0) > 0;
 
     jumpCnt.value =
-        HeroSkill.learnedSkill(HeroSkill.Jump) &&
+        !HeroSkill.learnedSkill(HeroSkill.Jump) ||
         Mota.Plugin.require('skill_g').jumpIgnoreFloor.has(core.status.floorId)
             ? -1
             : 3 - (flags[`jump_${core.status.floorId}`] ?? 0);

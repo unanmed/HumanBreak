@@ -1,6 +1,7 @@
 // @ts-nocheck
 
 export function init() {
+    if (main.mode === 'editor') return;
     const { mainUi, fixedUi, mainSetting } = Mota.requireAll('var');
     const CustomToolbar = Mota.require('class', 'CustomToolbar');
 

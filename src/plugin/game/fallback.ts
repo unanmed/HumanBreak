@@ -204,13 +204,18 @@ export function init() {
         control.prototype.waitHeroToStop = function (callback?: () => void) {
             core.stopAutomaticRoute();
             core.clearContinueAutomaticRoute();
-
-            if (heroMover.controller) {
-                heroMover.controller.stop().then(() => {
-                    callback?.();
-                });
-            } else {
-                callback?.();
+            heroMover.controller?.stop();
+            if (callback) {
+                core.status.replay.animate = true;
+                core.lockControl();
+                core.status.automaticRoute.moveDirectly = false;
+                setTimeout(
+                    function () {
+                        core.status.replay.animate = false;
+                        callback();
+                    },
+                    core.status.replay.speed === 24 ? 1 : 30
+                );
             }
         };
 
@@ -653,29 +658,24 @@ export function init() {
     });
 
     const moveAction = new Set<string>(['up', 'down', 'left', 'right']);
-    let controller: IMoveController | null = null;
     // 复写录像的移动
     core.registerReplayAction('move', action => {
         if (moveAction.has(action)) {
-            const next = core.status.replay.toReplay[1];
             if (!heroMover.moving) {
-                controller = heroMover.startMove();
+                heroMover.startMove();
             }
-            if (!controller) {
+            if (!heroMover.controller) {
                 return false;
             }
-            controller.push({
+            heroMover.controller.push({
                 type: 'dir',
                 value: action as Dir
             });
-            if (moveAction.has(next)) {
+
+            heroMover.controller.onEnd.then(() => {
                 core.replay();
-            } else {
-                controller.onEnd.then(() => {
-                    core.replay();
-                    controller = null;
-                });
-            }
+            });
+
             return true;
         } else {
             return false;

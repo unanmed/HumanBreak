@@ -91,6 +91,10 @@ export namespace HeroSkill {
         learned.delete(skill);
     }
 
+    export function clearSkill() {
+        learned.clear();
+    }
+
     export function saveSkill(): SkillSave {
         return { autoSkill, learned: [...learned] };
     }

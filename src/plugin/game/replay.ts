@@ -20,6 +20,7 @@ export function clip(...replace: string[]) {
 }
 
 export function init() {
+    const { HeroSkill } = Mota.require('module', 'Mechanism');
     // 注册修改设置的录像操作
     core.registerReplayAction('settings', name => {
         if (!name.startsWith('set:')) return false;
@@ -27,7 +28,11 @@ export function init() {
         const v = eval(value);
         if (typeof v !== 'boolean') return false;
         if (!replayableSettings.includes(setting)) return false;
-        flags[setting] = v;
+        switch (setting) {
+            case 'autoSkill':
+                HeroSkill.setAutoSkill(v);
+                break;
+        }
         core.status.route.push(name);
         core.replay();
         return true;

@@ -530,14 +530,6 @@ loading.once('coreInit', () => {
     });
 });
 
-const { hook } = Mota.requireAll('var');
-hook.on('reset', () => {
-    const HeroSkill = Mota.require('module', 'Mechanism').HeroSkill;
-    mainSetting.reset({
-        'action.autoSkill': HeroSkill.getAutoSkill()
-    });
-});
-
 interface SettingTextData {
     [x: string]: string[] | SettingTextData;
 }
