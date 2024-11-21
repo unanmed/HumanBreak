@@ -1,8 +1,6 @@
 import { debounce } from 'lodash-es';
 import logInfo from '../../data/logger.json';
 
-// todo: 使用格式化输出？
-
 export const enum LogLevel {
     /** 输出所有，包括日志 */
     LOG,
@@ -57,6 +55,8 @@ export class Logger {
 
     private catching: boolean = false;
     private catchedInfo: LoggerCatchInfo[] = [];
+
+    private catchStack: LoggerCatchInfo[][] = [];
 
     constructor(logLevel: LogLevel) {
         this.level = logLevel;
@@ -182,13 +182,19 @@ export class Logger {
     catch<T>(fn: () => T): LoggerCatchReturns<T> {
         const before = this.enabled;
         this.catchedInfo = [];
+        this.catchStack.push(this.catchedInfo);
         this.disable();
         this.catching = true;
         const ret = fn();
         this.catching = false;
         if (before) this.enable();
 
-        return { ret, info: this.catchedInfo };
+        this.catchStack.pop();
+        const last = this.catchStack?.at(-1);
+        const info = this.catchedInfo;
+        this.catchedInfo = last ?? [];
+
+        return { ret, info };
     }
 
     disable() {
