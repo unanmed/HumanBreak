@@ -36,7 +36,7 @@ Mota.require('var', 'loading').once('coreInit', () => {
     mapDraw.size(core._PX_, core._PY_);
     floorChange.size(480, 480);
     floorChange.setHD(true);
-    floorChange.setZIndex(10);
+    floorChange.setZIndex(50);
     floorChange.setTips(tips);
     pop.setZIndex(80);
 

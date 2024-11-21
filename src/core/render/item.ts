@@ -337,7 +337,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     }
 
     update(item: RenderItem<any> = this): void {
-        if (this.needUpdate) return;
+        if (this.needUpdate || this.hidden) return;
         this.needUpdate = true;
         this.cacheDirty = true;
         this.parent?.update(item);

@@ -67,13 +67,11 @@ export class FloorDamageExtends
     }
 
     private onUpdate = (floor: FloorIds) => {
-        this.sprite.requestBeforeFrame(() => {
-            if (!this.floorBinder.bindThisFloor) {
-                ensureFloorDamage(floor);
-                core.status.maps[floor].enemy.calRealAttribute();
-            }
-            this.update(floor);
-        });
+        if (!this.floorBinder.bindThisFloor) {
+            ensureFloorDamage(floor);
+            core.status.maps[floor].enemy.calRealAttribute();
+        }
+        this.update(floor);
     };
 
     private onSetBlock = (x: number, y: number, floor: FloorIds) => {

@@ -27,12 +27,12 @@ function createLayer() {
 
     const damage = new FloorDamageExtends();
     const detail = new FloorItemDetail();
+    group.id = 'layer-loop';
     group.extends(damage);
     group.extends(detail);
 
     loopLayer = group;
     group.setZIndex(20);
-    group.id = 'layer-loop';
 }
 
 function enableLoopMapElement(floorId: FloorIds) {
@@ -61,18 +61,18 @@ function enableLoopMapElement(floorId: FloorIds) {
 
     loopLayer.removeTicker(delegation);
     delegation = loopLayer.delegateTicker(() => {
-        const [x1] = Transform.transformed(transform, 0, 0);
+        const [x1] = transform.transformed(0, 0);
         const camera = loopLayer.camera;
         if (x1 > 0) {
             // 这个是计算循环地图应该显示在哪
-            const [, y2] = Transform.transformed(transform, x1 - testPos, 0);
+            const [, y2] = transform.transformed(x1 - testPos, 0);
             camera.reset();
             camera.translate(core._PX_ - testPos, y2);
             loopLayer.pos(transform.x - core._PX_, 0);
             loopLayer.show();
             loopLayer.update(loopLayer);
         } else {
-            const [x2, y2] = Transform.transformed(transform, testPos, 0);
+            const [x2, y2] = transform.transformed(testPos, 0);
             if (x2 < core._PX_) {
                 // 这个不用做其他运算，可以直接显示
                 camera.reset();

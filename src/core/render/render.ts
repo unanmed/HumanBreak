@@ -33,7 +33,7 @@ export class MotaRenderer extends Container {
     }
 
     update(item: RenderItem = this) {
-        if (this.needUpdate) return;
+        if (this.needUpdate || this.hidden) return;
         this.needUpdate = true;
         this.requestRenderFrame(() => {
             this.refresh(item);

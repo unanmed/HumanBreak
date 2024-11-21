@@ -178,8 +178,28 @@ export class Transform {
     }
 
     /**
-     * 根据摄像机的信息，将一个点转换为计算后的位置
-     * @param transform 摄像机
+     * 根据变换矩阵的信息，将一个点转换为计算后的位置
+     * @param x 横坐标
+     * @param y 纵坐标
+     */
+    transformed(x: number, y: number) {
+        return multiplyVec3(this.mat, [x, y, 1]);
+    }
+
+    /**
+     * 根据变换矩阵的信息，将一个计算后的位置逆转换为原位置
+     * @param x 横坐标
+     * @param y 纵坐标
+     */
+    untransformed(x: number, y: number) {
+        const invert = mat3.create();
+        mat3.invert(invert, this.mat);
+        return multiplyVec3(invert, [x, y, 1]);
+    }
+
+    /**
+     * 根据变换矩阵的信息，将一个点转换为计算后的位置
+     * @param transform 变换矩阵
      * @param x 横坐标
      * @param y 纵坐标
      */
@@ -188,8 +208,8 @@ export class Transform {
     }
 
     /**
-     * 根据摄像机的信息，将一个计算后的位置逆转换为原位置
-     * @param transform 摄像机
+     * 根据变换矩阵的信息，将一个计算后的位置逆转换为原位置
+     * @param transform 变换矩阵
      * @param x 横坐标
      * @param y 纵坐标
      */
