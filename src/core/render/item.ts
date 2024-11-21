@@ -468,17 +468,21 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
 }
 
 RenderItem.ticker.add(() => {
+    // slice 是为了让函数里面的 request 进入下一帧执行
     if (beforeFrame.length > 0) {
-        beforeFrame.forEach(v => v());
+        const arr = beforeFrame.slice();
         beforeFrame.splice(0);
+        arr.forEach(v => v());
     }
     if (renderFrame.length > 0) {
-        renderFrame.forEach(v => v());
+        const arr = renderFrame.slice();
         renderFrame.splice(0);
+        arr.forEach(v => v());
     }
     if (afterFrame.length > 0) {
-        afterFrame.forEach(v => v());
+        const arr = afterFrame.slice();
         afterFrame.splice(0);
+        arr.forEach(v => v());
     }
 });
 
