@@ -315,13 +315,13 @@ control.prototype._initStatistics = function (totalTime) {
 
 ////// 清除自动寻路路线 //////
 control.prototype.clearAutomaticRouteNode = function (x, y) {
-    core.clearMap(
-        'route',
-        x * 32 + 5 - core.status.automaticRoute.offsetX,
-        y * 32 + 5 - core.status.automaticRoute.offsetY,
-        27,
-        27
-    );
+    // core.clearMap(
+    //     'route',
+    //     x * 32 + 5 - core.status.automaticRoute.offsetX,
+    //     y * 32 + 5 - core.status.automaticRoute.offsetY,
+    //     27,
+    //     27
+    // );
 };
 
 ////// 停止自动寻路操作 //////
@@ -336,8 +336,8 @@ control.prototype.stopAutomaticRoute = function () {
     core.status.automaticRoute.destY = null;
     core.status.automaticRoute.lastDirection = null;
     core.status.heroStop = true;
-    if (core.status.automaticRoute.moveStepBeforeStop.length == 0)
-        core.deleteCanvas('route');
+    // if (core.status.automaticRoute.moveStepBeforeStop.length == 0)
+    //     core.deleteCanvas('route');
 };
 
 ////// 保存剩下的寻路，并停止 //////
@@ -371,7 +371,7 @@ control.prototype.continueAutomaticRoute = function () {
 
 ////// 清空剩下的自动寻路列表 //////
 control.prototype.clearContinueAutomaticRoute = function (callback) {
-    core.deleteCanvas('route');
+    // core.deleteCanvas('route');
     core.status.automaticRoute.moveStepBeforeStop = [];
     if (callback) callback();
 };
@@ -470,57 +470,7 @@ control.prototype._setAutomaticRoute_clickMoveDirectly = function (
 };
 
 control.prototype._setAutomaticRoute_drawRoute = function (moveStep) {
-    // 计算绘制区域的宽高，并尽可能小的创建route层
-    var sx = core.bigmap.width * 32,
-        sy = core.bigmap.height * 32,
-        dx = 0,
-        dy = 0;
-    moveStep.forEach(function (t) {
-        sx = Math.min(sx, t.x * 32);
-        dx = Math.max(dx, t.x * 32);
-        sy = Math.min(sy, t.y * 32);
-        dy = Math.max(dy, t.y * 32);
-    });
-    core.status.automaticRoute.offsetX = sx;
-    core.status.automaticRoute.offsetY = sy;
-    var ctx = core.createCanvas(
-        'route',
-        sx - core.bigmap.offsetX,
-        sy - core.bigmap.offsetY,
-        dx - sx + 32,
-        dy - sy + 32,
-        95
-    );
-    ctx.fillStyle = '#bfbfbf';
-    ctx.strokeStyle = '#bfbfbf';
-    ctx.lineWidth = 8;
-    for (var m = 0; m < moveStep.length; m++) {
-        if (m == moveStep.length - 1) {
-            core.fillRect(
-                ctx,
-                moveStep[m].x * 32 + 10 - sx,
-                moveStep[m].y * 32 + 10 - sy,
-                12,
-                12
-            );
-        } else {
-            ctx.beginPath();
-            var cx = moveStep[m].x * 32 + 16 - sx,
-                cy = moveStep[m].y * 32 + 16 - sy;
-            var currDir = moveStep[m].direction,
-                nextDir = moveStep[m + 1].direction;
-            ctx.moveTo(
-                cx - core.utils.scan[currDir].x * 11,
-                cy - core.utils.scan[currDir].y * 11
-            );
-            ctx.lineTo(cx, cy);
-            ctx.lineTo(
-                cx + core.utils.scan[nextDir].x * 11,
-                cy + core.utils.scan[nextDir].y * 11
-            );
-            ctx.stroke();
-        }
-    }
+    // Deprecated.
 };
 
 control.prototype._setAutomaticRoute_setAutoSteps = function (moveStep) {
@@ -992,11 +942,11 @@ control.prototype.updateViewport = function () {
         core.control.setGameCanvasTranslate(cn, offsetX, offsetY);
     });
     // ------ 路线
-    core.relocateCanvas(
-        'route',
-        core.status.automaticRoute.offsetX - core.bigmap.offsetX,
-        core.status.automaticRoute.offsetY - core.bigmap.offsetY
-    );
+    // core.relocateCanvas(
+    //     'route',
+    //     core.status.automaticRoute.offsetX - core.bigmap.offsetX,
+    //     core.status.automaticRoute.offsetY - core.bigmap.offsetY
+    // );
     // ------ 所有的大怪物也都需要重定位
     for (var one in core.dymCanvas) {
         if (one.startsWith('_bigImage_')) {
