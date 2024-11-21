@@ -255,7 +255,9 @@ export class HeroRenderer
     move(dir: Dir2): Promise<void> {
         if (!this.moving) {
             logger.error(12);
-            return Promise.reject();
+            return Promise.reject(
+                'Cannot moving hero while hero not in moving!'
+            );
         }
 
         this.moveDir = dir;
@@ -276,7 +278,7 @@ export class HeroRenderer
      * 结束勇士的移动过程
      */
     endMove(): Promise<void> {
-        if (!this.moving) return Promise.reject();
+        if (!this.moving) return Promise.resolve();
         if (this.moveEnding) return this.moveEnding;
         else {
             const promise = new Promise<void>(resolve => {
@@ -347,8 +349,8 @@ export class HeroRenderer
      *           因为此举会导致层级的重新排序，降低渲染性能。
      */
     moveAs(x: number, y: number, time: number, fn: TimingFn<3>): Promise<void> {
-        if (!this.moving) return Promise.reject();
-        if (!this.renderable) return Promise.reject();
+        if (!this.moving) return Promise.resolve();
+        if (!this.renderable) return Promise.resolve();
         let nowZIndex = fn(0)[2];
         let startTime = Date.now();
         return new Promise(res => {

@@ -27,7 +27,6 @@ export function init() {
         core.control.controldata.updateStatusBar();
         if (!core.control.noAutoEvents) core.checkAutoEvents();
         core.control._updateStatusBar_setToolboxIcon();
-        core.clearRouteFolding();
         core.control.noAutoEvents = true;
         // 更新vue状态栏
         updateVueStatusBar();

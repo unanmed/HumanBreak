@@ -287,7 +287,6 @@ items.prototype.loadEquip = function (equipId, callback) {
         if (callback) callback();
         return;
     }
-    core.status.route.push(`equip:${equipId}`);
 
     this._realLoadEquip(
         type,
@@ -304,7 +303,7 @@ items.prototype.unloadEquip = function (equipType, callback) {
         if (callback) callback();
         return;
     }
-    core.status.route.push(`unequip:${unloadEquipId}`);
+    core.status.route.push(`unequip:${equipType}`);
 
     this._realLoadEquip(equipType, null, unloadEquipId, callback);
 };
@@ -354,6 +353,7 @@ items.prototype._realLoadEquip = function (type, loadId, unloadId, callback) {
     if (loadId) core.removeItem(loadId);
     if (unloadId) core.addItem(unloadId);
     core.status.hero.equipment[type] = loadId || null;
+    if (loadId) core.status.route.push(`equip:${type}:${loadId}`);
 
     // --- 提示
     if (loadId) core.drawTip('已装备上' + loadEquip.name, loadId);

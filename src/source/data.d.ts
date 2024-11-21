@@ -232,6 +232,7 @@ type BgmIds =
 
 type FontIds =
     | 'normal'
+    | 'FiraCode'
 
 interface NameMap {
     '确定': 'confirm.mp3';

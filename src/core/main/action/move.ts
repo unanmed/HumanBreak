@@ -58,6 +58,7 @@ export class HeroKeyMover {
 
     private onPressKey = (code: KeyCode) => {
         if (core.isReplaying()) return;
+        core.waitHeroToStop();
         if (code === this.hotkeyData.left.key) this.press('left');
         else if (code === this.hotkeyData.right.key) this.press('right');
         else if (code === this.hotkeyData.up.key) this.press('up');

@@ -1739,17 +1739,30 @@ control.prototype._replayAction_item = function (action) {
 
 control.prototype._replayAction_equip = function (action) {
     if (action.indexOf('equip:') != 0) return false;
-    var equipId = action.substring(6);
-    var ownEquipment = core.getToolboxItems('equips');
-    var index = ownEquipment.indexOf(equipId),
-        per = core._WIDTH_ - 1;
-    if (index < 0) {
+    const [, type, id] = action.split(':');
+    let t = Number(type);
+    const hasType = !isNaN(t);
+    const equipId = hasType ? id : type;
+    const ownEquipment = core.getToolboxItems('equips');
+    if (!ownEquipment.includes(equipId)) {
         core.removeFlag('__doNotCheckAutoEvents__');
         return false;
     }
+    if (!hasType) {
+        const type = core.getEquipTypeById(equipId);
+        if (type >= 0) t = type;
+        else {
+            Mota.Plugin.require('render_r').tip(
+                'error',
+                '无法装备' + core.material.items[equipId]?.name
+            );
+            return false;
+        }
+    }
+    const now = core.status.hero.equipment[t];
 
-    var cb = function () {
-        var next = core.status.replay.toReplay[0] || '';
+    const cb = function () {
+        const next = core.status.replay.toReplay[0] || '';
         if (!next.startsWith('equip:') && !next.startsWith('unEquip:')) {
             core.removeFlag('__doNotCheckAutoEvents__');
             core.checkAutoEvents();
@@ -1758,33 +1771,34 @@ control.prototype._replayAction_equip = function (action) {
     };
     core.setFlag('__doNotCheckAutoEvents__', true);
 
-    core.status.route.push(action);
     if (
         core.material.items[equipId].hideInReplay ||
         core.status.replay.speed == 24
     ) {
-        core.loadEquip(equipId, cb);
+        core.items._realLoadEquip(t, equipId, now);
+        cb();
         return true;
     }
-    core.status.event.data = {
-        page: Math.floor(index / per) + 1,
-        selectId: null
-    };
-    index = (index % per) + per;
-    core.ui._drawEquipbox(index);
     setTimeout(function () {
         core.ui.closePanel();
-        core.loadEquip(equipId, cb);
+        core.items._realLoadEquip(t, equipId, now);
+        cb();
     }, core.control.__replay_getTimeout());
     return true;
 };
 
 control.prototype._replayAction_unEquip = function (action) {
-    if (action.indexOf('unEquip:') != 0) return false;
-    var equipType = parseInt(action.substring(8));
+    if (action.indexOf('unequip:') != 0) return false;
+    const type = action.slice(8);
+    let equipType = Number(type);
     if (!core.isset(equipType)) {
-        core.removeFlag('__doNotCheckAutoEvents__');
-        return false;
+        const id = core.status.hero.equipment.indexOf(type);
+        if (id === -1) {
+            core.removeFlag('__doNotCheckAutoEvents__');
+            return false;
+        } else {
+            equipType = id;
+        }
     }
 
     var cb = function () {
@@ -1797,15 +1811,15 @@ control.prototype._replayAction_unEquip = function (action) {
     };
     core.setFlag('__doNotCheckAutoEvents__', true);
 
-    core.ui._drawEquipbox(equipType);
-    core.status.route.push(action);
     if (core.status.replay.speed == 24) {
-        core.unloadEquip(equipType, cb);
+        core.unloadEquip(equipType);
+        cb();
         return true;
     }
     setTimeout(function () {
         core.ui.closePanel();
-        core.unloadEquip(equipType, cb);
+        core.unloadEquip(equipType);
+        cb();
     }, core.control.__replay_getTimeout());
     return true;
 };
@@ -3050,6 +3064,7 @@ control.prototype.clearStatusBar = function () {
 ////// 更新状态栏 //////
 control.prototype.updateStatusBar = function (doNotCheckAutoEvents, immediate) {
     if (!core.isPlaying()) return;
+    core.clearRouteFolding();
     if (immediate) {
         return this.updateStatusBar_update();
     }
