@@ -47,7 +47,7 @@
         "20": "Cannot apply animation to camera operation that does not belong to it.",
         "21": "Cannot apply transition to camera operation that does not belong to it.",
         "22": "There is already an active camera for delivered render item. Consider using 'Camera.for' or diable the active camera to avoid some exceptions.",
-        "23": "Render item with id of '$1' has already exists.",
+        "23": "Render item with id of '$1' has already exists. Please avoid repeat id since it may cause issues when use 'getElementById'.",
         "24": "Uniform block can only be used in glsl version es 300.",
         "25": "Cannot activate weather since there's no weather with id of '$1'.",
         "26": "Cannot set attribute when only element number specified. Use 'pointer' or 'pointerI' instead.",

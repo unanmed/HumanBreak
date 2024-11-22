@@ -166,7 +166,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     set id(v: string) {
         if (this.isRoot || this.findRoot()) {
             if (RenderItem.itemMap.has(this._id)) {
-                logger.warn(23);
+                logger.warn(23, this._id);
                 RenderItem.itemMap.delete(this._id);
             }
             RenderItem.itemMap.set(v, this);
