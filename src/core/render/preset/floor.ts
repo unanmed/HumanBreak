@@ -339,7 +339,8 @@ export class LayerDoorAnimate implements ILayerRenderExtends {
             animate: 0,
             frame,
             bigImage: false,
-            render: renderable.render
+            render: renderable.render,
+            alpha: 1
         };
         return { renderable: data, count: frame, perTime };
     }

@@ -4139,16 +4139,24 @@ maps.prototype.animateBlock = function (loc, type, time, callback) {
         typeof type != 'number'
     ) {
         if (callback) callback();
-    }
-    // --- 检测所有是0的点
-    var list = this._animateBlock_getList(loc, type);
-    if (list.length == 0) {
-        if (callback) callback();
         return;
     }
-    this._animateBlock_drawList(list, 0);
-    time /= Math.max(core.status.replay.speed, 1);
-    this._animateBlock_doAnimate(loc, list, type, time, callback);
+    loc.forEach(function (t) {
+        if (type === 'show') core.showBlock(t[0], t[1]);
+        else if (type === 'hide') core.hideBlock(t[0], t[1]);
+        else if (type === 'remove') core.removeBlock(t[0], t[1]);
+        else core.showBlock(t[0], t[1]);
+    });
+    callback?.();
+    // --- 检测所有是0的点
+    // var list = this._animateBlock_getList(loc, type);
+    // if (list.length == 0) {
+    //     if (callback) callback();
+    //     return;
+    // }
+    // this._animateBlock_drawList(list, 0);
+    // time /= Math.max(core.status.replay.speed, 1);
+    // this._animateBlock_doAnimate(loc, list, type, time, callback);
 };
 
 maps.prototype._animateBlock_doAnimate = function (

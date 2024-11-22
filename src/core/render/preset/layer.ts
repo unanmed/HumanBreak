@@ -513,6 +513,7 @@ export interface LayerMovingRenderable extends RenderableData {
     zIndex: number;
     x: number;
     y: number;
+    alpha: number;
 }
 
 export class Layer extends Container {
@@ -842,7 +843,8 @@ export class Layer extends Container {
                     ...renderable,
                     x: nx,
                     y: ny,
-                    zIndex: ny
+                    zIndex: ny,
+                    alpha: 1
                 });
             }
         }
@@ -858,8 +860,10 @@ export class Layer extends Container {
      * 计算自动元件的连接信息（会丢失autotiles属性的引用）
      */
     calAutotiles(x: number, y: number, width: number, height: number) {
-        const ex = x + width;
-        const ey = y + height;
+        const sx = x - 1;
+        const sy = y - 1;
+        const ex = x + width + 1;
+        const ey = y + height + 1;
         const data = this.renderData;
         const tile = texture.autotile;
         const map = maps_90f36752_8815_4be8_b32b_d7fad1d0542e;
@@ -922,9 +926,10 @@ export class Layer extends Container {
             }
         };
 
-        for (let nx = x; nx < ex; nx++) {
-            for (let ny = y; ny < ey; ny++) {
-                if (nx > w || ny > h) continue;
+        for (let nx = sx; nx < ex; nx++) {
+            if (nx >= w || nx < 0) continue;
+            for (let ny = sy; ny < ey; ny++) {
+                if (ny >= h || ny < 0) continue;
                 const index = nx + ny * w;
                 const num = data[index];
                 // 特判空气墙与空图块
@@ -1208,7 +1213,7 @@ export class Layer extends Container {
         const r = (max1 * max2) ** 2;
 
         this.movingRenderable.forEach(v => {
-            const { x, y, image, render, animate } = v;
+            const { x, y, image, render, animate, alpha } = v;
             const ff = frame % v.frame;
             const i = animate === -1 ? ff : animate;
             const [sx, sy, w, h] = render[i];
@@ -1226,6 +1231,7 @@ export class Layer extends Container {
                 return;
             }
 
+            ctx.globalAlpha = alpha;
             ctx.drawImage(image, sx, sy, w, h, px, py, w, h);
         });
     }
@@ -1413,7 +1419,8 @@ export class Layer extends Container {
             frame: renderable.frame,
             bigImage: renderable.bigImage,
             animate: -1,
-            render: renderable.render
+            render: renderable.render,
+            alpha: 1
         };
         return moving;
     }
