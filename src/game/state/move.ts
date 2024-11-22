@@ -541,7 +541,7 @@ export class HeroMover extends ObjectMoverBase {
         }
 
         if (!this.ignoreTerrain || !this.noRoute) {
-            this.moveDir = showDir;
+            this.moveDir = dir4Move;
         }
 
         // 检查传送门

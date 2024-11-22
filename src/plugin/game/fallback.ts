@@ -71,7 +71,8 @@ export function init() {
     }
 
     function setHeroDirection(dir: Dir) {
-        if (!heroMover.moving) heroMover.moveDir = dir;
+        heroMover.setFaceDir(dir);
+        heroMover.setMoveDir(dir);
     }
 
     /**
