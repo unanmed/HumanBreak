@@ -389,7 +389,7 @@ export class HeroRenderer
     render() {
         if (!this.renderable) return;
         if (!this.animate) {
-            this.renderable.animate = -1;
+            this.renderable.animate = 0;
         } else {
             this.renderable.animate = this.movingFrame;
         }
