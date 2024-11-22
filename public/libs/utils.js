@@ -689,8 +689,6 @@ utils.prototype._encodeRoute_encodeOne = function (t) {
     if (t.startsWith('item:'))
         return 'I' + this._encodeRoute_id2number(t.slice(5)) + ':';
     else if (t.startsWith('unEquip:')) return 'u' + t.slice(8);
-    else if (t.startsWith('equip:'))
-        return 'e' + this._encodeRoute_id2number(t.slice(6)) + ':';
     else if (t.startsWith('saveEquip:')) return 's' + t.slice(10);
     else if (t.startsWith('loadEquip:')) return 'l' + t.slice(10);
     else if (t.startsWith('fly:')) return 'F' + t.slice(4) + ':';

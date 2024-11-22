@@ -1763,7 +1763,7 @@ control.prototype._replayAction_equip = function (action) {
 
     const cb = function () {
         const next = core.status.replay.toReplay[0] || '';
-        if (!next.startsWith('equip:') && !next.startsWith('unEquip:')) {
+        if (!next.startsWith('equip:') && !next.startsWith('unequip:')) {
             core.removeFlag('__doNotCheckAutoEvents__');
             core.checkAutoEvents();
         }
@@ -1803,7 +1803,7 @@ control.prototype._replayAction_unEquip = function (action) {
 
     var cb = function () {
         var next = core.status.replay.toReplay[0] || '';
-        if (!next.startsWith('equip:') && !next.startsWith('unEquip:')) {
+        if (!next.startsWith('equip:') && !next.startsWith('unequip:')) {
             core.removeFlag('__doNotCheckAutoEvents__');
             core.checkAutoEvents();
         }

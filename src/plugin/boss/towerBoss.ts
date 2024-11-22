@@ -193,7 +193,7 @@ export class TowerBoss extends BarrageBoss {
         TowerBoss.effect.end();
         core.status.hero.hp = this.heroHp;
 
-        Mota.Plugin.require('replay_g').clip('choice:0');
+        Mota.Plugin.require('replay_g').clip('choices:0');
     }
 
     /**
