@@ -419,6 +419,7 @@ events.prototype.trigger = function (x, y, callback) {
     }
 
     if (block.event.trigger && block.event.trigger !== 'null') {
+        core.clearRouteFolding();
         var noPass = block.event.noPass,
             trigger = block.event.trigger;
         if (noPass) core.clearAutomaticRouteNode(x, y);
