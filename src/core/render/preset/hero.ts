@@ -111,7 +111,8 @@ export class HeroRenderer
             autotile: false,
             bigImage: true,
             render: this.getRenderFromDir(this.showDir),
-            animate: 0
+            animate: 0,
+            alpha: 1
         };
     }
 
@@ -247,6 +248,7 @@ export class HeroRenderer
      */
     readyMove() {
         this.moving = true;
+        this.fixMoveSpeed();
     }
 
     /**
@@ -261,8 +263,9 @@ export class HeroRenderer
         }
 
         this.moveDir = dir;
-        if (this.moveDetached) return this.moveDetached;
-        else {
+        if (this.moveDetached) {
+            return this.moveDetached;
+        } else {
             this.step();
             this.moveDetached = new Promise(res => {
                 this.once('stepEnd', () => {

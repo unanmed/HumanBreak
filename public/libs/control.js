@@ -2825,7 +2825,7 @@ control.prototype.checkRouteFolding = function () {
                 if (core.status.routeFolding[v].length >= one.length)
                     delete core.status.routeFolding[v];
             });
-            core.status.route = core.status.route.slice(0, one.length);
+            core.status.route.splice(one.length);
             this._bindRoutePush();
         }
     }
