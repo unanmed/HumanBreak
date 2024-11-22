@@ -646,8 +646,6 @@ export class HeroMover extends ObjectMoverBase {
                 if (x === 0) core.setHeroLoc('x', map.width - 1);
                 else core.setHeroLoc('x', 0);
             } else {
-                // console.trace();
-
                 core.setHeroLoc('x', nx, true);
                 core.setHeroLoc('y', ny, true);
             }

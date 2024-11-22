@@ -720,6 +720,7 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
             continue;
         if (dir && !core.inArray(canMoveArray[dx][dy], dir)) continue;
         if (canMoveDirectlyArray[i] < 0) continue;
+        core.clearRouteFolding();
         if (core.control.moveDirectly(dx, dy, canMoveDirectlyArray[i])) {
             if (dir) {
                 core.moveHero(dir, function () {});
