@@ -255,6 +255,7 @@ export function init() {
             destY: number,
             stepPostfix: DiredLoc[]
         ) {
+            if (heroMover.moving) return;
             if (!core.status.played || core.status.lockControl) return;
             if (this._setAutomaticRoute_isMoving(destX, destY)) return;
             if (this._setAutomaticRoute_isTurning(destX, destY, stepPostfix))
