@@ -115,7 +115,7 @@ dam4.png ---- 存档 59
 [x] 复写 api，rewrite()
 [x] 对 vnode 进行简单的包装，提供出显示文字、显示图片等 api 以及修改 css 的 api
 [] mapDamage 注册
-[] Box 组件右下角添加 resize 按钮
+[x] Box 组件右下角添加 resize 按钮
 [] 被光环加成的怪显示受到了哪些加成
 [x] 鼠标放到光环怪上时高亮它产生的光环
 [] 删除 unplugin-vue-components 插件，换用 import 引入

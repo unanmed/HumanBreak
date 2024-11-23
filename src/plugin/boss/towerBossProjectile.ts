@@ -154,6 +154,8 @@ export class ArrowProjectile extends Projectile<TowerBoss> {
         for (let i = 0; i < 15; i++) {
             ctxVer.fillRect(2, i * 32 + 2, 28, 28);
         }
+        hor.freeze();
+        ver.freeze();
     }
 
     /**
@@ -643,6 +645,8 @@ export class ThunderBallProjectile extends Projectile<TowerBoss> {
         for (let i = 0; i < 15; i++) {
             ctxVer.fillRect(2, i * 32 + 2, 28, 28);
         }
+        hor.freeze();
+        ver.freeze();
     }
 
     /**

@@ -882,11 +882,6 @@ export class Shadow {
 
         // canvas
         const canvas = this.canvas;
-        canvas.id = `shadow`;
-        canvas.style.display = 'block';
-        canvas.style.position = 'absolute';
-        canvas.style.pointerEvents = 'none';
-        canvas.style.zIndex = Z_INDEX.toString();
 
         // Locations
         this.locations = {
