@@ -292,10 +292,10 @@ export function upgradeSkill(skill: number) {
         case 10: // 铸剑为盾
             HeroSkill.learnSkill(HeroSkill.Shield);
             break;
-        case 11: // 学习
+        case 11: // 魔法盾
             core.status.hero.magicDef += 100;
             break;
-        case 12:
+        case 14:
             core.addBuff('atk', 0.1);
             core.addBuff('def', 0.1);
             break;
