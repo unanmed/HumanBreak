@@ -132,11 +132,11 @@ utils.prototype.replaceValue = function (value) {
                 /temp:([a-zA-Z0-9_]+)/g,
                 "core.getFlag('@temp@$1', 0)"
             );
-        if (value.indexOf('switch:') >= 0)
-            value = value.replace(
-                /switch:([a-zA-Z0-9_]+)/g,
-                "core.getFlag('" + (prefix || ':f@x@y') + "@$1', 0)"
-            );
+        // if (value.indexOf('switch:') >= 0)
+        //     value = value.replace(
+        //         /switch:([a-zA-Z0-9_]+)/g,
+        //         "core.getFlag('" + (prefix || ':f@x@y') + "@$1', 0)"
+        //     );
     }
     return value;
 };

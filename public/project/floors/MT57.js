@@ -23,7 +23,7 @@ main.floors.MT57=
         "7,1": [
             {
                 "type": "if",
-                "condition": "(!switch:A)",
+                "condition": "(!flag:palace1)",
                 "true": [
                     {
                         "type": "openDoor",
@@ -59,7 +59,7 @@ main.floors.MT57=
             },
             {
                 "type": "setValue",
-                "name": "switch:A",
+                "name": "flag:palace1",
                 "value": "true"
             }
         ]
