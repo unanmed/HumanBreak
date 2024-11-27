@@ -22,7 +22,9 @@ export interface IRenderUpdater {
 }
 
 interface IRenderAnchor {
+    /** 锚点横坐标，0表示最左端，1表示最右端 */
     anchorX: number;
+    /** 锚点纵坐标，0表示最上端，1表示最下端 */
     anchorY: number;
 
     /**
@@ -53,6 +55,7 @@ interface IRenderConfig {
 }
 
 export interface IRenderChildable {
+    /** 当前元素的子元素 */
     children: Set<RenderItem>;
 
     /**
@@ -312,7 +315,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         if (this.hidden) return;
         this.emit('beforeRender', transform);
         this.needUpdate = false;
-        const tran = this.transformFallThrough ? transform : this.transform;
+        const tran = this.transformFallThrough ? transform : this._transform;
 
         const ax = -this.anchorX * this.width;
         const ay = -this.anchorY * this.height;

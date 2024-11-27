@@ -138,6 +138,9 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
         MotaOffscreenCanvas2D.list.delete(this);
     }
 
+    /**
+     * 冻结这个画布的属性，之后便不能被修改，同时会从画布列表中删去。
+     */
     freeze() {
         this._freezed = true;
         MotaOffscreenCanvas2D.list.delete(this);
