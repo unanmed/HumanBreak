@@ -159,6 +159,20 @@ export class Image extends RenderItem<EImageEvent> {
         this.image = image;
         this.update();
     }
+
+    patchProp(
+        key: string,
+        prevValue: any,
+        nextValue: any,
+        namespace?: ElementNamespace,
+        parentComponent?: ComponentInternalInstance | null
+    ): void {
+        switch (key) {
+            case 'image':
+                this.setImage(nextValue);
+                return;
+        }
+    }
 }
 
 export class Comment extends RenderItem {

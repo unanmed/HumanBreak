@@ -10,14 +10,22 @@ import EventEmitter from 'eventemitter3';
 import {
     AnimateProps,
     BaseProps,
+    BezierProps,
+    CirclesProps,
     CommentProps,
     ContainerProps,
     CustomProps,
     DamageProps,
+    EllipseProps,
     GL2Props,
+    GraphicsProps,
     ImageProps,
     LayerGroupProps,
     LayerProps,
+    LineProps,
+    PathProps,
+    QuadraticProps,
+    RectProps,
     ShaderProps,
     SpriteProps,
     TextProps
@@ -65,19 +73,6 @@ type TagDefine<T extends object, E extends ERenderItemEvent> = T &
     MappingEvent<E> &
     ReservedProps;
 
-export type RenderItemComponent = _Define<BaseProps, ERenderItemEvent>;
-export type SpriteComponent = _Define<SpriteProps, ESpriteEvent>;
-export type ContainerComponent = _Define<ContainerProps, EContainerEvent>;
-export type GL2Component = _Define<GL2Props, EGL2Event>;
-export type ShaderComponent = _Define<ShaderProps, EShaderEvent>;
-export type TextComponent = _Define<TextProps, ETextEvent>;
-export type ImageComponent = _Define<ImageProps, EImageEvent>;
-export type CommentComponent = _Define<CommentProps, ERenderItemEvent>;
-export type LayerGroupComponent = _Define<LayerGroupProps, ELayerGroupEvent>;
-export type LayerComponent = _Define<LayerProps, ELayerEvent>;
-export type AnimateComponent = _Define<AnimateProps, EAnimateEvent>;
-export type DamageComponent = _Define<DamageProps, EDamageEvent>;
-
 declare module 'vue/jsx-runtime' {
     namespace JSX {
         export interface IntrinsicElements {
@@ -92,6 +87,14 @@ declare module 'vue/jsx-runtime' {
             'layer-group': TagDefine<LayerGroupProps, ELayerGroupEvent>;
             damage: TagDefine<DamageProps, EDamageEvent>;
             animate: TagDefine<AnimateProps, EAnimateEvent>;
+            graphics: TagDefine<GraphicsProps, ERenderItemEvent>;
+            'g-rect': TagDefine<RectProps, ERenderItemEvent>;
+            'g-circle': TagDefine<CirclesProps, ERenderItemEvent>;
+            'g-ellipse': TagDefine<EllipseProps, ERenderItemEvent>;
+            'g-line': TagDefine<LineProps, ERenderItemEvent>;
+            'g-bezier': TagDefine<BezierProps, ERenderItemEvent>;
+            'g-quad': TagDefine<QuadraticProps, ERenderItemEvent>;
+            'g-path': TagDefine<PathProps, ERenderItemEvent>;
         }
     }
 }

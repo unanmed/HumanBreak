@@ -25,6 +25,8 @@ export interface BaseProps {
     hidden?: boolean;
     transform?: Transform;
     type?: RenderItemPosition;
+    enableCache?: boolean;
+    fallthrough?: boolean;
     id?: string;
     alpha?: number;
     composite?: GlobalCompositeOperation;
@@ -87,3 +89,19 @@ export interface DamageProps extends BaseProps {
     strokeStyle?: string;
     strokeWidth?: number;
 }
+
+export interface GraphicsProps extends BaseProps {}
+
+export interface RectProps extends BaseProps {}
+
+export interface CirclesProps extends BaseProps {}
+
+export interface EllipseProps extends BaseProps {}
+
+export interface LineProps extends BaseProps {}
+
+export interface BezierProps extends BaseProps {}
+
+export interface QuadraticProps extends BaseProps {}
+
+export interface PathProps extends BaseProps {}

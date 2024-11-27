@@ -1,5 +1,5 @@
 import { logger } from '@/core/common/logger';
-import { ERenderItemEvent, RenderItem } from '../item';
+import { ERenderItemEvent, RenderItem, RenderItemPosition } from '../item';
 import { ElementNamespace, VNodeProps } from 'vue';
 import { Container } from '../container';
 import { MotaRenderer } from '../render';
@@ -7,6 +7,17 @@ import { Sprite } from '../sprite';
 import { Comment, Image, Text } from '../preset/misc';
 import { Shader } from '../shader';
 import { Animate, Damage, EDamageEvent, Layer, LayerGroup } from '../preset';
+import {
+    BezierCurve,
+    Circle,
+    Ellipse,
+    Graphics,
+    Line,
+    Path,
+    QuadraticCurve,
+    Rect
+} from '../preset/graphics';
+import { BaseProps } from './props';
 
 type OnItemCreate<
     E extends ERenderItemEvent = ERenderItemEvent,
@@ -48,32 +59,32 @@ class RenderTagMap {
 
 export const tagMap = new RenderTagMap();
 
+const standardElement = (
+    Item: new (
+        type: RenderItemPosition,
+        cache?: boolean,
+        fall?: boolean
+    ) => RenderItem
+) => {
+    return (_0: any, _1: any, props?: any) => {
+        if (!props) return new Item('static');
+        else {
+            const {
+                type = 'static',
+                enableCache = true,
+                fallthrough = false
+            } = props;
+            return new Item(type, enableCache, fallthrough);
+        }
+    };
+};
+
 // Default elements
-tagMap.register('container', (_0, _1, props) => {
-    if (!props) return new Container();
-    else {
-        const {
-            type = 'static',
-            enableCache = true,
-            fallthrough = false
-        } = props;
-        return new Container(type, enableCache, fallthrough);
-    }
-});
+tagMap.register('container', standardElement(Container));
 tagMap.register('mota-renderer', (_0, _1, props) => {
     return new MotaRenderer(props?.id);
 });
-tagMap.register('sprite', (_0, _1, props) => {
-    if (!props) return new Sprite();
-    else {
-        const {
-            type = 'static',
-            enableCache = true,
-            fallthrough = false
-        } = props;
-        return new Sprite(type, enableCache, fallthrough);
-    }
-});
+tagMap.register('sprite', standardElement(Sprite));
 tagMap.register('text', (_0, _1, props) => {
     if (!props) return new Text();
     else {
@@ -159,3 +170,11 @@ tagMap.register<EDamageEvent, Damage>('damage', (_0, _1, props) => {
 tagMap.register('animate', (_0, _1, props) => {
     return new Animate();
 });
+tagMap.register('graphics', standardElement(Graphics));
+tagMap.register('g-rect', standardElement(Rect));
+tagMap.register('g-circle', standardElement(Circle));
+tagMap.register('g-ellipse', standardElement(Ellipse));
+tagMap.register('g-line', standardElement(Line));
+tagMap.register('g-bezier', standardElement(BezierCurve));
+tagMap.register('g-quad', standardElement(QuadraticCurve));
+tagMap.register('g-path', standardElement(Path));

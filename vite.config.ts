@@ -11,7 +11,7 @@ const FSHOST = 'http://127.0.0.1:3000/';
 
 const custom = [
     'container', 'image', 'sprite', 'shader', 'text', 'comment', 'custom', 
-    'layer', 'layer-group', 'animate', 'damage'
+    'layer', 'layer-group', 'animate', 'damage', 'graphics'
 ]
 
 // https://vitejs.dev/config/
@@ -22,7 +22,7 @@ export default defineConfig({
         }),
         vuejsx({
             isCustomElement: (tag) => {
-                return custom.includes(tag)
+                return custom.includes(tag) || tag.startsWith('g-');
             }
         }),
         legacy({
