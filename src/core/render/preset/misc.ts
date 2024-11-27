@@ -1,9 +1,14 @@
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 import { Sprite } from '../sprite';
+import { ERenderItemEvent, RenderItem, RenderItemPosition } from '../item';
+import { Transform } from '../transform';
+import { ElementNamespace, ComponentInternalInstance } from 'vue';
 
 type CanvasStyle = string | CanvasGradient | CanvasPattern;
 
-export class Text extends Sprite {
+export interface ETextEvent extends ERenderItemEvent {}
+
+export class Text extends RenderItem<ETextEvent> {
     text: string;
 
     fillStyle?: CanvasStyle = '#fff';
@@ -16,26 +21,30 @@ export class Text extends Sprite {
 
     private static measureCanvas = new MotaOffscreenCanvas2D();
 
-    constructor(text: string = '') {
-        super('static', false);
+    constructor(text: string = '', type: RenderItemPosition = 'static') {
+        super(type, false);
 
         this.text = text;
         if (text.length > 0) this.calBox();
+    }
 
-        this.renderFn = ({ canvas, ctx }) => {
-            ctx.textBaseline = 'bottom';
-            ctx.fillStyle = this.fillStyle ?? 'transparent';
-            ctx.strokeStyle = this.strokeStyle ?? 'transparent';
-            ctx.font = this.font ?? '';
-            ctx.lineWidth = this.strokeWidth;
+    protected render(
+        canvas: MotaOffscreenCanvas2D,
+        transform: Transform
+    ): void {
+        const ctx = canvas.ctx;
+        ctx.textBaseline = 'bottom';
+        ctx.fillStyle = this.fillStyle ?? 'transparent';
+        ctx.strokeStyle = this.strokeStyle ?? 'transparent';
+        ctx.font = this.font ?? '';
+        ctx.lineWidth = this.strokeWidth;
 
-            if (this.strokeStyle) {
-                ctx.strokeText(this.text, 0, this.descent);
-            }
-            if (this.fillStyle) {
-                ctx.fillText(this.text, 0, this.descent);
-            }
-        };
+        if (this.strokeStyle) {
+            ctx.strokeText(this.text, 0, this.descent);
+        }
+        if (this.fillStyle) {
+            ctx.fillText(this.text, 0, this.descent);
+        }
     }
 
     /**
@@ -96,6 +105,22 @@ export class Text extends Sprite {
         this.descent = fontBoundingBoxAscent;
         this.size(width, fontBoundingBoxAscent);
     }
+
+    patchProp(
+        key: string,
+        prevValue: any,
+        nextValue: any,
+        namespace?: ElementNamespace,
+        parentComponent?: ComponentInternalInstance | null
+    ): void {
+        switch (key) {
+            case 'font':
+                if (!this.assertType(nextValue, 'string', key)) return;
+                this.setFont(nextValue);
+                break;
+        }
+        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
+    }
 }
 
 export type SizedCanvasImageSource = Exclude<
@@ -103,26 +128,47 @@ export type SizedCanvasImageSource = Exclude<
     VideoFrame | SVGElement
 >;
 
-export class Image extends Sprite {
-    image: SizedCanvasImageSource;
+export interface EImageEvent extends ERenderItemEvent {}
 
-    constructor(image: SizedCanvasImageSource) {
-        super();
+export class Image extends RenderItem<EImageEvent> {
+    image: CanvasImageSource;
+
+    constructor(image: CanvasImageSource, type: RenderItemPosition = 'static') {
+        super(type);
         this.image = image;
-        this.size(image.width, image.height);
+        if (image instanceof VideoFrame || image instanceof SVGElement) {
+            this.size(200, 200);
+        } else {
+            this.size(image.width, image.height);
+        }
+    }
 
-        this.renderFn = ({ canvas, ctx }) => {
-            ctx.drawImage(this.image, 0, 0, canvas.width, canvas.height);
-        };
+    protected render(
+        canvas: MotaOffscreenCanvas2D,
+        transform: Transform
+    ): void {
+        const ctx = canvas.ctx;
+        ctx.drawImage(this.image, 0, 0, canvas.width, canvas.height);
     }
 
     /**
      * 设置图片资源
      * @param image 图片资源
      */
-    setImage(image: SizedCanvasImageSource) {
+    setImage(image: CanvasImageSource) {
         this.image = image;
-        this.size(image.width, image.height);
-        this.update(this);
+        this.update();
     }
+}
+
+export class Comment extends RenderItem {
+    constructor(public text: string = '') {
+        super('static');
+        this.hide();
+    }
+
+    protected render(
+        canvas: MotaOffscreenCanvas2D,
+        transform: Transform
+    ): void {}
 }

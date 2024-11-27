@@ -4,6 +4,7 @@ import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
 import { Ticker, TickerFn } from 'mutate-animate';
 import { Transform } from './transform';
 import { logger } from '../common/logger';
+import { ElementNamespace, ComponentInternalInstance } from 'vue';
 
 export type RenderFunction = (
     canvas: MotaOffscreenCanvas2D,
@@ -117,6 +118,24 @@ interface IRenderTickerSupport {
     hasTicker(id: number): boolean;
 }
 
+interface IRenderVueSupport {
+    /**
+     * 在 jsx, vue 中当属性改变后触发此函数，用于处理响应式等情况
+     * @param key 属性键名
+     * @param prevValue 该属性先前的数值
+     * @param nextValue 该属性当前的数值
+     * @param namespace 元素命名空间
+     * @param parentComponent 元素的父组件
+     */
+    patchProp(
+        key: string,
+        prevValue: any,
+        nextValue: any,
+        namespace?: ElementNamespace,
+        parentComponent?: ComponentInternalInstance | null
+    ): void;
+}
+
 export interface ERenderItemEvent {
     beforeUpdate: [item?: RenderItem];
     afterUpdate: [item?: RenderItem];
@@ -144,7 +163,9 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         IRenderAnchor,
         IRenderConfig,
         IRenderFrame,
-        IRenderTickerSupport
+        IRenderTickerSupport,
+        IRenderChildable,
+        IRenderVueSupport
 {
     /** 渲染的全局ticker */
     static ticker: Ticker = new Ticker();
@@ -194,16 +215,34 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     hidden: boolean = false;
     /** 滤镜 */
     filter: string = 'none';
+    /** 混合方式 */
+    composite: GlobalCompositeOperation = 'source-over';
+    /** 不透明度 */
+    alpha: number = 1;
 
+    private _parent?: RenderItem;
     /** 当前元素的父元素 */
-    parent?: RenderItem & IRenderChildable;
+    get parent() {
+        return this._parent;
+    }
     /** 当前元素是否为根元素 */
     readonly isRoot: boolean = false;
 
     protected needUpdate: boolean = false;
 
-    /** 该渲染元素的模型变换矩阵 */
-    transform: Transform = new Transform();
+    private _transform: Transform = new Transform();
+    /** 设置该渲染元素的模型变换矩阵 */
+    set transform(value: Transform) {
+        this._transform = value;
+        this.update();
+    }
+    /** 获取该渲染元素的模型变换矩阵 */
+    get transform() {
+        this.update();
+        return this._transform;
+    }
+    /** 该渲染元素的子元素 */
+    children: Set<RenderItem<ERenderItemEvent>> = new Set();
 
     /** 渲染缓存信息 */
     protected cache: MotaOffscreenCanvas2D = new MotaOffscreenCanvas2D();
@@ -278,10 +317,13 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         const ax = -this.anchorX * this.width;
         const ay = -this.anchorY * this.height;
 
-        canvas.ctx.save();
+        const ctx = canvas.ctx;
+        ctx.save();
         canvas.setAntiAliasing(this.antiAliasing);
         if (this.enableCache) canvas.ctx.filter = this.filter;
         if (this.type === 'static') transformCanvas(canvas, tran);
+        ctx.globalAlpha = this.alpha;
+        ctx.globalCompositeOperation = this.composite;
         if (this.enableCache) {
             const { width, height, ctx } = this.cache;
             if (this.cacheDirty) {
@@ -317,6 +359,24 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     setFilter(filter: string) {
         this.filter = filter;
         this.update(this);
+    }
+
+    /**
+     * 设置本元素渲染时的混合方式
+     * @param composite 混合方式
+     */
+    setComposite(composite: GlobalCompositeOperation) {
+        this.composite = composite;
+        this.update();
+    }
+
+    /**
+     * 设置本元素的不透明度
+     * @param alpha 不透明度
+     */
+    setAlpha(alpha: number) {
+        this.alpha = alpha;
+        this.update();
     }
 
     /**
@@ -426,10 +486,10 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      * 将这个渲染元素添加到其他父元素上
      * @param parent 父元素
      */
-    append(parent: IRenderChildable & RenderItem) {
+    append(parent: RenderItem) {
         this.remove();
         parent.children.add(this);
-        this.parent = parent;
+        this._parent = parent;
         parent.requestSort();
         this.needUpdate = false;
         this.update();
@@ -447,12 +507,185 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         if (!this.parent) return false;
         const parent = this.parent;
         const success = parent.children.delete(this);
-        this.parent = void 0;
+        this._parent = void 0;
         parent.requestSort();
         parent.update();
         if (!success) return false;
         RenderItem.itemMap.delete(this._id);
         return true;
+    }
+
+    /**
+     * 添加子元素，默认没有任何行为且会抛出警告，你需要在自己的RenderItem继承类中复写它，才可以使用
+     * @param child 子元素
+     */
+    appendChild(...child: RenderItem<any>[]): void {
+        logger.warn(35);
+    }
+
+    /**
+     * 移除子元素，默认没有任何行为且会抛出警告，你需要在自己的RenderItem继承类中复写它，才可以使用
+     * @param child 子元素
+     */
+    removeChild(...child: RenderItem<any>[]): void {
+        logger.warn(36);
+    }
+
+    /**
+     * 申请对元素进行排序，默认没有任何行为且会抛出警告，你需要在自己的RenderItem继承类中复写它，才可以使用
+     */
+    requestSort(): void {
+        logger.warn(37);
+    }
+
+    /**
+     * 判断一个prop是否是期望类型
+     * @param value 实际值
+     * @param expected 期望类型
+     * @param key 键名
+     */
+    protected assertType(
+        value: any,
+        expected: string | (new () => any),
+        key: string
+    ) {
+        if (typeof expected === 'string') {
+            const type = typeof value;
+            if (type !== expected) {
+                logger.warn(21, key, expected, type);
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            if (value instanceof expected) {
+                return true;
+            } else {
+                logger.warn(
+                    21,
+                    key,
+                    expected.name,
+                    value?.constructor?.name ?? typeof value
+                );
+                return false;
+            }
+        }
+    }
+
+    /**
+     * 解析事件key
+     * @param key 键名
+     * @returns 返回字符串表示解析后的键名，返回布尔值表示不是事件
+     */
+    protected parseEvent(key: string): string | false {
+        if (key.startsWith('on')) {
+            const code = key.charCodeAt(2);
+            if (code >= 65 && code <= 90) {
+                return key[2].toLowerCase() + key.slice(3);
+            }
+        }
+        return false;
+    }
+
+    patchProp(
+        key: string,
+        prevValue: any,
+        nextValue: any,
+        namespace?: ElementNamespace,
+        parentComponent?: ComponentInternalInstance | null
+    ): void {
+        switch (key) {
+            case 'x': {
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.pos(nextValue, this.transform.y);
+                return;
+            }
+            case 'y': {
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.pos(this.transform.x, nextValue);
+                return;
+            }
+            case 'anchorX': {
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setAnchor(nextValue, this.anchorY);
+                return;
+            }
+            case 'anchorY': {
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setAnchor(this.anchorX, nextValue);
+                return;
+            }
+            case 'zIndex': {
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setZIndex(nextValue);
+                return;
+            }
+            case 'width': {
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.size(nextValue, this.height);
+                return;
+            }
+            case 'height': {
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.size(this.width, nextValue);
+                return;
+            }
+            case 'filter': {
+                if (!this.assertType(nextValue, 'string', key)) return;
+                this.setFilter(this.filter);
+                return;
+            }
+            case 'hd': {
+                if (!this.assertType(nextValue, 'boolean', key)) return;
+                this.setHD(nextValue);
+                return;
+            }
+            case 'antiAliasing': {
+                if (!this.assertType(nextValue, 'boolean', key)) return;
+                this.setAntiAliasing(nextValue);
+                return;
+            }
+            case 'hidden': {
+                if (!this.assertType(nextValue, 'boolean', key)) return;
+                if (nextValue) this.hide();
+                else this.show();
+                return;
+            }
+            case 'transform': {
+                if (!this.assertType(nextValue, Transform, key)) return;
+                this.transform = nextValue;
+                this.update();
+                return;
+            }
+            case 'type': {
+                if (!this.assertType(nextValue, 'string', key)) return;
+                this.type = nextValue;
+                this.update();
+                return;
+            }
+            case 'id': {
+                if (!this.assertType(nextValue, 'string', key)) return;
+                this.id = nextValue;
+                return;
+            }
+            case 'alpha': {
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setAlpha(nextValue);
+                return;
+            }
+            case 'composite': {
+                if (!this.assertType(nextValue, 'string', key)) return;
+                this.setComposite(nextValue);
+                return;
+            }
+        }
+        const ev = this.parseEvent(key);
+        if (ev) {
+            if (prevValue) {
+                this.off(ev as keyof ERenderItemEvent, prevValue);
+            }
+            this.on(ev as keyof ERenderItemEvent, nextValue);
+        }
     }
 
     /**

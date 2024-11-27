@@ -134,6 +134,7 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
         this.canvas.remove();
         this.ctx.reset();
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this._freezed = true;
         MotaOffscreenCanvas2D.list.delete(this);
     }
 

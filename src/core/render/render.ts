@@ -67,11 +67,12 @@ export class MotaRenderer extends Container {
         }
     }
 
-    private searchElement(ele: Container, id: string): RenderItem | null {
+    private searchElement(ele: RenderItem, id: string): RenderItem | null {
         for (const child of ele.children) {
             if (child.id === id) return child;
-            if (child instanceof Container) {
-                return this.searchElement(child, id);
+            else {
+                const ele = this.searchElement(child, id);
+                if (ele) return ele;
             }
         }
         return null;

@@ -138,6 +138,10 @@ export class HeroKeyMover {
     private onStepEnd = () => {
         const con = this.controller;
         if (!con) return;
+        if (core.status.lockControl) {
+            con.stop();
+            return;
+        }
         if (!this.moving) {
             con.stop();
             return;

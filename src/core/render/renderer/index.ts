@@ -1,0 +1,99 @@
+import {
+    ComponentInternalInstance,
+    createRenderer,
+    ElementNamespace,
+    VNodeProps
+} from 'vue';
+import { ERenderItemEvent, RenderItem } from '../item';
+import { tagMap } from './map';
+import { logger } from '@/core/common/logger';
+import { Comment, Text } from '../preset/misc';
+
+export const { createApp, render } = createRenderer<RenderItem, RenderItem>({
+    patchProp: function (
+        el: RenderItem,
+        key: string,
+        prevValue: any,
+        nextValue: any,
+        namespace?: ElementNamespace,
+        parentComponent?: ComponentInternalInstance | null
+    ): void {
+        el.patchProp(key, prevValue, nextValue, namespace, parentComponent);
+    },
+
+    insert: function (
+        el: RenderItem<ERenderItemEvent>,
+        parent: RenderItem,
+        anchor?: RenderItem<ERenderItemEvent> | null
+    ): void {
+        parent.appendChild(el);
+    },
+
+    remove: function (el: RenderItem<ERenderItemEvent>): void {
+        el.remove();
+        el.destroy();
+    },
+
+    createElement: function (
+        type: string,
+        namespace?: ElementNamespace,
+        isCustomizedBuiltIn?: string,
+        vnodeProps?: (VNodeProps & { [key: string]: any }) | null
+    ): RenderItem {
+        const onCreate = tagMap.get(type);
+        if (!onCreate) {
+            logger.error(20, type);
+            throw new Error(`Cannot create element '${type}'`);
+        }
+        return onCreate(namespace, isCustomizedBuiltIn, vnodeProps);
+    },
+
+    createText: function (text: string): RenderItem<ERenderItemEvent> {
+        logger.warn(38);
+        return new Text(text);
+    },
+
+    createComment: function (text: string): RenderItem<ERenderItemEvent> {
+        return new Comment(text);
+    },
+
+    setText: function (node: RenderItem<ERenderItemEvent>, text: string): void {
+        if (node instanceof Text) {
+            node.setText(text);
+        } else {
+            logger.warn(39);
+        }
+    },
+
+    setElementText: function (node: RenderItem, text: string): void {
+        if (node instanceof Text) {
+            node.setText(text);
+        } else {
+            logger.warn(39);
+        }
+    },
+
+    parentNode: function (
+        node: RenderItem<ERenderItemEvent>
+    ): RenderItem | null {
+        return node.parent ?? null;
+    },
+
+    nextSibling: function (
+        node: RenderItem<ERenderItemEvent>
+    ): RenderItem<ERenderItemEvent> | null {
+        if (!node.parent) {
+            return null;
+        } else {
+            const parent = node.parent;
+            const list = [...parent.children];
+            const index = list.indexOf(node);
+            return list[index] ?? null;
+        }
+    }
+});
+
+export * from './elements';
+export * from './map';
+export * from './props';
+export * from './use';

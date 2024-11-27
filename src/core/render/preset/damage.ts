@@ -21,7 +21,7 @@ import type {
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 import { isNil } from 'lodash-es';
 import { getDamageColor } from '@/plugin/utils';
-import { RenderItem, transformCanvas } from '../item';
+import { ERenderItemEvent, RenderItem, transformCanvas } from '../item';
 import EventEmitter from 'eventemitter3';
 import { Transform } from '../transform';
 
@@ -123,7 +123,7 @@ export interface DamageRenderable {
     strokeWidth?: number;
 }
 
-interface EDamageEvent extends ESpriteEvent {
+export interface EDamageEvent extends ERenderItemEvent {
     setMapSize: [width: number, height: number];
     beforeDamageRender: [need: Set<number>, transform: Transform];
     updateBlocks: [blocks: Set<number>];

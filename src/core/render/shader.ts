@@ -1,7 +1,7 @@
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
 import { ERenderItemEvent, RenderItem, RenderItemPosition } from './item';
 import { Transform } from './transform';
-import { GL2, GL2Program, IGL2ProgramPrefix } from './gl2';
+import { EGL2Event, GL2, GL2Program, IGL2ProgramPrefix } from './gl2';
 
 const SHADER_PREFIX: IGL2ProgramPrefix = {
     VERTEX: /* glsl */ `#version 300 es
@@ -33,7 +33,11 @@ void main() {
 }
 `;
 
-export class Shader extends GL2 {
+export interface EShaderEvent extends EGL2Event {}
+
+export class Shader<E extends EShaderEvent = EShaderEvent> extends GL2<
+    EShaderEvent | E
+> {
     setHD(hd: boolean): void {
         super.setHD(hd);
         this.sizeGL(this.width, this.height);

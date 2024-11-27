@@ -9,8 +9,8 @@ export class FloorViewport implements ILayerGroupRenderExtends {
     id: string = 'viewport';
 
     group!: LayerGroup;
-    hero!: HeroRenderer;
-    binder!: LayerGroupFloorBinder;
+    hero?: HeroRenderer;
+    binder?: LayerGroupFloorBinder;
 
     /** 是否启用视角控制拓展 */
     enabled: boolean = true;
@@ -91,12 +91,13 @@ export class FloorViewport implements ILayerGroupRenderExtends {
      * @param y 图格纵坐标
      */
     getBoundedPosition(x: number, y: number) {
+        if (!this.checkDependency()) return { x, y };
         if (!this.boundX && !this.boundY) return { x, y };
         const width = core._WIDTH_;
         const height = core._HEIGHT_;
         const minX = (width - 1) / 2;
         const minY = (height - 1) / 2;
-        const floor = core.status.maps[this.binder.getFloor()];
+        const floor = core.status.maps[this.binder!.getFloor()];
         const maxX = floor.width - minX - 1;
         const maxY = floor.height - minY - 1;
 
@@ -151,6 +152,7 @@ export class FloorViewport implements ILayerGroupRenderExtends {
     }
 
     private createMoveTransition() {
+        if (!this.checkDependency()) return;
         let xTarget: number = 0;
         let yTarget: number = 0;
         let xStart: number = this.ox;
@@ -159,7 +161,7 @@ export class FloorViewport implements ILayerGroupRenderExtends {
         let yStartTime: number = Date.now();
         let ending: boolean = false;
         // 这个数等于 sinh(2)，用这个数的话，可以正好在刚开始移动的时候达到1的斜率，效果会比较好
-        let transitionTime = this.hero.speed * 3.626860407847019;
+        let transitionTime = this.hero!.speed * 3.626860407847019;
 
         const setTargetX = (x: number, time: number) => {
             if (x === xTarget) return;
@@ -175,7 +177,7 @@ export class FloorViewport implements ILayerGroupRenderExtends {
         };
 
         if (this.movingFramer) {
-            this.hero.off('moveTick', this.movingFramer);
+            this.hero!.off('moveTick', this.movingFramer);
         }
         this.movingFramer = () => {
             if (this.inTransition) return;
@@ -186,22 +188,22 @@ export class FloorViewport implements ILayerGroupRenderExtends {
                 ending = true;
             }
             if (!ending) {
-                const dir = this.hero.stepDir;
+                const dir = this.hero!.stepDir;
                 const { x, y } = core.utils.scan2[dir];
                 setTargetX(-x * this.maxOffset, now);
                 setTargetY(-y * this.maxOffset, now);
             }
 
-            if (!this.hero.renderable) return;
+            if (!this.hero!.renderable) return;
 
-            const { x, y } = this.hero.renderable;
+            const { x, y } = this.hero!.renderable;
             const { x: nx, y: ny } = this.getBoundedPosition(x, y);
             this.nx = nx;
             this.ny = ny;
 
             if (ending) {
                 if (this.ox === xTarget && this.oy == yTarget) {
-                    this.hero.off('moveTick', this.movingFramer);
+                    this.hero!.off('moveTick', this.movingFramer);
                     return;
                 }
             }
@@ -228,7 +230,7 @@ export class FloorViewport implements ILayerGroupRenderExtends {
                 }
             }
         };
-        this.hero.on('moveTick', this.movingFramer);
+        this.hero!.on('moveTick', this.movingFramer);
     }
 
     /**
@@ -299,8 +301,9 @@ export class FloorViewport implements ILayerGroupRenderExtends {
         // this.createMoving();
     }
 
-    awake(group: LayerGroup): void {
-        this.group = group;
+    private checkDependency() {
+        if (this.hero && this.binder) return true;
+        const group = this.group;
         const ex1 = group.getLayer('event')?.getExtends('floor-hero');
         const ex2 = group.getExtends('floor-binder');
         if (
@@ -309,12 +312,15 @@ export class FloorViewport implements ILayerGroupRenderExtends {
         ) {
             this.hero = ex1;
             this.binder = ex2;
-            this.create();
-            adapter.add(this);
-        } else {
-            logger.error(15);
-            group.removeExtends('viewport');
+            return true;
         }
+        return false;
+    }
+
+    awake(group: LayerGroup): void {
+        this.group = group;
+        this.create();
+        adapter.add(this);
     }
 
     onDestroy(group: LayerGroup): void {

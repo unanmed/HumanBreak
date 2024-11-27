@@ -71,6 +71,7 @@ export class Container<E extends EContainerEvent = EContainerEvent>
     removeChild(...child: RenderItem<any>[]): void {
         let changed = false;
         child.forEach(v => {
+            if (v.parent !== this) return;
             const success = v.remove();
             if (success) {
                 changed = true;

@@ -1,4 +1,4 @@
-import { TimingFn } from 'mutate-animate';
+import { Ticker, TimingFn } from 'mutate-animate';
 import { RenderAdapter } from './adapter';
 import { FloorViewport } from './preset/viewport';
 

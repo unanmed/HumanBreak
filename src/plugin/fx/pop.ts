@@ -1,4 +1,5 @@
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
+import { wrapInstancedComponent } from '@/core/render';
 import { RenderItem, RenderItemPosition } from '@/core/render/item';
 import { Transform } from '@/core/render/transform';
 import { TimingFn } from 'mutate-animate';
@@ -18,7 +19,7 @@ function parabola(input: number): [number, number] {
     return [x, x ** 2 / 20 - 3 * x];
 }
 
-export class PopText extends RenderItem {
+class Pop extends RenderItem {
     private popList: Set<PopData> = new Set();
 
     private delegation: number = 0;
@@ -94,3 +95,5 @@ export class PopText extends RenderItem {
         this.removeTicker(this.delegation);
     }
 }
+
+export const PopText = wrapInstancedComponent(() => new Pop('static'));

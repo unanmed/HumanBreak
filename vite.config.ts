@@ -9,11 +9,22 @@ import postcssPresetEnv from 'postcss-preset-env';
 
 const FSHOST = 'http://127.0.0.1:3000/';
 
+const custom = [
+    'container', 'image', 'sprite', 'shader', 'text', 'comment', 'custom', 
+    'layer', 'layer-group', 'animate', 'damage'
+]
+
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [
-        vue(),
-        vuejsx(),
+        vue({
+            customElement: custom
+        }),
+        vuejsx({
+            isCustomElement: (tag) => {
+                return custom.includes(tag)
+            }
+        }),
         legacy({
             targets: ['defaults', 'not IE 11'],
             polyfills: true,

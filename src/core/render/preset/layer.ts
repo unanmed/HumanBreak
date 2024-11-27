@@ -1,8 +1,13 @@
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
-import { Container } from '../container';
+import { Container, EContainerEvent } from '../container';
 import { Sprite } from '../sprite';
 import { TimingFn } from 'mutate-animate';
-import { IAnimateFrame, renderEmits, RenderItem } from '../item';
+import {
+    ERenderItemEvent,
+    IAnimateFrame,
+    renderEmits,
+    RenderItem
+} from '../item';
 import { logger } from '@/core/common/logger';
 import { RenderableData, texture } from '../cache';
 import {
@@ -14,6 +19,7 @@ import {
 import { Transform } from '../transform';
 import { LayerFloorBinder, LayerGroupFloorBinder } from './floor';
 import { RenderAdapter } from '../adapter';
+import { ElementNamespace, ComponentInternalInstance } from 'vue';
 
 export interface ILayerGroupRenderExtends {
     /** 拓展的唯一标识符 */
@@ -95,7 +101,12 @@ const layerZIndex: Record<FloorLayer, number> = {
     fg2: 50
 };
 
-export class LayerGroup extends Container implements IAnimateFrame {
+export interface ELayerGroupEvent extends EContainerEvent {}
+
+export class LayerGroup
+    extends Container<ELayerGroupEvent>
+    implements IAnimateFrame
+{
     /** 地图组列表 */
     // static list: Set<LayerGroup> = new Set();
 
@@ -115,7 +126,7 @@ export class LayerGroup extends Container implements IAnimateFrame {
     camera: Transform = new Transform();
 
     private needRender?: Set<number>;
-    private extend: Map<string, ILayerGroupRenderExtends> = new Map();
+    readonly extend: Map<string, ILayerGroupRenderExtends> = new Map();
 
     constructor() {
         super('static', true);
@@ -212,18 +223,28 @@ export class LayerGroup extends Container implements IAnimateFrame {
      * 添加显示层
      * @param layer 显示层
      */
-    addLayer(layer: FloorLayer) {
-        const l = new Layer();
-        l.layer = layer;
-        this.layers.set(layer, l);
-        l.setZIndex(layerZIndex[layer]);
-        this.appendChild(l);
+    addLayer(layer: FloorLayer | Layer) {
+        if (typeof layer === 'string') {
+            const l = new Layer();
+            l.layer = layer;
+            this.layers.set(layer, l);
+            l.setZIndex(layerZIndex[layer]);
+            this.appendChild(l);
 
-        for (const ex of this.extend.values()) {
-            ex.onLayerAdd?.(this, l);
+            for (const ex of this.extend.values()) {
+                ex.onLayerAdd?.(this, l);
+            }
+
+            return l;
+        } else {
+            if (layer.layer) {
+                this.layers.set(layer.layer, layer);
+                for (const ex of this.extend.values()) {
+                    ex.onLayerAdd?.(this, layer);
+                }
+            }
+            return layer;
         }
-
-        return l;
     }
 
     /**
@@ -516,7 +537,9 @@ export interface LayerMovingRenderable extends RenderableData {
     alpha: number;
 }
 
-export class Layer extends Container {
+export interface ELayerEvent extends EContainerEvent {}
+
+export class Layer extends Container<ELayerEvent> {
     // 一些会用到的常量
     static readonly FRAME_0 = 1;
     static readonly FRAME_1 = 2;
@@ -1382,6 +1405,55 @@ export class Layer extends Container {
                 }
             );
         });
+    }
+
+    patchProp(
+        key: string,
+        prevValue: any,
+        nextValue: any,
+        namespace?: ElementNamespace,
+        parentComponent?: ComponentInternalInstance | null
+    ): void {
+        switch (key) {
+            case 'layer':
+                if (!this.assertType(nextValue, 'string', key)) return;
+                const parent = this.parent;
+                if (parent instanceof LayerGroup) {
+                    parent.removeLayer(this);
+                    this.layer = nextValue;
+                    parent.addLayer(this);
+                } else {
+                    this.layer = nextValue;
+                }
+                this.update();
+                return;
+        }
+    }
+
+    private addToGroup(group: LayerGroup) {
+        if (this.layer) {
+            group.addLayer(this);
+        }
+    }
+
+    private removeFromGroup(group: LayerGroup) {
+        if (this.layer) {
+            group.removeLayer(this);
+        }
+    }
+
+    append(parent: RenderItem): void {
+        super.append(parent);
+        if (parent instanceof LayerGroup) {
+            this.addToGroup(parent);
+        }
+    }
+
+    remove(): boolean {
+        if (this.parent instanceof LayerGroup) {
+            this.removeFromGroup(this.parent);
+        }
+        return super.remove();
     }
 
     destroy(): void {

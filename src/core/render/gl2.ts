@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
 import { logger } from '../common/logger';
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
-import { RenderItem, RenderItemPosition } from './item';
+import { ERenderItemEvent, RenderItem, RenderItemPosition } from './item';
 import { Transform } from './transform';
 import { isWebGL2Supported } from '../fx/webgl';
 
@@ -91,7 +91,11 @@ export type ProgramConstructor<T extends GL2Program> = new (
     fs?: string
 ) => T;
 
-export abstract class GL2 extends RenderItem {
+export interface EGL2Event extends ERenderItemEvent {}
+
+export abstract class GL2<E extends EGL2Event = EGL2Event> extends RenderItem<
+    EGL2Event | E
+> {
     /** 是否支持此组件 */
     static readonly support: boolean = isWebGL2Supported();
 

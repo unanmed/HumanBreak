@@ -6,6 +6,8 @@ import {
 } from './item';
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
 import { Transform } from './transform';
+import { ElementNamespace, ComponentInternalInstance } from 'vue';
+import { logger } from '../common/logger';
 
 export interface ESpriteEvent extends ERenderItemEvent {}
 
@@ -39,5 +41,25 @@ export class Sprite<
     setRenderFn(fn: RenderFunction) {
         this.renderFn = fn;
         this.update(this);
+    }
+
+    patchProp(
+        key: string,
+        prevValue: any,
+        nextValue: any,
+        namespace?: ElementNamespace,
+        parentComponent?: ComponentInternalInstance | null
+    ): void {
+        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
+        const type = typeof nextValue;
+        switch (key) {
+            case 'render':
+                if (type !== 'function') {
+                    logger.error(21, key, 'function', type);
+                    return;
+                }
+                this.setRenderFn(nextValue);
+                break;
+        }
     }
 }

@@ -1,14 +1,15 @@
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
+import { wrapInstancedComponent } from '@/core/render';
 import { RenderItem, RenderItemPosition } from '@/core/render/item';
 import { Transform } from '@/core/render/transform';
 
 // 渲染端的向后兼容用，会充当两个版本间过渡的作用
-export class FloorChange extends RenderItem {
+class Change extends RenderItem {
     private tips: string[] = [];
     /** 当前小贴士 */
     private usingTip: string = '';
     /** 透明度 */
-    private alpha: number = 0;
+    private backAlpha: number = 0;
     private title: string = '';
 
     constructor(type: RenderItemPosition) {
@@ -45,10 +46,10 @@ export class FloorChange extends RenderItem {
                     const dt = Date.now() - start;
                     const progress = dt / time;
                     if (progress > 1) {
-                        this.alpha = 1;
+                        this.backAlpha = 1;
                         this.removeTicker(id);
                     } else {
-                        this.alpha = progress;
+                        this.backAlpha = progress;
                     }
                     this.update();
                 },
@@ -71,9 +72,9 @@ export class FloorChange extends RenderItem {
                     const progress = dt / time;
                     if (progress > 1) {
                         this.removeTicker(id);
-                        this.alpha = 0;
+                        this.backAlpha = 0;
                     } else {
-                        this.alpha = 1 - progress;
+                        this.backAlpha = 1 - progress;
                     }
                     this.update();
                 },
@@ -87,9 +88,9 @@ export class FloorChange extends RenderItem {
         canvas: MotaOffscreenCanvas2D,
         transform: Transform
     ): void {
-        if (this.alpha === 0) return;
+        if (this.backAlpha === 0) return;
         const ctx = canvas.ctx;
-        ctx.globalAlpha = this.alpha;
+        ctx.globalAlpha = this.backAlpha;
         ctx.fillStyle = '#000';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.textAlign = 'center';
@@ -106,3 +107,5 @@ export class FloorChange extends RenderItem {
         }
     }
 }
+
+export const FloorChange = wrapInstancedComponent(() => new Change('static'));

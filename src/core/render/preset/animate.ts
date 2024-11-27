@@ -4,14 +4,15 @@ import { Sprite } from '../sprite';
 import { HeroRenderer } from './hero';
 import { ILayerGroupRenderExtends, LayerGroup } from './layer';
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
-import { transformCanvas } from '../item';
+import { ERenderItemEvent, RenderItem, transformCanvas } from '../item';
+import { Transform } from '../transform';
 
 export class LayerGroupAnimate implements ILayerGroupRenderExtends {
     static animateList: Set<LayerGroupAnimate> = new Set();
     id: string = 'animate';
 
     group!: LayerGroup;
-    hero!: HeroRenderer;
+    hero?: HeroRenderer;
     animate!: Animate;
 
     private animation: Set<AnimateData> = new Set();
@@ -28,7 +29,8 @@ export class LayerGroupAnimate implements ILayerGroupRenderExtends {
     }
 
     private updatePosition(animate: AnimateData) {
-        if (!this.hero.renderable) return;
+        if (!this.checkHero()) return;
+        if (!this.hero?.renderable) return;
         const { x, y } = this.hero.renderable;
         const cell = this.group.cellSize;
         const half = cell / 2;
@@ -48,30 +50,37 @@ export class LayerGroupAnimate implements ILayerGroupRenderExtends {
     };
 
     private listen() {
-        this.hero.on('moveTick', this.onMoveTick);
+        if (this.checkHero()) {
+            this.hero!.on('moveTick', this.onMoveTick);
+        }
+    }
+
+    private checkHero() {
+        if (this.hero) return true;
+        const ex = this.group.getLayer('event')?.getExtends('floor-hero');
+        if (ex instanceof HeroRenderer) {
+            this.hero = ex;
+            return true;
+        }
+        return false;
     }
 
     awake(group: LayerGroup): void {
         this.group = group;
-        const ex = group.getLayer('event')?.getExtends('floor-hero');
-        if (ex instanceof HeroRenderer) {
-            this.hero = ex;
-            this.animate = new Animate();
-            this.animate.size(group.width, group.height);
-            this.animate.setHD(true);
-            this.animate.setZIndex(100);
-            group.appendChild(this.animate);
-            LayerGroupAnimate.animateList.add(this);
-            this.listen();
-        } else {
-            logger.error(14);
-            group.removeExtends('animate');
-        }
+        this.animate = new Animate();
+        this.animate.size(group.width, group.height);
+        this.animate.setHD(true);
+        this.animate.setZIndex(100);
+        group.appendChild(this.animate);
+        LayerGroupAnimate.animateList.add(this);
+        this.listen();
     }
 
     onDestroy(group: LayerGroup): void {
-        this.hero.off('moveTick', this.onMoveTick);
-        LayerGroupAnimate.animateList.delete(this);
+        if (this.checkHero()) {
+            this.hero!.off('moveTick', this.onMoveTick);
+            LayerGroupAnimate.animateList.delete(this);
+        }
     }
 }
 
@@ -89,7 +98,9 @@ interface AnimateData {
     readonly absolute: boolean;
 }
 
-export class Animate extends Sprite {
+export interface EAnimateEvent extends ERenderItemEvent {}
+
+export class Animate extends RenderItem<EAnimateEvent> {
     /** 绝对位置的动画 */
     private absoluteAnimates: Set<AnimateData> = new Set();
     /** 静态位置的动画 */
@@ -101,18 +112,6 @@ export class Animate extends Sprite {
 
     constructor() {
         super('absolute', false, true);
-
-        this.setRenderFn((canvas, transform) => {
-            if (
-                this.absoluteAnimates.size === 0 &&
-                this.staticAnimates.size === 0
-            ) {
-                return;
-            }
-            this.drawAnimates(this.absoluteAnimates, canvas);
-            transformCanvas(canvas, transform);
-            this.drawAnimates(this.staticAnimates, canvas);
-        });
 
         this.delegation = this.delegateTicker(time => {
             if (time - this.lastTime < 50) return;
@@ -127,6 +126,21 @@ export class Animate extends Sprite {
         });
 
         adapter.add(this);
+    }
+
+    protected render(
+        canvas: MotaOffscreenCanvas2D,
+        transform: Transform
+    ): void {
+        if (
+            this.absoluteAnimates.size === 0 &&
+            this.staticAnimates.size === 0
+        ) {
+            return;
+        }
+        this.drawAnimates(this.absoluteAnimates, canvas);
+        transformCanvas(canvas, transform);
+        this.drawAnimates(this.staticAnimates, canvas);
     }
 
     private drawAnimates(

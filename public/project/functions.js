@@ -278,9 +278,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 要存档的内容
             var data = {
                 floorId: core.status.floorId,
-                hero: core.clone(core.status.hero, name => name !== 'chase'),
+                hero: core.status.hero,
                 hard: core.status.hard,
-                maps: core.clone(core.maps.saveMap()),
+                maps: core.maps.saveMap(),
                 route: core.encodeRoute(core.status.route, !fromAutosave),
                 values: values,
                 version: core.firstData.version,
@@ -291,7 +291,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 skill: HeroSkill.saveSkill()
             };
 
-            return data;
+            return structuredClone(data);
         },
         loadData: function (data, callback) {
             // 读档操作；从存储中读取了内容后的行为
