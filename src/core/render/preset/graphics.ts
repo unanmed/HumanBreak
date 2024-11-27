@@ -36,55 +36,6 @@ export const enum GraphicMode {
     All = 3
 }
 
-export class Graphics extends RenderItem {
-    /** 排序后的子元素 */
-    sortedChildren: RenderItem[] = [];
-
-    /** 是否需要重排 */
-    private needSort: boolean = false;
-
-    protected render(
-        canvas: MotaOffscreenCanvas2D,
-        transform: Transform
-    ): void {
-        const ctx = canvas.ctx;
-        this.sortedChildren.forEach(v => {
-            ctx.save();
-            v.renderContent(canvas, transform);
-            ctx.restore();
-        });
-    }
-
-    /**
-     * 为这个Graphics元素添加子元素，要求只能是Graphics元素或基于GraphicItemBase的元素
-     * @param child 要添加的子元素
-     */
-    appendChild(...child: RenderItem<any>[]): void {
-        child.forEach(v => {
-            // 如果是Graphics或GraphicItemBase实例，则加入子元素列表，否则抛出警告并忽略本次添加
-            if (v instanceof Graphics || v instanceof GraphicItemBase) {
-            } else {
-            }
-        });
-    }
-
-    /**
-     * 移除子元素
-     */
-    removeChild(...child: RenderItem<any>[]): void {}
-
-    /**
-     * 申请对子元素按照zIndex进行重排
-     */
-    requestSort(): void {
-        // 在下一帧渲染前进行排序
-        if (!this.needSort) {
-            this.needSort = true;
-            this.requestBeforeFrame(() => {});
-        }
-    }
-}
-
 export abstract class GraphicItemBase
     extends RenderItem
     implements IGraphicProperty

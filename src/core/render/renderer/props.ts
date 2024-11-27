@@ -90,8 +90,6 @@ export interface DamageProps extends BaseProps {
     strokeWidth?: number;
 }
 
-export interface GraphicsProps extends BaseProps {}
-
 export interface RectProps extends BaseProps {}
 
 export interface CirclesProps extends BaseProps {}

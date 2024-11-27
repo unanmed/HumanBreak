@@ -18,7 +18,6 @@ import {
     DamageProps,
     EllipseProps,
     GL2Props,
-    GraphicsProps,
     IconProps,
     ImageProps,
     LayerGroupProps,
@@ -88,7 +87,6 @@ declare module 'vue/jsx-runtime' {
             'layer-group': TagDefine<LayerGroupProps, ELayerGroupEvent>;
             damage: TagDefine<DamageProps, EDamageEvent>;
             animation: TagDefine<AnimateProps, EAnimateEvent>;
-            graphics: TagDefine<GraphicsProps, ERenderItemEvent>;
             'g-rect': TagDefine<RectProps, ERenderItemEvent>;
             'g-circle': TagDefine<CirclesProps, ERenderItemEvent>;
             'g-ellipse': TagDefine<EllipseProps, ERenderItemEvent>;

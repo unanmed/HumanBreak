@@ -11,7 +11,6 @@ import {
     BezierCurve,
     Circle,
     Ellipse,
-    Graphics,
     Line,
     Path,
     QuadraticCurve,
@@ -170,7 +169,6 @@ tagMap.register<EDamageEvent, Damage>('damage', (_0, _1, props) => {
 tagMap.register('animation', (_0, _1, props) => {
     return new Animate();
 });
-tagMap.register('graphics', standardElement(Graphics));
 tagMap.register('g-rect', standardElement(Rect));
 tagMap.register('g-circle', standardElement(Circle));
 tagMap.register('g-ellipse', standardElement(Ellipse));
