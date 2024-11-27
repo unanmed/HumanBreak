@@ -20,6 +20,7 @@ import { Transform } from '../transform';
 import { LayerFloorBinder, LayerGroupFloorBinder } from './floor';
 import { RenderAdapter } from '../adapter';
 import { ElementNamespace, ComponentInternalInstance } from 'vue';
+import { Camera } from '../camera';
 
 export interface ILayerGroupRenderExtends {
     /** 拓展的唯一标识符 */
@@ -204,6 +205,9 @@ export class LayerGroup
      */
     setCellSize(size: number) {
         this.cellSize = size;
+        this.layers.forEach(v => {
+            v.setCellSize(size);
+        });
     }
 
     /**
@@ -340,6 +344,37 @@ export class LayerGroup
         for (const ex of this.extend.values()) {
             ex.onFrameUpdate?.(this, RenderItem.animatedFrame % 4);
         }
+    }
+
+    patchProp(
+        key: string,
+        prevValue: any,
+        nextValue: any,
+        namespace?: ElementNamespace,
+        parentComponent?: ComponentInternalInstance | null
+    ): void {
+        switch (key) {
+            case 'cellSize':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setCellSize(nextValue);
+                return;
+            case 'blockSize':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setBlockSize(nextValue);
+                return;
+            case 'floorId':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                const binder = this.getExtends('floor-binder');
+                if (binder instanceof LayerGroupFloorBinder) {
+                    binder.bindFloor(nextValue);
+                }
+                return;
+            case 'camera':
+                if (!this.assertType(nextValue, Camera, key)) return;
+                this.camera = nextValue;
+                return;
+        }
+        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
 
     destroy(): void {
@@ -705,6 +740,15 @@ export class Layer extends Container<ELayerEvent> {
             x >= 0 &&
             y >= 0
         );
+    }
+
+    /**
+     * 设置每个图块的大小
+     * @param size 每个图块的大小
+     */
+    setCellSize(size: number) {
+        this.cellSize = size;
+        this.update();
     }
 
     /**
@@ -1427,7 +1471,28 @@ export class Layer extends Container<ELayerEvent> {
                 }
                 this.update();
                 return;
+            case 'cellSize':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setCellSize(nextValue);
+                return;
+            case 'mapWidth':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setMapSize(nextValue, this.mapHeight);
+                return;
+            case 'mapHeight':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setMapSize(this.mapWidth, nextValue);
+                return;
+            case 'background':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setBackground(nextValue);
+                return;
+            case 'floorImage':
+                if (!this.assertType(nextValue, Array, key)) return;
+                this.setFloorImage(nextValue);
+                return;
         }
+        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
 
     private addToGroup(group: LayerGroup) {

@@ -115,10 +115,23 @@ export class Text extends RenderItem<ETextEvent> {
         parentComponent?: ComponentInternalInstance | null
     ): void {
         switch (key) {
+            case 'text':
+                if (!this.assertType(nextValue, 'string', key)) return;
+                this.setText(nextValue);
+                return;
+            case 'fillStyle':
+                this.setStyle(nextValue);
+                return;
+            case 'strokeStyle':
+                this.setStyle(void 0, nextValue);
+                return;
             case 'font':
                 if (!this.assertType(nextValue, 'string', key)) return;
                 this.setFont(nextValue);
                 break;
+            case 'strokeWidth':
+                this.setStrokeWidth(nextValue);
+                return;
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
@@ -173,6 +186,7 @@ export class Image extends RenderItem<EImageEvent> {
                 this.setImage(nextValue);
                 return;
         }
+        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
 }
 

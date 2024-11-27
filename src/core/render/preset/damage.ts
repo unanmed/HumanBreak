@@ -24,6 +24,7 @@ import { getDamageColor } from '@/plugin/utils';
 import { ERenderItemEvent, RenderItem, transformCanvas } from '../item';
 import EventEmitter from 'eventemitter3';
 import { Transform } from '../transform';
+import { ElementNamespace, ComponentInternalInstance } from 'vue';
 
 const ensureFloorDamage = Mota.require('fn', 'ensureFloorDamage');
 
@@ -200,6 +201,13 @@ export class Damage extends RenderItem<EDamageEvent> {
         this.emit('setMapSize', width, height);
     }
 
+    /**
+     * 设置每个图块的大小
+     */
+    setCellSize(size: number) {
+        this.cellSize = size;
+        this.update();
+    }
     /**
      * 更新怪物列表。更新后，{@link Damage.enemy} 会丢失原来的怪物列表引用，换为传入的列表引用
      * @param enemy 怪物列表
@@ -524,6 +532,48 @@ export class Damage extends RenderItem<EDamageEvent> {
         });
         ctx.restore();
         // console.timeEnd('damage');
+    }
+
+    patchProp(
+        key: string,
+        prevValue: any,
+        nextValue: any,
+        namespace?: ElementNamespace,
+        parentComponent?: ComponentInternalInstance | null
+    ): void {
+        switch (key) {
+            case 'mapWidth':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setMapSize(nextValue, this.mapHeight);
+                return;
+            case 'mapHeight':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setMapSize(this.mapWidth, nextValue);
+                return;
+            case 'cellSize':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setCellSize(nextValue);
+                return;
+            case 'enemy':
+                if (!this.assertType(nextValue, 'object', key)) return;
+                this.updateCollection(nextValue);
+                return;
+            case 'font':
+                if (!this.assertType(nextValue, 'string', key)) return;
+                this.font = nextValue;
+                this.update();
+                return;
+            case 'strokeStyle':
+                this.strokeStyle = nextValue;
+                this.update();
+                return;
+            case 'strokeWidth':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.strokeWidth = nextValue;
+                this.update();
+                return;
+        }
+        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
 
     destroy(): void {

@@ -86,7 +86,7 @@ export interface DamageProps extends BaseProps {
     cellSize?: number;
     enemy?: EnemyCollection;
     font?: string;
-    strokeStyle?: string;
+    strokeStyle?: CanvasStyle;
     strokeWidth?: number;
 }
 

@@ -50,16 +50,12 @@ export class Sprite<
         namespace?: ElementNamespace,
         parentComponent?: ComponentInternalInstance | null
     ): void {
-        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
-        const type = typeof nextValue;
         switch (key) {
             case 'render':
-                if (type !== 'function') {
-                    logger.error(21, key, 'function', type);
-                    return;
-                }
+                if (this.assertType(nextValue, 'function', key)) return;
                 this.setRenderFn(nextValue);
                 break;
         }
+        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
 }

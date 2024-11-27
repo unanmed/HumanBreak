@@ -546,7 +546,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      */
     protected assertType(
         value: any,
-        expected: string | (new () => any),
+        expected: string | (new (...params: any[]) => any),
         key: string
     ) {
         if (typeof expected === 'string') {
