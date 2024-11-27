@@ -3,6 +3,7 @@ import { Sprite } from '../sprite';
 import { ERenderItemEvent, RenderItem, RenderItemPosition } from '../item';
 import { Transform } from '../transform';
 import { ElementNamespace, ComponentInternalInstance } from 'vue';
+import { AutotileRenderable, RenderableData } from '../cache';
 
 type CanvasStyle = string | CanvasGradient | CanvasPattern;
 
@@ -185,4 +186,51 @@ export class Comment extends RenderItem {
         canvas: MotaOffscreenCanvas2D,
         transform: Transform
     ): void {}
+}
+
+export interface EIconEvent extends ERenderItemEvent {}
+
+export class Icon extends RenderItem<EIconEvent> {
+    /** 图标id */
+    icon: AllNumbers = 0;
+    /** 帧数 */
+    frame: number = 0;
+    /** 是否启用动画 */
+    animate: boolean = false;
+    /** 图标的渲染信息 */
+    private renderable?: RenderableData | AutotileRenderable;
+
+    protected render(
+        canvas: MotaOffscreenCanvas2D,
+        transform: Transform
+    ): void {}
+
+    /**
+     * 设置图标
+     * @param id 图标id
+     */
+    setIcon(id: AllIds | AllNumbers) {}
+
+    patchProp(
+        key: string,
+        prevValue: any,
+        nextValue: any,
+        namespace?: ElementNamespace,
+        parentComponent?: ComponentInternalInstance | null
+    ): void {
+        switch (key) {
+            case 'icon':
+                this.setIcon(nextValue);
+                return;
+            case 'animate':
+                if (!this.assertType(nextValue, 'boolean', key)) return;
+                this.animate = nextValue;
+                return;
+            case 'frame':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.frame = nextValue;
+                return;
+        }
+        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
+    }
 }

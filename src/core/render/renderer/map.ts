@@ -4,7 +4,7 @@ import { ElementNamespace, VNodeProps } from 'vue';
 import { Container } from '../container';
 import { MotaRenderer } from '../render';
 import { Sprite } from '../sprite';
-import { Comment, Image, Text } from '../preset/misc';
+import { Comment, Icon, Image, Text } from '../preset/misc';
 import { Shader } from '../shader';
 import { Animate, Damage, EDamageEvent, Layer, LayerGroup } from '../preset';
 import {
@@ -167,7 +167,7 @@ tagMap.register('layer-group', (_0, _1, props) => {
 tagMap.register<EDamageEvent, Damage>('damage', (_0, _1, props) => {
     return new Damage();
 });
-tagMap.register('animate', (_0, _1, props) => {
+tagMap.register('animation', (_0, _1, props) => {
     return new Animate();
 });
 tagMap.register('graphics', standardElement(Graphics));
@@ -178,3 +178,4 @@ tagMap.register('g-line', standardElement(Line));
 tagMap.register('g-bezier', standardElement(BezierCurve));
 tagMap.register('g-quad', standardElement(QuadraticCurve));
 tagMap.register('g-path', standardElement(Path));
+tagMap.register('icon', standardElement(Icon));

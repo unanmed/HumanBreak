@@ -105,3 +105,5 @@ export interface BezierProps extends BaseProps {}
 export interface QuadraticProps extends BaseProps {}
 
 export interface PathProps extends BaseProps {}
+
+export interface IconProps extends BaseProps {}

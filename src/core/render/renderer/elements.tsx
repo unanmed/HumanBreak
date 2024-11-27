@@ -19,6 +19,7 @@ import {
     EllipseProps,
     GL2Props,
     GraphicsProps,
+    IconProps,
     ImageProps,
     LayerGroupProps,
     LayerProps,
@@ -34,7 +35,7 @@ import { ERenderItemEvent, RenderItem } from '../item';
 import { ESpriteEvent, Sprite } from '../sprite';
 import { EContainerEvent } from '../container';
 import { EGL2Event } from '../gl2';
-import { EImageEvent, ETextEvent } from '../preset/misc';
+import { EIconEvent, EImageEvent, ETextEvent } from '../preset/misc';
 import { ELayerEvent, ELayerGroupEvent } from '../preset/layer';
 import { EAnimateEvent } from '../preset/animate';
 import { EDamageEvent } from '../preset/damage';
@@ -86,7 +87,7 @@ declare module 'vue/jsx-runtime' {
             layer: TagDefine<LayerProps, ELayerEvent>;
             'layer-group': TagDefine<LayerGroupProps, ELayerGroupEvent>;
             damage: TagDefine<DamageProps, EDamageEvent>;
-            animate: TagDefine<AnimateProps, EAnimateEvent>;
+            animation: TagDefine<AnimateProps, EAnimateEvent>;
             graphics: TagDefine<GraphicsProps, ERenderItemEvent>;
             'g-rect': TagDefine<RectProps, ERenderItemEvent>;
             'g-circle': TagDefine<CirclesProps, ERenderItemEvent>;
@@ -95,6 +96,7 @@ declare module 'vue/jsx-runtime' {
             'g-bezier': TagDefine<BezierProps, ERenderItemEvent>;
             'g-quad': TagDefine<QuadraticProps, ERenderItemEvent>;
             'g-path': TagDefine<PathProps, ERenderItemEvent>;
+            icon: TagDefine<IconProps, EIconEvent>;
         }
     }
 }
