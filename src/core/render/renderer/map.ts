@@ -68,12 +68,24 @@ const standardElement = (
     return (_0: any, _1: any, props?: any) => {
         if (!props) return new Item('static');
         else {
-            const {
-                type = 'static',
-                enableCache = true,
-                fallthrough = false
-            } = props;
-            return new Item(type, enableCache, fallthrough);
+            const { type = 'static', cache = true, fall = false } = props;
+            return new Item(type, cache, fall);
+        }
+    };
+};
+
+const standardElementNoCache = (
+    Item: new (
+        type: RenderItemPosition,
+        cache?: boolean,
+        fall?: boolean
+    ) => RenderItem
+) => {
+    return (_0: any, _1: any, props?: any) => {
+        if (!props) return new Item('static');
+        else {
+            const { type = 'static', cache = false, fall = false } = props;
+            return new Item(type, cache, fall);
         }
     };
 };
@@ -169,11 +181,11 @@ tagMap.register<EDamageEvent, Damage>('damage', (_0, _1, props) => {
 tagMap.register('animation', (_0, _1, props) => {
     return new Animate();
 });
-tagMap.register('g-rect', standardElement(Rect));
-tagMap.register('g-circle', standardElement(Circle));
-tagMap.register('g-ellipse', standardElement(Ellipse));
-tagMap.register('g-line', standardElement(Line));
-tagMap.register('g-bezier', standardElement(BezierCurve));
-tagMap.register('g-quad', standardElement(QuadraticCurve));
-tagMap.register('g-path', standardElement(Path));
-tagMap.register('icon', standardElement(Icon));
+tagMap.register('g-rect', standardElementNoCache(Rect));
+tagMap.register('g-circle', standardElementNoCache(Circle));
+tagMap.register('g-ellipse', standardElementNoCache(Ellipse));
+tagMap.register('g-line', standardElementNoCache(Line));
+tagMap.register('g-bezier', standardElementNoCache(BezierCurve));
+tagMap.register('g-quad', standardElementNoCache(QuadraticCurve));
+tagMap.register('g-path', standardElementNoCache(Path));
+tagMap.register('icon', standardElementNoCache(Icon));

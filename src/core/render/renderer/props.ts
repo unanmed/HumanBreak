@@ -25,8 +25,8 @@ export interface BaseProps {
     hidden?: boolean;
     transform?: Transform;
     type?: RenderItemPosition;
-    enableCache?: boolean;
-    fallthrough?: boolean;
+    cache?: boolean;
+    fall?: boolean;
     id?: string;
     alpha?: number;
     composite?: GlobalCompositeOperation;
