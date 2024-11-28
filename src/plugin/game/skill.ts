@@ -51,14 +51,21 @@ export const jumpIgnoreFloor: Set<FloorIds> = new Set([
     'MT93'
 ]);
 // 跳跃
-export function jumpSkill() {
+export function jumpSkill(callback?: () => void) {
     if (core.status.floorId.startsWith('tower')) {
-        return core.drawTip('当前无法使用该技能');
+        callback?.();
+        core.drawTip('当前无法使用该技能');
+        return false;
     }
     if (jumpIgnoreFloor.has(core.status.floorId) || flags.onChase) {
-        return core.drawTip('当前楼层无法使用该技能');
+        callback?.();
+        core.drawTip('当前楼层无法使用该技能');
+        return false;
     }
-    if (!HeroSkill.learnedSkill(HeroSkill.Jump)) return;
+    if (!HeroSkill.learnedSkill(HeroSkill.Jump)) {
+        callback?.();
+        return false;
+    }
     if (!flags['jump_' + core.status.floorId])
         flags['jump_' + core.status.floorId] = 0;
     if (core.status.floorId == 'MT14') {
@@ -67,11 +74,16 @@ export function jumpSkill() {
             flags.MT14Jump = true;
         }
         if (flags.jump_MT14 === 2 && !flags.MT14Jump) {
-            return core.drawTip('该地图还有一个必跳的地方，你还没有跳');
+            callback?.();
+            core.drawTip('该地图还有一个必跳的地方，你还没有跳');
+            return false;
         }
     }
-    if (flags['jump_' + core.status.floorId] >= 3)
-        return core.drawTip('当前地图使用次数已用完');
+    if (flags['jump_' + core.status.floorId] >= 3) {
+        callback?.();
+        core.drawTip('当前地图使用次数已用完');
+        return false;
+    }
     var direction = core.status.hero.loc.direction;
     var loc = core.status.hero.loc;
     var checkLoc = {};
@@ -106,13 +118,19 @@ export function jumpSkill() {
         cls == 'items' ||
         (id.startsWith('X') && !ignoreInJump.event.includes(id)) ||
         (bgId.startsWith('X') && !ignoreInJump.bg.includes(bgId))
-    )
-        return core.drawTip('当前无法使用技能');
+    ) {
+        callback?.();
+        core.drawTip('当前无法使用技能');
+        return false;
+    }
     // debugger;
     // 不是怪物且不可以通行
     if (noPass && !(cls == 'enemys' || cls == 'enemy48')) {
         var toLoc = checkNoPass(direction, checkLoc.x, checkLoc.y, true);
-        if (!toLoc) return;
+        if (!toLoc) {
+            callback?.();
+            return false;
+        }
         core.autosave();
         if (flags.chapter <= 1) core.status.hero.hp -= 200 * flags.hard;
         core.updateStatusBar();
@@ -121,16 +139,25 @@ export function jumpSkill() {
             core.status.hero.hp = 0;
             core.updateStatusBar();
             core.events.lose('你跳死了');
+            callback?.();
+            return false;
         }
         core.playSound('015-Jump01.ogg');
-        core.insertAction([
-            { type: 'jumpHero', loc: [toLoc.x, toLoc.y], time: 500 }
-        ]);
+        core.insertAction(
+            [{ type: 'jumpHero', loc: [toLoc.x, toLoc.y], time: 500 }],
+            void 0,
+            void 0,
+            callback
+        );
+        return true;
     }
     // 是怪物
     if (cls == 'enemys' || cls == 'enemy48') {
         var firstNoPass = checkNoPass(direction, checkLoc.x, checkLoc.y, false);
-        if (!firstNoPass) return;
+        if (!firstNoPass) {
+            callback?.();
+            return false;
+        }
         core.autosave();
         if (flags.chapter <= 1) core.status.hero.hp -= 200 * flags.hard;
         core.updateStatusBar();
@@ -139,18 +166,27 @@ export function jumpSkill() {
             core.status.hero.hp = 0;
             core.updateStatusBar();
             core.events.lose('你跳死了');
+            callback?.();
+            return false;
         }
         core.playSound('015-Jump01.ogg');
-        core.insertAction([
-            {
-                type: 'jump',
-                from: [checkLoc.x, checkLoc.y],
-                to: [firstNoPass.x, firstNoPass.y],
-                time: 500,
-                keep: true
-            }
-        ]);
+        core.insertAction(
+            [
+                {
+                    type: 'jump',
+                    from: [checkLoc.x, checkLoc.y],
+                    to: [firstNoPass.x, firstNoPass.y],
+                    time: 500,
+                    keep: true
+                }
+            ],
+            void 0,
+            void 0,
+            callback
+        );
+        return true;
     }
+    return false;
 
     // 检查一条线上的不可通过
     function checkNoPass(direction, x, y, startNo) {
@@ -174,8 +210,9 @@ export function jumpSkill() {
             y > core.status.thisMap.height - 1 ||
             x < 0 ||
             y < 0
-        )
+        ) {
             return core.drawTip('当前无法使用技能');
+        }
         var id = core.getBlockId(x, y) || '';
         if (core.getBgNumber(x, y))
             var bgId =

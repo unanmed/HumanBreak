@@ -46,12 +46,17 @@ type KeyUsing = [Hotkey, symbol];
 
 /**
  * 在组件中定义按键操作
+ * @param noScope 是否不创建新作用域
  */
-export function useKey(): KeyUsing {
-    const sym = Symbol();
-    gameKey.use(sym);
-    onUnmounted(() => {
-        gameKey.dispose();
-    });
-    return [gameKey, sym];
+export function useKey(noScope: boolean = false): KeyUsing {
+    if (noScope) {
+        return [gameKey, gameKey.scope];
+    } else {
+        const sym = Symbol();
+        gameKey.use(sym);
+        onUnmounted(() => {
+            gameKey.dispose();
+        });
+        return [gameKey, sym];
+    }
 }

@@ -152,7 +152,10 @@ export function init() {
                 !core.status.floorId.startsWith('tower') &&
                 HeroSkill.learnedSkill(HeroSkill.Jump)
             ) {
-                Mota.Plugin.require('skill_g').jumpSkill();
+                const success = Mota.Plugin.require('skill_g').jumpSkill();
+                core.status.route.push(`useSkill:${toEmit}`);
+                if (!success) core.replay();
+                return true;
             } else {
                 if (core.hasItem('pickaxe')) {
                     core.useItem('pickaxe');

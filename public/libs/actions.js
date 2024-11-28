@@ -2746,11 +2746,8 @@ actions.prototype._clickReplay = function (x, y) {
 
 actions.prototype._clickReplay_fromBeginning = function () {
     core.ui.closePanel();
-    core.startGame(
-        core.status.hard,
-        core.getFlag('__seed__'),
-        core.cloneArray(core.status.route)
-    );
+    const route = core.status.route.slice();
+    core.startGame(core.status.hard, core.getFlag('__seed__'), route);
 };
 
 actions.prototype._clickReplay_fromLoad = function () {
