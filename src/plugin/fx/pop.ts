@@ -19,7 +19,7 @@ function parabola(input: number): [number, number] {
     return [x, x ** 2 / 20 - 3 * x];
 }
 
-class Pop extends RenderItem {
+export class Pop extends RenderItem {
     private popList: Set<PopData> = new Set();
 
     private delegation: number = 0;

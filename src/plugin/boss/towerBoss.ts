@@ -22,7 +22,7 @@ import {
 import { IStateDamageable } from '@/game/state/interface';
 import { HeroRenderer } from '@/core/render/preset/hero';
 import { controller } from '@/module/weather';
-import { PopText } from '../fx/pop';
+import { Pop, PopText } from '../fx/pop';
 
 Mota.require('var', 'loading').once('coreInit', () => {
     const shader = new Shader();
@@ -78,7 +78,7 @@ export class TowerBoss extends BarrageBoss {
     /** 楼层渲染容器 */
     private mapDraw: Container;
     /** 伤害弹出 */
-    pop: PopText;
+    pop: Pop;
 
     /** 每个阶段的进度，具体定义参考 ai 函数开头 */
     private stageProgress: number = 0;
@@ -131,7 +131,7 @@ export class TowerBoss extends BarrageBoss {
         const render = MotaRenderer.get('render-main')!;
         this.group = render.getElementById('layer-main') as LayerGroup;
         this.mapDraw = render.getElementById('map-draw') as Container;
-        this.pop = render.getElementById('pop-main') as PopText;
+        this.pop = render.getElementById('pop-main') as Pop;
 
         this.healthBar.init();
         this.word.init();
