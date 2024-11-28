@@ -25,6 +25,8 @@ interface IGraphicProperty extends ILineProperty {
     fill: CanvasStyle;
     /** 描边样式 */
     stroke: CanvasStyle;
+    /** 填充算法 */
+    fillRule: CanvasFillRule;
 }
 
 export const enum GraphicMode {
@@ -49,6 +51,7 @@ export abstract class GraphicItemBase
     lineJoin: CanvasLineJoin = 'bevel';
     lineCap: CanvasLineCap = 'butt';
     miterLimit: number = 10;
+    fillRule: CanvasFillRule = 'nonzero';
 
     /**
      * 设置描边绘制的信息
@@ -101,10 +104,27 @@ export class Rect extends GraphicItemBase {
 }
 
 export class Circle extends GraphicItemBase {
+    radius: number = 10;
+    start: number = 0;
+    end: number = Math.PI * 2;
+
     protected render(
         canvas: MotaOffscreenCanvas2D,
         transform: Transform
     ): void {}
+
+    /**
+     * 设置圆的半径
+     * @param radius 半径
+     */
+    setRadius(radius: number) {}
+
+    /**
+     * 设置圆的起始与终止角度
+     * @param start 起始角度
+     * @param end 终止角度
+     */
+    setAngle(start: number, end: number) {}
 
     patchProp(
         key: string,
@@ -120,10 +140,29 @@ export class Circle extends GraphicItemBase {
 }
 
 export class Ellipse extends GraphicItemBase {
+    radiusX: number = 10;
+    radiusY: number = 10;
+    start: number = 0;
+    end: number = Math.PI * 2;
+
     protected render(
         canvas: MotaOffscreenCanvas2D,
         transform: Transform
     ): void {}
+
+    /**
+     * 设置椭圆的横纵轴长度
+     * @param x 横轴长度
+     * @param y 纵轴长度
+     */
+    setRadius(x: number, y: number) {}
+
+    /**
+     * 设置椭圆的起始与终止角度
+     * @param start 起始角度
+     * @param end 终止角度
+     */
+    setAngle(start: number, end: number) {}
 
     patchProp(
         key: string,
@@ -139,10 +178,25 @@ export class Ellipse extends GraphicItemBase {
 }
 
 export class Line extends GraphicItemBase {
+    x1: number = 0;
+    y1: number = 0;
+    x2: number = 0;
+    y2: number = 0;
+
     protected render(
         canvas: MotaOffscreenCanvas2D,
         transform: Transform
     ): void {}
+
+    /**
+     * 设置第一个点的横纵坐标
+     */
+    setPoint1(x: number, y: number) {}
+
+    /**
+     * 设置第二个点的横纵坐标
+     */
+    setPoint2(x: number, y: number) {}
 
     patchProp(
         key: string,
@@ -158,10 +212,39 @@ export class Line extends GraphicItemBase {
 }
 
 export class BezierCurve extends GraphicItemBase {
+    sx: number = 0;
+    sy: number = 0;
+    cp1x: number = 0;
+    cp1y: number = 0;
+    cp2x: number = 0;
+    cp2y: number = 0;
+    ex: number = 0;
+    ey: number = 0;
+
     protected render(
         canvas: MotaOffscreenCanvas2D,
         transform: Transform
     ): void {}
+
+    /**
+     * 设置起始点坐标
+     */
+    setStart(x: number, y: number) {}
+
+    /**
+     * 设置控制点1坐标
+     */
+    setControl1(x: number, y: number) {}
+
+    /**
+     * 设置控制点2坐标
+     */
+    setControl2(x: number, y: number) {}
+
+    /**
+     * 设置终点坐标
+     */
+    setEnd(x: number, y: number) {}
 
     patchProp(
         key: string,
@@ -177,10 +260,32 @@ export class BezierCurve extends GraphicItemBase {
 }
 
 export class QuadraticCurve extends GraphicItemBase {
+    sx: number = 0;
+    sy: number = 0;
+    cpx: number = 0;
+    cpy: number = 0;
+    ex: number = 0;
+    ey: number = 0;
+
     protected render(
         canvas: MotaOffscreenCanvas2D,
         transform: Transform
     ): void {}
+
+    /**
+     * 设置起始点坐标
+     */
+    setStart(x: number, y: number) {}
+
+    /**
+     * 设置控制点坐标
+     */
+    setControl(x: number, y: number) {}
+
+    /**
+     * 设置终点坐标
+     */
+    setEnd(x: number, y: number) {}
 
     patchProp(
         key: string,
@@ -203,6 +308,19 @@ export class Path extends GraphicItemBase {
         canvas: MotaOffscreenCanvas2D,
         transform: Transform
     ): void {}
+
+    /**
+     * 获取当前路径
+     */
+    getPath() {
+        return this.path;
+    }
+
+    /**
+     * 为路径添加路径
+     * @param path 要添加的路径
+     */
+    addPath(path: Path2D) {}
 
     patchProp(
         key: string,
