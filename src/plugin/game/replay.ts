@@ -46,6 +46,7 @@ export function init() {
                 break;
         }
         const settingName = settingNameMap[setting];
+        core.status.route.push(name);
         if (settingName) {
             tipAndWait(`切换设置：${settingName}`, 1000).then(() => {
                 core.replay();
@@ -53,7 +54,6 @@ export function init() {
         } else {
             core.replay();
         }
-        core.status.route.push(name);
         return true;
     });
 
@@ -63,10 +63,10 @@ export function init() {
         upgradeSkill(skill);
         const s = getSkillFromIndex(skill);
         const skillName = s?.title;
+        core.status.route.push(name);
         tipAndWait(`升级技能：${skillName}`, 1000).then(() => {
             core.replay();
         });
-        core.status.route.push(name);
         return true;
     });
 
@@ -113,10 +113,10 @@ export function init() {
             (type === 'buy' ? num : -num) as number
         );
         const { name: itemName } = core.material.items[id as AllIdsOf<'items'>];
+        core.status.route.push(name);
         tipAndWait(`购买物品：${itemName}`, 1000).then(() => {
             core.replay();
         });
-        core.status.route.push(name);
         return true;
     });
 
@@ -180,6 +180,7 @@ export function init() {
         }
         core.updateStatusBar();
         const name = skillNameMap[toEmit];
+        core.status.route.push(`useSkill:${toEmit}`);
         if (name) {
             tipAndWait(`切换技能：${name}`, 1000).then(() => {
                 core.replay();
@@ -187,7 +188,6 @@ export function init() {
         } else {
             core.replay();
         }
-        core.status.route.push(`useSkill:${toEmit}`);
         return true;
     }
 
