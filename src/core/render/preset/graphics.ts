@@ -1,10 +1,10 @@
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
-import { RenderItem } from '../item';
+import { ERenderItemEvent, RenderItem } from '../item';
 import { Transform } from '../transform';
 import { ElementNamespace, ComponentInternalInstance } from 'vue';
 
 /*
- * Expected usage (this comment needs to be deleted after implements correctly):
+ * Expected usage (this comment needs to be deleted after implementing correctly):
  * <rect x={10} y={30} width={50} height={30} fill stroke /> <!-- 表现为先填充，后描边 -->
  * <circle x={10} y={50} radius={10} start={Math.PI / 2} end={Math.PI} stroke /> <!-- 表现为仅描边 -->
  * <ellipse x={100} y={50} radiusX={10} radiusY={50} strokeAndFill /> <!-- 表现为先描边后填充 -->
@@ -50,8 +50,10 @@ export const enum GraphicMode {
     StrokeAndFill
 }
 
+export interface EGraphicItemEvent extends ERenderItemEvent {}
+
 export abstract class GraphicItemBase
-    extends RenderItem
+    extends RenderItem<EGraphicItemEvent>
     implements IGraphicProperty
 {
     mode: number = GraphicMode.Fill;

@@ -248,3 +248,34 @@ export class Icon extends RenderItem<EIconEvent> {
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
 }
+
+export interface EWinskinEvent extends ERenderItemEvent {}
+
+export class Winskin extends RenderItem<EWinskinEvent> {
+    image: SizedCanvasImageSource;
+
+    constructor(
+        image: SizedCanvasImageSource,
+        type: RenderItemPosition = 'static'
+    ) {
+        super(type, false, false);
+        this.image = image;
+    }
+
+    protected render(
+        canvas: MotaOffscreenCanvas2D,
+        transform: Transform
+    ): void {}
+
+    patchProp(
+        key: string,
+        prevValue: any,
+        nextValue: any,
+        namespace?: ElementNamespace,
+        parentComponent?: ComponentInternalInstance | null
+    ): void {
+        switch (key) {
+        }
+        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
+    }
+}

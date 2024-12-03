@@ -28,17 +28,24 @@ import {
     RectProps,
     ShaderProps,
     SpriteProps,
-    TextProps
+    TextProps,
+    WinskinProps
 } from './props';
 import { ERenderItemEvent, RenderItem } from '../item';
 import { ESpriteEvent, Sprite } from '../sprite';
 import { EContainerEvent } from '../container';
 import { EGL2Event } from '../gl2';
-import { EIconEvent, EImageEvent, ETextEvent } from '../preset/misc';
+import {
+    EIconEvent,
+    EImageEvent,
+    ETextEvent,
+    EWinskinEvent
+} from '../preset/misc';
 import { ELayerEvent, ELayerGroupEvent } from '../preset/layer';
 import { EAnimateEvent } from '../preset/animate';
 import { EDamageEvent } from '../preset/damage';
 import { EShaderEvent } from '../shader';
+import { EGraphicItemEvent } from '../preset/graphics';
 
 export type WrapEventEmitterEvents<T extends EventEmitter.ValidEventTypes> =
     T extends string | symbol
@@ -87,14 +94,15 @@ declare module 'vue/jsx-runtime' {
             'layer-group': TagDefine<LayerGroupProps, ELayerGroupEvent>;
             damage: TagDefine<DamageProps, EDamageEvent>;
             animation: TagDefine<AnimateProps, EAnimateEvent>;
-            'g-rect': TagDefine<RectProps, ERenderItemEvent>;
-            'g-circle': TagDefine<CirclesProps, ERenderItemEvent>;
-            'g-ellipse': TagDefine<EllipseProps, ERenderItemEvent>;
-            'g-line': TagDefine<LineProps, ERenderItemEvent>;
-            'g-bezier': TagDefine<BezierProps, ERenderItemEvent>;
-            'g-quad': TagDefine<QuadraticProps, ERenderItemEvent>;
-            'g-path': TagDefine<PathProps, ERenderItemEvent>;
+            'g-rect': TagDefine<RectProps, EGraphicItemEvent>;
+            'g-circle': TagDefine<CirclesProps, EGraphicItemEvent>;
+            'g-ellipse': TagDefine<EllipseProps, EGraphicItemEvent>;
+            'g-line': TagDefine<LineProps, EGraphicItemEvent>;
+            'g-bezier': TagDefine<BezierProps, EGraphicItemEvent>;
+            'g-quad': TagDefine<QuadraticProps, EGraphicItemEvent>;
+            'g-path': TagDefine<PathProps, EGraphicItemEvent>;
             icon: TagDefine<IconProps, EIconEvent>;
+            winskin: TagDefine<WinskinProps, EWinskinEvent>;
         }
     }
 }

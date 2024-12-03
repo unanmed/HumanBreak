@@ -4,7 +4,7 @@ import { ElementNamespace, VNodeProps } from 'vue';
 import { Container } from '../container';
 import { MotaRenderer } from '../render';
 import { Sprite } from '../sprite';
-import { Comment, Icon, Image, Text } from '../preset/misc';
+import { Comment, Icon, Image, Text, Winskin } from '../preset/misc';
 import { Shader } from '../shader';
 import { Animate, Damage, EDamageEvent, Layer, LayerGroup } from '../preset';
 import {
@@ -189,3 +189,13 @@ tagMap.register('g-bezier', standardElementNoCache(BezierCurve));
 tagMap.register('g-quad', standardElementNoCache(QuadraticCurve));
 tagMap.register('g-path', standardElementNoCache(Path));
 tagMap.register('icon', standardElementNoCache(Icon));
+tagMap.register('winskin', (_0, _1, props) => {
+    if (!props) return new Winskin(core.material.images.images['winskin.png']);
+    else {
+        const {
+            image = core.material.images.images['winskin.png'],
+            type = 'static'
+        } = props;
+        return new Winskin(image, type);
+    }
+});
