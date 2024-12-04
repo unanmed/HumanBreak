@@ -247,6 +247,13 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     /** 该渲染元素的子元素 */
     children: Set<RenderItem<ERenderItemEvent>> = new Set();
 
+    get x() {
+        return this._transform.x;
+    }
+    get y() {
+        return this._transform.y;
+    }
+
     /** 渲染缓存信息 */
     protected cache: MotaOffscreenCanvas2D = new MotaOffscreenCanvas2D();
     /** 是否需要更新缓存 */

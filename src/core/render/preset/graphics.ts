@@ -74,16 +74,37 @@ export abstract class GraphicItemBase
     setLineOption(options: Partial<ILineProperty>) {}
 
     /**
-     * 设置绘制样式
+     * 设置填充样式
      * @param style 绘制样式
      */
-    setStyle(style: CanvasStyle) {}
+    setFillStyle(style: CanvasStyle) {}
+
+    /**
+     * 设置描边样式
+     * @param style 绘制样式
+     */
+    setStrokeStyle(style: CanvasStyle) {}
+
+    /**
+     * 设置填充原则
+     * @param rule 填充原则
+     */
+    setFillRule(rule: CanvasFillRule) {}
 
     /**
      * 设置绘制模式，是描边还是填充
      * @param mode 绘制模式
      */
     setMode(mode: GraphicMode) {}
+
+    /**
+     * 设置画布的渲染状态，在实际渲染前调用
+     * @param canvas 要设置的画布
+     */
+    protected setCanvasState(canvas: MotaOffscreenCanvas2D) {
+        const ctx = canvas.ctx;
+        ctx.fillStyle = this.fill; // 示例，后面的都按这个写，不需要save restore，写完把这个注释删了
+    }
 
     patchProp(
         key: string,
@@ -102,7 +123,29 @@ export class Rect extends GraphicItemBase {
     protected render(
         canvas: MotaOffscreenCanvas2D,
         transform: Transform
-    ): void {}
+    ): void {
+        const ctx = canvas.ctx;
+        this.setCanvasState(canvas);
+        ctx.beginPath();
+        ctx.rect(this.x, this.y, this.width, this.height);
+
+        switch (this.mode) {
+            case GraphicMode.Fill:
+                ctx.fill(this.fillRule);
+                break;
+            case GraphicMode.Stroke:
+                ctx.stroke();
+                break;
+            case GraphicMode.FillAndStroke:
+                ctx.fill(this.fillRule);
+                ctx.stroke();
+                break;
+            case GraphicMode.StrokeAndFill:
+                ctx.stroke();
+                ctx.fill(this.fillRule);
+                break;
+        }
+    }
 
     patchProp(
         key: string,
