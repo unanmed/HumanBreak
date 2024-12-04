@@ -1,5 +1,9 @@
 import { mat3, ReadonlyMat3, ReadonlyVec3, vec2, vec3 } from 'gl-matrix';
 
+export interface ITransformUpdatable {
+    update(): void;
+}
+
 export class Transform {
     mat: mat3 = mat3.create();
 
@@ -11,6 +15,17 @@ export class Transform {
 
     /** 有没有对这个Transform进行过修改，用于优化常规表现 */
     private modified: boolean = false;
+
+    /** 绑定的可更新元素 */
+    bindedObject?: ITransformUpdatable;
+
+    /**
+     * 对这个变换实例添加绑定对象，当矩阵变换时，自动调用其 update 函数
+     * @param obj 要绑定的对象
+     */
+    bind(obj?: ITransformUpdatable) {
+        this.bindedObject = obj;
+    }
 
     /**
      * 重设所有参数
@@ -33,6 +48,7 @@ export class Transform {
         this.scaleX *= x;
         this.scaleY *= y;
         this.modified = true;
+        this.bindedObject?.update();
     }
 
     /**
@@ -43,6 +59,7 @@ export class Transform {
         this.x += x;
         this.y += y;
         this.modified = true;
+        this.bindedObject?.update();
     }
 
     /**
@@ -56,6 +73,7 @@ export class Transform {
             this.rad -= n * Math.PI * 2;
         }
         this.modified = true;
+        this.bindedObject?.update();
     }
 
     /**
@@ -66,6 +84,7 @@ export class Transform {
         this.scaleX = x;
         this.scaleY = y;
         this.modified = true;
+        this.bindedObject?.update();
     }
 
     /**
@@ -76,6 +95,7 @@ export class Transform {
         this.x = x;
         this.y = y;
         this.modified = true;
+        this.bindedObject?.update();
     }
 
     /**
@@ -85,6 +105,7 @@ export class Transform {
         mat3.rotate(this.mat, this.mat, rad - this.rad);
         this.rad = rad;
         this.modified = true;
+        this.bindedObject?.update();
     }
 
     /**
@@ -110,6 +131,7 @@ export class Transform {
             mat3.fromValues(a, b, 0, c, d, 0, e, f, 1)
         );
         this.calAttributes();
+        this.bindedObject?.update();
     }
 
     /**
@@ -131,6 +153,7 @@ export class Transform {
     ) {
         mat3.set(this.mat, a, b, 0, c, d, 0, e, f, 1);
         this.calAttributes();
+        this.bindedObject?.update();
     }
 
     /**

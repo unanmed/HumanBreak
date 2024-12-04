@@ -233,25 +233,17 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
 
     protected needUpdate: boolean = false;
 
-    private _transform: Transform = new Transform();
-    /** 设置该渲染元素的模型变换矩阵 */
-    set transform(value: Transform) {
-        this._transform = value;
-        this.update();
-    }
-    /** 获取该渲染元素的模型变换矩阵 */
-    get transform() {
-        this.update();
-        return this._transform;
-    }
+    /** 该元素的变换矩阵 */
+    transform: Transform = new Transform();
+
     /** 该渲染元素的子元素 */
     children: Set<RenderItem<ERenderItemEvent>> = new Set();
 
     get x() {
-        return this._transform.x;
+        return this.transform.x;
     }
     get y() {
-        return this._transform.y;
+        return this.transform.y;
     }
 
     /** 渲染缓存信息 */
@@ -274,6 +266,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this.transformFallThrough = transformFallThrough;
         this.type = type;
 
+        this.transform.bind(this);
         this.cache.withGameScale(true);
     }
 
@@ -322,7 +315,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         if (this.hidden) return;
         this.emit('beforeRender', transform);
         this.needUpdate = false;
-        const tran = this.transformFallThrough ? transform : this._transform;
+        const tran = this.transformFallThrough ? transform : this.transform;
 
         const ax = -this.anchorX * this.width;
         const ay = -this.anchorY * this.height;

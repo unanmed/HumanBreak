@@ -13,7 +13,7 @@ import { ElementNamespace, ComponentInternalInstance } from 'vue';
  * Line BezierCurve QuadraticCurve 无法设置填充属性，如设置则无效
  */
 
-interface ILineProperty {
+export interface ILineProperty {
     /** 线宽 */
     lineWidth: number;
     /** 线的虚线设置 */
@@ -28,8 +28,8 @@ interface ILineProperty {
     miterLimit: number;
 }
 
-interface IGraphicProperty extends ILineProperty {
-    /** 渲染模式，可选 {@link GraphicMode.Fill}, {@link GraphicMode.Stroke}, {@link GraphicMode.All} */
+export interface IGraphicProperty extends ILineProperty {
+    /** 渲染模式，参考 {@link GraphicMode} */
     mode: GraphicMode;
     /** 填充样式 */
     fill: CanvasStyle;
@@ -145,18 +145,6 @@ export class Rect extends GraphicItemBase {
                 ctx.fill(this.fillRule);
                 break;
         }
-    }
-
-    patchProp(
-        key: string,
-        prevValue: any,
-        nextValue: any,
-        namespace?: ElementNamespace,
-        parentComponent?: ComponentInternalInstance | null
-    ): void {
-        switch (key) {
-        }
-        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
 }
 
