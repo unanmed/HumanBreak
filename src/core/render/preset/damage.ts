@@ -503,7 +503,8 @@ export class Damage extends RenderItem<EDamageEvent> {
             this.emit('dirtyUpdate', v);
 
             // 否则依次渲染并写入缓存
-            const temp = cache?.canvas ?? new MotaOffscreenCanvas2D();
+            const temp =
+                block.cache.get(v)?.canvas ?? new MotaOffscreenCanvas2D();
             temp.clear();
             temp.setHD(true);
             temp.setAntiAliasing(true);

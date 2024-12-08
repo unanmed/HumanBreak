@@ -130,10 +130,8 @@ export class BlockCacher<
             if (deep & (1 << i)) {
                 const nowIndex = index * this.cacheDepth + i;
                 const item = this.cache.get(nowIndex);
-                if (item) {
-                    item.destroy();
-                    this.cache.delete(nowIndex);
-                }
+                item?.destroy();
+                this.cache.delete(nowIndex);
             }
         }
     }
@@ -141,12 +139,10 @@ export class BlockCacher<
     /**
      * 清空指定索引的缓存，与 {@link clearCache} 不同的是，这里会直接清空对应索引的缓存，而不是指定分块的缓存（分块->void）
      */
-    clearCacheByIndex(index: number, func: (item: T) => void) {
+    clearCacheByIndex(index: number) {
         const item = this.cache.get(index);
-        if (item) {
-            item.destroy();
-            this.cache.delete(index);
-        }
+        item?.destroy();
+        this.cache.delete(index);
     }
 
     /**
