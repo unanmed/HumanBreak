@@ -1,5 +1,6 @@
 import { HeroSkill } from '@/game/mechanism/misc';
 import { getSkillFromIndex, upgradeSkill } from './skillTree';
+import { canOpenShop } from './shop';
 
 const replayableSettings = ['autoSkill'];
 
@@ -73,9 +74,17 @@ export function init() {
     // 商店
     let shopOpened = false;
     let openedShopId = '';
+
+    Mota.require('var', 'hook').on('reset', () => {
+        shopOpened = false;
+        openedShopId = '';
+    });
+
     core.registerReplayAction('openShop', name => {
         if (!name.startsWith('openShop:')) return false;
-        if (shopOpened) return false;
+        const id = name.slice(9);
+        if (!canOpenShop(id)) return false;
+        if (shopOpened && openedShopId === id) return true;
         openedShopId = name.slice(9);
         shopOpened = true;
         core.status.route.push(name);
@@ -87,9 +96,8 @@ export function init() {
         if (!name.startsWith('buy:') && !name.startsWith('sell:')) return false;
         if (!shopOpened) return false;
         if (!openedShopId) return false;
-        const [type, id, num] = name
-            .split(':')
-            .map(v => (/^\d+$/.test(v) ? parseInt(v) : v));
+        const [type, id, n] = name.split(':');
+        const num = parseInt(n);
         const shop = core.status.shops[openedShopId] as ItemShopEvent;
         const item = shop.choices.find(v => v.id === id);
         if (!item) return false;
@@ -122,7 +130,6 @@ export function init() {
 
     core.registerReplayAction('closeShop', name => {
         if (name !== 'closeShop') return false;
-        if (!shopOpened) return false;
         shopOpened = false;
         openedShopId = '';
         core.status.route.push(name);
