@@ -147,7 +147,6 @@ function showSpecialSetting(id: string, vBind?: any) {
         mainUi.showAll();
     });
     mainUi.open(id, vBind);
-    console.log(core.status.lockControl);
 }
 
 function HotkeySetting(props: SettingComponentProps) {

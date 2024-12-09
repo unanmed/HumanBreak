@@ -550,6 +550,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			},
 			{
 				"type": "setText",
+				"position": "down",
 				"text": [
 					0,
 					0,
@@ -570,78 +571,63 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				"type": "playSound",
 				"name": "paper.mp3"
 			},
+			"人们说要铭记历史，但他们却忘记了历史。\n    ——我是这样评价这个故事的。",
+			{
+				"type": "playSound",
+				"name": "paper.mp3"
+			},
 			"人类简史——起源篇",
 			{
 				"type": "playSound",
 				"name": "paper.mp3"
 			},
-			"在万物的发展中，任何物体都有它自己的发光点。",
+			"在历史的长河中，山火、暴雨、地震不过是自然界的常态，是时间流逝中微不足道的涟漪。",
 			{
 				"type": "playSound",
 				"name": "paper.mp3"
 			},
-			"人类，这个起初完全不起眼的种族，",
+			"这些自然现象如同大地的呼吸，时而平静，时而狂暴。",
 			{
 				"type": "playSound",
 				"name": "paper.mp3"
 			},
-			"却在那一天发生了惊天的变动。",
+			"对于动物和植物而言，这些变化是生存的考验，是自然选择的无情法则。",
 			{
 				"type": "playSound",
 				"name": "paper.mp3"
 			},
-			"那曾是一个不起眼的日子。",
+			"每一次山火，都意味着森林的重生与毁灭；每一场暴雨，都带来了生命的滋润与洪水的威胁；每一次地震，都改变了地貌，塑造了新的环境。",
 			{
 				"type": "playSound",
 				"name": "paper.mp3"
 			},
-			"直到一记闪电劈在了山上。",
+			"在这片土地上，生命在自然的力量中挣扎、适应、繁衍。",
 			{
 				"type": "playSound",
 				"name": "paper.mp3"
 			},
-			"山火蔓延，霎时间，茂密的树林已然变为了焦炭。",
+			"那些无法适应的，最终被淘汰；而那些幸存者，则继续在这片土地上书写着生命的传奇。",
 			{
 				"type": "playSound",
 				"name": "paper.mp3"
 			},
-			"山火的发生让野兽饥不择食，",
+			"然而，对于那些在这片土地上生存的原始人而言，这些自然现象不仅仅是生存的考验，更是他们日常生活中不可或缺的一部分。",
 			{
 				"type": "playSound",
 				"name": "paper.mp3"
 			},
-			"无数的人类被野兽硬生生拖走。",
+			"在公元前8000年，这里曾有一个不起眼的山洞，隐匿于群山之间，仿佛与世隔绝。山洞中，原始人正忙碌着，准备迎接即将到来的季节变化。",
 			{
 				"type": "playSound",
 				"name": "paper.mp3"
 			},
-			"那又是一个不起眼的日子，",
-			{
-				"type": "playSound",
-				"name": "paper.mp3"
-			},
-			"却让人类又一次发生了翻天地覆的变化。",
-			{
-				"type": "playSound",
-				"name": "paper.mp3"
-			},
-			"一位野蛮人，也是我们的主角，",
-			{
-				"type": "playSound",
-				"name": "paper.mp3"
-			},
-			"踏上了属于他的旅途。",
 			{
 				"type": "sleep",
 				"time": 1000
 			},
 			{
-				"type": "playSound",
-				"name": "paper.mp3"
-			},
-			"公元前8000年",
-			{
 				"type": "setText",
+				"position": "down",
 				"text": [
 					255,
 					255,
