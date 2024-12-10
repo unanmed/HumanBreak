@@ -253,6 +253,8 @@ export interface EWinskinEvent extends ERenderItemEvent {}
 
 export class Winskin extends RenderItem<EWinskinEvent> {
     image: SizedCanvasImageSource;
+    /** 边框宽度 */
+    borderSize: number = 32;
 
     constructor(
         image: SizedCanvasImageSource,
@@ -266,6 +268,18 @@ export class Winskin extends RenderItem<EWinskinEvent> {
         canvas: MotaOffscreenCanvas2D,
         transform: Transform
     ): void {}
+
+    /**
+     * 设置winskin图片
+     * @param image winskin图片
+     */
+    setImage(image: SizedCanvasImageSource) {}
+
+    /**
+     * 设置边框大小
+     * @param size 边框大小
+     */
+    setBorderSize(size: number) {}
 
     patchProp(
         key: string,
