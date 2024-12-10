@@ -63,6 +63,7 @@ Mota.require('var', 'loading').once('coreInit', () => {
 /**
  * 对文字进行分行操作
  * @param data 文字信息
+ * @returns 分行信息，每一项表示应该在这一项索引之后分行
  */
 function splitLines(data: TextContentData) {
     const words = breakWords(data);
@@ -80,19 +81,11 @@ function splitLines(data: TextContentData) {
     const ctx = testCanvas.ctx;
     ctx.font = data.font;
 
-    console.time();
     while (1) {
         const diff = end - start;
 
         if (diff === 1) {
-            const data1 = ctx.measureText(
-                text.slice(words[resolved], words[end])
-            );
-            if (data1.width <= data.width) {
-                res.push(words[end - 1]);
-            } else {
-                res.push(words[start]);
-            }
+            res.push(words[start]);
             if (end === words.length) break;
             resolved = start;
             end = words.length;
@@ -109,13 +102,17 @@ function splitLines(data: TextContentData) {
             }
         }
     }
-    console.timeEnd();
 
     return res;
 }
 
 const defaultsBreak = ' -,.)]}?!;:，。）】？！；：';
+const defaultsIgnoreStart =
+    '）)】》＞﹞>)]»›〕〉}］」｝〗』，。？！：；·…,.?!:;、……~&@#～＆＠＃';
+const defaultsIgnoreEnd = '（(【《＜﹝<([«‹〔〈{［「｛〖『';
 const breakSet = new Set(defaultsBreak);
+const ignoreStart = new Set(defaultsIgnoreStart);
+const ignoreEnd = new Set(defaultsIgnoreEnd);
 
 /**
  * 判断一个文字是否是 CJK 文字
@@ -139,6 +136,7 @@ function isCJK(char: number) {
 /**
  * 对文字进行分词操作
  * @param data 文字信息
+ * @returns 一个数字数组，每一项应当在这一项索引之后分词
  */
 function breakWords(data: TextContentData) {
     let allBreak = false;
@@ -157,10 +155,10 @@ function breakWords(data: TextContentData) {
         }
     }
 
-    console.time();
     const res: number[] = [0];
     const text = data.text;
-    const { ignoreLineStart, ignoreLineEnd } = data;
+    const ignoreLineStart = data.ignoreLineStart.union(ignoreStart);
+    const ignoreLineEnd = data.ignoreLineEnd.union(ignoreEnd);
     for (let pointer = 0; pointer < text.length; pointer++) {
         const char = text[pointer];
         const next = text[pointer + 1];
@@ -186,6 +184,5 @@ function breakWords(data: TextContentData) {
         }
     }
     res.push(text.length);
-    console.timeEnd();
     return res;
 }
