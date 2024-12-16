@@ -1,5 +1,7 @@
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
-import { defineComponent } from 'vue';
+import { defineComponent, onUpdated, shallowRef, watch } from 'vue';
+import { Transform } from '../transform';
+import { isSetEqual } from '../utils';
 
 export const enum WordBreak {
     /** 不换行 */
@@ -10,6 +12,12 @@ export const enum WordBreak {
     All
 }
 
+export const enum TextAlign {
+    Left,
+    Center,
+    End
+}
+
 export interface TextContentProps {
     text: string;
     x?: number;
@@ -17,16 +25,22 @@ export interface TextContentProps {
     width?: number;
     height?: number;
     font?: string;
+    /** 是否持续上一次的文本，开启后，如果修改后的文本以修改前的文本为开头，那么会继续播放而不会从头播放 */
+    keepLast?: boolean;
     /** 打字机时间间隔，即两个字出现之间相隔多长时间 */
     interval?: number;
     /** 行高 */
     lineHeight?: number;
     /** 分词规则 */
     wordBreak?: WordBreak;
+    /** 文字对齐方式 */
+    textAlign?: TextAlign;
     /** 行首忽略字符，即不会出现在行首的字符 */
     ignoreLineStart?: Iterable<string>;
     /** 行尾忽略字符，即不会出现在行尾的字符 */
     ignoreLineEnd?: Iterable<string>;
+    /** 会被分词规则识别的分词字符 */
+    breakChars: Iterable<string>;
 }
 
 interface TextContentData {
@@ -39,12 +53,122 @@ interface TextContentData {
     ignoreLineStart: Set<string>;
     /** 行尾忽略字符，即不会出现在行尾的字符 */
     ignoreLineEnd: Set<string>;
-    /** 会被分词规则识别的文字 */
+    /** 会被分词规则识别的分词字符 */
     breakChars: Set<string>;
 }
 
-export const TextContent = defineComponent((props, ctx) => {
-    return () => {};
+class TextContentCachePool {
+    private pool: MotaOffscreenCanvas2D[] = [];
+
+    /**
+     * 申请画布
+     * @param num 要申请多少画布
+     */
+    requestCanvas(num: number): MotaOffscreenCanvas2D[] {
+        if (this.pool.length < num) {
+            const diff = num - this.pool.length;
+            for (let i = 0; i < diff; i++) {
+                this.pool.push(new MotaOffscreenCanvas2D(false));
+            }
+        }
+        return this.pool.splice(0, num);
+    }
+
+    /**
+     * 退回画布
+     * @param canvas 要退回多少画布
+     */
+    returnCanvas(canvas: MotaOffscreenCanvas2D[]) {
+        this.pool.push(...canvas);
+    }
+}
+
+const pool = new TextContentCachePool();
+
+export const TextContent = defineComponent<TextContentProps>((props, ctx) => {
+    const ensureProps = () => {
+        props.x ??= 0;
+        props.y ??= 0;
+        props.width ??= 200;
+        props.height ??= 200;
+        props.font ??= core.status.globalAttribute.font;
+        props.ignoreLineEnd ??= new Set();
+        props.ignoreLineStart ??= new Set();
+        props.keepLast ??= false;
+        props.interval ??= 0;
+        props.lineHeight ??= 0;
+        props.wordBreak ??= WordBreak.Space;
+        props.breakChars ??= new Set();
+    };
+
+    const makeSplitData = (): TextContentData => {
+        ensureProps();
+        return {
+            text: props.text,
+            width: props.width!,
+            font: props.font!,
+            wordBreak: props.wordBreak!,
+            ignoreLineStart: new Set(props.ignoreLineStart),
+            ignoreLineEnd: new Set(props.ignoreLineEnd),
+            breakChars: new Set(props.breakChars)
+        };
+    };
+
+    /**
+     * 判断是否需要重新分行
+     */
+    const needResplit = (value: TextContentData, old: TextContentData) => {
+        return (
+            value.text !== old.text ||
+            value.font !== old.font ||
+            value.width !== old.width ||
+            value.wordBreak !== old.wordBreak ||
+            !isSetEqual(value.breakChars, old.breakChars) ||
+            !isSetEqual(value.ignoreLineEnd, old.ignoreLineEnd) ||
+            !isSetEqual(value.ignoreLineStart, old.ignoreLineStart)
+        );
+    };
+
+    const render = (canvas: MotaOffscreenCanvas2D, transform: Transform) => {};
+
+    const data = shallowRef<TextContentData>(makeSplitData());
+
+    onUpdated(() => {
+        data.value = makeSplitData();
+    });
+
+    let shouldKeep = false;
+    const lineData = shallowRef([0]);
+    watch(data, (value, old) => {
+        if (needResplit(value, old)) {
+            lineData.value = splitLines(value);
+        }
+
+        if (props.keepLast && value.text.startsWith(old.text)) {
+            shouldKeep = true;
+        }
+    });
+
+    watch(lineData, (value, old) => {
+        if (shouldKeep) {
+            shouldKeep = false;
+            const isSub = value.every((v, i) => v === old[i]);
+            if (isSub) {
+            }
+        }
+    });
+
+    return () => {
+        return (
+            <sprite
+                x={props.x}
+                y={props.y}
+                width={props.width}
+                height={props.height}
+                render={render}
+            ></sprite>
+        );
+    };
 });
 
 export const Textbox = defineComponent((props, ctx) => {
@@ -60,6 +184,22 @@ Mota.require('var', 'loading').once('coreInit', () => {
     testCanvas.freeze();
 });
 
+const fontSizeGuessScale = new Map<string, number>([
+    ['px', 1],
+    ['%', 0.2],
+    ['', 0.2],
+    ['cm', 37.8],
+    ['mm', 3.78],
+    ['Q', 3.78 / 4],
+    ['in', 96],
+    ['pc', 16],
+    ['pt', 96 / 72],
+    ['em', 16],
+    ['vw', 0.2],
+    ['vh', 0.2],
+    ['rem', 16]
+]);
+
 /**
  * 对文字进行分行操作
  * @param data 文字信息
@@ -71,24 +211,46 @@ function splitLines(data: TextContentData) {
 
     // 对文字二分，然后计算长度
     const text = data.text;
-    let start = 0;
-    let end = words.length;
-    let resolved = 0;
-    let mid = 0;
-
     const res: number[] = [];
-
+    const fontSize = data.font.match(/\s*[\d\.-]+[a-zA-Z%]*\s*/)?.[0].trim();
+    const unit = fontSize?.match(/[a-zA-Z%]+/)?.[0];
+    const guessScale = fontSizeGuessScale.get(unit ?? '') ?? 0.2;
+    const guessSize = parseInt(fontSize ?? '0') * guessScale;
+    const averageLength = text.length / words.length;
+    const guess = data.width / guessSize / averageLength;
     const ctx = testCanvas.ctx;
     ctx.font = data.font;
 
+    let start = 0;
+    let end = Math.ceil(guess);
+    let resolved = 0;
+    let mid = 0;
+    let guessCount = 1;
+    let splitProgress = false;
+
+    console.time();
     while (1) {
+        if (!splitProgress) {
+            const chars = text.slice(words[start], words[end]);
+            const { width } = ctx.measureText(chars);
+            if (width < data.width && end < words.length) {
+                guessCount *= 2;
+                end = Math.ceil(guessCount * guess + start);
+                if (end > words.length) end = words.length;
+            } else {
+                splitProgress = true;
+            }
+            continue;
+        }
         const diff = end - start;
 
         if (diff === 1) {
             res.push(words[start]);
             if (end === words.length) break;
             resolved = start;
-            end = words.length;
+            end = Math.ceil(start + guess);
+            guessCount = 1;
+            splitProgress = false;
         } else {
             mid = Math.floor((start + end) / 2);
             const chars = text.slice(words[resolved], words[mid]);
@@ -102,6 +264,7 @@ function splitLines(data: TextContentData) {
             }
         }
     }
+    console.timeEnd();
 
     return res;
 }

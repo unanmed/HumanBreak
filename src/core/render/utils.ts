@@ -27,3 +27,10 @@ export function addTiming(timing1: TimingFn, timing2: TimingFn): TimingFn {
 export function multiplyTiming(timing1: TimingFn, timing2: TimingFn): TimingFn {
     return (p: number) => timing1(p) * timing2(p);
 }
+
+/**
+ * 判断两个集合是否相等
+ */
+export function isSetEqual<T>(set1: Set<T>, set2: Set<T>) {
+    return set1.size === set2.size && set1.isSubsetOf(set2);
+}
