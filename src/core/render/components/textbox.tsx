@@ -345,7 +345,6 @@ export const TextContent = defineComponent<TextContentProps, TextContentEmits>(
          * 从头开始渲染
          */
         const rawRender = (text: string, lines: number[]) => {
-            console.trace();
             makeRenderable(text, lines, 0, 0);
             spriteElement.value?.update();
         };

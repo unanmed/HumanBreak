@@ -84,11 +84,27 @@ export class MotaRenderer extends Container {
         this.target.delete();
     }
 
+    /**
+     * 刷新所有元素
+     */
+    refreshAll() {
+        const stack: RenderItem[] = [this];
+        while (stack.length > 0) {
+            const item = stack.pop();
+            if (!item) break;
+            if (item.children.size === 0) {
+                item.update();
+            } else {
+                item.children.forEach(v => stack.push(v));
+            }
+        }
+    }
+
     static get(id: string) {
         return this.list.get(id);
     }
 }
 
 window.addEventListener('resize', () => {
-    MotaRenderer.list.forEach(v => v.update(v));
+    MotaRenderer.list.forEach(v => v.requestAfterFrame(() => v.refreshAll()));
 });
