@@ -32,5 +32,6 @@ export function multiplyTiming(timing1: TimingFn, timing2: TimingFn): TimingFn {
  * 判断两个集合是否相等
  */
 export function isSetEqual<T>(set1: Set<T>, set2: Set<T>) {
-    return set1.size === set2.size && set1.isSubsetOf(set2);
+    if (set1 === set2) return true;
+    else return set1.size === set2.size && set1.isSubsetOf(set2);
 }

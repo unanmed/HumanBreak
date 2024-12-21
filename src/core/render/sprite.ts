@@ -52,7 +52,7 @@ export class Sprite<
     ): void {
         switch (key) {
             case 'render':
-                if (this.assertType(nextValue, 'function', key)) return;
+                if (!this.assertType(nextValue, 'function', key)) return;
                 this.setRenderFn(nextValue);
                 break;
         }

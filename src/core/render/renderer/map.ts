@@ -92,6 +92,7 @@ const standardElementNoCache = (
 
 // Default elements
 tagMap.register('container', standardElement(Container));
+tagMap.register('template', standardElement(Container));
 tagMap.register('mota-renderer', (_0, _1, props) => {
     return new MotaRenderer(props?.id);
 });

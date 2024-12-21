@@ -6,6 +6,7 @@ import {
     ILayerRenderExtends
 } from '../preset/layer';
 import type { EnemyCollection } from '@/game/enemy/damage';
+import { ILineProperty } from '../preset/graphics';
 
 export interface CustomProps {
     _item: (props: BaseProps) => RenderItem;
@@ -90,19 +91,28 @@ export interface DamageProps extends BaseProps {
     strokeWidth?: number;
 }
 
-export interface RectProps extends BaseProps {}
+interface GraphicPropsBase extends BaseProps, Partial<ILineProperty> {
+    fill?: boolean;
+    stroke?: boolean;
+    strokeAndFill?: boolean;
+    fillRule?: CanvasFillRule;
+    fillStyle?: CanvasStyle;
+    strokeStyle?: CanvasStyle;
+}
 
-export interface CirclesProps extends BaseProps {}
+export interface RectProps extends GraphicPropsBase {}
 
-export interface EllipseProps extends BaseProps {}
+export interface CirclesProps extends GraphicPropsBase {}
 
-export interface LineProps extends BaseProps {}
+export interface EllipseProps extends GraphicPropsBase {}
 
-export interface BezierProps extends BaseProps {}
+export interface LineProps extends GraphicPropsBase {}
 
-export interface QuadraticProps extends BaseProps {}
+export interface BezierProps extends GraphicPropsBase {}
 
-export interface PathProps extends BaseProps {}
+export interface QuadraticProps extends GraphicPropsBase {}
+
+export interface PathProps extends GraphicPropsBase {}
 
 export interface IconProps extends BaseProps {}
 

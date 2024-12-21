@@ -11,8 +11,8 @@ import { LayerGroupHalo } from '@/plugin/fx/halo';
 import { FloorViewport } from './preset/viewport';
 import { PopText } from '@/plugin/fx/pop';
 import { FloorChange } from '@/plugin/fallback';
-import { render } from './renderer';
-import { defineComponent, ref } from 'vue';
+import { createApp } from './renderer';
+import { defineComponent } from 'vue';
 
 let main: MotaRenderer;
 
@@ -61,7 +61,8 @@ Mota.require('var', 'loading').once('coreInit', () => {
     });
 
     main.hide();
-    render(<Com></Com>, main);
+    createApp(Com).mount(main);
+    // render(<Com></Com>, main);
 
     console.log(main);
 });
