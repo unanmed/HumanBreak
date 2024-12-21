@@ -91,12 +91,18 @@ export interface DamageProps extends BaseProps {
     strokeWidth?: number;
 }
 
-interface GraphicPropsBase extends BaseProps, Partial<ILineProperty> {
+export interface GraphicPropsBase extends BaseProps, Partial<ILineProperty> {
+    /** 是否填充，若填写 {@link stroke}，那么表现为先填充后描边 */
     fill?: boolean;
+    /** 是否描边，若填写 {@link fill}，那么表现为先填充后描边 */
     stroke?: boolean;
+    /** 是否先描边后填充，优先级最高，若设置，则 {@link fill} 与 {@link stroke} 无效。 */
     strokeAndFill?: boolean;
+    /** 填充原则，比如 `nonzero` 表示非零环绕原则，默认为奇偶环绕原则 `evenodd` */
     fillRule?: CanvasFillRule;
+    /** 填充样式 */
     fillStyle?: CanvasStyle;
+    /** 描边样式 */
     strokeStyle?: CanvasStyle;
 }
 
