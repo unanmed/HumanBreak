@@ -130,7 +130,7 @@ const textContentOptions = {
         'x',
         'y'
     ],
-    emits: ['typeEnd']
+    emits: ['typeEnd', 'typeStart']
 } satisfies SetupComponentOptions<TextContentProps, TextContentEmits>;
 
 export const TextContent = defineComponent<TextContentProps, TextContentEmits>(
@@ -168,7 +168,7 @@ export const TextContent = defineComponent<TextContentProps, TextContentEmits>(
                 if (key in renderData && !isNil(value)) {
                     if (key === 'width') {
                         if (value && value <= 0) {
-                            logger.warn(41);
+                            logger.warn(41, String(props.width));
                             renderData.width = 200;
                         } else {
                             renderData.width = value;
@@ -238,11 +238,12 @@ export const TextContent = defineComponent<TextContentProps, TextContentEmits>(
                 const line = dirtyIndex[linePointer];
                 const data = renderable[line];
                 const pointer = char - data.from;
-                if (pointer >= data.to) {
+                if (char >= data.to) {
                     data.pointer = data.text.length;
                     linePointer++;
                 } else {
                     data.pointer = pointer;
+                    break;
                 }
             }
             if (linePointer >= dirtyIndex.length) {
@@ -255,6 +256,7 @@ export const TextContent = defineComponent<TextContentProps, TextContentEmits>(
         onTick(tick);
         onMounted(() => {
             data.value = makeSplitData();
+            lineData.value = splitLines(data.value);
         });
 
         const renderContent = (
@@ -343,6 +345,7 @@ export const TextContent = defineComponent<TextContentProps, TextContentEmits>(
          * 从头开始渲染
          */
         const rawRender = (text: string, lines: number[]) => {
+            console.trace();
             makeRenderable(text, lines, 0, 0);
             spriteElement.value?.update();
         };
@@ -419,7 +422,6 @@ export const TextContent = defineComponent<TextContentProps, TextContentEmits>(
                 rawRender(data.value.text, value);
             }
         });
-        lineData.value = splitLines(data.value);
 
         return () => {
             return (
