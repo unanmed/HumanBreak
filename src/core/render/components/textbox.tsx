@@ -1,9 +1,12 @@
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 import {
+    computed,
     defineComponent,
     onMounted,
+    onUnmounted,
     onUpdated,
     ref,
+    shallowReactive,
     shallowRef,
     SlotsType,
     VNode,
@@ -16,6 +19,8 @@ import { Sprite } from '../sprite';
 import { onTick } from '../renderer';
 import { isNil } from 'lodash-es';
 import { SetupComponentOptions } from './types';
+import EventEmitter from 'eventemitter3';
+import { Container } from '../container';
 
 export const enum WordBreak {
     /** 不换行 */
@@ -128,364 +133,412 @@ const textContentOptions = {
         'width',
         'wordBreak',
         'x',
-        'y'
+        'y',
+        'fill',
+        'fillStyle',
+        'strokeStyle',
+        'strokeWidth',
+        'stroke'
     ],
     emits: ['typeEnd', 'typeStart']
-} satisfies SetupComponentOptions<TextContentProps, TextContentEmits>;
+} satisfies SetupComponentOptions<
+    TextContentProps,
+    TextContentEmits,
+    keyof TextContentEmits
+>;
 
-export const TextContent = defineComponent<TextContentProps, TextContentEmits>(
-    (props, { emit }) => {
-        if (props.width && props.width <= 0) {
-            logger.warn(41, String(props.width));
-        }
-        const renderData: Required<TextContentProps> = {
-            text: props.text,
-            textAlign: props.textAlign ?? TextAlign.Left,
-            x: props.x ?? 0,
-            y: props.y ?? 0,
-            width: !props.width || props.width <= 0 ? 200 : props.width,
-            height: props.height ?? 200,
-            font:
-                props.font ??
-                core.status.globalAttribute?.font ??
-                '16px Verdana',
-            ignoreLineEnd: props.ignoreLineEnd ?? new Set(),
-            ignoreLineStart: props.ignoreLineStart ?? new Set(),
-            keepLast: props.keepLast ?? false,
-            interval: props.interval ?? 0,
-            lineHeight: props.lineHeight ?? 0,
-            wordBreak: props.wordBreak ?? WordBreak.Space,
-            breakChars: props.breakChars ?? new Set(),
-            fillStyle: props.fillStyle ?? '#fff',
-            strokeStyle: props.strokeStyle ?? 'transparent',
-            fill: props.fill ?? true,
-            stroke: props.stroke ?? false,
-            strokeWidth: props.strokeWidth ?? 2
-        };
+export const TextContent = defineComponent<
+    TextContentProps,
+    TextContentEmits,
+    keyof TextContentEmits
+>((props, { emit }) => {
+    if (props.width && props.width <= 0) {
+        logger.warn(41, String(props.width));
+    }
+    const renderData: Required<TextContentProps> = {
+        text: props.text,
+        textAlign: props.textAlign ?? TextAlign.Left,
+        x: props.x ?? 0,
+        y: props.y ?? 0,
+        width: !props.width || props.width <= 0 ? 200 : props.width,
+        height: props.height ?? 200,
+        font: props.font ?? core.status.globalAttribute?.font ?? '16px Verdana',
+        ignoreLineEnd: props.ignoreLineEnd ?? new Set(),
+        ignoreLineStart: props.ignoreLineStart ?? new Set(),
+        keepLast: props.keepLast ?? false,
+        interval: props.interval ?? 0,
+        lineHeight: props.lineHeight ?? 0,
+        wordBreak: props.wordBreak ?? WordBreak.Space,
+        breakChars: props.breakChars ?? new Set(),
+        fillStyle: props.fillStyle ?? '#fff',
+        strokeStyle: props.strokeStyle ?? 'transparent',
+        fill: props.fill ?? true,
+        stroke: props.stroke ?? false,
+        strokeWidth: props.strokeWidth ?? 2
+    };
 
-        const ensureProps = () => {
-            for (const [key, value] of Object.entries(props)) {
-                if (key in renderData && !isNil(value)) {
-                    if (key === 'width') {
-                        if (value && value <= 0) {
-                            logger.warn(41, String(props.width));
-                            renderData.width = 200;
-                        } else {
-                            renderData.width = value;
-                        }
+    const ensureProps = () => {
+        for (const [key, value] of Object.entries(props)) {
+            if (key in renderData && !isNil(value)) {
+                if (key === 'width') {
+                    if (value && value <= 0) {
+                        logger.warn(41, String(props.width));
+                        renderData.width = 200;
                     } else {
-                        // @ts-ignore
-                        renderData[key] = value;
+                        renderData.width = value;
                     }
-                }
-            }
-        };
-
-        const makeSplitData = (): TextContentData => {
-            ensureProps();
-            return {
-                text: renderData.text,
-                width: renderData.width!,
-                font: renderData.font!,
-                wordBreak: renderData.wordBreak!,
-                ignoreLineStart: new Set(renderData.ignoreLineStart),
-                ignoreLineEnd: new Set(renderData.ignoreLineEnd),
-                breakChars: new Set(renderData.breakChars)
-            };
-        };
-
-        /**
-         * 判断是否需要重新分行
-         */
-        const needResplit = (value: TextContentData, old: TextContentData) => {
-            return (
-                value.text !== old.text ||
-                value.font !== old.font ||
-                value.width !== old.width ||
-                value.wordBreak !== old.wordBreak ||
-                !isSetEqual(value.breakChars, old.breakChars) ||
-                !isSetEqual(value.ignoreLineEnd, old.ignoreLineEnd) ||
-                !isSetEqual(value.ignoreLineStart, old.ignoreLineStart)
-            );
-        };
-
-        /** 每行的渲染信息 */
-        const renderable: TextContentRenderable[] = [];
-        /** 需要更新的行数 */
-        const dirtyIndex: number[] = [];
-        const spriteElement = ref<Sprite>();
-
-        /** dirtyIndex 更新指针 */
-        let linePointer = 0;
-        let startTime = 0;
-        /** 从哪个字符开始渲染 */
-        let fromChar = 0;
-        /** 是否需要更新渲染 */
-        let needUpdate = false;
-        const tick = () => {
-            if (!needUpdate) return;
-            spriteElement.value?.update();
-            const time = Date.now();
-            const char =
-                Math.floor((time - startTime) / renderData.interval!) +
-                fromChar;
-            if (!isFinite(char)) {
-                renderable.forEach(v => (v.pointer = v.text.length));
-                needUpdate = false;
-                return;
-            }
-            while (linePointer < dirtyIndex.length) {
-                const line = dirtyIndex[linePointer];
-                const data = renderable[line];
-                const pointer = char - data.from;
-                if (char >= data.to) {
-                    data.pointer = data.text.length;
-                    linePointer++;
                 } else {
-                    data.pointer = pointer;
-                    break;
+                    // @ts-ignore
+                    renderData[key] = value;
                 }
             }
-            if (linePointer >= dirtyIndex.length) {
-                needUpdate = false;
-                renderable.forEach(v => (v.pointer = v.text.length));
-                emit('typeEnd');
-            }
+        }
+    };
+
+    const makeSplitData = (): TextContentData => {
+        ensureProps();
+        return {
+            text: renderData.text,
+            width: renderData.width!,
+            font: renderData.font!,
+            wordBreak: renderData.wordBreak!,
+            ignoreLineStart: new Set(renderData.ignoreLineStart),
+            ignoreLineEnd: new Set(renderData.ignoreLineEnd),
+            breakChars: new Set(renderData.breakChars)
         };
+    };
 
-        onTick(tick);
-        onMounted(() => {
-            data.value = makeSplitData();
-            lineData.value = splitLines(data.value);
-        });
+    /**
+     * 判断是否需要重新分行
+     */
+    const needResplit = (value: TextContentData, old: TextContentData) => {
+        return (
+            value.text !== old.text ||
+            value.font !== old.font ||
+            value.width !== old.width ||
+            value.wordBreak !== old.wordBreak ||
+            !isSetEqual(value.breakChars, old.breakChars) ||
+            !isSetEqual(value.ignoreLineEnd, old.ignoreLineEnd) ||
+            !isSetEqual(value.ignoreLineStart, old.ignoreLineStart)
+        );
+    };
 
-        const renderContent = (
-            canvas: MotaOffscreenCanvas2D,
-            transform: Transform
-        ) => {
-            const ctx = canvas.ctx;
-            ctx.font = renderData.font;
-            ctx.fillStyle = renderData.fillStyle;
-            ctx.strokeStyle = renderData.strokeStyle;
-            ctx.lineWidth = renderData.strokeWidth;
+    /** 每行的渲染信息 */
+    const renderable: TextContentRenderable[] = [];
+    /** 需要更新的行数 */
+    const dirtyIndex: number[] = [];
+    const spriteElement = ref<Sprite>();
 
-            renderable.forEach(v => {
-                if (v.pointer === 0) return;
-                const text = v.text.slice(0, v.pointer);
+    /** dirtyIndex 更新指针 */
+    let linePointer = 0;
+    let startTime = 0;
+    /** 从哪个字符开始渲染 */
+    let fromChar = 0;
+    /** 是否需要更新渲染 */
+    let needUpdate = false;
+    const tick = () => {
+        if (!needUpdate) return;
+        spriteElement.value?.update();
+        const time = Date.now();
+        const char =
+            Math.floor((time - startTime) / renderData.interval!) + fromChar;
+        if (!isFinite(char)) {
+            renderable.forEach(v => (v.pointer = v.text.length));
+            needUpdate = false;
+            return;
+        }
+        while (linePointer < dirtyIndex.length) {
+            const line = dirtyIndex[linePointer];
+            const data = renderable[line];
+            const pointer = char - data.from;
+            if (char >= data.to) {
+                data.pointer = data.text.length;
+                linePointer++;
+            } else {
+                data.pointer = pointer;
+                break;
+            }
+        }
+        if (linePointer >= dirtyIndex.length) {
+            needUpdate = false;
+            renderable.forEach(v => (v.pointer = v.text.length));
+            emit('typeEnd');
+        }
+    };
+
+    onTick(tick);
+    onMounted(() => {
+        data.value = makeSplitData();
+        lineData.value = splitLines(data.value);
+    });
+
+    const renderContent = (
+        canvas: MotaOffscreenCanvas2D,
+        transform: Transform
+    ) => {
+        const ctx = canvas.ctx;
+        ctx.font = renderData.font;
+        ctx.fillStyle = renderData.fillStyle;
+        ctx.strokeStyle = renderData.strokeStyle;
+        ctx.lineWidth = renderData.strokeWidth;
+
+        renderable.forEach(v => {
+            if (v.pointer === 0) return;
+            const text = v.text.slice(0, v.pointer);
+            if (renderData.textAlign === TextAlign.Left) {
                 if (renderData.stroke) ctx.strokeText(text, v.x, v.y);
                 if (renderData.fill) ctx.fillText(text, v.x, v.y);
-            });
-        };
+            } else if (renderData.textAlign === TextAlign.Center) {
+                const x = (renderData.width - v.x) / 2 + v.x;
+                if (renderData.stroke) ctx.strokeText(text, x, v.y);
+                if (renderData.fill) ctx.fillText(text, x, v.y);
+            } else {
+                const x = renderData.width;
+                if (renderData.stroke) ctx.strokeText(text, x, v.y);
+                if (renderData.fill) ctx.fillText(text, x, v.y);
+            }
+        });
+    };
 
-        /**
-         * 生成 renderable 对象
-         * @param text 全部文本
-         * @param lines 分行信息
-         * @param index 从第几行开始生成
-         * @param from 从第几个字符开始生成
-         */
-        const makeRenderable = (
-            text: string,
-            lines: number[],
-            index: number,
-            from: number
-        ) => {
-            renderable.splice(index);
-            dirtyIndex.splice(0);
-            dirtyIndex.push(index);
-            // 初始化渲染
-            linePointer = 0;
-            startTime = Date.now();
-            fromChar = from;
-            needUpdate = true;
+    /**
+     * 生成 renderable 对象
+     * @param text 全部文本
+     * @param lines 分行信息
+     * @param index 从第几行开始生成
+     * @param from 从第几个字符开始生成
+     */
+    const makeRenderable = (
+        text: string,
+        lines: number[],
+        index: number,
+        from: number
+    ) => {
+        renderable.splice(index);
+        dirtyIndex.splice(0);
+        dirtyIndex.push(index);
+        // 初始化渲染
+        linePointer = 0;
+        startTime = Date.now();
+        fromChar = from;
+        needUpdate = true;
 
-            let startY = renderable.reduce(
-                (prev, curr) => prev + curr.textHeight + curr.height,
-                0
-            );
-            // 第一个比较特殊，需要特判
-            const start = lines[index - 1] ?? 0;
-            const end = lines[index];
-            const startPointer = from > start && from < end ? from - start : 0;
+        let startY = renderable.reduce(
+            (prev, curr) => prev + curr.textHeight + curr.height,
+            0
+        );
+        // 第一个比较特殊，需要特判
+        const start = lines[index - 1] ?? 0;
+        const end = lines[index];
+        const startPointer = from > start && from < end ? from - start : 0;
+        const height = testHeight(text, renderData.font!);
+        startY += height;
+        renderable.push({
+            text: text.slice(start, end),
+            x: 0,
+            y: startY,
+            height: renderData.lineHeight!,
+            textHeight: height,
+            pointer: startPointer,
+            from: start,
+            to: end
+        });
+
+        for (let i = index + 1; i < lines.length; i++) {
+            dirtyIndex.push(i);
+            const start = lines[i - 1] ?? 0;
+            const end = lines[i];
             const height = testHeight(text, renderData.font!);
             startY += height;
+
             renderable.push({
                 text: text.slice(start, end),
                 x: 0,
                 y: startY,
                 height: renderData.lineHeight!,
                 textHeight: height,
-                pointer: startPointer,
+                pointer: 0,
                 from: start,
                 to: end
             });
+        }
+        emit('typeStart');
+    };
 
-            for (let i = index + 1; i < lines.length; i++) {
-                dirtyIndex.push(i);
-                const start = lines[i - 1] ?? 0;
-                const end = lines[i];
-                const height = testHeight(text, renderData.font!);
-                startY += height;
+    /**
+     * 从头开始渲染
+     */
+    const rawRender = (text: string, lines: number[]) => {
+        makeRenderable(text, lines, 0, 0);
+        spriteElement.value?.update();
+    };
 
-                renderable.push({
-                    text: text.slice(start, end),
-                    x: 0,
-                    y: startY,
-                    height: renderData.lineHeight!,
-                    textHeight: height,
-                    pointer: 0,
-                    from: start,
-                    to: end
-                });
-            }
-            emit('typeStart');
-        };
+    /**
+     * 接续上一个继续渲染
+     * @param from 从第几个字符接续渲染
+     * @param lines 分行信息
+     * @param index 从第几行接续渲染
+     */
+    const continueRender = (
+        text: string,
+        from: number,
+        lines: number[],
+        index: number
+    ) => {
+        makeRenderable(text, lines, index, from);
+        spriteElement.value?.update();
+    };
 
-        /**
-         * 从头开始渲染
-         */
-        const rawRender = (text: string, lines: number[]) => {
-            makeRenderable(text, lines, 0, 0);
-            spriteElement.value?.update();
-        };
+    const data = shallowRef<TextContentData>(makeSplitData());
 
-        /**
-         * 接续上一个继续渲染
-         * @param from 从第几个字符接续渲染
-         * @param lines 分行信息
-         * @param index 从第几行接续渲染
-         */
-        const continueRender = (
-            text: string,
-            from: number,
-            lines: number[],
-            index: number
-        ) => {
-            makeRenderable(text, lines, index, from);
-            spriteElement.value?.update();
-        };
+    onUpdated(() => {
+        data.value = makeSplitData();
+    });
 
-        const data = shallowRef<TextContentData>(makeSplitData());
+    let shouldKeep = false;
+    const lineData = shallowRef([0]);
+    watch(data, (value, old) => {
+        if (needResplit(value, old)) {
+            lineData.value = splitLines(value);
+        }
 
-        onUpdated(() => {
-            data.value = makeSplitData();
-        });
+        if (renderData.keepLast && value.text.startsWith(old.text)) {
+            shouldKeep = true;
+        }
+    });
 
-        let shouldKeep = false;
-        const lineData = shallowRef([0]);
-        watch(data, (value, old) => {
-            if (needResplit(value, old)) {
-                lineData.value = splitLines(value);
-            }
+    // 判断是否需要接续渲染
+    watch(lineData, (value, old) => {
+        if (shouldKeep) {
+            shouldKeep = false;
+            const isSub = old.slice(0, -1).every((v, i) => v === value[i]);
 
-            if (renderData.keepLast && value.text.startsWith(old.text)) {
-                shouldKeep = true;
-            }
-        });
-
-        // 判断是否需要接续渲染
-        watch(lineData, (value, old) => {
-            if (shouldKeep) {
-                shouldKeep = false;
-                const isSub = old.slice(0, -1).every((v, i) => v === value[i]);
-
-                // 有点地狱的条件分歧，大体就是分为两种情况，一种是两个末尾一致，如果一致那直接从下一行接着画就完事了
-                // 但是如果不一致，那么从旧的最后一个开始往后画
-                if (isSub) {
-                    const last = value[old.length - 1];
-                    const oldLast = value.at(-1);
-                    if (!last) {
-                        rawRender(data.value.text, value);
-                        return;
-                    }
-                    if (last === oldLast) {
-                        const index = old.length - 1;
-                        continueRender(data.value.text, last, value, index);
-                    } else {
-                        if (!oldLast) {
-                            rawRender(data.value.text, value);
-                        } else {
-                            const index = old.length - 1;
-                            continueRender(
-                                data.value.text,
-                                oldLast,
-                                value,
-                                index
-                            );
-                        }
-                    }
-                } else {
+            // 有点地狱的条件分歧，大体就是分为两种情况，一种是两个末尾一致，如果一致那直接从下一行接着画就完事了
+            // 但是如果不一致，那么从旧的最后一个开始往后画
+            if (isSub) {
+                const last = value[old.length - 1];
+                const oldLast = value.at(-1);
+                if (!last) {
                     rawRender(data.value.text, value);
+                    return;
+                }
+                if (last === oldLast) {
+                    const index = old.length - 1;
+                    continueRender(data.value.text, last, value, index);
+                } else {
+                    if (!oldLast) {
+                        rawRender(data.value.text, value);
+                    } else {
+                        const index = old.length - 1;
+                        continueRender(data.value.text, oldLast, value, index);
+                    }
                 }
             } else {
                 rawRender(data.value.text, value);
             }
-        });
+        } else {
+            rawRender(data.value.text, value);
+        }
+    });
 
-        return () => {
-            return (
-                <sprite
-                    ref={spriteElement}
-                    hd
-                    antiAliasing={false}
-                    x={renderData.x}
-                    y={renderData.y}
-                    width={renderData.width}
-                    height={renderData.height}
-                    render={renderContent}
-                ></sprite>
-            );
-        };
-    },
-    textContentOptions
-);
+    return () => {
+        return (
+            <sprite
+                ref={spriteElement}
+                hd
+                antiAliasing={true}
+                x={renderData.x}
+                y={renderData.y}
+                width={renderData.width}
+                height={renderData.height}
+                render={renderContent}
+            ></sprite>
+        );
+    };
+}, textContentOptions);
 
 export interface TextboxProps extends TextContentProps {
+    id?: string;
     /** 背景颜色 */
     backColor?: CanvasStyle;
     /** 背景 winskin */
     winskin?: string;
+    /** 边框与文字间的距离，默认为8 */
+    padding?: number;
 }
 
-interface TextboxSlots extends SlotsType {
-    default: () => VNode;
-}
+type TextboxEmits = TextContentEmits;
+type TextboxSlots = SlotsType<{ default: (data: TextboxProps) => VNode[] }>;
 
 const textboxOptions = {
     props: (textContentOptions.props as (keyof TextboxProps)[]).concat([
         'backColor',
-        'winskin'
-    ])
+        'winskin',
+        'id'
+    ]),
+    emits: textContentOptions.emits
 } satisfies SetupComponentOptions<TextboxProps, {}, string, TextboxSlots>;
 
-export const Textbox = defineComponent<TextboxProps, {}, string, TextboxSlots>(
-    (props, { slots }) => {
-        return () => {
-            return (
-                <container>
-                    {slots.default ? (
-                        slots.default()
-                    ) : props.winskin ? (
-                        // todo
-                        <winskin></winskin>
-                    ) : (
-                        // todo
-                        <g-rect
-                            x={0}
-                            y={0}
-                            width={props.width ?? 200}
-                            height={props.height ?? 200}
-                            fill
-                            fillStyle={props.backColor}
-                        ></g-rect>
-                    )}
-                    <TextContent {...props}></TextContent>
-                </container>
-            );
-        };
-    },
-    textboxOptions
-);
+let id = 0;
+function getNextTextboxId() {
+    return `@default-textbox-${id++}`;
+}
+
+export const Textbox = defineComponent<
+    TextboxProps,
+    TextboxEmits,
+    keyof TextboxEmits,
+    TextboxSlots
+>((props, { slots }) => {
+    const data = shallowReactive({ ...props });
+    data.padding ??= 8;
+    data.width ??= 200;
+    data.height ??= 200;
+    data.id ??= '';
+
+    const store = TextboxStore.use(props.id ?? getNextTextboxId(), data);
+    const hidden = ref(false);
+    store.on('hide', () => (hidden.value = true));
+    store.on('show', () => (hidden.value = false));
+    onUpdated(() => {
+        for (const [key, value] of Object.entries(props)) {
+            // @ts-ignore
+            if (!isNil(value)) data[key] = value;
+        }
+    });
+
+    const contentWidth = computed(() => data.width! - data.padding! * 2);
+    const contentHeight = computed(() => data.height! - data.padding! * 2);
+
+    return () => {
+        return (
+            <container hidden={hidden.value} id="11111">
+                {slots.default ? (
+                    slots.default(data)
+                ) : props.winskin ? (
+                    // todo
+                    <winskin></winskin>
+                ) : (
+                    // todo
+                    <g-rect
+                        x={0}
+                        y={0}
+                        width={data.width ?? 200}
+                        height={data.height ?? 200}
+                        fill
+                        fillStyle={data.backColor}
+                    ></g-rect>
+                )}
+                <TextContent
+                    {...data}
+                    x={data.padding}
+                    y={data.padding}
+                    width={contentWidth.value}
+                    height={contentHeight.value}
+                ></TextContent>
+            </container>
+        );
+    };
+}, textboxOptions);
 
 const fontSizeGuessScale = new Map<string, number>([
     ['px', 1],
@@ -531,6 +584,7 @@ function splitLines(data: TextContentData) {
     let mid = 0;
     let guessCount = 1;
     let splitProgress = false;
+    let last = 0;
 
     while (1) {
         if (!splitProgress) {
@@ -548,8 +602,15 @@ function splitLines(data: TextContentData) {
         const diff = end - start;
 
         if (diff === 1) {
-            res.push(words[start]);
+            if (start === last) {
+                res.push(words[last + 1]);
+                start = words[last + 1];
+                end = start + 1;
+            } else {
+                res.push(words[start]);
+            }
             if (end >= words.length) break;
+            last = resolved;
             resolved = start;
             end = Math.ceil(start + guess);
             if (end > words.length) end = words.length;
@@ -658,4 +719,68 @@ function testHeight(text: string, font: string) {
     const ctx = testCanvas.ctx;
     ctx.font = font;
     return ctx.measureText(text).fontBoundingBoxAscent;
+}
+
+interface TextboxStoreEvent {
+    update: [value: TextboxProps];
+    show: [];
+    hide: [];
+}
+
+export class TextboxStore extends EventEmitter<TextboxStoreEvent> {
+    static list: Map<string, TextboxStore> = new Map();
+
+    private constructor(private readonly data: TextboxProps) {
+        super();
+    }
+
+    /**
+     * 修改渲染数据
+     */
+    modify(data: Partial<TextboxProps>) {
+        for (const [key, value] of Object.entries(data)) {
+            // @ts-ignore
+            if (!isNil(value)) this.data[key] = value;
+        }
+        this.emit('update', this.data);
+    }
+
+    /**
+     * 显示文本框
+     */
+    show() {
+        this.emit('show');
+    }
+
+    /**
+     * 隐藏文本框
+     */
+    hide() {
+        this.emit('hide');
+    }
+
+    /**
+     * 获取文本框
+     * @param id 文本框id
+     */
+    static get(id: string): TextboxStore | undefined {
+        return this.list.get(id);
+    }
+
+    /**
+     * 在当前作用域下生成文本框控制器
+     * @param id 文本框id
+     * @param props 文本框渲染数据
+     */
+    static use(id: string, props: TextboxProps) {
+        const store = new TextboxStore(props);
+        if (this.list.has(id)) {
+            logger.warn(42, id);
+        }
+        this.list.set(id, store);
+        onUnmounted(() => {
+            this.list.delete(id);
+        });
+        return store;
+    }
 }

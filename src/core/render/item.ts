@@ -159,6 +159,7 @@ const beforeFrame: (() => void)[] = [];
 const afterFrame: (() => void)[] = [];
 const renderFrame: (() => void)[] = [];
 
+let count = 0;
 export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     extends EventEmitter<ERenderItemEvent | E>
     implements
@@ -181,6 +182,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
 
     /** id到渲染元素的映射 */
     static itemMap: Map<string, RenderItem> = new Map();
+
+    readonly uid: number = count++;
 
     private _id: string = '';
 
@@ -399,11 +402,11 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this.anchorY = y;
     }
 
-    update(item: RenderItem<any> = this): void {
-        if (this.needUpdate || this.hidden) return;
+    update(item: RenderItem<any> = this, force: boolean = false): void {
+        if ((this.needUpdate || this.hidden) && !force) return;
         this.needUpdate = true;
         this.cacheDirty = true;
-        this.parent?.update(item);
+        this.parent?.update(item, force);
     }
 
     setHD(hd: boolean): void {
@@ -473,7 +476,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     hide() {
         if (this.hidden) return;
         this.hidden = true;
-        this.update(this);
+        this.update(this, true);
     }
 
     /**
@@ -482,7 +485,23 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     show() {
         if (!this.hidden) return;
         this.hidden = false;
-        this.update(this);
+        this.refreshAllChildren(true);
+    }
+
+    /**
+     * 刷新所有子元素
+     */
+    refreshAllChildren(force: boolean = false) {
+        if (this.children.size > 0) {
+            const stack: RenderItem[] = [this];
+            while (stack.length > 0) {
+                const item = stack.pop();
+                if (!item) continue;
+                item.cacheDirty = true;
+                item.children.forEach(v => stack.push(v));
+            }
+        }
+        this.update(this, force);
     }
 
     /**
@@ -555,7 +574,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         if (typeof expected === 'string') {
             const type = typeof value;
             if (type !== expected) {
-                logger.warn(21, key, expected, type);
+                logger.error(21, key, expected, type);
                 return false;
             } else {
                 return true;
@@ -564,7 +583,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
             if (value instanceof expected) {
                 return true;
             } else {
-                logger.warn(
+                logger.error(
                     21,
                     key,
                     expected.name,
