@@ -2,6 +2,7 @@ import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 import { ERenderItemEvent, RenderItem } from '../item';
 import { Transform } from '../transform';
 import { ElementNamespace, ComponentInternalInstance } from 'vue';
+import { isNil } from 'lodash-es';
 
 /*
  * Expected usage (this comment needs to be deleted after implementing correctly):
@@ -54,14 +55,14 @@ export interface EGraphicItemEvent extends ERenderItemEvent {}
 
 export abstract class GraphicItemBase
     extends RenderItem<EGraphicItemEvent>
-    implements IGraphicProperty
+    implements Required<ILineProperty>
 {
     mode: number = GraphicMode.Fill;
     fill: CanvasStyle = '#fff';
     stroke: CanvasStyle = '#fff';
     lineWidth: number = 2;
-    lineDash?: number[] | undefined;
-    lineDashOffset?: number | undefined;
+    lineDash: number[] = [];
+    lineDashOffset: number = 0;
     lineJoin: CanvasLineJoin = 'bevel';
     lineCap: CanvasLineCap = 'butt';
     miterLimit: number = 10;
@@ -71,31 +72,50 @@ export abstract class GraphicItemBase
      * 设置描边绘制的信息
      * @param options 线的信息
      */
-    setLineOption(options: Partial<ILineProperty>) {}
+    setLineOption(options: Partial<ILineProperty>) {
+        if (!isNil(options.lineWidth)) this.lineWidth = options.lineWidth;
+        if (!isNil(options.lineDash)) this.lineDash = options.lineDash;
+        if (!isNil(options.lineDashOffset)) this.lineDashOffset = options.lineDashOffset;
+        if (!isNil(options.lineJoin)) this.lineJoin = options.lineJoin;
+        if (!isNil(options.lineCap)) this.lineCap = options.lineCap;
+        if (!isNil(options.miterLimit)) this.miterLimit = options.miterLimit;
+    }
 
     /**
      * 设置填充样式
      * @param style 绘制样式
      */
-    setFillStyle(style: CanvasStyle) {}
+    setFillStyle(style: CanvasStyle) {
+        this.fill = style;
+        this.update();
+    }
 
     /**
      * 设置描边样式
      * @param style 绘制样式
      */
-    setStrokeStyle(style: CanvasStyle) {}
+    setStrokeStyle(style: CanvasStyle) {
+        this.stroke = style;
+        this.update();
+    }
 
     /**
      * 设置填充原则
      * @param rule 填充原则
      */
-    setFillRule(rule: CanvasFillRule) {}
+    setFillRule(rule: CanvasFillRule) {
+        this.fillRule = rule;
+        this.update();
+    }
 
     /**
      * 设置绘制模式，是描边还是填充
      * @param mode 绘制模式
      */
-    setMode(mode: GraphicMode) {}
+    setMode(mode: GraphicMode) {
+        this.mode = mode;
+        this.update();
+    }
 
     /**
      * 设置画布的渲染状态，在实际渲染前调用
@@ -103,7 +123,16 @@ export abstract class GraphicItemBase
      */
     protected setCanvasState(canvas: MotaOffscreenCanvas2D) {
         const ctx = canvas.ctx;
-        ctx.fillStyle = this.fill; // 示例，后面的都按这个写，不需要save restore，写完把这个注释删了
+        ctx.fillStyle = this.fill;
+        ctx.strokeStyle = this.stroke;
+        ctx.lineWidth = this.lineWidth;
+        ctx.setLineDash(this.lineDash)
+        ctx.lineDashOffset = this.lineDashOffset;
+        ctx.lineJoin = this.lineJoin;
+        ctx.lineCap = this.lineCap;
+        ctx.miterLimit = this.miterLimit;
+        ctx.fill(this.fillRule);
+        this.update();
     }
 
     patchProp(
@@ -156,20 +185,50 @@ export class Circle extends GraphicItemBase {
     protected render(
         canvas: MotaOffscreenCanvas2D,
         transform: Transform
-    ): void {}
+    ): void {
+        const ctx = canvas.ctx;
+        this.setCanvasState(canvas);
+        ctx.beginPath();
+        ctx.arc(this.x,this.y,this.radius,this.start,this.end);
+
+        switch (this.mode) {
+            case GraphicMode.Fill:
+                ctx.fill(this.fillRule);
+                break;
+            case GraphicMode.Stroke:
+                ctx.stroke();
+                break;
+            case GraphicMode.FillAndStroke:
+                ctx.fill(this.fillRule);
+                ctx.stroke();
+                break;
+            case GraphicMode.StrokeAndFill:
+                ctx.stroke();
+                ctx.fill(this.fillRule);
+                break;
+        }
+    }
 
     /**
      * 设置圆的半径
      * @param radius 半径
      */
-    setRadius(radius: number) {}
+    setRadius(radius: number) {
+        this.radius = radius;
+        this.size(radius*2,radius*2);
+        this.update();
+    }
 
     /**
      * 设置圆的起始与终止角度
      * @param start 起始角度
      * @param end 终止角度
      */
-    setAngle(start: number, end: number) {}
+    setAngle(start: number, end: number) {
+        this.start = start;
+        this.end = end;
+        this.update();
+    }
 
     patchProp(
         key: string,
@@ -193,21 +252,52 @@ export class Ellipse extends GraphicItemBase {
     protected render(
         canvas: MotaOffscreenCanvas2D,
         transform: Transform
-    ): void {}
+    ): void {
+        const ctx = canvas.ctx;
+        this.setCanvasState(canvas);
+        ctx.beginPath();
+        ctx.ellipse(this.x,this.y,this.radiusX,this.radiusY,0,this.start,this.end);
+
+        switch (this.mode) {
+            case GraphicMode.Fill:
+                ctx.fill(this.fillRule);
+                break;
+            case GraphicMode.Stroke:
+                ctx.stroke();
+                break;
+            case GraphicMode.FillAndStroke:
+                ctx.fill(this.fillRule);
+                ctx.stroke();
+                break;
+            case GraphicMode.StrokeAndFill:
+                ctx.stroke();
+                ctx.fill(this.fillRule);
+                break;
+        }
+    }
 
     /**
      * 设置椭圆的横纵轴长度
      * @param x 横轴长度
      * @param y 纵轴长度
      */
-    setRadius(x: number, y: number) {}
+    setRadius(x: number, y: number) {
+        this.radiusX = x;
+        this.radiusY = y;
+        this.update();
+    }
+
 
     /**
      * 设置椭圆的起始与终止角度
      * @param start 起始角度
      * @param end 终止角度
      */
-    setAngle(start: number, end: number) {}
+    setAngle(start: number, end: number) {
+        this.start = start;
+        this.end = end;
+        this.update();
+    }
 
     patchProp(
         key: string,
@@ -231,17 +321,33 @@ export class Line extends GraphicItemBase {
     protected render(
         canvas: MotaOffscreenCanvas2D,
         transform: Transform
-    ): void {}
+    ): void {
+        const ctx = canvas.ctx;
+        this.setCanvasState(canvas);
+        ctx.beginPath();
+        ctx.moveTo(this.x1,this.y1)
+        ctx.lineTo(this.x2,this.y2);
+        ctx.stroke();
+           
+    }
 
     /**
      * 设置第一个点的横纵坐标
      */
-    setPoint1(x: number, y: number) {}
+    setPoint1(x: number, y: number) {
+        this.x1 = x;
+        this.y1 = y;
+        this.update();
+    }
 
     /**
      * 设置第二个点的横纵坐标
      */
-    setPoint2(x: number, y: number) {}
+    setPoint2(x: number, y: number) {
+        this.x2 = x;
+        this.y2 = y;
+        this.update();
+    }
 
     patchProp(
         key: string,
@@ -269,27 +375,50 @@ export class BezierCurve extends GraphicItemBase {
     protected render(
         canvas: MotaOffscreenCanvas2D,
         transform: Transform
-    ): void {}
+    ): void {
+        const ctx = canvas.ctx;
+        this.setCanvasState(canvas);
+        ctx.beginPath();
+        ctx.moveTo(this.sx,this.sy)
+        ctx.bezierCurveTo(this.cp1x,this.cp1y,this.cp2x,this.cp2y,this.ex,this.ey);
+        ctx.stroke();
+    }
 
     /**
      * 设置起始点坐标
      */
-    setStart(x: number, y: number) {}
+    setStart(x: number, y: number) {
+        this.sx = x;
+        this.sy = y;
+        this.update();
+    }
 
     /**
      * 设置控制点1坐标
      */
-    setControl1(x: number, y: number) {}
+    setControl1(x: number, y: number) {
+        this.cp1x = x;
+        this.cp1y = y;
+        this.update();
+    }
 
     /**
      * 设置控制点2坐标
      */
-    setControl2(x: number, y: number) {}
+    setControl2(x: number, y: number) {
+        this.cp2x = x;
+        this.cp2y = y;
+        this.update();
+    }
 
     /**
      * 设置终点坐标
      */
-    setEnd(x: number, y: number) {}
+    setEnd(x: number, y: number) {
+        this.ex = x;
+        this.ey = y;
+        this.update();
+    }
 
     patchProp(
         key: string,
@@ -315,22 +444,41 @@ export class QuadraticCurve extends GraphicItemBase {
     protected render(
         canvas: MotaOffscreenCanvas2D,
         transform: Transform
-    ): void {}
+    ): void {
+        const ctx = canvas.ctx;
+        this.setCanvasState(canvas);
+        ctx.beginPath();
+        ctx.moveTo(this.sx,this.sy)
+        ctx.quadraticCurveTo(this.cpx,this.cpy,this.ex,this.ey);
+        ctx.stroke();
+    }
 
     /**
      * 设置起始点坐标
      */
-    setStart(x: number, y: number) {}
+    setStart(x: number, y: number) {
+        this.sx = x;
+        this.sy = y;
+        this.update();
+    }
 
     /**
      * 设置控制点坐标
      */
-    setControl(x: number, y: number) {}
+    setControl(x: number, y: number) {
+        this.cpx = x;
+        this.cpy = y;
+        this.update();
+    }
 
     /**
      * 设置终点坐标
      */
-    setEnd(x: number, y: number) {}
+    setEnd(x: number, y: number) {
+        this.ex = x;
+        this.ey = y;
+        this.update();
+    }
 
     patchProp(
         key: string,
@@ -352,7 +500,26 @@ export class Path extends GraphicItemBase {
     protected render(
         canvas: MotaOffscreenCanvas2D,
         transform: Transform
-    ): void {}
+    ): void {
+        const ctx = canvas.ctx;
+        this.setCanvasState(canvas);
+        switch (this.mode) {
+            case GraphicMode.Fill:
+                ctx.fill(this.path,this.fillRule);
+                break;
+            case GraphicMode.Stroke:
+                ctx.stroke(this.path);
+                break;
+            case GraphicMode.FillAndStroke:
+                ctx.fill(this.path,this.fillRule);
+                ctx.stroke(this.path);
+                break;
+            case GraphicMode.StrokeAndFill:
+                ctx.stroke(this.path);
+                ctx.fill(this.path,this.fillRule);
+                break;
+        }
+    }
 
     /**
      * 获取当前路径
@@ -365,7 +532,10 @@ export class Path extends GraphicItemBase {
      * 为路径添加路径
      * @param path 要添加的路径
      */
-    addPath(path: Path2D) {}
+    addPath(path: Path2D) {
+        this.path.addPath(path);
+        this.update();
+    }
 
     patchProp(
         key: string,
