@@ -67,8 +67,10 @@ export class FloorViewport implements ILayerGroupRenderExtends {
         const halfHeight = core._PY_ / 2;
         const cell = this.group.cellSize;
         const half = cell / 2;
-        this.nx = -(nx - halfWidth + half) / this.group.cellSize;
-        this.ny = -(ny - halfHeight + half) / this.group.cellSize;
+        this.applyPosition(
+            -(nx - halfWidth + half) / this.group.cellSize,
+            -(ny - halfHeight + half) / this.group.cellSize
+        );
         this.mutateTo(x, y);
     }
 
@@ -116,8 +118,7 @@ export class FloorViewport implements ILayerGroupRenderExtends {
         if (!this.enabled) return;
         const { x: nx, y: ny } = this.getBoundedPosition(x, y);
         this.group.removeTicker(this.transition, false);
-        this.nx = nx;
-        this.ny = ny;
+        this.applyPosition(nx, ny);
     }
 
     /**
@@ -198,8 +199,7 @@ export class FloorViewport implements ILayerGroupRenderExtends {
 
             const { x, y } = this.hero!.renderable;
             const { x: nx, y: ny } = this.getBoundedPosition(x, y);
-            this.nx = nx;
-            this.ny = ny;
+            this.applyPosition(nx, ny);
 
             if (ending) {
                 if (this.ox === xTarget && this.oy == yTarget) {
@@ -264,41 +264,32 @@ export class FloorViewport implements ILayerGroupRenderExtends {
                 const progress = fn((now - start) / time);
                 const tx = dx * progress;
                 const ty = dy * progress;
-                this.nx = tx + sx;
-                this.ny = ty + sy;
+                this.applyPosition(tx + sx, ty + sy);
             },
             time,
             () => {
-                this.nx = x;
-                this.ny = y;
+                this.applyPosition(x, y);
                 this.inTransition = false;
             }
         );
     }
 
-    private create() {
-        let nx = this.nx;
-        let ny = this.ny;
+    private applyPosition(x: number, y: number) {
+        if (!this.enabled) return;
+        if (x === this.nx && y === this.ny) return;
         const halfWidth = core._PX_ / 2;
         const halfHeight = core._PY_ / 2;
-        this.delegation = this.group.delegateTicker(() => {
-            if (!this.enabled) return;
-            if (this.nx === nx && this.ny === ny) {
-                return;
-            }
-            const cell = this.group.cellSize;
-            const half = cell / 2;
-            nx = this.nx;
-            ny = this.ny;
-            const { x: bx, y: by } = this.getBoundedPosition(nx, ny);
-            const rx = bx * cell - halfWidth + half;
-            const ry = by * cell - halfHeight + half;
-            core.bigmap.offsetX = rx;
-            core.bigmap.offsetY = ry;
-            this.group.camera.setTranslate(-rx, -ry);
-            this.group.update(this.group);
-        });
-        // this.createMoving();
+        const cell = this.group.cellSize;
+        const half = cell / 2;
+        this.nx = x;
+        this.ny = y;
+        const { x: bx, y: by } = this.getBoundedPosition(x, y);
+        const rx = bx * cell - halfWidth + half;
+        const ry = by * cell - halfHeight + half;
+        core.bigmap.offsetX = rx;
+        core.bigmap.offsetY = ry;
+        this.group.camera.setTranslate(-rx, -ry);
+        this.group.update(this.group);
     }
 
     private checkDependency() {
@@ -319,7 +310,6 @@ export class FloorViewport implements ILayerGroupRenderExtends {
 
     awake(group: LayerGroup): void {
         this.group = group;
-        this.create();
         adapter.add(this);
     }
 
