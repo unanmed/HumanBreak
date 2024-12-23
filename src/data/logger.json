@@ -69,7 +69,7 @@
         "39": "Plain text is not supported outside Text element.",
         "40": "Cannot return canvas that is not provided by this pool.",
         "41": "Width of text content components must be positive. receive: $1",
-        "42": "Repeat Textbox id: '$1'.",
+        "42": "Repeated Textbox id: '$1'.",
         "1001": "Item-detail extension needs 'floor-binder' and 'floor-damage' extension as dependency.",
         "1101": "Cannot add new effect to point effect instance, for there's no more reserve space for it. Please increase the max count of the instance."
     }

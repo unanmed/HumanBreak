@@ -855,7 +855,7 @@ actions.prototype._sys_keyDownCtrl = function () {
         core.status.event.id == 'action' &&
         core.status.event.data.type == 'text'
     ) {
-        core.doAction();
+        this._clickAction_text();
         return true;
     }
     if (
@@ -1117,16 +1117,25 @@ actions.prototype._clickAction_text = function () {
     // 正在淡入淡出的话不执行
     if (core.status.event.animateUI) return;
 
-    var data = core.clone(core.status.event.data.current);
-    if (typeof data == 'string') data = { type: 'text', text: data };
+    const Store = Mota.require('module', 'Render').TextboxStore;
+    const store = Store.get('main-textbox');
+
+    // var data = core.clone(core.status.event.data.current);
+    // if (typeof data == 'string') data = { type: 'text', text: data };
 
     // 打字机效果显示全部文字
-    if (core.status.event.interval != null) {
-        data.showAll = true;
-        core.insertAction(data);
-        core.doAction();
+    if (store.typing) {
+        store.endType();
         return;
+    } else {
+        store.hide();
     }
+    // if (core.status.event.interval != null) {
+    //     data.showAll = true;
+    //     core.insertAction(data);
+    //     core.doAction();
+    //     return;
+    // }
 
     if (!data.code) {
         core.ui._animateUI('hide', null, core.doAction);

@@ -13,6 +13,7 @@ import { PopText } from '@/plugin/fx/pop';
 import { FloorChange } from '@/plugin/fallback';
 import { createApp } from './renderer';
 import { defineComponent } from 'vue';
+import { Textbox } from './components';
 
 let main: MotaRenderer;
 
@@ -55,6 +56,21 @@ Mota.require('var', 'loading').once('coreInit', () => {
                     <layer layer="fg2" zIndex={50}></layer>
                     <PopText id="pop-main" zIndex={80}></PopText>
                 </layer-group>
+                <Textbox
+                    id="main-textbox"
+                    text=""
+                    hidden
+                    width={480}
+                    height={150}
+                    y={330}
+                    zIndex={30}
+                    fillStyle={'#000'}
+                    titleFill={'#000'}
+                    font="16px normal"
+                    titleFont="20px normal"
+                    interval={25}
+                    lineHeight={6}
+                ></Textbox>
                 <FloorChange id="floor-change" zIndex={50}></FloorChange>
             </container>
         );

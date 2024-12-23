@@ -7,7 +7,7 @@ import {
 import { ERenderItemEvent, RenderItem } from '../item';
 import { tagMap } from './map';
 import { logger } from '@/core/common/logger';
-import { Comment, Text } from '../preset/misc';
+import { Comment, ETextEvent, Text } from '../preset/misc';
 
 export const { createApp, render } = createRenderer<RenderItem, RenderItem>({
     patchProp: function (
@@ -48,7 +48,7 @@ export const { createApp, render } = createRenderer<RenderItem, RenderItem>({
         return onCreate(namespace, isCustomizedBuiltIn, vnodeProps);
     },
 
-    createText: function (text: string): RenderItem<ERenderItemEvent> {
+    createText: function (text: string): RenderItem<ETextEvent> {
         if (!/^\s*$/.test(text)) logger.warn(38);
         return new Text(text);
     },

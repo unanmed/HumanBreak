@@ -446,10 +446,9 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
             endFn: end
         };
         RenderItem.tickerMap.set(id, delegation);
-        RenderItem.ticker.add(fn);
         if (typeof time === 'number' && time < 2147438647 && time > 0) {
             delegation.timeout = window.setTimeout(() => {
-                RenderItem.ticker.remove(fn);
+                RenderItem.tickerMap.delete(id);
                 end?.();
             }, time);
         }
@@ -616,6 +615,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         namespace?: ElementNamespace,
         parentComponent?: ComponentInternalInstance | null
     ): void {
+        if (isNil(prevValue) && isNil(nextValue)) return;
         switch (key) {
             case 'x': {
                 if (!this.assertType(nextValue, 'number', key)) return;
@@ -722,13 +722,16 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     }
 }
 
-RenderItem.ticker.add(() => {
+RenderItem.ticker.add(time => {
     // slice 是为了让函数里面的 request 进入下一帧执行
     if (beforeFrame.length > 0) {
         const arr = beforeFrame.slice();
         beforeFrame.splice(0);
         arr.forEach(v => v());
     }
+    RenderItem.tickerMap.forEach(v => {
+        v.fn(time);
+    });
     if (renderFrame.length > 0) {
         const arr = renderFrame.slice();
         renderFrame.splice(0);

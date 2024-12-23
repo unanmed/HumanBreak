@@ -1553,24 +1553,70 @@ events.prototype.__action_doAsyncFunc = function (isAsync, func) {
 
 events.prototype._action_text = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
-    data.text = core.replaceText(data.text, prefix);
-    var ctx = data.code ? '__text__' + data.code : null;
-    data.ctx = ctx;
-    if (core.getContextByName(ctx) && !data.showAll) {
-        core.ui._animateUI('hide', ctx, function () {
-            core.ui.drawTextBox(data.text, data);
-            core.ui._animateUI('show', ctx, function () {
-                if (data.async) core.doAction();
-            });
-        });
-        return;
+    const Store = Mota.require('module', 'Render').TextboxStore;
+    const store = Store.get('main-textbox');
+    const { text } = data;
+    let title = '';
+    let inTitle = false;
+    let titleStartIndex = 0;
+    let titleEndIndex = 0;
+    for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+
+        if (inTitle) {
+            if (char === '\\' && text[i + 1] === ']') {
+                title += ']';
+                i++;
+            } else if (char === ']') {
+                inTitle = false;
+                titleEndIndex = i + 1;
+                break;
+            } else {
+                title += char;
+            }
+            continue;
+        }
+
+        if (char === '\t' && text[i + 1] === '[') {
+            inTitle = true;
+            titleStartIndex = i;
+            // 跳转至方括号内
+            i++;
+            continue;
+        }
+
+        if (char === '\\' && text[i + 1] === 't' && text[i + 2] === '[') {
+            inTitle = true;
+            titleStartIndex = i;
+            // 跳转至方括号内
+            i += 2;
+            continue;
+        }
     }
-    core.ui.drawTextBox(data.text, data);
-    if (!data.showAll) {
-        core.ui._animateUI('show', ctx, function () {
-            if (data.async) core.doAction();
-        });
-    }
+
+    const showTitle =
+        text.slice(0, titleStartIndex) + text.slice(titleEndIndex);
+    store.show();
+    store.modify({ text: showTitle, title });
+
+    // data.text = core.replaceText(data.text, prefix);
+    // var ctx = data.code ? '__text__' + data.code : null;
+    // data.ctx = ctx;
+    // if (core.getContextByName(ctx) && !data.showAll) {
+    //     core.ui._animateUI('hide', ctx, function () {
+    //         core.ui.drawTextBox(data.text, data);
+    //         core.ui._animateUI('show', ctx, function () {
+    //             if (data.async) core.doAction();
+    //         });
+    //     });
+    //     return;
+    // }
+    // core.ui.drawTextBox(data.text, data);
+    // if (!data.showAll) {
+    //     core.ui._animateUI('show', ctx, function () {
+    //         if (data.async) core.doAction();
+    //     });
+    // }
 };
 
 events.prototype._action_moveTextBox = function (data, x, y, prefix) {

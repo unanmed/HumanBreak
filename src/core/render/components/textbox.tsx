@@ -16,11 +16,11 @@ import { Transform } from '../transform';
 import { isSetEqual } from '../utils';
 import { logger } from '@/core/common/logger';
 import { Sprite } from '../sprite';
-import { onTick } from '../renderer';
+import { ContainerProps, onTick } from '../renderer';
 import { isNil } from 'lodash-es';
 import { SetupComponentOptions } from './types';
 import EventEmitter from 'eventemitter3';
-import { Container } from '../container';
+import { Text } from '../preset';
 
 export const enum WordBreak {
     /** 不换行 */
@@ -46,7 +46,7 @@ Mota.require('var', 'loading').once('coreInit', () => {
     testCanvas.freeze();
 });
 
-export interface TextContentProps {
+interface TextContentRenderData {
     text: string;
     x?: number;
     y?: number;
@@ -80,7 +80,13 @@ export interface TextContentProps {
     fill?: boolean;
     /** 是否描边 */
     stroke?: boolean;
+    /** 是否无视打字机，强制全部显示 */
+    showAll?: boolean;
 }
+
+export interface TextContentProps
+    extends ContainerProps,
+        TextContentRenderData {}
 
 export type TextContentEmits = {
     typeEnd: () => void;
@@ -103,9 +109,8 @@ interface TextContentData {
 
 interface TextContentRenderable {
     x: number;
-    y: number;
     /** 行高，为0时表示两行间为默认行距 */
-    height: number;
+    lineHeight: number;
     /** 这一行文字的高度，即 measureText 算出的高度 */
     textHeight: number;
     /** 这一行的文字 */
@@ -138,7 +143,8 @@ const textContentOptions = {
         'fillStyle',
         'strokeStyle',
         'strokeWidth',
-        'stroke'
+        'stroke',
+        'showAll'
     ],
     emits: ['typeEnd', 'typeStart']
 } satisfies SetupComponentOptions<
@@ -155,7 +161,7 @@ export const TextContent = defineComponent<
     if (props.width && props.width <= 0) {
         logger.warn(41, String(props.width));
     }
-    const renderData: Required<TextContentProps> = {
+    const renderData: Required<TextContentRenderData> = shallowReactive({
         text: props.text,
         textAlign: props.textAlign ?? TextAlign.Left,
         x: props.x ?? 0,
@@ -174,8 +180,9 @@ export const TextContent = defineComponent<
         strokeStyle: props.strokeStyle ?? 'transparent',
         fill: props.fill ?? true,
         stroke: props.stroke ?? false,
-        strokeWidth: props.strokeWidth ?? 2
-    };
+        strokeWidth: props.strokeWidth ?? 2,
+        showAll: props.showAll ?? false
+    });
 
     const ensureProps = () => {
         for (const [key, value] of Object.entries(props)) {
@@ -242,9 +249,11 @@ export const TextContent = defineComponent<
         const time = Date.now();
         const char =
             Math.floor((time - startTime) / renderData.interval!) + fromChar;
-        if (!isFinite(char)) {
+        if (!isFinite(char) || renderData.showAll) {
             renderable.forEach(v => (v.pointer = v.text.length));
             needUpdate = false;
+            linePointer = dirtyIndex.length;
+            emit('typeEnd');
             return;
         }
         while (linePointer < dirtyIndex.length) {
@@ -259,6 +268,7 @@ export const TextContent = defineComponent<
                 break;
             }
         }
+
         if (linePointer >= dirtyIndex.length) {
             needUpdate = false;
             renderable.forEach(v => (v.pointer = v.text.length));
@@ -282,21 +292,23 @@ export const TextContent = defineComponent<
         ctx.strokeStyle = renderData.strokeStyle;
         ctx.lineWidth = renderData.strokeWidth;
 
+        let y = renderable[0]?.textHeight ?? 0;
         renderable.forEach(v => {
             if (v.pointer === 0) return;
             const text = v.text.slice(0, v.pointer);
             if (renderData.textAlign === TextAlign.Left) {
-                if (renderData.stroke) ctx.strokeText(text, v.x, v.y);
-                if (renderData.fill) ctx.fillText(text, v.x, v.y);
+                if (renderData.stroke) ctx.strokeText(text, v.x, y);
+                if (renderData.fill) ctx.fillText(text, v.x, y);
             } else if (renderData.textAlign === TextAlign.Center) {
                 const x = (renderData.width - v.x) / 2 + v.x;
-                if (renderData.stroke) ctx.strokeText(text, x, v.y);
-                if (renderData.fill) ctx.fillText(text, x, v.y);
+                if (renderData.stroke) ctx.strokeText(text, x, y);
+                if (renderData.fill) ctx.fillText(text, x, y);
             } else {
                 const x = renderData.width;
-                if (renderData.stroke) ctx.strokeText(text, x, v.y);
-                if (renderData.fill) ctx.fillText(text, x, v.y);
+                if (renderData.stroke) ctx.strokeText(text, x, y);
+                if (renderData.fill) ctx.fillText(text, x, y);
             }
+            y += v.textHeight + v.lineHeight;
         });
     };
 
@@ -323,7 +335,7 @@ export const TextContent = defineComponent<
         needUpdate = true;
 
         let startY = renderable.reduce(
-            (prev, curr) => prev + curr.textHeight + curr.height,
+            (prev, curr) => prev + curr.textHeight + curr.lineHeight,
             0
         );
         // 第一个比较特殊，需要特判
@@ -335,12 +347,11 @@ export const TextContent = defineComponent<
         renderable.push({
             text: text.slice(start, end),
             x: 0,
-            y: startY,
-            height: renderData.lineHeight!,
+            lineHeight: renderData.lineHeight!,
             textHeight: height,
             pointer: startPointer,
             from: start,
-            to: end
+            to: end ?? text.length
         });
 
         for (let i = index + 1; i < lines.length; i++) {
@@ -353,12 +364,11 @@ export const TextContent = defineComponent<
             renderable.push({
                 text: text.slice(start, end),
                 x: 0,
-                y: startY,
-                height: renderData.lineHeight!,
+                lineHeight: renderData.lineHeight!,
                 textHeight: height,
                 pointer: 0,
                 from: start,
-                to: end
+                to: end ?? text.length
             });
         }
         emit('typeStart');
@@ -443,9 +453,8 @@ export const TextContent = defineComponent<
     return () => {
         return (
             <sprite
+                {...renderData}
                 ref={spriteElement}
-                hd
-                antiAliasing={true}
                 x={renderData.x}
                 y={renderData.y}
                 width={renderData.width}
@@ -456,14 +465,23 @@ export const TextContent = defineComponent<
     };
 }, textContentOptions);
 
-export interface TextboxProps extends TextContentProps {
-    id?: string;
+export interface TextboxProps extends TextContentProps, ContainerProps {
     /** 背景颜色 */
     backColor?: CanvasStyle;
     /** 背景 winskin */
     winskin?: string;
     /** 边框与文字间的距离，默认为8 */
     padding?: number;
+    /** 标题 */
+    title?: string;
+    /** 标题字体 */
+    titleFont?: string;
+    /** 标题填充样式 */
+    titleFill?: CanvasStyle;
+    /** 标题描边样式 */
+    titleStroke?: CanvasStyle;
+    /** 标题文字与边框间的距离，默认为4 */
+    titlePadding?: number;
 }
 
 type TextboxEmits = TextContentEmits;
@@ -473,7 +491,23 @@ const textboxOptions = {
     props: (textContentOptions.props as (keyof TextboxProps)[]).concat([
         'backColor',
         'winskin',
-        'id'
+        'id',
+        'padding',
+        'alpha',
+        'hidden',
+        'anchorX',
+        'anchorY',
+        'antiAliasing',
+        'cache',
+        'composite',
+        'fall',
+        'hd',
+        'transform',
+        'type',
+        'zIndex',
+        'titleFill',
+        'titleStroke',
+        'titleFont'
     ]),
     emits: textContentOptions.emits
 } satisfies SetupComponentOptions<TextboxProps, {}, string, TextboxSlots>;
@@ -494,24 +528,110 @@ export const Textbox = defineComponent<
     data.width ??= 200;
     data.height ??= 200;
     data.id ??= '';
+    data.alpha ??= 1;
+    data.titleFill ??= '#000';
+    data.titleStroke ??= 'transparent';
+    data.titleFont ??= '16px Verdana';
+    data.titlePadding ??= 4;
 
-    const store = TextboxStore.use(props.id ?? getNextTextboxId(), data);
-    const hidden = ref(false);
+    const titleElement = ref<Text>();
+    const titleWidth = ref(data.titlePadding * 2);
+    const titleHeight = ref(data.titlePadding * 2);
+    const contentY = computed(() => {
+        const height = titleHeight.value;
+        return data.title ? height : 0;
+    });
+    const contentWidth = computed(() => data.width! - data.padding! * 2);
+    const contentHeight = computed(
+        () => data.height! - data.padding! * 2 - contentY.value
+    );
+
+    const calTitleSize = (text: string) => {
+        if (!titleElement.value) return;
+        const { width, height } = titleElement.value;
+        titleWidth.value = width + data.titlePadding! * 2;
+        titleHeight.value = height + data.titlePadding! * 2;
+        data.title = text;
+    };
+
+    watch(titleElement, (value, old) => {
+        old?.off('setText', calTitleSize);
+        value?.on('setText', calTitleSize);
+        if (value) calTitleSize(value?.text);
+    });
+
+    onUnmounted(() => {
+        titleElement.value?.off('setText', calTitleSize);
+    });
+
+    // ----- store
+
+    /** 结束打字机 */
+    const storeEmits: TextboxStoreEmits = {
+        endType() {
+            data.showAll = true;
+        }
+    };
+
+    const store = TextboxStore.use(
+        props.id ?? getNextTextboxId(),
+        data,
+        storeEmits
+    );
+    const hidden = ref(data.hidden);
     store.on('hide', () => (hidden.value = true));
     store.on('show', () => (hidden.value = false));
-    onUpdated(() => {
-        for (const [key, value] of Object.entries(props)) {
-            // @ts-ignore
-            if (!isNil(value)) data[key] = value;
+    store.on('update', value => {
+        if (value.title) {
+            titleElement.value?.requestBeforeFrame(() => {
+                const { width, height } = titleElement.value!;
+                titleWidth.value = width + data.padding! * 2;
+                titleHeight.value = height + data.padding! * 2;
+            });
         }
     });
 
-    const contentWidth = computed(() => data.width! - data.padding! * 2);
-    const contentHeight = computed(() => data.height! - data.padding! * 2);
+    const onTypeStart = () => {
+        store.emitTypeStart();
+    };
+
+    const onTypeEnd = () => {
+        data.showAll = false;
+        store.emitTypeEnd();
+    };
 
     return () => {
         return (
-            <container hidden={hidden.value} id="11111">
+            <container {...data} hidden={hidden.value} alpha={data.alpha}>
+                {data.title ? (
+                    <container
+                        zIndex={10}
+                        width={titleWidth.value}
+                        height={titleHeight.value}
+                    >
+                        {props.winskin ? (
+                            <winskin></winskin>
+                        ) : (
+                            <g-rect
+                                x={0}
+                                y={0}
+                                width={titleWidth.value}
+                                height={titleHeight.value}
+                            ></g-rect>
+                        )}
+                        <text
+                            ref={titleElement}
+                            text={data.title}
+                            x={data.titlePadding}
+                            y={data.titlePadding}
+                            fillStyle={data.titleFill}
+                            strokeStyle={data.titleStroke}
+                            font={data.titleFont}
+                        ></text>
+                    </container>
+                ) : (
+                    ''
+                )}
                 {slots.default ? (
                     slots.default(data)
                 ) : props.winskin ? (
@@ -521,19 +641,24 @@ export const Textbox = defineComponent<
                     // todo
                     <g-rect
                         x={0}
-                        y={0}
+                        y={contentY.value}
                         width={data.width ?? 200}
-                        height={data.height ?? 200}
+                        height={(data.height ?? 200) - contentY.value}
                         fill
                         fillStyle={data.backColor}
                     ></g-rect>
                 )}
                 <TextContent
                     {...data}
-                    x={data.padding}
-                    y={data.padding}
+                    hidden={false}
+                    x={data.padding!}
+                    y={contentY.value + data.padding!}
                     width={contentWidth.value}
                     height={contentHeight.value}
+                    onTypeEnd={onTypeEnd}
+                    onTypeStart={onTypeStart}
+                    zIndex={0}
+                    showAll={data.showAll}
                 ></TextContent>
             </container>
         );
@@ -721,17 +846,51 @@ function testHeight(text: string, font: string) {
     return ctx.measureText(text).fontBoundingBoxAscent;
 }
 
+interface TextboxStoreEmits {
+    endType: () => void;
+}
+
 interface TextboxStoreEvent {
     update: [value: TextboxProps];
     show: [];
     hide: [];
+    typeStart: [];
+    typeEnd: [];
 }
 
 export class TextboxStore extends EventEmitter<TextboxStoreEvent> {
     static list: Map<string, TextboxStore> = new Map();
 
-    private constructor(private readonly data: TextboxProps) {
+    typing: boolean = false;
+
+    private constructor(
+        private readonly data: TextboxProps,
+        private readonly emits: TextboxStoreEmits
+    ) {
         super();
+    }
+
+    /**
+     * 开始打字，由组件调用，而非组件外调用
+     */
+    emitTypeStart() {
+        this.typing = true;
+        this.emit('typeStart');
+    }
+
+    /**
+     * 结束打字，由组件调用，而非组件外调用
+     */
+    emitTypeEnd() {
+        this.typing = false;
+        this.emit('typeEnd');
+    }
+
+    /**
+     * 结束打字机的打字
+     */
+    endType() {
+        this.emits.endType();
     }
 
     /**
@@ -772,8 +931,8 @@ export class TextboxStore extends EventEmitter<TextboxStoreEvent> {
      * @param id 文本框id
      * @param props 文本框渲染数据
      */
-    static use(id: string, props: TextboxProps) {
-        const store = new TextboxStore(props);
+    static use(id: string, props: TextboxProps, emits: TextboxStoreEmits) {
+        const store = new TextboxStore(props, emits);
         if (this.list.has(id)) {
             logger.warn(42, id);
         }

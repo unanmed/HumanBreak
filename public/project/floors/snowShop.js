@@ -22,7 +22,7 @@ main.floors.snowShop=
             "而且，一共就只有三件装备（"
         ],
         "7,5": [
-            "\t[商店老板,N636]\b[up,7,5]请随意挑选",
+            "\t[商店老板]请随意挑选",
             {
                 "type": "openShop",
                 "id": "snowShop",

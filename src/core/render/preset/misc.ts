@@ -7,7 +7,9 @@ import { AutotileRenderable, RenderableData } from '../cache';
 
 type CanvasStyle = string | CanvasGradient | CanvasPattern;
 
-export interface ETextEvent extends ERenderItemEvent {}
+export interface ETextEvent extends ERenderItemEvent {
+    setText: [text: string];
+}
 
 export class Text extends RenderItem<ETextEvent> {
     text: string;
@@ -67,6 +69,7 @@ export class Text extends RenderItem<ETextEvent> {
         this.text = text;
         this.calBox();
         if (this.parent) this.update(this);
+        this.emit('setText', text);
     }
 
     /**
@@ -120,10 +123,10 @@ export class Text extends RenderItem<ETextEvent> {
                 this.setText(nextValue);
                 return;
             case 'fillStyle':
-                this.setStyle(nextValue);
+                this.setStyle(nextValue, this.strokeStyle);
                 return;
             case 'strokeStyle':
-                this.setStyle(void 0, nextValue);
+                this.setStyle(this.fillStyle, nextValue);
                 return;
             case 'font':
                 if (!this.assertType(nextValue, 'string', key)) return;

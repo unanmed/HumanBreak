@@ -4,7 +4,14 @@ import { ElementNamespace, VNodeProps } from 'vue';
 import { Container } from '../container';
 import { MotaRenderer } from '../render';
 import { Sprite } from '../sprite';
-import { Comment, Icon, Image, Text, Winskin } from '../preset/misc';
+import {
+    Comment,
+    ETextEvent,
+    Icon,
+    Image,
+    Text,
+    Winskin
+} from '../preset/misc';
 import { Shader } from '../shader';
 import { Animate, Damage, EDamageEvent, Layer, LayerGroup } from '../preset';
 import {
@@ -90,6 +97,40 @@ const standardElementNoCache = (
     };
 };
 
+const enum ElementState {
+    None = 0,
+    Cache = 1,
+    Fall = 2
+}
+
+/**
+ * standardElementFor
+ */
+const se = (
+    Item: new (
+        type: RenderItemPosition,
+        cache?: boolean,
+        fall?: boolean
+    ) => RenderItem,
+    position: RenderItemPosition,
+    state: ElementState
+) => {
+    const defaultCache = !!(state & ElementState.Cache);
+    const defautFall = !!(state & ElementState.Fall);
+
+    return (_0: any, _1: any, props?: any) => {
+        if (!props) return new Item('absolute');
+        else {
+            const {
+                type = position,
+                cache = defaultCache,
+                fall = defautFall
+            } = props;
+            return new Item(type, cache, fall);
+        }
+    };
+};
+
 // Default elements
 tagMap.register('container', standardElement(Container));
 tagMap.register('template', standardElement(Container));
@@ -97,7 +138,7 @@ tagMap.register('mota-renderer', (_0, _1, props) => {
     return new MotaRenderer(props?.id);
 });
 tagMap.register('sprite', standardElement(Sprite));
-tagMap.register('text', (_0, _1, props) => {
+tagMap.register<ETextEvent, Text>('text', (_0, _1, props) => {
     if (!props) return new Text();
     else {
         const { type = 'static', text = '' } = props;
@@ -182,13 +223,13 @@ tagMap.register<EDamageEvent, Damage>('damage', (_0, _1, props) => {
 tagMap.register('animation', (_0, _1, props) => {
     return new Animate();
 });
-tagMap.register('g-rect', standardElementNoCache(Rect));
-tagMap.register('g-circle', standardElementNoCache(Circle));
-tagMap.register('g-ellipse', standardElementNoCache(Ellipse));
-tagMap.register('g-line', standardElementNoCache(Line));
-tagMap.register('g-bezier', standardElementNoCache(BezierCurve));
-tagMap.register('g-quad', standardElementNoCache(QuadraticCurve));
-tagMap.register('g-path', standardElementNoCache(Path));
+tagMap.register('g-rect', se(Rect, 'absolute', ElementState.None));
+tagMap.register('g-circle', se(Circle, 'absolute', ElementState.None));
+tagMap.register('g-ellipse', se(Ellipse, 'absolute', ElementState.None));
+tagMap.register('g-line', se(Line, 'absolute', ElementState.None));
+tagMap.register('g-bezier', se(BezierCurve, 'absolute', ElementState.None));
+tagMap.register('g-quad', se(QuadraticCurve, 'absolute', ElementState.None));
+tagMap.register('g-path', se(Path, 'absolute', ElementState.None));
 tagMap.register('icon', standardElementNoCache(Icon));
 tagMap.register('winskin', (_0, _1, props) => {
     if (!props) return new Winskin(core.material.images.images['winskin.png']);
