@@ -617,6 +617,7 @@ export const Textbox = defineComponent<
                                 y={0}
                                 width={titleWidth.value}
                                 height={titleHeight.value}
+                                fillStyle={data.backColor}
                             ></g-rect>
                         )}
                         <text

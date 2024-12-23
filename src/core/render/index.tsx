@@ -64,10 +64,11 @@ Mota.require('var', 'loading').once('coreInit', () => {
                     height={150}
                     y={330}
                     zIndex={30}
-                    fillStyle={'#000'}
-                    titleFill={'#000'}
+                    fillStyle={'#fff'}
+                    titleFill={'gold'}
                     font="16px normal"
-                    titleFont="20px normal"
+                    titleFont="700 20px normal"
+                    winskin="winskin2.png"
                     interval={25}
                     lineHeight={6}
                 ></Textbox>
