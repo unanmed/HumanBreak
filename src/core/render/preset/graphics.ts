@@ -75,10 +75,12 @@ export abstract class GraphicItemBase
     setLineOption(options: Partial<ILineProperty>) {
         if (!isNil(options.lineWidth)) this.lineWidth = options.lineWidth;
         if (!isNil(options.lineDash)) this.lineDash = options.lineDash;
-        if (!isNil(options.lineDashOffset)) this.lineDashOffset = options.lineDashOffset;
+        if (!isNil(options.lineDashOffset))
+            this.lineDashOffset = options.lineDashOffset;
         if (!isNil(options.lineJoin)) this.lineJoin = options.lineJoin;
         if (!isNil(options.lineCap)) this.lineCap = options.lineCap;
         if (!isNil(options.miterLimit)) this.miterLimit = options.miterLimit;
+        this.update();
     }
 
     /**
@@ -126,7 +128,7 @@ export abstract class GraphicItemBase
         ctx.fillStyle = this.fill;
         ctx.strokeStyle = this.stroke;
         ctx.lineWidth = this.lineWidth;
-        ctx.setLineDash(this.lineDash)
+        ctx.setLineDash(this.lineDash);
         ctx.lineDashOffset = this.lineDashOffset;
         ctx.lineJoin = this.lineJoin;
         ctx.lineCap = this.lineCap;
@@ -189,7 +191,7 @@ export class Circle extends GraphicItemBase {
         const ctx = canvas.ctx;
         this.setCanvasState(canvas);
         ctx.beginPath();
-        ctx.arc(this.x,this.y,this.radius,this.start,this.end);
+        ctx.arc(this.x, this.y, this.radius, this.start, this.end);
 
         switch (this.mode) {
             case GraphicMode.Fill:
@@ -215,7 +217,7 @@ export class Circle extends GraphicItemBase {
      */
     setRadius(radius: number) {
         this.radius = radius;
-        this.size(radius*2,radius*2);
+        this.size(radius * 2, radius * 2);
         this.update();
     }
 
@@ -244,11 +246,11 @@ export class Circle extends GraphicItemBase {
                 return;
             case 'start':
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.setAngle(nextValue,this.end);
+                this.setAngle(nextValue, this.end);
                 return;
             case 'end':
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.setAngle(this.start,nextValue);
+                this.setAngle(this.start, nextValue);
                 return;
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
@@ -268,7 +270,15 @@ export class Ellipse extends GraphicItemBase {
         const ctx = canvas.ctx;
         this.setCanvasState(canvas);
         ctx.beginPath();
-        ctx.ellipse(this.x,this.y,this.radiusX,this.radiusY,0,this.start,this.end);
+        ctx.ellipse(
+            this.x,
+            this.y,
+            this.radiusX,
+            this.radiusY,
+            0,
+            this.start,
+            this.end
+        );
 
         switch (this.mode) {
             case GraphicMode.Fill:
@@ -299,7 +309,6 @@ export class Ellipse extends GraphicItemBase {
         this.update();
     }
 
-
     /**
      * 设置椭圆的起始与终止角度
      * @param start 起始角度
@@ -321,19 +330,19 @@ export class Ellipse extends GraphicItemBase {
         switch (key) {
             case 'radiusX':
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.setRadius(nextValue,this.radiusY);
+                this.setRadius(nextValue, this.radiusY);
                 return;
             case 'radiusY':
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.setRadius(this.radiusY,nextValue);
+                this.setRadius(this.radiusY, nextValue);
                 return;
             case 'start':
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.setAngle(nextValue,this.end);
+                this.setAngle(nextValue, this.end);
                 return;
             case 'end':
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.setAngle(this.start,nextValue);
+                this.setAngle(this.start, nextValue);
                 return;
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
@@ -353,10 +362,9 @@ export class Line extends GraphicItemBase {
         const ctx = canvas.ctx;
         this.setCanvasState(canvas);
         ctx.beginPath();
-        ctx.moveTo(this.x1,this.y1)
-        ctx.lineTo(this.x2,this.y2);
+        ctx.moveTo(this.x1, this.y1);
+        ctx.lineTo(this.x2, this.y2);
         ctx.stroke();
-           
     }
 
     /**
@@ -387,19 +395,19 @@ export class Line extends GraphicItemBase {
         switch (key) {
             case 'x1':
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.setPoint1(nextValue,this.y1);
+                this.setPoint1(nextValue, this.y1);
                 return;
             case 'y1':
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.setPoint1(this.x1,nextValue);
+                this.setPoint1(this.x1, nextValue);
                 return;
             case 'x2':
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.setPoint2(nextValue,this.y2);
+                this.setPoint2(nextValue, this.y2);
                 return;
             case 'y2':
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.setPoint2(this.x2,nextValue);
+                this.setPoint2(this.x2, nextValue);
                 return;
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
@@ -423,8 +431,15 @@ export class BezierCurve extends GraphicItemBase {
         const ctx = canvas.ctx;
         this.setCanvasState(canvas);
         ctx.beginPath();
-        ctx.moveTo(this.sx,this.sy)
-        ctx.bezierCurveTo(this.cp1x,this.cp1y,this.cp2x,this.cp2y,this.ex,this.ey);
+        ctx.moveTo(this.sx, this.sy);
+        ctx.bezierCurveTo(
+            this.cp1x,
+            this.cp1y,
+            this.cp2x,
+            this.cp2y,
+            this.ex,
+            this.ey
+        );
         ctx.stroke();
     }
 
@@ -474,35 +489,35 @@ export class BezierCurve extends GraphicItemBase {
         switch (key) {
             case 'sx':
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.setStart(nextValue,this.sy);
+                this.setStart(nextValue, this.sy);
                 return;
             case 'sy':
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.setStart(this.sx,nextValue);
+                this.setStart(this.sx, nextValue);
                 return;
             case 'cp1x':
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.setControl1(nextValue,this.cp1y);
+                this.setControl1(nextValue, this.cp1y);
                 return;
             case 'cp1y':
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.setControl1(this.cp1x,nextValue);
+                this.setControl1(this.cp1x, nextValue);
                 return;
             case 'cp2x':
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.setControl2(nextValue,this.cp2y);
+                this.setControl2(nextValue, this.cp2y);
                 return;
             case 'cp2y':
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.setControl2(this.cp2x,nextValue);
+                this.setControl2(this.cp2x, nextValue);
                 return;
             case 'ex':
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.setEnd(nextValue,this.ey);
+                this.setEnd(nextValue, this.ey);
                 return;
             case 'ey':
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.setEnd(this.ex,nextValue);
+                this.setEnd(this.ex, nextValue);
                 return;
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
@@ -524,8 +539,8 @@ export class QuadraticCurve extends GraphicItemBase {
         const ctx = canvas.ctx;
         this.setCanvasState(canvas);
         ctx.beginPath();
-        ctx.moveTo(this.sx,this.sy)
-        ctx.quadraticCurveTo(this.cpx,this.cpy,this.ex,this.ey);
+        ctx.moveTo(this.sx, this.sy);
+        ctx.quadraticCurveTo(this.cpx, this.cpy, this.ex, this.ey);
         ctx.stroke();
     }
 
@@ -566,27 +581,27 @@ export class QuadraticCurve extends GraphicItemBase {
         switch (key) {
             case 'sx':
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.setStart(nextValue,this.sy);
+                this.setStart(nextValue, this.sy);
                 return;
             case 'sy':
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.setStart(this.sx,nextValue);
+                this.setStart(this.sx, nextValue);
                 return;
             case 'cpx':
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.setControl(nextValue,this.cpy);
+                this.setControl(nextValue, this.cpy);
                 return;
             case 'cpy':
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.setControl(this.cpx,nextValue);
+                this.setControl(this.cpx, nextValue);
                 return;
             case 'ex':
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.setEnd(nextValue,this.ey);
+                this.setEnd(nextValue, this.ey);
                 return;
             case 'ey':
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.setEnd(this.ex,nextValue);
+                this.setEnd(this.ex, nextValue);
                 return;
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
@@ -605,18 +620,18 @@ export class Path extends GraphicItemBase {
         this.setCanvasState(canvas);
         switch (this.mode) {
             case GraphicMode.Fill:
-                ctx.fill(this.path,this.fillRule);
+                ctx.fill(this.path, this.fillRule);
                 break;
             case GraphicMode.Stroke:
                 ctx.stroke(this.path);
                 break;
             case GraphicMode.FillAndStroke:
-                ctx.fill(this.path,this.fillRule);
+                ctx.fill(this.path, this.fillRule);
                 ctx.stroke(this.path);
                 break;
             case GraphicMode.StrokeAndFill:
                 ctx.stroke(this.path);
-                ctx.fill(this.path,this.fillRule);
+                ctx.fill(this.path, this.fillRule);
                 break;
         }
     }
