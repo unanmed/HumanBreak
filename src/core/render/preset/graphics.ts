@@ -143,7 +143,7 @@ export abstract class GraphicItemBase
                 this.propStroke = value;
                 break;
             case GraphicModeProp.StrokeAndFill:
-                this.strokeAndFill = true;
+                this.strokeAndFill = value;
                 break;
         }
         if (this.strokeAndFill) {
