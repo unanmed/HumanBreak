@@ -238,6 +238,18 @@ export class Circle extends GraphicItemBase {
         parentComponent?: ComponentInternalInstance | null
     ): void {
         switch (key) {
+            case 'radius':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setRadius(nextValue);
+                return;
+            case 'start':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setAngle(nextValue,this.end);
+                return;
+            case 'end':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setAngle(this.start,nextValue);
+                return;
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
@@ -307,6 +319,22 @@ export class Ellipse extends GraphicItemBase {
         parentComponent?: ComponentInternalInstance | null
     ): void {
         switch (key) {
+            case 'radiusX':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setRadius(nextValue,this.radiusY);
+                return;
+            case 'radiusY':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setRadius(this.radiusY,nextValue);
+                return;
+            case 'start':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setAngle(nextValue,this.end);
+                return;
+            case 'end':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setAngle(this.start,nextValue);
+                return;
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
@@ -357,6 +385,22 @@ export class Line extends GraphicItemBase {
         parentComponent?: ComponentInternalInstance | null
     ): void {
         switch (key) {
+            case 'x1':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setPoint1(nextValue,this.y1);
+                return;
+            case 'y1':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setPoint1(this.x1,nextValue);
+                return;
+            case 'x2':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setPoint2(nextValue,this.y2);
+                return;
+            case 'y2':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setPoint2(this.x2,nextValue);
+                return;
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
@@ -428,6 +472,38 @@ export class BezierCurve extends GraphicItemBase {
         parentComponent?: ComponentInternalInstance | null
     ): void {
         switch (key) {
+            case 'sx':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setStart(nextValue,this.sy);
+                return;
+            case 'sy':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setStart(this.sx,nextValue);
+                return;
+            case 'cp1x':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setControl1(nextValue,this.cp1y);
+                return;
+            case 'cp1y':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setControl1(this.cp1x,nextValue);
+                return;
+            case 'cp2x':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setControl2(nextValue,this.cp2y);
+                return;
+            case 'cp2y':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setControl2(this.cp2x,nextValue);
+                return;
+            case 'ex':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setEnd(nextValue,this.ey);
+                return;
+            case 'ey':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setEnd(this.ex,nextValue);
+                return;
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
@@ -488,6 +564,30 @@ export class QuadraticCurve extends GraphicItemBase {
         parentComponent?: ComponentInternalInstance | null
     ): void {
         switch (key) {
+            case 'sx':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setStart(nextValue,this.sy);
+                return;
+            case 'sy':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setStart(this.sx,nextValue);
+                return;
+            case 'cpx':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setControl(nextValue,this.cpy);
+                return;
+            case 'cpy':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setControl(this.cpx,nextValue);
+                return;
+            case 'ex':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setEnd(nextValue,this.ey);
+                return;
+            case 'ey':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setEnd(this.ex,nextValue);
+                return;
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
@@ -545,6 +645,11 @@ export class Path extends GraphicItemBase {
         parentComponent?: ComponentInternalInstance | null
     ): void {
         switch (key) {
+            case 'path':
+                if (!this.assertType(nextValue, Path2D, key)) return;
+                this.path = nextValue;
+                this.update();
+                return;
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
