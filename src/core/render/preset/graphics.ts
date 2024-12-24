@@ -51,6 +51,12 @@ export const enum GraphicMode {
     StrokeAndFill
 }
 
+const enum GraphicModeProp {
+    Fill,
+    Stroke,
+    StrokeAndFill
+}
+
 export interface EGraphicItemEvent extends ERenderItemEvent {}
 
 export abstract class GraphicItemBase
@@ -67,6 +73,11 @@ export abstract class GraphicItemBase
     lineCap: CanvasLineCap = 'butt';
     miterLimit: number = 10;
     fillRule: CanvasFillRule = 'nonzero';
+
+    private propFill: boolean = true;
+    private propStroke: boolean = false;
+    private strokeAndFill: boolean = false;
+    private propFillSet: boolean = false;
 
     /**
      * 设置描边绘制的信息
@@ -120,6 +131,46 @@ export abstract class GraphicItemBase
     }
 
     /**
+     * 检查渲染模式，参考 {@link GraphicPropsBase} 中的 fill stroke strokeAndFill 属性
+     */
+    private checkMode(mode: GraphicModeProp, value: boolean) {
+        switch (mode) {
+            case GraphicModeProp.Fill:
+                this.propFill = value;
+                this.propFillSet = true;
+                break;
+            case GraphicModeProp.Stroke:
+                this.propStroke = value;
+                break;
+            case GraphicModeProp.StrokeAndFill:
+                this.strokeAndFill = true;
+                break;
+        }
+        if (this.strokeAndFill) {
+            this.mode = GraphicMode.StrokeAndFill;
+        } else {
+            if (!this.propFillSet) {
+                if (this.propStroke) {
+                    this.mode = GraphicMode.Stroke;
+                } else {
+                    this.mode = GraphicMode.Fill;
+                }
+            } else {
+                if (this.propFill && this.propStroke) {
+                    this.mode = GraphicMode.FillAndStroke;
+                } else if (this.propFill) {
+                    this.mode = GraphicMode.Fill;
+                } else if (this.propStroke) {
+                    this.mode = GraphicMode.Stroke;
+                } else {
+                    this.mode = GraphicMode.Fill;
+                }
+            }
+        }
+        this.update();
+    }
+
+    /**
      * 设置画布的渲染状态，在实际渲染前调用
      * @param canvas 要设置的画布
      */
@@ -144,7 +195,60 @@ export abstract class GraphicItemBase
         namespace?: ElementNamespace,
         parentComponent?: ComponentInternalInstance | null
     ): void {
+        if (isNil(prevValue) && isNil(nextValue)) return;
         switch (key) {
+            case 'fill':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.checkMode(GraphicModeProp.Fill, nextValue);
+                break;
+            case 'stroke':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.checkMode(GraphicModeProp.Stroke, nextValue);
+                break;
+            case 'strokeAndFill':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.checkMode(GraphicModeProp.StrokeAndFill, nextValue);
+                break;
+            case 'fillRule':
+                if (!this.assertType(nextValue, 'string', key)) return;
+                this.setFillRule(nextValue);
+                break;
+            case 'fillStyle':
+                this.setFillStyle(nextValue);
+                break;
+            case 'strokeStyle':
+                this.setStrokeStyle(nextValue);
+                break;
+            case 'lineWidth':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.lineWidth = nextValue;
+                this.update();
+                break;
+            case 'lineDash':
+                if (!this.assertType(nextValue, Array, key)) return;
+                this.lineDash = nextValue;
+                this.update();
+                break;
+            case 'lineDashOffset':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.lineDashOffset = nextValue;
+                this.update();
+                break;
+            case 'lineJoin':
+                if (!this.assertType(nextValue, 'string', key)) return;
+                this.lineJoin = nextValue;
+                this.update();
+                break;
+            case 'lineCap':
+                if (!this.assertType(nextValue, 'string', key)) return;
+                this.lineCap = nextValue;
+                this.update();
+                break;
+            case 'miterLimit':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.miterLimit = nextValue;
+                this.update();
+                break;
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
