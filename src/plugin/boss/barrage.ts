@@ -17,8 +17,11 @@ export abstract class BarrageBoss extends EventEmitter<BarrageBossEvent> {
 
     /** 开始时刻 */
     private startTime: number = 0;
+
     /** 当前帧数 */
     frame: number = 0;
+    /** 上一帧的时刻 */
+    lastTime: number = 0;
 
     /** 这个boss战的主渲染元素，所有弹幕都会在此之上渲染 */
     abstract readonly main: BossSprite;
@@ -31,17 +34,19 @@ export abstract class BarrageBoss extends EventEmitter<BarrageBossEvent> {
      * boss的ai，战斗开始后，每帧执行一次
      * @param time 从战斗开始算起至现在经过了多长时间
      * @param frame 从战斗开始算起至现在经过了多少帧，即当前是第几帧
+     * @param dt 本帧距上一帧多长时间，即上一帧持续了多长时间
      */
-    abstract ai(time: number, frame: number): void;
+    abstract ai(time: number, frame: number, dt: number): void;
 
     private tick = () => {
         const now = Date.now();
-        this.ai(now - this.startTime, this.frame);
+        const dt = now - this.lastTime;
+        this.ai(now - this.startTime, this.frame, dt);
         this.frame++;
         this.projectiles.forEach(v => {
             const time = now - v.startTime;
             v.time = time;
-            v.ai(this, time, v.frame);
+            v.ai(this, time, v.frame, dt);
             v.frame++;
             if (time > 60_000) {
                 this.destroyProjectile(v);
@@ -50,6 +55,7 @@ export abstract class BarrageBoss extends EventEmitter<BarrageBossEvent> {
                 v.doDamage(this.state);
             }
         });
+        this.lastTime = now;
     };
 
     /**
@@ -230,8 +236,9 @@ export abstract class Projectile<T extends BarrageBoss = BarrageBoss> {
      * @param boss 从属的boss
      * @param time 从弹幕生成开始算起至现在经过了多长时间
      * @param frame 从弹幕生成开始算起至现在经过了多少帧，即当前是第几帧
+     * @param dt 本帧距上一帧多长时间，即上一帧持续了多长时间
      */
-    abstract ai(boss: T, time: number, frame: number): void;
+    abstract ai(boss: T, time: number, frame: number, dt: number): void;
 
     /**
      * 这个弹幕的渲染函数，原则上一个boss的弹幕应该全部画在同一层，而且渲染前画布不进行矩阵变换

@@ -179,6 +179,8 @@ export class TowerBoss extends BarrageBoss {
         this.healthBar.remove();
         this.word.remove();
         this.main.remove();
+        this.main.destroy();
+        this.healthBar.destroy();
 
         const event = this.group.getLayer('event');
         const hero = event?.getExtends('floor-hero') as HeroRenderer;
