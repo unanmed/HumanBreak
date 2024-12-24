@@ -517,3 +517,11 @@ export function calStringSize(str: string) {
 
     return size;
 }
+
+export function clamp(num: number, start: number, end: number) {
+    const s = Math.min(start, end);
+    const e = Math.max(start, end);
+    if (num < s) return s;
+    else if (num > e) return e;
+    return num;
+}
