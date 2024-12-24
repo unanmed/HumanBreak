@@ -108,17 +108,49 @@ export interface GraphicPropsBase extends BaseProps, Partial<ILineProperty> {
 
 export interface RectProps extends GraphicPropsBase {}
 
-export interface CirclesProps extends GraphicPropsBase {}
+export interface CirclesProps extends GraphicPropsBase {
+    radius?: number;
+    start?: number;
+    end?: number;
+}
 
-export interface EllipseProps extends GraphicPropsBase {}
+export interface EllipseProps extends GraphicPropsBase {
+    radiusX?: number;
+    radiusY?: number;
+    start?: number;
+    end?: number;
+}
 
-export interface LineProps extends GraphicPropsBase {}
+export interface LineProps extends GraphicPropsBase {
+    x1?: number;
+    y1?: number;
+    x2?: number;
+    y2?: number;
+}
 
-export interface BezierProps extends GraphicPropsBase {}
+export interface BezierProps extends GraphicPropsBase {
+    sx?: number;
+    sy?: number;
+    cp1x?: number;
+    cp1y?: number;
+    cp2x?: number;
+    cp2y?: number;
+    ex?: number;
+    ey?: number;
+}
 
-export interface QuadraticProps extends GraphicPropsBase {}
+export interface QuadraticProps extends GraphicPropsBase {
+    sx?: number;
+    sy?: number;
+    cpx?: number;
+    cpy?: number;
+    ex?: number;
+    ey?: number;
+}
 
-export interface PathProps extends GraphicPropsBase {}
+export interface PathProps extends GraphicPropsBase {
+    path?: Path2D;
+}
 
 export interface IconProps extends BaseProps {}
 
