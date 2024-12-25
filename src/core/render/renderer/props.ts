@@ -7,6 +7,7 @@ import {
 } from '../preset/layer';
 import type { EnemyCollection } from '@/game/enemy/damage';
 import { ILineProperty } from '../preset/graphics';
+import { SizedCanvasImageSource } from '../preset';
 
 export interface CustomProps {
     _item: (props: BaseProps) => RenderItem;
@@ -152,6 +153,13 @@ export interface PathProps extends GraphicPropsBase {
     path?: Path2D;
 }
 
-export interface IconProps extends BaseProps {}
+export interface IconProps extends BaseProps {
+    icon: AllNumbers;
+    frame: number;
+    animate: boolean;
+}
 
-export interface WinskinProps extends BaseProps {}
+export interface WinskinProps extends BaseProps {
+    image: SizedCanvasImageSource;
+    borderSize: number;
+}
