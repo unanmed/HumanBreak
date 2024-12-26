@@ -14,7 +14,8 @@ import {
     Line,
     Path,
     QuadraticCurve,
-    Rect
+    Rect,
+    RectR
 } from '../preset/graphics';
 import { BaseProps } from './props';
 
@@ -189,6 +190,7 @@ tagMap.register('g-line', standardElementNoCache(Line));
 tagMap.register('g-bezier', standardElementNoCache(BezierCurve));
 tagMap.register('g-quad', standardElementNoCache(QuadraticCurve));
 tagMap.register('g-path', standardElementNoCache(Path));
+tagMap.register('g-rectr', standardElementNoCache(RectR));
 tagMap.register('icon', standardElementNoCache(Icon));
 tagMap.register('winskin', (_0, _1, props) => {
     if (!props) return new Winskin(core.material.images.images['winskin.png']);

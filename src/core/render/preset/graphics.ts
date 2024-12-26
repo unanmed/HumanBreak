@@ -1,5 +1,5 @@
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
-import { ERenderItemEvent, RenderItem } from '../item';
+import { ERenderItemEvent, RenderItem, RenderItemPosition } from '../item';
 import { Transform } from '../transform';
 import { ElementNamespace, ComponentInternalInstance } from 'vue';
 import { isNil } from 'lodash-es';
@@ -769,6 +769,106 @@ export class Path extends GraphicItemBase {
                 this.path = nextValue;
                 this.update();
                 return;
+        }
+        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
+    }
+}
+
+const enum RectRType {
+    /** 圆角为椭圆 */
+    Ellipse,
+    /** 圆角为二次贝塞尔曲线 */
+    Quad,
+    /** 圆角为三次贝塞尔曲线。该模式下，包含两个控制点，一个控制点位于上下矩形边延长线，另一个控制点位于左右矩形边延长线 */
+    Cubic,
+    /** 圆角为直线连接 */
+    Line
+}
+
+export class RectR extends GraphicItemBase {
+    /** 矩形路径 */
+    private path: Path2D;
+
+    /** 圆角类型 */
+    roundType: RectRType = RectRType.Ellipse;
+    /** 横向圆角半径 */
+    radiusX: number = 0;
+    /** 纵向圆角半径 */
+    radiusY: number = 0;
+    /**
+     * 二次贝塞尔曲线下，表示控制点的横向比例，控制点在上下矩形边与圆角的交界处为0，在左右矩形边与圆角的交界处延长线为1
+     * 三次贝塞尔曲线下，表示在上下矩形边延长线上的控制点的比例
+     */
+    cpx: number = 0;
+    /**
+     * 二次贝塞尔曲线下，表示控制点的纵向比例，控制点在左右矩形边与圆角的交界处为0，在上下矩形边与圆角的交界处延长线为1
+     * 三次贝塞尔曲线下，表示在左右矩形边延长线上的控制点的比例
+     */
+    cpy: number = 0;
+
+    constructor(
+        type: RenderItemPosition,
+        cache: boolean = false,
+        fall: boolean = false
+    ) {
+        super(type, cache, fall);
+
+        const path = new Path2D();
+        path.rect(this.x, this.y, this.width, this.height);
+        this.path = path;
+    }
+
+    /**
+     * 更新路径
+     */
+    private updatePath() {}
+
+    /**
+     * 设置圆角半径
+     * @param x 横向半径
+     * @param y 纵向半径
+     */
+    setRadius(x: number, y: number) {}
+
+    /**
+     * 设置贝塞尔曲线模式下的控制点
+     * @param x cpx
+     * @param y cpy
+     */
+    setControl(x: number, y: number) {}
+
+    protected render(
+        canvas: MotaOffscreenCanvas2D,
+        transform: Transform
+    ): void {
+        const ctx = canvas.ctx;
+        this.setCanvasState(canvas);
+        switch (this.mode) {
+            case GraphicMode.Fill:
+                ctx.fill(this.path, this.fillRule);
+                break;
+            case GraphicMode.Stroke:
+                ctx.stroke(this.path);
+                break;
+            case GraphicMode.FillAndStroke:
+                ctx.fill(this.path, this.fillRule);
+                ctx.stroke(this.path);
+                break;
+            case GraphicMode.StrokeAndFill:
+                ctx.stroke(this.path);
+                ctx.fill(this.path, this.fillRule);
+                break;
+        }
+    }
+
+    patchProp(
+        key: string,
+        prevValue: any,
+        nextValue: any,
+        namespace?: ElementNamespace,
+        parentComponent?: ComponentInternalInstance | null
+    ): void {
+        switch (key) {
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
