@@ -21,7 +21,8 @@ import {
     Line,
     Path,
     QuadraticCurve,
-    Rect
+    Rect,
+    RectR
 } from '../preset/graphics';
 import { BaseProps } from './props';
 

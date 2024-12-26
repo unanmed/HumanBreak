@@ -153,6 +153,29 @@ export interface PathProps extends GraphicPropsBase {
     path?: Path2D;
 }
 
+export interface RectRProps extends GraphicPropsBase {
+    /** 圆角半径，此参数传入时，radiusX 和 radiusY 应保持一致 */
+    radius: number;
+    /** 圆角横向半径 */
+    radiusX?: number;
+    /** 圆角纵向半径 */
+    radiusY?: number;
+    /** 圆角为线模式 */
+    line?: boolean;
+    /** 圆角为椭圆模式，默认值 */
+    ellipse?: boolean;
+    /** 圆角为二次贝塞尔曲线模式 */
+    quad?: boolean;
+    /** 圆角为三次贝塞尔曲线模式 */
+    cubic?: boolean;
+    /** 控制点，此参数传入时，cpx 和 cpy 应保持一致 */
+    cp?: number;
+    /** 横向控制点 */
+    cpx?: number;
+    /** 纵向控制点 */
+    cpy?: number;
+}
+
 export interface IconProps extends BaseProps {
     icon: AllNumbers;
     frame: number;
