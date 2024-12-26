@@ -157,7 +157,6 @@ type InterfaceType = keyof SystemInterfaceMap;
 
 interface PluginInterface {
     // 渲染进程定义的插件
-    pop_r: typeof import('../plugin/pop');
     use_r: typeof import('../plugin/use');
     fly_r: typeof import('../plugin/ui/fly');
     chase_r: typeof import('../plugin/chase');
