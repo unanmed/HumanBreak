@@ -21,8 +21,7 @@ import {
     Line,
     Path,
     QuadraticCurve,
-    Rect,
-    RectR
+    Rect
 } from '../preset/graphics';
 import { BaseProps } from './props';
 
@@ -231,6 +230,7 @@ tagMap.register('g-line', se(Line, 'absolute', ElementState.None));
 tagMap.register('g-bezier', se(BezierCurve, 'absolute', ElementState.None));
 tagMap.register('g-quad', se(QuadraticCurve, 'absolute', ElementState.None));
 tagMap.register('g-path', se(Path, 'absolute', ElementState.None));
+tagMap.register('g-rectr', se(Path, 'absolute', ElementState.None));
 tagMap.register('icon', standardElementNoCache(Icon));
 tagMap.register('winskin', (_0, _1, props) => {
     if (!props) return new Winskin(core.material.images.images['winskin.png']);
