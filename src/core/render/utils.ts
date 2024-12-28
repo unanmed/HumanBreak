@@ -1,6 +1,21 @@
 import { Ticker, TimingFn } from 'mutate-animate';
 import { RenderAdapter } from './adapter';
 import { FloorViewport } from './preset/viewport';
+import { JSX } from 'vue/jsx-runtime';
+import { Component, DefineComponent, DefineSetupFnComponent } from 'vue';
+
+export type Props<
+    T extends
+        | keyof JSX.IntrinsicElements
+        | DefineSetupFnComponent<any>
+        | DefineComponent
+> = T extends keyof JSX.IntrinsicElements
+    ? JSX.IntrinsicElements[T]
+    : T extends DefineSetupFnComponent<any>
+    ? InstanceType<T>['$props']
+    : T extends DefineComponent
+    ? InstanceType<T>['$props']
+    : unknown;
 
 export function disableViewport() {
     const adapter = RenderAdapter.get<FloorViewport>('viewport');

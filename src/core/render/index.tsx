@@ -14,71 +14,67 @@ import { FloorChange } from '@/plugin/fallback';
 import { createApp } from './renderer';
 import { defineComponent } from 'vue';
 import { Textbox } from './components';
+import { ILayerGroupRenderExtends, ILayerRenderExtends } from './preset';
+import { Props } from './utils';
 
 let main: MotaRenderer;
 
 Mota.require('var', 'loading').once('coreInit', () => {
     main = new MotaRenderer();
 
-    const Com = defineComponent(props => {
+    const App = defineComponent(props => {
+        const layerGroupExtends: ILayerGroupRenderExtends[] = [
+            new FloorDamageExtends(),
+            new FloorItemDetail(),
+            new LayerGroupFilter(),
+            new LayerGroupPortal(),
+            new LayerGroupHalo(),
+            new LayerGroupAnimate(),
+            new FloorViewport()
+        ];
+        const eventExtends: ILayerRenderExtends[] = [
+            new HeroRenderer(),
+            new LayerDoorAnimate(),
+            new LayerShadowExtends()
+        ];
+        const mapDrawProps: Props<'container'> = {
+            width: core._PX_,
+            height: core._PY_
+        };
+        const mainTextboxProps: Props<typeof Textbox> = {
+            text: '',
+            hidden: true,
+            width: 480,
+            height: 150,
+            y: 330,
+            zIndex: 30,
+            fillStyle: '#fff',
+            titleFill: 'gold',
+            font: '16px normal',
+            titleFont: '700 20px normal',
+            winskin: 'winskin2.png',
+            interval: 25,
+            lineHeight: 6
+        };
+
         return () => (
-            <container
-                id="map-draw"
-                hd
-                antiAliasing={false}
-                width={core._PX_}
-                height={core._PY_}
-            >
-                <layer-group
-                    id="layer-main"
-                    ex={[
-                        new FloorDamageExtends(),
-                        new FloorItemDetail(),
-                        new LayerGroupFilter(),
-                        new LayerGroupPortal(),
-                        new LayerGroupHalo(),
-                        new LayerGroupAnimate(),
-                        new FloorViewport()
-                    ]}
-                >
+            <container id="map-draw" {...mapDrawProps}>
+                <layer-group id="layer-main" ex={layerGroupExtends}>
                     <layer layer="bg" zIndex={10}></layer>
                     <layer layer="bg2" zIndex={20}></layer>
-                    <layer
-                        layer="event"
-                        zIndex={30}
-                        ex={[
-                            new HeroRenderer(),
-                            new LayerDoorAnimate(),
-                            new LayerShadowExtends()
-                        ]}
-                    ></layer>
+                    <layer layer="event" zIndex={30} ex={eventExtends}></layer>
                     <layer layer="fg" zIndex={40}></layer>
                     <layer layer="fg2" zIndex={50}></layer>
                     <PopText id="pop-main" zIndex={80}></PopText>
                 </layer-group>
-                <Textbox
-                    id="main-textbox"
-                    text=""
-                    hidden
-                    width={480}
-                    height={150}
-                    y={330}
-                    zIndex={30}
-                    fillStyle={'#fff'}
-                    titleFill={'gold'}
-                    font="16px normal"
-                    titleFont="700 20px normal"
-                    winskin="winskin2.png"
-                    interval={25}
-                    lineHeight={6}
-                ></Textbox>
+                <Textbox id="main-textbox" {...mainTextboxProps}></Textbox>
                 <FloorChange id="floor-change" zIndex={50}></FloorChange>
             </container>
         );
     });
 
     main.hide();
-    createApp(Com).mount(main);
+    createApp(App).mount(main);
     // render(<Com></Com>, main);
 
     console.log(main);
