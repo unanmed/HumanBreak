@@ -69,6 +69,9 @@ export class SplittableBall extends Projectile<PalaceBoss> {
     private ax: number = 0;
     private ay: number = 0;
 
+    /** 是否已经分裂过 */
+    private splitted: boolean = false;
+
     static init(colors: Record<string, string[]>) {
         this.ball.clear();
         for (const [key, color] of Object.entries(colors)) {
@@ -192,6 +195,8 @@ export class SplittableBall extends Projectile<PalaceBoss> {
 
     private split(boss: PalaceBoss) {
         if (!this.splitData?.split) return;
+        if (this.splitted) return;
+        this.splitted = true;
         const {
             startAngle,
             endAngle,
@@ -257,5 +262,10 @@ export class SplittableBall extends Projectile<PalaceBoss> {
         if (!texture) return;
         const ctx = canvas.ctx;
         ctx.drawImage(texture.canvas, this.x - 16, this.y - 16, 32, 32);
+    }
+
+    destroy(): void {
+        this.split(this.boss);
+        super.destroy();
     }
 }
