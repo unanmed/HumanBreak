@@ -416,8 +416,8 @@ export namespace Hitbox {
     export function checkCircleCircle(circle1: Circle, circle2: Circle) {
         const dx = circle1.x - circle2.x;
         const dy = circle1.y - circle2.y;
-        const dis = Math.hypot(dx, dy);
-        return dis <= circle1.radius + circle2.radius;
+        const dis = dx ** 2 + dy ** 2;
+        return dis <= (circle1.radius + circle2.radius) ** 2;
     }
 
     /**
