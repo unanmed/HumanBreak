@@ -21,9 +21,9 @@ import {
     Line,
     Path,
     QuadraticCurve,
-    Rect
+    Rect,
+    RectR
 } from '../preset/graphics';
-import { BaseProps } from './props';
 
 type OnItemCreate<
     E extends ERenderItemEvent = ERenderItemEvent,
@@ -217,10 +217,10 @@ tagMap.register('layer-group', (_0, _1, props) => {
         return l;
     }
 });
-tagMap.register<EDamageEvent, Damage>('damage', (_0, _1, props) => {
+tagMap.register<EDamageEvent, Damage>('damage', (_0, _1, _props) => {
     return new Damage();
 });
-tagMap.register('animation', (_0, _1, props) => {
+tagMap.register('animation', (_0, _1, _props) => {
     return new Animate();
 });
 tagMap.register('g-rect', se(Rect, 'absolute', ElementState.None));
@@ -230,7 +230,7 @@ tagMap.register('g-line', se(Line, 'absolute', ElementState.None));
 tagMap.register('g-bezier', se(BezierCurve, 'absolute', ElementState.None));
 tagMap.register('g-quad', se(QuadraticCurve, 'absolute', ElementState.None));
 tagMap.register('g-path', se(Path, 'absolute', ElementState.None));
-tagMap.register('g-rectr', se(Path, 'absolute', ElementState.None));
+tagMap.register('g-rectr', se(RectR, 'absolute', ElementState.None));
 tagMap.register('icon', standardElementNoCache(Icon));
 tagMap.register('winskin', (_0, _1, props) => {
     if (!props) return new Winskin(core.material.images.images['winskin.png']);
