@@ -540,7 +540,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      * 添加子元素，默认没有任何行为且会抛出警告，你需要在自己的RenderItem继承类中复写它，才可以使用
      * @param child 子元素
      */
-    appendChild(...child: RenderItem<any>[]): void {
+    appendChild(..._child: RenderItem<any>[]): void {
         logger.warn(35);
     }
 
@@ -548,7 +548,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      * 移除子元素，默认没有任何行为且会抛出警告，你需要在自己的RenderItem继承类中复写它，才可以使用
      * @param child 子元素
      */
-    removeChild(...child: RenderItem<any>[]): void {
+    removeChild(..._child: RenderItem<any>[]): void {
         logger.warn(36);
     }
 
@@ -612,8 +612,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         key: string,
         prevValue: any,
         nextValue: any,
-        namespace?: ElementNamespace,
-        parentComponent?: ComponentInternalInstance | null
+        _namespace?: ElementNamespace,
+        _parentComponent?: ComponentInternalInstance | null
     ): void {
         if (isNil(prevValue) && isNil(nextValue)) return;
         switch (key) {

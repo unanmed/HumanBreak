@@ -22,7 +22,7 @@ let main: MotaRenderer;
 Mota.require('var', 'loading').once('coreInit', () => {
     main = new MotaRenderer();
 
-    const App = defineComponent(props => {
+    const App = defineComponent(_props => {
         const layerGroupExtends: ILayerGroupRenderExtends[] = [
             new FloorDamageExtends(),
             new FloorItemDetail(),
@@ -50,7 +50,7 @@ Mota.require('var', 'loading').once('coreInit', () => {
             zIndex: 30,
             fillStyle: '#fff',
             titleFill: 'gold',
-            font: '16px normal',
+            fontFamily: 'normal',
             titleFont: '700 20px normal',
             winskin: 'winskin2.png',
             interval: 25,

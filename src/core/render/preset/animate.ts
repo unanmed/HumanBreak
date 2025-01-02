@@ -76,7 +76,7 @@ export class LayerGroupAnimate implements ILayerGroupRenderExtends {
         this.listen();
     }
 
-    onDestroy(group: LayerGroup): void {
+    onDestroy(_group: LayerGroup): void {
         if (this.checkHero()) {
             this.hero!.off('moveTick', this.onMoveTick);
             LayerGroupAnimate.animateList.delete(this);

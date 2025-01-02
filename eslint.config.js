@@ -61,7 +61,9 @@ export default tseslint.config(
                     varsIgnorePattern: '^_',
                     ignoreRestSiblings: true
                 }
-            ]
+            ],
+            '@typescript-eslint/no-namespace': 'off',
+            '@typescript-eslint/no-this-alias': 'off'
         }
     },
     eslintPluginPrettierRecommended

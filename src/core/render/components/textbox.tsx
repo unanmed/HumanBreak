@@ -21,21 +21,12 @@ import { isNil } from 'lodash-es';
 import { SetupComponentOptions } from './types';
 import EventEmitter from 'eventemitter3';
 import { Text } from '../preset';
-
-export const enum WordBreak {
-    /** 不换行 */
-    None,
-    /** 仅空格和连字符等可换行，CJK 字符可任意换行，默认值 */
-    Space,
-    /** 所有字符都可以换行 */
-    All
-}
-
-export const enum TextAlign {
-    Left,
-    Center,
-    End
-}
+import {
+    buildFont,
+    TextAlign,
+    ITextContentRenderData,
+    WordBreak
+} from './textboxHelper';
 
 let testCanvas: MotaOffscreenCanvas2D;
 Mota.require('var', 'loading').once('coreInit', () => {
@@ -46,47 +37,9 @@ Mota.require('var', 'loading').once('coreInit', () => {
     testCanvas.freeze();
 });
 
-interface TextContentRenderData {
-    text: string;
-    x?: number;
-    y?: number;
-    width?: number;
-    height?: number;
-    /** 字体 */
-    font?: string;
-    /** 是否持续上一次的文本，开启后，如果修改后的文本以修改前的文本为开头，那么会继续播放而不会从头播放 */
-    keepLast?: boolean;
-    /** 打字机时间间隔，即两个字出现之间相隔多长时间 */
-    interval?: number;
-    /** 行高 */
-    lineHeight?: number;
-    /** 分词规则 */
-    wordBreak?: WordBreak;
-    /** 文字对齐方式 */
-    textAlign?: TextAlign;
-    /** 行首忽略字符，即不会出现在行首的字符 */
-    ignoreLineStart?: Iterable<string>;
-    /** 行尾忽略字符，即不会出现在行尾的字符 */
-    ignoreLineEnd?: Iterable<string>;
-    /** 会被分词规则识别的分词字符 */
-    breakChars?: Iterable<string>;
-    /** 填充样式 */
-    fillStyle?: CanvasStyle;
-    /** 描边样式 */
-    strokeStyle?: CanvasStyle;
-    /** 线宽 */
-    strokeWidth?: number;
-    /** 是否填充 */
-    fill?: boolean;
-    /** 是否描边 */
-    stroke?: boolean;
-    /** 是否无视打字机，强制全部显示 */
-    showAll?: boolean;
-}
-
 export interface TextContentProps
     extends ContainerProps,
-        TextContentRenderData {}
+        ITextContentRenderData {}
 
 export type TextContentEmits = {
     typeEnd: () => void;
@@ -126,7 +79,10 @@ interface TextContentRenderable {
 const textContentOptions = {
     props: [
         'breakChars',
-        'font',
+        'fontFamily',
+        'fontSize',
+        'fontBold',
+        'fontItalic',
         'height',
         'ignoreLineEnd',
         'ignoreLineStart',
@@ -161,14 +117,18 @@ export const TextContent = defineComponent<
     if (props.width && props.width <= 0) {
         logger.warn(41, String(props.width));
     }
-    const renderData: Required<TextContentRenderData> = shallowReactive({
+    const renderData: Required<ITextContentRenderData> = shallowReactive({
         text: props.text,
         textAlign: props.textAlign ?? TextAlign.Left,
         x: props.x ?? 0,
         y: props.y ?? 0,
         width: !props.width || props.width <= 0 ? 200 : props.width,
         height: props.height ?? 200,
-        font: props.font ?? core.status.globalAttribute?.font ?? '16px Verdana',
+        fontFamily:
+            props.fontFamily ?? core.status.globalAttribute?.font ?? 'Verdana',
+        fontSize: props.fontSize ?? 16,
+        fontBold: props.fontWeight ?? false,
+        fontItalic: props.fontItalic ?? false,
         ignoreLineEnd: props.ignoreLineEnd ?? new Set(),
         ignoreLineStart: props.ignoreLineStart ?? new Set(),
         keepLast: props.keepLast ?? false,
@@ -195,7 +155,7 @@ export const TextContent = defineComponent<
                         renderData.width = value;
                     }
                 } else {
-                    // @ts-ignore
+                    // @ts-expect-error may use spread?
                     renderData[key] = value;
                 }
             }
@@ -207,7 +167,12 @@ export const TextContent = defineComponent<
         return {
             text: renderData.text,
             width: renderData.width!,
-            font: renderData.font!,
+            font: buildFont(
+                renderData.fontFamily,
+                renderData.fontSize,
+                renderData.fontWeight,
+                renderData.fontItalic
+            ),
             wordBreak: renderData.wordBreak!,
             ignoreLineStart: new Set(renderData.ignoreLineStart),
             ignoreLineEnd: new Set(renderData.ignoreLineEnd),
@@ -287,7 +252,7 @@ export const TextContent = defineComponent<
         transform: Transform
     ) => {
         const ctx = canvas.ctx;
-        ctx.font = renderData.font;
+        // ctx.font = renderData.font;
         ctx.fillStyle = renderData.fillStyle;
         ctx.strokeStyle = renderData.strokeStyle;
         ctx.lineWidth = renderData.strokeWidth;
@@ -325,52 +290,52 @@ export const TextContent = defineComponent<
         index: number,
         from: number
     ) => {
-        renderable.splice(index);
-        dirtyIndex.splice(0);
-        dirtyIndex.push(index);
-        // 初始化渲染
-        linePointer = 0;
-        startTime = Date.now();
-        fromChar = from;
-        needUpdate = true;
+        // renderable.splice(index);
+        // dirtyIndex.splice(0);
+        // dirtyIndex.push(index);
+        // // 初始化渲染
+        // linePointer = 0;
+        // startTime = Date.now();
+        // fromChar = from;
+        // needUpdate = true;
 
-        let startY = renderable.reduce(
-            (prev, curr) => prev + curr.textHeight + curr.lineHeight,
-            0
-        );
-        // 第一个比较特殊，需要特判
-        const start = lines[index - 1] ?? 0;
-        const end = lines[index];
-        const startPointer = from > start && from < end ? from - start : 0;
-        const height = testHeight(text, renderData.font!);
-        startY += height;
-        renderable.push({
-            text: text.slice(start, end),
-            x: 0,
-            lineHeight: renderData.lineHeight!,
-            textHeight: height,
-            pointer: startPointer,
-            from: start,
-            to: end ?? text.length
-        });
+        // let startY = renderable.reduce(
+        //     (prev, curr) => prev + curr.textHeight + curr.lineHeight,
+        //     0
+        // );
+        // // 第一个比较特殊，需要特判
+        // const start = lines[index - 1] ?? 0;
+        // const end = lines[index];
+        // const startPointer = from > start && from < end ? from - start : 0;
+        // const height = testHeight(text, renderData.font!);
+        // startY += height;
+        // renderable.push({
+        //     text: text.slice(start, end),
+        //     x: 0,
+        //     lineHeight: renderData.lineHeight!,
+        //     textHeight: height,
+        //     pointer: startPointer,
+        //     from: start,
+        //     to: end ?? text.length
+        // });
 
-        for (let i = index + 1; i < lines.length; i++) {
-            dirtyIndex.push(i);
-            const start = lines[i - 1] ?? 0;
-            const end = lines[i];
-            const height = testHeight(text, renderData.font!);
-            startY += height;
+        // for (let i = index + 1; i < lines.length; i++) {
+        //     dirtyIndex.push(i);
+        //     const start = lines[i - 1] ?? 0;
+        //     const end = lines[i];
+        //     const height = testHeight(text, renderData.font!);
+        //     startY += height;
 
-            renderable.push({
-                text: text.slice(start, end),
-                x: 0,
-                lineHeight: renderData.lineHeight!,
-                textHeight: height,
-                pointer: 0,
-                from: start,
-                to: end ?? text.length
-            });
-        }
+        //     renderable.push({
+        //         text: text.slice(start, end),
+        //         x: 0,
+        //         lineHeight: renderData.lineHeight!,
+        //         textHeight: height,
+        //         pointer: 0,
+        //         from: start,
+        //         to: end ?? text.length
+        //     });
+        // }
         emit('typeStart');
     };
 
@@ -485,7 +450,10 @@ export interface TextboxProps extends TextContentProps, ContainerProps {
 }
 
 type TextboxEmits = TextContentEmits;
-type TextboxSlots = SlotsType<{ default: (data: TextboxProps) => VNode[] }>;
+type TextboxSlots = SlotsType<{
+    default: (data: TextboxProps) => VNode[];
+    title: (data: TextboxProps) => VNode[];
+}>;
 
 const textboxOptions = {
     props: (textContentOptions.props as (keyof TextboxProps)[]).concat([
@@ -609,7 +577,9 @@ export const Textbox = defineComponent<
                         width={titleWidth.value}
                         height={titleHeight.value}
                     >
-                        {props.winskin ? (
+                        {slots.title ? (
+                            slots.title(data)
+                        ) : props.winskin ? (
                             <winskin></winskin>
                         ) : (
                             <g-rect
@@ -666,6 +636,13 @@ export const Textbox = defineComponent<
     };
 }, textboxOptions);
 
+interface LineSplitData {
+    text: string;
+    font: string;
+    wait: number;
+    icon: AllIds | AllNumbers;
+}
+
 const fontSizeGuessScale = new Map<string, number>([
     ['px', 1],
     ['%', 0.2],
@@ -695,7 +672,7 @@ function splitLines(data: TextContentData) {
     // 对文字二分，然后计算长度
     const text = data.text;
     const res: number[] = [];
-    const fontSize = data.font.match(/\s*[\d\.-]+[a-zA-Z%]*\s*/)?.[0].trim();
+    const fontSize = data.font.match(/\s*[\d\.-]+[a-zA-Z%]+\s*/)?.[0].trim();
     const unit = fontSize?.match(/[a-zA-Z%]+/)?.[0];
     const guessScale = fontSizeGuessScale.get(unit ?? '') ?? 0.2;
     const guessSize = parseInt(fontSize ?? '1') * guessScale;

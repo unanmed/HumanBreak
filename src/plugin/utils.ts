@@ -472,10 +472,10 @@ export function formatSize(size: number) {
     return size < 1 << 10
         ? `${size.toFixed(2)}B`
         : size < 1 << 20
-        ? `${(size / (1 << 10)).toFixed(2)}KB`
-        : size < 1 << 30
-        ? `${(size / (1 << 20)).toFixed(2)}MB`
-        : `${(size / (1 << 30)).toFixed(2)}GB`;
+          ? `${(size / (1 << 10)).toFixed(2)}KB`
+          : size < 1 << 30
+            ? `${(size / (1 << 20)).toFixed(2)}MB`
+            : `${(size / (1 << 30)).toFixed(2)}GB`;
 }
 
 let num = 0;

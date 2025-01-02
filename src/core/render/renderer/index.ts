@@ -24,7 +24,7 @@ export const { createApp, render } = createRenderer<RenderItem, RenderItem>({
     insert: function (
         el: RenderItem<ERenderItemEvent>,
         parent: RenderItem,
-        anchor?: RenderItem<ERenderItemEvent> | null
+        _anchor?: RenderItem<ERenderItemEvent> | null
     ): void {
         parent.appendChild(el);
     },
