@@ -1,5 +1,4 @@
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
-import { Sprite } from '../sprite';
 import {
     ERenderItemEvent,
     IAnimateFrame,
@@ -11,8 +10,6 @@ import { Transform } from '../transform';
 import { ElementNamespace, ComponentInternalInstance } from 'vue';
 import { AutotileRenderable, RenderableData } from '../cache';
 import { texture } from '../cache';
-import { isNil } from 'lodash-es';
-import { logger } from '@/core/common/logger';
 
 type CanvasStyle = string | CanvasGradient | CanvasPattern;
 
@@ -42,7 +39,7 @@ export class Text extends RenderItem<ETextEvent> {
 
     protected render(
         canvas: MotaOffscreenCanvas2D,
-        transform: Transform
+        _transform: Transform
     ): void {
         const ctx = canvas.ctx;
         ctx.textBaseline = 'bottom';
@@ -171,7 +168,7 @@ export class Image extends RenderItem<EImageEvent> {
 
     protected render(
         canvas: MotaOffscreenCanvas2D,
-        transform: Transform
+        _transform: Transform
     ): void {
         const ctx = canvas.ctx;
         ctx.drawImage(this.image, 0, 0, canvas.width, canvas.height);
@@ -209,8 +206,8 @@ export class Comment extends RenderItem {
     }
 
     protected render(
-        canvas: MotaOffscreenCanvas2D,
-        transform: Transform
+        _canvas: MotaOffscreenCanvas2D,
+        _transform: Transform
     ): void {}
 }
 
@@ -228,7 +225,7 @@ export class Icon extends RenderItem<EIconEvent> implements IAnimateFrame {
 
     protected render(
         canvas: MotaOffscreenCanvas2D,
-        transform: Transform
+        _transform: Transform
     ): void {
         const ctx = canvas.ctx;
         const renderable = this.renderable;
@@ -239,7 +236,7 @@ export class Icon extends RenderItem<EIconEvent> implements IAnimateFrame {
         const frame = this.animate
             ? RenderItem.animatedFrame % renderable.frame
             : 0;
-        if (this.animate) {
+        if (!this.animate) {
             if (renderable.autotile) {
                 ctx.drawImage(renderable.image[0], x, y, w, h, 0, 0, cw, ch);
             } else {
@@ -336,7 +333,7 @@ export class Winskin extends RenderItem<EWinskinEvent> {
 
     protected render(
         canvas: MotaOffscreenCanvas2D,
-        transform: Transform
+        _transform: Transform
     ): void {
         const ctx = canvas.ctx;
         const img = this.image;
@@ -346,7 +343,8 @@ export class Winskin extends RenderItem<EWinskinEvent> {
         const h = canvas.height;
         const sz = this.borderSize / 32;
         ctx.drawImage(img, 128, 0, 16, 16, x, y, 16 * sz, 16 * sz);
-        for (var dx = 0; dx < w - 64 * sz; dx += 32 * sz) {
+        let dx;
+        for (dx = 0; dx < w - 64 * sz; dx += 32 * sz) {
             ctx.drawImage(
                 img,
                 144,
@@ -404,7 +402,8 @@ export class Winskin extends RenderItem<EWinskinEvent> {
             16 * sz
         );
         // 左右
-        for (var dy = 0; dy < h - 64 * sz; dy += 32 * sz) {
+        let dy;
+        for (dy = 0; dy < h - 64 * sz; dy += 32 * sz) {
             ctx.drawImage(
                 img,
                 128,

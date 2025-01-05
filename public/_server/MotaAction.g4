@@ -806,22 +806,13 @@ return code;
 //为了避免关键字冲突,全部加了_s
 //动作
 action
-    :   text_0_s
-    |   text_1_s
-    |   text_2_s
-    |   moveTextBox_s
-    |   clearTextBox_s
+    :   text_s
     |   comment_s
     |   autoText_s
     |   scrollText_s
     |   setText_s
     |   tip_s
     |   setValue_s
-    |   setEnemy_s
-    |   setEnemyOnPoint_s
-    |   resetEnemyOnPoint_s
-    |   moveEnemyOnPoint_s
-    |   moveEnemyOnPoint_1_s
     |   setEquip_s
     |   setFloor_s
     |   setGlobalAttribute_s
@@ -831,7 +822,6 @@ action
     |   show_s
     |   hide_s
     |   setBlockOpacity_s
-    |   setBlockFilter_s
     |   trigger_s
     |   insert_1_s
     |   insert_2_s
@@ -866,8 +856,6 @@ action
     |   unloadEquip_s
     |   openShop_s
     |   disableShop_s
-    |   follow_s
-    |   unfollow_s
     |   animate_s
     |   animate_1_s
     |   stopAnimate_s
@@ -879,7 +867,6 @@ action
     |   moveImage_s
     |   rotateImage_s
     |   scaleImage_s
-    |   showGif_s
     |   setCurtain_0_s
     |   setCurtain_1_s
     |   screenFlash_s
@@ -950,188 +937,31 @@ action
     |   pass_s
     ;
 
-text_0_s
-    :   '显示文章' ':' EvalString_Multi Newline
+
+
+text_s
+    :   '标题' EvalString? '图标' EvalString?  '像素坐标 x' IntString? 'y' IntString? '宽' IntString? '高' IntString? '维持文本' Bool '打字间隔' IntString? '行高' IntString? BGNL? Newline
+     EvalString_Multi Newline
     
 
-/* text_0_s
-tooltip : text：显示一段文字（剧情）
-helpUrl : /_docs/#/instruction
-previewBlock : true
-default : ["欢迎使用事件编辑器(双击方块可直接预览)"]
-var code = '"'+EvalString_Multi_0+'"';
-if (block.isCollapsed() || !block.isEnabled()) {
-    code = '{"type": "text", "text": '+code;
-    if (block.isCollapsed()) code += ', "_collapsed": true';
-    if (!block.isEnabled()) code += ', "_disabled": true';
-    code += '}';
-}
-return code+',\n';
-*/;
-
-text_1_s
-    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? '起点 px' PosString? 'py' PosString? '宽' PosString? '编号' Int '不等待操作' Bool BGNL? Newline EvalString_Multi Newline
-    
-
-/* text_1_s
+/* text_s
 tooltip : text：显示一段文字（剧情）,选项较多请右键点击帮助
 helpUrl : /_docs/#/instruction
 previewBlock : true
 allIds : ['EvalString_1']
-default : ["小妖精","fairy","","","","",0,false,"欢迎使用事件编辑器(双击方块可直接预览)"]
-var title='';
-if (EvalString_0==''){
-    if (EvalString_1=='' )title='';
-    else title='\\t['+EvalString_1+']';
-} else {
-    if (EvalString_1=='')title='\\t['+EvalString_0+']';
-    else title='\\t['+EvalString_0+','+EvalString_1+']';
-}
-var pos = '';
-if (PosString_0 || PosString_1) {
-    if (EvalString_2) throw new Error('对话框效果和起点像素位置只能设置一项！');
-    pos = '[' + (PosString_0||0) + ',' + (PosString_1||0);
-    if (PosString_2) pos += ',' + PosString_2;
-    pos += ']';
-}
-if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.test(EvalString_2))) {
-  throw new Error('对话框效果的用法请右键点击帮助');
-}
-EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
-var code =  '"'+title+EvalString_2+EvalString_Multi_0+'"';
-if (block.isCollapsed() || !block.isEnabled() || pos || Int_0 || Bool_0) {
-    code = '{"type": "text", "text": '+code;
-    if (pos) code += ', "pos": ' + pos;
-    if (Int_0) code += ', "code": ' + Int_0;
-    if (Bool_0) code += ', "async": true';
-    if (block.isCollapsed()) code += ', "_collapsed": true';
-    if (!block.isEnabled()) code += ', "_disabled": true';
-    code += '}';
-}
-return code+',\n';
+default : ["小妖精","fairy","","","","",false,"","","欢迎使用事件编辑器"]
+EvalString_0= EvalString_0 ? (', "title": "'+EvalString_0+'"') : '';
+EvalString_1= EvalString_1 ? (', "icon": "'+EvalString_1+'"') : '';
+IntString_0= IntString_0 ? (', "x": '+IntString_0) : '';
+IntString_1= IntString_1 ? (', "y": '+IntString_1) : '';
+IntString_2= IntString_2 ? (', "width": '+IntString_2) : '';
+IntString_3= IntString_3 ? (', "height": '+IntString_3) : '';
+IntString_4= IntString_4 ? (', "interval": '+IntString_4) : '';
+IntString_5= IntString_5 ? (', "lineHeight": '+IntString_5) : '';
+var code = '{"type": "text"'+EvalString_0+EvalString_1+IntString_0+IntString_1+IntString_2+IntString_3+',"keepLast":'+Bool_0+IntString_4+IntString_5+'"text":"'+EvalString_Multi_0+'"},\n';
+return code
 */;
 
-text_2_s
-    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? '起点 px' PosString? 'py' PosString? '宽' PosString? '编号' Int '不等待操作' Bool BGNL? Newline EvalString_Multi BGNL? Newline textDrawingList* Newline
-    
-
-/* text_2_s
-tooltip : text：显示一段文字（剧情）,选项较多请右键点击帮助
-helpUrl : /_docs/#/instruction
-previewBlock : true
-allIds : ['EvalString_1']
-default : ["小妖精","fairy","","","","",0,"欢迎使用事件编辑器(双击方块可直接预览)",null]
-var title='';
-if (EvalString_0==''){
-    if (EvalString_1=='' )title='';
-    else title='\\t['+EvalString_1+']';
-} else {
-    if (EvalString_1=='')title='\\t['+EvalString_0+']';
-    else title='\\t['+EvalString_0+','+EvalString_1+']';
-}
-var pos = '';
-if (PosString_0 || PosString_1) {
-    if (EvalString_2) throw new Error('对话框效果和起点像素位置只能设置一项！');
-    pos = '[' + (PosString_0||0) + ',' + (PosString_1||0);
-    if (PosString_2) pos += ',' + PosString_2;
-    pos += ']';
-}
-if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.test(EvalString_2))) {
-  throw new Error('对话框效果的用法请右键点击帮助');
-}
-EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
-var code =  '"'+title+EvalString_2+textDrawingList_0.replace(/\s/g, '')+EvalString_Multi_0+'"';
-if (block.isCollapsed() || !block.isEnabled() || pos || Int_0 || Bool_0) {
-    code = '{"type": "text", "text": '+code;
-    if (pos) code += ', "pos": ' + pos;
-    if (Int_0) code += ', "code": ' + Int_0;
-    if (Bool_0) code += ', "async": true';
-    if (block.isCollapsed()) code += ', "_collapsed": true';
-    if (!block.isEnabled()) code += ', "_disabled": true';
-    code += '}';
-}
-return code+',\n';
-*/;
-
-textDrawingList
-    : textDrawing
-    | textDrawingEmpty;
-
-
-textDrawing
-    : '立绘' EvalString '翻转' Reverse_List '绘制坐标' 'x' IntString 'y' IntString '宽' IntString? '高' IntString? BGNL? Newline
-      '裁剪坐标' 'x' IntString? 'y' IntString? '宽' IntString? '高' IntString? '不透明度' EvalString? '旋转角度' IntString?
-
-/* textDrawing
-tooltip : 立绘
-helpUrl : /_docs/#/instruction
-default : ["fairy.png","null","0","0","","","","","","","",""]
-colour : this.subColor
-previewBlock : true
-allImages : ['EvalString_0']
-if (Reverse_List_0 && Reverse_List_0 != 'null') EvalString_0 += Reverse_List_0;
-var list = [EvalString_0, IntString_0, IntString_1];
-if (IntString_2 || IntString_3) {
-    if (list.length != 3 || !IntString_2 || !IntString_3) {
-        throw "绘制的宽和高需同时设置";
-    }
-    list.push(IntString_2);
-    list.push(IntString_3);
-}
-if (IntString_4 || IntString_5 || IntString_6 || IntString_7) {
-    if (list.length != 5) throw "如设置裁剪区域，请先设置绘制区域的宽高";
-    if (!IntString_4 || !IntString_5 || !IntString_6 || !IntString_7) {
-        throw "如设置裁剪区域，请同时设置全部的裁剪坐标和宽高";
-    }
-    list.splice(1, 0, IntString_4, IntString_5, IntString_6, IntString_7);
-}
-if (EvalString_1) {
-    if (list.length != 9) throw "如设置不透明度，需填满所有坐标和宽高";
-    var opacity = parseFloat(EvalString_1);
-    if (isNaN(opacity) || opacity < 0 || opacity > 1) throw "不合法的不透明度，必须是0到1之间"
-    list.push(opacity);
-}
-if (IntString_8) {
-    if (list.length != 10) throw "如设置旋转角度，需填满所有坐标和宽高，以及不透明度";
-    list.push(IntString_8);
-}
-return "\\f[" + list.join(",")+"]";
-*/;
-
-textDrawingEmpty
-    :   Newline
-    
-/* textDrawingEmpty
-var code = '';
-return code;
-*/;
-
-moveTextBox_s
-    :   '移动对话框' ':' Int 'px' PosString 'py' PosString '使用增量' Bool '移动方式' MoveMode_List '动画时间' Int '不等待执行完毕' Bool Newline
-
-/* moveTextBox_s
-tooltip : 移动对话框
-helpUrl : /_docs/#/instruction
-default : [1,"0","0",false,'',500,false]
-MoveMode_List_0 = (MoveMode_List_0!=='') ? (', "moveMode": "'+MoveMode_List_0+'"'):'';
-Bool_0 = Bool_0 ?', "relative": true':'';
-Bool_1 = Bool_1 ?', "async": true':'';
-var code = '{"type": "moveTextBox", "code": '+Int_0+', "loc": ['+PosString_0+','+PosString_1+']'+Bool_0+MoveMode_List_0+', "time": '+Int_1+Bool_1+'},\n';
-return code;
-*/;
-
-clearTextBox_s
-    :   '清除对话框' ':' EvalString? Newline
-
-/* clearTextBox_s
-tooltip : 清除对话框
-helpUrl : /_docs/#/instruction
-default : ["1"]
-if (EvalString_0 && !/^\d+(,\d+)*$/.test(EvalString_0)) throw new Error('对话框编号需要以逗号分隔');
-EvalString_0 = EvalString_0 ? (', "code": ['+EvalString_0+']') : '';
-var code = '{"type": "clearTextBox"'+EvalString_0+'},\n';
-return code;
-*/;
 
 
 comment_s
@@ -1189,39 +1019,38 @@ return code;
 */;
 
 setText_s
-    :   '设置剧情文本的属性' '位置' SetTextPosition_List '偏移像素' IntString? '对齐' TextAlign_List? '粗体' B_1_List? BGNL? '标题颜色' ColorString? Colour '正文颜色' ColorString? Colour '背景色' EvalString? Colour BGNL? '标题大小' IntString? '正文大小' IntString? '行距' IntString? '打字间隔' IntString? '字符间距' IntString? '淡入淡出时间' IntString? Newline
+    :   '设置剧情文本的属性' '位置像素x' IntString? 'y' IntString? '宽' IntString? '高'  IntString? '字体类型' EvalString? '字体大小' IntString? '字体线宽' IntString? BGNL? 
+    '是否斜体' Bool? '维持文本' Bool? '打字间隔' IntString? '行高' IntString? '文字颜色' ColorString? Colour '文字描边颜色' ColorString? Colour '描边线宽' IntString? '是否填充' Bool '是否描边' Bool BGNL?
+    '背景色' ColorString? Colour '背景winskin' EvalString? '文字与边框距离' IntString?  '标题是否填充' Bool '标题是否描边' Bool'标题与边框的距离' IntString? BGNL?
+    '对齐方式' TextAlign_List '分词原则' WordBreak_List '行首禁则' EvalString? '行尾禁则' EvalString? '分词规则识别字符' EvalString? Newline
     
 
 /* setText_s
-tooltip : setText：设置剧情文本的属性,颜色为RGB三元组或RGBA四元组,打字间隔为剧情文字添加的时间间隔,为整数或不填，字符间距为字符之间的距离，为整数或不填。
+tooltip : setText：设置文本的属性,颜色为RGB三元组或RGBA四元组,打字间隔为剧情文字添加的时间间隔,为整数或不填，字符间距为字符之间的距离，为整数或不填。
 helpUrl : /_docs/#/instruction
 previewBlock : true
-default : [null,"",null,null,"",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"","","","","",""]
-SetTextPosition_List_0 =SetTextPosition_List_0==='null'?'': ', "position": "'+SetTextPosition_List_0+'"';
-TextAlign_List_0 = TextAlign_List_0==='null'?'': ', "align": "'+TextAlign_List_0+'"';
-var colorRe = MotaActionFunctions.pattern.colorRe;
-IntString_0 = IntString_0 ? (', "offset": '+IntString_0) : '';
-ColorString_0 = ColorString_0 ? (', "title": ['+ColorString_0+']') : '';
-ColorString_1 = ColorString_1 ? (', "text": ['+ColorString_1+']') : '';
-if (EvalString_0) {
-  if (colorRe.test(EvalString_0)) {
-    EvalString_0 = ', "background": ['+EvalString_0+']';
-  }
-  else if (/^\w+\.png$/.test(EvalString_0)) {
-    EvalString_0 = ', "background": "'+EvalString_0+'"';
-  }
-  else {
-    throw new Error('背景格式错误,必须是形如0~255,0~255,0~255,0~1的颜色，或一个WindowSkin的png图片名称');
-  }
-}
-IntString_1 = IntString_1 ? (', "titlefont": '+IntString_1) : '';
-IntString_2 = IntString_2 ? (', "textfont": '+IntString_2) : '';
-IntString_3 = IntString_3 ? (', "lineHeight": '+IntString_3) : '';
-IntString_4 = IntString_4 ? (', "time": '+IntString_4) : '';
-IntString_5 = IntString_5 ? (', "letterSpacing": '+IntString_5) : '';
-IntString_6 = IntString_6 ? (', "animateTime": ' + IntString_6) : '';
-B_1_List_0 = B_1_List_0==='null'?'':', "bold": '+B_1_List_0;
-var code = '{"type": "setText"'+SetTextPosition_List_0+IntString_0+TextAlign_List_0+B_1_List_0+ColorString_0+ColorString_1+EvalString_0+IntString_1+IntString_2+IntString_3+IntString_4+IntString_5+IntString_6+'},\n';
+default : ["","","","","","","",false,false,"","","",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"",true,false,"",'rgba(255,255,255,1)',"","",true,false,"",'null','space',"","",""]
+IntString_0= IntString_0 ? (', "x": '+IntString_0) : '';
+IntString_1 = IntString_1 ? (', "y": '+IntString_1) : '';
+IntString_2 = IntString_2 ? (', "width": '+IntString_2) : '';
+IntString_3 = IntString_3 ? (', "height": '+IntString_3) : '';
+EvalString_0 = EvalString_0 ? (', "fontFamily": '+EvalString_0) : '';
+IntString_4 = IntString_4 ? (', "fontSize": '+IntString_4) : '';
+IntString_5 = IntString_5 ? (', " interval": '+IntString_5) : '';
+IntString_6 = IntString_6 ? (', "lineHeight": ' + IntString_6) : '';
+IntString_7 = IntString_7? (', "strokeWidth": ' + IntString_7) : '';
+EvalString_1 = EvalString_1 ? (', "winskin": '+EvalString_1) : '';
+IntString_8 = IntString_8? (', "padding": ' + IntString_8) : '';
+IntString_9 = IntString_9? (', "titlePadding": ' + IntString_9) : '';
+TextAlign_List_0 = TextAlign_List_0==='null'?'':', "textAlign": "'+TextAlign_List_0+'"';
+WordBreak_List_0 = WordBreak_List_0==='null'?'':', "wordBreak": "'+WordBreak_List_0+'"';
+EvalString_2 = EvalString_2? (', "ignoreLineStart": '+EvalString_2) : '';
+EvalString_3 = EvalString_3 ? (', "ignoreLineEnd": '+EvalString_3) : '';
+EvalString_4 = EvalString_4 ? (', "breakChars": '+EvalString_4) : '';
+ColorString_0=ColorString_0?(', "fillStyle": ['+ColorString_0+']'):'';
+ColorString_1=ColorString_1?(', "strokeStyle": ['+ColorString_1+']'):'';
+ColorString_2=ColorString_2?(', "backColor": ['+ColorString_2+']'):'';
+var code = '{"type": "setText"'+IntString_0+IntString_1+IntString_2+IntString_3+EvalString_0+IntString_4+', " fontItalic": '+Bool_0+', " keepLast": '+Bool_1+IntString_5+IntString_6+ColorString_0+ColorString_1+IntString_7 +',"fill":'+Bool_2+',"stroke":'+Bool_3+ColorString_2+EvalString_1+IntString_8+',"titleFill":'+Bool_4+',"titleStroke":'+Bool_5+IntString_9 +TextAlign_List_0+WordBreak_List_0+EvalString_2+EvalString_3+EvalString_4+'},\n';
 return code;
 */;
 
@@ -1257,23 +1086,6 @@ return code;
 */;
 
 
-setEnemy_s
-    :   '设置怪物属性' ':' '怪物ID' IdString '的' EnemyId_List AssignOperator_List expression '不刷新显伤' Bool Newline
-
-
-/* setEnemy_s
-tooltip : setEnemy：设置某个怪物的属性
-helpUrl : /_docs/#/instruction
-default : ["greenSlime", "atk", "=", "", false]
-allEnemys : ['IdString_0']
-colour : this.dataColor
-if (AssignOperator_List_0 && AssignOperator_List_0 != '=') {
-  AssignOperator_List_0 = ', "operator": "' + AssignOperator_List_0 + '"';
-} else AssignOperator_List_0 = '';
-Bool_0 = Bool_0 ? ', "norefresh": true' : '';
-var code = '{"type": "setEnemy", "id": "'+IdString_0+'", "name": "'+EnemyId_List_0+'"'+AssignOperator_List_0+', "value": "'+expression_0+'"'+Bool_0+'},\n';
-return code;
-*/;
 
 
 setEquip_s
@@ -1294,84 +1106,6 @@ var code = '{"type": "setEquip", "id": "'+IdString_0+'"'+EquipValueType_List_0+'
 return code;
 */;
 
-
-setEnemyOnPoint_s
-    :   '设置某点怪物属性' ':' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '的' EnemyPoint_List AssignOperator_List expression '不刷新显伤' Bool Newline
-
-
-/* setEnemyOnPoint_s
-tooltip : setEnemyOnPoint：设置某个点上怪物的属性
-helpUrl : /_docs/#/instruction
-default : ["", "", "", "atk", "=", "", false]
-selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
-allFloorIds : ['IdString_0']
-colour : this.dataColor
-var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
-if (AssignOperator_List_0 && AssignOperator_List_0 != '=') {
-  AssignOperator_List_0 = ', "operator": "' + AssignOperator_List_0 + '"';
-} else AssignOperator_List_0 = '';
-IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-Bool_0 = Bool_0 ? ', "norefresh": true' : '';
-var code = '{"type": "setEnemyOnPoint"'+floorstr+IdString_0+', "name": "'+EnemyPoint_List_0+'"'+AssignOperator_List_0+', "value": "'+expression_0+'"'+Bool_0+'},\n';
-return code;
-*/;
-
-resetEnemyOnPoint_s
-    :   '重置某点怪物属性' ':' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '不刷新显伤' Bool Newline
-
-
-/* resetEnemyOnPoint_s
-tooltip : resetEnemyOnPoint：重置某个点上怪物的属性
-helpUrl : /_docs/#/instruction
-default : ["", "", "", false]
-selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
-allFloorIds : ['IdString_0']
-colour : this.dataColor
-var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
-IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-Bool_0 = Bool_0 ? ', "norefresh": true' : '';
-var code = '{"type": "resetEnemyOnPoint"'+floorstr+IdString_0+Bool_0+'},\n';
-return code;
-*/;
-
-moveEnemyOnPoint_s
-    :   '移动某点怪物属性' ':' '起点' 'x' PosString? ',' 'y' PosString? '终点' 'x' PosString? 'y' PosString? '楼层' IdString? '不刷新显伤' Bool Newline
-
-
-/* moveEnemyOnPoint_s
-tooltip : moveEnemyOnPoint：移动某个点上怪物的属性到其他点
-helpUrl : /_docs/#/instruction
-default : ["", "", "", "", "", false]
-allFloorIds : ['IdString_0']
-selectPoint : ["PosString_2", "PosString_3"]
-menu : [['选择起点位置','editor_blockly.selectPoint(block,["PosString_0", "PosString_1"])']]
-colour : this.dataColor
-IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-var floorstr = PosString_0 && PosString_1 ? ', "from": ['+PosString_0+','+PosString_1+']' : '';
-if (PosString_2 && PosString_3) floorstr += ', "to": ['+PosString_2+','+PosString_3+']'
-Bool_0 = Bool_0 ? ', "norefresh": true' : '';
-var code = '{"type": "moveEnemyOnPoint"'+floorstr+IdString_0+Bool_0+'},\n';
-return code;
-*/;
-
-moveEnemyOnPoint_1_s
-    :   '移动某点怪物属性' ':' '起点' 'x' PosString? ',' 'y' PosString? '增量' 'dx' PosString? 'dy' PosString? '楼层' IdString? '不刷新显伤' Bool Newline
-
-
-/* moveEnemyOnPoint_1_s
-tooltip : moveEnemyOnPoint：移动某个点上怪物的属性到其他点
-helpUrl : /_docs/#/instruction
-default : ["", "", "", "", "", false]
-allFloorIds : ['IdString_0']
-selectPoint : ["PosString_0", "PosString_1"]
-colour : this.dataColor
-IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-var floorstr = PosString_0 && PosString_1 ? ', "from": ['+PosString_0+','+PosString_1+']' : '';
-if (PosString_2 && PosString_3) floorstr += ', "dxy": ['+PosString_2+','+PosString_3+']'
-Bool_0 = Bool_0 ? ', "norefresh": true' : '';
-var code = '{"type": "moveEnemyOnPoint"'+floorstr+IdString_0+Bool_0+'},\n';
-return code;
-*/;
 
 setFloor_s
     :   '设置楼层属性' ':' Floor_Meta_List '楼层名' IdString? '为' JsonEvalString Newline
@@ -1432,7 +1166,7 @@ return code;
 
 
 setNameMap_s
-    :   '设置文件别名' ':' EvalString '为' EvalString? Newline
+    :   '(已弃用)设置文件别名' ':' EvalString '为' EvalString? Newline
 
 
 /* setNameMap_s
@@ -1501,27 +1235,6 @@ IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0 ?', "async": true':'';
 var code = '{"type": "setBlockOpacity"'+floorstr+IdString_0+', "opacity": '+Number_0+IntString_0+Bool_0+'},\n';
-return code;
-*/;
-
-setBlockFilter_s
-    :   '设置图块特效' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '虚化' Number '色相' Int '灰度' Number '反色' Bool '阴影' Number Newline
-    
-
-/* setBlockFilter_s
-tooltip : setBlockFilter: 设置图块特效
-helpUrl : /_docs/#/instruction
-default : ["","","",0,0,0,false,0]
-selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
-allFloorIds : ['IdString_0']
-colour : this.mapColor
-var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
-if (Number_0 < 0) throw '虚化不得小于0；0为完全没有虚化';
-if (Int_0 < 0 || Int_0 >= 360) throw '色相需要在0~359之间';
-if (Number_1 < 0 || Number_1 > 1) throw '灰度需要在0~1之间';
-if (Number_2 < 0) throw '阴影不得小于0；0为完全没有阴影';
-
-var code = '{"type": "setBlockFilter"'+floorstr+IdString_0+', "blur": '+Number_0+', "hue": '+Int_0+', "grayscale": '+Number_1+', "invert": '+Bool_0+', "shadow": '+Number_2+'},\n';
 return code;
 */;
 
@@ -2003,36 +1716,6 @@ var code = '{"type": "disableShop", "id": "'+IdString_0+'"},\n';
 return code;
 */;
 
-follow_s
-    :   '跟随勇士' '行走图' EvalString Newline
-
-
-/* follow_s
-tooltip : follow: 跟随勇士
-helpUrl : /_docs/#/instruction
-default : ["npc.png"]
-allImages : ['EvalString_0']
-material : ["./project/images/:images", "EvalString_0"]
-colour : this.dataColor
-var code = '{"type": "follow", "name": "'+EvalString_0+'"},\n';
-return code;
-*/;
-
-unfollow_s
-    :   '取消跟随' '行走图' EvalString? Newline
-
-
-/* unfollow_s
-tooltip : unfollow: 取消跟随
-helpUrl : /_docs/#/instruction
-default : [""]
-allImages : ['EvalString_0']
-material : ["./project/images/:images", "EvalString_0"]
-colour : this.dataColor
-EvalString_0 = EvalString_0 ? (', "name": "' + EvalString_0 + '"') : "";
-var code = '{"type": "unfollow"' + EvalString_0 + '},\n';
-return code;
-*/;
 
 vibrate_s
     :   '画面震动' '方向' Vibrate_List '时间' Int '速度' Int '振幅' Int '不等待执行完毕' Bool Newline
@@ -2229,22 +1912,6 @@ var code = '{"type": "hideImage", "code": '+NInt_0+', "time": '+Int_0+async+'},\
 return code;
 */;
 
-showGif_s
-    :   '显示或清除动图' EvalString? '起点像素位置' 'x' PosString? 'y' PosString? Newline
-    
-
-/* showGif_s
-tooltip : showGif：显示动图
-helpUrl : /_docs/#/instruction
-default : ["","",""]
-allImages : ['EvalString_0']
-previewBlock : true
-colour : this.imageColor
-EvalString_0 = EvalString_0 ? (', "name": "'+EvalString_0+'"') : '';
-var loc = (PosString_0 && PosString_1) ? (', "loc": ['+PosString_0+','+PosString_1+']') : '';
-var code = '{"type": "showGif"'+EvalString_0+loc+'},\n';
-return code;
-*/;
 
 moveImage_s
     :   '图片移动' '图片编号' NInt '终点像素位置' 'x' PosString? 'y' PosString? BGNL?
@@ -2354,7 +2021,7 @@ return code;
 */;
 
 setWeather_s
-    :   '更改天气' Weather_List '强度' Int '持续到下个本事件' Bool Newline
+    :   '(已弃用)更改天气' Weather_List '强度' Int '持续到下个本事件' Bool Newline
     
 
 /* setWeather_s
@@ -2964,7 +2631,7 @@ return code;
 
 
 wait_s
-    :   '等待用户操作并获得按键或点击信息' '仅检测子块' Bool '超时毫秒数' Int BGNL? Newline waitContext* BEND Newline
+    :   '（已弃用）等待用户操作并获得按键或点击信息' '仅检测子块' Bool '超时毫秒数' Int BGNL? Newline waitContext* BEND Newline
 
 
 /* wait_s
@@ -3162,7 +2829,7 @@ return code;
 
 
 previewUI_s
-    :   'ui绘制并预览' '（双击此项可进行预览）' BGNL? Newline action+  BEND Newline
+    :   '(已弃用)ui绘制并预览' '（双击此项可进行预览）' BGNL? Newline action+  BEND Newline
 
 
 /* previewUI_s
@@ -3177,7 +2844,7 @@ return code;
 
 
 clearMap_s
-    :   '清除画布' '起点像素' 'x' PosString? 'y' PosString? '宽' PosString? '高' PosString? Newline
+    :   '(已弃用)清除画布' '起点像素' 'x' PosString? 'y' PosString? '宽' PosString? '高' PosString? Newline
 
 /* clearMap_s
 tooltip : clearMap: 清除画布
@@ -3195,7 +2862,7 @@ return code;
 
 
 setAttribute_s
-    : '设置画布属性' '字体' FontString? '填充样式' ColorString? Colour '边框样式' ColorString? Colour BGNL? '线宽度' IntString? '不透明度' EvalString? '对齐' TextAlign_List '基准线' TextBaseline_List 'z值' IntString? Newline
+    : '(已弃用)设置画布属性' '字体' FontString? '填充样式' ColorString? Colour '边框样式' ColorString? Colour BGNL? '线宽度' IntString? '不透明度' EvalString? '对齐' TextAlign_List '基准线' TextBaseline_List 'z值' IntString? Newline
 
 /* setAttribute_s
 tooltip : setAttribute：设置画布属性
@@ -3222,7 +2889,7 @@ return code;
 
 
 setFilter_s
-    :   '设置画布特效' '虚化' Number '色相' Int '灰度' Number '反色' Bool '阴影' Number Newline
+    :   '(已弃用)设置画布特效' '虚化' Number '色相' Int '灰度' Number '反色' Bool '阴影' Number Newline
     
 
 /* setFilter_s
@@ -3241,7 +2908,7 @@ return code;
 
 
 fillText_s
-    :   '绘制文本' 'x' PosString 'y' PosString '样式' ColorString? Colour '字体' FontString? '最大宽度' IntString? BGNL? EvalString Newline
+    :   '(已弃用)绘制文本' 'x' PosString 'y' PosString '样式' ColorString? Colour '字体' FontString? '最大宽度' IntString? BGNL? EvalString Newline
 
 /* fillText_s
 tooltip : fillText：绘制一行文本；可以设置最大宽度进行放缩
@@ -3257,7 +2924,7 @@ return code;
 */;
 
 fillBoldText_s
-    :   '绘制描边文本' 'x' PosString 'y' PosString '样式' ColorString? Colour '描边颜色' ColorString? Colour '字体' FontString? BGNL? EvalString Newline
+    :   '(已弃用)绘制描边文本' 'x' PosString 'y' PosString '样式' ColorString? Colour '描边颜色' ColorString? Colour '字体' FontString? BGNL? EvalString Newline
 
 /* fillBoldText_s
 tooltip : fillBoldText：绘制一行描边文本
@@ -3273,7 +2940,7 @@ return code;
 */;
 
 drawTextContent_s
-    :   '绘制多行文本'  EvalString_Multi BGNL? '起点像素' 'x' PosString 'y' PosString '最大宽度' IntString? '颜色' ColorString? Colour BGNL? '对齐' TextAlign_List '字体大小' IntString? '行距' IntString? '粗体' Bool Newline
+    :   '(已弃用)绘制多行文本'  EvalString_Multi BGNL? '起点像素' 'x' PosString 'y' PosString '最大宽度' IntString? '颜色' ColorString? Colour BGNL? '对齐' TextAlign_List '字体大小' IntString? '行距' IntString? '粗体' Bool Newline
 
 /* drawTextContent_s
 tooltip : drawTextContent：绘制多行文本
@@ -3293,7 +2960,7 @@ return code;
 */;
 
 fillRect_s
-    :   '绘制矩形' '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString '圆角半径' PosString? '旋转度数' PosString? '颜色' ColorString? Colour Newline
+    :   '(已弃用)绘制矩形' '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString '圆角半径' PosString? '旋转度数' PosString? '颜色' ColorString? Colour Newline
 
 /* fillRect_s
 tooltip : fillRect：绘制矩形
@@ -3309,7 +2976,7 @@ return code;
 */;
 
 strokeRect_s
-    :   '绘制矩形边框' '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString '圆角半径' PosString? '旋转度数' PosString? '颜色' ColorString? Colour '线宽' IntString? Newline
+    :   '(已弃用)绘制矩形边框' '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString '圆角半径' PosString? '旋转度数' PosString? '颜色' ColorString? Colour '线宽' IntString? Newline
 
 /* strokeRect_s
 tooltip : strokeRect：绘制矩形边框
@@ -3326,7 +2993,7 @@ return code;
 */;
 
 drawLine_s
-    :   '绘制线段' '起点像素' 'x' PosString 'y' PosString '终点像素' 'x' PosString 'y' PosString '颜色' ColorString? Colour '线宽' IntString? Newline
+    :   '(已弃用)绘制线段' '起点像素' 'x' PosString 'y' PosString '终点像素' 'x' PosString 'y' PosString '颜色' ColorString? Colour '线宽' IntString? Newline
 
 /* drawLine_s
 tooltip : drawLine：绘制线段
@@ -3341,7 +3008,7 @@ return code;
 */;
 
 drawArrow_s
-    :   '绘制箭头' '起点像素' 'x' PosString 'y' PosString '终点像素' 'x' PosString 'y' PosString '颜色' ColorString? Colour '线宽' IntString? Newline
+    :   '(已弃用)绘制箭头' '起点像素' 'x' PosString 'y' PosString '终点像素' 'x' PosString 'y' PosString '颜色' ColorString? Colour '线宽' IntString? Newline
 
 /* drawArrow_s
 tooltip : drawArrow：绘制箭头
@@ -3357,7 +3024,7 @@ return code;
 
 
 fillPolygon_s
-    :   '绘制多边形' '顶点像素列表' 'x' EvalString 'y' EvalString '颜色' ColorString? Colour Newline
+    :   '(已弃用)绘制多边形' '顶点像素列表' 'x' EvalString 'y' EvalString '颜色' ColorString? Colour Newline
 
 /* fillPolygon_s
 tooltip : fillPolygon：绘制多边形
@@ -3378,7 +3045,7 @@ return code;
 
 
 strokePolygon_s
-    :   '绘制多边形边框' '顶点像素列表' 'x' EvalString 'y' EvalString '颜色' ColorString? Colour '线宽' IntString? Newline
+    :   '(已弃用)绘制多边形边框' '顶点像素列表' 'x' EvalString 'y' EvalString '颜色' ColorString? Colour '线宽' IntString? Newline
 
 /* strokePolygon_s
 tooltip : strokePolygon：绘制多边形边框
@@ -3399,7 +3066,7 @@ return code;
 */;
 
 fillEllipse_s
-    :   '绘制椭圆' '中心' 'x' PosString 'y' PosString '长半径' PosString '短半径' PosString '旋转度数' PosString? '颜色' ColorString? Colour Newline
+    :   '(已弃用)绘制椭圆' '中心' 'x' PosString 'y' PosString '长半径' PosString '短半径' PosString '旋转度数' PosString? '颜色' ColorString? Colour Newline
 
 /* fillEllipse_s
 tooltip : fillEllipse：绘制椭圆
@@ -3414,7 +3081,7 @@ return code;
 */;
 
 strokeEllipse_s
-    :   '绘制椭圆边框' '中心' 'x' PosString 'y' PosString '长半径' PosString '短半径' PosString '旋转度数' PosString? '颜色' ColorString? Colour '线宽' IntString? Newline
+    :   '(已弃用)绘制椭圆边框' '中心' 'x' PosString 'y' PosString '长半径' PosString '短半径' PosString '旋转度数' PosString? '颜色' ColorString? Colour '线宽' IntString? Newline
 
 /* strokeEllipse_s
 tooltip : strokeEllipse：绘制椭圆边框
@@ -3430,7 +3097,7 @@ return code;
 */;
 
 fillArc_s
-    :   '绘制扇形' '中心' 'x' PosString 'y' PosString '半径' PosString '起点角度' PosString '终点角度' PosString '颜色' ColorString? Colour Newline
+    :   '(已弃用)绘制扇形' '中心' 'x' PosString 'y' PosString '半径' PosString '起点角度' PosString '终点角度' PosString '颜色' ColorString? Colour Newline
 
 /* fillArc_s
 tooltip : fillArc：绘制扇形
@@ -3444,7 +3111,7 @@ return code;
 
 
 strokeArc_s
-    :   '绘制弧' '中心' 'x' PosString 'y' PosString '半径' PosString '起点角度' PosString '终点角度' PosString '颜色' ColorString? Colour '线宽' IntString? Newline
+    :   '(已弃用)绘制弧' '中心' 'x' PosString 'y' PosString '半径' PosString '起点角度' PosString '终点角度' PosString '颜色' ColorString? Colour '线宽' IntString? Newline
 
 /* strokeArc_s
 tooltip : strokeArc：绘制弧
@@ -3460,7 +3127,7 @@ return code;
 
 
 drawImage_s
-    :   '绘制图片' EvalString '翻转' Reverse_List '起点像素' 'x' PosString 'y' PosString '宽' PosString? '高' PosString? '旋转度数' PosString? Newline
+    :   '(已弃用)绘制图片' EvalString '翻转' Reverse_List '起点像素' 'x' PosString 'y' PosString '宽' PosString? '高' PosString? '旋转度数' PosString? Newline
 
 
 /* drawImage_s
@@ -3481,7 +3148,7 @@ return code;
 */;
 
 drawImage_1_s
-    :   '绘制图片' EvalString '翻转' Reverse_List '裁剪的起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString BGNL?
+    :   '(已弃用)绘制图片' EvalString '翻转' Reverse_List '裁剪的起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString BGNL?
         '绘制的起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString '旋转度数' PosString? Newline
 
 
@@ -3503,7 +3170,7 @@ return code;
 */;
 
 drawIcon_s
-    :   '绘制图标' 'ID' IdString '帧' Int '起点像素' 'x' PosString 'y' PosString '宽' PosString? '高' PosString? Newline
+    :   '(已弃用)绘制图标' 'ID' IdString '帧' Int '起点像素' 'x' PosString 'y' PosString '宽' PosString? '高' PosString? Newline
 
 
 /* drawIcon_s
@@ -3521,7 +3188,7 @@ return code;
 */;
 
 drawBackground_s
-    :   '绘制背景图' EvalString Colour '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString Newline
+    :   '(已弃用)绘制背景图' EvalString Colour '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString Newline
 
 
 /* drawBackground_s
@@ -3545,7 +3212,7 @@ return code;
 */;
 
 drawSelector_s
-    :   '绘制闪烁光标' EvalString '编号' Int '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString Newline
+    :   '(已弃用)绘制闪烁光标' EvalString '编号' Int '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString Newline
 
 
 /* drawSelector_s
@@ -3559,7 +3226,7 @@ return code;
 */;
 
 drawSelector_1_s
-    :   '清除闪烁光标' '编号' Int Newline
+    :   '(已弃用)清除闪烁光标' '编号' Int Newline
 
 
 /* drawSelector_1_s
@@ -4004,6 +3671,10 @@ SetTextPosition_List
 TextAlign_List
     :   '不改变'|'左对齐'|'左右居中'|'右对齐'
     /*TextAlign_List ['null','left','center','right']*/;
+
+WordBreak_List
+    :   '不改变'|'不分词'|'空格分词'|'全部分词'
+    /*WordBreak_List ['null','none','space','all']*/;
 
 TextBaseline_List
     :   '不改变'|'顶部'|'悬挂'|'居中'|'标准值'|'ideographic'|'底部'

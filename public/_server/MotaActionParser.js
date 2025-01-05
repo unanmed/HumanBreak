@@ -249,10 +249,6 @@ ActionParser.prototype.parseAction = function() {
 
   // 不同种类的事件
 
-  // 如果是文字：显示
-  if (typeof data == "string") {
-      data={"type": "text", "text": data}
-  }
   this.event.data.type=data.type;
   switch (data.type) {
     case "_next":
@@ -260,57 +256,9 @@ ActionParser.prototype.parseAction = function() {
       this.next = data.next;
       return;
     case "text": // 文字/对话
-      var info = this.getTitleAndPosition(data.text);
-      var textDrawing = [];
-      info[3] = (info[3] || "").replace(/(\f|\\f)\[(.*?)]/g, function (text, sympol, str) {
-        var ss = str.split(",");
-        if (ss.length == 3 || ss.length == 5 || ss.length >=9) {
-          var swap = function (i, j) { var x = ss[i]; ss[i] = ss[j]; ss[j] = x;}
-          if (ss.length >= 9) {
-            swap(1,5); swap(2,6); swap(3,7); swap(4,8);
-          }
-          textDrawing.push(ss);
-        }
-        return '';
-      });
-      if (textDrawing.length > 0) {
-        var buildTextDrawing = function (obj) {
-          if(!obj) obj=[];
-          var text_choices = null;
-          for(var ii=obj.length-1,choice;choice=obj[ii];ii--) {
-            var reverse = 'null';
-            if (choice[0].endsWith(':o') || choice[0].endsWith(':x') || choice[0].endsWith(':y')) {
-              reverse = choice[0].substring(choice[0].length - 2);
-              choice[0] = choice[0].substring(0, choice[0].length - 2);
-            }
-            text_choices=MotaActionBlocks['textDrawing'].xmlText([
-              choice[0], reverse, choice[1], choice[2], choice[3], choice[4], choice[5], choice[6], 
-              choice[7], choice[8], choice[9], choice[10], text_choices]);
-          }
-          return text_choices;
-        }
-        data.pos = data.pos || [];
-        this.next = MotaActionFunctions.xmlText('text_2_s', [
-          info[0], info[1], info[2], data.pos[0], data.pos[1], data.pos[2], data.code||0, data.async||false, info[3], buildTextDrawing(textDrawing), this.next
-        ], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
-      } else if (info[0] || info[1] || info[2] || data.pos || data.code) {
-        data.pos = data.pos || [];
-        this.next = MotaActionFunctions.xmlText('text_1_s',[
-          info[0], info[1], info[2], data.pos[0], data.pos[1], data.pos[2], data.code||0, data.async||false, info[3], this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
-      }
-      else {
-        this.next = MotaActionFunctions.xmlText('text_0_s', [info[3],this.next],
-           /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
-      }
-      break;
-    case "moveTextBox": // 移动对话框
-      data.loc = data.loc || ['',''];
-      this.next = MotaActionBlocks['moveTextBox_s'].xmlText([
-        data.code, data.loc[0], data.loc[1], data.relative||false, data.moveMode, data.time, data.async, this.next]);
-      break;
-    case "clearTextBox": // 清除对话框
-      this.next = MotaActionBlocks['clearTextBox_s'].xmlText([(data.code||"").toString(),this.next]);
-      break;  
+    this.next = MotaActionBlocks['text_s'].xmlText([
+      data.title, data.icon, data.x, data.y, data.width, data.height, data.keepLast,data.interval,data.lineHeight, this.next]);
+    break;
     case "autoText": // 自动剧情文本
       var info = this.getTitleAndPosition(data.text);
       this.next = MotaActionBlocks['autoText_s'].xmlText([
@@ -324,14 +272,14 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['comment_s'].xmlText([this.EvalString_Multi(data.text),this.next]);
       break;
     case "setText": // 设置剧情文本的属性
-      data.title=this.Colour(data.title);
-      data.text=this.Colour(data.text);
-      if (!/^\w+\.png$/.test(data.background))
-        data.background=this.Colour(data.background);
+      //data.backColor=this.Colour(data.backColor);
+      //data.fillStyle=this.Colour(data.fillStyle);
+      //data.strokeStyle=this.Colour(data.strokeStyle);
       this.next = MotaActionBlocks['setText_s'].xmlText([
-        data.position,data.offset,data.align,data.bold,data.title,'rgba('+data.title+')',
-        data.text,'rgba('+data.text+')',data.background,'rgba('+data.background+')',
-        data.titlefont,data.textfont,data.lineHeight,data.time,data.letterSpacing,data.animateTime,this.next]);
+        data.x,data.y,data.width,data.height,data.fontFamily,data.fontSize,data.fontWeight,
+        data.fontItalic,data.keepLast,data.interval,data.lineHeight,,data.fillStyle,'rgba('+data.fillStyle+')',
+        data.strokeStyle,'rgba('+data.strokeStyle+')',data.strokeWidth,data.fill,data.stroke,data.backColor,'rgba('+data.backColor+')',
+        data.winskin,data.padding,data.titleFill,data.titleStroke,data.titlePadding,data.textAlign,data.wordBreak,data.ignoreLineStart,data.ignoreLineEnd,data.breakChars,this.next]);
       break;
     case "tip":
       this.next = MotaActionBlocks['tip_s'].xmlText([
@@ -384,18 +332,6 @@ ActionParser.prototype.parseAction = function() {
       })
       this.next = MotaActionBlocks['setBlockOpacity_s'].xmlText([
         x_str.join(','),y_str.join(','),data.floorId||'',data.opacity,data.time,data.async||false,this.next]);
-      break;
-    case "setBlockFilter": // 设置图块不透明度
-      data.loc=data.loc||[];
-      if (!(data.loc[0] instanceof Array))
-        data.loc = [data.loc];
-      var x_str=[],y_str=[];
-      data.loc.forEach(function (t) {
-        x_str.push(t[0]);
-        y_str.push(t[1]);
-      })
-      this.next = MotaActionBlocks['setBlockFilter_s'].xmlText([
-        x_str.join(','),y_str.join(','),data.floorId||'',data.blur,data.hue,data.grayscale,data.invert||false,data.shadow,this.next]);
       break;
     case "turnBlock": // 事件转向
       data.loc=data.loc||[];
@@ -542,12 +478,6 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['changePos_s'].xmlText([
         data.loc[0],data.loc[1],data.direction,this.next]);
       break;
-    case "follow": // 跟随勇士
-      this.next = MotaActionBlocks['follow_s'].xmlText([data.name||"", this.next]);
-      break;
-    case "unfollow": // 取消跟随
-      this.next = MotaActionBlocks['unfollow_s'].xmlText([data.name||"", this.next]);
-      break;
     case "animate": // 显示动画
       if (data.loc == 'hero') {
         this.next = MotaActionBlocks['animate_1_s'].xmlText([
@@ -615,11 +545,6 @@ ActionParser.prototype.parseAction = function() {
       data.center=data.center||['','']
       this.next = MotaActionBlocks['scaleImage_s'].xmlText([
         data.code, data.center[0], data.center[1], data.moveMode||'',  data.scale, data.time||0, data.async||false, this.next]);
-      break;
-    case "showGif": // 显示动图
-      data.loc=data.loc||['','']
-      this.next = MotaActionBlocks['showGif_s'].xmlText([
-        data.name,data.loc[0],data.loc[1],this.next]);
       break;
     case "setCurtain": // 颜色渐变
       if(this.isset(data.color)){
@@ -749,47 +674,6 @@ ActionParser.prototype.parseAction = function() {
         this.expandEvalBlock([data.value]),
         data.norefresh || false,
         this.next]);
-      break;
-    case "setEnemy":
-      this.next = MotaActionBlocks['setEnemy_s'].xmlText([
-        MotaActionFunctions.replaceToName_token(data.id), data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), 
-        data.norefresh||false, this.next]);
-      break;
-    case "setEnemyOnPoint":
-      data.loc=data.loc||[];
-      if (!(data.loc[0] instanceof Array))
-        data.loc = [data.loc];
-      var x_str=[],y_str=[];
-      data.loc.forEach(function (t) {
-        x_str.push(t[0]);
-        y_str.push(t[1]);
-      })
-      this.next = MotaActionBlocks['setEnemyOnPoint_s'].xmlText([
-        x_str.join(','),y_str.join(','),data.floorId||'',data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), 
-        data.norefresh||false, this.next]);
-      break;
-    case "resetEnemyOnPoint":
-      data.loc=data.loc||[];
-      if (!(data.loc[0] instanceof Array))
-        data.loc = [data.loc];
-      var x_str=[],y_str=[];
-      data.loc.forEach(function (t) {
-        x_str.push(t[0]);
-        y_str.push(t[1]);
-      })
-      this.next = MotaActionBlocks['resetEnemyOnPoint_s'].xmlText([
-        x_str.join(','),y_str.join(','), data.floorId||'',data.norefresh||false,this.next]);
-      break;
-    case "moveEnemyOnPoint":
-      data.from=data.from||['','']
-      if (data.dxy) {
-        this.next = MotaActionBlocks['moveEnemyOnPoint_1_s'].xmlText([
-          data.from[0], data.from[1], data.dxy[0], data.dxy[1], data.floorId||'',data.norefresh||false,this.next]);
-      } else {
-        data.to=data.to||['','']
-        this.next = MotaActionBlocks['moveEnemyOnPoint_s'].xmlText([
-          data.from[0], data.from[1], data.to[0], data.to[1], data.floorId||'',data.norefresh||false,this.next]);
-      }
       break;
     case "setEquip":
       this.next = MotaActionBlocks['setEquip_s'].xmlText([

@@ -184,8 +184,6 @@ export abstract class GraphicItemBase
         ctx.lineJoin = this.lineJoin;
         ctx.lineCap = this.lineCap;
         ctx.miterLimit = this.miterLimit;
-        ctx.fill(this.fillRule);
-        this.update();
     }
 
     patchProp(
@@ -257,7 +255,7 @@ export abstract class GraphicItemBase
 export class Rect extends GraphicItemBase {
     protected render(
         canvas: MotaOffscreenCanvas2D,
-        transform: Transform
+        _transform: Transform
     ): void {
         const ctx = canvas.ctx;
         this.setCanvasState(canvas);
@@ -290,7 +288,7 @@ export class Circle extends GraphicItemBase {
 
     protected render(
         canvas: MotaOffscreenCanvas2D,
-        transform: Transform
+        _transform: Transform
     ): void {
         const ctx = canvas.ctx;
         this.setCanvasState(canvas);
@@ -369,7 +367,7 @@ export class Ellipse extends GraphicItemBase {
 
     protected render(
         canvas: MotaOffscreenCanvas2D,
-        transform: Transform
+        _transform: Transform
     ): void {
         const ctx = canvas.ctx;
         this.setCanvasState(canvas);
@@ -461,7 +459,7 @@ export class Line extends GraphicItemBase {
 
     protected render(
         canvas: MotaOffscreenCanvas2D,
-        transform: Transform
+        _transform: Transform
     ): void {
         const ctx = canvas.ctx;
         this.setCanvasState(canvas);
@@ -530,7 +528,7 @@ export class BezierCurve extends GraphicItemBase {
 
     protected render(
         canvas: MotaOffscreenCanvas2D,
-        transform: Transform
+        _transform: Transform
     ): void {
         const ctx = canvas.ctx;
         this.setCanvasState(canvas);
@@ -638,7 +636,7 @@ export class QuadraticCurve extends GraphicItemBase {
 
     protected render(
         canvas: MotaOffscreenCanvas2D,
-        transform: Transform
+        _transform: Transform
     ): void {
         const ctx = canvas.ctx;
         this.setCanvasState(canvas);
@@ -718,7 +716,7 @@ export class Path extends GraphicItemBase {
 
     protected render(
         canvas: MotaOffscreenCanvas2D,
-        transform: Transform
+        _transform: Transform
     ): void {
         const ctx = canvas.ctx;
         this.setCanvasState(canvas);
@@ -839,7 +837,7 @@ export class RectR extends GraphicItemBase {
 
     protected render(
         canvas: MotaOffscreenCanvas2D,
-        transform: Transform
+        _transform: Transform
     ): void {
         const ctx = canvas.ctx;
         this.setCanvasState(canvas);
