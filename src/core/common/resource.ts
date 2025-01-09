@@ -100,7 +100,7 @@ export class ImageResource extends Resource<HTMLImageElement> {
         super(uri, 'image');
     }
 
-    load(onProgress?: ProgressFn): Promise<HTMLImageElement> {
+    load(_onProgress?: ProgressFn): Promise<HTMLImageElement> {
         const img = new Image();
         img.src = this.resolveURI();
         this.resource = img;
@@ -229,9 +229,10 @@ export class AudioResource extends Resource<HTMLAudioElement> {
         super(uri, 'audio');
     }
 
-    load(onProgress?: ProgressFn): Promise<HTMLAudioElement> {
+    load(_onProgress?: ProgressFn): Promise<HTMLAudioElement> {
         const audio = new Audio();
         audio.src = this.resolveURI();
+        audio.preload = 'none';
         this.resource = audio;
         return new Promise<HTMLAudioElement>(res => {
             this.loaded = true;
@@ -383,13 +384,12 @@ export class LoadTask<
                 }
                 this.loaded = now;
             })
-            .catch(reason => {
+            .catch(() => {
                 LoadTask.errorTask++;
                 logger.error(2, this.resource.type, this.resource.uri);
             });
         this.emit('loadStart', this.resource);
         const value = await load;
-        // @ts-ignore
         LoadTask.loadedTaskList.add(this);
         this.loaded = totalByte;
         LoadTask.loadedTask++;
@@ -407,7 +407,6 @@ export class LoadTask<
         uri: string
     ): LoadTask<T> {
         const task = new LoadTask(type, uri);
-        // @ts-ignore
         this.taskList.add(task);
         return task;
     }
@@ -541,7 +540,7 @@ export function loadDefaultResource() {
         .forEach(v => {
             const res = LoadTask.add('material', `material/${v}`);
             res.once('load', res => {
-                // @ts-ignore
+                // @ts-expect-error 不能推导
                 core.material.images[
                     v.slice(0, -4) as SelectKey<
                         MaterialImages,
@@ -554,7 +553,7 @@ export function loadDefaultResource() {
     weathers.forEach(v => {
         const res = LoadTask.add('material', `material/${v}.png`);
         res.once('load', res => {
-            // @ts-ignore
+            // @ts-expect-error 需要赋值
             core.animateFrame.weather[v] = res.resource;
         });
     });
@@ -674,7 +673,6 @@ export async function loadCompressedResource() {
 
                         // material
                         if (materialImages.some(v => name === v + '.png')) {
-                            // @ts-ignore
                             core.material.images[
                                 name.slice(0, -4) as SelectKey<
                                     MaterialImages,
@@ -682,7 +680,7 @@ export async function loadCompressedResource() {
                                 >
                             ] = image;
                         } else if (weathers.some(v => name === v + '.png')) {
-                            // @ts-ignore
+                            // @ts-expect-error 需要赋值
                             core.animateFrame.weather[v] = image;
                         }
                     }
