@@ -248,6 +248,7 @@ export abstract class GL2<E extends EGL2Event = EGL2Event> extends RenderItem<
             case RenderMode.Arrays: {
                 const { mode, first, count } = param as DrawArraysParam;
                 gl.drawArrays(mode, first, count);
+                break;
             }
             case RenderMode.Elements: {
                 if (!indices) return;
@@ -255,11 +256,13 @@ export abstract class GL2<E extends EGL2Event = EGL2Event> extends RenderItem<
                     param as DrawElementsParam;
                 gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indices.data);
                 gl.drawElements(mode, count, type, offset);
+                break;
             }
             case RenderMode.ArraysInstanced: {
                 const { mode, first, count, instanceCount } =
                     param as DrawArraysInstancedParam;
                 gl.drawArraysInstanced(mode, first, count, instanceCount);
+                break;
             }
             case RenderMode.ElementsInstanced: {
                 if (!indices) return;
@@ -272,6 +275,7 @@ export abstract class GL2<E extends EGL2Event = EGL2Event> extends RenderItem<
                 } = param as DrawElementsInstancedParam;
                 gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indices.data);
                 gl.drawElementsInstanced(mode, count, type, offset, ins);
+                break;
             }
         }
     }
@@ -714,12 +718,8 @@ class ShaderUniform<T extends UniformType> implements IShaderUniform<T> {
     ) {}
 
     set(...params: UniformSetFn[T]): void {
-        this.gl.vertexAttribIPointer;
         // 因为ts类型推导的限制，类型肯定正确，但是推导不出，所以这里直接 as any 屏蔽掉类型推导
-        const x0 = params[0] as any;
-        const x1 = params[1] as any;
-        const x2 = params[2] as any;
-        const x3 = params[3] as any;
+        const [x0, x1, x2, x3] = params as any[];
         switch (this.type) {
             case UniformType.Uniform1f:
                 this.gl.uniform1f(this.location, x0);
@@ -807,10 +807,7 @@ class ShaderAttrib<T extends AttribType> implements IShaderAttrib<T> {
 
     set(...params: AttribSetFn[T]) {
         // 因为ts类型推导的限制，类型肯定正确，但是推导不出，所以这里直接 as any 屏蔽掉类型推导
-        const x0 = params[0] as any;
-        const x1 = params[1] as any;
-        const x2 = params[2] as any;
-        const x3 = params[3] as any;
+        const [x0, x1, x2, x3] = params as any[];
         switch (this.type) {
             case AttribType.Attrib1f:
                 this.gl.vertexAttrib1f(this.location, x0);
@@ -1035,10 +1032,10 @@ class ShaderUniformBlock implements IShaderUniformBlock {
         const buffer = this.buffer;
         gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
         if (srcOffset !== void 0) {
-            // @ts-ignore
+            // @ts-expect-error 无法推断
             gl.bufferSubData(gl.UNIFORM_BUFFER, 0, srcData, srcOffset, length);
         } else {
-            // @ts-ignore
+            // @ts-expect-error 无法推断
             gl.bufferSubData(gl.UNIFORM_BUFFER, 0, srcData);
         }
         gl.bindBufferBase(gl.UNIFORM_BUFFER, this.binding, buffer);
@@ -1478,7 +1475,7 @@ export class GL2Program extends EventEmitter<ShaderProgramEvent> {
     /**
      * 定义一个 uniform 变量，并存入本着色器程序的 uniform 变量映射
      * @param uniform uniform 变量名
-     * @param type uniform 类型，可选 {@link Shader.UNIFORM_1f} 至 {@link Shader.UNIFORM_4uiv}
+     * @param type uniform 类型，可选 {@link GL2.UNIFORM_1f} 至 {@link GL2.UNIFORM_4uiv}
      * @returns uniform 变量的操作对象，可用于设置其值
      */
     defineUniform<T extends UniformType>(
@@ -1506,7 +1503,7 @@ export class GL2Program extends EventEmitter<ShaderProgramEvent> {
     /**
      * 定义一个 uniform 矩阵变量，并存入本着色器程序的 uniform 矩阵变量映射
      * @param uniform uniform 矩阵变量名
-     * @param type uniform 矩阵类型，可选 {@link Shader.U_MATRIX_2x2} 至 {@link Shader.U_MATRIX_4x4}
+     * @param type uniform 矩阵类型，可选 {@link GL2.U_MATRIX_2x2} 至 {@link GL2.U_MATRIX_4x4}
      * @returns uniform 矩阵变量的操作对象，可用于设置其值
      */
     defineUniformMatrix(
