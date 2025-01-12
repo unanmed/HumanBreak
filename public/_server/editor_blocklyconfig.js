@@ -96,11 +96,8 @@ editor_blocklyconfig=(function(){
       ], 'splitImages'),
     ],
     '显示文字':[
-      MotaActionBlocks['text_0_s'].xmlText(),
-      MotaActionBlocks['text_1_s'].xmlText(),
-      MotaActionFunctions.actionParser.parseList("\t[小妖精,fairy]\f[fairy.png,0,0]欢迎使用事件编辑器(双击方块可直接预览)"),
-      MotaActionBlocks['moveTextBox_s'].xmlText(),
-      MotaActionBlocks['clearTextBox_s'].xmlText(),
+      MotaActionBlocks['text_s'].xmlText(),
+     
       MotaActionBlocks['comment_s'].xmlText(),
       MotaActionBlocks['autoText_s'].xmlText(),
       MotaActionBlocks['scrollText_s'].xmlText(),
@@ -120,11 +117,6 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['setValue_s'].xmlText([
         MotaActionBlocks['idIdList_e'].xmlText(['status','生命']), '=', '', false
       ]),
-      MotaActionBlocks['setEnemy_s'].xmlText(),
-      MotaActionBlocks['setEnemyOnPoint_s'].xmlText(),
-      MotaActionBlocks['resetEnemyOnPoint_s'].xmlText(),
-      MotaActionBlocks['moveEnemyOnPoint_s'].xmlText(),
-      MotaActionBlocks['moveEnemyOnPoint_1_s'].xmlText(),
       MotaActionBlocks['setEquip_s'].xmlText(),
       MotaActionBlocks['setFloor_s'].xmlText(),
       MotaActionBlocks['setGlobalAttribute_s'].xmlText(),
@@ -143,9 +135,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['unloadEquip_s'].xmlText(),
       MotaActionBlocks['openShop_s'].xmlText(),
       MotaActionBlocks['disableShop_s'].xmlText(),
-      MotaActionBlocks['setHeroIcon_s'].xmlText(),
-      MotaActionBlocks['follow_s'].xmlText(),
-      MotaActionBlocks['unfollow_s'].xmlText(),
+      MotaActionBlocks['setHeroIcon_s'].xmlText()
     ],
     '地图处理':[
       MotaActionBlocks['battle_1_s'].xmlText(),
@@ -155,7 +145,6 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['hide_s'].xmlText(),
       MotaActionBlocks['setBlock_s'].xmlText(),
       MotaActionBlocks['setBlockOpacity_s'].xmlText(),
-      MotaActionBlocks['setBlockFilter_s'].xmlText(),
       MotaActionBlocks['turnBlock_s'].xmlText(),
       MotaActionBlocks['moveHero_s'].xmlText(),
       MotaActionBlocks['move_s'].xmlText(),
@@ -225,7 +214,6 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['moveImage_s'].xmlText(),
       MotaActionBlocks['rotateImage_s'].xmlText(),
       MotaActionBlocks['scaleImage_s'].xmlText(),
-      MotaActionBlocks['showGif_s'].xmlText(),
       MotaActionBlocks['playBgm_s'].xmlText(),
       MotaActionBlocks['pauseBgm_s'].xmlText(),
       MotaActionBlocks['resumeBgm_s'].xmlText(),

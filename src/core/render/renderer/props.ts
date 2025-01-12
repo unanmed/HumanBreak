@@ -7,6 +7,7 @@ import {
 } from '../preset/layer';
 import type { EnemyCollection } from '@/game/enemy/damage';
 import { ILineProperty } from '../preset/graphics';
+import { SizedCanvasImageSource } from '../preset';
 
 export interface CustomProps {
     _item: (props: BaseProps) => RenderItem;
@@ -108,18 +109,80 @@ export interface GraphicPropsBase extends BaseProps, Partial<ILineProperty> {
 
 export interface RectProps extends GraphicPropsBase {}
 
-export interface CirclesProps extends GraphicPropsBase {}
+export interface CirclesProps extends GraphicPropsBase {
+    radius?: number;
+    start?: number;
+    end?: number;
+}
 
-export interface EllipseProps extends GraphicPropsBase {}
+export interface EllipseProps extends GraphicPropsBase {
+    radiusX?: number;
+    radiusY?: number;
+    start?: number;
+    end?: number;
+}
 
-export interface LineProps extends GraphicPropsBase {}
+export interface LineProps extends GraphicPropsBase {
+    x1?: number;
+    y1?: number;
+    x2?: number;
+    y2?: number;
+}
 
-export interface BezierProps extends GraphicPropsBase {}
+export interface BezierProps extends GraphicPropsBase {
+    sx?: number;
+    sy?: number;
+    cp1x?: number;
+    cp1y?: number;
+    cp2x?: number;
+    cp2y?: number;
+    ex?: number;
+    ey?: number;
+}
 
-export interface QuadraticProps extends GraphicPropsBase {}
+export interface QuadraticProps extends GraphicPropsBase {
+    sx?: number;
+    sy?: number;
+    cpx?: number;
+    cpy?: number;
+    ex?: number;
+    ey?: number;
+}
 
-export interface PathProps extends GraphicPropsBase {}
+export interface PathProps extends GraphicPropsBase {
+    path?: Path2D;
+}
 
-export interface IconProps extends BaseProps {}
+export interface RectRProps extends GraphicPropsBase {
+    /** 圆角半径，此参数传入时，radiusX 和 radiusY 应保持一致 */
+    radius: number;
+    /** 圆角横向半径 */
+    radiusX?: number;
+    /** 圆角纵向半径 */
+    radiusY?: number;
+    /** 圆角为线模式 */
+    line?: boolean;
+    /** 圆角为椭圆模式，默认值 */
+    ellipse?: boolean;
+    /** 圆角为二次贝塞尔曲线模式 */
+    quad?: boolean;
+    /** 圆角为三次贝塞尔曲线模式 */
+    cubic?: boolean;
+    /** 控制点，此参数传入时，cpx 和 cpy 应保持一致 */
+    cp?: number;
+    /** 横向控制点 */
+    cpx?: number;
+    /** 纵向控制点 */
+    cpy?: number;
+}
 
-export interface WinskinProps extends BaseProps {}
+export interface IconProps extends BaseProps {
+    icon: AllNumbers;
+    frame?: number;
+    animate?: boolean;
+}
+
+export interface WinskinProps extends BaseProps {
+    image: ImageIds;
+    borderSize?: number;
+}

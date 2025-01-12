@@ -26,6 +26,7 @@ import {
     PathProps,
     QuadraticProps,
     RectProps,
+    RectRProps,
     ShaderProps,
     SpriteProps,
     TextProps,
@@ -101,6 +102,7 @@ declare module 'vue/jsx-runtime' {
             'g-bezier': TagDefine<BezierProps, EGraphicItemEvent>;
             'g-quad': TagDefine<QuadraticProps, EGraphicItemEvent>;
             'g-path': TagDefine<PathProps, EGraphicItemEvent>;
+            'g-rectr': TagDefine<RectRProps, EGraphicItemEvent>;
             icon: TagDefine<IconProps, EIconEvent>;
             winskin: TagDefine<WinskinProps, EWinskinEvent>;
         }

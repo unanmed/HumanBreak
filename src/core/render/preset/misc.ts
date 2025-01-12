@@ -1,9 +1,17 @@
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
-import { Sprite } from '../sprite';
-import { ERenderItemEvent, RenderItem, RenderItemPosition } from '../item';
+import {
+    ERenderItemEvent,
+    IAnimateFrame,
+    renderEmits,
+    RenderItem,
+    RenderItemPosition
+} from '../item';
 import { Transform } from '../transform';
 import { ElementNamespace, ComponentInternalInstance } from 'vue';
 import { AutotileRenderable, RenderableData } from '../cache';
+import { texture } from '../cache';
+import { isNil } from 'lodash-es';
+import { logger } from '@/core/common/logger';
 
 type CanvasStyle = string | CanvasGradient | CanvasPattern;
 
@@ -33,7 +41,7 @@ export class Text extends RenderItem<ETextEvent> {
 
     protected render(
         canvas: MotaOffscreenCanvas2D,
-        transform: Transform
+        _transform: Transform
     ): void {
         const ctx = canvas.ctx;
         ctx.textBaseline = 'bottom';
@@ -162,7 +170,7 @@ export class Image extends RenderItem<EImageEvent> {
 
     protected render(
         canvas: MotaOffscreenCanvas2D,
-        transform: Transform
+        _transform: Transform
     ): void {
         const ctx = canvas.ctx;
         ctx.drawImage(this.image, 0, 0, canvas.width, canvas.height);
@@ -200,33 +208,108 @@ export class Comment extends RenderItem {
     }
 
     protected render(
-        canvas: MotaOffscreenCanvas2D,
-        transform: Transform
+        _canvas: MotaOffscreenCanvas2D,
+        _transform: Transform
     ): void {}
 }
 
 export interface EIconEvent extends ERenderItemEvent {}
 
-export class Icon extends RenderItem<EIconEvent> {
+export class Icon extends RenderItem<EIconEvent> implements IAnimateFrame {
     /** 图标id */
     icon: AllNumbers = 0;
     /** 帧数 */
-    frame: number = 0;
+    frame?: number = 0;
     /** 是否启用动画 */
-    animate: boolean = false;
+    animate?: boolean = false;
     /** 图标的渲染信息 */
     private renderable?: RenderableData | AutotileRenderable;
 
+    private pendingIcon?: AllNumbers;
+
+    constructor(type: RenderItemPosition, cache?: boolean, fall?: boolean) {
+        super(type, cache, fall);
+        this.setAntiAliasing(false);
+        this.setHD(false);
+    }
+
     protected render(
         canvas: MotaOffscreenCanvas2D,
-        transform: Transform
-    ): void {}
+        _transform: Transform
+    ): void {
+        const ctx = canvas.ctx;
+        const renderable = this.renderable;
+        if (!renderable) return;
+        const [x, y, w, h] = renderable.render[0];
+        const cw = canvas.width;
+        const ch = canvas.height;
+        const frame = this.animate
+            ? RenderItem.animatedFrame % renderable.frame
+            : 0;
+
+        if (!this.animate) {
+            if (renderable.autotile) {
+                ctx.drawImage(renderable.image[0], x, y, w, h, 0, 0, cw, ch);
+            } else {
+                ctx.drawImage(renderable.image, x, y, w, h, 0, 0, cw, ch);
+            }
+        } else {
+            const [x1, y1, w1, h1] = renderable.render[frame];
+            if (renderable.autotile) {
+                const img = renderable.image[0];
+                ctx.drawImage(img, x1, y1, w1, h1, 0, 0, cw, ch);
+            } else {
+                ctx.drawImage(renderable.image, x1, y1, w1, h1, 0, 0, cw, ch);
+            }
+        }
+    }
 
     /**
      * 设置图标
      * @param id 图标id
      */
-    setIcon(id: AllIds | AllNumbers) {}
+    setIcon(id: AllIds | AllNumbers) {
+        const num = typeof id === 'number' ? id : texture.idNumberMap[id];
+
+        const loading = Mota.require('var', 'loading');
+        if (loading.loaded) {
+            this.setIconRenderable(num);
+        } else {
+            if (isNil(this.pendingIcon)) {
+                loading.once('loaded', () => {
+                    this.setIconRenderable(this.pendingIcon ?? 0);
+                    delete this.pendingIcon;
+                });
+            }
+            this.pendingIcon = num;
+        }
+    }
+
+    private setIconRenderable(num: AllNumbers) {
+        const renderable = texture.getRenderable(num);
+
+        if (!renderable) {
+            logger.warn(43, num.toString());
+            return;
+        } else {
+            this.icon = num;
+            this.renderable = renderable;
+            this.frame = renderable.frame;
+        }
+        this.update();
+    }
+
+    /**
+     * 更新动画帧
+     */
+    updateFrameAnimate(): void {
+        this.update(this);
+    }
+
+    destroy(): void {
+        renderEmits.removeFramer(this);
+        super.destroy();
+    }
 
     patchProp(
         key: string,
@@ -242,10 +325,14 @@ export class Icon extends RenderItem<EIconEvent> {
             case 'animate':
                 if (!this.assertType(nextValue, 'boolean', key)) return;
                 this.animate = nextValue;
+                if (nextValue) renderEmits.addFramer(this);
+                else renderEmits.removeFramer(this);
+                this.update();
                 return;
             case 'frame':
                 if (!this.assertType(nextValue, 'number', key)) return;
                 this.frame = nextValue;
+                this.update();
                 return;
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
@@ -259,6 +346,8 @@ export class Winskin extends RenderItem<EWinskinEvent> {
     /** 边框宽度 */
     borderSize: number = 32;
 
+    private pendingImage?: ImageIds;
+
     constructor(
         image: SizedCanvasImageSource,
         type: RenderItemPosition = 'static'
@@ -269,20 +358,188 @@ export class Winskin extends RenderItem<EWinskinEvent> {
 
     protected render(
         canvas: MotaOffscreenCanvas2D,
-        transform: Transform
-    ): void {}
+        _transform: Transform
+    ): void {
+        const ctx = canvas.ctx;
+        const img = this.image;
+        const x = 0;
+        const y = 0;
+        const w = canvas.width;
+        const h = canvas.height;
+        const sz = this.borderSize / 32;
+        ctx.drawImage(img, 128, 0, 16, 16, x, y, 16 * sz, 16 * sz);
+        let dx;
+        for (dx = 0; dx < w - 64 * sz; dx += 32 * sz) {
+            ctx.drawImage(
+                img,
+                144,
+                0,
+                32,
+                16,
+                x + dx + 16,
+                y,
+                32 * sz,
+                16 * sz
+            );
+            ctx.drawImage(
+                img,
+                144,
+                48,
+                32,
+                16,
+                x + dx + 16,
+                y + h - 16 * sz,
+                32 * sz,
+                16 * sz
+            );
+        }
+        ctx.drawImage(
+            img,
+            144,
+            0,
+            w - dx - 32,
+            16,
+            x + dx + 16 * sz,
+            y,
+            w - dx - 32 * sz,
+            16 * sz
+        );
+        ctx.drawImage(
+            img,
+            144,
+            48,
+            w - dx - 32,
+            16,
+            x + dx + 16 * sz,
+            y + h - 16 * sz,
+            w - dx - 32 * sz,
+            16 * sz
+        );
+        ctx.drawImage(
+            img,
+            176,
+            0,
+            16,
+            16,
+            x + w - 16 * sz,
+            y,
+            16 * sz,
+            16 * sz
+        );
+        // 左右
+        let dy;
+        for (dy = 0; dy < h - 64 * sz; dy += 32 * sz) {
+            ctx.drawImage(
+                img,
+                128,
+                16,
+                16,
+                32,
+                x,
+                y + dy + 16 * sz,
+                16 * sz,
+                32 * sz
+            );
+            ctx.drawImage(
+                img,
+                176,
+                16,
+                16,
+                32,
+                x + w - 16 * sz,
+                y + dy + 16 * sz,
+                16 * sz,
+                32 * sz
+            );
+        }
+        ctx.drawImage(
+            img,
+            128,
+            16,
+            16,
+            h - dy - 32,
+            x,
+            y + dy + 16 * sz,
+            16 * sz,
+            h - dy - 32 * sz
+        );
+        ctx.drawImage(
+            img,
+            176,
+            16,
+            16,
+            h - dy - 32,
+            x + w - 16 * sz,
+            y + dy + 16 * sz,
+            16 * sz,
+            h - dy - 32 * sz
+        );
+        // 下方
+        ctx.drawImage(
+            img,
+            128,
+            48,
+            16,
+            16,
+            x,
+            y + h - 16 * sz,
+            16 * sz,
+            16 * sz
+        );
+        ctx.drawImage(
+            img,
+            176,
+            48,
+            16,
+            16,
+            x + w - 16 * sz,
+            y + h - 16 * sz,
+            16 * sz,
+            16 * sz
+        );
+        this.update();
+    }
 
     /**
      * 设置winskin图片
      * @param image winskin图片
      */
-    setImage(image: SizedCanvasImageSource) {}
+    setImage(image: SizedCanvasImageSource) {
+        this.image = image;
+        this.update();
+    }
+
+    /**
+     * 通过图片名称设置winskin
+     * @param name 图片名称
+     */
+    setImageByName(name: ImageIds) {
+        const loading = Mota.require('var', 'loading');
+        if (loading.loaded) {
+            const image = core.material.images.images[name];
+            this.setImage(image);
+        } else {
+            if (isNil(this.pendingImage)) {
+                loading.once('loaded', () => {
+                    const id = this.pendingImage;
+                    if (!id) return;
+                    const image = core.material.images.images[id];
+                    this.setImage(image);
+                    delete this.pendingImage;
+                });
+            }
+            this.pendingImage = name;
+        }
+    }
 
     /**
      * 设置边框大小
      * @param size 边框大小
      */
-    setBorderSize(size: number) {}
+    setBorderSize(size: number) {
+        this.borderSize = size;
+        this.update();
+    }
 
     patchProp(
         key: string,
@@ -292,6 +549,14 @@ export class Winskin extends RenderItem<EWinskinEvent> {
         parentComponent?: ComponentInternalInstance | null
     ): void {
         switch (key) {
+            case 'image':
+                if (!this.assertType(nextValue, 'string', key)) return;
+                this.setImageByName(nextValue);
+                return;
+            case 'borderSize':
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this.setBorderSize(nextValue);
+                return;
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
