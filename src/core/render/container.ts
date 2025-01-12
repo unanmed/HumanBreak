@@ -36,13 +36,9 @@ export class Container<E extends EContainerEvent = EContainerEvent>
         canvas: MotaOffscreenCanvas2D,
         transform: Transform
     ): void {
-        const { ctx } = canvas;
-
         this.sortedChildren.forEach(v => {
             if (v.hidden) return;
-            ctx.save();
             v.renderContent(canvas, transform);
-            ctx.restore();
         });
     }
 

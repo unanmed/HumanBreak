@@ -31,21 +31,19 @@ export class MotaRenderer extends Container {
         MotaRenderer.list.set(id, this);
     }
 
-    update(item: RenderItem = this) {
+    update(_item: RenderItem = this) {
         if (this.needUpdate || this.hidden) return;
         this.needUpdate = true;
         this.requestRenderFrame(() => {
-            this.refresh(item);
+            this.refresh();
         });
     }
 
-    protected refresh(item: RenderItem = this): void {
+    protected refresh(): void {
         if (!this.needUpdate) return;
         this.needUpdate = false;
-        this.emit('beforeUpdate', item);
         this.target.clear();
         this.renderContent(this.target, Transform.identity);
-        this.emit('afterUpdate', item);
     }
 
     /**

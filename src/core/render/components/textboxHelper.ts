@@ -107,5 +107,5 @@ export function buildFont(
     weight: number = 500,
     italic: boolean = false
 ) {
-    return `${italic ? 'italic ' : ''}${weight} ${size}px ${family}`;
+    return `${italic ? 'italic ' : ''}${weight} ${size}px "${family}"`;
 }

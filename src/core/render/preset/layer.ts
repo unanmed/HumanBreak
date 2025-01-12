@@ -2,20 +2,10 @@ import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 import { Container, EContainerEvent } from '../container';
 import { Sprite } from '../sprite';
 import { TimingFn } from 'mutate-animate';
-import {
-    ERenderItemEvent,
-    IAnimateFrame,
-    renderEmits,
-    RenderItem
-} from '../item';
+import { IAnimateFrame, renderEmits, RenderItem } from '../item';
 import { logger } from '@/core/common/logger';
 import { RenderableData, texture } from '../cache';
-import {
-    BlockCacher,
-    CanvasCacheItem,
-    IBlockCacheable,
-    ICanvasCacheItem
-} from './block';
+import { BlockCacher, CanvasCacheItem, ICanvasCacheItem } from './block';
 import { Transform } from '../transform';
 import { LayerFloorBinder, LayerGroupFloorBinder } from './floor';
 import { RenderAdapter } from '../adapter';
@@ -148,13 +138,9 @@ export class LayerGroup
     }
 
     protected render(canvas: MotaOffscreenCanvas2D): void {
-        const { ctx } = canvas;
-
         this.sortedChildren.forEach(v => {
             if (v.hidden) return;
-            ctx.save();
             v.renderContent(canvas, this.camera);
-            ctx.restore();
         });
     }
 
@@ -362,13 +348,14 @@ export class LayerGroup
                 if (!this.assertType(nextValue, 'number', key)) return;
                 this.setBlockSize(nextValue);
                 return;
-            case 'floorId':
+            case 'floorId': {
                 if (!this.assertType(nextValue, 'number', key)) return;
                 const binder = this.getExtends('floor-binder');
                 if (binder instanceof LayerGroupFloorBinder) {
                     binder.bindFloor(nextValue);
                 }
                 return;
+            }
             case 'camera':
                 if (!this.assertType(nextValue, Camera, key)) return;
                 this.camera = nextValue;
@@ -1376,7 +1363,7 @@ export class Layer extends Container<ELayerEvent> {
         // 删除原始位置的图块
         this.putRenderData([0], 1, fx, fy);
 
-        let nowZ = fy;
+        const nowZ = fy;
         const startTime = Date.now();
         return new Promise<void>(resolve => {
             this.delegateTicker(
@@ -1423,7 +1410,7 @@ export class Layer extends Container<ELayerEvent> {
         time: number,
         relative: boolean = true
     ) {
-        let nowZ = y;
+        const nowZ = y;
         const startTime = Date.now();
         return new Promise<void>(resolve => {
             this.delegateTicker(
@@ -1459,7 +1446,7 @@ export class Layer extends Container<ELayerEvent> {
         parentComponent?: ComponentInternalInstance | null
     ): void {
         switch (key) {
-            case 'layer':
+            case 'layer': {
                 if (!this.assertType(nextValue, 'string', key)) return;
                 const parent = this.parent;
                 if (parent instanceof LayerGroup) {
@@ -1471,6 +1458,7 @@ export class Layer extends Container<ELayerEvent> {
                 }
                 this.update();
                 return;
+            }
             case 'cellSize':
                 if (!this.assertType(nextValue, 'number', key)) return;
                 this.setCellSize(nextValue);

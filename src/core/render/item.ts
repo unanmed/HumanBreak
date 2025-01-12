@@ -140,8 +140,6 @@ interface IRenderVueSupport {
 }
 
 export interface ERenderItemEvent {
-    beforeUpdate: [item?: RenderItem];
-    afterUpdate: [item?: RenderItem];
     beforeRender: [transform: Transform];
     afterRender: [transform: Transform];
     destroy: [];
@@ -344,7 +342,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
             canvas.ctx.translate(ax, ay);
             this.render(canvas, tran);
         }
-        canvas.ctx.restore();
+        ctx.restore();
         this.emit('afterRender', transform);
     }
 
@@ -389,6 +387,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      * 获取当前元素的绝对位置（不建议使用，因为应当很少会有获取绝对位置的需求）
      */
     getAbsolutePosition(): LocArr {
+        if (this.type === 'absolute') return [0, 0];
         const { x, y } = this.transform;
         if (!this.parent) return [x, y];
         else {
@@ -400,13 +399,15 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     setAnchor(x: number, y: number): void {
         this.anchorX = x;
         this.anchorY = y;
+        this.update();
     }
 
-    update(item: RenderItem<any> = this, force: boolean = false): void {
-        if ((this.needUpdate || this.hidden) && !force) return;
+    update(item: RenderItem<any> = this): void {
+        if (this.needUpdate) return;
         this.needUpdate = true;
         this.cacheDirty = true;
-        this.parent?.update(item, force);
+        if (this.hidden) return;
+        this.parent?.update(item);
     }
 
     setHD(hd: boolean): void {
@@ -475,7 +476,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     hide() {
         if (this.hidden) return;
         this.hidden = true;
-        this.update(this, true);
+        this.update(this);
     }
 
     /**
@@ -484,13 +485,13 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     show() {
         if (!this.hidden) return;
         this.hidden = false;
-        this.refreshAllChildren(true);
+        this.refreshAllChildren();
     }
 
     /**
      * 刷新所有子元素
      */
-    refreshAllChildren(force: boolean = false) {
+    refreshAllChildren() {
         if (this.children.size > 0) {
             const stack: RenderItem[] = [this];
             while (stack.length > 0) {
@@ -500,7 +501,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
                 item.children.forEach(v => stack.push(v));
             }
         }
-        this.update(this, force);
+        this.update(this);
     }
 
     /**
@@ -523,6 +524,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
 
     /**
      * 从渲染树中移除这个节点
+     * @returns 是否移除成功
      */
     remove(): boolean {
         if (!this.parent) return false;
