@@ -289,7 +289,7 @@ export class Icon extends RenderItem<EIconEvent> implements IAnimateFrame {
         const renderable = texture.getRenderable(num);
 
         if (!renderable) {
-            logger.warn(42, num.toString());
+            logger.warn(43, num.toString());
             return;
         } else {
             this.icon = num;
