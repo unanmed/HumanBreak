@@ -183,6 +183,6 @@ export interface IconProps extends BaseProps {
 }
 
 export interface WinskinProps extends BaseProps {
-    image: SizedCanvasImageSource;
-    borderSize: number;
+    image: ImageIds;
+    borderSize?: number;
 }

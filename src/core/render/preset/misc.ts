@@ -278,7 +278,7 @@ export class Icon extends RenderItem<EIconEvent> implements IAnimateFrame {
             if (isNil(this.pendingIcon)) {
                 loading.once('loaded', () => {
                     this.setIconRenderable(this.pendingIcon ?? 0);
-                    this.pendingIcon = void 0;
+                    delete this.pendingIcon;
                 });
             }
             this.pendingIcon = num;
@@ -345,6 +345,8 @@ export class Winskin extends RenderItem<EWinskinEvent> {
     image: SizedCanvasImageSource;
     /** 边框宽度 */
     borderSize: number = 32;
+
+    private pendingImage?: ImageIds;
 
     constructor(
         image: SizedCanvasImageSource,
@@ -508,6 +510,29 @@ export class Winskin extends RenderItem<EWinskinEvent> {
     }
 
     /**
+     * 通过图片名称设置winskin
+     * @param name 图片名称
+     */
+    setImageByName(name: ImageIds) {
+        const loading = Mota.require('var', 'loading');
+        if (loading.loaded) {
+            const image = core.material.images.images[name];
+            this.setImage(image);
+        } else {
+            if (isNil(this.pendingImage)) {
+                loading.once('loaded', () => {
+                    const id = this.pendingImage;
+                    if (!id) return;
+                    const image = core.material.images.images[id];
+                    this.setImage(image);
+                    delete this.pendingImage;
+                });
+            }
+            this.pendingImage = name;
+        }
+    }
+
+    /**
      * 设置边框大小
      * @param size 边框大小
      */
@@ -525,7 +550,8 @@ export class Winskin extends RenderItem<EWinskinEvent> {
     ): void {
         switch (key) {
             case 'image':
-                this.setImage(nextValue);
+                if (!this.assertType(nextValue, 'string', key)) return;
+                this.setImageByName(nextValue);
                 return;
             case 'borderSize':
                 if (!this.assertType(nextValue, 'number', key)) return;
