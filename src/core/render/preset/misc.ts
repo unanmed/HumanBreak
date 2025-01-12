@@ -217,9 +217,9 @@ export class Icon extends RenderItem<EIconEvent> implements IAnimateFrame {
     /** 图标id */
     icon: AllNumbers = 0;
     /** 帧数 */
-    frame: number = 0;
+    frame?: number = 0;
     /** 是否启用动画 */
-    animate: boolean = false;
+    animate?: boolean = false;
     /** 图标的渲染信息 */
     private renderable?: RenderableData | AutotileRenderable;
 
@@ -245,21 +245,13 @@ export class Icon extends RenderItem<EIconEvent> implements IAnimateFrame {
         } else {
             const [x1, y1, w1, h1] = renderable.render[frame];
             if (renderable.autotile) {
-                ctx.drawImage(
-                    renderable.image[0],
-                    x1,
-                    y1,
-                    w1,
-                    h1,
-                    0,
-                    0,
-                    cw,
-                    ch
-                );
+                const img = renderable.image[0];
+                ctx.drawImage(img, x1, y1, w1, h1, 0, 0, cw, ch);
             } else {
                 ctx.drawImage(renderable.image, x1, y1, w1, h1, 0, 0, cw, ch);
             }
-            this.update(this), renderEmits.addFramer(this);
+            this.update(this);
+            renderEmits.addFramer(this);
         }
     }
 
@@ -276,11 +268,15 @@ export class Icon extends RenderItem<EIconEvent> implements IAnimateFrame {
             return;
         } else {
             this.icon = num;
-            renderable.animate = 0;
-            this.renderable = renderable;
+
             this.frame = renderable.frame;
         }
         this.update();
+    }
+
+    destroy(): void {
+        renderEmits.removeFramer(this);
+        super.destroy();
     }
 
     /**

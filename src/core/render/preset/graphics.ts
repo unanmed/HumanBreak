@@ -196,11 +196,11 @@ export abstract class GraphicItemBase
         if (isNil(prevValue) && isNil(nextValue)) return;
         switch (key) {
             case 'fill':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'boolean', key)) return;
                 this.checkMode(GraphicModeProp.Fill, nextValue);
                 break;
             case 'stroke':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'boolean', key)) return;
                 this.checkMode(GraphicModeProp.Stroke, nextValue);
                 break;
             case 'strokeAndFill':
