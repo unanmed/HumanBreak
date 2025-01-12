@@ -211,6 +211,7 @@ class TextureCache extends EventEmitter<TextureCacheEvent> {
             // enemy48和npc48都应该视为大怪物
             if (cls === 'enemy48' || cls === 'npc48') {
                 const img = core.material.images[cls];
+                if (!img) return null;
                 // @ts-ignore
                 const line = icons[cls][id];
                 const w = 32;
@@ -234,6 +235,7 @@ class TextureCache extends EventEmitter<TextureCacheEvent> {
             }
             // 自动元件
             if (cls === 'autotile') {
+                if (!this.autotile) return null;
                 const auto = this.autotile[num as AllNumbersOf<'autotile'>];
                 const cell = 32;
                 const render: [number, number, number, number][] = [];
@@ -264,6 +266,7 @@ class TextureCache extends EventEmitter<TextureCacheEvent> {
                     core.material.images[
                         cls as Exclude<Cls, 'tileset' | 'autotile'>
                     ];
+                if (!image) return null;
                 const frame = core.getAnimateFrames(cls);
                 const cell = 32;
                 // @ts-ignore

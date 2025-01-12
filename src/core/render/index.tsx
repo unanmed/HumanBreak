@@ -69,6 +69,7 @@ Mota.require('var', 'loading').once('coreInit', () => {
                 </layer-group>
                 <Textbox id="main-textbox" {...mainTextboxProps}></Textbox>
                 <FloorChange id="floor-change" zIndex={50}></FloorChange>
+                <icon icon={13} animate></icon>
             </container>
         );
     });

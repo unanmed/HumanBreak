@@ -13,11 +13,15 @@ class GameLoading extends EventEmitter<GameLoadEvent> {
     private autotileLoaded: number = 0;
     private autotileNum?: number;
     private autotileListened: boolean = false;
+    loaded: boolean = false;
 
     constructor() {
         super();
-        this.on('coreInit', () => {
+        this.once('coreInit', () => {
             this.autotileNum = Object.keys(core.material.icons.autotile).length;
+        });
+        this.once('loaded', () => {
+            this.loaded = true;
         });
     }
 

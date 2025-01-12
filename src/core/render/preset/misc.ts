@@ -10,6 +10,8 @@ import { Transform } from '../transform';
 import { ElementNamespace, ComponentInternalInstance } from 'vue';
 import { AutotileRenderable, RenderableData } from '../cache';
 import { texture } from '../cache';
+import { isNil } from 'lodash-es';
+import { logger } from '@/core/common/logger';
 
 type CanvasStyle = string | CanvasGradient | CanvasPattern;
 
@@ -223,6 +225,14 @@ export class Icon extends RenderItem<EIconEvent> implements IAnimateFrame {
     /** 图标的渲染信息 */
     private renderable?: RenderableData | AutotileRenderable;
 
+    private pendingIcon?: AllNumbers;
+
+    constructor(type: RenderItemPosition, cache?: boolean, fall?: boolean) {
+        super(type, cache, fall);
+        this.setAntiAliasing(false);
+        this.setHD(false);
+    }
+
     protected render(
         canvas: MotaOffscreenCanvas2D,
         _transform: Transform
@@ -236,6 +246,7 @@ export class Icon extends RenderItem<EIconEvent> implements IAnimateFrame {
         const frame = this.animate
             ? RenderItem.animatedFrame % renderable.frame
             : 0;
+
         if (!this.animate) {
             if (renderable.autotile) {
                 ctx.drawImage(renderable.image[0], x, y, w, h, 0, 0, cw, ch);
@@ -250,8 +261,6 @@ export class Icon extends RenderItem<EIconEvent> implements IAnimateFrame {
             } else {
                 ctx.drawImage(renderable.image, x1, y1, w1, h1, 0, 0, cw, ch);
             }
-            this.update(this);
-            renderEmits.addFramer(this);
         }
     }
 
@@ -261,22 +270,33 @@ export class Icon extends RenderItem<EIconEvent> implements IAnimateFrame {
      */
     setIcon(id: AllIds | AllNumbers) {
         const num = typeof id === 'number' ? id : texture.idNumberMap[id];
+
+        const loading = Mota.require('var', 'loading');
+        if (loading.loaded) {
+            this.setIconRenderable(num);
+        } else {
+            if (isNil(this.pendingIcon)) {
+                loading.once('loaded', () => {
+                    this.setIconRenderable(this.pendingIcon ?? 0);
+                    this.pendingIcon = void 0;
+                });
+            }
+            this.pendingIcon = num;
+        }
+    }
+
+    private setIconRenderable(num: AllNumbers) {
         const renderable = texture.getRenderable(num);
 
         if (!renderable) {
-            //todo: logger.warn()
+            logger.warn(42, num.toString());
             return;
         } else {
             this.icon = num;
-
+            this.renderable = renderable;
             this.frame = renderable.frame;
         }
         this.update();
-    }
-
-    destroy(): void {
-        renderEmits.removeFramer(this);
-        super.destroy();
     }
 
     /**
@@ -284,6 +304,11 @@ export class Icon extends RenderItem<EIconEvent> implements IAnimateFrame {
      */
     updateFrameAnimate(): void {
         this.update(this);
+    }
+
+    destroy(): void {
+        renderEmits.removeFramer(this);
+        super.destroy();
     }
 
     patchProp(
@@ -300,6 +325,8 @@ export class Icon extends RenderItem<EIconEvent> implements IAnimateFrame {
             case 'animate':
                 if (!this.assertType(nextValue, 'boolean', key)) return;
                 this.animate = nextValue;
+                if (nextValue) renderEmits.addFramer(this);
+                else renderEmits.removeFramer(this);
                 this.update();
                 return;
             case 'frame':

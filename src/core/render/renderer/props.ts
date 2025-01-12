@@ -178,8 +178,8 @@ export interface RectRProps extends GraphicPropsBase {
 
 export interface IconProps extends BaseProps {
     icon: AllNumbers;
-    frame: number;
-    animate: boolean;
+    frame?: number;
+    animate?: boolean;
 }
 
 export interface WinskinProps extends BaseProps {
