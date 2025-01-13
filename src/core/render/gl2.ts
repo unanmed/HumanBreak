@@ -1531,7 +1531,7 @@ export class GL2Program extends EventEmitter<ShaderProgramEvent> {
     /**
      * 定义一个 attribute 常量，并存入本着色器程序的 attribute 常量映射，在 es 300 版本中叫做 in
      * @param attrib attribute 常量名
-     * @param type attribute 类型，可选 {@link Shader.Attrib1f} 至 {@link Shader.AttribI4uiv}
+     * @param type attribute 类型，可选 {@link GL2.ATTRIB_1f} 至 {@link GL2.ATTRIB_I4uiv}
      * @returns attribute 常量的操作对象，可用于设置其值
      */
     defineAttribute<T extends AttribType>(
