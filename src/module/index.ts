@@ -7,3 +7,7 @@ Mota.register('module', 'Weather', {
     WeatherController,
     RainWeather
 });
+
+export * from './weather';
+export * from './audio';
+export * from './loader';

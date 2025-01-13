@@ -23,6 +23,12 @@ export interface IStreamReader<T = any> {
     pump(data: Uint8Array | undefined, done: boolean): void;
 
     /**
+     * 当前对象被传递给加载流时执行的函数
+     * @param controller 传输流控制对象
+     */
+    piped(controller: IStreamController<T>): void;
+
+    /**
      * 开始流传输
      * @param stream 传输流对象
      * @param controller 传输流控制对象
@@ -50,6 +56,8 @@ export class StreamLoader
     /** 读取流对象 */
     private stream?: ReadableStream;
 
+    private loading: boolean = false;
+
     constructor(public readonly url: string) {
         super();
     }
@@ -64,6 +72,8 @@ export class StreamLoader
     }
 
     async start() {
+        if (this.loading) return;
+        this.loading = true;
         const response = await window.fetch(this.url);
         const stream = response.body;
         if (!stream) {
@@ -82,12 +92,14 @@ export class StreamLoader
             if (done) break;
         }
 
+        this.loading = false;
         this.target.forEach(v => v.end(true));
     }
 
     cancel(reason?: string) {
         if (!this.stream) return;
         this.stream.cancel(reason);
+        this.loading = false;
         this.target.forEach(v => v.end(false, reason));
     }
 }
