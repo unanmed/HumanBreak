@@ -187,8 +187,38 @@ export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
      * @param id 音频名称
      * @param when 从音频的哪个位置开始播放，单位秒
      */
-    play(id: string, when?: number) {
+    play(id: string, when: number = 0) {
         this.getRoute(id)?.play(when);
+    }
+
+    /**
+     * 暂停音频播放
+     * @param id 音频名称
+     * @returns 当音乐真正停止时兑现
+     */
+    pause(id: string) {
+        const route = this.getRoute(id);
+        if (!route) return Promise.resolve();
+        else return route.pause();
+    }
+
+    /**
+     * 停止音频播放
+     * @param id 音频名称
+     * @returns 当音乐真正停止时兑现
+     */
+    stop(id: string) {
+        const route = this.getRoute(id);
+        if (!route) return Promise.resolve();
+        else return route.stop();
+    }
+
+    /**
+     * 继续音频播放
+     * @param id 音频名称
+     */
+    resume(id: string) {
+        this.getRoute(id)?.resume();
     }
 
     /**
@@ -299,7 +329,7 @@ export class AudioRoute
      * 开始播放这个音频
      * @param when 从音频的什么时候开始播放，单位秒
      */
-    play(when?: number) {
+    play(when: number = 0) {
         if (this.source.playing) return;
         this.link();
         if (this.effectRoute.length > 0) {
@@ -430,3 +460,5 @@ export class AudioRoute
         this.effectRoute.forEach(v => v.end());
     }
 }
+
+export const audioPlayer = new AudioPlayer();

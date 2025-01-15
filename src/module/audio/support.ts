@@ -25,21 +25,21 @@ export function isAudioSupport(type: AudioType): boolean {
     }
 }
 
-const typeMap = new Map<string, string>([
-    ['ogg', 'audio/ogg; codecs="vorbis"'],
-    ['mp3', 'audio/mpeg'],
-    ['wav', 'audio/wav; codecs="1"'],
-    ['flac', 'audio/flac'],
-    ['opus', 'audio/ogg; codecs="opus"'],
-    ['aac', 'audio/aac']
+const typeMap = new Map<string, AudioType>([
+    ['ogg', AudioType.Ogg],
+    ['mp3', AudioType.Mp3],
+    ['wav', AudioType.Wav],
+    ['flac', AudioType.Flac],
+    ['opus', AudioType.Opus],
+    ['aac', AudioType.Aac]
 ]);
 
 /**
  * 根据文件名拓展猜测其类型
  * @param file 文件名
  */
-export function guessTypeByExt(file: string) {
-    const ext = /\.[a-zA-Z]$/.exec(file);
+export function guessTypeByExt(file: string): AudioType | '' {
+    const ext = /\.[a-zA-Z\d]+$/.exec(file);
     if (!ext?.[0]) return '';
     const type = ext[0].slice(1);
     return typeMap.get(type.toLocaleLowerCase()) ?? '';

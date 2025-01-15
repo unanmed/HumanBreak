@@ -82,6 +82,7 @@ export class StreamLoader
             return;
         }
         this.target.add(reader);
+        reader.piped(this);
         return this;
     }
 
@@ -98,25 +99,21 @@ export class StreamLoader
         this.stream = stream;
         const reader = response.body?.getReader();
         const targets = [...this.target];
-        try {
-            await Promise.all(
-                targets.map(v => v.start(stream, this, response))
-            );
+        // try {
+        await Promise.all(targets.map(v => v.start(stream, this, response)));
 
-            // 开始流传输
-            while (true) {
-                const { value, done } = await reader.read();
-                await Promise.all(
-                    targets.map(v => v.pump(value, done, response))
-                );
-                if (done) break;
-            }
-
-            this.loading = false;
-            targets.forEach(v => v.end(true));
-        } catch (e) {
-            logger.error(26, this.url, String(e));
+        // 开始流传输
+        while (true) {
+            const { value, done } = await reader.read();
+            await Promise.all(targets.map(v => v.pump(value, done, response)));
+            if (done) break;
         }
+
+        this.loading = false;
+        targets.forEach(v => v.end(true));
+        // } catch (e) {
+        //     logger.error(26, this.url, String(e));
+        // }
     }
 
     cancel(reason?: string) {

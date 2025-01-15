@@ -80,23 +80,25 @@ export interface IAudioDecoder {
      * 解码流数据
      * @param data 流数据
      */
-    decode(data: Uint8Array): Promise<IAudioDecodeData>;
+    decode(data: Uint8Array): Promise<IAudioDecodeData | undefined>;
 
     /**
      * 当音频解码完成后，会调用此函数，需要返回之前还未解析或未返回的音频数据。调用后，该解码器将不会被再次使用
      */
-    flush(): Promise<IAudioDecodeData>;
+    flush(): Promise<IAudioDecodeData | undefined>;
 }
 
-const fileSignatures: Map<string, AudioType> = new Map([
-    ['49 44 33', AudioType.Mp3],
-    ['4F 67 67 53', AudioType.Ogg],
-    ['52 49 46 46', AudioType.Wav],
-    ['66 4C 61 43', AudioType.Flac],
-    ['4F 70 75 73', AudioType.Opus],
-    ['FF F1', AudioType.Aac],
-    ['FF F9', AudioType.Aac]
-]);
+const fileSignatures: [AudioType, number[]][] = [
+    [AudioType.Mp3, [0x49, 0x44, 0x33]],
+    [AudioType.Ogg, [0x4f, 0x67, 0x67, 0x53]],
+    [AudioType.Wav, [52, 0x49, 0x46, 0x46]],
+    [AudioType.Flac, [0x66, 0x4c, 0x61, 0x43]],
+    [AudioType.Aac, [0xff, 0xf1]],
+    [AudioType.Aac, [0xff, 0xf9]]
+];
+const oggHeaders: [AudioType, number[]][] = [
+    [AudioType.Opus, [0x4f, 0x70, 0x75, 0x73, 0x48, 0x65, 0x61, 0x64]]
+];
 
 const mimeTypeMap: Record<AudioType, MimeType> = {
     [AudioType.Aac]: 'audio/aac',
@@ -112,7 +114,8 @@ function isOggPage(data: any): data is OggPage {
 }
 
 export class AudioStreamSource extends AudioSource implements IStreamReader {
-    static readonly decoderMap: Map<AudioType, IAudioDecoder> = new Map();
+    static readonly decoderMap: Map<AudioType, new () => IAudioDecoder> =
+        new Map();
     output: AudioBufferSourceNode;
 
     /** 音频数据 */
@@ -138,6 +141,8 @@ export class AudioStreamSource extends AudioSource implements IStreamReader {
 
     /** 开始播放时刻 */
     private lastStartTime: number = 0;
+    /** 上一次播放的缓存长度 */
+    private lastBufferSamples: number = 0;
 
     /** 是否已经获取到头文件 */
     private headerRecieved: boolean = false;
@@ -152,12 +157,14 @@ export class AudioStreamSource extends AudioSource implements IStreamReader {
     /** 缓存音频数据，每 bufferChunkSize 秒钟组成一个 Float32Array，用于流式解码 */
     private audioData: Float32Array[][] = [];
 
+    private errored: boolean = false;
+
     /**
      * 注册一个解码器
      * @param type 要注册的解码器允许解码的类型
      * @param decoder 解码器对象
      */
-    static registerDecoder(type: AudioType, decoder: IAudioDecoder) {
+    static registerDecoder(type: AudioType, decoder: new () => IAudioDecoder) {
         if (this.decoderMap.has(type)) {
             logger.warn(47, type);
             return;
@@ -184,42 +191,60 @@ export class AudioStreamSource extends AudioSource implements IStreamReader {
     }
 
     async pump(data: Uint8Array | undefined, done: boolean): Promise<void> {
-        if (!data) return;
+        if (!data || this.errored) return;
         if (!this.headerRecieved) {
-            // 检查头文件获取音频类型
-            const toCheck = [...data.slice(0, 16)];
-            const hexArray = toCheck.map(v => v.toString(16).padStart(2, '0'));
-            const hex = hexArray.join(' ');
-            for (const [key, value] of fileSignatures) {
-                if (hex.startsWith(key)) {
-                    this.audioType = value;
+            // 检查头文件获取音频类型，仅检查前256个字节
+            const toCheck = data.slice(0, 256);
+            for (const [type, value] of fileSignatures) {
+                if (value.every((v, i) => toCheck[i] === v)) {
+                    this.audioType = type;
                     break;
                 }
             }
+            if (this.audioType === AudioType.Ogg) {
+                // 如果是ogg的话，进一步判断是不是opus
+                for (const [key, value] of oggHeaders) {
+                    const has = toCheck.some((_, i) => {
+                        return value.every((v, ii) => toCheck[i + ii] === v);
+                    });
+                    if (has) {
+                        this.audioType = key;
+                        break;
+                    }
+                }
+            }
             if (!this.audioType) {
-                logger.error(25, hex);
+                logger.error(
+                    25,
+                    [...toCheck]
+                        .map(v => v.toString().padStart(2, '0'))
+                        .join(' ')
+                        .toUpperCase()
+                );
                 return;
             }
             // 创建解码器
-            const decoder = AudioStreamSource.decoderMap.get(this.audioType);
-            this.decoder = decoder;
-            if (!decoder) {
+            const Decoder = AudioStreamSource.decoderMap.get(this.audioType);
+            if (!Decoder) {
+                this.errored = true;
                 logger.error(24, this.audioType);
                 return Promise.reject(
                     `Cannot decode stream source type of '${this.audioType}', since there is no registered decoder for that type.`
                 );
             }
+            this.decoder = new Decoder();
             // 创建数据解析器
             const mime = mimeTypeMap[this.audioType];
             const parser = new CodecParser(mime);
             this.parser = parser;
-            await decoder.create();
+            await this.decoder.create();
             this.headerRecieved = true;
         }
 
         const decoder = this.decoder;
         const parser = this.parser;
         if (!decoder || !parser) {
+            this.errored = true;
             return Promise.reject(
                 'No parser or decoder attached in this AudioStreamSource'
             );
@@ -234,13 +259,13 @@ export class AudioStreamSource extends AudioSource implements IStreamReader {
      * 检查采样率，如果还未解析出采样率，那么将设置采样率，如果当前采样率与之前不同，那么发出警告
      */
     private checkSampleRate(info: (OggPage | CodecFrame)[]) {
-        const first = info[0];
-        if (first) {
-            const frame = isOggPage(first) ? first.codecFrames[0] : first;
+        for (const one of info) {
+            const frame = isOggPage(one) ? one.codecFrames[0] : one;
             if (frame) {
                 const rate = frame.header.sampleRate;
                 if (this.sampleRate === 0) {
                     this.sampleRate = rate;
+                    break;
                 } else {
                     if (rate !== this.sampleRate) {
                         logger.warn(48);
@@ -260,6 +285,7 @@ export class AudioStreamSource extends AudioSource implements IStreamReader {
     ) {
         // 解析音频数据
         const audioData = await decoder.decode(data);
+        if (!audioData) return;
         // @ts-expect-error 库类型声明错误
         const audioInfo = [...parser.parseChunk(data)] as (
             | OggPage
@@ -277,6 +303,7 @@ export class AudioStreamSource extends AudioSource implements IStreamReader {
      */
     private async decodeFlushData(decoder: IAudioDecoder, parser: CodecParser) {
         const audioData = await decoder.flush();
+        if (!audioData) return;
         // @ts-expect-error 库类型声明错误
         const audioInfo = [...parser.flush()] as (OggPage | CodecFrame)[];
 
@@ -303,23 +330,33 @@ export class AudioStreamSource extends AudioSource implements IStreamReader {
         const chunk = this.sampleRate * this.bufferChunkSize;
         const sampled = this.bufferedSamples;
         const pushIndex = Math.floor(sampled / chunk);
-        const bufferIndex = sampled % (this.sampleRate * chunk);
+        const bufferIndex = sampled % chunk;
         const dataLength = data.channelData[0].length;
-        const restLength = chunk - bufferIndex;
-        // 把数据放入缓存
-        for (let i = 0; i < channels; i++) {
-            const audioData = this.audioData[i];
-            if (!audioData[pushIndex]) {
-                audioData.push(new Float32Array(chunk * this.sampleRate));
+        let buffered = 0;
+        let nowIndex = pushIndex;
+        let toBuffer = bufferIndex;
+        while (buffered < dataLength) {
+            const rest = toBuffer !== 0 ? chunk - bufferIndex : chunk;
+
+            for (let i = 0; i < channels; i++) {
+                const audioData = this.audioData[i];
+                if (!audioData[nowIndex]) {
+                    audioData.push(new Float32Array(chunk));
+                }
+                const toPush = data.channelData[i].slice(
+                    buffered,
+                    buffered + rest
+                );
+
+                audioData[nowIndex].set(toPush, toBuffer);
             }
-            audioData[pushIndex].set(data.channelData[i], bufferIndex);
-            if (restLength < dataLength) {
-                const nextData = new Float32Array(chunk * this.sampleRate);
-                nextData.set(data.channelData[i].slice(restLength), 0);
-                audioData.push(nextData);
-            }
+            buffered += rest;
+            nowIndex++;
+            toBuffer = 0;
         }
-        this.buffered += info.reduce((prev, curr) => prev + curr.duration, 0);
+
+        this.buffered +=
+            info.reduce((prev, curr) => prev + curr.duration, 0) / 1000;
         this.bufferedSamples += info.reduce(
             (prev, curr) => prev + curr.samples,
             0
@@ -330,71 +367,112 @@ export class AudioStreamSource extends AudioSource implements IStreamReader {
      * 检查已缓冲内容，并在未开始播放时播放
      */
     private checkBufferedPlay() {
-        if (this.playing || this.loaded) return;
-        const played = this.ac.currentTime - this.lastStartTime;
+        if (this.playing || this.sampleRate === 0) return;
+        const played = this.lastBufferSamples / this.sampleRate;
         const dt = this.buffered - played;
+        if (this.loaded) {
+            this.playAudio(played);
+            return;
+        }
         if (dt < this.bufferPlayDuration) return;
+        console.log(played, this.lastBufferSamples, this.sampleRate);
+        this.lastBufferSamples = this.bufferedSamples;
         // 需要播放
+        this.mergeBuffers();
+        if (!this.buffer) return;
+        if (this.playing) this.output.stop();
+        this.createSourceNode(this.buffer);
+        this.output.loop = false;
+        this.output.start(0, played);
+        this.lastStartTime = this.ac.currentTime;
+        this.playing = true;
+        this.output.addEventListener('ended', () => {
+            this.playing = false;
+            this.checkBufferedPlay();
+        });
+    }
+
+    private mergeBuffers() {
         const buffer = this.ac.createBuffer(
             this.audioData.length,
             this.bufferedSamples,
             this.sampleRate
         );
-        this.buffer = buffer;
         const chunk = this.sampleRate * this.bufferChunkSize;
-        const bufferedChunks = Math.floor(this.buffered / chunk);
-        const restLength = this.buffered % chunk;
+        const bufferedChunks = Math.floor(this.bufferedSamples / chunk);
+        const restLength = this.bufferedSamples % chunk;
         for (let i = 0; i < this.audioData.length; i++) {
             const audio = this.audioData[i];
             const data = new Float32Array(this.bufferedSamples);
             for (let j = 0; j < bufferedChunks; j++) {
                 data.set(audio[j], chunk * j);
             }
-            if (restLength !== 0) data.set(audio[bufferedChunks], 0);
+            if (restLength !== 0) {
+                data.set(
+                    audio[bufferedChunks].slice(0, restLength),
+                    chunk * bufferedChunks
+                );
+            }
+
             buffer.copyToChannel(data, i, 0);
         }
-        this.createSourceNode(buffer);
-        this.output.start(played);
-        this.lastStartTime = this.ac.currentTime;
-        this.output.addEventListener('ended', () => {
-            this.checkBufferedPlay();
-        });
+        this.buffer = buffer;
     }
-
-    private mergeBuffers() {}
 
     async start() {
         delete this.buffer;
         this.headerRecieved = false;
         this.audioType = '';
+        this.errored = false;
+        this.buffered = 0;
+        this.sampleRate = 0;
+        this.bufferedSamples = 0;
+        this.duration = 0;
+        this.loaded = false;
+        if (this.playing) this.output.stop();
+        this.playing = false;
+        this.lastStartTime = this.ac.currentTime;
     }
 
     end(done: boolean, reason?: string): void {
-        if (done) {
+        if (done && this.buffer) {
             this.loaded = true;
             delete this.controller;
             this.mergeBuffers();
-            const played = this.ac.currentTime - this.lastStartTime;
-            this.output.stop();
-            this.play(played);
+            // const played = this.lastBufferSamples / this.sampleRate;
+            // this.playAudio(played);
+            this.duration = this.buffered;
+            this.audioData = [];
+            this.decoder?.destroy();
+            delete this.decoder;
+            delete this.parser;
         } else {
             logger.warn(44, reason ?? '');
         }
     }
 
+    private playAudio(when?: number) {
+        if (!this.buffer) return;
+        this.lastStartTime = this.ac.currentTime;
+        if (this.playing) this.output.stop();
+        this.emit('play');
+        this.createSourceNode(this.buffer);
+        this.output.start(0, when);
+        this.playing = true;
+        console.log(when);
+
+        this.output.addEventListener('ended', () => {
+            this.playing = false;
+            this.emit('end');
+            if (this.loop && !this.output.loop) this.play(0);
+        });
+    }
+
     play(when?: number): void {
-        if (this.playing) return;
+        if (this.playing || this.errored) return;
         if (this.loaded && this.buffer) {
             this.playing = true;
-            this.lastStartTime = this.ac.currentTime;
-            this.emit('play');
-            this.createSourceNode(this.buffer);
-            this.output.start(when);
-            this.output.addEventListener('ended', () => {
-                this.playing = false;
-                this.emit('end');
-                if (this.loop && !this.output.loop) this.play(0);
-            });
+            this.playAudio(when);
         } else {
             this.controller?.start();
         }
@@ -404,13 +482,16 @@ export class AudioStreamSource extends AudioSource implements IStreamReader {
         if (!this.target) return;
         const node = this.ac.createBufferSource();
         node.buffer = buffer;
+        if (this.playing) this.output.stop();
+        this.playing = false;
         this.output = node;
         node.connect(this.target.input);
         node.loop = this.loop;
     }
 
     stop(): number {
-        this.output.stop();
+        if (this.playing) this.output.stop();
+        this.playing = false;
         return this.ac.currentTime - this.lastStartTime;
     }
 
@@ -453,7 +534,7 @@ export class AudioElementSource extends AudioSource {
         this.audio.src = url;
     }
 
-    play(when: number): void {
+    play(when: number = 0): void {
         if (this.playing) return;
         this.audio.currentTime = when;
         this.audio.play();
@@ -510,7 +591,7 @@ export class AudioBufferSource extends AudioSource {
         this.lastStartTime = this.ac.currentTime;
         this.emit('play');
         this.createSourceNode(this.buffer);
-        this.output.start(when);
+        this.output.start(0, when);
         this.output.addEventListener('ended', () => {
             this.playing = false;
             this.emit('end');
