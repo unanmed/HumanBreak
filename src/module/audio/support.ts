@@ -2,11 +2,20 @@ const audio = new Audio();
 
 const supportMap = new Map<string, boolean>();
 
+export const enum AudioType {
+    Mp3 = 'audio/mpeg',
+    Wav = 'audio/wav; codecs="1"',
+    Flac = 'audio/flac',
+    Opus = 'audio/ogg; codecs="opus"',
+    Ogg = 'audio/ogg; codecs="vorbis"',
+    Aac = 'audio/aac'
+}
+
 /**
  * 检查一种音频类型是否能被播放
  * @param type 音频类型
  */
-export function isAudioSupport(type: string): boolean {
+export function isAudioSupport(type: AudioType): boolean {
     if (supportMap.has(type)) return supportMap.get(type)!;
     else {
         const support = audio.canPlayType(type);
@@ -22,7 +31,7 @@ const typeMap = new Map<string, string>([
     ['wav', 'audio/wav; codecs="1"'],
     ['flac', 'audio/flac'],
     ['opus', 'audio/ogg; codecs="opus"'],
-    ['acc', 'audio/acc']
+    ['aac', 'audio/aac']
 ]);
 
 /**
@@ -36,11 +45,11 @@ export function guessTypeByExt(file: string) {
     return typeMap.get(type.toLocaleLowerCase()) ?? '';
 }
 
-isAudioSupport('audio/ogg; codecs="vorbis"');
-isAudioSupport('audio/mpeg');
-isAudioSupport('audio/wav; codecs="1"');
-isAudioSupport('audio/flac');
-isAudioSupport('audio/ogg; codecs="opus"');
-isAudioSupport('audio/acc');
+isAudioSupport(AudioType.Ogg);
+isAudioSupport(AudioType.Mp3);
+isAudioSupport(AudioType.Wav);
+isAudioSupport(AudioType.Flac);
+isAudioSupport(AudioType.Opus);
+isAudioSupport(AudioType.Aac);
 
 console.log(supportMap);

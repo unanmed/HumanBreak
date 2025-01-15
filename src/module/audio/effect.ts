@@ -192,8 +192,8 @@ export class DelayEffect extends AudioEffect {
 }
 
 export class EchoEffect extends AudioEffect {
-    output: DelayNode;
-    input: DelayNode;
+    output: GainNode;
+    input: GainNode;
 
     /** 延迟节点 */
     private readonly delay: DelayNode;
@@ -207,8 +207,6 @@ export class EchoEffect extends AudioEffect {
     constructor(ac: AudioContext) {
         super(ac);
         const delay = ac.createDelay();
-        this.input = delay;
-        this.output = delay;
         const gain = ac.createGain();
         gain.gain.value = 0.5;
         delay.delayTime.value = 0.05;
@@ -216,6 +214,8 @@ export class EchoEffect extends AudioEffect {
         gain.connect(delay);
         this.delay = delay;
         this.gainNode = gain;
+        this.input = gain;
+        this.output = gain;
     }
 
     /**

@@ -100,6 +100,11 @@ export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
 
     /**
      * 创建一个修改音量的效果器
+     * ```txt
+     *             |----------|
+     * Input ----> | GainNode | ----> Output
+     *             |----------|
+     * ```
      */
     createVolumeEffect() {
         return new VolumeEffect(this.ac);
@@ -107,6 +112,11 @@ export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
 
     /**
      * 创建一个立体声效果器
+     * ```txt
+     *             |------------|
+     * Input ----> | PannerNode | ----> Output
+     *             |------------|
+     * ```
      */
     createStereoEffect() {
         return new StereoEffect(this.ac);
@@ -114,6 +124,15 @@ export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
 
     /**
      * 创建一个修改单个声道音量的效果器
+     * ```txt
+     *                                  |----------|
+     *                               -> | GainNode | \
+     *             |--------------| /   |----------|  -> |------------|
+     * Input ----> | SplitterNode |        ......        | MergerNode | ----> Output
+     *             |--------------| \   |----------|  -> |------------|
+     *                               -> | GainNode | /
+     *                                  |----------|
+     * ```
      */
     createChannelVolumeEffect() {
         return new ChannelVolumeEffect(this.ac);
@@ -121,6 +140,15 @@ export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
 
     /**
      * 创建一个回声效果器
+     * ```txt
+     *             |----------|
+     * Input ----> | GainNode | ----> Output
+     *        ^    |----------|   |
+     *        |                   |
+     *        |   |------------|  ↓
+     *        |-- | Delay Node | <--
+     *            |------------|
+     * ```
      */
     createEchoEffect() {
         return new EchoEffect(this.ac);

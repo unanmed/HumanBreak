@@ -32,6 +32,9 @@ importers:
       chart.js:
         specifier: ^4.4.3
         version: 4.4.3
+      codec-parser:
+        specifier: ^2.5.0
+        version: 2.5.0
       eventemitter3:
         specifier: ^5.0.1
         version: 5.0.1

@@ -23,6 +23,9 @@
         "21": "Incorrect render prop type is delivered. key: '$1', expected type: '$2', delivered type: '$3'",
         "22": "Incorrect props for custom tag. Please ensure you have delivered 'item' prop and other required props.",
         "23": "Cannot get reader when fetching '$1'.",
+        "24": "Cannot decode stream source type of '$1', since there is no registered decoder for that type.",
+        "25": "Unknown audio type. Header: '$1'",
+        "26": "Uncaught error when fetching stream data from '$1'. Error info: $2.",
         "1101": "Shadow extension needs 'floor-hero' extension as dependency.",
         "1201": "Floor-damage extension needs 'floor-binder' extension as dependency.",
         "1301": "Portal extension need 'floor-binder' extension as dependency.",
@@ -74,6 +77,9 @@
         "43": "Cannot set icon of '$1', since it does not exists. Please ensure you have delivered correct icon id or number.",
         "44": "Unexpected end when loading stream audio, reason: '$1'",
         "45": "Audio route with id of '$1' has already existed. New route will override old route.",
+        "46": "Cannot pipe new StreamReader object when stream is loading.",
+        "47": "Audio stream decoder for audio type '$1' has already existed.",
+        "48": "Sample rate in stream audio must be constant.",
         "1001": "Item-detail extension needs 'floor-binder' and 'floor-damage' extension as dependency.",
         "1101": "Cannot add new effect to point effect instance, for there's no more reserve space for it. Please increase the max count of the instance."
     }

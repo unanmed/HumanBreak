@@ -2,6 +2,8 @@ import { logger } from '@/core/common/logger';
 import EventEmitter from 'eventemitter3';
 
 export interface IStreamController<T = void> {
+    readonly loading: boolean;
+
     /**
      * 开始流传输
      */
@@ -20,7 +22,11 @@ export interface IStreamReader<T = any> {
      * @param data 传入的字节流数据，只包含本分块的内容
      * @param done 是否传输完成
      */
-    pump(data: Uint8Array | undefined, done: boolean): void;
+    pump(
+        data: Uint8Array | undefined,
+        done: boolean,
+        response: Response
+    ): Promise<void>;
 
     /**
      * 当前对象被传递给加载流时执行的函数
@@ -33,7 +39,11 @@ export interface IStreamReader<T = any> {
      * @param stream 传输流对象
      * @param controller 传输流控制对象
      */
-    start(stream: ReadableStream, controller: IStreamController<T>): void;
+    start(
+        stream: ReadableStream,
+        controller: IStreamController<T>,
+        response: Response
+    ): Promise<void>;
 
     /**
      * 结束流传输
@@ -56,7 +66,7 @@ export class StreamLoader
     /** 读取流对象 */
     private stream?: ReadableStream;
 
-    private loading: boolean = false;
+    loading: boolean = false;
 
     constructor(public readonly url: string) {
         super();
@@ -67,6 +77,10 @@ export class StreamLoader
      * @param reader 字节流读取对象
      */
     pipe(reader: IStreamReader) {
+        if (this.loading) {
+            logger.warn(46);
+            return;
+        }
         this.target.add(reader);
         return this;
     }
@@ -83,17 +97,26 @@ export class StreamLoader
         // 获取读取器
         this.stream = stream;
         const reader = response.body?.getReader();
-        this.target.forEach(v => v.start(stream, this));
+        const targets = [...this.target];
+        try {
+            await Promise.all(
+                targets.map(v => v.start(stream, this, response))
+            );
 
-        // 开始流传输
-        while (true) {
-            const { value, done } = await reader.read();
-            this.target.forEach(v => v.pump(value, done));
-            if (done) break;
+            // 开始流传输
+            while (true) {
+                const { value, done } = await reader.read();
+                await Promise.all(
+                    targets.map(v => v.pump(value, done, response))
+                );
+                if (done) break;
+            }
+
+            this.loading = false;
+            targets.forEach(v => v.end(true));
+        } catch (e) {
+            logger.error(26, this.url, String(e));
         }
-
-        this.loading = false;
-        this.target.forEach(v => v.end(true));
     }
 
     cancel(reason?: string) {
