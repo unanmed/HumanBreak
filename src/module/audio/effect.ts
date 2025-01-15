@@ -83,7 +83,11 @@ export class StereoEffect extends AudioEffect {
      * @param y 朝向y坐标
      * @param z 朝向z坐标
      */
-    setOrientation(x: number, y: number, z: number) {}
+    setOrientation(x: number, y: number, z: number) {
+        this.output.orientationX.value = x;
+        this.output.orientationY.value = y;
+        this.output.orientationZ.value = z;
+    }
 
     /**
      * 设置音频位置，x正方形水平向右，y正方形垂直于地面向上，z正方向垂直屏幕远离用户
@@ -91,7 +95,11 @@ export class StereoEffect extends AudioEffect {
      * @param y 位置y坐标
      * @param z 位置z坐标
      */
-    setPosition(x: number, y: number, z: number) {}
+    setPosition(x: number, y: number, z: number) {
+        this.output.positionX.value = x;
+        this.output.positionY.value = y;
+        this.output.positionZ.value = z;
+    }
 
     end(): void {}
 
@@ -113,12 +121,16 @@ export class VolumeEffect extends AudioEffect {
      * 设置音量大小
      * @param volume 音量大小
      */
-    setVolume(volume: number) {}
+    setVolume(volume: number) {
+        this.output.gain.value = volume;
+    }
 
     /**
      * 获取音量大小
      */
-    getVolume(): number {}
+    getVolume(): number {
+        return this.output.gain.value;
+    }
 
     end(): void {}
 
@@ -148,16 +160,22 @@ export class ChannelVolumeEffect extends AudioEffect {
 
     /**
      * 设置某个声道的音量大小
-     * @param channel 要设置的声道
+     * @param channel 要设置的声道，可填0-5
      * @param volume 这个声道的音量大小
      */
-    setVolume(channel: number, volume: number) {}
+    setVolume(channel: number, volume: number) {
+        if (!this.gain[channel]) return;
+        this.gain[channel].gain.value = volume;
+    }
 
     /**
-     * 获取某个声道的音量大小
+     * 获取某个声道的音量大小，可填0-5
      * @param channel 要获取的声道
      */
-    getVolume(channel: number): number {}
+    getVolume(channel: number): number {
+        if (!this.gain[channel]) return 0;
+        return this.gain[channel].gain.value;
+    }
 
     end(): void {}
 
@@ -179,12 +197,16 @@ export class DelayEffect extends AudioEffect {
      * 设置延迟时长
      * @param delay 延迟时长，单位秒
      */
-    setDelay(delay: number) {}
+    setDelay(delay: number) {
+        this.output.delayTime.value = delay;
+    }
 
     /**
      * 获取延迟时长
      */
-    getDelay() {}
+    getDelay() {
+        return this.output.delayTime.value;
+    }
 
     end(): void {}
 

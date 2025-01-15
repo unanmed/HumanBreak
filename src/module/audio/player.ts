@@ -8,6 +8,7 @@ import {
 import {
     AudioEffect,
     ChannelVolumeEffect,
+    DelayEffect,
     EchoEffect,
     IAudioOutput,
     StereoEffect,
@@ -136,6 +137,16 @@ export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
      */
     createChannelVolumeEffect() {
         return new ChannelVolumeEffect(this.ac);
+    }
+
+    /**
+     * 创建一个延迟效果器
+     *             |-----------|
+     * Input ----> | DelayNode | ----> Output
+     *             |-----------|
+     */
+    createDelay() {
+        return new DelayEffect(this.ac);
     }
 
     /**
