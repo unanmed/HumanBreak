@@ -1,12 +1,12 @@
-import { OggVorbisDecoder } from '@wasm-audio-decoders/ogg-vorbis';
+import { OggVorbisDecoderWebWorker } from '@wasm-audio-decoders/ogg-vorbis';
 import { IAudioDecodeData, IAudioDecoder } from './source';
-import { OggOpusDecoder } from 'ogg-opus-decoder';
+import { OggOpusDecoderWebWorker } from 'ogg-opus-decoder';
 
 export class VorbisDecoder implements IAudioDecoder {
-    decoder?: OggVorbisDecoder;
+    decoder?: OggVorbisDecoderWebWorker;
 
     async create(): Promise<void> {
-        this.decoder = new OggVorbisDecoder();
+        this.decoder = new OggVorbisDecoderWebWorker();
         await this.decoder.ready;
     }
 
@@ -19,15 +19,15 @@ export class VorbisDecoder implements IAudioDecoder {
     }
 
     async flush(): Promise<IAudioDecodeData | undefined> {
-        return await this.decoder?.flush();
+        return this.decoder?.flush();
     }
 }
 
 export class OpusDecoder implements IAudioDecoder {
-    decoder?: OggOpusDecoder;
+    decoder?: OggOpusDecoderWebWorker;
 
     async create(): Promise<void> {
-        this.decoder = new OggOpusDecoder();
+        this.decoder = new OggOpusDecoderWebWorker();
         await this.decoder.ready;
     }
 

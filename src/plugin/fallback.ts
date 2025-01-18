@@ -86,7 +86,7 @@ class Change extends RenderItem {
 
     protected render(
         canvas: MotaOffscreenCanvas2D,
-        transform: Transform
+        _transform: Transform
     ): void {
         if (this.backAlpha === 0) return;
         const ctx = canvas.ctx;

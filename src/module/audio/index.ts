@@ -1,4 +1,4 @@
-import { loadAllBgm } from './bgmLoader';
+import { loadAllBgm } from './bgm';
 import { OpusDecoder, VorbisDecoder } from './decoder';
 import { AudioStreamSource } from './source';
 import { AudioType } from './support';
@@ -11,4 +11,5 @@ export * from './support';
 export * from './effect';
 export * from './player';
 export * from './source';
-export * from './bgmLoader';
+export * from './bgm';
+export * from './decoder';

@@ -1,4 +1,3 @@
-import { BgmController, bgm } from './audio/bgm';
 import { SoundController, SoundEffect, sound } from './audio/sound';
 import { Focus, GameUi, UiController } from './main/custom/ui';
 import { GameStorage } from './main/storage';
@@ -11,7 +10,7 @@ import {
     mainSetting,
     settingStorage
 } from './main/setting';
-import { KeyCode, ScanCode } from '@/plugin/keyCodes';
+import { KeyCode } from '@/plugin/keyCodes';
 import { status } from '@/plugin/ui/statusBar';
 import '@/plugin';
 import './package';
@@ -80,7 +79,6 @@ import { TextboxStore } from './render/index';
 
 // ----- 类注册
 Mota.register('class', 'AudioPlayer', AudioPlayer);
-Mota.register('class', 'BgmController', BgmController);
 Mota.register('class', 'CustomToolbar', CustomToolbar);
 Mota.register('class', 'Focus', Focus);
 Mota.register('class', 'GameStorage', GameStorage);
@@ -106,7 +104,6 @@ Mota.register('fn', 'removeAnimate', removeAnimate);
 // ----- 变量注册
 Mota.register('var', 'mainUi', mainUi);
 Mota.register('var', 'fixedUi', fixedUi);
-Mota.register('var', 'bgm', bgm);
 Mota.register('var', 'sound', sound);
 Mota.register('var', 'gameKey', gameKey);
 Mota.register('var', 'mainSetting', mainSetting);

@@ -3,13 +3,13 @@ import { EventEmitter } from '../common/eventEmitter';
 import { GameStorage } from './storage';
 import { has, triggerFullscreen } from '@/plugin/utils';
 import { createSettingComponents } from './init/settings';
-import { bgm } from '../audio/bgm';
 import { SoundEffect } from '../audio/sound';
 import settingsText from '@/data/settings.json';
 import { isMobile } from '@/plugin/use';
 import { fontSize } from '@/plugin/ui/statusBar';
 import { CustomToolbar } from './custom/toolbar';
 import { fixedUi } from './init/ui';
+import { bgmController } from '@/module';
 
 export interface SettingComponentProps {
     item: MotaSettingItem;
@@ -347,7 +347,7 @@ const root = document.getElementById('root') as HTMLDivElement;
 function handleScreenSetting<T extends number | boolean>(
     key: string,
     n: T,
-    o: T
+    _o: T
 ) {
     if (key === 'fullscreen') {
         // 全屏
@@ -369,7 +369,7 @@ function handleScreenSetting<T extends number | boolean>(
 function handleActionSetting<T extends number | boolean>(
     key: string,
     n: T,
-    o: T
+    _o: T
 ) {
     if (key === 'autoSkill') {
         // 自动切换技能
@@ -382,13 +382,13 @@ function handleActionSetting<T extends number | boolean>(
 function handleAudioSetting<T extends number | boolean>(
     key: string,
     n: T,
-    o: T
+    _o: T
 ) {
-    if (key === 'bgmEnabled') {
-        bgm.disable = !n;
-        if (core.isPlaying()) core.checkBgm();
+    if (key === 'bgmEnabled') {      
+        bgmController.setEnabled(n as boolean);
+        core.checkBgm();
     } else if (key === 'bgmVolume') {
-        bgm.volume = (n as number) / 100;
+        bgmController.setVolume((n as number) / 100);
     } else if (key === 'soundEnabled') {
         SoundEffect.disable = !n;
     } else if (key === 'soundVolume') {

@@ -526,17 +526,20 @@ control.prototype.setHeroMoveInterval = function (callback) {
     //     render.move(true);
     // });
 
-    core.interval.heroMoveInterval = window.setInterval(function () {
-        // render.offset += toAdd * 4;
-        core.status.heroMoving += toAdd;
-        if (core.status.heroMoving >= 8) {
-            clearInterval(core.interval.heroMoveInterval);
-            core.status.heroMoving = 0;
-            // render.offset = 0;
-            // render.move(false);
-            if (callback) callback();
-        }
-    }, ((core.values.moveSpeed / 8) * toAdd) / core.status.replay.speed);
+    core.interval.heroMoveInterval = window.setInterval(
+        function () {
+            // render.offset += toAdd * 4;
+            core.status.heroMoving += toAdd;
+            if (core.status.heroMoving >= 8) {
+                clearInterval(core.interval.heroMoveInterval);
+                core.status.heroMoving = 0;
+                // render.offset = 0;
+                // render.move(false);
+                if (callback) callback();
+            }
+        },
+        ((core.values.moveSpeed / 8) * toAdd) / core.status.replay.speed
+    );
 };
 
 ////// 每移动一格后执行的事件 //////
@@ -2988,25 +2991,23 @@ control.prototype.screenFlash = function (
 // todo: deprecate playBgm, pauseBgm, resumeBgm, triggerBgm
 ////// 播放背景音乐 //////
 control.prototype.playBgm = function (bgm, startTime) {
-    bgm = core.getMappedName(bgm);
-    if (main.mode !== 'play') return;
-    Mota.require('var', 'bgm').changeTo(bgm, startTime);
+    // see src/module/fallback/audio.ts
 };
 
 ////// 暂停背景音乐的播放 //////
 control.prototype.pauseBgm = function () {
-    if (main.mode !== 'play') return;
-    Mota.require('var', 'bgm').pause();
+    // see src/module/fallback/audio.ts
 };
 
 ////// 恢复背景音乐的播放 //////
 control.prototype.resumeBgm = function (resumeTime) {
-    if (main.mode !== 'play') return;
-    Mota.require('var', 'bgm').resume();
+    // see src/module/fallback/audio.ts
 };
 
 ////// 更改背景音乐的播放 //////
 control.prototype.triggerBgm = function () {
+    // see src/module/fallback/audio.ts
+    return;
     if (main.mode !== 'play') return;
     const bgm = Mota.require('var', 'bgm');
     bgm.disable = !bgm.disable;
@@ -3036,6 +3037,8 @@ control.prototype.getPlayingSounds = function (name) {
 
 ////// 检查bgm状态 //////
 control.prototype.checkBgm = function () {
+    // see src/module/fallback/audio.ts
+    return;
     const bgm = Mota.require('var', 'bgm');
     if (bgm.disable) {
         bgm.pause();

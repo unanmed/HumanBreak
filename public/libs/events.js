@@ -696,12 +696,12 @@ events.prototype.getItem = function (id, num, x, y, isGentleClick, callback) {
                     (id.endsWith('Key')
                         ? '（钥匙类道具，遇到对应的门时自动打开）'
                         : itemCls == 'tools'
-                        ? '（消耗类道具，请按T在道具栏使用）'
-                        : itemCls == 'constants'
-                        ? '（永久类道具，请按T在道具栏使用）'
-                        : itemCls == 'equips'
-                        ? '（装备类道具，请按Q在装备栏进行装备）'
-                        : '')
+                          ? '（消耗类道具，请按T在道具栏使用）'
+                          : itemCls == 'constants'
+                            ? '（永久类道具，请按T在道具栏使用）'
+                            : itemCls == 'equips'
+                              ? '（装备类道具，请按Q在装备栏进行装备）'
+                              : '')
             );
         }
         itemHint.push(id);

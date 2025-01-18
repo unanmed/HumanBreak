@@ -194,6 +194,14 @@ export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
     }
 
     /**
+     * 移除一个音频播放路由
+     * @param id 要移除的播放路由的名称
+     */
+    removeRoute(id: string) {
+        this.audioRoutes.delete(id);
+    }
+
+    /**
      * 播放音频
      * @param id 音频名称
      * @param when 从音频的哪个位置开始播放，单位秒
@@ -272,6 +280,14 @@ export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
     }
 }
 
+export const enum AudioStatus {
+    Playing,
+    Pausing,
+    Paused,
+    Stoping,
+    Stoped
+}
+
 type AudioStartHook = (route: AudioRoute) => void;
 type AudioEndHook = (time: number, route: AudioRoute) => void;
 
@@ -295,10 +311,17 @@ export class AudioRoute
     /** 结束时长，当音频暂停或停止时，会经过这么长时间之后才真正终止播放，期间可以做音频淡入淡出等效果 */
     endTime: number = 0;
 
-    /** 是否已暂停，注意停止播放是不算暂停的 */
-    paused: boolean = false;
+    /** 当前播放状态 */
+    status: AudioStatus = AudioStatus.Stoped;
     /** 暂停时刻 */
     private pauseTime: number = 0;
+
+    private shouldStop: boolean = false;
+    /**
+     * 每次暂停或停止时自增，用于判断当前正在处理的情况。
+     * 假如暂停后很快播放，然后很快暂停，那么需要根据这个来判断实际是否应该执行暂停后操作
+     */
+    stopIdentifier: number = 0;
 
     private audioStartHook?: AudioStartHook;
     private audioEndHook?: AudioEndHook;
@@ -341,16 +364,18 @@ export class AudioRoute
      * @param when 从音频的什么时候开始播放，单位秒
      */
     play(when: number = 0) {
-        if (this.source.playing) return;
+        if (this.status === AudioStatus.Playing) return;
         this.link();
         if (this.effectRoute.length > 0) {
             const first = this.effectRoute[0];
             this.source.connect(first);
+            const last = this.effectRoute.at(-1)!;
+            last.connect({ input: this.player.getDestination() });
         } else {
             this.source.connect({ input: this.player.getDestination() });
         }
         this.source.play(when);
-        this.paused = false;
+        this.status = AudioStatus.Playing;
         this.pauseTime = 0;
         this.audioStartHook?.(this);
         this.startAllEffect();
@@ -361,29 +386,55 @@ export class AudioRoute
      * 暂停音频播放
      */
     async pause() {
-        if (this.paused || !this.source.playing) return;
+        if (this.status !== AudioStatus.Playing) return;
+        this.status = AudioStatus.Pausing;
+        this.stopIdentifier++;
+        const identifier = this.stopIdentifier;
         if (this.audioEndHook) {
             this.audioEndHook(this.endTime, this);
             await sleep(this.endTime);
         }
+        if (
+            this.status !== AudioStatus.Pausing ||
+            this.stopIdentifier !== identifier
+        ) {
+            return;
+        }
         const time = this.source.stop();
         this.pauseTime = time;
-        this.paused = true;
-        this.endAllEffect();
-        this.emit('pause');
+        if (this.shouldStop) {
+            this.status = AudioStatus.Stoped;
+            this.endAllEffect();
+            this.emit('stop');
+            this.shouldStop = false;
+        } else {
+            this.status = AudioStatus.Paused;
+            this.endAllEffect();
+            this.emit('pause');
+        }
     }
 
     /**
      * 继续音频播放
      */
     resume() {
-        if (this.source.playing) return;
-        if (this.paused) {
+        if (this.status === AudioStatus.Playing) return;
+        if (
+            this.status === AudioStatus.Pausing ||
+            this.status === AudioStatus.Stoping
+        ) {
+            console.log(1);
+
+            this.audioStartHook?.(this);
+            this.emit('resume');
+            return;
+        }
+        if (this.status === AudioStatus.Paused) {
             this.play(this.pauseTime);
         } else {
             this.play(0);
         }
-        this.paused = false;
+        this.status = AudioStatus.Playing;
         this.pauseTime = 0;
         this.audioStartHook?.(this);
         this.startAllEffect();
@@ -394,13 +445,27 @@ export class AudioRoute
      * 停止音频播放
      */
     async stop() {
-        if (!this.source.playing) return;
+        if (this.status !== AudioStatus.Playing) {
+            if (this.status === AudioStatus.Pausing) {
+                this.shouldStop = true;
+            }
+            return;
+        }
+        this.status = AudioStatus.Stoping;
+        this.stopIdentifier++;
+        const identifier = this.stopIdentifier;
         if (this.audioEndHook) {
             this.audioEndHook(this.endTime, this);
             await sleep(this.endTime);
         }
+        if (
+            this.status !== AudioStatus.Stoping ||
+            this.stopIdentifier !== identifier
+        ) {
+            return;
+        }
         this.source.stop();
-        this.paused = false;
+        this.status = AudioStatus.Stoped;
         this.pauseTime = 0;
         this.endAllEffect();
         this.emit('stop');
@@ -473,3 +538,4 @@ export class AudioRoute
 }
 
 export const audioPlayer = new AudioPlayer();
+// window.audioPlayer = audioPlayer;

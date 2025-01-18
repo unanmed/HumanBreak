@@ -1,5 +1,4 @@
 import type { AudioPlayer } from '@/core/audio/audio';
-import type { BgmController } from '@/core/audio/bgm';
 import type { SoundController, SoundEffect } from '@/core/audio/sound';
 import type { Disposable } from '@/core/common/disposable';
 import type {
@@ -61,7 +60,6 @@ interface ClassInterface {
     AudioPlayer: typeof AudioPlayer;
     SoundEffect: typeof SoundEffect;
     SoundController: typeof SoundController;
-    BgmController: typeof BgmController;
     Danmaku: typeof Danmaku;
     // todo: 放到插件 ShaderEffect: typeof ShaderEffect;
     // 定义于游戏进程，渲染进程依然可用
@@ -92,7 +90,6 @@ interface VariableInterface {
     fixedUi: UiController;
     KeyCode: typeof KeyCode;
     // isMobile: boolean;
-    bgm: BgmController;
     sound: SoundController;
     settingStorage: GameStorage;
     status: Ref<boolean>;
@@ -431,7 +428,7 @@ class Mota {
 
     static require(type: InterfaceType, key: string): any {
         const data = this.getByType(type)[key];
-        if (!!data) return data;
+        if (data) return data;
         else {
             throw new Error(
                 `Cannot resolve require: type='${type}',key='${key}'`
@@ -457,10 +454,10 @@ class Mota {
         return type === 'class'
             ? this.classes
             : type === 'fn'
-            ? this.functions
-            : type === 'var'
-            ? this.variables
-            : this.modules;
+              ? this.functions
+              : type === 'var'
+                ? this.variables
+                : this.modules;
     }
 }
 

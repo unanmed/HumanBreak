@@ -5,8 +5,8 @@ import { Camera, CameraAnimation, ICameraScale } from '@/core/render/camera';
 import { LayerGroup } from '@/core/render/preset/layer';
 import { MotaRenderer } from '@/core/render/render';
 import { Sprite } from '@/core/render/sprite';
-import { bgm } from '@/core/audio/bgm';
 import { PointEffect, PointEffectType } from '../fx/pointShader';
+import { bgmController } from '@/module';
 
 const path: Partial<Record<FloorIds, LocArr[]>> = {
     MT16: [
@@ -261,11 +261,12 @@ function initFromSave(chase: Chase) {
 }
 
 function playAudio(from: number, chase: Chase) {
-    bgm.changeTo('escape.mp3', from);
-    bgm.blockChange();
+    const playing = bgmController.playingBgm;
+    bgmController.play('escape.mp3', from);
+    bgmController.blockChange();
     chase.on('end', () => {
-        bgm.unblockChange();
-        bgm.undo();
+        bgmController.unblockChange();
+        if (playing) bgmController.play(playing);
     });
 }
 
