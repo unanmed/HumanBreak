@@ -1,6 +1,7 @@
 import EventEmitter from 'eventemitter3';
 import { audioPlayer, AudioPlayer } from './player';
 import { logger } from '@/core/common/logger';
+import { VolumeEffect } from './effect';
 
 type LocationArray = [number, number, number];
 
@@ -16,9 +17,32 @@ export class SoundPlayer<
     readonly buffer: Map<T, AudioBuffer> = new Map();
     /** 所有正在播放的音乐 */
     readonly playing: Set<number> = new Set();
+    /** 音量节点 */
+    readonly gain: VolumeEffect;
+
+    /** 是否已经启用 */
+    enabled: boolean = true;
 
     constructor(public readonly player: AudioPlayer) {
         super();
+        this.gain = player.createVolumeEffect();
+    }
+
+    /**
+     * 设置是否启用音效
+     * @param enabled 是否启用音效
+     */
+    setEnabled(enabled: boolean) {
+        if (!enabled) this.stopAllSounds();
+        this.enabled = enabled;
+    }
+
+    /**
+     * 设置音量大小
+     * @param volume 音量大小
+     */
+    setVolume(volume: number) {
+        this.gain.setVolume(volume);
     }
 
     /**
@@ -46,6 +70,7 @@ export class SoundPlayer<
         position: LocationArray = [0, 0, 0],
         orientation: LocationArray = [1, 0, 0]
     ) {
+        if (!this.enabled) return -1;
         const buffer = this.buffer.get(id);
         if (!buffer) {
             logger.warn(52, id);
@@ -58,7 +83,7 @@ export class SoundPlayer<
         const stereo = this.player.createStereoEffect();
         stereo.setPosition(position[0], position[1], position[2]);
         stereo.setOrientation(orientation[0], orientation[1], orientation[2]);
-        route.addEffect(stereo);
+        route.addEffect([stereo, this.gain]);
         this.player.addRoute(`sounds.${soundNum}`, route);
         route.play();
         source.output.addEventListener('ended', () => {

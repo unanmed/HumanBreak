@@ -3,13 +3,12 @@ import { EventEmitter } from '../common/eventEmitter';
 import { GameStorage } from './storage';
 import { has, triggerFullscreen } from '@/plugin/utils';
 import { createSettingComponents } from './init/settings';
-import { SoundEffect } from '../audio/sound';
 import settingsText from '@/data/settings.json';
 import { isMobile } from '@/plugin/use';
 import { fontSize } from '@/plugin/ui/statusBar';
 import { CustomToolbar } from './custom/toolbar';
 import { fixedUi } from './init/ui';
-import { bgmController } from '@/module';
+import { bgmController, soundPlayer } from '@/module';
 
 export interface SettingComponentProps {
     item: MotaSettingItem;
@@ -390,9 +389,9 @@ function handleAudioSetting<T extends number | boolean>(
     } else if (key === 'bgmVolume') {
         bgmController.setVolume((n as number) / 100);
     } else if (key === 'soundEnabled') {
-        SoundEffect.disable = !n;
+        soundPlayer.setEnabled(n as boolean);
     } else if (key === 'soundVolume') {
-        SoundEffect.volume = (n as number) / 100;
+        soundPlayer.setVolume((n as number) / 100)
     }
 }
 
