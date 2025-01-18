@@ -11,7 +11,8 @@ type ResourceType =
     | 'material'
     | 'audio'
     | 'json'
-    | 'zip';
+    | 'zip'
+    | 'byte';
 interface CompressedLoadListItem {
     type: ResourceType;
     name: string;
@@ -147,7 +148,7 @@ export async function splitResource() {
     for (const sound of data.main.sounds) {
         const path = `./dist/project/sounds/${sound}`;
         const stat = await fs.stat(path);
-        await pushItem('audio', sound, 'sound', stat, await fs.readFile(path));
+        await pushItem('byte', sound, 'sound', stat, await fs.readFile(path));
     }
 
     // fonts

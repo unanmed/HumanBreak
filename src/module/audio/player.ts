@@ -17,6 +17,7 @@ import {
 import { isNil } from 'lodash-es';
 import { logger } from '@/core/common/logger';
 import { sleep } from 'mutate-animate';
+import { AudioDecoder } from './decoder';
 
 interface AudioPlayerEvent {}
 
@@ -34,6 +35,14 @@ export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
         this.ac = new AudioContext();
         this.gain = this.ac.createGain();
         this.gain.connect(this.ac.destination);
+    }
+
+    /**
+     * 解码音频数据
+     * @param data 音频数据
+     */
+    decodeAudioData(data: Uint8Array) {
+        return AudioDecoder.decodeAudioData(data, this);
     }
 
     /**
@@ -207,7 +216,12 @@ export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
      * @param when 从音频的哪个位置开始播放，单位秒
      */
     play(id: string, when: number = 0) {
-        this.getRoute(id)?.play(when);
+        const route = this.getRoute(id);
+        if (!route) {
+            logger.warn(53, 'play', id);
+            return;
+        }
+        route.play(when);
     }
 
     /**
@@ -217,8 +231,11 @@ export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
      */
     pause(id: string) {
         const route = this.getRoute(id);
-        if (!route) return Promise.resolve();
-        else return route.pause();
+        if (!route) {
+            logger.warn(53, 'pause', id);
+            return;
+        }
+        return route.pause();
     }
 
     /**
@@ -228,8 +245,11 @@ export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
      */
     stop(id: string) {
         const route = this.getRoute(id);
-        if (!route) return Promise.resolve();
-        else return route.stop();
+        if (!route) {
+            logger.warn(53, 'stop', id);
+            return;
+        }
+        return route.stop();
     }
 
     /**
@@ -237,11 +257,16 @@ export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
      * @param id 音频名称
      */
     resume(id: string) {
-        this.getRoute(id)?.resume();
+        const route = this.getRoute(id);
+        if (!route) {
+            logger.warn(53, 'play', id);
+            return;
+        }
+        route.resume();
     }
 
     /**
-     * 设置听者位置，x正方形水平向右，y正方形垂直于地面向上，z正方向垂直屏幕远离用户
+     * 设置听者位置，x正方向水平向右，y正方向垂直于地面向上，z正方向垂直屏幕远离用户
      * @param x 位置x坐标
      * @param y 位置y坐标
      * @param z 位置z坐标
@@ -254,7 +279,7 @@ export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
     }
 
     /**
-     * 设置听者朝向，x正方形水平向右，y正方形垂直于地面向上，z正方向垂直屏幕远离用户
+     * 设置听者朝向，x正方向水平向右，y正方向垂直于地面向上，z正方向垂直屏幕远离用户
      * @param x 朝向x坐标
      * @param y 朝向y坐标
      * @param z 朝向z坐标
@@ -267,7 +292,7 @@ export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
     }
 
     /**
-     * 设置听者头顶朝向，x正方形水平向右，y正方形垂直于地面向上，z正方向垂直屏幕远离用户
+     * 设置听者头顶朝向，x正方向水平向右，y正方向垂直于地面向上，z正方向垂直屏幕远离用户
      * @param x 头顶朝向x坐标
      * @param y 头顶朝向y坐标
      * @param z 头顶朝向z坐标
@@ -315,6 +340,11 @@ export class AudioRoute
     status: AudioStatus = AudioStatus.Stoped;
     /** 暂停时刻 */
     private pauseTime: number = 0;
+
+    /** 音频时长，单位秒 */
+    get duration() {
+        return this.source.duration;
+    }
 
     private shouldStop: boolean = false;
     /**
@@ -423,8 +453,6 @@ export class AudioRoute
             this.status === AudioStatus.Pausing ||
             this.status === AudioStatus.Stoping
         ) {
-            console.log(1);
-
             this.audioStartHook?.(this);
             this.emit('resume');
             return;

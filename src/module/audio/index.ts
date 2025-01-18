@@ -1,11 +1,11 @@
 import { loadAllBgm } from './bgm';
 import { OpusDecoder, VorbisDecoder } from './decoder';
-import { AudioStreamSource } from './source';
 import { AudioType } from './support';
+import { AudioDecoder } from './decoder';
 
 loadAllBgm();
-AudioStreamSource.registerDecoder(AudioType.Ogg, VorbisDecoder);
-AudioStreamSource.registerDecoder(AudioType.Opus, OpusDecoder);
+AudioDecoder.registerDecoder(AudioType.Ogg, VorbisDecoder);
+AudioDecoder.registerDecoder(AudioType.Opus, OpusDecoder);
 
 export * from './support';
 export * from './effect';
@@ -13,3 +13,4 @@ export * from './player';
 export * from './source';
 export * from './bgm';
 export * from './decoder';
+export * from './sound';

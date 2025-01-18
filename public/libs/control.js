@@ -2988,7 +2988,6 @@ control.prototype.screenFlash = function (
     });
 };
 
-// todo: deprecate playBgm, pauseBgm, resumeBgm, triggerBgm
 ////// 播放背景音乐 //////
 control.prototype.playBgm = function (bgm, startTime) {
     // see src/module/fallback/audio.ts
@@ -3007,32 +3006,21 @@ control.prototype.resumeBgm = function (resumeTime) {
 ////// 更改背景音乐的播放 //////
 control.prototype.triggerBgm = function () {
     // see src/module/fallback/audio.ts
-    return;
-    if (main.mode !== 'play') return;
-    const bgm = Mota.require('var', 'bgm');
-    bgm.disable = !bgm.disable;
-
-    if (!bgm.disable) this.resumeBgm();
-    else this.pauseBgm();
 };
 
-// todo: deprecate playSound, stopSound, getPlayingSounds
 ////// 播放音频 //////
 control.prototype.playSound = function (sound, pitch, callback) {
-    sound = core.getMappedName(sound);
-    Mota.require('var', 'sound').play(sound, callback);
+    // see src/module/fallback/audio.ts
 };
 
 ////// 停止所有音频 //////
 control.prototype.stopSound = function (id) {
-    if (typeof id === 'number') Mota.require('var', 'sound').stop(id);
-    else Mota.require('var', 'sound').stopAll();
+    // see src/module/fallback/audio.ts
 };
 
 ////// 获得当前正在播放的所有（指定）音效的id列表 //////
 control.prototype.getPlayingSounds = function (name) {
-    name = core.getMappedName(name);
-    return Mota.require('var', 'sound').getPlaying(name);
+    // see src/module/fallback/audio.ts
 };
 
 ////// 检查bgm状态 //////

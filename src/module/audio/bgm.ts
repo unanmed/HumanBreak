@@ -11,7 +11,12 @@ interface BgmVolume {
     transition: Transition;
 }
 
-interface BgmControllerEvent {}
+interface BgmControllerEvent {
+    play: [];
+    pause: [];
+    resume: [];
+    stop: [];
+}
 
 export class BgmController<
     T extends string = BgmIds
@@ -203,6 +208,7 @@ export class BgmController<
         if (!this.enabled) return;
         this.player.play(this.getId(id), when);
         this.playing = true;
+        this.emit('play');
     }
 
     /**
@@ -214,6 +220,7 @@ export class BgmController<
             this.player.resume(this.getId(this.playingBgm));
         }
         this.playing = true;
+        this.emit('resume');
     }
 
     /**
@@ -225,6 +232,7 @@ export class BgmController<
             this.player.pause(this.getId(this.playingBgm));
         }
         this.playing = false;
+        this.emit('pause');
     }
 
     /**
@@ -236,6 +244,7 @@ export class BgmController<
             this.player.stop(this.getId(this.playingBgm));
         }
         this.playing = false;
+        this.emit('stop');
     }
 }
 

@@ -1,4 +1,3 @@
-import { SoundController, SoundEffect, sound } from './audio/sound';
 import { Focus, GameUi, UiController } from './main/custom/ui';
 import { GameStorage } from './main/storage';
 import './main/init/';
@@ -14,7 +13,6 @@ import { KeyCode } from '@/plugin/keyCodes';
 import { status } from '@/plugin/ui/statusBar';
 import '@/plugin';
 import './package';
-import { AudioPlayer } from './audio/audio';
 import { CustomToolbar } from './main/custom/toolbar';
 import {
     Hotkey,
@@ -78,7 +76,6 @@ import { MotaOffscreenCanvas2D } from './fx/canvas2d';
 import { TextboxStore } from './render/index';
 
 // ----- 类注册
-Mota.register('class', 'AudioPlayer', AudioPlayer);
 Mota.register('class', 'CustomToolbar', CustomToolbar);
 Mota.register('class', 'Focus', Focus);
 Mota.register('class', 'GameStorage', GameStorage);
@@ -87,8 +84,6 @@ Mota.register('class', 'Hotkey', Hotkey);
 Mota.register('class', 'Keyboard', Keyboard);
 Mota.register('class', 'MotaSetting', MotaSetting);
 Mota.register('class', 'SettingDisplayer', SettingDisplayer);
-Mota.register('class', 'SoundController', SoundController);
-Mota.register('class', 'SoundEffect', SoundEffect);
 Mota.register('class', 'UiController', UiController);
 Mota.register('class', 'MComponent', MComponent);
 Mota.register('class', 'ResourceController', ResourceController);
@@ -104,7 +99,6 @@ Mota.register('fn', 'removeAnimate', removeAnimate);
 // ----- 变量注册
 Mota.register('var', 'mainUi', mainUi);
 Mota.register('var', 'fixedUi', fixedUi);
-Mota.register('var', 'sound', sound);
 Mota.register('var', 'gameKey', gameKey);
 Mota.register('var', 'mainSetting', mainSetting);
 Mota.register('var', 'KeyCode', KeyCode);

@@ -1,6 +1,8 @@
 import { Patch, PatchClass } from '@/common/patch';
-import { bgmController } from '../audio';
+import { audioPlayer, bgmController, soundPlayer } from '../audio';
 import { mainSetting } from '@/core/main/setting';
+import { sleep } from 'mutate-animate';
+import { isNil } from 'lodash-es';
 
 export function patchAudio() {
     const patch = new Patch(PatchClass.Control);
@@ -36,5 +38,31 @@ export function patchAudio() {
     patch.add('triggerBgm', function () {
         if (bgmController.playing) bgmController.pause();
         else bgmController.resume();
+    });
+
+    patch.add(
+        'playSound',
+        function (sound, _pitch, callback, position, orientation) {
+            const name = core.getMappedName(sound) as SoundIds;
+            const num = soundPlayer.play(name, position, orientation);
+            const route = audioPlayer.getRoute(`sounds.${num}`);
+            if (!route) {
+                callback?.();
+                return -1;
+            } else {
+                sleep(route.duration).then(() => callback?.());
+                return num;
+            }
+        }
+    );
+    patch.add('stopSound', function (id) {
+        if (isNil(id)) {
+            soundPlayer.stopAllSounds();
+        } else {
+            soundPlayer.stop(id);
+        }
+    });
+    patch.add('getPlayingSounds', function () {
+        return [...soundPlayer.playing];
     });
 }

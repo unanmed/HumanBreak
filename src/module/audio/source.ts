@@ -5,6 +5,7 @@ import { logger } from '@/core/common/logger';
 import { AudioType } from './support';
 import CodecParser, { CodecFrame, MimeType, OggPage } from 'codec-parser';
 import { isNil } from 'lodash-es';
+import { IAudioDecodeData, AudioDecoder, checkAudioType } from './decoder';
 
 interface AudioSourceEvent {
     play: [];
@@ -20,6 +21,9 @@ export abstract class AudioSource
 
     /** 是否正在播放 */
     playing: boolean = false;
+
+    /** 获取音频时长 */
+    abstract get duration(): number;
 
     constructor(public readonly ac: AudioContext) {
         super();
@@ -49,57 +53,6 @@ export abstract class AudioSource
     abstract setLoop(loop: boolean): void;
 }
 
-export interface IAudioDecodeError {
-    /** 错误信息 */
-    message: string;
-}
-
-export interface IAudioDecodeData {
-    /** 每个声道的音频信息 */
-    channelData: Float32Array[];
-    /** 已经被解码的 PCM 采样数 */
-    samplesDecoded: number;
-    /** 音频采样率 */
-    sampleRate: number;
-    /** 解码错误信息 */
-    errors: IAudioDecodeError[];
-}
-
-export interface IAudioDecoder {
-    /**
-     * 创建音频解码器
-     */
-    create(): Promise<void>;
-
-    /**
-     * 摧毁这个解码器
-     */
-    destroy(): void;
-
-    /**
-     * 解码流数据
-     * @param data 流数据
-     */
-    decode(data: Uint8Array): Promise<IAudioDecodeData | undefined>;
-
-    /**
-     * 当音频解码完成后，会调用此函数，需要返回之前还未解析或未返回的音频数据。调用后，该解码器将不会被再次使用
-     */
-    flush(): Promise<IAudioDecodeData | undefined>;
-}
-
-const fileSignatures: [AudioType, number[]][] = [
-    [AudioType.Mp3, [0x49, 0x44, 0x33]],
-    [AudioType.Ogg, [0x4f, 0x67, 0x67, 0x53]],
-    [AudioType.Wav, [52, 0x49, 0x46, 0x46]],
-    [AudioType.Flac, [0x66, 0x4c, 0x61, 0x43]],
-    [AudioType.Aac, [0xff, 0xf1]],
-    [AudioType.Aac, [0xff, 0xf9]]
-];
-const oggHeaders: [AudioType, number[]][] = [
-    [AudioType.Opus, [0x4f, 0x70, 0x75, 0x73, 0x48, 0x65, 0x61, 0x64]]
-];
-
 const mimeTypeMap: Record<AudioType, MimeType> = {
     [AudioType.Aac]: 'audio/aac',
     [AudioType.Flac]: 'audio/flac',
@@ -114,8 +67,6 @@ function isOggPage(data: any): data is OggPage {
 }
 
 export class AudioStreamSource extends AudioSource implements IStreamReader {
-    static readonly decoderMap: Map<AudioType, new () => IAudioDecoder> =
-        new Map();
     output: AudioBufferSourceNode;
 
     /** 音频数据 */
@@ -129,6 +80,8 @@ export class AudioStreamSource extends AudioSource implements IStreamReader {
     bufferedSamples: number = 0;
     /** 歌曲时长，加载完毕之前保持为 0 */
     duration: number = 0;
+    /** 当前已经播放了多长时间 */
+    // readonly currentTime: number = -1;
     /** 在流传输阶段，至少缓冲多长时间的音频之后才开始播放，单位秒 */
     bufferPlayDuration: number = 1;
     /** 音频的采样率，未成功解析出之前保持为 0 */
@@ -149,7 +102,7 @@ export class AudioStreamSource extends AudioSource implements IStreamReader {
     /** 音频类型 */
     private audioType: AudioType | '' = '';
     /** 音频解码器 */
-    private decoder?: IAudioDecoder;
+    private decoder?: AudioDecoder;
     /** 音频解析器 */
     private parser?: CodecParser;
     /** 每多长时间组成一个缓存 Float32Array */
@@ -158,19 +111,6 @@ export class AudioStreamSource extends AudioSource implements IStreamReader {
     private audioData: Float32Array[][] = [];
 
     private errored: boolean = false;
-
-    /**
-     * 注册一个解码器
-     * @param type 要注册的解码器允许解码的类型
-     * @param decoder 解码器对象
-     */
-    static registerDecoder(type: AudioType, decoder: new () => IAudioDecoder) {
-        if (this.decoderMap.has(type)) {
-            logger.warn(47, type);
-            return;
-        }
-        this.decoderMap.set(type, decoder);
-    }
 
     constructor(context: AudioContext) {
         super(context);
@@ -195,24 +135,7 @@ export class AudioStreamSource extends AudioSource implements IStreamReader {
         if (!this.headerRecieved) {
             // 检查头文件获取音频类型，仅检查前256个字节
             const toCheck = data.slice(0, 256);
-            for (const [type, value] of fileSignatures) {
-                if (value.every((v, i) => toCheck[i] === v)) {
-                    this.audioType = type;
-                    break;
-                }
-            }
-            if (this.audioType === AudioType.Ogg) {
-                // 如果是ogg的话，进一步判断是不是opus
-                for (const [key, value] of oggHeaders) {
-                    const has = toCheck.some((_, i) => {
-                        return value.every((v, ii) => toCheck[i + ii] === v);
-                    });
-                    if (has) {
-                        this.audioType = key;
-                        break;
-                    }
-                }
-            }
+            this.audioType = checkAudioType(data);
             if (!this.audioType) {
                 logger.error(
                     25,
@@ -224,7 +147,7 @@ export class AudioStreamSource extends AudioSource implements IStreamReader {
                 return;
             }
             // 创建解码器
-            const Decoder = AudioStreamSource.decoderMap.get(this.audioType);
+            const Decoder = AudioDecoder.decoderMap.get(this.audioType);
             if (!Decoder) {
                 this.errored = true;
                 logger.error(24, this.audioType);
@@ -280,7 +203,7 @@ export class AudioStreamSource extends AudioSource implements IStreamReader {
      */
     private async decodeData(
         data: Uint8Array,
-        decoder: IAudioDecoder,
+        decoder: AudioDecoder,
         parser: CodecParser
     ) {
         // 解析音频数据
@@ -301,7 +224,7 @@ export class AudioStreamSource extends AudioSource implements IStreamReader {
     /**
      * 解码剩余数据
      */
-    private async decodeFlushData(decoder: IAudioDecoder, parser: CodecParser) {
+    private async decodeFlushData(decoder: AudioDecoder, parser: CodecParser) {
         const audioData = await decoder.flush();
         if (!audioData) return;
         // @ts-expect-error 库类型声明错误
@@ -375,7 +298,6 @@ export class AudioStreamSource extends AudioSource implements IStreamReader {
             return;
         }
         if (dt < this.bufferPlayDuration) return;
-        console.log(played, this.lastBufferSamples, this.sampleRate);
         this.lastBufferSamples = this.bufferedSamples;
         // 需要播放
         this.mergeBuffers();
@@ -439,8 +361,6 @@ export class AudioStreamSource extends AudioSource implements IStreamReader {
             this.loaded = true;
             delete this.controller;
             this.mergeBuffers();
-            // const played = this.lastBufferSamples / this.sampleRate;
-            // this.playAudio(played);
             this.duration = this.buffered;
             this.audioData = [];
             this.decoder?.destroy();
@@ -510,6 +430,13 @@ export class AudioElementSource extends AudioSource {
     /** audio 元素 */
     readonly audio: HTMLAudioElement;
 
+    get duration(): number {
+        return this.audio.duration;
+    }
+    get currentTime(): number {
+        return this.audio.currentTime;
+    }
+
     constructor(context: AudioContext) {
         super(context);
         const audio = new Audio();
@@ -564,6 +491,9 @@ export class AudioBufferSource extends AudioSource {
     /** 是否循环 */
     private loop: boolean = false;
 
+    duration: number = 0;
+    // readonly currentTime: number = -1;
+
     /** 播放开始时刻 */
     private lastStartTime: number = 0;
     private target?: IAudioInput;
@@ -583,6 +513,7 @@ export class AudioBufferSource extends AudioSource {
         } else {
             this.buffer = buffer;
         }
+        this.duration = this.buffer.duration;
     }
 
     play(when?: number): void {

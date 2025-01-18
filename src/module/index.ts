@@ -1,3 +1,4 @@
+import { soundPlayer } from './audio';
 import { patchAll } from './fallback';
 import { controller } from './weather';
 import { RainWeather } from './weather/rain';
@@ -9,6 +10,7 @@ Mota.register('module', 'Weather', {
     WeatherController,
     RainWeather
 });
+Mota.register('module', 'Audio', { soundPlayer });
 
 export * from './weather';
 export * from './audio';

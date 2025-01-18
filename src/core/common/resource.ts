@@ -14,6 +14,7 @@ interface ResourceType {
     audio: HTMLAudioElement;
     json: any;
     zip: JSZip;
+    byte: Uint8Array;
 }
 
 interface ResourceMap {
@@ -24,6 +25,7 @@ interface ResourceMap {
     audio: AudioResource;
     json: JSONResource;
     zip: ZipResource;
+    byte: ByteResource;
 }
 
 interface CompressedLoadListItem {
@@ -40,7 +42,8 @@ const types: Record<keyof ResourceType, JSZip.OutputType> = {
     material: 'blob',
     audio: 'arraybuffer',
     json: 'string',
-    zip: 'arraybuffer'
+    zip: 'arraybuffer',
+    byte: 'uint8array'
 };
 
 const base = import.meta.env.DEV ? '/' : '';
@@ -191,6 +194,27 @@ export class BufferResource extends Resource<ArrayBuffer> {
     }
 }
 
+export class ByteResource extends Resource<Uint8Array> {
+    /**
+     * 创建一个二进制缓冲区资源
+     * @param uri 资源的URI，格式为 byte/file，例如 'byte/myBuffer.mp3'
+     */
+    constructor(uri: string) {
+        super(uri, 'buffer');
+    }
+
+    async load(_onProgress?: ProgressFn): Promise<Uint8Array> {
+        const response = await fetch(this.resolveURI());
+        const data = await response.bytes();
+        this.resource = data;
+        return data;
+    }
+
+    resolveURI(): string {
+        return toURL(`${base}${findURL(this.uri)}`);
+    }
+}
+
 export class JSONResource<T = any> extends Resource<T> {
     /**
      * 创建一个JSON对象资源
@@ -303,7 +327,8 @@ export const resourceTypeMap = {
     material: MaterialResource,
     audio: AudioResource,
     json: JSONResource,
-    zip: ZipResource
+    zip: ZipResource,
+    byte: ByteResource
 };
 
 interface LoadEvent<T extends keyof ResourceType> {
@@ -501,10 +526,11 @@ export function loadDefaultResource() {
     });
     // sound
     data.main.sounds.forEach(v => {
-        const res = LoadTask.add('buffer', `buffer/project/sounds/${v}`);
+        const res = LoadTask.add('byte', `byte/project/sounds/${v}`);
         Mota.r(() => {
             res.once('load', res => {
-                Mota.require('var', 'sound').add(`sounds.${v}`, res.resource!);
+                const { soundPlayer } = Mota.require('module', 'Audio');
+                soundPlayer.add(v, res.resource!);
             });
         });
     });
@@ -691,11 +717,8 @@ export async function loadCompressedResource() {
                             new FontFace(name.slice(0, -4), font)
                         );
                     } else if (usage === 'sound') {
-                        const sound = value as ArrayBuffer;
-                        Mota.require('var', 'sound').add(
-                            `sounds.${name}`,
-                            sound
-                        );
+                        const { soundPlayer } = Mota.require('module', 'Audio');
+                        soundPlayer.add(v, value);
                     } else if (usage === 'animate') {
                         const ani = value as string;
                         core.material.animates[

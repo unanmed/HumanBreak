@@ -959,7 +959,7 @@ interface Control {
     /**
      * 获得映射文件名
      */
-    getMappedName<K extends keyof NameMap>(name: K): NameMap[K];
+    getMappedName(name: string): string;
 
     /**
      * @deprecated
@@ -1063,12 +1063,16 @@ interface Control {
      * @param sound 音效名
      * @param pitch 音调，同时会修改播放速度，100为原速
      * @param callback 回调函数
+     * @param position 音频播放位置
+     * @param orientation 音频播放朝向
      * @returns 音效的唯一标识符，用于停止音效等操作
      */
     playSound(
         sound: SoundIds | NameMapIn<SoundIds>,
         pitch?: number,
-        callback?: () => void
+        callback?: () => void,
+        position?: [number, nnumber, number],
+        orientation?: [number, number, number]
     ): number;
 
     /**
@@ -1081,9 +1085,8 @@ interface Control {
     /**
      * @deprecated
      * 获得正在播放的所有音效的id列表
-     * @param name 要获得的音效名
      */
-    getPlayingSounds(name?: SoundIds | NameMapIn<SoundIds>): number[];
+    getPlayingSounds(): number[];
 
     /**
      * @deprecated
