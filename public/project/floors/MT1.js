@@ -12,7 +12,7 @@ main.floors.MT1=
     "images": [],
     "ratio": 1,
     "defaultGround": "T331",
-    "bgm": "cave.mp3",
+    "bgm": "cave.opus",
     "firstArrive": [
         "\t[原始人]不知为何，最近这些蝙蝠的攻击性变得很强，而且还不知道从哪冒出来了这些黏糊糊的东西。",
         "\t[原始人]之前捡到了一个来历不明的方块状东西（怪物手册），好像能打开，不知道里面有没有写什么",

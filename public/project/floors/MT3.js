@@ -12,7 +12,7 @@ main.floors.MT3=
     "images": [],
     "ratio": 1,
     "defaultGround": "T331",
-    "bgm": "cave.mp3",
+    "bgm": "cave.opus",
     "firstArrive": [],
     "eachArrive": [],
     "parallelDo": "",

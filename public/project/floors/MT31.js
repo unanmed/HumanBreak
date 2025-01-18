@@ -12,7 +12,7 @@ main.floors.MT31=
     "images": [],
     "ratio": 2,
     "defaultGround": "grass",
-    "bgm": "road.mp3",
+    "bgm": "road.opus",
     "firstArrive": [
         "\t[低级智人]\b[up,hero]杰克，你为什么在这？",
         "\t[杰克,thief]\b[up,4,7]哟，咱好久不见了，我只是来这里寻找点东西。",

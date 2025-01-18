@@ -120,7 +120,7 @@ main.floors.MT0=
     "width": 15,
     "height": 15,
     "autoEvent": {},
-    "bgm": "cave.mp3",
+    "bgm": "cave.opus",
     "beforeBattle": {},
     "bg2map": [
 

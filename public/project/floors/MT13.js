@@ -12,7 +12,7 @@ main.floors.MT13=
     "images": [],
     "ratio": 1,
     "defaultGround": "grass",
-    "bgm": "mount.mp3",
+    "bgm": "mount.opus",
     "firstArrive": [],
     "eachArrive": [],
     "parallelDo": "",

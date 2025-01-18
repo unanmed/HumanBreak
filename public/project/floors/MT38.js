@@ -12,7 +12,7 @@ main.floors.MT38=
     "images": [],
     "ratio": 8,
     "defaultGround": "T580",
-    "bgm": "winter.mp3",
+    "bgm": "winter.opus",
     "firstArrive": [
         "\t[低级智人]\b[down,hero]奇怪，这里的山崖边竟然有护栏，难道这附近有其他人吗？"
     ],

@@ -12,7 +12,7 @@ main.floors.MT70=
 "images": [],
 "ratio": 8,
 "defaultGround": "T650",
-"bgm": "palaceSouth.mp3",
+"bgm": "palaceSouth.opus",
 "firstArrive": [],
 "eachArrive": [],
 "parallelDo": "",

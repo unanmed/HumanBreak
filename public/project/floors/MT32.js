@@ -12,7 +12,7 @@ main.floors.MT32=
     "images": [],
     "ratio": 8,
     "defaultGround": "T580",
-    "bgm": "winter.mp3",
+    "bgm": "winter.opus",
     "firstArrive": [
         {
             "type": "function",

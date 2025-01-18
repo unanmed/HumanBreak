@@ -19,7 +19,7 @@ main.floors.tower7=
     ],
     "ratio": 2,
     "defaultGround": "T526",
-    "bgm": "tower.mp3",
+    "bgm": "tower.opus",
     "firstArrive": [
         {
             "type": "hideStatusBar",

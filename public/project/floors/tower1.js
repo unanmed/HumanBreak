@@ -12,7 +12,7 @@ main.floors.tower1=
     "images": [],
     "ratio": 2,
     "defaultGround": "T526",
-    "bgm": "tower.mp3",
+    "bgm": "tower.opus",
     "firstArrive": [
         "\t[野蛮人]\b[up,hero]这里，便是智慧之塔了",
         "注意破墙镐在本区结束后会全部删除，请在本区域全部用完"

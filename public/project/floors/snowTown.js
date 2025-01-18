@@ -12,7 +12,7 @@ main.floors.snowTown=
     "images": [],
     "ratio": 8,
     "defaultGround": "T580",
-    "bgm": "winterTown.mp3",
+    "bgm": "winterTown.opus",
     "firstArrive": null,
     "eachArrive": [],
     "parallelDo": "",

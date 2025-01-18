@@ -12,7 +12,7 @@ main.floors.MT16=
     "images": [],
     "ratio": 1,
     "defaultGround": "T331",
-    "bgm": "mount.mp3",
+    "bgm": "mount.opus",
     "color": null,
     "weather": [
         "cloud",

@@ -12,7 +12,7 @@ main.floors.MT14=
     "images": [],
     "ratio": 1,
     "defaultGround": "T331",
-    "bgm": "mount.mp3",
+    "bgm": "mount.opus",
     "firstArrive": null,
     "eachArrive": [
         {

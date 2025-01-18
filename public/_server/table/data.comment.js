@@ -154,7 +154,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "material",
 					"_directory": "./project/bgms/",
 					"_transform": (function (one) {
-						if (one.endsWith('.mp3') || one.endsWith('.ogg') || one.endsWith('.wav') || one.endsWith('.m4a') || one.endsWith('.flac'))
+						if (one.endsWith('.mp3') || one.endsWith('.ogg') || one.endsWith('.wav') || one.endsWith('.m4a') || one.endsWith('.flac') || one.endsWith('.opus'))
 							return one;
 						return null;
 					}).toString(),

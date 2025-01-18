@@ -12,7 +12,7 @@ main.floors.MT96=
     "images": [],
     "ratio": 8,
     "defaultGround": "T650",
-    "bgm": "palaceNorth.mp3",
+    "bgm": "palaceNorth.opus",
     "firstArrive": [],
     "eachArrive": [],
     "parallelDo": "",

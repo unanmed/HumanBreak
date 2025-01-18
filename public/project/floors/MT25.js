@@ -12,7 +12,7 @@ main.floors.MT25=
     "images": [],
     "ratio": 2,
     "defaultGround": "grass",
-    "bgm": "road.mp3",
+    "bgm": "road.opus",
     "firstArrive": [],
     "eachArrive": [],
     "parallelDo": "",

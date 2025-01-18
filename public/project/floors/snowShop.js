@@ -12,7 +12,7 @@ main.floors.snowShop=
     "images": [],
     "ratio": 8,
     "defaultGround": "T640",
-    "bgm": "winterTown.mp3",
+    "bgm": "winterTown.opus",
     "firstArrive": [],
     "eachArrive": [],
     "parallelDo": "",

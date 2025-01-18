@@ -12,7 +12,7 @@ main.floors.MT19=
     "images": [],
     "ratio": 2,
     "defaultGround": "grass",
-    "bgm": "plot1.mp3",
+    "bgm": "plot1.opus",
     "firstArrive": [],
     "eachArrive": [],
     "parallelDo": "",

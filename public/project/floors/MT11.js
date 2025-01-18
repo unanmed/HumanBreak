@@ -12,7 +12,7 @@ main.floors.MT11=
     "images": [],
     "ratio": 1,
     "defaultGround": "grass",
-    "bgm": "grass.mp3",
+    "bgm": "grass.opus",
     "firstArrive": [],
     "eachArrive": [],
     "parallelDo": "",

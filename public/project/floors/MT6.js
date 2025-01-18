@@ -12,7 +12,7 @@ main.floors.MT6=
     "images": [],
     "ratio": 1,
     "defaultGround": "grass",
-    "bgm": "grass.mp3",
+    "bgm": "grass.opus",
     "firstArrive": [
         {
             "type": "setCurtain",

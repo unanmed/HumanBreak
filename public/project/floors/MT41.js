@@ -12,7 +12,7 @@ main.floors.MT41=
     "images": [],
     "ratio": 8,
     "defaultGround": "T331",
-    "bgm": "winter.mp3",
+    "bgm": "winter.opus",
     "firstArrive": [],
     "eachArrive": [],
     "parallelDo": "",

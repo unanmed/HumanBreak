@@ -12,7 +12,7 @@ main.floors.empty=
     "images": [],
     "ratio": 1,
     "defaultGround": "grass",
-    "bgm": "mount.mp3",
+    "bgm": "mount.opus",
     "weather": [
         "sun",
         8

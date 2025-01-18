@@ -12,7 +12,7 @@ main.floors.tower2=
     "images": [],
     "ratio": 2,
     "defaultGround": "T526",
-    "bgm": "tower.mp3",
+    "bgm": "tower.opus",
     "firstArrive": null,
     "eachArrive": [],
     "parallelDo": "",
