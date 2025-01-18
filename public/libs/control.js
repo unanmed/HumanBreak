@@ -3038,13 +3038,6 @@ control.prototype.getPlayingSounds = function (name) {
 ////// 检查bgm状态 //////
 control.prototype.checkBgm = function () {
     // see src/module/fallback/audio.ts
-    return;
-    const bgm = Mota.require('var', 'bgm');
-    if (bgm.disable) {
-        bgm.pause();
-    } else if (!bgm.playing) {
-        bgm.changeTo(bgm.now ?? main.startBgm);
-    }
 };
 
 ///// 设置屏幕放缩 //////

@@ -48,7 +48,7 @@ interface Bgm {
 
 const list = bgm as Partial<Record<BgmIds, Bgm>>;
 
-const selected = ref<BgmIds>('title.mp3');
+const selected = ref<BgmIds>('title.opus');
 
 const content = computed(() => {
     return eval('`' + splitText(list[selected.value]!.desc) + '`');

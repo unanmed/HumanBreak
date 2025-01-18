@@ -328,7 +328,7 @@ onMounted(async () => {
     resize();
 
     soundChecked.value = mainSetting.getValue('audio.bgmEnabled', true);
-    bgmController.play('title.mp3');
+    bgmController.play('title.opus');
 
     start.style.opacity = '1';
     if (played) {
