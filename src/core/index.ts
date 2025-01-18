@@ -1,3 +1,5 @@
+// todo: 这个引入不加会报错，应该是循环引用导致的
+import '@/plugin/utils';
 import { Focus, GameUi, UiController } from './main/custom/ui';
 import { GameStorage } from './main/storage';
 import './main/init/';

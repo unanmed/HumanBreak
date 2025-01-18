@@ -1,5 +1,3 @@
-import type { AudioPlayer } from '@/core/audio/audio';
-import type { SoundController, SoundEffect } from '@/core/audio/sound';
 import type { Disposable } from '@/core/common/disposable';
 import type {
     EventEmitter,
@@ -57,9 +55,6 @@ interface ClassInterface {
     Hotkey: typeof Hotkey;
     Keyboard: typeof Keyboard;
     CustomToolbar: typeof CustomToolbar;
-    AudioPlayer: typeof AudioPlayer;
-    SoundEffect: typeof SoundEffect;
-    SoundController: typeof SoundController;
     Danmaku: typeof Danmaku;
     // todo: 放到插件 ShaderEffect: typeof ShaderEffect;
     // 定义于游戏进程，渲染进程依然可用
@@ -90,7 +85,6 @@ interface VariableInterface {
     fixedUi: UiController;
     KeyCode: typeof KeyCode;
     // isMobile: boolean;
-    sound: SoundController;
     settingStorage: GameStorage;
     status: Ref<boolean>;
     // 定义于游戏进程，渲染进程依然可用
