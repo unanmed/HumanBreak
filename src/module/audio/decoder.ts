@@ -116,6 +116,7 @@ export abstract class AudioDecoder {
                 decodedData.channelData.forEach((v, i) => {
                     buffer.copyToChannel(v, i);
                 });
+                decoder.destroy();
                 return buffer;
             }
         }
