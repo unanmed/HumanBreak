@@ -205,9 +205,9 @@ export class ByteResource extends Resource<Uint8Array> {
 
     async load(_onProgress?: ProgressFn): Promise<Uint8Array> {
         const response = await fetch(this.resolveURI());
-        const data = await response.bytes();
-        this.resource = data;
-        return data;
+        const data = await response.arrayBuffer();
+        this.resource = new Uint8Array(data);
+        return this.resource;
     }
 
     resolveURI(): string {
