@@ -592,7 +592,7 @@ editor_uievent_wrapper = function (editor) {
                     html += '<br style="display:none"/><img key="' + directory + one + '" style="display:none; max-width: 100%"/>';
                 }
                 // 试听音频
-                if (one.endsWith('.mp3') || one.endsWith('.ogg') || one.endsWith('.wav') || one.endsWith('.m4a') || one.endsWith('.flac')) {
+                if (one.endsWith('.mp3') || one.endsWith('.ogg') || one.endsWith('.wav') || one.endsWith('.m4a') || one.endsWith('.flac') || one.endsWith('.opus')) {
                     html += "<button onclick='editor.uievent._previewMaterialAudio(this)' style='margin-left: 10px'>播放</button>"
                     html += "<small> 音调：<input value='100' style='width:28px' onchange='editor.uievent._previewMaterialAudio_onPitchChange(this)'></small>";
                     html += `<small style='display:none; margin-left: 15px'>0:00 / 0:00</small><br style="display:none"/>

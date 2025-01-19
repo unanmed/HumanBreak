@@ -67,22 +67,22 @@ main.floors.MT21=
                     "人类简史——起源篇",
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     "他踏出了寻找智慧的第一步。",
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     "他所练就的勇气，也成为他寻找智慧路上的一大利器。",
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     "人类简史——起源篇，完。",
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     {
                         "type": "setValue",
@@ -96,36 +96,36 @@ main.floors.MT21=
                     "人类简史——进化篇",
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     "或许，他真的不理解智慧。",
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     "或许，他已经理解了一些。",
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     "但这不重要。",
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     "他的轨迹已经注定了他对未来的影响。",
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     "这个世界，甚至这个宇宙，都因为他的存在而改变。",
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     "在这里，智慧小径，将是他智慧的飞跃点。",
                     {

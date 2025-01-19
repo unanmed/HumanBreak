@@ -80,7 +80,7 @@ const props = defineProps<{
     ui: GameUi;
 }>();
 
-const bg = core.material.images.images['bg.jpg'];
+const bg = core.material.images.images['bg.webp'];
 
 let startdiv: HTMLDivElement;
 let start: HTMLDivElement;

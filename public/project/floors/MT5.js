@@ -78,22 +78,22 @@ main.floors.MT5=
                     "人类简史——起源篇",
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     "走出山洞，看似一个不起眼的举动，却是一个让残酷的真相永远地消失在了历史中的举动。",
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     "但是，这个举动，也是人类至今都能与自然和谐共处的根本。",
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     "那些残酷的历史将无人知晓，那些人类的残忍杀戮将不会出现。",
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     "而这些源头便是这看似无足轻重的一个举动。",
                     {

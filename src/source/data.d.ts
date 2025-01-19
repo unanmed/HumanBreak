@@ -1,4 +1,3 @@
-
 type FloorIds =
     | 'empty'
     | 'MT0'
@@ -106,16 +105,15 @@ type FloorIds =
     | 'MT94'
     | 'MT95'
     | 'MT96'
-    | 'MT97'
+    | 'MT97';
 
 type ImageIds =
     | 'IQ.png'
     | 'arrow.png'
     | 'atk.png'
-    | 'bg.jpg'
+    | 'bg.webp'
     | 'boom.png'
     | 'botton.png'
-    | 'cave2.jpg'
     | 'def.png'
     | 'exp.png'
     | 'hero1.png'
@@ -138,12 +136,10 @@ type ImageIds =
     | 'skill7.png'
     | 'skill8.png'
     | 'skill9.png'
-    | 'title.jpg'
-    | 'tower.jpg'
-    | 'tower7.jpeg'
+    | 'tower7.webp'
     | 'winskin.png'
     | 'winskin2.png'
-    | 'winskin3.png'
+    | 'winskin3.png';
 
 type AnimationIds =
     | 'amazed'
@@ -167,7 +163,7 @@ type AnimationIds =
     | 'sweat'
     | 'sweat2'
     | 'sword'
-    | 'zone'
+    | 'zone';
 
 type SoundIds =
     | '008-System08.opus'
@@ -209,7 +205,7 @@ type SoundIds =
     | 'shop.opus'
     | 'thunder.opus'
     | 'tree.opus'
-    | 'zone.opus'
+    | 'zone.opus';
 
 type BgmIds =
     | 'beforeBoss.opus'
@@ -232,35 +228,33 @@ type BgmIds =
     | 'towerBoss2.opus'
     | 'towerBoss3.opus'
     | 'winter.opus'
-    | 'winterTown.opus'
+    | 'winterTown.opus';
 
-type FontIds =
-    | 'normal'
-    | 'FiraCode'
+type FontIds = 'normal' | 'FiraCode';
 
 interface NameMap {
-    '确定': 'confirm.mp3';
-    '取消': 'cancel.mp3';
-    '操作失败': 'error.mp3';
-    '光标移动': 'cursor.mp3';
-    '打开界面': 'open_ui.mp3';
-    '读档': 'load.mp3';
-    '存档': 'save.mp3';
-    '获得道具': 'item.mp3';
-    '回血': 'recovery.mp3';
-    '炸弹': 'bomb.mp3';
-    '飞行器': 'centerFly.mp3';
-    '开关门': 'door.mp3';
-    '上下楼': 'floor.mp3';
-    '跳跃': 'jump.mp3';
-    '破墙镐': 'pickaxe.mp3';
-    '破冰镐': 'icePickaxe.mp3';
-    '宝石': 'gem.mp3';
-    '阻激夹域': 'zone.mp3';
-    '穿脱装备': 'equip.mp3';
-    '背景音乐': 'bgm.mp3';
-    '攻击': 'attack.mp3';
-    '背景图': 'bg.jpg';
-    '商店': 'shop.mp3';
-    '领域': 'zone';
+    确定: 'confirm.opus';
+    取消: 'cancel.opus';
+    操作失败: 'error.opus';
+    光标移动: 'cursor.opus';
+    打开界面: 'open_ui.opus';
+    读档: 'load.opus';
+    存档: 'save.opus';
+    获得道具: 'item.opus';
+    回血: 'recovery.opus';
+    炸弹: 'bomb.opus';
+    飞行器: 'centerFly.opus';
+    开关门: 'door.opus';
+    上下楼: 'floor.opus';
+    跳跃: 'jump.opus';
+    破墙镐: 'pickaxe.opus';
+    破冰镐: 'icePickaxe.opus';
+    宝石: 'gem.opus';
+    阻激夹域: 'zone.opus';
+    穿脱装备: 'equip.opus';
+    背景音乐: 'bgm.opus';
+    攻击: 'attack.opus';
+    背景图: 'bg.jpg';
+    商店: 'shop.opus';
+    领域: 'zone';
 }

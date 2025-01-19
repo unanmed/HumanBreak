@@ -26,7 +26,7 @@ main.floors.MT15=
     "firstArrive": [
         {
             "type": "loadBgm",
-            "name": "escape.mp3"
+            "name": "escape.opus"
         },
         "\t[野蛮人]\b[up,hero]山路开始崎岖多变了，要更小心一些"
     ],

@@ -11,7 +11,7 @@ main.floors.tower7=
     "cannotViewMap": true,
     "images": [
         {
-            "name": "tower7.jpeg",
+            "name": "tower7.webp",
             "canvas": "bg",
             "x": 0,
             "y": 0
@@ -27,19 +27,19 @@ main.floors.tower7=
         },
         {
             "type": "loadBgm",
-            "name": "beforeBoss.mp3"
+            "name": "beforeBoss.opus"
         },
         {
             "type": "loadBgm",
-            "name": "towerBoss.mp3"
+            "name": "towerBoss.opus"
         },
         {
             "type": "loadBgm",
-            "name": "towerBoss2.mp3"
+            "name": "towerBoss2.opus"
         },
         {
             "type": "loadBgm",
-            "name": "towerBoss3.mp3"
+            "name": "towerBoss3.opus"
         },
         {
             "type": "pauseBgm"
@@ -54,7 +54,7 @@ main.floors.tower7=
         "\t[智慧之神,E557]\b[down,7,2]但是，他们的低下智慧，却让他们在我这里败下阵来",
         {
             "type": "playBgm",
-            "name": "beforeBoss.mp3"
+            "name": "beforeBoss.opus"
         },
         "\t[智慧之神,E557]\b[down,7,2]愚蠢的他们只会一头冲向我这",
         "\t[智慧之神,E557]\b[down,7,2]在我面前变成一滩肉泥",
@@ -82,7 +82,7 @@ main.floors.tower7=
         "\t[智慧之神,E557]\b[down,7,2]现在，你应该知道这座塔的来源了吧？",
         {
             "type": "playBgm",
-            "name": "towerBoss.mp3"
+            "name": "towerBoss.opus"
         },
         "\t[智慧之神,E557]\b[down,7,2]就让我来看一看你是不是能够改变历史的人吧！",
         {

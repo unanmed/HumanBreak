@@ -124,10 +124,9 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"IQ.png",
 			"arrow.png",
 			"atk.png",
-			"bg.jpg",
+			"bg.webp",
 			"boom.png",
 			"botton.png",
-			"cave2.jpg",
 			"def.png",
 			"exp.png",
 			"hero1.png",
@@ -150,9 +149,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"skill7.png",
 			"skill8.png",
 			"skill9.png",
-			"title.jpg",
-			"tower.jpg",
-			"tower7.jpeg",
+			"tower7.webp",
 			"winskin.png",
 			"winskin2.png",
 			"winskin3.png"
@@ -573,57 +570,57 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			},
 			{
 				"type": "playSound",
-				"name": "paper.mp3"
+				"name": "paper.opus"
 			},
 			"人们说要铭记历史，但他们却忘记了历史。\n    ——我是这样评价这个故事的。",
 			{
 				"type": "playSound",
-				"name": "paper.mp3"
+				"name": "paper.opus"
 			},
 			"人类简史——起源篇",
 			{
 				"type": "playSound",
-				"name": "paper.mp3"
+				"name": "paper.opus"
 			},
 			"在历史的长河中，山火、暴雨、地震不过是自然界的常态，是时间流逝中微不足道的涟漪。",
 			{
 				"type": "playSound",
-				"name": "paper.mp3"
+				"name": "paper.opus"
 			},
 			"这些自然现象如同大地的呼吸，时而平静，时而狂暴。",
 			{
 				"type": "playSound",
-				"name": "paper.mp3"
+				"name": "paper.opus"
 			},
 			"对于动物和植物而言，这些变化是生存的考验，是自然选择的无情法则。",
 			{
 				"type": "playSound",
-				"name": "paper.mp3"
+				"name": "paper.opus"
 			},
 			"每一次山火，都意味着森林的重生与毁灭；每一场暴雨，都带来了生命的滋润与洪水的威胁；每一次地震，都改变了地貌，塑造了新的环境。",
 			{
 				"type": "playSound",
-				"name": "paper.mp3"
+				"name": "paper.opus"
 			},
 			"在这片土地上，生命在自然的力量中挣扎、适应、繁衍。",
 			{
 				"type": "playSound",
-				"name": "paper.mp3"
+				"name": "paper.opus"
 			},
 			"那些无法适应的，最终被淘汰；而那些幸存者，则继续在这片土地上书写着生命的传奇。",
 			{
 				"type": "playSound",
-				"name": "paper.mp3"
+				"name": "paper.opus"
 			},
 			"然而，对于那些在这片土地上生存的原始人而言，这些自然现象不仅仅是生存的考验，更是他们日常生活中不可或缺的一部分。",
 			{
 				"type": "playSound",
-				"name": "paper.mp3"
+				"name": "paper.opus"
 			},
 			"在公元前8000年，这里曾有一个不起眼的山洞，隐匿于群山之间，仿佛与世隔绝。山洞中，原始人正忙碌着，准备迎接即将到来的季节变化。",
 			{
 				"type": "playSound",
-				"name": "paper.mp3"
+				"name": "paper.opus"
 			},
 			{
 				"type": "sleep",

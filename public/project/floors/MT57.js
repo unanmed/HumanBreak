@@ -51,7 +51,7 @@ main.floors.MT57=
                     },
                     {
                         "type": "playSound",
-                        "name": "door.mp3"
+                        "name": "door.opus"
                     },
                     "\t[智人]\b[down,hero]貌似有哪里的门开了，应该是苍蓝之殿右下角吧",
                     "现在可以去苍蓝之殿的右下区域了。注意有三条可以去右边的路，机关门都已经开启"

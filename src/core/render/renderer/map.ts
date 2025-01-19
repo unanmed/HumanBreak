@@ -146,10 +146,10 @@ tagMap.register<ETextEvent, Text>('text', (_0, _1, props) => {
     }
 });
 tagMap.register('image', (_0, _1, props) => {
-    if (!props) return new Image(core.material.images.images['bg.jpg']);
+    if (!props) return new Image(core.material.images.images['bg.webp']);
     else {
         const {
-            image = core.material.images.images['bg.jpg'],
+            image = core.material.images.images['bg.webp'],
             type = 'static'
         } = props;
         return new Image(image, type);

@@ -84,12 +84,12 @@ editor_blocklyconfig=(function(){
         "name": "bg.jpg", "x": 0, "y": 0, "canvas": "bg"
       }], 'floorImage'),
       MotaActionFunctions.actionParser.parse({
-        "time": 160, "openSound": "door.mp3", "closeSound": "door.mp3", "keys": {"yellowKey": 1, "orangeKey": 1}
+        "time": 160, "openSound": "door.opus", "closeSound": "door.opus", "keys": {"yellowKey": 1, "orangeKey": 1}
       }, 'doorInfo'),
       MotaActionBlocks['faceIds_m'].xmlText(),
       MotaActionBlocks['mainStyle_m'].xmlText(),
       MotaActionFunctions.actionParser.parse({
-        "背景音乐": "bgm.mp3", "确定": "confirm.mp3", "攻击": "attack.mp3", "背景图": "bg.jpg", "领域": "zone", "文件名": "file.jpg"
+        "背景音乐": "bgm.opus", "确定": "confirm.opus", "攻击": "attack.opus", "背景图": "bg.jpg", "领域": "zone", "文件名": "file.jpg"
       }, 'nameMap'),
       MotaActionFunctions.actionParser.parse([
         {"name": "hero.png", "width": 32, "height": 32, "prefix": "hero_"},

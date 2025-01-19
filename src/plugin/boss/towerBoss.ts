@@ -313,7 +313,7 @@ export class TowerBoss extends BarrageBoss {
             this.skill1Time = 1;
             this.skill2Time = 1;
             this.skill3Time = 1;
-            core.playBgm('towerBoss.mp3');
+            core.playBgm('towerBoss.opus');
         }
     }
 
@@ -399,7 +399,7 @@ export class TowerBoss extends BarrageBoss {
         this.attackTime = 3;
         this.skill4Time = 5;
         this.skill5Time = 3;
-        core.playBgm('towerBoss2.mp3');
+        core.playBgm('towerBoss2.opus');
         controller.activate('rain', 6);
     }
 
@@ -502,7 +502,7 @@ export class TowerBoss extends BarrageBoss {
         this.terrainClose(1);
         this.skill6Time = 30;
         this.skill7Time = 2;
-        core.playBgm('towerBoss3.mp3');
+        core.playBgm('towerBoss3.opus');
     }
 
     releaseSkill6(n: number, last: number) {

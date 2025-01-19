@@ -17,7 +17,7 @@ main.floors.MT14=
     "eachArrive": [
         {
             "type": "loadBgm",
-            "name": "plot1.mp3"
+            "name": "plot1.opus"
         }
     ],
     "parallelDo": "",
@@ -154,32 +154,32 @@ main.floors.MT14=
                                 "人类简史——起源篇",
                                 {
                                     "type": "playSound",
-                                    "name": "paper.mp3"
+                                    "name": "paper.opus"
                                 },
                                 "但他已经抑制不了自己的好奇心。",
                                 {
                                     "type": "playSound",
-                                    "name": "paper.mp3"
+                                    "name": "paper.opus"
                                 },
                                 "人类嘛，总会在好奇心的驱使下前进。",
                                 {
                                     "type": "playSound",
-                                    "name": "paper.mp3"
+                                    "name": "paper.opus"
                                 },
                                 "但是，他们却用好奇心给自己带来了灾难，",
                                 {
                                     "type": "playSound",
-                                    "name": "paper.mp3"
+                                    "name": "paper.opus"
                                 },
                                 "只得利用历史中的野蛮人的好奇心来拯救自己。",
                                 {
                                     "type": "playSound",
-                                    "name": "paper.mp3"
+                                    "name": "paper.opus"
                                 },
                                 "不出所料，这个野蛮人走上了勇气之路。",
                                 {
                                     "type": "playSound",
-                                    "name": "paper.mp3"
+                                    "name": "paper.opus"
                                 },
                                 {
                                     "type": "setText",

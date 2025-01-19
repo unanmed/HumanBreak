@@ -262,7 +262,7 @@ function initFromSave(chase: Chase) {
 
 function playAudio(from: number, chase: Chase) {
     const playing = bgmController.playingBgm;
-    bgmController.play('escape.mp3', from);
+    bgmController.play('escape.opus', from);
     bgmController.blockChange();
     chase.on('end', () => {
         bgmController.unblockChange();

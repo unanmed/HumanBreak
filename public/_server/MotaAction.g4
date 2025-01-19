@@ -567,7 +567,7 @@ doorInfo_m
 
 /* doorInfo_m
 tooltip : 开门信息
-default : [160, 'door.mp3', 'door.mp3']
+default : [160, 'door.opus', 'door.opus']
 helpUrl : /_docs/#/instruction
 EvalString_0 = EvalString_0 && (', "openSound": "' + EvalString_0 + '"');
 EvalString_1 = EvalString_1 && (', "closeSound": "' + EvalString_1 + '"');
@@ -693,7 +693,7 @@ nameMapBgm
 
 /* nameMapBgm
 tooltip : 映射背景音乐
-default : ['背景音乐', 'bgm.mp3']
+default : ['背景音乐', 'bgm.opus']
 allBgms : ['EvalString_1']
 material : ["./project/bgms/", "EvalString_1"]
 helpUrl : /_docs/#/instruction
@@ -705,7 +705,7 @@ nameMapSoundKnown
 
 /* nameMapSoundKnown
 tooltip : 映射系统音效
-default : ['确定', 'confirm.mp3']
+default : ['确定', 'confirm.opus']
 allSounds : ['EvalString_0']
 material : ["./project/sounds/", "EvalString_0"]
 helpUrl : /_docs/#/instruction
@@ -717,7 +717,7 @@ nameMapSoundUnknown
 
 /* nameMapSoundUnknown
 tooltip : 映射音效
-default : ['攻击', 'attack.mp3']
+default : ['攻击', 'attack.opus']
 allSounds : ['EvalString_1']
 material : ["./project/sounds/", "EvalString_1"]
 helpUrl : /_docs/#/instruction
@@ -2194,7 +2194,7 @@ playBgm_s
 /* playBgm_s
 tooltip : playBgm: 播放背景音乐
 helpUrl : /_docs/#/instruction
-default : ["bgm.mp3", 0, true]
+default : ["bgm.opus", 0, true]
 allBgms : ['EvalString_0']
 material : ["./project/bgms/", "EvalString_0"]
 colour : this.imageColor
@@ -2236,7 +2236,7 @@ loadBgm_s
 /* loadBgm_s
 tooltip : loadBgm: 预加载某个背景音乐，之后可以直接播放
 helpUrl : /_docs/#/instruction
-default : ["bgm.mp3"]
+default : ["bgm.opus"]
 allBgms : ['EvalString_0']
 material : ["./project/bgms/", "EvalString_0"]
 colour : this.imageColor
@@ -2251,7 +2251,7 @@ freeBgm_s
 /* freeBgm_s
 tooltip : freeBgm: 释放背景音乐的缓存
 helpUrl : /_docs/#/instruction
-default : ["bgm.mp3"]
+default : ["bgm.opus"]
 allBgms : ['EvalString_0']
 colour : this.imageColor
 var code = '{"type": "freeBgm", "name": "'+EvalString_0+'"},\n';
@@ -2265,7 +2265,7 @@ playSound_s
 /* playSound_s
 tooltip : playSound: 播放音效
 helpUrl : /_docs/#/instruction
-default : ["item.mp3",false,"",false]
+default : ["item.opus",false,"",false]
 colour : this.imageColor
 allSounds : ['EvalString_0']
 material : ["./project/sounds/", "EvalString_0"]

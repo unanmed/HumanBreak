@@ -40,7 +40,7 @@ main.floors.MT41=
             "\t[初级智人]\b[up,hero]喝一口吧，已经很长时间没喝水了。",
             {
                 "type": "playSound",
-                "name": "drink.mp3"
+                "name": "drink.opus"
             },
             {
                 "type": "sleep",

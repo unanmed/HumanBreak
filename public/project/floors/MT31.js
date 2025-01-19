@@ -77,17 +77,17 @@ main.floors.MT31=
                     "人类简史——进化篇",
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     "经过了漫长的行走，他感到真相越来越接近。",
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     "前方，是会将凛冽渗入骨髓的冰封雪原。",
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     "这里，他将寻找到所谓的真相。",
                     {

@@ -24,7 +24,7 @@ main.floors.MT16=
         },
         {
             "type": "loadBgm",
-            "name": "escape.mp3"
+            "name": "escape.opus"
         },
         "\t[野蛮人]\b[up,hero]这里就是山顶了",
         "\t[野蛮人]\b[up,hero]砍一些柴火就赶快回去吧",
@@ -414,7 +414,7 @@ main.floors.MT16=
             },
             {
                 "type": "loadBgm",
-                "name": "escape.mp3"
+                "name": "escape.opus"
             }
         ],
         "3,23": [

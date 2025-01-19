@@ -66,37 +66,37 @@ main.floors.MT48=
                     "人类简史——进化篇",
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     "孤注一掷。",
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     "为拯救自己，人类执行了苍蓝计划。",
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     "硬币一旦抛出，又有谁能得知它的朝向呢？",
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     "在它落地之前，前方，是毁灭，亦是重生。",
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     "当他踏入宫殿的那一刻，硬币便已抛出。",
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     "来自未来的“孤注一掷”。",
                     {
                         "type": "playSound",
-                        "name": "paper.mp3"
+                        "name": "paper.opus"
                     },
                     {
                         "type": "setText",
