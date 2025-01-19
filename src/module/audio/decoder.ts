@@ -7,7 +7,7 @@ import type { AudioPlayer } from './player';
 const fileSignatures: [AudioType, number[]][] = [
     [AudioType.Mp3, [0x49, 0x44, 0x33]],
     [AudioType.Ogg, [0x4f, 0x67, 0x67, 0x53]],
-    [AudioType.Wav, [52, 0x49, 0x46, 0x46]],
+    [AudioType.Wav, [0x52, 0x49, 0x46, 0x46]],
     [AudioType.Flac, [0x66, 0x4c, 0x61, 0x43]],
     [AudioType.Aac, [0xff, 0xf1]],
     [AudioType.Aac, [0xff, 0xf9]]
@@ -87,7 +87,7 @@ export abstract class AudioDecoder {
             logger.error(
                 25,
                 [...toCheck]
-                    .map(v => v.toString().padStart(2, '0'))
+                    .map(v => v.toString(16).padStart(2, '0'))
                     .join(' ')
                     .toUpperCase()
             );
