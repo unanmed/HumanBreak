@@ -587,7 +587,7 @@ editor_uievent_wrapper = function (editor) {
                 var disabled = _isTileset && value.indexOf(one) >= 0 ? 'disabled' : ''
                 html += `<input type="checkbox" key="${one}" class="materialCheckbox" ${checked} ${disabled}/> ${one}`;
                 // 预览图片
-                if (one.endsWith('.png') || one.endsWith('.jpg') || one.endsWith('.jpeg') || one.endsWith('.gif')) {
+                if (one.endsWith('.png') || one.endsWith('.jpg') || one.endsWith('.jpeg') || one.endsWith('.gif') || one.endsWith('.webp')) {
                     html += "<button onclick='editor.uievent._previewMaterialImage(this)' style='margin-left: 10px'>预览</button>";
                     html += '<br style="display:none"/><img key="' + directory + one + '" style="display:none; max-width: 100%"/>';
                 }
