@@ -169,7 +169,7 @@ function init() {
             animate = core.material.items[equipId].equip.animate;
 
         // 检查该动画是否存在SE，如果不存在则使用默认音效
-        if (!core.material.animates[animate]?.se) core.playSound('attack.mp3');
+        if (!core.material.animates[animate]?.se) core.playSound('attack.opus');
 
         // 战斗伤害
         const info = enemy.calDamage(core.status.hero);

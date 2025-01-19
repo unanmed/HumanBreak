@@ -63,7 +63,7 @@ onMounted(async () => {
 
         if (!soundPlayed && time >= 1500) {
             soundPlayed = true;
-            core.playSound('chapter.mp3');
+            core.playSound('chapter.opus');
         }
         ctx.restore();
         ctx.save();

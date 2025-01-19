@@ -209,7 +209,7 @@ export class ArrowProjectile extends Projectile<TowerBoss> {
     ai(boss: TowerBoss, time: number, frame: number): void {
         if (time > 3000) {
             if (!this.sounded) {
-                core.playSound('arrow.mp3');
+                core.playSound('arrow.opus');
                 this.sounded = true;
             }
             const progress = (time - 3000) / 2000;
@@ -531,7 +531,7 @@ export class ThunderProjectile extends Projectile<TowerBoss> {
     ai(boss: TowerBoss, time: number, frame: number): void {
         if (time > 500) {
             if (!this.sounded) {
-                core.playSound('thunder.mp3');
+                core.playSound('thunder.opus');
                 this.sounded = true;
             }
         }
@@ -687,7 +687,7 @@ export class ThunderBallProjectile extends Projectile<TowerBoss> {
         if (this.damaged) return false;
         this.damaged = true;
         target.hp -= this.damage;
-        core.playSound('electron.mp3');
+        core.playSound('electron.opus');
         popDamage(this.damage, this.boss, '#cfe6fc');
         return true;
     }
@@ -695,7 +695,7 @@ export class ThunderBallProjectile extends Projectile<TowerBoss> {
     ai(boss: TowerBoss, time: number, frame: number): void {
         if (time > 3000) {
             if (!this.sounded) {
-                core.playSound('electron.mp3');
+                core.playSound('electron.opus');
                 this.sounded = true;
             }
             const dt = time - 3000;
@@ -958,7 +958,7 @@ export class ChainProjectile extends Projectile<TowerBoss> {
         if (this.damaged) return false;
         target.hp -= this.damage;
         this.damaged = true;
-        core.playSound('electron.mp3');
+        core.playSound('electron.opus');
         popDamage(this.damage, this.boss, '#8affd6');
         return true;
     }

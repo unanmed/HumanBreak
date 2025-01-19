@@ -166,7 +166,7 @@ export namespace BluePalace {
         }
 
         core.lockControl();
-        core.playSound('door.mp3');
+        core.playSound('door.opus');
 
         const Adapter = Mota.require('module', 'Render').RenderAdapter;
         const adapter = Adapter.get<LayerDoorAnimate>('door-animate');

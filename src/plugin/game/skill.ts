@@ -142,7 +142,7 @@ export function jumpSkill(callback?: () => void) {
             callback?.();
             return false;
         }
-        core.playSound('015-Jump01.ogg');
+        core.playSound('015-Jump01.opus');
         core.insertAction(
             [{ type: 'jumpHero', loc: [toLoc.x, toLoc.y], time: 500 }],
             void 0,
@@ -169,7 +169,7 @@ export function jumpSkill(callback?: () => void) {
             callback?.();
             return false;
         }
-        core.playSound('015-Jump01.ogg');
+        core.playSound('015-Jump01.opus');
         core.insertAction(
             [
                 {

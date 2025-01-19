@@ -164,7 +164,6 @@ interface PluginInterface {
     remainEnemy_g: typeof import('../plugin/game/enemy/remainEnemy');
     chase_g: typeof import('../plugin/game/chase');
     skill_g: typeof import('../plugin/game/skill');
-    towerBoss_g: typeof import('../plugin/game/towerBoss');
     itemDetail_g: typeof import('../plugin/game/fx/itemDetail');
     checkBlock_g: typeof import('../plugin/game/enemy/checkblock');
 }
