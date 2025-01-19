@@ -340,10 +340,24 @@ export class AudioRoute
     status: AudioStatus = AudioStatus.Stoped;
     /** 暂停时刻 */
     private pauseTime: number = 0;
+    /** 暂停时播放了多长时间 */
+    private pauseCurrentTime: number = 0;
 
     /** 音频时长，单位秒 */
     get duration() {
         return this.source.duration;
+    }
+    /** 当前播放了多长时间，单位秒 */
+    get currentTime() {
+        if (this.status === AudioStatus.Paused) {
+            return this.pauseCurrentTime;
+        } else {
+            return this.source.currentTime;
+        }
+    }
+    set currentTime(time: number) {
+        this.source.stop();
+        this.source.play(time);
     }
 
     private shouldStop: boolean = false;
@@ -430,6 +444,7 @@ export class AudioRoute
         ) {
             return;
         }
+        this.pauseCurrentTime = this.source.currentTime;
         const time = this.source.stop();
         this.pauseTime = time;
         if (this.shouldStop) {

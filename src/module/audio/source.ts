@@ -24,6 +24,8 @@ export abstract class AudioSource
 
     /** 获取音频时长 */
     abstract get duration(): number;
+    /** 获取当前音频播放了多长时间 */
+    abstract get currentTime(): number;
 
     constructor(public readonly ac: AudioContext) {
         super();
@@ -81,7 +83,9 @@ export class AudioStreamSource extends AudioSource implements IStreamReader {
     /** 歌曲时长，加载完毕之前保持为 0 */
     duration: number = 0;
     /** 当前已经播放了多长时间 */
-    // readonly currentTime: number = -1;
+    get currentTime(): number {
+        return this.ac.currentTime - this.lastStartTime + this.lastStartWhen;
+    }
     /** 在流传输阶段，至少缓冲多长时间的音频之后才开始播放，单位秒 */
     bufferPlayDuration: number = 1;
     /** 音频的采样率，未成功解析出之前保持为 0 */
@@ -92,6 +96,8 @@ export class AudioStreamSource extends AudioSource implements IStreamReader {
 
     private target?: IAudioInput;
 
+    /** 上一次播放是从何时开始的 */
+    private lastStartWhen: number = 0;
     /** 开始播放时刻 */
     private lastStartTime: number = 0;
     /** 上一次播放的缓存长度 */
@@ -492,8 +498,12 @@ export class AudioBufferSource extends AudioSource {
     private loop: boolean = false;
 
     duration: number = 0;
-    // readonly currentTime: number = -1;
+    get currentTime(): number {
+        return this.ac.currentTime - this.lastStartTime + this.lastStartWhen;
+    }
 
+    /** 上一次播放是从何时开始的 */
+    private lastStartWhen: number = 0;
     /** 播放开始时刻 */
     private lastStartTime: number = 0;
     private target?: IAudioInput;
