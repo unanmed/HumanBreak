@@ -376,6 +376,16 @@ export class AudioRoute
     ) {
         super();
         this.output = source.output;
+        source.on('end', () => {
+            if (this.status === AudioStatus.Playing) {
+                this.status = AudioStatus.Stoped;
+            }
+        });
+        source.on('play', () => {
+            if (this.status !== AudioStatus.Playing) {
+                this.status = AudioStatus.Playing;
+            }
+        });
     }
 
     /**
