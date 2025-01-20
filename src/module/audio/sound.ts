@@ -46,6 +46,13 @@ export class SoundPlayer<
     }
 
     /**
+     * 获取音量大小
+     */
+    getVolume() {
+        return this.gain.getVolume();
+    }
+
+    /**
      * 添加一个音效
      * @param id 音效名称
      * @param data 音效的Uint8Array数据

@@ -385,8 +385,6 @@ export class AudioStreamSource extends AudioSource implements IStreamReader {
         this.createSourceNode(this.buffer);
         this.output.start(0, when);
         this.playing = true;
-        console.log(when);
-
         this.output.addEventListener('ended', () => {
             this.playing = false;
             this.emit('end');

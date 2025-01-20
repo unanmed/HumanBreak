@@ -79,6 +79,13 @@ export class BgmController<
     }
 
     /**
+     * 获取总音量大小
+     */
+    getVolume() {
+        return this.mainGain.getVolume();
+    }
+
+    /**
      * 设置是否启用
      * @param enabled 是否启用
      */
