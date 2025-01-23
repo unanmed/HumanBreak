@@ -42,9 +42,9 @@ export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
             document.body.removeEventListener('touchstart', func);
             document.body.removeEventListener('keydown', func);
         };
-        document.body.addEventListener('mousedown', func);
-        document.body.addEventListener('touchstart', func);
-        document.body.addEventListener('keydown', func);
+        document.body.addEventListener('mousedown', func, { capture: true });
+        document.body.addEventListener('touchstart', func, { capture: true });
+        document.body.addEventListener('keydown', func, { capture: true });
     }
 
     /**
