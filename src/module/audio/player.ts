@@ -35,6 +35,16 @@ export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
         this.ac = new AudioContext();
         this.gain = this.ac.createGain();
         this.gain.connect(this.ac.destination);
+
+        const func = () => {
+            this.ac.resume();
+            document.body.removeEventListener('mousedown', func);
+            document.body.removeEventListener('touchstart', func);
+            document.body.removeEventListener('keydown', func);
+        };
+        document.body.addEventListener('mousedown', func);
+        document.body.addEventListener('touchstart', func);
+        document.body.addEventListener('keydown', func);
     }
 
     /**
