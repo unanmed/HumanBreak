@@ -7,7 +7,6 @@ import {
 } from '../preset/layer';
 import type { EnemyCollection } from '@/game/enemy/damage';
 import { ILineProperty } from '../preset/graphics';
-import { SizedCanvasImageSource } from '../preset';
 
 export interface CustomProps {
     _item: (props: BaseProps) => RenderItem;

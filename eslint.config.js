@@ -63,7 +63,8 @@ export default tseslint.config(
                 }
             ],
             '@typescript-eslint/no-namespace': 'off',
-            '@typescript-eslint/no-this-alias': 'off'
+            '@typescript-eslint/no-this-alias': 'off',
+            'no-console': 'warn'
         }
     },
     eslintPluginPrettierRecommended

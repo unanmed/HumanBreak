@@ -232,8 +232,6 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     /** 当前元素是否为根元素 */
     readonly isRoot: boolean = false;
 
-    protected needUpdate: boolean = false;
-
     /** 该元素的变换矩阵 */
     transform: Transform = new Transform();
 
@@ -250,7 +248,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     /** 渲染缓存信息 */
     protected cache: MotaOffscreenCanvas2D = new MotaOffscreenCanvas2D();
     /** 是否需要更新缓存 */
-    protected cacheDirty: boolean = true;
+    protected cacheDirty: boolean = false;
     /** 是否启用缓存机制 */
     readonly enableCache: boolean = true;
     /** 是否启用transform下穿机制，即画布的变换是否会继续作用到下一层画布 */
@@ -303,7 +301,6 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this.width = width;
         this.height = height;
         this.cache.size(width, height);
-        this.cacheDirty = true;
         this.update(this);
     }
 
@@ -315,7 +312,6 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     renderContent(canvas: MotaOffscreenCanvas2D, transform: Transform) {
         if (this.hidden) return;
         this.emit('beforeRender', transform);
-        this.needUpdate = false;
         const tran = this.transformFallThrough ? transform : this.transform;
 
         const ax = -this.anchorX * this.width;
@@ -339,6 +335,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
 
             canvas.ctx.drawImage(this.cache.canvas, ax, ay, width, height);
         } else {
+            this.cacheDirty = false;
             canvas.ctx.translate(ax, ay);
             this.render(canvas, tran);
         }
@@ -403,8 +400,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     }
 
     update(item: RenderItem<any> = this): void {
-        if (this.needUpdate) return;
-        this.needUpdate = true;
+        if (this.cacheDirty) return;
         this.cacheDirty = true;
         if (this.hidden) return;
         this.parent?.update(item);
@@ -513,7 +509,6 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         parent.children.add(this);
         this._parent = parent;
         parent.requestSort();
-        this.needUpdate = false;
         this.update();
         if (this._id !== '') {
             const root = this.findRoot();

@@ -15,3 +15,5 @@ Mota.register('module', 'Audio', { soundPlayer });
 export * from './weather';
 export * from './audio';
 export * from './loader';
+export * from './fallback';
+export * from './ui';

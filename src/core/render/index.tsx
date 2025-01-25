@@ -13,7 +13,7 @@ import { PopText } from '@/plugin/fx/pop';
 import { FloorChange } from '@/plugin/fallback';
 import { createApp } from './renderer';
 import { defineComponent } from 'vue';
-import { Textbox } from './components';
+import { Textbox } from '../../module/ui/components';
 import { ILayerGroupRenderExtends, ILayerRenderExtends } from './preset';
 import { Props } from './utils';
 
@@ -53,7 +53,7 @@ Mota.require('var', 'loading').once('coreInit', () => {
             fontFamily: 'normal',
             titleFont: '700 20px normal',
             winskin: 'winskin2.png',
-            interval: 25,
+            interval: 100,
             lineHeight: 6
         };
 
@@ -101,4 +101,4 @@ export * from './shader';
 export * from './sprite';
 export * from './transform';
 export * from './utils';
-export * from './components';
+export * from '../../module/ui/components';

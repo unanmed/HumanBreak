@@ -29,19 +29,23 @@ export class MotaRenderer extends Container {
         this.transform.translate(240, 240);
 
         MotaRenderer.list.set(id, this);
+
+        const update = () => {
+            this.requestRenderFrame(() => {
+                this.refresh();
+                update();
+            });
+        };
+
+        update();
     }
 
     update(_item: RenderItem = this) {
-        if (this.needUpdate || this.hidden) return;
-        this.needUpdate = true;
-        this.requestRenderFrame(() => {
-            this.refresh();
-        });
+        this.cacheDirty = true;
     }
 
     protected refresh(): void {
-        if (!this.needUpdate) return;
-        this.needUpdate = false;
+        if (!this.cacheDirty) return;
         this.target.clear();
         this.renderContent(this.target, Transform.identity);
     }

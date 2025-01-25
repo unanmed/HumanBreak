@@ -17,7 +17,6 @@ import {
     CustomProps,
     DamageProps,
     EllipseProps,
-    GL2Props,
     IconProps,
     ImageProps,
     LayerGroupProps,
@@ -33,9 +32,8 @@ import {
     WinskinProps
 } from './props';
 import { ERenderItemEvent, RenderItem } from '../item';
-import { ESpriteEvent, Sprite } from '../sprite';
+import { ESpriteEvent } from '../sprite';
 import { EContainerEvent } from '../container';
-import { EGL2Event } from '../gl2';
 import {
     EIconEvent,
     EImageEvent,
