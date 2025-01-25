@@ -367,6 +367,7 @@ export class Winskin extends RenderItem<EWinskinEvent> {
         const w = canvas.width;
         const h = canvas.height;
         const sz = this.borderSize / 32;
+        ctx.drawImage(img, 0, 0, 128, 128, x + 2, y + 2, w - 4, h - 4);
         ctx.drawImage(img, 128, 0, 16, 16, x, y, 16 * sz, 16 * sz);
         let dx;
         for (dx = 0; dx < w - 64 * sz; dx += 32 * sz) {
