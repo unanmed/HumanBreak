@@ -35,16 +35,6 @@ export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
         this.ac = new AudioContext();
         this.gain = this.ac.createGain();
         this.gain.connect(this.ac.destination);
-
-        const func = () => {
-            this.ac.resume();
-            document.body.removeEventListener('mousedown', func);
-            document.body.removeEventListener('touchstart', func);
-            document.body.removeEventListener('keydown', func);
-        };
-        document.body.addEventListener('mousedown', func, { capture: true });
-        document.body.addEventListener('touchstart', func, { capture: true });
-        document.body.addEventListener('keydown', func, { capture: true });
     }
 
     /**
@@ -427,9 +417,10 @@ export class AudioRoute
      * 开始播放这个音频
      * @param when 从音频的什么时候开始播放，单位秒
      */
-    play(when: number = 0) {
+    async play(when: number = 0) {
         if (this.status === AudioStatus.Playing) return;
         this.link();
+        await this.player.ac.resume();
         if (this.effectRoute.length > 0) {
             const first = this.effectRoute[0];
             this.source.connect(first);
