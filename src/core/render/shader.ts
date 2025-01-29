@@ -1,5 +1,4 @@
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
-import { Transform } from './transform';
 import { EGL2Event, GL2, GL2Program, IGL2ProgramPrefix } from './gl2';
 
 const SHADER_PREFIX: IGL2ProgramPrefix = {
@@ -37,51 +36,26 @@ export interface EShaderEvent extends EGL2Event {}
 export class Shader<E extends EShaderEvent = EShaderEvent> extends GL2<
     EShaderEvent | E
 > {
-    setHD(hd: boolean): void {
-        super.setHD(hd);
-        this.sizeGL(this.width, this.height);
-    }
-
-    size(width: number, height: number): void {
-        super.size(width, height);
-        this.sizeGL(width, height);
-    }
-
-    private sizeGL(width: number, height: number) {
-        const ratio = this.highResolution ? devicePixelRatio : 1;
-        const scale = ratio * core.domStyle.scale;
-        this.canvas.width = width * scale;
-        this.canvas.height = height * scale;
-    }
-
-    protected preDraw(
+    protected drawScene(
         canvas: MotaOffscreenCanvas2D,
-        _transform: Transform,
-        _gl: WebGL2RenderingContext,
+        gl: WebGL2RenderingContext,
         program: GL2Program
-    ): boolean {
-        if (!program.modified) return false;
+    ): void {
+        if (!program.modified) return;
         const tex = program.getTexture('u_sampler');
-        if (!tex) return false;
+        if (!tex) return;
         const c = canvas.canvas;
         if (tex.width === c.width && tex.height === c.height) {
             tex.sub(c, 0, 0, c.width, c.height);
         } else {
             tex.set(c);
         }
-        return true;
+        this.draw(gl, program);
     }
-
-    protected postDraw(
-        _canvas: MotaOffscreenCanvas2D,
-        _transform: Transform,
-        _gl: WebGL2RenderingContext,
-        _program: GL2Program
-    ): void {}
 }
 
 export class ShaderProgram extends GL2Program {
-    protected readonly prefix: IGL2ProgramPrefix = SHADER_PREFIX;
+    protected override readonly prefix: IGL2ProgramPrefix = SHADER_PREFIX;
 
     constructor(gl2: GL2, vs?: string, fs?: string) {
         super(gl2, vs, fs);

@@ -184,62 +184,66 @@ export abstract class GL2<E extends EGL2Event = EGL2Event> extends RenderItem<
         this.init();
     }
 
+    setHD(hd: boolean): void {
+        super.setHD(hd);
+        this.sizeGL(this.width, this.height);
+    }
+
+    size(width: number, height: number): void {
+        super.size(width, height);
+        this.sizeGL(width, height);
+    }
+
+    private sizeGL(width: number, height: number) {
+        const ratio = this.highResolution ? devicePixelRatio : 1;
+        const scale = ratio * core.domStyle.scale;
+        this.canvas.width = width * scale;
+        this.canvas.height = height * scale;
+    }
+
     protected render(
         canvas: MotaOffscreenCanvas2D,
         transform: Transform
     ): void {
-        if (!GL2.support || !this.program) return;
+        if (!GL2.support || !this.program || !this.gl) return;
         const compile = this.program.requestCompile();
         if (compile) {
             this.gl.useProgram(this.program.program);
         }
 
         if (this.cacheDirty) {
-            this.drawScene(canvas, transform);
+            // 清空画布
+            const gl = this.gl;
+            gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+            gl.clearColor(0, 0, 0, 0);
+            gl.clearDepth(1);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            this.drawScene(canvas, gl, this.program, transform);
             this.cacheDirty = false;
         }
 
         canvas.ctx.drawImage(this.canvas, 0, 0, this.width, this.height);
     }
 
-    drawScene(canvas: MotaOffscreenCanvas2D, transform: Transform) {
-        const gl = this.gl;
-        const program = this.program;
-        if (!gl || !program) return;
-        const ready = program.ready();
-        if (!ready) return;
-
-        // 清空画布
-        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-        gl.clearColor(0, 0, 0, 0);
-        gl.clearDepth(1);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-        const pre = this.preDraw(canvas, transform, gl, program);
-        if (!pre) {
-            this.postDraw(canvas, transform, gl, program);
-            return;
-        }
-
-        this.draw(gl, program);
-
-        this.postDraw(canvas, transform, gl, program);
-    }
-
-    protected abstract preDraw(
+    /**
+     * 渲染当前 gl2 画布
+     * @param canvas 渲染至的目标画布，注意系统会自动将 gl2 画布渲染至目标画布，不需要手动画到该画布上
+     * @param gl 当前正在渲染的 gl2 画布
+     * @param program 当前元素正在使用的着色器程序
+     * @param transform 当前元素相对父元素的变换矩阵
+     */
+    protected abstract drawScene(
         canvas: MotaOffscreenCanvas2D,
-        transform: Transform,
         gl: WebGL2RenderingContext,
-        program: GL2Program
-    ): boolean;
-
-    protected abstract postDraw(
-        canvas: MotaOffscreenCanvas2D,
-        transform: Transform,
-        gl: WebGL2RenderingContext,
-        program: GL2Program
+        program: GL2Program,
+        transform: Transform
     ): void;
 
+    /**
+     * 执行顶点绘制
+     * @param gl 当前正在渲染的 gl2 画布
+     * @param program 当前元素正在使用的着色器程序
+     */
     draw(gl: WebGL2RenderingContext, program: GL2Program) {
         const indices = program.usingIndices;
         const param = program.getDrawParams(program.renderMode);
@@ -1675,7 +1679,7 @@ export class GL2Program extends EventEmitter<ShaderProgramEvent> {
     }
 
     /**
-     * 摧毁这个着色器程序，不要直接调用，请使用 {@link Shader.deleteProgram} 来删除一个着色器程序
+     * 摧毁这个着色器程序，不要直接调用，请使用 {@link GL2.deleteProgram} 来删除一个着色器程序
      */
     destroy() {
         this.clearProgram();

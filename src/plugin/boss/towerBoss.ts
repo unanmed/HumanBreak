@@ -5,7 +5,6 @@ import { MotaRenderer } from '@/core/render/render';
 import { LayerGroup } from '@/core/render/preset/layer';
 import { RenderItem } from '@/core/render/item';
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
-import { Transform } from '@/core/render/transform';
 import { Animation, hyper, power, sleep, Transition } from 'mutate-animate';
 import { Container } from '@/core/render/container';
 import {
@@ -22,7 +21,7 @@ import {
 import { IStateDamageable } from '@/game/state/interface';
 import { HeroRenderer } from '@/core/render/preset/hero';
 import { controller } from '@/module/weather';
-import { Pop, PopText } from '../fx/pop';
+import { Pop } from '../fx/pop';
 
 Mota.require('var', 'loading').once('coreInit', () => {
     const shader = new Shader();
@@ -67,7 +66,7 @@ export class TowerBoss extends BarrageBoss {
 
     readonly hitbox: Hitbox.Rect;
     readonly state: IStateDamageable;
-    readonly main: BossEffect;
+    readonly main: BossSprite;
 
     /** 血条显示元素 */
     private healthBar: HealthBar;
@@ -127,7 +126,7 @@ export class TowerBoss extends BarrageBoss {
 
         this.healthBar = new HealthBar('absolute');
         this.word = new Word('absolute');
-        this.main = new BossEffect('absolute', this);
+        this.main = new BossSprite('absolute', this);
         const render = MotaRenderer.get('render-main')!;
         this.group = render.getElementById('layer-main') as LayerGroup;
         this.mapDraw = render.getElementById('map-draw') as Container;
@@ -135,7 +134,9 @@ export class TowerBoss extends BarrageBoss {
 
         this.healthBar.init();
         this.word.init();
-        this.main.init();
+        this.main.size(480, 480);
+        this.main.setHD(true);
+        this.main.setZIndex(80);
 
         TowerBoss.effect.setTransform(this.group.camera);
 
@@ -201,7 +202,7 @@ export class TowerBoss extends BarrageBoss {
     /**
      * 用于全局检测，例如受伤、攻击boss等
      */
-    check(time: number) {
+    check(_time: number) {
         this.checkLose();
     }
 
@@ -298,7 +299,7 @@ export class TowerBoss extends BarrageBoss {
         this.stageProgress = 0;
     }
 
-    private aiPrologue(time: number, frame: number) {
+    private aiPrologue(time: number, _frame: number) {
         // stageProgress:
         // 0: 开始; 1: 开始血条动画
 
@@ -362,7 +363,7 @@ export class TowerBoss extends BarrageBoss {
         }
     }
 
-    private aiStage1(time: number, frame: number) {
+    private aiStage1(time: number, _frame: number) {
         // stageProgress:
         // 0: 开始; 1,2,3,4: 对应对话
 
@@ -394,7 +395,7 @@ export class TowerBoss extends BarrageBoss {
         }
     }
 
-    private aiDialogue1(time: number, frame: number) {
+    private aiDialogue1(time: number, _frame: number) {
         this.changeStage(TowerBossStage.Stage2, time);
         this.attackTime = 3;
         this.skill4Time = 5;
@@ -441,7 +442,7 @@ export class TowerBoss extends BarrageBoss {
         }
     }
 
-    private aiStage2(time: number, frame: number) {
+    private aiStage2(time: number, _frame: number) {
         const skill4Release = this.skill4Time * this.skill4Interval;
         const skill5Release = this.skill5Time * this.skill5Interval;
         const attack = this.attackTime * this.attackInterval;
@@ -496,7 +497,7 @@ export class TowerBoss extends BarrageBoss {
         core.setBlock(557, 7, n + 1);
     }
 
-    private aiDialogue2(time: number, frame: number) {
+    private aiDialogue2(time: number, _frame: number) {
         this.changeStage(TowerBossStage.Stage3, time);
         this.attackTime = 3;
         this.terrainClose(1);
@@ -539,7 +540,7 @@ export class TowerBoss extends BarrageBoss {
         }
     }
 
-    private aiStage3(time: number, frame: number) {
+    private aiStage3(time: number, _frame: number) {
         const skill6Release = this.skill6Time * this.skill6Interval;
         const skill7Release = this.skill7Time * this.skill7Interval;
         const attack = this.attackTime * this.attackInterval;
@@ -567,7 +568,7 @@ export class TowerBoss extends BarrageBoss {
         }
     }
 
-    private aiStage4(time: number, frame: number) {
+    private aiStage4(time: number, _frame: number) {
         const skill6Release = this.skill6Time * this.skill6Interval;
         const skill7Release = this.skill7Time * this.skill7Interval;
         const attack = this.attackTime * this.attackInterval;
@@ -595,7 +596,7 @@ export class TowerBoss extends BarrageBoss {
         }
     }
 
-    private aiStage5(time: number, frame: number) {
+    private aiStage5(time: number, _frame: number) {
         const skill6Release = this.skill6Time * this.skill6Interval;
         const skill7Release = this.skill7Time * this.skill7Interval;
         const attack = this.attackTime * this.attackInterval;
@@ -618,7 +619,7 @@ export class TowerBoss extends BarrageBoss {
         }
     }
 
-    private aiEnd(time: number, frame: number) {
+    private aiEnd(_time: number, _frame: number) {
         this.end();
         core.insertAction([
             { type: 'openDoor', loc: [13, 6], floorId: 'MT19' },
@@ -628,29 +629,6 @@ export class TowerBoss extends BarrageBoss {
             { type: 'showStatusBar' }
         ]);
     }
-}
-
-class BossEffect extends BossSprite<TowerBoss> {
-    /**
-     * 初始化
-     */
-    init() {
-        this.size(480, 480);
-        this.setHD(true);
-        this.setZIndex(80);
-    }
-
-    protected preDraw(
-        canvas: MotaOffscreenCanvas2D,
-        transform: Transform
-    ): boolean {
-        return true;
-    }
-
-    protected postDraw(
-        canvas: MotaOffscreenCanvas2D,
-        transform: Transform
-    ): void {}
 }
 
 interface TextRenderable {
@@ -747,10 +725,7 @@ class Word extends RenderItem {
         return res;
     }
 
-    protected render(
-        canvas: MotaOffscreenCanvas2D,
-        transform: Transform
-    ): void {
+    protected render(canvas: MotaOffscreenCanvas2D): void {
         const data = this.getTextRenerable();
         const ctx = canvas.ctx;
         ctx.font = '18px "normal"';
@@ -832,10 +807,7 @@ class HealthBar extends RenderItem {
         this.status = HealthBarStatus.End;
     }
 
-    protected render(
-        canvas: MotaOffscreenCanvas2D,
-        transform: Transform
-    ): void {
+    protected render(canvas: MotaOffscreenCanvas2D): void {
         const ctx = canvas.ctx;
 
         const hp = this.trans.value.hp;

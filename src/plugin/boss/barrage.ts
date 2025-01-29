@@ -103,7 +103,7 @@ export abstract class BarrageBoss extends EventEmitter<BarrageBossEvent> {
     }
 }
 
-export abstract class BossSprite<
+export class BossSprite<
     T extends BarrageBoss = BarrageBoss
 > extends RenderItem {
     /** 这个sprite所属的boss */
@@ -115,36 +115,16 @@ export abstract class BossSprite<
     }
 
     /**
-     * 在内置渲染函数执行前渲染内容，返回false会阻止内置渲染函数执行
-     * @param canvas 渲染至的画布
-     * @param transform 渲染时的变换矩阵
+     * override 此方法来实现自定义渲染，默认会调用 {@link renderProjectiles} 方法。
+     * 关于本方法，参考 {@link RenderItem.render}
+     * @param canvas 渲染至的目标画布
+     * @param transform 当前画布相对于父元素的变换矩阵
      */
-    protected abstract preDraw(
-        canvas: MotaOffscreenCanvas2D,
-        transform: Transform
-    ): boolean;
-
-    /**
-     * 在内置渲染函数执行后渲染内容，如果preDraw返回false，也会执行本函数
-     * @param canvas 渲染至的画布
-     * @param transform 渲染时的变换矩阵
-     */
-    protected abstract postDraw(
-        canvas: MotaOffscreenCanvas2D,
-        transform: Transform
-    ): void;
-
     protected render(
         canvas: MotaOffscreenCanvas2D,
         transform: Transform
     ): void {
-        const pre = this.preDraw(canvas, transform);
-        if (!pre) {
-            this.postDraw(canvas, transform);
-            return;
-        }
         this.renderProjectiles(canvas, transform);
-        this.postDraw(canvas, transform);
     }
 
     /**

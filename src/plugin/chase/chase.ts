@@ -142,7 +142,7 @@ export class Chase extends EventEmitter<ChaseEvent> {
 
         this.emit('frame', nTime, fTime);
 
-        while (1) {
+        while (true) {
             const time = this.onTimeListener[0];
             if (!time) break;
             if (time.time <= nTime) {
@@ -157,7 +157,7 @@ export class Chase extends EventEmitter<ChaseEvent> {
         const floor = this.onFloorTimeListener[this.nowFloor];
         if (!floor) return;
 
-        while (1) {
+        while (true) {
             const time = floor[0];
             if (!time) break;
             if (time.time <= fTime) {
