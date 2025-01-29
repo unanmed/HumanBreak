@@ -354,8 +354,8 @@ export class HeroRenderer
     moveAs(x: number, y: number, time: number, fn: TimingFn<3>): Promise<void> {
         if (!this.moving) return Promise.resolve();
         if (!this.renderable) return Promise.resolve();
-        let nowZIndex = fn(0)[2];
-        let startTime = Date.now();
+        const nowZIndex = fn(0)[2];
+        const startTime = Date.now();
         return new Promise(res => {
             this.layer.delegateTicker(
                 () => {
@@ -414,7 +414,7 @@ export class HeroRenderer
         layer.removeTicker(this.moveId);
     }
 
-    onMovingUpdate(layer: Layer, renderable: LayerMovingRenderable[]): void {
+    onMovingUpdate(_layer: Layer, renderable: LayerMovingRenderable[]): void {
         if (this.renderable) {
             renderable.push(this.renderable);
             this.emit('append', renderable);

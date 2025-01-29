@@ -7,7 +7,6 @@ import {
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
 import { Transform } from './transform';
 import { ElementNamespace, ComponentInternalInstance } from 'vue';
-import { logger } from '../common/logger';
 
 export interface ESpriteEvent extends ERenderItemEvent {}
 

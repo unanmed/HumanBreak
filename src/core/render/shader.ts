@@ -1,5 +1,4 @@
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
-import { ERenderItemEvent, RenderItem, RenderItemPosition } from './item';
 import { Transform } from './transform';
 import { EGL2Event, GL2, GL2Program, IGL2ProgramPrefix } from './gl2';
 
@@ -57,8 +56,8 @@ export class Shader<E extends EShaderEvent = EShaderEvent> extends GL2<
 
     protected preDraw(
         canvas: MotaOffscreenCanvas2D,
-        transform: Transform,
-        gl: WebGL2RenderingContext,
+        _transform: Transform,
+        _gl: WebGL2RenderingContext,
         program: GL2Program
     ): boolean {
         if (!program.modified) return false;
@@ -74,10 +73,10 @@ export class Shader<E extends EShaderEvent = EShaderEvent> extends GL2<
     }
 
     protected postDraw(
-        canvas: MotaOffscreenCanvas2D,
-        transform: Transform,
-        gl: WebGL2RenderingContext,
-        program: GL2Program
+        _canvas: MotaOffscreenCanvas2D,
+        _transform: Transform,
+        _gl: WebGL2RenderingContext,
+        _program: GL2Program
     ): void {}
 }
 

@@ -170,7 +170,7 @@ export class LayerGroupFloorBinder
         LayerGroupFloorBinder.activedBinder.add(this);
     }
 
-    onLayerAdd(group: LayerGroup, layer: Layer): void {
+    onLayerAdd(_group: LayerGroup, layer: Layer): void {
         this.checkLayerExtends(layer);
     }
 
@@ -300,7 +300,7 @@ export class LayerFloorBinder implements ILayerRenderExtends {
         this.checkListen();
     }
 
-    onDestroy(layer: Layer) {
+    onDestroy(_layer: Layer) {
         LayerFloorBinder.listenedBinder.delete(this);
         this.parent?.layerBinders.delete(this);
     }
@@ -397,11 +397,11 @@ export class LayerDoorAnimate implements ILayerRenderExtends {
         doorAdapter.add(this);
     }
 
-    onMovingUpdate(layer: Layer, renderable: LayerMovingRenderable[]): void {
+    onMovingUpdate(_layer: Layer, renderable: LayerMovingRenderable[]): void {
         renderable.push(...this.moving);
     }
 
-    onDestroy(layer: Layer): void {
+    onDestroy(_layer: Layer): void {
         doorAdapter.remove(this);
     }
 }

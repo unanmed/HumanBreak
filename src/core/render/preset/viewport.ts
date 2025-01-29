@@ -1,4 +1,3 @@
-import { logger } from '@/core/common/logger';
 import { HeroRenderer } from './hero';
 import { ILayerGroupRenderExtends, LayerGroup } from './layer';
 import { LayerGroupFloorBinder } from './floor';
@@ -162,7 +161,7 @@ export class FloorViewport implements ILayerGroupRenderExtends {
         let yStartTime: number = Date.now();
         let ending: boolean = false;
         // 这个数等于 sinh(2)，用这个数的话，可以正好在刚开始移动的时候达到1的斜率，效果会比较好
-        let transitionTime = this.hero!.speed * 3.626860407847019;
+        const transitionTime = this.hero!.speed * 3.626860407847019;
 
         const setTargetX = (x: number, time: number) => {
             if (x === xTarget) return;

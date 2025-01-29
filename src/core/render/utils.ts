@@ -3,6 +3,8 @@ import { RenderAdapter } from './adapter';
 import { FloorViewport } from './preset/viewport';
 import { JSX } from 'vue/jsx-runtime';
 import { DefineComponent, DefineSetupFnComponent } from 'vue';
+import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
+import { Transform } from './transform';
 
 export type Props<
     T extends
@@ -49,4 +51,14 @@ export function multiplyTiming(timing1: TimingFn, timing2: TimingFn): TimingFn {
 export function isSetEqual<T>(set1: Set<T>, set2: Set<T>) {
     if (set1 === set2) return true;
     else return set1.size === set2.size && set1.isSubsetOf(set2);
+}
+
+export function transformCanvas(
+    canvas: MotaOffscreenCanvas2D,
+    transform: Transform
+) {
+    const { ctx } = canvas;
+    const mat = transform.mat;
+    const [a, b, , c, d, , e, f] = mat;
+    ctx.transform(a, b, c, d, e, f);
 }

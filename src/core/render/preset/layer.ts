@@ -2,7 +2,7 @@ import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 import { Container, EContainerEvent } from '../container';
 import { Sprite } from '../sprite';
 import { TimingFn } from 'mutate-animate';
-import { IAnimateFrame, renderEmits, RenderItem } from '../item';
+import { RenderItem } from '../item';
 import { logger } from '@/core/common/logger';
 import { RenderableData, texture } from '../cache';
 import { BlockCacher, CanvasCacheItem, ICanvasCacheItem } from './block';
@@ -11,6 +11,7 @@ import { LayerFloorBinder, LayerGroupFloorBinder } from './floor';
 import { RenderAdapter } from '../adapter';
 import { ElementNamespace, ComponentInternalInstance } from 'vue';
 import { Camera } from '../camera';
+import { IAnimateFrame, renderEmits } from '../frame';
 
 export interface ILayerGroupRenderExtends {
     /** 拓展的唯一标识符 */

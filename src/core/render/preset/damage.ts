@@ -6,13 +6,7 @@ import {
     Layer,
     LayerGroup
 } from './layer';
-import { ESpriteEvent, Sprite } from '../sprite';
-import {
-    BlockCacher,
-    CanvasCacheItem,
-    IBlockCacheable,
-    ICanvasCacheItem
-} from './block';
+import { BlockCacher, CanvasCacheItem, ICanvasCacheItem } from './block';
 import type {
     DamageEnemy,
     EnemyCollection,
@@ -21,10 +15,11 @@ import type {
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 import { isNil } from 'lodash-es';
 import { getDamageColor } from '@/plugin/utils';
-import { ERenderItemEvent, RenderItem, transformCanvas } from '../item';
+import { ERenderItemEvent, RenderItem } from '../item';
 import EventEmitter from 'eventemitter3';
 import { Transform } from '../transform';
 import { ElementNamespace, ComponentInternalInstance } from 'vue';
+import { transformCanvas } from '../utils';
 
 const ensureFloorDamage = Mota.require('fn', 'ensureFloorDamage');
 
@@ -75,22 +70,22 @@ export class FloorDamageExtends
         this.update(floor);
     };
 
-    private onSetBlock = (x: number, y: number, floor: FloorIds) => {
-        // this.sprite.enemy?.once('extract', () => {
-        //     if (floor !== this.sprite.enemy?.floorId) return;
-        //     this.sprite.updateBlocks();
-        // });
-        // if (!this.floorBinder.bindThisFloor) {
-        //     this.sprite.enemy?.extract();
-        // }
-    };
+    // private onSetBlock = (x: number, y: number, floor: FloorIds) => {
+    //     this.sprite.enemy?.once('extract', () => {
+    //         if (floor !== this.sprite.enemy?.floorId) return;
+    //         this.sprite.updateBlocks();
+    //     });
+    //     if (!this.floorBinder.bindThisFloor) {
+    //         this.sprite.enemy?.extract();
+    //     }
+    // };
 
     /**
      * 进行楼层更新监听
      */
     private listen() {
         this.floorBinder.on('update', this.onUpdate);
-        this.floorBinder.on('setBlock', this.onSetBlock);
+        // this.floorBinder.on('setBlock', this.onSetBlock);
     }
 
     awake(group: LayerGroup): void {
@@ -106,9 +101,9 @@ export class FloorDamageExtends
         }
     }
 
-    onDestroy(group: LayerGroup): void {
+    onDestroy(_group: LayerGroup): void {
         this.floorBinder.off('update', this.onUpdate);
-        this.floorBinder.off('setBlock', this.onSetBlock);
+        // this.floorBinder.off('setBlock', this.onSetBlock);
     }
 }
 
@@ -259,7 +254,7 @@ export class Damage extends RenderItem<EDamageEvent> {
             blocks.forEach(v => this.dirtyBlocks.add(v));
             this.emit('updateBlocks', blocks);
         } else {
-            this.blockData.forEach((v, i) => {
+            this.blockData.forEach((_v, i) => {
                 this.dirtyBlocks.add(i);
             });
             this.emit('updateBlocks', new Set(this.blockData.keys()));
@@ -473,7 +468,6 @@ export class Damage extends RenderItem<EDamageEvent> {
         // console.time('damage');
         const { ctx } = canvas;
         transformCanvas(canvas, transform);
-        // console.trace();
 
         const render = this.calNeedRender(transform);
         const block = this.block;

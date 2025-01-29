@@ -1,11 +1,10 @@
-import { logger } from '@/core/common/logger';
 import { RenderAdapter } from '../adapter';
-import { Sprite } from '../sprite';
 import { HeroRenderer } from './hero';
 import { ILayerGroupRenderExtends, LayerGroup } from './layer';
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
-import { ERenderItemEvent, RenderItem, transformCanvas } from '../item';
+import { ERenderItemEvent, RenderItem } from '../item';
 import { Transform } from '../transform';
+import { transformCanvas } from '../utils';
 
 export class LayerGroupAnimate implements ILayerGroupRenderExtends {
     static animateList: Set<LayerGroupAnimate> = new Set();

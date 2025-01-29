@@ -5,6 +5,7 @@ import { Ticker, TickerFn } from 'mutate-animate';
 import { Transform } from './transform';
 import { logger } from '../common/logger';
 import { ElementNamespace, ComponentInternalInstance } from 'vue';
+import { transformCanvas } from './utils';
 
 export type RenderFunction = (
     canvas: MotaOffscreenCanvas2D,
@@ -21,7 +22,7 @@ export interface IRenderUpdater {
     update(item?: RenderItem): void;
 }
 
-interface IRenderAnchor {
+export interface IRenderAnchor {
     /** 锚点横坐标，0表示最左端，1表示最右端 */
     anchorX: number;
     /** 锚点纵坐标，0表示最上端，1表示最下端 */
@@ -35,7 +36,7 @@ interface IRenderAnchor {
     setAnchor(x: number, y: number): void;
 }
 
-interface IRenderConfig {
+export interface IRenderConfig {
     /** 是否是高清画布 */
     highResolution: boolean;
     /** 是否启用抗锯齿 */
@@ -76,7 +77,7 @@ export interface IRenderChildable {
     requestSort(): void;
 }
 
-interface IRenderFrame {
+export interface IRenderFrame {
     /**
      * 在下一帧渲染之前执行函数，常用于渲染前数据更新，理论上不应当用于渲染，不保证运行顺序
      * @param fn 执行的函数
@@ -96,7 +97,7 @@ interface IRenderFrame {
     requestRenderFrame(fn: () => void): void;
 }
 
-interface IRenderTickerSupport {
+export interface IRenderTickerSupport {
     /**
      * 委托ticker，让其在指定时间范围内每帧执行对应函数，超过时间后自动删除
      * @param fn 每帧执行的函数
@@ -121,7 +122,7 @@ interface IRenderTickerSupport {
     hasTicker(id: number): boolean;
 }
 
-interface IRenderVueSupport {
+export interface IRenderVueSupport {
     /**
      * 在 jsx, vue 中当属性改变后触发此函数，用于处理响应式等情况
      * @param key 属性键名
@@ -139,12 +140,114 @@ interface IRenderVueSupport {
     ): void;
 }
 
+export const enum MouseType {
+    /** 没有按键按下 */
+    None = 0,
+    /** 左键 */
+    Left = 1 << 0,
+    /** 中键，即按下滚轮 */
+    Middle = 1 << 1,
+    /** 右键 */
+    Right = 1 << 2,
+    /** 侧键后退 */
+    Back = 1 << 3,
+    /** 侧键前进 */
+    Forward = 1 << 4
+}
+
+export const enum WheelType {
+    None,
+    /** 以像素为单位 */
+    Pixel,
+    /** 以行为单位，每行长度视浏览器设置而定，约为 1rem */
+    Line,
+    /** 以页为单位，一般为一个屏幕高度 */
+    Page
+}
+
+export interface IActionEvent {
+    /** 当前事件是监听的哪个元素 */
+    readonly target: RenderItem;
+    /** 这次操作的标识符，在按下、移动、抬起阶段中保持不变 */
+    readonly identifier: number;
+    /** 相对于触发元素左上角的横坐标 */
+    readonly offsetX: number;
+    /** 相对于触发元素左上角的纵坐标 */
+    readonly offsetY: number;
+    /** 相对于整个画布左上角的横坐标 */
+    readonly absoluteX: number;
+    /** 相对于整个画布左上角的纵坐标 */
+    readonly absoluteY: number;
+    /**
+     * 触发的按键种类，会出现在点击、按下、抬起三个事件中，而其他的如移动等该值只会是 {@link MouseType.None}，
+     * 电脑端可以有左键、中键、右键等，手机只会触发左键，每一项的值参考 {@link MouseType}
+     */
+    readonly type: MouseType;
+    /**
+     * 当前按下了哪些按键。该值是一个数字，可以通过位运算判断是否按下了某个按键。
+     * 例如通过 `buttons & MouseType.Left` 来判断是否按下了左键。
+     */
+    readonly buttons: number;
+    /** 触发时是否按下了 alt 键 */
+    readonly altKey: boolean;
+    /** 触发时是否按下了 shift 键 */
+    readonly shiftKey: boolean;
+    /** 触发时是否按下了 ctrl 键 */
+    readonly ctrlKey: boolean;
+    /** 触发时是否按下了 Windows(Windows) / Command(Mac) 键 */
+    readonly metaKey: boolean;
+
+    /**
+     * 调用后将停止事件的继续传播。
+     * 在捕获阶段，将会阻止捕获的进一步进行，在冒泡阶段，将会阻止冒泡的进一步进行。
+     * 如果当前元素有很多监听器，该方法并不会阻止其他监听器的执行。
+     */
+    stopPropagation(): void;
+}
+
+export interface IWheelEvent extends IActionEvent {
+    /** 滚轮事件的鼠标横向滚动量 */
+    readonly wheelX: number;
+    /** 滚轮事件的鼠标纵向滚动量 */
+    readonly wheelY: number;
+    /** 滚轮事件的鼠标垂直屏幕的滚动量 */
+    readonly wheelZ: number;
+    /** 滚轮事件的滚轮类型，表示了对应值的单位 */
+    readonly wheelType: WheelType;
+}
+
 export interface ERenderItemEvent {
     beforeRender: [transform: Transform];
     afterRender: [transform: Transform];
     destroy: [];
-    /** 当这个元素被点击时触发 */
-    clickCapture: [x: number, y: number, type: number, ev: MouseEvent];
+    /** 当这个元素被点击时的捕获阶段触发 */
+    clickCapture: [ev: IActionEvent];
+    /** 当这个元素被点击时的冒泡阶段触发 */
+    click: [ev: IActionEvent];
+    /** 当鼠标或手指在该元素上按下的捕获阶段触发 */
+    downCapture: [ev: IActionEvent];
+    /** 当鼠标或手指在该元素上按下的冒泡阶段触发 */
+    down: [ev: IActionEvent];
+    /** 当鼠标或手指在该元素上移动的捕获阶段触发 */
+    moveCapture: [ev: IActionEvent];
+    /** 当鼠标或手指在该元素上移动的冒泡阶段触发 */
+    move: [ev: IActionEvent];
+    /** 当鼠标或手指在该元素上抬起的捕获阶段触发 */
+    upCapture: [ev: IActionEvent];
+    /** 当鼠标或手指在该元素上抬起的冒泡阶段触发 */
+    up: [ev: IActionEvent];
+    /** 当鼠标或手指进入该元素的捕获阶段触发 */
+    enterCapture: [ev: IActionEvent];
+    /** 当鼠标或手指进入该元素的冒泡阶段触发 */
+    enter: [ev: IActionEvent];
+    /** 当鼠标或手指离开该元素的捕获阶段触发 */
+    leaveCapture: [ev: IActionEvent];
+    /** 当鼠标或手指离开该元素的冒泡阶段触发 */
+    leave: [ev: IActionEvent];
+    /** 当鼠标滚轮时的捕获阶段触发 */
+    wheelCapture: [ev: IWheelEvent];
+    /** 当鼠标滚轮时的冒泡阶段触发 */
+    wheel: [ev: IWheelEvent];
 }
 
 interface TickerDelegation {
@@ -205,8 +308,9 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     width: number = 200;
     height: number = 200;
 
-    // 渲染锚点，(0,0)表示左上角，(1,1)表示右下角
+    /** 渲染锚点，(0,0)表示左上角，(1,1)表示右下角 */
     anchorX: number = 0;
+    /** 渲染锚点，(0,0)表示左上角，(1,1)表示右下角 */
     anchorY: number = 0;
 
     /** 渲染模式，absolute表示绝对位置，static表示跟随摄像机移动 */
@@ -740,63 +844,3 @@ RenderItem.ticker.add(time => {
         arr.forEach(v => v());
     }
 });
-
-export interface IAnimateFrame {
-    updateFrameAnimate(frame: number, time: number): void;
-}
-
-interface RenderEvent {
-    animateFrame: [frame: number, time: number];
-}
-
-class RenderEmits extends EventEmitter<RenderEvent> {
-    private framer: Set<IAnimateFrame> = new Set();
-
-    /**
-     * 添加一个可更新帧动画的对象
-     */
-    addFramer(framer: IAnimateFrame) {
-        this.framer.add(framer);
-    }
-
-    /**
-     * 移除一个可更新帧动画的对象
-     */
-    removeFramer(framer: IAnimateFrame) {
-        this.framer.delete(framer);
-    }
-
-    /**
-     * 更新所有帧动画
-     * @param frame 帧数
-     * @param time 帧动画时刻
-     */
-    emitAnimateFrame(frame: number, time: number) {
-        this.framer.forEach(v => v.updateFrameAnimate(frame, time));
-        this.emit('animateFrame', frame, time);
-    }
-}
-
-export const renderEmits = new RenderEmits();
-
-Mota.require('var', 'hook').once('reset', () => {
-    let lastTime = 0;
-    RenderItem.ticker.add(time => {
-        if (!core.isPlaying()) return;
-        if (time - lastTime > core.values.animateSpeed) {
-            RenderItem.animatedFrame++;
-            lastTime = time;
-            renderEmits.emitAnimateFrame(RenderItem.animatedFrame, time);
-        }
-    });
-});
-
-export function transformCanvas(
-    canvas: MotaOffscreenCanvas2D,
-    transform: Transform
-) {
-    const { ctx } = canvas;
-    const mat = transform.mat;
-    const [a, b, , c, d, , e, f] = mat;
-    ctx.transform(a, b, c, d, e, f);
-}

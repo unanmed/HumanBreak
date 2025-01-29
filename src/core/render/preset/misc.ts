@@ -1,17 +1,12 @@
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
-import {
-    ERenderItemEvent,
-    IAnimateFrame,
-    renderEmits,
-    RenderItem,
-    RenderItemPosition
-} from '../item';
+import { ERenderItemEvent, RenderItem, RenderItemPosition } from '../item';
 import { Transform } from '../transform';
 import { ElementNamespace, ComponentInternalInstance } from 'vue';
 import { AutotileRenderable, RenderableData } from '../cache';
 import { texture } from '../cache';
 import { isNil } from 'lodash-es';
 import { logger } from '@/core/common/logger';
+import { IAnimateFrame, renderEmits } from '../frame';
 
 type CanvasStyle = string | CanvasGradient | CanvasPattern;
 

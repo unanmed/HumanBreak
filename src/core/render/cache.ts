@@ -97,10 +97,10 @@ class TextureCache extends EventEmitter<TextureCacheEvent> {
 
         Mota.require('var', 'loading').once('loaded', () => {
             const map = maps_90f36752_8815_4be8_b32b_d7fad1d0542e;
-            // @ts-ignore
+            // @ts-expect-error 无法推导
             this.idNumberMap = {};
             for (const [key, { id }] of Object.entries(map)) {
-                // @ts-ignore
+                // @ts-expect-error 无法推导
                 this.idNumberMap[id] = parseInt(key) as AllNumbers;
             }
             this.tileset = core.material.images.tilesets;
@@ -128,7 +128,7 @@ class TextureCache extends EventEmitter<TextureCacheEvent> {
      */
     private calRenderable() {
         const map = maps_90f36752_8815_4be8_b32b_d7fad1d0542e;
-        for (const [key, data] of Object.entries(map)) {
+        for (const key of Object.keys(map)) {
             this.calRenderableByNum(parseInt(key));
         }
     }
@@ -167,7 +167,8 @@ class TextureCache extends EventEmitter<TextureCacheEvent> {
         const data = map[num as Exclude<AllNumbers, 0>];
         // 地狱般的分支if
         if (data) {
-            let { cls, faceIds, bigImage, id, animate } = data;
+            let { faceIds, bigImage } = data;
+            const { cls, id, animate } = data;
             if (cls === 'enemys' || cls === 'enemy48') {
                 // 怪物需要特殊处理，因为它的大怪物信息不在 maps 里面
                 ({ bigImage, faceIds } = enemys[id as EnemyIds]);
@@ -212,7 +213,7 @@ class TextureCache extends EventEmitter<TextureCacheEvent> {
             if (cls === 'enemy48' || cls === 'npc48') {
                 const img = core.material.images[cls];
                 if (!img) return null;
-                // @ts-ignore
+                // @ts-expect-error 无法推导
                 const line = icons[cls][id];
                 const w = 32;
                 const h = 48;
@@ -269,7 +270,7 @@ class TextureCache extends EventEmitter<TextureCacheEvent> {
                 if (!image) return null;
                 const frame = core.getAnimateFrames(cls);
                 const cell = 32;
-                // @ts-ignore
+                // @ts-expect-error 无法推导
                 const offset = (icons[cls][id] as number) * cell;
                 const render: [number, number, number, number][] = [
                     [0, offset, cell, cell]

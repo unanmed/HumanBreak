@@ -101,4 +101,4 @@ export * from './shader';
 export * from './sprite';
 export * from './transform';
 export * from './utils';
-export * from '../../module/ui/components';
+export * from './event';
