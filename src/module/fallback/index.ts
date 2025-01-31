@@ -1,9 +1,10 @@
 import { Patch } from '@/common/patch';
 import { patchAudio } from './audio';
-
-patchAudio();
+import { patchWeather } from './weather';
 
 export function patchAll() {
+    patchAudio();
+    patchWeather();
     const loading = Mota.require('var', 'loading');
     loading.once('coreInit', () => {
         Patch.patchAll();

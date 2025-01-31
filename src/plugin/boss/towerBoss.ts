@@ -20,8 +20,8 @@ import {
 } from './towerBossProjectile';
 import { IStateDamageable } from '@/game/state/interface';
 import { HeroRenderer } from '@/core/render/preset/hero';
-import { controller } from '@/module/weather';
 import { Pop } from '../fx/pop';
+import { WeatherController } from '@/module';
 
 Mota.require('var', 'loading').once('coreInit', () => {
     const shader = new Shader();
@@ -401,7 +401,8 @@ export class TowerBoss extends BarrageBoss {
         this.skill4Time = 5;
         this.skill5Time = 3;
         core.playBgm('towerBoss2.opus');
-        controller.activate('rain', 6);
+        const weather = WeatherController.get('main');
+        weather?.activate('rain', 6);
     }
 
     releaseSkill4() {

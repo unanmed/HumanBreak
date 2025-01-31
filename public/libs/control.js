@@ -2853,11 +2853,7 @@ control.prototype.getMappedName = function (name) {
 ////// 更改天气效果 //////
 control.prototype.setWeather = function (type, level) {
     // Deprecated. Use WeatherController API instead.
-    Mota.r(() => {
-        const controller = Mota.require('module', 'Weather').controller;
-        controller.clearWeather();
-        if (type !== null && type !== void 0) controller.activate(type, level);
-    });
+    // Fallback see src/module/fallback/weather.ts
 };
 
 ////// 注册一个天气 //////

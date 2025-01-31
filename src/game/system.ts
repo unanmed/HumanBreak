@@ -38,7 +38,6 @@ import type * as Animation from 'mutate-animate';
 import type * as RenderUtils from '@/core/render/utils';
 import type { WeatherController } from '@/module/weather/weather';
 import type { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
-import type { TextboxStore } from '@/core/render';
 
 interface ClassInterface {
     // 渲染进程与游戏进程通用
@@ -115,7 +114,6 @@ interface ModuleInterface {
         Camera: typeof Camera;
         MotaOffscreenCanvas2D: typeof MotaOffscreenCanvas2D;
         Utils: typeof RenderUtils;
-        TextboxStore: typeof TextboxStore;
     };
     State: {
         ItemState: typeof ItemState;

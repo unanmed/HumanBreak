@@ -388,7 +388,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     /**
      * 渲染函数
      * @param canvas 渲染至的画布
-     * @param transform 当前变换矩阵的，渲染时已经进行变换处理，不需要对画布再次进行变换处理
+     * @param transform 当前变换矩阵的，渲染时已经进行变换处理，不需要对画布再次进行变换处理。
      *                  此参数可用于自己对元素进行变换处理，也会用于对子元素的处理。
      *                  例如对于`absolute`类型的元素，同时有对视角改变的需求，就可以通过此参数进行变换。
      *                  样板内置的`Layer`及`Damage`元素就是通过此方式实现的

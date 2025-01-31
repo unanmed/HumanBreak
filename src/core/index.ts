@@ -75,7 +75,6 @@ import './render/index';
 import * as RenderUtils from './render/utils';
 import '@/module';
 import { MotaOffscreenCanvas2D } from './fx/canvas2d';
-import { TextboxStore } from './render/index';
 
 // ----- 类注册
 Mota.register('class', 'CustomToolbar', CustomToolbar);
@@ -157,8 +156,7 @@ Mota.register('module', 'Render', {
     LayerGroupFloorBinder,
     Camera,
     MotaOffscreenCanvas2D,
-    Utils: RenderUtils,
-    TextboxStore
+    Utils: RenderUtils
 });
 Mota.register('module', 'Action', {
     HeroKeyMover

@@ -1,26 +1,25 @@
 import { FloorItemDetail } from '@/plugin/fx/itemDetail';
-import { FloorDamageExtends } from './preset/damage';
-import { LayerDoorAnimate } from './preset/floor';
-import { HeroRenderer } from './preset/hero';
-import { MotaRenderer } from './render';
-import { LayerShadowExtends } from '../fx/shadow';
+import { FloorDamageExtends, LayerGroup } from '@/core/render';
+import { LayerDoorAnimate } from '@/core/render';
+import { HeroRenderer } from '@/core/render';
+import { MotaRenderer } from '@/core/render';
+import { LayerShadowExtends } from '@/core/fx/shadow';
 import { LayerGroupFilter } from '@/plugin/fx/gameCanvas';
-import { LayerGroupAnimate } from './preset/animate';
+import { LayerGroupAnimate } from '@/core/render';
 import { LayerGroupPortal } from '@/plugin/fx/portal';
 import { LayerGroupHalo } from '@/plugin/fx/halo';
-import { FloorViewport } from './preset/viewport';
+import { FloorViewport } from '@/core/render';
 import { PopText } from '@/plugin/fx/pop';
 import { FloorChange } from '@/plugin/fallback';
-import { createApp } from './renderer';
-import { defineComponent } from 'vue';
-import { Textbox } from '../../module/ui/components';
-import { ILayerGroupRenderExtends, ILayerRenderExtends } from './preset';
-import { Props } from './utils';
+import { createApp } from '@/core/render';
+import { defineComponent, onMounted, ref } from 'vue';
+import { Textbox } from './components';
+import { ILayerGroupRenderExtends, ILayerRenderExtends } from '@/core/render';
+import { Props } from '@/core/render';
+import { WeatherController } from '../weather';
 
-let main: MotaRenderer;
-
-Mota.require('var', 'loading').once('coreInit', () => {
-    main = new MotaRenderer();
+export function create() {
+    const main = new MotaRenderer();
 
     const App = defineComponent(_props => {
         const layerGroupExtends: ILayerGroupRenderExtends[] = [
@@ -57,9 +56,16 @@ Mota.require('var', 'loading').once('coreInit', () => {
             lineHeight: 6
         };
 
+        const map = ref<LayerGroup>();
+        const weather = new WeatherController('main');
+
+        onMounted(() => {
+            weather.bind(map.value);
+        });
+
         return () => (
             <container id="map-draw" {...mapDrawProps}>
-                <layer-group id="layer-main" ex={layerGroupExtends}>
+                <layer-group id="layer-main" ex={layerGroupExtends} ref={map}>
                     <layer layer="bg" zIndex={10}></layer>
                     <layer layer="bg2" zIndex={20}></layer>
                     <layer layer="event" zIndex={30} ex={eventExtends}></layer>
@@ -75,28 +81,16 @@ Mota.require('var', 'loading').once('coreInit', () => {
 
     main.hide();
     createApp(App).mount(main);
-    // render(<Com></Com>, main);
+
+    Mota.require('var', 'hook').on('reset', () => {
+        main.show();
+    });
+
+    Mota.require('var', 'hook').on('restart', () => {
+        main.hide();
+    });
 
     console.log(main);
-});
+}
 
-Mota.require('var', 'hook').on('reset', () => {
-    main.show();
-});
-
-Mota.require('var', 'hook').on('restart', () => {
-    main.hide();
-});
-
-export * from './preset';
-export * from './renderer';
-export * from './adapter';
-export * from './cache';
-export * from './camera';
-export * from './container';
-export * from './gl2';
-export * from './item';
-export * from './render';
-export * from './shader';
-export * from './sprite';
-export * from './transform';
+export * from './components';
