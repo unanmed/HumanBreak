@@ -1,5 +1,5 @@
 import { Shader, ShaderProgram } from '@/core/render/shader';
-import { IWeather, WeatherController } from './weather';
+import { IWeather } from './weather';
 import { MotaRenderer } from '@/core/render/render';
 import { Container } from '@/core/render/container';
 import { GL2Program, IShaderUniform, UniformType } from '@/core/render/gl2';
@@ -173,8 +173,6 @@ export class SnowWeather implements IWeather {
         shader.remove();
     }
 }
-
-WeatherController.register(SnowWeather);
 
 class SnowShader extends Shader {
     static snowProgram: ShaderProgram;

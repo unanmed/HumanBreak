@@ -1,5 +1,5 @@
 import { Shader, ShaderProgram } from '@/core/render/shader';
-import { IWeather, WeatherController } from './weather';
+import { IWeather } from './weather';
 import { MotaRenderer } from '@/core/render/render';
 import { Container } from '@/core/render/container';
 import { IShaderUniform, UniformType } from '@/core/render/gl2';
@@ -78,67 +78,66 @@ void main() {
 /** 雨滴顶点坐标 */
 const vertex = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
 
-Mota.require('var', 'loading').once('coreInit', () => {
-    const shader = new RainShader();
-    const gl = shader.gl;
-    shader.size(480, 480);
-    shader.setHD(true);
-    shader.setZIndex(100);
-    RainWeather.shader = shader;
-    const program = shader.createProgram(ShaderProgram);
-    program.fs(rainFs);
-    program.vs(rainVs);
-    program.requestCompile();
-    const pos = program.defineAttribArray('a_rainVertex');
-    program.defineAttribArray('a_offset');
-    program.defineAttribArray('a_data');
-    program.defineUniform('u_progress', shader.UNIFORM_1f);
-    program.defineUniform('u_color', shader.UNIFORM_4f);
-    program.mode(shader.DRAW_ARRAYS_INSTANCED);
-    RainShader.rainProgram = program;
-    shader.useProgram(program);
-
-    if (pos) {
-        pos.buffer(vertex, gl.STATIC_DRAW);
-        pos.pointer(2, gl.FLOAT, false, 0, 0);
-        pos.enable();
-    }
-});
-
 export class RainWeather implements IWeather {
-    static id: string = 'rain';
-
-    static shader: RainShader;
+    readonly shader: RainShader;
+    readonly program: ShaderProgram;
 
     private progress: IShaderUniform<UniformType.Uniform1f> | null = null;
 
-    constructor(readonly level: number = 5) {}
+    constructor(readonly level: number = 5) {
+        const shader = new RainShader();
+        const gl = shader.gl;
+        shader.size(480, 480);
+        shader.setHD(true);
+        shader.setZIndex(100);
+        const program = shader.createProgram(ShaderProgram);
+        program.fs(rainFs);
+        program.vs(rainVs);
+        program.requestCompile();
+        const pos = program.defineAttribArray('a_rainVertex');
+        program.defineAttribArray('a_offset');
+        program.defineAttribArray('a_data');
+        program.defineUniform('u_progress', shader.UNIFORM_1f);
+        program.defineUniform('u_color', shader.UNIFORM_4f);
+        program.mode(shader.DRAW_ARRAYS_INSTANCED);
+        shader.useProgram(program);
+
+        if (pos) {
+            pos.buffer(vertex, gl.STATIC_DRAW);
+            pos.pointer(2, gl.FLOAT, false, 0, 0);
+            pos.enable();
+        }
+        this.shader = shader;
+        this.program = program;
+    }
 
     activate(): void {
         const render = MotaRenderer.get('render-main');
         const draw = render?.getElementById('map-draw') as Container;
         if (!draw) return;
-        const shader = RainWeather.shader;
+        const shader = this.shader;
         shader.append(draw);
 
         const gl = shader.gl;
-        const program = RainShader.rainProgram;
+        const program = this.program;
         program.paramArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, 100 * this.level);
 
         this.progress = program.getUniform<UniformType.Uniform1f>('u_progress');
+        shader.useProgram(program);
         shader.generateRainPath(
             this.level * 100,
             (((Math.random() - 0.5) * Math.PI) / 30) * this.level,
-            (Math.PI / 180) * (12 - this.level)
+            (Math.PI / 180) * (12 - this.level),
+            program
         );
     }
 
     frame(): void {
-        RainWeather.shader.update(RainWeather.shader);
+        this.shader.update(this.shader);
         const time = 5000 - 400 * this.level;
         const progress = (Date.now() % time) / time;
 
-        RainWeather.shader.useProgram(RainShader.rainProgram);
+        this.shader.useProgram(this.program);
         this.progress?.set(progress);
     }
 
@@ -147,25 +146,23 @@ export class RainWeather implements IWeather {
         const draw = render?.getElementById('map-draw') as Container;
         const layer = draw.children;
         if (!layer || !draw) return;
-        const shader = RainWeather.shader;
+        const shader = this.shader;
         draw.appendChild(...layer);
         shader.remove();
     }
 }
 
-WeatherController.register(RainWeather);
-
 class RainShader extends Shader {
-    static rainProgram: ShaderProgram;
-    static backProgram: ShaderProgram;
-
     /**
      * 生成雨滴
      * @param num 雨滴数量
      */
-    generateRainPath(num: number, angle: number, deviation: number) {
-        const program = RainShader.rainProgram;
-        RainWeather.shader.useProgram(program);
+    generateRainPath(
+        num: number,
+        angle: number,
+        deviation: number,
+        program: ShaderProgram
+    ) {
         const aOffset = program.getAttribArray('a_offset');
         const aData = program.getAttribArray('a_data');
         const color = program.getUniform<UniformType.Uniform4f>('u_color');

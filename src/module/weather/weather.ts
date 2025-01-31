@@ -1,11 +1,12 @@
 import { logger } from '@/core/common/logger';
+import { RenderItem } from '@/core/render';
 import { Ticker } from 'mutate-animate';
 
 export interface IWeather {
     /**
      * 初始化天气，当天气被添加时会被立刻调用
      */
-    activate(): void;
+    activate(item: RenderItem): void;
 
     /**
      * 每帧执行的函数
@@ -15,20 +16,24 @@ export interface IWeather {
     /**
      * 摧毁这个天气，当天气被删除时会执行
      */
-    deactivate(): void;
+    deactivate(item: RenderItem): void;
 }
 
-interface Weather<T extends IWeather = IWeather> {
-    id: string;
-    new (level?: number): T;
-}
+type Weather = new (level?: number) => IWeather;
 
 export class WeatherController {
     static list: Map<string, Weather> = new Map();
+    static map: Map<string, WeatherController> = new Map();
 
     /** 当前的所有天气 */
     active: Set<IWeather> = new Set();
     ticker: Ticker = new Ticker();
+
+    private binded?: RenderItem;
+
+    constructor(public readonly id: string) {
+        WeatherController.map.set(id, this);
+    }
 
     private tick = () => {
         this.active.forEach(v => {
@@ -40,9 +45,11 @@ export class WeatherController {
      * 清空所有天气
      */
     clearWeather() {
-        this.active.forEach(v => {
-            v.deactivate();
-        });
+        if (this.binded) {
+            this.active.forEach(v => {
+                v.deactivate(this.binded!);
+            });
+        }
         this.active.clear();
     }
 
@@ -50,7 +57,7 @@ export class WeatherController {
      * 获取一个天气
      * @param weather 要获取的天气
      */
-    getWeather<T extends IWeather>(weather: Weather<T>): T | null {
+    getWeather<T extends IWeather = IWeather>(weather: Weather): T | null {
         return ([...this.active].find(v => v instanceof weather) as T) ?? null;
     }
 
@@ -68,7 +75,9 @@ export class WeatherController {
         }
         const weather = new Weather(level);
         this.active.add(weather);
-        weather.activate();
+        if (this.binded) {
+            weather.activate(this.binded);
+        }
         if (!this.ticker.funcs.has(this.tick)) {
             this.ticker.add(this.tick);
         }
@@ -84,10 +93,37 @@ export class WeatherController {
         if (this.active.size === 0) {
             this.ticker.remove(this.tick);
         }
-        weather.deactivate();
+        if (this.binded) {
+            weather.deactivate(this.binded);
+        }
     }
 
-    static register(weather: Weather) {
-        this.list.set(weather.id, weather);
+    /**
+     * 将这个天气控制器绑定至一个渲染元素上
+     * @param item 要绑定的元素，不填表示取消绑定
+     */
+    bind(item?: RenderItem) {
+        if (this.binded) {
+            this.active.forEach(v => v.deactivate(this.binded!));
+        }
+        this.binded = item;
+        if (item) {
+            this.active.forEach(v => v.activate(item));
+        }
+    }
+
+    /**
+     * 摧毁这个天气控制器
+     */
+    destroy() {
+        WeatherController.map.delete(this.id);
+    }
+
+    static get(id: string) {
+        return this.map.get(id);
+    }
+
+    static register(id: string, weather: Weather) {
+        this.list.set(id, weather);
     }
 }

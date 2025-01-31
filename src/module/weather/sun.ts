@@ -1,4 +1,4 @@
-import { IWeather, WeatherController } from './weather';
+import { IWeather } from './weather';
 
 export class SunWeather implements IWeather {
     static id: string = 'sun';
@@ -9,5 +9,3 @@ export class SunWeather implements IWeather {
 
     deactivate(): void {}
 }
-
-WeatherController.register(SunWeather);
