@@ -31,6 +31,7 @@ export interface BaseProps {
     id?: string;
     alpha?: number;
     composite?: GlobalCompositeOperation;
+    cursor?: string;
 }
 
 export interface SpriteProps extends BaseProps {

@@ -78,6 +78,29 @@ export class Container<E extends EContainerEvent = EContainerEvent>
         this.update(this);
     }
 
+    append(parent: RenderItem): void {
+        super.append(parent);
+        if (this.root) {
+            this.forEachChild(ele => {
+                ele.checkRoot();
+                this.root?.connect(ele);
+            });
+        }
+    }
+
+    /**
+     * 遍历这个元素中的每个子元素，并执行传入的函数
+     * @param fn 对每个元素执行的函数
+     */
+    forEachChild(fn: (ele: RenderItem) => void) {
+        const stack: RenderItem[] = [this];
+        while (stack.length > 0) {
+            const ele = stack.pop()!;
+            stack.push(...ele.children);
+            fn(ele);
+        }
+    }
+
     private sortChildren() {
         this.sortedChildren = [...this.children].sort(
             (a, b) => a.zIndex - b.zIndex

@@ -278,15 +278,6 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         return this._transform;
     }
 
-    private _cursor: string = 'auto';
-    /** 鼠标覆盖在该元素上时的指针样式 */
-    set cursor(v: string) {
-        this.setCursor(v);
-    }
-    get cursor() {
-        return this._cursor;
-    }
-
     //#endregion
 
     //#region 父子关系
@@ -487,19 +478,6 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     }
 
     /**
-     * 设置鼠标放在该元素上时的指针样式
-     * @param cursor 要设置成的指针样式
-     */
-    setCursor(cursor: string = 'auto') {
-        const canvas = this._root?.getCanvas();
-        if (!canvas) return;
-        if (this.hovered) {
-            canvas.style.cursor = cursor;
-        }
-        this._cursor = cursor;
-    }
-
-    /**
      * 隐藏这个元素
      */
     hide() {
@@ -591,14 +569,19 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
 
     //#region 父子关系
 
-    protected checkRoot() {
-        if (this._root || this.isRoot) return this._root;
+    checkRoot() {
+        if (this._root) return this._root;
+        if (this.isRoot) return this;
         let ele: RenderItem = this;
         while (!ele.isRoot) {
-            if (!ele.parent) {
+            if (ele._root) {
+                this._root = ele._root;
+                return this._root;
+            }
+            if (!ele._parent) {
                 return null;
             } else {
-                ele = ele.parent;
+                ele = ele._parent;
             }
         }
         this._root = ele as RenderItem & IRenderTreeRoot;
@@ -631,10 +614,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this._parent = parent;
         parent.requestSort();
         this.update();
-        if (this._id !== '') {
-            this.checkRoot();
-            this._root?.connect(this);
-        }
+        this.checkRoot();
+        this._root?.connect(this);
     }
 
     /**
@@ -845,11 +826,6 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
                     this.mouseId.delete(event.type);
                 }
                 break;
-            }
-            case ActionType.Enter: {
-                const canvas = this._root?.getCanvas();
-                if (!canvas) return true;
-                canvas.style.cursor = this._cursor;
             }
         }
 
