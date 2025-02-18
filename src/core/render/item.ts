@@ -840,8 +840,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      * @returns 是否继续传递事件
      */
     protected processBubble<T extends ActionType>(
-        type: T,
-        event: ActionEventMap[T],
+        _type: T,
+        _event: ActionEventMap[T],
         inElement: boolean
     ): boolean {
         return inElement;
@@ -858,7 +858,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     ): vec3 {
         const x = event.offsetX + this.anchorX * this.width;
         const y = event.offsetY + this.anchorY * this.height;
-        return transform.untransformed(x, y);
+        if (this.type === 'absolute') return [x, y, 0];
+        else return transform.untransformed(x, y);
     }
 
     /**

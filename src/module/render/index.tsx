@@ -1,5 +1,5 @@
 import { FloorItemDetail } from '@/plugin/fx/itemDetail';
-import { FloorDamageExtends, LayerGroup, Transform } from '@/core/render';
+import { FloorDamageExtends, LayerGroup } from '@/core/render';
 import { LayerDoorAnimate } from '@/core/render';
 import { HeroRenderer } from '@/core/render';
 import { MotaRenderer } from '@/core/render';
@@ -17,7 +17,6 @@ import { Textbox } from './components';
 import { ILayerGroupRenderExtends, ILayerRenderExtends } from '@/core/render';
 import { Props } from '@/core/render';
 import { WeatherController } from '../weather';
-import { IActionEvent } from '@/core/render/event';
 
 export function create() {
     const main = new MotaRenderer();
