@@ -64,21 +64,8 @@ export function create() {
             weather.bind(map.value);
         });
 
-        const test = (msg: string) => {
-            return (ev: IActionEvent) => {
-                console.log(msg, ev);
-            };
-        };
-
         return () => (
             <container id="map-draw" {...mapDrawProps}>
-                <icon
-                    icon={50}
-                    zIndex={100}
-                    width={240}
-                    height={240}
-                    cursor="pointer"
-                ></icon>
                 <layer-group id="layer-main" ex={layerGroupExtends} ref={map}>
                     <layer layer="bg" zIndex={10}></layer>
                     <layer layer="bg2" zIndex={20}></layer>

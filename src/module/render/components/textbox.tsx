@@ -360,6 +360,7 @@ export const Textbox = defineComponent<
                 )}
                 <TextContent
                     {...data}
+                    id=""
                     hidden={false}
                     x={data.padding!}
                     y={contentY.value + data.padding!}

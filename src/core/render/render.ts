@@ -416,8 +416,10 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
 
     connect(item: RenderItem): void {
         if (item.id.length === 0) return;
-        if (this.idMap.has(item.id)) {
-            logger.warn(23, item.id);
+        const existed = this.idMap.get(item.id);
+        if (existed) {
+            if (existed === item) return;
+            else logger.warn(23, item.id);
         } else {
             this.idMap.set(item.id, item);
         }
