@@ -236,8 +236,8 @@ export class Icon extends RenderItem<EIconEvent> implements IAnimateFrame {
         const renderable = this.renderable;
         if (!renderable) return;
         const [x, y, w, h] = renderable.render[0];
-        const cw = canvas.width;
-        const ch = canvas.height;
+        const cw = this.width;
+        const ch = this.height;
         const frame = this.animate
             ? RenderItem.animatedFrame % renderable.frame
             : 0;

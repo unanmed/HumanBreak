@@ -822,6 +822,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
             }
             case ActionType.Down: {
                 // 记录标识符，用于判定 click
+                if (!inElement) return false;
                 if (event.touch) {
                     this.touchId.add(event.identifier);
                 } else {
@@ -830,6 +831,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
                 break;
             }
             case ActionType.Click: {
+                if (!inElement) return false;
                 if (event.touch) {
                     if (!this.touchId.has(event.identifier)) {
                         return false;
@@ -878,7 +880,9 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         event: IActionEvent,
         transform: Transform
     ): vec3 {
-        return transform.untransformed(event.offsetX, event.offsetY);
+        const x = event.offsetX + this.anchorX * this.width;
+        const y = event.offsetY + this.anchorY * this.height;
+        return transform.untransformed(x, y);
     }
 
     /**

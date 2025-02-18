@@ -214,7 +214,9 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
             case ActionType.Move:
             case ActionType.Enter:
             case ActionType.Leave:
-            case ActionType.Wheel:
+            case ActionType.Wheel: {
+                return this.getActiveMouseIdentifier(mouse);
+            }
             case ActionType.Up:
             case ActionType.Click: {
                 const id = this.getActiveMouseIdentifier(mouse);
@@ -241,14 +243,16 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
         mouse: MouseType = this.getMouseType(event)
     ): IActionEvent {
         const id = this.getMouseIdentifier(type, mouse);
+        const x = event.offsetX / core.domStyle.scale;
+        const y = event.offsetY / core.domStyle.scale;
         return {
             target: this,
             identifier: id,
             touch: false,
-            offsetX: event.offsetX,
-            offsetY: event.offsetY,
-            absoluteX: event.offsetX,
-            absoluteY: event.offsetY,
+            offsetX: x,
+            offsetY: y,
+            absoluteX: x,
+            absoluteY: y,
             type: mouse,
             buttons: this.getMouseButtons(event),
             altKey: event.altKey,
@@ -309,8 +313,8 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
         event: TouchEvent,
         rect: DOMRect
     ): IActionEvent {
-        const x = touch.clientX - rect.left;
-        const y = touch.clientY - rect.top;
+        const x = (touch.clientX - rect.left) / core.domStyle.scale;
+        const y = (touch.clientY - rect.top) / core.domStyle.scale;
         return {
             target: this,
             identifier: this.getTouchIdentifier(touch, type),

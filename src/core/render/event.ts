@@ -72,6 +72,7 @@ export interface IActionEvent {
     /**
      * 当前按下了哪些按键。该值是一个数字，可以通过位运算判断是否按下了某个按键。
      * 例如通过 `buttons & MouseType.Left` 来判断是否按下了左键。
+     * 注意在鼠标抬起或鼠标点击事件中，并不会包含触发的那个按键
      */
     buttons: number;
     /** 触发时是否按下了 alt 键 */

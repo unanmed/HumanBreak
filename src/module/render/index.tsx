@@ -66,7 +66,6 @@ export function create() {
 
         return () => (
             <container id="map-draw" {...mapDrawProps}>
-                <icon icon={50} zIndex={100}></icon>
                 <layer-group id="layer-main" ex={layerGroupExtends} ref={map}>
                     <layer layer="bg" zIndex={10}></layer>
                     <layer layer="bg2" zIndex={20}></layer>
