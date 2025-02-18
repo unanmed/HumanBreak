@@ -4,6 +4,8 @@ import { mainSetting } from '@/core/main/setting';
 import { sleep } from 'mutate-animate';
 import { isNil } from 'lodash-es';
 
+// todo: 添加弃用警告 logger.warn(56)
+
 export function patchAudio() {
     const patch = new Patch(PatchClass.Control);
 

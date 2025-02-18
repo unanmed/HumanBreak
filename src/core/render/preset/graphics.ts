@@ -80,6 +80,54 @@ export abstract class GraphicItemBase
     private propFillSet: boolean = false;
 
     /**
+     * 获取这个元素的绘制路径
+     */
+    abstract getPath(): Path2D;
+
+    protected render(
+        canvas: MotaOffscreenCanvas2D,
+        _transform: Transform
+    ): void {
+        const ctx = canvas.ctx;
+        this.setCanvasState(canvas);
+        const path = this.getPath();
+        switch (this.mode) {
+            case GraphicMode.Fill:
+                ctx.fill(path, this.fillRule);
+                break;
+            case GraphicMode.Stroke:
+                ctx.stroke(path);
+                break;
+            case GraphicMode.FillAndStroke:
+                ctx.fill(path, this.fillRule);
+                ctx.stroke(path);
+                break;
+            case GraphicMode.StrokeAndFill:
+                ctx.stroke(path);
+                ctx.fill(path, this.fillRule);
+                break;
+        }
+    }
+
+    protected isActionInElement(x: number, y: number): boolean {
+        const ctx = this.cache.ctx;
+        const path = this.getPath();
+        switch (this.mode) {
+            case GraphicMode.Fill:
+                return ctx.isPointInPath(path, x, y, this.fillRule);
+            case GraphicMode.Stroke:
+                return ctx.isPointInStroke(path, x, y);
+            case GraphicMode.FillAndStroke:
+            case GraphicMode.StrokeAndFill:
+                return (
+                    ctx.isPointInPath(path, x, y, this.fillRule) ||
+                    ctx.isPointInStroke(path, x, y)
+                );
+        }
+        return false;
+    }
+
+    /**
      * 设置描边绘制的信息
      * @param options 线的信息
      */
@@ -253,31 +301,10 @@ export abstract class GraphicItemBase
 }
 
 export class Rect extends GraphicItemBase {
-    protected render(
-        canvas: MotaOffscreenCanvas2D,
-        _transform: Transform
-    ): void {
-        const ctx = canvas.ctx;
-        this.setCanvasState(canvas);
-        ctx.beginPath();
-        ctx.rect(this.x, this.y, this.width, this.height);
-
-        switch (this.mode) {
-            case GraphicMode.Fill:
-                ctx.fill(this.fillRule);
-                break;
-            case GraphicMode.Stroke:
-                ctx.stroke();
-                break;
-            case GraphicMode.FillAndStroke:
-                ctx.fill(this.fillRule);
-                ctx.stroke();
-                break;
-            case GraphicMode.StrokeAndFill:
-                ctx.stroke();
-                ctx.fill(this.fillRule);
-                break;
-        }
+    getPath(): Path2D {
+        const path = new Path2D();
+        path.rect(this.x, this.y, this.width, this.height);
+        return path;
     }
 }
 

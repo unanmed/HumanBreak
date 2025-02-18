@@ -442,6 +442,7 @@ export function getVitualKeyOnce(
     assist: number = 0,
     emittable: KeyCode[] = []
 ): Promise<KeyboardEmits> {
+    // todo: 正确触发后删除监听器
     return new Promise(res => {
         const key = Keyboard.get('full')!;
         key.withAssist(assist);

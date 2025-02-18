@@ -2,6 +2,8 @@ import { Patch, PatchClass } from '@/common/patch';
 import { WeatherController } from '../weather';
 import { isNil } from 'lodash-es';
 
+// todo: 添加弃用警告 logger.warn(56)
+
 export function patchWeather() {
     const patch = new Patch(PatchClass.Control);
     let nowWeather: string = '';

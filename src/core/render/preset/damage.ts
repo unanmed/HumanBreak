@@ -203,6 +203,7 @@ export class Damage extends RenderItem<EDamageEvent> {
         this.cellSize = size;
         this.update();
     }
+
     /**
      * 更新怪物列表。更新后，{@link Damage.enemy} 会丢失原来的怪物列表引用，换为传入的列表引用
      * @param enemy 怪物列表

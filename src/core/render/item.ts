@@ -6,6 +6,16 @@ import { Transform } from './transform';
 import { logger } from '../common/logger';
 import { ElementNamespace, ComponentInternalInstance } from 'vue';
 import { transformCanvas } from './utils';
+import {
+    ActionEventMap,
+    ActionType,
+    ERenderItemActionEvent,
+    eventNameMap,
+    EventProgress,
+    IActionEvent,
+    MouseType
+} from './event';
+import { vec3 } from 'gl-matrix';
 
 export type RenderFunction = (
     canvas: MotaOffscreenCanvas2D,
@@ -140,114 +150,39 @@ export interface IRenderVueSupport {
     ): void;
 }
 
-export const enum MouseType {
-    /** 没有按键按下 */
-    None = 0,
-    /** 左键 */
-    Left = 1 << 0,
-    /** 中键，即按下滚轮 */
-    Middle = 1 << 1,
-    /** 右键 */
-    Right = 1 << 2,
-    /** 侧键后退 */
-    Back = 1 << 3,
-    /** 侧键前进 */
-    Forward = 1 << 4
-}
-
-export const enum WheelType {
-    None,
-    /** 以像素为单位 */
-    Pixel,
-    /** 以行为单位，每行长度视浏览器设置而定，约为 1rem */
-    Line,
-    /** 以页为单位，一般为一个屏幕高度 */
-    Page
-}
-
-export interface IActionEvent {
-    /** 当前事件是监听的哪个元素 */
-    readonly target: RenderItem;
-    /** 这次操作的标识符，在按下、移动、抬起阶段中保持不变 */
-    readonly identifier: number;
-    /** 相对于触发元素左上角的横坐标 */
-    readonly offsetX: number;
-    /** 相对于触发元素左上角的纵坐标 */
-    readonly offsetY: number;
-    /** 相对于整个画布左上角的横坐标 */
-    readonly absoluteX: number;
-    /** 相对于整个画布左上角的纵坐标 */
-    readonly absoluteY: number;
-    /**
-     * 触发的按键种类，会出现在点击、按下、抬起三个事件中，而其他的如移动等该值只会是 {@link MouseType.None}，
-     * 电脑端可以有左键、中键、右键等，手机只会触发左键，每一项的值参考 {@link MouseType}
-     */
-    readonly type: MouseType;
-    /**
-     * 当前按下了哪些按键。该值是一个数字，可以通过位运算判断是否按下了某个按键。
-     * 例如通过 `buttons & MouseType.Left` 来判断是否按下了左键。
-     */
-    readonly buttons: number;
-    /** 触发时是否按下了 alt 键 */
-    readonly altKey: boolean;
-    /** 触发时是否按下了 shift 键 */
-    readonly shiftKey: boolean;
-    /** 触发时是否按下了 ctrl 键 */
-    readonly ctrlKey: boolean;
-    /** 触发时是否按下了 Windows(Windows) / Command(Mac) 键 */
-    readonly metaKey: boolean;
+export interface IRenderTreeRoot {
+    readonly isRoot: true;
 
     /**
-     * 调用后将停止事件的继续传播。
-     * 在捕获阶段，将会阻止捕获的进一步进行，在冒泡阶段，将会阻止冒泡的进一步进行。
-     * 如果当前元素有很多监听器，该方法并不会阻止其他监听器的执行。
+     * 将一个渲染元素连接到此根元素
+     * @param item 要连接到此根元素的渲染元素
      */
-    stopPropagation(): void;
+    connect(item: RenderItem): void;
+
+    /**
+     * 将已连接的渲染元素从此根元素中去掉
+     * @param item 要取消连接的渲染元素
+     */
+    disconnect(item: RenderItem): void;
+
+    /**
+     * 修改已连接的元素的 id
+     * @param item 修改了 id 的元素
+     * @param previous 先前的元素 id
+     * @param current 现在的元素 id
+     */
+    modifyId(item: RenderItem, previous: string, current: string): void;
+
+    /**
+     * 获取渲染至的目标画布，即显示在画面上的画布
+     */
+    getCanvas(): HTMLCanvasElement;
 }
 
-export interface IWheelEvent extends IActionEvent {
-    /** 滚轮事件的鼠标横向滚动量 */
-    readonly wheelX: number;
-    /** 滚轮事件的鼠标纵向滚动量 */
-    readonly wheelY: number;
-    /** 滚轮事件的鼠标垂直屏幕的滚动量 */
-    readonly wheelZ: number;
-    /** 滚轮事件的滚轮类型，表示了对应值的单位 */
-    readonly wheelType: WheelType;
-}
-
-export interface ERenderItemEvent {
+export interface ERenderItemEvent extends ERenderItemActionEvent {
     beforeRender: [transform: Transform];
     afterRender: [transform: Transform];
     destroy: [];
-    /** 当这个元素被点击时的捕获阶段触发 */
-    clickCapture: [ev: IActionEvent];
-    /** 当这个元素被点击时的冒泡阶段触发 */
-    click: [ev: IActionEvent];
-    /** 当鼠标或手指在该元素上按下的捕获阶段触发 */
-    downCapture: [ev: IActionEvent];
-    /** 当鼠标或手指在该元素上按下的冒泡阶段触发 */
-    down: [ev: IActionEvent];
-    /** 当鼠标或手指在该元素上移动的捕获阶段触发 */
-    moveCapture: [ev: IActionEvent];
-    /** 当鼠标或手指在该元素上移动的冒泡阶段触发 */
-    move: [ev: IActionEvent];
-    /** 当鼠标或手指在该元素上抬起的捕获阶段触发 */
-    upCapture: [ev: IActionEvent];
-    /** 当鼠标或手指在该元素上抬起的冒泡阶段触发 */
-    up: [ev: IActionEvent];
-    /** 当鼠标或手指进入该元素的捕获阶段触发 */
-    enterCapture: [ev: IActionEvent];
-    /** 当鼠标或手指进入该元素的冒泡阶段触发 */
-    enter: [ev: IActionEvent];
-    /** 当鼠标或手指离开该元素的捕获阶段触发 */
-    leaveCapture: [ev: IActionEvent];
-    /** 当鼠标或手指离开该元素的冒泡阶段触发 */
-    leave: [ev: IActionEvent];
-    /** 当鼠标滚轮时的捕获阶段触发 */
-    wheelCapture: [ev: IWheelEvent];
-    /** 当鼠标滚轮时的冒泡阶段触发 */
-    wheel: [ev: IWheelEvent];
 }
 
 interface TickerDelegation {
@@ -281,25 +216,22 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     /** ticker委托id */
     static tickerId: number = 0;
 
-    /** id到渲染元素的映射 */
-    static itemMap: Map<string, RenderItem> = new Map();
-
     readonly uid: number = count++;
 
-    private _id: string = '';
+    //#region 元素属性
 
+    private _id: string = '';
+    /**
+     * 元素的 id，原则上不可重复
+     */
     get id(): string {
         return this._id;
     }
     set id(v: string) {
-        if (this.isRoot || this.findRoot()) {
-            if (RenderItem.itemMap.has(this._id)) {
-                logger.warn(23, this._id);
-                RenderItem.itemMap.delete(this._id);
-            }
-            RenderItem.itemMap.set(v, this);
-        }
+        this.checkRoot();
+        const prev = this._id;
         this._id = v;
+        this._root?.modifyId(this, prev, v);
     }
 
     /** 元素纵深，表示了遮挡关系 */
@@ -328,27 +260,61 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     /** 不透明度 */
     alpha: number = 1;
 
+    get x() {
+        return this._transform.x;
+    }
+    get y() {
+        return this._transform.y;
+    }
+
+    /** 该元素的变换矩阵 */
+    private _transform: Transform = new Transform();
+    set transform(value: Transform) {
+        this._transform.bind();
+        this._transform = value;
+        value.bind(this);
+    }
+    get transform() {
+        return this._transform;
+    }
+
+    private _cursor: string = 'auto';
+    /** 鼠标覆盖在该元素上时的指针样式 */
+    set cursor(v: string) {
+        this.setCursor(v);
+    }
+    get cursor() {
+        return this._cursor;
+    }
+
+    //#endregion
+
+    //#region 父子关系
+
     private _parent?: RenderItem;
     /** 当前元素的父元素 */
     get parent() {
         return this._parent;
     }
-    /** 当前元素是否为根元素 */
+    /** 当前元素是否为根元素，如果是根元素，那么必须实现 `IRenderTreeRoot` 接口 */
     readonly isRoot: boolean = false;
 
-    /** 该元素的变换矩阵 */
-    transform: Transform = new Transform();
+    private _root?: RenderItem & IRenderTreeRoot;
+    get root() {
+        return this._root;
+    }
+
+    /** 当前元素是否已经连接至任意根元素 */
+    get connected() {
+        return !!this._root;
+    }
 
     /** 该渲染元素的子元素 */
     children: Set<RenderItem<ERenderItemEvent>> = new Set();
 
-    get x() {
-        return this.transform.x;
-    }
-    get y() {
-        return this.transform.y;
-    }
+    //#endregion
 
+    //#region 渲染配置与缓存
     /** 渲染缓存信息 */
     protected cache: MotaOffscreenCanvas2D = new MotaOffscreenCanvas2D();
     /** 是否需要更新缓存 */
@@ -357,6 +323,26 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     readonly enableCache: boolean = true;
     /** 是否启用transform下穿机制，即画布的变换是否会继续作用到下一层画布 */
     readonly transformFallThrough: boolean = false;
+    //#endregion
+
+    //#region 交互事件
+
+    /** 是否调用了 `ev.stopPropagation` */
+    protected propagationStoped: Map<ActionType, boolean> = new Map();
+    /** 捕获阶段缓存的事件对象 */
+    private cachedEvent: Map<ActionType, IActionEvent> = new Map();
+    /** 下穿模式下当前下穿过来的变换矩阵 */
+    private fallTransform?: Transform;
+    /** 鼠标当前是否覆盖在当前元素上 */
+    private hovered: boolean = false;
+    /** 是否在元素内 */
+    private inElement: boolean = false;
+    /** 鼠标标识符映射，键为按下的鼠标按键类型，值表示本次操作的唯一标识符，在按下、移动、抬起过程中保持一致 */
+    protected mouseId: Map<MouseType, number> = new Map();
+    /** 当前所有的触摸标识符 */
+    protected touchId: Set<number> = new Set();
+
+    //#endregion
 
     constructor(
         type: RenderItemPosition,
@@ -369,20 +355,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this.transformFallThrough = transformFallThrough;
         this.type = type;
 
-        this.transform.bind(this);
+        this._transform.bind(this);
         this.cache.withGameScale(true);
-    }
-
-    private findRoot() {
-        let ele: RenderItem = this;
-        while (!ele.isRoot) {
-            if (!ele.parent) {
-                return null;
-            } else {
-                ele = ele.parent;
-            }
-        }
-        return ele;
     }
 
     /**
@@ -399,24 +373,17 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     ): void;
 
     /**
-     * 修改这个对象的大小
-     */
-    size(width: number, height: number): void {
-        this.width = width;
-        this.height = height;
-        this.cache.size(width, height);
-        this.update(this);
-    }
-
-    /**
      * 渲染当前对象
      * @param canvas 渲染至的画布
-     * @param transform 父元素的变换矩阵
+     * @param transform 由父元素传递过来的变换矩阵
      */
     renderContent(canvas: MotaOffscreenCanvas2D, transform: Transform) {
         if (this.hidden) return;
         this.emit('beforeRender', transform);
-        const tran = this.transformFallThrough ? transform : this.transform;
+        if (this.transformFallThrough) {
+            this.fallTransform = transform;
+        }
+        const tran = this.transformFallThrough ? transform : this._transform;
 
         const ax = -this.anchorX * this.width;
         const ay = -this.anchorY * this.height;
@@ -424,8 +391,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         const ctx = canvas.ctx;
         ctx.save();
         canvas.setAntiAliasing(this.antiAliasing);
-        if (this.enableCache) canvas.ctx.filter = this.filter;
         if (this.type === 'static') transformCanvas(canvas, tran);
+        ctx.filter = this.filter;
         ctx.globalAlpha = this.alpha;
         ctx.globalCompositeOperation = this.composite;
         if (this.enableCache) {
@@ -447,13 +414,25 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this.emit('afterRender', transform);
     }
 
+    //#region 修改元素属性
+
+    /**
+     * 修改这个对象的大小
+     */
+    size(width: number, height: number): void {
+        this.width = width;
+        this.height = height;
+        this.cache.size(width, height);
+        this.update(this);
+    }
+
     /**
      * 设置这个元素的位置，等效于`transform.setTranslate(x, y)`
      * @param x 横坐标
      * @param y 纵坐标
      */
     pos(x: number, y: number) {
-        this.transform.setTranslate(x, y);
+        this._transform.setTranslate(x, y);
         this.update();
     }
 
@@ -484,32 +463,6 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this.update();
     }
 
-    /**
-     * 获取当前元素的绝对位置（不建议使用，因为应当很少会有获取绝对位置的需求）
-     */
-    getAbsolutePosition(): LocArr {
-        if (this.type === 'absolute') return [0, 0];
-        const { x, y } = this.transform;
-        if (!this.parent) return [x, y];
-        else {
-            const [px, py] = this.parent.getAbsolutePosition();
-            return [x + px, y + py];
-        }
-    }
-
-    setAnchor(x: number, y: number): void {
-        this.anchorX = x;
-        this.anchorY = y;
-        this.update();
-    }
-
-    update(item: RenderItem<any> = this): void {
-        if (this.cacheDirty) return;
-        this.cacheDirty = true;
-        if (this.hidden) return;
-        this.parent?.update(item);
-    }
-
     setHD(hd: boolean): void {
         this.highResolution = hd;
         this.cache.setHD(hd);
@@ -526,6 +479,70 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this.zIndex = zIndex;
         this.parent?.requestSort();
     }
+
+    setAnchor(x: number, y: number): void {
+        this.anchorX = x;
+        this.anchorY = y;
+        this.update();
+    }
+
+    /**
+     * 设置鼠标放在该元素上时的指针样式
+     * @param cursor 要设置成的指针样式
+     */
+    setCursor(cursor: string = 'auto') {
+        const canvas = this._root?.getCanvas();
+        if (!canvas) return;
+        if (this.hovered) {
+            canvas.style.cursor = cursor;
+        }
+        this._cursor = cursor;
+    }
+
+    /**
+     * 隐藏这个元素
+     */
+    hide() {
+        if (this.hidden) return;
+        this.hidden = true;
+        this.update(this);
+    }
+
+    /**
+     * 显示这个元素
+     */
+    show() {
+        if (!this.hidden) return;
+        this.hidden = false;
+        this.refreshAllChildren();
+    }
+
+    //#endregion
+
+    /**
+     * 获取当前元素的绝对位置（不建议使用，因为应当很少会有获取绝对位置的需求）
+     */
+    getAbsolutePosition(x: number = 0, y: number = 0): LocArr {
+        if (this.type === 'absolute') {
+            if (this.parent) return this.parent.getAbsolutePosition(0, 0);
+            else return [0, 0];
+        }
+        const [px, py] = this._transform.transformed(x, y);
+        if (!this.parent) return [px, py];
+        else {
+            const [px, py] = this.parent.getAbsolutePosition();
+            return [x + px, y + py];
+        }
+    }
+
+    update(item: RenderItem<any> = this): void {
+        if (this.cacheDirty) return;
+        this.cacheDirty = true;
+        if (this.hidden) return;
+        this.parent?.update(item);
+    }
+
+    //#region 动画帧与 ticker
 
     requestBeforeFrame(fn: () => void): void {
         beforeFrame.push(fn);
@@ -570,22 +587,22 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         return RenderItem.tickerMap.has(id);
     }
 
-    /**
-     * 隐藏这个元素
-     */
-    hide() {
-        if (this.hidden) return;
-        this.hidden = true;
-        this.update(this);
-    }
+    //#endregion
 
-    /**
-     * 显示这个元素
-     */
-    show() {
-        if (!this.hidden) return;
-        this.hidden = false;
-        this.refreshAllChildren();
+    //#region 父子关系
+
+    protected checkRoot() {
+        if (this._root || this.isRoot) return this._root;
+        let ele: RenderItem = this;
+        while (!ele.isRoot) {
+            if (!ele.parent) {
+                return null;
+            } else {
+                ele = ele.parent;
+            }
+        }
+        this._root = ele as RenderItem & IRenderTreeRoot;
+        return ele;
     }
 
     /**
@@ -615,9 +632,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         parent.requestSort();
         this.update();
         if (this._id !== '') {
-            const root = this.findRoot();
-            if (!root) return;
-            RenderItem.itemMap.set(this._id, this);
+            this.checkRoot();
+            this._root?.connect(this);
         }
     }
 
@@ -633,7 +649,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         parent.requestSort();
         parent.update();
         if (!success) return false;
-        RenderItem.itemMap.delete(this._id);
+        this._root?.disconnect(this);
+        this._root = void 0;
         return true;
     }
 
@@ -659,6 +676,237 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     requestSort(): void {
         logger.warn(37);
     }
+
+    //#endregion
+
+    //#region 交互事件
+
+    /**
+     * 根据事件类型和事件阶段获取事件名称
+     * @param type 事件类型
+     * @param progress 事件阶段
+     */
+    getEventName(
+        type: ActionType,
+        progress: EventProgress
+    ): keyof ERenderItemActionEvent {
+        if (progress === EventProgress.Capture) {
+            return `${eventNameMap[type]}Capture` as keyof ERenderItemActionEvent;
+        } else {
+            return eventNameMap[type] as keyof ERenderItemActionEvent;
+        }
+    }
+
+    /**
+     * 传递事件，即将事件传递给父元素或子元素等，可以通过 override 来实现自己的事件传递，
+     * 例如 Container 元素就需要在捕获阶段将事件传递给所有子元素，
+     * 默认行为是，捕获阶段触发自身冒泡，冒泡阶段触发父元素冒泡，适用于大部分不包含子元素的元素
+     * @param type 事件类型
+     * @param progress 事件阶段，捕获阶段或冒泡阶段
+     * @param event 正在处理的事件对象
+     */
+    protected propagateEvent<T extends ActionType>(
+        type: T,
+        progress: EventProgress,
+        event: ActionEventMap[T]
+    ): void {
+        if (progress === EventProgress.Capture) {
+            this.bubbleEvent(type, event);
+        } else {
+            this.parent?.bubbleEvent(type, event);
+        }
+    }
+
+    private handleEvent<T extends ActionType>(
+        type: T,
+        progress: EventProgress,
+        event: ActionEventMap[T]
+    ) {
+        const ev = this.processEvent(type, progress, event);
+        if (ev) {
+            const name = this.getEventName(type, progress);
+            this.emit(name, ev);
+            if (!this.propagationStoped.get(type)) {
+                this.propagateEvent(type, progress, ev);
+            }
+        }
+        this.propagationStoped.set(type, false);
+        return ev;
+    }
+
+    /**
+     * 捕获事件
+     * @param type 事件类型
+     * @param event 由父元素传递来的事件
+     */
+    captureEvent<T extends ActionType>(type: T, event: ActionEventMap[T]) {
+        return this.handleEvent(type, EventProgress.Capture, event);
+    }
+
+    /**
+     * 冒泡事件
+     * @param type 事件类型
+     * @param event 由子元素传递来的事件
+     */
+    bubbleEvent<T extends ActionType>(type: T, event: ActionEventMap[T]) {
+        return this.handleEvent(type, EventProgress.Bubble, event);
+    }
+
+    /**
+     * 处理事件，用于根据上一级传递的事件内容生成新的事件内容，并执行一些事件的默认行为
+     * @param type 事件类型
+     * @param progress 事件阶段，捕获阶段还是冒泡阶段
+     * @param event 由上一级（捕获阶段的父元素，冒泡阶段的子元素）传递来的事件内容
+     */
+    protected processEvent<T extends ActionType>(
+        type: T,
+        progress: EventProgress,
+        event: ActionEventMap[T]
+    ): ActionEventMap[T] | null {
+        if (progress === EventProgress.Capture) {
+            // 捕获阶段需要计算鼠标位置
+            const tran = this.transformFallThrough
+                ? this.fallTransform
+                : this._transform;
+            if (!tran) return null;
+            const [nx, ny] = this.calActionPosition(event, tran);
+            const inElement = this.isActionInElement(nx, ny);
+            // 在元素范围内，执行事件
+            const newEvent: ActionEventMap[T] = {
+                ...event,
+                offsetX: nx,
+                offsetY: ny,
+                target: this,
+                stopPropagation: () => {
+                    this.propagationStoped.set(type, true);
+                }
+            };
+            this.inElement = inElement;
+            if (!this.processCapture(type, newEvent, inElement)) return null;
+            this.cachedEvent.set(type, newEvent);
+            return newEvent;
+        } else {
+            const newEvent = this.cachedEvent.get(type) as ActionEventMap[T];
+            this.processBubble(type, newEvent, this.inElement);
+            this.cachedEvent.delete(type);
+            return newEvent;
+        }
+    }
+
+    /**
+     * 处理捕获阶段的事件，可以通过 override 来添加新内容，注意调用 `super.processCapture` 来执行默认行为
+     * @param type 事件类型
+     * @param event 正在处理的事件对象
+     * @param inElement 当前鼠标是否在元素内
+     * @returns 是否继续传递事件
+     */
+    protected processCapture<T extends ActionType>(
+        type: T,
+        event: ActionEventMap[T],
+        inElement: boolean
+    ): boolean {
+        switch (type) {
+            case ActionType.Move: {
+                if (this.hovered && !inElement) {
+                    this.hovered = false;
+                    this.emit('leaveCapture', event);
+                    this.emit('leave', event);
+                    return false;
+                } else if (!this.hovered && inElement) {
+                    this.hovered = true;
+                    this.emit('enterCapture', event);
+                    this.emit('enter', event);
+                    return true;
+                }
+                break;
+            }
+            case ActionType.Down: {
+                // 记录标识符，用于判定 click
+                if (event.touch) {
+                    this.touchId.add(event.identifier);
+                } else {
+                    this.mouseId.set(event.type, event.identifier);
+                }
+                break;
+            }
+            case ActionType.Click: {
+                if (event.touch) {
+                    if (!this.touchId.has(event.identifier)) {
+                        return false;
+                    }
+                    this.touchId.delete(event.identifier);
+                } else {
+                    if (this.mouseId.get(event.type) !== event.identifier) {
+                        this.mouseId.delete(event.type);
+                        return false;
+                    }
+                    this.mouseId.delete(event.type);
+                }
+                break;
+            }
+            case ActionType.Enter: {
+                const canvas = this._root?.getCanvas();
+                if (!canvas) return true;
+                canvas.style.cursor = this._cursor;
+            }
+        }
+
+        return inElement;
+    }
+
+    /**
+     * 处理冒泡阶段的事件，可以通过 override 来添加新内容，注意调用 `super.processBubble` 来执行默认行为
+     * @param type 事件类型
+     * @param event 正在处理的事件对象
+     * @param inElement 当前鼠标是否在元素内
+     * @returns 是否继续传递事件
+     */
+    protected processBubble<T extends ActionType>(
+        type: T,
+        event: ActionEventMap[T],
+        inElement: boolean
+    ): boolean {
+        return inElement;
+    }
+
+    /**
+     * 计算一个点击事件在该元素上的位置
+     * @param event 触发的事件
+     * @param transform 当前的变换矩阵
+     */
+    protected calActionPosition(
+        event: IActionEvent,
+        transform: Transform
+    ): vec3 {
+        return transform.untransformed(event.offsetX, event.offsetY);
+    }
+
+    /**
+     * 判断一个点击事件是否在元素内，可以通过 override 来修改其行为
+     * @param x 横坐标
+     * @param y 纵坐标
+     */
+    protected isActionInElement(x: number, y: number) {
+        return x >= 0 && x < this.width && y >= 0 && y < this.height;
+    }
+
+    actionClick() {}
+
+    actionDown() {}
+
+    actionUp() {}
+
+    actionMove() {}
+
+    actionEnter() {}
+
+    actionLeave() {}
+
+    actionWheel() {}
+
+    //#endregion
+
+    //#region vue支持 props处理
 
     /**
      * 判断一个prop是否是期望类型
@@ -720,12 +968,12 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         switch (key) {
             case 'x': {
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.pos(nextValue, this.transform.y);
+                this.pos(nextValue, this._transform.y);
                 return;
             }
             case 'y': {
                 if (!this.assertType(nextValue, 'number', key)) return;
-                this.pos(this.transform.x, nextValue);
+                this.pos(this._transform.x, nextValue);
                 return;
             }
             case 'anchorX': {
@@ -811,6 +1059,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         }
     }
 
+    //#endregion
+
     /**
      * 摧毁这个渲染元素，摧毁后不应继续使用
      */
@@ -819,7 +1069,6 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this.emit('destroy');
         this.removeAllListeners();
         this.cache.delete();
-        RenderItem.itemMap.delete(this._id);
     }
 }
 

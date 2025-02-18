@@ -205,7 +205,8 @@ export class Transform {
      * @param x 横坐标
      * @param y 纵坐标
      */
-    transformed(x: number, y: number) {
+    transformed(x: number, y: number): vec3 {
+        if (!this.modified) return [x, y, 1];
         return multiplyVec3(this.mat, [x, y, 1]);
     }
 
@@ -214,7 +215,8 @@ export class Transform {
      * @param x 横坐标
      * @param y 纵坐标
      */
-    untransformed(x: number, y: number) {
+    untransformed(x: number, y: number): vec3 {
+        if (!this.modified) return [x, y, 1];
         const invert = mat3.create();
         mat3.invert(invert, this.mat);
         return multiplyVec3(invert, [x, y, 1]);

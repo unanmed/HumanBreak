@@ -17,6 +17,7 @@ import { Textbox } from './components';
 import { ILayerGroupRenderExtends, ILayerRenderExtends } from '@/core/render';
 import { Props } from '@/core/render';
 import { WeatherController } from '../weather';
+import { IActionEvent } from '@/core/render/event';
 
 export function create() {
     const main = new MotaRenderer();
@@ -65,6 +66,7 @@ export function create() {
 
         return () => (
             <container id="map-draw" {...mapDrawProps}>
+                <icon icon={50} zIndex={100}></icon>
                 <layer-group id="layer-main" ex={layerGroupExtends} ref={map}>
                     <layer layer="bg" zIndex={10}></layer>
                     <layer layer="bg2" zIndex={20}></layer>

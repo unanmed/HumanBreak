@@ -1,4 +1,5 @@
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
+import { ActionType, EventProgress, ActionEventMap } from './event';
 import {
     ERenderItemEvent,
     IRenderChildable,
@@ -81,6 +82,29 @@ export class Container<E extends EContainerEvent = EContainerEvent>
         this.sortedChildren = [...this.children].sort(
             (a, b) => a.zIndex - b.zIndex
         );
+    }
+
+    protected propagateEvent<T extends ActionType>(
+        type: T,
+        progress: EventProgress,
+        event: ActionEventMap[T]
+    ): void {
+        const len = this.sortedChildren.length;
+        if (progress === EventProgress.Capture) {
+            let success = false;
+            for (let i = len - 1; i >= 0; i--) {
+                if (this.sortedChildren[i].captureEvent(type, event)) {
+                    success = true;
+                    break;
+                }
+            }
+            // 如果没有子元素能够触发，那么自身触发冒泡
+            if (!success) {
+                this.bubbleEvent(type, event);
+            }
+        } else {
+            this.parent?.bubbleEvent(type, event);
+        }
     }
 
     destroy(): void {
