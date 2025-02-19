@@ -5,7 +5,6 @@ import {
     IKeepController,
     IUIInstance,
     IUIMountable,
-    UIBaseElement,
     UIComponent
 } from './shared';
 import { Props } from '@/core/render';
@@ -18,7 +17,8 @@ import {
     ref,
     Ref,
     shallowRef,
-    ShallowRef
+    ShallowRef,
+    VNode
 } from 'vue';
 import { UIContainer } from './container';
 
@@ -109,10 +109,7 @@ export class UIController<C extends UIComponent = UIComponent>
      * 创建一个 ui 控制器
      * @param id 这个控制器的唯一标识符
      */
-    constructor(
-        public readonly id: string,
-        public readonly baseElement: UIBaseElement
-    ) {
+    constructor(public readonly id: string) {
         super();
         if (UIController.controllers.has(id)) {
             logger.warn(57, id);
@@ -124,7 +121,7 @@ export class UIController<C extends UIComponent = UIComponent>
     /**
      * 渲染这个 UI
      */
-    render() {
+    render(): VNode {
         return h(UIContainer, { controller: this });
     }
 

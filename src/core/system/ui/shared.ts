@@ -1,12 +1,5 @@
 import { Props } from '@/core/render';
-import {
-    DefineComponent,
-    DefineSetupFnComponent,
-    Ref,
-    ShallowRef,
-    SlotsType,
-    VNode
-} from 'vue';
+import { DefineComponent, DefineSetupFnComponent, Ref, ShallowRef } from 'vue';
 
 export type UIComponent = DefineSetupFnComponent<any> | DefineComponent;
 
@@ -29,14 +22,6 @@ export interface IKeepController {
     unload(): void;
 }
 
-export type UIBaseElementSlots = SlotsType<{
-    defaults: () => VNode[];
-}>;
-
-export type UIBaseElement =
-    | DefineComponent<{}, {}, string, UIBaseElementSlots>
-    | DefineSetupFnComponent<{}, {}, UIBaseElementSlots>;
-
 export interface IUIMountable<C extends UIComponent> {
     /** 当前的 UI 栈 */
     readonly stack: IUIInstance<C>[];
@@ -44,8 +29,6 @@ export interface IUIMountable<C extends UIComponent> {
     readonly backIns: ShallowRef<IUIInstance<C> | null>;
     /** 当前是否显示背景 UI */
     readonly showBack: Ref<boolean>;
-    /** UI 控制器的根元素 */
-    readonly baseElement: UIBaseElement;
 
     /**
      * 隐藏一个 UI

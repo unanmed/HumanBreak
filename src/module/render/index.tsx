@@ -17,7 +17,7 @@ import { Textbox } from './components';
 import { ILayerGroupRenderExtends, ILayerRenderExtends } from '@/core/render';
 import { Props } from '@/core/render';
 import { WeatherController } from '../weather';
-import { UIController, UIRenderBase } from '@/core/system';
+import { UIController } from '@/core/system';
 
 export function create() {
     const main = new MotaRenderer();
@@ -64,11 +64,13 @@ export function create() {
             weather.bind(map.value);
         });
 
-        const ui = new UIController('main-ui', UIRenderBase);
+        const ui = new UIController('main-ui');
 
         return () => (
             <container id="map-draw" {...mapDrawProps}>
-                {ui.render()}
+                <container width={480} height={480}>
+                    {ui.render()}
+                </container>
                 <layer-group id="layer-main" ex={layerGroupExtends} ref={map}>
                     <layer layer="bg" zIndex={10}></layer>
                     <layer layer="bg2" zIndex={20}></layer>

@@ -1,7 +1,6 @@
-import { computed, defineComponent } from 'vue';
-import { IUIMountable, UIBaseElementSlots, UIComponent } from './shared';
+import { computed, defineComponent, VNode } from 'vue';
+import { IUIMountable, UIComponent } from './shared';
 import { SetupComponentOptions } from '@/module';
-import { ContainerProps } from '@/core/render';
 
 export interface UIContainerProps {
     controller: IUIMountable<UIComponent>;
@@ -15,42 +14,18 @@ export const UIContainer = defineComponent<UIContainerProps>(props => {
     const data = props.controller;
     const back = data.backIns;
     const show = computed(() => data.stack.filter(v => !v.hidden));
-    return () => {
-        return (
-            <data.baseElement>
-                {(() => {
-                    const b = back.value;
-                    if (!b || !data.showBack.value || b.hidden) return;
-                    return (
-                        <b.ui.component
-                            {...b.vBind}
-                            key={b.key}
-                        ></b.ui.component>
-                    );
-                })()}
-                {show.value.map(v => (
-                    <v.ui.component {...v.vBind} key={v.key}></v.ui.component>
-                ))}
-            </data.baseElement>
+    return (): VNode[] => {
+        const elements: VNode[] = [];
+        const b = back.value;
+        if (b && data.showBack.value && !b.hidden) {
+            elements.push(
+                <b.ui.component {...b.vBind} key={b.key}></b.ui.component>
+            );
+        }
+        return elements.concat(
+            show.value.map(v => (
+                <v.ui.component {...v.vBind} key={v.key}></v.ui.component>
+            ))
         );
     };
 }, containerConfig);
-
-export const UIRenderBase = defineComponent<
-    ContainerProps,
-    {},
-    string,
-    UIBaseElementSlots
->((_props, { slots }) => {
-    return () => {
-        return <container>{slots.defaults()}</container>;
-    };
-});
-
-export const UIDomBase = defineComponent<{}, {}, string, UIBaseElementSlots>(
-    (_props, { slots }) => {
-        return () => {
-            return <div>{slots.defaults()}</div>;
-        };
-    }
-);
