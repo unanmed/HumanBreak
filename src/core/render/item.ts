@@ -177,6 +177,12 @@ export interface IRenderTreeRoot {
      * 获取渲染至的目标画布，即显示在画面上的画布
      */
     getCanvas(): HTMLCanvasElement;
+
+    /**
+     * 当鼠标覆盖在某个元素上时执行
+     * @param element 鼠标覆盖的元素
+     */
+    hoverElement(element: RenderItem): void;
 }
 
 export interface ERenderItemEvent extends ERenderItemActionEvent {
@@ -259,6 +265,9 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     composite: GlobalCompositeOperation = 'source-over';
     /** 不透明度 */
     alpha: number = 1;
+
+    /** 鼠标覆盖在此元素上时的光标样式 */
+    cursor: string = 'auto';
 
     get x() {
         return this._transform.x;
@@ -788,6 +797,9 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     ): boolean {
         switch (type) {
             case ActionType.Move: {
+                if (inElement) {
+                    this._root?.hoverElement(this);
+                }
                 if (this.hovered && !inElement) {
                     this.hovered = false;
                     this.emit('leaveCapture', event);
@@ -1061,6 +1073,11 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
             case 'anc': {
                 if (!this.assertType(nextValue, Array, key)) return;
                 this.setAnchor(nextValue[0] as number, nextValue[1] as number);
+                return;
+            }
+            case 'cursor': {
+                if (!this.assertType(nextValue, 'string', key)) return;
+                this.cursor = nextValue;
                 return;
             }
         }
