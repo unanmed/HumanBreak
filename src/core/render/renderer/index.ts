@@ -49,7 +49,11 @@ export const { createApp, render } = createRenderer<RenderItem, RenderItem>({
     },
 
     createText: function (text: string): RenderItem<ETextEvent> {
-        if (!/^\s*$/.test(text)) logger.warn(38);
+        if (/^\s*$/.test(text)) {
+            return new Comment();
+        } else {
+            logger.warn(38);
+        }
         return new Text(text);
     },
 

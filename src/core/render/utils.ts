@@ -19,6 +19,17 @@ export type Props<
         ? InstanceType<T>['$props'] & InstanceType<T>['$emits']
         : unknown;
 
+export type ElementLocator = [
+    x?: number,
+    y?: number,
+    width?: number,
+    height?: number,
+    anchorX?: number,
+    anchorY?: number
+];
+
+export type ElementAnchor = [x: number, y: number];
+
 export function disableViewport() {
     const adapter = RenderAdapter.get<FloorViewport>('viewport');
     if (!adapter) return;

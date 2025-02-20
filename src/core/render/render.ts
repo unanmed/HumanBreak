@@ -62,7 +62,6 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
         this.target = new MotaOffscreenCanvas2D(true, canvas);
         this.size(core._PX_, core._PY_);
         this.target.withGameScale(true);
-        this.target.size(core._PX_, core._PY_);
         this.target.setAntiAliasing(false);
 
         this.setAnchor(0.5, 0.5);
@@ -79,6 +78,12 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
 
         update();
         this.listen();
+    }
+
+    size(width: number, height: number): void {
+        super.size(width, height);
+        this.target.size(width, height);
+        this.transform.setTranslate(width / 2, height / 2);
     }
 
     private listen() {

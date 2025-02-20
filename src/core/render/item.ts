@@ -895,6 +895,18 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      * @param expected 期望类型
      * @param key 键名
      */
+    protected assertType(value: any, expected: string, key: string): boolean;
+    /**
+     * 判断一个prop是否是期望类型
+     * @param value 实际值
+     * @param expected 期望类型
+     * @param key 键名
+     */
+    protected assertType<T>(
+        value: any,
+        expected: new (...params: any[]) => T,
+        key: string
+    ): value is T;
     protected assertType(
         value: any,
         expected: string | (new (...params: any[]) => any),
@@ -1028,6 +1040,27 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
             case 'composite': {
                 if (!this.assertType(nextValue, 'string', key)) return;
                 this.setComposite(nextValue);
+                return;
+            }
+            case 'loc': {
+                if (!this.assertType(nextValue, Array, key)) return;
+                if (!isNil(nextValue[0]) && !isNil(nextValue[1])) {
+                    this.pos(nextValue[0] as number, nextValue[1] as number);
+                }
+                if (!isNil(nextValue[2]) && !isNil(nextValue[3])) {
+                    this.size(nextValue[2] as number, nextValue[3] as number);
+                }
+                if (!isNil(nextValue[4]) && !isNil(nextValue[5])) {
+                    this.setAnchor(
+                        nextValue[4] as number,
+                        nextValue[5] as number
+                    );
+                }
+                return;
+            }
+            case 'anc': {
+                if (!this.assertType(nextValue, Array, key)) return;
+                this.setAnchor(nextValue[0] as number, nextValue[1] as number);
                 return;
             }
         }

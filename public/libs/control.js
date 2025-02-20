@@ -3149,8 +3149,8 @@ control.prototype.resize = function () {
         core.domStyle.scale = target - 0.25;
     }
 
-    const pw = core._PX_ * core.domStyle.scale;
-    const ph = core._PY_ * core.domStyle.scale;
+    const pw = (480 + 180) * core.domStyle.scale;
+    const ph = 480 * core.domStyle.scale;
     core.dom.gameDraw.style.width = `${pw}px`;
     core.dom.gameDraw.style.height = `${ph}px`;
 
