@@ -31,7 +31,6 @@ export const { createApp, render } = createRenderer<RenderItem, RenderItem>({
 
     remove: function (el: RenderItem<ERenderItemEvent>): void {
         el.remove();
-        el.destroy();
     },
 
     createElement: function (

@@ -1,6 +1,7 @@
 import { ElementLocator, Sprite } from '@/core/render';
-import { defineComponent, onMounted, ref, watch } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 import { SetupComponentOptions } from './types';
+import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 
 interface ProgressProps {
     /** 进度条的位置 */
@@ -20,23 +21,21 @@ const progressProps = {
 export const Progress = defineComponent<ProgressProps>(props => {
     const element = ref<Sprite>();
 
-    onMounted(() => {
-        element.value?.setRenderFn(canvas => {
-            const { ctx } = canvas;
-            const width = props.loc[2] ?? 200;
-            const height = props.loc[3] ?? 200;
-            ctx.fillStyle = props.background ?? 'gray';
-            ctx.fillRect(0, 0, width, height);
-            ctx.fillStyle = props.success ?? 'green';
-            ctx.fillRect(0, 0, width * props.progress, height);
-        });
-    });
+    const render = (canvas: MotaOffscreenCanvas2D) => {
+        const { ctx } = canvas;
+        const width = props.loc[2] ?? 200;
+        const height = props.loc[3] ?? 200;
+        ctx.fillStyle = props.background ?? 'gray';
+        ctx.fillRect(0, 0, width, height);
+        ctx.fillStyle = props.success ?? 'green';
+        ctx.fillRect(0, 0, width * props.progress, height);
+    };
 
     watch(props, () => {
         element.value?.update();
     });
 
     return () => {
-        return <sprite ref={element} loc={props.loc}></sprite>;
+        return <sprite ref={element} loc={props.loc} render={render}></sprite>;
     };
 }, progressProps);

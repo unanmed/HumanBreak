@@ -1,6 +1,8 @@
 import { gameKey, Hotkey } from '@/core/main/custom/hotkey';
 import { Animation, Ticker, Transition } from 'mutate-animate';
 import { onMounted, onUnmounted } from 'vue';
+import { ERenderItemEvent, RenderItem } from '../item';
+import EventEmitter from 'eventemitter3';
 
 const ticker = new Ticker();
 
@@ -59,4 +61,14 @@ export function useKey(noScope: boolean = false): KeyUsing {
         });
         return [gameKey, sym];
     }
+}
+
+export function onEvent<
+    T extends ERenderItemEvent,
+    K extends EventEmitter.EventNames<T>
+>(item: RenderItem<T>, key: K, listener: EventEmitter.EventListener<T, K>) {
+    item.on(key, listener);
+    onUnmounted(() => {
+        item.off(key, listener);
+    });
 }

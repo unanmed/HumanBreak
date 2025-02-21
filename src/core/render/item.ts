@@ -2,7 +2,7 @@ import { isNil } from 'lodash-es';
 import { EventEmitter } from 'eventemitter3';
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
 import { Ticker, TickerFn } from 'mutate-animate';
-import { Transform } from './transform';
+import { ITransformUpdatable, Transform } from './transform';
 import { logger } from '../common/logger';
 import { ElementNamespace, ComponentInternalInstance } from 'vue';
 import { transformCanvas } from './utils';
@@ -189,6 +189,7 @@ export interface ERenderItemEvent extends ERenderItemActionEvent {
     beforeRender: [transform: Transform];
     afterRender: [transform: Transform];
     destroy: [];
+    transform: [item: RenderItem, transform: Transform];
 }
 
 interface TickerDelegation {
@@ -211,7 +212,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         IRenderFrame,
         IRenderTickerSupport,
         IRenderChildable,
-        IRenderVueSupport
+        IRenderVueSupport,
+        ITransformUpdatable
 {
     /** 渲染的全局ticker */
     static ticker: Ticker = new Ticker();
@@ -519,6 +521,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
 
     //#endregion
 
+    //#region 功能方法
+
     /**
      * 获取当前元素的绝对位置（不建议使用，因为应当很少会有获取绝对位置的需求）
      */
@@ -535,12 +539,41 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         }
     }
 
+    /**
+     * 获取到可以包围这个元素的最小矩形
+     */
+    getBoundingRect(): DOMRectReadOnly {
+        if (this.type === 'absolute') {
+            return new DOMRectReadOnly(0, 0, this.width, this.height);
+        }
+        const tran = this.transformFallThrough
+            ? this.fallTransform
+            : this._transform;
+        if (!tran) return new DOMRectReadOnly(0, 0, this.width, this.height);
+        const [x1, y1] = tran.transformed(0, 0);
+        const [x2, y2] = tran.transformed(this.width, 0);
+        const [x3, y3] = tran.transformed(0, this.height);
+        const [x4, y4] = tran.transformed(this.width, this.height);
+        const left = Math.min(x1, x2, x3, x4);
+        const right = Math.max(x1, x2, x3, x4);
+        const top = Math.min(y1, y2, y3, y4);
+        const bottom = Math.max(y1, y2, y3, y4);
+        return new DOMRectReadOnly(left, top, right - left, bottom - top);
+    }
+
     update(item: RenderItem<any> = this): void {
         if (this.cacheDirty) return;
         this.cacheDirty = true;
         if (this.hidden) return;
         this.parent?.update(item);
     }
+
+    updateTransform() {
+        this.update();
+        this.emit('transform', this, this._transform);
+    }
+
+    //#endregion
 
     //#region 动画帧与 ticker
 
@@ -639,6 +672,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this.checkRoot();
         this._root?.connect(this);
         this.canvases.forEach(v => v.activate());
+        this._transform.bind(this);
     }
 
     /**
@@ -653,6 +687,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         parent.requestSort();
         parent.update();
         this.canvases.forEach(v => v.deactivate());
+        this._transform.bind();
         if (!success) return false;
         this._root?.disconnect(this);
         this._root = void 0;
@@ -1115,6 +1150,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this.emit('destroy');
         this.removeAllListeners();
         this.cache.delete();
+        this.canvases.forEach(v => v.delete());
+        this.canvases.clear();
     }
 }
 

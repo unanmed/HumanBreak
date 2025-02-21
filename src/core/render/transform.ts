@@ -1,7 +1,7 @@
 import { mat3, ReadonlyMat3, ReadonlyVec3, vec2, vec3 } from 'gl-matrix';
 
 export interface ITransformUpdatable {
-    update(): void;
+    updateTransform?(): void;
 }
 
 export class Transform {
@@ -48,7 +48,7 @@ export class Transform {
         this.scaleX *= x;
         this.scaleY *= y;
         this.modified = true;
-        this.bindedObject?.update();
+        this.bindedObject?.updateTransform?.();
     }
 
     /**
@@ -59,7 +59,7 @@ export class Transform {
         this.x += x;
         this.y += y;
         this.modified = true;
-        this.bindedObject?.update();
+        this.bindedObject?.updateTransform?.();
     }
 
     /**
@@ -73,7 +73,7 @@ export class Transform {
             this.rad -= n * Math.PI * 2;
         }
         this.modified = true;
-        this.bindedObject?.update();
+        this.bindedObject?.updateTransform?.();
     }
 
     /**
@@ -84,7 +84,7 @@ export class Transform {
         this.scaleX = x;
         this.scaleY = y;
         this.modified = true;
-        this.bindedObject?.update();
+        this.bindedObject?.updateTransform?.();
     }
 
     /**
@@ -95,7 +95,7 @@ export class Transform {
         this.x = x;
         this.y = y;
         this.modified = true;
-        this.bindedObject?.update();
+        this.bindedObject?.updateTransform?.();
     }
 
     /**
@@ -105,7 +105,7 @@ export class Transform {
         mat3.rotate(this.mat, this.mat, rad - this.rad);
         this.rad = rad;
         this.modified = true;
-        this.bindedObject?.update();
+        this.bindedObject?.updateTransform?.();
     }
 
     /**
@@ -131,7 +131,7 @@ export class Transform {
             mat3.fromValues(a, b, 0, c, d, 0, e, f, 1)
         );
         this.calAttributes();
-        this.bindedObject?.update();
+        this.bindedObject?.updateTransform?.();
     }
 
     /**
@@ -153,7 +153,7 @@ export class Transform {
     ) {
         mat3.set(this.mat, a, b, 0, c, d, 0, e, f, 1);
         this.calAttributes();
-        this.bindedObject?.update();
+        this.bindedObject?.updateTransform?.();
     }
 
     /**

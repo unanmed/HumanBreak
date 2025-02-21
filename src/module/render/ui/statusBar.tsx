@@ -122,11 +122,7 @@ export const LeftStatusBar = defineComponent<StatusBarProps<ILeftHeroStatus>>(
                     <image image={mdefIcon} loc={iconLoc(3)}></image>
                     <text text={f(s.mdef)} loc={textLoc(3)} font={font1}></text>
                     <image image={moneyIcon} loc={iconLoc(4)}></image>
-                    <text
-                        text={f(s.money)}
-                        loc={textLoc(4)}
-                        font={font1}
-                    ></text>
+                    <text text={f(s.money)} loc={textLoc(4)} font={font1} />
                     <image image={expIcon} loc={iconLoc(5)}></image>
                     <text text={f(s.exp)} loc={textLoc(5)} font={font1}></text>
                     <text
