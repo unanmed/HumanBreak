@@ -33,8 +33,14 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
         return this._freezed;
     }
 
+    private _active: boolean = true;
+    get active() {
+        return this._active;
+    }
+
     /**
-     * 创建一个新的离屏画布
+     * 创建一个新的离屏画布\
+     * **注意**：如果你在自定义渲染元素中使用，请避免使用此构造函数，而应该使用 `RenderItem.requireCanvas`
      * @param alpha 是否启用透明度通道
      * @param canvas 指定画布，不指定时会自动创建一个新画布
      */
@@ -143,6 +149,27 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
      */
     freeze() {
         this._freezed = true;
+        MotaOffscreenCanvas2D.list.delete(this);
+    }
+
+    /**
+     * 使此画布生效，使用前请务必调用此函数，生效后会跟随游戏的放缩比例更改大小，但会导致不会被垃圾回收
+     */
+    activate() {
+        if (this._active || this._freezed) return;
+        MotaOffscreenCanvas2D.list.add(this);
+        if (this.autoScale) {
+            this.size(this.width, this.height);
+            this.symbol++;
+            this.emit('resize');
+        }
+    }
+
+    /**
+     * 使此画布失效，当这个画布暂时不会被使用时请务必调用此函数，失效后若没有对此画布的引用，那么会自动垃圾回收
+     */
+    deactivate() {
+        if (!this._active || this._freezed) return;
         MotaOffscreenCanvas2D.list.delete(this);
     }
 

@@ -10,7 +10,6 @@ import { Transform } from '../transform';
 import { LayerFloorBinder, LayerGroupFloorBinder } from './floor';
 import { RenderAdapter } from '../adapter';
 import { ElementNamespace, ComponentInternalInstance } from 'vue';
-import { Camera } from '../camera';
 import { IAnimateFrame, renderEmits } from '../frame';
 
 export interface ILayerGroupRenderExtends {
@@ -358,7 +357,7 @@ export class LayerGroup
                 return;
             }
             case 'camera':
-                if (!this.assertType(nextValue, Camera, key)) return;
+                if (!this.assertType(nextValue, Transform, key)) return;
                 this.camera = nextValue;
                 return;
         }
@@ -571,11 +570,11 @@ export class Layer extends Container<ELayerEvent> {
     static readonly FRAME_ALL = 15;
 
     /** 静态层，包含除大怪物及正在移动的内容外的内容 */
-    protected staticMap: MotaOffscreenCanvas2D = new MotaOffscreenCanvas2D();
+    protected staticMap: MotaOffscreenCanvas2D = this.requireCanvas();
     /** 移动层，包含大怪物及正在移动的内容 */
-    protected movingMap: MotaOffscreenCanvas2D = new MotaOffscreenCanvas2D();
+    protected movingMap: MotaOffscreenCanvas2D = this.requireCanvas();
     /** 背景图层 */
-    protected backMap: MotaOffscreenCanvas2D = new MotaOffscreenCanvas2D();
+    protected backMap: MotaOffscreenCanvas2D = this.requireCanvas();
 
     /** 最终渲染至的Sprite */
     main: Sprite = new Sprite('absolute', false, true);
@@ -783,12 +782,12 @@ export class Layer extends Container<ELayerEvent> {
         if (!data) return;
 
         const frame = data.frame;
-        const temp = new MotaOffscreenCanvas2D();
+        const temp = this.requireCanvas();
         temp.setHD(false);
         temp.setAntiAliasing(false);
         temp.withGameScale(false);
         for (let i = 0; i < frame; i++) {
-            const canvas = new MotaOffscreenCanvas2D();
+            const canvas = this.requireCanvas();
             const ctx = canvas.ctx;
             const tempCtx = temp.ctx;
             const [sx, sy, w, h] = data.render[i];
@@ -1206,7 +1205,7 @@ export class Layer extends Container<ELayerEvent> {
             const ex = Math.min(sx + blockSize, this.mapWidth);
             const ey = Math.min(sy + blockSize, this.mapHeight);
 
-            const temp = new MotaOffscreenCanvas2D();
+            const temp = this.requireCanvas();
             temp.setAntiAliasing(false);
             temp.setHD(false);
             temp.withGameScale(false);
@@ -1478,7 +1477,7 @@ export class Layer extends Container<ELayerEvent> {
                 return;
             case 'floorImage':
                 if (!this.assertType(nextValue, Array, key)) return;
-                this.setFloorImage(nextValue);
+                this.setFloorImage(nextValue as FloorAnimate[]);
                 return;
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);

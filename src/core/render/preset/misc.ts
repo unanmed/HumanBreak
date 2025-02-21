@@ -19,7 +19,7 @@ export class Text extends RenderItem<ETextEvent> {
 
     fillStyle?: CanvasStyle = '#fff';
     strokeStyle?: CanvasStyle;
-    font?: string = '';
+    font: string = '16px Verdana';
     strokeWidth: number = 1;
 
     private length: number = 0;
@@ -42,7 +42,7 @@ export class Text extends RenderItem<ETextEvent> {
         ctx.textBaseline = 'bottom';
         ctx.fillStyle = this.fillStyle ?? 'transparent';
         ctx.strokeStyle = this.strokeStyle ?? 'transparent';
-        ctx.font = this.font ?? '';
+        ctx.font = this.font;
         ctx.lineWidth = this.strokeWidth;
 
         if (this.strokeStyle) {
@@ -59,7 +59,7 @@ export class Text extends RenderItem<ETextEvent> {
     measure() {
         const ctx = Text.measureCanvas.ctx;
         ctx.textBaseline = 'bottom';
-        ctx.font = this.font ?? '';
+        ctx.font = this.font;
         const res = ctx.measureText(this.text);
         return res;
     }

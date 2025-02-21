@@ -26,7 +26,12 @@ import {
     STATUS_BAR_HEIGHT,
     STATUS_BAR_WIDTH
 } from '../shared';
-import { IHeroStatus, StatusBar } from './statusBar';
+import {
+    ILeftHeroStatus,
+    IRightHeroStatus,
+    LeftStatusBar,
+    RightStatusBar
+} from './statusBar';
 import { onLoaded } from '../use';
 
 const MainScene = defineComponent(() => {
@@ -71,25 +76,58 @@ const MainScene = defineComponent(() => {
         weather.bind(map.value);
     });
 
-    const status: IHeroStatus = reactive({
+    const leftStatus: ILeftHeroStatus = reactive({
         hp: 0,
         atk: 0,
         def: 0,
-        mdef: 0
+        mdef: 0,
+        money: 0,
+        exp: 0,
+        yellowKey: 0,
+        blueKey: 0,
+        redKey: 0,
+        floor: 'MT0',
+        lv: '',
+        regen: 0,
+        exAtk: 0,
+        magicDef: 0
     });
+    const rightStatus: IRightHeroStatus = reactive({});
+
+    const { getHeroStatusOn } = Mota.requireAll('fn');
+
+    const updateStatus = () => {
+        const hero = core.status.hero;
+        leftStatus.atk = getHeroStatusOn('atk');
+        leftStatus.hp = getHeroStatusOn('hp');
+        leftStatus.def = getHeroStatusOn('def');
+        leftStatus.mdef = getHeroStatusOn('mdef');
+        leftStatus.money = getHeroStatusOn('money');
+        leftStatus.exp = core.getNextLvUpNeed() ?? 0;
+        leftStatus.yellowKey = core.itemCount('yellowKey');
+        leftStatus.blueKey = core.itemCount('blueKey');
+        leftStatus.redKey = core.itemCount('redKey');
+        leftStatus.floor = core.status.floorId;
+        leftStatus.lv = core.getLvName(hero.lv);
+        leftStatus.regen = getHeroStatusOn('hpmax');
+        leftStatus.exAtk = getHeroStatusOn('mana');
+        leftStatus.magicDef = getHeroStatusOn('magicDef');
+    };
 
     const loaded = ref(false);
     onLoaded(() => {
         loaded.value = true;
     });
 
+    Mota.require('var', 'hook').on('statusBarUpdate', updateStatus);
+
     return () => (
         <container id="main-scene" width={MAIN_WIDTH} height={MAIN_HEIGHT}>
             {loaded.value && (
-                <StatusBar
+                <LeftStatusBar
                     loc={[0, 0, STATUS_BAR_WIDTH, STATUS_BAR_HEIGHT]}
-                    status={status}
-                ></StatusBar>
+                    status={leftStatus}
+                ></LeftStatusBar>
             )}
             <container id="map-draw" {...mapDrawProps} x={180} zIndex={10}>
                 <layer-group id="layer-main" ex={layerGroupExtends} ref={map}>
@@ -103,6 +141,12 @@ const MainScene = defineComponent(() => {
                 <Textbox id="main-textbox" {...mainTextboxProps}></Textbox>
                 <FloorChange id="floor-change" zIndex={50}></FloorChange>
             </container>
+            {loaded.value && (
+                <RightStatusBar
+                    loc={[480 + 180, 0, STATUS_BAR_WIDTH, STATUS_BAR_HEIGHT]}
+                    status={rightStatus}
+                ></RightStatusBar>
+            )}
             {mainUIController.render()}
         </container>
     );

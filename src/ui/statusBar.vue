@@ -262,7 +262,9 @@ onUnmounted(() => {
     font-size: 200%;
     width: 100%;
     margin-bottom: 14px;
-    text-shadow: 3px 2px 3px #000, 0px 0px 3px #111;
+    text-shadow:
+        3px 2px 3px #000,
+        0px 0px 3px #111;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -303,7 +305,9 @@ onUnmounted(() => {
     font-size: 200%;
     width: 100%;
     text-align: center;
-    text-shadow: 3px 2px 3px #000, 0px 0px 3px #111;
+    text-shadow:
+        3px 2px 3px #000,
+        0px 0px 3px #111;
 }
 
 #status-lv {
@@ -311,7 +315,9 @@ onUnmounted(() => {
     font-size: 200%;
     width: 100%;
     text-align: center;
-    text-shadow: 3px 2px 3px #000, 0px 0px 3px #111;
+    text-shadow:
+        3px 2px 3px #000,
+        0px 0px 3px #111;
 }
 
 .status-extra {

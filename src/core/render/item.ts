@@ -316,13 +316,15 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
 
     //#region 渲染配置与缓存
     /** 渲染缓存信息 */
-    protected cache: MotaOffscreenCanvas2D = new MotaOffscreenCanvas2D();
+    protected cache: MotaOffscreenCanvas2D;
     /** 是否需要更新缓存 */
     protected cacheDirty: boolean = false;
     /** 是否启用缓存机制 */
     readonly enableCache: boolean = true;
     /** 是否启用transform下穿机制，即画布的变换是否会继续作用到下一层画布 */
     readonly transformFallThrough: boolean = false;
+    /** 这个渲染元素使用到的所有画布 */
+    protected readonly canvases: Set<MotaOffscreenCanvas2D> = new Set();
     //#endregion
 
     //#region 交互事件
@@ -356,6 +358,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this.type = type;
 
         this._transform.bind(this);
+        this.cache = this.requireCanvas();
         this.cache.withGameScale(true);
     }
 
@@ -412,6 +415,16 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         }
         ctx.restore();
         this.emit('afterRender', transform);
+    }
+
+    /**
+     * 申请一个 `MotaOffscreenCanvas2D`，即申请一个画布
+     * @param alpha 是否启用画布的 alpha 通道
+     */
+    protected requireCanvas(alpha: boolean = true) {
+        const canvas = new MotaOffscreenCanvas2D(alpha);
+        this.canvases.add(canvas);
+        return canvas;
     }
 
     //#region 修改元素属性
@@ -625,6 +638,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this.update();
         this.checkRoot();
         this._root?.connect(this);
+        this.canvases.forEach(v => v.activate());
     }
 
     /**
@@ -638,6 +652,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this._parent = void 0;
         parent.requestSort();
         parent.update();
+        this.canvases.forEach(v => v.deactivate());
         if (!success) return false;
         this._root?.disconnect(this);
         this._root = void 0;
