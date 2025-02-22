@@ -821,6 +821,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
                 : this._transform;
             if (!tran) return null;
             const [nx, ny] = this.calActionPosition(event, tran);
+
             const inElement = this.isActionInElement(nx, ny);
             // 在元素范围内，执行事件
             const newEvent: ActionEventMap[T] = {

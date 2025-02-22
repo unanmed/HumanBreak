@@ -148,8 +148,13 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
             const max = maxLength - height.value;
             const target = clamp(y, 0, max);
             contentTarget = target;
-            scrollTarget =
-                (height.value - scrollLength) * (contentTarget / max);
+            if (direction.value === ScrollDirection.Horizontal) {
+                scrollTarget =
+                    (width.value - scrollLength) * (contentTarget / max);
+            } else {
+                scrollTarget =
+                    (height.value - scrollLength) * (contentTarget / max);
+            }
             transition.time(time).transition('scroll', scrollTarget);
             transition.time(time).transition('showScroll', target);
         };
@@ -246,6 +251,7 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
                         max = rect.bottom;
                     }
                 }
+                getArea(v, rect);
                 v.on('transform', onTransform);
                 listenedChild.add(v);
                 checkItem(v);
@@ -326,20 +332,31 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
             }
         };
 
-        const getPos = (ev: IActionEvent) => {
-            if (direction.value === ScrollDirection.Horizontal) {
-                return ev.offsetX;
+        const getPos = (ev: IActionEvent, absolute: boolean = false) => {
+            if (absolute) {
+                if (direction.value === ScrollDirection.Horizontal) {
+                    return ev.absoluteX;
+                } else {
+                    return ev.absoluteY;
+                }
             } else {
-                return ev.offsetY;
+                if (direction.value === ScrollDirection.Horizontal) {
+                    return ev.offsetX;
+                } else {
+                    return ev.offsetY;
+                }
             }
         };
 
         let identifier = -2;
-        let lastPos = 0;
+        let downPos = 0;
+        /** 拖动内容时，内容原本所在的位置 */
+        let contentBefore = 0;
 
         const down = (ev: IActionEvent) => {
             identifier = ev.identifier;
-            lastPos = getPos(ev);
+            downPos = getPos(ev, true);
+            contentBefore = contentTarget;
         };
 
         const move = (ev: IActionEvent) => {
@@ -354,10 +371,8 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
                     return;
                 }
             }
-            const movement = pos - lastPos;
-
-            scrollTo(contentTarget - movement, 0);
-            lastPos = pos;
+            const movement = pos - downPos;
+            scrollTo(contentBefore - movement, 0);
         };
 
         /** 最初滚动条在哪 */
@@ -385,10 +400,11 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
         const downScroll = (ev: IActionEvent) => {
             scrollBefore = contentTarget;
             scrollIdentifier = ev.identifier;
-            const pos = getPos(ev);
+            const pos = getPos(ev, true);
             // 计算点击在了滚动条的哪个位置
+            const offsetPos = getPos(ev);
             const sEnd = scrollPos + scrollLength;
-            if (pos >= scrollPos && pos <= sEnd) {
+            if (offsetPos >= scrollPos && offsetPos <= sEnd) {
                 scrollDownPos = pos - scrollPos;
                 scrollMutate = false;
                 scrollPin = getScrollPin(ev);
@@ -398,8 +414,8 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
         };
 
         const moveScroll = (ev: IActionEvent) => {
-            if (ev.identifier !== scrollIdentifier) return;
-            const pos = getPos(ev);
+            if (ev.identifier !== scrollIdentifier || scrollMutate) return;
+            const pos = getPos(ev, true);
             const scrollPos = pos - scrollDownPos;
             let deltaPin = 0;
             let threshold = 0;
@@ -451,7 +467,7 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
             return (
                 <container loc={props.loc} onWheel={wheel}>
                     <container-custom
-                        loc={props.loc}
+                        loc={[0, 0, props.loc[2], props.loc[3]]}
                         ref={content}
                         onDown={down}
                         render={renderContent}

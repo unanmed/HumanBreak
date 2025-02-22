@@ -250,6 +250,7 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
         const id = this.getMouseIdentifier(type, mouse);
         const x = event.offsetX / core.domStyle.scale;
         const y = event.offsetY / core.domStyle.scale;
+
         return {
             target: this,
             identifier: id,
@@ -463,10 +464,10 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
     private toTagString(item: RenderItem, space: number, deep: number): string {
         const name = item.constructor.name;
         if (item.children.size === 0) {
-            return `${' '.repeat(deep * space)}<${name} id="${item.id}" type="${item.type}"></${name}>\n`;
+            return `${' '.repeat(deep * space)}<${name} id="${item.id}" type="${item.type}"${item.hidden ? ' hidden' : ''}></${name}>\n`;
         } else {
             return (
-                `${' '.repeat(deep * space)}<${name} id="${item.id}" type="${item.type}">\n` +
+                `${' '.repeat(deep * space)}<${name} id="${item.id}" type="${item.type}" ${item.hidden ? 'hidden' : ''}>\n` +
                 `${[...item.children].map(v => this.toTagString(v, space, deep + 1)).join('')}` +
                 `${' '.repeat(deep * space)}</${name}>\n`
             );
