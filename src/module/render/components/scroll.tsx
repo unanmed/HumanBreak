@@ -45,7 +45,7 @@ export interface ScrollProps {
      * 滚动到最下方（最右方）时的填充大小，如果默认的高度计算方式有误，
      * 那么可以调整此参数来修复错误
      */
-    padHeight?: number;
+    pad?: number;
 }
 
 type ScrollSlots = SlotsType<{
@@ -53,7 +53,7 @@ type ScrollSlots = SlotsType<{
 }>;
 
 const scrollProps = {
-    props: ['hor', 'noscroll', 'loc', 'padHeight']
+    props: ['hor', 'noscroll', 'loc', 'pad']
 } satisfies SetupComponentOptions<ScrollProps, {}, string, ScrollSlots>;
 
 /** 滚动条图示的最短长度 */
@@ -199,8 +199,22 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
          */
         const onTransform = (item: RenderItem) => {
             const rect = item.getBoundingRect();
+            const pad = props.pad ?? 0;
+            if (direction.value === ScrollDirection.Horizontal) {
+                if (rect.right > maxLength - pad) {
+                    maxLength = rect.right + pad;
+                    updatePosition();
+                }
+            } else {
+                if (rect.bottom > maxLength - pad) {
+                    maxLength = rect.bottom + pad;
+                    updatePosition();
+                }
+            }
             getArea(item, rect);
             checkItem(item);
+            scroll.value?.update();
+            content.value?.update();
         };
 
         /**
@@ -256,7 +270,7 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
                 listenedChild.add(v);
                 checkItem(v);
             });
-            maxLength = max + (props.padHeight ?? 0);
+            maxLength = max + (props.pad ?? 0);
             updatePosition();
             scroll.value?.update();
         };
