@@ -455,6 +455,7 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
                         ref={content}
                         onDown={down}
                         render={renderContent}
+                        zIndex={0}
                     >
                         {slots.default?.()}
                     </container-custom>
@@ -465,6 +466,7 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
                         render={drawScroll}
                         onDown={downScroll}
                         onUp={upScroll}
+                        zIndex={10}
                     ></sprite>
                 </container>
             );
