@@ -70,6 +70,7 @@ export const Page = defineComponent<PageProps, {}, string, PageSlots>(
         const height = computed(() => props.loc[3] ?? 200);
         const round = computed(() => pageSize.value / 4);
         const pageFont = computed(() => `${pageSize.value}px normal`);
+        const nowPageFont = computed(() => `bold ${pageSize.value}px normal`);
 
         // 左右箭头的颜色
         const leftColor = computed(() => (isFirst.value ? '#666' : '#ddd'));
@@ -161,7 +162,11 @@ export const Page = defineComponent<PageProps, {}, string, PageSlots>(
                         {slots.default?.(nowPage.value)}
                     </container>
                     <container loc={pageLoc.value}>
-                        <container loc={leftLoc.value} onClick={lastPage}>
+                        <container
+                            loc={leftLoc.value}
+                            onClick={lastPage}
+                            cursor="pointer"
+                        >
                             <g-rectr
                                 loc={rectLoc.value}
                                 circle={[round.value]}
@@ -180,6 +185,7 @@ export const Page = defineComponent<PageProps, {}, string, PageSlots>(
                             <container
                                 loc={leftPageLoc.value}
                                 onClick={lastPage}
+                                cursor="pointer"
                             >
                                 <g-rectr
                                     loc={rectLoc.value}
@@ -209,13 +215,14 @@ export const Page = defineComponent<PageProps, {}, string, PageSlots>(
                                 loc={textLoc.value}
                                 text={nowPage.value.toString()}
                                 fillStyle="#222"
-                                font={pageFont.value}
+                                font={nowPageFont.value}
                             ></text>
                         </container>
                         {!isLast.value && (
                             <container
                                 loc={rightPageLoc.value}
                                 onClick={nextPage}
+                                cursor="pointer"
                             >
                                 <g-rectr
                                     loc={rectLoc.value}
@@ -231,7 +238,11 @@ export const Page = defineComponent<PageProps, {}, string, PageSlots>(
                                 ></text>
                             </container>
                         )}
-                        <container loc={rightLoc.value} onClick={nextPage}>
+                        <container
+                            loc={rightLoc.value}
+                            onClick={nextPage}
+                            cursor="pointer"
+                        >
                             <g-rectr
                                 loc={rectLoc.value}
                                 circle={[round.value]}

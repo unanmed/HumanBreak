@@ -92,6 +92,7 @@ export const LeftStatusBar = defineComponent<StatusBarProps<ILeftHeroStatus>>(
                         text={floorName}
                         loc={central(24)}
                         font={font1}
+                        cursor="pointer"
                     ></text>
                     <text text={s.lv} loc={central(54)} font={font1}></text>
                     <image image={hpIcon} loc={iconLoc(0)}></image>
@@ -144,11 +145,17 @@ export const LeftStatusBar = defineComponent<StatusBarProps<ILeftHeroStatus>>(
                         font={font2}
                         fillStyle="#f88"
                     ></text>
-                    <text text="技能树" loc={central(396)} font={font1}></text>
+                    <text
+                        text="技能树"
+                        loc={central(396)}
+                        font={font1}
+                        cursor="pointer"
+                    ></text>
                     <text
                         text="查看技能"
                         loc={central(428)}
                         font={font1}
+                        cursor="pointer"
                     ></text>
                 </container>
             );

@@ -45,6 +45,7 @@ export interface BaseProps {
     id?: string;
     alpha?: number;
     composite?: GlobalCompositeOperation;
+    cursor?: string;
     /**
      * 定位属性，可以填 `[横坐标，纵坐标，宽度，高度，x锚点，y锚点]`，
      * 对于横坐标与纵坐标、宽度与高度、x锚点与y锚点，两两一组要么都填，要么都不填

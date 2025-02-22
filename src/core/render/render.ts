@@ -2,6 +2,7 @@ import { logger } from '../common/logger';
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
 import { Container } from './container';
 import {
+    ActionEventMap,
     ActionType,
     IActionEvent,
     IWheelEvent,
@@ -46,6 +47,8 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
 
     /** 用于终止 document 上的监听 */
     private abort?: AbortController;
+    /** 根据捕获行为判断光标样式 */
+    private targetCursor: string = 'auto';
 
     target!: MotaOffscreenCanvas2D;
 
@@ -108,6 +111,7 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
                 ActionType.Move,
                 this.lastMouse
             );
+            this.targetCursor = 'auto';
             this.captureEvent(ActionType.Move, event);
         });
         canvas.addEventListener('mouseenter', ev => {
@@ -381,6 +385,16 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
         return list;
     }
 
+    bubbleEvent<T extends ActionType>(
+        type: T,
+        event: ActionEventMap[T]
+    ): ActionEventMap[T] | null {
+        if (this.targetCursor !== this.target.canvas.style.cursor) {
+            this.target.canvas.style.cursor = this.targetCursor;
+        }
+        return super.bubbleEvent(type, event);
+    }
+
     update(_item: RenderItem = this) {
         this.cacheDirty = true;
     }
@@ -450,7 +464,11 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
         return this.target.canvas;
     }
 
-    hoverElement(_element: RenderItem): void {}
+    hoverElement(element: RenderItem): void {
+        if (element.cursor !== 'auto') {
+            this.targetCursor = element.cursor;
+        }
+    }
 
     destroy() {
         super.destroy();

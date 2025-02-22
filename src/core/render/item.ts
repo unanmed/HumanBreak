@@ -271,6 +271,9 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     /** 不透明度 */
     alpha: number = 1;
 
+    /** 鼠标覆盖在此元素上时的光标样式 */
+    cursor: string = 'auto';
+
     get x() {
         return this._transform.x;
     }
@@ -1147,6 +1150,11 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
             case 'anc': {
                 if (!this.assertType(nextValue, Array, key)) return;
                 this.setAnchor(nextValue[0] as number, nextValue[1] as number);
+                return;
+            }
+            case 'cursor': {
+                if (!this.assertType(nextValue, 'string', key)) return;
+                this.cursor = nextValue;
                 return;
             }
             case 'scale': {
