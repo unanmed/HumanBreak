@@ -1,10 +1,10 @@
 import {
     computed,
     defineComponent,
+    nextTick,
     onMounted,
     onUnmounted,
     onUpdated,
-    reactive,
     ref,
     SlotsType,
     VNode,
@@ -13,11 +13,10 @@ import {
 import { SetupComponentOptions } from './types';
 import {
     Container,
-    ContainerProps,
     ElementLocator,
     RenderItem,
     Sprite,
-    SpriteProps
+    Transform
 } from '@/core/render';
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 import { hyper, Transition } from 'mutate-animate';
@@ -29,9 +28,18 @@ export const enum ScrollDirection {
     Vertical
 }
 
-interface ScrollProps {
-    direction: ScrollDirection;
+export interface ScrollExpose {
+    /**
+     * 控制滚动条滚动至目标位置
+     * @param y 滚动至的目标位置
+     * @param time 滚动的动画时长，默认为无动画
+     */
+    scrollTo(y: number, time?: number): void;
+}
+
+export interface ScrollProps {
     loc: ElementLocator;
+    hor?: boolean;
     noscroll?: boolean;
     /**
      * 滚动到最下方（最右方）时的填充大小，如果默认的高度计算方式有误，
@@ -45,22 +53,47 @@ type ScrollSlots = SlotsType<{
 }>;
 
 const scrollProps = {
-    props: ['direction', 'noscroll']
+    props: ['hor', 'noscroll', 'loc', 'padHeight']
 } satisfies SetupComponentOptions<ScrollProps, {}, string, ScrollSlots>;
 
 /** 滚动条图示的最短长度 */
 const SCROLL_MIN_LENGTH = 20;
 /** 滚动条图示的宽度 */
 const SCROLL_WIDTH = 10;
+/** 滚动条的颜色 */
+const SCROLL_COLOR = '#ddd';
 
+/**
+ * 滚动条组件，具有虚拟滚动功能，即在画面外的不渲染。参数参考 {@link ScrollProps}，暴露接口参考 {@link ScrollExpose}
+ *
+ * ---
+ *
+ * 使用时，建议使用平铺式布局，即包含很多子元素，而不要用一个 container 将所有内容包裹，
+ * 每个子元素的高度（宽度）不建议过大，以更好地通过虚拟滚动优化
+ *
+ * **推荐写法**：
+ * ```tsx
+ * <Scroll>
+ *   <item />
+ *   <item />
+ *   ...其他元素
+ *   <item />
+ *   <item />
+ * </Scroll>
+ * ```
+ * **不推荐**使用这种写法：
+ * ```tsx
+ * <Scroll>
+ *   <container>
+ *     <item />
+ *   </container>
+ * <Scroll>
+ * ```
+ */
 export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
-    (props, { slots }) => {
-        const scrollProps: SpriteProps = reactive({
-            loc: [0, 0, 0, 0]
-        });
-        const contentProps: ContainerProps = reactive({
-            loc: [0, 0, 0, 0]
-        });
+    (props, { slots, expose }) => {
+        /** 滚动条的定位 */
+        const sp = ref<ElementLocator>([0, 0, 1, 1]);
 
         const listenedChild: Set<RenderItem> = new Set();
         const areaMap: Map<RenderItem, [number, number]> = new Map();
@@ -69,52 +102,63 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
 
         const width = computed(() => props.loc[2] ?? 200);
         const height = computed(() => props.loc[3] ?? 200);
+        const direction = computed(() =>
+            props.hor ? ScrollDirection.Horizontal : ScrollDirection.Vertical
+        );
 
-        let showScroll = 0;
-        let nowScroll = 0;
+        /** 滚动内容的当前位置 */
+        let contentPos = 0;
+        /** 滚动条的当前位置 */
+        let scrollPos = 0;
+        /** 滚动内容的目标位置 */
+        let contentTarget = 0;
+        /** 滚动条的目标位置 */
+        let scrollTarget = 0;
+        /** 滚动内容的长度 */
         let maxLength = 0;
+        /** 滚动条的长度 */
         let scrollLength = SCROLL_MIN_LENGTH;
 
         const transition = new Transition();
         transition.value.scroll = 0;
+        transition.value.showScroll = 0;
         transition.mode(hyper('sin', 'out')).absolute();
 
+        //#region 滚动操作
+
         transition.ticker.add(() => {
-            if (transition.value.scroll !== nowScroll) {
-                showScroll = transition.value.scroll;
-                scroll.value?.update();
+            if (scrollPos !== scrollTarget) {
+                scrollPos = transition.value.scroll;
+                content.value?.update();
+            }
+            if (contentPos !== contentTarget) {
+                contentPos = transition.value.showScroll;
+                checkAllItem();
+                updatePosition();
                 content.value?.update();
             }
         });
-
-        watch(
-            () => props.loc,
-            value => {
-                const width = value[2] ?? 200;
-                const height = value[3] ?? 200;
-                if (props.direction === ScrollDirection.Horizontal) {
-                    props.loc = [0, height - SCROLL_WIDTH, width, SCROLL_WIDTH];
-                } else {
-                    props.loc = [width - SCROLL_WIDTH, 0, SCROLL_WIDTH, height];
-                }
-            }
-        );
 
         /**
          * 滚动到目标值
          * @param time 动画时长
          */
-        const scrollTo = (y: number, time: number = 1) => {
-            const target = clamp(y, 0, maxLength);
-            transition.time(time).transition('scroll', target);
-            nowScroll = y;
+        const scrollTo = (y: number, time: number = 0) => {
+            if (maxLength < height.value) return;
+            const max = maxLength - height.value;
+            const target = clamp(y, 0, max);
+            contentTarget = target;
+            scrollTarget =
+                (height.value - scrollLength) * (contentTarget / max);
+            transition.time(time).transition('scroll', scrollTarget);
+            transition.time(time).transition('showScroll', target);
         };
 
         /**
          * 计算一个元素会在画面上显示的区域
          */
         const getArea = (item: RenderItem, rect: DOMRectReadOnly) => {
-            if (props.direction === ScrollDirection.Horizontal) {
+            if (direction.value === ScrollDirection.Horizontal) {
                 areaMap.set(item, [rect.left - width.value, rect.right]);
             } else {
                 areaMap.set(item, [rect.top - height.value, rect.bottom]);
@@ -131,11 +175,18 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
                 return;
             }
             const [min, max] = area;
-            if (nowScroll > min - 10 && nowScroll < max + 10) {
+            if (contentPos > min - 10 && contentPos < max + 10) {
                 item.show();
             } else {
                 item.hide();
             }
+        };
+
+        /**
+         * 对所有元素执行显示检查
+         */
+        const checkAllItem = () => {
+            content.value?.children.forEach(v => checkItem(v));
         };
 
         /**
@@ -147,15 +198,46 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
             checkItem(item);
         };
 
+        /**
+         * 更新滚动条位置
+         */
+        const updatePosition = () => {
+            if (direction.value === ScrollDirection.Horizontal) {
+                scrollLength = Math.max(
+                    SCROLL_MIN_LENGTH,
+                    (width.value / maxLength) * width.value
+                );
+                const h = props.noscroll
+                    ? height.value
+                    : height.value - SCROLL_WIDTH;
+                sp.value = [0, h, width.value, SCROLL_WIDTH];
+            } else {
+                scrollLength = clamp(
+                    (height.value / maxLength) * height.value,
+                    SCROLL_MIN_LENGTH,
+                    height.value - 10
+                );
+                const w = props.noscroll
+                    ? width.value
+                    : width.value - SCROLL_WIDTH;
+                sp.value = [w, 0, SCROLL_WIDTH, height.value];
+            }
+        };
+
+        let updating = false;
         const updateScroll = () => {
-            if (!content.value) return;
+            if (!content.value || updating) return;
+            updating = true;
+            nextTick(() => {
+                updating = false;
+            });
             let max = 0;
             listenedChild.forEach(v => v.off('transform', onTransform));
             listenedChild.clear();
             areaMap.clear();
             content.value.children.forEach(v => {
                 const rect = v.getBoundingRect();
-                if (props.direction === ScrollDirection.Horizontal) {
+                if (direction.value === ScrollDirection.Horizontal) {
                     if (rect.right > max) {
                         max = rect.right;
                     }
@@ -166,76 +248,95 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
                 }
                 v.on('transform', onTransform);
                 listenedChild.add(v);
+                checkItem(v);
             });
             maxLength = max + (props.padHeight ?? 0);
-            if (props.direction === ScrollDirection.Horizontal) {
-                scrollLength = Math.max(
-                    SCROLL_MIN_LENGTH,
-                    (width.value / max) * width.value
-                );
-                const h = props.noscroll
-                    ? height.value
-                    : height.value - SCROLL_WIDTH;
-                contentProps.loc = [-showScroll, 0, width.value, h];
-            } else {
-                scrollLength = clamp(
-                    (height.value / max) * height.value,
-                    SCROLL_MIN_LENGTH,
-                    height.value - 10
-                );
-                const w = props.noscroll
-                    ? width.value
-                    : width.value - SCROLL_WIDTH;
-                contentProps.loc = [0, -showScroll, w, height.value];
-            }
+            updatePosition();
             scroll.value?.update();
         };
 
+        watch(() => props.loc, updateScroll);
         onUpdated(updateScroll);
         onMounted(updateScroll);
         onUnmounted(() => {
             listenedChild.forEach(v => v.off('transform', onTransform));
         });
 
+        //#endregion
+
+        //#region 渲染滚动
+
         const drawScroll = (canvas: MotaOffscreenCanvas2D) => {
             if (props.noscroll) return;
             const ctx = canvas.ctx;
             ctx.lineCap = 'round';
-            ctx.lineWidth = 6;
-            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = SCROLL_COLOR;
             ctx.beginPath();
-            if (props.direction === ScrollDirection.Horizontal) {
-                ctx.moveTo(nowScroll + 5, 5);
-                ctx.lineTo(nowScroll + scrollLength + 5, 5);
+            const scroll = transition.value.scroll;
+            if (direction.value === ScrollDirection.Horizontal) {
+                ctx.moveTo(scroll + 5, 5);
+                ctx.lineTo(scroll + scrollLength - 5, 5);
             } else {
-                ctx.moveTo(5, nowScroll + 5);
-                ctx.lineTo(5, nowScroll + scrollLength + 5);
+                ctx.moveTo(5, scroll + 5);
+                ctx.lineTo(5, scroll + scrollLength - 5);
             }
             ctx.stroke();
         };
 
+        const renderContent = (
+            canvas: MotaOffscreenCanvas2D,
+            children: RenderItem[],
+            transform: Transform
+        ) => {
+            const ctx = canvas.ctx;
+            ctx.save();
+            if (direction.value === ScrollDirection.Horizontal) {
+                ctx.translate(-contentPos, 0);
+            } else {
+                ctx.translate(0, -contentPos);
+            }
+            children.forEach(v => {
+                if (v.hidden) return;
+                v.renderContent(canvas, transform);
+            });
+            ctx.restore();
+        };
+
+        //#endregion
+
+        //#region 事件监听
+
+        const wheelScroll = (delta: number, max: number) => {
+            const sign = Math.sign(delta);
+            const dx = Math.abs(delta);
+            const movement = Math.min(max, dx) * sign;
+            scrollTo(contentTarget + movement, dx > 10 ? 300 : 0);
+        };
+
         const wheel = (ev: IWheelEvent) => {
-            if (props.direction === ScrollDirection.Horizontal) {
+            if (direction.value === ScrollDirection.Horizontal) {
                 if (ev.wheelX !== 0) {
-                    scrollTo(nowScroll + ev.wheelX, 300);
+                    wheelScroll(ev.wheelX, width.value / 5);
                 } else if (ev.wheelY !== 0) {
-                    scrollTo(nowScroll + ev.wheelY, 300);
+                    wheelScroll(ev.wheelY, width.value / 5);
                 }
             } else {
-                scrollTo(nowScroll + ev.wheelY, 300);
+                wheelScroll(ev.wheelY, height.value / 5);
             }
         };
 
         const getPos = (ev: IActionEvent) => {
-            if (props.direction === ScrollDirection.Horizontal) {
+            if (direction.value === ScrollDirection.Horizontal) {
                 return ev.offsetX;
             } else {
                 return ev.offsetY;
             }
         };
 
-        let identifier: number = -1;
-        let lastPos: number = 0;
+        let identifier = -2;
+        let lastPos = 0;
+
         const down = (ev: IActionEvent) => {
             identifier = ev.identifier;
             lastPos = getPos(ev);
@@ -249,24 +350,32 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
             } else {
                 if (ev.buttons & MouseType.Left) {
                     pos = getPos(ev);
+                } else {
+                    return;
                 }
             }
             const movement = pos - lastPos;
-            scrollTo(nowScroll + movement, 1);
+
+            scrollTo(contentTarget - movement, 0);
             lastPos = pos;
         };
 
+        /** 最初滚动条在哪 */
         let scrollBefore = 0;
-        let scrollIdentifier = -1;
+        /** 本次拖动滚动条的操作标识符 */
+        let scrollIdentifier = -2;
+        /** 点击滚动条时，点击位置在平行于滚动条方向的位置 */
         let scrollDownPos = 0;
+        /** 是否是点击了滚动条区域中滚动条之外的地方，这样视为类滚轮操作 */
         let scrollMutate = false;
+        /** 点击滚动条时，点击位置垂直于滚动条方向的位置 */
         let scrollPin = 0;
 
         /**
          * 获取点击滚动条时，垂直于滚动条方向的位置
          */
         const getScrollPin = (ev: IActionEvent) => {
-            if (props.direction === ScrollDirection.Horizontal) {
+            if (direction.value === ScrollDirection.Horizontal) {
                 return ev.absoluteY;
             } else {
                 return ev.absoluteX;
@@ -274,13 +383,13 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
         };
 
         const downScroll = (ev: IActionEvent) => {
-            scrollBefore = nowScroll;
+            scrollBefore = contentTarget;
             scrollIdentifier = ev.identifier;
             const pos = getPos(ev);
             // 计算点击在了滚动条的哪个位置
-            const sEnd = nowScroll + scrollLength;
-            if (pos >= nowScroll && pos <= sEnd) {
-                scrollDownPos = pos - nowScroll;
+            const sEnd = contentTarget + scrollLength;
+            if (pos >= contentTarget && pos <= sEnd) {
+                scrollDownPos = pos - contentTarget;
                 scrollMutate = false;
                 scrollPin = getScrollPin(ev);
             } else {
@@ -304,21 +413,24 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
                 threshold = 100;
             }
             if (deltaPin > threshold) {
-                scrollTo(scrollBefore, 1);
+                scrollTo(scrollBefore, 0);
             } else {
-                scrollTo(scrollPos, 1);
+                const pos = (scrollPos / height.value) * maxLength;
+                scrollTo(pos, 0);
             }
         };
 
         const upScroll = (ev: IActionEvent) => {
             if (!scrollMutate) return;
             const pos = getPos(ev);
-            if (pos < nowScroll) {
+            if (pos < contentTarget) {
                 scrollTo(pos - 50);
             } else {
                 scrollTo(pos + 50);
             }
         };
+
+        //#endregion
 
         onMounted(() => {
             scroll.value?.root?.on('move', move);
@@ -328,16 +440,27 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
         onUnmounted(() => {
             scroll.value?.root?.off('move', move);
             scroll.value?.root?.off('move', moveScroll);
+            transition.ticker.destroy();
+        });
+
+        expose<ScrollExpose>({
+            scrollTo
         });
 
         return () => {
             return (
                 <container loc={props.loc} onWheel={wheel}>
-                    <container {...contentProps} ref={content} onDown={down}>
-                        {slots.default()}
-                    </container>
+                    <container-custom
+                        loc={props.loc}
+                        ref={content}
+                        onDown={down}
+                        render={renderContent}
+                    >
+                        {slots.default?.()}
+                    </container-custom>
                     <sprite
-                        {...scrollProps}
+                        nocache
+                        loc={sp.value}
                         ref={scroll}
                         render={drawScroll}
                         onDown={downScroll}

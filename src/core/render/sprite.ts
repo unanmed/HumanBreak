@@ -7,7 +7,6 @@ import {
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
 import { Transform } from './transform';
 import { ElementNamespace, ComponentInternalInstance } from 'vue';
-import { ActionType, EventProgress, ActionEventMap } from './event';
 
 export interface ESpriteEvent extends ERenderItemEvent {}
 
@@ -41,14 +40,6 @@ export class Sprite<
     setRenderFn(fn: RenderFunction) {
         this.renderFn = fn;
         this.update(this);
-    }
-
-    protected propagateEvent<T extends ActionType>(
-        type: T,
-        _progress: EventProgress,
-        event: ActionEventMap[T]
-    ): void {
-        this.parent?.bubbleEvent(type, event);
     }
 
     patchProp(

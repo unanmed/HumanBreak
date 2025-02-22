@@ -8,6 +8,7 @@ import {
 import type { EnemyCollection } from '@/game/enemy/damage';
 import { ILineProperty } from '../preset/graphics';
 import { ElementAnchor, ElementLocator } from '../utils';
+import { CustomContainerRenderFn } from '../container';
 
 export interface CustomProps {
     _item: (props: BaseProps) => RenderItem;
@@ -27,7 +28,10 @@ export interface BaseProps {
     hidden?: boolean;
     transform?: Transform;
     type?: RenderItemPosition;
+    /** 是否启用缓存，用处较少，主要用于一些默认不启用缓存的元素的特殊优化 */
     cache?: boolean;
+    /** 是否不启用缓存，优先级大于 cache，用处较少，主要用于一些特殊优化 */
+    nocache?: boolean;
     fall?: boolean;
     id?: string;
     alpha?: number;
@@ -48,6 +52,10 @@ export interface SpriteProps extends BaseProps {
 }
 
 export interface ContainerProps extends BaseProps {}
+
+export interface ConatinerCustomProps extends ContainerProps {
+    render?: CustomContainerRenderFn;
+}
 
 export interface GL2Props extends BaseProps {}
 

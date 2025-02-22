@@ -13,6 +13,7 @@ import {
     BezierProps,
     CirclesProps,
     CommentProps,
+    ConatinerCustomProps,
     ContainerProps,
     CustomProps,
     DamageProps,
@@ -84,6 +85,10 @@ declare module 'vue/jsx-runtime' {
         export interface IntrinsicElements {
             sprite: TagDefine<SpriteProps, ESpriteEvent>;
             container: TagDefine<ContainerProps, EContainerEvent>;
+            'container-custom': TagDefine<
+                ConatinerCustomProps,
+                EContainerEvent
+            >;
             shader: TagDefine<ShaderProps, EShaderEvent>;
             text: TagDefine<TextProps, ETextEvent>;
             image: TagDefine<ImageProps, EImageEvent>;

@@ -1,3 +1,4 @@
+import { ElementNamespace, ComponentInternalInstance } from 'vue';
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
 import { ActionType, EventProgress, ActionEventMap } from './event';
 import {
@@ -14,7 +15,6 @@ export class Container<E extends EContainerEvent = EContainerEvent>
     extends RenderItem<E | EContainerEvent>
     implements IRenderChildable
 {
-    children: Set<RenderItem> = new Set();
     sortedChildren: RenderItem[] = [];
 
     private needSort: boolean = false;
@@ -133,7 +133,53 @@ export class Container<E extends EContainerEvent = EContainerEvent>
     destroy(): void {
         super.destroy();
         this.children.forEach(v => {
-            v.destroy();
+            v.remove();
         });
+    }
+}
+
+export type CustomContainerRenderFn = (
+    canvas: MotaOffscreenCanvas2D,
+    children: RenderItem[],
+    transform: Transform
+) => void;
+
+export class ContainerCustom extends Container {
+    private renderFn?: CustomContainerRenderFn;
+
+    protected render(
+        canvas: MotaOffscreenCanvas2D,
+        transform: Transform
+    ): void {
+        if (!this.renderFn) {
+            super.render(canvas, transform);
+        } else {
+            this.renderFn(canvas, this.sortedChildren, transform);
+        }
+    }
+
+    /**
+     * 设置这个自定义容器的渲染函数
+     * @param render 渲染函数
+     */
+    setRenderFn(render?: CustomContainerRenderFn) {
+        this.renderFn = render;
+    }
+
+    patchProp(
+        key: string,
+        prevValue: any,
+        nextValue: any,
+        namespace?: ElementNamespace,
+        parentComponent?: ComponentInternalInstance | null
+    ): void {
+        switch (key) {
+            case 'render': {
+                if (!this.assertType(nextValue, 'function', key)) return;
+                this.setRenderFn(nextValue);
+                return;
+            }
+        }
+        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
 }

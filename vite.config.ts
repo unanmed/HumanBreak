@@ -11,7 +11,8 @@ const FSHOST = 'http://127.0.0.1:3000/';
 
 const custom = [
     'container', 'image', 'sprite', 'shader', 'text', 'comment', 'custom', 
-    'layer', 'layer-group', 'animate', 'damage', 'graphics', 'icon', 'winskin'
+    'layer', 'layer-group', 'animate', 'damage', 'graphics', 'icon', 'winskin',
+    'container-custom'
 ]
 
 // https://vitejs.dev/config/

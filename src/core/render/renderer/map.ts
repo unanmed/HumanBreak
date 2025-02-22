@@ -1,7 +1,7 @@
 import { logger } from '@/core/common/logger';
 import { ERenderItemEvent, RenderItem, RenderItemPosition } from '../item';
 import { ElementNamespace, VNodeProps } from 'vue';
-import { Container } from '../container';
+import { Container, ContainerCustom } from '../container';
 import { MotaRenderer } from '../render';
 import { Sprite } from '../sprite';
 import {
@@ -75,8 +75,13 @@ const standardElement = (
     return (_0: any, _1: any, props?: any) => {
         if (!props) return new Item('static');
         else {
-            const { type = 'static', cache = true, fall = false } = props;
-            return new Item(type, cache, fall);
+            const {
+                type = 'static',
+                cache = true,
+                fall = false,
+                nocache = false
+            } = props;
+            return new Item(type, cache && !nocache, fall);
         }
     };
 };
@@ -91,8 +96,13 @@ const standardElementNoCache = (
     return (_0: any, _1: any, props?: any) => {
         if (!props) return new Item('static');
         else {
-            const { type = 'static', cache = false, fall = false } = props;
-            return new Item(type, cache, fall);
+            const {
+                type = 'static',
+                cache = false,
+                fall = false,
+                nocache = true
+            } = props;
+            return new Item(type, cache && !nocache, fall);
         }
     };
 };
@@ -124,15 +134,17 @@ const se = (
             const {
                 type = position,
                 cache = defaultCache,
-                fall = defautFall
+                fall = defautFall,
+                nocache = !defaultCache
             } = props;
-            return new Item(type, cache, fall);
+            return new Item(type, cache && !nocache, fall);
         }
     };
 };
 
 // Default elements
 tagMap.register('container', standardElement(Container));
+tagMap.register('container-custom', standardElement(ContainerCustom));
 tagMap.register('template', standardElement(Container));
 tagMap.register('mota-renderer', (_0, _1, props) => {
     return new MotaRenderer(props?.id);

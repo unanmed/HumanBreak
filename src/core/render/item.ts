@@ -362,6 +362,11 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this._transform.bind(this);
         this.cache = this.requireCanvas();
         this.cache.withGameScale(true);
+        if (!enableCache) {
+            this.cache.withGameScale(false);
+            this.cache.size(1, 1);
+            this.cache.freeze();
+        }
     }
 
     /**
@@ -437,7 +442,9 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     size(width: number, height: number): void {
         this.width = width;
         this.height = height;
-        this.cache.size(width, height);
+        if (this.enableCache) {
+            this.cache.size(width, height);
+        }
         this.update(this);
     }
 
@@ -480,13 +487,17 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
 
     setHD(hd: boolean): void {
         this.highResolution = hd;
-        this.cache.setHD(hd);
+        if (this.enableCache) {
+            this.cache.setHD(hd);
+        }
         this.update(this);
     }
 
     setAntiAliasing(anti: boolean): void {
         this.antiAliasing = anti;
-        this.cache.setAntiAliasing(anti);
+        if (this.enableCache) {
+            this.cache.setAntiAliasing(anti);
+        }
         this.update(this);
     }
 
@@ -540,7 +551,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     }
 
     /**
-     * 获取到可以包围这个元素的最小矩形
+     * 获取到可以包围这个元素的最小矩形，相对于父元素
      */
     getBoundingRect(): DOMRectReadOnly {
         if (this.type === 'absolute') {
