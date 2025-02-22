@@ -107,10 +107,11 @@ export class Text extends RenderItem<ETextEvent> {
      * 计算字体所占空间，从而确定这个元素的大小
      */
     calBox() {
-        const { width, fontBoundingBoxAscent } = this.measure();
+        const { width, actualBoundingBoxAscent, actualBoundingBoxDescent } =
+            this.measure();
         this.length = width;
-        this.descent = fontBoundingBoxAscent;
-        this.size(width, fontBoundingBoxAscent);
+        this.descent = actualBoundingBoxAscent;
+        this.size(width, actualBoundingBoxAscent + actualBoundingBoxDescent);
     }
 
     patchProp(

@@ -3,6 +3,7 @@ import { defineComponent } from 'vue';
 import { SetupComponentOptions } from '../components';
 import { ElementLocator } from '@/core/render';
 import { Scroll } from '../components/scroll';
+import { Page } from '../components/page';
 
 export interface ILeftHeroStatus {
     hp: number;
@@ -91,7 +92,6 @@ export const LeftStatusBar = defineComponent<StatusBarProps<ILeftHeroStatus>>(
                         text={floorName}
                         loc={central(24)}
                         font={font1}
-                        cursor="pointer"
                     ></text>
                     <text text={s.lv} loc={central(54)} font={font1}></text>
                     <image image={hpIcon} loc={iconLoc(0)}></image>
@@ -144,17 +144,11 @@ export const LeftStatusBar = defineComponent<StatusBarProps<ILeftHeroStatus>>(
                         font={font2}
                         fillStyle="#f88"
                     ></text>
-                    <text
-                        text="技能树"
-                        loc={central(396)}
-                        font={font1}
-                        cursor="pointer"
-                    ></text>
+                    <text text="技能树" loc={central(396)} font={font1}></text>
                     <text
                         text="查看技能"
                         loc={central(428)}
                         font={font1}
-                        cursor="pointer"
                     ></text>
                 </container>
             );
@@ -170,6 +164,21 @@ export const RightStatusBar = defineComponent<StatusBarProps<IRightHeroStatus>>(
                 <container loc={p.loc}>
                     <g-rect loc={[0, 0, p.loc[2], p.loc[3]]} stroke></g-rect>
                     <Scroll loc={[0, 0, 180, 100]}></Scroll>
+                    <Page loc={[0, 200, 180, 100]} pages={3}>
+                        {(page: number) => {
+                            switch (page) {
+                                case 1: {
+                                    return <text text="测试"></text>;
+                                }
+                                case 2: {
+                                    return <text text="测试2"></text>;
+                                }
+                                case 3: {
+                                    return <text text="测试3"></text>;
+                                }
+                            }
+                        }}
+                    </Page>
                 </container>
             );
         };

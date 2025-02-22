@@ -450,9 +450,7 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
         return this.target.canvas;
     }
 
-    hoverElement(element: RenderItem): void {
-        this.target.canvas.style.cursor = element.cursor;
-    }
+    hoverElement(_element: RenderItem): void {}
 
     destroy() {
         super.destroy();

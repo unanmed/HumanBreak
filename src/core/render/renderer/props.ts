@@ -7,7 +7,12 @@ import {
 } from '../preset/layer';
 import type { EnemyCollection } from '@/game/enemy/damage';
 import {
+    BezierParams,
+    CircleParams,
+    EllipseParams,
     ILineProperty,
+    LineParams,
+    QuadParams,
     RectRCircleParams,
     RectREllipseParams
 } from '../preset/graphics';
@@ -40,7 +45,6 @@ export interface BaseProps {
     id?: string;
     alpha?: number;
     composite?: GlobalCompositeOperation;
-    cursor?: string;
     /**
      * 定位属性，可以填 `[横坐标，纵坐标，宽度，高度，x锚点，y锚点]`，
      * 对于横坐标与纵坐标、宽度与高度、x锚点与y锚点，两两一组要么都填，要么都不填
@@ -131,33 +135,6 @@ export interface GraphicPropsBase extends BaseProps, Partial<ILineProperty> {
     /** 描边样式 */
     strokeStyle?: CanvasStyle;
 }
-
-export type CircleParams = [radius?: number, start?: number, end?: number];
-export type EllipseParams = [
-    radiusX?: number,
-    radiusY?: number,
-    start?: number,
-    end?: number
-];
-export type LineParams = [x1: number, y1: number, x2: number, y2: number];
-export type BezierParams = [
-    sx: number,
-    sy: number,
-    cp1x: number,
-    cp1y: number,
-    cp2x: number,
-    cp2y: number,
-    ex: number,
-    ey: number
-];
-export type QuadParams = [
-    sx: number,
-    sy: number,
-    cpx: number,
-    cpy: number,
-    ex: number,
-    ey: number
-];
 
 export interface RectProps extends GraphicPropsBase {}
 

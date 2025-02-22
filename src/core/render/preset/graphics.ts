@@ -5,6 +5,57 @@ import { ElementNamespace, ComponentInternalInstance } from 'vue';
 import { clamp, isNil } from 'lodash-es';
 import { logger } from '@/core/common/logger';
 
+export type CircleParams = [
+    cx?: number,
+    cy?: number,
+    radius?: number,
+    start?: number,
+    end?: number
+];
+export type EllipseParams = [
+    cx?: number,
+    cy?: number,
+    radiusX?: number,
+    radiusY?: number,
+    start?: number,
+    end?: number
+];
+export type LineParams = [x1: number, y1: number, x2: number, y2: number];
+export type BezierParams = [
+    sx: number,
+    sy: number,
+    cp1x: number,
+    cp1y: number,
+    cp2x: number,
+    cp2y: number,
+    ex: number,
+    ey: number
+];
+export type QuadParams = [
+    sx: number,
+    sy: number,
+    cpx: number,
+    cpy: number,
+    ex: number,
+    ey: number
+];
+export type RectRCircleParams = [
+    r1: number,
+    r2?: number,
+    r3?: number,
+    r4?: number
+];
+export type RectREllipseParams = [
+    rx1: number,
+    ry1: number,
+    rx2?: number,
+    ry2?: number,
+    rx3?: number,
+    ry3?: number,
+    rx4?: number,
+    ry4?: number
+];
+
 export interface ILineProperty {
     /** 线宽 */
     lineWidth: number;
@@ -376,18 +427,21 @@ export class Circle extends GraphicItemBase {
                 if (!this.assertType(nextValue, 'number', key)) return;
                 this.setAngle(this.start, nextValue);
                 return;
-            case 'circle':
-                if (!this.assertType(nextValue, Array, key)) return;
-                if (!isNil(nextValue[0])) {
-                    this.setRadius(nextValue[0] as number);
+            case 'circle': {
+                const value = nextValue as CircleParams;
+                if (!this.assertType(value, Array, key)) return;
+                const [cx, cy, radius, start, end] = value;
+                if (!isNil(cx) && !isNil(cy)) {
+                    this.pos(cx, cy);
                 }
-                if (!isNil(nextValue[1]) && !isNil(nextValue[2])) {
-                    this.setAngle(
-                        nextValue[1] as number,
-                        nextValue[2] as number
-                    );
+                if (!isNil(radius)) {
+                    this.setRadius(radius);
+                }
+                if (!isNil(start) && !isNil(end)) {
+                    this.setAngle(start, end);
                 }
                 return;
+            }
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
@@ -464,21 +518,21 @@ export class Ellipse extends GraphicItemBase {
                 if (!this.assertType(nextValue, 'number', key)) return;
                 this.setAngle(this.start, nextValue);
                 return;
-            case 'ellipse':
-                if (!this.assertType(nextValue, Array, key)) return;
-                if (!isNil(nextValue[0]) && !isNil(nextValue[1])) {
-                    this.setRadius(
-                        nextValue[0] as number,
-                        nextValue[1] as number
-                    );
+            case 'ellipse': {
+                const value = nextValue as EllipseParams;
+                if (!this.assertType(value, Array, key)) return;
+                const [cx, cy, radiusX, radiusY, start, end] = value;
+                if (!isNil(cx) && !isNil(cy)) {
+                    this.pos(cx, cy);
                 }
-                if (!isNil(nextValue[2]) && !isNil(nextValue[3])) {
-                    this.setAngle(
-                        nextValue[2] as number,
-                        nextValue[3] as number
-                    );
+                if (!isNil(radiusX) && !isNil(radiusY)) {
+                    this.setRadius(radiusX, radiusY);
+                }
+                if (!isNil(start) && !isNil(end)) {
+                    this.setAngle(start, end);
                 }
                 return;
+            }
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
@@ -857,23 +911,6 @@ export const enum RectRCorner {
     BottomRight,
     BottomLeft
 }
-
-export type RectRCircleParams = [
-    r1: number,
-    r2?: number,
-    r3?: number,
-    r4?: number
-];
-export type RectREllipseParams = [
-    rx1: number,
-    ry1: number,
-    rx2?: number,
-    ry2?: number,
-    rx3?: number,
-    ry3?: number,
-    rx4?: number,
-    ry4?: number
-];
 
 export class RectR extends GraphicItemBase {
     /** 圆角属性，四元素数组，每个元素是一个二元素数组，表示这个角的半径，顺序为 左上，右上，右下，左下 */
