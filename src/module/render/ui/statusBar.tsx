@@ -169,12 +169,7 @@ export const RightStatusBar = defineComponent<StatusBarProps<IRightHeroStatus>>(
             return (
                 <container loc={p.loc}>
                     <g-rect loc={[0, 0, p.loc[2], p.loc[3]]} stroke></g-rect>
-                    <Scroll loc={[0, 100, 180, 100]} hor>
-                        <text text="测试1" loc={[0, 0]}></text>
-                        <text text="测试2" loc={[50, 0]}></text>
-                        <text text="测试3" loc={[100, 0]}></text>
-                        <text text="测试4" loc={[200, 0]}></text>
-                    </Scroll>
+                    <Scroll loc={[0, 0, 180, 100]}></Scroll>
                 </container>
             );
         };

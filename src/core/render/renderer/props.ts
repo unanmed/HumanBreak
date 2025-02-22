@@ -6,8 +6,12 @@ import {
     ILayerRenderExtends
 } from '../preset/layer';
 import type { EnemyCollection } from '@/game/enemy/damage';
-import { ILineProperty } from '../preset/graphics';
-import { ElementAnchor, ElementLocator } from '../utils';
+import {
+    ILineProperty,
+    RectRCircleParams,
+    RectREllipseParams
+} from '../preset/graphics';
+import { ElementAnchor, ElementLocator, ElementScale } from '../utils';
 import { CustomContainerRenderFn } from '../container';
 
 export interface CustomProps {
@@ -45,6 +49,10 @@ export interface BaseProps {
     loc?: ElementLocator;
     /** 锚点属性，可以填 `[x锚点，y锚点]`，是 anchorX, anchorY 的简写属性 */
     anc?: ElementAnchor;
+    /** 放缩属性，可以填 `[x比例，y比例]`，是 transform 的简写属性之一 */
+    scale?: ElementScale;
+    /** 旋转属性，单位弧度，是 transform 的简写属性之一 */
+    rotate?: number;
 }
 
 export interface SpriteProps extends BaseProps {
@@ -124,12 +132,44 @@ export interface GraphicPropsBase extends BaseProps, Partial<ILineProperty> {
     strokeStyle?: CanvasStyle;
 }
 
+export type CircleParams = [radius?: number, start?: number, end?: number];
+export type EllipseParams = [
+    radiusX?: number,
+    radiusY?: number,
+    start?: number,
+    end?: number
+];
+export type LineParams = [x1: number, y1: number, x2: number, y2: number];
+export type BezierParams = [
+    sx: number,
+    sy: number,
+    cp1x: number,
+    cp1y: number,
+    cp2x: number,
+    cp2y: number,
+    ex: number,
+    ey: number
+];
+export type QuadParams = [
+    sx: number,
+    sy: number,
+    cpx: number,
+    cpy: number,
+    ex: number,
+    ey: number
+];
+
 export interface RectProps extends GraphicPropsBase {}
 
 export interface CirclesProps extends GraphicPropsBase {
     radius?: number;
     start?: number;
     end?: number;
+    /**
+     * 圆属性参数，可以填 `[半径，起始角度，终止角度]`，是 radius, start, end 的简写，
+     * 其中半径可选，后两项要么都填，要么都不填
+     */
+    circle?: CircleParams;
 }
 
 export interface EllipseProps extends GraphicPropsBase {
@@ -137,6 +177,11 @@ export interface EllipseProps extends GraphicPropsBase {
     radiusY?: number;
     start?: number;
     end?: number;
+    /**
+     * 椭圆属性参数，可以填 `[x半径，y半径，起始角度，终止角度]`，是 radiusX, radiusY, start, end 的简写，
+     * 其中前两项和后两项要么都填，要么都不填
+     */
+    ellipse?: EllipseParams;
 }
 
 export interface LineProps extends GraphicPropsBase {
@@ -144,6 +189,8 @@ export interface LineProps extends GraphicPropsBase {
     y1?: number;
     x2?: number;
     y2?: number;
+    /** 直线属性参数，可以填 `[x1, y1, x2, y2]`，都是必填 */
+    line?: LineParams;
 }
 
 export interface BezierProps extends GraphicPropsBase {
@@ -155,6 +202,8 @@ export interface BezierProps extends GraphicPropsBase {
     cp2y?: number;
     ex?: number;
     ey?: number;
+    /** 三次贝塞尔曲线参数，可以填 `[sx, sy, cp1x, cp1y, cp2x, cp2y, ex, ey]`，都是必填 */
+    curve?: BezierParams;
 }
 
 export interface QuadraticProps extends GraphicPropsBase {
@@ -164,6 +213,8 @@ export interface QuadraticProps extends GraphicPropsBase {
     cpy?: number;
     ex?: number;
     ey?: number;
+    /** 二次贝塞尔曲线参数，可以填 `[sx, sy, cpx, cpy, ex, ey]`，都是必填 */
+    curve?: QuadParams;
 }
 
 export interface PathProps extends GraphicPropsBase {
@@ -171,26 +222,23 @@ export interface PathProps extends GraphicPropsBase {
 }
 
 export interface RectRProps extends GraphicPropsBase {
-    /** 圆角半径，此参数传入时，radiusX 和 radiusY 应保持一致 */
-    radius: number;
-    /** 圆角横向半径 */
-    radiusX?: number;
-    /** 圆角纵向半径 */
-    radiusY?: number;
-    /** 圆角为线模式 */
-    line?: boolean;
-    /** 圆角为椭圆模式，默认值 */
-    ellipse?: boolean;
-    /** 圆角为二次贝塞尔曲线模式 */
-    quad?: boolean;
-    /** 圆角为三次贝塞尔曲线模式 */
-    cubic?: boolean;
-    /** 控制点，此参数传入时，cpx 和 cpy 应保持一致 */
-    cp?: number;
-    /** 横向控制点 */
-    cpx?: number;
-    /** 纵向控制点 */
-    cpy?: number;
+    /**
+     * 圆形圆角参数，可以填 `[r1, r2, r3, r4]`，后三项可选。填写不同数量下的表现：
+     * - 1个：每个角都是 `r1` 半径的圆
+     * - 2个：左上和右下是 `r1` 半径的圆，右上和左下是 `r2` 半径的圆
+     * - 3个：左上是 `r1` 半径的圆，右上和左下是 `r2` 半径的圆，右下是 `r3` 半径的圆
+     * - 4个：左上、右上、左下、右下 分别是 `r1, r2, r3, r4` 半径的圆
+     */
+    circle?: RectRCircleParams;
+    /**
+     * 圆形圆角参数，可以填 `[rx1, ry1, rx2, ry2, rx3, ry3, rx4, ry4]`，
+     * 两两一组，后三组可选，填写不同数量下的表现：
+     * - 1组：每个角都是 `[rx1, ry1]` 半径的椭圆
+     * - 2组：左上和右下是 `[rx1, ry1]` 半径的椭圆，右上和左下是 `[rx2, ry2]` 半径的椭圆
+     * - 3组：左上是 `[rx1, ry1]` 半径的椭圆，右上和左下是 `[rx2, ey2]` 半径的椭圆，右下是 `[rx3, ry3]` 半径的椭圆
+     * - 4组：左上、右上、左下、右下 分别是 `[rx1, ry1], [rx2, ry2], [rx3, ry3], [rx4, ry4]` 半径的椭圆
+     */
+    ellipse?: RectREllipseParams;
 }
 
 export interface IconProps extends BaseProps {

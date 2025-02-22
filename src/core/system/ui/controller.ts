@@ -96,6 +96,11 @@ export class UIController<C extends UIComponent = UIComponent>
         () => this.userShowBack.value && this.sysShowBack.value
     );
 
+    /** 当前是否显示 UI */
+    get active() {
+        return this.showBack.value;
+    }
+
     /** 自定义显示模式下的配置信息 */
     private config?: IUICustomConfig<C>;
     /** 是否维持背景 UI */

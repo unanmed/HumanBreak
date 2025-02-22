@@ -197,9 +197,15 @@ export class Image extends RenderItem<EImageEvent> {
 }
 
 export class Comment extends RenderItem {
+    readonly isComment: boolean = true;
+
     constructor(public text: string = '') {
-        super('static');
+        super('static', false, false);
         this.hide();
+    }
+
+    getBoundingRect(): DOMRectReadOnly {
+        return new DOMRectReadOnly(0, 0, 0, 0);
     }
 
     protected render(

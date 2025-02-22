@@ -1,8 +1,9 @@
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
-import { ERenderItemEvent, RenderItem, RenderItemPosition } from '../item';
+import { ERenderItemEvent, RenderItem } from '../item';
 import { Transform } from '../transform';
 import { ElementNamespace, ComponentInternalInstance } from 'vue';
-import { isNil } from 'lodash-es';
+import { clamp, isNil } from 'lodash-es';
+import { logger } from '@/core/common/logger';
 
 /*
  * Expected usage (this comment needs to be deleted after implementing correctly):
@@ -63,7 +64,7 @@ export abstract class GraphicItemBase
     extends RenderItem<EGraphicItemEvent>
     implements Required<ILineProperty>
 {
-    mode: number = GraphicMode.Fill;
+    mode: GraphicMode = GraphicMode.Fill;
     fill: CanvasStyle = '#fff';
     stroke: CanvasStyle = '#fff';
     lineWidth: number = 2;
@@ -79,6 +80,9 @@ export abstract class GraphicItemBase
     private strokeAndFill: boolean = false;
     private propFillSet: boolean = false;
 
+    private cachePath?: Path2D;
+    protected pathDirty: boolean = false;
+
     /**
      * 获取这个元素的绘制路径
      */
@@ -90,7 +94,12 @@ export abstract class GraphicItemBase
     ): void {
         const ctx = canvas.ctx;
         this.setCanvasState(canvas);
-        const path = this.getPath();
+        if (this.pathDirty) {
+            this.cachePath = this.getPath();
+            this.pathDirty = false;
+        }
+        const path = this.cachePath;
+        if (!path) return;
         switch (this.mode) {
             case GraphicMode.Fill:
                 ctx.fill(path, this.fillRule);
@@ -111,12 +120,16 @@ export abstract class GraphicItemBase
 
     protected isActionInElement(x: number, y: number): boolean {
         const ctx = this.cache.ctx;
-        const path = this.getPath();
+        if (this.pathDirty) {
+            this.cachePath = this.getPath();
+            this.pathDirty = false;
+        }
+        const path = this.cachePath;
+        if (!path) return false;
         switch (this.mode) {
             case GraphicMode.Fill:
                 return ctx.isPointInPath(path, x, y, this.fillRule);
             case GraphicMode.Stroke:
-                return ctx.isPointInStroke(path, x, y);
             case GraphicMode.FillAndStroke:
             case GraphicMode.StrokeAndFill:
                 return (
@@ -124,7 +137,6 @@ export abstract class GraphicItemBase
                     ctx.isPointInStroke(path, x, y)
                 );
         }
-        return false;
     }
 
     /**
@@ -272,7 +284,7 @@ export abstract class GraphicItemBase
                 break;
             case 'lineDash':
                 if (!this.assertType(nextValue, Array, key)) return;
-                this.lineDash = nextValue;
+                this.lineDash = nextValue as number[];
                 this.update();
                 break;
             case 'lineDashOffset':
@@ -301,9 +313,19 @@ export abstract class GraphicItemBase
 }
 
 export class Rect extends GraphicItemBase {
+    pos(x: number, y: number): void {
+        super.pos(x, y);
+        this.pathDirty = true;
+    }
+
+    size(width: number, height: number): void {
+        super.size(width, height);
+        this.pathDirty = true;
+    }
+
     getPath(): Path2D {
         const path = new Path2D();
-        path.rect(this.x, this.y, this.width, this.height);
+        path.rect(0, 0, this.width, this.height);
         return path;
     }
 }
@@ -312,32 +334,13 @@ export class Circle extends GraphicItemBase {
     radius: number = 10;
     start: number = 0;
     end: number = Math.PI * 2;
+    anchorX: number = 0.5;
+    anchorY: number = 0.5;
 
-    protected render(
-        canvas: MotaOffscreenCanvas2D,
-        _transform: Transform
-    ): void {
-        const ctx = canvas.ctx;
-        this.setCanvasState(canvas);
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, this.start, this.end);
-
-        switch (this.mode) {
-            case GraphicMode.Fill:
-                ctx.fill(this.fillRule);
-                break;
-            case GraphicMode.Stroke:
-                ctx.stroke();
-                break;
-            case GraphicMode.FillAndStroke:
-                ctx.fill(this.fillRule);
-                ctx.stroke();
-                break;
-            case GraphicMode.StrokeAndFill:
-                ctx.stroke();
-                ctx.fill(this.fillRule);
-                break;
-        }
+    getPath(): Path2D {
+        const path = new Path2D();
+        path.arc(this.radius, this.radius, this.radius, this.start, this.end);
+        return path;
     }
 
     /**
@@ -347,6 +350,7 @@ export class Circle extends GraphicItemBase {
     setRadius(radius: number) {
         this.radius = radius;
         this.size(radius * 2, radius * 2);
+        this.pathDirty = true;
         this.update();
     }
 
@@ -358,6 +362,7 @@ export class Circle extends GraphicItemBase {
     setAngle(start: number, end: number) {
         this.start = start;
         this.end = end;
+        this.pathDirty = true;
         this.update();
     }
 
@@ -381,6 +386,18 @@ export class Circle extends GraphicItemBase {
                 if (!this.assertType(nextValue, 'number', key)) return;
                 this.setAngle(this.start, nextValue);
                 return;
+            case 'circle':
+                if (!this.assertType(nextValue, Array, key)) return;
+                if (!isNil(nextValue[0])) {
+                    this.setRadius(nextValue[0] as number);
+                }
+                if (!isNil(nextValue[1]) && !isNil(nextValue[2])) {
+                    this.setAngle(
+                        nextValue[1] as number,
+                        nextValue[2] as number
+                    );
+                }
+                return;
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
@@ -391,40 +408,21 @@ export class Ellipse extends GraphicItemBase {
     radiusY: number = 10;
     start: number = 0;
     end: number = Math.PI * 2;
+    anchorX: number = 0.5;
+    anchorY: number = 0.5;
 
-    protected render(
-        canvas: MotaOffscreenCanvas2D,
-        _transform: Transform
-    ): void {
-        const ctx = canvas.ctx;
-        this.setCanvasState(canvas);
-        ctx.beginPath();
-        ctx.ellipse(
-            this.x,
-            this.y,
+    getPath(): Path2D {
+        const path = new Path2D();
+        path.ellipse(
+            this.radiusX,
+            this.radiusY,
             this.radiusX,
             this.radiusY,
             0,
             this.start,
             this.end
         );
-
-        switch (this.mode) {
-            case GraphicMode.Fill:
-                ctx.fill(this.fillRule);
-                break;
-            case GraphicMode.Stroke:
-                ctx.stroke();
-                break;
-            case GraphicMode.FillAndStroke:
-                ctx.fill(this.fillRule);
-                ctx.stroke();
-                break;
-            case GraphicMode.StrokeAndFill:
-                ctx.stroke();
-                ctx.fill(this.fillRule);
-                break;
-        }
+        return path;
     }
 
     /**
@@ -435,6 +433,8 @@ export class Ellipse extends GraphicItemBase {
     setRadius(x: number, y: number) {
         this.radiusX = x;
         this.radiusY = y;
+        this.size(x, y);
+        this.pathDirty = true;
         this.update();
     }
 
@@ -446,6 +446,7 @@ export class Ellipse extends GraphicItemBase {
     setAngle(start: number, end: number) {
         this.start = start;
         this.end = end;
+        this.pathDirty = true;
         this.update();
     }
 
@@ -473,6 +474,21 @@ export class Ellipse extends GraphicItemBase {
                 if (!this.assertType(nextValue, 'number', key)) return;
                 this.setAngle(this.start, nextValue);
                 return;
+            case 'ellipse':
+                if (!this.assertType(nextValue, Array, key)) return;
+                if (!isNil(nextValue[0]) && !isNil(nextValue[1])) {
+                    this.setRadius(
+                        nextValue[0] as number,
+                        nextValue[1] as number
+                    );
+                }
+                if (!isNil(nextValue[2]) && !isNil(nextValue[3])) {
+                    this.setAngle(
+                        nextValue[2] as number,
+                        nextValue[3] as number
+                    );
+                }
+                return;
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
@@ -483,17 +499,15 @@ export class Line extends GraphicItemBase {
     y1: number = 0;
     x2: number = 0;
     y2: number = 0;
+    mode: GraphicMode = GraphicMode.Stroke;
 
-    protected render(
-        canvas: MotaOffscreenCanvas2D,
-        _transform: Transform
-    ): void {
-        const ctx = canvas.ctx;
-        this.setCanvasState(canvas);
-        ctx.beginPath();
-        ctx.moveTo(this.x1, this.y1);
-        ctx.lineTo(this.x2, this.y2);
-        ctx.stroke();
+    getPath(): Path2D {
+        const path = new Path2D();
+        const x = this.x;
+        const y = this.y;
+        path.moveTo(this.x1 - x, this.y1 - y);
+        path.lineTo(this.x2 - x, this.y2 - y);
+        return path;
     }
 
     /**
@@ -502,6 +516,7 @@ export class Line extends GraphicItemBase {
     setPoint1(x: number, y: number) {
         this.x1 = x;
         this.y1 = y;
+        this.fitRect();
         this.update();
     }
 
@@ -511,7 +526,18 @@ export class Line extends GraphicItemBase {
     setPoint2(x: number, y: number) {
         this.x2 = x;
         this.y2 = y;
+        this.fitRect();
         this.update();
+    }
+
+    private fitRect() {
+        const left = Math.min(this.x1, this.x2);
+        const top = Math.min(this.y1, this.y2);
+        const right = Math.max(this.x1, this.x2);
+        const bottom = Math.max(this.y1, this.y2);
+        this.pos(left, top);
+        this.size(right - left, bottom - top);
+        this.pathDirty = true;
     }
 
     patchProp(
@@ -538,6 +564,11 @@ export class Line extends GraphicItemBase {
                 if (!this.assertType(nextValue, 'number', key)) return;
                 this.setPoint2(this.x2, nextValue);
                 return;
+            case 'line':
+                if (!this.assertType(nextValue as number[], Array, key)) return;
+                this.setPoint1(nextValue[0], nextValue[1]);
+                this.setPoint2(nextValue[2], nextValue[3]);
+                return;
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
@@ -552,24 +583,22 @@ export class BezierCurve extends GraphicItemBase {
     cp2y: number = 0;
     ex: number = 0;
     ey: number = 0;
+    mode: GraphicMode = GraphicMode.Stroke;
 
-    protected render(
-        canvas: MotaOffscreenCanvas2D,
-        _transform: Transform
-    ): void {
-        const ctx = canvas.ctx;
-        this.setCanvasState(canvas);
-        ctx.beginPath();
-        ctx.moveTo(this.sx, this.sy);
-        ctx.bezierCurveTo(
-            this.cp1x,
-            this.cp1y,
-            this.cp2x,
-            this.cp2y,
-            this.ex,
-            this.ey
+    getPath(): Path2D {
+        const path = new Path2D();
+        const x = this.x;
+        const y = this.y;
+        path.moveTo(this.sx - x, this.sy - y);
+        path.bezierCurveTo(
+            this.cp1x - x,
+            this.cp1y - y,
+            this.cp2x - x,
+            this.cp2y - y,
+            this.ex - x,
+            this.ey - y
         );
-        ctx.stroke();
+        return path;
     }
 
     /**
@@ -578,6 +607,7 @@ export class BezierCurve extends GraphicItemBase {
     setStart(x: number, y: number) {
         this.sx = x;
         this.sy = y;
+        this.fitRect();
         this.update();
     }
 
@@ -587,6 +617,7 @@ export class BezierCurve extends GraphicItemBase {
     setControl1(x: number, y: number) {
         this.cp1x = x;
         this.cp1y = y;
+        this.fitRect();
         this.update();
     }
 
@@ -596,6 +627,7 @@ export class BezierCurve extends GraphicItemBase {
     setControl2(x: number, y: number) {
         this.cp2x = x;
         this.cp2y = y;
+        this.fitRect();
         this.update();
     }
 
@@ -605,7 +637,18 @@ export class BezierCurve extends GraphicItemBase {
     setEnd(x: number, y: number) {
         this.ex = x;
         this.ey = y;
+        this.fitRect();
         this.update();
+    }
+
+    private fitRect() {
+        const left = Math.min(this.sx, this.cp1x, this.cp2x, this.ex);
+        const top = Math.min(this.sy, this.cp1y, this.cp2y, this.ey);
+        const right = Math.max(this.sx, this.cp1x, this.cp2x, this.ex);
+        const bottom = Math.max(this.sy, this.cp1y, this.cp2y, this.ey);
+        this.pos(left, top);
+        this.size(right - left, bottom - top);
+        this.pathDirty = true;
     }
 
     patchProp(
@@ -648,6 +691,13 @@ export class BezierCurve extends GraphicItemBase {
                 if (!this.assertType(nextValue, 'number', key)) return;
                 this.setEnd(this.ex, nextValue);
                 return;
+            case 'curve':
+                if (!this.assertType(nextValue as number[], Array, key)) return;
+                this.setStart(nextValue[0], nextValue[1]);
+                this.setControl1(nextValue[2], nextValue[3]);
+                this.setControl2(nextValue[4], nextValue[5]);
+                this.setEnd(nextValue[6], nextValue[7]);
+                return;
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
@@ -660,6 +710,21 @@ export class QuadraticCurve extends GraphicItemBase {
     cpy: number = 0;
     ex: number = 0;
     ey: number = 0;
+    mode: GraphicMode = GraphicMode.Stroke;
+
+    getPath(): Path2D {
+        const path = new Path2D();
+        const x = this.x;
+        const y = this.y;
+        path.moveTo(this.sx - x, this.sy - y);
+        path.quadraticCurveTo(
+            this.cpx - x,
+            this.cpy - y,
+            this.ex - x,
+            this.ey - y
+        );
+        return path;
+    }
 
     protected render(
         canvas: MotaOffscreenCanvas2D,
@@ -679,6 +744,7 @@ export class QuadraticCurve extends GraphicItemBase {
     setStart(x: number, y: number) {
         this.sx = x;
         this.sy = y;
+        this.fitRect();
         this.update();
     }
 
@@ -688,6 +754,7 @@ export class QuadraticCurve extends GraphicItemBase {
     setControl(x: number, y: number) {
         this.cpx = x;
         this.cpy = y;
+        this.fitRect();
         this.update();
     }
 
@@ -697,7 +764,18 @@ export class QuadraticCurve extends GraphicItemBase {
     setEnd(x: number, y: number) {
         this.ex = x;
         this.ey = y;
+        this.fitRect();
         this.update();
+    }
+
+    private fitRect() {
+        const left = Math.min(this.sx, this.cpx, this.ex);
+        const top = Math.min(this.sy, this.cpy, this.ey);
+        const right = Math.max(this.sx, this.cpx, this.ex);
+        const bottom = Math.max(this.sy, this.cpy, this.ey);
+        this.pos(left, top);
+        this.size(right - left, bottom - top);
+        this.pathDirty = true;
     }
 
     patchProp(
@@ -732,6 +810,12 @@ export class QuadraticCurve extends GraphicItemBase {
                 if (!this.assertType(nextValue, 'number', key)) return;
                 this.setEnd(this.ex, nextValue);
                 return;
+            case 'curve':
+                if (!this.assertType(nextValue as number[], Array, key)) return;
+                this.setStart(nextValue[0], nextValue[1]);
+                this.setControl(nextValue[2], nextValue[3]);
+                this.setEnd(nextValue[4], nextValue[5]);
+                return;
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }
@@ -740,30 +824,6 @@ export class QuadraticCurve extends GraphicItemBase {
 export class Path extends GraphicItemBase {
     /** 路径 */
     path: Path2D = new Path2D();
-
-    protected render(
-        canvas: MotaOffscreenCanvas2D,
-        _transform: Transform
-    ): void {
-        const ctx = canvas.ctx;
-        this.setCanvasState(canvas);
-        switch (this.mode) {
-            case GraphicMode.Fill:
-                ctx.fill(this.path, this.fillRule);
-                break;
-            case GraphicMode.Stroke:
-                ctx.stroke(this.path);
-                break;
-            case GraphicMode.FillAndStroke:
-                ctx.fill(this.path, this.fillRule);
-                ctx.stroke(this.path);
-                break;
-            case GraphicMode.StrokeAndFill:
-                ctx.stroke(this.path);
-                ctx.fill(this.path, this.fillRule);
-                break;
-        }
-    }
 
     /**
      * 获取当前路径
@@ -778,6 +838,7 @@ export class Path extends GraphicItemBase {
      */
     addPath(path: Path2D) {
         this.path.addPath(path);
+        this.pathDirty = true;
         this.update();
     }
 
@@ -792,6 +853,7 @@ export class Path extends GraphicItemBase {
             case 'path':
                 if (!this.assertType(nextValue, Path2D, key)) return;
                 this.path = nextValue;
+                this.pathDirty = true;
                 this.update();
                 return;
         }
@@ -799,90 +861,156 @@ export class Path extends GraphicItemBase {
     }
 }
 
-const enum RectRType {
-    /** 圆角为椭圆 */
-    Ellipse,
-    /** 圆角为二次贝塞尔曲线 */
-    Quad,
-    /** 圆角为三次贝塞尔曲线。该模式下，包含两个控制点，一个控制点位于上下矩形边延长线，另一个控制点位于左右矩形边延长线 */
-    Cubic,
-    /** 圆角为直线连接 */
-    Line
+export const enum RectRCorner {
+    TopLeft,
+    TopRight,
+    BottomRight,
+    BottomLeft
 }
 
+export type RectRCircleParams = [
+    r1: number,
+    r2?: number,
+    r3?: number,
+    r4?: number
+];
+export type RectREllipseParams = [
+    rx1: number,
+    ry1: number,
+    rx2?: number,
+    ry2?: number,
+    rx3?: number,
+    ry3?: number,
+    rx4?: number,
+    ry4?: number
+];
+
 export class RectR extends GraphicItemBase {
-    /** 矩形路径 */
-    private path: Path2D;
+    /** 圆角属性，四元素数组，每个元素是一个二元素数组，表示这个角的半径，顺序为 左上，右上，右下，左下 */
+    readonly corner: [radiusX: number, radiusY: number][] = [
+        [0, 0],
+        [0, 0],
+        [0, 0],
+        [0, 0]
+    ];
 
-    /** 圆角类型 */
-    roundType: RectRType = RectRType.Ellipse;
-    /** 横向圆角半径 */
-    radiusX: number = 0;
-    /** 纵向圆角半径 */
-    radiusY: number = 0;
-    /**
-     * 二次贝塞尔曲线下，表示控制点的横向比例，控制点在上下矩形边与圆角的交界处为0，在左右矩形边与圆角的交界处延长线为1
-     * 三次贝塞尔曲线下，表示在上下矩形边延长线上的控制点的比例
-     */
-    cpx: number = 0;
-    /**
-     * 二次贝塞尔曲线下，表示控制点的纵向比例，控制点在左右矩形边与圆角的交界处为0，在上下矩形边与圆角的交界处延长线为1
-     * 三次贝塞尔曲线下，表示在左右矩形边延长线上的控制点的比例
-     */
-    cpy: number = 0;
-
-    constructor(
-        type: RenderItemPosition,
-        cache: boolean = false,
-        fall: boolean = false
-    ) {
-        super(type, cache, fall);
-
+    getPath(): Path2D {
         const path = new Path2D();
-        path.rect(this.x, this.y, this.width, this.height);
-        this.path = path;
+        const { width: w, height: h } = this;
+        const [[xtl, ytl], [xtr, ytr], [xbr, ybr], [xbl, ybl]] = this.corner;
+        // 左上圆角终点
+        path.moveTo(xtl, 0);
+        // 右上圆角起点
+        path.lineTo(w - xtr, 0);
+        // 右上圆角终点
+        path.ellipse(w - xtr, ytr, xtr, ytr, 0, -Math.PI / 2, 0);
+        // 右下圆角起点
+        path.lineTo(w, h - ybr);
+        // 右下圆角终点
+        path.ellipse(w - xbr, h - ybr, xbr, ybr, 0, 0, Math.PI / 2);
+        // 左下圆角起点
+        path.lineTo(xbl, h);
+        // 左下圆角终点
+        path.ellipse(xbl, h - ybl, xbl, ybl, 0, Math.PI / 2, Math.PI);
+        // 左上圆角起点
+        path.lineTo(0, ytl);
+        // 左上圆角终点
+        path.ellipse(xtl, ytl, xtl, ytl, 0, Math.PI, -Math.PI / 2);
+        path.closePath();
+        return path;
     }
-
-    /**
-     * 更新路径
-     */
-    private updatePath() {}
 
     /**
      * 设置圆角半径
      * @param x 横向半径
      * @param y 纵向半径
      */
-    setRadius(x: number, y: number) {}
+    setRadius(x: number, y: number, corner: RectRCorner) {
+        const hw = this.width / 2;
+        const hh = this.height / 2;
+        this.corner[corner] = [clamp(x, 0, hw), clamp(y, 0, hh)];
+        this.pathDirty = true;
+        this.update();
+    }
 
     /**
-     * 设置贝塞尔曲线模式下的控制点
-     * @param x cpx
-     * @param y cpy
+     * 设置圆形圆角参数
+     * @param circle 圆形圆角参数
      */
-    setControl(x: number, y: number) {}
+    setCircle(circle: RectRCircleParams) {
+        const [r1, r2 = 0, r3 = 0, r4 = 0] = circle;
+        switch (circle.length) {
+            case 1: {
+                this.setRadius(r1, r1, RectRCorner.BottomLeft);
+                this.setRadius(r1, r1, RectRCorner.BottomRight);
+                this.setRadius(r1, r1, RectRCorner.TopLeft);
+                this.setRadius(r1, r1, RectRCorner.TopRight);
+                break;
+            }
+            case 2: {
+                this.setRadius(r1, r1, RectRCorner.TopLeft);
+                this.setRadius(r1, r1, RectRCorner.BottomRight);
+                this.setRadius(r2, r2, RectRCorner.BottomLeft);
+                this.setRadius(r2, r2, RectRCorner.TopRight);
+                break;
+            }
+            case 3: {
+                this.setRadius(r1, r1, RectRCorner.TopLeft);
+                this.setRadius(r2, r2, RectRCorner.TopRight);
+                this.setRadius(r2, r2, RectRCorner.BottomLeft);
+                this.setRadius(r3, r3, RectRCorner.BottomRight);
+                break;
+            }
+            case 4: {
+                this.setRadius(r1, r1, RectRCorner.TopLeft);
+                this.setRadius(r2, r2, RectRCorner.TopRight);
+                this.setRadius(r3, r3, RectRCorner.BottomRight);
+                this.setRadius(r4, r4, RectRCorner.BottomLeft);
+                break;
+            }
+        }
+    }
 
-    protected render(
-        canvas: MotaOffscreenCanvas2D,
-        _transform: Transform
-    ): void {
-        const ctx = canvas.ctx;
-        this.setCanvasState(canvas);
-        switch (this.mode) {
-            case GraphicMode.Fill:
-                ctx.fill(this.path, this.fillRule);
+    /**
+     * 设置椭圆圆角参数
+     * @param ellipse 椭圆圆角参数
+     */
+    setEllipse(ellipse: RectREllipseParams) {
+        const [rx1, ry1, rx2 = 0, ry2 = 0, rx3 = 0, ry3 = 0, rx4 = 0, ry4 = 0] =
+            ellipse;
+
+        switch (ellipse.length) {
+            case 2: {
+                this.setRadius(rx1, ry1, RectRCorner.BottomLeft);
+                this.setRadius(rx1, ry1, RectRCorner.BottomRight);
+                this.setRadius(rx1, ry1, RectRCorner.TopLeft);
+                this.setRadius(rx1, ry1, RectRCorner.TopRight);
                 break;
-            case GraphicMode.Stroke:
-                ctx.stroke(this.path);
+            }
+            case 4: {
+                this.setRadius(rx1, ry1, RectRCorner.TopLeft);
+                this.setRadius(rx1, ry1, RectRCorner.BottomRight);
+                this.setRadius(rx2, ry2, RectRCorner.BottomLeft);
+                this.setRadius(rx2, ry2, RectRCorner.TopRight);
                 break;
-            case GraphicMode.FillAndStroke:
-                ctx.fill(this.path, this.fillRule);
-                ctx.stroke(this.path);
+            }
+            case 6: {
+                this.setRadius(rx1, ry1, RectRCorner.TopLeft);
+                this.setRadius(rx2, ry2, RectRCorner.TopRight);
+                this.setRadius(rx2, ry2, RectRCorner.BottomLeft);
+                this.setRadius(rx3, ry3, RectRCorner.BottomRight);
                 break;
-            case GraphicMode.StrokeAndFill:
-                ctx.stroke(this.path);
-                ctx.fill(this.path, this.fillRule);
+            }
+            case 8: {
+                this.setRadius(rx1, ry1, RectRCorner.TopLeft);
+                this.setRadius(rx2, ry2, RectRCorner.TopRight);
+                this.setRadius(rx3, ry3, RectRCorner.BottomRight);
+                this.setRadius(rx4, ry4, RectRCorner.BottomLeft);
                 break;
+            }
+            default: {
+                logger.warn(58, ellipse.length.toString());
+            }
         }
     }
 
@@ -894,6 +1022,18 @@ export class RectR extends GraphicItemBase {
         parentComponent?: ComponentInternalInstance | null
     ): void {
         switch (key) {
+            case 'circle': {
+                const value = nextValue as RectRCircleParams;
+                if (!this.assertType(value, Array, key)) return;
+                this.setCircle(value);
+                return;
+            }
+            case 'ellipse': {
+                const value = nextValue as RectREllipseParams;
+                if (!this.assertType(value, Array, key)) return;
+                this.setEllipse(value);
+                return;
+            }
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
     }

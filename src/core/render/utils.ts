@@ -29,6 +29,7 @@ export type ElementLocator = [
 ];
 
 export type ElementAnchor = [x: number, y: number];
+export type ElementScale = [x: number, y: number];
 
 export function disableViewport() {
     const adapter = RenderAdapter.get<FloorViewport>('viewport');

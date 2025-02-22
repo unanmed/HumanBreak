@@ -147,7 +147,12 @@ const MainScene = defineComponent(() => {
                     status={rightStatus}
                 ></RightStatusBar>
             )}
-            {mainUIController.render()}
+            <container
+                loc={[0, 0, MAIN_WIDTH, MAIN_HEIGHT]}
+                hidden={mainUIController.showBack.value}
+            >
+                {mainUIController.render()}
+            </container>
         </container>
     );
 });

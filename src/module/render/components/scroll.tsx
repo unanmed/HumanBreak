@@ -155,6 +155,7 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
                 scrollTarget =
                     (height.value - scrollLength) * (contentTarget / max);
             }
+            if (isNaN(scrollTarget)) scrollTarget = 0;
             transition.time(time).transition('scroll', scrollTarget);
             transition.time(time).transition('showScroll', target);
         };
@@ -200,16 +201,21 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
         const onTransform = (item: RenderItem) => {
             const rect = item.getBoundingRect();
             const pad = props.pad ?? 0;
-            if (direction.value === ScrollDirection.Horizontal) {
-                if (rect.right > maxLength - pad) {
-                    maxLength = rect.right + pad;
-                    updatePosition();
+            if (item.parent === content.value) {
+                if (direction.value === ScrollDirection.Horizontal) {
+                    if (rect.right > maxLength - pad) {
+                        maxLength = rect.right + pad;
+                        updatePosition();
+                    }
+                } else {
+                    if (rect.bottom > maxLength - pad) {
+                        maxLength = rect.bottom + pad;
+                        updatePosition();
+                    }
                 }
             } else {
-                if (rect.bottom > maxLength - pad) {
-                    maxLength = rect.bottom + pad;
-                    updatePosition();
-                }
+                item.off('transform', onTransform);
+                listenedChild.delete(item);
             }
             getArea(item, rect);
             checkItem(item);
@@ -222,9 +228,10 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
          */
         const updatePosition = () => {
             if (direction.value === ScrollDirection.Horizontal) {
-                scrollLength = Math.max(
+                scrollLength = clamp(
+                    (height.value / maxLength) * width.value,
                     SCROLL_MIN_LENGTH,
-                    (width.value / maxLength) * width.value
+                    width.value
                 );
                 const h = props.noscroll
                     ? height.value
@@ -234,7 +241,7 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
                 scrollLength = clamp(
                     (height.value / maxLength) * height.value,
                     SCROLL_MIN_LENGTH,
-                    height.value - 10
+                    height.value
                 );
                 const w = props.noscroll
                     ? width.value
@@ -255,6 +262,7 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
             listenedChild.clear();
             areaMap.clear();
             content.value.children.forEach(v => {
+                if (v.isComment) return;
                 const rect = v.getBoundingRect();
                 if (direction.value === ScrollDirection.Horizontal) {
                     if (rect.right > max) {
@@ -266,11 +274,13 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
                     }
                 }
                 getArea(v, rect);
-                v.on('transform', onTransform);
-                listenedChild.add(v);
+                if (!listenedChild.has(v)) {
+                    v.on('transform', onTransform);
+                    listenedChild.add(v);
+                }
                 checkItem(v);
             });
-            maxLength = max + (props.pad ?? 0);
+            maxLength = Math.max(max + (props.pad ?? 0), 10);
             updatePosition();
             scroll.value?.update();
         };
@@ -491,6 +501,7 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
                     </container-custom>
                     <sprite
                         nocache
+                        hidden={props.noscroll}
                         loc={sp.value}
                         ref={scroll}
                         render={drawScroll}

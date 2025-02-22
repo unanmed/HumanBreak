@@ -116,7 +116,7 @@ const enum ElementState {
 /**
  * standardElementFor
  */
-const se = (
+const _se = (
     Item: new (
         type: RenderItemPosition,
         cache?: boolean,
@@ -235,14 +235,14 @@ tagMap.register<EDamageEvent, Damage>('damage', (_0, _1, _props) => {
 tagMap.register('animation', (_0, _1, _props) => {
     return new Animate();
 });
-tagMap.register('g-rect', se(Rect, 'absolute', ElementState.None));
-tagMap.register('g-circle', se(Circle, 'absolute', ElementState.None));
-tagMap.register('g-ellipse', se(Ellipse, 'absolute', ElementState.None));
-tagMap.register('g-line', se(Line, 'absolute', ElementState.None));
-tagMap.register('g-bezier', se(BezierCurve, 'absolute', ElementState.None));
-tagMap.register('g-quad', se(QuadraticCurve, 'absolute', ElementState.None));
-tagMap.register('g-path', se(Path, 'absolute', ElementState.None));
-tagMap.register('g-rectr', se(RectR, 'absolute', ElementState.None));
+tagMap.register('g-rect', standardElementNoCache(Rect));
+tagMap.register('g-circle', standardElementNoCache(Circle));
+tagMap.register('g-ellipse', standardElementNoCache(Ellipse));
+tagMap.register('g-line', standardElementNoCache(Line));
+tagMap.register('g-bezier', standardElementNoCache(BezierCurve));
+tagMap.register('g-quad', standardElementNoCache(QuadraticCurve));
+tagMap.register('g-path', standardElementNoCache(Path));
+tagMap.register('g-rectr', standardElementNoCache(RectR));
 tagMap.register('icon', standardElementNoCache(Icon));
 tagMap.register('winskin', (_0, _1, props) => {
     if (!props) return new Winskin(core.material.images.images['winskin.png']);

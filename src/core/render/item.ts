@@ -228,6 +228,9 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
 
     //#region 元素属性
 
+    /** 是否是注释元素 */
+    readonly isComment: boolean = false;
+
     private _id: string = '';
     /**
      * 元素的 id，原则上不可重复
@@ -561,10 +564,22 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
             ? this.fallTransform
             : this._transform;
         if (!tran) return new DOMRectReadOnly(0, 0, this.width, this.height);
-        const [x1, y1] = tran.transformed(0, 0);
-        const [x2, y2] = tran.transformed(this.width, 0);
-        const [x3, y3] = tran.transformed(0, this.height);
-        const [x4, y4] = tran.transformed(this.width, this.height);
+        const [x1, y1] = tran.transformed(
+            -this.anchorX * this.width,
+            -this.anchorY * this.height
+        );
+        const [x2, y2] = tran.transformed(
+            this.width * (1 - this.anchorX),
+            -this.anchorY * this.height
+        );
+        const [x3, y3] = tran.transformed(
+            -this.anchorX * this.width,
+            this.height * (1 - this.anchorY)
+        );
+        const [x4, y4] = tran.transformed(
+            this.width * (1 - this.anchorX),
+            this.height * (1 - this.anchorY)
+        );
         const left = Math.min(x1, x2, x3, x4);
         const right = Math.max(x1, x2, x3, x4);
         const top = Math.min(y1, y2, y3, y4);
@@ -1140,6 +1155,19 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
             case 'cursor': {
                 if (!this.assertType(nextValue, 'string', key)) return;
                 this.cursor = nextValue;
+                return;
+            }
+            case 'scale': {
+                if (!this.assertType(nextValue, Array, key)) return;
+                this._transform.setScale(
+                    nextValue[0] as number,
+                    nextValue[1] as number
+                );
+                return;
+            }
+            case 'rotate': {
+                if (!this.assertType(nextValue, 'number', key)) return;
+                this._transform.setRotate(nextValue);
                 return;
             }
         }

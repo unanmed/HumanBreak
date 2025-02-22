@@ -116,7 +116,9 @@ export class Container<E extends EContainerEvent = EContainerEvent>
         if (progress === EventProgress.Capture) {
             let success = false;
             for (let i = len - 1; i >= 0; i--) {
-                if (this.sortedChildren[i].captureEvent(type, event)) {
+                const child = this.sortedChildren[i];
+                if (child.hidden) continue;
+                if (child.captureEvent(type, event)) {
                     success = true;
                     break;
                 }
