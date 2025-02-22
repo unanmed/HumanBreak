@@ -387,9 +387,9 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
             scrollIdentifier = ev.identifier;
             const pos = getPos(ev);
             // 计算点击在了滚动条的哪个位置
-            const sEnd = contentTarget + scrollLength;
-            if (pos >= contentTarget && pos <= sEnd) {
-                scrollDownPos = pos - contentTarget;
+            const sEnd = scrollPos + scrollLength;
+            if (pos >= scrollPos && pos <= sEnd) {
+                scrollDownPos = pos - scrollPos;
                 scrollMutate = false;
                 scrollPin = getScrollPin(ev);
             } else {
@@ -423,10 +423,10 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
         const upScroll = (ev: IActionEvent) => {
             if (!scrollMutate) return;
             const pos = getPos(ev);
-            if (pos < contentTarget) {
-                scrollTo(pos - 50);
+            if (pos < scrollPos) {
+                scrollTo(contentTarget - 50, 300);
             } else {
-                scrollTo(pos + 50);
+                scrollTo(contentTarget + 50, 300);
             }
         };
 
