@@ -19,9 +19,10 @@ import {
     Transform
 } from '@/core/render';
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
-import { hyper, Transition } from 'mutate-animate';
+import { hyper, linear, Transition } from 'mutate-animate';
 import { clamp } from 'lodash-es';
 import { IActionEvent, IWheelEvent, MouseType } from '@/core/render/event';
+import { transitioned } from '../use';
 
 export const enum ScrollDirection {
     Horizontal,
@@ -61,7 +62,7 @@ const SCROLL_MIN_LENGTH = 20;
 /** 滚动条图示的宽度 */
 const SCROLL_WIDTH = 10;
 /** 滚动条的颜色 */
-const SCROLL_COLOR = '#ddd';
+const SCROLL_COLOR = '255,255,255';
 
 /**
  * 滚动条组件，具有虚拟滚动功能，即在画面外的不渲染。参数参考 {@link ScrollProps}，暴露接口参考 {@link ScrollExpose}
@@ -100,11 +101,20 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
         const content = ref<Container>();
         const scroll = ref<Sprite>();
 
+        const scrollAlpha = transitioned(0.5, 100, linear())!;
+
         const width = computed(() => props.loc[2] ?? 200);
         const height = computed(() => props.loc[3] ?? 200);
         const direction = computed(() =>
             props.hor ? ScrollDirection.Horizontal : ScrollDirection.Vertical
         );
+        const scrollColor = computed(
+            () => `rgba(${SCROLL_COLOR},${scrollAlpha.ref.value ?? 0.5})`
+        );
+
+        watch(scrollColor, () => {
+            scroll.value?.update();
+        });
 
         /** 滚动内容的当前位置 */
         let contentPos = 0;
@@ -301,7 +311,7 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
             const ctx = canvas.ctx;
             ctx.lineCap = 'round';
             ctx.lineWidth = 3;
-            ctx.strokeStyle = SCROLL_COLOR;
+            ctx.strokeStyle = scrollColor.value;
             ctx.beginPath();
             const scroll = transition.value.scroll;
             if (direction.value === ScrollDirection.Horizontal) {
@@ -435,6 +445,7 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
             } else {
                 scrollMutate = true;
             }
+            scrollAlpha.set(0.9);
         };
 
         const moveScroll = (ev: IActionEvent) => {
@@ -461,6 +472,7 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
         };
 
         const upScroll = (ev: IActionEvent) => {
+            scrollAlpha.set(0.7);
             if (!scrollMutate) return;
             const pos = getPos(ev);
             if (pos < scrollPos) {
@@ -468,6 +480,14 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
             } else {
                 scrollTo(contentTarget + 50, 300);
             }
+        };
+
+        const enter = () => {
+            scrollAlpha.set(0.7);
+        };
+
+        const leave = () => {
+            scrollAlpha.set(0.5);
         };
 
         //#endregion
@@ -508,6 +528,8 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
                         onDown={downScroll}
                         onUp={upScroll}
                         zIndex={10}
+                        onEnter={enter}
+                        onLeave={leave}
                     ></sprite>
                 </container>
             );
