@@ -5,16 +5,6 @@ import { ElementNamespace, ComponentInternalInstance } from 'vue';
 import { clamp, isNil } from 'lodash-es';
 import { logger } from '@/core/common/logger';
 
-/*
- * Expected usage (this comment needs to be deleted after implementing correctly):
- * <rect x={10} y={30} width={50} height={30} fill stroke /> <!-- 表现为先填充，后描边 -->
- * <circle x={10} y={50} radius={10} start={Math.PI / 2} end={Math.PI} stroke /> <!-- 表现为仅描边 -->
- * <ellipse x={100} y={50} radiusX={10} radiusY={50} strokeAndFill /> <!-- 表现为先描边后填充 -->
- * <rect x={100} y={50} width={50} height={30} fill /> <!-- 表现为仅填充 -->
- * <rect x={100} y={50} width={50} height={30} /> <!-- 表现为仅填充 -->
- * Line BezierCurve QuadraticCurve 无法设置填充属性，如设置则无效
- */
-
 export interface ILineProperty {
     /** 线宽 */
     lineWidth: number;
