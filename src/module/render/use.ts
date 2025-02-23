@@ -67,13 +67,13 @@ export function onLoaded(hook: () => void) {
     }
 }
 
-export interface ITransitionedController {
-    readonly ref: Ref<number>;
-    readonly value: number;
-    set(value: number): void;
+export interface ITransitionedController<T> {
+    readonly ref: Ref<T>;
+    readonly value: T;
+    set(value: T): void;
 }
 
-class RenderTransition implements ITransitionedController {
+class RenderTransition implements ITransitionedController<number> {
     private static key: number = 0;
 
     private readonly key: string = `$${RenderTransition.key++}`;
@@ -94,6 +94,7 @@ class RenderTransition implements ITransitionedController {
         public readonly curve: TimingFn
     ) {
         this.ref = ref(value);
+        transition.value[this.key] = value;
         transition.ticker.add(() => {
             this.ref.value = transition.value[this.key];
         });
@@ -107,15 +108,133 @@ class RenderTransition implements ITransitionedController {
     }
 }
 
+type ColorRGBA = [number, number, number, number];
+
+class RenderColorTransition implements ITransitionedController<string> {
+    private static key: number = 0;
+
+    private readonly keyR: string = `$colorR${RenderColorTransition.key++}`;
+    private readonly keyG: string = `$colorG${RenderColorTransition.key++}`;
+    private readonly keyB: string = `$colorB${RenderColorTransition.key++}`;
+    private readonly keyA: string = `$colorA${RenderColorTransition.key++}`;
+
+    public readonly ref: Ref<string>;
+
+    set value(v: string) {
+        this.set(v);
+    }
+    get value() {
+        return this.encodeColor();
+    }
+
+    constructor(
+        value: string,
+        public readonly transition: Transition,
+        public readonly time: number,
+        public readonly curve: TimingFn
+    ) {
+        this.ref = ref(value);
+        const [r, g, b, a] = this.decodeColor(value);
+        transition.value[this.keyR] = r;
+        transition.value[this.keyG] = g;
+        transition.value[this.keyB] = b;
+        transition.value[this.keyA] = a;
+        transition.ticker.add(() => {
+            this.ref.value = this.encodeColor();
+        });
+    }
+
+    set(value: string): void {
+        this.transitionColor(this.decodeColor(value));
+    }
+
+    private transitionColor([r, g, b, a]: ColorRGBA) {
+        this.transition
+            .mode(this.curve)
+            .time(this.time)
+            .transition(this.keyR, r)
+            .transition(this.keyG, g)
+            .transition(this.keyB, b)
+            .transition(this.keyA, a);
+    }
+
+    private decodeColor(color: string): ColorRGBA {
+        if (color.startsWith('#')) {
+            return this.decodeHash(color);
+        } else if (color.startsWith('rgba')) {
+            return this.decodeRGBA(color);
+        } else if (color.startsWith('rgb')) {
+            return this.decodeRGB(color);
+        }
+        return [0, 0, 0, 1];
+    }
+
+    private decodeHash(color: string): ColorRGBA {
+        switch (color.length) {
+            case 4:
+                return [
+                    Number(`0x${color.slice(1, 2).repeat(2)}`),
+                    Number(`0x${color.slice(2, 3).repeat(2)}`),
+                    Number(`0x${color.slice(3, 4).repeat(2)}`),
+                    1
+                ];
+            case 5:
+                return [
+                    Number(`0x${color.slice(1, 2).repeat(2)}`),
+                    Number(`0x${color.slice(2, 3).repeat(2)}`),
+                    Number(`0x${color.slice(3, 4).repeat(2)}`),
+                    Number(`0x${color.slice(4, 5).repeat(2)}`)
+                ];
+            case 7:
+                return [
+                    Number(`0x${color.slice(1, 3)}`),
+                    Number(`0x${color.slice(3, 5)}`),
+                    Number(`0x${color.slice(5, 7)}`),
+                    1
+                ];
+            case 9:
+                return [
+                    Number(`0x${color.slice(1, 3)}`),
+                    Number(`0x${color.slice(3, 5)}`),
+                    Number(`0x${color.slice(5, 7)}`),
+                    Number(`0x${color.slice(7, 9)}`)
+                ];
+        }
+        return [0, 0, 0, 0];
+    }
+
+    private decodeRGBA(color: string): ColorRGBA {
+        const data = color.slice(color.indexOf('(') + 1, color.indexOf(')'));
+        const [r, g, b, a] = data.split(',');
+        return [Number(r), Number(g), Number(b), Number(a)];
+    }
+
+    private decodeRGB(color: string): ColorRGBA {
+        const data = color.slice(color.indexOf('(') + 1, color.indexOf(')'));
+        const [r, g, b] = data.split(',');
+        return [Number(r), Number(g), Number(b), 1];
+    }
+
+    private encodeColor() {
+        const r = this.transition.value[this.keyR];
+        const g = this.transition.value[this.keyG];
+        const b = this.transition.value[this.keyB];
+        const a = this.transition.value[this.keyA];
+        return `rgba(${r},${g},${b},${a})`;
+    }
+}
+
 const transitionMap = new Map<ComponentInternalInstance, Transition>();
 
-export function transitioned(
-    value: number,
-    time: number,
-    curve: TimingFn
-): ITransitionedController | null {
+function checkTransition() {
     const instance = getCurrentInstance();
     if (!instance) return null;
+    if (instance.isUnmounted) {
+        const tran = transitionMap.get(instance);
+        tran?.ticker.destroy();
+        transitionMap.delete(instance);
+        return null;
+    }
     if (!transitionMap.has(instance)) {
         const tran = new Transition();
         transitionMap.set(instance, tran);
@@ -126,5 +245,52 @@ export function transitioned(
     }
     const tran = transitionMap.get(instance);
     if (!tran) return null;
+    return tran;
+}
+
+/**
+ * 创建一个渐变数值，当数值发生变化时会缓慢变化值目标值而非突变，只可以用于组件内，不可用于组件外
+ * ```tsx
+ * const value = transitioned(10, 300, linear()); // 创建渐变，初始值为 10，渐变时长 300ms，线性变化
+ * value.set(100); // 渐变至 100
+ *
+ * // 直接在元素上使用
+ * <text text={value.ref.value} />
+ * ```
+ * @param value 初始值
+ * @param time 渐变时长
+ * @param curve 渐变的速率曲线
+ */
+export function transitioned(
+    value: number,
+    time: number,
+    curve: TimingFn
+): ITransitionedController<number> | null {
+    const tran = checkTransition();
+    if (!tran) return null;
     return new RenderTransition(value, tran, time, curve);
+}
+
+/**
+ * 创建一个渐变颜色，当颜色发生变化时会缓慢变化值目标值而非突变，自动判断颜色字符串类型，只可用于组件内，不可用于组件外
+ * ```tsx
+ * // 创建渐变，初始值为 '#fff'（白色），渐变时长 300ms，线性变化
+ * const color = transitionedColor('#fff', 300, linear());
+ * color.set('rgba(129, 30, 40, 0.7)'); // 渐变至这个颜色
+ *
+ * // 直接在元素上使用
+ * <text text='文本' fillStyle={color.ref.value} />
+ * ```
+ * @param color 颜色的初始值
+ * @param time 渐变时长
+ * @param curve 渐变的速率曲线
+ */
+export function transitionedColor(
+    color: string,
+    time: number,
+    curve: TimingFn
+): ITransitionedController<string> | null {
+    const tran = checkTransition();
+    if (!tran) return null;
+    return new RenderColorTransition(color, tran, time, curve);
 }
