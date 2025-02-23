@@ -67,7 +67,8 @@ const textContentOptions = {
         'strokeStyle',
         'strokeWidth',
         'stroke',
-        'showAll'
+        'showAll',
+        'loc'
     ],
     emits: ['typeEnd', 'typeStart']
 } satisfies SetupComponentOptions<
@@ -89,6 +90,10 @@ export const TextContent = defineComponent<
     let renderable: TyperRenderable[] = [];
     let needUpdate = false;
     let nowText = '';
+
+    watch(props, value => {
+        typer.setConfig(value);
+    });
 
     const retype = () => {
         if (props.showAll) {

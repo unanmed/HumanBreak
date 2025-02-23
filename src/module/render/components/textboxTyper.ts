@@ -457,7 +457,7 @@ const enum ExpStringType {
     Backquote
 }
 
-const defaultsBreak = ' -,.)]}?!;:，。）】？！；：';
+const defaultsBreak = ' -,.)]}?!;:%&*#@/\\=+~，。）】？！；：';
 const defaultsIgnoreStart =
     '）)】》＞﹞>)]»›〕〉}］」｝〗』，。？！：；·…,.?!:;、……~&@#～＆＠＃';
 const defaultsIgnoreEnd = '（(【《＜﹝<([«‹〔〈{［「｛〖『';
@@ -873,6 +873,12 @@ export class TextContentParser {
         return this.splitLines(width);
     }
 
+    private getHeight(metrics: TextMetrics) {
+        return (
+            metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
+        );
+    }
+
     /**
      * 检查是否需要换行，如果需要则换行
      * @param width 最大宽度
@@ -910,7 +916,6 @@ export class TextContentParser {
                 const index = this.bsLineWidth(maxWidth, this.nowRenderable);
                 data.splitLines.push(this.wordBreak[index]);
                 this.lineHeights.push(this.lineHeight);
-                this.lineStart = pointer;
                 this.bsStart = index;
                 const text = data.text.slice(
                     this.wordBreak[index],
@@ -928,6 +933,8 @@ export class TextContentParser {
                     break;
                 }
             }
+            this.lineWidth = 0;
+            this.lineStart = pointer;
             return true;
         }
     }
@@ -956,10 +963,12 @@ export class TextContentParser {
             const metrics = ctx.measureText(text);
             if (metrics.width > width) {
                 end = mid;
+            } else if (metrics.width === width) {
+                return mid;
             } else {
                 start = mid;
             }
-            height = metrics.fontBoundingBoxAscent;
+            height = this.getHeight(metrics);
         }
     }
 
@@ -969,7 +978,10 @@ export class TextContentParser {
     private checkRestLine(width: number, guess: number) {
         if (this.wordBreak.length === 0) return true;
         const last = this.nowRenderable - 1;
-        if (last === -1) return;
+        if (last === -1) {
+            const now = this.renderable[this.nowRenderable];
+            return this.checkLineWidth(width, guess, now.text.length);
+        }
         const data = this.renderable[last];
         const rest = width - this.lineWidth;
         if (data.type === TextContentType.Text) {
@@ -984,8 +996,9 @@ export class TextContentParser {
             if (metrics.width < rest) {
                 this.lineWidth += metrics.width;
                 data.lastLineWidth = metrics.width;
-                if (metrics.fontBoundingBoxAscent > this.lineHeight) {
-                    this.lineHeight = metrics.fontBoundingBoxAscent;
+                const height = this.getHeight(metrics);
+                if (height > this.lineHeight) {
+                    this.lineHeight = height;
                 }
                 return false;
             } else {
@@ -1012,6 +1025,7 @@ export class TextContentParser {
                         break;
                     }
                 }
+                this.lineWidth = 0;
                 return true;
             }
         } else if (data.type === TextContentType.Icon) {
@@ -1056,6 +1070,8 @@ export class TextContentParser {
 
         const allBreak = this.wordBreakRule === WordBreak.All;
 
+        // debugger;
+
         for (let i = 0; i < this.renderable.length; i++) {
             const data = this.renderable[i];
             const { wordBreak, fontSize } = data;
@@ -1081,22 +1097,22 @@ export class TextContentParser {
 
                 const next = data.text[pointer + 1];
 
-                if (char === '\n' || (char === '\\' && next === 'n')) {
+                if (char === '\n') {
                     const data = this.renderable[this.nowRenderable];
                     wordBreak.push(pointer);
                     data.splitLines.push(pointer);
                     continue;
                 }
 
-                if (!ignoreLineEnd.has(char) && ignoreLineEnd.has(next)) {
+                if (char === '\\' && next === 'n') {
+                    const data = this.renderable[this.nowRenderable];
                     wordBreak.push(pointer);
-                    this.checkLineWidth(width, guess, pointer);
+                    data.splitLines.push(pointer);
+                    pointer++;
                     continue;
                 }
 
-                if (ignoreLineStart.has(char) && !ignoreLineStart.has(next)) {
-                    wordBreak.push(pointer + 1);
-                    this.checkLineWidth(width, guess, pointer);
+                if (ignoreLineStart.has(next) || ignoreLineEnd.has(char)) {
                     continue;
                 }
 
@@ -1108,6 +1124,8 @@ export class TextContentParser {
 
             this.checkRestLine(width, guess);
         }
+
+        console.log(this.renderable);
 
         return {
             lineHeights: this.lineHeights,
