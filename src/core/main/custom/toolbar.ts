@@ -411,44 +411,6 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
     static closeAll() {
         this.list.forEach(v => v.closeAll());
     }
-
-    /**
-     * 设置默认工具栏的内容
-     */
-    static setDefaultTool(replaying: boolean) {
-        const mainStorage = GameStorage.for(GameStorage.fromGame('main'));
-        mainStorage.read();
-        let defaultsTool = CustomToolbar.list.find(v => v.id === '@defaults');
-        const hasDefaults = !!defaultsTool;
-        if (!defaultsTool) {
-            defaultsTool = new CustomToolbar('@defaults', true);
-        }
-        defaultsTool.closeAll();
-        defaultsTool.items.splice(0);
-        defaultsTool.add(replaying ? replayingDefaultTool : playingDefaultTool);
-        if (!mainStorage.getValue('played', false)) {
-            mainStorage.setValue('played', true);
-
-            // 计算位置，显示在游戏画面下方
-            if (!hasDefaults) {
-                const game = core.dom.gameDraw;
-                const bottom = game.offsetTop + game.offsetHeight;
-                const left = game.offsetLeft;
-                const width = game.offsetWidth;
-
-                if (isMobile) {
-                    // 手机端显示在最下方
-                    defaultsTool.setPos(16, bottom);
-                    defaultsTool.setSize(window.innerWidth - 32, 85);
-                } else {
-                    // 电脑显示在屏幕右方
-                    defaultsTool.setPos(left, bottom);
-                    defaultsTool.setSize(width, 70);
-                }
-            }
-        }
-        defaultsTool.show();
-    }
 }
 
 Mota.require('var', 'loading').once('coreInit', () => {
@@ -464,9 +426,4 @@ Mota.require('var', 'loading').once('coreInit', () => {
 });
 Mota.require('var', 'hook').on('reset', () => {
     CustomToolbar.showAll();
-});
-
-Mota.require('var', 'hook').once('reset', () => {
-    CustomToolbar.setDefaultTool(false);
-    CustomToolbar.save();
 });

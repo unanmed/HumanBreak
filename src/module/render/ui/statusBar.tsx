@@ -1,7 +1,7 @@
 import { GameUI } from '@/core/system';
 import { computed, defineComponent, ref, watch } from 'vue';
 import { SetupComponentOptions, TextContent } from '../components';
-import { ElementLocator, Sprite } from '@/core/render';
+import { DefaultProps, ElementLocator, Sprite } from '@/core/render';
 import { transitionedColor } from '../use';
 import { linear } from 'mutate-animate';
 import { Scroll } from '../components/scroll';
@@ -34,13 +34,14 @@ export interface ILeftHeroStatus {
     magicDef: number;
 }
 
-interface StatusBarProps<T> {
+interface StatusBarProps<T> extends DefaultProps {
     loc: ElementLocator;
     status: T;
+    hidden: boolean;
 }
 
 const statusBarProps = {
-    props: ['loc', 'status']
+    props: ['loc', 'status', 'hidden']
 } satisfies SetupComponentOptions<StatusBarProps<unknown>>;
 
 export const LeftStatusBar = defineComponent<StatusBarProps<ILeftHeroStatus>>(
@@ -93,7 +94,7 @@ export const LeftStatusBar = defineComponent<StatusBarProps<ILeftHeroStatus>>(
 
         return () => {
             return (
-                <container loc={p.loc}>
+                <container loc={p.loc} hidden={p.hidden}>
                     <text
                         text={floorName.value}
                         loc={central(24)}
@@ -310,7 +311,7 @@ export const RightStatusBar = defineComponent<StatusBarProps<IRightHeroStatus>>(
 
         return () => {
             return (
-                <container loc={p.loc}>
+                <container loc={p.loc} hidden={p.hidden}>
                     <g-rectr
                         loc={[10, 10, 160, 24]}
                         circle={[6]}

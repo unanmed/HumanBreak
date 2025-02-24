@@ -78,9 +78,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 });
             }
 
-            Mota.r(() => {
-                Mota.require('class', 'CustomToolbar').setDefaultTool(false);
-            });
             const { NightSpecial, HeroSkill } = Mota.require(
                 'module',
                 'Mechanism'

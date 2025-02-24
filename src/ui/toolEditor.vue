@@ -53,7 +53,7 @@
                 <div id="tool-preview-container">
                     <div class="tool-preview-item" v-for="item of bar.items">
                         <component
-                            :is="(CustomToolbar.info[item.type].show as any)"
+                            :is="CustomToolbar.info[item.type].show as any"
                             :item="item"
                             :toolbar="bar"
                         ></component>
@@ -179,7 +179,7 @@
                 <div id="tool-preview-container">
                     <div class="tool-preview-item" v-for="item of bar.items">
                         <component
-                            :is="(CustomToolbar.info[item.type].show as any)"
+                            :is="CustomToolbar.info[item.type].show as any"
                             :item="item"
                             :toolbar="bar"
                         ></component>
@@ -292,10 +292,6 @@ function exit() {
 }
 
 function deleteTool(id: string) {
-    if (id === '@defaults') {
-        tip('warn', '该工具栏不能删除！');
-        return;
-    }
     Modal.confirm({
         title: '确定要删除这个自定义工具栏吗？',
         onOk() {

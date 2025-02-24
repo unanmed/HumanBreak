@@ -71,6 +71,7 @@ const MainScene = defineComponent(() => {
     };
 
     const map = ref<LayerGroup>();
+    const hideStatus = ref(false);
     const weather = new WeatherController('main');
 
     onMounted(() => {
@@ -114,6 +115,8 @@ const MainScene = defineComponent(() => {
 
     const updateStatus = () => {
         if (!core.status || !core.status.hero || !core.status.floorId) return;
+        hideStatus.value = core.getFlag('hideStatusBar', false);
+
         const hero = core.status.hero;
         const floor = core.status.floorId;
         leftStatus.atk = getHeroStatusOn('atk');
@@ -171,6 +174,7 @@ const MainScene = defineComponent(() => {
                 <LeftStatusBar
                     loc={[0, 0, STATUS_BAR_WIDTH, STATUS_BAR_HEIGHT]}
                     status={leftStatus}
+                    hidden={hideStatus.value}
                 ></LeftStatusBar>
             )}
             <g-line line={[180, 0, 180, 480]} lineWidth={1} />
@@ -191,6 +195,7 @@ const MainScene = defineComponent(() => {
                 <RightStatusBar
                     loc={[480 + 180, 0, STATUS_BAR_WIDTH, STATUS_BAR_HEIGHT]}
                     status={rightStatus}
+                    hidden={hideStatus.value}
                 ></RightStatusBar>
             )}
             <container
@@ -201,10 +206,21 @@ const MainScene = defineComponent(() => {
             </container>
             <g-rect
                 loc={[0, 0, MAIN_WIDTH, MAIN_HEIGHT]}
+                hidden={hideStatus.value}
                 zIndex={100}
                 stroke
                 noevent
             ></g-rect>
+            <g-line
+                line={[180, 0, 480 + 180, 0]}
+                hidden={!hideStatus.value}
+                zIndex={100}
+            />
+            <g-line
+                line={[180, 480, 480 + 180, 480]}
+                hidden={!hideStatus.value}
+                zIndex={100}
+            />
         </container>
     );
 });

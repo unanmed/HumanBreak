@@ -114,6 +114,7 @@ export abstract class GraphicItemBase
     lineCap: CanvasLineCap = 'butt';
     miterLimit: number = 10;
     fillRule: CanvasFillRule = 'nonzero';
+    enableCache: boolean = false;
 
     private propFill: boolean = true;
     private propStroke: boolean = false;
@@ -122,7 +123,7 @@ export abstract class GraphicItemBase
 
     private actionStroke: boolean = false;
     private cachePath?: Path2D;
-    protected pathDirty: boolean = false;
+    protected pathDirty: boolean = true;
 
     /**
      * 获取这个元素的绘制路径
@@ -141,6 +142,7 @@ export abstract class GraphicItemBase
         }
         const path = this.cachePath;
         if (!path) return;
+
         switch (this.mode) {
             case GraphicMode.Fill:
                 ctx.fill(path, this.fillRule);

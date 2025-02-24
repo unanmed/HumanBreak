@@ -1284,7 +1284,6 @@ control.prototype.startReplay = function (list) {
     //     '由于不可抗力，录像播放过程中将没有勇士移动动画'
     // );
     Mota.require('var', 'hook').emit('replayStatus', false);
-    Mota.require('class', 'CustomToolbar').setDefaultTool(true);
     this.replay();
 };
 
@@ -1380,7 +1379,6 @@ control.prototype.stopReplay = function (force) {
     core.updateStatusBar(false, true);
     core.drawTip('停止播放并恢复游戏');
     Mota.require('var', 'hook').emit('replayStatus', true);
-    Mota.require('class', 'CustomToolbar').setDefaultTool(false);
 };
 
 ////// 回退 //////
@@ -1417,7 +1415,6 @@ control.prototype.rewindReplay = function () {
         core.control._replay_drawProgress();
         core.updateStatusBar(false, true);
         core.drawTip('成功回退到上一个节点');
-        Mota.require('class', 'CustomToolbar').setDefaultTool(true);
     });
 };
 
