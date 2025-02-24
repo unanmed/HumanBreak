@@ -92,6 +92,7 @@ export const { createApp, render } = createRenderer<RenderItem, RenderItem>({
     nextSibling: function (
         node: RenderItem<ERenderItemEvent>
     ): RenderItem<ERenderItemEvent> | null {
+        if (!node) return null;
         if (!node.parent) {
             return null;
         } else {

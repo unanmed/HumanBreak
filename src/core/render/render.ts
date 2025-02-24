@@ -97,6 +97,7 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
         // 画布监听
         const canvas = this.target.canvas;
         canvas.addEventListener('mousedown', ev => {
+            ev.preventDefault();
             const mouse = this.getMouseType(ev);
             this.lastMouse = mouse;
             this.captureEvent(
@@ -105,11 +106,13 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
             );
         });
         canvas.addEventListener('mouseup', ev => {
+            ev.preventDefault();
             const event = this.createMouseAction(ev, ActionType.Up);
             this.captureEvent(ActionType.Up, event);
             this.captureEvent(ActionType.Click, event);
         });
         canvas.addEventListener('mousemove', ev => {
+            ev.preventDefault();
             const event = this.createMouseAction(
                 ev,
                 ActionType.Move,
@@ -131,6 +134,7 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
             );
         });
         canvas.addEventListener('mouseleave', ev => {
+            ev.preventDefault();
             this.hoveredElement.forEach(v => {
                 v.emit('leave', this.createMouseActionBase(ev, v));
             });
@@ -138,11 +142,13 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
             this.beforeHovered.clear();
         });
         document.addEventListener('touchstart', ev => {
+            ev.preventDefault();
             this.createTouchAction(ev, ActionType.Down).forEach(v => {
                 this.captureEvent(ActionType.Down, v);
             });
         });
         document.addEventListener('touchend', ev => {
+            ev.preventDefault();
             this.createTouchAction(ev, ActionType.Up).forEach(v => {
                 this.captureEvent(ActionType.Up, v);
                 this.captureEvent(ActionType.Click, v);
@@ -150,12 +156,14 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
             });
         });
         document.addEventListener('touchcancel', ev => {
+            ev.preventDefault();
             this.createTouchAction(ev, ActionType.Up).forEach(v => {
                 this.captureEvent(ActionType.Up, v);
                 this.touchInfo.delete(v.identifier);
             });
         });
         document.addEventListener('touchmove', ev => {
+            ev.preventDefault();
             this.createTouchAction(ev, ActionType.Move).forEach(v => {
                 const touch = this.touchInfo.get(v.identifier);
                 if (!touch) return;
@@ -172,6 +180,7 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
             });
         });
         canvas.addEventListener('wheel', ev => {
+            ev.preventDefault();
             this.captureEvent(
                 ActionType.Wheel,
                 this.createWheelAction(ev, ActionType.Wheel)

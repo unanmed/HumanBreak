@@ -1,6 +1,7 @@
 import { backDir, has } from '@/plugin/game/utils';
 import { loading } from '../game';
 import type { LayerDoorAnimate } from '@/core/render/preset/floor';
+import { getSkillLevel } from '@/plugin/game/skillTree';
 
 /**
  * 一些零散机制的数据
@@ -62,6 +63,24 @@ export namespace HeroSkill {
     export const Shield = Skill.Shield;
     export const Jump = Skill.Jump;
 
+    const skillNameMap = new Map<Skill, string>([
+        [Skill.Blade, '断灭之刃'],
+        [Skill.Shield, '铸剑为盾'],
+        [Skill.Jump, '跳跃']
+    ]);
+
+    const skillDesc = new Map<Skill, (level: number) => string>([
+        [
+            Skill.Blade,
+            level => `攻击上升 ${level * 10}%，防御下降 ${level * 10}%`
+        ],
+        [
+            Skill.Shield,
+            level => `防御上升 ${level * 10}%，攻击下降 ${level * 10}%`
+        ],
+        [Skill.Jump, () => `跳过前方障碍，或踢走面前的怪物`]
+    ]);
+
     interface SkillSave {
         autoSkill: boolean;
         learned: Skill[];
@@ -70,6 +89,29 @@ export namespace HeroSkill {
     const learned = new Set<Skill>();
     let autoSkill = true;
     let enabled: Skill = Skill.None;
+
+    export function getLevel(skill: Skill = getEnabled()) {
+        switch (skill) {
+            case Blade:
+                return getSkillLevel(2);
+            case Jump:
+                return learned.has(Jump) ? 1 : 0;
+            case Shield:
+                return getSkillLevel(10);
+        }
+        return 0;
+    }
+
+    export function getSkillName(skill: Skill = getEnabled()) {
+        return skillNameMap.get(skill) ?? '未开启技能';
+    }
+
+    export function getSkillDesc(
+        skill: Skill = getEnabled(),
+        level: number = getLevel()
+    ) {
+        return skillDesc.get(skill)?.(level) ?? '';
+    }
 
     export function setAutoSkill(auto: boolean) {
         autoSkill = auto;

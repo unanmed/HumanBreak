@@ -941,10 +941,17 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         event: IActionEvent,
         transform: Transform
     ): vec3 {
-        const x = event.offsetX + this.anchorX * this.width;
-        const y = event.offsetY + this.anchorY * this.height;
-        if (this.type === 'absolute') return [x, y, 0];
-        else return transform.untransformed(x, y);
+        const ax = this.anchorX * this.width;
+        const ay = this.anchorY * this.height;
+        if (this.type === 'absolute') {
+            return [event.offsetX + ax, event.offsetY + ay, 0];
+        } else {
+            const [tx, ty] = transform.untransformed(
+                event.offsetX,
+                event.offsetY
+            );
+            return [tx + ax, ty + ay, 0];
+        }
     }
 
     /**
@@ -1185,6 +1192,11 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
             case 'rotate': {
                 if (!this.assertType(nextValue, 'number', key)) return;
                 this._transform.setRotate(nextValue);
+                return;
+            }
+            case 'noevent': {
+                if (!this.assertType(nextValue, 'boolean', key)) return;
+                this.noEvent = nextValue;
                 return;
             }
         }

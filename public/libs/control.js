@@ -1298,9 +1298,9 @@ control.prototype.triggerReplay = function () {
 control.prototype.pauseReplay = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
     core.status.replay.pausing = true;
-    core.updateStatusBar(false, true);
     core.drawTip('暂停播放');
     Mota.require('var', 'hook').emit('replayStatus', false);
+    core.updateStatusBar(false, true);
 };
 
 ////// 恢复播放 //////
@@ -1311,10 +1311,10 @@ control.prototype.resumeReplay = function () {
         return core.drawTip('请等待当前事件的处理结束');
     }
     core.status.replay.pausing = false;
-    core.updateStatusBar(false, true);
     core.drawTip('恢复播放');
     core.replay();
     Mota.require('var', 'hook').emit('replayStatus', true);
+    core.updateStatusBar(false, true);
 };
 
 ////// 单步播放 //////
@@ -1341,7 +1341,7 @@ control.prototype.speedUpReplay = function () {
             break;
         }
     }
-    core.drawTip('x' + core.status.replay.speed + '倍');
+    core.updateStatusBar(false, true);
 };
 
 ////// 减速播放 //////
@@ -1354,7 +1354,7 @@ control.prototype.speedDownReplay = function () {
             break;
         }
     }
-    core.drawTip('x' + core.status.replay.speed + '倍');
+    core.updateStatusBar(false, true);
 };
 
 ////// 设置播放速度 //////

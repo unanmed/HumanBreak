@@ -99,6 +99,7 @@ export class Focus<T = any> extends EventEmitter<FocusEvent<T>> {
             this.emit('splice', []);
             return;
         }
+        if (!this.stack[index]) return;
         const last = this.stack.at(-1) ?? null;
         if (!last) this.unfocus();
         else this.focus(last);

@@ -78,6 +78,8 @@ export interface BaseProps {
     scale?: ElementScale;
     /** 旋转属性，单位弧度，是 transform 的简写属性之一 */
     rotate?: number;
+    /** 这个元素是否不会触发任何交互事件（cursor 属性也会无效），当执行到此元素时，会下穿至下一个元素 */
+    noevent?: boolean;
 }
 
 export interface SpriteProps extends BaseProps {
@@ -155,6 +157,8 @@ export interface GraphicPropsBase extends BaseProps, Partial<ILineProperty> {
     fillStyle?: CanvasStyle;
     /** 描边样式 */
     strokeStyle?: CanvasStyle;
+    /** 在交互时，是否只检查交互位置只在描边上，对 fill, stroke, strokeAndFill 均有效 */
+    actionStroke?: boolean;
 }
 
 export interface RectProps extends GraphicPropsBase {}
@@ -229,7 +233,7 @@ export interface RectRProps extends GraphicPropsBase {
      */
     circle?: RectRCircleParams;
     /**
-     * 圆形圆角参数，可以填 `[rx1, ry1, rx2, ry2, rx3, ry3, rx4, ry4]`，
+     * 椭圆圆角参数，可以填 `[rx1, ry1, rx2, ry2, rx3, ry3, rx4, ry4]`，
      * 两两一组，后三组可选，填写不同数量下的表现：
      * - 1组：每个角都是 `[rx1, ry1]` 半径的椭圆
      * - 2组：左上和右下是 `[rx1, ry1]` 半径的椭圆，右上和左下是 `[rx2, ry2]` 半径的椭圆

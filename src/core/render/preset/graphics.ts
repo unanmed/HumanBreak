@@ -105,8 +105,8 @@ export abstract class GraphicItemBase
     implements Required<ILineProperty>
 {
     mode: GraphicMode = GraphicMode.Fill;
-    fill: CanvasStyle = '#fff';
-    stroke: CanvasStyle = '#fff';
+    fill: CanvasStyle = '#ddd';
+    stroke: CanvasStyle = '#ddd';
     lineWidth: number = 2;
     lineDash: number[] = [];
     lineDashOffset: number = 0;
@@ -120,6 +120,7 @@ export abstract class GraphicItemBase
     private strokeAndFill: boolean = false;
     private propFillSet: boolean = false;
 
+    private actionStroke: boolean = false;
     private cachePath?: Path2D;
     protected pathDirty: boolean = false;
 
@@ -172,11 +173,13 @@ export abstract class GraphicItemBase
         ctx.lineCap = this.lineCap;
         ctx.lineJoin = this.lineJoin;
         ctx.setLineDash(this.lineDash);
+        if (this.actionStroke) {
+            return ctx.isPointInStroke(path, fixX, fixY);
+        }
         switch (this.mode) {
             case GraphicMode.Fill:
                 return ctx.isPointInPath(path, fixX, fixY, this.fillRule);
             case GraphicMode.Stroke:
-                return ctx.isPointInStroke(path, fixX, fixY);
             case GraphicMode.FillAndStroke:
             case GraphicMode.StrokeAndFill:
                 return (
@@ -350,6 +353,10 @@ export abstract class GraphicItemBase
                 if (!this.assertType(nextValue, 'number', key)) return false;
                 this.miterLimit = nextValue;
                 this.update();
+                return true;
+            case 'actionStroke':
+                if (!this.assertType(nextValue, 'boolean', key)) return false;
+                this.actionStroke = nextValue;
                 return true;
         }
         return false;

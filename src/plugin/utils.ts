@@ -392,7 +392,7 @@ export function generateBinary(arr: boolean[]) {
     let num = 0;
     arr.forEach((v, i) => {
         if (v) {
-            num += 1 << i;
+            num |= 1 << i;
         }
     });
     return num;

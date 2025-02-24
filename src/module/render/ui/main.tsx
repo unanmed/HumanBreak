@@ -33,6 +33,7 @@ import {
     RightStatusBar
 } from './statusBar';
 import { onLoaded } from '../use';
+import { ReplayingStatus } from './toolbar';
 
 const MainScene = defineComponent(() => {
     const layerGroupExtends: ILayerGroupRenderExtends[] = [
@@ -92,12 +93,29 @@ const MainScene = defineComponent(() => {
         exAtk: 0,
         magicDef: 0
     });
-    const rightStatus: IRightHeroStatus = reactive({});
+    const replayStatus: ReplayingStatus = reactive({
+        playing: false,
+        speed: 1,
+        played: 0,
+        total: 0
+    });
+    const rightStatus: IRightHeroStatus = reactive({
+        autoSkill: false,
+        skillName: '',
+        skillDesc: '',
+        jumpCount: 0,
+        springCount: 0,
+        floor: 'MT0',
+        replaying: false,
+        replayStatus
+    });
 
     const { getHeroStatusOn } = Mota.requireAll('fn');
 
     const updateStatus = () => {
+        if (!core.status || !core.status.hero || !core.status.floorId) return;
         const hero = core.status.hero;
+        const floor = core.status.floorId;
         leftStatus.atk = getHeroStatusOn('atk');
         leftStatus.hp = getHeroStatusOn('hp');
         leftStatus.def = getHeroStatusOn('def');
@@ -112,6 +130,32 @@ const MainScene = defineComponent(() => {
         leftStatus.regen = getHeroStatusOn('hpmax');
         leftStatus.exAtk = getHeroStatusOn('mana');
         leftStatus.magicDef = getHeroStatusOn('magicDef');
+
+        const { HeroSkill } = Mota.require('module', 'Mechanism');
+        rightStatus.autoSkill = HeroSkill.getAutoSkill();
+        rightStatus.skillName = HeroSkill.getSkillName();
+        rightStatus.skillDesc = HeroSkill.getSkillDesc();
+        rightStatus.floor = floor;
+        rightStatus.replaying = core.isReplaying();
+        const { pausing, speed, toReplay, totalList } = core.status.replay;
+        replayStatus.playing = !pausing;
+        replayStatus.speed = speed;
+        replayStatus.played = totalList.length - toReplay.length;
+        replayStatus.total = totalList.length;
+        if (HeroSkill.learnedSkill(HeroSkill.Jump)) {
+            if (Mota.Plugin.require('skill_g').jumpIgnoreFloor.has(floor)) {
+                rightStatus.jumpCount = -2;
+            } else {
+                rightStatus.jumpCount = 3 - (flags[`jump_${floor}`] ?? 0);
+            }
+        } else {
+            rightStatus.jumpCount = -1;
+        }
+        if (core.hasFlag('spring')) {
+            rightStatus.springCount = 50 - (flags.springCount ?? 0);
+        } else {
+            rightStatus.springCount = -1;
+        }
     };
 
     const loaded = ref(false);
@@ -129,6 +173,7 @@ const MainScene = defineComponent(() => {
                     status={leftStatus}
                 ></LeftStatusBar>
             )}
+            <g-line line={[180, 0, 180, 480]} lineWidth={1} />
             <container id="map-draw" {...mapDrawProps} x={180} zIndex={10}>
                 <layer-group id="layer-main" ex={layerGroupExtends} ref={map}>
                     <layer layer="bg" zIndex={10}></layer>
@@ -141,6 +186,7 @@ const MainScene = defineComponent(() => {
                 <Textbox id="main-textbox" {...mainTextboxProps}></Textbox>
                 <FloorChange id="floor-change" zIndex={50}></FloorChange>
             </container>
+            <g-line line={[180 + 480, 0, 180 + 480, 480]} lineWidth={1} />
             {loaded.value && (
                 <RightStatusBar
                     loc={[480 + 180, 0, STATUS_BAR_WIDTH, STATUS_BAR_HEIGHT]}
@@ -153,6 +199,12 @@ const MainScene = defineComponent(() => {
             >
                 {mainUIController.render()}
             </container>
+            <g-rect
+                loc={[0, 0, MAIN_WIDTH, MAIN_HEIGHT]}
+                zIndex={100}
+                stroke
+                noevent
+            ></g-rect>
         </container>
     );
 });

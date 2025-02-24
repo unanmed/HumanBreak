@@ -1,8 +1,18 @@
 import { GameUI } from '@/core/system';
-import { defineComponent } from 'vue';
-import { SetupComponentOptions } from '../components';
-import { ElementLocator } from '@/core/render';
+import { computed, defineComponent, ref, watch } from 'vue';
+import { SetupComponentOptions, TextContent } from '../components';
+import { ElementLocator, Sprite } from '@/core/render';
+import { transitionedColor } from '../use';
+import { linear } from 'mutate-animate';
 import { Scroll } from '../components/scroll';
+import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
+import { getArea, MinimapDrawer } from '@/plugin/ui/fly';
+import {
+    NumpadToolbar,
+    PlayingToolbar,
+    ReplayingStatus,
+    ReplayingToolbar
+} from './toolbar';
 
 export interface ILeftHeroStatus {
     hp: number;
@@ -23,8 +33,6 @@ export interface ILeftHeroStatus {
     /** 魔法防御 */
     magicDef: number;
 }
-
-export interface IRightHeroStatus {}
 
 interface StatusBarProps<T> {
     loc: ElementLocator;
@@ -47,7 +55,7 @@ export const LeftStatusBar = defineComponent<StatusBarProps<ILeftHeroStatus>>(
         const s = p.status;
         const f = core.formatBigNumber;
 
-        const floorName = core.floors[s.floor].title;
+        const floorName = computed(() => core.floors[s.floor]?.title ?? '');
 
         const key = (num: number) => {
             return num.toString().padStart(2, '0');
@@ -86,9 +94,8 @@ export const LeftStatusBar = defineComponent<StatusBarProps<ILeftHeroStatus>>(
         return () => {
             return (
                 <container loc={p.loc}>
-                    <g-rect loc={[0, 0, p.loc[2], p.loc[3]]} stroke></g-rect>
                     <text
-                        text={floorName}
+                        text={floorName.value}
                         loc={central(24)}
                         font={font1}
                         cursor="pointer"
@@ -163,13 +170,228 @@ export const LeftStatusBar = defineComponent<StatusBarProps<ILeftHeroStatus>>(
     statusBarProps
 );
 
+interface RightStatusBarMisc {
+    name: string;
+    value: string;
+    nameColor: string;
+    valueColor: string;
+}
+
+export interface IRightHeroStatus {
+    /** 自动切换技能 */
+    autoSkill: boolean;
+    /** 当前开启的技能 */
+    skillName: string;
+    /** 技能描述 */
+    skillDesc: string;
+    /** 跳跃剩余次数，-1 表示未开启，-2表示当前楼层不能跳 */
+    jumpCount: number;
+    /** 治愈之泉剩余次数，-1 表示未开启 */
+    springCount: number;
+    /** 当前楼层 */
+    floor: FloorIds;
+    /** 是否正在录像播放 */
+    replaying: boolean;
+    /** 录像播放状态 */
+    replayStatus: ReplayingStatus;
+}
+
 export const RightStatusBar = defineComponent<StatusBarProps<IRightHeroStatus>>(
     p => {
+        const font1 = '18px normal';
+        const font2 = '16px normal';
+
+        const minimap = ref<Sprite>();
+        const inNumpad = ref(false);
+
+        const onNumpad = () => {
+            inNumpad.value = !inNumpad.value;
+        };
+
+        const s = p.status;
+        const skill = computed(() =>
+            s.autoSkill ? '已开启自动切换' : s.skillName
+        );
+        const skillDesc = computed(() =>
+            s.autoSkill ? '自动切换技能时，会自动选择最优技能' : s.skillDesc
+        );
+
+        const skillColor = transitionedColor('#284', 200, linear())!;
+
+        watch(
+            () => s.autoSkill,
+            value => {
+                skillColor.set(value ? '#284' : '#824');
+            }
+        );
+
+        const miscData = computed<RightStatusBarMisc[]>(() => {
+            const data: RightStatusBarMisc[] = [];
+            if (s.jumpCount !== -1) {
+                const text =
+                    s.jumpCount === -2 ? '不可跳跃' : s.jumpCount.toString();
+                data.push({
+                    name: '跳跃剩余',
+                    nameColor: '#fff',
+                    value: text,
+                    valueColor: '#fff'
+                });
+            }
+            if (s.springCount >= 0) {
+                data.push({
+                    name: '治愈之泉',
+                    nameColor: '#a7ffa7',
+                    value: s.springCount.toString(),
+                    valueColor: '#a7ffa7'
+                });
+            }
+            return data;
+        });
+
+        const central = (y: number): ElementLocator => {
+            const width = p.loc[2] ?? 200;
+            return [width / 2, y, void 0, void 0, 0.5, 0.5];
+        };
+
+        const middle = (x: number, y: number): ElementLocator => {
+            return [x, y, void 0, void 0, 0, 0.5];
+        };
+
+        const changeAutoSkill = () => {
+            const { HeroSkill } = Mota.require('module', 'Mechanism');
+            const auto = !s.autoSkill;
+            HeroSkill.setAutoSkill(auto);
+            core.status.route.push(`set:autoSkill:${auto}`);
+            core.updateStatusBar();
+        };
+
+        const area = getArea();
+        const minimapDrawer = new MinimapDrawer(
+            document.createElement('canvas')
+        );
+        minimapDrawer.noBorder = true;
+        minimapDrawer.scale = 4;
+        minimapDrawer.showInfo = true;
+        let linked = false;
+        const drawMinimap = (canvas: MotaOffscreenCanvas2D) => {
+            const ctx = canvas.ctx;
+            ctx.save();
+            ctx.scale(
+                1 / core.domStyle.scale / devicePixelRatio,
+                1 / core.domStyle.scale / devicePixelRatio
+            );
+            if (!linked) {
+                minimapDrawer.link(canvas.canvas);
+                linked = true;
+            }
+            if (minimapDrawer.nowFloor !== s.floor) {
+                minimapDrawer.drawedThumbnail = {};
+            } else {
+                minimapDrawer.drawToTarget();
+                ctx.restore();
+                return;
+            }
+            minimapDrawer.nowFloor = s.floor;
+            minimapDrawer.nowArea =
+                Object.keys(area).find(v =>
+                    area[v].includes(core.status.floorId)
+                ) ?? '';
+            minimapDrawer.locateMap(minimapDrawer.nowFloor);
+            minimapDrawer.drawMap();
+            ctx.restore();
+        };
+
+        watch(
+            () => s.floor,
+            () => {
+                minimap.value?.update();
+            }
+        );
+
         return () => {
             return (
                 <container loc={p.loc}>
-                    <g-rect loc={[0, 0, p.loc[2], p.loc[3]]} stroke></g-rect>
-                    <Scroll loc={[0, 0, 180, 100]}></Scroll>
+                    <g-rectr
+                        loc={[10, 10, 160, 24]}
+                        circle={[6]}
+                        fillStyle={skillColor.ref.value}
+                        onClick={changeAutoSkill}
+                        cursor="pointer"
+                    ></g-rectr>
+                    <text
+                        loc={central(22)}
+                        text={skill.value}
+                        font={font1}
+                        onClick={changeAutoSkill}
+                        cursor="pointer"
+                    />
+                    <TextContent
+                        loc={[10, 42, 160, 60]}
+                        text={skillDesc.value}
+                        fontFamily="normal"
+                        fontSize={14}
+                        width={160}
+                        lineHeight={4}
+                    ></TextContent>
+                    <g-line
+                        line={[0, 107, 180, 107]}
+                        strokeStyle="#888"
+                        lineWidth={1}
+                        zIndex={-20}
+                    ></g-line>
+                    <Scroll loc={[0, 107, 180, 100]}>
+                        {miscData.value
+                            .map((v, i) => {
+                                return [
+                                    <text
+                                        text={v.name}
+                                        loc={middle(10, 16 + i * 22)}
+                                        fillStyle={v.nameColor}
+                                        font={font2}
+                                    ></text>,
+                                    <text
+                                        text={v.value}
+                                        loc={middle(100, 16 + i * 22)}
+                                        fillStyle={v.valueColor}
+                                        font={font2}
+                                    ></text>
+                                ];
+                            })
+                            .flat()}
+                    </Scroll>
+                    <g-line
+                        line={[0, 207, 180, 207]}
+                        strokeStyle="#888"
+                        lineWidth={1}
+                        zIndex={-20}
+                    ></g-line>
+                    <sprite
+                        ref={minimap}
+                        loc={[10, 207, 160, 160]}
+                        render={drawMinimap}
+                    ></sprite>
+                    <g-line
+                        line={[0, 367, 180, 367]}
+                        strokeStyle="#888"
+                        lineWidth={1}
+                        zIndex={-20}
+                    ></g-line>
+                    {inNumpad.value ? (
+                        <NumpadToolbar
+                            loc={[0, 367, 180, 113]}
+                            onNumpad={onNumpad}
+                        />
+                    ) : s.replaying ? (
+                        <ReplayingToolbar
+                            loc={[0, 367, 180, 113]}
+                            status={s.replayStatus}
+                        />
+                    ) : (
+                        <PlayingToolbar
+                            loc={[0, 367, 180, 113]}
+                            onNumpad={onNumpad}
+                        />
+                    )}
                 </container>
             );
         };

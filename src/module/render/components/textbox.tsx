@@ -211,7 +211,7 @@ const textboxOptions = {
         'hidden',
         'anchorX',
         'anchorY',
-        'antiAliasing',
+        'anti',
         'cache',
         'composite',
         'fall',

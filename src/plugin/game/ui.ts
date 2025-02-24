@@ -28,8 +28,6 @@ export function init() {
         if (!core.control.noAutoEvents) core.checkAutoEvents();
         core.control._updateStatusBar_setToolboxIcon();
         core.control.noAutoEvents = true;
-        // 更新vue状态栏
-        updateVueStatusBar();
         Mota.require('var', 'hook').emit('statusBarUpdate');
     };
 
@@ -65,11 +63,4 @@ export function init() {
         core.setFlag('hideStatusBar', true);
         core.setFlag('showToolbox', showToolbox || null);
     };
-}
-
-function updateVueStatusBar() {
-    Mota.r(() => {
-        const status = Mota.require('var', 'status');
-        status.value = !status.value;
-    });
 }

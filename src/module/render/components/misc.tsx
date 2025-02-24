@@ -12,6 +12,8 @@ interface ProgressProps extends DefaultProps {
     success?: CanvasStyle;
     /** 未完成部分的样式，默认为灰色（gray） */
     background?: CanvasStyle;
+    /** 线宽度 */
+    lineWidth?: number;
 }
 
 const progressProps = {
@@ -25,10 +27,22 @@ export const Progress = defineComponent<ProgressProps>(props => {
         const { ctx } = canvas;
         const width = props.loc[2] ?? 200;
         const height = props.loc[3] ?? 200;
-        ctx.fillStyle = props.background ?? 'gray';
-        ctx.fillRect(0, 0, width, height);
-        ctx.fillStyle = props.success ?? 'green';
-        ctx.fillRect(0, 0, width * props.progress, height);
+        ctx.lineCap = 'round';
+        const lineWidth = props.lineWidth ?? 2;
+        ctx.lineWidth = lineWidth;
+        ctx.strokeStyle = props.background ?? 'gray';
+        ctx.beginPath();
+        ctx.moveTo(lineWidth, height / 2);
+        ctx.lineTo(width - lineWidth, height / 2);
+        ctx.stroke();
+        if (!isNaN(props.progress)) {
+            ctx.strokeStyle = props.success ?? 'green';
+            const p = lineWidth + (width - lineWidth * 2) * props.progress;
+            ctx.beginPath();
+            ctx.moveTo(lineWidth, height / 2);
+            ctx.lineTo(p, height / 2);
+            ctx.stroke();
+        }
     };
 
     watch(props, () => {
