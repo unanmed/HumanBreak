@@ -1125,8 +1125,6 @@ export class TextContentParser {
             this.checkRestLine(width, guess);
         }
 
-        console.log(this.renderable);
-
         return {
             lineHeights: this.lineHeights,
             data: this.renderable

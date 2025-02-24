@@ -1,4 +1,3 @@
-import { ElementNamespace, ComponentInternalInstance } from 'vue';
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
 import { ActionType, EventProgress, ActionEventMap } from './event';
 import {
@@ -168,20 +167,18 @@ export class ContainerCustom extends Container {
         this.renderFn = render;
     }
 
-    patchProp(
+    protected handleProps(
         key: string,
         prevValue: any,
-        nextValue: any,
-        namespace?: ElementNamespace,
-        parentComponent?: ComponentInternalInstance | null
-    ): void {
+        nextValue: any
+    ): boolean {
         switch (key) {
             case 'render': {
-                if (!this.assertType(nextValue, 'function', key)) return;
+                if (!this.assertType(nextValue, 'function', key)) return false;
                 this.setRenderFn(nextValue);
-                return;
+                return true;
             }
         }
-        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
+        return super.handleProps(key, prevValue, nextValue);
     }
 }

@@ -10,12 +10,12 @@ import {
 } from 'vue';
 import { SetupComponentOptions } from './types';
 import { clamp } from 'lodash-es';
-import { ElementLocator } from '@/core/render';
+import { DefaultProps, ElementLocator } from '@/core/render';
 
 /** 圆角矩形页码距离容器的边框大小，与 pageSize 相乘 */
 const RECT_PAD = 0.1;
 
-export interface PageProps {
+export interface PageProps extends DefaultProps {
     /** 共有多少页 */
     pages: number;
     /** 页码组件的定位 */
@@ -40,6 +40,23 @@ const pageProps = {
     props: ['pages', 'loc', 'pageSize']
 } satisfies SetupComponentOptions<PageProps, {}, string, PageSlots>;
 
+/**
+ * 分页组件，用于多页切换，例如存档界面等。参数参考 {@link PageProps}，函数接口参考 {@link PageExpose}
+ *
+ * ---
+ *
+ * 用例如下，是一个在每页显示文字的用例，其中 page 表示第几页：
+ * ```tsx
+ * <Page maxPage={5}>
+ *   {
+ *     (page: number) => {
+ *       // 页码从第一页开始，因此这里索引要减一
+ *       return items[page - 1].map(v => <text text={v.text} />)
+ *     }
+ *   }
+ * </Page>
+ * ```
+ */
 export const Page = defineComponent<PageProps, {}, string, PageSlots>(
     (props, { slots, expose }) => {
         const nowPage = ref(1);
@@ -60,8 +77,8 @@ export const Page = defineComponent<PageProps, {}, string, PageSlots>(
         const textLoc = ref<ElementLocator>([0, 0, 0, 0]);
 
         // 两个监听的参数
-        const leftArrow = ref<Path2D>(new Path2D());
-        const rightArrow = ref<Path2D>(new Path2D());
+        const leftArrow = ref<Path2D>();
+        const rightArrow = ref<Path2D>();
 
         const isFirst = computed(() => nowPage.value === 1);
         const isLast = computed(() => nowPage.value === props.pages);

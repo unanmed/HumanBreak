@@ -8,6 +8,13 @@ import { ERenderItemEvent, RenderItem } from '../item';
 import { tagMap } from './map';
 import { logger } from '@/core/common/logger';
 import { Comment, ETextEvent, Text } from '../preset/misc';
+import { BaseProps } from './props';
+import { TagDefine } from './elements';
+
+export type DefaultProps<
+    P extends BaseProps = BaseProps,
+    E extends ERenderItemEvent = ERenderItemEvent
+> = TagDefine<P, E>;
 
 export const { createApp, render } = createRenderer<RenderItem, RenderItem>({
     patchProp: function (

@@ -1,7 +1,6 @@
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 import { ERenderItemEvent, RenderItem } from '../item';
 import { Transform } from '../transform';
-import { ElementNamespace, ComponentInternalInstance } from 'vue';
 import { clamp, isNil } from 'lodash-es';
 import { logger } from '@/core/common/logger';
 
@@ -167,15 +166,22 @@ export abstract class GraphicItemBase
         }
         const path = this.cachePath;
         if (!path) return false;
+        const fixX = x * devicePixelRatio;
+        const fixY = y * devicePixelRatio;
+        ctx.lineWidth = this.lineWidth;
+        ctx.lineCap = this.lineCap;
+        ctx.lineJoin = this.lineJoin;
+        ctx.setLineDash(this.lineDash);
         switch (this.mode) {
             case GraphicMode.Fill:
-                return ctx.isPointInPath(path, x, y, this.fillRule);
+                return ctx.isPointInPath(path, fixX, fixY, this.fillRule);
             case GraphicMode.Stroke:
+                return ctx.isPointInStroke(path, fixX, fixY);
             case GraphicMode.FillAndStroke:
             case GraphicMode.StrokeAndFill:
                 return (
-                    ctx.isPointInPath(path, x, y, this.fillRule) ||
-                    ctx.isPointInStroke(path, x, y)
+                    ctx.isPointInPath(path, fixX, fixY, this.fillRule) ||
+                    ctx.isPointInStroke(path, fixX, fixY)
                 );
         }
     }
@@ -287,69 +293,66 @@ export abstract class GraphicItemBase
         ctx.miterLimit = this.miterLimit;
     }
 
-    patchProp(
+    protected handleProps(
         key: string,
-        prevValue: any,
-        nextValue: any,
-        namespace?: ElementNamespace,
-        parentComponent?: ComponentInternalInstance | null
-    ): void {
-        if (isNil(prevValue) && isNil(nextValue)) return;
+        _prevValue: any,
+        nextValue: any
+    ): boolean {
         switch (key) {
             case 'fill':
-                if (!this.assertType(nextValue, 'boolean', key)) return;
+                if (!this.assertType(nextValue, 'boolean', key)) return false;
                 this.checkMode(GraphicModeProp.Fill, nextValue);
-                break;
+                return true;
             case 'stroke':
-                if (!this.assertType(nextValue, 'boolean', key)) return;
+                if (!this.assertType(nextValue, 'boolean', key)) return false;
                 this.checkMode(GraphicModeProp.Stroke, nextValue);
-                break;
+                return true;
             case 'strokeAndFill':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.checkMode(GraphicModeProp.StrokeAndFill, nextValue);
-                break;
+                return true;
             case 'fillRule':
-                if (!this.assertType(nextValue, 'string', key)) return;
+                if (!this.assertType(nextValue, 'string', key)) return false;
                 this.setFillRule(nextValue);
-                break;
+                return true;
             case 'fillStyle':
                 this.setFillStyle(nextValue);
-                break;
+                return true;
             case 'strokeStyle':
                 this.setStrokeStyle(nextValue);
-                break;
+                return true;
             case 'lineWidth':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.lineWidth = nextValue;
                 this.update();
-                break;
+                return true;
             case 'lineDash':
-                if (!this.assertType(nextValue, Array, key)) return;
+                if (!this.assertType(nextValue, Array, key)) return false;
                 this.lineDash = nextValue as number[];
                 this.update();
-                break;
+                return true;
             case 'lineDashOffset':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.lineDashOffset = nextValue;
                 this.update();
-                break;
+                return true;
             case 'lineJoin':
-                if (!this.assertType(nextValue, 'string', key)) return;
+                if (!this.assertType(nextValue, 'string', key)) return false;
                 this.lineJoin = nextValue;
                 this.update();
-                break;
+                return true;
             case 'lineCap':
-                if (!this.assertType(nextValue, 'string', key)) return;
+                if (!this.assertType(nextValue, 'string', key)) return false;
                 this.lineCap = nextValue;
                 this.update();
-                break;
+                return true;
             case 'miterLimit':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.miterLimit = nextValue;
                 this.update();
-                break;
+                return true;
         }
-        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
+        return false;
     }
 }
 
@@ -407,29 +410,27 @@ export class Circle extends GraphicItemBase {
         this.update();
     }
 
-    patchProp(
+    protected handleProps(
         key: string,
         prevValue: any,
-        nextValue: any,
-        namespace?: ElementNamespace,
-        parentComponent?: ComponentInternalInstance | null
-    ): void {
+        nextValue: any
+    ): boolean {
         switch (key) {
             case 'radius':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setRadius(nextValue);
-                return;
+                return true;
             case 'start':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setAngle(nextValue, this.end);
-                return;
+                return true;
             case 'end':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setAngle(this.start, nextValue);
-                return;
+                return true;
             case 'circle': {
                 const value = nextValue as CircleParams;
-                if (!this.assertType(value, Array, key)) return;
+                if (!this.assertType(value, Array, key)) return false;
                 const [cx, cy, radius, start, end] = value;
                 if (!isNil(cx) && !isNil(cy)) {
                     this.pos(cx, cy);
@@ -440,10 +441,10 @@ export class Circle extends GraphicItemBase {
                 if (!isNil(start) && !isNil(end)) {
                     this.setAngle(start, end);
                 }
-                return;
+                return true;
             }
         }
-        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
+        return super.handleProps(key, prevValue, nextValue);
     }
 }
 
@@ -494,33 +495,31 @@ export class Ellipse extends GraphicItemBase {
         this.update();
     }
 
-    patchProp(
+    protected handleProps(
         key: string,
         prevValue: any,
-        nextValue: any,
-        namespace?: ElementNamespace,
-        parentComponent?: ComponentInternalInstance | null
-    ): void {
+        nextValue: any
+    ): boolean {
         switch (key) {
             case 'radiusX':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setRadius(nextValue, this.radiusY);
-                return;
+                return true;
             case 'radiusY':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setRadius(this.radiusY, nextValue);
-                return;
+                return true;
             case 'start':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setAngle(nextValue, this.end);
-                return;
+                return true;
             case 'end':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setAngle(this.start, nextValue);
-                return;
+                return true;
             case 'ellipse': {
                 const value = nextValue as EllipseParams;
-                if (!this.assertType(value, Array, key)) return;
+                if (!this.assertType(value, Array, key)) return false;
                 const [cx, cy, radiusX, radiusY, start, end] = value;
                 if (!isNil(cx) && !isNil(cy)) {
                     this.pos(cx, cy);
@@ -531,10 +530,10 @@ export class Ellipse extends GraphicItemBase {
                 if (!isNil(start) && !isNil(end)) {
                     this.setAngle(start, end);
                 }
-                return;
+                return true;
             }
         }
-        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
+        return super.handleProps(key, prevValue, nextValue);
     }
 }
 
@@ -584,37 +583,37 @@ export class Line extends GraphicItemBase {
         this.pathDirty = true;
     }
 
-    patchProp(
+    protected handleProps(
         key: string,
         prevValue: any,
-        nextValue: any,
-        namespace?: ElementNamespace,
-        parentComponent?: ComponentInternalInstance | null
-    ): void {
+        nextValue: any
+    ): boolean {
         switch (key) {
             case 'x1':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setPoint1(nextValue, this.y1);
-                return;
+                return true;
             case 'y1':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setPoint1(this.x1, nextValue);
-                return;
+                return true;
             case 'x2':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setPoint2(nextValue, this.y2);
-                return;
+                return true;
             case 'y2':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setPoint2(this.x2, nextValue);
-                return;
+                return true;
             case 'line':
-                if (!this.assertType(nextValue as number[], Array, key)) return;
+                if (!this.assertType(nextValue as number[], Array, key)) {
+                    return false;
+                }
                 this.setPoint1(nextValue[0], nextValue[1]);
                 this.setPoint2(nextValue[2], nextValue[3]);
-                return;
+                return true;
         }
-        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
+        return super.handleProps(key, prevValue, nextValue);
     }
 }
 
@@ -685,6 +684,10 @@ export class BezierCurve extends GraphicItemBase {
         this.update();
     }
 
+    protected isActionInElement(x: number, y: number): boolean {
+        return x >= 0 && x < this.width && y >= 0 && y < this.height;
+    }
+
     private fitRect() {
         const left = Math.min(this.sx, this.cp1x, this.cp2x, this.ex);
         const top = Math.min(this.sy, this.cp1y, this.cp2y, this.ey);
@@ -695,55 +698,55 @@ export class BezierCurve extends GraphicItemBase {
         this.pathDirty = true;
     }
 
-    patchProp(
+    protected handleProps(
         key: string,
         prevValue: any,
-        nextValue: any,
-        namespace?: ElementNamespace,
-        parentComponent?: ComponentInternalInstance | null
-    ): void {
+        nextValue: any
+    ): boolean {
         switch (key) {
             case 'sx':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setStart(nextValue, this.sy);
-                return;
+                return true;
             case 'sy':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setStart(this.sx, nextValue);
-                return;
+                return true;
             case 'cp1x':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setControl1(nextValue, this.cp1y);
-                return;
+                return true;
             case 'cp1y':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setControl1(this.cp1x, nextValue);
-                return;
+                return true;
             case 'cp2x':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setControl2(nextValue, this.cp2y);
-                return;
+                return true;
             case 'cp2y':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setControl2(this.cp2x, nextValue);
-                return;
+                return true;
             case 'ex':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setEnd(nextValue, this.ey);
-                return;
+                return true;
             case 'ey':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setEnd(this.ex, nextValue);
-                return;
+                return true;
             case 'curve':
-                if (!this.assertType(nextValue as number[], Array, key)) return;
+                if (!this.assertType(nextValue as number[], Array, key)) {
+                    return false;
+                }
                 this.setStart(nextValue[0], nextValue[1]);
                 this.setControl1(nextValue[2], nextValue[3]);
                 this.setControl2(nextValue[4], nextValue[5]);
                 this.setEnd(nextValue[6], nextValue[7]);
-                return;
+                return true;
         }
-        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
+        return super.handleProps(key, prevValue, nextValue);
     }
 }
 
@@ -822,46 +825,50 @@ export class QuadraticCurve extends GraphicItemBase {
         this.pathDirty = true;
     }
 
-    patchProp(
+    protected isActionInElement(x: number, y: number): boolean {
+        return x >= 0 && x < this.width && y >= 0 && y < this.height;
+    }
+
+    protected handleProps(
         key: string,
         prevValue: any,
-        nextValue: any,
-        namespace?: ElementNamespace,
-        parentComponent?: ComponentInternalInstance | null
-    ): void {
+        nextValue: any
+    ): boolean {
         switch (key) {
             case 'sx':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setStart(nextValue, this.sy);
-                return;
+                return true;
             case 'sy':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setStart(this.sx, nextValue);
-                return;
+                return true;
             case 'cpx':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setControl(nextValue, this.cpy);
-                return;
+                return true;
             case 'cpy':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setControl(this.cpx, nextValue);
-                return;
+                return true;
             case 'ex':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setEnd(nextValue, this.ey);
-                return;
+                return true;
             case 'ey':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setEnd(this.ex, nextValue);
-                return;
+                return true;
             case 'curve':
-                if (!this.assertType(nextValue as number[], Array, key)) return;
+                if (!this.assertType(nextValue as number[], Array, key)) {
+                    return false;
+                }
                 this.setStart(nextValue[0], nextValue[1]);
                 this.setControl(nextValue[2], nextValue[3]);
                 this.setEnd(nextValue[4], nextValue[5]);
-                return;
+                return true;
         }
-        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
+        return super.handleProps(key, prevValue, nextValue);
     }
 }
 
@@ -886,22 +893,24 @@ export class Path extends GraphicItemBase {
         this.update();
     }
 
-    patchProp(
+    protected isActionInElement(x: number, y: number): boolean {
+        return x >= 0 && x < this.width && y >= 0 && y < this.height;
+    }
+
+    protected handleProps(
         key: string,
         prevValue: any,
-        nextValue: any,
-        namespace?: ElementNamespace,
-        parentComponent?: ComponentInternalInstance | null
-    ): void {
+        nextValue: any
+    ): boolean {
         switch (key) {
             case 'path':
-                if (!this.assertType(nextValue, Path2D, key)) return;
+                if (!this.assertType(nextValue, Path2D, key)) return false;
                 this.path = nextValue;
                 this.pathDirty = true;
                 this.update();
-                return;
+                return true;
         }
-        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
+        return super.handleProps(key, prevValue, nextValue);
     }
 }
 
@@ -1041,27 +1050,25 @@ export class RectR extends GraphicItemBase {
         }
     }
 
-    patchProp(
+    protected handleProps(
         key: string,
         prevValue: any,
-        nextValue: any,
-        namespace?: ElementNamespace,
-        parentComponent?: ComponentInternalInstance | null
-    ): void {
+        nextValue: any
+    ): boolean {
         switch (key) {
             case 'circle': {
                 const value = nextValue as RectRCircleParams;
-                if (!this.assertType(value, Array, key)) return;
+                if (!this.assertType(value, Array, key)) return false;
                 this.setCircle(value);
-                return;
+                return true;
             }
             case 'ellipse': {
                 const value = nextValue as RectREllipseParams;
-                if (!this.assertType(value, Array, key)) return;
+                if (!this.assertType(value, Array, key)) return false;
                 this.setEllipse(value);
-                return;
+                return true;
             }
         }
-        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
+        return super.handleProps(key, prevValue, nextValue);
     }
 }

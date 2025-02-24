@@ -12,12 +12,12 @@ import {
     watch
 } from 'vue';
 import { logger } from '@/core/common/logger';
-import { Sprite } from '../../../core/render/sprite';
-import { ContainerProps } from '../../../core/render/renderer';
+import { Sprite } from '@/core/render/sprite';
+import { ContainerProps, DefaultProps } from '@/core/render/renderer';
 import { isNil } from 'lodash-es';
 import { SetupComponentOptions } from './types';
 import EventEmitter from 'eventemitter3';
-import { Text } from '../../../core/render/preset';
+import { Text } from '@/core/render/preset';
 import {
     ITextContentConfig,
     TextContentTyper,
@@ -26,7 +26,7 @@ import {
 } from './textboxTyper';
 
 export interface TextContentProps
-    extends ContainerProps,
+    extends DefaultProps,
         Partial<ITextContentConfig> {
     /** 显示的文字 */
     text?: string;

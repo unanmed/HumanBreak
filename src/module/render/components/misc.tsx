@@ -1,9 +1,9 @@
-import { ElementLocator, Sprite } from '@/core/render';
+import { DefaultProps, ElementLocator, Sprite } from '@/core/render';
 import { defineComponent, ref, watch } from 'vue';
 import { SetupComponentOptions } from './types';
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 
-interface ProgressProps {
+interface ProgressProps extends DefaultProps {
     /** 进度条的位置 */
     loc: ElementLocator;
     /** 进度条的进度，1表示完成，0表示未完成 */

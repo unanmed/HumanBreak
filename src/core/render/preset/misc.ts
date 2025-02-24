@@ -1,7 +1,6 @@
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 import { ERenderItemEvent, RenderItem, RenderItemPosition } from '../item';
 import { Transform } from '../transform';
-import { ElementNamespace, ComponentInternalInstance } from 'vue';
 import { AutotileRenderable, RenderableData } from '../cache';
 import { texture } from '../cache';
 import { isNil } from 'lodash-es';
@@ -114,33 +113,31 @@ export class Text extends RenderItem<ETextEvent> {
         this.size(width, actualBoundingBoxAscent + actualBoundingBoxDescent);
     }
 
-    patchProp(
+    protected handleProps(
         key: string,
-        prevValue: any,
-        nextValue: any,
-        namespace?: ElementNamespace,
-        parentComponent?: ComponentInternalInstance | null
-    ): void {
+        _prevValue: any,
+        nextValue: any
+    ): boolean {
         switch (key) {
             case 'text':
-                if (!this.assertType(nextValue, 'string', key)) return;
+                if (!this.assertType(nextValue, 'string', key)) return false;
                 this.setText(nextValue);
-                return;
+                return true;
             case 'fillStyle':
                 this.setStyle(nextValue, this.strokeStyle);
-                return;
+                return true;
             case 'strokeStyle':
                 this.setStyle(this.fillStyle, nextValue);
-                return;
+                return true;
             case 'font':
-                if (!this.assertType(nextValue, 'string', key)) return;
+                if (!this.assertType(nextValue, 'string', key)) return false;
                 this.setFont(nextValue);
                 break;
             case 'strokeWidth':
                 this.setStrokeWidth(nextValue);
-                return;
+                return true;
         }
-        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
+        return false;
     }
 }
 
@@ -181,19 +178,17 @@ export class Image extends RenderItem<EImageEvent> {
         this.update();
     }
 
-    patchProp(
+    protected handleProps(
         key: string,
-        prevValue: any,
-        nextValue: any,
-        namespace?: ElementNamespace,
-        parentComponent?: ComponentInternalInstance | null
-    ): void {
+        _prevValue: any,
+        nextValue: any
+    ): boolean {
         switch (key) {
             case 'image':
                 this.setImage(nextValue);
-                return;
+                return true;
         }
-        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
+        return false;
     }
 }
 
@@ -213,6 +208,10 @@ export class Comment extends RenderItem {
         _canvas: MotaOffscreenCanvas2D,
         _transform: Transform
     ): void {}
+
+    protected handleProps(): boolean {
+        return false;
+    }
 }
 
 export interface EIconEvent extends ERenderItemEvent {}
@@ -313,31 +312,29 @@ export class Icon extends RenderItem<EIconEvent> implements IAnimateFrame {
         super.destroy();
     }
 
-    patchProp(
+    protected handleProps(
         key: string,
-        prevValue: any,
-        nextValue: any,
-        namespace?: ElementNamespace,
-        parentComponent?: ComponentInternalInstance | null
-    ): void {
+        _prevValue: any,
+        nextValue: any
+    ): boolean {
         switch (key) {
             case 'icon':
                 this.setIcon(nextValue);
-                return;
+                return true;
             case 'animate':
-                if (!this.assertType(nextValue, 'boolean', key)) return;
+                if (!this.assertType(nextValue, 'boolean', key)) return false;
                 this.animate = nextValue;
                 if (nextValue) renderEmits.addFramer(this);
                 else renderEmits.removeFramer(this);
                 this.update();
-                return;
+                return true;
             case 'frame':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.frame = nextValue;
                 this.update();
-                return;
+                return true;
         }
-        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
+        return false;
     }
 }
 
@@ -544,23 +541,21 @@ export class Winskin extends RenderItem<EWinskinEvent> {
         this.update();
     }
 
-    patchProp(
+    protected handleProps(
         key: string,
-        prevValue: any,
-        nextValue: any,
-        namespace?: ElementNamespace,
-        parentComponent?: ComponentInternalInstance | null
-    ): void {
+        _prevValue: any,
+        nextValue: any
+    ): boolean {
         switch (key) {
             case 'image':
-                if (!this.assertType(nextValue, 'string', key)) return;
+                if (!this.assertType(nextValue, 'string', key)) return false;
                 this.setImageByName(nextValue);
-                return;
+                return true;
             case 'borderSize':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setBorderSize(nextValue);
-                return;
+                return true;
         }
-        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
+        return false;
     }
 }

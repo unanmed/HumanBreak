@@ -24,27 +24,47 @@ export interface CustomProps {
 }
 
 export interface BaseProps {
+    /** 元素的横坐标 */
     x?: number;
+    /** 元素的纵坐标 */
     y?: number;
+    /** 元素的横向锚点位置 */
     anchorX?: number;
+    /** 元素的纵向锚点位置 */
     anchorY?: number;
+    /** 元素的纵深，值越大越靠上 */
     zIndex?: number;
+    /** 元素的宽度 */
     width?: number;
+    /** 元素的高度 */
     height?: number;
+    /** 元素的滤镜 */
     filter?: string;
+    /** 是否启用高清画布 */
     hd?: boolean;
-    antiAliasing?: boolean;
+    /** 是否启用抗锯齿 */
+    anti?: boolean;
+    /** 是否不启用抗锯齿，优先级大于 anti，主要用于像素图片渲染 */
+    noanti?: boolean;
+    /** 元素是否隐藏，可以用于一些画面效果，也可以用于调试 */
     hidden?: boolean;
+    /** 元素的变换矩阵 */
     transform?: Transform;
+    /** 元素的定位模式，static 表示常规定位，absolute 定位模式下元素位置始终处于左上角 */
     type?: RenderItemPosition;
     /** 是否启用缓存，用处较少，主要用于一些默认不启用缓存的元素的特殊优化 */
     cache?: boolean;
     /** 是否不启用缓存，优先级大于 cache，用处较少，主要用于一些特殊优化 */
     nocache?: boolean;
+    /** 是否启用变换矩阵下穿，下穿模式下，当前元素会使用由父元素传递过来的变换矩阵，而非元素自身的 */
     fall?: boolean;
+    /** 这个元素的唯一标识符，不可重复 */
     id?: string;
+    /** 这个元素的不透明度 */
     alpha?: number;
+    /** 这个元素与已渲染内容的混合模式，默认为 source-over */
     composite?: GlobalCompositeOperation;
+    /** 鼠标放在这个元素上时的光标样式 */
     cursor?: string;
     /**
      * 定位属性，可以填 `[横坐标，纵坐标，宽度，高度，x锚点，y锚点]`，

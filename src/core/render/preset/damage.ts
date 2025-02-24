@@ -18,7 +18,6 @@ import { getDamageColor } from '@/plugin/utils';
 import { ERenderItemEvent, RenderItem } from '../item';
 import EventEmitter from 'eventemitter3';
 import { Transform } from '../transform';
-import { ElementNamespace, ComponentInternalInstance } from 'vue';
 import { transformCanvas } from '../utils';
 
 const ensureFloorDamage = Mota.require('fn', 'ensureFloorDamage');
@@ -529,46 +528,44 @@ export class Damage extends RenderItem<EDamageEvent> {
         // console.timeEnd('damage');
     }
 
-    patchProp(
+    protected handleProps(
         key: string,
-        prevValue: any,
-        nextValue: any,
-        namespace?: ElementNamespace,
-        parentComponent?: ComponentInternalInstance | null
-    ): void {
+        _prevValue: any,
+        nextValue: any
+    ): boolean {
         switch (key) {
             case 'mapWidth':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setMapSize(nextValue, this.mapHeight);
-                return;
+                return true;
             case 'mapHeight':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setMapSize(this.mapWidth, nextValue);
-                return;
+                return true;
             case 'cellSize':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setCellSize(nextValue);
-                return;
+                return true;
             case 'enemy':
-                if (!this.assertType(nextValue, 'object', key)) return;
+                if (!this.assertType(nextValue, 'object', key)) return false;
                 this.updateCollection(nextValue);
-                return;
+                return true;
             case 'font':
-                if (!this.assertType(nextValue, 'string', key)) return;
+                if (!this.assertType(nextValue, 'string', key)) return false;
                 this.font = nextValue;
                 this.update();
-                return;
+                return true;
             case 'strokeStyle':
                 this.strokeStyle = nextValue;
                 this.update();
-                return;
+                return true;
             case 'strokeWidth':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.strokeWidth = nextValue;
                 this.update();
-                return;
+                return true;
         }
-        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
+        return false;
     }
 
     destroy(): void {

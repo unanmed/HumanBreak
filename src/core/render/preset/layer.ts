@@ -9,7 +9,6 @@ import { BlockCacher, CanvasCacheItem, ICanvasCacheItem } from './block';
 import { Transform } from '../transform';
 import { LayerFloorBinder, LayerGroupFloorBinder } from './floor';
 import { RenderAdapter } from '../adapter';
-import { ElementNamespace, ComponentInternalInstance } from 'vue';
 import { IAnimateFrame, renderEmits } from '../frame';
 
 export interface ILayerGroupRenderExtends {
@@ -332,36 +331,34 @@ export class LayerGroup
         }
     }
 
-    patchProp(
+    protected handleProps(
         key: string,
-        prevValue: any,
-        nextValue: any,
-        namespace?: ElementNamespace,
-        parentComponent?: ComponentInternalInstance | null
-    ): void {
+        _prevValue: any,
+        nextValue: any
+    ): boolean {
         switch (key) {
             case 'cellSize':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setCellSize(nextValue);
-                return;
+                return true;
             case 'blockSize':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setBlockSize(nextValue);
-                return;
+                return true;
             case 'floorId': {
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 const binder = this.getExtends('floor-binder');
                 if (binder instanceof LayerGroupFloorBinder) {
                     binder.bindFloor(nextValue);
                 }
-                return;
+                return true;
             }
             case 'camera':
-                if (!this.assertType(nextValue, Transform, key)) return;
+                if (!this.assertType(nextValue, Transform, key)) return false;
                 this.camera = nextValue;
-                return;
+                return true;
         }
-        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
+        return false;
     }
 
     destroy(): void {
@@ -1438,16 +1435,14 @@ export class Layer extends Container<ELayerEvent> {
         });
     }
 
-    patchProp(
+    protected handleProps(
         key: string,
-        prevValue: any,
-        nextValue: any,
-        namespace?: ElementNamespace,
-        parentComponent?: ComponentInternalInstance | null
-    ): void {
+        _prevValue: any,
+        nextValue: any
+    ): boolean {
         switch (key) {
             case 'layer': {
-                if (!this.assertType(nextValue, 'string', key)) return;
+                if (!this.assertType(nextValue, 'string', key)) return false;
                 const parent = this.parent;
                 if (parent instanceof LayerGroup) {
                     parent.removeLayer(this);
@@ -1457,30 +1452,30 @@ export class Layer extends Container<ELayerEvent> {
                     this.layer = nextValue;
                 }
                 this.update();
-                return;
+                return true;
             }
             case 'cellSize':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setCellSize(nextValue);
-                return;
+                return true;
             case 'mapWidth':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setMapSize(nextValue, this.mapHeight);
-                return;
+                return true;
             case 'mapHeight':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setMapSize(this.mapWidth, nextValue);
-                return;
+                return true;
             case 'background':
-                if (!this.assertType(nextValue, 'number', key)) return;
+                if (!this.assertType(nextValue, 'number', key)) return false;
                 this.setBackground(nextValue);
-                return;
+                return true;
             case 'floorImage':
-                if (!this.assertType(nextValue, Array, key)) return;
+                if (!this.assertType(nextValue, Array, key)) return false;
                 this.setFloorImage(nextValue as FloorAnimate[]);
-                return;
+                return true;
         }
-        super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
+        return false;
     }
 
     private addToGroup(group: LayerGroup) {

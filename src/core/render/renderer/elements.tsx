@@ -76,7 +76,7 @@ type _Define<P extends BaseProps, E extends ERenderItemEvent> = DefineComponent<
     Readonly<P & MappingEvent<E>>
 >;
 
-type TagDefine<T extends object, E extends ERenderItemEvent> = T &
+export type TagDefine<T extends object, E extends ERenderItemEvent> = T &
     MappingEvent<E> &
     ReservedProps;
 

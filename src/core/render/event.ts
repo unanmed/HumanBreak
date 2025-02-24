@@ -49,21 +49,11 @@ export const enum EventProgress {
     Bubble
 }
 
-export interface IActionEvent {
+export interface IActionEventBase {
     /** 当前事件是监听的哪个元素 */
     target: RenderItem;
-    /** 这次操作的标识符，在按下、移动、抬起阶段中保持不变 */
-    identifier: number;
     /** 是触摸操作还是鼠标操作 */
     touch: boolean;
-    /** 相对于触发元素左上角的横坐标 */
-    offsetX: number;
-    /** 相对于触发元素左上角的纵坐标 */
-    offsetY: number;
-    /** 相对于整个画布左上角的横坐标 */
-    absoluteX: number;
-    /** 相对于整个画布左上角的纵坐标 */
-    absoluteY: number;
     /**
      * 触发的按键种类，会出现在点击、按下、抬起三个事件中，而其他的如移动等该值只会是 {@link MouseType.None}，
      * 电脑端可以有左键、中键、右键等，手机只会触发左键，每一项的值参考 {@link MouseType}
@@ -83,6 +73,19 @@ export interface IActionEvent {
     ctrlKey: boolean;
     /** 触发时是否按下了 Windows(Windows) / Command(Mac) 键 */
     metaKey: boolean;
+}
+
+export interface IActionEvent extends IActionEventBase {
+    /** 这次操作的标识符，在按下、移动、抬起阶段中保持不变 */
+    identifier: number;
+    /** 相对于触发元素左上角的横坐标 */
+    offsetX: number;
+    /** 相对于触发元素左上角的纵坐标 */
+    offsetY: number;
+    /** 相对于整个画布左上角的横坐标 */
+    absoluteX: number;
+    /** 相对于整个画布左上角的纵坐标 */
+    absoluteY: number;
 
     /**
      * 调用后将停止事件的继续传播。
@@ -120,14 +123,10 @@ export interface ERenderItemActionEvent {
     upCapture: [ev: Readonly<IActionEvent>];
     /** 当鼠标或手指在该元素上抬起的冒泡阶段触发 */
     up: [ev: Readonly<IActionEvent>];
-    /** 当鼠标或手指进入该元素的捕获阶段触发 */
-    enterCapture: [ev: Readonly<IActionEvent>];
-    /** 当鼠标或手指进入该元素的冒泡阶段触发 */
-    enter: [ev: Readonly<IActionEvent>];
-    /** 当鼠标或手指离开该元素的捕获阶段触发 */
-    leaveCapture: [ev: Readonly<IActionEvent>];
-    /** 当鼠标或手指离开该元素的冒泡阶段触发 */
-    leave: [ev: Readonly<IActionEvent>];
+    /** 当鼠标或手指进入该元素时触发 */
+    enter: [ev: Readonly<IActionEventBase>];
+    /** 当鼠标或手指离开该元素时触发 */
+    leave: [ev: Readonly<IActionEventBase>];
     /** 当鼠标滚轮时的捕获阶段触发 */
     wheelCapture: [ev: Readonly<IWheelEvent>];
     /** 当鼠标滚轮时的冒泡阶段触发 */
@@ -144,7 +143,7 @@ export interface ActionEventMap {
     [ActionType.Wheel]: IWheelEvent;
 }
 
-export const eventNameMap: Record<ActionType, string> = {
+export const eventNameMap: Record<ActionType, keyof ERenderItemActionEvent> = {
     [ActionType.Click]: 'click',
     [ActionType.Down]: 'down',
     [ActionType.Move]: 'move',

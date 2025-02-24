@@ -272,7 +272,9 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     alpha: number = 1;
 
     /** 鼠标覆盖在此元素上时的光标样式 */
-    cursor: string = 'auto';
+    cursor: string = 'inherit';
+    /** 该元素是否忽略交互事件 */
+    noEvent: boolean = false;
 
     get x() {
         return this._transform.x;
@@ -340,14 +342,12 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     private cachedEvent: Map<ActionType, IActionEvent> = new Map();
     /** 下穿模式下当前下穿过来的变换矩阵 */
     private fallTransform?: Transform;
-    /** 鼠标当前是否覆盖在当前元素上 */
-    private hovered: boolean = false;
     /** 是否在元素内 */
     private inElement: boolean = false;
     /** 鼠标标识符映射，键为按下的鼠标按键类型，值表示本次操作的唯一标识符，在按下、移动、抬起过程中保持一致 */
     protected mouseId: Map<MouseType, number> = new Map();
     /** 当前所有的触摸标识符 */
-    protected touchId: Set<number> = new Set();
+    readonly touchId: Set<number> = new Set();
 
     //#endregion
 
@@ -650,7 +650,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
 
     //#region 父子关系
 
-    checkRoot() {
+    checkRoot(): RenderItem | null {
         if (this._root) return this._root;
         if (this.isRoot) return this;
         let ele: RenderItem = this;
@@ -756,10 +756,12 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         type: ActionType,
         progress: EventProgress
     ): keyof ERenderItemActionEvent {
-        if (progress === EventProgress.Capture) {
+        if (type === ActionType.Enter || type === ActionType.Leave) {
+            return eventNameMap[type];
+        } else if (progress === EventProgress.Capture) {
             return `${eventNameMap[type]}Capture` as keyof ERenderItemActionEvent;
         } else {
-            return eventNameMap[type] as keyof ERenderItemActionEvent;
+            return eventNameMap[type];
         }
     }
 
@@ -829,6 +831,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         progress: EventProgress,
         event: ActionEventMap[T]
     ): ActionEventMap[T] | null {
+        if (this.noEvent) return null;
         if (progress === EventProgress.Capture) {
             // 捕获阶段需要计算鼠标位置
             const tran = this.transformFallThrough
@@ -836,7 +839,6 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
                 : this._transform;
             if (!tran) return null;
             const [nx, ny] = this.calActionPosition(event, tran);
-
             const inElement = this.isActionInElement(nx, ny);
             // 在元素范围内，执行事件
             const newEvent: ActionEventMap[T] = {
@@ -876,17 +878,6 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
             case ActionType.Move: {
                 if (inElement) {
                     this._root?.hoverElement(this);
-                }
-                if (this.hovered && !inElement) {
-                    this.hovered = false;
-                    this.emit('leaveCapture', event);
-                    this.emit('leave', event);
-                    return false;
-                } else if (!this.hovered && inElement) {
-                    this.hovered = true;
-                    this.emit('enterCapture', event);
-                    this.emit('enter', event);
-                    return true;
                 }
                 break;
             }
@@ -929,10 +920,15 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      * @returns 是否继续传递事件
      */
     protected processBubble<T extends ActionType>(
-        _type: T,
+        type: T,
         _event: ActionEventMap[T],
         inElement: boolean
     ): boolean {
+        switch (type) {
+            case ActionType.Enter:
+            case ActionType.Leave:
+                return false;
+        }
         return inElement;
     }
 
@@ -1039,6 +1035,21 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         return false;
     }
 
+    /**
+     * 自定义处理 props，自定义元素需要 override 此函数来处理 props
+     * @param key 传入的 props 的键名
+     * @param prevValue 这个 props 之前的值
+     * @param nextValue 这个 props 传入的值
+     * @returns 是否处理成功
+     */
+    protected handleProps(
+        _key: string,
+        _prevValue: any,
+        _nextValue: any
+    ): boolean {
+        return false;
+    }
+
     patchProp(
         key: string,
         prevValue: any,
@@ -1047,6 +1058,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         _parentComponent?: ComponentInternalInstance | null
     ): void {
         if (isNil(prevValue) && isNil(nextValue)) return;
+        if (this.handleProps(key, prevValue, nextValue)) return;
         switch (key) {
             case 'x': {
                 if (!this.assertType(nextValue, 'number', key)) return;
@@ -1093,9 +1105,14 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
                 this.setHD(nextValue);
                 return;
             }
-            case 'antiAliasing': {
+            case 'anti': {
                 if (!this.assertType(nextValue, 'boolean', key)) return;
                 this.setAntiAliasing(nextValue);
+                return;
+            }
+            case 'noanti': {
+                if (!this.assertType(nextValue, 'boolean', key)) return;
+                this.setAntiAliasing(!nextValue);
                 return;
             }
             case 'hidden': {

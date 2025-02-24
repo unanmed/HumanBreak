@@ -2,9 +2,9 @@ import { logger } from '../common/logger';
 import { MotaOffscreenCanvas2D } from '../fx/canvas2d';
 import { Container } from './container';
 import {
-    ActionEventMap,
     ActionType,
     IActionEvent,
+    IActionEventBase,
     IWheelEvent,
     MouseType,
     WheelType
@@ -49,6 +49,10 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
     private abort?: AbortController;
     /** 根据捕获行为判断光标样式 */
     private targetCursor: string = 'auto';
+    /** 当前鼠标覆盖的元素 */
+    private hoveredElement: Set<RenderItem> = new Set();
+    /** 本次交互前鼠标覆盖的元素 */
+    private beforeHovered: Set<RenderItem> = new Set();
 
     target!: MotaOffscreenCanvas2D;
 
@@ -112,17 +116,26 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
                 this.lastMouse
             );
             this.targetCursor = 'auto';
+            const temp = this.beforeHovered;
+            temp.clear();
+            this.beforeHovered = this.hoveredElement;
+            this.hoveredElement = temp;
             this.captureEvent(ActionType.Move, event);
-        });
-        canvas.addEventListener('mouseenter', ev => {
-            const event = this.createMouseAction(ev, ActionType.Enter);
-            this.emit('enterCapture', event);
-            this.emit('enter', event);
+            if (this.targetCursor !== this.target.canvas.style.cursor) {
+                this.target.canvas.style.cursor = this.targetCursor;
+            }
+            this.checkMouseEnterLeave(
+                ev,
+                this.beforeHovered,
+                this.hoveredElement
+            );
         });
         canvas.addEventListener('mouseleave', ev => {
-            const event = this.createMouseAction(ev, ActionType.Leave);
-            this.emit('leaveCapture', event);
-            this.emit('leave', event);
+            this.hoveredElement.forEach(v => {
+                v.emit('leave', this.createMouseActionBase(ev, v));
+            });
+            this.hoveredElement.clear();
+            this.beforeHovered.clear();
         });
         document.addEventListener('touchstart', ev => {
             this.createTouchAction(ev, ActionType.Down).forEach(v => {
@@ -133,27 +146,29 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
             this.createTouchAction(ev, ActionType.Up).forEach(v => {
                 this.captureEvent(ActionType.Up, v);
                 this.captureEvent(ActionType.Click, v);
+                this.touchInfo.delete(v.identifier);
             });
         });
         document.addEventListener('touchcancel', ev => {
             this.createTouchAction(ev, ActionType.Up).forEach(v => {
                 this.captureEvent(ActionType.Up, v);
+                this.touchInfo.delete(v.identifier);
             });
         });
         document.addEventListener('touchmove', ev => {
             this.createTouchAction(ev, ActionType.Move).forEach(v => {
                 const touch = this.touchInfo.get(v.identifier);
                 if (!touch) return;
-                const inElement = this.isTouchInCanvas(v.offsetX, v.offsetY);
-                if (touch.hovered && !inElement) {
-                    this.emit('leaveCapture', v);
-                    this.emit('leave', v);
-                }
-                if (!touch.hovered && inElement) {
-                    this.emit('enterCapture', v);
-                    this.emit('enter', v);
-                }
+                const temp = this.beforeHovered;
+                temp.clear();
+                this.beforeHovered = this.hoveredElement;
+                this.hoveredElement = temp;
                 this.captureEvent(ActionType.Move, v);
+                this.checkTouchEnterLeave(
+                    ev,
+                    this.beforeHovered,
+                    this.hoveredElement
+                );
             });
         });
         canvas.addEventListener('wheel', ev => {
@@ -244,6 +259,39 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
         if (event.buttons & 0b1000) buttons |= MouseType.Back;
         if (event.buttons & 0b10000) buttons |= MouseType.Forward;
         return buttons;
+    }
+
+    private createMouseActionBase(
+        event: MouseEvent,
+        target: RenderItem = this,
+        mouse: MouseType = this.getMouseType(event)
+    ): IActionEventBase {
+        return {
+            target: target,
+            touch: false,
+            type: mouse,
+            buttons: this.getMouseButtons(event),
+            altKey: event.altKey,
+            ctrlKey: event.ctrlKey,
+            shiftKey: event.shiftKey,
+            metaKey: event.metaKey
+        };
+    }
+
+    private createTouchActionBase(
+        event: TouchEvent,
+        target: RenderItem
+    ): IActionEventBase {
+        return {
+            target: target,
+            touch: false,
+            type: MouseType.Left,
+            buttons: MouseType.Left,
+            altKey: event.altKey,
+            ctrlKey: event.ctrlKey,
+            shiftKey: event.shiftKey,
+            metaKey: event.metaKey
+        };
     }
 
     private createMouseAction(
@@ -385,14 +433,40 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
         return list;
     }
 
-    bubbleEvent<T extends ActionType>(
-        type: T,
-        event: ActionEventMap[T]
-    ): ActionEventMap[T] | null {
-        if (this.targetCursor !== this.target.canvas.style.cursor) {
-            this.target.canvas.style.cursor = this.targetCursor;
-        }
-        return super.bubbleEvent(type, event);
+    private checkMouseEnterLeave(
+        event: MouseEvent,
+        before: Set<RenderItem>,
+        now: Set<RenderItem>
+    ) {
+        // 先 leave，再 enter
+        before.forEach(v => {
+            if (!now.has(v)) {
+                v.emit('leave', this.createMouseActionBase(event, v));
+            }
+        });
+        now.forEach(v => {
+            if (!before.has(v)) {
+                v.emit('enter', this.createMouseActionBase(event, v));
+            }
+        });
+    }
+
+    private checkTouchEnterLeave(
+        event: TouchEvent,
+        before: Set<RenderItem>,
+        now: Set<RenderItem>
+    ) {
+        // 先 leave，再 enter
+        before.forEach(v => {
+            if (!now.has(v)) {
+                v.emit('leave', this.createTouchActionBase(event, v));
+            }
+        });
+        now.forEach(v => {
+            if (!before.has(v)) {
+                v.emit('enter', this.createTouchActionBase(event, v));
+            }
+        });
     }
 
     update(_item: RenderItem = this) {
@@ -465,9 +539,10 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
     }
 
     hoverElement(element: RenderItem): void {
-        if (element.cursor !== 'auto') {
+        if (element.cursor !== 'inherit') {
             this.targetCursor = element.cursor;
         }
+        this.hoveredElement.add(element);
     }
 
     destroy() {

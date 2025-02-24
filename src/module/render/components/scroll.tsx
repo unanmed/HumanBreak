@@ -13,6 +13,7 @@ import {
 import { SetupComponentOptions } from './types';
 import {
     Container,
+    DefaultProps,
     ElementLocator,
     RenderItem,
     Sprite,
@@ -38,7 +39,7 @@ export interface ScrollExpose {
     scrollTo(y: number, time?: number): void;
 }
 
-export interface ScrollProps {
+export interface ScrollProps extends DefaultProps {
     loc: ElementLocator;
     hor?: boolean;
     noscroll?: boolean;
