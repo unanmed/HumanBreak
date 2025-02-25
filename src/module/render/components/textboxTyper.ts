@@ -877,7 +877,8 @@ export class TextContentParser {
 
     private getHeight(metrics: TextMetrics) {
         return (
-            metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
+            Math.abs(metrics.actualBoundingBoxAscent) +
+            Math.abs(metrics.actualBoundingBoxDescent)
         );
     }
 
@@ -966,6 +967,9 @@ export class TextContentParser {
             if (metrics.width > width) {
                 end = mid;
             } else if (metrics.width === width) {
+                if (height > this.lineHeight) {
+                    this.lineHeight = height;
+                }
                 return mid;
             } else {
                 start = mid;

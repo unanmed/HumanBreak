@@ -113,7 +113,11 @@ export class Text extends RenderItem<ETextEvent> {
             this.measure();
         this.length = width;
         this.descent = actualBoundingBoxAscent;
-        this.size(width, actualBoundingBoxAscent + actualBoundingBoxDescent);
+        this.size(
+            width,
+            Math.abs(actualBoundingBoxAscent) +
+                Math.abs(actualBoundingBoxDescent)
+        );
     }
 
     protected handleProps(
