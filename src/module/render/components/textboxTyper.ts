@@ -422,6 +422,7 @@ export class TextContentTyper extends EventEmitter<TextContentTyperEvent> {
      * 开始打字
      */
     type() {
+        if (this.typing) return;
         if (this.config.interval === 0) {
             this.emit('typeStart');
             this.typeChars(Infinity);
@@ -438,6 +439,7 @@ export class TextContentTyper extends EventEmitter<TextContentTyperEvent> {
      * 立即显示所有文字
      */
     typeAll() {
+        if (!this.typing) return;
         this.typeChars(Infinity);
         this.render?.(this.renderData, false);
     }

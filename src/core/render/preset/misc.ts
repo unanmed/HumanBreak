@@ -30,7 +30,10 @@ export class Text extends RenderItem<ETextEvent> {
         super(type, false);
 
         this.text = text;
-        if (text.length > 0) this.calBox();
+        if (text.length > 0) {
+            this.calBox();
+            this.emit('setText', text);
+        }
     }
 
     protected render(
@@ -70,7 +73,7 @@ export class Text extends RenderItem<ETextEvent> {
     setText(text: string) {
         this.text = text;
         this.calBox();
-        if (this.parent) this.update(this);
+        this.update(this);
         this.emit('setText', text);
     }
 
@@ -81,7 +84,7 @@ export class Text extends RenderItem<ETextEvent> {
     setFont(font: string) {
         this.font = font;
         this.calBox();
-        if (this.parent) this.update(this);
+        this.update(this);
     }
 
     /**
@@ -410,8 +413,7 @@ export class Winskin extends RenderItem<EWinskinEvent> {
             Winskin.patternMap.set(this.imageName, winskinPattern);
         }
         this.patternCache = winskinPattern;
-        pattern.delete();
-        this.canvases.delete(pattern);
+        this.deleteCanvas(pattern);
         return winskinPattern;
     }
 

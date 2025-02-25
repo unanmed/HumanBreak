@@ -437,6 +437,15 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         return canvas;
     }
 
+    /**
+     * 删除由 `requireCanvas` 申请的画布，当画布不再使用时，可以用该方法删除画布
+     * @param canvas 要删除的画布
+     */
+    protected deleteCanvas(canvas: MotaOffscreenCanvas2D) {
+        if (!this.canvases.delete(canvas)) return;
+        canvas.delete();
+    }
+
     //#region 修改元素属性
 
     /**
@@ -457,8 +466,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      * @param y 纵坐标
      */
     pos(x: number, y: number) {
+        // 这个函数会调用 update，因此不再手动调用 update
         this._transform.setTranslate(x, y);
-        this.update();
     }
 
     /**
@@ -588,10 +597,15 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     }
 
     update(item: RenderItem<any> = this): void {
-        if (this.cacheDirty) return;
-        this.cacheDirty = true;
-        if (this.hidden) return;
-        this.parent?.update(item);
+        if (this._parent) {
+            if (this.cacheDirty && this._parent.cacheDirty) return;
+            this.cacheDirty = true;
+            if (this.hidden) return;
+            this._parent.update(item);
+        } else {
+            if (this.cacheDirty) return;
+            this.cacheDirty = true;
+        }
     }
 
     updateTransform() {
@@ -649,6 +663,12 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     //#endregion
 
     //#region 父子关系
+
+    setRoot(item: RenderItem & IRenderTreeRoot) {
+        this._root?.disconnect(this);
+        this._root = item;
+        item.connect(item);
+    }
 
     checkRoot(): RenderItem | null {
         if (this._root) return this._root;

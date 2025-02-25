@@ -1553,7 +1553,7 @@ events.prototype.__action_doAsyncFunc = function (isAsync, func) {
 
 events.prototype._action_text = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
-    const Store = Mota.require('module', 'Render').TextboxStore;
+    const Store = Mota.require('module', 'MainUI').TextboxStore;
     const store = Store.get('main-textbox');
     const { text } = data;
     let title = '';
@@ -1594,10 +1594,10 @@ events.prototype._action_text = function (data, x, y, prefix) {
         }
     }
 
-    const showTitle =
-        text.slice(0, titleStartIndex) + text.slice(titleEndIndex);
+    const showText = text.slice(0, titleStartIndex) + text.slice(titleEndIndex);
     store.show();
-    store.modify({ text: showTitle, title });
+    store.modify({ title });
+    store.setText(showText);
 
     // data.text = core.replaceText(data.text, prefix);
     // var ctx = data.code ? '__text__' + data.code : null;

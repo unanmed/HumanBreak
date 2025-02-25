@@ -1117,7 +1117,7 @@ actions.prototype._clickAction_text = function () {
     // 正在淡入淡出的话不执行
     if (core.status.event.animateUI) return;
 
-    const Store = Mota.require('module', 'Render').TextboxStore;
+    const Store = Mota.require('module', 'MainUI').TextboxStore;
     const store = Store.get('main-textbox');
 
     // var data = core.clone(core.status.event.data.current);

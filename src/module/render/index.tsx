@@ -4,6 +4,7 @@ import { defineComponent } from 'vue';
 import { UIController } from '@/core/system';
 import { mainSceneUI } from './ui/main';
 import { MAIN_HEIGHT, MAIN_WIDTH } from './shared';
+import { TextboxStore } from './components';
 
 export function create() {
     const main = new MotaRenderer();
@@ -33,6 +34,10 @@ export function create() {
 
     console.log(main);
 }
+
+Mota.register('module', 'MainUI', {
+    TextboxStore
+});
 
 export * from './components';
 export * from './ui';

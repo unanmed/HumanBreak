@@ -13,7 +13,7 @@ function checkSupport() {
         sleep(3000).then(() => {
             tip(
                 'warning',
-                `您的浏览器不支持WebGL，大部分特效将会无法显示，建议使用新版浏览器`
+                `您的浏览器不支持WebGL，大部分效果将会无法显示，请更新你的浏览器`
             );
         });
     }
@@ -21,7 +21,7 @@ function checkSupport() {
         sleep(3000).then(() => {
             tip(
                 'warning',
-                `您的浏览器不支持WebGL2，一部分特效将会无法显示，建议使用新版浏览器`
+                `您的浏览器不支持WebGL2，大部分效果将会无法显示，请更新你的浏览器`
             );
         });
     }
@@ -54,10 +54,10 @@ type UniformFunc<
 type UniformBinderValue<N extends UniformBinderNum> = N extends 1
     ? number
     : N extends 2
-    ? [number, number]
-    : N extends 3
-    ? [number, number, number]
-    : [number, number, number, number];
+      ? [number, number]
+      : N extends 3
+        ? [number, number, number]
+        : [number, number, number, number];
 
 interface UniformBinder<
     N extends UniformBinderNum,

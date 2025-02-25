@@ -80,9 +80,9 @@ export class Container<E extends EContainerEvent = EContainerEvent>
     append(parent: RenderItem): void {
         super.append(parent);
         if (this.root) {
+            const root = this.root;
             this.forEachChild(ele => {
-                ele.checkRoot();
-                this.root?.connect(ele);
+                ele.setRoot(root);
             });
         }
     }
@@ -104,6 +104,7 @@ export class Container<E extends EContainerEvent = EContainerEvent>
         this.sortedChildren = [...this.children].sort(
             (a, b) => a.zIndex - b.zIndex
         );
+        this.update();
     }
 
     protected propagateEvent<T extends ActionType>(
