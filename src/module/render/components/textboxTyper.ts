@@ -135,7 +135,16 @@ export interface TyperIconRenderable {
     renderable: RenderableData | AutotileRenderable;
 }
 
-export type TyperRenderable = TyperTextRenderable | TyperIconRenderable;
+export interface TyperWaitRenderable {
+    type: TextContentType.Wait;
+    wait: number;
+    waited: number;
+}
+
+export type TyperRenderable =
+    | TyperTextRenderable
+    | TyperIconRenderable
+    | TyperWaitRenderable;
 
 interface TextContentTyperEvent {
     typeStart: [];
@@ -271,49 +280,64 @@ export class TextContentTyper extends EventEmitter<TextContentTyperEvent> {
     private createTyperData(index: number, line: number) {
         const renderable = this.renderObject.data[index];
         if (!renderable) return false;
-        if (renderable.type === TextContentType.Text) {
-            if (line < 0 || line > renderable.splitLines.length) {
-                return false;
+        switch (renderable.type) {
+            case TextContentType.Text: {
+                if (line < 0 || line > renderable.splitLines.length) {
+                    return false;
+                }
+                const start = renderable.splitLines[line - 1] ?? -1;
+                const end =
+                    renderable.splitLines[line] ?? renderable.text.length - 1;
+
+                const data: TyperTextRenderable = {
+                    type: TextContentType.Text,
+                    x: this.x,
+                    y: this.y,
+                    text: renderable.text.slice(start + 1, end + 1),
+                    font: renderable.font,
+                    fillStyle: renderable.fillStyle,
+                    strokeStyle: this.config.strokeStyle,
+                    pointer: 0
+                };
+                this.processingData = data;
+                this.renderData.push(data);
+                return true;
             }
-            const start = renderable.splitLines[line - 1] ?? 0;
-            const end = renderable.splitLines[line] ?? renderable.text.length;
-            const data: TyperTextRenderable = {
-                type: TextContentType.Text,
-                x: this.x,
-                y: this.y,
-                text: renderable.text.slice(start, end),
-                font: renderable.font,
-                fillStyle: renderable.fillStyle,
-                strokeStyle: this.config.strokeStyle,
-                pointer: 0
-            };
-            this.processingData = data;
-            this.renderData.push(data);
-            return true;
-        } else {
-            const tex = texture.getRenderable(renderable.icon!);
-            if (!tex) return false;
-            const { render } = tex;
-            const [, , width, height] = render[0];
-            const aspect = width / height;
-            let iconWidth = 0;
-            if (aspect < 1) {
-                // 这时候应该把高度限定在当前字体大小
-                iconWidth = width * (renderable.fontSize / height);
-            } else {
-                iconWidth = renderable.fontSize;
+            case TextContentType.Icon: {
+                const tex = texture.getRenderable(renderable.icon!);
+                if (!tex) return false;
+                const { render } = tex;
+                const [, , width, height] = render[0];
+                const aspect = width / height;
+                let iconWidth = 0;
+                if (aspect < 1) {
+                    // 这时候应该把高度限定在当前字体大小
+                    iconWidth = width * (renderable.fontSize / height);
+                } else {
+                    iconWidth = renderable.fontSize;
+                }
+                const data: TyperIconRenderable = {
+                    type: TextContentType.Icon,
+                    x: this.x,
+                    y: this.y,
+                    width: iconWidth,
+                    height: iconWidth / aspect,
+                    renderable: tex
+                };
+                this.processingData = data;
+                this.renderData.push(data);
+                return true;
             }
-            const data: TyperIconRenderable = {
-                type: TextContentType.Icon,
-                x: this.x,
-                y: this.y,
-                width: iconWidth,
-                height: iconWidth / aspect,
-                renderable: tex
-            };
-            this.processingData = data;
-            this.renderData.push(data);
-            return true;
+            case TextContentType.Wait: {
+                const data: TyperWaitRenderable = {
+                    type: TextContentType.Wait,
+                    wait: renderable.wait!,
+                    waited: 0
+                };
+                this.processingData = data;
+                this.renderData.push(data);
+                return true;
+            }
         }
     }
 
@@ -339,62 +363,64 @@ export class TextContentTyper extends EventEmitter<TextContentTyperEvent> {
                 return true;
             }
             const lineHeight = this.renderObject.lineHeights[this.nowLine];
-            if (now.type === TextContentType.Text) {
-                const restChars = now.text.length - now.pointer;
-                if (restChars <= rest) {
-                    // 当前这段 renderable 打字完成后，刚好结束或还有内容
-                    rest -= restChars;
-                    now.pointer = now.text.length;
-                    if (this.dataLine === renderable.splitLines.length) {
-                        // 如果是最后一行
-                        if (isNil(renderable.lastLineWidth)) {
-                            const ctx = this.parser.testCanvas.ctx;
-                            ctx.font = now.font;
-                            const metrics = ctx.measureText(now.text);
-                            renderable.lastLineWidth = metrics.width;
+            switch (now.type) {
+                case TextContentType.Text: {
+                    const restChars = now.text.length - now.pointer;
+                    if (restChars <= rest) {
+                        // 当前这段 renderable 打字完成后，刚好结束或还有内容
+                        rest -= restChars;
+                        now.pointer = now.text.length;
+                        if (this.dataLine === renderable.splitLines.length) {
+                            // 如果是最后一行
+                            if (isNil(renderable.lastLineWidth)) {
+                                const ctx = this.parser.testCanvas.ctx;
+                                ctx.font = now.font;
+                                const metrics = ctx.measureText(now.text);
+                                renderable.lastLineWidth = metrics.width;
+                            }
+                            this.x += renderable.lastLineWidth;
+                            this.dataLine = 0;
+                            this.pointer++;
+                        } else {
+                            // 不是最后一行，那么换行
+                            this.x = 0;
+                            this.y += lineHeight + this.config.lineHeight;
+                            this.dataLine++;
+                            this.nowLine++;
                         }
-                        this.x += renderable.lastLineWidth;
-                        this.dataLine = 0;
-                        this.pointer++;
-                        const success = this.createTyperData(
-                            this.pointer,
-                            this.dataLine
-                        );
-                        if (!success) return true;
                     } else {
-                        // 不是最后一行，那么换行
+                        now.pointer += rest;
+                        return false;
+                    }
+                    break;
+                }
+                case TextContentType.Icon: {
+                    rest--;
+                    this.pointer++;
+                    if (renderable.splitLines[0] === 0) {
+                        // 如果图标换行
                         this.x = 0;
                         this.y += lineHeight + this.config.lineHeight;
-                        this.dataLine++;
                         this.nowLine++;
-                        const success = this.createTyperData(
-                            this.pointer,
-                            this.dataLine
-                        );
-                        if (!success) return true;
+                        this.dataLine = 0;
+                        now.x = 0;
+                        now.y = this.y;
+                    } else {
+                        this.x += now.width;
                     }
-                } else {
-                    now.pointer += rest;
-                    return false;
+                    break;
                 }
-            } else {
-                rest--;
-                this.pointer++;
-                if (renderable.splitLines[0] === 0) {
-                    // 如果图标换行
-                    this.x = 0;
-                    this.y += lineHeight + this.config.lineHeight;
-                    this.nowLine++;
-                    this.dataLine = 0;
-                    now.x = 0;
-                    now.y = this.y;
+                case TextContentType.Wait: {
+                    now.waited += num;
+                    if (now.waited > now.wait) {
+                        // 等待结束
+                        this.pointer++;
+                    }
+                    break;
                 }
-                const success = this.createTyperData(
-                    this.pointer,
-                    this.dataLine
-                );
-                if (!success) return true;
             }
+            const success = this.createTyperData(this.pointer, this.dataLine);
+            if (!success) return true;
         }
         return false;
     }
@@ -563,7 +589,7 @@ export class TextContentParser {
         const end = this.indexParam(start);
         if (end === -1) {
             // 标签结束
-            return ['', start];
+            return ['', start - 1];
         } else {
             // 标签开始
             return [this.text.slice(start + 1, end), end];
@@ -634,43 +660,43 @@ export class TextContentParser {
     }
 
     private parseFillStyle(pointer: number) {
-        const [param, end] = this.getChildableTagParam(pointer + 1);
+        const [param, end] = this.getChildableTagParam(pointer + 2);
         if (!param) {
             // 参数为空或没有参数，视为标签结束
             const color = this.fillStyleStack.pop();
             if (!color) {
                 logger.warn(54, '\\r', pointer.toString());
-                return pointer;
+                return end;
             }
-            this.addTextRenderable();
+            if (this.resolved.length > 0) this.addTextRenderable();
             this.status.fillStyle = color;
-            return pointer;
+            return end;
         } else {
             // 标签开始
             this.fillStyleStack.push(this.status.fillStyle);
-            this.addTextRenderable();
+            if (this.resolved.length > 0) this.addTextRenderable();
             this.status.fillStyle = param;
             return end;
         }
     }
 
     private parseFontSize(pointer: number) {
-        const [param, end] = this.getChildableTagParam(pointer + 1);
+        const [param, end] = this.getChildableTagParam(pointer + 2);
         if (!param) {
             // 参数为空或没有参数，视为标签结束
             const size = this.fontSizeStack.pop();
             if (!size) {
                 logger.warn(54, '\\c', pointer.toString());
-                return pointer;
+                return end;
             }
-            this.addTextRenderable();
+            if (this.resolved.length > 0) this.addTextRenderable();
             this.status.fontSize = size;
             this.font = this.buildFont();
-            return pointer;
+            return end;
         } else {
             // 标签开始
             this.fontSizeStack.push(this.status.fontSize);
-            this.addTextRenderable();
+            if (this.resolved.length > 0) this.addTextRenderable();
             this.status.fontSize = parseFloat(param);
             this.font = this.buildFont();
             return end;
@@ -678,22 +704,22 @@ export class TextContentParser {
     }
 
     private parseFontFamily(pointer: number) {
-        const [param, end] = this.getChildableTagParam(pointer + 1);
+        const [param, end] = this.getChildableTagParam(pointer + 2);
         if (!param) {
             // 参数为空或没有参数，视为标签结束
             const font = this.fontFamilyStack.pop();
             if (!font) {
                 logger.warn(54, '\\g', pointer.toString());
-                return pointer;
+                return end;
             }
-            this.addTextRenderable();
+            if (this.resolved.length > 0) this.addTextRenderable();
             this.status.fontFamily = font;
             this.font = this.buildFont();
-            return pointer;
+            return end;
         } else {
             // 标签开始
             this.fontFamilyStack.push(this.status.fontFamily);
-            this.addTextRenderable();
+            if (this.resolved.length > 0) this.addTextRenderable();
             this.status.fontFamily = param;
             this.font = this.buildFont();
             return end;
@@ -701,20 +727,20 @@ export class TextContentParser {
     }
 
     private parseFontWeight() {
-        this.addTextRenderable();
+        if (this.resolved.length > 0) this.addTextRenderable();
         this.status.fontWeight = this.status.fontWeight > 500 ? 500 : 700;
         this.font = this.buildFont();
     }
 
     private parseFontItalic() {
-        this.addTextRenderable();
+        if (this.resolved.length > 0) this.addTextRenderable();
         this.status.fontItalic = !this.status.fontItalic;
         this.font = this.buildFont();
     }
 
     private parseWait(pointer: number) {
-        this.addTextRenderable();
-        const [param, end] = this.getTagParam(pointer);
+        if (this.resolved.length > 0) this.addTextRenderable();
+        const [param, end] = this.getTagParam(pointer + 2);
         if (!param) {
             logger.warn(55, '\\z');
             return pointer;
@@ -725,10 +751,10 @@ export class TextContentParser {
     }
 
     private parseIcon(pointer: number) {
-        this.addTextRenderable();
-        const [param, end] = this.getTagParam(pointer);
+        if (this.resolved.length > 0) this.addTextRenderable();
+        const [param, end] = this.getTagParam(pointer + 2);
         if (!param) {
-            logger.warn(55, '\\z');
+            logger.warn(55, '\\i');
             return pointer;
         }
         if (/^\d+$/.test(param)) {
@@ -741,6 +767,10 @@ export class TextContentParser {
                 this.addIconRenderable(num as AllNumbers);
             } else {
                 const num = texture.idNumberMap[param as AllIds];
+                if (num === void 0) {
+                    logger.warn(59, param);
+                    return end;
+                }
                 this.addIconRenderable(num);
             }
         }
@@ -844,9 +874,11 @@ export class TextContentParser {
                         break;
                     case 'd':
                         this.parseFontWeight();
+                        pointer++;
                         break;
                     case 'e':
                         this.parseFontItalic();
+                        pointer++;
                         break;
                     case 'z':
                         pointer = this.parseWait(pointer);
@@ -863,7 +895,7 @@ export class TextContentParser {
                 // 表达式
                 pointer++;
                 inExpression = true;
-                expStart = pointer;
+                expStart = pointer + 1;
                 continue;
             }
 
@@ -902,10 +934,14 @@ export class TextContentParser {
         // 如果大于猜测，那么算长度
         const data = this.renderable[this.nowRenderable];
         const ctx = this.testCanvas.ctx;
-        ctx.font = this.font;
+        ctx.font = data.font;
         const metrics = ctx.measureText(
             data.text.slice(this.lineStart, pointer + 1)
         );
+        const height = this.getHeight(metrics);
+        if (height > this.lineHeight) {
+            this.lineHeight = height;
+        }
         if (metrics.width < rest) {
             // 实际宽度小于剩余宽度时，将猜测增益乘以剩余总宽度与当前宽度的比值的若干倍
             this.guessGain *= (rest / metrics.width) * (1.1 + 1 / length);
@@ -950,7 +986,7 @@ export class TextContentParser {
         const data = this.renderable[index];
         const { wordBreak } = data;
         const ctx = this.testCanvas.ctx;
-        ctx.font = this.font;
+        ctx.font = data.font;
         while (true) {
             const mid = Math.floor((start + end) / 2);
             if (mid === start) {
@@ -961,9 +997,10 @@ export class TextContentParser {
             }
             const text = data.text.slice(
                 wordBreak[this.bsStart],
-                wordBreak[mid]
+                wordBreak[mid] + 1
             );
             const metrics = ctx.measureText(text);
+            height = this.getHeight(metrics);
             if (metrics.width > width) {
                 end = mid;
             } else if (metrics.width === width) {
@@ -974,21 +1011,19 @@ export class TextContentParser {
             } else {
                 start = mid;
             }
-            height = this.getHeight(metrics);
         }
     }
 
     /**
      * 检查剩余字符能否分行
      */
-    private checkRestLine(width: number, guess: number) {
+    private checkRestLine(width: number, guess: number, pointer: number) {
         if (this.wordBreak.length === 0) return true;
-        const last = this.nowRenderable - 1;
-        if (last === -1) {
-            const now = this.renderable[this.nowRenderable];
-            return this.checkLineWidth(width, guess, now.text.length);
+        if (pointer === -1) {
+            return this.checkLineWidth(width, guess, 0);
         }
-        const data = this.renderable[last];
+        const isLast = this.renderable.length - 1 === pointer;
+        const data = this.renderable[pointer];
         const rest = width - this.lineWidth;
         if (data.type === TextContentType.Text) {
             const wordBreak = data.wordBreak;
@@ -996,7 +1031,7 @@ export class TextContentParser {
             const lastIndex = isNil(lastLine) ? 0 : lastLine;
             const restText = data.text.slice(lastIndex);
             const ctx = this.testCanvas.ctx;
-            ctx.font = this.font;
+            ctx.font = data.font;
             const metrics = ctx.measureText(restText);
             // 如果剩余内容不能构成完整的行
             if (metrics.width < rest) {
@@ -1014,12 +1049,12 @@ export class TextContentParser {
                 this.bsEnd = lastBreak;
                 let maxWidth = rest;
                 while (true) {
-                    const index = this.bsLineWidth(maxWidth, last);
+                    const index = this.bsLineWidth(maxWidth, pointer);
                     data.splitLines.push(this.wordBreak[index]);
                     this.lineHeights.push(this.lineHeight);
                     this.bsStart = index;
                     const text = data.text.slice(this.wordBreak[index]);
-                    if (text.length < guess / 4) {
+                    if (!isLast && text.length < guess / 4) {
                         // 如果剩余文字很少，几乎不可能会单独成一行时，直接结束循环
                         this.lastBreakIndex = index;
                         break;
@@ -1046,9 +1081,15 @@ export class TextContentParser {
             } else {
                 iconWidth = this.status.fontSize;
             }
+            this.lineWidth += iconWidth;
+            const iconHeight = iconWidth / aspect;
+            if (iconHeight > this.lineHeight) {
+                this.lineHeight = iconHeight;
+            }
             if (iconWidth > rest) {
                 data.splitLines.push(0);
                 this.lineHeights.push(this.lineHeight);
+                this.lineWidth = 0;
                 return true;
             } else {
                 return false;
@@ -1076,8 +1117,6 @@ export class TextContentParser {
 
         const allBreak = this.wordBreakRule === WordBreak.All;
 
-        // debugger;
-
         for (let i = 0; i < this.renderable.length; i++) {
             const data = this.renderable[i];
             const { wordBreak, fontSize } = data;
@@ -1086,7 +1125,7 @@ export class TextContentParser {
             this.wordBreak = wordBreak;
 
             if (data.type === TextContentType.Icon) {
-                this.checkRestLine(width, guess);
+                this.checkRestLine(width, guess, i - 1);
                 continue;
             } else if (data.type === TextContentType.Wait) {
                 continue;
@@ -1128,7 +1167,7 @@ export class TextContentParser {
                 }
             }
 
-            this.checkRestLine(width, guess);
+            this.checkRestLine(width, guess, i);
         }
 
         return {

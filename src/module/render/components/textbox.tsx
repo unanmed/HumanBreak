@@ -131,24 +131,30 @@ export const TextContent = defineComponent<
         const ctx = canvas.ctx;
         ctx.textBaseline = 'top';
         renderable.forEach(v => {
-            if (v.type === TextContentType.Text) {
-                ctx.fillStyle = v.fillStyle;
-                ctx.strokeStyle = v.strokeStyle;
-                ctx.font = v.font;
-                const text = v.text.slice(0, v.pointer);
+            switch (v.type) {
+                case TextContentType.Text: {
+                    if (v.text.length === 0) return;
+                    ctx.fillStyle = v.fillStyle;
+                    ctx.strokeStyle = v.strokeStyle;
+                    ctx.font = v.font;
+                    const text = v.text.slice(0, v.pointer);
 
-                if (props.fill ?? true) {
-                    ctx.fillText(text, v.x, v.y);
+                    if (props.fill ?? true) {
+                        ctx.fillText(text, v.x, v.y);
+                    }
+                    if (props.stroke) {
+                        ctx.strokeText(text, v.x, v.y);
+                    }
+                    break;
                 }
-                if (props.stroke) {
-                    ctx.strokeText(text, v.x, v.y);
+                case TextContentType.Icon: {
+                    const { renderable: r, x: dx, y: dy, width, height } = v;
+                    const render = r.render;
+                    const [x, y, w, h] = render[0];
+                    const icon = r.autotile ? r.image[0] : r.image;
+                    ctx.drawImage(icon, x, y, w, h, dx, dy, width, height);
+                    break;
                 }
-            } else {
-                const r = v.renderable;
-                const render = r.render;
-                const [x, y, w, h] = render[0];
-                const icon = r.autotile ? r.image[0] : r.image;
-                ctx.drawImage(icon, x, y, w, h, v.x, v.y, v.width, v.height);
             }
         });
     };
