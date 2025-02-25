@@ -132,7 +132,7 @@ export class Text extends RenderItem<ETextEvent> {
             case 'font':
                 if (!this.assertType(nextValue, 'string', key)) return false;
                 this.setFont(nextValue);
-                break;
+                return true;
             case 'strokeWidth':
                 this.setStrokeWidth(nextValue);
                 return true;
@@ -338,14 +338,27 @@ export class Icon extends RenderItem<EIconEvent> implements IAnimateFrame {
     }
 }
 
+interface WinskinPatterns {
+    top: CanvasPattern;
+    left: CanvasPattern;
+    bottom: CanvasPattern;
+    right: CanvasPattern;
+}
+
 export interface EWinskinEvent extends ERenderItemEvent {}
 
 export class Winskin extends RenderItem<EWinskinEvent> {
     image: SizedCanvasImageSource;
-    /** 边框宽度 */
+    /** 边框宽度，32表示原始宽度 */
     borderSize: number = 32;
+    /** 图片名称 */
+    imageName?: string;
 
     private pendingImage?: ImageIds;
+    private patternCache?: WinskinPatterns;
+    private patternTransform: DOMMatrix;
+
+    private static patternMap: Map<string, WinskinPatterns> = new Map();
 
     constructor(
         image: SizedCanvasImageSource,
@@ -353,6 +366,64 @@ export class Winskin extends RenderItem<EWinskinEvent> {
     ) {
         super(type, false, false);
         this.image = image;
+        this.setAntiAliasing(false);
+
+        if (window.DOMMatrix) {
+            this.patternTransform = new DOMMatrix();
+        } else if (window.WebKitCSSMatrix) {
+            this.patternTransform = new WebKitCSSMatrix();
+        } else {
+            this.patternTransform = new SVGMatrix();
+        }
+    }
+
+    private generatePattern() {
+        const pattern = this.requireCanvas();
+        const img = this.image;
+        pattern.size(32, 16);
+        pattern.withGameScale(false);
+        pattern.setHD(false);
+        pattern.setAntiAliasing(false);
+        const ctx = pattern.ctx;
+        ctx.drawImage(img, 144, 0, 32, 16, 0, 0, 32, 16);
+        const topPattern = ctx.createPattern(pattern.canvas, 'repeat');
+        ctx.clearRect(0, 0, 32, 16);
+        ctx.drawImage(img, 144, 48, 32, 16, 0, 0, 32, 16);
+        const bottomPattern = ctx.createPattern(pattern.canvas, 'repeat');
+        ctx.clearRect(0, 0, 32, 16);
+        pattern.size(16, 32);
+        ctx.drawImage(img, 128, 16, 16, 32, 0, 0, 16, 32);
+        const leftPattern = ctx.createPattern(pattern.canvas, 'repeat');
+        ctx.clearRect(0, 0, 16, 32);
+        ctx.drawImage(img, 176, 16, 16, 32, 0, 0, 16, 32);
+        const rightPattern = ctx.createPattern(pattern.canvas, 'repeat');
+        if (!topPattern || !bottomPattern || !leftPattern || !rightPattern) {
+            return null;
+        }
+        const winskinPattern: WinskinPatterns = {
+            top: topPattern,
+            bottom: bottomPattern,
+            left: leftPattern,
+            right: rightPattern
+        };
+        if (this.imageName) {
+            Winskin.patternMap.set(this.imageName, winskinPattern);
+        }
+        this.patternCache = winskinPattern;
+        pattern.delete();
+        this.canvases.delete(pattern);
+        return winskinPattern;
+    }
+
+    private getPattern() {
+        if (!this.imageName) {
+            if (this.patternCache) return this.patternCache;
+            return this.generatePattern();
+        } else {
+            const pattern = Winskin.patternMap.get(this.imageName);
+            if (pattern) return pattern;
+            return this.generatePattern();
+        }
     }
 
     protected render(
@@ -361,143 +432,38 @@ export class Winskin extends RenderItem<EWinskinEvent> {
     ): void {
         const ctx = canvas.ctx;
         const img = this.image;
-        const x = 0;
-        const y = 0;
-        const w = canvas.width;
-        const h = canvas.height;
-        const sz = this.borderSize / 32;
-        ctx.drawImage(img, 0, 0, 128, 128, x + 2, y + 2, w - 4, h - 4);
-        ctx.drawImage(img, 128, 0, 16, 16, x, y, 16 * sz, 16 * sz);
-        let dx;
-        for (dx = 0; dx < w - 64 * sz; dx += 32 * sz) {
-            ctx.drawImage(
-                img,
-                144,
-                0,
-                32,
-                16,
-                x + dx + 16,
-                y,
-                32 * sz,
-                16 * sz
-            );
-            ctx.drawImage(
-                img,
-                144,
-                48,
-                32,
-                16,
-                x + dx + 16,
-                y + h - 16 * sz,
-                32 * sz,
-                16 * sz
-            );
-        }
-        ctx.drawImage(
-            img,
-            144,
-            0,
-            w - dx - 32,
-            16,
-            x + dx + 16 * sz,
-            y,
-            w - dx - 32 * sz,
-            16 * sz
-        );
-        ctx.drawImage(
-            img,
-            144,
-            48,
-            w - dx - 32,
-            16,
-            x + dx + 16 * sz,
-            y + h - 16 * sz,
-            w - dx - 32 * sz,
-            16 * sz
-        );
-        ctx.drawImage(
-            img,
-            176,
-            0,
-            16,
-            16,
-            x + w - 16 * sz,
-            y,
-            16 * sz,
-            16 * sz
-        );
-        // 左右
-        let dy;
-        for (dy = 0; dy < h - 64 * sz; dy += 32 * sz) {
-            ctx.drawImage(
-                img,
-                128,
-                16,
-                16,
-                32,
-                x,
-                y + dy + 16 * sz,
-                16 * sz,
-                32 * sz
-            );
-            ctx.drawImage(
-                img,
-                176,
-                16,
-                16,
-                32,
-                x + w - 16 * sz,
-                y + dy + 16 * sz,
-                16 * sz,
-                32 * sz
-            );
-        }
-        ctx.drawImage(
-            img,
-            128,
-            16,
-            16,
-            h - dy - 32,
-            x,
-            y + dy + 16 * sz,
-            16 * sz,
-            h - dy - 32 * sz
-        );
-        ctx.drawImage(
-            img,
-            176,
-            16,
-            16,
-            h - dy - 32,
-            x + w - 16 * sz,
-            y + dy + 16 * sz,
-            16 * sz,
-            h - dy - 32 * sz
-        );
-        // 下方
-        ctx.drawImage(
-            img,
-            128,
-            48,
-            16,
-            16,
-            x,
-            y + h - 16 * sz,
-            16 * sz,
-            16 * sz
-        );
-        ctx.drawImage(
-            img,
-            176,
-            48,
-            16,
-            16,
-            x + w - 16 * sz,
-            y + h - 16 * sz,
-            16 * sz,
-            16 * sz
-        );
-        this.update();
+        const w = this.width;
+        const h = this.height;
+        const pad = this.borderSize / 2;
+        // 背景
+        ctx.drawImage(img, 0, 0, 128, 128, 2, 2, w - 4, h - 4);
+        const pattern = this.getPattern();
+        if (!pattern) return;
+        const { top, left, right, bottom } = pattern;
+        top.setTransform(this.patternTransform);
+        left.setTransform(this.patternTransform);
+        right.setTransform(this.patternTransform);
+        bottom.setTransform(this.patternTransform);
+        // 上下左右边框
+        ctx.save();
+        ctx.fillStyle = top;
+        ctx.translate(pad, 0);
+        ctx.fillRect(0, 0, w - pad * 2, pad);
+        ctx.fillStyle = bottom;
+        ctx.translate(0, h - pad);
+        ctx.fillRect(0, 0, w - pad * 2, pad);
+        ctx.fillStyle = left;
+        ctx.translate(-pad, pad * 2 - h);
+        ctx.fillRect(0, 0, pad, h - pad * 2);
+        ctx.fillStyle = right;
+        ctx.translate(w - pad, 0);
+        ctx.fillRect(0, 0, pad, h - pad * 2);
+        ctx.restore();
+        // 四个角的边框
+        ctx.drawImage(img, 128, 0, 16, 16, 0, 0, pad, pad);
+        ctx.drawImage(img, 176, 0, 16, 16, w - pad, 0, pad, pad);
+        ctx.drawImage(img, 128, 48, 16, 16, 0, h - pad, pad, pad);
+        ctx.drawImage(img, 176, 48, 16, 16, w - pad, h - pad, pad, pad);
     }
 
     /**
@@ -506,6 +472,7 @@ export class Winskin extends RenderItem<EWinskinEvent> {
      */
     setImage(image: SizedCanvasImageSource) {
         this.image = image;
+        this.patternCache = void 0;
         this.update();
     }
 
@@ -530,6 +497,7 @@ export class Winskin extends RenderItem<EWinskinEvent> {
             }
             this.pendingImage = name;
         }
+        this.imageName = name;
     }
 
     /**
@@ -538,6 +506,8 @@ export class Winskin extends RenderItem<EWinskinEvent> {
      */
     setBorderSize(size: number) {
         this.borderSize = size;
+        this.patternTransform.a = size / 32;
+        this.patternTransform.d = size / 32;
         this.update();
     }
 
