@@ -313,7 +313,7 @@ export abstract class GraphicItemBase
                 this.checkMode(GraphicModeProp.Stroke, nextValue);
                 return true;
             case 'strokeAndFill':
-                if (!this.assertType(nextValue, 'number', key)) return false;
+                if (!this.assertType(nextValue, 'boolean', key)) return false;
                 this.checkMode(GraphicModeProp.StrokeAndFill, nextValue);
                 return true;
             case 'fillRule':
