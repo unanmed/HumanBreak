@@ -70,7 +70,7 @@ export function onLoaded(hook: () => void) {
 export interface ITransitionedController<T> {
     readonly ref: Ref<T>;
     readonly value: T;
-    set(value: T): void;
+    set(value: T, time?: number): void;
 }
 
 class RenderTransition implements ITransitionedController<number> {
@@ -100,11 +100,8 @@ class RenderTransition implements ITransitionedController<number> {
         });
     }
 
-    set(value: number): void {
-        this.transition
-            .time(this.time)
-            .mode(this.curve)
-            .transition(this.key, value);
+    set(value: number, time: number = this.time): void {
+        this.transition.time(time).mode(this.curve).transition(this.key, value);
     }
 }
 
@@ -144,14 +141,14 @@ class RenderColorTransition implements ITransitionedController<string> {
         });
     }
 
-    set(value: string): void {
-        this.transitionColor(this.decodeColor(value));
+    set(value: string, time: number = this.time): void {
+        this.transitionColor(this.decodeColor(value), time);
     }
 
-    private transitionColor([r, g, b, a]: ColorRGBA) {
+    private transitionColor([r, g, b, a]: ColorRGBA, time: number) {
         this.transition
             .mode(this.curve)
-            .time(this.time)
+            .time(time)
             .transition(this.keyR, r)
             .transition(this.keyG, g)
             .transition(this.keyB, b)

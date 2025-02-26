@@ -34,6 +34,7 @@ import {
 } from './statusBar';
 import { onLoaded } from '../use';
 import { ReplayingStatus } from './toolbar';
+import { Tip } from '../components/tip';
 
 const MainScene = defineComponent(() => {
     const layerGroupExtends: ILayerGroupRenderExtends[] = [
@@ -187,6 +188,13 @@ const MainScene = defineComponent(() => {
                 </layer-group>
                 <Textbox id="main-textbox" {...mainTextboxProps}></Textbox>
                 <FloorChange id="floor-change" zIndex={50}></FloorChange>
+                <Tip
+                    id="main-tip"
+                    zIndex={80}
+                    loc={[8, 8, 200, 32]}
+                    pad={[12, 6]}
+                    corner={16}
+                />
             </container>
             <g-line line={[180 + 480, 0, 180 + 480, 480]} lineWidth={1} />
             {loaded.value && (

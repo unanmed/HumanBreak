@@ -10,7 +10,7 @@ import { IAnimateFrame, renderEmits } from '../frame';
 type CanvasStyle = string | CanvasGradient | CanvasPattern;
 
 export interface ETextEvent extends ERenderItemEvent {
-    setText: [text: string];
+    setText: [text: string, width: number, height: number];
 }
 
 export class Text extends RenderItem<ETextEvent> {
@@ -32,7 +32,7 @@ export class Text extends RenderItem<ETextEvent> {
         this.text = text;
         if (text.length > 0) {
             this.calBox();
-            this.emit('setText', text);
+            this.emit('setText', text, this.width, this.height);
         }
     }
 
@@ -74,7 +74,7 @@ export class Text extends RenderItem<ETextEvent> {
         this.text = text;
         this.calBox();
         this.update(this);
-        this.emit('setText', text);
+        this.emit('setText', text, this.width, this.height);
     }
 
     /**
@@ -113,11 +113,7 @@ export class Text extends RenderItem<ETextEvent> {
             this.measure();
         this.length = width;
         this.descent = actualBoundingBoxAscent;
-        this.size(
-            width,
-            Math.abs(actualBoundingBoxAscent) +
-                Math.abs(actualBoundingBoxDescent)
-        );
+        this.size(width, actualBoundingBoxAscent + actualBoundingBoxDescent);
     }
 
     protected handleProps(
@@ -277,6 +273,10 @@ export class Icon extends RenderItem<EIconEvent> implements IAnimateFrame {
      * @param id 图标id
      */
     setIcon(id: AllIds | AllNumbers) {
+        if (id === 0) {
+            this.renderable = void 0;
+            return;
+        }
         const num = typeof id === 'number' ? id : texture.idNumberMap[id];
 
         const loading = Mota.require('var', 'loading');

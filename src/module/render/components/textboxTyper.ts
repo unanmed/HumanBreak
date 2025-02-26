@@ -909,8 +909,7 @@ export class TextContentParser {
 
     private getHeight(metrics: TextMetrics) {
         return (
-            Math.abs(metrics.actualBoundingBoxAscent) +
-            Math.abs(metrics.actualBoundingBoxDescent)
+            metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
         );
     }
 

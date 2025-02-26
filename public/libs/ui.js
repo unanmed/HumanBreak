@@ -944,60 +944,11 @@ ui.prototype.clearUI = function () {
 
 ////// 左上角绘制一段提示 //////
 ui.prototype.drawTip = function (text, id, frame) {
-    text = core.replaceText(text) || '';
-    var realText = this._getRealContent(text);
-    var one = {
-        text: text,
-        textX: 21,
-        width: 26 + core.calWidth('data', realText, '16px Arial'),
-        opacity: 0.1,
-        stage: 1,
-        frame: frame || 0,
-        time: 0
-    };
-    if (id != null) {
-        var info = core.getBlockInfo(id);
-        if (info == null || !info.image || info.bigImage) {
-            // 检查状态栏图标
-            if (core.statusBar.icons[id] instanceof Image) {
-                info = {
-                    image: core.statusBar.icons[id],
-                    posX: 0,
-                    posY: 0,
-                    height: 32
-                };
-            } else info = null;
-        }
-        if (info != null) {
-            one.image = info.image;
-            one.posX = info.posX;
-            one.posY = info.posY;
-            one.height = info.height;
-            one.textX += 24;
-            one.width += 24;
-        }
-    }
-    core.animateFrame.tip = one;
+    // Deprecated. Fallback in modules/fallback/ui.ts
 };
 
 ui.prototype._drawTip_drawOne = function (tip) {
-    core.setAlpha('data', tip.opacity);
-    core.fillRect('data', 5, 5, tip.width, 42, '#000000');
-    if (tip.image)
-        core.drawImage(
-            'data',
-            tip.image,
-            (tip.posX + tip.frame) * 32,
-            tip.posY * tip.height,
-            32,
-            32,
-            10,
-            10,
-            32,
-            32
-        );
-    core.fillText('data', tip.text, tip.textX, 33, '#FFF', '16px normal');
-    core.setAlpha('data', 1);
+    // Deprecated. Fallback in modules/fallback/ui.ts
 };
 
 ////// 地图中间绘制一段文字 //////
@@ -1137,8 +1088,8 @@ ui.prototype._getPosition = function (content) {
                         py == null
                             ? 'center'
                             : py > core._HALF_HEIGHT_
-                            ? 'up'
-                            : 'down';
+                              ? 'up'
+                              : 'down';
                 }
                 return '';
             }
@@ -2274,7 +2225,8 @@ ui.prototype._drawTextBox_getHorizontalPosition = function (
         paddingRight = 12;
     if ((posInfo.px != null && posInfo.py != null) || posInfo.pos)
         paddingLeft = 20;
-    if (titleInfo.icon != null) paddingLeft = 62; // 15 + 32 + 15
+    if (titleInfo.icon != null)
+        paddingLeft = 62; // 15 + 32 + 15
     else if (titleInfo.image) paddingLeft = 90; // 10 + 70 + 10
     var left = 7 + 3 * (core._HALF_WIDTH_ - 6),
         right = core._PX_ - left,
@@ -3044,8 +2996,8 @@ ui.prototype._drawSwitchs_display = function () {
             (core.flags.extraDamageType == 2
                 ? '[最简]'
                 : core.flags.extraDamageType == 1
-                ? '[半透明]'
-                : '[完整]'),
+                  ? '[半透明]'
+                  : '[完整]'),
         '自动放缩： ' + (core.getLocalStorage('autoScale') ? '[ON]' : '[OFF]'),
         '返回上一级'
     ];
@@ -3710,8 +3662,8 @@ ui.prototype._drawSLPanel_drawRecords = function (n) {
         core.status.event.id == 'save'
             ? '存档'
             : core.status.event.id == 'load'
-            ? '读档'
-            : '回放';
+              ? '读档'
+              : '回放';
 
     for (var i = 0; i < (n || 6); i++) {
         var data = core.status.event.ui[i];
