@@ -1,5 +1,5 @@
-import { DefaultProps, ElementLocator, Sprite } from '@/core/render';
-import { defineComponent, ref, watch } from 'vue';
+import { DefaultProps, ElementLocator, PathProps, Sprite } from '@/core/render';
+import { computed, defineComponent, ref, watch } from 'vue';
 import { SetupComponentOptions } from './types';
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 
@@ -53,3 +53,57 @@ export const Progress = defineComponent<ProgressProps>(props => {
         return <sprite ref={element} loc={props.loc} render={render}></sprite>;
     };
 }, progressProps);
+
+export interface ArrowProps extends PathProps {
+    /** 箭头的四个坐标 */
+    arrow: [number, number, number, number];
+    /** 箭头的头部大小 */
+    head?: number;
+    /** 箭头的颜色 */
+    color?: CanvasStyle;
+}
+
+const arrowProps = {
+    props: ['arrow', 'head', 'color']
+} satisfies SetupComponentOptions<ArrowProps>;
+
+export const Arrow = defineComponent<ArrowProps>(props => {
+    const loc = computed<ElementLocator>(() => {
+        const [x1, y1, x2, y2] = props.arrow;
+        const left = Math.min(x1, x2);
+        const right = Math.max(x1, x2);
+        const top = Math.min(y1, y2);
+        const bottom = Math.max(y1, y2);
+        return [left, top, right - left, bottom - top];
+    });
+    const path = computed(() => {
+        const path = new Path2D();
+        const head = props.head ?? 8;
+        const [x = 0, y = 0] = loc.value;
+        const [x1, y1, x2, y2] = props.arrow;
+        path.moveTo(x1 - x, y1 - y);
+        path.lineTo(x2 - x, y2 - y);
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        path.moveTo(
+            x2 - head * Math.cos(angle - Math.PI / 6),
+            y2 - head * Math.sin(angle - Math.PI / 6)
+        );
+        path.lineTo(x2 - x, y2 - y);
+        path.lineTo(
+            x2 - head * Math.cos(angle + Math.PI / 6),
+            y2 - head * Math.sin(angle + Math.PI / 6)
+        );
+        return path;
+    });
+
+    return () => (
+        <g-path
+            loc={loc.value}
+            path={path.value}
+            stroke
+            strokeStyle={props.color}
+            lineCap="round"
+            lineJoin="round"
+        />
+    );
+}, arrowProps);
