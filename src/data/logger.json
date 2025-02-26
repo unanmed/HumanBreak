@@ -92,6 +92,7 @@
         "58": "Fail to set ellipse round rect, since length of 'ellipse' property should only be 2, 4, 6 or 8. delivered: $1",
         "59": "Unknown icon '$1' in parsing text content.",
         "60": "Repeated Tip id: '$1'.",
+        "61": "Unexpected recursive call of $1.update in render function. Please ensure you must do this, if you do, ignore this warn.",
         "1001": "Item-detail extension needs 'floor-binder' and 'floor-damage' extension as dependency.",
         "1101": "Cannot add new effect to point effect instance, for there's no more reserve space for it. Please increase the max count of the instance."
     }

@@ -351,6 +351,13 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
 
     //#endregion
 
+    //#region debug
+
+    /** 是否需要禁用更新，如果出现更新，那么发出警告并停止更新操作 */
+    private forbidUpdate: boolean = false;
+
+    //#endregion
+
     constructor(
         type: RenderItemPosition,
         enableCache: boolean = true,
@@ -392,6 +399,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      */
     renderContent(canvas: MotaOffscreenCanvas2D, transform: Transform) {
         if (this.hidden) return;
+        this.forbidUpdate = true;
         this.emit('beforeRender', transform);
         if (this.transformFallThrough) {
             this.fallTransform = transform;
@@ -425,6 +433,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         }
         ctx.restore();
         this.emit('afterRender', transform);
+        this.forbidUpdate = false;
     }
 
     /**
@@ -601,6 +610,11 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     }
 
     update(item: RenderItem<any> = this): void {
+        if (import.meta.env.DEV) {
+            if (this.forbidUpdate) {
+                logger.warn(61, this.constructor.name);
+            }
+        }
         if (this._parent) {
             if (this.cacheDirty && this._parent.cacheDirty) return;
             this.cacheDirty = true;
