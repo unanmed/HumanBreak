@@ -195,6 +195,8 @@ export interface IRightHeroStatus {
     replaying: boolean;
     /** 录像播放状态 */
     replayStatus: ReplayingStatus;
+    /** 极昼永夜 */
+    night: number;
 }
 
 export const RightStatusBar = defineComponent<StatusBarProps<IRightHeroStatus>>(
@@ -244,6 +246,15 @@ export const RightStatusBar = defineComponent<StatusBarProps<IRightHeroStatus>>(
                     nameColor: '#a7ffa7',
                     value: s.springCount.toString(),
                     valueColor: '#a7ffa7'
+                });
+            }
+            if (s.night !== 0) {
+                const text = s.night.toString();
+                data.push({
+                    name: '极昼永夜',
+                    nameColor: '#a3f8ff',
+                    value: s.night > 0 ? '+' + text : text,
+                    valueColor: s.night > 0 ? '#a7ffa7' : '#ffa7a7'
                 });
             }
             return data;

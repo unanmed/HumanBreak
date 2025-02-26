@@ -107,7 +107,8 @@ const MainScene = defineComponent(() => {
         springCount: 0,
         floor: 'MT0',
         replaying: false,
-        replayStatus
+        replayStatus,
+        night: 0
     });
 
     const { getHeroStatusOn } = Mota.requireAll('fn');
@@ -133,10 +134,11 @@ const MainScene = defineComponent(() => {
         leftStatus.exAtk = getHeroStatusOn('mana');
         leftStatus.magicDef = getHeroStatusOn('magicDef');
 
-        const { HeroSkill } = Mota.require('module', 'Mechanism');
+        const { HeroSkill, NightSpecial } = Mota.require('module', 'Mechanism');
         rightStatus.autoSkill = HeroSkill.getAutoSkill();
         rightStatus.skillName = HeroSkill.getSkillName();
         rightStatus.skillDesc = HeroSkill.getSkillDesc();
+        rightStatus.night = NightSpecial.getNight(floor);
         rightStatus.floor = floor;
         rightStatus.replaying = core.isReplaying();
         const { pausing, speed, toReplay, totalList } = core.status.replay;
