@@ -476,7 +476,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      */
     setFilter(filter: string) {
         this.filter = filter;
-        this.update(this);
+        // 设置滤镜时，不需要更新自身的缓存，直接调用父元素的更新即可
+        this._parent?.update();
     }
 
     /**
@@ -485,7 +486,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      */
     setComposite(composite: GlobalCompositeOperation) {
         this.composite = composite;
-        this.update();
+        // 设置混合模式时，不需要更新自身的缓存，直接调用父元素的更新即可
+        this._parent?.update();
     }
 
     /**
@@ -494,7 +496,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      */
     setAlpha(alpha: number) {
         this.alpha = alpha;
-        this.update();
+        // 设置不透明度时，不需要更新自身的缓存，直接调用父元素的更新即可
+        this._parent?.update();
     }
 
     setHD(hd: boolean): void {
@@ -521,7 +524,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     setAnchor(x: number, y: number): void {
         this.anchorX = x;
         this.anchorY = y;
-        this.update();
+        // 设置锚点时，不需要更新自身的缓存，直接调用父元素的更新即可
+        this._parent?.update();
     }
 
     /**
@@ -609,7 +613,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     }
 
     updateTransform() {
-        this.update();
+        // 更新变换矩阵时，不需要更新自身的缓存，直接调用父元素的更新即可
+        this._parent?.update();
         this.emit('transform', this, this._transform);
     }
 
