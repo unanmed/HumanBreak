@@ -101,9 +101,9 @@ export class Container<E extends EContainerEvent = EContainerEvent>
     }
 
     private sortChildren() {
-        this.sortedChildren = [...this.children].sort(
-            (a, b) => a.zIndex - b.zIndex
-        );
+        this.sortedChildren = [...this.children]
+            .filter(v => !v.isComment)
+            .sort((a, b) => a.zIndex - b.zIndex);
         this.update();
     }
 
