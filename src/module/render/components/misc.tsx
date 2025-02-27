@@ -1,7 +1,15 @@
-import { DefaultProps, ElementLocator, PathProps, Sprite } from '@/core/render';
+import {
+    DefaultProps,
+    ElementLocator,
+    onTick,
+    PathProps,
+    Sprite
+} from '@/core/render';
 import { computed, defineComponent, ref, watch } from 'vue';
 import { SetupComponentOptions } from './types';
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
+import { TextboxProps, TextContent } from './textbox';
+import { Scroll, ScrollExpose, ScrollProps } from './scroll';
 
 interface ProgressProps extends DefaultProps {
     /** 进度条的位置 */
@@ -107,3 +115,121 @@ export const Arrow = defineComponent<ArrowProps>(props => {
         />
     );
 }, arrowProps);
+
+export interface ScrollTextProps extends TextboxProps, ScrollProps {
+    /** 自动滚动的速度，每秒多少像素 */
+    speed: number;
+    /** 文字的最大宽度 */
+    width: number;
+    /** 自动滚动组件的定位 */
+    loc: ElementLocator;
+    /** 文字滚动入元素之前要先滚动多少像素，默认16像素 */
+    pad?: number;
+}
+
+export type ScrollTextEmits = {
+    /**
+     * 当滚动完毕时触发
+     */
+    scrollEnd: () => void;
+};
+
+export interface ScrollTextExpose {
+    /**
+     * 暂停滚动
+     */
+    pause(): void;
+
+    /**
+     * 继续滚动
+     */
+    resume(): void;
+
+    /**
+     * 设置滚动速度
+     */
+    setSpeed(speed: number): void;
+
+    /**
+     * 立刻重新滚动
+     */
+    rescroll(): void;
+}
+
+const scrollProps = {
+    props: ['speed', 'loc', 'pad', 'width'],
+    emits: ['scrollEnd']
+} satisfies SetupComponentOptions<
+    ScrollTextProps,
+    ScrollTextEmits,
+    keyof ScrollTextEmits
+>;
+
+export const ScrollText = defineComponent<
+    ScrollTextProps,
+    ScrollTextEmits,
+    keyof ScrollTextEmits
+>((props, { emit, expose, attrs }) => {
+    const scroll = ref<ScrollExpose>();
+    const speed = ref(props.speed);
+
+    const eleHeight = computed(() => props.loc[3] ?? props.height ?? 200);
+    const pad = computed(() => props.pad ?? 16);
+
+    let lastFixedTime = Date.now();
+    let lastFixedPos = 0;
+    let paused = false;
+    let nowScroll = 0;
+
+    onTick(() => {
+        if (paused || !scroll.value) return;
+        const now = Date.now();
+        const dt = now - lastFixedTime;
+        nowScroll = (dt / 1000) * speed.value + lastFixedPos;
+        scroll.value.scrollTo(nowScroll, 0);
+        if (nowScroll >= scroll.value.getScrollLength()) {
+            emit('scrollEnd');
+            paused = true;
+        }
+    });
+
+    const pause = () => {
+        paused = true;
+    };
+
+    const resume = () => {
+        paused = false;
+        lastFixedPos = nowScroll;
+        lastFixedTime = Date.now();
+    };
+
+    const setSpeed = (value: number) => {
+        lastFixedPos = nowScroll;
+        lastFixedTime = Date.now();
+        speed.value = value;
+    };
+
+    const rescroll = () => {
+        nowScroll = 0;
+        lastFixedTime = Date.now();
+        lastFixedPos = 0;
+    };
+
+    expose<ScrollTextExpose>({ pause, resume, setSpeed, rescroll });
+
+    return () => (
+        <Scroll
+            ref={scroll}
+            loc={props.loc}
+            padEnd={eleHeight.value + pad.value}
+            noscroll
+        >
+            <TextContent
+                {...attrs}
+                width={props.width}
+                loc={[8, eleHeight.value + pad.value]}
+                autoHeight
+            />
+        </Scroll>
+    );
+}, scrollProps);

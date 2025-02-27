@@ -66,7 +66,8 @@ const MainScene = defineComponent(() => {
         titleFont: '700 20px normal',
         winskin: 'winskin2.png',
         interval: 100,
-        lineHeight: 4
+        lineHeight: 4,
+        width: 480
     };
 
     const map = ref<LayerGroup>();

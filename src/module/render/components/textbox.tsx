@@ -26,6 +26,7 @@ import {
     WordBreak,
     TextAlign
 } from './textboxTyper';
+import { ElementLocator } from '@/core/render';
 
 export interface TextContentProps
     extends DefaultProps,
@@ -36,6 +37,10 @@ export interface TextContentProps
     fill?: boolean;
     /** 是否描边 */
     stroke?: boolean;
+    /** 是否自适应高度 */
+    autoHeight?: boolean;
+    /** 文字的最大宽度 */
+    width: number;
 }
 
 export type TextContentEmits = {
@@ -53,6 +58,11 @@ export interface TextContentExpose {
      * 立刻显示所有文字
      */
     showAll(): void;
+
+    /**
+     * 获取这段 TextContent 的总高度
+     */
+    getHeight(): number;
 }
 
 const textContentOptions = {
@@ -76,7 +86,8 @@ const textContentOptions = {
         'strokeWidth',
         'stroke',
         'loc',
-        'width'
+        'width',
+        'autoHeight'
     ],
     emits: ['typeEnd', 'typeStart']
 } satisfies SetupComponentOptions<
@@ -90,8 +101,11 @@ export const TextContent = defineComponent<
     TextContentEmits,
     keyof TextContentEmits
 >((props, { emit, expose }) => {
-    const width = computed(() => props.width ?? props.loc?.[2] ?? 200);
-    if (width.value < 0) {
+    const loc = ref<ElementLocator>(
+        (props.loc?.slice() as ElementLocator) ?? []
+    );
+
+    if (props.width < 0) {
         logger.warn(41, String(props.width));
     }
 
@@ -112,6 +126,7 @@ export const TextContent = defineComponent<
             typer.setText(props.text ?? '');
             typer.type();
             needUpdate = false;
+            updateLoc();
         });
     };
 
@@ -119,12 +134,23 @@ export const TextContent = defineComponent<
         typer.typeAll();
     };
 
-    watch(props, value => {
-        typer.setConfig(value);
+    watch(props, () => {
+        typer.setConfig(props);
         retype();
     });
 
-    expose({ retype, showAll });
+    const getHeight = () => {
+        return typer.getHeight();
+    };
+
+    const updateLoc = () => {
+        if (props.autoHeight) {
+            const [x = 0, y = 0, width = 200, , ax = 0, ay = 0] = loc.value;
+            loc.value = [x, y, width, getHeight(), ax, ay];
+        }
+    };
+
+    expose<TextContentExpose>({ retype, showAll, getHeight });
 
     const spriteElement = shallowRef<Sprite>();
     const renderContent = (canvas: MotaOffscreenCanvas2D) => {
@@ -175,7 +201,7 @@ export const TextContent = defineComponent<
     return () => {
         return (
             <sprite
-                loc={props.loc}
+                loc={loc.value}
                 ref={spriteElement}
                 render={renderContent}
             ></sprite>
@@ -200,6 +226,8 @@ export interface TextboxProps extends TextContentProps, DefaultProps {
     titleStroke?: CanvasStyle;
     /** 标题文字与边框间的距离，默认为4 */
     titlePadding?: number;
+    /** 最大宽度 */
+    width: number;
 }
 
 export interface TextboxExpose {
@@ -257,8 +285,8 @@ export const Textbox = defineComponent<
     keyof TextboxEmits,
     TextboxSlots
 >((props, { slots, expose }) => {
-    const contentData = shallowReactive<TextContentProps>({});
-    const data = shallowReactive<TextboxProps>({});
+    const contentData = shallowReactive<TextContentProps>({ width: 200 });
+    const data = shallowReactive<TextboxProps>({ width: 200 });
 
     const setContentData = () => {
         contentData.breakChars = props.breakChars ?? '';

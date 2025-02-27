@@ -37,6 +37,11 @@ export interface ScrollExpose {
      * @param time 滚动的动画时长，默认为无动画
      */
     scrollTo(y: number, time?: number): void;
+
+    /**
+     * 获取这个滚动条组件最多可以滚动多长
+     */
+    getScrollLength(): number;
 }
 
 export interface ScrollProps extends DefaultProps {
@@ -47,7 +52,7 @@ export interface ScrollProps extends DefaultProps {
      * 滚动到最下方（最右方）时的填充大小，如果默认的高度计算方式有误，
      * 那么可以调整此参数来修复错误
      */
-    pad?: number;
+    padEnd?: number;
 }
 
 type ScrollSlots = SlotsType<{
@@ -55,7 +60,7 @@ type ScrollSlots = SlotsType<{
 }>;
 
 const scrollProps = {
-    props: ['hor', 'noscroll', 'loc', 'pad']
+    props: ['hor', 'noscroll', 'loc', 'padEnd']
 } satisfies SetupComponentOptions<ScrollProps, {}, string, ScrollSlots>;
 
 /** 滚动条图示的最短长度 */
@@ -112,6 +117,7 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
         const scrollColor = computed(
             () => `rgba(${SCROLL_COLOR},${scrollAlpha.ref.value ?? 0.5})`
         );
+        const padEnd = computed(() => props.padEnd ?? 0);
 
         watch(scrollColor, () => {
             scroll.value?.update();
@@ -145,7 +151,6 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
             if (contentPos !== contentTarget) {
                 contentPos = transition.value.showScroll;
                 checkAllItem();
-                updatePosition();
                 content.value?.update();
             }
         });
@@ -211,7 +216,7 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
          */
         const onTransform = (item: RenderItem) => {
             const rect = item.getBoundingRect();
-            const pad = props.pad ?? 0;
+            const pad = props.padEnd ?? 0;
             if (item.parent === content.value) {
                 if (direction.value === ScrollDirection.Horizontal) {
                     if (rect.right > maxLength - pad) {
@@ -291,7 +296,7 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
                 }
                 checkItem(v);
             });
-            maxLength = Math.max(max + (props.pad ?? 0), 10);
+            maxLength = Math.max(max + padEnd.value, 10);
             updatePosition();
             scroll.value?.update();
         };
@@ -504,9 +509,18 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
             transition.ticker.destroy();
         });
 
+        //#region expose 函数
+
+        const getScrollLength = () => {
+            return maxLength - height.value;
+        };
+
         expose<ScrollExpose>({
-            scrollTo
+            scrollTo,
+            getScrollLength
         });
+
+        //#endregion
 
         return () => {
             return (

@@ -124,6 +124,8 @@ export interface TyperTextRenderable {
     strokeStyle: CanvasStyle;
     /** 文字画到哪个索引 */
     pointer: number;
+    /** 这段文字的总高度 */
+    height: number;
 }
 
 export interface TyperIconRenderable {
@@ -232,6 +234,15 @@ export class TextContentTyper extends EventEmitter<TextContentTyperEvent> {
     }
 
     /**
+     * 获取这段文字的总高度
+     */
+    getHeight() {
+        const heights = this.renderObject.lineHeights;
+        const lines = heights.reduce((prev, curr) => prev + curr, 0);
+        return lines + this.config.lineHeight * heights.length;
+    }
+
+    /**
      * 设置打字机的配置属性
      * @param config 配置信息
      */
@@ -285,19 +296,21 @@ export class TextContentTyper extends EventEmitter<TextContentTyperEvent> {
                 if (line < 0 || line > renderable.splitLines.length) {
                     return false;
                 }
-                const start = renderable.splitLines[line - 1] ?? -1;
+                const start = renderable.splitLines[line - 1] ?? 0;
                 const end =
-                    renderable.splitLines[line] ?? renderable.text.length - 1;
+                    renderable.splitLines[line] ?? renderable.text.length;
+                const lineHeight = this.renderObject.lineHeights[this.nowLine];
 
                 const data: TyperTextRenderable = {
                     type: TextContentType.Text,
                     x: this.x,
                     y: this.y,
-                    text: renderable.text.slice(start + 1, end + 1),
+                    text: renderable.text.slice(start, end),
                     font: renderable.font,
                     fillStyle: renderable.fillStyle,
                     strokeStyle: this.config.strokeStyle,
-                    pointer: 0
+                    pointer: 0,
+                    height: lineHeight + this.config.lineHeight
                 };
                 this.processingData = data;
                 this.renderData.push(data);
@@ -926,7 +939,7 @@ export class TextContentParser {
         const rest = width - this.lineWidth;
         const guessRest = guess * (rest / width) * this.guessGain;
         const length = pointer - this.lineStart + 1;
-        if (length < guessRest) {
+        if (length <= guessRest) {
             return false;
         }
         this.guessGain = 1;
@@ -941,7 +954,7 @@ export class TextContentParser {
         if (height > this.lineHeight) {
             this.lineHeight = height;
         }
-        if (metrics.width < rest) {
+        if (metrics.width <= rest) {
             // 实际宽度小于剩余宽度时，将猜测增益乘以剩余总宽度与当前宽度的比值的若干倍
             this.guessGain *= (rest / metrics.width) * (1.1 + 1 / length);
             this.bsStart = breakIndex;
@@ -956,7 +969,7 @@ export class TextContentParser {
                 this.lineHeights.push(this.lineHeight);
                 this.bsStart = index;
                 const text = data.text.slice(
-                    this.wordBreak[index],
+                    this.wordBreak[index] + 1,
                     pointer + 1
                 );
                 if (text.length < guessRest / 4) {
@@ -995,7 +1008,7 @@ export class TextContentParser {
                 return start;
             }
             const text = data.text.slice(
-                wordBreak[this.bsStart],
+                wordBreak[this.bsStart] + 1,
                 wordBreak[mid] + 1
             );
             const metrics = ctx.measureText(text);
@@ -1028,7 +1041,7 @@ export class TextContentParser {
             const wordBreak = data.wordBreak;
             const lastLine = data.splitLines.at(-1);
             const lastIndex = isNil(lastLine) ? 0 : lastLine;
-            const restText = data.text.slice(lastIndex);
+            const restText = data.text.slice(lastIndex + 1);
             const ctx = this.testCanvas.ctx;
             ctx.font = data.font;
             const metrics = ctx.measureText(restText);
@@ -1052,7 +1065,7 @@ export class TextContentParser {
                     data.splitLines.push(this.wordBreak[index]);
                     this.lineHeights.push(this.lineHeight);
                     this.bsStart = index;
-                    const text = data.text.slice(this.wordBreak[index]);
+                    const text = data.text.slice(this.wordBreak[index] + 1);
                     if (!isLast && text.length < guess / 4) {
                         // 如果剩余文字很少，几乎不可能会单独成一行时，直接结束循环
                         this.lastBreakIndex = index;
@@ -1168,6 +1181,8 @@ export class TextContentParser {
 
             this.checkRestLine(width, guess, i);
         }
+
+        this.lineHeights.push(this.lineHeight);
 
         return {
             lineHeights: this.lineHeights,

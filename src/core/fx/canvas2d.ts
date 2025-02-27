@@ -64,22 +64,24 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
             logger.warn(33);
             return;
         }
+        const w = Math.max(width, 1);
+        const h = Math.max(height, 1);
         let ratio = this.highResolution ? devicePixelRatio : 1;
         const scale = core.domStyle.scale;
         if (this.autoScale) {
             ratio *= scale;
         }
         this.scale = ratio;
-        this.canvas.width = width * ratio;
-        this.canvas.height = height * ratio;
-        this.width = width;
+        this.canvas.width = w * ratio;
+        this.canvas.height = h * ratio;
+        this.width = w;
         this.height = height;
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         this.ctx.scale(ratio, ratio);
         this.ctx.imageSmoothingEnabled = this.antiAliasing;
         if (this.canvas.isConnected) {
-            this.canvas.style.width = `${width * scale}px`;
-            this.canvas.style.height = `${height * scale}px`;
+            this.canvas.style.width = `${w * scale}px`;
+            this.canvas.style.height = `${h * scale}px`;
         }
     }
 
