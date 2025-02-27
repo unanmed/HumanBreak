@@ -7,6 +7,9 @@ import { isNil } from 'lodash-es';
 import { logger } from '@/core/common/logger';
 import { IAnimateFrame, renderEmits } from '../frame';
 
+/** 文字的安全填充，会填充在文字的上侧和下侧，防止削顶和削底 */
+const SAFE_PAD = 1;
+
 type CanvasStyle = string | CanvasGradient | CanvasPattern;
 
 export interface ETextEvent extends ERenderItemEvent {
@@ -31,8 +34,10 @@ export class Text extends RenderItem<ETextEvent> {
 
         this.text = text;
         if (text.length > 0) {
-            this.calBox();
-            this.emit('setText', text, this.width, this.height);
+            this.requestBeforeFrame(() => {
+                this.calBox();
+                this.emit('setText', text, this.width, this.height);
+            });
         }
     }
 
@@ -41,6 +46,7 @@ export class Text extends RenderItem<ETextEvent> {
         _transform: Transform
     ): void {
         const ctx = canvas.ctx;
+        const stroke = this.strokeWidth;
         ctx.textBaseline = 'bottom';
         ctx.fillStyle = this.fillStyle ?? 'transparent';
         ctx.strokeStyle = this.strokeStyle ?? 'transparent';
@@ -48,10 +54,10 @@ export class Text extends RenderItem<ETextEvent> {
         ctx.lineWidth = this.strokeWidth;
 
         if (this.strokeStyle) {
-            ctx.strokeText(this.text, 0, this.descent);
+            ctx.strokeText(this.text, stroke, this.descent + stroke + SAFE_PAD);
         }
         if (this.fillStyle) {
-            ctx.fillText(this.text, 0, this.descent);
+            ctx.fillText(this.text, stroke, this.descent + stroke + SAFE_PAD);
         }
     }
 
@@ -95,6 +101,7 @@ export class Text extends RenderItem<ETextEvent> {
     setStyle(fill?: CanvasStyle, stroke?: CanvasStyle) {
         this.fillStyle = fill;
         this.strokeStyle = stroke;
+        this.update();
     }
 
     /**
@@ -102,7 +109,11 @@ export class Text extends RenderItem<ETextEvent> {
      * @param width 宽度
      */
     setStrokeWidth(width: number) {
+        const before = this.strokeWidth;
         this.strokeWidth = width;
+        const dw = width - before;
+        this.size(this.width + dw * 2, this.height + dw * 2);
+        this.update();
     }
 
     /**
@@ -113,7 +124,8 @@ export class Text extends RenderItem<ETextEvent> {
             this.measure();
         this.length = width;
         this.descent = actualBoundingBoxAscent;
-        this.size(width, actualBoundingBoxAscent + actualBoundingBoxDescent);
+        const height = actualBoundingBoxAscent + actualBoundingBoxDescent;
+        this.size(width, height + this.strokeWidth * 2 + SAFE_PAD * 2);
     }
 
     protected handleProps(

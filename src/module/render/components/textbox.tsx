@@ -3,6 +3,7 @@ import {
     computed,
     defineComponent,
     nextTick,
+    onMounted,
     onUnmounted,
     ref,
     shallowReactive,
@@ -46,6 +47,7 @@ export interface TextContentProps
 export type TextContentEmits = {
     typeEnd: () => void;
     typeStart: () => void;
+    updateHeight: (height: number) => void;
 };
 
 export interface TextContentExpose {
@@ -89,7 +91,7 @@ const textContentOptions = {
         'width',
         'autoHeight'
     ],
-    emits: ['typeEnd', 'typeStart']
+    emits: ['typeEnd', 'typeStart', 'updateHeight']
 } satisfies SetupComponentOptions<
     TextContentProps,
     TextContentEmits,
@@ -144,10 +146,12 @@ export const TextContent = defineComponent<
     };
 
     const updateLoc = () => {
+        const height = getHeight();
         if (props.autoHeight) {
             const [x = 0, y = 0, width = 200, , ax = 0, ay = 0] = loc.value;
-            loc.value = [x, y, width, getHeight(), ax, ay];
+            loc.value = [x, y, width, height, ax, ay];
         }
+        emit('updateHeight', height);
     };
 
     expose<TextContentExpose>({ retype, showAll, getHeight });
@@ -197,6 +201,8 @@ export const TextContent = defineComponent<
     typer.on('typeEnd', () => {
         emit('typeEnd');
     });
+
+    onMounted(retype);
 
     return () => {
         return (

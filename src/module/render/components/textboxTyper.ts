@@ -9,6 +9,9 @@ import {
 import EventEmitter from 'eventemitter3';
 import { isNil } from 'lodash-es';
 
+/** 文字的安全填充，会填充在文字的上侧和下侧，防止削顶和削底 */
+const SAFE_PAD = 1;
+
 export const enum WordBreak {
     /** 不换行 */
     None,
@@ -110,6 +113,8 @@ export interface ITextContentRenderable {
 export interface ITextContentRenderObject {
     /** 每一行的高度 */
     lineHeights: number[];
+    /** 每一行的宽度 */
+    lineWidths: number[];
     /** 渲染数据 */
     data: ITextContentRenderable[];
 }
@@ -173,7 +178,8 @@ export class TextContentTyper extends EventEmitter<TextContentTyperEvent> {
     /** 渲染信息 */
     private renderObject: ITextContentRenderObject = {
         lineHeights: [],
-        data: []
+        data: [],
+        lineWidths: []
     };
     /** 渲染信息 */
     private renderData: TyperRenderable[] = [];
@@ -239,7 +245,7 @@ export class TextContentTyper extends EventEmitter<TextContentTyperEvent> {
     getHeight() {
         const heights = this.renderObject.lineHeights;
         const lines = heights.reduce((prev, curr) => prev + curr, 0);
-        return lines + this.config.lineHeight * heights.length;
+        return lines + this.config.lineHeight * heights.length + SAFE_PAD * 2;
     }
 
     /**
@@ -275,7 +281,7 @@ export class TextContentTyper extends EventEmitter<TextContentTyperEvent> {
         this.typing = false;
         this.dataLine = 0;
         this.x = 0;
-        this.y = 0;
+        this.y = SAFE_PAD;
     }
 
     /**
@@ -286,6 +292,19 @@ export class TextContentTyper extends EventEmitter<TextContentTyperEvent> {
         this._text = text;
         this.resetTypeStatus(lastText);
         this.renderObject = this.parser.parse(text, this.config.width);
+    }
+
+    private getDataX(line: number) {
+        const width = this.renderObject.lineWidths[line];
+        if (isNil(width)) return this.x;
+        switch (this.config.textAlign) {
+            case TextAlign.Left:
+                return this.x;
+            case TextAlign.Center:
+                return this.x + (this.config.width - width) / 2;
+            case TextAlign.End:
+                return this.x + this.config.width - width;
+        }
     }
 
     private createTyperData(index: number, line: number) {
@@ -303,7 +322,7 @@ export class TextContentTyper extends EventEmitter<TextContentTyperEvent> {
 
                 const data: TyperTextRenderable = {
                     type: TextContentType.Text,
-                    x: this.x,
+                    x: this.getDataX(line),
                     y: this.y,
                     text: renderable.text.slice(start, end),
                     font: renderable.font,
@@ -331,7 +350,7 @@ export class TextContentTyper extends EventEmitter<TextContentTyperEvent> {
                 }
                 const data: TyperIconRenderable = {
                     type: TextContentType.Icon,
-                    x: this.x,
+                    x: this.getDataX(line),
                     y: this.y,
                     width: iconWidth,
                     height: iconWidth / aspect,
@@ -537,6 +556,8 @@ export class TextContentParser {
     private lineHeight: number = 0;
     /** 每一行的行高 */
     private lineHeights: number[] = [];
+    /** 每一行的宽度 */
+    private lineWidths: number[] = [];
     /** 当前这一行已经有多长 */
     private lineWidth: number = 0;
     /** 这一行未计算部分的起始位置索引 */
@@ -809,6 +830,7 @@ export class TextContentParser {
         this.nowRenderable = -1;
         this.lineHeight = 0;
         this.lineHeights = [];
+        this.lineWidths = [];
         this.lineWidth = 0;
         this.lineStart = 0;
         this.guessGain = 1;
@@ -967,6 +989,7 @@ export class TextContentParser {
                 const index = this.bsLineWidth(maxWidth, this.nowRenderable);
                 data.splitLines.push(this.wordBreak[index]);
                 this.lineHeights.push(this.lineHeight);
+                this.lineWidths.push(this.lineWidth);
                 this.bsStart = index;
                 const text = data.text.slice(
                     this.wordBreak[index] + 1,
@@ -990,10 +1013,11 @@ export class TextContentParser {
         }
     }
 
-    private bsLineWidth(width: number, index: number) {
+    private bsLineWidth(maxWidth: number, index: number) {
         let start = this.bsStart;
         let end = this.bsEnd;
         let height = 0;
+        let width = 0;
 
         const data = this.renderable[index];
         const { wordBreak } = data;
@@ -1005,6 +1029,7 @@ export class TextContentParser {
                 if (height > this.lineHeight) {
                     this.lineHeight = height;
                 }
+                this.lineWidth = width;
                 return start;
             }
             const text = data.text.slice(
@@ -1012,10 +1037,12 @@ export class TextContentParser {
                 wordBreak[mid] + 1
             );
             const metrics = ctx.measureText(text);
+            width = metrics.width;
             height = this.getHeight(metrics);
-            if (metrics.width > width) {
+            if (width > maxWidth) {
                 end = mid;
-            } else if (metrics.width === width) {
+            } else if (width === maxWidth) {
+                this.lineWidth = width;
                 if (height > this.lineHeight) {
                     this.lineHeight = height;
                 }
@@ -1064,6 +1091,7 @@ export class TextContentParser {
                     const index = this.bsLineWidth(maxWidth, pointer);
                     data.splitLines.push(this.wordBreak[index]);
                     this.lineHeights.push(this.lineHeight);
+                    this.lineWidths.push(this.lineWidth);
                     this.bsStart = index;
                     const text = data.text.slice(this.wordBreak[index] + 1);
                     if (!isLast && text.length < guess / 4) {
@@ -1089,9 +1117,9 @@ export class TextContentParser {
             let iconWidth = 0;
             if (aspect < 1) {
                 // 这时候应该把高度限定在当前字体大小
-                iconWidth = width * (this.status.fontSize / height);
+                iconWidth = width * (data.fontSize / height);
             } else {
-                iconWidth = this.status.fontSize;
+                iconWidth = data.fontSize;
             }
             this.lineWidth += iconWidth;
             const iconHeight = iconWidth / aspect;
@@ -1109,13 +1137,69 @@ export class TextContentParser {
         }
     }
 
+    private checkLastSize() {
+        const last = this.renderable.at(-1);
+        if (!last) return;
+        const index = this.lastBreakIndex;
+        const text = last.text.slice(this.wordBreak[index] + 1);
+        const ctx = this.testCanvas.ctx;
+        ctx.font = last.font;
+        const metrics = ctx.measureText(text);
+        this.lineWidth = metrics.width;
+        const height = this.getHeight(metrics);
+        if (height > this.lineHeight) {
+            this.lineHeight = height;
+        }
+    }
+
+    private checkNoneBreakSize() {
+        const ctx = this.testCanvas.ctx;
+        this.renderable.forEach(data => {
+            switch (data.type) {
+                case TextContentType.Text: {
+                    ctx.font = data.font;
+                    const metrics = ctx.measureText(data.text);
+                    this.lineWidth += metrics.width;
+                    const height = this.getHeight(metrics);
+                    if (height > this.lineHeight) this.lineHeight = height;
+                    break;
+                }
+                case TextContentType.Icon: {
+                    const renderable = texture.getRenderable(data.icon!);
+                    if (!renderable) return false;
+                    const [, , width, height] = renderable.render[0];
+                    const aspect = width / height;
+                    let iconWidth = 0;
+                    if (aspect < 1) {
+                        // 这时候应该把高度限定在当前字体大小
+                        iconWidth = width * (data.fontSize / height);
+                    } else {
+                        iconWidth = data.fontSize;
+                    }
+                    this.lineWidth += iconWidth;
+                    const iconHeight = iconWidth / aspect;
+                    if (iconHeight > this.lineHeight) {
+                        this.lineHeight = iconHeight;
+                    }
+                }
+            }
+        });
+        this.lineHeights.push(this.lineHeight);
+        this.lineWidths.push(this.lineWidth);
+    }
+
     /**
      * 对解析出的文字分词并分行
      * @param width 文字的宽度，到达这么宽之后换行
      */
     private splitLines(width: number): ITextContentRenderObject {
         if (this.wordBreakRule === WordBreak.None) {
-            return { lineHeights: [0], data: this.renderable };
+            this.checkNoneBreakSize();
+            return {
+                lineHeights: this.lineHeights,
+                data: this.renderable,
+                lineWidths: this.lineWidths
+            };
         }
         this.nowRenderable = -1;
 
@@ -1182,11 +1266,14 @@ export class TextContentParser {
             this.checkRestLine(width, guess, i);
         }
 
+        this.checkLastSize();
         this.lineHeights.push(this.lineHeight);
+        this.lineWidths.push(this.lineWidth);
 
         return {
             lineHeights: this.lineHeights,
-            data: this.renderable
+            data: this.renderable,
+            lineWidths: this.lineWidths
         };
     }
 }

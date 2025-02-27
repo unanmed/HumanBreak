@@ -212,7 +212,7 @@ export const ScrollText = defineComponent<
     const scroll = ref<ScrollExpose>();
     const speed = ref(props.speed);
 
-    const eleHeight = computed(() => props.loc[3] ?? props.height ?? 200);
+    const eleHeight = computed(() => props.loc[3] ?? props.width);
     const pad = computed(() => props.pad ?? 16);
 
     let lastFixedTime = Date.now();
@@ -370,6 +370,15 @@ const backgroundProps = {
     props: ['loc', 'winskin', 'color', 'border']
 } satisfies SetupComponentOptions<BackgroundProps>;
 
+/**
+ * 背景组件，与 Selection 类似，不过绘制的是背景，而不是选择光标，参数参考 {@link BackgroundProps}，用例如下：
+ * ```tsx
+ * // 使用 winskin2.png 作为背景
+ * <Background loc={[8, 8, 160, 160]} winskin="winskin2.png" />
+ * // 使用指定填充和边框颜色作为背景
+ * <Background loc={[8, 8, 160, 160]} color="#333" border="gold" />
+ * ```
+ */
 export const Background = defineComponent<BackgroundProps>(props => {
     const isWinskin = computed(() => !!props.winskin);
     const fixedLoc = computed<ElementLocator>(() => {
