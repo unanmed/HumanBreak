@@ -247,7 +247,7 @@ export const NumpadToolbar = defineComponent<
     const altAlpha = transitioned(0, 100, linear())!;
 
     const ctrlColor = computed(
-        () => `rgba(255,255,255,${ctrlAlpha.ref.value})`
+        () => `rgba(221,221,221,${ctrlAlpha.ref.value})`
     );
     const ctrlTextColor = computed(() => {
         const rgb = Math.floor(255 - ctrlAlpha.ref.value * 255);
@@ -255,14 +255,14 @@ export const NumpadToolbar = defineComponent<
     });
 
     const shiftColor = computed(
-        () => `rgba(255,255,255,${shiftAlpha.ref.value})`
+        () => `rgba(221,221,221,${shiftAlpha.ref.value})`
     );
     const shiftTextColor = computed(() => {
         const rgb = Math.floor(255 - shiftAlpha.ref.value * 255);
         return `rgba(${rgb},${rgb},${rgb},1)`;
     });
 
-    const altColor = computed(() => `rgba(255,255,255,${altAlpha.ref.value})`);
+    const altColor = computed(() => `rgba(221,221,221,${altAlpha.ref.value})`);
     const altTextColor = computed(() => {
         const rgb = Math.floor(255 - altAlpha.ref.value * 255);
         return `rgba(${rgb},${rgb},${rgb},1)`;

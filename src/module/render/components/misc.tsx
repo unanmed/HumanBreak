@@ -30,6 +30,16 @@ const progressProps = {
     props: ['loc', 'progress', 'success', 'background']
 } satisfies SetupComponentOptions<ProgressProps>;
 
+/**
+ * 进度条组件，参数参考 {@link ProgressProps}，用例如下：
+ * ```tsx
+ * // 定义进度
+ * const progress = ref(0);
+ *
+ * // 显示进度条
+ * <Progress loc={[12, 12, 120, 8]} progress={progress.value} />
+ * ```
+ */
 export const Progress = defineComponent<ProgressProps>(props => {
     const element = ref<Sprite>();
 
@@ -65,7 +75,7 @@ export const Progress = defineComponent<ProgressProps>(props => {
 }, progressProps);
 
 export interface ArrowProps extends PathProps {
-    /** 箭头的四个坐标 */
+    /** 箭头的起始和终点坐标，前两个是起始坐标，后两个是终点坐标 */
     arrow: [number, number, number, number];
     /** 箭头的头部大小 */
     head?: number;
@@ -77,6 +87,13 @@ const arrowProps = {
     props: ['arrow', 'head', 'color']
 } satisfies SetupComponentOptions<ArrowProps>;
 
+/**
+ * 箭头组件，显示一个箭头，参数参考 {@link ArrowProps}，用例如下：
+ * ```tsx
+ * // 从 (12, 12) 到 (48, 48) 的箭头
+ * <Arrow arrow={[12, 12, 48, 48]} />
+ * ```
+ */
 export const Arrow = defineComponent<ArrowProps>(props => {
     const loc = computed<ElementLocator>(() => {
         const [x1, y1, x2, y2] = props.arrow;
@@ -167,6 +184,26 @@ const scrollProps = {
     keyof ScrollTextEmits
 >;
 
+/**
+ * 滚动文字，可以用于展示长剧情或者 staff 表，参数参考 {@link ScrollTextProps}，
+ * 事件参考 {@link ScrollTextEmits}，函数接口参考 {@link ScrollTextExpose}，用例如下：
+ * ```tsx
+ * // 用于接受函数接口
+ * const scroll = ref<ScrollTextExpose>();
+ * // 显示的文字
+ * const text = '滚动文字'.repeat(100);
+ *
+ * onMounted(() => {
+ *   // 设置为每秒滚动 100 像素
+ *   scroll.value?.setSpeed(100);
+ *   // 暂停滚动
+ *   scroll.value?.pause();
+ * });
+ *
+ * // 显示滚动文字，每秒滚动 50 像素
+ * <ScrollText ref={scroll} text={text} speed={50} loc={[0, 0, 180, 100]} width={180} />
+ * ```
+ */
 export const ScrollText = defineComponent<
     ScrollTextProps,
     ScrollTextEmits,
@@ -228,7 +265,7 @@ export const ScrollText = defineComponent<
         >
             <TextContent
                 {...attrs}
-                width={props.width}
+                width={props.width - 16}
                 loc={[8, eleHeight.value + pad.value]}
                 autoHeight
             />
@@ -249,6 +286,15 @@ const selectionProps = {
     props: ['loc', 'color', 'border', 'winskin', 'alphaRange']
 } satisfies SetupComponentOptions<SelectionProps>;
 
+/**
+ * 显示一个选择光标，与 2.x 的 drawUIEventSelector 效果一致，参数参考 {@link SelectionProps}，用例如下：
+ * ```tsx
+ * // 使用 winskin.png 作为选择光标，光标动画的不透明度范围是 [0.3, 0.8]
+ * <Selection loc={[24, 24, 80, 16]} winskin="winskin.png" alphaRange={[0.3, 0.8]} />
+ * // 使用指定的填充和边框颜色作为选择光标
+ * <Selection loc={[24, 24, 80, 16]} color="#ddd" border="gold" />
+ * ```
+ */
 export const Selection = defineComponent<SelectionProps>(props => {
     const minAlpha = computed(() => props.alphaRange?.[0] ?? 0.25);
     const maxAlpha = computed(() => props.alphaRange?.[1] ?? 0.55);
@@ -312,3 +358,37 @@ export const Selection = defineComponent<SelectionProps>(props => {
             />
         );
 }, selectionProps);
+
+export interface BackgroundProps extends DefaultProps {
+    loc: ElementLocator;
+    winskin?: ImageIds;
+    color?: CanvasStyle;
+    border?: CanvasStyle;
+}
+
+const backgroundProps = {
+    props: ['loc', 'winskin', 'color', 'border']
+} satisfies SetupComponentOptions<BackgroundProps>;
+
+export const Background = defineComponent<BackgroundProps>(props => {
+    const isWinskin = computed(() => !!props.winskin);
+    const fixedLoc = computed<ElementLocator>(() => {
+        const [x = 0, y = 0, width = 200, height = 200] = props.loc;
+        return [x + 2, y + 2, width - 4, height - 4];
+    });
+
+    return () =>
+        isWinskin.value ? (
+            <winskin image={props.winskin!} loc={props.loc} noanti />
+        ) : (
+            <g-rectr
+                loc={fixedLoc.value}
+                fillStyle={props.color}
+                strokeStyle={props.border}
+                fill
+                stroke
+                lineWidth={2}
+                circle={[4]}
+            />
+        );
+}, backgroundProps);
