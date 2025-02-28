@@ -1,7 +1,7 @@
 import { GameUI } from '@/core/system';
 import { computed, defineComponent, ref, watch } from 'vue';
 import { SetupComponentOptions, TextContent } from '../components';
-import { DefaultProps, ElementLocator, Sprite } from '@/core/render';
+import { DefaultProps, ElementLocator, Sprite, Font } from '@/core/render';
 import { transitionedColor } from '../use';
 import { linear } from 'mutate-animate';
 import { Scroll } from '../components/scroll';
@@ -62,9 +62,9 @@ export const LeftStatusBar = defineComponent<StatusBarProps<ILeftHeroStatus>>(
             return num.toString().padStart(2, '0');
         };
 
-        const font1 = '18px normal';
-        const font2 = 'bold 18px normal';
-        const font3 = 'bold 14px normal';
+        const font1 = new Font('normal', 18);
+        const font2 = new Font('normal', 18, 'px', 700);
+        const font3 = new Font('normal', 14, 'px', 700);
 
         const iconLoc = (n: number): ElementLocator => {
             return [16, 76 + 44 * n, 32, 32];
@@ -201,8 +201,8 @@ export interface IRightHeroStatus {
 
 export const RightStatusBar = defineComponent<StatusBarProps<IRightHeroStatus>>(
     p => {
-        const font1 = '18px normal';
-        const font2 = '16px normal';
+        const font1 = new Font('normal', 18);
+        const font2 = new Font('normal', 16);
 
         const minimap = ref<Sprite>();
         const inNumpad = ref(false);
@@ -340,8 +340,7 @@ export const RightStatusBar = defineComponent<StatusBarProps<IRightHeroStatus>>(
                     <TextContent
                         loc={[10, 42, 160, 60]}
                         text={skillDesc.value}
-                        fontFamily="normal"
-                        fontSize={14}
+                        font={new Font('normal', 14)}
                         width={160}
                         lineHeight={4}
                     ></TextContent>

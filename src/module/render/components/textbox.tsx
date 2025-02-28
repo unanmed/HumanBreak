@@ -27,7 +27,7 @@ import {
     WordBreak,
     TextAlign
 } from './textboxTyper';
-import { ElementLocator } from '@/core/render';
+import { ElementLocator, Font } from '@/core/render';
 
 export interface TextContentProps
     extends DefaultProps,
@@ -70,10 +70,7 @@ export interface TextContentExpose {
 const textContentOptions = {
     props: [
         'breakChars',
-        'fontFamily',
-        'fontSize',
-        'fontWeight',
-        'fontItalic',
+        'font',
         'ignoreLineEnd',
         'ignoreLineStart',
         'interval',
@@ -225,7 +222,7 @@ export interface TextboxProps extends TextContentProps, DefaultProps {
     /** 标题 */
     title?: string;
     /** 标题字体 */
-    titleFont?: string;
+    titleFont?: Font;
     /** 标题填充样式 */
     titleFill?: CanvasStyle;
     /** 标题描边样式 */
@@ -296,10 +293,7 @@ export const Textbox = defineComponent<
 
     const setContentData = () => {
         contentData.breakChars = props.breakChars ?? '';
-        contentData.fontFamily = props.fontFamily ?? 'Verdana';
-        contentData.fontSize = props.fontSize ?? 16;
-        contentData.fontWeight = props.fontWeight ?? 500;
-        contentData.fontItalic = props.fontItalic ?? false;
+        contentData.font = props.font ?? new Font();
         contentData.ignoreLineEnd = props.ignoreLineEnd ?? '';
         contentData.ignoreLineStart = props.ignoreLineStart ?? '';
         contentData.interval = props.interval ?? 0;
@@ -323,7 +317,7 @@ export const Textbox = defineComponent<
         data.padding = props.padding ?? 8;
         data.titleFill = props.titleFill ?? 'gold';
         data.titleStroke = props.titleStroke ?? 'transparent';
-        data.titleFont = props.titleFont ?? '18px Verdana';
+        data.titleFont = props.titleFont ?? new Font('Verdana', 18);
         data.titlePadding = props.titlePadding ?? 8;
         data.width = props.width ?? props.loc?.[2] ?? 200;
         data.height = props.height ?? props.loc?.[3] ?? 200;

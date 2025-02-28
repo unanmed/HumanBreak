@@ -1,4 +1,4 @@
-import { DefaultProps, ElementLocator, texture } from '@/core/render';
+import { DefaultProps, ElementLocator, Font, texture } from '@/core/render';
 import { computed, defineComponent, onUnmounted, ref } from 'vue';
 import { SetupComponentOptions } from './types';
 import { transitioned } from '../use';
@@ -36,7 +36,7 @@ export const Tip = defineComponent<TipProps>((props, { expose }) => {
     const text = ref<string>('');
     const textWidth = ref(0);
 
-    const font = '16px normal';
+    const font = new Font('normal');
 
     const alpha = transitioned(0, 500, hyper('sin', 'in-out'))!;
     const pad = computed(() => props.pad ?? [4, 4]);

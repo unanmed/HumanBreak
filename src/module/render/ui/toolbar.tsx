@@ -1,4 +1,4 @@
-import { DefaultProps, ElementLocator } from '@/core/render';
+import { DefaultProps, ElementLocator, Font } from '@/core/render';
 import { computed, defineComponent, ref } from 'vue';
 import { SetupComponentOptions } from '../components';
 import {
@@ -82,7 +82,7 @@ export const PlayingToolbar = defineComponent<
     const loadIcon = core.statusBar.icons.load;
     const setIcon = core.statusBar.icons.settings;
 
-    const iconFont = '12px Verdana';
+    const iconFont = new Font('Verdana', 12);
 
     const book = () => core.openBook(true);
     const tool = () => core.openEquipbox(true);
@@ -160,8 +160,8 @@ export const ReplayingToolbar = defineComponent<ReplayingProps>(props => {
 
     const bookIcon = core.statusBar.icons.book;
     const saveIcon = core.statusBar.icons.save;
-    const font1 = '16px normal';
-    const font2 = '12px Verdana';
+    const font1 = new Font('normal', 16);
+    const font2 = new Font('Verdana', 12);
 
     const speedText = computed(() => `${status.speed}速`);
     const progress = computed(() => status.played / status.total);

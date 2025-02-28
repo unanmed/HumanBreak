@@ -18,6 +18,7 @@ import {
 } from '../preset/graphics';
 import { ElementAnchor, ElementLocator, ElementScale } from '../utils';
 import { CustomContainerRenderFn } from '../container';
+import { Font } from '../style/font';
 
 export interface CustomProps {
     _item: (props: BaseProps) => RenderItem;
@@ -100,7 +101,7 @@ export interface TextProps extends BaseProps {
     text?: string;
     fillStyle?: CanvasStyle;
     strokeStyle?: CanvasStyle;
-    font?: string;
+    font?: Font;
     strokeWidth?: number;
 }
 

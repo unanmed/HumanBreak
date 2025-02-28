@@ -2,6 +2,7 @@ import { logger } from '@/core/common/logger';
 import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 import {
     AutotileRenderable,
+    Font,
     onTick,
     RenderableData,
     texture
@@ -28,14 +29,8 @@ export const enum TextAlign {
 }
 
 export interface ITextContentConfig {
-    /** 字体类型 */
-    fontFamily: string;
-    /** 字体大小 */
-    fontSize: number;
-    /** 字体线宽 */
-    fontWeight: number;
-    /** 是否斜体 */
-    fontItalic: boolean;
+    /** 字体 */
+    font: Font;
     /** 是否持续上一次的文本，开启后，如果修改后的文本以修改前的文本为开头，那么会继续播放而不会从头播放 */
     keepLast: boolean;
     /** 打字机时间间隔，即两个字出现之间相隔多长时间 */
@@ -60,6 +55,17 @@ export interface ITextContentConfig {
     strokeWidth: number;
     /** 文字宽度，到达这么宽之后换行 */
     width: number;
+}
+
+interface TyperConfig extends ITextContentConfig {
+    /** 字体类型 */
+    fontFamily: string;
+    /** 字体大小 */
+    fontSize: number;
+    /** 字体线宽 */
+    fontWeight: number;
+    /** 是否斜体 */
+    fontItalic: boolean;
 }
 
 export interface ITextContentRenderData {
@@ -162,7 +168,7 @@ type TyperFunction = (data: TyperRenderable[], typing: boolean) => void;
 
 export class TextContentTyper extends EventEmitter<TextContentTyperEvent> {
     /** 文字配置信息 */
-    readonly config: Required<ITextContentConfig>;
+    readonly config: Required<TyperConfig>;
     /** 文字解析器 */
     readonly parser: TextContentParser;
 
@@ -205,12 +211,14 @@ export class TextContentTyper extends EventEmitter<TextContentTyperEvent> {
 
     constructor(config: Partial<ITextContentConfig>) {
         super();
+        const font = config.font ?? new Font();
 
         this.config = {
-            fontFamily: config.fontFamily ?? 'Verdana',
-            fontSize: config.fontSize ?? 16,
-            fontWeight: config.fontWeight ?? 500,
-            fontItalic: config.fontItalic ?? false,
+            font,
+            fontFamily: font.family,
+            fontSize: font.size,
+            fontWeight: font.weight,
+            fontItalic: font.italic,
             keepLast: config.keepLast ?? false,
             interval: config.interval ?? 0,
             lineHeight: config.lineHeight ?? 0,
@@ -762,7 +770,7 @@ export class TextContentParser {
 
     private parseFontWeight() {
         if (this.resolved.length > 0) this.addTextRenderable();
-        this.status.fontWeight = this.status.fontWeight > 500 ? 500 : 700;
+        this.status.fontWeight = this.status.fontWeight > 400 ? 400 : 700;
         this.font = this.buildFont();
     }
 
@@ -1300,7 +1308,7 @@ function isCJK(char: number) {
 export function buildFont(
     family: string,
     size: number,
-    weight: number = 500,
+    weight: number = 400,
     italic: boolean = false
 ) {
     return `${italic ? 'italic ' : ''}${weight} ${size}px "${family}"`;

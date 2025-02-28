@@ -10,7 +10,7 @@ import {
 } from 'vue';
 import { SetupComponentOptions } from './types';
 import { clamp } from 'lodash-es';
-import { DefaultProps, ElementLocator } from '@/core/render';
+import { DefaultProps, ElementLocator, Font } from '@/core/render';
 
 /** 圆角矩形页码距离容器的边框大小，与 pageSize 相乘 */
 const RECT_PAD = 0.1;
@@ -20,8 +20,10 @@ export interface PageProps extends DefaultProps {
     pages: number;
     /** 页码组件的定位 */
     loc: ElementLocator;
-    /** 页码的字体大小，默认为 14 */
-    pageSize?: number;
+    /** 页码的字体 */
+    font?: Font;
+    /** 只有一页的时候，是否隐藏页码 */
+    hideIfSingle?: boolean;
 }
 
 export interface PageExpose {
@@ -37,7 +39,7 @@ type PageSlots = SlotsType<{
 }>;
 
 const pageProps = {
-    props: ['pages', 'loc', 'pageSize']
+    props: ['pages', 'loc', 'font', 'hideIfSingle']
 } satisfies SetupComponentOptions<PageProps, {}, string, PageSlots>;
 
 /**
@@ -80,14 +82,15 @@ export const Page = defineComponent<PageProps, {}, string, PageSlots>(
         const leftArrow = ref<Path2D>();
         const rightArrow = ref<Path2D>();
 
+        const font = computed(() => props.font ?? new Font());
         const isFirst = computed(() => nowPage.value === 1);
         const isLast = computed(() => nowPage.value === props.pages);
-        const pageSize = computed(() => props.pageSize ?? 14);
         const width = computed(() => props.loc[2] ?? 200);
         const height = computed(() => props.loc[3] ?? 200);
-        const round = computed(() => pageSize.value / 4);
-        const pageFont = computed(() => `${pageSize.value}px normal`);
-        const nowPageFont = computed(() => `bold ${pageSize.value}px normal`);
+        const round = computed(() => font.value.size / 4);
+        const nowPageFont = computed(() =>
+            Font.clone(font.value, { weight: 700 })
+        );
 
         // 左右箭头的颜色
         const leftColor = computed(() => (isFirst.value ? '#666' : '#ddd'));
@@ -100,11 +103,11 @@ export const Page = defineComponent<PageProps, {}, string, PageSlots>(
             nextTick(() => {
                 updating = false;
             });
-            const pageH = pageSize.value + 8;
+            const pageH = font.value.size + 8;
             contentLoc.value = [0, 0, width.value, height.value - pageH];
             pageLoc.value = [0, height.value - pageH, width.value, pageH];
             const center = width.value / 2;
-            const size = pageSize.value * 1.5;
+            const size = font.value.size * 1.5;
             nowPageLoc.value = [center, 0, size, size, 0.5, 0];
             leftPageLoc.value = [center - size * 1.5, 0, size, size, 0.5, 0];
             leftLoc.value = [center - size * 3, 0, size, size, 0.5, 0];
@@ -113,8 +116,8 @@ export const Page = defineComponent<PageProps, {}, string, PageSlots>(
         };
 
         const updateArrowPath = () => {
-            const rectSize = pageSize.value * 1.5;
-            const size = pageSize.value;
+            const rectSize = font.value.size * 1.5;
+            const size = font.value.size;
             const pad = rectSize - size;
             const left = new Path2D();
             left.moveTo(size, pad);
@@ -129,13 +132,13 @@ export const Page = defineComponent<PageProps, {}, string, PageSlots>(
         };
 
         const updateRectAndText = () => {
-            const size = pageSize.value * 1.5;
+            const size = font.value.size * 1.5;
             const pad = RECT_PAD * size;
             rectLoc.value = [pad, pad, size - pad * 2, size - pad * 2];
             textLoc.value = [size / 2, size / 2, void 0, void 0, 0.5, 0.5];
         };
 
-        watch(pageSize, () => {
+        watch(font, () => {
             updatePagePos();
             updateArrowPath();
             updateRectAndText();
@@ -178,7 +181,10 @@ export const Page = defineComponent<PageProps, {}, string, PageSlots>(
                     <container loc={contentLoc.value}>
                         {slots.default?.(nowPage.value)}
                     </container>
-                    <container loc={pageLoc.value}>
+                    <container
+                        loc={pageLoc.value}
+                        hidden={props.hideIfSingle && props.pages === 1}
+                    >
                         <container
                             loc={leftLoc.value}
                             onClick={lastPage}
@@ -214,7 +220,7 @@ export const Page = defineComponent<PageProps, {}, string, PageSlots>(
                                 <text
                                     loc={textLoc.value}
                                     text={(nowPage.value - 1).toString()}
-                                    font={pageFont.value}
+                                    font={font.value}
                                 ></text>
                             </container>
                         )}
@@ -251,7 +257,7 @@ export const Page = defineComponent<PageProps, {}, string, PageSlots>(
                                 <text
                                     loc={textLoc.value}
                                     text={(nowPage.value + 1).toString()}
-                                    font={pageFont.value}
+                                    font={font.value}
                                 ></text>
                             </container>
                         )}

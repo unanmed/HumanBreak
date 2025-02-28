@@ -8,7 +8,8 @@ import {
     HeroRenderer,
     LayerDoorAnimate,
     Props,
-    LayerGroup
+    LayerGroup,
+    Font
 } from '@/core/render';
 import { WeatherController } from '@/module/weather';
 import { FloorChange } from '@/plugin/fallback';
@@ -62,8 +63,8 @@ const MainScene = defineComponent(() => {
         zIndex: 30,
         fillStyle: '#fff',
         titleFill: 'gold',
-        fontFamily: 'normal',
-        titleFont: '700 20px normal',
+        font: new Font('normal'),
+        titleFont: new Font('normal', 20, 'px', 700),
         winskin: 'winskin2.png',
         interval: 100,
         lineHeight: 4,

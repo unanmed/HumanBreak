@@ -6,6 +6,7 @@ import { texture } from '../cache';
 import { isNil } from 'lodash-es';
 import { logger } from '@/core/common/logger';
 import { IAnimateFrame, renderEmits } from '../frame';
+import { Font } from '../style/font';
 
 /** 文字的安全填充，会填充在文字的上侧和下侧，防止削顶和削底 */
 const SAFE_PAD = 1;
@@ -21,7 +22,7 @@ export class Text extends RenderItem<ETextEvent> {
 
     fillStyle?: CanvasStyle = '#fff';
     strokeStyle?: CanvasStyle;
-    font: string = '16px Verdana';
+    font: Font = new Font();
     strokeWidth: number = 1;
 
     private length: number = 0;
@@ -50,7 +51,7 @@ export class Text extends RenderItem<ETextEvent> {
         ctx.textBaseline = 'bottom';
         ctx.fillStyle = this.fillStyle ?? 'transparent';
         ctx.strokeStyle = this.strokeStyle ?? 'transparent';
-        ctx.font = this.font;
+        ctx.font = this.font.string();
         ctx.lineWidth = this.strokeWidth;
 
         if (this.strokeStyle) {
@@ -67,7 +68,7 @@ export class Text extends RenderItem<ETextEvent> {
     measure() {
         const ctx = Text.measureCanvas.ctx;
         ctx.textBaseline = 'bottom';
-        ctx.font = this.font;
+        ctx.font = this.font.string();
         const res = ctx.measureText(this.text);
         return res;
     }
@@ -87,7 +88,7 @@ export class Text extends RenderItem<ETextEvent> {
      * 设置使用的字体
      * @param font 字体
      */
-    setFont(font: string) {
+    setFont(font: Font) {
         this.font = font;
         this.calBox();
         this.update(this);
@@ -145,7 +146,7 @@ export class Text extends RenderItem<ETextEvent> {
                 this.setStyle(this.fillStyle, nextValue);
                 return true;
             case 'font':
-                if (!this.assertType(nextValue, 'string', key)) return false;
+                if (!this.assertType(nextValue, Font, key)) return false;
                 this.setFont(nextValue);
                 return true;
             case 'strokeWidth':

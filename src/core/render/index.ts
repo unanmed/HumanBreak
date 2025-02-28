@@ -1,5 +1,6 @@
 export * from './preset';
 export * from './renderer';
+export * from './style';
 export * from './adapter';
 export * from './cache';
 export * from './camera';
