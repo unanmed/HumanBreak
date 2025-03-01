@@ -126,7 +126,8 @@ export class Text extends RenderItem<ETextEvent> {
         this.length = width;
         this.descent = actualBoundingBoxAscent;
         const height = actualBoundingBoxAscent + actualBoundingBoxDescent;
-        this.size(width, height + this.strokeWidth * 2 + SAFE_PAD * 2);
+        const stroke = this.strokeWidth * 2;
+        this.size(width + stroke, height + stroke + SAFE_PAD * 2);
     }
 
     protected handleProps(

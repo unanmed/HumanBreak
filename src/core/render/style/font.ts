@@ -33,16 +33,22 @@ type _FontStretch =
 type _FontVariant = 'normal' | 'small-caps';
 
 export class Font implements IFontConfig {
+    static defaultFamily: string = 'Verdana';
+    static defaultSize: number = 16;
+    static defaultSizeUnit: string = 'px';
+    static defaultWeight: number = 400;
+    static defaultItalic: boolean = false;
+
     private readonly fallbacks: Font[] = [];
 
     private fontString: string = '';
 
     constructor(
-        public readonly family: string = 'Verdana',
-        public readonly size: number = 16,
-        public readonly sizeUnit: string = 'px',
-        public readonly weight: number = 400,
-        public readonly italic: boolean = false
+        public readonly family: string = Font.defaultFamily,
+        public readonly size: number = Font.defaultSize,
+        public readonly sizeUnit: string = Font.defaultSizeUnit,
+        public readonly weight: number = Font.defaultWeight,
+        public readonly italic: boolean = Font.defaultItalic
     ) {
         this.fontString = this.getFont();
     }
@@ -93,11 +99,11 @@ export class Font implements IFontConfig {
 
     private static parseOne(str: string) {
         if (!str) return new Font();
-        let italic = false;
-        let weight = 400;
-        let size = 16;
-        let unit = 'px';
-        let family = 'Verdana';
+        let italic = this.defaultItalic;
+        let weight = this.defaultWeight;
+        let size = this.defaultSize;
+        let unit = this.defaultSizeUnit;
+        let family = this.defaultFamily;
         const tokens = str.split(/\s+/);
         tokens.forEach(v => {
             // font-italic
@@ -134,6 +140,24 @@ export class Font implements IFontConfig {
         for (let i = 1; i < fonts.length; i++) {
             main.addFallback(this.parseOne(fonts[i]));
         }
+    }
+
+    /**
+     * 设置默认字体
+     */
+    static setDefaults(font: Font) {
+        this.defaultFamily = font.family;
+        this.defaultItalic = font.italic;
+        this.defaultSize = font.size;
+        this.defaultSizeUnit = font.sizeUnit;
+        this.defaultWeight = font.weight;
+    }
+
+    /**
+     * 获取默认字体
+     */
+    static defaults() {
+        return new Font();
     }
 
     /**

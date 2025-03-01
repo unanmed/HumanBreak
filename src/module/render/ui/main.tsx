@@ -19,7 +19,7 @@ import { FloorItemDetail } from '@/plugin/fx/itemDetail';
 import { PopText } from '@/plugin/fx/pop';
 import { LayerGroupPortal } from '@/plugin/fx/portal';
 import { defineComponent, onMounted, reactive, ref } from 'vue';
-import { Textbox } from '../components';
+import { Textbox, Tip } from '../components';
 import { GameUI, UIController } from '@/core/system';
 import {
     MAIN_HEIGHT,
@@ -35,7 +35,6 @@ import {
 } from './statusBar';
 import { onLoaded } from '../use';
 import { ReplayingStatus } from './toolbar';
-import { Tip } from '../components/tip';
 
 const MainScene = defineComponent(() => {
     const layerGroupExtends: ILayerGroupRenderExtends[] = [

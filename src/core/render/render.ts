@@ -562,13 +562,17 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
     }
 
     private toTagString(item: RenderItem, space: number, deep: number): string {
+        if (item.isComment) return '';
         const name = item.constructor.name;
         if (item.children.size === 0) {
-            return `${' '.repeat(deep * space)}<${name} id="${item.id}" uid="${item.uid}" type="${item.type}"${item.hidden ? ' hidden' : ''}></${name}>\n`;
+            return `${' '.repeat(deep * space)}<${name} ${item.id ? `id="${item.id}" ` : ''}uid="${item.uid}"${item.hidden ? ' hidden' : ''} />\n`;
         } else {
             return (
-                `${' '.repeat(deep * space)}<${name} id="${item.id}" uid="${item.uid}" type="${item.type}" ${item.hidden ? 'hidden' : ''}>\n` +
-                `${[...item.children].map(v => this.toTagString(v, space, deep + 1)).join('')}` +
+                `${' '.repeat(deep * space)}<${name} ${item.id ? `${item.id} ` : ''}uid="${item.uid}" ${item.hidden ? 'hidden' : ''}>\n` +
+                `${[...item.children]
+                    .filter(v => !v.isComment)
+                    .map(v => this.toTagString(v, space, deep + 1))
+                    .join('')}` +
                 `${' '.repeat(deep * space)}</${name}>\n`
             );
         }
