@@ -5,9 +5,9 @@ import {
     IKeepController,
     IUIInstance,
     IUIMountable,
-    UIComponent
+    UIComponent,
+    UIProps
 } from './shared';
-import { Props } from '@/core/render';
 import { UIInstance } from './instance';
 import {
     computed,
@@ -35,13 +35,13 @@ export const enum UIMode {
     Custom
 }
 
-export interface IUICustomConfig<C extends UIComponent> {
+export interface IUICustomConfig {
     /**
      * 打开一个新的 UI
      * @param ins 要打开的 UI 实例
      * @param stack 当前的 UI 栈，还未将 UI 实例加入栈中
      */
-    open(ins: IUIInstance<C>, stack: IUIInstance<C>[]): void;
+    open(ins: IUIInstance, stack: IUIInstance[]): void;
 
     /**
      * 关闭一个 UI
@@ -49,7 +49,7 @@ export interface IUICustomConfig<C extends UIComponent> {
      * @param stack 当前的 UI 栈，还未将 UI 实例移除
      * @param index 这个 UI 实例在 UI 栈中的索引
      */
-    close(ins: IUIInstance<C>, stack: IUIInstance<C>[], index: number): void;
+    close(ins: IUIInstance, stack: IUIInstance[], index: number): void;
 
     /**
      * 隐藏一个 UI
@@ -57,7 +57,7 @@ export interface IUICustomConfig<C extends UIComponent> {
      * @param stack 当前的 UI 栈
      * @param index 这个 UI 实例在 UI 栈中的索引
      */
-    hide(ins: IUIInstance<C>, stack: IUIInstance<C>[], index: number): void;
+    hide(ins: IUIInstance, stack: IUIInstance[], index: number): void;
 
     /**
      * 显示一个 UI
@@ -65,32 +65,32 @@ export interface IUICustomConfig<C extends UIComponent> {
      * @param stack 当前的 UI 栈
      * @param index 这个 UI 实例在 UI 栈中的索引
      */
-    show(ins: IUIInstance<C>, stack: IUIInstance<C>[], index: number): void;
+    show(ins: IUIInstance, stack: IUIInstance[], index: number): void;
 
     /**
      * 更新所有 UI 的显示，一般会在显示模式更改时调用
      * @param stack 当前的 UI 栈
      */
-    update(stack: IUIInstance<C>[]): void;
+    update(stack: IUIInstance[]): void;
 }
 
 interface UIControllerEvent {}
 
-export class UIController<C extends UIComponent = UIComponent>
+export class UIController
     extends EventEmitter<UIControllerEvent>
-    implements IUIMountable<C>
+    implements IUIMountable
 {
     static controllers: Map<string, UIController> = new Map();
 
     /** 当前的 ui 栈 */
-    readonly stack: IUIInstance<C>[] = reactive([]);
+    readonly stack: IUIInstance[] = reactive([]);
     /** UI 显示方式 */
     mode: UIMode = UIMode.LastOnlyStack;
     /** 这个 UI 实例的背景，当这个 UI 处于显示模式时，会显示背景 */
-    background?: IGameUI<C>;
+    background?: IGameUI;
 
     /** 背景 UI 实例 */
-    readonly backIns: ShallowRef<IUIInstance<C> | null> = shallowRef(null);
+    readonly backIns: ShallowRef<IUIInstance | null> = shallowRef(null);
     /** 当前是否显示背景 UI */
     readonly showBack: ComputedRef<boolean> = computed(
         () => this.userShowBack.value && this.sysShowBack.value
@@ -102,7 +102,7 @@ export class UIController<C extends UIComponent = UIComponent>
     }
 
     /** 自定义显示模式下的配置信息 */
-    private config?: IUICustomConfig<C>;
+    private config?: IUICustomConfig;
     /** 是否维持背景 UI */
     private keepBack: boolean = false;
     /** 用户是否显示背景 UI */
@@ -134,7 +134,7 @@ export class UIController<C extends UIComponent = UIComponent>
      * 设置背景 UI
      * @param back 这个 UI 控制器的背景 UI
      */
-    setBackground(back: IGameUI<C>) {
+    setBackground(back: IGameUI) {
         this.background = back;
     }
 
@@ -171,13 +171,12 @@ export class UIController<C extends UIComponent = UIComponent>
         };
     }
 
-    /**
-     * 打开一个 ui
-     * @param ui 要打开的 ui
-     * @param vBind 传递给这个 ui 的响应式数据
-     */
-    open(ui: IGameUI<C>, vBind: Props<C>) {
-        const ins = new UIInstance(ui, vBind);
+    open<T extends UIComponent>(
+        ui: IGameUI<T>,
+        vBind: UIProps<T>,
+        alwaysShow: boolean = false
+    ): IUIInstance<T> {
+        const ins = new UIInstance(ui, vBind, alwaysShow);
         switch (this.mode) {
             case UIMode.LastOnly:
             case UIMode.LastOnlyStack:
@@ -196,11 +195,7 @@ export class UIController<C extends UIComponent = UIComponent>
         return ins;
     }
 
-    /**
-     * 关闭一个 ui
-     * @param ui 要关闭的 ui 实例
-     */
-    close(ui: UIInstance<C>) {
+    close(ui: IUIInstance) {
         const index = this.stack.indexOf(ui);
         if (index === -1) return;
         switch (this.mode) {
@@ -239,7 +234,16 @@ export class UIController<C extends UIComponent = UIComponent>
         this.keepBack = false;
     }
 
-    hide(ins: IUIInstance<C>): void {
+    closeAll(ui?: IGameUI): void {
+        if (!ui) {
+            this.stack.splice(0);
+        } else {
+            const list = this.stack.filter(v => v.ui === ui);
+            list.forEach(v => this.close(v));
+        }
+    }
+
+    hide(ins: IUIInstance): void {
         const index = this.stack.indexOf(ins);
         if (index === -1) return;
         if (this.mode === UIMode.Custom) {
@@ -249,7 +253,7 @@ export class UIController<C extends UIComponent = UIComponent>
         }
     }
 
-    show(ins: IUIInstance<C>): void {
+    show(ins: IUIInstance): void {
         const index = this.stack.indexOf(ins);
         if (index === -1) return;
         if (this.mode === UIMode.Custom) {
@@ -290,7 +294,7 @@ export class UIController<C extends UIComponent = UIComponent>
      * 使用自定义的显示模式
      * @param config 自定义显示模式的配置
      */
-    showCustom(config: IUICustomConfig<C>) {
+    showCustom(config: IUICustomConfig) {
         this.mode = UIMode.Custom;
         this.config = config;
         config.update(this.stack);
@@ -300,10 +304,8 @@ export class UIController<C extends UIComponent = UIComponent>
      * 获取一个元素上的 ui 控制器
      * @param id 要获取的 ui 控制器的唯一标识符
      */
-    static getController<T extends UIComponent>(
-        id: string
-    ): UIController<T> | null {
-        const res = this.controllers.get(id) as UIController<T>;
+    static getController(id: string): UIController | null {
+        const res = this.controllers.get(id);
         return res ?? null;
     }
 }

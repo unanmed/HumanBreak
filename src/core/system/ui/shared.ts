@@ -3,7 +3,17 @@ import { DefineComponent, DefineSetupFnComponent, Ref, ShallowRef } from 'vue';
 
 export type UIComponent = DefineSetupFnComponent<any> | DefineComponent;
 
-export interface IGameUI<C extends UIComponent> {
+export interface UIComponentProps<T extends UIComponent = UIComponent> {
+    controller: IUIMountable;
+    instance: IUIInstance<T>;
+}
+
+export type UIProps<C extends UIComponent = UIComponent> = Omit<
+    Props<C>,
+    keyof UIComponentProps<C>
+>;
+
+export interface IGameUI<C extends UIComponent = UIComponent> {
     /** 这个 UI 的名称 */
     readonly name: string;
     /** 这个 UI 的组件 */
@@ -22,11 +32,11 @@ export interface IKeepController {
     unload(): void;
 }
 
-export interface IUIMountable<C extends UIComponent> {
+export interface IUIMountable {
     /** 当前的 UI 栈 */
-    readonly stack: IUIInstance<C>[];
+    readonly stack: IUIInstance<UIComponent>[];
     /** 当前的背景 UI */
-    readonly backIns: ShallowRef<IUIInstance<C> | null>;
+    readonly backIns: ShallowRef<IUIInstance<UIComponent> | null>;
     /** 当前是否显示背景 UI */
     readonly showBack: Ref<boolean>;
 
@@ -34,13 +44,46 @@ export interface IUIMountable<C extends UIComponent> {
      * 隐藏一个 UI
      * @param ins 要隐藏的 UI 实例
      */
-    hide(ins: IUIInstance<C>): void;
+    hide(ins: IUIInstance<UIComponent>): void;
 
     /**
      * 显示一个 UI
      * @param ins 要显示的 UI 实例
      */
-    show(ins: IUIInstance<C>): void;
+    show(ins: IUIInstance<UIComponent>): void;
+
+    /**
+     * 隐藏背景 UI
+     */
+    hideBackground(): void;
+
+    /**
+     * 显示背景 UI
+     */
+    showBackground(): void;
+
+    /**
+     * 打开一个 ui
+     * @param ui 要打开的 ui
+     * @param vBind 传递给这个 ui 的响应式数据
+     * @param alwaysShow 这个 ui 是否保持开启，对于需要叠加显示的 ui 非常有用
+     */
+    open<T extends UIComponent>(
+        ui: IGameUI<T>,
+        vBind: UIProps<T>,
+        alwaysShow?: boolean
+    ): IUIInstance<T>;
+
+    /**
+     * 关闭一个 ui
+     * @param ui 要关闭的 ui 实例
+     */
+    close(ui: IUIInstance<UIComponent>): void;
+
+    /**
+     * 关闭所有或指定类型的所有 UI
+     */
+    closeAll(ui?: IGameUI<UIComponent>): void;
 
     /**
      * 维持背景，直到下次所有 UI 都被关闭
@@ -48,15 +91,17 @@ export interface IUIMountable<C extends UIComponent> {
     keep(): IKeepController;
 }
 
-export interface IUIInstance<C extends UIComponent> {
+export interface IUIInstance<C extends UIComponent = UIComponent> {
     /** 这个 ui 实例的唯一 key，用于 vue */
     readonly key: number;
     /** 这个 ui 实例的 ui 信息 */
     readonly ui: IGameUI<C>;
     /** 传递给这个 ui 实例的响应式数据 */
-    readonly vBind: Props<C>;
+    readonly vBind: UIProps<C>;
     /** 当前元素是否被隐藏 */
     readonly hidden: boolean;
+    /** 是否永远保持开启 */
+    readonly alwaysShow: boolean;
 
     /**
      * 隐藏这个 ui

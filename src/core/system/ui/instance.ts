@@ -1,5 +1,5 @@
 import { Props } from '@/core/render';
-import { IGameUI, IUIInstance, UIComponent } from './shared';
+import { IGameUI, IUIInstance, UIComponent, UIProps } from './shared';
 import EventEmitter from 'eventemitter3';
 import { markRaw, mergeProps } from 'vue';
 
@@ -21,7 +21,8 @@ export class UIInstance<C extends UIComponent>
 
     constructor(
         ui: IGameUI<C>,
-        public vBind: Props<C>
+        public vBind: UIProps<C>,
+        public readonly alwaysShow: boolean = false
     ) {
         super();
         this.ui = markRaw(ui);
@@ -30,13 +31,13 @@ export class UIInstance<C extends UIComponent>
     /**
      * 设置这个 UI 实例的响应式数据的值
      * @param data 要设置的值
-     * @param merge 是将传入的值与原先的值合并（true），还是将当前值覆盖掉原先的值（false）
+     * @param merge 是将传入的值与原先的值合并（true），还是将当前值覆盖掉原先的值（false），默认合并
      */
-    setVBind(data: Props<C>, merge: boolean = true) {
+    setVBind(data: Partial<Props<C>>, merge: boolean = true) {
         if (merge) {
-            this.vBind = mergeProps(this.vBind, data) as Props<C>;
+            this.vBind = mergeProps(this.vBind, data) as UIProps<C>;
         } else {
-            this.vBind = data;
+            this.vBind = data as UIProps<C>;
         }
     }
 
