@@ -5,6 +5,7 @@ import { TextContent, TextContentExpose, TextContentProps } from './textbox';
 import { SetupComponentOptions } from './types';
 import { TextAlign } from './textboxTyper';
 import { Page, PageExpose } from './page';
+import { GameUI, IUIMountable } from '@/core/system';
 
 export interface ConfirmBoxProps extends DefaultProps, TextContentProps {
     text: string;
@@ -66,11 +67,11 @@ const confirmBoxProps = {
  *   color="#333"
  *   border="gold"
  *   // 设置选项的字体
- *   selFont="16px Verdana"
+ *   selFont={new Font('Verdana', 16)}
  *   // 设置选项的文本颜色
  *   selFill="#d48"
- *   // 完全继承 TextContent 的参数，因此可以填写 fontFamily 参数指定文本字体
- *   fontFamily="Arial"
+ *   // 完全继承 TextContent 的参数，因此可以填写 font 参数指定文本字体
+ *   font={new Font('arial')}
  *   onYes={onYes}
  *   onNo={onNo}
  * />
@@ -191,8 +192,11 @@ export const ConfirmBox = defineComponent<
     );
 }, confirmBoxProps);
 
+export type ChoiceKey = string | number | symbol;
+export type ChoiceItem = [key: ChoiceKey, text: string];
+
 export interface ChoicesProps extends DefaultProps, TextContentProps {
-    choices: [key: string | number | symbol, text: string][];
+    choices: ChoiceItem[];
     loc: ElementLocator;
     width: number;
     maxHeight?: number;
@@ -206,12 +210,11 @@ export interface ChoicesProps extends DefaultProps, TextContentProps {
     titleFont?: Font;
     titleFill?: CanvasStyle;
     pad?: number;
-    defaultChoice?: string | number | symbol;
     interval?: number;
 }
 
 export type ChoicesEmits = {
-    choice: (key: string | number | symbol) => void;
+    choose: (key: ChoiceKey) => void;
 };
 
 const choicesProps = {
@@ -230,16 +233,49 @@ const choicesProps = {
         'titleFont',
         'titleFill',
         'pad',
-        'defaultChoice',
         'interval'
     ],
-    emits: ['choice']
+    emits: ['choose']
 } satisfies SetupComponentOptions<
     ChoicesProps,
     ChoicesEmits,
     keyof ChoicesEmits
 >;
 
+/**
+ * 选项框组件，用于在多个选项中选择一个，例如样板的系统设置就由它实现。
+ * 参数参考 {@link ChoicesProps}，事件参考 {@link ChoicesEmits}。用例如下：
+ * ```tsx
+ * <Choices
+ *   // 选项数组，每一项是一个二元素数组，第一项表示这个选项的 id，在选中时会以此作为参数传递给事件
+ *   // 第二项表示这一项的内容，即展示给玩家看的内容
+ *   choices={[[0, '选项1'], [100, '选项2']]}
+ *   // 选项框会自动计算宽度和高度，因此不需要手动指定，即使手动指定也无效
+ *   loc={[240, 240, void 0, void 0, 0.5, 0.5]}
+ *   text="请选择一项"
+ *   title="选项"
+ *   // 使用 winskin 图片作为背景
+ *   winskin="winskin.png"
+ *   // 使用颜色作为背景和边框，如果设置了 winskin，那么此参数无效
+ *   color="#333"
+ *   border="gold"
+ *   // 调整每两个选项之间的间隔
+ *   interval={12}
+ *   // 设置选项的字体
+ *   selFont={new Font('Verdana', 16)}
+ *   // 设置选项的文本颜色
+ *   selFill="#d48"
+ *   // 设置标题的字体
+ *   titleFont={new Font('Verdana', 16)}
+ *   // 设置标题的文本颜色
+ *   selFill="gold"
+ *   // 完全继承 TextContent 的参数，因此可以填写 font 参数指定文本字体
+ *   font={new Font('arial')}
+ *   // 当选择某一项时触发
+ *   onChoice={(choice) => console.log(choice)}
+ * />
+ * ```
+ */
 export const Choices = defineComponent<
     ChoicesProps,
     ChoicesEmits,
@@ -424,7 +460,7 @@ export const Choices = defineComponent<
     key.realize('confirm', () => {
         const page = pageCom.value?.now() ?? 1;
         const index = page * choiceCountPerPage.value + selected.value;
-        emit('choice', props.choices[index][0]);
+        emit('choose', props.choices[index][0]);
     });
 
     return () => (
@@ -479,7 +515,7 @@ export const Choices = defineComponent<
                                 font={props.selFont}
                                 cursor="pointer"
                                 zIndex={5}
-                                onClick={() => emit('choice', v[0])}
+                                onClick={() => emit('choose', v[0])}
                                 onSetText={(_, width, height) =>
                                     updateChoiceSize(i, width, height)
                                 }
@@ -492,3 +528,78 @@ export const Choices = defineComponent<
         </container>
     );
 }, choicesProps);
+
+/**
+ * 弹出一个确认框，然后将确认结果返回
+ * @param controller UI 控制器
+ * @param text 确认文本内容
+ * @param loc 确认框的位置
+ * @param width 确认框的宽度
+ * @param props 额外的 props
+ */
+export function getConfirm(
+    controller: IUIMountable,
+    text: string,
+    loc: ElementLocator,
+    width: number,
+    props?: Partial<ConfirmBoxProps>
+) {
+    return new Promise<boolean>(res => {
+        const instance = controller.open(
+            ConfirmBoxUI,
+            {
+                ...(props ?? {}),
+                loc,
+                text,
+                width,
+                onYes: () => {
+                    controller.close(instance);
+                    res(true);
+                },
+                onNo: () => {
+                    controller.close(instance);
+                    res(false);
+                }
+            },
+            true
+        );
+    });
+}
+
+/**
+ * 弹出一个选择框，然后将选择结果返回
+ * @param controller UI 控制器
+ * @param choices 选择框的选项
+ * @param loc 选择框的位置
+ * @param width 选择框的宽度
+ * @param props 额外的 props
+ */
+export function getChoice<T extends ChoiceKey = ChoiceKey>(
+    controller: IUIMountable,
+    choices: ChoiceItem[],
+    loc: ElementLocator,
+    width: number,
+    props?: Partial<ChoicesProps>
+) {
+    return new Promise<T>(res => {
+        const instance = controller.open(
+            ChoicesUI,
+            {
+                ...(props ?? {}),
+                choices,
+                loc,
+                width,
+                onChoose: key => {
+                    controller.close(instance);
+                    res(key as T);
+                }
+            },
+            true
+        );
+    });
+}
+
+/** @see {@link ConfirmBox} */
+export const ConfirmBoxUI = new GameUI('confirm-box', ConfirmBox);
+/** @see {@link Choices} */
+export const ChoicesUI = new GameUI('choices', Choices);
