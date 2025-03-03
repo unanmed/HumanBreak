@@ -23,7 +23,7 @@ export const UIContainer = defineComponent<UIContainerProps>(props => {
                     controller={data}
                     instance={b}
                     key={b.key}
-                    hidden={b.hidden}
+                    hidden={b.hidden && !b.alwaysShow}
                 ></b.ui.component>
             );
         }
@@ -34,7 +34,7 @@ export const UIContainer = defineComponent<UIContainerProps>(props => {
                     key={v.key}
                     controller={data}
                     instance={v}
-                    hidden={v.hidden}
+                    hidden={v.hidden && !v.alwaysShow}
                 ></v.ui.component>
             ))
         );

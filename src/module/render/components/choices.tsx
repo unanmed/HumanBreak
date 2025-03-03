@@ -50,7 +50,7 @@ const confirmBoxProps = {
 >;
 
 /**
- * 确认框组件，与 2.x 的 drawConfirm 类似，可以键盘操作，
+ * 确认框组件，与 2.x 的 drawConfirm 类似，可以键盘操作，单次调用参考 {@link getConfirm}。
  * 参数参考 {@link ConfirmBoxProps}，事件参考 {@link ConfirmBoxEmits}，用例如下：
  * ```tsx
  * const onYes = () => console.log('yes');
@@ -243,7 +243,7 @@ const choicesProps = {
 >;
 
 /**
- * 选项框组件，用于在多个选项中选择一个，例如样板的系统设置就由它实现。
+ * 选项框组件，用于在多个选项中选择一个，例如样板的系统设置就由它实现。单次调用参考 {@link getChoice}。
  * 参数参考 {@link ChoicesProps}，事件参考 {@link ChoicesEmits}。用例如下：
  * ```tsx
  * <Choices
@@ -530,12 +530,28 @@ export const Choices = defineComponent<
 }, choicesProps);
 
 /**
- * 弹出一个确认框，然后将确认结果返回
+ * 弹出一个确认框，然后将确认结果返回，例如给玩家弹出一个确认框，并获取玩家是否确认：
+ * ```ts
+ * const confirm = await getConfirm(
+ *   // 在哪个 UI 控制器上打开，对于一般 UI 组件来说，直接填写 props.controller 即可
+ *   props.controller,
+ *   // 确认内容
+ *   '确认要 xxx 吗？',
+ *   // 确认框的位置，宽度由下一个参数指定，高度参数由组件内部计算得出，指定无效
+ *   [240, 240, void 0, void 0, 0.5, 0.5],
+ *   // 宽度设为 240
+ *   240,
+ *   // 可以给选择框传入其他的 props，例如指定字体，此项可选
+ *   { font: new Font('Verdana', 20) }
+ * );
+ * // 之后，就可以直接判断 confirm 来执行不同的操作了
+ * if (confirm) { ... }
+ * ```
  * @param controller UI 控制器
  * @param text 确认文本内容
  * @param loc 确认框的位置
  * @param width 确认框的宽度
- * @param props 额外的 props
+ * @param props 额外的 props，参考 {@link ConfirmBoxProps}
  */
 export function getConfirm(
     controller: IUIMountable,
@@ -567,12 +583,28 @@ export function getConfirm(
 }
 
 /**
- * 弹出一个选择框，然后将选择结果返回
+ * 弹出一个选择框，然后将选择结果返回，例如给玩家弹出一个选择框，并获取玩家选择了哪个：
+ * ```ts
+ * const choice = await getChoice(
+ *   // 在哪个 UI 控制器上打开，对于一般 UI 组件来说，直接填写 props.controller 即可
+ *   props.controller,
+ *   // 选项内容，参考 Choices 的注释
+ *   [[0, '选项1'], [1, '选项2'], [2, '选项3']],
+ *   // 选择框的位置，宽度由下一个参数指定，高度参数由组件内部计算得出，指定无效
+ *   [240, 240, void 0, void 0, 0.5, 0.5],
+ *   // 宽度设为 240
+ *   240,
+ *   // 可以给选择框传入其他的 props，例如指定标题，此项可选
+ *   { title: '选项标题' }
+ * );
+ * // 之后，就可以直接判断 choice 来执行不同的操作了
+ * if (choice === 0) { ... }
+ * ```
  * @param controller UI 控制器
  * @param choices 选择框的选项
  * @param loc 选择框的位置
  * @param width 选择框的宽度
- * @param props 额外的 props
+ * @param props 额外的 props，参考 {@link ChoicesProps}
  */
 export function getChoice<T extends ChoiceKey = ChoiceKey>(
     controller: IUIMountable,

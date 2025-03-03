@@ -1,4 +1,4 @@
-import { GameUI } from '@/core/system';
+import { GameUI, UIComponentProps } from '@/core/system';
 import { computed, defineComponent, ref, watch } from 'vue';
 import { SetupComponentOptions, TextContent } from '../components';
 import { DefaultProps, ElementLocator, Sprite, Font } from '@/core/render';
@@ -34,7 +34,7 @@ export interface ILeftHeroStatus {
     magicDef: number;
 }
 
-interface StatusBarProps<T> extends DefaultProps {
+interface StatusBarProps<T> extends DefaultProps, UIComponentProps {
     loc: ElementLocator;
     status: T;
     hidden: boolean;

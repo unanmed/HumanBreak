@@ -657,7 +657,7 @@ interface CoreSave {
     /**
      * 自动存档信息
      */
-    autosave: Readonly<Autosave>;
+    autosave: Autosave;
 
     /**
      * 收藏的存档
@@ -679,7 +679,7 @@ interface Autosave {
     /**
      * 当前存档信息
      */
-    data?: Save[];
+    data?: Save[] | null;
 
     /**
      * 自动存档位的最大值
@@ -982,7 +982,7 @@ interface Core extends Pick<Main, CoreDataFromMain> {
     /**
      * 存档信息
      */
-    readonly saves: Readonly<CoreSave>;
+    readonly saves: CoreSave;
 
     /**
      * 全局数值信息

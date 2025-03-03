@@ -46,7 +46,7 @@ interface Events extends EventData {
     startGame(
         hard: string,
         seed?: number,
-        route?: string,
+        route?: string[],
         callback?: () => void
     ): void;
 
