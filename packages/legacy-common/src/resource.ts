@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig, ResponseType } from 'axios';
-import { Disposable, EventEmitter } from '@motajs/legacy-common';
+import { EventEmitter } from './eventEmitter';
+import { Disposable } from './disposable';
 import { logger } from '@motajs/common';
 import JSZip from 'jszip';
 

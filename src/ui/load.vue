@@ -30,7 +30,7 @@ import {
     loadCompressedResource,
     loadDefaultResource,
     LoadTask
-} from '@/core/common/resource';
+} from '@motajs/legacy-common';
 import { GameUi } from '@/core/main/custom/ui';
 import { formatSize } from '@/plugin/utils';
 import { logger } from '@motajs/common';
