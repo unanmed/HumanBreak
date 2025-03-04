@@ -1,6 +1,6 @@
 import { defineComponent, VNode } from 'vue';
 import { IUIMountable } from './shared';
-import { SetupComponentOptions } from '@/module';
+import { SetupComponentOptions } from './types';
 
 export interface UIContainerProps {
     controller: IUIMountable;

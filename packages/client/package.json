@@ -1,5 +1,5 @@
 {
-    "name": "@motajs/render",
+    "name": "@motajs/client",
     "dependencies": {
         "@motajs/render": "workspace:*"
     }

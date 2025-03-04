@@ -13,7 +13,7 @@ import { Scroll, ScrollExpose, ScrollProps } from './scroll';
 import { transitioned } from '../use';
 import { hyper } from 'mutate-animate';
 import { logger } from '@motajs/common';
-import { GameUI, IUIMountable } from '@/core/system';
+import { GameUI, IUIMountable } from '@motajs/system-ui';
 
 interface ProgressProps extends DefaultProps {
     /** 进度条的位置 */

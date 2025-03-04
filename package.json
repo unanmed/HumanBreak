@@ -14,11 +14,7 @@
     "lines": "tsx script/lines.ts"
   },
   "dependencies": {
-    "@motajs/render": "workspace:*",
-    "@motajs/common": "workspace:*",
-    "@motajs/client": "workspace:*",
     "@ant-design/icons-vue": "^6.1.0",
-    "@emotion/css": "^11.13.0",
     "@vueuse/core": "^10.11.1",
     "@wasm-audio-decoders/ogg-vorbis": "^0.1.16",
     "anon-tokyo": "0.0.0-alpha.0",
@@ -28,7 +24,6 @@
     "codec-parser": "^2.5.0",
     "eventemitter3": "^5.0.1",
     "gl-matrix": "^3.4.3",
-    "gsap": "^3.12.5",
     "jszip": "^3.10.1",
     "lodash-es": "^4.17.21",
     "lz-string": "^1.5.0",

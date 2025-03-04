@@ -20,7 +20,7 @@ import { PopText } from '@/plugin/fx/pop';
 import { LayerGroupPortal } from '@/plugin/fx/portal';
 import { defineComponent, onMounted, reactive, ref } from 'vue';
 import { Textbox, Tip } from '../components';
-import { GameUI, UIController } from '@/core/system';
+import { GameUI, UIController } from '@motajs/system-ui';
 import {
     MAIN_HEIGHT,
     MAIN_WIDTH,

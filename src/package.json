@@ -1,0 +1,10 @@
+{
+    "name": "@motajs/user",
+    "dependencies": {
+        "@motajs/client": "workspace:*",
+        "@motajs/common": "workspace:*",
+        "@motajs/render": "workspace:*",
+        "@motajs/system": "workspace:*",
+        "@motajs/system-ui": "workspace:*"
+    }
+}

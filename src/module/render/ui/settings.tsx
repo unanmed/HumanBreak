@@ -1,5 +1,5 @@
 import { ElementLocator } from '@motajs/render';
-import { GameUI, UIComponentProps } from '@/core/system';
+import { GameUI, UIComponentProps } from '@motajs/system-ui';
 import { defineComponent } from 'vue';
 import {
     ChoiceItem,

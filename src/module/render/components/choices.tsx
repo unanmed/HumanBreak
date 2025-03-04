@@ -5,7 +5,7 @@ import { TextContent, TextContentExpose, TextContentProps } from './textbox';
 import { SetupComponentOptions } from './types';
 import { TextAlign } from './textboxTyper';
 import { Page, PageExpose } from './page';
-import { GameUI, IUIMountable } from '@/core/system';
+import { GameUI, IUIMountable } from '@motajs/system-ui';
 
 export interface ConfirmBoxProps extends DefaultProps, TextContentProps {
     text: string;

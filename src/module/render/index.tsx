@@ -1,6 +1,6 @@
 import { MotaRenderer, createApp } from '@motajs/render';
 import { defineComponent } from 'vue';
-import { UIController } from '@/core/system';
+import { UIController } from '@motajs/system-ui';
 import { mainSceneUI } from './ui/main';
 import { MAIN_HEIGHT, MAIN_WIDTH } from './shared';
 import { TextboxStore } from './components';

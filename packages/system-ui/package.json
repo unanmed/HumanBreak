@@ -1,0 +1,7 @@
+{
+    "name": "@motajs/system-ui",
+    "dependencies": {
+        "@motajs/common": "workspace:*",
+        "@motajs/render": "workspace:*"
+    }
+}

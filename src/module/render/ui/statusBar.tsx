@@ -1,4 +1,4 @@
-import { GameUI, UIComponentProps } from '@/core/system';
+import { GameUI, UIComponentProps } from '@motajs/system-ui';
 import { computed, defineComponent, ref, watch } from 'vue';
 import { SetupComponentOptions, TextContent } from '../components';
 import {
