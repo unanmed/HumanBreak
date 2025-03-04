@@ -1,10 +1,10 @@
-import { DefaultProps, ElementLocator, Font, texture } from '@/core/render';
+import { DefaultProps, ElementLocator, Font, texture } from '@motajs/render';
+import { logger } from '@motajs/common';
 import { computed, defineComponent, onUnmounted, ref } from 'vue';
 import { SetupComponentOptions } from './types';
 import { transitioned } from '../use';
 import { hyper } from 'mutate-animate';
 import { debounce } from 'lodash-es';
-import { logger } from '@/core/common/logger';
 
 export interface TipProps extends DefaultProps {
     loc: ElementLocator;

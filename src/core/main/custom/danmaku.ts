@@ -1,6 +1,6 @@
 import BoxAnimate from '@/components/boxAnimate.vue';
 import { EventEmitter } from '@/core/common/eventEmitter';
-import { logger } from '@/core/common/logger';
+import { logger } from '@motajs/common';
 import { ResponseBase } from '@/core/interface';
 import {
     deleteWith,

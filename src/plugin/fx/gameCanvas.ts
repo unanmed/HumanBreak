@@ -1,9 +1,9 @@
-import { logger } from '@/core/common/logger';
-import { LayerGroupFloorBinder } from '@/core/render/preset/floor';
+import { logger } from '@motajs/common';
 import {
+    LayerGroupFloorBinder,
     ILayerGroupRenderExtends,
     LayerGroup
-} from '@/core/render/preset/layer';
+} from '@motajs/render';
 
 const filterMap: [FloorIds[], string][] = [];
 

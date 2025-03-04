@@ -1,11 +1,16 @@
 import { GameUI, UIComponentProps } from '@/core/system';
 import { computed, defineComponent, ref, watch } from 'vue';
 import { SetupComponentOptions, TextContent } from '../components';
-import { DefaultProps, ElementLocator, Sprite, Font } from '@/core/render';
+import {
+    DefaultProps,
+    ElementLocator,
+    Sprite,
+    Font,
+    MotaOffscreenCanvas2D
+} from '@motajs/render';
 import { transitionedColor } from '../use';
 import { linear } from 'mutate-animate';
 import { Scroll } from '../components/scroll';
-import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 import { getArea, MinimapDrawer } from '@/plugin/ui/fly';
 import {
     NumpadToolbar,

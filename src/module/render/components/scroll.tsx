@@ -17,12 +17,14 @@ import {
     ElementLocator,
     RenderItem,
     Sprite,
-    Transform
-} from '@/core/render';
-import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
+    Transform,
+    MotaOffscreenCanvas2D,
+    IActionEvent,
+    IWheelEvent,
+    MouseType
+} from '@motajs/render';
 import { hyper, linear, Transition } from 'mutate-animate';
 import { clamp } from 'lodash-es';
-import { IActionEvent, IWheelEvent, MouseType } from '@/core/render/event';
 import { transitioned } from '../use';
 
 export const enum ScrollDirection {

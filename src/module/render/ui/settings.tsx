@@ -1,4 +1,4 @@
-import { ElementLocator } from '@/core/render';
+import { ElementLocator } from '@motajs/render';
 import { GameUI, UIComponentProps } from '@/core/system';
 import { defineComponent } from 'vue';
 import {

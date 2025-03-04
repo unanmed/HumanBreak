@@ -1,12 +1,12 @@
-import { logger } from '@/core/common/logger';
-import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
+import { logger } from '@motajs/common';
+import { MotaOffscreenCanvas2D } from '@motajs/render';
 import { mainSetting, MotaSettingItem } from '@/core/main/setting';
-import { LayerGroupFloorBinder } from '@/core/render/preset/floor';
 import {
+    LayerGroupFloorBinder,
     ILayerGroupRenderExtends,
-    LayerGroup
-} from '@/core/render/preset/layer';
-import { Sprite } from '@/core/render/sprite';
+    LayerGroup,
+    Sprite
+} from '@motajs/render';
 import type { BluePalace } from '@/game/mechanism/misc';
 
 /** 最大粒子数 */

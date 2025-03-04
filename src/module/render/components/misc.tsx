@@ -4,15 +4,15 @@ import {
     onTick,
     PathProps,
     Sprite
-} from '@/core/render';
+} from '@motajs/render';
 import { computed, defineComponent, ref, SetupContext, watch } from 'vue';
 import { SetupComponentOptions } from './types';
-import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
+import { MotaOffscreenCanvas2D } from '@motajs/render';
 import { TextboxProps, TextContent, TextContentProps } from './textbox';
 import { Scroll, ScrollExpose, ScrollProps } from './scroll';
 import { transitioned } from '../use';
 import { hyper } from 'mutate-animate';
-import { logger } from '@/core/common/logger';
+import { logger } from '@motajs/common';
 import { GameUI, IUIMountable } from '@/core/system';
 
 interface ProgressProps extends DefaultProps {

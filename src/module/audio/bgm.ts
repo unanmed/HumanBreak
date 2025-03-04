@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
 import { audioPlayer, AudioPlayer, AudioRoute, AudioStatus } from './player';
 import { guessTypeByExt, isAudioSupport } from './support';
-import { logger } from '@/core/common/logger';
+import { logger } from '@motajs/common';
 import { StreamLoader } from '../loader';
 import { linear, sleep, Transition } from 'mutate-animate';
 import { VolumeEffect } from './effect';

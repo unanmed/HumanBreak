@@ -1,7 +1,10 @@
-import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
-import { wrapInstancedComponent } from '@/core/render';
-import { RenderItem, RenderItemPosition } from '@/core/render/item';
-import { Transform } from '@/core/render/transform';
+import {
+    wrapInstancedComponent,
+    MotaOffscreenCanvas2D,
+    RenderItem,
+    RenderItemPosition,
+    Transform
+} from '@motajs/render';
 
 // 渲染端的向后兼容用，会充当两个版本间过渡的作用
 class Change extends RenderItem {

@@ -1,12 +1,12 @@
-import { logger } from '@/core/common/logger';
-import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
+import { logger } from '@motajs/common';
 import {
     AutotileRenderable,
     Font,
     onTick,
     RenderableData,
-    texture
-} from '@/core/render';
+    texture,
+    MotaOffscreenCanvas2D
+} from '@motajs/render';
 import EventEmitter from 'eventemitter3';
 import { isNil } from 'lodash-es';
 

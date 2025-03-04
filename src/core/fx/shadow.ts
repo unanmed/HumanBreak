@@ -1,21 +1,17 @@
 import { mat4 } from 'gl-matrix';
-import { logger } from '../common/logger';
+import { logger } from '@motajs/common';
 import {
     WebGLColorArray,
     createProgram,
     isWebGL2Supported
 } from './webgl';
-import { ILayerRenderExtends, Layer } from '../render/preset/layer';
-import { HeroRenderer } from '../render/preset/hero';
-import { Sprite } from '../render/sprite';
+import { ILayerRenderExtends, Layer, HeroRenderer, Sprite } from '@motajs/render';
 
 /** 
  * 最大光源数量，必须设置，且光源数不能超过这个值，这个值决定了会预留多少的缓冲区，因此最好尽可能小，同时游戏过程中不可修改
  * 这个值越大，对显卡尤其是显存的要求会越大，不过考虑到各种设备的性能差异，不建议超过10
  */
 const MAX_LIGHT_NUM = 5;
-/** 阴影层的Z值 */
-const Z_INDEX = 55;
 // 我也不知道这个数怎么来的，试出来是这个，别动就行
 const FOVY = Math.PI / 2;
 const ignore: Set<AllNumbers> = new Set([660, 661]);

@@ -1,6 +1,9 @@
-import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
-import { RenderItem, RenderItemPosition } from '@/core/render/item';
-import { Transform } from '@/core/render/transform';
+import {
+    MotaOffscreenCanvas2D,
+    RenderItem,
+    RenderItemPosition,
+    Transform
+} from '@motajs/render';
 import { IStateDamageable } from '@/game/state/interface';
 import EventEmitter from 'eventemitter3';
 import { Ticker } from 'mutate-animate';

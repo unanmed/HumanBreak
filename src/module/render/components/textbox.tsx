@@ -1,4 +1,11 @@
-import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
+import {
+    ElementLocator,
+    Font,
+    Sprite,
+    DefaultProps,
+    Text,
+    MotaOffscreenCanvas2D
+} from '@motajs/render';
 import {
     computed,
     defineComponent,
@@ -12,13 +19,10 @@ import {
     VNode,
     watch
 } from 'vue';
-import { logger } from '@/core/common/logger';
-import { Sprite } from '@/core/render/sprite';
-import { DefaultProps } from '@/core/render/renderer';
+import { logger } from '@motajs/common';
 import { isNil } from 'lodash-es';
 import { SetupComponentOptions } from './types';
 import EventEmitter from 'eventemitter3';
-import { Text } from '@/core/render/preset';
 import {
     ITextContentConfig,
     TextContentTyper,
@@ -27,7 +31,6 @@ import {
     WordBreak,
     TextAlign
 } from './textboxTyper';
-import { ElementLocator, Font } from '@/core/render';
 
 export interface TextContentProps
     extends DefaultProps,

@@ -1,19 +1,15 @@
-import type { RenderAdapter } from '@/core/render/adapter';
-import type { LayerGroupAnimate } from '@/core/render/preset/animate';
 import type {
+    RenderAdapter,
     LayerDoorAnimate,
-    LayerFloorBinder
-} from '@/core/render/preset/floor';
-import type { HeroRenderer } from '@/core/render/preset/hero';
-import type { Layer, LayerGroup } from '@/core/render/preset/layer';
+    LayerGroupAnimate,
+    LayerFloorBinder,
+    HeroRenderer,
+    Layer,
+    LayerGroup,
+    FloorViewport
+} from '@motajs/render';
 import type { TimingFn } from 'mutate-animate';
-import {
-    BlockMover,
-    heroMoveCollection,
-    IMoveController,
-    MoveStep
-} from '@/game/state/move';
-import type { FloorViewport } from '@/core/render/preset/viewport';
+import { BlockMover, heroMoveCollection, MoveStep } from '@/game/state/move';
 
 // 向后兼容用，会充当两个版本间过渡的作用
 

@@ -1,5 +1,4 @@
-import { MotaRenderer } from '@/core/render';
-import { createApp } from '@/core/render';
+import { MotaRenderer, createApp } from '@motajs/render';
 import { defineComponent } from 'vue';
 import { UIController } from '@/core/system';
 import { mainSceneUI } from './ui/main';

@@ -1,4 +1,4 @@
-import { DefaultProps, ElementLocator, Font } from '@/core/render';
+import { DefaultProps, ElementLocator, Font } from '@motajs/render';
 import { computed, defineComponent, ref } from 'vue';
 import { SetupComponentOptions } from '../components';
 import {

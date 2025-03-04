@@ -1,10 +1,12 @@
-import { Container } from '@/core/render/container';
-import { FloorDamageExtends } from '@/core/render/preset/damage';
-import { LayerGroupFloorBinder } from '@/core/render/preset/floor';
-import { FloorLayer, LayerGroup } from '@/core/render/preset/layer';
-import { FloorViewport } from '@/core/render/preset/viewport';
-import { MotaRenderer } from '@/core/render/render';
-import { Transform } from '@/core/render/transform';
+import {
+    Container,
+    FloorDamageExtends,
+    LayerGroupFloorBinder,
+    FloorLayer,
+    LayerGroup,
+    FloorViewport,
+    MotaRenderer
+} from '@motajs/render';
 import { FloorItemDetail } from '@/plugin/fx/itemDetail';
 
 const loopMaps = Mota.require('module', 'Mechanism').MiscData.loopMaps;

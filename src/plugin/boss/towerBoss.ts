@@ -1,12 +1,15 @@
-import { Shader } from '@/core/render/shader';
+import {
+    Shader,
+    MotaRenderer,
+    LayerGroup,
+    RenderItem,
+    MotaOffscreenCanvas2D,
+    Container,
+    HeroRenderer
+} from '@motajs/render';
 import { PointEffect } from '../fx/pointShader';
 import { BarrageBoss, BossSprite, Hitbox } from './barrage';
-import { MotaRenderer } from '@/core/render/render';
-import { LayerGroup } from '@/core/render/preset/layer';
-import { RenderItem } from '@/core/render/item';
-import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 import { Animation, hyper, power, sleep, Transition } from 'mutate-animate';
-import { Container } from '@/core/render/container';
 import {
     ArrowProjectile,
     AttackProjectile,
@@ -19,7 +22,6 @@ import {
     ThunderProjectile
 } from './towerBossProjectile';
 import { IStateDamageable } from '@/game/state/interface';
-import { HeroRenderer } from '@/core/render/preset/hero';
 import { Pop } from '../fx/pop';
 import { WeatherController } from '@/module';
 

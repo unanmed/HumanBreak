@@ -10,7 +10,7 @@ import {
 } from 'vue';
 import { SetupComponentOptions } from './types';
 import { clamp } from 'lodash-es';
-import { DefaultProps, ElementLocator, Font } from '@/core/render';
+import { DefaultProps, ElementLocator, Font } from '@motajs/render';
 
 /** 圆角矩形页码距离容器的边框大小，与 pageSize 相乘 */
 const RECT_PAD = 0.1;

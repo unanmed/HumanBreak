@@ -1,0 +1,75 @@
+import { Animation, Ticker, Transition } from 'mutate-animate';
+import { ERenderItemEvent, RenderItem } from '@motajs/render-core';
+// todo: 改为 monorepo
+import { gameKey, Hotkey } from '@/core/main/custom/hotkey';
+import { onMounted, onUnmounted } from 'vue';
+import EventEmitter from 'eventemitter3';
+
+const ticker = new Ticker();
+
+/**
+ * 在组件中每帧执行一次函数
+ * @param fn 每帧执行的函数
+ */
+export function onTick(fn: (time: number) => void) {
+    onMounted(() => {
+        ticker.add(fn);
+    });
+    onUnmounted(() => {
+        ticker.remove(fn);
+    });
+}
+
+type AnimationUsing = [Animation];
+type TransitionUsing = [Transition];
+
+/**
+ * 在组件中创建一个动画实例
+ */
+export function useAnimation(): AnimationUsing {
+    const ani = new Animation();
+    onUnmounted(() => {
+        ani.ticker.destroy();
+    });
+    return [ani];
+}
+
+/**
+ * 在组件中创建一个渐变实例
+ */
+export function useTransition(): TransitionUsing {
+    const tran = new Transition();
+    onUnmounted(() => {
+        tran.ticker.destroy();
+    });
+    return [tran];
+}
+
+type KeyUsing = [Hotkey, symbol];
+
+/**
+ * 在组件中定义按键操作
+ * @param noScope 是否不创建新作用域
+ */
+export function useKey(noScope: boolean = false): KeyUsing {
+    if (noScope) {
+        return [gameKey, gameKey.scope];
+    } else {
+        const sym = Symbol();
+        gameKey.use(sym);
+        onUnmounted(() => {
+            gameKey.dispose();
+        });
+        return [gameKey, sym];
+    }
+}
+
+export function onEvent<
+    T extends ERenderItemEvent,
+    K extends EventEmitter.EventNames<T>
+>(item: RenderItem<T>, key: K, listener: EventEmitter.EventListener<T, K>) {
+    item.on(key, listener);
+    onUnmounted(() => {
+        item.off(key, listener);
+    });
+}

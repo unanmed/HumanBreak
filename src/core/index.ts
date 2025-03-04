@@ -56,25 +56,13 @@ import EnemyTarget from '@/panel/enemyTarget.vue';
 import KeyboardPanel from '@/panel/keyboard.vue';
 import { MCGenerator } from './main/layout';
 import { ResourceController } from './loader/controller';
-import { logger } from './common/logger';
+import { logger } from '@motajs/common';
 import { Danmaku } from './main/custom/danmaku';
 import * as Shadow from './fx/shadow';
-import { MotaRenderer } from './render/render';
-import { Container } from './render/container';
-import { Sprite } from './render/sprite';
-import { Image, Text } from './render/preset/misc';
-import { RenderItem } from './render/item';
-import { texture } from './render/cache';
-import { RenderAdapter } from './render/adapter';
-import { Layer } from './render/preset/layer';
-import { LayerGroupFloorBinder } from './render/preset/floor';
+import { Render } from '@motajs/client';
 import { HeroKeyMover } from './main/action/move';
-import { Camera } from './render/camera';
 import * as Animation from 'mutate-animate';
-import './render/index';
-import * as RenderUtils from './render/utils';
 import '@/module';
-import { MotaOffscreenCanvas2D } from './fx/canvas2d';
 
 // ----- 类注册
 Mota.register('class', 'CustomToolbar', CustomToolbar);
@@ -143,21 +131,7 @@ Mota.register('module', 'UIComponents', {
 Mota.register('module', 'MCGenerator', MCGenerator);
 Mota.register('module', 'Shadow', Shadow);
 Mota.register('module', 'Effect', {});
-Mota.register('module', 'Render', {
-    texture,
-    MotaRenderer,
-    Container,
-    Sprite,
-    Text,
-    Image,
-    RenderItem,
-    RenderAdapter,
-    Layer,
-    LayerGroupFloorBinder,
-    Camera,
-    MotaOffscreenCanvas2D,
-    Utils: RenderUtils
-});
+Mota.register('module', 'Render', Render);
 Mota.register('module', 'Action', {
     HeroKeyMover
 });

@@ -1,10 +1,15 @@
-import { Shader, ShaderProgram } from '@/core/render/shader';
+import {
+    Shader,
+    ShaderProgram,
+    MotaRenderer,
+    Container,
+    GL2Program,
+    IShaderUniform,
+    UniformType,
+    Transform,
+    MotaOffscreenCanvas2D
+} from '@motajs/render';
 import { IWeather } from './weather';
-import { MotaRenderer } from '@/core/render/render';
-import { Container } from '@/core/render/container';
-import { GL2Program, IShaderUniform, UniformType } from '@/core/render/gl2';
-import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
-import { Transform } from '@/core/render/transform';
 
 const snowVs = /* glsl */ `
 in vec2 a_snowVertex;

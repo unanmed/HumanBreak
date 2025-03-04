@@ -77,7 +77,7 @@
                             @click="addIcon(icon as AllIds)"
                         >
                             <BoxAnimate
-                                :id="(icon as AllIds)"
+                                :id="icon as AllIds"
                                 :noborder="true"
                                 :no-animate="true"
                                 :height="getIconHeight(icon as AllIds)"
@@ -166,7 +166,7 @@ import { calStringSize, tip } from '@/plugin/utils';
 import { gameKey } from '@/core/main/custom/hotkey';
 import { isNil } from 'lodash-es';
 import { stringifyCSS, parseCss, getIconHeight } from '@/plugin/utils';
-import { logger, LogLevel } from '@/core/common/logger';
+import { logger, LogLevel } from '@motajs/common';
 import Scroll from '@/components/scroll.vue';
 import BoxAnimate from '@/components/boxAnimate.vue';
 

@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
 import { IStreamController, IStreamReader } from '../loader';
 import { IAudioInput, IAudioOutput } from './effect';
-import { logger } from '@/core/common/logger';
+import { logger } from '@motajs/common';
 import { AudioType } from './support';
 import CodecParser, { CodecFrame, MimeType, OggPage } from 'codec-parser';
 import { isNil } from 'lodash-es';

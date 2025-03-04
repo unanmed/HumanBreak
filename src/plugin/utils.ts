@@ -9,7 +9,7 @@ import { decompressFromBase64 } from 'lz-string';
 import { Keyboard, KeyboardEmits } from '@/core/main/custom/keyboard';
 import { fixedUi, mainUi } from '@/core/main/init/ui';
 import { isAssist } from '@/core/main/custom/hotkey';
-import { logger } from '@/core/common/logger';
+import { logger } from '@motajs/common';
 
 type CanParseCss = keyof {
     [P in keyof CSSStyleDeclaration as CSSStyleDeclaration[P] extends string

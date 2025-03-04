@@ -1,5 +1,4 @@
-import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
-import { Transform } from '@/core/render';
+import { Transform, MotaOffscreenCanvas2D } from '@motajs/render';
 import { IStateDamageable } from '@/game/state/interface';
 import { Hitbox, Projectile } from './barrage';
 import type { PalaceBoss } from './palaceBoss';
@@ -223,7 +222,7 @@ export class SplittableBall extends Projectile<PalaceBoss> {
         }
     }
 
-    ai(boss: PalaceBoss, time: number, frame: number, dt: number): void {
+    ai(boss: PalaceBoss, time: number, _frame: number, dt: number): void {
         if (this.splitData?.split) {
             if (time > this.splitData.time) {
                 this.split(boss);
@@ -256,7 +255,7 @@ export class SplittableBall extends Projectile<PalaceBoss> {
         this.setPosition(x + this.vx * p, y + this.vy * p);
     }
 
-    render(canvas: MotaOffscreenCanvas2D, transform: Transform): void {
+    render(canvas: MotaOffscreenCanvas2D, _transform: Transform): void {
         if (!this.color) return;
         const texture = SplittableBall.ball.get(this.color);
         if (!texture) return;

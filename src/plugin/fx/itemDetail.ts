@@ -1,15 +1,13 @@
-import { logger } from '@/core/common/logger';
+import { logger } from '@motajs/common';
 import { mainSetting } from '@/core/main/setting';
 import {
     Damage,
     DamageRenderable,
-    FloorDamageExtends
-} from '@/core/render/preset/damage';
-import { LayerGroupFloorBinder } from '@/core/render/preset/floor';
-import {
+    FloorDamageExtends,
+    LayerGroupFloorBinder,
     ILayerGroupRenderExtends,
     LayerGroup
-} from '@/core/render/preset/layer';
+} from '@motajs/render';
 
 interface ItemDetailData {
     x: number;

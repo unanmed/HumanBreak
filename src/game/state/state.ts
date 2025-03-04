@@ -1,6 +1,6 @@
 import { Undoable } from '@/core/interface';
 import { EventEmitter } from 'eventemitter3';
-import { logger } from '@/core/common/logger';
+import { logger } from '@motajs/common';
 
 type ToJSONFunction<T> = (data: T) => string;
 type FromJSONFunction<T> = (data: string) => T;

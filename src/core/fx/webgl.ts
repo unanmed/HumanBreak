@@ -1,6 +1,6 @@
 import { ensureArray, tip } from '@/plugin/utils';
 import { sleep } from 'mutate-animate';
-import { logger } from '../common/logger';
+import { logger } from '@motajs/common';
 
 const { gl, gl2 } = checkSupport();
 

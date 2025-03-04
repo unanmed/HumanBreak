@@ -18,9 +18,18 @@
         "baseUrl": ".",
         "paths": {
             "@/*": ["src/*"],
-            "@ui/*": ["src/ui/*"]
+            "@ui/*": ["src/ui/*"],
+            "@motajs/*": ["packages/*/src"]
         }
     },
-    "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.d.ts",
+        "src/**/*.tsx",
+        "src/**/*.vue",
+        "packages/**/*.ts",
+        "packages/**/*.d.ts",
+        "packages/**/*.tsx"
+    ],
     "references": [{ "path": "./tsconfig.node.json" }]
 }

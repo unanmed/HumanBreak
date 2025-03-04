@@ -1,7 +1,5 @@
-import { logger } from '@/core/common/logger';
-import { UniformType } from '@/core/render/gl2';
-import { Shader, ShaderProgram } from '@/core/render/shader';
-import { Transform } from '@/core/render/transform';
+import { logger } from '@motajs/common';
+import { UniformType, Shader, ShaderProgram, Transform } from '@motajs/render';
 
 export const enum PointEffectType {
     /**

@@ -1,4 +1,4 @@
-import { logger } from '@/core/common/logger';
+import { logger } from '@motajs/common';
 import EventEmitter from 'eventemitter3';
 
 export interface IStreamController<T = void> {

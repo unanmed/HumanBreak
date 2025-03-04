@@ -1,4 +1,4 @@
-import { Props } from '@/core/render';
+import { Props } from '@motajs/render';
 import { DefineComponent, DefineSetupFnComponent, Ref, ShallowRef } from 'vue';
 
 export type UIComponent = DefineSetupFnComponent<any> | DefineComponent;

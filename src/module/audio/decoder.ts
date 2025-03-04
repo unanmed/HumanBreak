@@ -1,4 +1,4 @@
-import { logger } from '@/core/common/logger';
+import { logger } from '@motajs/common';
 import { OggVorbisDecoderWebWorker } from '@wasm-audio-decoders/ogg-vorbis';
 import { OggOpusDecoderWebWorker } from 'ogg-opus-decoder';
 import { AudioType, isAudioSupport } from './support';

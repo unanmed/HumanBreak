@@ -1,11 +1,14 @@
-import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
-import { CameraAnimation } from '@/core/render/camera';
-import { Container } from '@/core/render/container';
-import { LayerGroup } from '@/core/render/preset/layer';
-import { MotaRenderer } from '@/core/render/render';
-import { Shader } from '@/core/render/shader';
-import { Sprite } from '@/core/render/sprite';
-import { disableViewport, enableViewport } from '@/core/render/utils';
+import { MotaOffscreenCanvas2D } from '@motajs/render';
+import {
+    CameraAnimation,
+    Container,
+    LayerGroup,
+    MotaRenderer,
+    Shader,
+    Sprite,
+    disableViewport,
+    enableViewport
+} from '@motajs/render';
 import type { HeroMover, MoveStep } from '@/game/state/move';
 import EventEmitter from 'eventemitter3';
 

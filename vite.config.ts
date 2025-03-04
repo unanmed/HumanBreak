@@ -4,8 +4,9 @@ import legacy from '@vitejs/plugin-legacy';
 import components from 'unplugin-vue-components/vite';
 import vuejsx from '@vitejs/plugin-vue-jsx'
 import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers';
-import { resolve } from 'path';
+import path, { resolve } from 'path';
 import postcssPresetEnv from 'postcss-preset-env';
+import glob from 'glob'
 
 const FSHOST = 'http://127.0.0.1:3000/';
 
@@ -14,6 +15,14 @@ const custom = [
     'layer', 'layer-group', 'animate', 'damage', 'graphics', 'icon', 'winskin',
     'container-custom'
 ]
+
+const aliases = glob.sync('packages/*/src').map((srcPath) => {
+    const packageName = path.basename(path.dirname(srcPath));
+    return {
+        find: `@motajs/${packageName}`,
+        replacement: path.resolve(__dirname, srcPath),
+    };
+});
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -36,6 +45,7 @@ export default defineConfig({
     base: `./`,
     resolve: {
         alias: {
+            ...aliases,
             '@': resolve(__dirname, './src'),
             '@ui': resolve(__dirname, './src/ui')
         }

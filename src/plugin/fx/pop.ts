@@ -1,7 +1,11 @@
-import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
-import { wrapInstancedComponent } from '@/core/render';
-import { RenderItem, RenderItemPosition } from '@/core/render/item';
-import { Transform } from '@/core/render/transform';
+import {
+    wrapInstancedComponent,
+    RenderItem,
+    RenderItemPosition,
+    Transform,
+    MotaOffscreenCanvas2D
+} from '@motajs/render';
+
 import { TimingFn } from 'mutate-animate';
 
 interface PopData {
@@ -61,7 +65,7 @@ export class Pop extends RenderItem {
 
     protected render(
         canvas: MotaOffscreenCanvas2D,
-        transform: Transform
+        _transform: Transform
     ): void {
         const ctx = canvas.ctx;
         const toDelete = new Set<PopData>();

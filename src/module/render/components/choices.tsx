@@ -1,4 +1,4 @@
-import { DefaultProps, ElementLocator, Font, useKey } from '@/core/render';
+import { DefaultProps, ElementLocator, Font, useKey } from '@motajs/render';
 import { computed, defineComponent, reactive, ref } from 'vue';
 import { Background, Selection } from './misc';
 import { TextContent, TextContentExpose, TextContentProps } from './textbox';

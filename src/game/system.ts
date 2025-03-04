@@ -18,26 +18,15 @@ import type { Ref } from 'vue';
 import type * as battle from './enemy/battle';
 import type * as hero from './state/hero';
 import type * as damage from './enemy/damage';
-import type { Logger } from '@/core/common/logger';
+import type { Logger } from '@motajs/common';
 import type { Danmaku } from '@/core/main/custom/danmaku';
 import type * as misc from './mechanism/misc';
-import type { texture } from '@/core/render/cache';
-import type { MotaRenderer } from '@/core/render/render';
-import type { Container } from '@/core/render/container';
-import type { Sprite } from '@/core/render/sprite';
-import type { Image, Text } from '@/core/render/preset/misc';
-import type { RenderItem } from '@/core/render/item';
-import type { RenderAdapter } from '@/core/render/adapter';
+import type { Render } from '@motajs/client';
 import type { ItemState } from './state/item';
-import type { Layer } from '@/core/render/preset/layer';
-import type { LayerGroupFloorBinder } from '@/core/render/preset/floor';
 import type { HeroKeyMover } from '@/core/main/action/move';
 import type { BlockMover, HeroMover, ObjectMoverBase } from './state/move';
-import type { Camera } from '@/core/render/camera';
 import type * as Animation from 'mutate-animate';
-import type * as RenderUtils from '@/core/render/utils';
 import type { WeatherController } from '@/module/weather/weather';
-import type { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 
 interface ClassInterface {
     // 渲染进程与游戏进程通用
@@ -100,21 +89,7 @@ interface ModuleInterface {
         HeroSkill: typeof misc.HeroSkill;
     };
     Effect: {};
-    Render: {
-        texture: typeof texture;
-        MotaRenderer: typeof MotaRenderer;
-        Container: typeof Container;
-        Sprite: typeof Sprite;
-        Text: typeof Text;
-        Image: typeof Image;
-        RenderItem: typeof RenderItem;
-        RenderAdapter: typeof RenderAdapter;
-        Layer: typeof Layer;
-        LayerGroupFloorBinder: typeof LayerGroupFloorBinder;
-        Camera: typeof Camera;
-        MotaOffscreenCanvas2D: typeof MotaOffscreenCanvas2D;
-        Utils: typeof RenderUtils;
-    };
+    Render: typeof Render;
     State: {
         ItemState: typeof ItemState;
         HeroMover: typeof HeroMover;

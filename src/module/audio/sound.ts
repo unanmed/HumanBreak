@@ -1,6 +1,6 @@
 import EventEmitter from 'eventemitter3';
 import { audioPlayer, AudioPlayer } from './player';
-import { logger } from '@/core/common/logger';
+import { logger } from '@motajs/common';
 import { VolumeEffect } from './effect';
 
 type LocationArray = [number, number, number];

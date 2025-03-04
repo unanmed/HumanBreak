@@ -1,0 +1,9 @@
+{
+    "name": "@motajs/render",
+    "dependencies": {
+        "@motajs/render-core": "workspace:*",
+        "@motajs/render-elements": "workspace:*",
+        "@motajs/render-style": "workspace:*",
+        "@motajs/render-vue": "workspace:*"
+    }
+}

@@ -10,7 +10,7 @@ import {
     Props,
     LayerGroup,
     Font
-} from '@/core/render';
+} from '@motajs/render';
 import { WeatherController } from '@/module/weather';
 import { FloorChange } from '@/plugin/fallback';
 import { LayerGroupFilter } from '@/plugin/fx/gameCanvas';

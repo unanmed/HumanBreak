@@ -1,0 +1,7 @@
+packages:
+    - 'packages/*'
+    - 'packages/*/*'
+
+ignore:
+    - 'packages/**/dist'
+    - 'packages/**/node_modules'

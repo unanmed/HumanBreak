@@ -1,4 +1,4 @@
-import { DefaultProps, ElementLocator, GraphicPropsBase } from '@/core/render';
+import { DefaultProps, ElementLocator, GraphicPropsBase } from '@motajs/render';
 import { computed, defineComponent, onMounted, Ref, ref, watch } from 'vue';
 import { SetupComponentOptions } from './types';
 

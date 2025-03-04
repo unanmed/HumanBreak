@@ -15,7 +15,7 @@ import {
     VolumeEffect
 } from './effect';
 import { isNil } from 'lodash-es';
-import { logger } from '@/core/common/logger';
+import { logger } from '@motajs/common';
 import { sleep } from 'mutate-animate';
 import { AudioDecoder } from './decoder';
 

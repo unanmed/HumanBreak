@@ -1,10 +1,14 @@
 import { Animation, hyper, linear, power, sleep } from 'mutate-animate';
 import { Chase, ChaseData, IChaseController } from './chase';
 import { completeAchievement } from '../ui/achievement';
-import { Camera, CameraAnimation, ICameraScale } from '@/core/render/camera';
-import { LayerGroup } from '@/core/render/preset/layer';
-import { MotaRenderer } from '@/core/render/render';
-import { Sprite } from '@/core/render/sprite';
+import {
+    Camera,
+    CameraAnimation,
+    ICameraScale,
+    LayerGroup,
+    MotaRenderer,
+    Sprite
+} from '@motajs/render';
 import { PointEffect, PointEffectType } from '../fx/pointShader';
 import { bgmController } from '@/module';
 

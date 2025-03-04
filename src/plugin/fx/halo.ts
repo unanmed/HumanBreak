@@ -1,13 +1,13 @@
-import { logger } from '@/core/common/logger';
-import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
+import { logger } from '@motajs/common';
+import { MotaOffscreenCanvas2D } from '@motajs/render';
 import { mainSetting } from '@/core/main/setting';
-import { LayerGroupFloorBinder } from '@/core/render/preset/floor';
 import {
+    LayerGroupFloorBinder,
     ILayerGroupRenderExtends,
-    LayerGroup
-} from '@/core/render/preset/layer';
-import { Sprite } from '@/core/render/sprite';
-import { Transform } from '@/core/render/transform';
+    LayerGroup,
+    Sprite,
+    Transform
+} from '@motajs/render';
 
 const gameListener = Mota.require('var', 'gameListener');
 

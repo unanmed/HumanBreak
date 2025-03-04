@@ -33,7 +33,7 @@ import {
 } from '@/core/common/resource';
 import { GameUi } from '@/core/main/custom/ui';
 import { formatSize } from '@/plugin/utils';
-import { logger } from '@/core/common/logger';
+import { logger } from '@motajs/common';
 import { fixedUi } from '@/core/main/init/ui';
 import { sleep } from 'mutate-animate';
 

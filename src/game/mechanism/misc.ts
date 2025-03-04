@@ -1,6 +1,6 @@
 import { backDir, has } from '@/plugin/game/utils';
 import { loading } from '../game';
-import type { LayerDoorAnimate } from '@/core/render/preset/floor';
+import type { LayerDoorAnimate } from '@motajs/render';
 import { getSkillLevel } from '@/plugin/game/skillTree';
 
 /**

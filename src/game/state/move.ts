@@ -1,17 +1,17 @@
 import EventEmitter from 'eventemitter3';
 import { backDir, checkCanMoveExtended, toDir } from './utils';
 import { loading } from '../game';
-import type { RenderAdapter } from '@/core/render/adapter';
-import type { HeroRenderer } from '@/core/render/preset/hero';
-import type { FloorViewport } from '@/core/render/preset/viewport';
-import type { HeroKeyMover } from '@/core/main/action/move';
 import type {
+    RenderAdapter,
+    HeroRenderer,
+    FloorViewport,
     FloorLayer,
     Layer,
     LayerGroup,
-    LayerMovingRenderable
-} from '@/core/render/preset/layer';
-import type { LayerFloorBinder } from '@/core/render/preset/floor';
+    LayerMovingRenderable,
+    LayerFloorBinder
+} from '@motajs/render';
+import type { HeroKeyMover } from '@/core/main/action/move';
 import { BluePalace, MiscData } from '../mechanism/misc';
 import { sleep } from 'mutate-animate';
 

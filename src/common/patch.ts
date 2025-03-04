@@ -1,4 +1,4 @@
-import { logger } from '@/core/common/logger';
+import { logger } from '@motajs/common';
 
 export const enum PatchClass {
     Actions,

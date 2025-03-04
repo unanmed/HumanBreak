@@ -1,5 +1,5 @@
-import { logger } from '@/core/common/logger';
-import { RenderItem } from '@/core/render';
+import { logger } from '@motajs/common';
+import { RenderItem } from '@motajs/render';
 import { Ticker } from 'mutate-animate';
 
 export interface IWeather {

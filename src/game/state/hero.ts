@@ -1,4 +1,4 @@
-import { logger } from '@/core/common/logger';
+import { logger } from '@motajs/common';
 import { EventEmitter } from 'eventemitter3';
 import { cloneDeep, isNil } from 'lodash-es';
 import { ItemState } from './item';

@@ -1,8 +1,12 @@
-import { Shader, ShaderProgram } from '@/core/render/shader';
+import {
+    Shader,
+    ShaderProgram,
+    MotaRenderer,
+    Container,
+    IShaderUniform,
+    UniformType
+} from '@motajs/render';
 import { IWeather } from './weather';
-import { MotaRenderer } from '@/core/render/render';
-import { Container } from '@/core/render/container';
-import { IShaderUniform, UniformType } from '@/core/render/gl2';
 
 const rainVs = /* glsl */ `
 in vec2 a_rainVertex;

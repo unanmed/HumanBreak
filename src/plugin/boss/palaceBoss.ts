@@ -1,15 +1,14 @@
 import { IStateDamageable } from '@/game/state/interface';
 import { BarrageBoss, BossSprite, Hitbox } from './barrage';
-import { MotaOffscreenCanvas2D } from '@/core/fx/canvas2d';
 import {
     Container,
-    HeroRenderer,
     LayerGroup,
     MotaRenderer,
     RenderItem,
     Shader,
-    Transform
-} from '@/core/render';
+    Transform,
+    MotaOffscreenCanvas2D
+} from '@motajs/render';
 import { Pop } from '../fx/pop';
 import { SplittableBall } from './palaceBossProjectile';
 import { PointEffect } from '../fx/pointShader';

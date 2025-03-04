@@ -1,4 +1,4 @@
-import { Props } from '@/core/render';
+import { Props } from '@motajs/render';
 import { IGameUI, IUIInstance, UIComponent, UIProps } from './shared';
 import EventEmitter from 'eventemitter3';
 import { markRaw, mergeProps } from 'vue';
