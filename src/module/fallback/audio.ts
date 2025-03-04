@@ -1,4 +1,4 @@
-import { Patch, PatchClass } from '@/common/patch';
+import { Patch, PatchClass } from '@motajs/legacy-common';
 import { audioPlayer, bgmController, soundPlayer } from '../audio';
 import { mainSetting } from '@/core/main/setting';
 import { sleep } from 'mutate-animate';

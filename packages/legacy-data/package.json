@@ -1,0 +1,6 @@
+{
+    "name": "@motajs/legacy-data",
+    "dependencies": {
+        "@motajs/common": "workspace:*"
+    }
+}

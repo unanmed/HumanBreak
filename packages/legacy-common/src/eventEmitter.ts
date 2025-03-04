@@ -1,6 +1,4 @@
-function has<T>(value: T): value is NonNullable<T> {
-    return value !== null && value !== undefined;
-}
+import { isNil } from 'lodash-es';
 
 export type Callable = (...params: any) => any;
 
@@ -143,7 +141,7 @@ export class EventEmitter<T extends Record<keyof T, Callable> = {}> {
      */
     removeAllListeners(event: string): void;
     removeAllListeners(event?: string | keyof T) {
-        if (has(event)) this.events[event] = [];
+        if (!isNil(event)) this.events[event] = [];
         else this.events = {};
     }
 }

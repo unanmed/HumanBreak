@@ -1,0 +1,6 @@
+{
+    "name": "@motajs/legacy-client",
+    "dependencies": {
+        "@motajs/common": "workspace:*"
+    }
+}

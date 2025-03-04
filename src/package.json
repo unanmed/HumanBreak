@@ -5,6 +5,9 @@
         "@motajs/common": "workspace:*",
         "@motajs/render": "workspace:*",
         "@motajs/system": "workspace:*",
-        "@motajs/system-ui": "workspace:*"
+        "@motajs/system-ui": "workspace:*",
+        "@motajs/legacy-common": "workspace:*",
+        "@motajs/legacy-client": "workspace:*",
+        "@motajs/legacy-data": "workspace:*"
     }
 }

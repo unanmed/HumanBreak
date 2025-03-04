@@ -1,9 +1,9 @@
-import { EventEmitter } from './eventEmitter';
+import { EventEmitter } from 'eventemitter3';
 
 interface DisposableEvent<T> {
-    active: (value: T) => void;
-    dispose: (value: T) => void;
-    destroy: () => void;
+    active: [value: T];
+    dispose: [value: T];
+    destroy: [];
 }
 
 export class Disposable<T> extends EventEmitter<DisposableEvent<T>> {

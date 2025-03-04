@@ -1,8 +1,7 @@
 import axios, { AxiosRequestConfig, ResponseType } from 'axios';
-import { Disposable } from './disposable';
+import { Disposable, EventEmitter } from '@motajs/legacy-common';
 import { logger } from '@motajs/common';
 import JSZip from 'jszip';
-import { EventEmitter } from './eventEmitter';
 
 type ProgressFn = (now: number, total: number) => void;
 

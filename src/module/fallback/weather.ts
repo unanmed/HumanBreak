@@ -1,4 +1,4 @@
-import { Patch, PatchClass } from '@/common/patch';
+import { Patch, PatchClass } from '@motajs/legacy-common';
 import { WeatherController } from '../weather';
 import { isNil } from 'lodash-es';
 

@@ -1,8 +1,8 @@
-import type { Disposable } from '@/core/common/disposable';
 import type {
+    Disposable,
     EventEmitter,
     IndexedEventEmitter
-} from '@/core/common/eventEmitter';
+} from '@motajs/legacy-common';
 import type { loading } from './game';
 import type { Hotkey } from '@/core/main/custom/hotkey';
 import type { Keyboard } from '@/core/main/custom/keyboard';

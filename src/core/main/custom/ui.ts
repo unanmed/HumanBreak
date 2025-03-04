@@ -1,8 +1,6 @@
 import { Component, shallowReactive } from 'vue';
-import { Callable, EventEmitter } from '../../common/eventEmitter';
-import { KeyCode } from '@/plugin/keyCodes';
+import { EventEmitter } from '@motajs/legacy-common';
 import { Hotkey } from './hotkey';
-import { generateBinary } from '@/plugin/utils';
 
 interface FocusEvent<T> {
     focus: (before: T | null, after: T) => void;

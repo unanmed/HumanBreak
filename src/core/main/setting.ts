@@ -1,5 +1,5 @@
 import { FunctionalComponent, reactive } from 'vue';
-import { EventEmitter } from '../common/eventEmitter';
+import { EventEmitter } from '@motajs/legacy-common';
 import { GameStorage } from './storage';
 import { has, triggerFullscreen } from '@/plugin/utils';
 import { createSettingComponents } from './init/settings';

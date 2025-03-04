@@ -1,4 +1,4 @@
-import { Patch, PatchClass } from '@/common/patch';
+import { Patch, PatchClass } from '@motajs/legacy-common';
 import { TipStore } from '../render/components/tip';
 
 export function patchUI() {

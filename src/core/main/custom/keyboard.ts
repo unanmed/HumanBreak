@@ -1,4 +1,4 @@
-import { EventEmitter, Listener } from '@/core/common/eventEmitter';
+import { EventEmitter, Listener } from '@motajs/legacy-common';
 import { KeyCode } from '@/plugin/keyCodes';
 import { gameKey } from './hotkey';
 import { unwarpBinary } from './hotkey';

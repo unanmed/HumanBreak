@@ -1,4 +1,4 @@
-import { EventEmitter } from '@/core/common/eventEmitter';
+import { EventEmitter } from '@motajs/legacy-common';
 import { deleteWith, has } from '@/plugin/utils';
 import { Component, nextTick, reactive, shallowReactive } from 'vue';
 import { fixedUi } from '../init/ui';
@@ -11,7 +11,6 @@ import type {
     ToolbarItemMap,
     ToolbarItemType
 } from '../init/toolbar';
-import { isMobile } from '@/plugin/use';
 
 interface CustomToolbarEvent {
     add: (item: ValueOf<ToolbarItemMap>) => void;

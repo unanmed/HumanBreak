@@ -1,13 +1,12 @@
 import './system';
 import '../plugin/game/index';
 import * as damage from './enemy/damage';
-import { EventEmitter, IndexedEventEmitter } from '@/core/common/eventEmitter';
+import { EventEmitter, IndexedEventEmitter } from '@motajs/legacy-common';
 import { specials } from './enemy/special';
 import { gameListener, hook, loading } from './game';
 import * as battle from './enemy/battle';
 import * as hero from './state/hero';
 import * as miscMechanism from './mechanism/misc';
-import { registerPresetState } from './state/preset';
 import { ItemState } from './state/item';
 import {
     BlockMover,
@@ -51,8 +50,6 @@ main.loading = loading;
 loading.once('coreInit', () => {
     Mota.Plugin.init();
 });
-
-registerPresetState();
 
 window.addEventListener('beforeunload', () => {
     core.checkAutosave();
