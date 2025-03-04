@@ -6,7 +6,7 @@ import vuejsx from '@vitejs/plugin-vue-jsx'
 import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers';
 import path, { resolve } from 'path';
 import postcssPresetEnv from 'postcss-preset-env';
-import glob from 'glob'
+import * as glob from 'glob'
 
 const FSHOST = 'http://127.0.0.1:3000/';
 
@@ -44,11 +44,17 @@ export default defineConfig({
     ],
     base: `./`,
     resolve: {
-        alias: {
+        alias: [
             ...aliases,
-            '@': resolve(__dirname, './src'),
-            '@ui': resolve(__dirname, './src/ui')
-        }
+            {
+                find: '@',
+                replacement: resolve(__dirname, './src')
+            },
+            {
+                find: '@ui',
+                replacement: resolve(__dirname, './src/ui')
+            }
+        ]
     },
     build: {
         rollupOptions: {

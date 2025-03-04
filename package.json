@@ -16,6 +16,7 @@
   "dependencies": {
     "@motajs/render": "workspace:*",
     "@motajs/common": "workspace:*",
+    "@motajs/client": "workspace:*",
     "@ant-design/icons-vue": "^6.1.0",
     "@emotion/css": "^11.13.0",
     "@vueuse/core": "^10.11.1",
