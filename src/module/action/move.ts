@@ -1,8 +1,8 @@
 import { KeyCode } from '@motajs/client-base';
-import { Hotkey, HotkeyData } from '../custom/hotkey';
+import { Hotkey, HotkeyData } from '@motajs/system-action';
 import type { HeroMover, IMoveController } from '@/game/state/move';
 import { Ticker } from 'mutate-animate';
-import { mainScope } from '../init/hotkey';
+import { mainScope } from '@motajs/legacy-ui';
 
 type MoveKey = Record<Dir, HotkeyData>;
 type MoveKeyConfig = Record<Dir, string>;

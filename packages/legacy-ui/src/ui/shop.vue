@@ -172,9 +172,9 @@ import {
 import { splitText, tip } from '../utils';
 import Scroll from '../components/scroll.vue';
 import BoxAnimate from '../components/boxAnimate.vue';
-import { GameUi } from '@/core/main/custom/ui';
-import { gameKey } from '@/core/main/custom/hotkey';
-import { mainUi } from '@/core/main/init/ui';
+import { GameUi } from '../controller';
+import { gameKey } from '@motajs/system-action';
+import { mainUi } from '../preset/ui';
 
 const props = defineProps<{
     num: number;

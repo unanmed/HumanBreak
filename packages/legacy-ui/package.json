@@ -4,6 +4,8 @@
         "@motajs/render": "workspace:*",
         "@motajs/common": "workspace:*",
         "@motajs/client": "workspace:*",
-        "@motajs/client-base": "workspace:*"
+        "@motajs/client-base": "workspace:*",
+        "@motajs/legacy-system": "workspace:*",
+        "@motajs/system-action": "workspace:*"
     }
 }

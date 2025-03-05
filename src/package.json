@@ -7,9 +7,11 @@
         "@motajs/render": "workspace:*",
         "@motajs/system": "workspace:*",
         "@motajs/system-ui": "workspace:*",
+        "@motajs/system-action": "workspace:*",
         "@motajs/legacy-common": "workspace:*",
         "@motajs/legacy-client": "workspace:*",
         "@motajs/legacy-data": "workspace:*",
-        "@motajs/legacy-ui": "workspace:*"
+        "@motajs/legacy-ui": "workspace:*",
+        "@motajs/legacy-system": "workspace:*"
     }
 }

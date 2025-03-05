@@ -12,9 +12,9 @@
 import { getDetailedEnemy } from '../tools/fixed';
 import BookDetail from './bookDetail.vue';
 import { detailInfo } from '../tools/book';
-import { hovered } from '@/core/main/init/fixed';
-import { GameUi } from '@/core/main/custom/ui';
-import { mainUi } from '@/core/main/init/ui';
+import { hovered } from '../preset/fixed';
+import { GameUi } from '../controller';
+import { mainUi } from '../preset/ui';
 
 const props = defineProps<{
     num: number;

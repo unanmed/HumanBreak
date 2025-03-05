@@ -9,8 +9,8 @@
 import { Animation, hyper, sleep } from 'mutate-animate';
 import { onMounted } from 'vue';
 import { has } from '../utils';
-import { GameUi } from '@/core/main/custom/ui';
-import { fixedUi } from '@/core/main/init/ui';
+import { GameUi } from '../controller';
+import { fixedUi } from '../preset/ui';
 
 const props = defineProps<{
     num: number;

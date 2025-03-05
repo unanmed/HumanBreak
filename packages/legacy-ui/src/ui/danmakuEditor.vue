@@ -158,17 +158,17 @@ import {
     SendOutlined,
     UpOutlined
 } from '@ant-design/icons-vue';
-import { Danmaku } from '@/core/main/custom/danmaku';
-import { GameUi } from '@/core/main/custom/ui';
+import { Danmaku } from '../danmaku';
+import { GameUi } from '../controller';
 import { sleep } from 'mutate-animate';
-import { fixedUi } from '@/core/main/init/ui';
+import { fixedUi } from '../preset/ui';
 import { calStringSize, tip } from '../utils';
-import { gameKey } from '@/core/main/custom/hotkey';
+import { gameKey } from '@motajs/system-action';
 import { isNil } from 'lodash-es';
 import { stringifyCSS, parseCss, getIconHeight } from '../utils';
 import { logger, LogLevel } from '@motajs/common';
-import Scroll from '@/components/scroll.vue';
-import BoxAnimate from '@/components/boxAnimate.vue';
+import Scroll from '../components/scroll.vue';
+import BoxAnimate from '../components/boxAnimate.vue';
 
 const props = defineProps<{
     num: number;

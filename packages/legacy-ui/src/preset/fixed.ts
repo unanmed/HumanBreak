@@ -18,7 +18,7 @@ const showFixed = debounce((block: Block) => {
     if (!enemy) return;
     fixedUi.open(
         'fixed',
-        { enemy, close, loc: [cx, cy] },
+        { enemy, close, loc: [cx, cy], hovered },
         { close: closeFixed }
     );
 }, 200);

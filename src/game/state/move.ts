@@ -11,7 +11,7 @@ import type {
     LayerMovingRenderable,
     LayerFloorBinder
 } from '@motajs/render';
-import type { HeroKeyMover } from '@/core/main/action/move';
+import type { HeroKeyMover } from '@/module/action/move';
 import { BluePalace, MiscData } from '../mechanism/misc';
 import { sleep } from 'mutate-animate';
 
@@ -293,7 +293,7 @@ export class BlockMover extends ObjectMoverBase {
         return true;
     }
 
-    protected async onMoveStart(controller: IMoveController): Promise<void> {
+    protected async onMoveStart(_controller: IMoveController): Promise<void> {
         const adapter = BlockMover.adapter;
         if (adapter) {
             const list = adapter.items;
@@ -332,7 +332,7 @@ export class BlockMover extends ObjectMoverBase {
         }
     }
 
-    protected async onMoveEnd(controller: IMoveController): Promise<void> {
+    protected async onMoveEnd(_controller: IMoveController): Promise<void> {
         if (this.renderable) {
             this.layerItems.forEach(v => {
                 v.moving.delete(this.renderable!);
@@ -349,7 +349,7 @@ export class BlockMover extends ObjectMoverBase {
 
     protected async onStepStart(
         step: MoveStepDir,
-        controller: IMoveController
+        _controller: IMoveController
     ): Promise<BlockMoveCode> {
         await this.moveAnimate(step);
         const { x: dx, y: dy } = core.utils.scan2[this.moveDir];
@@ -360,17 +360,17 @@ export class BlockMover extends ObjectMoverBase {
     }
 
     protected async onStepEnd(
-        step: MoveStepDir,
-        code: BlockMoveCode,
-        controller: IMoveController
+        _step: MoveStepDir,
+        _code: BlockMoveCode,
+        _controller: IMoveController
     ): Promise<void> {}
 
     protected onSetMoveSpeed(
-        speed: number,
-        controller: IMoveController
+        _speed: number,
+        _controller: IMoveController
     ): void {}
 
-    private moveAnimate(step: MoveStepDir) {
+    private moveAnimate(_step: MoveStepDir) {
         const layer = this.layerItems[0];
         if (!layer) return;
         if (!this.renderable) return;
@@ -521,7 +521,7 @@ export class HeroMover extends ObjectMoverBase {
     }
 
     protected async onStepStart(
-        step: MoveStepDir,
+        _step: MoveStepDir,
         controller: IMoveController
     ): Promise<HeroMoveCode> {
         const showDir = toDir(this.faceDir);
@@ -594,7 +594,7 @@ export class HeroMover extends ObjectMoverBase {
     }
 
     protected async onStepEnd(
-        step: MoveStepDir,
+        _step: MoveStepDir,
         code: HeroMoveCode,
         controller: IMoveController
     ): Promise<void> {
@@ -661,7 +661,10 @@ export class HeroMover extends ObjectMoverBase {
         }
     }
 
-    protected onSetMoveSpeed(speed: number, controller: IMoveController): void {
+    protected onSetMoveSpeed(
+        speed: number,
+        _controller: IMoveController
+    ): void {
         const adapter = HeroMover.adapter;
         if (!adapter) return;
         adapter.sync('setMoveSpeed', speed);
@@ -785,7 +788,7 @@ export class HeroMover extends ObjectMoverBase {
         const list = adapter.items;
         const { x: tx, y: ty, dir: toDir } = data;
         const { x, y, direction } = core.status.hero.loc;
-        const { x: dx, y: dy } = core.utils.scan[direction];
+        const { x: dx } = core.utils.scan[direction];
         const { x: tdx } = core.utils.scan[toDir];
 
         const promises = [...list].map(v => {

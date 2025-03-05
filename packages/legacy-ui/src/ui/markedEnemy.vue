@@ -56,8 +56,8 @@ import { MarkInfo, unmarkEnemy } from '../mark';
 import Box from '../components/box.vue';
 import Scroll from '../components/scroll.vue';
 import BoxAnimate from '../components/boxAnimate.vue';
-import { GameUi } from '@/core/main/custom/ui';
-import { fixedUi } from '@/core/main/init/ui';
+import { GameUi } from '../controller';
+import { fixedUi } from '../preset/ui';
 
 const props = defineProps<{
     num: number;

@@ -18,8 +18,8 @@ import {
     getVitualKeyOnce,
     openDanmakuPoster
 } from '@motajs/legacy-ui';
-import { gameKey } from '@/core/main/custom/hotkey';
-import { generateKeyboardEvent } from '@/core/main/custom/keyboard';
+import { gameKey } from '@motajs/system-action';
+import { generateKeyboardEvent } from '@motajs/system-action';
 import { transitioned } from '../use';
 import { linear } from 'mutate-animate';
 import { KeyCode } from '@motajs/client-base';

@@ -1,6 +1,6 @@
 import { Patch, PatchClass } from '@motajs/legacy-common';
 import { audioPlayer, bgmController, soundPlayer } from '../audio';
-import { mainSetting } from '@/core/main/setting';
+import { mainSetting } from '@motajs/legacy-ui';
 import { sleep } from 'mutate-animate';
 import { isNil } from 'lodash-es';
 

@@ -22,9 +22,9 @@ import { computed, onUnmounted, ref } from 'vue';
 import desc from '../data/desc.json';
 import { splitText } from '../utils';
 import Colomn from '../components/colomn.vue';
-import { GameUi } from '@/core/main/custom/ui';
-import { gameKey } from '@/core/main/custom/hotkey';
-import { mainUi } from '@/core/main/init/ui';
+import { GameUi } from '../controller';
+import { gameKey } from '@motajs/system-action';
+import { mainUi } from '../preset/ui';
 
 const props = defineProps<{
     num: number;

@@ -63,6 +63,7 @@
     "glob": "^11.0.1",
     "globals": "^15.14.0",
     "less": "^4.2.0",
+    "madge": "^8.0.0",
     "postcss-preset-env": "^9.6.0",
     "rollup": "^3.29.4",
     "terser": "^5.31.6",

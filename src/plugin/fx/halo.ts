@@ -1,6 +1,6 @@
 import { logger } from '@motajs/common';
 import { MotaOffscreenCanvas2D } from '@motajs/render';
-import { mainSetting } from '@/core/main/setting';
+import { mainSetting } from '@motajs/legacy-ui';
 import {
     LayerGroupFloorBinder,
     ILayerGroupRenderExtends,

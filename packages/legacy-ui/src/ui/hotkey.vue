@@ -36,15 +36,15 @@
 </template>
 
 <script lang="ts" setup>
-import { Hotkey } from '@/core/main/custom/hotkey';
-import { GameUi } from '@/core/main/custom/ui';
+import { Hotkey } from '@motajs/system-action';
+import { GameUi } from '../controller';
 import Column from '../components/colomn.vue';
-import { mainUi } from '@/core/main/init/ui';
+import { mainUi } from '../preset/ui';
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
 import { KeyCode, KeyCodeUtils } from '@motajs/client-base';
 import { generateBinary, keycode } from '../utils';
 import { cloneDeep } from 'lodash-es';
-import { gameKey } from '@/core/main/custom/hotkey';
+import { gameKey } from '@motajs/system-action';
 
 interface HotkeyKeys {
     index: number;

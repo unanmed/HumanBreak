@@ -1,5 +1,5 @@
 import { KeyCode } from '@motajs/client-base';
-import { Keyboard } from '../custom/keyboard';
+import { Keyboard } from '@motajs/system-action';
 
 const qweKey = new Keyboard('qwe'); // 字母键盘，A-Z
 const numKey = new Keyboard('num'); // 数字键盘，1-0
@@ -239,7 +239,7 @@ numKey
         y: 0,
         width: 45,
         height: 45,
-        text: `<span style='font-size: 80%'>\$<br />4</span>`
+        text: `<span style='font-size: 80%'>$<br />4</span>`
     })
     .add({
         key: KeyCode.Digit5,

@@ -46,10 +46,10 @@ import BookDetail from './bookDetail.vue';
 import { LeftOutlined } from '@ant-design/icons-vue';
 import { ToShowEnemy, detailInfo } from '../tools/book';
 import { getDetailedEnemy } from '../tools/fixed';
-import { GameUi } from '@/core/main/custom/ui';
-import { gameKey } from '@/core/main/custom/hotkey';
-import { mainUi } from '@/core/main/init/ui';
-import { mainSetting } from '@/core/main/setting';
+import { GameUi } from '../controller';
+import { gameKey } from '@motajs/system-action';
+import { mainUi } from '../preset/ui';
+import { mainSetting } from '../preset/ui';
 import { isMobile } from '../use';
 
 const props = defineProps<{

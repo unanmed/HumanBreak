@@ -186,10 +186,10 @@ import BoxAnimate from '../components/boxAnimate.vue';
 import { has, tip, type } from '../utils';
 import { cancelGlobalDrag, isMobile, useDrag } from '../use';
 import { hyper } from 'mutate-animate';
-import { GameUi } from '@/core/main/custom/ui';
-import { gameKey } from '@/core/main/custom/hotkey';
+import { GameUi } from '../controller';
+import { gameKey } from '@motajs/system-action';
 import { getStatusLabel } from '../utils';
-import { mainUi } from '@/core/main/init/ui';
+import { mainUi } from '../preset/ui';
 
 const props = defineProps<{
     num: number;

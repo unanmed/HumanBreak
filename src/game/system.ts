@@ -23,7 +23,7 @@ import type { Danmaku } from '@/core/main/custom/danmaku';
 import type * as misc from './mechanism/misc';
 import type { Render } from '@motajs/client';
 import type { ItemState } from './state/item';
-import type { HeroKeyMover } from '@/core/main/action/move';
+import type { HeroKeyMover } from '@/module/action/move';
 import type { BlockMover, HeroMover, ObjectMoverBase } from './state/move';
 import type * as Animation from 'mutate-animate';
 import type { WeatherController } from '@/module/weather/weather';

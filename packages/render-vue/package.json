@@ -4,6 +4,7 @@
         "@motajs/common": "workspace:*",
         "@motajs/render-core": "workspace:*",
         "@motajs/render-elements": "workspace:*",
-        "@motajs/render-style": "workspace:*"
+        "@motajs/render-style": "workspace:*",
+        "@motajs/system-action": "workspace:*"
     }
 }

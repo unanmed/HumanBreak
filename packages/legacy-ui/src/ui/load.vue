@@ -31,10 +31,10 @@ import {
     loadDefaultResource,
     LoadTask
 } from '@motajs/legacy-common';
-import { GameUi } from '@/core/main/custom/ui';
+import { GameUi } from '../controller';
 import { formatSize } from '../utils';
 import { logger } from '@motajs/common';
-import { fixedUi } from '@/core/main/init/ui';
+import { fixedUi } from '../preset/ui';
 import { sleep } from 'mutate-animate';
 
 const props = defineProps<{

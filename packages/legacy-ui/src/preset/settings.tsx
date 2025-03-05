@@ -1,7 +1,7 @@
 import type { SettingComponent, SettingComponentProps } from '../setting';
 import { Button, InputNumber, Radio } from 'ant-design-vue';
 import { mainUi } from './ui';
-import { gameKey } from '../custom/hotkey';
+import { gameKey } from '@motajs/system-action';
 
 interface Components {
     Default: SettingComponent;
@@ -28,7 +28,7 @@ export function createSettingComponents() {
     return com;
 }
 
-function DefaultSetting(props: SettingComponentProps) {
+function DefaultSetting(_props: SettingComponentProps) {
     return (
         <div>
             <span> 未知的设置类型 </span>
@@ -149,7 +149,7 @@ function showSpecialSetting(id: string, vBind?: any) {
     mainUi.open(id, vBind);
 }
 
-function HotkeySetting(props: SettingComponentProps) {
+function HotkeySetting(_props: SettingComponentProps) {
     return (
         <div style="display: flex; justify-content: center">
             <Button
@@ -168,7 +168,7 @@ function HotkeySetting(props: SettingComponentProps) {
     );
 }
 
-function ToolbarEditor(props: SettingComponentProps) {
+function ToolbarEditor(_props: SettingComponentProps) {
     return (
         <div style="display: flex; justify-content: center">
             <Button
@@ -183,7 +183,7 @@ function ToolbarEditor(props: SettingComponentProps) {
     );
 }
 
-function PerformanceSetting(props: SettingComponentProps) {
+function PerformanceSetting(_props: SettingComponentProps) {
     return (
         <div style="display: flex; justify-content: center">
             <Button

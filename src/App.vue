@@ -26,7 +26,7 @@
 
 <script lang="ts" setup>
 import { onMounted } from 'vue';
-import { mainUi, fixedUi } from './core/main/init/ui';
+import { mainUi, fixedUi } from '@motajs/legacy-ui';
 
 onMounted(() => {
     const { hook } = Mota.requireAll('var');

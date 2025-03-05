@@ -8,7 +8,7 @@ import { requireUniqueSymbol } from '../utils';
 import { MinimapDrawer, getArea } from '../tools/fly';
 import { useDrag, useWheel } from '../use';
 import { debounce } from 'lodash-es';
-import { mainSetting } from '@/core/main/setting';
+import { mainSetting } from '../preset/ui';
 
 const props = defineProps<{
     action?: boolean;
@@ -168,6 +168,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+    const hook = Mota.require('var', 'hook');
     hook.off('afterChangeFloor', onChange);
     hook.off('afterBattle', afterBattle);
 });

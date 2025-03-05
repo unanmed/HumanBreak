@@ -28,9 +28,9 @@
 
 <script lang="ts" setup>
 import { nextTick, onUnmounted, reactive, watch } from 'vue';
-import { Danmaku } from '@/core/main/custom/danmaku';
+import { Danmaku } from '../danmaku';
 import { LikeFilled } from '@ant-design/icons-vue';
-import { mainSetting } from '@/core/main/setting';
+import { mainSetting } from '../preset/ui';
 import { debounce } from 'lodash-es';
 
 interface ElementMap {

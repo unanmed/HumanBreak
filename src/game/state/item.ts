@@ -1,13 +1,11 @@
 import EventEmitter from 'eventemitter3';
-import type { Hero } from './hero';
-import { GameState, gameStates } from './state';
 import { loading } from '../game';
 
-type EffectFn = (state: GameState, hero: Hero<any>) => void;
-type CanUseEffectFn = (state: GameState, hero: Hero<any>) => boolean;
+type EffectFn = () => void;
+type CanUseEffectFn = () => boolean;
 
 interface ItemStateEvent {
-    use: [hero: Hero<any>];
+    use: [];
 }
 
 export class ItemState<
@@ -56,7 +54,6 @@ export class ItemState<
         this.canUseItemEffect = item.canUseItemEffect;
 
         this.compileFunction();
-        this.compileEvent();
     }
 
     private compileFunction() {
@@ -83,48 +80,6 @@ export class ItemState<
                 ) as CanUseEffectFn;
             }
         }
-    }
-
-    private compileEvent() {
-        // todo
-    }
-
-    /**
-     * 使用这个物品
-     * @param hero 使用物品的勇士
-     */
-    use(hero: Hero<any>): boolean {
-        if (!this.canUse(hero)) return false;
-        if (!gameStates.now) return false;
-        const state = gameStates.now;
-        this.useItemEffectFn?.(state, hero);
-        if (this.useItemEvent) core.insertAction(this.useItemEvent);
-        if (!this.noRoute) {
-            core.status.route.push(`item:${this.id}`);
-        }
-
-        hero.addItem(this.id, -1);
-        this.emit('use', hero);
-
-        return true;
-    }
-
-    /**
-     * 判断是否可以使用一个物品
-     * @param hero 使用物品的勇士
-     */
-    canUse(hero: Hero<any>, num: number = 1): boolean {
-        if (num <= 0) return false;
-        if (hero.itemCount(this.id) < num) return false;
-        if (!gameStates.now) return false;
-        return !!this.canUseItemEffectFn?.(gameStates.now, hero);
-    }
-
-    /**
-     * 标记当前物品为不进入录像，也就是录像中不会使用该道具
-     */
-    markNoRoute() {
-        this.noRoute = true;
     }
 
     /**

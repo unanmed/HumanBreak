@@ -21,7 +21,7 @@ import { computed, ref } from 'vue';
 import skills from '../data/skill.json';
 import { has } from '../utils';
 import Column from '../components/colomn.vue';
-import { mainUi } from '@/core/main/init/ui';
+import { mainUi } from '../preset/ui';
 
 const props = defineProps<{
     num: number;

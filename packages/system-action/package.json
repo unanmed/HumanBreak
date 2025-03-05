@@ -1,0 +1,6 @@
+{
+    "name": "@motajs/system-action",
+    "dependencies": {
+        "@motajs/common": "workspace:*"
+    }
+}

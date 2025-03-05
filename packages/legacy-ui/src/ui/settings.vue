@@ -73,20 +73,20 @@
 
 <script lang="ts" setup>
 import { computed, onUnmounted, ref, shallowRef } from 'vue';
+import { mainSetting } from '../preset/ui';
 import {
-    mainSetting,
     MotaSetting,
     MotaSettingItem,
     SettingDisplayer,
     SettingDisplayInfo
-} from '@/core/main/setting';
+} from '../setting';
 import { RightOutlined, LeftOutlined } from '@ant-design/icons-vue';
 import { splitText } from '../utils';
 import Scroll from '../components/scroll.vue';
 import { isMobile } from '../use';
-import { gameKey } from '@/core/main/custom/hotkey';
-import { GameUi } from '@/core/main/custom/ui';
-import { mainUi } from '@/core/main/init/ui';
+import { gameKey } from '@motajs/system-action';
+import { GameUi } from '../controller';
+import { mainUi } from '../preset/ui';
 
 const props = defineProps<{
     info?: MotaSetting;

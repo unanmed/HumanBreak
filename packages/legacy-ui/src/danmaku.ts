@@ -1,18 +1,10 @@
-import BoxAnimate from '@/components/boxAnimate.vue';
 import { EventEmitter } from 'eventemitter3';
 import { logger } from '@motajs/common';
-import { ResponseBase } from '@/core/interface';
-import {
-    deleteWith,
-    ensureArray,
-    getIconHeight,
-    parseCss,
-    tip
-} from '@motajs/legacy-ui';
+import { deleteWith, ensureArray, parseCss, tip } from '@motajs/legacy-ui';
+import { ResponseBase } from '@motajs/client-base';
 import axios, { AxiosResponse, toFormData } from 'axios';
-import { Component, VNode, h, shallowReactive } from 'vue';
+import { VNode, h, shallowReactive } from 'vue';
 // /* @__PURE__ */ import { id, password } from '../../../../user';
-import { mainSetting } from '../setting';
 
 type CSSObj = Partial<Record<CanParseCss, string>>;
 
@@ -213,8 +205,8 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
      * @param stroke 描边颜色
      */
     color(fill?: string, stroke?: string) {
-        fill && (this.textColor = fill);
-        stroke && (this.strokeColor = stroke);
+        if (fill) this.textColor = fill;
+        if (stroke) this.strokeColor = stroke;
     }
 
     /**
@@ -492,41 +484,3 @@ export class Danmaku extends EventEmitter<DanmakuEvent> {
         this.specList[type] = fn;
     }
 }
-
-// 图标类型
-Danmaku.registerSpecContent('i', content => {
-    const height = getIconHeight(content as AllIds);
-
-    return h(BoxAnimate as Component, {
-        id: content,
-        noborder: true,
-        noAnimate: true,
-        width: 32,
-        height
-    });
-});
-
-if (import.meta.env.DEV) {
-    Danmaku.backend = `/danmaku`;
-}
-
-Mota.require('var', 'hook').once('reset', () => {
-    Danmaku.fetch();
-});
-
-// 勇士移动后显示弹幕
-Mota.require('var', 'hook').on('moveOneStep', (x, y, floor) => {
-    const enabled = mainSetting.getValue('ui.danmaku', true);
-    if (!enabled) return;
-    const f = Danmaku.allInPos[floor];
-    if (f) {
-        const danmaku = f[`${x},${y}`];
-        if (danmaku) {
-            danmaku.forEach(v => {
-                setTimeout(() => {
-                    v.show();
-                }, Math.random() * 1000);
-            });
-        }
-    }
-});

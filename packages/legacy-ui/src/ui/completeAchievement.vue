@@ -23,8 +23,8 @@ import { computed, onMounted, ref } from 'vue';
 import Box from '../components/box.vue';
 import list from '../data/achievement.json';
 import { AchievementType, getNowPoint, totalPoint } from '../tools/achievement';
-import { GameUi } from '@/core/main/custom/ui';
-import { fixedUi } from '@/core/main/init/ui';
+import { GameUi } from '../controller';
+import { fixedUi } from '../preset/ui';
 
 const height = window.innerHeight;
 

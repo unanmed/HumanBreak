@@ -31,7 +31,7 @@
 <script lang="ts" setup>
 import { onMounted, onUpdated, Ref, ref, watch } from 'vue';
 import Box from '../components/box.vue';
-import { GameUi } from '@/core/main/custom/ui';
+import { GameUi } from '../controller';
 import type { DamageEnemy, EnemyInfo } from '@/game/enemy/damage';
 import { nextFrame } from '../utils';
 

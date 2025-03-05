@@ -84,9 +84,9 @@ import Scroll from '../components/scroll.vue';
 import { has, splitText, tip } from '../utils';
 import { isMobile } from '../use';
 import { sleep } from 'mutate-animate';
-import { gameKey } from '@/core/main/custom/hotkey';
-import { GameUi } from '@/core/main/custom/ui';
-import { mainUi } from '@/core/main/init/ui';
+import { gameKey } from '@motajs/system-action';
+import { GameUi } from '../controller';
+import { mainUi } from '../preset/ui';
 import type { Chapter } from '@/plugin/game/skillTree';
 
 const props = defineProps<{

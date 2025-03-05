@@ -105,10 +105,10 @@ export class Keyboard extends EventEmitter<VirtualKeyboardEvent> {
         this.scopeStack.push(symbol);
         const ev: Listener<VirtualKeyEmitFn>[] = [];
         this.onEmitKey[symbol] = ev;
-        // @ts-ignore
+        // @ts-expect-error 无法推导
         this.events = ev;
         this.emit('scopeCreate', symbol);
-        if (!!last) {
+        if (last) {
             this.scopeAssist[symbol] = this.assist;
         }
         this.assist = 0;
@@ -133,7 +133,7 @@ export class Keyboard extends EventEmitter<VirtualKeyboardEvent> {
         if (!symbol) return;
         this.scope = symbol;
         this.assist = this.scopeAssist[symbol];
-        // @ts-ignore
+        // @ts-expect-error 无法推导
         this.events = this.onEmitKey[symbol];
     }
 
@@ -189,7 +189,7 @@ export class Keyboard extends EventEmitter<VirtualKeyboardEvent> {
     }
 }
 
-export function generateKeyboardEvent(key: KeyCode, assist: number) {
+export function generateKeyboardEvent(_key: KeyCode, assist: number) {
     const { ctrl, alt, shift } = unwarpBinary(assist);
     const ev = new KeyboardEvent('keyup', {
         ctrlKey: ctrl,

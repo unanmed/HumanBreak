@@ -67,11 +67,10 @@ import { sleep } from 'mutate-animate';
 import { doByInterval } from '../utils';
 import { triggerFullscreen } from '../utils';
 import { isMobile } from '../use';
-import { GameUi } from '@/core/main/custom/ui';
-import { gameKey } from '@/core/main/custom/hotkey';
-import { mainUi } from '@/core/main/init/ui';
-import { CustomToolbar } from '@/core/main/custom/toolbar';
-import { mainSetting } from '@/core/main/setting';
+import { GameUi } from '../controller';
+import { gameKey } from '@motajs/system-action';
+import { mainUi } from '../preset/ui';
+import { mainSetting } from '../preset/ui';
 import { mat4 } from 'gl-matrix';
 // todo: 改了
 import { bgmController } from '@/module';
@@ -323,7 +322,6 @@ onMounted(async () => {
     main = document.getElementById('start-main') as HTMLDivElement;
     start = document.getElementById('start') as HTMLDivElement;
     background = document.getElementById('background') as HTMLImageElement;
-    CustomToolbar.closeAll();
 
     window.addEventListener('resize', resize);
     resize();

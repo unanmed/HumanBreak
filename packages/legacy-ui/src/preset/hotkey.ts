@@ -1,5 +1,5 @@
 import { KeyCode } from '@motajs/client-base';
-import { gameKey, HotkeyJSON } from '../custom/hotkey';
+import { gameKey, HotkeyJSON } from '@motajs/system-action';
 import {
     openDanmakuPoster,
     tip,
@@ -9,7 +9,7 @@ import {
 } from '@motajs/legacy-ui';
 import { hovered } from './fixed';
 import { mainUi } from './ui';
-import { GameStorage } from '../storage';
+import { GameStorage } from '@motajs/legacy-system';
 
 export const mainScope = Symbol.for('@key_main');
 

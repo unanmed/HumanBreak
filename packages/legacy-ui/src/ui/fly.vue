@@ -99,12 +99,12 @@ import {
 } from '@ant-design/icons-vue';
 import { debounce } from 'lodash-es';
 import { tip } from '../utils';
-import { GameUi } from '@/core/main/custom/ui';
-import { gameKey } from '@/core/main/custom/hotkey';
+import { GameUi } from '../controller';
+import { gameKey } from '@motajs/system-action';
 import { createChangable } from '../tools/common';
-import { mainUi } from '@/core/main/init/ui';
-import { mainSetting } from '@/core/main/setting';
-import { GameStorage } from '@/core/main/storage';
+import { mainUi } from '../preset/ui';
+import { mainSetting } from '../preset/ui';
+import { GameStorage } from '@motajs/legacy-system';
 
 const props = defineProps<{
     num: number;

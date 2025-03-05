@@ -10,9 +10,9 @@ import {
     SetupComponentOptions,
     waitbox
 } from '../components';
-import { mainUi } from '@/core/main/init/ui';
-import { gameKey } from '@/core/main/custom/hotkey';
-import { generateKeyboardEvent } from '@/core/main/custom/keyboard';
+import { mainUi } from '@motajs/legacy-ui';
+import { gameKey } from '@motajs/system-action';
+import { generateKeyboardEvent } from '@motajs/system-action';
 import { getVitualKeyOnce } from '@motajs/legacy-ui';
 import { getAllSavesData, getSaveData } from '@/module/utils';
 

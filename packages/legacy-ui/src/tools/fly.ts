@@ -1,4 +1,4 @@
-import { mainSetting } from '@/core/main/setting';
+import { mainSetting } from '../preset/ui';
 import { downloadCanvasImage, has, tip } from '../utils';
 
 type BFSFromString = `${FloorIds},${number},${number},${Dir}`;

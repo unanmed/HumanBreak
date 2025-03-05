@@ -1,6 +1,5 @@
 import { Component, shallowReactive } from 'vue';
 import { EventEmitter } from '@motajs/legacy-common';
-import { Hotkey } from './hotkey';
 
 interface FocusEvent<T> {
     focus: (before: T | null, after: T) => void;
@@ -125,6 +124,7 @@ type UiVBind = Record<string, any>;
 interface MountedVBind {
     num: number;
     ui: GameUi;
+    controller: UiController;
     [x: string]: any;
 }
 
@@ -132,14 +132,12 @@ export class GameUi extends EventEmitter<GameUiEvent> {
     static uiList: GameUi[] = [];
 
     component: Component;
-    hotkey?: Hotkey;
     id: string;
     symbol: symbol = Symbol();
 
-    constructor(id: string, component: Component, hotkey?: Hotkey) {
+    constructor(id: string, component: Component) {
         super();
         this.component = component;
-        this.hotkey = hotkey;
         this.id = id;
         GameUi.uiList.push(this);
     }
@@ -273,6 +271,7 @@ export class UiController extends Focus<IndexedGameUi> {
         const bind = {
             num,
             ui,
+            controller: this,
             ...(vBind ?? {})
         };
         const sui = ui.with(bind, vOn);

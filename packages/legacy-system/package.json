@@ -1,7 +1,6 @@
 {
-    "name": "@motajs/system",
+    "name": "@motajs/legacy-system",
     "dependencies": {
-        "@motajs/system-ui": "workspace:*",
         "@motajs/system-action": "workspace:*"
     }
 }

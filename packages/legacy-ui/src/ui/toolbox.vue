@@ -116,9 +116,9 @@ import { isMobile } from '../use';
 import { type, has } from '../utils';
 import { hyper } from 'mutate-animate';
 import { message } from 'ant-design-vue';
-import { GameUi } from '@/core/main/custom/ui';
-import { gameKey } from '@/core/main/custom/hotkey';
-import { mainUi } from '@/core/main/init/ui';
+import { GameUi } from '../controller';
+import { gameKey } from '@motajs/system-action';
+import { mainUi } from '../preset/ui';
 
 const props = defineProps<{
     num: number;

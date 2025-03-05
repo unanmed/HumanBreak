@@ -1,4 +1,4 @@
-import { fixedUi } from '@/core/main/init/ui';
+import { fixedUi } from './preset/ui';
 import type { DamageEnemy } from '@/game/enemy/damage';
 import { tip } from './utils';
 import { ref, Ref } from 'vue';

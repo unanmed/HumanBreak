@@ -1,7 +1,6 @@
 import { Animation, Ticker, Transition } from 'mutate-animate';
 import { ERenderItemEvent, RenderItem } from '@motajs/render-core';
-// todo: 改为 monorepo
-import { gameKey, Hotkey } from '@/core/main/custom/hotkey';
+import { gameKey, Hotkey } from '@motajs/system-action';
 import { onMounted, onUnmounted } from 'vue';
 import EventEmitter from 'eventemitter3';
 

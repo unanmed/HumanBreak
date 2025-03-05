@@ -6,9 +6,8 @@ import { Ref, ref } from 'vue';
 import { EVENT_KEY_CODE_MAP, KeyCode } from '@motajs/client-base';
 import axios from 'axios';
 import { decompressFromBase64 } from 'lz-string';
-import { Keyboard, KeyboardEmits } from '@/core/main/custom/keyboard';
-import { fixedUi, mainUi } from '@/core/main/init/ui';
-import { isAssist } from '@/core/main/custom/hotkey';
+import { Keyboard, KeyboardEmits, isAssist } from '@motajs/system-action';
+import { fixedUi, mainUi } from './preset/ui';
 import { logger } from '@motajs/common';
 
 type CanParseCss = keyof {

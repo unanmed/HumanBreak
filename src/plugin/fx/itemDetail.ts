@@ -1,5 +1,5 @@
 import { logger } from '@motajs/common';
-import { mainSetting } from '@/core/main/setting';
+import { mainSetting } from '@motajs/legacy-ui';
 import {
     Damage,
     DamageRenderable,
