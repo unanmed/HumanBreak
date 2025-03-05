@@ -1,0 +1,8 @@
+{
+    "name": "@motajs/legacy-ui",
+    "dependencies": {
+        "@motajs/render": "workspace:*",
+        "@motajs/common": "workspace:*",
+        "@motajs/client": "workspace:*"
+    }
+}

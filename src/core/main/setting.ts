@@ -1,11 +1,9 @@
 import { FunctionalComponent, reactive } from 'vue';
 import { EventEmitter } from '@motajs/legacy-common';
 import { GameStorage } from './storage';
-import { has, triggerFullscreen } from '@/plugin/utils';
+import { has, triggerFullscreen, isMobile } from '@motajs/legacy-ui';
 import { createSettingComponents } from './init/settings';
 import settingsText from '@/data/settings.json';
-import { isMobile } from '@/plugin/use';
-import { fontSize } from '@/plugin/ui/statusBar';
 import { CustomToolbar } from './custom/toolbar';
 import { fixedUi } from './init/ui';
 import { bgmController, soundPlayer } from '@/module';
@@ -361,7 +359,7 @@ function handleScreenSetting<T extends number | boolean>(
         storage.setValue('@@absoluteFontSize', absoluteSize);
         storage.write();
     } else if (key === 'fontSizeStatus') {
-        fontSize.value = n as number;
+        // fontSize.value = n as number;
     }
 }
 

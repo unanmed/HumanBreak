@@ -8,7 +8,7 @@ import {
     getIconHeight,
     parseCss,
     tip
-} from '@/plugin/utils';
+} from '@motajs/legacy-ui';
 import axios, { AxiosResponse, toFormData } from 'axios';
 import { Component, VNode, h, shallowReactive } from 'vue';
 // /* @__PURE__ */ import { id, password } from '../../../../user';

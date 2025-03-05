@@ -1,5 +1,5 @@
 import { EventEmitter } from '@motajs/legacy-common';
-import { deleteWith, has } from '@/plugin/utils';
+import { deleteWith, has } from '@motajs/legacy-ui';
 import { Component, nextTick, reactive, shallowReactive } from 'vue';
 import { fixedUi } from '../init/ui';
 import { GameStorage } from '../storage';
@@ -124,48 +124,6 @@ const misc: Misc = {
             });
         }
     }
-};
-
-const playingDefaultTool: MiscToolbar = {
-    id: '@defaults_misc',
-    type: 'misc',
-    folded: false,
-    noDefaultAction: true,
-    items: [
-        'book',
-        'fly',
-        'save',
-        'load',
-        'toolbox',
-        'equipbox',
-        'shop',
-        'virtualKey',
-        'setting',
-        'undo',
-        'redo',
-        'viewMap',
-        'danmaku',
-        'minimap'
-    ]
-};
-const replayingDefaultTool: MiscToolbar = {
-    id: '@defaults_misc',
-    type: 'misc',
-    folded: false,
-    noDefaultAction: true,
-    items: [
-        'startReplay',
-        'stopReplay',
-        'rewindReplay',
-        'stepReplay',
-        'book',
-        'speedDownReplay',
-        'speedUpReplay',
-        'save',
-        'viewMap',
-        'danmaku',
-        'minimap'
-    ]
 };
 
 export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
@@ -389,11 +347,11 @@ export class CustomToolbar extends EventEmitter<CustomToolbarEvent> {
         toolbarStorage.read();
         for (const [key, value] of Object.entries(toolbarStorage.data)) {
             const bar = this.get(key) ?? new CustomToolbar(key);
-            bar.x = value.x;
-            bar.y = value.y;
-            bar.width = value.w;
-            bar.height = value.h;
-            for (const item of value.items) {
+            bar.x = value!.x;
+            bar.y = value!.y;
+            bar.width = value!.w;
+            bar.height = value!.h;
+            for (const item of value!.items) {
                 bar.add(item);
             }
         }

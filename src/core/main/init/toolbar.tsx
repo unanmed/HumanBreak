@@ -1,4 +1,4 @@
-import { KeyCode, KeyCodeUtils } from '@/plugin/keyCodes';
+import { KeyCode, KeyCodeUtils } from '@motajs/client';
 import { CustomToolbar } from '../custom/toolbar';
 import BoxAnimate from '@/components/boxAnimate.vue';
 import { checkAssist, unwarpBinary } from '../custom/hotkey';
@@ -6,7 +6,7 @@ import {
     flipBinary,
     getVitualKeyOnce,
     openDanmakuPoster
-} from '@/plugin/utils';
+} from '@motajs/legacy-ui';
 import { cloneDeep } from 'lodash-es';
 import {
     Button,
@@ -18,11 +18,10 @@ import {
 import { MotaSettingItem, mainSetting } from '../setting';
 import Minimap from '@/components/minimap.vue';
 import { gameKey } from '../custom/hotkey';
-import { FunctionalComponent, StyleValue, h, ref } from 'vue';
+import { FunctionalComponent, h, ref } from 'vue';
 import { mainUi } from './ui';
-import { isMobile } from '@/plugin/use';
+import { isMobile } from '@motajs/legacy-ui';
 import {
-    BackwardFilled,
     BackwardOutlined,
     BorderOuterOutlined,
     CaretRightOutlined,

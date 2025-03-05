@@ -13,7 +13,7 @@ import type { MotaSetting, SettingDisplayer } from '@/core/main/setting';
 import type { GameStorage } from '@/core/main/storage';
 import type { DamageEnemy, EnemyCollection } from './enemy/damage';
 import type { specials } from './enemy/special';
-import type { KeyCode } from '@/plugin/keyCodes';
+import type { KeyCode } from '@motajs/client';
 import type { Ref } from 'vue';
 import type * as battle from './enemy/battle';
 import type * as hero from './state/hero';
@@ -121,10 +121,7 @@ type InterfaceType = keyof SystemInterfaceMap;
 
 interface PluginInterface {
     // 渲染进程定义的插件
-    use_r: typeof import('../plugin/use');
-    fly_r: typeof import('../plugin/ui/fly');
     chase_r: typeof import('../plugin/chase');
-    completion_r: typeof import('../plugin/completion');
     gameCanvas_r: typeof import('../plugin/fx/gameCanvas');
     frag_r: typeof import('../plugin/fx/frag');
     boss_r: typeof import('../plugin/boss');

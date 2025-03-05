@@ -195,6 +195,36 @@ importers:
 
   packages/common: {}
 
+  packages/legacy-client:
+    dependencies:
+      '@motajs/common':
+        specifier: workspace:*
+        version: link:../common
+
+  packages/legacy-common:
+    dependencies:
+      '@motajs/common':
+        specifier: workspace:*
+        version: link:../common
+
+  packages/legacy-data:
+    dependencies:
+      '@motajs/common':
+        specifier: workspace:*
+        version: link:../common
+
+  packages/legacy-ui:
+    dependencies:
+      '@motajs/client':
+        specifier: workspace:*
+        version: link:../client
+      '@motajs/common':
+        specifier: workspace:*
+        version: link:../common
+      '@motajs/render':
+        specifier: workspace:*
+        version: link:../render
+
   packages/render:
     dependencies:
       '@motajs/render-core':

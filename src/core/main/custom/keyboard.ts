@@ -1,8 +1,8 @@
 import { EventEmitter, Listener } from '@motajs/legacy-common';
-import { KeyCode } from '@/plugin/keyCodes';
+import { KeyCode } from '@motajs/client';
 import { gameKey } from './hotkey';
 import { unwarpBinary } from './hotkey';
-import { deleteWith, flipBinary } from '@/plugin/utils';
+import { deleteWith, flipBinary } from '@motajs/legacy-ui';
 import { cloneDeep } from 'lodash-es';
 import { shallowReactive } from 'vue';
 

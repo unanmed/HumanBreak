@@ -1,5 +1,5 @@
 import { Animation, linear, sleep } from 'mutate-animate';
-import { has } from '../utils';
+import { has } from '@motajs/legacy-ui';
 
 // todo: 移植到渲染树
 

@@ -1,4 +1,4 @@
-import { KeyCode } from '@/plugin/keyCodes';
+import { KeyCode } from '@motajs/client';
 import { Hotkey, HotkeyData } from '../custom/hotkey';
 import type { HeroMover, IMoveController } from '@/game/state/move';
 import { Ticker } from 'mutate-animate';

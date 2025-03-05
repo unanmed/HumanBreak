@@ -1,4 +1,4 @@
-import { ensureArray, tip } from '@/plugin/utils';
+import { ensureArray, tip } from '@motajs/legacy-ui';
 import { sleep } from 'mutate-animate';
 import { logger } from '@motajs/common';
 

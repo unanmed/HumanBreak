@@ -13,7 +13,7 @@ import {
 import { mainUi } from '@/core/main/init/ui';
 import { gameKey } from '@/core/main/custom/hotkey';
 import { generateKeyboardEvent } from '@/core/main/custom/keyboard';
-import { getVitualKeyOnce } from '@/plugin/utils';
+import { getVitualKeyOnce } from '@motajs/legacy-ui';
 import { getAllSavesData, getSaveData } from '@/module/utils';
 
 export interface SettingsProps extends Partial<ChoicesProps>, UIComponentProps {

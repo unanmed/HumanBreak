@@ -11,7 +11,7 @@ import {
 import { transitionedColor } from '../use';
 import { linear } from 'mutate-animate';
 import { Scroll } from '../components/scroll';
-import { getArea, MinimapDrawer } from '@/plugin/ui/fly';
+import { getArea, MinimapDrawer } from '@motajs/legacy-ui';
 import {
     NumpadToolbar,
     PlayingToolbar,

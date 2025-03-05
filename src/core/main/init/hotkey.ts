@@ -1,8 +1,13 @@
-import { KeyCode } from '@/plugin/keyCodes';
+import { KeyCode } from '@motajs/client';
 import { gameKey, HotkeyJSON } from '../custom/hotkey';
-import { openDanmakuPoster, tip } from '@/plugin/utils';
+import {
+    openDanmakuPoster,
+    tip,
+    hasMarkedEnemy,
+    markEnemy,
+    unmarkEnemy
+} from '@motajs/legacy-ui';
 import { hovered } from './fixed';
-import { hasMarkedEnemy, markEnemy, unmarkEnemy } from '@/plugin/mark';
 import { mainUi } from './ui';
 import { GameStorage } from '../storage';
 

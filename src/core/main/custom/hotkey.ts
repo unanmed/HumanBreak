@@ -1,5 +1,10 @@
-import { KeyCode } from '@/plugin/keyCodes';
-import { deleteWith, generateBinary, keycode, spliceBy } from '@/plugin/utils';
+import { KeyCode } from '@motajs/client';
+import {
+    deleteWith,
+    generateBinary,
+    keycode,
+    spliceBy
+} from '@motajs/legacy-ui';
 import { EventEmitter } from 'eventemitter3';
 import { isNil } from 'lodash-es';
 

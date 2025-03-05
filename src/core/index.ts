@@ -11,8 +11,7 @@ import {
     mainSetting,
     settingStorage
 } from './main/setting';
-import { KeyCode } from '@/plugin/keyCodes';
-import { status } from '@/plugin/ui/statusBar';
+import { KeyCode } from '@motajs/client';
 import '@/plugin';
 import './package';
 import { CustomToolbar } from './main/custom/toolbar';
@@ -25,26 +24,13 @@ import {
 } from './main/custom/hotkey';
 import { Keyboard, generateKeyboardEvent } from './main/custom/keyboard';
 import './main/layout';
-import { MComponent, m } from './main/layout';
 import { createSettingComponents } from './main/init/settings';
 import {
     createToolbarComponents,
     createToolbarEditorComponents
 } from './main/init/toolbar';
 import { VirtualKey } from './main/init/misc';
-import * as utils from '@/plugin/utils';
-import * as use from '@/plugin/use';
-import * as mark from '@/plugin/mark';
-import * as keyCodes from '@/plugin/keyCodes';
-import { addAnimate, removeAnimate } from '@/plugin/animateController';
-import * as bookTools from '@/plugin/ui/book';
-import * as commonTools from '@/plugin/ui/common';
-import * as equipboxTools from '@/plugin/ui/equipbox';
-import * as fixedTools from '@/plugin/ui/fixed';
-import * as flyTools from '@/plugin/ui/fly';
-import * as statusBarTools from '@/plugin/ui/statusBar';
-import * as toolboxTools from '@/plugin/ui/toolbox';
-import * as UI from '@ui/index';
+import { UI } from '@motajs/legacy-ui';
 import Box from '@/components/box.vue';
 import BoxAnimate from '@/components/boxAnimate.vue';
 import Colomn from '@/components/colomn.vue';
@@ -54,7 +40,6 @@ import EnemyCritical from '@/panel/enemyCritical.vue';
 import EnemySpecial from '@/panel/enemySpecial.vue';
 import EnemyTarget from '@/panel/enemyTarget.vue';
 import KeyboardPanel from '@/panel/keyboard.vue';
-import { MCGenerator } from './main/layout';
 import { logger } from '@motajs/common';
 import { Danmaku } from './main/custom/danmaku';
 import * as Shadow from './fx/shadow';
@@ -73,16 +58,12 @@ Mota.register('class', 'Keyboard', Keyboard);
 Mota.register('class', 'MotaSetting', MotaSetting);
 Mota.register('class', 'SettingDisplayer', SettingDisplayer);
 Mota.register('class', 'UiController', UiController);
-Mota.register('class', 'MComponent', MComponent);
 Mota.register('class', 'Danmaku', Danmaku);
 // ----- 函数注册
-Mota.register('fn', 'm', m);
 Mota.register('fn', 'unwrapBinary', unwarpBinary);
 Mota.register('fn', 'checkAssist', checkAssist);
 Mota.register('fn', 'isAssist', isAssist);
 Mota.register('fn', 'generateKeyboardEvent', generateKeyboardEvent);
-Mota.register('fn', 'addAnimate', addAnimate);
-Mota.register('fn', 'removeAnimate', removeAnimate);
 // ----- 变量注册
 Mota.register('var', 'mainUi', mainUi);
 Mota.register('var', 'fixedUi', fixedUi);
@@ -102,18 +83,6 @@ Mota.register('module', 'MiscComponents', {
     VirtualKey
 });
 Mota.register('module', 'RenderUtils', utils);
-Mota.register('module', 'Use', use);
-Mota.register('module', 'Mark', mark);
-Mota.register('module', 'KeyCodes', keyCodes);
-Mota.register('module', 'UITools', {
-    book: bookTools,
-    common: commonTools,
-    equipbox: equipboxTools,
-    fixed: fixedTools,
-    fly: flyTools,
-    statusBar: statusBarTools,
-    toolbox: toolboxTools
-});
 Mota.register('module', 'UI', UI);
 Mota.register('module', 'UIComponents', {
     Box,
@@ -126,7 +95,6 @@ Mota.register('module', 'UIComponents', {
     EnemyTarget,
     Keyboard: KeyboardPanel
 });
-Mota.register('module', 'MCGenerator', MCGenerator);
 Mota.register('module', 'Shadow', Shadow);
 Mota.register('module', 'Effect', {});
 Mota.register('module', 'Render', Render);

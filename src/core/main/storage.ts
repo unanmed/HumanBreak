@@ -1,10 +1,10 @@
-import { has } from '@/plugin/utils';
+import { isNil } from 'lodash-es';
 
 export class GameStorage<T extends object = any> {
     static list: GameStorage<any>[] = [];
 
     key: string;
-    data!: T;
+    data!: Partial<T>;
 
     constructor(key: string) {
         this.key = key;
@@ -42,7 +42,7 @@ export class GameStorage<T extends object = any> {
     getValue<K extends keyof T>(key: K, defaults: T[K]): T[K];
     getValue<T>(key: string, defaults?: T): T;
     getValue<K extends keyof T>(key: K, defaults?: T[K]) {
-        if (has(this.data[key])) return this.data[key];
+        if (!isNil(this.data[key])) return this.data[key];
         else {
             if (defaults !== void 0) {
                 this.data[key] = defaults;
@@ -57,7 +57,6 @@ export class GameStorage<T extends object = any> {
     }
 
     clear() {
-        // @ts-ignore
         this.data = {};
     }
 

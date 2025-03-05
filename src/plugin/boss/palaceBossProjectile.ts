@@ -2,7 +2,7 @@ import { Transform, MotaOffscreenCanvas2D } from '@motajs/render';
 import { IStateDamageable } from '@/game/state/interface';
 import { Hitbox, Projectile } from './barrage';
 import type { PalaceBoss } from './palaceBoss';
-import { clamp } from '../utils';
+import { clamp } from '@motajs/legacy-ui';
 
 function popDamage(damage: number, boss: PalaceBoss, color: string) {
     const { x, y } = core.status.hero.loc;

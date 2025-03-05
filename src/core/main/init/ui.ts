@@ -1,4 +1,4 @@
-import * as UI from '@ui/.';
+import { UI } from '@motajs/legacy-ui';
 import * as MiscUI from './misc';
 import { GameUi, UiController } from '../custom/ui';
 import { mainSetting } from '../setting';
@@ -26,7 +26,6 @@ mainUi.showAll();
 
 export const fixedUi = new UiController(true);
 fixedUi.register(
-    new GameUi('statusBar', UI.StatusBar),
     new GameUi('markedEnemy', UI.Marked),
     new GameUi('fixed', UI.Fixed),
     new GameUi('chapter', UI.Chapter),

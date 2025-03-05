@@ -1,6 +1,6 @@
 import { Animation, hyper, linear, power, sleep } from 'mutate-animate';
 import { Chase, ChaseData, IChaseController } from './chase';
-import { completeAchievement } from '../ui/achievement';
+import { completeAchievement } from '@motajs/legacy-ui';
 import {
     Camera,
     CameraAnimation,
