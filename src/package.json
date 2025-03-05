@@ -2,6 +2,7 @@
     "name": "@motajs/user",
     "dependencies": {
         "@motajs/client": "workspace:*",
+        "@motajs/client-base": "workspace:*",
         "@motajs/common": "workspace:*",
         "@motajs/render": "workspace:*",
         "@motajs/system": "workspace:*",

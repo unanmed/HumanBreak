@@ -22,7 +22,7 @@ import { gameKey } from '@/core/main/custom/hotkey';
 import { generateKeyboardEvent } from '@/core/main/custom/keyboard';
 import { transitioned } from '../use';
 import { linear } from 'mutate-animate';
-import { KeyCode } from '@motajs/client';
+import { KeyCode } from '@motajs/client-base';
 import { Progress } from '../components/misc';
 
 interface ToolbarProps extends DefaultProps {

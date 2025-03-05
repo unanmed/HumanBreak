@@ -3,6 +3,7 @@
     "dependencies": {
         "@motajs/render": "workspace:*",
         "@motajs/common": "workspace:*",
-        "@motajs/client": "workspace:*"
+        "@motajs/client": "workspace:*",
+        "@motajs/client-base": "workspace:*"
     }
 }

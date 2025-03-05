@@ -41,7 +41,7 @@ import { GameUi } from '@/core/main/custom/ui';
 import Column from '../components/colomn.vue';
 import { mainUi } from '@/core/main/init/ui';
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
-import { KeyCode, KeyCodeUtils } from '@motajs/client';
+import { KeyCode, KeyCodeUtils } from '@motajs/client-base';
 import { generateBinary, keycode } from '../utils';
 import { cloneDeep } from 'lodash-es';
 import { gameKey } from '@/core/main/custom/hotkey';

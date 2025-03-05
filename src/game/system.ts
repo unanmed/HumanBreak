@@ -13,7 +13,7 @@ import type { MotaSetting, SettingDisplayer } from '@/core/main/setting';
 import type { GameStorage } from '@/core/main/storage';
 import type { DamageEnemy, EnemyCollection } from './enemy/damage';
 import type { specials } from './enemy/special';
-import type { KeyCode } from '@motajs/client';
+import type { KeyCode } from '@motajs/client-base';
 import type { Ref } from 'vue';
 import type * as battle from './enemy/battle';
 import type * as hero from './state/hero';

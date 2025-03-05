@@ -11,7 +11,7 @@ import {
     mainSetting,
     settingStorage
 } from './main/setting';
-import { KeyCode } from '@motajs/client';
+import { KeyCode } from '@motajs/client-base';
 import '@/plugin';
 import './package';
 import { CustomToolbar } from './main/custom/toolbar';

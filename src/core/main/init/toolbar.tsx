@@ -1,4 +1,4 @@
-import { KeyCode, KeyCodeUtils } from '@motajs/client';
+import { KeyCode, KeyCodeUtils } from '@motajs/client-base';
 import { CustomToolbar } from '../custom/toolbar';
 import BoxAnimate from '@/components/boxAnimate.vue';
 import { checkAssist, unwarpBinary } from '../custom/hotkey';

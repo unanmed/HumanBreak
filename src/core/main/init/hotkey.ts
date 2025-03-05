@@ -1,4 +1,4 @@
-import { KeyCode } from '@motajs/client';
+import { KeyCode } from '@motajs/client-base';
 import { gameKey, HotkeyJSON } from '../custom/hotkey';
 import {
     openDanmakuPoster,

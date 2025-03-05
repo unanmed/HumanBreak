@@ -3,7 +3,7 @@ import { MessageApi } from 'ant-design-vue/lib/message';
 import { isNil } from 'lodash-es';
 import { Animation, sleep, TimingFn } from 'mutate-animate';
 import { Ref, ref } from 'vue';
-import { EVENT_KEY_CODE_MAP, KeyCode } from '@motajs/client';
+import { EVENT_KEY_CODE_MAP, KeyCode } from '@motajs/client-base';
 import axios from 'axios';
 import { decompressFromBase64 } from 'lz-string';
 import { Keyboard, KeyboardEmits } from '@/core/main/custom/keyboard';

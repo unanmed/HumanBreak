@@ -1,4 +1,4 @@
-import { KeyCode } from '@motajs/client';
+import { KeyCode } from '@motajs/client-base';
 import { Keyboard } from '../custom/keyboard';
 
 const qweKey = new Keyboard('qwe'); // 字母键盘，A-Z

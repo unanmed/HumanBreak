@@ -1,4 +1,4 @@
-import { KeyCode } from '@motajs/client';
+import { KeyCode } from '@motajs/client-base';
 import {
     deleteWith,
     generateBinary,

@@ -1,5 +1,5 @@
 import { EventEmitter, Listener } from '@motajs/legacy-common';
-import { KeyCode } from '@motajs/client';
+import { KeyCode } from '@motajs/client-base';
 import { gameKey } from './hotkey';
 import { unwarpBinary } from './hotkey';
 import { deleteWith, flipBinary } from '@motajs/legacy-ui';
