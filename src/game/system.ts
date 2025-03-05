@@ -1,516 +1,95 @@
-import type {
-    Disposable,
-    EventEmitter,
-    IndexedEventEmitter
-} from '@motajs/legacy-common';
-import type { loading } from './game';
-import type { Hotkey } from '@/core/main/custom/hotkey';
-import type { Keyboard } from '@/core/main/custom/keyboard';
-import type { CustomToolbar } from '@/core/main/custom/toolbar';
-import type { Focus, GameUi, UiController } from '@/core/main/custom/ui';
-import type { gameListener, hook } from './game';
-import type { MotaSetting, SettingDisplayer } from '@/core/main/setting';
-import type { GameStorage } from '@/core/main/storage';
-import type { DamageEnemy, EnemyCollection } from './enemy/damage';
-import type { specials } from './enemy/special';
-import type { KeyCode } from '@motajs/client-base';
-import type { Ref } from 'vue';
-import type * as battle from './enemy/battle';
-import type * as hero from './state/hero';
-import type * as damage from './enemy/damage';
-import type { Logger } from '@motajs/common';
-import type { Danmaku } from '@/core/main/custom/danmaku';
-import type * as misc from './mechanism/misc';
-import type { Render } from '@motajs/client';
-import type { ItemState } from './state/item';
-import type { HeroKeyMover } from '@/module/action/move';
-import type { BlockMover, HeroMover, ObjectMoverBase } from './state/move';
-import type * as Animation from 'mutate-animate';
-import type { WeatherController } from '@/module/weather/weather';
-
-interface ClassInterface {
-    // 渲染进程与游戏进程通用
-    EventEmitter: typeof EventEmitter;
-    IndexedEventEmitter: typeof IndexedEventEmitter;
-    Disposable: typeof Disposable;
-    // 定义于渲染进程
-    GameStorage: typeof GameStorage;
-    MotaSetting: typeof MotaSetting;
-    SettingDisplayer: typeof SettingDisplayer;
-    Focus: typeof Focus;
-    GameUi: typeof GameUi;
-    UiController: typeof UiController;
-    Hotkey: typeof Hotkey;
-    Keyboard: typeof Keyboard;
-    CustomToolbar: typeof CustomToolbar;
-    Danmaku: typeof Danmaku;
-    // todo: 放到插件 ShaderEffect: typeof ShaderEffect;
-    // 定义于游戏进程，渲染进程依然可用
-    EnemyCollection: typeof EnemyCollection;
-    DamageEnemy: typeof DamageEnemy;
-}
-
-type _IBattle = typeof battle;
-type _IHero = typeof hero;
-type _IDamage = typeof damage;
-
-interface FunctionInterface extends _IBattle, _IHero, _IDamage {
-    // 定义于渲染进程，录像中会进行polyfill，但是不执行任何内容
-    readyAllResource(): void;
-    // 定义于游戏进程，渲染进程依然可用
-
-    // todo
-}
-
-interface VariableInterface {
-    // 定义于渲染进程，录像中会进行polyfill
-    loading: typeof loading;
-    hook: typeof hook;
-    gameListener: typeof gameListener;
-    mainSetting: MotaSetting;
-    gameKey: Hotkey;
-    mainUi: UiController;
-    fixedUi: UiController;
-    KeyCode: typeof KeyCode;
-    // isMobile: boolean;
-    settingStorage: GameStorage;
-    status: Ref<boolean>;
-    // 定义于游戏进程，渲染进程依然可用
-    haloSpecials: number[];
-    enemySpecials: typeof specials;
-    logger: Logger;
-}
+import type * as Client from '@motajs/client';
+import type * as ClientBase from '@motajs/client-base';
+import type * as Common from '@motajs/common';
+import type * as LegacyClient from '@motajs/legacy-client';
+import type * as LegacyCommon from '@motajs/legacy-common';
+import type * as LegacySystem from '@motajs/legacy-system';
+import type * as LegacyUI from '@motajs/legacy-ui';
+import type * as Render from '@motajs/render';
+import type * as RenderCore from '@motajs/render-core';
+import type * as RenderElements from '@motajs/render-elements';
+import type * as RenderStyle from '@motajs/render-style';
+import type * as RenderVue from '@motajs/render-vue';
+import type * as System from '@motajs/system';
+import type * as SystemAction from '@motajs/system-action';
+import type * as SystemUI from '@motajs/system-ui';
 
 interface ModuleInterface {
-    Mechanism: {
-        BluePalace: typeof misc.BluePalace;
-        NightSpecial: typeof misc.NightSpecial;
-        MiscData: typeof misc.MiscData;
-        HeroSkill: typeof misc.HeroSkill;
-    };
-    Effect: {};
-    Render: typeof Render;
-    State: {
-        ItemState: typeof ItemState;
-        HeroMover: typeof HeroMover;
-        BlockMover: typeof BlockMover;
-        ObjectMoverBase: typeof ObjectMoverBase;
-        heroMoveCollection: {
-            mover: HeroMover;
-            keyMover?: HeroKeyMover;
-        };
-    };
-    Action: {
-        HeroKeyMover: typeof HeroKeyMover;
-    };
-    Animation: typeof Animation;
-    Weather: {
-        controller: WeatherController;
-        WeatherController: typeof WeatherController;
-    };
-}
-
-interface SystemInterfaceMap {
-    class: ClassInterface;
-    fn: FunctionInterface;
-    var: VariableInterface;
-    module: ModuleInterface;
-}
-
-type InterfaceType = keyof SystemInterfaceMap;
-
-interface PluginInterface {
-    // 渲染进程定义的插件
-    chase_r: typeof import('../plugin/chase');
-    gameCanvas_r: typeof import('../plugin/fx/gameCanvas');
-    frag_r: typeof import('../plugin/fx/frag');
-    boss_r: typeof import('../plugin/boss');
-    // 游戏进程定义的插件
-    utils_g: typeof import('../plugin/game/utils');
-    shop_g: typeof import('../plugin/game/shop');
-    replay_g: typeof import('../plugin/game/replay');
-    skillTree_g: typeof import('../plugin/game/skillTree');
-    removeMap_g: typeof import('../plugin/game/removeMap');
-    remainEnemy_g: typeof import('../plugin/game/enemy/remainEnemy');
-    chase_g: typeof import('../plugin/game/chase');
-    skill_g: typeof import('../plugin/game/skill');
-    itemDetail_g: typeof import('../plugin/game/fx/itemDetail');
-    checkBlock_g: typeof import('../plugin/game/enemy/checkblock');
-}
-
-interface PackageInterface {
-    axios: typeof import('axios');
-    // 'chart.js': typeof import('chart.js');
-    jszip: typeof import('jszip');
-    lodash: typeof import('lodash-es');
-    'lz-string': typeof import('lz-string');
-    'mutate-animate': typeof import('mutate-animate');
-    // vue: typeof import('vue');
+    '@motajs/client': typeof Client;
+    '@motajs/client-base': typeof ClientBase;
+    '@motajs/common': typeof Common;
+    '@motajs/legacy-client': typeof LegacyClient;
+    '@motajs/legacy-common': typeof LegacyCommon;
+    '@motajs/legacy-system': typeof LegacySystem;
+    '@motajs/legacy-ui': typeof LegacyUI;
+    '@motajs/render': typeof Render;
+    '@motajs/render-core': typeof RenderCore;
+    '@motajs/render-elements': typeof RenderElements;
+    '@motajs/render-style': typeof RenderStyle;
+    '@motajs/render-vue': typeof RenderVue;
+    '@motajs/system': typeof System;
+    '@motajs/system-action': typeof SystemAction;
+    '@motajs/system-ui': typeof SystemUI;
 }
 
 export interface IMota {
-    rewrite: typeof rewrite;
     r: typeof r;
     rf: typeof rf;
 
-    /** 样板插件接口 */
-    Plugin: IPlugin;
-    /**
-     * 样板使用的第三方库接口，可以直接获取到库的原有接口。
-     * 接口在渲染进程中引入，在游戏进程中不会polyfill，因此在游戏进程中使用时，
-     * 应先使用main.replayChecking进行检查，保证该值不存在时才进行使用，否则会引起录像出错
-     */
-    // Package: IPackage;
-
     /**
      * 获取一个样板接口
-     * @param type 要获取的接口类型
      * @param key 接口名称
      */
-    require<T extends InterfaceType, K extends keyof SystemInterfaceMap[T]>(
-        type: T,
-        key: K
-    ): SystemInterfaceMap[T][K];
+    require<K extends keyof ModuleInterface>(key: K): ModuleInterface[K];
     /**
      * 获取一个样板接口
-     * @param type 要获取的接口类型
      * @param key 接口名称
      */
-    require(type: InterfaceType, key: string): any;
-
-    /**
-     * 获取一种接口的所有内容
-     * @param type 要获取的接口类型
-     */
-    requireAll<T extends InterfaceType>(type: T): SystemInterfaceMap[T];
+    require<T = unknown>(key: string): T;
 
     /**
      * 注册一个样板接口
-     * @param type 要注册的接口类型
      * @param key 接口名称
      * @param data 接口内容
      */
-    register<T extends InterfaceType, K extends keyof SystemInterfaceMap[T]>(
-        type: T,
+    register<K extends keyof ModuleInterface>(
         key: K,
-        data: SystemInterfaceMap[T][K]
+        data: ModuleInterface[K]
     ): void;
     /**
      * 注册一个样板接口
-     * @param type 要注册的接口类型
      * @param key 接口名称
      * @param data 接口内容
      */
-    register(type: InterfaceType, key: string, data: any): void;
-}
-
-export interface IPlugin {
-    inited: boolean;
-
-    /**
-     * 初始化所有插件
-     */
-    init(): void;
-
-    /**
-     * 获取到一个插件的内容
-     * @param plugin 要获取的插件
-     */
-    require<K extends keyof PluginInterface>(plugin: K): PluginInterface[K];
-    /**
-     * 获取到一个插件的内容
-     * @param plugin 要获取的插件
-     */
-    require(plugin: string): any;
-
-    /**
-     * 获取所有插件
-     */
-    requireAll(): PluginInterface & { [x: string]: any };
-
-    /**
-     * 注册一个插件
-     * @param plugin 要注册的插件名
-     * @param data 插件内容
-     * @param init 插件的初始化函数，可选，初始化函数接受两个参数，分别是plugin和data，表示插件名称和内容
-     */
-    register<K extends keyof PluginInterface>(
-        plugin: K,
-        data: PluginInterface[K],
-        init?: (plugin: K, data: PluginInterface[K]) => void
-    ): void;
-    /**
-     * 注册一个插件
-     * @param plugin 要注册的插件名
-     * @param init 插件的初始化函数，初始化函数接受一个参数，表示插件名称，要求返回插件内容
-     */
-    register<K extends keyof PluginInterface>(
-        plugin: K,
-        init: (plugin: K) => PluginInterface[K]
-    ): void;
-    /**
-     * 注册一个插件
-     * @param plugin 要注册的插件名
-     * @param data 插件内容
-     * @param init 插件的初始化函数，可选，初始化函数接受两个参数，分别是plugin和data，表示插件名称和内容
-     */
-    register<K extends string, D>(
-        plugin: K,
-        data: D,
-        init?: (plugin: K, data: D) => void
-    ): void;
-    /**
-     * 注册一个插件
-     * @param plugin 要注册的插件名
-     * @param init 插件的初始化函数，初始化函数接受一个参数，表示插件名称，要求返回插件内容
-     */
-    register<K extends string>(plugin: K, init: (plugin: K) => any): void;
-}
-
-export interface IPackage {
-    /**
-     * 获取样板使用的第三方库
-     * @param name 要获取的第三方库
-     */
-    require<K extends keyof PackageInterface>(name: K): PackageInterface[K];
-
-    /**
-     * 获取样板使用的所有第三方库
-     */
-    requireAll(): PackageInterface;
-
-    register<K extends keyof PackageInterface>(
-        name: K,
-        data: PackageInterface[K]
-    ): void;
-}
-
-interface IPluginData {
-    /** 插件类型，content表示直接注册了内容，function表示注册了初始化函数，内容从其返回值获取 */
-    type: 'content' | 'function';
-    data: any;
-    init?: (plugin: string, data?: any) => any;
-}
-
-class MPlugin {
-    private static plugins: Record<string, IPluginData> = {};
-    private static pluginData: Record<string, any> = {};
-    static inited = false;
-
-    constructor() {
-        throw new Error(`System plugin class cannot be constructed.`);
-    }
-
-    static init() {
-        for (const [key, data] of Object.entries(this.plugins)) {
-            if (data.type === 'content') {
-                data.init?.(key, data.data);
-            } else {
-                data.data = data.init!(key);
-            }
-            this.pluginData[key] = data.data;
-        }
-        this.inited = true;
-    }
-
-    static require(key: string) {
-        if (!this.inited) {
-            throw new Error(`Cannot access plugin '${key}' before initialize.`);
-        }
-        if (!(key in this.plugins)) {
-            throw new Error(`Cannot resolve plugin require: key='${key}'`);
-        }
-        return this.plugins[key].data;
-    }
-
-    static requireAll(): PluginInterface {
-        return this.pluginData as PluginInterface;
-    }
-
-    static register(key: string, data: any, init?: any) {
-        if (typeof data === 'function') {
-            this.plugins[key] = {
-                type: 'function',
-                init: data,
-                data: void 0
-            };
-        } else {
-            this.plugins[key] = {
-                type: 'content',
-                data,
-                init
-            };
-        }
-    }
-}
-
-class MPackage {
-    // @ts-ignore
-    private static packages: PackageInterface = {};
-
-    constructor() {
-        throw new Error(`System package class cannot be constructed.`);
-    }
-
-    static require<K extends keyof PackageInterface>(
-        name: K
-    ): PackageInterface[K] {
-        return this.packages[name];
-    }
-
-    static requireAll() {
-        return this.packages;
-    }
-
-    static register<K extends keyof PackageInterface>(
-        name: K,
-        data: PackageInterface[K]
-    ) {
-        this.packages[name] = data;
-    }
+    register(key: string, data: unknown): void;
 }
 
 /**
- * 样板接口系统，通过 Mota 获取到样板的核心功能，不可实例化
+ * 样板接口系统，通过 Mota 获取到样板的核心功能
  */
-class Mota {
-    private static classes: Record<string, any> = {};
-    private static functions: Record<string, any> = {};
-    private static variables: Record<string, any> = {};
-    private static modules: Record<string, any> = {};
+class Mota implements IMota {
+    private modules: Record<string, any> = {};
 
-    static rewrite = rewrite;
-    static r = r;
-    static rf = rf;
-    static Plugin = MPlugin;
-    // static Package = MPackage;
+    r = r;
+    rf = rf;
 
     constructor() {
         throw new Error(`System interface class cannot be constructed.`);
     }
 
-    static require(type: InterfaceType, key: string): any {
-        const data = this.getByType(type)[key];
+    require(key: string): any {
+        const data = this.modules[key];
         if (data) return data;
         else {
-            throw new Error(
-                `Cannot resolve require: type='${type}',key='${key}'`
-            );
+            throw new Error(`Cannot resolve module '${key}'`);
         }
     }
 
-    static requireAll<T extends InterfaceType>(type: T): SystemInterfaceMap[T] {
-        return this.getByType(type) as SystemInterfaceMap[T];
-    }
-
-    static register(type: InterfaceType, key: string, data: any) {
-        const obj = this.getByType(type);
-        if (key in obj) {
-            console.warn(
-                `重复的样板接口注册: type='${type}', key='${key}'，已将其覆盖`
-            );
+    register(key: string, data: any) {
+        if (key in this.modules) {
+            console.warn(`模块注册重复: '${key}'，已将其覆盖`);
         }
-        obj[key] = data;
-    }
-
-    private static getByType(type: InterfaceType) {
-        return type === 'class'
-            ? this.classes
-            : type === 'fn'
-              ? this.functions
-              : type === 'var'
-                ? this.variables
-                : this.modules;
-    }
-}
-
-type RewriteType = 'full' | 'front' | 'add';
-type _F<F> = F extends (...params: infer P) => infer R ? [P, R] : never;
-type _Func = (...params: any) => any;
-
-/**
- * 全量复写或在函数前添加内容
- * @param base 函数所在对象
- * @param key 函数名称，即函数在base中叫什么
- * @param type 复写类型，full表示全量复写，front表示在原函数之前添加内容
- * @param re 复写函数，类型为full时表示将原函数完全覆盖，为front时表示将该函数添加到原函数之前
- * @param bind 原函数的调用对象，默认为base
- * @param rebind 复写函数的调用对象，默认为base
- */
-function rewrite<
-    O,
-    K extends SelectKey<O, _Func>,
-    R extends 'full' | 'front',
-    T = O
->(
-    base: O,
-    key: K,
-    type: R,
-    re: (
-        this: T,
-        ...params: [..._F<O[K]>[0], ...any[]]
-    ) => R extends 'full' ? _F<O[K]>[1] : void,
-    bind?: any,
-    rebind?: T
-): (this: T, ...params: [..._F<O[K]>[0], ...any[]]) => _F<O[K]>[1];
-/**
- * 在函数后追加内容
- * @param base 函数所在对象
- * @param key 函数名称，即函数在base中叫什么
- * @param type 复写类型，add表示在函数后追加
- * @param re 复写函数，类型为add时表示在原函数后面追加复写函数，会在第一个参数中传入原函数的返回值，
- *           并要求复写函数必须有返回值，作为复写的最终返回值。
- * @param bind 原函数的调用对象，默认为`base`
- * @param rebind 复写函数的调用对象，默认为`base`
- */
-function rewrite<O, K extends SelectKey<O, _Func>, T = O>(
-    base: O,
-    key: K,
-    type: 'add',
-    re: (
-        this: T,
-        ...params: [_F<O[K]>[1], ..._F<O[K]>[0], ...any[]]
-    ) => _F<O[K]>[1],
-    bind?: any,
-    rebind?: T
-): (this: T, ...params: [..._F<O[K]>[0], ...any[]]) => _F<O[K]>[1];
-function rewrite<O, K extends SelectKey<O, _Func>, T = O>(
-    base: O,
-    key: K,
-    type: RewriteType,
-    re: (this: T, ...params: [..._F<O[K]>[0], ...any[]]) => _F<O[K]>[1],
-    bind?: any,
-    rebind?: T
-): (this: T, ...params: [..._F<O[K]>[0], ...any[]]) => _F<O[K]>[1] {
-    const func = base[key];
-    if (typeof func !== 'function') {
-        throw new Error(
-            `Cannot rewrite variable with type of '${typeof func}'.`
-        );
-    }
-    if (type === 'full') {
-        // @ts-ignore
-        return (base[key] = re.bind(rebind ?? base));
-    } else if (type === 'add') {
-        const origin = base[key];
-        function res(this: T, ...params: [..._F<O[K]>[0], ...any[]]) {
-            const v = (origin as _Func).call(bind ?? base, ...params);
-            // @ts-ignore
-            const ret = re.call(rebind ?? base, v, ...params);
-            return ret;
-        }
-        // @ts-ignore
-        return (base[key] = res);
-    } else {
-        const origin = base[key];
-        function res(this: T, ...params: [..._F<O[K]>[0], ...any[]]) {
-            // @ts-ignore
-            re.call(rebind ?? base, ...params);
-            const ret = (origin as _Func).call(bind ?? base, ...params);
-            return ret;
-        }
-        // @ts-ignore
-        return (base[key] = res);
+        this.modules[key] = data;
     }
 }
 
@@ -525,6 +104,8 @@ function rewrite<O, K extends SelectKey<O, _Func>, T = O>(
 function r<T = undefined>(fn: (this: T) => void, thisArg?: T) {
     if (!main.replayChecking && main.mode === 'play') fn.call(thisArg as T);
 }
+
+const empty = () => {};
 
 /**
  * 将一个函数包裹成渲染进程函数，执行这个函数时将直接在渲染进程下执行。该函数与 {@link r} 函数的关系，
@@ -541,8 +122,8 @@ function rf<F extends (...params: any) => any, T>(
     fn: F,
     thisArg?: T
 ): (this: T, ...params: Parameters<F>) => ReturnType<F> | undefined {
-    // @ts-ignore
-    if (main.replayChecking || main.mode === 'editor') return () => {};
+    // @ts-expect-error 录像验证的时候不能执行任何操作，因此返回空函数
+    if (main.replayChecking || main.mode === 'editor') return empty;
     else {
         return (...params) => {
             return fn.call(thisArg, ...params);
@@ -556,4 +137,4 @@ declare global {
     }
 }
 
-window.Mota = Mota;
+window.Mota = new Mota();

@@ -23,7 +23,7 @@ type Forward<T> = {
 
 type ForwardKeys<T> = keyof Forward<T>;
 
-declare const Mota: import('../game/system').IMota;
+declare const Mota: import('../../src/game/system').IMota;
 interface Window {
-    Mota: import('../game/system').IMota;
+    Mota: import('../../src/game/system').IMota;
 }

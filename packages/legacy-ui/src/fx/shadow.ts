@@ -1,13 +1,14 @@
 import { mat4 } from 'gl-matrix';
 import { logger } from '@motajs/common';
+import { WebGLColorArray, createProgram, isWebGL2Supported } from './webgl';
 import {
-    WebGLColorArray,
-    createProgram,
-    isWebGL2Supported
-} from './webgl';
-import { ILayerRenderExtends, Layer, HeroRenderer, Sprite } from '@motajs/render';
+    ILayerRenderExtends,
+    Layer,
+    HeroRenderer,
+    Sprite
+} from '@motajs/render';
 
-/** 
+/**
  * 最大光源数量，必须设置，且光源数不能超过这个值，这个值决定了会预留多少的缓冲区，因此最好尽可能小，同时游戏过程中不可修改
  * 这个值越大，对显卡尤其是显存的要求会越大，不过考虑到各种设备的性能差异，不建议超过10
  */
@@ -29,7 +30,13 @@ interface ShadowConfig {
     blur?: number;
 }
 
-function addLightFromBlock(floors: FloorIds[], block: number, config: LightConfig, sc?: ShadowConfig, hero?: LightConfig) {
+function addLightFromBlock(
+    floors: FloorIds[],
+    block: number,
+    config: LightConfig,
+    sc?: ShadowConfig,
+    hero?: LightConfig
+) {
     floors.forEach(v => {
         const shadow = new Shadow(v);
         shadow.background = [0, 0, 0, 0.2];
@@ -65,7 +72,7 @@ function addLightFromBlock(floors: FloorIds[], block: number, config: LightConfi
                 }
             });
         });
-    })
+    });
 }
 
 const hook = Mota.require('var', 'hook');
@@ -73,7 +80,10 @@ const hook = Mota.require('var', 'hook');
 hook.once('reset', () => {
     Shadow.init();
     addLightFromBlock(
-        core.floorIds.slice(61, 70).concat(core.floorIds.slice(72, 81)).concat(core.floorIds.slice(85, 107)),
+        core.floorIds
+            .slice(61, 70)
+            .concat(core.floorIds.slice(72, 81))
+            .concat(core.floorIds.slice(85, 107)),
         103,
         { decay: 50, r: 300, color: [0.9333, 0.6, 0.333, 0.3] },
         { background: [0, 0, 0, 0.2] },
@@ -82,7 +92,12 @@ hook.once('reset', () => {
     addLightFromBlock(
         ['MT50', 'MT60', 'MT61', 'MT72', 'MT73', 'MT74', 'MT75'],
         103,
-        { decay: 20, r: 150, color: [0.9333, 0.6, 0.333, 0.3], noShelter: true },
+        {
+            decay: 20,
+            r: 150,
+            color: [0.9333, 0.6, 0.333, 0.3],
+            noShelter: true
+        },
         { background: [0, 0, 0, 0.3] }
     );
     Mota.rewrite(core.control, 'loadData', 'add', () => {
@@ -95,17 +110,17 @@ hook.once('reset', () => {
 hook.on('reset', () => {
     Shadow.update(true);
     LayerShadowExtends.shadowList.forEach(v => v.update());
-})
+});
 hook.on('setBlock', () => {
     Shadow.update(true);
     LayerShadowExtends.shadowList.forEach(v => v.update());
-})
-hook.on('changingFloor', floorId => {        
+});
+hook.on('changingFloor', floorId => {
     Shadow.clearBuffer();
     Shadow.update(true);
     // setCanvasFilterByFloorId(floorId);
     LayerShadowExtends.shadowList.forEach(v => v.update());
-})
+});
 
 // 深度测试着色器
 
@@ -259,7 +274,6 @@ void main() {
 }
 `;
 
-
 interface ShadowProgram {
     depth: WebGLProgram;
     color: WebGLProgram;
@@ -384,7 +398,8 @@ export class Shadow {
      * @param nocache 是否不使用缓存
      */
     calShadowInfo(nocache: boolean = false) {
-        if (!nocache && this.cache && Shadow.cached.has(this.floorId)) return this.cache;        
+        if (!nocache && this.cache && Shadow.cached.has(this.floorId))
+            return this.cache;
         Shadow.cached.add(this.floorId);
         Shadow.clearBuffer();
 
@@ -402,33 +417,81 @@ export class Shadow {
                 const t = (core._PY_ - (y + h)) * ratio;
                 res.push(
                     // 上边缘
-                    l, t, 0,
-                    l, t, m,
-                    r, t, m,
-                    r, t, 0,
-                    r, t, m,
-                    l, t, 0,
+                    l,
+                    t,
+                    0,
+                    l,
+                    t,
+                    m,
+                    r,
+                    t,
+                    m,
+                    r,
+                    t,
+                    0,
+                    r,
+                    t,
+                    m,
+                    l,
+                    t,
+                    0,
                     // 右
-                    r, t, 0,
-                    r, t, m,
-                    r, b, m,
-                    r, b, 0,
-                    r, b, m,
-                    r, t, 0,
+                    r,
+                    t,
+                    0,
+                    r,
+                    t,
+                    m,
+                    r,
+                    b,
+                    m,
+                    r,
+                    b,
+                    0,
+                    r,
+                    b,
+                    m,
+                    r,
+                    t,
+                    0,
                     // 下
-                    r, b, 0,
-                    r, b, m,
-                    l, b, m,
-                    l, b, 0,
-                    l, b, m,
-                    r, b, 0,
+                    r,
+                    b,
+                    0,
+                    r,
+                    b,
+                    m,
+                    l,
+                    b,
+                    m,
+                    l,
+                    b,
+                    0,
+                    l,
+                    b,
+                    m,
+                    r,
+                    b,
+                    0,
                     // 左
-                    l, b, 0,
-                    l, b, m,
-                    l, t, m,
-                    l, t, 0,
-                    l, t, m,
-                    l, b, 0
+                    l,
+                    b,
+                    0,
+                    l,
+                    b,
+                    m,
+                    l,
+                    t,
+                    m,
+                    l,
+                    t,
+                    0,
+                    l,
+                    t,
+                    m,
+                    l,
+                    b,
+                    0
                 );
             });
         });
@@ -462,7 +525,7 @@ export class Shadow {
     removeLight(id: string) {
         const index = this.lights.findIndex(v => v.id === id);
         this.lights.splice(index, 1);
-        delete this.originLightInfo[id]
+        delete this.originLightInfo[id];
         this.followHero.delete(id);
         this.requestRefresh();
     }
@@ -509,7 +572,7 @@ export class Shadow {
      * @param nocache 是否不使用缓存
      * @param resize 是否resize canvas
      */
-    private refresh(nocache: boolean = false, resize: boolean = false) {        
+    private refresh(nocache: boolean = false, resize: boolean = false) {
         this.calShadowInfo(nocache);
         if (resize) {
             Shadow.resizeCanvas();
@@ -527,7 +590,7 @@ export class Shadow {
 
         // depth test
         gl.useProgram(Shadow.program.depth);
-        const lightProjection = Shadow.martix.projection
+        const lightProjection = Shadow.martix.projection;
 
         // 使用 3D 纹理存储深度信息
         const texture = Shadow.texture.depth;
@@ -545,11 +608,23 @@ export class Shadow {
         gl.enable(gl.DEPTH_TEST);
         gl.depthFunc(gl.LESS);
         this.lights.forEach((light, i) => {
-            this.depthTest(lightProjection, light, i, texture, length, proj, view);
+            this.depthTest(
+                lightProjection,
+                light,
+                i,
+                texture,
+                length,
+                proj,
+                view
+            );
         });
 
         gl.disableVertexAttribArray(position);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(info.length), gl.STATIC_DRAW);
+        gl.bufferData(
+            gl.ARRAY_BUFFER,
+            new Float32Array(info.length),
+            gl.STATIC_DRAW
+        );
         gl.vertexAttribPointer(position, 3, gl.FLOAT, false, 0, 0);
         gl.bindTexture(gl.TEXTURE_2D, null);
 
@@ -593,13 +668,14 @@ export class Shadow {
                 const v = this.lights[i];
                 data.push(
                     // 坐标
-                    v.x * ratio, v.y * ratio, 0, 0 // 填充到 4 个分量以确保对齐
+                    v.x * ratio,
+                    v.y * ratio,
+                    0,
+                    0 // 填充到 4 个分量以确保对齐
                 );
             } else {
                 // 如果没有光源，添加填充以确保统一缓冲区大小保持一致
-                data.push(
-                    0, 0, 0, 0
-                );
+                data.push(0, 0, 0, 0);
             }
         }
         for (let i = 0; i < MAX_LIGHT_NUM; i++) {
@@ -607,13 +683,14 @@ export class Shadow {
                 const v = this.lights[i];
                 data.push(
                     // 颜色
-                    v.color[0], v.color[1], v.color[2], v.color[3] // 4 个分量的颜色
+                    v.color[0],
+                    v.color[1],
+                    v.color[2],
+                    v.color[3] // 4 个分量的颜色
                 );
             } else {
                 // 如果没有光源，添加填充以确保统一缓冲区大小保持一致
-                data.push(
-                    0, 0, 0, 0
-                );
+                data.push(0, 0, 0, 0);
             }
         }
         for (let i = 0; i < MAX_LIGHT_NUM; i++) {
@@ -621,13 +698,14 @@ export class Shadow {
                 const v = this.lights[i];
                 data.push(
                     // 半径、衰减半径、遮挡
-                    v.r * ratio, v.decay * ratio, v.noShelter ? 1 : 0, 0 // 填充到 4 个分量
+                    v.r * ratio,
+                    v.decay * ratio,
+                    v.noShelter ? 1 : 0,
+                    0 // 填充到 4 个分量
                 );
             } else {
                 // 如果没有光源，添加填充以确保统一缓冲区大小保持一致
-                data.push(
-                    0, 0, 0, 0
-                );
+                data.push(0, 0, 0, 0);
             }
         }
 
@@ -635,7 +713,11 @@ export class Shadow {
 
         const lightsBuffer = Shadow.buffer.color.lights;
         gl.bindBuffer(gl.UNIFORM_BUFFER, lightsBuffer);
-        gl.bufferData(gl.UNIFORM_BUFFER, new Float32Array(data), gl.DYNAMIC_DRAW);
+        gl.bufferData(
+            gl.UNIFORM_BUFFER,
+            new Float32Array(data),
+            gl.DYNAMIC_DRAW
+        );
         gl.uniformBlockBinding(Shadow.program.color, blockIndex, 0);
         gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, lightsBuffer);
 
@@ -644,7 +726,13 @@ export class Shadow {
         const colorFramebuffer = Shadow.buffer.color.framebuffer;
         gl.enable(gl.DEPTH_TEST);
         gl.bindFramebuffer(gl.FRAMEBUFFER, colorFramebuffer);
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, colorTexture, 0);
+        gl.framebufferTexture2D(
+            gl.FRAMEBUFFER,
+            gl.COLOR_ATTACHMENT0,
+            gl.TEXTURE_2D,
+            colorTexture,
+            0
+        );
         gl.bindTexture(gl.TEXTURE_2D, colorTexture);
         gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
         gl.viewport(0, 0, canvas.width, canvas.height);
@@ -690,7 +778,13 @@ export class Shadow {
         const blurFramebuffer = Shadow.buffer.blur1.framebuffer;
         gl.bindTexture(gl.TEXTURE_2D, colorTexture);
         gl.bindFramebuffer(gl.FRAMEBUFFER, blurFramebuffer);
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, blurTexture, 0);
+        gl.framebufferTexture2D(
+            gl.FRAMEBUFFER,
+            gl.COLOR_ATTACHMENT0,
+            gl.TEXTURE_2D,
+            blurTexture,
+            0
+        );
         gl.viewport(0, 0, canvas.width, canvas.height);
         gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
 
@@ -714,7 +808,7 @@ export class Shadow {
         gl.vertexAttribPointer(texBlur2, 2, gl.FLOAT, false, 0, 0);
         const blur2IndicesBuffer = Shadow.buffer.blur2.indices;
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, blur2IndicesBuffer);
-    
+
         // Texture
         const blur2TextureLoc = Shadow.locations.blur2.u_texture;
         const blur2TextureSizeLoc = Shadow.locations.blur2.u_textureSize;
@@ -747,13 +841,24 @@ export class Shadow {
         const gl = Shadow.gl;
         const ratio = core.domStyle.scale * devicePixelRatio;
         const cameraMatrix = mat4.create();
-        mat4.lookAt(cameraMatrix, [light.x * ratio, light.y * ratio, core._PX_ * 2 * ratio], [light.x * ratio, light.y * ratio, 0], [0, 1, 0]);
+        mat4.lookAt(
+            cameraMatrix,
+            [light.x * ratio, light.y * ratio, core._PX_ * 2 * ratio],
+            [light.x * ratio, light.y * ratio, 0],
+            [0, 1, 0]
+        );
 
         const size = core._PX_ * ratio * 2;
         gl.viewport(0, 0, size, size);
         const framebuffer = Shadow.buffer.depth.framebuffer[index];
         gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
-        gl.framebufferTextureLayer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, texture, 0, index);
+        gl.framebufferTextureLayer(
+            gl.FRAMEBUFFER,
+            gl.COLOR_ATTACHMENT0,
+            texture,
+            0,
+            index
+        );
         gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
 
         gl.uniformMatrix4fv(proj, false, lightProjection);
@@ -782,12 +887,20 @@ export class Shadow {
             gl.UNSIGNED_BYTE,
             null
         );
-        gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(
+            gl.TEXTURE_2D_ARRAY,
+            gl.TEXTURE_MIN_FILTER,
+            gl.NEAREST
+        );
+        gl.texParameteri(
+            gl.TEXTURE_2D_ARRAY,
+            gl.TEXTURE_MAG_FILTER,
+            gl.NEAREST
+        );
         return texture!;
     }
 
-    private static create2DTexture(size: number) {        
+    private static create2DTexture(size: number) {
         const gl = Shadow.gl;
         const texture = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -909,48 +1022,62 @@ export class Shadow {
                 u_texture: gl.getUniformLocation(blur2, 'u_texture')!,
                 u_textureSize: gl.getUniformLocation(blur2, 'u_textureSize')!
             }
-        }
+        };
 
         // Matrix
         const lightProjection = mat4.create();
         mat4.perspective(lightProjection, FOVY, 1, 1, core._PX_ * ratio);
         this.martix = {
             projection: lightProjection
-        }
+        };
 
         // Buffer
-        const depthFramebuffers = Array(MAX_LIGHT_NUM).fill(1).map(v => gl.createFramebuffer()!);
+        const depthFramebuffers = Array(MAX_LIGHT_NUM)
+            .fill(1)
+            .map(v => gl.createFramebuffer()!);
         this.buffer = {
             depth: {
                 position: gl.createBuffer()!,
                 framebuffer: depthFramebuffers
             },
             color: {
-                position: this.initBuffer(new Float32Array([1, 1, -1, 1, 1, -1, -1, -1])),
-                texcoord: this.initBuffer(new Float32Array([1, 1, 0, 1, 1, 0, 0, 0])),
+                position: this.initBuffer(
+                    new Float32Array([1, 1, -1, 1, 1, -1, -1, -1])
+                ),
+                texcoord: this.initBuffer(
+                    new Float32Array([1, 1, 0, 1, 1, 0, 0, 0])
+                ),
                 indices: this.initIndicesBuffer(),
                 framebuffer: gl.createFramebuffer()!,
                 lights: gl.createBuffer()!
             },
             blur1: {
-                position: this.initBuffer(new Float32Array([1, 1, -1, 1, 1, -1, -1, -1])),
-                texcoord: this.initBuffer(new Float32Array([1, 1, 0, 1, 1, 0, 0, 0])),
+                position: this.initBuffer(
+                    new Float32Array([1, 1, -1, 1, 1, -1, -1, -1])
+                ),
+                texcoord: this.initBuffer(
+                    new Float32Array([1, 1, 0, 1, 1, 0, 0, 0])
+                ),
                 indices: this.initIndicesBuffer(),
                 framebuffer: gl.createFramebuffer()!
             },
             blur2: {
-                position: this.initBuffer(new Float32Array([1, 1, -1, 1, 1, -1, -1, -1])),
-                texcoord: this.initBuffer(new Float32Array([1, 1, 0, 1, 1, 0, 0, 0])),
+                position: this.initBuffer(
+                    new Float32Array([1, 1, -1, 1, 1, -1, -1, -1])
+                ),
+                texcoord: this.initBuffer(
+                    new Float32Array([1, 1, 0, 1, 1, 0, 0, 0])
+                ),
                 indices: this.initIndicesBuffer()
             }
-        }
+        };
 
         // Texture
         this.texture = {
             depth: this.create3DTexture(core._PX_, MAX_LIGHT_NUM),
             color: this.create2DTexture(core._PX_),
             blur: this.create2DTexture(core._PX_)
-        }
+        };
         this.resizeCanvas();
     }
 
@@ -961,7 +1088,7 @@ export class Shadow {
             mat4.perspective(lightProjection, FOVY, 1, 1, core._PX_ * ratio);
             this.martix = {
                 projection: lightProjection
-            }
+            };
         }
     }
 
@@ -1254,8 +1381,8 @@ export class LayerShadowExtends implements ILayerRenderExtends {
     static shadowList: Set<LayerShadowExtends> = new Set();
     id: string = 'shadow';
 
-    layer!: Layer
-    hero!: HeroRenderer
+    layer!: Layer;
+    hero!: HeroRenderer;
     sprite!: Sprite;
 
     update() {
@@ -1265,19 +1392,19 @@ export class LayerShadowExtends implements ILayerRenderExtends {
     private onMoveTick = (x: number, y: number) => {
         const now = Shadow.now();
         if (!now) return;
-        if (now.followHero.size === 0) return;                
+        if (now.followHero.size === 0) return;
         now.followHero.forEach(v => {
             now.modifyLight(v, {
                 x: x * 32 + 16,
                 y: y * 32 + 16
             });
         });
-        now.requestRefresh();        
-        
+        now.requestRefresh();
+
         this.layer.requestAfterFrame(() => {
             this.sprite.update(this.sprite);
         });
-    }
+    };
 
     private listen() {
         this.hero.on('moveTick', this.onMoveTick);
@@ -1297,9 +1424,15 @@ export class LayerShadowExtends implements ILayerRenderExtends {
         this.sprite = new Sprite('static', false);
         this.sprite.setHD(true);
         this.sprite.size(layer.width, layer.height);
-        this.sprite.setRenderFn((canvas, transform) => {   
+        this.sprite.setRenderFn((canvas, transform) => {
             if (Shadow.map[core.status.floorId]) {
-                canvas.ctx.drawImage(Shadow.canvas, 0, 0, layer.width, layer.height);
+                canvas.ctx.drawImage(
+                    Shadow.canvas,
+                    0,
+                    0,
+                    layer.width,
+                    layer.height
+                );
             }
         });
 

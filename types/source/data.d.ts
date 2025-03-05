@@ -1,4 +1,3 @@
-
 type FloorIds =
     | 'empty'
     | 'MT0'
@@ -106,7 +105,7 @@ type FloorIds =
     | 'MT94'
     | 'MT95'
     | 'MT96'
-    | 'MT97'
+    | 'MT97';
 
 type ImageIds =
     | 'IQ.png'
@@ -140,7 +139,7 @@ type ImageIds =
     | 'tower7.webp'
     | 'winskin.png'
     | 'winskin2.png'
-    | 'winskin3.png'
+    | 'winskin3.png';
 
 type AnimationIds =
     | 'amazed'
@@ -164,7 +163,7 @@ type AnimationIds =
     | 'sweat'
     | 'sweat2'
     | 'sword'
-    | 'zone'
+    | 'zone';
 
 type SoundIds =
     | '008-System08.opus'
@@ -206,7 +205,7 @@ type SoundIds =
     | 'shop.opus'
     | 'thunder.opus'
     | 'tree.opus'
-    | 'zone.opus'
+    | 'zone.opus';
 
 type BgmIds =
     | 'beforeBoss.opus'
@@ -229,35 +228,33 @@ type BgmIds =
     | 'towerBoss2.opus'
     | 'towerBoss3.opus'
     | 'winter.opus'
-    | 'winterTown.opus'
+    | 'winterTown.opus';
 
-type FontIds =
-    | 'normal'
-    | 'FiraCode'
+type FontIds = 'normal' | 'FiraCode';
 
 interface NameMap {
-    '确定': 'confirm.opus';
-    '取消': 'cancel.opus';
-    '操作失败': 'error.opus';
-    '光标移动': 'cursor.opus';
-    '打开界面': 'open_ui.opus';
-    '读档': 'load.opus';
-    '存档': 'save.opus';
-    '获得道具': 'item.opus';
-    '回血': 'recovery.opus';
-    '炸弹': 'bomb.opus';
-    '飞行器': 'centerFly.opus';
-    '开关门': 'door.opus';
-    '上下楼': 'floor.opus';
-    '跳跃': 'jump.opus';
-    '破墙镐': 'pickaxe.opus';
-    '破冰镐': 'icePickaxe.opus';
-    '宝石': 'gem.opus';
-    '阻激夹域': 'zone.opus';
-    '穿脱装备': 'equip.opus';
-    '背景音乐': 'bgm.opus';
-    '攻击': 'attack.opus';
-    '背景图': 'bg.jpg';
-    '商店': 'shop.opus';
-    '领域': 'zone';
+    确定: 'confirm.opus';
+    取消: 'cancel.opus';
+    操作失败: 'error.opus';
+    光标移动: 'cursor.opus';
+    打开界面: 'open_ui.opus';
+    读档: 'load.opus';
+    存档: 'save.opus';
+    获得道具: 'item.opus';
+    回血: 'recovery.opus';
+    炸弹: 'bomb.opus';
+    飞行器: 'centerFly.opus';
+    开关门: 'door.opus';
+    上下楼: 'floor.opus';
+    跳跃: 'jump.opus';
+    破墙镐: 'pickaxe.opus';
+    破冰镐: 'icePickaxe.opus';
+    宝石: 'gem.opus';
+    阻激夹域: 'zone.opus';
+    穿脱装备: 'equip.opus';
+    背景音乐: 'bgm.opus';
+    攻击: 'attack.opus';
+    背景图: 'bg.jpg';
+    商店: 'shop.opus';
+    领域: 'zone';
 }
