@@ -18,7 +18,6 @@
         "baseUrl": ".",
         "paths": {
             "@/*": ["src/*"],
-            "@ui/*": ["src/ui/*"],
             "@motajs/*": ["packages/*/src"]
         }
     },

@@ -1,6 +1,7 @@
 packages:
     - 'packages/*'
     - 'packages/*/*'
+    - 'src/'
 
 ignore:
     - 'packages/**/dist'

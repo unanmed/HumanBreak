@@ -189,9 +189,17 @@ importers:
 
   packages/client:
     dependencies:
+      '@motajs/client-base':
+        specifier: workspace:*
+        version: link:../client-base
       '@motajs/render':
         specifier: workspace:*
         version: link:../render
+      '@motajs/system':
+        specifier: workspace:*
+        version: link:../system
+
+  packages/client-base: {}
 
   packages/common: {}
 
@@ -218,6 +226,9 @@ importers:
       '@motajs/client':
         specifier: workspace:*
         version: link:../client
+      '@motajs/client-base':
+        specifier: workspace:*
+        version: link:../client-base
       '@motajs/common':
         specifier: workspace:*
         version: link:../common
@@ -293,6 +304,39 @@ importers:
       '@motajs/render':
         specifier: workspace:*
         version: link:../render
+
+  src:
+    dependencies:
+      '@motajs/client':
+        specifier: workspace:*
+        version: link:../packages/client
+      '@motajs/client-base':
+        specifier: workspace:*
+        version: link:../packages/client-base
+      '@motajs/common':
+        specifier: workspace:*
+        version: link:../packages/common
+      '@motajs/legacy-client':
+        specifier: workspace:*
+        version: link:../packages/legacy-client
+      '@motajs/legacy-common':
+        specifier: workspace:*
+        version: link:../packages/legacy-common
+      '@motajs/legacy-data':
+        specifier: workspace:*
+        version: link:../packages/legacy-data
+      '@motajs/legacy-ui':
+        specifier: workspace:*
+        version: link:../packages/legacy-ui
+      '@motajs/render':
+        specifier: workspace:*
+        version: link:../packages/render
+      '@motajs/system':
+        specifier: workspace:*
+        version: link:../packages/system
+      '@motajs/system-ui':
+        specifier: workspace:*
+        version: link:../packages/system-ui
 
 packages:
 

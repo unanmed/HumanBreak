@@ -10,6 +10,6 @@
         "@motajs/legacy-common": "workspace:*",
         "@motajs/legacy-client": "workspace:*",
         "@motajs/legacy-data": "workspace:*",
-        "@motajs/legacy-ui": "workspacee:*"
+        "@motajs/legacy-ui": "workspace:*"
     }
 }
