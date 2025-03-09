@@ -1,5 +1,5 @@
 import { Keyboard } from '@motajs/system-action';
-import KeyboardUI from '../panel/keyboard.vue';
+import KeyboardUI from './keyboard.vue';
 
 interface VirtualKeyProps {
     keyboard: Keyboard;
