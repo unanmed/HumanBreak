@@ -4,7 +4,7 @@ layout: home
 
 hero:
     name: 'mota-js'
-    text: 'HTML5魔塔样板V2.A'
+    text: 'HTML5魔塔样板V2.B'
     tagline: HTML5魔塔样板从 2.x 到 3.0 的过渡版本
     actions:
         - theme: brand

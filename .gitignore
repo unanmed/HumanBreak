@@ -49,4 +49,5 @@ script/people.ts
 user.ts
 .antlr
 graph.svg
-docs/.vitepress
+docs/.vitepress/cache
+docs/.vitepress/dist

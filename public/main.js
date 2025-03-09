@@ -1,4 +1,4 @@
-///<reference path="../src/types/core.d.ts" />
+///<reference path="../types/declaration/core.d.ts" />
 function main() {
     //------------------------ 用户修改内容 ------------------------//
 
