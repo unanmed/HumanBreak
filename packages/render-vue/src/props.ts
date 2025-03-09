@@ -22,8 +22,7 @@ import {
     RectREllipseParams
 } from '@motajs/render-elements';
 import { Font } from '@motajs/render-style';
-// todo: 改成接口
-import type { EnemyCollection } from '@/game/enemy/damage';
+import { IEnemyCollection } from '@motajs/types';
 
 export interface CustomProps {
     _item: (props: BaseProps) => RenderItem;
@@ -144,7 +143,7 @@ export interface DamageProps extends BaseProps {
     mapWidth?: number;
     mapHeight?: number;
     cellSize?: number;
-    enemy?: EnemyCollection;
+    enemy?: IEnemyCollection;
     font?: string;
     strokeStyle?: CanvasStyle;
     strokeWidth?: number;

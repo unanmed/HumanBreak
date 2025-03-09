@@ -1,7 +1,7 @@
 import { getDamageColor } from '../utils';
 import { ToShowEnemy } from './book';
-import type { DamageEnemy, EnemyInfo } from '@/game/enemy/damage';
 import { isMobile } from '../use';
+import { EnemyInfo, IDamageEnemy } from '@motajs/types';
 
 export function getLocFromMouseLoc(x: number, y: number): LocArr {
     const mx = Math.round(x + core.bigmap.offsetX / 32);
@@ -10,7 +10,7 @@ export function getLocFromMouseLoc(x: number, y: number): LocArr {
 }
 
 export function getDetailedEnemy(
-    enemy: DamageEnemy,
+    enemy: IDamageEnemy,
     floorId: FloorIds = core.status.floorId
 ): ToShowEnemy {
     const ratio = core.status.maps[floorId].ratio;

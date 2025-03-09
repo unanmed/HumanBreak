@@ -9,7 +9,7 @@ import {
     UiController
 } from '@motajs/legacy-ui';
 import { bgmController, soundPlayer } from '@/module';
-import settingsText from '@/data/settings.json';
+import settingsText from '../data/settings.json';
 
 //#region legacy-ui
 export const mainUi = new UiController();

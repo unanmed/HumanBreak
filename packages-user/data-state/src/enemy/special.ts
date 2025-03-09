@@ -1,16 +1,16 @@
-import { getHeroStatusOn } from '@/game/state/hero';
-import { EnemyInfo } from './damage';
+import { getHeroStatusOn } from '../state/hero';
+import { UserEnemyInfo } from './damage';
 
 export interface SpecialDeclaration {
     code: number;
-    name: string | ((enemy: EnemyInfo) => string);
-    desc: string | ((enemy: EnemyInfo) => string);
+    name: string | ((enemy: UserEnemyInfo) => string);
+    desc: string | ((enemy: UserEnemyInfo) => string);
     color: string;
 }
 
 const fromFunc = (
-    func: string | ((enemy: EnemyInfo) => string),
-    enemy: EnemyInfo
+    func: string | ((enemy: UserEnemyInfo) => string),
+    enemy: UserEnemyInfo
 ) => {
     return typeof func === 'string' ? func : func(enemy);
 };

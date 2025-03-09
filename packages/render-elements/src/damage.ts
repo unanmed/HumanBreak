@@ -16,12 +16,7 @@ import {
     LayerGroup
 } from './layer';
 import { BlockCacher, CanvasCacheItem, ICanvasCacheItem } from './block';
-// todo: 改成接口形式
-import type {
-    DamageEnemy,
-    EnemyCollection,
-    MapDamage
-} from '@/game/enemy/damage';
+import { IDamageEnemy, IEnemyCollection, MapDamage } from '@motajs/types';
 
 const ensureFloorDamage = Mota.require('fn', 'ensureFloorDamage');
 
@@ -151,9 +146,9 @@ export class Damage extends RenderItem<EDamageEvent> {
     renderable: Map<number, Set<DamageRenderable>> = new Map();
 
     /** 当前渲染怪物列表 */
-    enemy?: EnemyCollection;
+    enemy?: IEnemyCollection;
     /** 每个分块中包含的怪物集合 */
-    blockData: Map<number, Map<number, DamageEnemy>> = new Map();
+    blockData: Map<number, Map<number, IDamageEnemy>> = new Map();
     /** 单元格大小 */
     cellSize: number = 32;
 
@@ -224,7 +219,7 @@ export class Damage extends RenderItem<EDamageEvent> {
      * 更新怪物列表。更新后，{@link Damage.enemy} 会丢失原来的怪物列表引用，换为传入的列表引用
      * @param enemy 怪物列表
      */
-    updateCollection(enemy: EnemyCollection) {
+    updateCollection(enemy: IEnemyCollection) {
         if (this.enemy !== enemy) {
             this.enemy?.off('calculated', this.onExtract);
             enemy.on('calculated', this.onExtract);
@@ -322,7 +317,7 @@ export class Damage extends RenderItem<EDamageEvent> {
      * @param enemy 怪物
      * @param block 怪物所属分块
      */
-    private extract(enemy: DamageEnemy, block: Set<DamageRenderable>) {
+    private extract(enemy: IDamageEnemy, block: Set<DamageRenderable>) {
         if (enemy.progress !== 4) return;
         const x = enemy.x!;
         const y = enemy.y!;

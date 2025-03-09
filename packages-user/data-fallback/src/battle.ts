@@ -1,7 +1,14 @@
-import { DamageEnemy, ensureFloorDamage, getSingleEnemy } from './damage';
-import { findDir, has } from '../../plugin/game/utils';
-import { hook, loading } from '../game';
-import { HeroSkill, NightSpecial } from '../mechanism/misc';
+import {
+    DamageEnemy,
+    ensureFloorDamage,
+    getSingleEnemy,
+    getEnemy,
+    HeroSkill,
+    NightSpecial
+} from '@user/data-state';
+import { hook, loading } from '@user/data-base';
+import { Patch, PatchClass } from '@motajs/legacy-common';
+import { isNil } from 'lodash-es';
 
 export interface CurrentEnemy {
     enemy: DamageEnemy;
@@ -9,22 +16,11 @@ export interface CurrentEnemy {
     onMapEnemy: DamageEnemy[];
 }
 
-export function getEnemy(
-    x: number,
-    y: number,
-    floorId: FloorIds = core.status.floorId
-) {
-    const enemy = core.status.maps[floorId].enemy.get(x, y);
-    return enemy;
-}
-
 function init() {
-    core.enemys.canBattle = function canBattle(
-        x: number | DamageEnemy,
-        y: number,
-        floorId: FloorIds = core.status.floorId
-    ) {
-        const enemy = typeof x === 'number' ? getEnemy(x, y, floorId) : x;
+    const patch = new Patch(PatchClass.Enemys);
+
+    patch.add('canBattle', function (x, y, floorId) {
+        const enemy = typeof x === 'number' ? getEnemy(x, y!, floorId) : x;
         if (!enemy) {
             throw new Error(
                 `Cannot get enemy on x:${x}, y:${y}, floor: ${floorId}`
@@ -33,7 +29,7 @@ function init() {
         const { damage } = enemy.calDamage();
 
         return damage < core.status.hero.hp;
-    };
+    });
 
     core.events.battle = function battle(
         x: number | DamageEnemy,
@@ -206,7 +202,7 @@ function init() {
         }
 
         // 如果是融化怪，需要特殊标记一下
-        if (special.has(25) && has(x) && has(y)) {
+        if (special.has(25) && !isNil(x) && !isNil(y)) {
             flags[`melt_${floorId}`] ??= {};
             flags[`melt_${floorId}`][`${x},${y}`] = enemy.info.melt;
         }
@@ -231,7 +227,7 @@ function init() {
         const todo: MotaEvent = [];
 
         // 战后事件
-        if (has(core.status.floorId)) {
+        if (!isNil(core.status.floorId)) {
             const loc = `${x},${y}` as LocString;
             todo.push(
                 ...(core.floors[core.status.floorId].afterBattle[loc] ?? [])
@@ -242,7 +238,7 @@ function init() {
         // 如果事件不为空，将其插入
         if (todo.length > 0) core.insertAction(todo, x, y);
 
-        if (has(x) && has(y)) {
+        if (!isNil(x) && !isNil(y)) {
             core.drawAnimate(animate, x, y);
             core.removeBlock(x, y);
         } else core.drawHeroAnimate(animate);

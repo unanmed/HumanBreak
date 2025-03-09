@@ -1,5 +1,5 @@
 import { backDir, has } from '@/plugin/game/utils';
-import { loading } from '../game';
+import { loading } from '@user/data-base';
 import type { LayerDoorAnimate } from '@motajs/render';
 import { getSkillLevel } from '@/plugin/game/skillTree';
 
@@ -210,9 +210,9 @@ export namespace BluePalace {
         core.lockControl();
         core.playSound('door.opus');
 
-        const Adapter = Mota.require('module', 'Render').RenderAdapter;
+        const Adapter = Mota.require('@motajs/render').RenderAdapter;
         const adapter = Adapter.get<LayerDoorAnimate>('door-animate');
-        const texture = Mota.require('module', 'Render').texture;
+        const texture = Mota.require('@motajs/render').texture;
         if (adapter) {
             Promise.all(
                 toConvert.map(v => {

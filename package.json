@@ -11,7 +11,12 @@
     "update": "tsx script/update.ts",
     "declare": "tsx script/declare.ts",
     "type": "vue-tsc --noEmit",
-    "lines": "tsx script/lines.ts"
+    "lines": "tsx script/lines.ts",
+    "build:packages": "vue-tsx --noEmit && tsx script/build-packages.ts",
+    "build:game": "vue-tsx --noEmit && tsx script/build-game.ts",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "dependencies": {
     "@ant-design/icons-vue": "^6.1.0",
@@ -71,7 +76,7 @@
     "typescript": "^5.5.4",
     "typescript-eslint": "^8.18.2",
     "unplugin-vue-components": "^0.22.12",
-    "vite": "^4.5.3",
+    "vite": "^4.5.9",
     "vite-plugin-dts": "^4.4.0",
     "vitepress": "^1.5.0",
     "vue-tsc": "^2.1.6",

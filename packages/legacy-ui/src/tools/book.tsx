@@ -1,5 +1,11 @@
-import type { CurrentEnemy } from '@/game/enemy/battle';
 import { has } from '../utils';
+import { IDamageEnemy } from '@motajs/types';
+
+export interface CurrentEnemy {
+    enemy: IDamageEnemy;
+    // 这个是干啥的？
+    onMapEnemy: IDamageEnemy[];
+}
 
 export interface ToShowEnemy extends CurrentEnemy {
     critical: string;

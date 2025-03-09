@@ -36,7 +36,13 @@ export default defineConfig({
             }
         }),
         legacy({
-            targets: ['defaults', 'not IE 11'],
+            targets: [
+                'Chrome >= 56',
+                'Firefox >= 51',
+                'Edge >= 79',
+                'Safari >= 15',
+                'Opera >= 43'
+            ],
             polyfills: true,
             modernPolyfills: true
         }),

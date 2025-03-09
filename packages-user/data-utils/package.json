@@ -1,0 +1,6 @@
+{
+    "name": "@user/data-utils",
+    "dependencies": {
+        "@user/data-base": "workspace:*"
+    }
+}

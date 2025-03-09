@@ -14,7 +14,7 @@ interface PluginDeclaration {
 }
 
 type Forward<T> = {
-    [K in keyof T as T[K] extends Function
+    [K in keyof T as T[K] extends (...params: any) => any
         ? K extends `_${string}`
             ? never
             : K
@@ -23,7 +23,7 @@ type Forward<T> = {
 
 type ForwardKeys<T> = keyof Forward<T>;
 
-declare const Mota: import('../../src/game/system').IMota;
+declare const Mota: import('@user/entry-data').IMota;
 interface Window {
     Mota: import('../../src/game/system').IMota;
 }

@@ -1,0 +1,8 @@
+{
+    "name": "@user/data-fallback",
+    "dependencies": {
+        "@motajs/legacy-common": "workspace:*",
+        "@user/data-state": "workspace:*",
+        "@user/data-base": "workspace:*"
+    }
+}

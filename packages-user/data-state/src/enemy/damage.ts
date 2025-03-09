@@ -1,74 +1,27 @@
-import { getHeroStatusOf, getHeroStatusOn } from '@/game/state/hero';
-import { Range } from '../util/range';
+import { getHeroStatusOf, getHeroStatusOn } from '../state/hero';
+import { Range } from '@user/data-utils';
 import { ensureArray, has, manhattan } from '@/plugin/game/utils';
 import EventEmitter from 'eventemitter3';
-import { hook } from '../game';
+import { hook } from '@user/data-base';
 import { HeroSkill, NightSpecial } from '../mechanism/misc';
+import {
+    EnemyInfo,
+    DamageInfo,
+    DamageDelta,
+    HaloData,
+    CriticalDamageDelta,
+    MapDamage,
+    HaloFn,
+    IEnemyCollection,
+    IDamageEnemy,
+    HaloType
+} from '@motajs/types';
 
 // todo: 光环划分优先级，从而可以实现光环的多级运算
 
-interface HaloType {
-    square: {
-        x: number;
-        y: number;
-        d: number;
-    };
-    manhattan: {
-        x: number;
-        y: number;
-        d: number;
-    };
-}
-
-export interface EnemyInfo extends Partial<Omit<Enemy, 'special'>> {
-    atk: number;
-    def: number;
-    hp: number;
-    special: Set<number>;
-    damageDecline: number;
-    atkBuff_: number;
-    defBuff_: number;
-    hpBuff_: number;
-    enemy: Enemy;
-    x?: number;
-    y?: number;
-    floorId?: FloorIds;
+export interface UserEnemyInfo extends EnemyInfo {
     togetherNum?: number;
 }
-
-interface DamageInfo {
-    damage: number;
-    /** 自动切换技能时使用的技能 */
-    skill?: number;
-}
-
-export interface MapDamage {
-    damage: number;
-    type: Set<string>;
-    mockery?: LocArr[];
-    hunt?: [x: number, y: number, dir: Dir][];
-}
-
-interface HaloData<T extends keyof HaloType = keyof HaloType> {
-    type: T;
-    data: HaloType[T];
-    special: number;
-    from?: DamageEnemy;
-}
-
-interface DamageDelta {
-    /** 跟最小伤害值的减伤 */
-    delta: number;
-    damage: number;
-    info: DamageInfo;
-}
-
-interface CriticalDamageDelta extends Omit<DamageDelta, 'info'> {
-    /** 勇士的攻击增量 */
-    atkDelta: number;
-}
-
-type HaloFn = (info: EnemyInfo, enemy: EnemyInfo) => void;
 
 /** 光环属性 */
 export const haloSpecials: Set<number> = new Set([
@@ -105,7 +58,10 @@ interface EnemyCollectionEvent {
     calculated: [];
 }
 
-export class EnemyCollection extends EventEmitter<EnemyCollectionEvent> {
+export class EnemyCollection
+    extends EventEmitter<EnemyCollectionEvent>
+    implements IEnemyCollection
+{
     floorId: FloorIds;
     list: Map<number, DamageEnemy> = new Map();
 
@@ -130,7 +86,7 @@ export class EnemyCollection extends EventEmitter<EnemyCollectionEvent> {
 
     get(x: number, y: number) {
         const index = x + y * this.width;
-        return this.list.get(index);
+        return this.list.get(index) ?? null;
     }
 
     /**
@@ -242,12 +198,12 @@ export class EnemyCollection extends EventEmitter<EnemyCollectionEvent> {
     }
 }
 
-export class DamageEnemy<T extends EnemyIds = EnemyIds> {
-    id: T;
+export class DamageEnemy implements IDamageEnemy {
+    id: EnemyIds;
     x?: number;
     y?: number;
     floorId?: FloorIds;
-    enemy: Enemy<T>;
+    enemy: Enemy;
     col?: EnemyCollection;
 
     /**
@@ -255,7 +211,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
      * 属性计算流程：预平衡光环(即计算加光环的光环怪的光环) -> 计算怪物在没有光环下的属性
      * -> provide inject 光环 -> 计算怪物的光环加成 -> 计算完毕
      */
-    info!: EnemyInfo;
+    info!: UserEnemyInfo;
 
     /** 向其他怪提供过的光环 */
     providedHalo: Set<number> = new Set();
@@ -267,7 +223,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     progress: number = 0;
 
     constructor(
-        enemy: Enemy<T>,
+        enemy: Enemy,
         x?: number,
         y?: number,
         floorId?: FloorIds,
@@ -426,7 +382,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
 
                     // 这一句必须放到applyHalo之前
                     this.providedHalo.add(29);
-                    const halo = (e: EnemyInfo, enemy: EnemyInfo) => {
+                    const halo = (e: UserEnemyInfo, enemy: UserEnemyInfo) => {
                         const s = enemy.specialHalo!;
 
                         for (const spe of s) {
@@ -489,7 +445,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
                 'square',
                 { x: this.x, y: this.y, d: 5 },
                 this,
-                (e, enemy) => {
+                (e: UserEnemyInfo, enemy) => {
                     if (
                         e.special.has(8) &&
                         (e.x !== this.x || this.y !== e.y)
@@ -620,7 +576,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
     /**
      * 接受其他怪的光环
      */
-    injectHalo(halo: HaloFn, enemy: EnemyInfo) {
+    injectHalo(halo: HaloFn, enemy: UserEnemyInfo) {
         halo(this.info, enemy);
     }
 
@@ -769,7 +725,7 @@ export class DamageEnemy<T extends EnemyIds = EnemyIds> {
         if (type) damage[loc].type.add(type);
     }
 
-    private calEnemyDamageOf(hero: Partial<HeroStatus>, enemy: EnemyInfo) {
+    private calEnemyDamageOf(hero: Partial<HeroStatus>, enemy: UserEnemyInfo) {
         const status = getHeroStatusOf(hero, realStatus, this.floorId);
         let damage = calDamageWith(enemy, status) ?? Infinity;
         let bestSkill = -1;
@@ -991,7 +947,7 @@ const skills: HeroSkill.Skill[] = [HeroSkill.Blade, HeroSkill.Shield];
  * @param hero 勇士信息
  */
 export function calDamageWith(
-    info: EnemyInfo,
+    info: UserEnemyInfo,
     hero: Partial<HeroStatus>
 ): number | null {
     const { hp, mdef } = core.status.hero;
@@ -1109,6 +1065,15 @@ export function getSingleEnemy(id: EnemyIds) {
     enemy.calAttribute();
     enemy.getRealInfo();
     enemy.calDamage(core.status.hero);
+    return enemy;
+}
+
+export function getEnemy(
+    x: number,
+    y: number,
+    floorId: FloorIds = core.status.floorId
+) {
+    const enemy = core.status.maps[floorId].enemy.get(x, y);
     return enemy;
 }
 

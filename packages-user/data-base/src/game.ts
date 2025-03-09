@@ -1,5 +1,5 @@
 import { EventEmitter } from 'eventemitter3';
-import type { DamageEnemy, EnemyCollection } from './enemy/damage';
+import { IDamageEnemy, IEnemyCollection } from '@motajs/types';
 
 // ----- 加载事件
 interface GameLoadEvent {
@@ -82,7 +82,7 @@ export interface GameEvent {
     /** Emitted in project/functions.js moveOneStep */
     moveOneStep: [x: number, y: number, floorId: FloorIds];
     /** Emitted in src/game/enemy/battle.ts afterBattle */
-    afterBattle: [enemy: DamageEnemy, x?: number, y?: number];
+    afterBattle: [enemy: IDamageEnemy, x?: number, y?: number];
     /** Emitted in libs/events.js changingFloor */
     changingFloor: [floorId: FloorIds, heroLoc: Loc];
     /** Emitted in libs/maps.js setBlock */
@@ -94,7 +94,7 @@ export interface GameEvent {
         oldBlock: AllNumbers
     ];
     /** Emitted in game/enemy/damage.ts */
-    enemyExtract: [col: EnemyCollection];
+    enemyExtract: [col: IEnemyCollection];
     /** Emitted in lib/events.js restart */
     restart: [];
     /** Emitted in lib/maps.js setBgFgBlock */

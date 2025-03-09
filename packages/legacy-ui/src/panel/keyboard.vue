@@ -21,10 +21,8 @@
 </template>
 
 <script lang="ts" setup>
-import { checkAssist } from '@/core/main/custom/hotkey';
-import { Keyboard } from '@/core/main/custom/keyboard';
-import { KeyboardEmits } from '@/core/main/custom/keyboard';
-import { KeyCodeUtils } from '@motajs/client';
+import { checkAssist, Keyboard, KeyboardEmits } from '@motajs/system-action';
+import { KeyCodeUtils } from '@motajs/client-base';
 import { nextTick, onUnmounted, ref } from 'vue';
 
 const props = defineProps<{

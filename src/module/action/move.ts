@@ -1,6 +1,6 @@
 import { KeyCode } from '@motajs/client-base';
 import { Hotkey, HotkeyData } from '@motajs/system-action';
-import type { HeroMover, IMoveController } from '@/game/state/move';
+import type { HeroMover, IMoveController } from '@user/data-state';
 import { Ticker } from 'mutate-animate';
 import { mainScope } from '@motajs/legacy-ui';
 

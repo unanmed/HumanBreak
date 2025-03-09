@@ -67,7 +67,7 @@ export interface IMota {
 /**
  * 样板接口系统，通过 Mota 获取到样板的核心功能
  */
-class Mota implements IMota {
+class MotaSystem implements IMota {
     private modules: Record<string, any> = {};
 
     r = r;
@@ -137,4 +137,8 @@ declare global {
     }
 }
 
-window.Mota = new Mota();
+export const Mota = new MotaSystem();
+
+export function createMota() {
+    window.Mota = Mota;
+}

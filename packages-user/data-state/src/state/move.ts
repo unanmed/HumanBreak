@@ -1,6 +1,6 @@
 import EventEmitter from 'eventemitter3';
 import { backDir, checkCanMoveExtended, toDir } from './utils';
-import { loading } from '../game';
+import { loading } from '@user/data-base';
 import type {
     RenderAdapter,
     HeroRenderer,
@@ -13,7 +13,7 @@ import type {
 } from '@motajs/render';
 import type { HeroKeyMover } from '@/module/action/move';
 import { BluePalace, MiscData } from '../mechanism/misc';
-import { sleep } from 'mutate-animate';
+import { sleep } from '@motajs/common';
 
 interface MoveStepDir {
     type: 'dir';
@@ -316,7 +316,7 @@ export class BlockMover extends ObjectMoverBase {
         this.blockNum = blockNum;
 
         Mota.r(() => {
-            const { Layer } = Mota.require('module', 'Render');
+            const { Layer } = Mota.require('@motajs/render');
             const r = Layer.getMovingRenderable(blockNum, this.x, this.y);
 
             if (r) {
@@ -877,7 +877,7 @@ export class HeroMover extends ObjectMoverBase {
         const adapter = HeroMover.adapter;
         const viewport = HeroMover.viewport;
         if (!adapter || !viewport) return;
-        const MotaRenderer = Mota.require('module', 'Render').MotaRenderer;
+        const MotaRenderer = Mota.require('@motajs/render').MotaRenderer;
         const render = MotaRenderer.get('render-main');
         const group = render?.getElementById('layer-loop') as LayerGroup;
         const layer = group?.getLayer('event');
@@ -939,8 +939,8 @@ export const heroMoveCollection: HeroMoveCollection = {
 loading.once('coreInit', () => {
     // 注册按键操作
     Mota.r(() => {
-        const { HeroKeyMover } = Mota.require('module', 'Action');
-        const gameKey = Mota.require('var', 'gameKey');
+        const { HeroKeyMover } = Mota.require('@motajs/system-action');
+        const { gameKey } = Mota.require('@motajs/system-action');
         const keyMover = new HeroKeyMover(gameKey, heroMover);
         heroMoveCollection.keyMover = keyMover;
     });
@@ -949,7 +949,7 @@ loading.once('coreInit', () => {
 // Adapter初始化
 loading.once('coreInit', () => {
     if (main.replayChecking || main.mode === 'editor') return;
-    const Adapter = Mota.require('module', 'Render').RenderAdapter;
+    const Adapter = Mota.require('@motajs/render').RenderAdapter;
     const adapter = Adapter.get<HeroRenderer>('hero-adapter');
     const viewport = Adapter.get<FloorViewport>('viewport');
     const layerAdapter = Adapter.get<Layer>('layer');

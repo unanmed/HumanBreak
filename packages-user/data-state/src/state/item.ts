@@ -1,5 +1,5 @@
 import EventEmitter from 'eventemitter3';
-import { loading } from '../game';
+import { loading } from '@user/data-base';
 
 type EffectFn = () => void;
 type CanUseEffectFn = () => boolean;

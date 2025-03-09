@@ -1,11 +1,11 @@
+import { IDamageEnemy } from '@motajs/types';
 import { fixedUi } from './preset/ui';
-import type { DamageEnemy } from '@/game/enemy/damage';
 import { tip } from './utils';
 import { ref, Ref } from 'vue';
 
 export interface MarkInfo<T extends EnemyIds> {
     id: T;
-    enemy: DamageEnemy<T>;
+    enemy: IDamageEnemy;
     /**
      * 提示模式，从低到高位数分别为：
      * 1. 踩临界时

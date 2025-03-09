@@ -1,0 +1,34 @@
+import { Mota } from '@user/entry-data';
+import * as Client from '@motajs/client';
+import * as ClientBase from '@motajs/client-base';
+import * as Common from '@motajs/common';
+import * as LegacyClient from '@motajs/legacy-client';
+import * as LegacyCommon from '@motajs/legacy-common';
+import * as LegacySystem from '@motajs/legacy-system';
+import * as LegacyUI from '@motajs/legacy-ui';
+import * as Render from '@motajs/render';
+import * as RenderCore from '@motajs/render-core';
+import * as RenderElements from '@motajs/render-elements';
+import * as RenderStyle from '@motajs/render-style';
+import * as RenderVue from '@motajs/render-vue';
+import * as System from '@motajs/system';
+import * as SystemAction from '@motajs/system-action';
+import * as SystemUI from '@motajs/system-ui';
+
+export function create() {
+    Mota.register('@motajs/client', Client);
+    Mota.register('@motajs/client-base', ClientBase);
+    Mota.register('@motajs/common', Common);
+    Mota.register('@motajs/legacy-client', LegacyClient);
+    Mota.register('@motajs/legacy-common', LegacyCommon);
+    Mota.register('@motajs/legacy-system', LegacySystem);
+    Mota.register('@motajs/legacy-ui', LegacyUI);
+    Mota.register('@motajs/render', Render);
+    Mota.register('@motajs/render-core', RenderCore);
+    Mota.register('@motajs/render-elements', RenderElements);
+    Mota.register('@motajs/render-style', RenderStyle);
+    Mota.register('@motajs/render-vue', RenderVue);
+    Mota.register('@motajs/system', System);
+    Mota.register('@motajs/system-action', SystemAction);
+    Mota.register('@motajs/system-ui', SystemUI);
+}

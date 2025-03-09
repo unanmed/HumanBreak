@@ -1,6 +1,7 @@
 import list from '../data/achievement.json';
 import { achiDict, checkCompletionAchievement } from './completion';
 import { changeLocalStorage, has } from '../utils';
+import { fixedUi } from '../preset';
 
 type AchievementList = typeof list;
 export type AchievementType = keyof AchievementList;
@@ -50,7 +51,7 @@ export function completeAchievement(type: AchievementType, index: number) {
     if (type === 'explore' && !Object.values(achiDict).includes(index)) {
         checkCompletionAchievement();
     }
-    Mota.require('var', 'fixedUi').open('completeAchi', {
+    fixedUi.open('completeAchi', {
         complete: `${type},${index}`
     });
 }

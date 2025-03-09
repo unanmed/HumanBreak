@@ -1,0 +1,21 @@
+{
+    "name": "@motajs/entry-client",
+    "dependencies": {
+        "@motajs/client": "workspace:*",
+        "@motajs/client-base": "workspace:*",
+        "@motajs/common": "workspace:*",
+        "@motajs/render": "workspace:*",
+        "@motajs/render-core": "workspace:*",
+        "@motajs/render-elements": "workspace:*",
+        "@motajs/render-style": "workspace:*",
+        "@motajs/render-vue": "workspace:*",
+        "@motajs/system": "workspace:*",
+        "@motajs/system-ui": "workspace:*",
+        "@motajs/system-action": "workspace:*",
+        "@motajs/legacy-common": "workspace:*",
+        "@motajs/legacy-client": "workspace:*",
+        "@motajs/legacy-data": "workspace:*",
+        "@motajs/legacy-ui": "workspace:*",
+        "@motajs/legacy-system": "workspace:*"
+    }
+}
