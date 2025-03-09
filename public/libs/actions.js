@@ -1,4 +1,4 @@
-///<reference path="../../src/types/core.d.ts" />
+///<reference path="../../types/declaration/core.d.ts" />
 
 /*
 actions.js：用户交互的事件的处理
@@ -582,7 +582,7 @@ actions.prototype._sys_ondown = function (x, y, px, py) {
         y: Math.floor((py + core.bigmap.offsetY) / 32)
     };
 
-    const loopMaps = Mota.require('module', 'Mechanism').MiscData.loopMaps;
+    const loopMaps = Mota.require('@user/data-state').MiscData.loopMaps;
     if (loopMaps.has(core.status.floorId)) {
         const floor = core.status.thisMap;
         if (pos.x < 0) pos.x += floor.width;
@@ -1117,7 +1117,7 @@ actions.prototype._clickAction_text = function () {
     // 正在淡入淡出的话不执行
     if (core.status.event.animateUI) return;
 
-    const Store = Mota.require('module', 'MainUI').TextboxStore;
+    const Store = Mota.require('@user/client-modules').TextboxStore;
     const store = Store.get('main-textbox');
 
     // var data = core.clone(core.status.event.data.current);
@@ -1519,7 +1519,7 @@ actions.prototype._keyUpViewMaps = function (keycode) {
 
 ////// 快捷商店界面时的点击操作 //////
 actions.prototype._clickQuickShop = function (x, y) {
-    const shop = Mota.Plugin.require('shop_g');
+    const shop = Mota.require('@user/legacy-plugin-data');
     var shopIds = shop.listShopIds();
     if (this._out(x)) return;
     var topIndex =
@@ -1557,7 +1557,7 @@ actions.prototype._keyUpQuickShop = function (keycode) {
         return;
     }
     this._selectChoices(
-        Mota.Plugin.require('shop_g').listShopIds().length + 1,
+        Mota.require('@user/data-state').listShopIds().length + 1,
         keycode,
         this._clickQuickShop
     );

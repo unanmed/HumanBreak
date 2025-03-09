@@ -12,15 +12,19 @@ function getCanvasFilterByFloorId(floorId: FloorIds = core.status.floorId) {
     return filterMap.find(v => v[0].includes(floorId))?.[1] ?? '';
 }
 
-loading.once('coreInit', () => {
-    filterMap.push(
-        [['MT50', 'MT60', 'MT61'], 'contrast(120%)'], // 童心佬的滤镜（
-        [
-            core.floorIds.slice(61, 70).concat(core.floorIds.slice(72, 107)),
-            'contrast(120%)'
-        ] // 童心佬的滤镜（
-    );
-});
+export function createGameCanvas() {
+    loading.once('coreInit', () => {
+        filterMap.push(
+            [['MT50', 'MT60', 'MT61'], 'contrast(120%)'], // 童心佬的滤镜（
+            [
+                core.floorIds
+                    .slice(61, 70)
+                    .concat(core.floorIds.slice(72, 107)),
+                'contrast(120%)'
+            ] // 童心佬的滤镜（
+        );
+    });
+}
 
 export class LayerGroupFilter implements ILayerGroupRenderExtends {
     id: string = 'filter';

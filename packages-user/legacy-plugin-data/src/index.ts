@@ -1,3 +1,4 @@
+import { loading } from '@user/data-base';
 import { initFallback } from './fallback';
 import { initFiveLayer } from './fiveLayer';
 import { createHook } from './hook';
@@ -8,11 +9,15 @@ if (import.meta.env.DEV) {
     import('./dev/hotReload');
 }
 
-initFallback();
-initFiveLayer();
-createHook();
-initReplay();
-initUI();
+export function create() {
+    initFallback();
+    loading.once('coreInit', () => {
+        initFiveLayer();
+        createHook();
+        initReplay();
+        initUI();
+    });
+}
 
 export * from './chase';
 export * from './fallback';

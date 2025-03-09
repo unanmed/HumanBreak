@@ -4,8 +4,11 @@ import { UIController } from '@motajs/system-ui';
 import { mainSceneUI } from './ui/main';
 import { MAIN_HEIGHT, MAIN_WIDTH } from './shared';
 import { hook } from '@user/data-base';
+import { createItemDetail } from './itemDetail';
+import { createLoopMap } from './loopMap';
+import { createGameCanvas } from './legacy/gameCanvas';
 
-export function create() {
+export function createGameRenderer() {
     const main = new MotaRenderer();
     main.size(MAIN_WIDTH, MAIN_HEIGHT);
 
@@ -32,6 +35,12 @@ export function create() {
     });
 
     console.log(main);
+}
+
+export function createRender() {
+    createGameCanvas();
+    createItemDetail();
+    createLoopMap();
 }
 
 export * from './components';

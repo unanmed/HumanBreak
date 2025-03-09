@@ -14,19 +14,6 @@ const i = (img: ImageMapKeys) => {
 
 const imageMap: Partial<ImageMap> = {};
 
-const { loading } = Mota.require('@user/data-base');
-loading.once('loaded', () => {
-    [
-        'enemys',
-        'enemy48',
-        'npcs',
-        'npc48',
-        'terrains',
-        'items',
-        'animates'
-    ].forEach(v => (imageMap[v as ImageMapKeys] = i(v as ImageMapKeys)));
-});
-
 interface AutotileCache {
     parent?: Set<AllNumbersOf<'autotile'>>;
     frame: number;
@@ -91,21 +78,21 @@ class TextureCache {
 
     constructor() {
         this.material = imageMap as Record<ImageMapKeys, HTMLImageElement>;
+    }
 
-        loading.once('loaded', () => {
-            const map = maps_90f36752_8815_4be8_b32b_d7fad1d0542e;
+    init() {
+        const map = maps_90f36752_8815_4be8_b32b_d7fad1d0542e;
+        // @ts-expect-error 无法推导
+        this.idNumberMap = {};
+        for (const [key, { id }] of Object.entries(map)) {
             // @ts-expect-error 无法推导
-            this.idNumberMap = {};
-            for (const [key, { id }] of Object.entries(map)) {
-                // @ts-expect-error 无法推导
-                this.idNumberMap[id] = parseInt(key) as AllNumbers;
-            }
-            this.tileset = core.material.images.tilesets;
-            this.autotile = splitAutotiles(this.idNumberMap);
-            this.images = core.material.images.images;
-            this.calRenderable();
-            this.calAutotileConnections();
-        });
+            this.idNumberMap[id] = parseInt(key) as AllNumbers;
+        }
+        this.tileset = core.material.images.tilesets;
+        this.autotile = splitAutotiles(this.idNumberMap);
+        this.images = core.material.images.images;
+        this.calRenderable();
+        this.calAutotileConnections();
     }
 
     /**
@@ -554,4 +541,20 @@ function splitAutotiles(map: IdToNumber): AutotileCaches {
     judge.delete();
 
     return cache as AutotileCaches;
+}
+
+export function createCache() {
+    const { loading } = Mota.require('@user/data-base');
+    loading.once('loaded', () => {
+        [
+            'enemys',
+            'enemy48',
+            'npcs',
+            'npc48',
+            'terrains',
+            'items',
+            'animates'
+        ].forEach(v => (imageMap[v as ImageMapKeys] = i(v as ImageMapKeys)));
+        texture.init();
+    });
 }

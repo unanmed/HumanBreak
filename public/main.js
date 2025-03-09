@@ -314,7 +314,10 @@ main.prototype.loadAsync = async function (mode, callback) {
     if (main.mode === 'editor') return;
 
     // 自动放缩最大化
-    let auto = Mota.require('var', 'mainSetting').getValue('autoScale', true);
+    let auto = Mota.require('@motajs/legacy-ui').mainSetting.getValue(
+        'autoScale',
+        true
+    );
 
     if (auto && !core.domStyle.isVertical) {
         const height = window.innerHeight;
@@ -327,7 +330,7 @@ main.prototype.loadAsync = async function (mode, callback) {
         core.domStyle.scale = window.innerWidth / core._PX_;
     }
     Mota.r(() => {
-        Mota.require('module', 'Render').MotaOffscreenCanvas2D.refreshAll();
+        Mota.require('@motajs/render').MotaOffscreenCanvas2D.refreshAll();
     });
 };
 

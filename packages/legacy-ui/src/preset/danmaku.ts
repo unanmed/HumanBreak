@@ -21,25 +21,27 @@ if (import.meta.env.DEV) {
     Danmaku.backend = `/danmaku`;
 }
 
-const { hook } = Mota.require('@user/data-base');
+export function createDanmaku() {
+    const { hook } = Mota.require('@user/data-base');
 
-hook.once('reset', () => {
-    Danmaku.fetch();
-});
+    hook.once('reset', () => {
+        Danmaku.fetch();
+    });
 
-// 勇士移动后显示弹幕
-hook.on('moveOneStep', (x, y, floor) => {
-    const enabled = mainSetting.getValue('ui.danmaku', true);
-    if (!enabled) return;
-    const f = Danmaku.allInPos[floor];
-    if (f) {
-        const danmaku = f[`${x},${y}`];
-        if (danmaku) {
-            danmaku.forEach(v => {
-                setTimeout(() => {
-                    v.show();
-                }, Math.random() * 1000);
-            });
+    // 勇士移动后显示弹幕
+    hook.on('moveOneStep', (x, y, floor) => {
+        const enabled = mainSetting.getValue('ui.danmaku', true);
+        if (!enabled) return;
+        const f = Danmaku.allInPos[floor];
+        if (f) {
+            const danmaku = f[`${x},${y}`];
+            if (danmaku) {
+                danmaku.forEach(v => {
+                    setTimeout(() => {
+                        v.show();
+                    }, Math.random() * 1000);
+                });
+            }
         }
-    }
-});
+    });
+}

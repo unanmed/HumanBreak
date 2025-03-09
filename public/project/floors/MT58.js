@@ -21,14 +21,14 @@ main.floors.MT58=
             {
                 "type": "function",
                 "async": true,
-                "function": "function(){\nMota.require('module', 'Mechanism').BluePalace.doorConvert(11, 3);\n}"
+                "function": "function(){\nMota.require('@user/data-state').Mechanism.BluePalace.doorConvert(11, 3);\n}"
             }
         ],
         "6,1": [
             {
                 "type": "function",
                 "async": true,
-                "function": "function(){\nMota.require('module', 'Mechanism').BluePalace.doorConvert(6, 1);\n}"
+                "function": "function(){\nMota.require('@user/data-state').Mechanism.BluePalace.doorConvert(6, 1);\n}"
             }
         ]
     },

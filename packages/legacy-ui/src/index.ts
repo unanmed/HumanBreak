@@ -1,4 +1,10 @@
-import 'ant-design-vue/dist/antd.dark.css';
+import { createFx } from './fx';
+import { createPreset } from './preset';
+
+export function create() {
+    createFx();
+    createPreset();
+}
 
 export * as UI from './ui';
 export * as Components from './components';

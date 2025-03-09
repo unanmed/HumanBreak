@@ -50,7 +50,7 @@ main.floors.MT0=
         "\r[red]注意！！！\r[]该塔新增了很多新的功能，同时对样板的ui进行了大幅度的改动，操作也有改变，由于内容过多，这里不再一一描述，具体请在道具栏查看百科全书！！百科全书是在你面前的几个道具中的其中一个",
         {
             "type": "function",
-            "function": "function(){\nif (!core.isReplaying()) Mota.require('var', 'fixedUi').open('chapter', { chapter: '序章  起源' });\n}"
+            "function": "function(){\nif (!core.isReplaying()) Mota.require('@motajs/legacy-ui').fixedUi.open('chapter', { chapter: '序章  起源' });\n}"
         }
     ],
     "parallelDo": "",
@@ -78,7 +78,7 @@ main.floors.MT0=
                 "yes": [
                     {
                         "type": "function",
-                        "function": "function(){\nMota.require('module', 'RenderUtils').swapChapter(2, flags.hard);\n}"
+                        "function": "function(){\nMota.require('@motajs/legacy-ui').swapChapter(2, flags.hard);\n}"
                     }
                 ],
                 "no": []

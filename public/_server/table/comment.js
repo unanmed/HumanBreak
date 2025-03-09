@@ -191,7 +191,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "popCheckboxSet",
 					"_checkboxSet": function () {
-						var array = Mota.require('var', 'enemySpecials');
+						var array = Mota.require('@user/data-state').specials;
 						var b = [],
 							c = [];
 						for (var index = 0; index < array.length; index++) {
@@ -313,7 +313,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "popCheckboxSet",
 					"_checkboxSet": function () {
-						var array = Mota.require('var', 'enemySpecials');
+						var array = Mota.require('@user/data-state').specials;
 						var b = [],
 							c = [];
 						for (var index = 0; index < array.length; index++) {

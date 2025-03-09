@@ -21,11 +21,13 @@ interface ItemData {
     y: number;
 }
 
-hook.on('setBlock', (x, y, floorId, block) => {
-    FloorItemDetail.listened.forEach(v => {
-        v.setBlock(block, x, y);
+export function createItemDetail() {
+    hook.on('setBlock', (x, y, floorId, block) => {
+        FloorItemDetail.listened.forEach(v => {
+            v.setBlock(block, x, y);
+        });
     });
-});
+}
 
 export class FloorItemDetail implements ILayerGroupRenderExtends {
     id: string = 'item-detail';

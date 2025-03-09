@@ -248,7 +248,7 @@ control.prototype.showStartAnimate = function (noAnimate, callback) {
             callback
         );
     Mota.r(() => {
-        Mota.require('var', 'fixedUi').open('start');
+        Mota.require('@motajs/legacy-ui').fixedUi.open('start');
     });
 };
 
@@ -526,20 +526,17 @@ control.prototype.setHeroMoveInterval = function (callback) {
     //     render.move(true);
     // });
 
-    core.interval.heroMoveInterval = window.setInterval(
-        function () {
-            // render.offset += toAdd * 4;
-            core.status.heroMoving += toAdd;
-            if (core.status.heroMoving >= 8) {
-                clearInterval(core.interval.heroMoveInterval);
-                core.status.heroMoving = 0;
-                // render.offset = 0;
-                // render.move(false);
-                if (callback) callback();
-            }
-        },
-        ((core.values.moveSpeed / 8) * toAdd) / core.status.replay.speed
-    );
+    core.interval.heroMoveInterval = window.setInterval(function () {
+        // render.offset += toAdd * 4;
+        core.status.heroMoving += toAdd;
+        if (core.status.heroMoving >= 8) {
+            clearInterval(core.interval.heroMoveInterval);
+            core.status.heroMoving = 0;
+            // render.offset = 0;
+            // render.move(false);
+            if (callback) callback();
+        }
+    }, ((core.values.moveSpeed / 8) * toAdd) / core.status.replay.speed);
 };
 
 ////// 每移动一格后执行的事件 //////
@@ -1139,7 +1136,7 @@ control.prototype.checkBlock = function () {
 
 control.prototype._checkBlock_disableQuickShop = function () {
     // 禁用快捷商店
-    const { setShopVisited } = Mota.Plugin.require('shop_g');
+    const { setShopVisited } = Mota.require('@user/data-state');
     if (core.flags.disableShopOnDamage) {
         Object.keys(core.status.shops).forEach(function (shopId) {
             setShopVisited(shopId, false);
@@ -1283,7 +1280,7 @@ control.prototype.startReplay = function (list) {
     //     'warn',
     //     '由于不可抗力，录像播放过程中将没有勇士移动动画'
     // );
-    Mota.require('var', 'hook').emit('replayStatus', false);
+    Mota.require('@user/data-base').hook.emit('replayStatus', false);
     this.replay();
 };
 
@@ -1298,7 +1295,7 @@ control.prototype.pauseReplay = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
     core.status.replay.pausing = true;
     core.drawTip('暂停播放');
-    Mota.require('var', 'hook').emit('replayStatus', false);
+    Mota.require('@user/data-base').hook.emit('replayStatus', false);
     core.updateStatusBar(false, true);
 };
 
@@ -1312,7 +1309,7 @@ control.prototype.resumeReplay = function () {
     core.status.replay.pausing = false;
     core.drawTip('恢复播放');
     core.replay();
-    Mota.require('var', 'hook').emit('replayStatus', true);
+    Mota.require('@user/data-base').hook.emit('replayStatus', true);
     core.updateStatusBar(false, true);
 };
 
@@ -1378,7 +1375,7 @@ control.prototype.stopReplay = function (force) {
     core.deleteCanvas('replay');
     core.updateStatusBar(false, true);
     core.drawTip('停止播放并恢复游戏');
-    Mota.require('var', 'hook').emit('replayStatus', true);
+    Mota.require('@user/data-base').hook.emit('replayStatus', true);
 };
 
 ////// 回退 //////
@@ -1648,7 +1645,10 @@ control.prototype._replay_error = function (action, callback) {
             if (core.status.replay.save.length > 0) {
                 core.status.replay.replaying = true;
                 core.status.replay.pausing = true;
-                Mota.require('var', 'hook').emit('replayStatus', false);
+                Mota.require('@user/data-base').hook.emit(
+                    'replayStatus',
+                    false
+                );
                 core.rewindReplay();
             } else {
                 core.playSound('操作失败');
@@ -1754,7 +1754,7 @@ control.prototype._replayAction_equip = function (action) {
         const type = core.getEquipTypeById(equipId);
         if (type >= 0) t = type;
         else {
-            Mota.Plugin.require('render_r').tip(
+            Mota.require('@motajs/legacy-ui').tip(
                 'error',
                 '无法装备' + core.material.items[equipId]?.name
             );
@@ -2068,7 +2068,7 @@ control.prototype._doSL_load = function (id, callback) {
             1
         )[0];
         if (!main.replayChecking) {
-            Mota.require('var', 'fixedUi').closeByName('start');
+            Mota.require('@motajs/legacy-ui').fixedUi.closeByName('start');
         }
         if (core.isPlaying() && !core.status.gameOver) {
             core.control.autosave(0);
@@ -2085,7 +2085,9 @@ control.prototype._doSL_load = function (id, callback) {
             null,
             function (data) {
                 if (!main.replayChecking && data) {
-                    Mota.require('var', 'fixedUi').closeByName('start');
+                    Mota.require('@motajs/legacy-ui').fixedUi.closeByName(
+                        'start'
+                    );
                 }
                 if (id == 'autoSave' && data != null) {
                     core.saves.autosave.data = data;
@@ -2143,7 +2145,7 @@ control.prototype._doSL_load_afterGet = function (id, data) {
     }
     // 追逐战
     Mota.r(() => {
-        Mota.Plugin.require('chase_r').end(false);
+        Mota.require('@user/legacy-plugin-client').end(false);
     });
     core.ui.closePanel();
     core.loadData(data, function () {
@@ -3113,8 +3115,6 @@ control.prototype.resize = function () {
     if (main.mode === 'editor') return;
     const width = window.innerWidth;
     const height = window.innerHeight;
-
-    const auto = Mota.require('var', 'mainSetting').getValue('autoScale', true);
 
     if (window.innerWidth >= 600) {
         // 横屏

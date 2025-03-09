@@ -25,11 +25,11 @@ events.prototype.resetGame = function (hero, hard, floorId, maps, values) {
 events.prototype.startGame = function (hard, seed, route, callback) {
     hard = hard || '';
     if (!main.replayChecking) {
-        Mota.require('var', 'fixedUi').closeByName('start');
+        Mota.require('@motajs/legacy-ui').fixedUi.closeByName('start');
     }
 
     if (main.mode != 'play') return;
-    Mota.Plugin.require('skillTree_g').resetSkillLevel();
+    Mota.require('@user/data-state').resetSkillLevel();
 
     // 无动画的开始游戏
     if (core.flags.startUsingCanvas || route != null) {
@@ -314,7 +314,7 @@ events.prototype.restart = function () {
     core.hideStatusBar();
     core.showStartAnimate();
     core.playBgm(main.startBgm);
-    Mota.require('var', 'hook').emit('restart');
+    Mota.require('@user/data-base').hook.emit('restart');
 };
 
 ////// 询问是否需要重新开始 //////
@@ -537,7 +537,7 @@ events.prototype.openDoor = function (x, y, needKey, callback) {
         core.removeBlock(x, y);
         setTimeout(function () {
             core.status.replay.animate = false;
-            Mota.require('var', 'hook').emit(
+            Mota.require('@user/data-base').hook.emit(
                 'afterOpenDoor',
                 block.event.id,
                 x,
@@ -627,7 +627,12 @@ events.prototype._openDoor_animate = function (block, x, y, callback) {
         core.maps._removeBlockFromMap(core.status.floorId, block);
         if (!locked) core.unlockControl();
         core.status.replay.animate = false;
-        Mota.require('var', 'hook').emit('afterOpenDoor', block.event.id, x, y);
+        Mota.require('@user/data-base').hook.emit(
+            'afterOpenDoor',
+            block.event.id,
+            x,
+            y
+        );
         if (callback) callback();
     };
 
@@ -696,18 +701,24 @@ events.prototype.getItem = function (id, num, x, y, isGentleClick, callback) {
                     (id.endsWith('Key')
                         ? '（钥匙类道具，遇到对应的门时自动打开）'
                         : itemCls == 'tools'
-                          ? '（消耗类道具，请按T在道具栏使用）'
-                          : itemCls == 'constants'
-                            ? '（永久类道具，请按T在道具栏使用）'
-                            : itemCls == 'equips'
-                              ? '（装备类道具，请按Q在装备栏进行装备）'
-                              : '')
+                        ? '（消耗类道具，请按T在道具栏使用）'
+                        : itemCls == 'constants'
+                        ? '（永久类道具，请按T在道具栏使用）'
+                        : itemCls == 'equips'
+                        ? '（装备类道具，请按Q在装备栏进行装备）'
+                        : '')
             );
         }
         itemHint.push(id);
     }
 
-    Mota.require('var', 'hook').emit('afterGetItem', id, x, y, isGentleClick);
+    Mota.require('@user/data-base').hook.emit(
+        'afterGetItem',
+        id,
+        x,
+        y,
+        isGentleClick
+    );
     if (callback) callback();
 };
 
@@ -867,7 +878,7 @@ events.prototype._changeFloor_beforeChange = function (info, callback) {
         if (info.time === 0 || main.replayChecking) {
             core.events._changeFloor_changing(info, callback);
         } else {
-            const Render = Mota.require('module', 'Render').MotaRenderer;
+            const Render = Mota.require('@motajs/render').MotaRenderer;
             const main = Render.get('render-main');
             const change = main.getElementById('floor-change');
             change.setTitle(core.floors[info.floorId]?.title ?? '');
@@ -900,7 +911,7 @@ events.prototype._changeFloor_changing = function (info, callback) {
     if (info.time === 0 || main.replayChecking) {
         this._changeFloor_afterChange(info, callback);
     } else {
-        const Render = Mota.require('module', 'Render').MotaRenderer;
+        const Render = Mota.require('@motajs/render').MotaRenderer;
         const main = Render.get('render-main');
         const change = main.getElementById('floor-change');
         change.hideChange(info.time / 2).then(() => {
@@ -919,7 +930,11 @@ events.prototype._changeFloor_afterChange = function (info, callback) {
 
 events.prototype.changingFloor = function (floorId, heroLoc) {
     this.eventdata.changingFloor(floorId, heroLoc);
-    Mota.require('var', 'hook').emit('changingFloor', floorId, heroLoc);
+    Mota.require('@user/data-base').hook.emit(
+        'changingFloor',
+        floorId,
+        heroLoc
+    );
 };
 
 ////// 转换楼层结束的事件 //////
@@ -1553,7 +1568,7 @@ events.prototype.__action_doAsyncFunc = function (isAsync, func) {
 
 events.prototype._action_text = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
-    const Store = Mota.require('module', 'MainUI').TextboxStore;
+    const Store = Mota.require('@user/client-modules').TextboxStore;
     const store = Store.get('main-textbox');
     const { text } = data;
     let title = '';
@@ -2203,13 +2218,13 @@ events.prototype._action_unloadEquip = function (data, x, y, prefix) {
 };
 
 events.prototype._action_openShop = function (data, x, y, prefix) {
-    Mota.Plugin.require('shop_g').setShopVisited(data.id, true);
-    if (data.open) Mota.Plugin.require('shop_g').openShop(data.id, true);
+    Mota.require('@user/data-state').setShopVisited(data.id, true);
+    if (data.open) Mota.require('@user/data-state').openShop(data.id, true);
     core.doAction();
 };
 
 events.prototype._action_disableShop = function (data, x, y, prefix) {
-    Mota.Plugin.require('shop_g').setShopVisited(data.id, false);
+    Mota.require('@user/data-state').setShopVisited(data.id, false);
     core.doAction();
 };
 
@@ -3396,7 +3411,7 @@ events.prototype.openToolbox = function (fromUserAction) {
 ////// 点击快捷商店按钮时的打开操作 //////
 events.prototype.openQuickShop = function (fromUserAction) {
     if (core.isReplaying()) return;
-    const shop = Mota.Plugin.require('shop_g');
+    const shop = Mota.require('@user/data-state');
 
     if (Object.keys(core.status.shops).length == 0) {
         core.playSound('操作失败');

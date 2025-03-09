@@ -51,8 +51,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 core.hideStatusBar(core.hasFlag('showToolbox'));
             else core.showStatusBar();
             if (main.mode === 'play' && !main.replayChecking) {
-                Mota.Plugin.require('fly_r').splitArea();
-                Mota.require('var', 'hook').emit('reset');
+                Mota.require('@motajs/legacy-ui').splitArea();
+                Mota.require('@user/data-base').hook.emit('reset');
             } else {
                 flags.autoSkill ??= true;
             }
@@ -78,10 +78,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 });
             }
 
-            const { NightSpecial, HeroSkill } = Mota.require(
-                'module',
-                'Mechanism'
-            );
+            const { NightSpecial, HeroSkill } =
+                Mota.require('@user/data-state');
             NightSpecial.clearNight(core.floorIds);
             HeroSkill.clearSkill();
         },
@@ -155,7 +153,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             }
 
             // 根据分区信息自动砍层与恢复
-            Mota.Plugin.require('removeMap_g')?.autoRemoveMaps?.(floorId);
+            Mota.require('@user/legacy-plugin-data')?.autoRemoveMaps?.(floorId);
 
             // 重置画布尺寸
             core.maps.resizeMap(floorId);
@@ -219,9 +217,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     core.visitFloor(floorId);
                 }
             }
-            if (!flags.debug && !main.replayChecking)
-                Mota.Plugin.require('completion_r').checkVisitedFloor();
-            Mota.require('var', 'hook').emit('afterChangeFloor', floorId);
+            // if (!flags.debug && !main.replayChecking)
+            //     Mota.Plugin.require('completion_r').checkVisitedFloor();
+            Mota.require('@user/data-base').hook.emit(
+                'afterChangeFloor',
+                floorId
+            );
         },
         flyTo: function (toId, callback) {
             // 楼层传送器的使用，从当前楼层飞往toId
@@ -267,10 +268,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     values[key] = core.clone(core.values[key]);
             }
 
-            const { NightSpecial, HeroSkill } = Mota.require(
-                'module',
-                'Mechanism'
-            );
+            const { NightSpecial, HeroSkill } =
+                Mota.require('@user/data-state');
 
             // 要存档的内容
             var data = {
@@ -283,7 +282,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 version: core.firstData.version,
                 guid: core.getGuid(),
                 time: new Date().getTime(),
-                skills: Mota.Plugin.require('skillTree_g').saveSkillTree(),
+                skills: Mota.require('@user/data-state').saveSkillTree(),
                 night: [...NightSpecial.saveNight()],
                 skill: HeroSkill.saveSkill()
             };
@@ -329,11 +328,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             }
             core.setFlag('__fromLoad__', true);
 
-            Mota.Plugin.require('skillTree_g').loadSkillTree(data.skills);
-            const { NightSpecial, HeroSkill } = Mota.require(
-                'module',
-                'Mechanism'
-            );
+            Mota.require('@user/data-state').loadSkillTree(data.skills);
+            const { NightSpecial, HeroSkill } =
+                Mota.require('@user/data-state');
 
             if (!data.night) {
                 // 兼容旧版
@@ -389,7 +386,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
 
                 Mota.r(() => {
                     if (flags.onChase) {
-                        const chase = Mota.Plugin.require('chase_r');
+                        const chase = Mota.require(
+                            '@user/legacy-plugin-client'
+                        );
                         const controller = chase.initChase(0);
                         controller.start(true);
                     }
@@ -456,7 +455,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
 
             // 如需强行终止行走可以在这里条件判定：
             // core.stopAutomaticRoute();
-            Mota.require('var', 'hook').emit(
+            Mota.require('@user/data-base').hook.emit(
                 'moveOneStep',
                 nowx,
                 nowy,

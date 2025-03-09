@@ -39,14 +39,16 @@ class RenderEmits extends EventEmitter<RenderEvent> {
 
 export const renderEmits = new RenderEmits();
 
-Mota.require('@user/data-base').hook.once('reset', () => {
-    let lastTime = 0;
-    RenderItem.ticker.add(time => {
-        if (!core.isPlaying()) return;
-        if (time - lastTime > core.values.animateSpeed) {
-            RenderItem.animatedFrame++;
-            lastTime = time;
-            renderEmits.emitAnimateFrame(RenderItem.animatedFrame, time);
-        }
+export function createFrame() {
+    Mota.require('@user/data-base').hook.once('reset', () => {
+        let lastTime = 0;
+        RenderItem.ticker.add(time => {
+            if (!core.isPlaying()) return;
+            if (time - lastTime > core.values.animateSpeed) {
+                RenderItem.animatedFrame++;
+                lastTime = time;
+                renderEmits.emitAnimateFrame(RenderItem.animatedFrame, time);
+            }
+        });
     });
-});
+}

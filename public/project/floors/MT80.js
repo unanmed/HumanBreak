@@ -21,7 +21,7 @@ main.floors.MT80=
             {
                 "type": "function",
                 "async": true,
-                "function": "function(){\nMota.require('module', 'Mechanism').BluePalace.doorConvert(7, 2);\n}"
+                "function": "function(){\nMota.require('@user/data-state').Mechanism.BluePalace.doorConvert(7, 2);\n}"
             }
         ]
     },

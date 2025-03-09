@@ -1551,49 +1551,51 @@ export class Layer extends Container<ELayerEvent> {
 
 const layerAdapter = new RenderAdapter<Layer>('layer');
 
-const { hook } = Mota.require('@user/data-base');
+export function createLayer() {
+    const { hook } = Mota.require('@user/data-base');
 
-hook.on('setBlock', (x, y, floor, block) => {
-    const isNow = floor === core.status.floorId;
-    LayerGroupFloorBinder.activedBinder.forEach(v => {
-        if (floor === v.floor || (isNow && v.bindThisFloor)) {
-            v.setBlock('event', block, x, y);
-        }
-    });
-    LayerFloorBinder.listenedBinder.forEach(v => {
-        if (v.layer.layer === 'event') {
-            if (v.floor === floor || (isNow && v.bindThisFloor)) {
-                v.setBlock(block, x, y);
+    hook.on('setBlock', (x, y, floor, block) => {
+        const isNow = floor === core.status.floorId;
+        LayerGroupFloorBinder.activedBinder.forEach(v => {
+            if (floor === v.floor || (isNow && v.bindThisFloor)) {
+                v.setBlock('event', block, x, y);
             }
-        }
-    });
-});
-hook.on('changingFloor', floor => {
-    // 潜在隐患：如果putRenderData改成异步，那么会变成两帧后才能真正刷新并渲染
-    // 考虑到楼层转换一般不会同时执行很多次，因此这里改为立刻更新
-    LayerGroupFloorBinder.activedBinder.forEach(v => {
-        if (v.bindThisFloor) v.updateBindData();
-        v.emit('floorChange', floor);
-    });
-    LayerFloorBinder.listenedBinder.forEach(v => {
-        if (v.bindThisFloor) v.updateBindData();
-    });
-});
-hook.on('setBgFgBlock', (name, number, x, y, floor) => {
-    const isNow = floor === core.status.floorId;
-    LayerGroupFloorBinder.activedBinder.forEach(v => {
-        if (floor === v.floor || (isNow && v.bindThisFloor)) {
-            v.setBlock(name, number, x, y);
-        }
-    });
-    LayerFloorBinder.listenedBinder.forEach(v => {
-        if (v.layer.layer === name) {
-            if (v.floor === floor || (isNow && v.bindThisFloor)) {
-                v.setBlock(number, x, y);
+        });
+        LayerFloorBinder.listenedBinder.forEach(v => {
+            if (v.layer.layer === 'event') {
+                if (v.floor === floor || (isNow && v.bindThisFloor)) {
+                    v.setBlock(block, x, y);
+                }
             }
-        }
+        });
     });
-});
+    hook.on('changingFloor', floor => {
+        // 潜在隐患：如果putRenderData改成异步，那么会变成两帧后才能真正刷新并渲染
+        // 考虑到楼层转换一般不会同时执行很多次，因此这里改为立刻更新
+        LayerGroupFloorBinder.activedBinder.forEach(v => {
+            if (v.bindThisFloor) v.updateBindData();
+            v.emit('floorChange', floor);
+        });
+        LayerFloorBinder.listenedBinder.forEach(v => {
+            if (v.bindThisFloor) v.updateBindData();
+        });
+    });
+    hook.on('setBgFgBlock', (name, number, x, y, floor) => {
+        const isNow = floor === core.status.floorId;
+        LayerGroupFloorBinder.activedBinder.forEach(v => {
+            if (floor === v.floor || (isNow && v.bindThisFloor)) {
+                v.setBlock(name, number, x, y);
+            }
+        });
+        LayerFloorBinder.listenedBinder.forEach(v => {
+            if (v.layer.layer === name) {
+                if (v.floor === floor || (isNow && v.bindThisFloor)) {
+                    v.setBlock(number, x, y);
+                }
+            }
+        });
+    });
+}
 
 interface LayerGroupBinderEvent {
     update: [floor: FloorIds];

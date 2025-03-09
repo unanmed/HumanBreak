@@ -1,10 +1,8 @@
 import { isNil } from 'lodash-es';
 import { Animation, sleep, TimingFn } from 'mutate-animate';
 import { Ref, ref } from 'vue';
-import { KeyCode } from '@motajs/client-base';
 import axios from 'axios';
 import { decompressFromBase64 } from 'lz-string';
-import { Keyboard, KeyboardEmits, isAssist } from '@motajs/system-action';
 import { logger } from '@motajs/common';
 
 type CanParseCss = keyof {

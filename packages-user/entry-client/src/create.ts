@@ -18,8 +18,11 @@ import * as ClientModules from '@user/client-modules';
 import * as LegacyPluginClient from '@user/legacy-plugin-client';
 import * as MutateAnimate from 'mutate-animate';
 import * as Vue from 'vue';
+import { hook, loading } from '@user/data-base';
 
 export function create() {
+    loading.once('registered', createModule);
+
     Mota.register('@motajs/client', Client);
     Mota.register('@motajs/client-base', ClientBase);
     Mota.register('@motajs/common', Common);
@@ -39,4 +42,16 @@ export function create() {
     Mota.register('@user/legacy-plugin-client', LegacyPluginClient);
     Mota.register('MutateAnimate', MutateAnimate);
     Mota.register('Vue', Vue);
+
+    loading.emit('clientRegistered');
+}
+
+async function createModule() {
+    LegacyUI.create();
+    RenderElements.create();
+    ClientModules.create();
+
+    await import('ant-design-vue/dist/antd.dark.css');
+    main.renderLoaded = true;
+    hook.emit('renderLoaded');
 }

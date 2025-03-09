@@ -147,7 +147,7 @@ main.floors.MT16=
             },
             {
                 "type": "function",
-                "function": "function(){\nconst controller = Mota.Plugin.require('chase_r').initChase(0);\ncontroller.initAudio(false);\n}"
+                "function": "function(){\nconst controller = Mota.require('@user/legacy-plugin-client').initChase(0);\ncontroller.initAudio(false);\n}"
             },
             {
                 "type": "show",
@@ -410,7 +410,7 @@ main.floors.MT16=
             "这里是漏怪检测，将会检测\r[gold]洞穴、山路、山脚、平原\r[white]地区的怪物是否清完",
             {
                 "type": "function",
-                "function": "function(){\nconst enemy = Mota.Plugin.require('remainEnemy_g').getRemainEnemyString(core.floorIds.slice(5, 17));\nif (enemy.length === 0) {\n\tcore.insertAction(['当前无剩余怪物！', { \"type\": \"hide\", \"remove\": true }, ]);\n} else {\n\tcore.insertAction(enemy);\n}\n}"
+                "function": "function(){\nconst enemy = Mota.require('@user/legacy-plugin-data').getRemainEnemyString(core.floorIds.slice(5, 17));\nif (enemy.length === 0) {\n\tcore.insertAction(['当前无剩余怪物！', { \"type\": \"hide\", \"remove\": true }, ]);\n} else {\n\tcore.insertAction(enemy);\n}\n}"
             },
             {
                 "type": "loadBgm",

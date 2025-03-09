@@ -806,7 +806,7 @@ maps.prototype.generateMovableArray = function (floorId) {
     for (var x = 0; x < width; ++x) {
         array[x] = Array(height).fill([]);
     }
-    const loopMaps = Mota.require('module', 'Mechanism').MiscData.loopMaps;
+    const loopMaps = Mota.require('@user/data-state').MiscData.loopMaps;
     const isLoop = loopMaps.has(floorId);
     var v2 = floorId == core.status.floorId && core.bigmap.v2;
     const half = core._HALF_WIDTH_;
@@ -888,7 +888,7 @@ maps.prototype._canMoveHero_checkPoint = function (
     var nx = x + core.utils.scan[direction].x,
         ny = y + core.utils.scan[direction].y;
 
-    const loopMaps = Mota.require('module', 'Mechanism').MiscData.loopMaps;
+    const loopMaps = Mota.require('@user/data-state').MiscData.loopMaps;
     if (loopMaps.has(floorId)) {
         if (nx < 0) nx = floor.width - 1;
         if (nx >= floor.width) nx = 0;
@@ -1129,7 +1129,7 @@ maps.prototype.automaticRoute = function (destX, destY) {
     var route = this._automaticRoute_bfs(startX, startY, destX, destY);
     if (route[destX + ',' + destY] == null) return [];
     const floor = core.status.thisMap;
-    const loopMaps = Mota.require('module', 'Mechanism').MiscData.loopMaps;
+    const loopMaps = Mota.require('@user/data-state').MiscData.loopMaps;
 
     // 路径数组转换
     var ans = [],
@@ -1162,7 +1162,7 @@ maps.prototype._automaticRoute_bfs = function (startX, startY, destX, destY) {
     queue.queue({ depth: 0, x: startX, y: startY });
     var blocks = core.getMapBlocksObj();
     const floor = core.status.thisMap;
-    const loopMaps = Mota.require('module', 'Mechanism').MiscData.loopMaps;
+    const loopMaps = Mota.require('@user/data-state').MiscData.loopMaps;
 
     while (queue.length != 0) {
         var curr = queue.dequeue(),
@@ -2654,7 +2654,7 @@ maps.prototype._drawThumbnail_realDrawTempCanvas = function (
     options
 ) {
     Mota.r(() => {
-        const setting = Mota.require('var', 'mainSetting');
+        const setting = Mota.require('@motajs/legacy-ui').mainSetting;
         options.ctx.imageSmoothingEnabled = !setting.getValue(
             'screen.antiAliasing',
             true
@@ -3230,7 +3230,7 @@ maps.prototype.removeBlockByIndex = function (index, floorId) {
         delete core.status.mapBlockObjs[floorId][block.x + ',' + block.y];
     core.setMapBlockDisabled(floorId, block.x, block.y, true);
     this._updateMapArray(floorId, block.x, block.y);
-    Mota.require('var', 'hook').emit(
+    Mota.require('@user/data-base').hook.emit(
         'setBlock',
         block.x,
         block.y,
@@ -3384,7 +3384,7 @@ maps.prototype.setBlock = function (number, x, y, floorId, noredraw) {
             }
         }
     }
-    Mota.require('var', 'hook').emit(
+    Mota.require('@user/data-base').hook.emit(
         'setBlock',
         x,
         y,
@@ -3626,7 +3626,7 @@ maps.prototype.setBgFgBlock = function (name, number, x, y, floorId) {
         else core.drawFg(floorId);
     }
 
-    Mota.require('var', 'hook').emit(
+    Mota.require('@user/data-base').hook.emit(
         'setBgFgBlock',
         name,
         number,

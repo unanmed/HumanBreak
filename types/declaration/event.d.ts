@@ -812,6 +812,20 @@ interface Events extends EventData {
     __action_getLoc(data: any, x?: number, y?: number, prefix?: any): any;
 
     _changeFloor_beforeChange(info: any, callback: () => void): void;
+
+    _action_moveAction(data: any, x: number, y: number, prefix: any): void;
+    _openDoor_check(
+        block: Block,
+        x: number,
+        y: number,
+        needKey: boolean
+    ): boolean;
+    _openDoor_animate(
+        block: Block,
+        x: number,
+        y: number,
+        callback?: () => void
+    ): void;
 }
 
 declare const events: new () => Events;

@@ -3,9 +3,11 @@ import { OpusDecoder, VorbisDecoder } from './decoder';
 import { AudioType } from './support';
 import { AudioDecoder } from './decoder';
 
-loadAllBgm();
-AudioDecoder.registerDecoder(AudioType.Ogg, VorbisDecoder);
-AudioDecoder.registerDecoder(AudioType.Opus, OpusDecoder);
+export function createAudio() {
+    loadAllBgm();
+    AudioDecoder.registerDecoder(AudioType.Ogg, VorbisDecoder);
+    AudioDecoder.registerDecoder(AudioType.Opus, OpusDecoder);
+}
 
 export * from './support';
 export * from './effect';

@@ -1,3 +1,15 @@
+import { createCache } from './cache';
+import { createFrame } from './frame';
+import { createLayer } from './layer';
+import { createViewport } from './viewport';
+
+export function create() {
+    createCache();
+    createFrame();
+    createLayer();
+    createViewport();
+}
+
 export * from './animate';
 export * from './block';
 export * from './cache';

@@ -51,5 +51,3 @@ isAudioSupport(AudioType.Wav);
 isAudioSupport(AudioType.Flac);
 isAudioSupport(AudioType.Opus);
 isAudioSupport(AudioType.Aac);
-
-console.log(supportMap);

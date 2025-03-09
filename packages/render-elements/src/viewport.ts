@@ -346,7 +346,9 @@ adapter.receiveSync('endMove', item => {
     item.endMove();
 });
 
-const { hook } = Mota.require('@user/data-base');
-hook.on('changingFloor', (_, loc) => {
-    adapter.all('setPosition', loc.x, loc.y);
-});
+export function createViewport() {
+    const { hook } = Mota.require('@user/data-base');
+    hook.on('changingFloor', (_, loc) => {
+        adapter.all('setPosition', loc.x, loc.y);
+    });
+}

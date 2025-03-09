@@ -296,10 +296,14 @@ core.prototype.init = async function (coreData, callback) {
         });
     } else {
         if (main.renderLoaded)
-            Mota.require('var', 'fixedUi').open('load', { callback });
+            Mota.require('@motajs/legacy-ui').fixedUi.open('load', {
+                callback
+            });
         else {
-            Mota.require('var', 'hook').once('renderLoaded', () => {
-                Mota.require('var', 'fixedUi').open('load', { callback });
+            Mota.require('@user/data-base').hook.once('renderLoaded', () => {
+                Mota.require('@motajs/legacy-ui').fixedUi.open('load', {
+                    callback
+                });
             });
         }
     }
@@ -638,7 +642,7 @@ core.prototype._afterLoadResources = function (callback) {
 
     // if (core.plugin._afterLoadResources) core.plugin._afterLoadResources();
     core.showStartAnimate();
-    Mota.require('var', 'hook').emit('load');
+    Mota.require('@user/data-base').hook.emit('load');
     if (callback) callback();
 };
 

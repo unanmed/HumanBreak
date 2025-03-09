@@ -56,7 +56,7 @@ const content = computed(() => {
                 .join('')
                 .replace(
                     /level:(\d+)/g,
-                    'Mota.Plugin.require("skillTree_g").getSkillLevel($1)'
+                    'Mota.require("@user/data-state").getSkillLevel($1)'
                 ) +
             '`'
     );

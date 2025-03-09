@@ -22,8 +22,6 @@ import {
 import { IDamageEnemy, IEnemyCollection, MapDamage } from '@motajs/types';
 import { UserEnemyInfo } from '@user/data-state';
 
-const { ensureFloorDamage } = Mota.require('@user/data-state');
-
 /**
  * 根据伤害大小获取颜色
  * @param damage 伤害大小
@@ -59,6 +57,7 @@ export class FloorDamageExtends
         if (!this.sprite || !floor) return;
         const map = core.status.maps[floor];
         this.sprite.setMapSize(map.width, map.height);
+        const { ensureFloorDamage } = Mota.require('@user/data-state');
         ensureFloorDamage(floor);
         const enemy = core.status.maps[floor].enemy;
 
@@ -79,6 +78,7 @@ export class FloorDamageExtends
 
     private onUpdate = (floor: FloorIds) => {
         if (!this.floorBinder.bindThisFloor) {
+            const { ensureFloorDamage } = Mota.require('@user/data-state');
             ensureFloorDamage(floor);
             core.status.maps[floor].enemy.calRealAttribute();
         }

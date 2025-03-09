@@ -1088,8 +1088,8 @@ ui.prototype._getPosition = function (content) {
                         py == null
                             ? 'center'
                             : py > core._HALF_HEIGHT_
-                              ? 'up'
-                              : 'down';
+                            ? 'up'
+                            : 'down';
                 }
                 return '';
             }
@@ -2225,8 +2225,7 @@ ui.prototype._drawTextBox_getHorizontalPosition = function (
         paddingRight = 12;
     if ((posInfo.px != null && posInfo.py != null) || posInfo.pos)
         paddingLeft = 20;
-    if (titleInfo.icon != null)
-        paddingLeft = 62; // 15 + 32 + 15
+    if (titleInfo.icon != null) paddingLeft = 62; // 15 + 32 + 15
     else if (titleInfo.image) paddingLeft = 90; // 10 + 70 + 10
     var left = 7 + 3 * (core._HALF_WIDTH_ - 6),
         right = core._PX_ - left,
@@ -2996,8 +2995,8 @@ ui.prototype._drawSwitchs_display = function () {
             (core.flags.extraDamageType == 2
                 ? '[最简]'
                 : core.flags.extraDamageType == 1
-                  ? '[半透明]'
-                  : '[完整]'),
+                ? '[半透明]'
+                : '[完整]'),
         '自动放缩： ' + (core.getLocalStorage('autoScale') ? '[ON]' : '[OFF]'),
         '返回上一级'
     ];
@@ -3053,7 +3052,7 @@ ui.prototype._drawNotes = function () {
 
 ////// 绘制快捷商店选择栏 //////
 ui.prototype._drawQuickShop = function () {
-    const shop = Mota.Plugin.require('shop');
+    const shop = Mota.require('@user/legacy-plugin-data');
     core.status.event.id = 'selectShop';
     var shopList = core.status.shops,
         keys = shop.listShopIds();
@@ -3662,8 +3661,8 @@ ui.prototype._drawSLPanel_drawRecords = function (n) {
         core.status.event.id == 'save'
             ? '存档'
             : core.status.event.id == 'load'
-              ? '读档'
-              : '回放';
+            ? '读档'
+            : '回放';
 
     for (var i = 0; i < (n || 6); i++) {
         var data = core.status.event.ui[i];

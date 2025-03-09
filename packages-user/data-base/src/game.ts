@@ -7,6 +7,9 @@ interface GameLoadEvent {
     autotileLoaded: [];
     coreInit: [];
     loaded: [];
+    registered: [];
+    dataRegistered: [];
+    clientRegistered: [];
 }
 
 class GameLoading extends EventEmitter<GameLoadEvent> {
@@ -58,6 +61,25 @@ class GameLoading extends EventEmitter<GameLoadEvent> {
 }
 
 export const loading = new GameLoading();
+main.loading = loading;
+
+let clientRegistered = false;
+let dataRegistered = false;
+
+function checkRegistered() {
+    if (clientRegistered && dataRegistered) {
+        loading.emit('registered');
+    }
+}
+
+loading.once('clientRegistered', () => {
+    clientRegistered = true;
+    checkRegistered();
+});
+loading.once('dataRegistered', () => {
+    dataRegistered = true;
+    checkRegistered();
+});
 
 export interface GameEvent {
     /** Emitted in libs/events.js resetGame. */

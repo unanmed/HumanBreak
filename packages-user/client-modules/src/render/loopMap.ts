@@ -18,9 +18,11 @@ let show: boolean = false;
 /** 循环式地图中，更新视角的委托ticker */
 let delegation: number = -1;
 
-hook.on('changingFloor', (floorId, heroLoc) => {
-    enableLoopMapElement(floorId);
-});
+export function createLoopMap() {
+    hook.on('changingFloor', (floorId, heroLoc) => {
+        enableLoopMapElement(floorId);
+    });
+}
 
 function createLayer() {
     const group = new LayerGroup();

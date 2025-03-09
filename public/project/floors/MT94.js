@@ -21,14 +21,14 @@ main.floors.MT94=
             "这里是漏怪检测，会检测\r[gold]第二章所有\r[]区域是否有遗漏怪物",
             {
                 "type": "function",
-                "function": "function(){\nconst enemy = Mota.Plugin.require('remainEnemy_g').getRemainEnemyString(core.floorIds.slice(40, 107));\nif (enemy.length === 0) {\n\tcore.insertAction(['当前无剩余怪物！', { \"type\": \"hide\", \"remove\": true }, ]);\n} else {\n\tcore.insertAction(enemy);\n}\n}"
+                "function": "function(){\nconst enemy = Mota.require('@user/legacy-plugin-data').getRemainEnemyString(core.floorIds.slice(40, 107));\nif (enemy.length === 0) {\n\tcore.insertAction(['当前无剩余怪物！', { \"type\": \"hide\", \"remove\": true }, ]);\n} else {\n\tcore.insertAction(enemy);\n}\n}"
             }
         ],
         "2,5": [
             {
                 "type": "function",
                 "async": true,
-                "function": "function(){\nMota.require('module', 'Mechanism').BluePalace.doorConvert(2, 5);\n}"
+                "function": "function(){\nMota.require('@user/data-state').Mechanism.BluePalace.doorConvert(2, 5);\n}"
             }
         ]
     },

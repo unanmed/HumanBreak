@@ -75,50 +75,52 @@ function addLightFromBlock(
     });
 }
 
-const { hook } = Mota.require('@user/data-base');
+export function createShadow() {
+    const { hook } = Mota.require('@user/data-base');
 
-hook.once('reset', () => {
-    Shadow.init();
-    addLightFromBlock(
-        core.floorIds
-            .slice(61, 70)
-            .concat(core.floorIds.slice(72, 81))
-            .concat(core.floorIds.slice(85, 107)),
-        103,
-        { decay: 50, r: 300, color: [0.9333, 0.6, 0.333, 0.3] },
-        { background: [0, 0, 0, 0.2] },
-        { decay: 50, r: 250, color: [0, 0, 0, 0] }
-    );
-    addLightFromBlock(
-        ['MT50', 'MT60', 'MT61', 'MT72', 'MT73', 'MT74', 'MT75'],
-        103,
-        {
-            decay: 20,
-            r: 150,
-            color: [0.9333, 0.6, 0.333, 0.3],
-            noShelter: true
-        },
-        { background: [0, 0, 0, 0.3] }
-    );
-    hook.on('loadData', () => {
+    hook.once('reset', () => {
+        Shadow.init();
+        addLightFromBlock(
+            core.floorIds
+                .slice(61, 70)
+                .concat(core.floorIds.slice(72, 81))
+                .concat(core.floorIds.slice(85, 107)),
+            103,
+            { decay: 50, r: 300, color: [0.9333, 0.6, 0.333, 0.3] },
+            { background: [0, 0, 0, 0.2] },
+            { decay: 50, r: 250, color: [0, 0, 0, 0] }
+        );
+        addLightFromBlock(
+            ['MT50', 'MT60', 'MT61', 'MT72', 'MT73', 'MT74', 'MT75'],
+            103,
+            {
+                decay: 20,
+                r: 150,
+                color: [0.9333, 0.6, 0.333, 0.3],
+                noShelter: true
+            },
+            { background: [0, 0, 0, 0.3] }
+        );
+        hook.on('loadData', () => {
+            Shadow.update(true);
+            LayerShadowExtends.shadowList.forEach(v => v.update());
+        });
+    });
+    hook.on('reset', () => {
         Shadow.update(true);
         LayerShadowExtends.shadowList.forEach(v => v.update());
     });
-});
-hook.on('reset', () => {
-    Shadow.update(true);
-    LayerShadowExtends.shadowList.forEach(v => v.update());
-});
-hook.on('setBlock', () => {
-    Shadow.update(true);
-    LayerShadowExtends.shadowList.forEach(v => v.update());
-});
-hook.on('changingFloor', floorId => {
-    Shadow.clearBuffer();
-    Shadow.update(true);
-    // setCanvasFilterByFloorId(floorId);
-    LayerShadowExtends.shadowList.forEach(v => v.update());
-});
+    hook.on('setBlock', () => {
+        Shadow.update(true);
+        LayerShadowExtends.shadowList.forEach(v => v.update());
+    });
+    hook.on('changingFloor', floorId => {
+        Shadow.clearBuffer();
+        Shadow.update(true);
+        // setCanvasFilterByFloorId(floorId);
+        LayerShadowExtends.shadowList.forEach(v => v.update());
+    });
+}
 
 // 深度测试着色器
 

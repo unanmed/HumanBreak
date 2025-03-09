@@ -218,7 +218,7 @@ interface Control {
     /**
      * 脚本编辑的control函数列表
      */
-    readonly controlData: ControlData;
+    readonly controldata: ControlData;
 
     /**
      * @deprecated
@@ -1169,6 +1169,15 @@ interface Control {
     _replay_SL(): void;
     _replay_viewMap(): void;
     _replay_error(action: string): void;
+    _setAutomaticRoute_isMoving(x: number, y: number): boolean;
+    _setAutomaticRoute_isTurning(x: number, y: number, postfix: any): boolean;
+    _setAutomaticRoute_clickMoveDirectly(
+        x: number,
+        y: number,
+        postfix: any
+    ): boolean;
+    _setAutomaticRoute_drawRoute(step: any): void;
+    _setAutomaticRoute_setAutoSteps(step: any): void;
 }
 
 declare const control: new () => Control;

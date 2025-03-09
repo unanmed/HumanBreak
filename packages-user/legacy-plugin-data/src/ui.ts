@@ -2,7 +2,7 @@
 
 export function initUI() {
     if (main.mode === 'editor') return;
-    const { mainUi, fixedUi, mainSetting } = Mota.requireAll('var');
+    const { mainUi, fixedUi, mainSetting } = Mota.require('@motajs/legacy-ui');
 
     ui.prototype.drawBook = function () {
         if (!core.isReplaying()) return mainUi.open('book');
@@ -27,7 +27,7 @@ export function initUI() {
         if (!core.control.noAutoEvents) core.checkAutoEvents();
         core.control._updateStatusBar_setToolboxIcon();
         core.control.noAutoEvents = true;
-        Mota.require('var', 'hook').emit('statusBarUpdate');
+        Mota.require('@user/data-base').hook.emit('statusBarUpdate');
     };
 
     control.prototype.showStatusBar = function () {

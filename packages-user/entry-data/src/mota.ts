@@ -93,10 +93,6 @@ class MotaSystem implements IMota {
     r = r;
     rf = rf;
 
-    constructor() {
-        throw new Error(`System interface class cannot be constructed.`);
-    }
-
     require(key: string): any {
         const data = this.modules[key];
         if (data) return data;

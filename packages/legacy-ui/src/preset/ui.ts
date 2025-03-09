@@ -9,37 +9,39 @@ import { mainSetting } from './settingIns';
 
 //#region legacy-ui
 
-const { hook } = Mota.require('@user/data-base');
-hook.once('mounted', () => {
-    const ui = document.getElementById('ui-main')!;
-    const fixed = document.getElementById('ui-fixed')!;
+export function createUI() {
+    const { hook } = Mota.require('@user/data-base');
+    hook.once('mounted', () => {
+        const ui = document.getElementById('ui-main')!;
+        const fixed = document.getElementById('ui-fixed')!;
 
-    const blur = mainSetting.getSetting('screen.blur');
+        const blur = mainSetting.getSetting('screen.blur');
 
-    mainUi.on('start', () => {
-        ui.style.display = 'flex';
-        if (blur?.value) {
-            ui.style.backdropFilter = 'blur(5px)';
-            ui.style.backgroundColor = 'rgba(0,0,0,0.7333)';
-        } else {
-            ui.style.backdropFilter = 'none';
-            ui.style.backgroundColor = 'rgba(0,0,0,0.85)';
-        }
-        core.lockControl();
+        mainUi.on('start', () => {
+            ui.style.display = 'flex';
+            if (blur?.value) {
+                ui.style.backdropFilter = 'blur(5px)';
+                ui.style.backgroundColor = 'rgba(0,0,0,0.7333)';
+            } else {
+                ui.style.backdropFilter = 'none';
+                ui.style.backgroundColor = 'rgba(0,0,0,0.85)';
+            }
+            core.lockControl();
+        });
+        mainUi.on('end', noClosePanel => {
+            ui.style.display = 'none';
+            if (!noClosePanel) {
+                core.closePanel();
+            }
+        });
+        fixedUi.on('start', () => {
+            fixed.style.display = 'block';
+        });
+        fixedUi.on('end', () => {
+            fixed.style.display = 'none';
+        });
     });
-    mainUi.on('end', noClosePanel => {
-        ui.style.display = 'none';
-        if (!noClosePanel) {
-            core.closePanel();
-        }
-    });
-    fixedUi.on('start', () => {
-        fixed.style.display = 'block';
-    });
-    fixedUi.on('end', () => {
-        fixed.style.display = 'none';
-    });
-});
+}
 
 //#endregion
 
@@ -145,7 +147,6 @@ function handleUiSetting<T extends number | boolean>(key: string, n: T, _o: T) {
 }
 
 // ----- 游戏的所有设置项
-// todo: 虚拟键盘缩放，小地图楼传缩放
 mainSetting
     .register(
         'screen',
@@ -253,10 +254,6 @@ loading.once('coreInit', () => {
             isMobile ? 300 : Math.floor(window.innerWidth / 600) * 50
         ),
         'ui.mapLazy': storage.getValue('ui.mapLazy', false),
-        'ui.toolbarScale': storage.getValue(
-            'ui.toolbarScale',
-            isMobile ? 50 : Math.floor((window.innerWidth / 1700) * 10) * 10
-        ),
         'ui.bookScale': storage.getValue('ui.bookScale', isMobile ? 100 : 80),
         'ui.danmaku': storage.getValue('ui.danmaku', true),
         'ui.danmakuSpeed': storage.getValue(
@@ -271,18 +268,6 @@ interface SettingTextData {
     [x: string]: string[] | SettingTextData;
 }
 
-function getSettingText(obj: SettingTextData, key?: string) {
-    for (const [k, value] of Object.entries(obj)) {
-        const setKey = key ? key + '.' + k : k;
-        if (value instanceof Array) {
-            mainSetting.setDescription(setKey, value.join('\n'));
-        } else {
-            getSettingText(value, setKey);
-        }
-    }
-}
-getSettingText(settingsText);
-
 mainSetting
     .setDescription('audio.bgmEnabled', `是否开启背景音乐`)
     .setDescription('audio.bgmVolume', `背景音乐的音量`)
@@ -293,7 +278,6 @@ mainSetting
         'ui.mapLazy',
         `是否启用小地图懒更新模式，此模式下剩余怪物数量不会实时更新而变成切换地图后更新，打开小地图时出现卡顿可以尝试开启此设置`
     )
-    .setDescription('ui.toolbarScale', `自定义工具栏的缩放比例`)
     .setDescription(
         'ui.bookScale',
         `怪物手册界面中每个怪物框体的高度缩放，最小值限定为 20% 屏幕高度`
@@ -320,6 +304,18 @@ function setFontSize() {
     mainSetting.setValue('screen.fontSize', size);
 }
 setFontSize();
+
+function getSettingText(obj: SettingTextData, key?: string) {
+    for (const [k, value] of Object.entries(obj)) {
+        const setKey = key ? key + '.' + k : k;
+        if (value instanceof Array) {
+            mainSetting.setDescription(setKey, value.join('\n'));
+        } else {
+            getSettingText(value, setKey);
+        }
+    }
+}
+getSettingText(settingsText);
 
 window.addEventListener('resize', () => {
     setFontSize();

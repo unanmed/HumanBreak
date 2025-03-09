@@ -18,6 +18,7 @@ export interface CurrentEnemy {
 
 export function patchBattle() {
     const patch = new Patch(PatchClass.Enemys);
+    const patch2 = new Patch(PatchClass.Events);
 
     patch.add('canBattle', function (x, y, floorId) {
         const enemy = typeof x === 'number' ? getEnemy(x, y!, floorId) : x;
@@ -31,7 +32,7 @@ export function patchBattle() {
         return damage < core.status.hero.hp;
     });
 
-    core.events.battle = function battle(
+    function battle(
         x: number | DamageEnemy,
         y: number,
         force: boolean = false,
@@ -59,7 +60,7 @@ export function patchBattle() {
         // 战后事件
         core.afterBattle(enemy, isLoc ? x : enemy.x, y);
         callback?.();
-    };
+    }
 
     const getFacedId = (enemy: DamageEnemy) => {
         const e = enemy.enemy;
@@ -69,9 +70,7 @@ export function patchBattle() {
         return e.id;
     };
 
-    core.enemys.getCurrentEnemys = function getCurrentEnemys(
-        floorId = core.status.floorId
-    ) {
+    patch.add('getCurrentEnemys', function (floorId = core.status.floorId) {
         floorId = floorId || core.status.floorId;
         const enemys: CurrentEnemy[] = [];
         const used: Record<string, DamageEnemy[]> = {};
@@ -100,9 +99,9 @@ export function patchBattle() {
             const bd = b.enemy.calDamage().damage;
             return ad - bd;
         });
-    };
+    });
 
-    core.events._sys_battle = function (data: Block, callback?: () => void) {
+    patch2.add('_sys_battle', function (data: Block, callback?: () => void) {
         // 检查战前事件
         const floor = core.floors[core.status.floorId];
         const beforeBattle: MotaEvent = [];
@@ -126,11 +125,11 @@ export function patchBattle() {
                 core.insertAction(beforeBattle, data.x, data.y, callback);
             }
         } else {
-            core.battle(data.x, data.y, false, callback);
+            battle(data.x, data.y, false, callback);
         }
-    };
+    });
 
-    core.events._action_battle = function (data, x, y, prefix) {
+    patch2.add('_action_battle', function (data, x, y, prefix) {
         if (data.id) {
             const enemy = getSingleEnemy(data.id as EnemyIds);
             // todo: 与不在地图上的怪物战斗
@@ -139,118 +138,123 @@ export function patchBattle() {
                 core.doAction();
                 return;
             }
-            const [ex, ey] = this.__action_getLoc(
+            const [ex, ey] = core.events.__action_getLoc(
                 data.loc,
                 x,
                 y,
                 prefix
             ) as LocArr;
-            core.battle(ex, ey, true, core.doAction);
+            battle(ex, ey, true, core.doAction);
         }
-    };
+    });
 
-    core.events.afterBattle = function afterBattle(
-        enemy: DamageEnemy,
-        x?: number,
-        y?: number
-    ) {
-        const floorId = core.status.floorId;
-        const special = enemy.info.special;
+    patch2.add(
+        'afterBattle',
+        function (enemy: DamageEnemy, x?: number, y?: number) {
+            const floorId = core.status.floorId;
+            const special = enemy.info.special;
 
-        // 播放战斗动画
-        let animate: AnimationIds = 'hand';
-        // 检查当前装备是否存在攻击动画
-        const equipId = core.getEquip(0);
-        if (equipId && (core.material.items[equipId].equip || {}).animate)
-            animate = core.material.items[equipId].equip.animate;
+            // 播放战斗动画
+            let animate: AnimationIds = 'hand';
+            // 检查当前装备是否存在攻击动画
+            const equipId = core.getEquip(0);
+            if (equipId && (core.material.items[equipId].equip || {}).animate)
+                animate = core.material.items[equipId].equip.animate;
 
-        // 检查该动画是否存在SE，如果不存在则使用默认音效
-        if (!core.material.animates[animate]?.se) core.playSound('attack.opus');
+            // 检查该动画是否存在SE，如果不存在则使用默认音效
+            if (!core.material.animates[animate]?.se)
+                core.playSound('attack.opus');
 
-        // 战斗伤害
-        const info = enemy.calDamage(core.status.hero);
-        const damage = info.damage;
-        // 判定是否致死
-        if (damage >= core.status.hero.hp) {
-            core.status.hero.hp = 0;
-            core.updateStatusBar(false, true);
-            core.events.lose('战斗失败');
-            return;
+            // 战斗伤害
+            const info = enemy.calDamage(core.status.hero);
+            const damage = info.damage;
+            // 判定是否致死
+            if (damage >= core.status.hero.hp) {
+                core.status.hero.hp = 0;
+                core.updateStatusBar(false, true);
+                core.events.lose('战斗失败');
+                return;
+            }
+
+            // 扣减体力值并记录统计数据
+            core.status.hero.hp -= damage;
+            core.status.hero.statistics.battleDamage += damage;
+            core.status.hero.statistics.battle++;
+
+            // 智慧之源
+            if (special.has(14) && flags.hard === 2) {
+                core.addFlag(
+                    'inte_' + floorId,
+                    Math.ceil((core.status.hero.mdef / 10) * 0.3) * 10
+                );
+                core.status.hero.mdef -=
+                    Math.ceil((core.status.hero.mdef / 10) * 0.3) * 10;
+            }
+
+            // 极昼永夜
+            if (special.has(22)) {
+                NightSpecial.addNight(floorId, -enemy.info.night!);
+            }
+            if (special.has(23)) {
+                NightSpecial.addNight(floorId, enemy.info.day!);
+            }
+
+            // 如果是融化怪，需要特殊标记一下
+            if (special.has(25) && !isNil(x) && !isNil(y)) {
+                flags[`melt_${floorId}`] ??= {};
+                flags[`melt_${floorId}`][`${x},${y}`] = enemy.info.melt;
+            }
+
+            // 获得金币
+            const money = enemy.info.money!;
+            core.status.hero.money += money;
+            core.status.hero.statistics.money += money;
+
+            // 获得经验
+            const exp = enemy.info.exp!;
+            core.status.hero.exp += exp;
+            core.status.hero.statistics.exp += exp;
+
+            const hint =
+                '打败 ' +
+                enemy.enemy.name +
+                '，金币+' +
+                money +
+                '，经验+' +
+                exp;
+            core.drawTip(hint, enemy.id);
+
+            HeroSkill.disableSkill();
+
+            // 事件的处理
+            const todo: MotaEvent = [];
+
+            // 战后事件
+            if (!isNil(core.status.floorId)) {
+                const loc = `${x},${y}` as LocString;
+                todo.push(
+                    ...(core.floors[core.status.floorId].afterBattle[loc] ?? [])
+                );
+            }
+            todo.push(...(enemy.enemy.afterBattle ?? []));
+
+            // 如果事件不为空，将其插入
+            if (todo.length > 0) core.insertAction(todo, x, y);
+
+            if (!isNil(x) && !isNil(y)) {
+                core.drawAnimate(animate, x, y);
+                core.removeBlock(x, y);
+            } else core.drawHeroAnimate(animate);
+
+            // 如果已有事件正在处理中
+            if (core.status.event.id == null) core.continueAutomaticRoute();
+            else core.clearContinueAutomaticRoute();
+
+            core.checkAutoEvents();
+
+            hook.emit('afterBattle', enemy, x, y);
         }
-
-        // 扣减体力值并记录统计数据
-        core.status.hero.hp -= damage;
-        core.status.hero.statistics.battleDamage += damage;
-        core.status.hero.statistics.battle++;
-
-        // 智慧之源
-        if (special.has(14) && flags.hard === 2) {
-            core.addFlag(
-                'inte_' + floorId,
-                Math.ceil((core.status.hero.mdef / 10) * 0.3) * 10
-            );
-            core.status.hero.mdef -=
-                Math.ceil((core.status.hero.mdef / 10) * 0.3) * 10;
-        }
-
-        // 极昼永夜
-        if (special.has(22)) {
-            NightSpecial.addNight(floorId, -enemy.info.night!);
-        }
-        if (special.has(23)) {
-            NightSpecial.addNight(floorId, enemy.info.day!);
-        }
-
-        // 如果是融化怪，需要特殊标记一下
-        if (special.has(25) && !isNil(x) && !isNil(y)) {
-            flags[`melt_${floorId}`] ??= {};
-            flags[`melt_${floorId}`][`${x},${y}`] = enemy.info.melt;
-        }
-
-        // 获得金币
-        const money = enemy.info.money!;
-        core.status.hero.money += money;
-        core.status.hero.statistics.money += money;
-
-        // 获得经验
-        const exp = enemy.info.exp!;
-        core.status.hero.exp += exp;
-        core.status.hero.statistics.exp += exp;
-
-        const hint =
-            '打败 ' + enemy.enemy.name + '，金币+' + money + '，经验+' + exp;
-        core.drawTip(hint, enemy.id);
-
-        HeroSkill.disableSkill();
-
-        // 事件的处理
-        const todo: MotaEvent = [];
-
-        // 战后事件
-        if (!isNil(core.status.floorId)) {
-            const loc = `${x},${y}` as LocString;
-            todo.push(
-                ...(core.floors[core.status.floorId].afterBattle[loc] ?? [])
-            );
-        }
-        todo.push(...(enemy.enemy.afterBattle ?? []));
-
-        // 如果事件不为空，将其插入
-        if (todo.length > 0) core.insertAction(todo, x, y);
-
-        if (!isNil(x) && !isNil(y)) {
-            core.drawAnimate(animate, x, y);
-            core.removeBlock(x, y);
-        } else core.drawHeroAnimate(animate);
-
-        // 如果已有事件正在处理中
-        if (core.status.event.id == null) core.continueAutomaticRoute();
-        else core.clearContinueAutomaticRoute();
-
-        core.checkAutoEvents();
-
-        hook.emit('afterBattle', enemy, x, y);
-    };
+    );
 }
 loading.once('coreInit', patchBattle);
 
