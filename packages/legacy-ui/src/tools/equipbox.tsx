@@ -1,4 +1,5 @@
-import { getStatusLabel, has } from '../utils';
+import { isNil } from 'lodash-es';
+import { getStatusLabel } from '../utils';
 
 /**
  * 获取所有装备
@@ -71,7 +72,7 @@ export function getNowStatus(nowEquip?: Equip, onCol: boolean = false) {
                 else status = getHeroStatusOn(v)?.toString();
 
                 let add = 0;
-                if (has(nowEquip)) {
+                if (!isNil(nowEquip)) {
                     add += Math.floor(
                         (nowEquip.value[v] ?? 0) * core.getBuff(v)
                     );

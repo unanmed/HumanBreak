@@ -1,9 +1,11 @@
 import { EventEmitter } from 'eventemitter3';
 import { logger } from '@motajs/common';
-import { deleteWith, ensureArray, parseCss, tip } from '@motajs/legacy-ui';
 import { ResponseBase } from '@motajs/client-base';
 import axios, { AxiosResponse, toFormData } from 'axios';
 import { VNode, h, shallowReactive } from 'vue';
+import { ensureArray, parseCss } from './utils';
+import { deleteWith } from '@motajs/legacy-common';
+import { tip } from './use';
 // /* @__PURE__ */ import { id, password } from '../../../../user';
 
 type CSSObj = Partial<Record<CanParseCss, string>>;

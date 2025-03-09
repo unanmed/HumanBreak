@@ -1,9 +1,6 @@
 import { FunctionalComponent, reactive } from 'vue';
 import { EventEmitter } from '@motajs/legacy-common';
-import { has } from './utils';
-import { createSettingComponents } from './preset';
-
-const COM = createSettingComponents();
+import { isNil } from 'lodash-es';
 
 export interface SettingComponentProps {
     item: MotaSettingItem;
@@ -85,7 +82,7 @@ export class MotaSetting extends EventEmitter<SettingEvent> {
         key: string,
         name: string,
         value: MotaSettingType,
-        com: SettingComponent = COM.Default,
+        com: SettingComponent,
         step: [number, number, number] = [0, 100, 1]
     ) {
         const setting: MotaSettingItem = {
@@ -162,12 +159,12 @@ export class MotaSetting extends EventEmitter<SettingEvent> {
         defaultValue?: T
     ): T | undefined {
         const setting = this.getSetting(key);
-        if (!has(setting) && !has(defaultValue)) return void 0;
+        if (isNil(setting) && isNil(defaultValue)) return void 0;
         if (setting instanceof MotaSetting) {
-            if (has(setting)) return defaultValue;
+            if (!isNil(setting)) return defaultValue;
             return void 0;
         } else {
-            return has(setting) ? (setting.value as T) : (defaultValue as T);
+            return !isNil(setting) ? (setting.value as T) : (defaultValue as T);
         }
     }
 

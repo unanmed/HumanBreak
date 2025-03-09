@@ -73,7 +73,7 @@
 
 <script lang="ts" setup>
 import { computed, onUnmounted, ref, shallowRef } from 'vue';
-import { mainSetting } from '../preset/ui';
+import { mainSetting } from '../preset/settingIns';
 import {
     MotaSetting,
     MotaSettingItem,
@@ -85,14 +85,9 @@ import { splitText } from '../utils';
 import Scroll from '../components/scroll.vue';
 import { isMobile } from '../use';
 import { gameKey } from '@motajs/system-action';
-import { GameUi } from '../controller';
-import { mainUi } from '../preset/ui';
+import { IMountedVBind } from '../interface';
 
-const props = defineProps<{
-    info?: MotaSetting;
-    num: number;
-    ui: GameUi;
-}>();
+const props = defineProps<IMountedVBind>();
 
 const setting = props.info ?? mainSetting;
 const display = shallowRef<SettingDisplayInfo[]>([]);
@@ -145,7 +140,7 @@ function click(key: string, index: number, item: MotaSettingItem) {
 }
 
 function exit() {
-    mainUi.close(props.num);
+    props.controller.close(props.num);
 }
 
 gameKey.use(props.ui.symbol);

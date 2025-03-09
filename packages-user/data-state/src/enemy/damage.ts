@@ -2,7 +2,7 @@ import { getHeroStatusOf, getHeroStatusOn } from '../state/hero';
 import { Range, ensureArray, has, manhattan } from '@user/data-utils';
 import EventEmitter from 'eventemitter3';
 import { hook } from '@user/data-base';
-import { HeroSkill, NightSpecial } from '../mechanism/misc';
+import { HeroSkill, NightSpecial } from '../mechanism';
 import {
     EnemyInfo,
     DamageInfo,
@@ -16,6 +16,7 @@ import {
     HaloType,
     IEnemyCollectionEvent
 } from '@motajs/types';
+import { isNil } from 'lodash-es';
 
 // todo: 光环划分优先级，从而可以实现光环的多级运算
 
@@ -293,7 +294,7 @@ export class DamageEnemy implements IDamageEnemy {
 
         // 融化，融化不属于怪物光环，因此不能用provide和inject计算，需要在这里计算
         const melt = flags[`melt_${floorId}`];
-        if (has(melt) && has(this.x) && has(this.y)) {
+        if (!isNil(melt) && !isNil(this.x) && !isNil(this.y)) {
             for (const [loc, per] of Object.entries(melt)) {
                 const [mx, my] = loc.split(',').map(v => parseInt(v));
                 if (

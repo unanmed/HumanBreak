@@ -1,5 +1,6 @@
 import { Component, shallowReactive } from 'vue';
 import { EventEmitter } from '@motajs/legacy-common';
+import { IGameUi, IUiController } from './interface';
 
 interface FocusEvent<T> {
     focus: (before: T | null, after: T) => void;
@@ -128,7 +129,7 @@ interface MountedVBind {
     [x: string]: any;
 }
 
-export class GameUi extends EventEmitter<GameUiEvent> {
+export class GameUi extends EventEmitter<GameUiEvent> implements IGameUi {
     static uiList: GameUi[] = [];
 
     component: Component;
@@ -161,7 +162,10 @@ interface HoldOnController {
     end(noClosePanel?: boolean): void;
 }
 
-export class UiController extends Focus<IndexedGameUi> {
+export class UiController
+    extends Focus<IndexedGameUi>
+    implements IUiController
+{
     static list: UiController[] = [];
     list: Record<string, GameUi> = {};
     num: number = 0;

@@ -98,18 +98,14 @@ import {
     DoubleRightOutlined
 } from '@ant-design/icons-vue';
 import { debounce } from 'lodash-es';
-import { tip } from '../utils';
-import { GameUi } from '../controller';
+import { tip } from '../use';
 import { gameKey } from '@motajs/system-action';
 import { createChangable } from '../tools/common';
-import { mainUi } from '../preset/ui';
-import { mainSetting } from '../preset/ui';
+import { mainSetting } from '../preset/settingIns';
 import { GameStorage } from '@motajs/legacy-system';
+import { IMountedVBind } from '../interface';
 
-const props = defineProps<{
-    num: number;
-    ui: GameUi;
-}>();
+const props = defineProps<IMountedVBind>();
 
 type Loc2 = [number, number, number, number];
 
@@ -162,7 +158,7 @@ let thumb: HTMLCanvasElement;
 let thumbCtx: CanvasRenderingContext2D;
 
 function exit() {
-    mainUi.close(props.num);
+    props.controller.close(props.num);
 }
 
 const title = computed(() => {
@@ -584,10 +580,7 @@ onUnmounted(() => {
     max-width: 50%;
     text-overflow: ellipsis;
     overflow: hidden;
-    text-shadow:
-        1px 1px 1px black,
-        1px -1px 1px black,
-        -1px 1px 1px black,
+    text-shadow: 1px 1px 1px black, 1px -1px 1px black, -1px 1px 1px black,
         -1px -1px 1px black;
 }
 

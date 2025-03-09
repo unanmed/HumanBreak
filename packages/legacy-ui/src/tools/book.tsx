@@ -1,4 +1,4 @@
-import { has } from '../utils';
+import { isNil } from 'lodash-es';
 import { IDamageEnemy } from '@motajs/types';
 
 export interface CurrentEnemy {
@@ -73,7 +73,7 @@ export function getDefDamage(
 
         if (res.length === 0) {
             origin = dam.damage;
-            if (has(origin)) {
+            if (!isNil(origin)) {
                 res.push([addDef + i * ratio, origin]);
                 last = origin;
             }
@@ -113,7 +113,7 @@ export function getCriticalDamage(
 
         if (res.length === 0) {
             origin = dam.damage;
-            if (has(origin)) {
+            if (!isNil(origin)) {
                 res.push([addAtk + i * ratio, origin]);
                 last = origin;
             }

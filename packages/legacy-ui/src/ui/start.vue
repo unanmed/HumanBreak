@@ -64,19 +64,14 @@ import {
     FullscreenExitOutlined
 } from '@ant-design/icons-vue';
 import { sleep } from 'mutate-animate';
-import { doByInterval } from '../utils';
-import { triggerFullscreen } from '../utils';
+import { doByInterval, triggerFullscreen } from '../utils';
 import { isMobile } from '../use';
-import { GameUi } from '../controller';
 import { gameKey } from '@motajs/system-action';
-import { mainUi } from '../preset/ui';
-import { mainSetting } from '../preset/ui';
+import { mainSetting } from '../preset/settingIns';
 import { mat4 } from 'gl-matrix';
+import { IMountedVBind } from '../interface';
 
-const props = defineProps<{
-    num: number;
-    ui: GameUi;
-}>();
+const props = defineProps<IMountedVBind>();
 
 const bg = core.material.images.images['bg.webp'];
 
@@ -158,7 +153,7 @@ async function clickStartButton(id: string) {
     }
     if (id === 'replay') core.chooseReplayFile();
     if (id === 'achievement') {
-        mainUi.open('achievement');
+        props.controller.open('achievement');
     }
 }
 

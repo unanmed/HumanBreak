@@ -1,15 +1,11 @@
 import { KeyCode } from '@motajs/client-base';
 import { gameKey, HotkeyJSON } from '@motajs/system-action';
-import {
-    openDanmakuPoster,
-    tip,
-    hasMarkedEnemy,
-    markEnemy,
-    unmarkEnemy
-} from '@motajs/legacy-ui';
 import { hovered } from './fixed';
-import { mainUi } from './ui';
+import { mainUi } from './uiIns';
 import { GameStorage } from '@motajs/legacy-system';
+// import { hasMarkedEnemy, markEnemy, unmarkEnemy } from '../mark';
+import { openDanmakuPoster } from '../uiUtils';
+import { tip } from '../use';
 
 export const mainScope = Symbol.for('@key_main');
 
@@ -506,9 +502,9 @@ gameKey
     .realize('mark', () => {
         const cls = hovered?.event.cls;
         if (cls === 'enemys' || cls === 'enemy48') {
-            const id = hovered!.event.id as EnemyIds;
-            if (hasMarkedEnemy(id)) unmarkEnemy(id);
-            else markEnemy(id);
+            // const id = hovered!.event.id as EnemyIds;
+            // if (hasMarkedEnemy(id)) unmarkEnemy(id);
+            // else markEnemy(id);
         }
     })
     .realize('special', () => {

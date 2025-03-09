@@ -85,8 +85,8 @@
                         <span>{{
                             selected === 'none'
                                 ? '永久道具'
-                                : (getClsName(all[selected].cls as ItemMode) ??
-                                  '永久道具')
+                                : getClsName(all[selected].cls as ItemMode) ??
+                                  '永久道具'
                         }}</span>
                     </div>
                 </div>
@@ -113,17 +113,14 @@ import Scroll from '../components/scroll.vue';
 import BoxAnimate from '../components/boxAnimate.vue';
 import { getClsName, getItems } from '../tools/toolbox';
 import { isMobile } from '../use';
-import { type, has } from '../utils';
+import { type } from '../utils';
 import { hyper } from 'mutate-animate';
 import { message } from 'ant-design-vue';
-import { GameUi } from '../controller';
 import { gameKey } from '@motajs/system-action';
-import { mainUi } from '../preset/ui';
+import { IMountedVBind } from '../interface';
+import { isNil } from 'lodash-es';
 
-const props = defineProps<{
-    num: number;
-    ui: GameUi;
-}>();
+const props = defineProps<IMountedVBind>();
 
 type ItemMode = 'tools' | 'constants';
 type ShowItemIds = ItemIdOf<'constants' | 'tools'> | 'none';
@@ -146,7 +143,7 @@ watch(index, n => {
 });
 
 watch(mode, n => {
-    if (!has(items[n][index.value])) {
+    if (isNil(items[n][index.value])) {
         selected.value = 'none';
         return;
     }
@@ -172,17 +169,17 @@ async function select(id: ShowItemIds, nouse: boolean = false) {
 }
 
 function exit() {
-    mainUi.close(props.num);
+    props.controller.close(props.num);
 }
 
 function use(id: ShowItemIds) {
     if (id === 'none') return;
     if (core.canUseItem(id)) {
-        const hold = mainUi.holdOn();
+        const hold = props.controller.holdOn();
         exit();
         nextTick(() => {
             core.tryUseItem(id, false, () => {
-                if (mainUi.stack.length === 0) {
+                if (props.controller.stack.length === 0) {
                     hold.end(core.status.event.id !== 'toolbox');
                 }
             });
@@ -196,10 +193,10 @@ function use(id: ShowItemIds) {
 }
 
 async function toEquip() {
-    mainUi.holdOn();
+    props.controller.holdOn();
     exit();
     nextTick(() => {
-        mainUi.open('equipbox');
+        props.controller.open('equipbox');
     });
 }
 

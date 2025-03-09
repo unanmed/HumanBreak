@@ -1,5 +1,3 @@
-import { HeroSkill } from './misc';
-
 let levels: number[] = [];
 
 export type Chapter = 'chapter1' | 'chapter2';
@@ -313,4 +311,129 @@ export function saveSkillTree() {
 
 export function loadSkillTree(data: number[]) {
     levels = data ?? [];
+}
+
+export namespace HeroSkill {
+    export const enum Skill {
+        None,
+        /** 断灭之刃 */
+        Blade,
+        /** 铸剑为盾 */
+        Shield,
+        /** 跳跃 */
+        Jump
+    }
+
+    export const Blade = Skill.Blade;
+    export const Shield = Skill.Shield;
+    export const Jump = Skill.Jump;
+
+    const skillNameMap = new Map<Skill, string>([
+        [Skill.Blade, '断灭之刃'],
+        [Skill.Shield, '铸剑为盾'],
+        [Skill.Jump, '跳跃']
+    ]);
+
+    const skillDesc = new Map<Skill, (level: number) => string>([
+        [
+            Skill.Blade,
+            level => `攻击上升 ${level * 10}%，防御下降 ${level * 10}%`
+        ],
+        [
+            Skill.Shield,
+            level => `防御上升 ${level * 10}%，攻击下降 ${level * 10}%`
+        ],
+        [Skill.Jump, () => `跳过前方障碍，或踢走面前的怪物`]
+    ]);
+
+    interface SkillSave {
+        autoSkill: boolean;
+        learned: Skill[];
+    }
+
+    const learned = new Set<Skill>();
+    let autoSkill = true;
+    let enabled: Skill = Skill.None;
+
+    export function getLevel(skill: Skill = getEnabled()) {
+        switch (skill) {
+            case Blade:
+                return getSkillLevel(2);
+            case Jump:
+                return learned.has(Jump) ? 1 : 0;
+            case Shield:
+                return getSkillLevel(10);
+        }
+        return 0;
+    }
+
+    export function getSkillName(skill: Skill = getEnabled()) {
+        return skillNameMap.get(skill) ?? '未开启技能';
+    }
+
+    export function getSkillDesc(
+        skill: Skill = getEnabled(),
+        level: number = getLevel()
+    ) {
+        return skillDesc.get(skill)?.(level) ?? '';
+    }
+
+    export function setAutoSkill(auto: boolean) {
+        autoSkill = auto;
+    }
+
+    export function getAutoSkill() {
+        return autoSkill;
+    }
+
+    export function learnedSkill(skill: Skill) {
+        return learned.has(skill);
+    }
+
+    export function learnSkill(skill: Skill) {
+        learned.add(skill);
+    }
+
+    export function forgetSkill(skill: Skill) {
+        learned.delete(skill);
+    }
+
+    export function clearSkill() {
+        learned.clear();
+    }
+
+    export function saveSkill(): SkillSave {
+        return { autoSkill, learned: [...learned] };
+    }
+
+    export function loadSkill(skills: SkillSave) {
+        learned.clear();
+        for (const skill of skills.learned) {
+            learned.add(skill);
+        }
+        autoSkill = skills.autoSkill;
+    }
+
+    export function getAll() {
+        return learned;
+    }
+
+    export function toggleSkill(skill: Skill) {
+        if (!learned.has(skill)) return;
+        if (enabled !== skill) enabled = skill;
+        else enabled = Skill.None;
+    }
+
+    export function enableSkill(skill: Skill) {
+        if (!learned.has(skill)) return;
+        enabled = skill;
+    }
+
+    export function disableSkill() {
+        enabled = Skill.None;
+    }
+
+    export function getEnabled() {
+        return enabled;
+    }
 }

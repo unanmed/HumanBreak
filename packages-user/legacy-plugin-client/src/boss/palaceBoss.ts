@@ -9,7 +9,7 @@ import {
     Transform,
     MotaOffscreenCanvas2D
 } from '@motajs/render';
-import { Pop } from '../fx/pop';
+import { Pop } from '../../../client-modules/src/render/legacy/pop';
 import { SplittableBall } from './palaceBossProjectile';
 import { PointEffect } from '../fx/pointShader';
 import { loading } from '@user/data-base';

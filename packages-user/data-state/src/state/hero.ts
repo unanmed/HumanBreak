@@ -1,7 +1,7 @@
 import { logger } from '@motajs/common';
 import { EventEmitter } from 'eventemitter3';
 import { cloneDeep } from 'lodash-es';
-import { HeroSkill, NightSpecial } from '../mechanism/misc';
+import { HeroSkill, NightSpecial } from '../mechanism';
 
 /**
  * 获取勇士在某一点的属性

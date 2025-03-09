@@ -1,7 +1,7 @@
 import { RenderAdapter } from '@motajs/render-core';
 import { HeroRenderer } from './hero';
 import { ILayerGroupRenderExtends, LayerGroup } from './layer';
-import { LayerGroupFloorBinder } from './floor';
+import { LayerGroupFloorBinder } from './layer';
 import { hyper, TimingFn } from 'mutate-animate';
 
 export class FloorViewport implements ILayerGroupRenderExtends {

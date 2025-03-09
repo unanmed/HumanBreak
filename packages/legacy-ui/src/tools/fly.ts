@@ -1,5 +1,7 @@
-import { mainSetting } from '../preset/ui';
-import { downloadCanvasImage, has, tip } from '../utils';
+import { isNil } from 'lodash-es';
+import { mainSetting } from '../preset/settingIns';
+import { tip } from '../use';
+import { downloadCanvasImage } from '../utils';
 
 type BFSFromString = `${FloorIds},${number},${number},${Dir}`;
 type BFSToString = `${FloorIds},${number},${number}`;
@@ -163,7 +165,7 @@ export function getMapData(
     noCache: boolean = false
 ): MapBFSResult {
     if (!floorId) return { maps: [], link: {} };
-    if (has(bfsCache[floorId]) && !noCache) return bfsCache[floorId]!;
+    if (!isNil(bfsCache[floorId]) && !noCache) return bfsCache[floorId]!;
 
     const queue = [floorId];
     const used: Partial<Record<FloorIds, boolean>> = {

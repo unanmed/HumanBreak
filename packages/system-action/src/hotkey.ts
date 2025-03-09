@@ -4,7 +4,7 @@ import {
     generateBinary,
     keycode,
     spliceBy
-} from '@motajs/legacy-ui';
+} from '@motajs/legacy-common';
 import { EventEmitter } from 'eventemitter3';
 import { isNil } from 'lodash-es';
 

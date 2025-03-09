@@ -26,8 +26,8 @@
 import { onMounted, onUpdated } from 'vue';
 import { LeftOutlined } from '@ant-design/icons-vue';
 import Scroll from './scroll.vue';
-import { isMobile } from '../use';
-import { has, requireUniqueSymbol } from '../utils';
+import { isMobile, requireUniqueSymbol } from '../use';
+import { isNil } from 'lodash-es';
 
 const emits = defineEmits<{
     (e: 'close'): void;
@@ -51,10 +51,10 @@ function resize() {
     left = document.getElementById(`column-left-${id}`) as HTMLDivElement;
     right = document.getElementById(`column-right-${id}`) as HTMLDivElement;
 
-    if (has(props.width) && !isMobile) main.style.width = `${props.width}%`;
-    if (has(props.height)) main.style.height = `${props.height}%`;
-    if (has(props.left)) left.style.flexBasis = `${props.left}%`;
-    if (has(props.right)) right.style.flexBasis = `${props.right}%`;
+    if (!isNil(props.width) && !isMobile) main.style.width = `${props.width}%`;
+    if (!isNil(props.height)) main.style.height = `${props.height}%`;
+    if (!isNil(props.left)) left.style.flexBasis = `${props.left}%`;
+    if (!isNil(props.right)) right.style.flexBasis = `${props.right}%`;
 }
 
 onMounted(async () => {

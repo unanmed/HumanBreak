@@ -169,18 +169,14 @@ import {
     RightOutlined,
     DoubleRightOutlined
 } from '@ant-design/icons-vue';
-import { splitText, tip } from '../utils';
+import { splitText } from '../utils';
 import Scroll from '../components/scroll.vue';
 import BoxAnimate from '../components/boxAnimate.vue';
-import { GameUi } from '../controller';
 import { gameKey } from '@motajs/system-action';
-import { mainUi } from '../preset/ui';
+import { IMountedVBind } from '../interface';
+import { tip } from '../use';
 
-const props = defineProps<{
-    num: number;
-    ui: GameUi;
-    shopId: string;
-}>();
+const props = defineProps<IMountedVBind>();
 
 const id = props.shopId;
 const shop = core.status.shops[id] as ItemShopEvent;
@@ -315,7 +311,7 @@ gameKey
 
 function exit() {
     if (bought) core.status.route.push('closeShop');
-    mainUi.close(props.num);
+    props.controller.close(props.num);
 }
 
 onMounted(async () => {

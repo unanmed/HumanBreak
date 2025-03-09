@@ -1,6 +1,6 @@
 import { Animation, hyper, linear, power, sleep } from 'mutate-animate';
 import { Chase, ChaseData, IChaseController } from './chase';
-import { completeAchievement } from '@motajs/legacy-ui';
+// import { completeAchievement } from '@motajs/legacy-ui';
 import {
     Camera,
     CameraAnimation,
@@ -206,7 +206,7 @@ export function initChase(): IChaseController {
         core.removeFlag('chaseId');
 
         if (success) {
-            completeAchievement('challenge', 0);
+            // completeAchievement('challenge', 0);
         }
     });
 

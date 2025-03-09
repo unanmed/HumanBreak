@@ -67,12 +67,12 @@
                 >
                 <span class="changable" :change="nowDamageChangable"
                     ><span style="font-family: 'FiraCode'">{{
-                        (nowDamage[0] as number) < 0 && !has(enemy.damage)
+                        (nowDamage[0] as number) < 0 && isNil(enemy.damage)
                             ? '=>'
                             : ''
                     }}</span
                     >{{
-                        (nowDamage[0] as number) < 0 && !has(enemy.damage)
+                        (nowDamage[0] as number) < 0 && isNil(enemy.damage)
                             ? format(-nowDamage[0])
                             : format(nowDamage[0])
                     }}</span
@@ -96,8 +96,8 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { detailInfo, getCriticalDamage, getDefDamage } from '../tools/book';
 import Chart, { ChartConfiguration } from 'chart.js/auto';
-import { has, setCanvasSize } from '../utils';
-import { debounce } from 'lodash-es';
+import { setCanvasSize } from '../utils';
+import { debounce, isNil } from 'lodash-es';
 import { isMobile } from '../use';
 import { createChangable } from '../tools/common';
 
@@ -113,10 +113,10 @@ const ceil = Math.ceil;
 
 const x = ref<number>();
 const y = ref<number>();
-x.value = has(x.value)
+x.value = !isNil(x.value)
     ? Math.round(x.value + core.bigmap.offsetX / 32)
     : void 0;
-y.value = has(y.value)
+y.value = !isNil(y.value)
     ? Math.round(y.value + core.bigmap.offsetY / 32)
     : void 0;
 

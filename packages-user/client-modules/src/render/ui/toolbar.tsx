@@ -13,17 +13,14 @@ import {
     StepForward,
     ViewMapIcon
 } from '../components/icons';
-import {
-    generateBinary,
-    getVitualKeyOnce,
-    openDanmakuPoster
-} from '@motajs/legacy-ui';
+import { getVitualKeyOnce, openDanmakuPoster } from '@motajs/legacy-ui';
 import { gameKey } from '@motajs/system-action';
 import { generateKeyboardEvent } from '@motajs/system-action';
 import { transitioned } from '../use';
 import { linear } from 'mutate-animate';
 import { KeyCode } from '@motajs/client-base';
 import { Progress } from '../components/misc';
+import { generateBinary } from '@motajs/legacy-common';
 
 interface ToolbarProps extends DefaultProps {
     loc?: ElementLocator;

@@ -31,13 +31,11 @@
 <script lang="ts" setup>
 import { onMounted, onUpdated, Ref, ref, watch } from 'vue';
 import Box from '../components/box.vue';
-import { GameUi } from '../controller';
 import { nextFrame } from '../utils';
 import { EnemyInfo, IDamageEnemy } from '@motajs/types';
 
 const props = defineProps<{
     num: number;
-    ui: GameUi;
     enemy: IDamageEnemy;
     close: Ref<boolean>;
     loc: [x: number, y: number];

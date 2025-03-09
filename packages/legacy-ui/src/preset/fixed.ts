@@ -1,5 +1,4 @@
 import { debounce } from 'lodash-es';
-import { fixedUi, mainUi } from './ui';
 import { ref } from 'vue';
 import { sleep } from 'mutate-animate';
 
@@ -16,6 +15,7 @@ const showFixed = debounce((block: Block) => {
     if (!e) return;
     const enemy = core.status.thisMap.enemy.get(block.x, block.y);
     if (!enemy) return;
+    const { fixedUi } = Mota.require('@motajs/legacy-ui');
     fixedUi.open(
         'fixed',
         { enemy, close, loc: [cx, cy], hovered },
@@ -29,6 +29,7 @@ const showFixed = debounce((block: Block) => {
 const closeFixed = () => {
     close.value = true;
     sleep(200).then(() => {
+        const { fixedUi } = Mota.require('@motajs/legacy-ui');
         fixedUi.closeByName('fixed');
         close.value = false;
     });
@@ -58,6 +59,7 @@ gameListener.on('mouseMove', e => {
 });
 
 hook.once('mounted', () => {
+    const { mainUi } = Mota.require('@motajs/legacy-ui');
     mainUi.on('start', () => {
         showFixed.cancel();
         closeFixed();

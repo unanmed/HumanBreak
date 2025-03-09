@@ -159,21 +159,17 @@ import {
     UpOutlined
 } from '@ant-design/icons-vue';
 import { Danmaku } from '../danmaku';
-import { GameUi } from '../controller';
 import { sleep } from 'mutate-animate';
-import { fixedUi } from '../preset/ui';
-import { calStringSize, tip } from '../utils';
+import { calStringSize, stringifyCSS, parseCss, getIconHeight } from '../utils';
 import { gameKey } from '@motajs/system-action';
 import { isNil } from 'lodash-es';
-import { stringifyCSS, parseCss, getIconHeight } from '../utils';
 import { logger, LogLevel } from '@motajs/common';
 import Scroll from '../components/scroll.vue';
 import BoxAnimate from '../components/boxAnimate.vue';
+import { IMountedVBind } from '../interface';
+import { tip } from '../use';
 
-const props = defineProps<{
-    num: number;
-    ui: GameUi;
-}>();
+const props = defineProps<IMountedVBind>();
 
 const frequentlyIcon: (AllIds | 'hero' | `X${number}`)[] = [
     'hero',
@@ -301,7 +297,7 @@ function close() {
     mainDiv.classList.remove('danmaku-startup');
     mainDiv.classList.add('danmaku-close');
     sleep(200).then(() => {
-        fixedUi.close(props.num);
+        props.controller.close(props.num);
     });
 }
 

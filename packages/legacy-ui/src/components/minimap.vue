@@ -4,11 +4,10 @@
 
 <script lang="ts" setup>
 import { onMounted, onUnmounted } from 'vue';
-import { requireUniqueSymbol } from '../utils';
 import { MinimapDrawer, getArea } from '../tools/fly';
-import { useDrag, useWheel } from '../use';
+import { useDrag, useWheel, requireUniqueSymbol } from '../use';
 import { debounce } from 'lodash-es';
-import { mainSetting } from '../preset/ui';
+import { mainSetting } from '../preset/settingIns';
 
 const props = defineProps<{
     action?: boolean;

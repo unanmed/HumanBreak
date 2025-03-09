@@ -16,7 +16,7 @@
                 ></BoxAnimate>
                 <div
                     class="special-text"
-                    v-if="has(enemy.special) && enemy.special.length > 0"
+                    v-if="!isNil(enemy.special) && enemy.special.length > 0"
                 >
                     <template v-for="(text, i) in enemy.showSpecial">
                         <span v-if="i < (isMobile ? 1 : 2)"
@@ -110,10 +110,10 @@
 </template>
 
 <script lang="ts" setup>
-import { has } from '../utils';
 import BoxAnimate from '../components/boxAnimate.vue';
 import { isMobile } from '../use';
 import { ToShowEnemy } from '../tools/book';
+import { isNil } from 'lodash-es';
 
 const props = defineProps<{
     enemy: ToShowEnemy;

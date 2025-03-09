@@ -30,7 +30,7 @@
 import { nextTick, onUnmounted, reactive, watch } from 'vue';
 import { Danmaku } from '../danmaku';
 import { LikeFilled } from '@ant-design/icons-vue';
-import { mainSetting } from '../preset/ui';
+import { mainSetting } from '../preset/settingIns';
 import { debounce } from 'lodash-es';
 
 interface ElementMap {
@@ -205,10 +205,7 @@ onUnmounted(() => {});
 }
 
 .danmaku-info {
-    text-shadow:
-        1px 1px 1px black,
-        1px -1px 1px black,
-        -1px 1px 1px black,
+    text-shadow: 1px 1px 1px black, 1px -1px 1px black, -1px 1px 1px black,
         -1px -1px 1px black;
 }
 

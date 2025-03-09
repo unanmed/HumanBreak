@@ -1,6 +1,7 @@
-import { ensureArray, tip } from '@motajs/legacy-ui';
+import { ensureArray } from '../utils';
 import { sleep } from 'mutate-animate';
 import { logger } from '@motajs/common';
+import { tip } from '../use';
 
 const { gl, gl2 } = checkSupport();
 
@@ -54,10 +55,10 @@ type UniformFunc<
 type UniformBinderValue<N extends UniformBinderNum> = N extends 1
     ? number
     : N extends 2
-      ? [number, number]
-      : N extends 3
-        ? [number, number, number]
-        : [number, number, number, number];
+    ? [number, number]
+    : N extends 3
+    ? [number, number, number]
+    : [number, number, number, number];
 
 interface UniformBinder<
     N extends UniformBinderNum,

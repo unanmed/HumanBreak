@@ -125,8 +125,8 @@
                     <BoxAnimate
                         :id="
                             isCol
-                                ? (equiped[selected] ?? 'none')
-                                : (toShow[selected]?.[0] ?? 'none')
+                                ? equiped[selected] ?? 'none'
+                                : toShow[selected]?.[0] ?? 'none'
                         "
                     ></BoxAnimate>
                     <span>{{ equip.name }}</span>
@@ -183,18 +183,14 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import Scroll from '../components/scroll.vue';
 import { getAddStatus, getEquips, getNowStatus } from '../tools/equipbox';
 import BoxAnimate from '../components/boxAnimate.vue';
-import { has, tip, type } from '../utils';
-import { cancelGlobalDrag, isMobile, useDrag } from '../use';
+import { type, getStatusLabel } from '../utils';
+import { cancelGlobalDrag, isMobile, tip, useDrag } from '../use';
 import { hyper } from 'mutate-animate';
-import { GameUi } from '../controller';
 import { gameKey } from '@motajs/system-action';
-import { getStatusLabel } from '../utils';
-import { mainUi } from '../preset/ui';
+import { IMountedVBind } from '../interface';
+import { isNil } from 'lodash-es';
 
-const props = defineProps<{
-    num: number;
-    ui: GameUi;
-}>();
+const props = defineProps<IMountedVBind>();
 
 const equips = ref(getEquips());
 const col = ref('all');
@@ -242,10 +238,10 @@ const equip = computed(() => {
     if (isCol.value) {
         const id = equiped.value[selected.value];
         const e = core.material.items[id];
-        if (!has(e)) return none;
+        if (isNil(e)) return none;
         return e;
     }
-    if (!has(index)) return none;
+    if (isNil(index)) return none;
     return all[index[0]];
 });
 
@@ -276,7 +272,7 @@ const toShow = computed(() => {
         const e = all[v[0]].equip!;
         const t = e.type;
         if (sortNorm !== 'none') {
-            if (!has(e[sortBy][sortNorm])) return false;
+            if (isNil(e[sortBy][sortNorm])) return false;
         }
         if (col.value === 'all') return true;
         if (typeof t === 'string') return t === col.value;
@@ -309,7 +305,7 @@ function changeSort() {
 }
 
 function exit() {
-    mainUi.close(props.num);
+    props.controller.close(props.num);
 }
 
 function clickList(i: number) {
@@ -350,7 +346,7 @@ function canDragin(type: number) {
     if (type < 0) return false;
     const et = equip.value.equip?.type;
     if (!core.canEquip(toShow.value[selected.value]?.[0])) return false;
-    if (!has(et)) return false;
+    if (isNil(et)) return false;
     if (typeof et === 'number') return type === et;
     return equipCol[type] === et;
 }
@@ -427,10 +423,10 @@ function dragout(e: Event) {
 }
 
 function toTool() {
-    mainUi.holdOn();
+    props.controller.holdOn();
     exit();
     nextTick(() => {
-        mainUi.open('toolbox');
+        props.controller.open('toolbox');
     });
 }
 

@@ -1,8 +1,23 @@
 import { sleep } from 'mutate-animate';
-import { tip } from './utils';
+import { message } from 'ant-design-vue';
+import { MessageApi } from 'ant-design-vue/lib/message';
 
-export default function init() {
-    return { useDrag, useWheel, useUp, isMobile };
+message.config({
+    maxCount: 3
+});
+export function tip(
+    type: Exclude<keyof MessageApi, 'open' | 'config' | 'destroy'>,
+    text: string
+) {
+    message[type]({
+        content: text,
+        class: 'antdv-message'
+    });
+}
+
+let num = 0;
+export function requireUniqueSymbol() {
+    return num++;
 }
 
 type DragFn = (x: number, y: number, e: MouseEvent | TouchEvent) => void;

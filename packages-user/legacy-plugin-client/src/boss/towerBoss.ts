@@ -22,10 +22,10 @@ import {
     ThunderProjectile
 } from './towerBossProjectile';
 import { IStateDamageable } from '@user/data-state';
-import { Pop } from '../fx/pop';
-import { WeatherController } from '@user/client-modules';
+import { Pop } from '../../../client-modules/src/render/legacy/pop';
 import { loading } from '@user/data-base';
 import { clip } from '@user/legacy-plugin-data';
+import { WeatherController } from '@user/client-modules';
 
 loading.once('coreInit', () => {
     const shader = new Shader();

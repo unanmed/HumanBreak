@@ -19,13 +19,11 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue';
 import skills from '../data/skill.json';
-import { has } from '../utils';
 import Column from '../components/colomn.vue';
-import { mainUi } from '../preset/ui';
+import { IMountedVBind } from '../interface';
+import { isNil } from 'lodash-es';
 
-const props = defineProps<{
-    num: number;
-}>();
+const props = defineProps<IMountedVBind>();
 
 type Skills = keyof typeof skills;
 
@@ -47,7 +45,7 @@ const content = computed(() => {
                 .map((v, i, a) => {
                     if (/^\d+\./.test(v)) return `${'&nbsp;'.repeat(12)}${v}`;
                     else if (
-                        (has(a[i - 1]) &&
+                        (!isNil(a[i - 1]) &&
                             v !== '<br>' &&
                             a[i - 1] === '<br>') ||
                         i === 0
@@ -65,7 +63,7 @@ const content = computed(() => {
 });
 
 function exit() {
-    mainUi.close(props.num);
+    props.controller.close(props.num);
 }
 </script>
 

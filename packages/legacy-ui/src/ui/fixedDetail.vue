@@ -13,14 +13,9 @@ import { getDetailedEnemy } from '../tools/fixed';
 import BookDetail from './bookDetail.vue';
 import { detailInfo } from '../tools/book';
 import { hovered } from '../preset/fixed';
-import { GameUi } from '../controller';
-import { mainUi } from '../preset/ui';
+import { IMountedVBind } from '../interface';
 
-const props = defineProps<{
-    num: number;
-    ui: GameUi;
-    panel?: 'special' | 'critical' | 'target';
-}>();
+const props = defineProps<IMountedVBind>();
 
 const panel = props.panel ?? 'special';
 
@@ -40,7 +35,7 @@ if (hovered) {
 }
 
 function close() {
-    mainUi.close(props.num);
+    props.controller.close(props.num);
 }
 </script>
 

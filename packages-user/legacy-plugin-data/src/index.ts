@@ -21,5 +21,4 @@ export * from './removeMap';
 export * from './replay';
 export * from './shop';
 export * from './skill';
-export * from '../../data-state/src/mechanism/skillTree';
 export * from './ui';

@@ -1,6 +1,6 @@
 import { Danmaku } from '../danmaku';
 import { Component, h } from 'vue';
-import { mainSetting } from './ui';
+import { mainSetting } from './settingIns';
 import { getIconHeight } from '../utils';
 import { BoxAnimate } from '../components';
 

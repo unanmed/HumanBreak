@@ -1,4 +1,4 @@
-export { default as Achievement } from './achievement.vue';
+// export { default as Achievement } from './achievement.vue';
 export { default as BgmList } from './bgmList.vue';
 export { default as Book } from './book.vue';
 export { default as BookDetail } from './bookDetail.vue';

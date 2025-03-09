@@ -37,14 +37,13 @@
 
 <script lang="ts" setup>
 import { Hotkey } from '@motajs/system-action';
-import { GameUi } from '../controller';
 import Column from '../components/colomn.vue';
-import { mainUi } from '../preset/ui';
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
 import { KeyCode, KeyCodeUtils } from '@motajs/client-base';
-import { generateBinary, keycode } from '../utils';
 import { cloneDeep } from 'lodash-es';
 import { gameKey } from '@motajs/system-action';
+import { generateBinary, keycode } from '@motajs/legacy-common';
+import { IMountedVBind } from '../interface';
 
 interface HotkeyKeys {
     index: number;
@@ -64,16 +63,12 @@ interface SelectedKey {
     index: number;
 }
 
-const props = defineProps<{
-    num: number;
-    ui: GameUi;
-    hotkey: Hotkey;
-}>();
+const props = defineProps<IMountedVBind & { hotkey: Hotkey }>();
 
 const hotkey = props.hotkey;
 
 function close() {
-    mainUi.close(props.num);
+    props.controller.close(props.num);
 }
 
 const selectedGroup = ref('ui');

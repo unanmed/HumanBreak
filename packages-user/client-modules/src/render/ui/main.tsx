@@ -11,13 +11,6 @@ import {
     Font
 } from '@motajs/render';
 import { WeatherController } from '../../weather';
-import {
-    FloorChange,
-    LayerGroupFilter,
-    LayerGroupHalo,
-    LayerGroupPortal,
-    PopText
-} from '@user/legacy-plugin-client';
 import { defineComponent, onMounted, reactive, ref } from 'vue';
 import { Textbox, Tip } from '../components';
 import { GameUI, UIController } from '@motajs/system-ui';
@@ -40,6 +33,11 @@ import { jumpIgnoreFloor } from '@user/legacy-plugin-data';
 import { hook } from '@user/data-base';
 import { FloorDamageExtends } from '../damage';
 import { FloorItemDetail } from '../itemDetail';
+import { LayerGroupPortal } from '../legacy/portal';
+import { LayerGroupFilter } from '../legacy/gameCanvas';
+import { LayerGroupHalo } from '../legacy/halo';
+import { FloorChange } from '../legacy/fallback';
+import { PopText } from '../legacy/pop';
 
 const MainScene = defineComponent(() => {
     const layerGroupExtends: ILayerGroupRenderExtends[] = [

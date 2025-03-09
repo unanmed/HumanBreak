@@ -22,7 +22,7 @@
                 :from-book="fromBook"
                 v-else-if="panel === 'critical'"
             ></EnemyCritical>
-            <EnemyTarget v-else-if="panel === 'target'"></EnemyTarget>
+            <!-- <EnemyTarget v-else-if="panel === 'target'"></EnemyTarget> -->
         </Transition>
         <div id="detail-more">
             <Transition name="detail">
@@ -35,8 +35,8 @@
                         id="enemy-target"
                         class="button-text more"
                         @click="changePanel($event, 'target')"
-                        ><LeftOutlined /> 怪物更多信息</span
-                    >
+                        ><LeftOutlined />
+                    </span>
                     <span
                         id="critical-more"
                         class="button-text more"
@@ -81,7 +81,7 @@ import { useDrag } from '../use';
 import EnemySpecial from '../panel/enemySpecial.vue';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons-vue';
 import EnemyCritical from '../panel/enemyCritical.vue';
-import EnemyTarget from '../panel/enemyTarget.vue';
+// import EnemyTarget from '../panel/enemyTarget.vue';
 import { detailInfo } from '../tools/book';
 import { gameKey } from '@motajs/system-action';
 

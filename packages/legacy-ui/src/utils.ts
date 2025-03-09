@@ -1,13 +1,10 @@
-import { message } from 'ant-design-vue';
-import { MessageApi } from 'ant-design-vue/lib/message';
 import { isNil } from 'lodash-es';
 import { Animation, sleep, TimingFn } from 'mutate-animate';
 import { Ref, ref } from 'vue';
-import { EVENT_KEY_CODE_MAP, KeyCode } from '@motajs/client-base';
+import { KeyCode } from '@motajs/client-base';
 import axios from 'axios';
 import { decompressFromBase64 } from 'lz-string';
 import { Keyboard, KeyboardEmits, isAssist } from '@motajs/system-action';
-import { fixedUi, mainUi } from './preset/ui';
 import { logger } from '@motajs/common';
 
 type CanParseCss = keyof {
@@ -17,25 +14,6 @@ type CanParseCss = keyof {
             : never
         : never]: CSSStyleDeclaration[P];
 };
-
-export default function init() {
-    return {
-        has,
-        getDamageColor,
-        parseCss,
-        tip,
-        changeLocalStorage,
-        swapChapter
-    };
-}
-
-/**
- * 判定一个值是否不是undefined或null
- * @param value 要判断的值
- */
-export function has<T>(value: T): value is NonNullable<T> {
-    return !isNil(value);
-}
 
 /**
  * 根据伤害大小获取颜色
@@ -66,14 +44,6 @@ export function setCanvasSize(
     canvas.height = h;
     canvas.style.width = `${w}px`;
     canvas.style.height = `${h}px`;
-}
-
-/**
- * 获取事件中的keycode对应的键
- * @param key 要获取的键
- */
-export function keycode(key: number) {
-    return EVENT_KEY_CODE_MAP[key];
 }
 
 /**
@@ -195,7 +165,7 @@ export function type(
     const all = toShow.length;
 
     const fn = (time: number) => {
-        if (!has(time)) return;
+        if (isNil(time)) return;
         const now = ani.x;
         content.value = toShow.slice(0, Math.floor(now));
         if (Math.floor(now) === all) {
@@ -213,19 +183,6 @@ export function type(
     return content;
 }
 
-message.config({
-    maxCount: 3
-});
-export function tip(
-    type: Exclude<keyof MessageApi, 'open' | 'config' | 'destroy'>,
-    text: string
-) {
-    message[type]({
-        content: text,
-        class: 'antdv-message'
-    });
-}
-
 /**
  * 设置文字分段换行等
  * @param str 文字
@@ -235,7 +192,7 @@ export function splitText(str: string[]) {
         .map((v, i, a) => {
             if (/^\d+\./.test(v)) return `${'&nbsp;'.repeat(12)}${v}`;
             else if (
-                (has(a[i - 1]) && v !== '<br>' && a[i - 1] === '<br>') ||
+                (!isNil(a[i - 1]) && v !== '<br>' && a[i - 1] === '<br>') ||
                 i === 0
             ) {
                 return `${'&nbsp;'.repeat(8)}${v}`;
@@ -339,25 +296,6 @@ export function ensureArray<T>(arr: T): T extends any[] ? T : T[] {
     return arr instanceof Array ? arr : [arr];
 }
 
-/**
- * 删除数组内的某个项，返回删除后的数组
- * @param arr 要操作的数组
- * @param ele 要删除的项
- */
-export function deleteWith<T>(arr: T[], ele: T): T[] {
-    const index = arr.indexOf(ele);
-    if (index === -1) return arr;
-    arr.splice(index, 1);
-    return arr;
-}
-
-export function spliceBy<T>(arr: T[], from: T): T[] {
-    const index = arr.indexOf(from);
-    if (index === -1) return arr;
-    arr.splice(index);
-    return arr;
-}
-
 export async function triggerFullscreen(full: boolean) {
     const { maxGameScale } = Mota.require('@user/data-utils');
     if (!!document.fullscreenElement && !full) {
@@ -380,20 +318,6 @@ export async function triggerFullscreen(full: boolean) {
             maxGameScale();
         });
     }
-}
-
-/**
- * 根据布尔值数组转换成一个二进制数
- * @param arr 要转换的布尔值数组
- */
-export function generateBinary(arr: boolean[]) {
-    let num = 0;
-    arr.forEach((v, i) => {
-        if (v) {
-            num |= 1 << i;
-        }
-    });
-    return num;
 }
 
 /**
@@ -423,50 +347,6 @@ export function getStatusLabel(name: string) {
     );
 }
 
-export function flipBinary(num: number, col: number) {
-    const n = 1 << col;
-    if (num & n) return num & ~n;
-    else return num | n;
-}
-
-/**
- * 唤起虚拟键盘，并获取到一次按键操作
- * @param emitAssist 是否可以获取辅助按键，为true时，如果按下辅助按键，那么会立刻返回该按键，
- *                   否则会视为开关辅助按键
- * @param assist 初始化的辅助按键
- */
-export function getVitualKeyOnce(
-    emitAssist: boolean = false,
-    assist: number = 0,
-    emittable: KeyCode[] = []
-): Promise<KeyboardEmits> {
-    // todo: 正确触发后删除监听器
-    return new Promise(res => {
-        const key = Keyboard.get('full')!;
-        key.withAssist(assist);
-        const id = mainUi.open('virtualKey', { keyboard: key });
-        key.on('emit', (item, assist, _index, ev) => {
-            ev.preventDefault();
-            if (emitAssist) {
-                if (emittable.length === 0 || emittable.includes(item.key)) {
-                    res({ key: item.key, assist: 0 });
-                    key.disposeScope();
-                    mainUi.close(id);
-                }
-            } else {
-                if (
-                    !isAssist(item.key) &&
-                    (emittable.length === 0 || emittable.includes(item.key))
-                ) {
-                    res({ key: item.key, assist });
-                    key.disposeScope();
-                    mainUi.close(id);
-                }
-            }
-        });
-    });
-}
-
 export function formatSize(size: number) {
     return size < 1 << 10
         ? `${size.toFixed(2)}B`
@@ -475,17 +355,6 @@ export function formatSize(size: number) {
         : size < 1 << 30
         ? `${(size / (1 << 20)).toFixed(2)}MB`
         : `${(size / (1 << 30)).toFixed(2)}GB`;
-}
-
-let num = 0;
-export function requireUniqueSymbol() {
-    return num++;
-}
-
-export function openDanmakuPoster() {
-    if (!fixedUi.hasName('danmakuEditor')) {
-        fixedUi.open('danmakuEditor');
-    }
 }
 
 export function getIconHeight(icon: AllIds | 'hero') {

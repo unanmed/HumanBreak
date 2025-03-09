@@ -1,6 +1,6 @@
 import type { SettingComponent, SettingComponentProps } from '../setting';
 import { Button, InputNumber, Radio } from 'ant-design-vue';
-import { mainUi } from './ui';
+import { mainUi } from './uiIns';
 import { gameKey } from '@motajs/system-action';
 
 interface Components {

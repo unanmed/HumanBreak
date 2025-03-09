@@ -9,7 +9,8 @@
 <script lang="tsx" setup>
 import { onMounted, onUnmounted, onUpdated } from 'vue';
 import { addAnimate, removeAnimate } from '../animateController';
-import { has, requireUniqueSymbol } from '../utils';
+import { requireUniqueSymbol } from '../use';
+import { isNil } from 'lodash-es';
 
 const id = requireUniqueSymbol().toFixed(0);
 
@@ -27,7 +28,7 @@ let ctx: CanvasRenderingContext2D;
 let drawFn: () => void;
 
 function draw() {
-    if (has(drawFn)) removeAnimate(drawFn);
+    if (!isNil(drawFn)) removeAnimate(drawFn);
 
     const cls = core.getClsFromId(props.id as AllIds);
     const frames = core.getAnimateFrames(cls);

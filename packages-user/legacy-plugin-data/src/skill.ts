@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { HeroSkill } from '@/game/mechanism/misc';
+import { HeroSkill } from '@user/data-state';
 
 // 所有的主动技能效果
 var ignoreInJump = {

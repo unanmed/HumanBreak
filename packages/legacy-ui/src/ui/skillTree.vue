@@ -81,17 +81,14 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons-vue';
 import Scroll from '../components/scroll.vue';
-import { has, splitText, tip } from '../utils';
-import { isMobile } from '../use';
+import { splitText } from '../utils';
+import { isMobile, tip } from '../use';
 import { sleep } from 'mutate-animate';
 import { gameKey } from '@motajs/system-action';
-import { GameUi } from '../controller';
-import { mainUi } from '../preset/ui';
+import { IMountedVBind } from '../interface';
+import { isNil } from 'lodash-es';
 
-const props = defineProps<{
-    num: number;
-    ui: GameUi;
-}>();
+const props = defineProps<IMountedVBind>();
 
 const skillTree = Mota.require('@user/legacy-plugin-data');
 
@@ -179,7 +176,7 @@ const level = computed(() => {
 });
 
 function exit() {
-    mainUi.close(props.num);
+    props.controller.close(props.num);
 }
 
 function resize() {
@@ -298,7 +295,7 @@ function selectChapter(delta: number) {
     const now = chapterList.indexOf(chapter.value);
     const to = now + delta;
 
-    if (has(chapterList[to]) && flags.chapter > to) {
+    if (!isNil(chapterList[to]) && flags.chapter > to) {
         selected.value = s[chapterList[to]][0].index;
         chapter.value = chapterList[to];
         update.value = !update.value;

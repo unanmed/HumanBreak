@@ -41,21 +41,17 @@
 import { onUnmounted, ref } from 'vue';
 import EnemyOne from '../components/enemyOne.vue';
 import Scroll from '../components/scroll.vue';
-import { has } from '../utils';
 import BookDetail from './bookDetail.vue';
 import { LeftOutlined } from '@ant-design/icons-vue';
 import { ToShowEnemy, detailInfo } from '../tools/book';
 import { getDetailedEnemy } from '../tools/fixed';
-import { GameUi } from '../controller';
 import { gameKey } from '@motajs/system-action';
-import { mainUi } from '../preset/ui';
-import { mainSetting } from '../preset/ui';
+import { mainSetting } from '../preset/settingIns';
 import { isMobile } from '../use';
+import { IMountedVBind } from '../interface';
+import { isNil } from 'lodash-es';
 
-const props = defineProps<{
-    num: number;
-    ui: GameUi;
-}>();
+const props = defineProps<IMountedVBind>();
 
 const floorId =
     // @ts-ignore
@@ -122,12 +118,12 @@ async function show() {
  * 退出怪物手册
  */
 async function exit() {
-    const hold = mainUi.holdOn();
-    mainUi.close(props.num);
+    const hold = props.controller.holdOn();
+    props.controller.close(props.num);
     if (core.events.recoverEvents(core.status.event.interval)) {
         hold.end(true);
         return;
-    } else if (has(core.status.event.ui)) {
+    } else if (!isNil(core.status.event.ui)) {
         core.status.boxAnimateObjs = [];
         // @ts-ignore
         core.ui._drawViewMaps(core.status.event.ui);

@@ -49,8 +49,13 @@
 <script lang="ts" setup>
 import { onMounted, onUnmounted, onUpdated, ref, watch } from 'vue';
 import { ArrowsAltOutlined, DragOutlined } from '@ant-design/icons-vue';
-import { isMobile, useDrag, cancelGlobalDrag } from '../use';
-import { has, requireUniqueSymbol } from '../utils';
+import {
+    isMobile,
+    useDrag,
+    cancelGlobalDrag,
+    requireUniqueSymbol
+} from '../use';
+import { isNil } from 'lodash-es';
 
 // todo: 重写
 
@@ -200,10 +205,10 @@ function resize() {
 
     if (!main) return;
 
-    if (has(props.width)) width.value = props.width;
-    if (has(props.height)) height.value = props.height;
-    if (has(props.left)) left.value = props.left;
-    if (has(props.top)) top.value = props.top;
+    if (!isNil(props.width)) width.value = props.width;
+    if (!isNil(props.height)) height.value = props.height;
+    if (!isNil(props.left)) left.value = props.left;
+    if (!isNil(props.top)) top.value = props.top;
 
     const beforeWidth = width.value;
     const beforeHeight = height.value;

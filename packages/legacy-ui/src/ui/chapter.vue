@@ -1,22 +1,17 @@
 <template>
     <div id="chapter">
         <canvas id="chapter-back"></canvas>
-        <span id="chapter-text">{{ chapter }}</span>
+        <span id="chapter-text">{{ props.chapter }}</span>
     </div>
 </template>
 
 <script lang="ts" setup>
 import { Animation, hyper, sleep } from 'mutate-animate';
 import { onMounted } from 'vue';
-import { has } from '../utils';
-import { GameUi } from '../controller';
-import { fixedUi } from '../preset/ui';
+import { IMountedVBind } from '../interface';
+import { isNil } from 'lodash-es';
 
-const props = defineProps<{
-    num: number;
-    ui: GameUi;
-    chapter: string;
-}>();
+const props = defineProps<IMountedVBind>();
 
 let can: HTMLCanvasElement;
 let ctx: CanvasRenderingContext2D;
@@ -50,14 +45,14 @@ onMounted(async () => {
     let started = false;
 
     ani.ticker.add(time => {
-        if (!has(time) || isNaN(time)) return;
+        if (isNil(time) || isNaN(time)) return;
         if (!started) {
             started = true;
             return;
         }
 
         if (time >= 4050) {
-            fixedUi.close(props.num);
+            props.controller.close(props.num);
             ani.ticker.destroy();
         }
 

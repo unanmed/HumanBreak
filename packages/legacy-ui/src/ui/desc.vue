@@ -22,21 +22,17 @@ import { computed, onUnmounted, ref } from 'vue';
 import desc from '../data/desc.json';
 import { splitText } from '../utils';
 import Colomn from '../components/colomn.vue';
-import { GameUi } from '../controller';
 import { gameKey } from '@motajs/system-action';
-import { mainUi } from '../preset/ui';
+import { IMountedVBind } from '../interface';
 
-const props = defineProps<{
-    num: number;
-    ui: GameUi;
-}>();
+const props = defineProps<IMountedVBind>();
 
 type DescKey = keyof typeof desc;
 
 const selected = ref(Object.keys(desc)[0] as DescKey);
 
 function exit() {
-    mainUi.close(props.num);
+    props.controller.close(props.num);
 }
 
 const content = computed(() => {

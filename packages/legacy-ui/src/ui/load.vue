@@ -34,14 +34,10 @@ import {
 import { GameUi } from '../controller';
 import { formatSize } from '../utils';
 import { logger } from '@motajs/common';
-import { fixedUi } from '../preset/ui';
 import { sleep } from 'mutate-animate';
+import { IMountedVBind } from '../interface';
 
-const props = defineProps<{
-    ui: GameUi;
-    num: number;
-    callback?: () => void;
-}>();
+const props = defineProps<IMountedVBind>();
 
 const loading = ref(0);
 const loaded = ref(0);
@@ -76,8 +72,8 @@ onMounted(async () => {
         loadDiv.style.opacity = '0';
         Mota.require('@user/data-base').loading.emit('loaded');
         await sleep(1000);
-        fixedUi.close(props.num);
-        fixedUi.open('start');
+        props.controller.close(props.num);
+        props.controller.open('start');
     });
     loadDiv = document.getElementById('load') as HTMLDivElement;
 });

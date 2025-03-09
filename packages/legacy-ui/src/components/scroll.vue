@@ -12,8 +12,12 @@
 <script lang="ts" setup>
 import { sleep } from 'mutate-animate';
 import { onMounted, onUnmounted, onUpdated } from 'vue';
-import { cancelGlobalDrag, useDrag, useWheel } from '../use';
-import { requireUniqueSymbol } from '../utils';
+import {
+    cancelGlobalDrag,
+    useDrag,
+    useWheel,
+    requireUniqueSymbol
+} from '../use';
 
 let main: HTMLDivElement;
 
