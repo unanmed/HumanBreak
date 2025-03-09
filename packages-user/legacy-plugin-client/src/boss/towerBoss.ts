@@ -21,7 +21,7 @@ import {
     ThunderBallProjectile,
     ThunderProjectile
 } from './towerBossProjectile';
-import { IStateDamageable } from '@/game/state/interface';
+import { IStateDamageable } from '@user/data-state';
 import { Pop } from '../fx/pop';
 import { WeatherController } from '@/module';
 

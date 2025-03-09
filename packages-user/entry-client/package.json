@@ -1,5 +1,5 @@
 {
-    "name": "@motajs/entry-client",
+    "name": "@user/entry-client",
     "dependencies": {
         "@motajs/client": "workspace:*",
         "@motajs/client-base": "workspace:*",
@@ -16,6 +16,8 @@
         "@motajs/legacy-client": "workspace:*",
         "@motajs/legacy-data": "workspace:*",
         "@motajs/legacy-ui": "workspace:*",
-        "@motajs/legacy-system": "workspace:*"
+        "@motajs/legacy-system": "workspace:*",
+        "@user/client-modules": "workspace:*",
+        "@user/legacy-plugin-client": "workspace:*"
     }
 }

@@ -1,3 +1,5 @@
+import 'ant-design-vue/dist/antd.dark.css';
+
 export * as UI from './ui';
 export * as Components from './components';
 export * from './preset';

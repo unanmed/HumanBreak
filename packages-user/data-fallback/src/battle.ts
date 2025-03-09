@@ -16,7 +16,7 @@ export interface CurrentEnemy {
     onMapEnemy: DamageEnemy[];
 }
 
-function init() {
+export function patchBattle() {
     const patch = new Patch(PatchClass.Enemys);
 
     patch.add('canBattle', function (x, y, floorId) {
@@ -252,7 +252,7 @@ function init() {
         hook.emit('afterBattle', enemy, x, y);
     };
 }
-loading.once('coreInit', init);
+loading.once('coreInit', patchBattle);
 
 declare global {
     interface Enemys {

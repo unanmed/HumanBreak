@@ -1,4 +1,5 @@
-///<reference path="../../../../src/types/core.d.ts" />
+// @ts-nocheck
+
 export {};
 
 /* @__PURE__ */ (function () {

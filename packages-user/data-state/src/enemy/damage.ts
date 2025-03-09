@@ -1,6 +1,5 @@
 import { getHeroStatusOf, getHeroStatusOn } from '../state/hero';
-import { Range } from '@user/data-utils';
-import { ensureArray, has, manhattan } from '@/plugin/game/utils';
+import { Range, ensureArray, has, manhattan } from '@user/data-utils';
 import EventEmitter from 'eventemitter3';
 import { hook } from '@user/data-base';
 import { HeroSkill, NightSpecial } from '../mechanism/misc';

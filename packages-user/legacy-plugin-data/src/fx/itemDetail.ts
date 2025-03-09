@@ -1,4 +1,4 @@
-import { EnemyCollection, ensureFloorDamage } from '@/game/enemy/damage';
+import { EnemyCollection, ensureFloorDamage } from '@user/data-state';
 import { formatDamage } from '../utils';
 
 export function init() {

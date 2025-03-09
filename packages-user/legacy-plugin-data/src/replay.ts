@@ -1,5 +1,8 @@
 import { HeroSkill } from '@/game/mechanism/misc';
-import { getSkillFromIndex, upgradeSkill } from './skillTree';
+import {
+    getSkillFromIndex,
+    upgradeSkill
+} from '../../data-state/src/mechanism/skillTree';
 import { canOpenShop } from './shop';
 
 const replayableSettings = ['autoSkill'];
@@ -20,7 +23,7 @@ export function clip(...replace: string[]) {
     core.status.route.push(...replace);
 }
 
-export function init() {
+export function initReplay() {
     function tipAndWait(content: string, time: number) {
         const speed = core.status.replay.speed;
         if (main.replayChecking || speed === 24) return Promise.resolve();

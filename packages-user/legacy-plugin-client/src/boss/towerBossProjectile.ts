@@ -2,7 +2,7 @@ import { hyper, power, TimingFn } from 'mutate-animate';
 import { Hitbox, Projectile } from './barrage';
 import { MotaOffscreenCanvas2D, Transform } from '@motajs/render';
 import type { TowerBoss } from './towerBoss';
-import { IStateDamageable } from '@/game/state/interface';
+import { IStateDamageable } from '@user/data-state';
 import { PointEffect, PointEffectType } from '../fx/pointShader';
 import { isNil } from 'lodash-es';
 

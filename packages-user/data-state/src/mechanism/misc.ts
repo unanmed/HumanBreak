@@ -1,7 +1,7 @@
-import { backDir, has } from '@/plugin/game/utils';
+import { backDir, has } from '@user/data-utils';
 import { loading } from '@user/data-base';
 import type { LayerDoorAnimate } from '@motajs/render';
-import { getSkillLevel } from '@/plugin/game/skillTree';
+import { getSkillLevel } from './skillTree';
 
 /**
  * 一些零散机制的数据

@@ -1,4 +1,4 @@
-import { HeroSkill } from '@/game/mechanism/misc';
+import { HeroSkill } from './misc';
 
 let levels: number[] = [];
 

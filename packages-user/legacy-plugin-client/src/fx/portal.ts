@@ -7,7 +7,7 @@ import {
     LayerGroup,
     Sprite
 } from '@motajs/render';
-import type { BluePalace } from '@/game/mechanism/misc';
+import type { BluePalace } from '@user/data-state';
 
 /** 最大粒子数 */
 const MAX_PARTICLES = 10;

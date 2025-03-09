@@ -1,10 +1,12 @@
 import { createApp } from 'vue';
-import './game/index';
 import App from './App.vue';
 import './styles.less';
-import 'ant-design-vue/dist/antd.dark.css';
+import { createGame } from '@user/entry-client';
 
 createApp(App).mount('#root');
+
+// 创建游戏实例
+createGame();
 
 main.init('play');
 main.listen();

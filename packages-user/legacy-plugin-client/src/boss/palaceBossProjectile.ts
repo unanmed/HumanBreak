@@ -1,5 +1,5 @@
 import { Transform, MotaOffscreenCanvas2D } from '@motajs/render';
-import { IStateDamageable } from '@/game/state/interface';
+import { IStateDamageable } from '@user/data-state';
 import { Hitbox, Projectile } from './barrage';
 import type { PalaceBoss } from './palaceBoss';
 import { clamp } from '@motajs/legacy-ui';

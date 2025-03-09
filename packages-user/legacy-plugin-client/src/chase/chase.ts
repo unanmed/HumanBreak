@@ -9,7 +9,7 @@ import {
     disableViewport,
     enableViewport
 } from '@motajs/render';
-import type { HeroMover, MoveStep } from '@/game/state/move';
+import type { HeroMover, MoveStep } from '@user/data-state';
 import EventEmitter from 'eventemitter3';
 
 export interface IChaseController {

@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-export function init() {
+export function initUI() {
     if (main.mode === 'editor') return;
     const { mainUi, fixedUi, mainSetting } = Mota.requireAll('var');
 

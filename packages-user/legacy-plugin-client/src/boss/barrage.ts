@@ -4,7 +4,7 @@ import {
     RenderItemPosition,
     Transform
 } from '@motajs/render';
-import { IStateDamageable } from '@/game/state/interface';
+import { IStateDamageable } from '@user/data-state';
 import EventEmitter from 'eventemitter3';
 import { Ticker } from 'mutate-animate';
 

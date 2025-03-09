@@ -1,4 +1,4 @@
-import { IStateDamageable } from '@/game/state/interface';
+import { IStateDamageable } from '@user/data-state';
 import { BarrageBoss, BossSprite, Hitbox } from './barrage';
 import {
     Container,

@@ -13,6 +13,13 @@ import type * as RenderVue from '@motajs/render-vue';
 import type * as System from '@motajs/system';
 import type * as SystemAction from '@motajs/system-action';
 import type * as SystemUI from '@motajs/system-ui';
+import type * as ClientModules from '@user/client-modules';
+import type * as DataBase from '@user/data-base';
+import type * as DataFallback from '@user/data-fallback';
+import type * as DataState from '@user/data-state';
+import type * as DataUtils from '@user/data-utils';
+import type * as LegacyPluginClient from '@user/legacy-plugin-client';
+import type * as LegacyPluginData from '@user/legacy-plugin-data';
 
 interface ModuleInterface {
     '@motajs/client': typeof Client;
@@ -30,6 +37,13 @@ interface ModuleInterface {
     '@motajs/system': typeof System;
     '@motajs/system-action': typeof SystemAction;
     '@motajs/system-ui': typeof SystemUI;
+    '@user/client-modules': typeof ClientModules;
+    '@user/data-base': typeof DataBase;
+    '@user/data-fallback': typeof DataFallback;
+    '@user/data-state': typeof DataState;
+    '@user/data-utils': typeof DataUtils;
+    '@user/legacy-plugin-client': typeof LegacyPluginClient;
+    '@user/legacy-plugin-data': typeof LegacyPluginData;
 }
 
 export interface IMota {
@@ -137,7 +151,7 @@ declare global {
     }
 }
 
-export const Mota = new MotaSystem();
+export const Mota: IMota = new MotaSystem();
 
 export function createMota() {
     window.Mota = Mota;

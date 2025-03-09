@@ -9,7 +9,7 @@ import type {
     FloorViewport
 } from '@motajs/render';
 import type { TimingFn } from 'mutate-animate';
-import { BlockMover, heroMoveCollection, MoveStep } from '@/game/state/move';
+import { BlockMover, heroMoveCollection, MoveStep } from '@user/data-state';
 
 // 向后兼容用，会充当两个版本间过渡的作用
 
@@ -23,13 +23,13 @@ interface Adapters {
 
 const adapters: Adapters = {};
 
-export function init() {
+export function initFallback() {
     const hook = Mota.require('var', 'hook');
     const loading = Mota.require('var', 'loading');
     let fallbackIds: number = 1e8;
 
     if (!main.replayChecking && main.mode === 'play') {
-        const Adapter = Mota.require('module', 'Render').RenderAdapter;
+        const Adapter = Mota.require('@motajs/render').RenderAdapter;
         const hero = Adapter.get<HeroRenderer>('hero-adapter');
         const doorAnimate = Adapter.get<LayerDoorAnimate>('door-animate');
         const animate = Adapter.get<LayerGroupAnimate>('animate');
@@ -88,8 +88,8 @@ export function init() {
 
     Mota.r(() => {
         // ----- 引入
-        const Camera = Mota.require('module', 'Render').Camera;
-        const Renderer = Mota.require('module', 'Render').MotaRenderer;
+        const { Camera, MotaRenderer: Renderer } =
+            Mota.require('@motajs/render');
         const Animation = Mota.require('module', 'Animation');
 
         // ----- 勇士移动相关

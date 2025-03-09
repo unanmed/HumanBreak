@@ -1,3 +1,10 @@
 {
-    "name": "@user/entry-data"
+    "name": "@user/entry-data",
+    "dependencies": {
+        "@user/data-base": "workspace:*",
+        "@user/data-fallback": "workspace:*",
+        "@user/data-state": "workspace:*",
+        "@user/data-utils": "workspace:*",
+        "@user/legacy-plugin-data": "workspace:*"
+    }
 }

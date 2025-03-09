@@ -16,7 +16,7 @@ function createCanvas(name, zIndex) {
     return canvas;
 }
 
-export function init() {
+export function initFiveLayer() {
     // 大地图适配
 
     core.initStatus.bg2maps = {};
