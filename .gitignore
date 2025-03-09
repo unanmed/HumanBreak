@@ -46,7 +46,7 @@ meeting.md
 *.csv
 script/special.ts
 script/people.ts
-docs/
 user.ts
 .antlr
 graph.svg
+docs/.vitepress
