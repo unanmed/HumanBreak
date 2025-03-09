@@ -10,7 +10,7 @@ export function openShop(shopId: string, noRoute: boolean) {
     if (shop.item) {
         Mota.r(() => {
             if (!core.isReplaying()) {
-                Mota.require('var', 'mainUi').open('shop', {
+                Mota.require('@motajs/legacy-ui').mainUi.open('shop', {
                     shopId: shopId
                 });
             }

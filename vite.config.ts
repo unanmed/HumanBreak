@@ -51,15 +51,7 @@ export default defineConfig({
     base: `./`,
     resolve: {
         alias: [
-            ...aliases,
-            {
-                find: '@',
-                replacement: resolve(__dirname, './src')
-            },
-            {
-                find: '@ui',
-                replacement: resolve(__dirname, './src/ui')
-            }
+            ...aliases
         ]
     },
     build: {

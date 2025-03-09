@@ -1,13 +1,13 @@
 import { logger } from '@motajs/common';
 import { mainSetting } from '@motajs/legacy-ui';
 import {
-    Damage,
-    DamageRenderable,
-    FloorDamageExtends,
     LayerGroupFloorBinder,
     ILayerGroupRenderExtends,
     LayerGroup
 } from '@motajs/render';
+import { hook } from '@user/data-base';
+import { ItemState } from '@user/data-state';
+import { Damage, DamageRenderable, FloorDamageExtends } from './damage';
 
 interface ItemDetailData {
     x: number;
@@ -21,8 +21,7 @@ interface ItemData {
     y: number;
 }
 
-const ItemState = Mota.require('module', 'State').ItemState;
-Mota.require('var', 'hook').on('setBlock', (x, y, floorId, block) => {
+hook.on('setBlock', (x, y, floorId, block) => {
     FloorItemDetail.listened.forEach(v => {
         v.setBlock(block, x, y);
     });
@@ -199,8 +198,7 @@ export class FloorItemDetail implements ILayerGroupRenderExtends {
                     return;
                 }
 
-                // @ts-ignore
-                ItemState.item(id)?.itemEffectFn();
+                ItemState.item(id)?.itemEffectFn?.();
                 detail?.set(index, { x, y, diff });
             });
         });

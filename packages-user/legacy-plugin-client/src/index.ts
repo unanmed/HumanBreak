@@ -3,4 +3,4 @@ export * from './chase';
 export * from './fx';
 
 export * from './fallback';
-export * from './loopMap';
+export * from '../../client-modules/src/render/loopMap';

@@ -8,8 +8,7 @@ import {
     Sprite,
     Transform
 } from '@motajs/render';
-
-const gameListener = Mota.require('var', 'gameListener');
+import { gameListener, hook } from '@user/data-base';
 
 export class LayerGroupHalo implements ILayerGroupRenderExtends {
     id: string = 'halo';
@@ -130,7 +129,7 @@ function updateHalo(block: Block) {
     }
 }
 
-Mota.require('var', 'hook').on('enemyExtract', col => {
+hook.on('enemyExtract', col => {
     LayerGroupHalo.sprites.forEach(v => {
         const floor = v.binder.getFloor();
         if (col.floorId === floor) {

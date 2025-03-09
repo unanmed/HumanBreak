@@ -59,7 +59,7 @@ function getRealStatus(
     name: keyof HeroStatus | 'all' | (keyof HeroStatus)[],
     floorId: FloorIds = core.status.floorId
 ): any {
-    const { getSkillLevel } = Mota.Plugin.require('skillTree_g');
+    const { getSkillLevel } = Mota.require('@user/legacy-plugin-data');
     if (name instanceof Array) {
         const res: any = {};
         name.forEach(v => {

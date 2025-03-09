@@ -7,7 +7,7 @@ import {
     LayerGroup,
     Sprite
 } from '@motajs/render';
-import type { BluePalace } from '@user/data-state';
+import { BluePalace } from '@user/data-state';
 
 /** 最大粒子数 */
 const MAX_PARTICLES = 10;
@@ -24,7 +24,7 @@ export class LayerGroupPortal implements ILayerGroupRenderExtends {
     portal!: Portal;
 
     private onFloorChange = (floor: FloorIds) => {
-        const data = Mota.require('module', 'Mechanism').BluePalace.portals;
+        const data = BluePalace.portals;
         this.portal.cellSize = this.group.cellSize;
         this.portal.setData(data[floor] ?? []);
     };

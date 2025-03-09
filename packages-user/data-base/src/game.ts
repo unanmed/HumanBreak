@@ -107,6 +107,8 @@ export interface GameEvent {
     ];
     /** Emitted in lib/control.js */
     replayStatus: [replaying: boolean];
+    /** Emitted in project/functions.js */
+    loadData: [];
 }
 
 export const hook = new EventEmitter<GameEvent>();

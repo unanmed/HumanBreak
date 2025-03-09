@@ -29,7 +29,7 @@ import { onMounted } from 'vue';
 import { mainUi, fixedUi } from '@motajs/legacy-ui';
 
 onMounted(() => {
-    const { hook } = Mota.requireAll('var');
+    const { hook } = Mota.require('@user/data-base');
     hook.emit('mounted');
 });
 

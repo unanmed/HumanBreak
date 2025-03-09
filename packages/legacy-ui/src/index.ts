@@ -4,6 +4,7 @@ export * as UI from './ui';
 export * as Components from './components';
 export * from './preset';
 export * from './tools';
+export * from './fx';
 
 export * from './animateController';
 export * from './controller';

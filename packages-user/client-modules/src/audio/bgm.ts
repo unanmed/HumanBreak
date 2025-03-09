@@ -258,7 +258,7 @@ export class BgmController<
 export const bgmController = new BgmController<BgmIds>(audioPlayer);
 
 export function loadAllBgm() {
-    const loading = Mota.require('var', 'loading');
+    const { loading } = Mota.require('@user/data-base');
     loading.once('coreInit', () => {
         const data = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d;
         for (const bgm of data.main.bgms) {

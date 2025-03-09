@@ -11,7 +11,7 @@ import type {
     LayerMovingRenderable,
     LayerFloorBinder
 } from '@motajs/render';
-import type { HeroKeyMover } from '@/module/action/move';
+import type { HeroKeyMover } from '@user/client-modules';
 import { BluePalace, MiscData } from '../mechanism/misc';
 import { sleep } from '@motajs/common';
 
@@ -939,7 +939,7 @@ export const heroMoveCollection: HeroMoveCollection = {
 loading.once('coreInit', () => {
     // 注册按键操作
     Mota.r(() => {
-        const { HeroKeyMover } = Mota.require('@motajs/system-action');
+        const { HeroKeyMover } = Mota.require('@user/client-modules');
         const { gameKey } = Mota.require('@motajs/system-action');
         const keyMover = new HeroKeyMover(gameKey, heroMover);
         heroMoveCollection.keyMover = keyMover;

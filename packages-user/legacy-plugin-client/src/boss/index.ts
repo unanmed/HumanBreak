@@ -1,3 +1,4 @@
+import { hook } from '@user/data-base';
 import { BarrageBoss } from './barrage';
 import { TowerBoss } from './towerBoss';
 
@@ -15,7 +16,7 @@ export function getBoss<T extends BarrageBoss>(): T | null {
     return boss as T;
 }
 
-Mota.require('var', 'hook').on('reset', () => {
+hook.on('reset', () => {
     if (boss) {
         boss.end();
     }

@@ -11,7 +11,7 @@ import { texture } from './cache';
 import { sleep } from 'mutate-animate';
 import { RenderAdapter } from '@motajs/render-core';
 
-const hook = Mota.require('var', 'hook');
+const { hook } = Mota.require('@user/data-base');
 
 hook.on('setBlock', (x, y, floor, block) => {
     const isNow = floor === core.status.floorId;

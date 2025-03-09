@@ -75,7 +75,7 @@ function addLightFromBlock(
     });
 }
 
-const hook = Mota.require('var', 'hook');
+const { hook } = Mota.require('@user/data-base');
 
 hook.once('reset', () => {
     Shadow.init();
@@ -100,11 +100,9 @@ hook.once('reset', () => {
         },
         { background: [0, 0, 0, 0.3] }
     );
-    Mota.rewrite(core.control, 'loadData', 'add', () => {
-        if (!main.replayChecking) {
-            Shadow.update(true);
-            LayerShadowExtends.shadowList.forEach(v => v.update());
-        }
+    hook.on('loadData', () => {
+        Shadow.update(true);
+        LayerShadowExtends.shadowList.forEach(v => v.update());
     });
 });
 hook.on('reset', () => {

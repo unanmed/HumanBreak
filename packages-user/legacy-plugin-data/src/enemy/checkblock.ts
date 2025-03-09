@@ -1,4 +1,4 @@
-import { has, ofDir } from '@/plugin/game/utils';
+import { has, ofDir } from '@user/data-utils';
 
 export function init() {
     // 伤害弹出
@@ -11,11 +11,11 @@ export function init() {
         const damage = info?.damage;
         if (damage) {
             if (!main.replayChecking) {
-                Mota.Plugin.require('pop_r').addPop(
-                    (x - core.bigmap.offsetX / 32) * 32 + 12,
-                    (y - core.bigmap.offsetY / 32) * 32 + 20,
-                    (-damage).toString()
-                );
+                // addPop(
+                //     (x - core.bigmap.offsetX / 32) * 32 + 12,
+                //     (y - core.bigmap.offsetY / 32) * 32 + 20,
+                //     (-damage).toString()
+                // );
             }
             core.status.hero.hp -= damage;
             const type = [...info.type];

@@ -40,7 +40,7 @@ export function removeMaps(
         deleted = true;
     }
     if (deleted && !main.replayChecking) {
-        Mota.Plugin.require('fly_r').splitArea();
+        Mota.require('@motajs/legacy-ui').splitArea();
     }
 }
 

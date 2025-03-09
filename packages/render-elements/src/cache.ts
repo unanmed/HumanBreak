@@ -14,7 +14,8 @@ const i = (img: ImageMapKeys) => {
 
 const imageMap: Partial<ImageMap> = {};
 
-Mota.require('var', 'loading').once('loaded', () => {
+const { loading } = Mota.require('@user/data-base');
+loading.once('loaded', () => {
     [
         'enemys',
         'enemy48',
@@ -91,7 +92,7 @@ class TextureCache {
     constructor() {
         this.material = imageMap as Record<ImageMapKeys, HTMLImageElement>;
 
-        Mota.require('var', 'loading').once('loaded', () => {
+        loading.once('loaded', () => {
             const map = maps_90f36752_8815_4be8_b32b_d7fad1d0542e;
             // @ts-expect-error 无法推导
             this.idNumberMap = {};

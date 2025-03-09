@@ -10,6 +10,7 @@ import {
     MotaOffscreenCanvas2D
 } from '@motajs/render';
 import { IWeather } from './weather';
+import { loading } from '@user/data-base';
 
 const snowVs = /* glsl */ `
 in vec2 a_snowVertex;
@@ -105,7 +106,7 @@ void main() {
 /** 雨滴顶点坐标 */
 const vertex = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
 
-Mota.require('var', 'loading').once('coreInit', () => {
+loading.once('coreInit', () => {
     const shader = new SnowShader();
     const gl = shader.gl;
     shader.size(480, 480);

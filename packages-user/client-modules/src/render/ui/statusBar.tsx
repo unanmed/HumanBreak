@@ -18,6 +18,7 @@ import {
     ReplayingStatus,
     ReplayingToolbar
 } from './toolbar';
+import { HeroSkill } from '@user/data-state';
 
 export interface ILeftHeroStatus {
     hp: number;
@@ -275,7 +276,6 @@ export const RightStatusBar = defineComponent<StatusBarProps<IRightHeroStatus>>(
         };
 
         const changeAutoSkill = () => {
-            const { HeroSkill } = Mota.require('module', 'Mechanism');
             const auto = !s.autoSkill;
             HeroSkill.setAutoSkill(auto);
             core.status.route.push(`set:autoSkill:${auto}`);

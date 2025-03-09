@@ -1,3 +1,4 @@
+import { loading } from '@user/data-base';
 import { TimingFn, Transition } from 'mutate-animate';
 import {
     ComponentInternalInstance,
@@ -59,7 +60,6 @@ export function onOrientationChange(hook: OrientationHook) {
  * @param hook 当游戏加载完成时执行的函数
  */
 export function onLoaded(hook: () => void) {
-    const loading = Mota.require('var', 'loading');
     if (!loading.loaded) {
         loading.once('loaded', hook);
     } else {

@@ -37,7 +37,8 @@ const closeFixed = () => {
 // todo: 应当在这里实现查看临界与特殊属性的功能
 export let hovered: Block | null;
 
-const { hook, gameListener } = Mota.requireAll('var');
+const { hook, gameListener } = Mota.require('@user/data-base');
+
 gameListener.on('hoverBlock', block => {
     closeFixed();
     hovered = block;

@@ -1,22 +1,23 @@
 import {
     Container,
-    FloorDamageExtends,
     LayerGroupFloorBinder,
     FloorLayer,
     LayerGroup,
     FloorViewport,
     MotaRenderer
 } from '@motajs/render';
-import { FloorItemDetail } from '@/plugin/fx/itemDetail';
+import { hook } from '@user/data-base';
+import { MiscData } from '@user/data-state';
+import { FloorDamageExtends } from './damage';
+import { FloorItemDetail } from './itemDetail';
 
-const loopMaps = Mota.require('module', 'Mechanism').MiscData.loopMaps;
+const loopMaps = MiscData.loopMaps;
 
 let loopLayer: LayerGroup;
 let show: boolean = false;
 /** 循环式地图中，更新视角的委托ticker */
 let delegation: number = -1;
 
-const hook = Mota.require('var', 'hook');
 hook.on('changingFloor', (floorId, heroLoc) => {
     enableLoopMapElement(floorId);
 });

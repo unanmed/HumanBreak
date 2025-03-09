@@ -8,17 +8,21 @@ import {
 import { logger } from '@motajs/common';
 import EventEmitter from 'eventemitter3';
 import { isNil } from 'lodash-es';
-import { LayerGroupFloorBinder } from './floor';
 import {
+    BlockCacher,
+    CanvasCacheItem,
+    ICanvasCacheItem,
     calNeedRenderOf,
     ILayerGroupRenderExtends,
     Layer,
-    LayerGroup
-} from './layer';
-import { BlockCacher, CanvasCacheItem, ICanvasCacheItem } from './block';
+    LayerGroup,
+    LayerGroupFloorBinder,
+    tagMap
+} from '@motajs/render';
 import { IDamageEnemy, IEnemyCollection, MapDamage } from '@motajs/types';
+import { UserEnemyInfo } from '@user/data-state';
 
-const ensureFloorDamage = Mota.require('fn', 'ensureFloorDamage');
+const { ensureFloorDamage } = Mota.require('@user/data-state');
 
 /**
  * 根据伤害大小获取颜色
@@ -323,7 +327,7 @@ export class Damage extends RenderItem<EDamageEvent> {
         const y = enemy.y!;
         const { damage } = enemy.calDamage();
         const cri = enemy.calCritical(1)[0]?.atkDelta ?? Infinity;
-        const real = enemy.getRealInfo();
+        const real = enemy.getRealInfo() as UserEnemyInfo;
 
         const dam1: DamageRenderable = {
             align: 'left',
@@ -586,5 +590,10 @@ export class Damage extends RenderItem<EDamageEvent> {
         this.enemy?.off('extract', this.onExtract);
     }
 }
+
+// 注册为内部元素
+tagMap.register<EDamageEvent, Damage>('damage', (_0, _1, _props) => {
+    return new Damage();
+});
 
 // const adapter = new RenderAdapter<Damage>('damage');

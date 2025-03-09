@@ -7,8 +7,4 @@ export function patchAll() {
     patchAudio();
     patchWeather();
     patchUI();
-    const loading = Mota.require('var', 'loading');
-    loading.once('coreInit', () => {
-        Patch.patchAll();
-    });
 }

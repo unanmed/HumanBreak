@@ -23,9 +23,11 @@ import {
 } from './towerBossProjectile';
 import { IStateDamageable } from '@user/data-state';
 import { Pop } from '../fx/pop';
-import { WeatherController } from '@/module';
+import { WeatherController } from '@user/client-modules';
+import { loading } from '@user/data-base';
+import { clip } from '@user/legacy-plugin-data';
 
-Mota.require('var', 'loading').once('coreInit', () => {
+loading.once('coreInit', () => {
     const shader = new Shader();
     shader.size(480, 480);
     shader.setHD(true);
@@ -198,7 +200,7 @@ export class TowerBoss extends BarrageBoss {
         TowerBoss.effect.end();
         core.status.hero.hp = this.heroHp;
 
-        Mota.Plugin.require('replay_g').clip('choices:0');
+        clip('choices:0');
     }
 
     /**

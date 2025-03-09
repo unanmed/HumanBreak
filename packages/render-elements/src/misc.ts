@@ -292,7 +292,7 @@ export class Icon extends RenderItem<EIconEvent> implements IAnimateFrame {
         }
         const num = typeof id === 'number' ? id : texture.idNumberMap[id];
 
-        const loading = Mota.require('var', 'loading');
+        const { loading } = Mota.require('@user/data-base');
         if (loading.loaded) {
             this.setIconRenderable(num);
         } else {
@@ -500,7 +500,7 @@ export class Winskin extends RenderItem<EWinskinEvent> {
      * @param name 图片名称
      */
     setImageByName(name: ImageIds) {
-        const loading = Mota.require('var', 'loading');
+        const { loading } = Mota.require('@user/data-base');
         if (loading.loaded) {
             const image = core.material.images.images[name];
             this.setImage(image);

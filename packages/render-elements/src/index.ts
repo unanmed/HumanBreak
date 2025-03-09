@@ -2,7 +2,6 @@ export * from './animate';
 export * from './block';
 export * from './cache';
 export * from './camera';
-export * from './damage';
 export * from './floor';
 export * from './frame';
 export * from './graphics';

@@ -107,6 +107,7 @@ import {
 } from '../tools/achievement';
 import Scroll from '../components/scroll.vue';
 import { isMobile } from '../use';
+import { mainUi } from '../preset';
 
 const props = defineProps<{
     num: number;
@@ -176,7 +177,7 @@ function getAllAchievements(type: AchievementType): ResolvedAchievement[] {
 }
 
 function exit() {
-    Mota.require('var', 'mainUi').close(props.num);
+    mainUi.close(props.num);
 }
 </script>
 

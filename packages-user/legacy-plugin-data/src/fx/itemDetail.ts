@@ -1,5 +1,5 @@
 import { EnemyCollection, ensureFloorDamage } from '@user/data-state';
-import { formatDamage } from '../utils';
+import { formatDamage } from '@user/data-utils';
 
 export function init() {
     core.control.updateDamage = function (
@@ -58,7 +58,7 @@ function renderThumbnailDamage(col: EnemyCollection) {
             py: 32 * (v.y! + 1) - 1,
             color: color
         });
-        const setting = Mota.require('var', 'mainSetting');
+        const setting = Mota.require('@motajs/legacy-ui').mainSetting;
         const criGem = setting.getValue('screen.criticalGem', false);
         const n = critical?.atkDelta ?? Infinity;
         const ratio = core.status.maps[col.floorId].ratio;

@@ -519,7 +519,7 @@ export class MinimapDrawer {
             ctx.textBaseline = 'middle';
             ctx.font = `3px "normal"`;
             ctx.strokeStyle = 'black';
-            Mota.require('fn', 'ensureFloorDamage')(floorId);
+            Mota.require('@user/data-state').ensureFloorDamage(floorId);
             ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
             ctx.fillRect(x - 6, y - 2, 12, 4);
             ctx.fillStyle = 'white';

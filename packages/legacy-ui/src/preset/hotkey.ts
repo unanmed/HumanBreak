@@ -535,7 +535,7 @@ gameKey
         core.actions._clickGameInfo_openComments();
     })
     .realize('skill1', () => {
-        const HeroSkill = Mota.require('module', 'Mechanism').HeroSkill;
+        const HeroSkill = Mota.require('@user/data-state').HeroSkill;
         if (!HeroSkill.learnedSkill(HeroSkill.Blade)) return;
         if (HeroSkill.getAutoSkill()) {
             tip('error', '已开启自动切换技能！');
@@ -547,13 +547,13 @@ gameKey
         core.updateStatusBar();
     })
     .realize('skill2', () => {
-        const HeroSkill = Mota.require('module', 'Mechanism').HeroSkill;
+        const HeroSkill = Mota.require('@user/data-state').HeroSkill;
         if (
             !flags.onChase &&
             !core.status.floorId.startsWith('tower') &&
             HeroSkill.learnedSkill(HeroSkill.Jump)
         ) {
-            Mota.Plugin.require('skill_g').jumpSkill();
+            Mota.require('@user/legacy-plugin-data').jumpSkill();
             core.status.route.push('useSkill:Jump');
         } else {
             if (core.hasItem('pickaxe')) {
@@ -562,7 +562,7 @@ gameKey
         }
     })
     .realize('skill3', () => {
-        const HeroSkill = Mota.require('module', 'Mechanism').HeroSkill;
+        const HeroSkill = Mota.require('@user/data-state').HeroSkill;
         if (!HeroSkill.learnedSkill(HeroSkill.Shield)) return;
         if (HeroSkill.getAutoSkill()) {
             tip('error', '已开启自动切换技能！');

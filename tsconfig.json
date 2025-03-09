@@ -17,7 +17,6 @@
         "noEmit": true,
         "baseUrl": ".",
         "paths": {
-            "@/*": ["src/*"],
             "@motajs/*": ["packages/*/src"],
             "@user/*": ["packages-user/*/src"]
         }

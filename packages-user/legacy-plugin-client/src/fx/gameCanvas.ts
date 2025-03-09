@@ -4,6 +4,7 @@ import {
     ILayerGroupRenderExtends,
     LayerGroup
 } from '@motajs/render';
+import { loading } from '@user/data-base';
 
 const filterMap: [FloorIds[], string][] = [];
 
@@ -11,7 +12,7 @@ function getCanvasFilterByFloorId(floorId: FloorIds = core.status.floorId) {
     return filterMap.find(v => v[0].includes(floorId))?.[1] ?? '';
 }
 
-Mota.require('var', 'loading').once('coreInit', () => {
+loading.once('coreInit', () => {
     filterMap.push(
         [['MT50', 'MT60', 'MT61'], 'contrast(120%)'], // 童心佬的滤镜（
         [

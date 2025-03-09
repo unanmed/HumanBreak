@@ -21,12 +21,14 @@ if (import.meta.env.DEV) {
     Danmaku.backend = `/danmaku`;
 }
 
-Mota.require('var', 'hook').once('reset', () => {
+const { hook } = Mota.require('@user/data-base');
+
+hook.once('reset', () => {
     Danmaku.fetch();
 });
 
 // 勇士移动后显示弹幕
-Mota.require('var', 'hook').on('moveOneStep', (x, y, floor) => {
+hook.on('moveOneStep', (x, y, floor) => {
     const enabled = mainSetting.getValue('ui.danmaku', true);
     if (!enabled) return;
     const f = Danmaku.allInPos[floor];

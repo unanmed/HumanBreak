@@ -72,8 +72,6 @@ import { gameKey } from '@motajs/system-action';
 import { mainUi } from '../preset/ui';
 import { mainSetting } from '../preset/ui';
 import { mat4 } from 'gl-matrix';
-// todo: 改了
-import { bgmController } from '@/module';
 
 const props = defineProps<{
     num: number;
@@ -90,7 +88,7 @@ let background: HTMLImageElement;
 
 let buttons: HTMLSpanElement[] = [];
 
-let played: boolean;
+let played: boolean = false;
 const soundChecked = ref(false);
 const fullscreen = ref(!!document.fullscreenElement);
 
@@ -327,6 +325,7 @@ onMounted(async () => {
     resize();
 
     soundChecked.value = mainSetting.getValue('audio.bgmEnabled', true);
+    const { bgmController } = Mota.require('@user/client-modules');
     bgmController.play('title.opus');
 
     start.style.opacity = '1';
@@ -425,8 +424,7 @@ onUnmounted(() => {
         );
         background-clip: text;
         -webkit-background-clip: text;
-        text-shadow:
-            1px 1px 4px rgba(0, 0, 0, 0.5),
+        text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5),
             -1px -1px 3px rgba(255, 255, 255, 0.3),
             5px 5px 5px rgba(0, 0, 0, 0.4);
         filter: brightness(1.8);
@@ -449,17 +447,14 @@ onUnmounted(() => {
             position: absolute;
             opacity: 0;
             animation: cursor 2.5s linear 0s infinite normal running;
-            transition:
-                left 0.4s ease-out,
-                top 0.4s ease-out,
+            transition: left 0.4s ease-out, top 0.4s ease-out,
                 opacity 1.5s ease-out;
         }
 
         .start-button {
             position: relative;
             font: bold 1.5em 'normal';
-            text-shadow:
-                1px 1px 2px rgba(0, 0, 0, 0.4),
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4),
                 0px 0px 1px rgba(255, 255, 255, 0.3);
             background-clip: text;
             -webkit-background-clip: text;

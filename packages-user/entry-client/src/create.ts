@@ -16,6 +16,8 @@ import * as SystemAction from '@motajs/system-action';
 import * as SystemUI from '@motajs/system-ui';
 import * as ClientModules from '@user/client-modules';
 import * as LegacyPluginClient from '@user/legacy-plugin-client';
+import * as MutateAnimate from 'mutate-animate';
+import * as Vue from 'vue';
 
 export function create() {
     Mota.register('@motajs/client', Client);
@@ -35,4 +37,6 @@ export function create() {
     Mota.register('@motajs/system-ui', SystemUI);
     Mota.register('@user/client-modules', ClientModules);
     Mota.register('@user/legacy-plugin-client', LegacyPluginClient);
+    Mota.register('MutateAnimate', MutateAnimate);
+    Mota.register('Vue', Vue);
 }

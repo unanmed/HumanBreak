@@ -1,3 +1,5 @@
+import EventEmitter from 'eventemitter3';
+
 export interface EnemyInfo extends Partial<Omit<Enemy, 'special'>> {
     atk: number;
     def: number;
@@ -133,7 +135,12 @@ export interface IDamageEnemy {
     getSeckillAtk(): number;
 }
 
-export interface IEnemyCollection {
+export interface IEnemyCollectionEvent {
+    calculated: [];
+    extract: [];
+}
+
+export interface IEnemyCollection extends EventEmitter<IEnemyCollectionEvent> {
     /** 这个怪物集的地图 id */
     readonly floorId: FloorIds;
     /** 地图宽度 */

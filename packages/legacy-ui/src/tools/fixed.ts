@@ -31,7 +31,7 @@ export function getDetailedEnemy(
     const special: [string, string, string][] = [...enemy.info.special]
         .filter(v => !enemy.info.specialHalo?.includes(v))
         .map(vv => {
-            const s = Mota.require('var', 'enemySpecials')[vv];
+            const s = Mota.require('@user/data-state').specials[vv];
             return [
                 fromFunc(s.name, enemy.info),
                 fromFunc(s.desc, enemy.info),

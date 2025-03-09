@@ -359,8 +359,7 @@ export function spliceBy<T>(arr: T[], from: T): T[] {
 }
 
 export async function triggerFullscreen(full: boolean) {
-    if (!Mota.Plugin.inited) return;
-    const { maxGameScale } = Mota.Plugin.require('utils_g');
+    const { maxGameScale } = Mota.require('@user/data-utils');
     if (!!document.fullscreenElement && !full) {
         if (window.jsinterface) {
             window.jsinterface.requestPortrait();
@@ -472,10 +471,10 @@ export function formatSize(size: number) {
     return size < 1 << 10
         ? `${size.toFixed(2)}B`
         : size < 1 << 20
-          ? `${(size / (1 << 10)).toFixed(2)}KB`
-          : size < 1 << 30
-            ? `${(size / (1 << 20)).toFixed(2)}MB`
-            : `${(size / (1 << 30)).toFixed(2)}GB`;
+        ? `${(size / (1 << 10)).toFixed(2)}KB`
+        : size < 1 << 30
+        ? `${(size / (1 << 20)).toFixed(2)}MB`
+        : `${(size / (1 << 30)).toFixed(2)}GB`;
 }
 
 let num = 0;

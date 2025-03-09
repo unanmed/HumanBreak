@@ -13,7 +13,8 @@ import {
     HaloFn,
     IEnemyCollection,
     IDamageEnemy,
-    HaloType
+    HaloType,
+    IEnemyCollectionEvent
 } from '@motajs/types';
 
 // todo: 光环划分优先级，从而可以实现光环的多级运算
@@ -52,13 +53,8 @@ specialValue
     .set(31, ['hpHalo'])
     .set(32, ['assimilateRange']);
 
-interface EnemyCollectionEvent {
-    extract: [];
-    calculated: [];
-}
-
 export class EnemyCollection
-    extends EventEmitter<EnemyCollectionEvent>
+    extends EventEmitter<IEnemyCollectionEvent>
     implements IEnemyCollection
 {
     floorId: FloorIds;

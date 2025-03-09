@@ -32,13 +32,13 @@
 import { onMounted, onUpdated, Ref, ref, watch } from 'vue';
 import Box from '../components/box.vue';
 import { GameUi } from '../controller';
-import type { DamageEnemy, EnemyInfo } from '@/game/enemy/damage';
 import { nextFrame } from '../utils';
+import { EnemyInfo, IDamageEnemy } from '@motajs/types';
 
 const props = defineProps<{
     num: number;
     ui: GameUi;
-    enemy: DamageEnemy;
+    enemy: IDamageEnemy;
     close: Ref<boolean>;
     loc: [x: number, y: number];
 }>();
@@ -83,7 +83,7 @@ const special = (() => {
     };
 
     const show = s.slice(0, 2).map(v => {
-        const s = Mota.require('var', 'enemySpecials')[v];
+        const s = Mota.require('@user/data-state').specials[v];
         return [fromFunc(s.name, enemy.info), s.color];
     });
     if (s.length > 2) show.push(['...', 'white']);

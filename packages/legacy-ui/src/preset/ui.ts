@@ -8,7 +8,6 @@ import {
     UI,
     UiController
 } from '@motajs/legacy-ui';
-import { bgmController, soundPlayer } from '@/module';
 import settingsText from '../data/settings.json';
 
 //#region legacy-ui
@@ -47,7 +46,7 @@ fixedUi.register(
 );
 fixedUi.showAll();
 
-const hook = Mota.require('var', 'hook');
+const { hook } = Mota.require('@user/data-base');
 hook.once('mounted', () => {
     const ui = document.getElementById('ui-main')!;
     const fixed = document.getElementById('ui-fixed')!;
@@ -143,7 +142,7 @@ function handleActionSetting<T extends number | boolean>(
 ) {
     if (key === 'autoSkill') {
         // 自动切换技能
-        const HeroSkill = Mota.require('module', 'Mechanism').HeroSkill;
+        const HeroSkill = Mota.require('@user/data-state').HeroSkill;
         HeroSkill.setAutoSkill(n as boolean);
         core.status.route.push(`set:autoSkill:${n}`);
     }
@@ -154,6 +153,7 @@ function handleAudioSetting<T extends number | boolean>(
     n: T,
     _o: T
 ) {
+    const { bgmController, soundPlayer } = Mota.require('@user/client-modules');
     if (key === 'bgmEnabled') {
         bgmController.setEnabled(n as boolean);
         core.checkBgm();
@@ -261,7 +261,7 @@ mainSetting
             .register('tips', '小贴士', true, COM.Boolean)
     );
 
-const loading = Mota.require('var', 'loading');
+const { loading } = Mota.require('@user/data-base');
 loading.once('coreInit', () => {
     mainSetting.reset({
         'screen.fullscreen': !!document.fullscreenElement,

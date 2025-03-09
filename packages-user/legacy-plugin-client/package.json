@@ -1,6 +1,7 @@
 {
     "name": "@user/legacy-plugin-client",
     "dependencies": {
+        "@user/client-modules": "workspace:*",
         "@user/data-state": "workspace:*"
     }
 }

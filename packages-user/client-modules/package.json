@@ -1,3 +1,8 @@
 {
-    "name": "@user/client-modules"
+    "name": "@user/client-modules",
+    "dependencies": {
+        "@motajs/render": "workspace:*",
+        "@motajs/legacy-ui": "workspace:*",
+        "@user/legacy-plugin-client": "workspace:*"
+    }
 }

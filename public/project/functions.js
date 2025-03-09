@@ -1,4 +1,4 @@
-///<reference path="../../src/types/core.d.ts" />
+///<reference path="../../types/declaration/core.d.ts" />
 
 var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
     events: {
@@ -395,6 +395,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     }
                 });
             });
+
+            Mota.require('@user/data-base').hook.emit('loadData');
         },
         updateStatusBar: function () {
             // 检查等级

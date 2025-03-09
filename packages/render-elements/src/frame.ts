@@ -39,7 +39,7 @@ class RenderEmits extends EventEmitter<RenderEvent> {
 
 export const renderEmits = new RenderEmits();
 
-Mota.require('var', 'hook').once('reset', () => {
+Mota.require('@user/data-base').hook.once('reset', () => {
     let lastTime = 0;
     RenderItem.ticker.add(time => {
         if (!core.isPlaying()) return;

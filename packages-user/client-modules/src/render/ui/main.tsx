@@ -1,7 +1,6 @@
-import { LayerShadowExtends } from '@/core/fx/shadow';
+import { LayerShadowExtends } from '@motajs/legacy-ui';
 import {
     ILayerGroupRenderExtends,
-    FloorDamageExtends,
     LayerGroupAnimate,
     FloorViewport,
     ILayerRenderExtends,
@@ -11,13 +10,14 @@ import {
     LayerGroup,
     Font
 } from '@motajs/render';
-import { WeatherController } from '@/module/weather';
-import { FloorChange } from '@/plugin/fallback';
-import { LayerGroupFilter } from '@/plugin/fx/gameCanvas';
-import { LayerGroupHalo } from '@/plugin/fx/halo';
-import { FloorItemDetail } from '@/plugin/fx/itemDetail';
-import { PopText } from '@/plugin/fx/pop';
-import { LayerGroupPortal } from '@/plugin/fx/portal';
+import { WeatherController } from '../../weather';
+import {
+    FloorChange,
+    LayerGroupFilter,
+    LayerGroupHalo,
+    LayerGroupPortal,
+    PopText
+} from '@user/legacy-plugin-client';
 import { defineComponent, onMounted, reactive, ref } from 'vue';
 import { Textbox, Tip } from '../components';
 import { GameUI, UIController } from '@motajs/system-ui';
@@ -35,6 +35,11 @@ import {
 } from './statusBar';
 import { onLoaded } from '../use';
 import { ReplayingStatus } from './toolbar';
+import { getHeroStatusOn, HeroSkill, NightSpecial } from '@user/data-state';
+import { jumpIgnoreFloor } from '@user/legacy-plugin-data';
+import { hook } from '@user/data-base';
+import { FloorDamageExtends } from '../damage';
+import { FloorItemDetail } from '../itemDetail';
 
 const MainScene = defineComponent(() => {
     const layerGroupExtends: ILayerGroupRenderExtends[] = [
@@ -112,8 +117,6 @@ const MainScene = defineComponent(() => {
         night: 0
     });
 
-    const { getHeroStatusOn } = Mota.requireAll('fn');
-
     const updateStatus = () => {
         if (!core.status || !core.status.hero || !core.status.floorId) return;
         hideStatus.value = core.getFlag('hideStatusBar', false);
@@ -135,7 +138,6 @@ const MainScene = defineComponent(() => {
         leftStatus.exAtk = getHeroStatusOn('mana');
         leftStatus.magicDef = getHeroStatusOn('magicDef');
 
-        const { HeroSkill, NightSpecial } = Mota.require('module', 'Mechanism');
         rightStatus.autoSkill = HeroSkill.getAutoSkill();
         rightStatus.skillName = HeroSkill.getSkillName();
         rightStatus.skillDesc = HeroSkill.getSkillDesc();
@@ -148,7 +150,7 @@ const MainScene = defineComponent(() => {
         replayStatus.played = totalList.length - toReplay.length;
         replayStatus.total = totalList.length;
         if (HeroSkill.learnedSkill(HeroSkill.Jump)) {
-            if (Mota.Plugin.require('skill_g').jumpIgnoreFloor.has(floor)) {
+            if (jumpIgnoreFloor.has(floor)) {
                 rightStatus.jumpCount = -2;
             } else {
                 rightStatus.jumpCount = 3 - (flags[`jump_${floor}`] ?? 0);
@@ -168,7 +170,7 @@ const MainScene = defineComponent(() => {
         loaded.value = true;
     });
 
-    Mota.require('var', 'hook').on('statusBarUpdate', updateStatus);
+    hook.on('statusBarUpdate', updateStatus);
 
     return () => (
         <container id="main-scene" width={MAIN_WIDTH} height={MAIN_HEIGHT}>

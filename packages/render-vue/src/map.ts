@@ -17,8 +17,6 @@ import {
     Text,
     Winskin,
     Animate,
-    Damage,
-    EDamageEvent,
     Layer,
     LayerGroup,
     BezierCurve,
@@ -235,9 +233,6 @@ tagMap.register('layer-group', (_0, _1, props) => {
 
         return l;
     }
-});
-tagMap.register<EDamageEvent, Damage>('damage', (_0, _1, _props) => {
-    return new Damage();
 });
 tagMap.register('animation', (_0, _1, _props) => {
     return new Animate();

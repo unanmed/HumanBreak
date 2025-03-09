@@ -34,7 +34,7 @@ const marked: MarkInfo<EnemyIds>[] = [];
  */
 export function markEnemy(id: EnemyIds) {
     if (hasMarkedEnemy(id)) return;
-    const DamageEnemy = Mota.require('class', 'DamageEnemy');
+    const { DamageEnemy, getHeroStatusOn } = Mota.require('@user/data-state');
     const enemy = new DamageEnemy(core.material.enemys[id]);
     enemy.calAttribute();
     enemy.getRealInfo();
@@ -43,7 +43,7 @@ export function markEnemy(id: EnemyIds) {
         id,
         enemy,
         mode: 0b011111,
-        lastAtk: Mota.requireAll('fn').getHeroStatusOn('atk', 'empty'),
+        lastAtk: getHeroStatusOn('atk', 'empty'),
         lastDamage: enemy.calDamage().damage,
         status: 0b0,
         update: ref(true)
@@ -65,7 +65,7 @@ export function unmarkEnemy(id: EnemyIds) {
 }
 
 export function checkMarkedEnemy() {
-    const { getHeroStatusOn } = Mota.requireAll('fn');
+    const { getHeroStatusOn } = Mota.require('@user/data-state');
     marked.forEach(v => {
         const { id, enemy, mode, lastAtk, lastDamage, markDamage } = v;
         const atk = getHeroStatusOn('atk', 'empty');
@@ -158,7 +158,7 @@ export function hasMarkedEnemy(id: EnemyIds) {
     return marked.some(v => v.id === id);
 }
 
-const hook = Mota.require('var', 'hook');
+const { hook } = Mota.require('@user/data-base');
 hook.on('statusBarUpdate', () => {
     checkMarkedEnemy();
 });

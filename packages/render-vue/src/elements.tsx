@@ -47,7 +47,6 @@ import {
     ELayerEvent,
     ELayerGroupEvent,
     EAnimateEvent,
-    EDamageEvent,
     EGraphicItemEvent
 } from '@motajs/render-elements';
 
@@ -100,7 +99,7 @@ declare module 'vue/jsx-runtime' {
             custom: TagDefine<CustomProps, ERenderItemEvent>;
             layer: TagDefine<LayerProps, ELayerEvent>;
             'layer-group': TagDefine<LayerGroupProps, ELayerGroupEvent>;
-            damage: TagDefine<DamageProps, EDamageEvent>;
+            damage: TagDefine<DamageProps, ERenderItemEvent>;
             animation: TagDefine<AnimateProps, EAnimateEvent>;
             'g-rect': TagDefine<RectProps, EGraphicItemEvent>;
             'g-circle': TagDefine<CirclesProps, EGraphicItemEvent>;

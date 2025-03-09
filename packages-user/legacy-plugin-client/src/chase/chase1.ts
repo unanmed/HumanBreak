@@ -10,7 +10,9 @@ import {
     Sprite
 } from '@motajs/render';
 import { PointEffect, PointEffectType } from '../fx/pointShader';
-import { bgmController } from '@/module';
+import { bgmController } from '@user/client-modules';
+import { loading } from '@user/data-base';
+import { chaseInit1, clip } from '@user/legacy-plugin-data';
 
 const path: Partial<Record<FloorIds, LocArr[]>> = {
     MT16: [
@@ -107,7 +109,7 @@ let back: Sprite | undefined;
 let contrastId: number = 0;
 const effect = new PointEffect();
 
-Mota.require('var', 'loading').once('loaded', () => {
+loading.once('loaded', () => {
     effect.create(Chase.shader, 40);
 });
 
@@ -215,7 +217,7 @@ export function initChase(): IChaseController {
     para3(chase, ani);
     processScale(chase, ani, scale, camera);
 
-    Mota.Plugin.require('chase_g').chaseInit1();
+    chaseInit1();
 
     chase.on('end', () => {
         effect.end();
@@ -712,7 +714,7 @@ function para3(chase: Chase, ani: Animation) {
     });
     chase.onceLoc(21, 7, 'MT14', async () => {
         flags.finishChase1 = true;
-        Mota.Plugin.require('replay_g').clip('choices:0');
+        clip('choices:0');
         core.showStatusBar();
         ani.time(750).apply('rect', 0);
         chase.end(true);

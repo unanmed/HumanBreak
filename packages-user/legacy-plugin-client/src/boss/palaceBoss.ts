@@ -12,8 +12,10 @@ import {
 import { Pop } from '../fx/pop';
 import { SplittableBall } from './palaceBossProjectile';
 import { PointEffect } from '../fx/pointShader';
+import { loading } from '@user/data-base';
+import { clip } from '@user/legacy-plugin-data';
 
-Mota.require('var', 'loading').once('coreInit', () => {
+loading.once('coreInit', () => {
     const shader = new Shader();
     shader.size(480, 480);
     shader.setHD(true);
@@ -102,7 +104,7 @@ export class PalaceBoss extends BarrageBoss {
         PalaceBoss.effect.end();
         core.status.hero.hp = this.heroHp;
 
-        Mota.Plugin.require('replay_g').clip('choices:0');
+        clip('choices:0');
     }
 
     ai(time: number, frame: number): void {}

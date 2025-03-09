@@ -1,9 +1,11 @@
-import { HeroSkill } from '@/game/mechanism/misc';
+import { HeroSkill } from '@user/data-state';
 import {
     getSkillFromIndex,
     upgradeSkill
 } from '../../data-state/src/mechanism/skillTree';
 import { canOpenShop } from './shop';
+import { hook } from '@user/data-base';
+import { jumpSkill } from './skill';
 
 const replayableSettings = ['autoSkill'];
 
@@ -27,7 +29,7 @@ export function initReplay() {
     function tipAndWait(content: string, time: number) {
         const speed = core.status.replay.speed;
         if (main.replayChecking || speed === 24) return Promise.resolve();
-        const { tip } = Mota.Plugin.require('utils_r');
+        const { tip } = Mota.require('@motajs/legacy-ui');
         tip('info', '录像播放操作：' + content);
         return new Promise<void>(res => {
             setTimeout(res, time / speed);
@@ -78,7 +80,7 @@ export function initReplay() {
     let shopOpened = false;
     let openedShopId = '';
 
-    Mota.require('var', 'hook').on('reset', () => {
+    hook.on('reset', () => {
         shopOpened = false;
         openedShopId = '';
     });
@@ -162,7 +164,7 @@ export function initReplay() {
                 !core.status.floorId.startsWith('tower') &&
                 HeroSkill.learnedSkill(HeroSkill.Jump)
             ) {
-                const success = Mota.Plugin.require('skill_g').jumpSkill();
+                const success = jumpSkill();
                 core.status.route.push(`useSkill:${toEmit}`);
                 if (!success) core.replay();
                 return true;

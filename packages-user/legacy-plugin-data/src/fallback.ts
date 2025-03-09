@@ -10,6 +10,7 @@ import type {
 } from '@motajs/render';
 import type { TimingFn } from 'mutate-animate';
 import { BlockMover, heroMoveCollection, MoveStep } from '@user/data-state';
+import { hook, loading } from '@user/data-base';
 
 // 向后兼容用，会充当两个版本间过渡的作用
 
@@ -24,8 +25,6 @@ interface Adapters {
 const adapters: Adapters = {};
 
 export function initFallback() {
-    const hook = Mota.require('var', 'hook');
-    const loading = Mota.require('var', 'loading');
     let fallbackIds: number = 1e8;
 
     if (!main.replayChecking && main.mode === 'play') {
@@ -90,7 +89,7 @@ export function initFallback() {
         // ----- 引入
         const { Camera, MotaRenderer: Renderer } =
             Mota.require('@motajs/render');
-        const Animation = Mota.require('module', 'Animation');
+        const Animation = Mota.require('MutateAnimate');
 
         // ----- 勇士移动相关
         control.prototype.moveAction = async function (callback?: () => void) {
@@ -313,7 +312,7 @@ export function initFallback() {
                 core.removeBlock(x, y);
                 setTimeout(function () {
                     core.status.replay.animate = false;
-                    Mota.require('var', 'hook').emit(
+                    hook.emit(
                         'afterOpenDoor',
                         block.event.id as AllIdsOf<'animates'>,
                         x,

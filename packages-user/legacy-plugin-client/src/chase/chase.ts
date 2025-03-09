@@ -9,7 +9,12 @@ import {
     disableViewport,
     enableViewport
 } from '@motajs/render';
-import type { HeroMover, MoveStep } from '@user/data-state';
+import { loading } from '@user/data-base';
+import {
+    heroMoveCollection,
+    type HeroMover,
+    type MoveStep
+} from '@user/data-state';
 import EventEmitter from 'eventemitter3';
 
 export interface IChaseController {
@@ -108,7 +113,7 @@ export class Chase extends EventEmitter<ChaseEvent> {
         const layer = render.getElementById('layer-main')! as LayerGroup;
         this.layer = layer;
 
-        const mover = Mota.require('module', 'State').heroMoveCollection.mover;
+        const mover = heroMoveCollection.mover;
         this.heroMove = mover;
 
         mover.on('stepEnd', this.onStepEnd);
@@ -345,7 +350,7 @@ export class Chase extends EventEmitter<ChaseEvent> {
     }
 }
 
-Mota.require('var', 'loading').once('coreInit', () => {
+loading.once('coreInit', () => {
     const shader = new Shader();
     Chase.shader = shader;
     shader.size(480, 480);

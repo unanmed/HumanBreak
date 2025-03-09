@@ -134,7 +134,7 @@ onMounted(() => {
     }
     drawer.drawMap();
 
-    const hook = Mota.require('var', 'hook');
+    const { hook } = Mota.require('@user/data-base');
     hook.on('afterChangeFloor', onChange);
     hook.on('afterBattle', afterBattle);
 
@@ -168,7 +168,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-    const hook = Mota.require('var', 'hook');
+    const { hook } = Mota.require('@user/data-base');
     hook.off('afterChangeFloor', onChange);
     hook.off('afterBattle', afterBattle);
 });

@@ -14,7 +14,7 @@ import { mainUi } from '@motajs/legacy-ui';
 import { gameKey } from '@motajs/system-action';
 import { generateKeyboardEvent } from '@motajs/system-action';
 import { getVitualKeyOnce } from '@motajs/legacy-ui';
-import { getAllSavesData, getSaveData } from '@/module/utils';
+import { getAllSavesData, getSaveData } from '../../utils';
 
 export interface SettingsProps extends Partial<ChoicesProps>, UIComponentProps {
     loc: ElementLocator;
@@ -410,7 +410,9 @@ export const DownloadSaveSelect = defineComponent<SettingsProps>(props => {
                         { text: '请等待处理完毕' }
                     );
                     core.download(
-                        `${core.firstData.name}_${core.formatDate2(new Date())}.h5save`,
+                        `${core.firstData.name}_${core.formatDate2(
+                            new Date()
+                        )}.h5save`,
                         data
                     );
                 }
@@ -426,7 +428,9 @@ export const DownloadSaveSelect = defineComponent<SettingsProps>(props => {
                 if (confirm) {
                     const data = await getSaveData(core.saves.saveIndex);
                     core.download(
-                        `${core.firstData.name}_${core.formatDate2(new Date())}.h5save`,
+                        `${core.firstData.name}_${core.formatDate2(
+                            new Date()
+                        )}.h5save`,
                         data
                     );
                 }

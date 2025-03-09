@@ -529,7 +529,7 @@ export function loadDefaultResource() {
         const res = LoadTask.add('byte', `byte/project/sounds/${v}`);
         Mota.r(() => {
             res.once('load', res => {
-                const { soundPlayer } = Mota.require('module', 'Audio');
+                const { soundPlayer } = Mota.require('@user/client-modules');
                 soundPlayer.add(v, res.resource!);
             });
         });
@@ -548,7 +548,7 @@ export function loadDefaultResource() {
         const res = LoadTask.add('image', `image/project/autotiles/${v}.png`);
         res.once('load', res => {
             autotiles[v as AllIdsOf<'autotile'>] = res.resource;
-            const loading = Mota.require('var', 'loading');
+            const { loading } = Mota.require('@user/data-base');
             loading.addAutotileLoaded();
             loading.onAutotileLoaded(autotiles);
             core.material.images.autotile[v as AllIdsOf<'autotile'>] =
@@ -675,7 +675,7 @@ export async function loadCompressedResource() {
                             autotiles[
                                 name.slice(0, -4) as AllIdsOf<'autotile'>
                             ] = image;
-                            const loading = Mota.require('var', 'loading');
+                            const { loading } = Mota.require('@user/data-base');
                             loading.addAutotileLoaded();
                             loading.onAutotileLoaded(autotiles);
                             core.material.images.autotile[
@@ -717,8 +717,10 @@ export async function loadCompressedResource() {
                             new FontFace(name.slice(0, -4), font)
                         );
                     } else if (usage === 'sound') {
-                        const { soundPlayer } = Mota.require('module', 'Audio');
-                        soundPlayer.add(v, value);
+                        const { soundPlayer } = Mota.require(
+                            '@user/client-modules'
+                        );
+                        soundPlayer.add(name as SoundIds, value as Uint8Array);
                     } else if (usage === 'animate') {
                         const ani = value as string;
                         core.material.animates[

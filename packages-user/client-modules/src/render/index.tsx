@@ -3,7 +3,7 @@ import { defineComponent } from 'vue';
 import { UIController } from '@motajs/system-ui';
 import { mainSceneUI } from './ui/main';
 import { MAIN_HEIGHT, MAIN_WIDTH } from './shared';
-import { TextboxStore } from './components';
+import { hook } from '@user/data-base';
 
 export function create() {
     const main = new MotaRenderer();
@@ -23,20 +23,16 @@ export function create() {
     main.hide();
     createApp(App).mount(main);
 
-    Mota.require('var', 'hook').on('reset', () => {
+    hook.on('reset', () => {
         main.show();
     });
 
-    Mota.require('var', 'hook').on('restart', () => {
+    hook.on('restart', () => {
         main.hide();
     });
 
     console.log(main);
 }
-
-Mota.register('module', 'MainUI', {
-    TextboxStore
-});
 
 export * from './components';
 export * from './ui';

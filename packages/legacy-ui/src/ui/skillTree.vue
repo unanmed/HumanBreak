@@ -87,32 +87,31 @@ import { sleep } from 'mutate-animate';
 import { gameKey } from '@motajs/system-action';
 import { GameUi } from '../controller';
 import { mainUi } from '../preset/ui';
-import type { Chapter } from '@/plugin/game/skillTree';
 
 const props = defineProps<{
     num: number;
     ui: GameUi;
 }>();
 
-const skillTree = Mota.Plugin.require('skillTree_g');
+const skillTree = Mota.require('@user/legacy-plugin-data');
 
 let canvas: HTMLCanvasElement;
 let ctx: CanvasRenderingContext2D;
-
-const selected = ref(0);
-const chapter = ref<Chapter>('chapter1');
-const update = ref(false);
 
 const chapterDict = {
     chapter1: '第一章',
     chapter2: '第二章'
 };
 
+const selected = ref(0);
+const chapter = ref<keyof typeof chapterDict>('chapter1');
+const update = ref(false);
+
 flags.skillTree ??= 0;
 
-const s = Mota.Plugin.require('skillTree_g').skills;
+const s = skillTree.skills;
 
-const chapterList = Object.keys(s) as Chapter[];
+const chapterList = Object.keys(s) as (keyof typeof chapterDict)[];
 
 selected.value = s[chapterList[flags.skillTree]][0].index;
 chapter.value = chapterList[flags.skillTree];
