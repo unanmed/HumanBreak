@@ -26,7 +26,7 @@ lang: zh-CN
 -   [@motajs/system](../api/motajs-system)
 -   [@motajs/system-action](../api/motajs-system-action)
 -   [@motajs/system-ui](../api/motajs-system-ui)
--   [@motajs/types](../api/types)
+-   [@motajs/types](../api/motajs-types)
 -   [@user/client-modules](../api/user-client-modules)
 -   [@user/data-base](../api/user-data-base)
 -   [@user/data-fallback](../api/user-data-fallback)
@@ -97,13 +97,11 @@ hook.on('afterBattle', enemy => {
 
     1. 加载渲染端入口
     2. 加载数据端入口
-    3. 并行初始化数据端，写入 `Mota` 全局变量
-    4. 初始化完毕后执行 `loading.emit('dataRegistered')` 钩子
-    5. 并行初始化渲染端
-    6. 初始化完毕后执行 `loading.emit('clientRegistered')` 钩子
-    7. 二者都初始化完毕后执行 `loading.emit('registered')` 钩子
-    8. 执行数据端各个模块的初始化函数
-    9. 执行渲染段各个模块的初始化函数
+    3. 并行初始化数据端与渲染端，在数据端写入 `Mota` 全局变量
+    4. 数据端初始化完毕后执行 `loading.emit('dataRegistered')` 钩子，渲染端初始化完毕后执行 `loading.emit('clientRegistered')` 钩子
+    5. 二者都初始化完毕后执行 `loading.emit('registered')` 钩子
+    6. 执行数据端各个模块的初始化函数
+    7. 执行渲染端各个模块的初始化函数
 
 4. 如果是录像验证中：
 
@@ -120,6 +118,10 @@ hook.on('afterBattle', enemy => {
 10. 自动元件加载完毕后执行 `loading.emit('autotileLoaded')` 钩子
 11. 资源加载完毕后执行 `loading.emit('loaded')` 钩子
 12. 进入标题界面
+
+使用流程图表示如下：
+
+![加载流程图](./img/mermaid-diagram-2025-03-12-210212.svg)
 
 ## 函数重写
 
@@ -146,7 +148,7 @@ export function patchMyFunctions() {
 }
 ```
 
-然后，我们找到 `client-modules` 文件夹下的 `index.ts` 文件，然后在 `create` 函数中调用 `patchMyFunctions`，这样我们的函数重写就完成了。
+然后，我们找到 `client-modules` 文件夹下的 `index.ts` 文件，然后在 `create` 函数中引入并调用 `patchMyFunctions`，这样我们的函数重写就完成了。**注意**，如果两个重写冲突，会在控制台弹出警告，并使用最后一次重写的内容。
 
 ::: warning
 **注意**，在渲染端重写的函数在录像验证中将无效，因为录像验证不会执行任何渲染端内容！
@@ -155,3 +157,32 @@ export function patchMyFunctions() {
 ## 目录结构
 
 我们建议每个文件夹中都有一个 `index.ts` 文件，将本文件夹中的其他文件经由此文件导出，这样方便管理，同时结构清晰。可以参考 `packages-user/client-modules` 文件夹中是如何做的。
+
+## ES6 模块化语法
+
+我们推荐使用 ES6 模块化语法来编写代码，这会大大提高开发效率。下面来简单说明一下模块化语法的用法，首先是引入其他模块：
+
+```ts
+import { Patch } from '@motajs/legacy-common'; // 从样板库中引入接口
+// 引入本地文件，注意不要填写后缀名，只可以在同一个 packages-user 子文件夹下使用
+// 不可以跨文件夹使用，例如 packages-user/client-modules 就不能直接引用 packages-user/data-base 文件夹
+// 需要使用 import { ... } from '@user/data-base'
+import { patchMyFunctions } from './override';
+```
+
+然后是从当前模块导出内容：
+
+```ts
+// 导出函数
+export function myFunc() { ... }
+// 导出变量/常量
+export const num = 100;
+// 导出类
+export class MyClass { ... }
+// 从另一个模块中导出全部内容，即将另一个模块的内容转发为当前模块
+export * from './xxx';
+```
+
+更多模块化语法内容请查看[这个文档](https://h5mota.com/bbs/thread/?tid=1018&p=3#p33)
+
+与 TypeScript 相关语法请查看[这个文档](https://h5mota.com/bbs/thread/?tid=1018&p=3#p41)

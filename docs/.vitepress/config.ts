@@ -5,12 +5,17 @@ export default defineConfig({
     title: 'HTML5 魔塔样板 V2.B',
     description: 'HTML5 魔塔样板 V2.B 帮助文档',
     base: '/_docs/',
+    markdown: {
+        math: true
+    },
     themeConfig: {
         // https://vitepress.dev/reference/default-theme-config
+        outline: [2, 3],
         nav: [
             { text: '主页', link: '/' },
             { text: '指南', link: '/guide/diff' },
-            { text: 'API', link: '/api/' }
+            { text: 'API', link: '/api/' },
+            { text: '错误代码', link: '/logger/' }
         ],
         sidebar: {
             '/guide/': [
@@ -18,7 +23,12 @@ export default defineConfig({
                     text: '深度指南',
                     items: [
                         { text: '差异说明', link: '/guide/diff' },
-                        { text: '系统说明', link: '/guide/system' }
+                        { text: '系统说明', link: '/guide/system' },
+                        { text: 'UI 编写', link: '/guide/ui' },
+                        { text: 'UI 优化', link: '/guide/ui-perf' },
+                        { text: 'UI 系统', link: '/guide/ui-system' },
+                        { text: 'UI 元素', link: '/guide/ui-elements' },
+                        { text: 'UI 常见问题', link: '/guide/ui-faq' }
                     ]
                 }
             ]
