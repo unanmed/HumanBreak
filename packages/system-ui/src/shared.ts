@@ -1,5 +1,11 @@
 import { Props } from '@motajs/render';
-import { DefineComponent, DefineSetupFnComponent, Ref, ShallowRef } from 'vue';
+import {
+    DefineComponent,
+    DefineSetupFnComponent,
+    Ref,
+    ShallowRef,
+    VNode
+} from 'vue';
 
 export type UIComponent = DefineSetupFnComponent<any> | DefineComponent;
 
@@ -51,6 +57,11 @@ export interface IUIMountable {
      * @param ins 要显示的 UI 实例
      */
     show(ins: IUIInstance<UIComponent>): void;
+
+    /**
+     * 渲染这个 UI，可以直接嵌入渲染树中
+     */
+    render(): VNode;
 
     /**
      * 隐藏背景 UI

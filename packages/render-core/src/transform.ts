@@ -43,29 +43,31 @@ export class Transform {
     /**
      * 修改缩放，叠加关系
      */
-    scale(x: number, y: number = x) {
+    scale(x: number, y: number = x): this {
         mat3.scale(this.mat, this.mat, [x, y]);
         this.scaleX *= x;
         this.scaleY *= y;
         this.modified = true;
         this.bindedObject?.updateTransform?.();
+        return this;
     }
 
     /**
      * 移动，叠加关系
      */
-    translate(x: number, y: number) {
+    translate(x: number, y: number): this {
         mat3.translate(this.mat, this.mat, [x, y]);
         this.x += x;
         this.y += y;
         this.modified = true;
         this.bindedObject?.updateTransform?.();
+        return this;
     }
 
     /**
      * 旋转，叠加关系
      */
-    rotate(rad: number) {
+    rotate(rad: number): this {
         mat3.rotate(this.mat, this.mat, rad);
         this.rad += rad;
         if (this.rad >= Math.PI * 2) {
@@ -74,38 +76,42 @@ export class Transform {
         }
         this.modified = true;
         this.bindedObject?.updateTransform?.();
+        return this;
     }
 
     /**
      * 设置缩放，非叠加关系
      */
-    setScale(x: number, y: number = x) {
+    setScale(x: number, y: number = x): this {
         mat3.scale(this.mat, this.mat, [x / this.scaleX, y / this.scaleY]);
         this.scaleX = x;
         this.scaleY = y;
         this.modified = true;
         this.bindedObject?.updateTransform?.();
+        return this;
     }
 
     /**
      * 设置位置，非叠加关系
      */
-    setTranslate(x: number, y: number) {
+    setTranslate(x: number, y: number): this {
         mat3.translate(this.mat, this.mat, [x - this.x, y - this.y]);
         this.x = x;
         this.y = y;
         this.modified = true;
         this.bindedObject?.updateTransform?.();
+        return this;
     }
 
     /**
      * 设置旋转，非叠加关系
      */
-    setRotate(rad: number) {
+    setRotate(rad: number): this {
         mat3.rotate(this.mat, this.mat, rad - this.rad);
         this.rad = rad;
         this.modified = true;
         this.bindedObject?.updateTransform?.();
+        return this;
     }
 
     /**
@@ -124,7 +130,7 @@ export class Transform {
         d: number,
         e: number,
         f: number
-    ) {
+    ): this {
         mat3.multiply(
             this.mat,
             this.mat,
@@ -132,6 +138,7 @@ export class Transform {
         );
         this.calAttributes();
         this.bindedObject?.updateTransform?.();
+        return this;
     }
 
     /**
@@ -150,10 +157,11 @@ export class Transform {
         d: number,
         e: number,
         f: number
-    ) {
+    ): this {
         mat3.set(this.mat, a, b, 0, c, d, 0, e, f, 1);
         this.calAttributes();
         this.bindedObject?.updateTransform?.();
+        return this;
     }
 
     /**

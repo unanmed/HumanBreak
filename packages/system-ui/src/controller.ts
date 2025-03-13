@@ -98,7 +98,7 @@ export class UIController
 
     /** 当前是否显示 UI */
     get active() {
-        return this.showBack.value;
+        return this.sysShowBack.value;
     }
 
     /** 自定义显示模式下的配置信息 */
@@ -123,9 +123,6 @@ export class UIController
         }
     }
 
-    /**
-     * 渲染这个 UI
-     */
     render(): VNode {
         return h(UIContainer, { controller: this });
     }
@@ -134,8 +131,9 @@ export class UIController
      * 设置背景 UI
      * @param back 这个 UI 控制器的背景 UI
      */
-    setBackground(back: IGameUI) {
+    setBackground<T extends UIComponent>(back: IGameUI<T>, vBind: UIProps<T>) {
         this.background = back;
+        this.backIns.value = new UIInstance(back, vBind, true);
     }
 
     /**

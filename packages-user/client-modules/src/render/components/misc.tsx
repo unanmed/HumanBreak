@@ -581,3 +581,4 @@ export function waitbox<T>(
 }
 
 export const WaitBoxUI = new GameUI('wait-box', WaitBox);
+export const BackgroundUI = new GameUI('background', Background);

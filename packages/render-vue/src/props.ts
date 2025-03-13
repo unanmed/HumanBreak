@@ -88,12 +88,14 @@ export interface BaseProps {
 }
 
 export interface SpriteProps extends BaseProps {
+    /** 自定义的渲染函数 */
     render?: RenderFunction;
 }
 
 export interface ContainerProps extends BaseProps {}
 
 export interface ConatinerCustomProps extends ContainerProps {
+    /** 自定义容器渲染函数 */
     render?: CustomContainerRenderFn;
 }
 
@@ -102,14 +104,20 @@ export interface GL2Props extends BaseProps {}
 export interface ShaderProps extends BaseProps {}
 
 export interface TextProps extends BaseProps {
+    /** 要渲染的文字 */
     text?: string;
+    /** 文字的填充样式 */
     fillStyle?: CanvasStyle;
+    /** 文字的描边样式 */
     strokeStyle?: CanvasStyle;
+    /** 文字的字体 */
     font?: Font;
+    /** 文字的描边粗细 */
     strokeWidth?: number;
 }
 
 export interface ImageProps extends BaseProps {
+    /** 图片对象 */
     image: CanvasImageSource;
 }
 
@@ -173,7 +181,7 @@ export interface CirclesProps extends GraphicPropsBase {
     start?: number;
     end?: number;
     /**
-     * 圆属性参数，可以填 `[半径，起始角度，终止角度]`，是 radius, start, end 的简写，
+     * 圆属性参数，可以填 `[圆心 x 坐标，圆心 y 坐标，半径，起始角度，终止角度]`，是 x, y, radius, start, end 的简写，
      * 其中半径可选，后两项要么都填，要么都不填
      */
     circle?: CircleParams;
@@ -185,7 +193,7 @@ export interface EllipseProps extends GraphicPropsBase {
     start?: number;
     end?: number;
     /**
-     * 椭圆属性参数，可以填 `[x半径，y半径，起始角度，终止角度]`，是 radiusX, radiusY, start, end 的简写，
+     * 椭圆属性参数，可以填 `[圆心 x 坐标，圆心 y 坐标，x半径，y半径，起始角度，终止角度]`，是 x, y, radiusX, radiusY, start, end 的简写，
      * 其中前两项和后两项要么都填，要么都不填
      */
     ellipse?: EllipseParams;
@@ -249,12 +257,17 @@ export interface RectRProps extends GraphicPropsBase {
 }
 
 export interface IconProps extends BaseProps {
-    icon: AllNumbers;
+    /** 图标 id 或数字 */
+    icon: AllNumbers | AllIds;
+    /** 显示图标的第几帧 */
     frame?: number;
+    /** 是否开启动画，开启后 frame 参数无效 */
     animate?: boolean;
 }
 
 export interface WinskinProps extends BaseProps {
+    /** winskin 的图片 id */
     image: ImageIds;
+    /** 边框大小 */
     borderSize?: number;
 }

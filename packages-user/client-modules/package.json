@@ -1,8 +1,18 @@
 {
     "name": "@user/client-modules",
     "dependencies": {
+        "@motajs/client-base": "workspace:*",
+        "@motajs/common": "workspace:*",
         "@motajs/render": "workspace:*",
+        "@motajs/render-core": "workspace:*",
+        "@motajs/legacy-common": "workspace:*",
         "@motajs/legacy-ui": "workspace:*",
-        "@user/legacy-plugin-client": "workspace:*"
+        "@motajs/types": "workspace:*",
+        "@motajs/system-action": "workspace:*",
+        "@motajs/system-ui": "workspace:*",
+        "@user/data-base": "workspace:*",
+        "@user/data-state": "workspace:*",
+        "@user/legacy-plugin-client": "workspace:*",
+        "@user/legacy-plugin-data": "workspace:*"
     }
 }

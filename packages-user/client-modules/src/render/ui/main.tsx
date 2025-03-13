@@ -13,7 +13,7 @@ import {
 import { WeatherController } from '../../weather';
 import { defineComponent, onMounted, reactive, ref } from 'vue';
 import { Textbox, Tip } from '../components';
-import { GameUI, UIController } from '@motajs/system-ui';
+import { GameUI } from '@motajs/system-ui';
 import {
     MAIN_HEIGHT,
     MAIN_WIDTH,
@@ -38,6 +38,7 @@ import { LayerGroupFilter } from '../legacy/gameCanvas';
 import { LayerGroupHalo } from '../legacy/halo';
 import { FloorChange } from '../legacy/fallback';
 import { PopText } from '../legacy/pop';
+import { mainUIController } from './controller';
 
 const MainScene = defineComponent(() => {
     const layerGroupExtends: ILayerGroupRenderExtends[] = [
@@ -235,4 +236,3 @@ const MainScene = defineComponent(() => {
 });
 
 export const mainSceneUI = new GameUI('main-scene', MainScene);
-export const mainUIController = new UIController('main-ui');

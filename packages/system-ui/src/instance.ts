@@ -1,18 +1,8 @@
 import { Props } from '@motajs/render';
 import { IGameUI, IUIInstance, UIComponent, UIProps } from './shared';
-import EventEmitter from 'eventemitter3';
 import { markRaw, mergeProps } from 'vue';
 
-interface UIInstanceEvent {
-    hide: [];
-    show: [];
-    close: [];
-}
-
-export class UIInstance<C extends UIComponent>
-    extends EventEmitter<UIInstanceEvent>
-    implements IUIInstance<C>
-{
+export class UIInstance<C extends UIComponent> implements IUIInstance<C> {
     private static counter: number = 0;
 
     readonly key: number = UIInstance.counter++;
@@ -24,7 +14,6 @@ export class UIInstance<C extends UIComponent>
         public vBind: UIProps<C>,
         public readonly alwaysShow: boolean = false
     ) {
-        super();
         this.ui = markRaw(ui);
     }
 
