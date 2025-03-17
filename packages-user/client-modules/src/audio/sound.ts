@@ -93,8 +93,10 @@ export class SoundPlayer<
         route.addEffect([stereo, this.gain]);
         this.player.addRoute(`sounds.${soundNum}`, route);
         route.play();
+        // 清理垃圾
         source.output.addEventListener('ended', () => {
             this.playing.delete(soundNum);
+            this.player.removeRoute(`sounds.${soundNum}`);
         });
         this.playing.add(soundNum);
         return soundNum;

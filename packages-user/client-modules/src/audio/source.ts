@@ -146,7 +146,7 @@ export class AudioStreamSource extends AudioSource implements IStreamReader {
                 logger.error(
                     25,
                     [...toCheck]
-                        .map(v => v.toString().padStart(2, '0'))
+                        .map(v => v.toString(16).padStart(2, '0'))
                         .join(' ')
                         .toUpperCase()
                 );
