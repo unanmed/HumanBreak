@@ -150,9 +150,11 @@ export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
 
     /**
      * 创建一个延迟效果器
+     * ```txt
      *             |-----------|
      * Input ----> | DelayNode | ----> Output
      *             |-----------|
+     * ```
      */
     createDelay() {
         return new DelayEffect(this.ac);
@@ -259,7 +261,7 @@ export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
     resume(id: string) {
         const route = this.getRoute(id);
         if (!route) {
-            logger.warn(53, 'play', id);
+            logger.warn(53, 'resume', id);
             return;
         }
         route.resume();
