@@ -65,6 +65,255 @@ export default defineConfig({
                         }
                     ]
                 }
+            ],
+            '/api/': [
+                {
+                    text: 'API 列表',
+                    items: [
+                        { text: '目录', link: '/api/' },
+                        {
+                            text: '@motajs/client',
+                            collapsed: true,
+                            items: [
+                                { text: '目录', link: '/api/motajs-client/' }
+                            ]
+                        },
+                        {
+                            text: '@motajs/client-base',
+                            collapsed: true,
+                            items: [
+                                {
+                                    text: '目录',
+                                    link: '/api/motajs-client-base/'
+                                },
+                                {
+                                    text: 'KeyCode',
+                                    link: '/api/motajs-client-base/KeyCode'
+                                }
+                            ]
+                        },
+                        {
+                            text: '@motajs/common',
+                            collapsed: true,
+                            items: [
+                                { text: '目录', link: '/api/motajs-common/' },
+                                {
+                                    text: '函数',
+                                    link: '/api/motajs-common/functions'
+                                },
+                                {
+                                    text: 'Logger',
+                                    link: '/api/motajs-common/Logger'
+                                }
+                            ]
+                        },
+                        {
+                            text: '@motajs/legacy-client',
+                            collapsed: true,
+                            items: [
+                                {
+                                    text: '目录',
+                                    link: '/api/motajs-legacy-client/'
+                                }
+                            ]
+                        },
+                        {
+                            text: '@motajs/legacy-common',
+                            collapsed: true,
+                            items: [
+                                {
+                                    text: '目录',
+                                    link: '/api/motajs-legacy-common/'
+                                }
+                            ]
+                        },
+                        {
+                            text: '@motajs/legacy-system',
+                            collapsed: true,
+                            items: [
+                                {
+                                    text: '目录',
+                                    link: '/api/motajs-legacy-system/'
+                                }
+                            ]
+                        },
+                        {
+                            text: '@motajs/legacy-ui',
+                            collapsed: true,
+                            items: [
+                                { text: '目录', link: '/api/motajs-legacy-ui/' }
+                            ]
+                        },
+                        {
+                            text: '@motajs/render',
+                            collapsed: true,
+                            items: [
+                                { text: '目录', link: '/api/motajs-render/' }
+                            ]
+                        },
+                        {
+                            text: '@motajs/render-core',
+                            collapsed: true,
+                            items: [
+                                {
+                                    text: '目录',
+                                    link: '/api/motajs-render-core/'
+                                }
+                            ]
+                        },
+                        {
+                            text: '@motajs/render-elements',
+                            collapsed: true,
+                            items: [
+                                {
+                                    text: '目录',
+                                    link: '/api/motajs-render-elements/'
+                                }
+                            ]
+                        },
+                        {
+                            text: '@motajs/render-style',
+                            collapsed: true,
+                            items: [
+                                {
+                                    text: '目录',
+                                    link: '/api/motajs-render-style/'
+                                }
+                            ]
+                        },
+                        {
+                            text: '@motajs/render-vue',
+                            collapsed: true,
+                            items: [
+                                {
+                                    text: '目录',
+                                    link: '/api/motajs-render-vue/'
+                                }
+                            ]
+                        },
+                        {
+                            text: '@motajs/system',
+                            collapsed: true,
+                            items: [
+                                { text: '目录', link: '/api/motajs-system/' }
+                            ]
+                        },
+                        {
+                            text: '@motajs/system-action',
+                            collapsed: true,
+                            items: [
+                                {
+                                    text: '目录',
+                                    link: '/api/motajs-system-action/'
+                                }
+                            ]
+                        },
+                        {
+                            text: '@motajs/system-ui',
+                            collapsed: true,
+                            items: [
+                                { text: '目录', link: '/api/motajs-system-ui/' }
+                            ]
+                        },
+                        {
+                            text: '@motajs/types',
+                            collapsed: true,
+                            items: [
+                                { text: '目录', link: '/api/motajs-types/' }
+                            ]
+                        },
+                        {
+                            text: '@user/client-modules',
+                            collapsed: true,
+                            items: [
+                                {
+                                    text: '目录',
+                                    link: '/api/user-client-modules/'
+                                }
+                            ]
+                        },
+                        {
+                            text: '@user/data-base',
+                            collapsed: true,
+                            items: [
+                                {
+                                    text: '目录',
+                                    link: '/api/user-data-base/'
+                                }
+                            ]
+                        },
+                        {
+                            text: '@user/data-fallback',
+                            collapsed: true,
+                            items: [
+                                {
+                                    text: '目录',
+                                    link: '/api/user-data-fallback/'
+                                }
+                            ]
+                        },
+                        {
+                            text: '@user/data-state',
+                            collapsed: true,
+                            items: [
+                                {
+                                    text: '目录',
+                                    link: '/api/user-data-state/'
+                                }
+                            ]
+                        },
+                        {
+                            text: '@user/data-utils',
+                            collapsed: true,
+                            items: [
+                                {
+                                    text: '目录',
+                                    link: '/api/user-data-utils/'
+                                }
+                            ]
+                        },
+                        {
+                            text: '@user/entry-client',
+                            collapsed: true,
+                            items: [
+                                {
+                                    text: '目录',
+                                    link: '/api/user-entry-client/'
+                                }
+                            ]
+                        },
+                        {
+                            text: '@user/entry-data',
+                            collapsed: true,
+                            items: [
+                                {
+                                    text: '目录',
+                                    link: '/api/user-entry-data/'
+                                }
+                            ]
+                        },
+                        {
+                            text: '@user/legacy-plugin-client',
+                            collapsed: true,
+                            items: [
+                                {
+                                    text: '目录',
+                                    link: '/api/user-legacy-plugin-client/'
+                                }
+                            ]
+                        },
+                        {
+                            text: '@user/legacy-plugin-data',
+                            collapsed: true,
+                            items: [
+                                {
+                                    text: '目录',
+                                    link: '/api/user-legacy-plugin-data/'
+                                }
+                            ]
+                        }
+                    ]
+                }
             ]
         },
         socialLinks: [
