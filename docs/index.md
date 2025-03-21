@@ -8,7 +8,7 @@ hero:
     tagline: HTML5魔塔样板从 2.x 到 3.0 的过渡版本
     actions:
         - theme: brand
-          text: 快速开始
+          text: 深度指南
           link: /guide/diff
         - theme: alt
           text: API列表

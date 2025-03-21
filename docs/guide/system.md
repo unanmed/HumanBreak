@@ -10,32 +10,32 @@ lang: zh-CN
 
 2.B 样板现在已经迁移至了 monorepo，将代码模块化，共分为 20 余个模块，每个模块的具体内容可以参考 API 文档，模块列表如下：
 
--   [@motajs/client](../api/motajs-client)
--   [@motajs/client-base](../api/motajs-client-base)
--   [@motajs/common](../api/motajs-common)
--   [@motajs/legacy-client](../api/motajs-legacy-client)
--   [@motajs/legacy-common](../api/motajs-legacy-common)
--   [@motajs/legacy-data](../api/motajs-legacy-data)
--   [@motajs/legacy-system](../api/motajs-legacy-system)
--   [@motajs/legacy-ui](../api/motajs-legacy-ui)
--   [@motajs/render](../api/motajs-render)
--   [@motajs/render-core](../api/motajs-render-core)
--   [@motajs/render-elements](../api/motajs-render-elements)
--   [@motajs/render-style](../api/motajs-render-style)
--   [@motajs/render-vue](../api/motajs-render-vue)
--   [@motajs/system](../api/motajs-system)
--   [@motajs/system-action](../api/motajs-system-action)
--   [@motajs/system-ui](../api/motajs-system-ui)
--   [@motajs/types](../api/motajs-types)
--   [@user/client-modules](../api/user-client-modules)
--   [@user/data-base](../api/user-data-base)
--   [@user/data-fallback](../api/user-data-fallback)
--   [@user/data-state](../api/user-data-state)
--   [@user/data-utils](../api/user-data-utils)
--   [@user/entry-client](../api/user-entry-client)
--   [@user/entry-data](../api/user-entry-data)
--   [@user/legacy-plugin-client](../api/user-legacy-plugin-client)
--   [@user/legacy-plugin-data](../api/user-legacy-plugin-data)
+-   [@motajs/client](../api/motajs-client) 渲染层代码
+-   [@motajs/client-base](../api/motajs-client-base) 渲染层底层代码
+-   [@motajs/common](../api/motajs-common) 渲染层和数据层通用代码
+-   [@motajs/legacy-client](../api/motajs-legacy-client) 遗留渲染层代码
+-   [@motajs/legacy-common](../api/motajs-legacy-common) 遗留通用代码
+-   [@motajs/legacy-data](../api/motajs-legacy-data) 遗留数据层代码
+-   [@motajs/legacy-system](../api/motajs-legacy-system) 遗留渲染层系统代码
+-   [@motajs/legacy-ui](../api/motajs-legacy-ui) 遗留 UI 相关代码
+-   [@motajs/render](../api/motajs-render) 渲染系统代码
+-   [@motajs/render-core](../api/motajs-render-core) 渲染系统核心代码
+-   [@motajs/render-elements](../api/motajs-render-elements) 渲染系统内置元素代码
+-   [@motajs/render-style](../api/motajs-render-style) 渲染系统样式代码
+-   [@motajs/render-vue](../api/motajs-render-vue) 渲染系统 vue 支持代码
+-   [@motajs/system](../api/motajs-system) 渲染层系统代码
+-   [@motajs/system-action](../api/motajs-system-action) 渲染层交互系统代码
+-   [@motajs/system-ui](../api/motajs-system-ui) 渲染层 UI 系统代码
+-   [@motajs/types](../api/motajs-types) 渲染层类型代码
+-   [@user/client-modules](../api/user-client-modules) 用户渲染层主要代码
+-   [@user/data-base](../api/user-data-base) 用户数据层底层代码
+-   [@user/data-fallback](../api/user-data-fallback) 用户数据层向后兼容代码
+-   [@user/data-state](../api/user-data-state) 用户数据层状态代码
+-   [@user/data-utils](../api/user-data-utils) 用户数据层工具代码
+-   [@user/entry-client](../api/user-entry-client) 用户渲染层入口
+-   [@user/entry-data](../api/user-entry-data) 用户数据层入口
+-   [@user/legacy-plugin-client](../api/user-legacy-plugin-client) 用户遗留渲染层代码
+-   [@user/legacy-plugin-data](../api/user-legacy-plugin-data) 用户遗留数据层代码
 
 ## Mota 全局变量
 
@@ -169,6 +169,10 @@ import { Patch } from '@motajs/legacy-common'; // 从样板库中引入接口
 // 需要使用 import { ... } from '@user/data-base'
 import { patchMyFunctions } from './override';
 ```
+
+:::warning
+注意，在之后的所有文档示例中，都会使用 `import xxx from '@xxx/xxx'` 的绝对路径形式作为示例，而不会使用相对路径，自己编写代码时请注意要引入的内容是否在当前模块（当前包）中，如果是，请使用相对路径，否则请使用绝对路径。
+:::
 
 然后是从当前模块导出内容：
 

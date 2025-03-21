@@ -12,7 +12,6 @@
         "@motajs/system-ui": "workspace:*",
         "@user/data-base": "workspace:*",
         "@user/data-state": "workspace:*",
-        "@user/legacy-plugin-client": "workspace:*",
         "@user/legacy-plugin-data": "workspace:*"
     }
 }

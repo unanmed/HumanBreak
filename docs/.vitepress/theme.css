@@ -1,0 +1,7 @@
+.mermaid {
+    max-width: 600px; /* 限制最大宽度 */
+    max-height: 400px; /* 限制最大高度 */
+    overflow: auto; /* 允许滚动以防止超出 */
+    display: block;
+    margin: 0 auto;
+}
