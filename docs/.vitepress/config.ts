@@ -75,7 +75,7 @@ export default defineConfig({
                             text: '@motajs/client',
                             collapsed: true,
                             items: [
-                                { text: '目录', link: '/api/motajs-client/' }
+                                { text: '主页', link: '/api/motajs-client/' }
                             ]
                         },
                         {
@@ -83,7 +83,7 @@ export default defineConfig({
                             collapsed: true,
                             items: [
                                 {
-                                    text: '目录',
+                                    text: '主页',
                                     link: '/api/motajs-client-base/'
                                 },
                                 {
@@ -96,7 +96,7 @@ export default defineConfig({
                             text: '@motajs/common',
                             collapsed: true,
                             items: [
-                                { text: '目录', link: '/api/motajs-common/' },
+                                { text: '主页', link: '/api/motajs-common/' },
                                 {
                                     text: '函数',
                                     link: '/api/motajs-common/functions'
@@ -112,7 +112,7 @@ export default defineConfig({
                             collapsed: true,
                             items: [
                                 {
-                                    text: '目录',
+                                    text: '主页',
                                     link: '/api/motajs-legacy-client/'
                                 }
                             ]
@@ -122,7 +122,7 @@ export default defineConfig({
                             collapsed: true,
                             items: [
                                 {
-                                    text: '目录',
+                                    text: '主页',
                                     link: '/api/motajs-legacy-common/'
                                 }
                             ]
@@ -132,7 +132,7 @@ export default defineConfig({
                             collapsed: true,
                             items: [
                                 {
-                                    text: '目录',
+                                    text: '主页',
                                     link: '/api/motajs-legacy-system/'
                                 }
                             ]
@@ -141,14 +141,14 @@ export default defineConfig({
                             text: '@motajs/legacy-ui',
                             collapsed: true,
                             items: [
-                                { text: '目录', link: '/api/motajs-legacy-ui/' }
+                                { text: '主页', link: '/api/motajs-legacy-ui/' }
                             ]
                         },
                         {
                             text: '@motajs/render',
                             collapsed: true,
                             items: [
-                                { text: '目录', link: '/api/motajs-render/' }
+                                { text: '主页', link: '/api/motajs-render/' }
                             ]
                         },
                         {
@@ -156,8 +156,64 @@ export default defineConfig({
                             collapsed: true,
                             items: [
                                 {
-                                    text: '目录',
+                                    text: '主页',
                                     link: '/api/motajs-render-core/'
+                                },
+                                {
+                                    text: '函数',
+                                    link: '/api/motajs-render-core/functions'
+                                },
+                                {
+                                    text: '交互事件',
+                                    link: '/api/motajs-render-core/Event'
+                                },
+                                {
+                                    text: 'MotaOffscreenCanvas2D',
+                                    link: '/api/motajs-render-core/MotaOffscreenCanvas2D'
+                                },
+                                {
+                                    text: 'Transform',
+                                    link: '/api/motajs-render-core/Transform'
+                                },
+                                {
+                                    text: 'RenderItem',
+                                    link: '/api/motajs-render-core/RenderItem'
+                                },
+                                {
+                                    text: 'Container',
+                                    link: '/api/motajs-render-core/Container'
+                                },
+                                {
+                                    text: 'ContainerCustom',
+                                    link: '/api/motajs-render-core/ContainerCustom'
+                                },
+                                {
+                                    text: 'Sprite',
+                                    link: '/api/motajs-render-core/Sprite'
+                                },
+                                {
+                                    text: 'MotaRenderer',
+                                    link: '/api/motajs-render-core/MotaRenderer'
+                                },
+                                {
+                                    text: 'GL2',
+                                    link: '/api/motajs-render-core/GL2'
+                                },
+                                {
+                                    text: 'GL2Program',
+                                    link: '/api/motajs-render-core/GL2Program'
+                                },
+                                {
+                                    text: 'RenderAdapter',
+                                    link: '/api/motajs-render-core/RenderAdapter'
+                                },
+                                {
+                                    text: 'Shader',
+                                    link: '/api/motajs-render-core/Shader'
+                                },
+                                {
+                                    text: 'ShaderProgram',
+                                    link: '/api/motajs-render-core/ShaderProgram'
                                 }
                             ]
                         },
@@ -166,7 +222,7 @@ export default defineConfig({
                             collapsed: true,
                             items: [
                                 {
-                                    text: '目录',
+                                    text: '主页',
                                     link: '/api/motajs-render-elements/'
                                 }
                             ]
@@ -176,7 +232,7 @@ export default defineConfig({
                             collapsed: true,
                             items: [
                                 {
-                                    text: '目录',
+                                    text: '主页',
                                     link: '/api/motajs-render-style/'
                                 }
                             ]
@@ -186,7 +242,7 @@ export default defineConfig({
                             collapsed: true,
                             items: [
                                 {
-                                    text: '目录',
+                                    text: '主页',
                                     link: '/api/motajs-render-vue/'
                                 }
                             ]
@@ -195,7 +251,7 @@ export default defineConfig({
                             text: '@motajs/system',
                             collapsed: true,
                             items: [
-                                { text: '目录', link: '/api/motajs-system/' }
+                                { text: '主页', link: '/api/motajs-system/' }
                             ]
                         },
                         {
@@ -203,7 +259,7 @@ export default defineConfig({
                             collapsed: true,
                             items: [
                                 {
-                                    text: '目录',
+                                    text: '主页',
                                     link: '/api/motajs-system-action/'
                                 }
                             ]
@@ -212,14 +268,14 @@ export default defineConfig({
                             text: '@motajs/system-ui',
                             collapsed: true,
                             items: [
-                                { text: '目录', link: '/api/motajs-system-ui/' }
+                                { text: '主页', link: '/api/motajs-system-ui/' }
                             ]
                         },
                         {
                             text: '@motajs/types',
                             collapsed: true,
                             items: [
-                                { text: '目录', link: '/api/motajs-types/' }
+                                { text: '主页', link: '/api/motajs-types/' }
                             ]
                         },
                         {
@@ -227,7 +283,7 @@ export default defineConfig({
                             collapsed: true,
                             items: [
                                 {
-                                    text: '目录',
+                                    text: '主页',
                                     link: '/api/user-client-modules/'
                                 }
                             ]
@@ -237,7 +293,7 @@ export default defineConfig({
                             collapsed: true,
                             items: [
                                 {
-                                    text: '目录',
+                                    text: '主页',
                                     link: '/api/user-data-base/'
                                 }
                             ]
@@ -247,7 +303,7 @@ export default defineConfig({
                             collapsed: true,
                             items: [
                                 {
-                                    text: '目录',
+                                    text: '主页',
                                     link: '/api/user-data-fallback/'
                                 }
                             ]
@@ -257,7 +313,7 @@ export default defineConfig({
                             collapsed: true,
                             items: [
                                 {
-                                    text: '目录',
+                                    text: '主页',
                                     link: '/api/user-data-state/'
                                 }
                             ]
@@ -267,7 +323,7 @@ export default defineConfig({
                             collapsed: true,
                             items: [
                                 {
-                                    text: '目录',
+                                    text: '主页',
                                     link: '/api/user-data-utils/'
                                 }
                             ]
@@ -277,7 +333,7 @@ export default defineConfig({
                             collapsed: true,
                             items: [
                                 {
-                                    text: '目录',
+                                    text: '主页',
                                     link: '/api/user-entry-client/'
                                 }
                             ]
@@ -287,7 +343,7 @@ export default defineConfig({
                             collapsed: true,
                             items: [
                                 {
-                                    text: '目录',
+                                    text: '主页',
                                     link: '/api/user-entry-data/'
                                 }
                             ]
@@ -297,7 +353,7 @@ export default defineConfig({
                             collapsed: true,
                             items: [
                                 {
-                                    text: '目录',
+                                    text: '主页',
                                     link: '/api/user-legacy-plugin-client/'
                                 }
                             ]
@@ -307,7 +363,7 @@ export default defineConfig({
                             collapsed: true,
                             items: [
                                 {
-                                    text: '目录',
+                                    text: '主页',
                                     link: '/api/user-legacy-plugin-data/'
                                 }
                             ]
