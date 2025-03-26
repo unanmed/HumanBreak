@@ -137,7 +137,7 @@ export class BlockCacher<
     }
 
     /**
-     * 清空指定索引的缓存，与 {@link clearCache} 不同的是，这里会直接清空对应索引的缓存，而不是指定分块的缓存（分块->void）
+     * 清空指定索引的缓存，与 {@link clearCache} 不同的是，这里会直接清空对应索引的缓存，而不是指定分块的缓存（元素->void）
      */
     clearCacheByIndex(index: number) {
         const item = this.cache.get(index);
@@ -303,10 +303,7 @@ export interface ICanvasCacheItem extends IBlockCacheable {
 }
 
 export class CanvasCacheItem implements ICanvasCacheItem {
-    constructor(
-        public canvas: MotaOffscreenCanvas2D,
-        public symbol: number
-    ) {}
+    constructor(public canvas: MotaOffscreenCanvas2D, public symbol: number) {}
 
     destroy(): void {
         this.canvas.delete();

@@ -80,7 +80,7 @@ export class Camera extends EventEmitter<CameraEvent> {
         });
 
         const ca = Camera.cameraMap.get(item);
-        if (ca && !ca.enabled) {
+        if (ca && ca.enabled) {
             logger.warn(22);
         }
     }
@@ -371,40 +371,40 @@ interface CameraAnimationBase {
     start: number;
 }
 
-interface TranslateAnimation extends CameraAnimationBase {
+export interface TranslateAnimation extends CameraAnimationBase {
     type: 'translate';
     timing: TimingFn;
     x: number;
     y: number;
 }
 
-interface TranslateAsAnimation extends CameraAnimationBase {
+export interface TranslateAsAnimation extends CameraAnimationBase {
     type: 'translateAs';
     timing: TimingFn<2>;
     time: number;
 }
 
-interface RotateAnimation extends CameraAnimationBase {
+export interface RotateAnimation extends CameraAnimationBase {
     type: 'rotate';
     timing: TimingFn;
     angle: number;
     time: number;
 }
 
-interface ScaleAnimation extends CameraAnimationBase {
+export interface ScaleAnimation extends CameraAnimationBase {
     type: 'scale';
     timing: TimingFn;
     scale: number;
     time: number;
 }
 
-type CameraAnimationData =
+export type CameraAnimationData =
     | TranslateAnimation
     | TranslateAsAnimation
     | RotateAnimation
     | ScaleAnimation;
 
-interface CameraAnimationExecution {
+export interface CameraAnimationExecution {
     data: CameraAnimationData[];
     animation: Animation;
 }
