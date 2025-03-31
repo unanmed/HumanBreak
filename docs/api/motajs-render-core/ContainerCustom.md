@@ -9,6 +9,10 @@
 ```mermaid
 graph LR
     ContainerCustom --> Container --> RenderItem --> EventEmitter
+
+    click Container "./Container"
+    click RenderItem "./RenderItem"
+    click EventEmitter "https://nodejs.org/api/events.html#class-eventemitter"
 ```
 
 ---

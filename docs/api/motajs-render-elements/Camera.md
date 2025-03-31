@@ -6,7 +6,9 @@
 
 ```mermaid
 graph LR
-  Camera --> EventEmitter
+    Camera --> EventEmitter
+
+    click EventEmitter "https://nodejs.org/api/events.html#class-eventemitter"
 ```
 
 _继承自 `EventEmitter<CameraEvent>`，支持事件监听。_

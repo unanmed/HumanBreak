@@ -9,6 +9,8 @@
 ```mermaid
 graph LR
     Transform --> EventEmitter
+
+    click EventEmitter "https://nodejs.org/api/events.html#class-eventemitter"
 ```
 
 ---

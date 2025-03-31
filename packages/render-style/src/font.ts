@@ -54,8 +54,8 @@ export class Font implements IFontConfig {
     }
 
     /**
-     * 添加补充字体，若当前字体不可用，那么会使用补充字体，补充字体也可以添加补充字体，但是请避免递归添加
-     * @param fallback 补充字体
+     * 添加后备字体，若当前字体不可用，那么会使用后备字体，后备字体也可以添加后备字体，但是请避免递归添加
+     * @param fallback 后备字体
      */
     addFallback(...fallback: Font[]) {
         this.fallbacks.push(...fallback);
@@ -63,9 +63,9 @@ export class Font implements IFontConfig {
     }
 
     private build() {
-        return `${
-            this.italic ? 'italic ' : ''
-        } ${this.weight} ${this.size}${this.sizeUnit} ${this.family}`;
+        return `${this.italic ? 'italic ' : ''} ${this.weight} ${this.size}${
+            this.sizeUnit
+        } ${this.family}`;
     }
 
     private getFallbackFont(used: Set<Font>) {

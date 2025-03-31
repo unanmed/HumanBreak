@@ -194,7 +194,7 @@ export interface EllipseProps extends GraphicPropsBase {
     end?: number;
     /**
      * 椭圆属性参数，可以填 `[圆心 x 坐标，圆心 y 坐标，x半径，y半径，起始角度，终止角度]`，是 x, y, radiusX, radiusY, start, end 的简写，
-     * 其中前两项和后两项要么都填，要么都不填
+     * 其中每两项要么都填，要么都不填
      */
     ellipse?: EllipseParams;
 }

@@ -9,6 +9,8 @@
 ```mermaid
 graph LR
     MotaOffscreenCanvas2D --> EventEmitter
+
+    click EventEmitter "https://nodejs.org/api/events.html#class-eventemitter"
 ```
 
 ---

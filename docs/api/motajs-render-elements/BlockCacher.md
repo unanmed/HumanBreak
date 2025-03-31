@@ -6,7 +6,9 @@
 
 ```mermaid
 graph LR
-  BlockCacher --> EventEmitter
+    BlockCacher --> EventEmitter
+
+    click EventEmitter "https://nodejs.org/api/events.html#class-eventemitter"
 ```
 
 _继承自 `EventEmitter<BlockCacherEvent>`，支持事件监听。_

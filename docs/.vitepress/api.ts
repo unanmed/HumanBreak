@@ -45,7 +45,7 @@ function generateSidebar(): void {
         items.sort((a, b) => {
             const titleA = a.text ?? '';
             const titleB = b.text ?? '';
-            return (weight[titleA] ?? 0) - (weight[titleB] ?? 0);
+            return (weight[titleB] ?? 0) - (weight[titleA] ?? 0);
         });
 
         sidebar.push({

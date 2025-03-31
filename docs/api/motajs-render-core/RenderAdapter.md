@@ -6,7 +6,7 @@
 
 ```mermaid
 graph LR
-  RenderAdapter --> 无继承关系
+    RenderAdapter --> 无继承关系
 ```
 
 _RenderAdapter 为独立类，无父类或子类。_

@@ -11,6 +11,8 @@
 ```mermaid
 graph LR
     RenderItem --> EventEmitter
+
+    click EventEmitter "https://nodejs.org/api/events.html#class-eventemitter"
 ```
 
 ---

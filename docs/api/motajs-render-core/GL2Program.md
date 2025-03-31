@@ -11,6 +11,8 @@
 ```mermaid
 graph LR
     GL2Program --> EventEmitter
+
+    click EventEmitter "https://nodejs.org/api/events.html#class-eventemitter"
 ```
 
 ---

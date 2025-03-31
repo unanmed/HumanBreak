@@ -8,8 +8,10 @@
 
 ```mermaid
 graph LR
-    EventEmitter --> RenderItem
-    RenderItem --> GL2
+    GL2 --> RenderItem --> EventEmitter
+
+    click RenderItem "./RenderItem"
+    click EventEmitter "https://nodejs.org/api/events.html#class-eventemitter"
 ```
 
 ---
