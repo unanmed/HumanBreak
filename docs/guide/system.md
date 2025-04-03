@@ -142,7 +142,7 @@ export function patchMyFunctions() {
     // 这时候需要去 types/declaration 中对应的文件中添加声明
     patch.add('getFlag', (name, defaultValue) => {
         // 重写 getFlag，如果变量是数字，那么 +100 后返回
-        const value = core.status.?hero.?flags[name] ?? defaultValue;
+        const value = core.status?.hero?.flags[name] ?? defaultValue;
         return typeof value === 'number' ? value + 100 : value;
     });
 }
