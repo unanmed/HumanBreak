@@ -113,7 +113,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * 注册一个按键，id可以包含数字后缀，可以显示为同一个按键操作拥有多个按键可以触发
      * @param data 要注册的按键信息
      */
-    register(data: RegisterHotkeyData) {
+    register(data: RegisterHotkeyData): this {
         const d: HotkeyData = {
             ...data,
             ctrl: !!data.ctrl,
@@ -140,7 +140,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * @param func 按键按下时执行的函数
      * @param config 按键的配置信息
      */
-    realize(id: string, func: HotkeyFunc, config?: HotkeyEmitConfig) {
+    realize(id: string, func: HotkeyFunc, config?: HotkeyEmitConfig): this {
         const toSet = Object.values(this.data).filter(v => {
             const split = v.id.split('_');
             const last = !isNaN(Number(split.at(-1)));
@@ -176,7 +176,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * 使用一个symbol作为当前作用域，之后调用{@link realize}所实现的按键功能将会添加至此作用域
      * @param symbol 当前作用域的symbol
      */
-    use(symbol: symbol) {
+    use(symbol: symbol): void {
         spliceBy(this.scopeStack, symbol);
         this.scopeStack.push(symbol);
         this.scope = symbol;
@@ -187,7 +187,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * 释放一个作用域，释放后作用域将退回至删除的作用域的上一级
      * @param symbol 要释放的作用域的symbol
      */
-    dispose(symbol: symbol = this.scopeStack.at(-1) ?? Symbol()) {
+    dispose(symbol: symbol = this.scopeStack.at(-1) ?? Symbol()): void {
         for (const key of Object.values(this.data)) {
             key.emits.delete(symbol);
         }
@@ -202,7 +202,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * @param assist 辅助按键，三位二进制数据，从低到高依次为`ctrl` `shift` `alt`
      * @param emit 是否触发set事件，当且仅当从fromJSON方法调用时为false
      */
-    set(id: string, key: KeyCode, assist: number, emit: boolean = true) {
+    set(id: string, key: KeyCode, assist: number, emit: boolean = true): void {
         const { ctrl, shift, alt } = unwarpBinary(assist);
         const data = this.data[id];
         if (!data) return;
@@ -269,7 +269,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * 检查按键按下情况，如果没有按下则添加
      * @param keyCode 按下的按键
      */
-    private checkPress(keyCode: KeyCode) {
+    private checkPress(keyCode: KeyCode): void {
         if (this.pressed.has(keyCode)) return;
         this.pressed.add(keyCode);
         this.pressTime.set(keyCode, Date.now());
@@ -280,7 +280,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * 当按键松开时，移除相应的按下配置
      * @param keyCode 松开的按键
      */
-    private checkPressEnd(keyCode: KeyCode) {
+    private checkPressEnd(keyCode: KeyCode): void {
         if (!this.pressed.has(keyCode)) return;
         this.pressed.delete(keyCode);
         this.pressTime.delete(keyCode);
@@ -327,6 +327,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
             }
             return false;
         }
+        return false;
     }
 
     /**
@@ -334,7 +335,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * @param id 组的id
      * @param name 组的名称
      */
-    group(id: string, name: string, keys?: RegisterHotkeyData[]) {
+    group(id: string, name: string, keys?: RegisterHotkeyData[]): this {
         this.grouping = id;
         this.groupName[id] = name;
         this.groups[id] ??= [];
@@ -345,14 +346,14 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
     /**
      * 启用这个按键控制器
      */
-    enable() {
+    enable(): void {
         this.enabled = true;
     }
 
     /**
      * 禁用这个按键控制器
      */
-    disable() {
+    disable(): void {
         this.enabled = false;
     }
 
@@ -360,12 +361,12 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * 在当前作用域下，满足什么条件时触发按键
      * @param fn 条件函数
      */
-    when(fn: () => boolean) {
+    when(fn: () => boolean): this {
         this.conditionMap.set(this.scope, fn);
         return this;
     }
 
-    toJSON() {
+    toJSON(): string {
         const res: Record<string, HotkeyJSON> = {};
         for (const [key, data] of Object.entries(this.data)) {
             res[key] = {
@@ -376,7 +377,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
         return JSON.stringify(res);
     }
 
-    fromJSON(data: string) {
+    fromJSON(data: string): void {
         const json: Record<string, HotkeyJSON> = JSON.parse(data);
         for (const [key, data] of Object.entries(json)) {
             this.set(key, data.key, data.assist, false);
@@ -393,7 +394,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * 根据id获取hotkey实例
      * @param id 要获取的hotkey实例的id
      */
-    static get(id: string) {
+    static get(id: string): Hotkey | undefined {
         return this.list.find(v => v.id === id);
     }
 }
@@ -406,7 +407,7 @@ export function unwarpBinary(bin: number): AssistHoykey {
     };
 }
 
-export function checkAssist(bin: number, key: KeyCode) {
+export function checkAssist(bin: number, key: KeyCode): boolean {
     return (
         isAssist(key) &&
         !!(
@@ -416,7 +417,9 @@ export function checkAssist(bin: number, key: KeyCode) {
     );
 }
 
-export function isAssist(key: KeyCode) {
+export function isAssist(
+    key: KeyCode
+): key is KeyCode.Ctrl | KeyCode.Shift | KeyCode.Alt {
     return key === KeyCode.Ctrl || key === KeyCode.Shift || key === KeyCode.Alt;
 }
 

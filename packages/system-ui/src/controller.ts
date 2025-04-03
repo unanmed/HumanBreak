@@ -74,7 +74,10 @@ export interface IUICustomConfig {
     update(stack: IUIInstance[]): void;
 }
 
-interface UIControllerEvent {}
+interface UIControllerEvent {
+    open: [ui: IGameUI, ins: IUIInstance];
+    close: [ui: IUIInstance];
+}
 
 export class UIController
     extends EventEmitter<UIControllerEvent>
@@ -190,6 +193,7 @@ export class UIController
                 break;
         }
         this.sysShowBack.value = true;
+        this.emit('open', ui, ins);
         return ins;
     }
 
@@ -230,6 +234,7 @@ export class UIController
             this.sysShowBack.value = false;
         }
         this.keepBack = false;
+        this.emit('close', ui);
     }
 
     closeAll(ui?: IGameUI): void {

@@ -115,6 +115,13 @@ export interface IUIInstance<C extends UIComponent = UIComponent> {
     readonly alwaysShow: boolean;
 
     /**
+     * 设置这个 UI 实例的响应式数据的值
+     * @param data 要设置的值
+     * @param merge 是将传入的值与原先的值合并（true），还是将当前值覆盖掉原先的值（false），默认合并
+     */
+    setVBind(data: Partial<Props<C>>, merge?: boolean): void;
+
+    /**
      * 隐藏这个 ui
      */
     hide(): void;
