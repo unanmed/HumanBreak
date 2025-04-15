@@ -25,7 +25,7 @@
 ## 构造方法
 
 ```typescript
-function constructor(patchClass: T): T;
+function constructor<T extends PatchClass>(patchClass: T): Patch<T>;
 ```
 
 -   **参数**

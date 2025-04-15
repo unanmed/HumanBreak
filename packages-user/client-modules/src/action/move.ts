@@ -1,6 +1,6 @@
 import { KeyCode } from '@motajs/client-base';
 import { Hotkey, HotkeyData } from '@motajs/system-action';
-import type { HeroMover, IMoveController } from '@user/data-state';
+import { HeroMover, IMoveController } from '@user/data-state';
 import { Ticker } from 'mutate-animate';
 import { mainScope } from '@motajs/legacy-ui';
 
@@ -114,7 +114,7 @@ export class HeroKeyMover {
 
         this.mover.oneStep(this.moveDir);
         const controller = this.mover.startMove(false, false, false, true);
-        if (!controller) return;
+        if (!controller) return false;
 
         this.controller = controller;
         controller.onEnd.then(() => {

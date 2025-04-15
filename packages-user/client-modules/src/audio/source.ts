@@ -112,7 +112,7 @@ export class AudioStreamSource extends AudioSource implements IStreamReader {
     /** 音频解析器 */
     private parser?: CodecParser;
     /** 每多长时间组成一个缓存 Float32Array */
-    private bufferChunkSize = 10;
+    private bufferChunkSize: number = 10;
     /** 缓存音频数据，每 bufferChunkSize 秒钟组成一个 Float32Array，用于流式解码 */
     private audioData: Float32Array[][] = [];
 

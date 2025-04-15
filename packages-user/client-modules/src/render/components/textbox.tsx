@@ -41,15 +41,27 @@ export interface TextContentProps
     fill?: boolean;
     /** 是否描边 */
     stroke?: boolean;
-    /** 是否自适应高度 */
+    /** 是否自适应高度，即组件内部计算 height 的值，而非指定，可与滚动条结合 */
     autoHeight?: boolean;
     /** 文字的最大宽度 */
     width: number;
 }
 
 export type TextContentEmits = {
+    /**
+     * 当打字机结束时触发
+     */
     typeEnd: () => void;
+
+    /**
+     * 当打字机开始打字时触发
+     */
     typeStart: () => void;
+
+    /**
+     * 当文字发生变动，组件内部重新计算文字高度时触发
+     * @param height 更新后的高度
+     */
     updateHeight: (height: number) => void;
 };
 
@@ -290,7 +302,7 @@ export const Textbox = defineComponent<
     TextboxEmits,
     keyof TextboxEmits,
     TextboxSlots
->((props, { slots, expose }) => {
+>((props, { slots, expose, emit }) => {
     const contentData = shallowReactive<TextContentProps>({ width: 200 });
     const data = shallowReactive<TextboxProps>({ width: 200 });
 
@@ -403,10 +415,12 @@ export const Textbox = defineComponent<
 
     const onTypeStart = () => {
         store.emitTypeStart();
+        emit('typeStart');
     };
 
     const onTypeEnd = () => {
         store.emitTypeEnd();
+        emit('typeEnd');
     };
 
     expose<TextboxExpose>({

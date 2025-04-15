@@ -669,7 +669,7 @@ export class TextContentParser {
             font: this.font,
             fontSize: this.status.fontSize,
             fillStyle: this.status.fillStyle,
-            wait,
+            wait: wait * this.config.interval,
             splitLines: [],
             wordBreak: []
         };

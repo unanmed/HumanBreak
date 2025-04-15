@@ -33,7 +33,7 @@ export type PageEmits = {
 export interface PageExpose {
     /**
      * 切换页码
-     * @param page 要切换至的页码数，1 表示第一页
+     * @param page 要切换至的页码数，0 表示第一页
      */
     changePage(page: number): void;
 

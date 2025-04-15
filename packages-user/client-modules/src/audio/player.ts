@@ -156,7 +156,7 @@ export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
      *             |-----------|
      * ```
      */
-    createDelay() {
+    createDelayEffect() {
         return new DelayEffect(this.ac);
     }
 
@@ -209,6 +209,10 @@ export class AudioPlayer extends EventEmitter<AudioPlayerEvent> {
      * @param id 要移除的播放路由的名称
      */
     removeRoute(id: string) {
+        const route = this.audioRoutes.get(id);
+        if (route) {
+            route.destroy();
+        }
         this.audioRoutes.delete(id);
     }
 
@@ -563,6 +567,10 @@ export class AudioRoute
         this.setOutput();
         if (this.source.playing) this.link();
         this.emit('updateEffect');
+    }
+
+    destroy() {
+        this.effectRoute.forEach(v => v.disconnect());
     }
 
     private setOutput() {

@@ -117,6 +117,7 @@ export class WeatherController {
      */
     destroy() {
         WeatherController.map.delete(this.id);
+        this.clearWeather();
     }
 
     static get(id: string) {

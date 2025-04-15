@@ -70,7 +70,25 @@ export function onLoaded(hook: () => void) {
 export interface ITransitionedController<T> {
     readonly ref: Ref<T>;
     readonly value: T;
+
+    /**
+     * 执行动画，使当前值缓慢变化至目标值
+     * @param value 目标值
+     * @param time 动画时长
+     */
     set(value: T, time?: number): void;
+
+    /**
+     * 设置动画的速率曲线
+     * @param timing 速率曲线
+     */
+    mode(timing: TimingFn): void;
+
+    /**
+     * 设置动画的动画时长
+     * @param time 动画时长
+     */
+    setTime(time: number): void;
 }
 
 class RenderTransition implements ITransitionedController<number> {
@@ -90,8 +108,8 @@ class RenderTransition implements ITransitionedController<number> {
     constructor(
         value: number,
         public readonly transition: Transition,
-        public readonly time: number,
-        public readonly curve: TimingFn
+        public time: number,
+        public curve: TimingFn
     ) {
         this.ref = ref(value);
         transition.value[this.key] = value;
@@ -102,6 +120,14 @@ class RenderTransition implements ITransitionedController<number> {
 
     set(value: number, time: number = this.time): void {
         this.transition.time(time).mode(this.curve).transition(this.key, value);
+    }
+
+    mode(timing: TimingFn): void {
+        this.curve = timing;
+    }
+
+    setTime(time: number): void {
+        this.time = time;
     }
 }
 
@@ -127,8 +153,8 @@ class RenderColorTransition implements ITransitionedController<string> {
     constructor(
         value: string,
         public readonly transition: Transition,
-        public readonly time: number,
-        public readonly curve: TimingFn
+        public time: number,
+        public curve: TimingFn
     ) {
         this.ref = ref(value);
         const [r, g, b, a] = this.decodeColor(value);
@@ -143,6 +169,14 @@ class RenderColorTransition implements ITransitionedController<string> {
 
     set(value: string, time: number = this.time): void {
         this.transitionColor(this.decodeColor(value), time);
+    }
+
+    mode(timing: TimingFn): void {
+        this.curve = timing;
+    }
+
+    setTime(time: number): void {
+        this.time = time;
     }
 
     private transitionColor([r, g, b, a]: ColorRGBA, time: number) {

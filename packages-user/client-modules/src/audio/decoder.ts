@@ -106,7 +106,7 @@ export abstract class AudioDecoder {
             } else {
                 const decoder = new Decoder();
                 await decoder.create();
-                const decodedData = await decoder.decode(data);
+                const decodedData = await decoder.decodeAll(data);
                 if (!decodedData) return null;
                 const buffer = player.ac.createBuffer(
                     decodedData.channelData.length,
@@ -150,7 +150,7 @@ export abstract class AudioDecoder {
     abstract flush(): Promise<IAudioDecodeData | undefined>;
 }
 
-export class VorbisDecoder implements AudioDecoder {
+export class VorbisDecoder extends AudioDecoder {
     decoder?: OggVorbisDecoderWebWorker;
 
     async create(): Promise<void> {
@@ -175,7 +175,7 @@ export class VorbisDecoder implements AudioDecoder {
     }
 }
 
-export class OpusDecoder implements AudioDecoder {
+export class OpusDecoder extends AudioDecoder {
     decoder?: OggOpusDecoderWebWorker;
 
     async create(): Promise<void> {

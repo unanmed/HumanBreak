@@ -14,6 +14,7 @@ import { transitioned } from '../use';
 import { hyper } from 'mutate-animate';
 import { logger } from '@motajs/common';
 import { GameUI, IUIMountable } from '@motajs/system-ui';
+import { clamp } from 'lodash-es';
 
 interface ProgressProps extends DefaultProps {
     /** 进度条的位置 */
@@ -57,9 +58,10 @@ export const Progress = defineComponent<ProgressProps>(props => {
         ctx.moveTo(lineWidth, height / 2);
         ctx.lineTo(width - lineWidth, height / 2);
         ctx.stroke();
-        if (!isNaN(props.progress)) {
+        const progress = clamp(props.progress, 0, 1);
+        if (!isNaN(progress)) {
             ctx.strokeStyle = props.success ?? 'green';
-            const p = lineWidth + (width - lineWidth * 2) * props.progress;
+            const p = lineWidth + (width - lineWidth * 2) * progress;
             ctx.beginPath();
             ctx.moveTo(lineWidth, height / 2);
             ctx.lineTo(p, height / 2);
@@ -137,7 +139,7 @@ export const Arrow = defineComponent<ArrowProps>(props => {
     );
 }, arrowProps);
 
-export interface ScrollTextProps extends TextboxProps, ScrollProps {
+export interface ScrollTextProps extends TextContentProps, ScrollProps {
     /** 自动滚动的速度，每秒多少像素 */
     speed: number;
     /** 文字的最大宽度 */
@@ -232,6 +234,7 @@ export const ScrollText = defineComponent<
             emit('scrollEnd');
             paused = true;
         }
+        lastFixedTime = now;
     });
 
     const pause = () => {

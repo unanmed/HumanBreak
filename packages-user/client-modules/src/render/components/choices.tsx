@@ -468,7 +468,7 @@ export const Choices = defineComponent<
             <Background
                 loc={[0, 0, props.width, boxHeight.value]}
                 winskin={props.winskin}
-                color={props.color}
+                color={props.color ?? '#333'}
                 border={props.border}
             />
             {hasTitle.value && (
@@ -515,6 +515,7 @@ export const Choices = defineComponent<
                                 font={props.selFont}
                                 cursor="pointer"
                                 zIndex={5}
+                                fillStyle={props.selFill}
                                 onClick={() => emit('choose', v[0])}
                                 onSetText={(_, width, height) =>
                                     updateChoiceSize(i, width, height)

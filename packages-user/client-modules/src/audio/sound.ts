@@ -131,4 +131,5 @@ export class SoundPlayer<
         this.playing.clear();
     }
 }
+
 export const soundPlayer = new SoundPlayer<SoundIds>(audioPlayer);
