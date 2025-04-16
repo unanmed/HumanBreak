@@ -15,6 +15,8 @@ import type { HeroKeyMover } from '@user/client-modules';
 import { BluePalace, MiscData } from '../mechanism/misc';
 import { sleep } from '@motajs/common';
 
+// todo: 转身功能
+
 interface MoveStepDir {
     type: 'dir';
     value: Move2;

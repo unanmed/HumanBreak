@@ -3,12 +3,19 @@ import { IDamageEnemy, IEnemyCollection } from '@motajs/types';
 
 // ----- 加载事件
 interface GameLoadEvent {
+    /** 当核心脚本加载完毕时触发 */
     coreLoaded: [];
+    /** 当自动元件加载完毕后触发 */
     autotileLoaded: [];
+    /** 当核心类初始化完毕后触发 */
     coreInit: [];
+    /** 当所有启动必要资源加载完毕后触发 */
     loaded: [];
+    /** 当客户端（渲染端）和数据端都挂载完毕后触发 */
     registered: [];
+    /** 当数据端挂载完毕后触发 */
     dataRegistered: [];
+    /** 当客户端（渲染端）挂载完毕后触发 */
     clientRegistered: [];
 }
 
@@ -36,8 +43,8 @@ class GameLoading extends EventEmitter<GameLoadEvent> {
     }
 
     /**
-     * 当自动原件加载完毕时
-     * @param autotiles 自动原件数组
+     * 当自动元件加载完毕时
+     * @param autotiles 自动元件数组
      */
     onAutotileLoaded(
         autotiles: Partial<Record<AllIdsOf<'autotile'>, HTMLImageElement>>
@@ -82,32 +89,32 @@ loading.once('dataRegistered', () => {
 });
 
 export interface GameEvent {
-    /** Emitted in libs/events.js resetGame. */
+    /** 当游戏初始化时触发，Emitted in libs/events.js resetGame. */
     reset: [];
-    /** Emitted in src/App.vue setup. */
+    /** 当游戏挂载完毕后触发，Emitted in src/App.vue setup. */
     mounted: [];
-    /** Emitted in plugin/game/ui.ts updateStatusBar_update */
+    /** 当状态栏更新时触发，Emitted in plugin/game/ui.ts updateStatusBar_update */
     statusBarUpdate: [];
-    /** Emitted in core/index.ts */
+    /** 当客户端（渲染端）加载完毕后触发，Emitted in core/index.ts */
     renderLoaded: [];
-    /** Emitted in libs/events.js getItem */
+    /** 当捡拾道具后触发，Emitted in libs/events.js getItem */
     afterGetItem: [
         itemId: AllIdsOf<'items'>,
         x: number,
         y: number,
         isGentleClick: boolean
     ];
-    /** Emitted in libs/events.js _openDoor_animate */
+    /** 当开门后触发，Emitted in libs/events.js _openDoor_animate */
     afterOpenDoor: [doorId: AllIdsOf<'animates'>, x: number, y: number];
-    /** Emitted in project/functions.js afterChangeFloor */
+    /** 当楼层切换后触发，Emitted in project/functions.js afterChangeFloor */
     afterChangeFloor: [floorId: FloorIds];
-    /** Emitted in project/functions.js moveOneStep */
+    /** 勇士每移动一步时触发，Emitted in project/functions.js moveOneStep */
     moveOneStep: [x: number, y: number, floorId: FloorIds];
-    /** Emitted in src/game/enemy/battle.ts afterBattle */
+    /** 战斗后触发，Emitted in src/game/enemy/battle.ts afterBattle */
     afterBattle: [enemy: IDamageEnemy, x?: number, y?: number];
-    /** Emitted in libs/events.js changingFloor */
+    /** 楼层切换中触发，具体时刻是楼层切换的正中间，刚刚执行完切换，Emitted in libs/events.js changingFloor */
     changingFloor: [floorId: FloorIds, heroLoc: Loc];
-    /** Emitted in libs/maps.js setBlock */
+    /** 当某一个图块被设置时触发，Emitted in libs/maps.js setBlock */
     setBlock: [
         x: number,
         y: number,
@@ -115,11 +122,11 @@ export interface GameEvent {
         newBlock: AllNumbers,
         oldBlock: AllNumbers
     ];
-    /** Emitted in game/enemy/damage.ts */
+    /** 当怪物信息被解析时触发，Emitted in game/enemy/damage.ts */
     enemyExtract: [col: IEnemyCollection];
-    /** Emitted in lib/events.js restart */
+    /** 当从游戏中回到游戏标题界面时触发，Emitted in lib/events.js restart */
     restart: [];
-    /** Emitted in lib/maps.js setBgFgBlock */
+    /** 当设置背景或前景图块时触发，Emitted in lib/maps.js setBgFgBlock */
     setBgFgBlock: [
         name: 'bg' | 'fg' | 'bg2' | 'fg2',
         number: AllNumbers,
@@ -127,9 +134,9 @@ export interface GameEvent {
         y: number,
         floorId: FloorIds
     ];
-    /** Emitted in lib/control.js */
+    /** 当录像播放在暂停和播放状态间切换时触发，Emitted in lib/control.js */
     replayStatus: [replaying: boolean];
-    /** Emitted in project/functions.js */
+    /** 当加载存档时触发，Emitted in project/functions.js */
     loadData: [];
 }
 
@@ -248,6 +255,7 @@ class GameListener extends EventEmitter<ListenerEvent> {
     }
 }
 
+/** @deprecated */
 export const gameListener = new GameListener();
 
 declare global {

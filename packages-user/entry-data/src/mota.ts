@@ -23,6 +23,7 @@ import type * as LegacyPluginData from '@user/legacy-plugin-data';
 // ---------- 必要的第三方库
 import type * as MutateAnimate from 'mutate-animate';
 import type * as Vue from 'vue';
+import type * as Lodash from 'lodash-es';
 
 interface ModuleInterface {
     '@motajs/client': typeof Client;
@@ -50,6 +51,7 @@ interface ModuleInterface {
     // ---------- 必要的第三方库
     MutateAnimate: typeof MutateAnimate;
     Vue: typeof Vue;
+    Lodash: typeof Lodash;
 }
 
 export interface IMota {

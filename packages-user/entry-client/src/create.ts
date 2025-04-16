@@ -18,6 +18,7 @@ import * as ClientModules from '@user/client-modules';
 import * as LegacyPluginClient from '@user/legacy-plugin-client';
 import * as MutateAnimate from 'mutate-animate';
 import * as Vue from 'vue';
+import * as Lodash from 'lodash-es';
 import { hook, loading } from '@user/data-base';
 
 export function create() {
@@ -42,6 +43,7 @@ export function create() {
     Mota.register('@user/legacy-plugin-client', LegacyPluginClient);
     Mota.register('MutateAnimate', MutateAnimate);
     Mota.register('Vue', Vue);
+    Mota.register('Lodash', Lodash);
 
     loading.emit('clientRegistered');
 }
