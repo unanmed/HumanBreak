@@ -123,7 +123,10 @@ export class Logger {
                 logTip.textContent = `Error thrown, please check in console.`;
                 hideTipText();
             }
-            console.error(`[ERROR Code ${code}] ${text}`);
+            const n = Math.floor(code / 50) + 1;
+            const n2 = code % 50;
+            const url = `/_docs/logger/error/error${n}.html#error-code-${n2}`;
+            console.error(`[ERROR Code ${code}] ${text}. See ${url}`);
         }
     }
 
@@ -147,13 +150,16 @@ export class Logger {
             });
         }
         if (this.level <= LogLevel.WARNING && this.enabled) {
-            console.warn(`[WARNING Code ${code}] ${text}`);
             if (!main.replayChecking) {
                 logTip.style.color = 'gold';
                 logTip.style.display = 'block';
                 logTip.textContent = `Warning thrown, please check in console.`;
                 hideTipText();
             }
+            const n = Math.floor(code / 50) + 1;
+            const n2 = code % 50;
+            const url = `/_docs/logger/warn/warn${n}.html#warn-code-${n2}`;
+            console.warn(`[WARNING Code ${code}] ${text}. See ${url}`);
         }
     }
 
