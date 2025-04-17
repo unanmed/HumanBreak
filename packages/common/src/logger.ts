@@ -186,7 +186,11 @@ export class Logger {
         this.disable();
         this.catching = true;
         const ret = fn();
-        this.catching = false;
+        if (this.catchStack.length === 0) {
+            this.catching = false;
+        } else {
+            this.catching = true;
+        }
         if (before) this.enable();
 
         this.catchStack.pop();
