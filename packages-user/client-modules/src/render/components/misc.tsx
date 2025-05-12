@@ -8,7 +8,7 @@ import {
 import { computed, defineComponent, ref, SetupContext, watch } from 'vue';
 import { SetupComponentOptions } from './types';
 import { MotaOffscreenCanvas2D } from '@motajs/render';
-import { TextboxProps, TextContent, TextContentProps } from './textbox';
+import { TextContent, TextContentProps } from './textbox';
 import { Scroll, ScrollExpose, ScrollProps } from './scroll';
 import { transitioned } from '../use';
 import { hyper } from 'mutate-animate';
@@ -457,6 +457,8 @@ const waitBoxProps = {
  *   winskin="winskin2.png"
  *   // 完全继承 TextContent 的参数，因此可以直接指定字体
  *   font={new Font('Verdana', 28)}
+ *   // 当传入的 Promise 兑现时触发此事件，注意此事件只可能触发一次，触发后便不会再次触发
+ *   onResolve={(time) => console.log(time)}
  * />
  * ```
  */

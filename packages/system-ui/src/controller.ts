@@ -23,11 +23,11 @@ import {
 import { UIContainer } from './container';
 
 export const enum UIMode {
-    /** 仅显示最后一个 UI，在关闭时，只会关闭指定的 UI */
+    /** 仅显示最后一个非 alwaysShow 的 UI，在关闭时，只会关闭指定的 UI */
     LastOnly,
     /** 显示所有非手动隐藏的 UI，在关闭时，只会关闭指定 UI */
     All,
-    /** 仅显示最后一个 UI，在关闭时，在此之后的所有 UI 会全部关闭 */
+    /** 仅显示最后一个非 alwaysShow 的 UI，在关闭时，在此之后的所有 UI 会全部关闭 */
     LastOnlyStack,
     /** 显示所有非手动隐藏的 UI，在关闭时，在此之后的所有 UI 会全部关闭 */
     AllStack,
@@ -181,8 +181,9 @@ export class UIController
         switch (this.mode) {
             case UIMode.LastOnly:
             case UIMode.LastOnlyStack:
-                this.stack.forEach(v => v.hide());
                 this.stack.push(ins);
+                this.stack.forEach(v => v.hide());
+                this.stack.findLast(v => !v.alwaysShow)?.show();
                 break;
             case UIMode.All:
             case UIMode.AllStack:
@@ -204,17 +205,13 @@ export class UIController
             case UIMode.LastOnly: {
                 this.stack.splice(index, 1);
                 this.stack.forEach(v => v.hide());
-                const last = this.stack.at(-1);
-                if (!last) break;
-                last.show();
+                this.stack.findLast(v => !v.alwaysShow)?.show();
                 break;
             }
             case UIMode.LastOnlyStack: {
                 this.stack.splice(index);
                 this.stack.forEach(v => v.hide());
-                const last = this.stack[index - 1];
-                if (!last) break;
-                last.show();
+                this.stack.findLast(v => !v.alwaysShow)?.show();
                 break;
             }
             case UIMode.All: {

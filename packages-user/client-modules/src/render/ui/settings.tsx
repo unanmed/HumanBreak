@@ -14,7 +14,8 @@ import { mainUi } from '@motajs/legacy-ui';
 import { gameKey } from '@motajs/system-action';
 import { generateKeyboardEvent } from '@motajs/system-action';
 import { getVitualKeyOnce } from '@motajs/legacy-ui';
-import { getAllSavesData, getSaveData } from '../../utils';
+import { getAllSavesData, getSaveData, syncFromServer } from '../../utils';
+import { getInput } from '../components/input';
 
 export interface SettingsProps extends Partial<ChoicesProps>, UIComponentProps {
     loc: ElementLocator;
@@ -294,14 +295,20 @@ export const SyncSave = defineComponent<SettingsProps>(props => {
         [SyncSaveChoice.Back, '返回上一级']
     ];
 
-    const choose = (key: ChoiceKey) => {
+    const choose = async (key: ChoiceKey) => {
         switch (key) {
             case SyncSaveChoice.ToServer: {
                 props.controller.open(SyncSaveSelectUI, { loc: props.loc });
                 break;
             }
             case SyncSaveChoice.FromServer: {
-                // todo
+                const replay = await getInput(
+                    props.controller,
+                    '请输入存档编号+密码',
+                    [240, 240, void 0, void 0, 0.5, 0.5],
+                    240
+                );
+                await syncFromServer(props.controller, replay);
                 break;
             }
             case SyncSaveChoice.ToLocal: {

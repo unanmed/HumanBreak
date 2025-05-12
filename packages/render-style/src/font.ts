@@ -69,7 +69,7 @@ export class Font implements IFontConfig {
     }
 
     private getFallbackFont(used: Set<Font>) {
-        let font = '';
+        let font = this.build();
         this.fallbacks.forEach(v => {
             if (used.has(v)) {
                 logger.warn(62, this.build());
@@ -86,7 +86,7 @@ export class Font implements IFontConfig {
             return this.build();
         } else {
             const usedFont = new Set<Font>();
-            return this.build() + this.getFallbackFont(usedFont);
+            return this.getFallbackFont(usedFont);
         }
     }
 
