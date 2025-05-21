@@ -157,10 +157,10 @@ export class TowerBoss extends BarrageBoss {
     override start() {
         super.start();
 
-        TowerBoss.shader.append(this.mapDraw);
-        this.healthBar.append(this.group);
-        this.word.append(this.group);
-        this.main.append(this.group);
+        TowerBoss.shader.appendTo(this.mapDraw);
+        this.healthBar.appendTo(this.group);
+        this.word.appendTo(this.group);
+        this.main.appendTo(this.group);
 
         const event = this.group.getLayer('event');
         const hero = event?.getExtends('floor-hero') as HeroRenderer;

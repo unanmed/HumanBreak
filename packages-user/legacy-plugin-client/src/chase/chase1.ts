@@ -333,7 +333,7 @@ function drawBack(chase: Chase, ani: Animation) {
         back.setZIndex(100);
         back.size(480, 480);
         back.pos(0, 0);
-        back.append(layer);
+        back.appendTo(layer);
         back.setRenderFn(canvas => {
             const ctx = canvas.ctx;
             ctx.fillStyle = '#000';

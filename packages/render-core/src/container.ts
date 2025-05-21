@@ -58,7 +58,7 @@ export class Container<E extends EContainerEvent = EContainerEvent>
      */
     appendChild(...children: RenderItem<any>[]) {
         children.forEach(v => {
-            v.append(this);
+            v.appendTo(this);
         });
         this.requestSort();
         this.update(this);
@@ -77,8 +77,8 @@ export class Container<E extends EContainerEvent = EContainerEvent>
         this.update(this);
     }
 
-    append(parent: RenderItem): void {
-        super.append(parent);
+    appendTo(parent: RenderItem): void {
+        super.appendTo(parent);
         if (this.root) {
             const root = this.root;
             this.forEachChild(ele => {

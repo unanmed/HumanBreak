@@ -728,7 +728,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      * 将这个渲染元素添加到其他父元素上
      * @param parent 父元素
      */
-    append(parent: RenderItem) {
+    appendTo(parent: RenderItem) {
         this.remove();
         parent.children.add(this);
         this._parent = parent;

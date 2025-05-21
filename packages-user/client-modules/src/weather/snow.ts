@@ -146,7 +146,7 @@ export class SnowWeather implements IWeather {
         const draw = render?.getElementById('map-draw') as Container;
         if (!draw) return;
         const shader = SnowWeather.shader;
-        shader.append(draw);
+        shader.appendTo(draw);
 
         const gl = shader.gl;
         const program = SnowShader.snowProgram;
@@ -175,7 +175,7 @@ export class SnowWeather implements IWeather {
         const draw = render?.getElementById('map-draw') as Container;
         if (!layer || !draw) return;
         const shader = SnowWeather.shader;
-        layer.append(draw);
+        layer.appendTo(draw);
         shader.remove();
     }
 }

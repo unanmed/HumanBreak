@@ -1,18 +1,16 @@
 import { KeyCode } from '@motajs/client-base';
 import { gameKey, HotkeyJSON } from '@motajs/system-action';
-import { hovered } from './fixed';
-import { mainUi } from './uiIns';
+import { hovered, mainUi, tip, openDanmakuPoster } from '@motajs/legacy-ui';
 import { GameStorage } from '@motajs/legacy-system';
-// import { hasMarkedEnemy, markEnemy, unmarkEnemy } from '../mark';
-import { openDanmakuPoster } from '../uiUtils';
-import { tip } from '../use';
+import { openStatistics } from '../render/ui/statistics';
+import { mainUIController } from '../render';
 
 export const mainScope = Symbol.for('@key_main');
 
 // todo: 读取上一个手动存档，存档至下一个存档栏
 // ----- Register
 gameKey
-    // --------------------
+    //#region 游戏按键
     .group('game', '游戏按键')
     .register({
         id: 'moveUp',
@@ -34,7 +32,7 @@ gameKey
         name: '右移',
         defaults: KeyCode.RightArrow
     })
-    // --------------------
+    //#region ui界面
     .group('ui', 'ui界面')
     .register({
         id: 'book',
@@ -106,7 +104,7 @@ gameKey
         name: '百科全书',
         defaults: KeyCode.KeyH
     })
-    // --------------------
+    //#region 功能按键
     .group('function', '功能按键')
     .register({
         id: 'undo_1',
@@ -224,7 +222,7 @@ gameKey
         defaults: KeyCode.Digit0,
         alt: true
     })
-    // --------------------
+    //#region 技能按键
     .group('skill', '技能按键')
     .register({
         id: 'skill1',
@@ -241,7 +239,7 @@ gameKey
         name: '铸剑为盾',
         defaults: KeyCode.Digit3
     })
-    // --------------------
+    //#region 系统按键
     .group('system', '系统按键')
     .register({
         id: 'restart',
@@ -258,7 +256,7 @@ gameKey
         name: '调试模式',
         defaults: KeyCode.F8
     })
-    // --------------------
+    //#region 通用按键
     .group('general', '通用按键')
     .register({
         id: 'exit_1',
@@ -285,7 +283,7 @@ gameKey
         name: '确认_3',
         defaults: KeyCode.KeyC
     })
-    // --------------------
+    //#region 开始界面
     .group('@ui_start', '开始界面')
     .register({
         id: '@start_up',
@@ -297,7 +295,7 @@ gameKey
         name: '下移光标',
         defaults: KeyCode.DownArrow
     })
-    // --------------------
+    //#region 怪物手册
     .group('@ui_book', '怪物手册')
     .register({
         id: '@book_up',
@@ -329,7 +327,7 @@ gameKey
         name: '上移5个怪物_2',
         defaults: KeyCode.PageUp
     })
-    // --------------------
+    //#region 道具栏
     .group('@ui_toolbox', '道具栏')
     .register({
         id: '@toolbox_right',
@@ -351,7 +349,7 @@ gameKey
         name: '光标下移',
         defaults: KeyCode.DownArrow
     })
-    // --------------------
+    //#region 商店
     .group('@ui_shop', '商店')
     .register({
         id: '@shop_up',
@@ -373,7 +371,7 @@ gameKey
         name: '减少购买量',
         defaults: KeyCode.LeftArrow
     })
-    // --------------------
+    //#region 楼层传送
     .group('@ui_fly', '楼层传送')
     .register({
         id: '@fly_left',
@@ -405,7 +403,7 @@ gameKey
         name: '下一张地图',
         defaults: KeyCode.PageUp
     })
-    // --------------------
+    //#region 传统楼传
     .group('@ui_fly_tradition', '楼层传送-传统按键')
     .register({
         id: '@fly_down_t',
@@ -441,7 +439,7 @@ gameKey
 gameKey.enable();
 gameKey.use(mainScope);
 
-// ----- Realization
+//#region 按键实现
 
 gameKey
     .when(
@@ -476,7 +474,7 @@ gameKey
         core.openQuickShop(true);
     })
     .realize('statistics', () => {
-        core.ui._drawStatistics();
+        openStatistics(mainUIController);
     })
     .realize('viewMap', () => {
         core.ui._drawViewMaps();

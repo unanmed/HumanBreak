@@ -120,7 +120,7 @@ export class RainWeather implements IWeather {
         const draw = render?.getElementById('map-draw') as Container;
         if (!draw) return;
         const shader = this.shader;
-        shader.append(draw);
+        shader.appendTo(draw);
 
         const gl = shader.gl;
         const program = this.program;

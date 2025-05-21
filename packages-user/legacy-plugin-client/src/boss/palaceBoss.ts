@@ -75,8 +75,8 @@ export class PalaceBoss extends BarrageBoss {
     override start(): void {
         super.start();
 
-        PalaceBoss.shader.append(this.mapDraw);
-        this.main.append(this.group);
+        PalaceBoss.shader.appendTo(this.mapDraw);
+        this.main.appendTo(this.group);
 
         // const event = this.group.getLayer('event');
         // const hero = event?.getExtends('floor-hero') as HeroRenderer;

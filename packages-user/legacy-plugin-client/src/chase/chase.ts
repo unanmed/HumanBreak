@@ -329,7 +329,7 @@ export class Chase extends EventEmitter<ChaseEvent> {
         this.onTimeListener.sort((a, b) => a.time - b.time);
         const render = MotaRenderer.get('render-main')!;
         const mapDraw = render.getElementById('map-draw') as Container;
-        Chase.shader.append(mapDraw);
+        Chase.shader.appendTo(mapDraw);
         this.emit('start');
     }
 

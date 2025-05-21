@@ -1493,8 +1493,8 @@ export class Layer extends Container<ELayerEvent> {
         }
     }
 
-    append(parent: RenderItem): void {
-        super.append(parent);
+    appendTo(parent: RenderItem): void {
+        super.appendTo(parent);
         if (parent instanceof LayerGroup) {
             this.addToGroup(parent);
         }
