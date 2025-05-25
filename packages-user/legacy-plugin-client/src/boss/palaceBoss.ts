@@ -2,7 +2,6 @@ import { IStateDamageable } from '@user/data-state';
 import { BarrageBoss, BossSprite, Hitbox } from './barrage';
 import {
     Container,
-    LayerGroup,
     MotaRenderer,
     RenderItem,
     Shader,
@@ -14,6 +13,7 @@ import { SplittableBall } from './palaceBossProjectile';
 import { PointEffect } from '../fx/pointShader';
 import { loading } from '@user/data-base';
 import { clip } from '@user/legacy-plugin-data';
+import { LayerGroup } from '@user/client-modules';
 
 loading.once('coreInit', () => {
     const shader = new Shader();

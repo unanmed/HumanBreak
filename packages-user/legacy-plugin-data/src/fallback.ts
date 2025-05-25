@@ -1,17 +1,17 @@
-import type {
-    RenderAdapter,
-    LayerDoorAnimate,
-    LayerGroupAnimate,
-    LayerFloorBinder,
-    HeroRenderer,
-    Layer,
-    LayerGroup,
-    FloorViewport
-} from '@motajs/render';
+import type { RenderAdapter } from '@motajs/render';
 import type { TimingFn } from 'mutate-animate';
 import { BlockMover, heroMoveCollection, MoveStep } from '@user/data-state';
 import { hook, loading } from '@user/data-base';
 import { Patch, PatchClass } from '@motajs/legacy-common';
+import type {
+    HeroRenderer,
+    LayerDoorAnimate,
+    LayerGroupAnimate,
+    Layer,
+    FloorViewport,
+    LayerFloorBinder,
+    LayerGroup
+} from '@user/client-modules';
 
 // 向后兼容用，会充当两个版本间过渡的作用
 
@@ -88,8 +88,8 @@ export function initFallback() {
 
     Mota.r(() => {
         // ----- 引入
-        const { Camera, MotaRenderer: Renderer } =
-            Mota.require('@motajs/render');
+        const { MotaRenderer: Renderer } = Mota.require('@motajs/render');
+        const { Camera } = Mota.require('@user/client-modules');
         const Animation = Mota.require('MutateAnimate');
 
         const patch = new Patch(PatchClass.Control);
@@ -116,7 +116,7 @@ export function initFallback() {
             '_action_moveAction',
             function (data: any, x: number, y: number, prefix: any) {
                 if (core.canMoveHero()) {
-                    var nx = core.nextX(),
+                    const nx = core.nextX(),
                         ny = core.nextY();
                     // 检查noPass决定是撞击还是移动
                     if (core.noPass(nx, ny)) {
@@ -314,10 +314,10 @@ export function initFallback() {
                 needKey: boolean,
                 callback?: () => void
             ) {
-                var block = core.getBlock(x, y);
+                const block = core.getBlock(x, y);
                 core.saveAndStopAutomaticRoute();
                 if (!core.events._openDoor_check(block, x, y, needKey)) {
-                    var locked = core.status.lockControl;
+                    const locked = core.status.lockControl;
                     core.waitHeroToStop(function () {
                         if (!locked) core.unlockControl();
                         if (callback) callback();
@@ -383,8 +383,8 @@ export function initFallback() {
                     if (callback) callback();
                     return;
                 }
-                var block = core.getBlockById(id);
-                var doorInfo = (block.event || {}).doorInfo;
+                const block = core.getBlockById(id);
+                const doorInfo = (block.event || {}).doorInfo;
                 if (!doorInfo) {
                     if (callback) callback();
                     return;

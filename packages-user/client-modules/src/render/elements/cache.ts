@@ -464,11 +464,9 @@ function splitAutotiles(map: IdToNumber): AutotileCaches {
         const master = new MotaOffscreenCanvas2D();
         master.setHD(false);
         master.setAntiAliasing(false);
-        master.withGameScale(false);
         master.size(32, 32);
         master.ctx.drawImage(img, 0, 0, 32, 32, 0, 0, 32, 32);
         masterMap[auto] = master.canvas.toDataURL('image/png');
-        master.delete();
 
         // 自动图块的绘制信息
         for (let i = 0; i <= 0b11111111; i++) {
@@ -491,9 +489,7 @@ function splitAutotiles(map: IdToNumber): AutotileCaches {
             const canvas = new MotaOffscreenCanvas2D();
             canvas.setHD(false);
             canvas.setAntiAliasing(false);
-            canvas.withGameScale(false);
             canvas.size(32 * frame, 32);
-            canvas.freeze();
             const ctx = canvas.ctx;
             for (let i = 0; i < frame; i++) {
                 const dx = 32 * i;
@@ -518,7 +514,6 @@ function splitAutotiles(map: IdToNumber): AutotileCaches {
     const judge = new MotaOffscreenCanvas2D();
     judge.setHD(false);
     judge.setAntiAliasing(false);
-    judge.withGameScale(false);
     judge.size(32, 32);
     // 进行父子关系判断
     for (const [key, img] of Object.entries(core.material.images.autotile)) {
@@ -538,7 +533,6 @@ function splitAutotiles(map: IdToNumber): AutotileCaches {
             }
         }
     }
-    judge.delete();
 
     return cache as AutotileCaches;
 }

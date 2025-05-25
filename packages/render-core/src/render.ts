@@ -42,6 +42,9 @@ export interface MotaRendererConfig {
 export class MotaRenderer extends Container implements IRenderTreeRoot {
     static list: Map<string, MotaRenderer> = new Map();
 
+    /** 缩放比 */
+    private scale: number = 1;
+
     /** 所有连接到此根元素的渲染元素的 id 到元素自身的映射 */
     protected idMap: Map<string, RenderItem> = new Map();
 
@@ -79,7 +82,6 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
         }
         this.target = new MotaOffscreenCanvas2D(config.alpha ?? true, canvas);
         this.size(config.width, config.height);
-        this.target.withGameScale(true);
         this.target.setAntiAliasing(false);
 
         this.setAnchor(0.5, 0.5);
@@ -96,6 +98,31 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
 
         update();
         this.listen();
+    }
+
+    /**
+     * 设置这个渲染器的缩放比
+     * @param scale 缩放比
+     */
+    setScale(scale: number) {
+        this.scale = scale;
+        this.onResize(scale);
+    }
+
+    /**
+     * 获取这个渲染器的缩放比
+     */
+    getScale() {
+        return this.scale;
+    }
+
+    onResize(scale: number): void {
+        this.target.setScale(scale);
+        const width = this.target.width * scale;
+        const height = this.target.height * scale;
+        this.target.canvas.style.width = `${width}px`;
+        this.target.canvas.style.height = `${height}px`;
+        super.onResize(scale);
     }
 
     private getMountCanvas(canvas: string | HTMLCanvasElement) {
@@ -576,7 +603,6 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
     destroy() {
         super.destroy();
         MotaRenderer.list.delete(this.id);
-        this.target.delete();
         this.abort?.abort();
     }
 

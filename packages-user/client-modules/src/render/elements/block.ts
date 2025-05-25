@@ -305,7 +305,5 @@ export interface ICanvasCacheItem extends IBlockCacheable {
 export class CanvasCacheItem implements ICanvasCacheItem {
     constructor(public canvas: MotaOffscreenCanvas2D, public symbol: number) {}
 
-    destroy(): void {
-        this.canvas.delete();
-    }
+    destroy(): void {}
 }

@@ -8,19 +8,17 @@ import {
 import { logger } from '@motajs/common';
 import EventEmitter from 'eventemitter3';
 import { isNil } from 'lodash-es';
-import {
-    BlockCacher,
-    CanvasCacheItem,
-    ICanvasCacheItem,
-    calNeedRenderOf,
-    ILayerGroupRenderExtends,
-    Layer,
-    LayerGroup,
-    LayerGroupFloorBinder,
-    tagMap
-} from '@motajs/render';
+import { tagMap } from '@motajs/render';
 import { IDamageEnemy, IEnemyCollection, MapDamage } from '@motajs/types';
 import { UserEnemyInfo } from '@user/data-state';
+import { BlockCacher, ICanvasCacheItem, CanvasCacheItem } from './block';
+import {
+    ILayerGroupRenderExtends,
+    LayerGroupFloorBinder,
+    LayerGroup,
+    Layer,
+    calNeedRenderOf
+} from './layer';
 
 /**
  * 根据伤害大小获取颜色
@@ -517,7 +515,6 @@ export class Damage extends RenderItem<EDamageEvent> {
             temp.clear();
             temp.setHD(true);
             temp.setAntiAliasing(true);
-            temp.withGameScale(true);
             temp.size(size, size);
             const { ctx: ct } = temp;
 

@@ -184,6 +184,11 @@ export abstract class GL2<E extends EGL2Event = EGL2Event> extends RenderItem<
         this.init();
     }
 
+    onResize(scale: number): void {
+        this.sizeGL(this.width, this.height);
+        super.onResize(scale);
+    }
+
     setHD(hd: boolean): void {
         super.setHD(hd);
         this.sizeGL(this.width, this.height);
@@ -196,7 +201,7 @@ export abstract class GL2<E extends EGL2Event = EGL2Event> extends RenderItem<
 
     private sizeGL(width: number, height: number) {
         const ratio = this.highResolution ? devicePixelRatio : 1;
-        const scale = ratio * core.domStyle.scale;
+        const scale = ratio * this.cache.scale;
         this.canvas.width = width * scale;
         this.canvas.height = height * scale;
     }

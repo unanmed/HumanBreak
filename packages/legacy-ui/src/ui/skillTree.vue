@@ -90,7 +90,7 @@ import { isNil } from 'lodash-es';
 
 const props = defineProps<IMountedVBind>();
 
-const skillTree = Mota.require('@user/legacy-plugin-data');
+const skillTree = Mota.require('@user/data-state');
 
 let canvas: HTMLCanvasElement;
 let ctx: CanvasRenderingContext2D;

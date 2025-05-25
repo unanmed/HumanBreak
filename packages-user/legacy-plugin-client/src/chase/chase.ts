@@ -1,14 +1,11 @@
 import { MotaOffscreenCanvas2D } from '@motajs/render';
+import { Container, MotaRenderer, Shader, Sprite } from '@motajs/render';
 import {
     CameraAnimation,
-    Container,
     LayerGroup,
-    MotaRenderer,
-    Shader,
-    Sprite,
     disableViewport,
     enableViewport
-} from '@motajs/render';
+} from '@user/client-modules';
 import { loading } from '@user/data-base';
 import {
     heroMoveCollection,
@@ -16,6 +13,7 @@ import {
     type MoveStep
 } from '@user/data-state';
 import EventEmitter from 'eventemitter3';
+import { mainRenderer } from 'packages-user/client-modules/src/render/renderer';
 
 export interface IChaseController {
     /** 本次追逐战实例 */
@@ -190,7 +188,7 @@ export class Chase extends EventEmitter<ChaseEvent> {
         for (const [key, nodes] of Object.entries(this.data.path)) {
             if (nodes.length === 0) return;
             const floor = key as FloorIds;
-            const canvas = new MotaOffscreenCanvas2D();
+            const canvas = mainRenderer.requireCanvas();
             const ctx = canvas.ctx;
             const cell = 32;
             const half = cell / 2;
@@ -345,7 +343,7 @@ export class Chase extends EventEmitter<ChaseEvent> {
         Chase.shader.remove();
         this.emit('end', success);
         this.removeAllListeners();
-        this.pathMap.forEach(v => v.delete());
+        this.pathMap.forEach(v => mainRenderer.deleteCanvas(v));
         this.pathMap.clear();
     }
 }

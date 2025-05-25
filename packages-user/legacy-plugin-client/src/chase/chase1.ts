@@ -1,16 +1,14 @@
 import { Animation, hyper, linear, power, sleep } from 'mutate-animate';
 import { Chase, ChaseData, IChaseController } from './chase';
-// import { completeAchievement } from '@motajs/legacy-ui';
+import { MotaRenderer, Sprite } from '@motajs/render';
+import { PointEffect, PointEffectType } from '../fx/pointShader';
 import {
+    bgmController,
     Camera,
     CameraAnimation,
     ICameraScale,
-    LayerGroup,
-    MotaRenderer,
-    Sprite
-} from '@motajs/render';
-import { PointEffect, PointEffectType } from '../fx/pointShader';
-import { bgmController } from '@user/client-modules';
+    LayerGroup
+} from '@user/client-modules';
 import { loading } from '@user/data-base';
 import { chaseInit1, clip } from '@user/legacy-plugin-data';
 
@@ -301,7 +299,7 @@ function processScale(
     });
 }
 
-async function wolfMove(chase: Chase) {
+async function wolfMove(_chase: Chase) {
     core.moveBlock(23, 17, Array(6).fill('down'), 80);
     await sleep(550);
     core.setBlock(508, 23, 23);
@@ -701,7 +699,7 @@ function para3(chase: Chase, ani: Animation) {
         addLargeContrast(61, 7, ani, chase);
     });
     const exploded: Set<number> = new Set();
-    chase.on('step', (x, y) => {
+    chase.on('step', x => {
         if (core.status.floorId !== 'MT14') return;
         if (exploded.has(x)) return;
         if (x > 20 && x < 49) {

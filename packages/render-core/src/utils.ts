@@ -1,6 +1,4 @@
 import { TimingFn } from 'mutate-animate';
-// import { RenderAdapter } from './adapter';
-// import { FloorViewport } from './preset/viewport';
 import { JSX } from 'vue/jsx-runtime';
 import { DefineComponent, DefineSetupFnComponent } from 'vue';
 import { MotaOffscreenCanvas2D } from './canvas2d';
@@ -14,10 +12,10 @@ export type Props<
 > = T extends keyof JSX.IntrinsicElements
     ? JSX.IntrinsicElements[T]
     : T extends DefineSetupFnComponent<any>
-      ? InstanceType<T>['$props'] & InstanceType<T>['$emits']
-      : T extends DefineComponent
-        ? InstanceType<T>['$props'] & InstanceType<T>['$emits']
-        : unknown;
+    ? InstanceType<T>['$props'] & InstanceType<T>['$emits']
+    : T extends DefineComponent
+    ? InstanceType<T>['$props'] & InstanceType<T>['$emits']
+    : unknown;
 
 export type ElementLocator = [
     x?: number,

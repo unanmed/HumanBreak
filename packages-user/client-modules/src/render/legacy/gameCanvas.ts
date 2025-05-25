@@ -1,10 +1,10 @@
 import { logger } from '@motajs/common';
-import {
-    LayerGroupFloorBinder,
-    ILayerGroupRenderExtends,
-    LayerGroup
-} from '@motajs/render';
 import { loading } from '@user/data-base';
+import {
+    ILayerGroupRenderExtends,
+    LayerGroup,
+    LayerGroupFloorBinder
+} from '../elements';
 
 const filterMap: [FloorIds[], string][] = [];
 
@@ -58,7 +58,7 @@ export class LayerGroupFilter implements ILayerGroupRenderExtends {
         }
     }
 
-    onDestroy(group: LayerGroup): void {
+    onDestroy(_group: LayerGroup): void {
         this.binder?.off('floorChange', this.onFloorChange);
     }
 }

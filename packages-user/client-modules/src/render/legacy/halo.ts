@@ -1,14 +1,13 @@
 import { logger } from '@motajs/common';
 import { MotaOffscreenCanvas2D } from '@motajs/render';
 import { mainSetting } from '@motajs/legacy-ui';
+import { Sprite, Transform } from '@motajs/render';
+import { gameListener, hook } from '@user/data-base';
 import {
-    LayerGroupFloorBinder,
     ILayerGroupRenderExtends,
     LayerGroup,
-    Sprite,
-    Transform
-} from '@motajs/render';
-import { gameListener, hook } from '@user/data-base';
+    LayerGroupFloorBinder
+} from '../elements';
 
 export class LayerGroupHalo implements ILayerGroupRenderExtends {
     id: string = 'halo';
@@ -37,7 +36,7 @@ export class LayerGroupHalo implements ILayerGroupRenderExtends {
         }
     }
 
-    onDestroy(group: LayerGroup): void {
+    onDestroy(_group: LayerGroup): void {
         this.halo?.destroy();
         LayerGroupHalo.sprites.delete(this.halo);
     }
@@ -67,7 +66,7 @@ class Halo extends Sprite {
         });
     }
 
-    drawHalo(canvas: MotaOffscreenCanvas2D, transform: Transform) {
+    drawHalo(canvas: MotaOffscreenCanvas2D, _transform: Transform) {
         if (!mainSetting.getValue('screen.halo', true)) return;
         const floorId = this.binder.getFloor();
         if (!floorId) return;

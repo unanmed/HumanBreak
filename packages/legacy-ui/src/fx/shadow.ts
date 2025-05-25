@@ -1,12 +1,8 @@
 import { mat4 } from 'gl-matrix';
 import { logger } from '@motajs/common';
 import { WebGLColorArray, createProgram, isWebGL2Supported } from './webgl';
-import {
-    ILayerRenderExtends,
-    Layer,
-    HeroRenderer,
-    Sprite
-} from '@motajs/render';
+import { Sprite } from '@motajs/render';
+import { ILayerRenderExtends, Layer, HeroRenderer } from '@user/client-modules';
 
 /**
  * 最大光源数量，必须设置，且光源数不能超过这个值，这个值决定了会预留多少的缓冲区，因此最好尽可能小，同时游戏过程中不可修改
@@ -114,7 +110,7 @@ export function createShadow() {
         Shadow.update(true);
         LayerShadowExtends.shadowList.forEach(v => v.update());
     });
-    hook.on('changingFloor', floorId => {
+    hook.on('changingFloor', () => {
         Shadow.clearBuffer();
         Shadow.update(true);
         // setCanvasFilterByFloorId(floorId);

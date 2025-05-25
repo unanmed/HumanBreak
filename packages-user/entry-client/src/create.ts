@@ -50,7 +50,6 @@ export function create() {
 
 async function createModule() {
     LegacyUI.create();
-    RenderElements.create();
     ClientModules.create();
 
     await import('ant-design-vue/dist/antd.dark.css');

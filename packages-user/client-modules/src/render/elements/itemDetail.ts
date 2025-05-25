@@ -1,13 +1,9 @@
 import { logger } from '@motajs/common';
 import { mainSetting } from '@motajs/legacy-ui';
-import {
-    LayerGroupFloorBinder,
-    ILayerGroupRenderExtends,
-    LayerGroup
-} from '@motajs/render';
 import { hook } from '@user/data-base';
 import { ItemState } from '@user/data-state';
 import { Damage, DamageRenderable, FloorDamageExtends } from './damage';
+import { ILayerGroupRenderExtends, LayerGroup, LayerGroupFloorBinder } from '.';
 
 interface ItemDetailData {
     x: number;
@@ -22,7 +18,7 @@ interface ItemData {
 }
 
 export function createItemDetail() {
-    hook.on('setBlock', (x, y, floorId, block) => {
+    hook.on('setBlock', (x, y, _floorId, block) => {
         FloorItemDetail.listened.forEach(v => {
             v.setBlock(block, x, y);
         });
@@ -261,7 +257,7 @@ export class FloorItemDetail implements ILayerGroupRenderExtends {
         }
     }
 
-    onDestroy(group: LayerGroup): void {
+    onDestroy(_group: LayerGroup): void {
         this.sprite.off('beforeDamageRender', this.onBeforeDamageRender);
         this.sprite.off('setMapSize', this.onUpdateMapSize);
         FloorItemDetail.listened.delete(this);

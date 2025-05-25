@@ -132,6 +132,14 @@ export interface IRenderTickerSupport {
     hasTicker(id: number): boolean;
 }
 
+export interface IRenderEvent {
+    /**
+     * 当触发缩放事件时，此函数执行的内容
+     * @param scale 缩放至的缩放比
+     */
+    onResize(scale: number): void;
+}
+
 export interface IRenderVueSupport {
     /**
      * 在 jsx, vue 中当属性改变后触发此函数，用于处理响应式等情况
@@ -185,6 +193,10 @@ export interface IRenderTreeRoot {
     hoverElement(element: RenderItem): void;
 }
 
+interface RenderItemCanvasData {
+    autoScale: boolean;
+}
+
 export interface ERenderItemEvent extends ERenderItemActionEvent {
     beforeRender: [transform: Transform];
     afterRender: [transform: Transform];
@@ -213,7 +225,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         IRenderTickerSupport,
         IRenderChildable,
         IRenderVueSupport,
-        ITransformUpdatable
+        ITransformUpdatable,
+        IRenderEvent
 {
     /** 渲染的全局ticker */
     static ticker: Ticker = new Ticker();
@@ -332,6 +345,11 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     readonly transformFallThrough: boolean = false;
     /** 这个渲染元素使用到的所有画布 */
     protected readonly canvases: Set<MotaOffscreenCanvas2D> = new Set();
+    /** 这个渲染元素每个画布的配置信息 */
+    private readonly canvasMap: Map<
+        MotaOffscreenCanvas2D,
+        RenderItemCanvasData
+    > = new Map();
     //#endregion
 
     //#region 交互事件
@@ -371,11 +389,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
 
         this._transform.bind(this);
         this.cache = this.requireCanvas();
-        this.cache.withGameScale(true);
         if (!enableCache) {
-            this.cache.withGameScale(false);
             this.cache.size(1, 1);
-            this.cache.freeze();
         }
     }
 
@@ -439,10 +454,12 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     /**
      * 申请一个 `MotaOffscreenCanvas2D`，即申请一个画布
      * @param alpha 是否启用画布的 alpha 通道
+     * @param autoScale 是否自动跟随缩放
      */
-    protected requireCanvas(alpha: boolean = true) {
+    requireCanvas(alpha: boolean = true, autoScale: boolean = false) {
         const canvas = new MotaOffscreenCanvas2D(alpha);
         this.canvases.add(canvas);
+        this.canvasMap.set(canvas, { autoScale });
         return canvas;
     }
 
@@ -450,9 +467,20 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      * 删除由 `requireCanvas` 申请的画布，当画布不再使用时，可以用该方法删除画布
      * @param canvas 要删除的画布
      */
-    protected deleteCanvas(canvas: MotaOffscreenCanvas2D) {
-        if (!this.canvases.delete(canvas)) return;
-        canvas.delete();
+    deleteCanvas(canvas: MotaOffscreenCanvas2D) {
+        this.canvases.delete(canvas);
+        this.canvasMap.delete(canvas);
+    }
+
+    //#region 事件处理
+
+    onResize(scale: number): void {
+        this.cache.setScale(scale);
+        this.canvases.forEach(v => {
+            if (this.canvasMap.get(v)?.autoScale) {
+                v.setScale(scale);
+            }
+        });
     }
 
     //#region 修改元素属性
@@ -736,7 +764,6 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this.update();
         this.checkRoot();
         this._root?.connect(this);
-        this.canvases.forEach(v => v.activate());
         this._transform.bind(this);
     }
 
@@ -751,7 +778,6 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this._parent = void 0;
         parent.requestSort();
         parent.update();
-        this.canvases.forEach(v => v.deactivate());
         this._transform.bind();
         if (!success) return false;
         this._root?.disconnect(this);
@@ -1257,8 +1283,6 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this.remove();
         this.emit('destroy');
         this.removeAllListeners();
-        this.cache.delete();
-        this.canvases.forEach(v => v.delete());
         this.canvases.clear();
     }
 }

@@ -629,15 +629,12 @@ export class Layer extends Container<ELayerEvent> {
 
         this.staticMap.setHD(false);
         // this.staticMap.setAntiAliasing(false);
-        this.staticMap.withGameScale(false);
         this.staticMap.size(core._PX_, core._PY_);
         this.movingMap.setHD(false);
         // this.movingMap.setAntiAliasing(false);
-        this.movingMap.withGameScale(false);
         this.movingMap.size(core._PX_, core._PY_);
         this.backMap.setHD(false);
         // this.backMap.setAntiAliasing(false);
-        this.backMap.withGameScale(false);
         this.backMap.size(core._PX_, core._PY_);
         this.main.setAntiAliasing(false);
         this.main.setHD(false);
@@ -777,7 +774,6 @@ export class Layer extends Container<ELayerEvent> {
         const num = this.background;
 
         const data = texture.getRenderable(num);
-        this.backImage.forEach(v => v.delete());
         this.backImage = [];
         if (!data) return;
 
@@ -785,7 +781,6 @@ export class Layer extends Container<ELayerEvent> {
         const temp = this.requireCanvas();
         temp.setHD(false);
         temp.setAntiAliasing(false);
-        temp.withGameScale(false);
         for (let i = 0; i < frame; i++) {
             const canvas = this.requireCanvas();
             const ctx = canvas.ctx;
@@ -793,7 +788,6 @@ export class Layer extends Container<ELayerEvent> {
             const [sx, sy, w, h] = data.render[i];
             canvas.setHD(false);
             canvas.setAntiAliasing(false);
-            canvas.withGameScale(false);
             canvas.size(core._PX_, core._PY_);
             temp.size(w, h);
 
@@ -806,7 +800,6 @@ export class Layer extends Container<ELayerEvent> {
 
             this.backImage.push(canvas);
         }
-        temp.delete();
 
         for (const ex of this.extend.values()) {
             ex.onBackgroundGenerated?.(this, this.backImage);
@@ -1208,7 +1201,6 @@ export class Layer extends Container<ELayerEvent> {
             const temp = this.requireCanvas();
             temp.setAntiAliasing(false);
             temp.setHD(false);
-            temp.withGameScale(false);
             temp.size(core._PX_, core._PY_);
 
             // 先画到临时画布，用于缓存
@@ -1512,10 +1504,6 @@ export class Layer extends Container<ELayerEvent> {
             ex.onDestroy?.(this);
         }
         super.destroy();
-        this.staticMap.delete();
-        this.movingMap.delete();
-        this.backMap.delete();
-        this.backImage.forEach(v => v.delete());
         this.block.destroy();
         this.main.destroy();
         layerAdapter.remove(this);

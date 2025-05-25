@@ -1,15 +1,14 @@
-import {
-    Container,
-    LayerGroupFloorBinder,
-    FloorLayer,
-    LayerGroup,
-    FloorViewport,
-    MotaRenderer
-} from '@motajs/render';
+import { Container, MotaRenderer } from '@motajs/render';
 import { hook } from '@user/data-base';
 import { MiscData } from '@user/data-state';
-import { FloorDamageExtends } from './damage';
-import { FloorItemDetail } from './itemDetail';
+import { FloorDamageExtends } from './elements/damage';
+import { FloorItemDetail } from './elements/itemDetail';
+import {
+    LayerGroup,
+    FloorLayer,
+    LayerGroupFloorBinder,
+    FloorViewport
+} from './elements';
 
 const loopMaps = MiscData.loopMaps;
 
@@ -19,7 +18,7 @@ let show: boolean = false;
 let delegation: number = -1;
 
 export function createLoopMap() {
-    hook.on('changingFloor', (floorId, heroLoc) => {
+    hook.on('changingFloor', (floorId, _heroLoc) => {
         enableLoopMapElement(floorId);
     });
 }

@@ -182,7 +182,6 @@ export class Winskin extends RenderItem<EWinskinEvent> {
         const pattern = this.requireCanvas();
         const img = this.image;
         pattern.size(32, 16);
-        pattern.withGameScale(false);
         pattern.setHD(false);
         pattern.setAntiAliasing(false);
         const ctx = pattern.ctx;
@@ -211,7 +210,6 @@ export class Winskin extends RenderItem<EWinskinEvent> {
             Winskin.patternMap.set(this.imageName, winskinPattern);
         }
         this.patternCache = winskinPattern;
-        this.deleteCanvas(pattern);
         return winskinPattern;
     }
 

@@ -1,15 +1,5 @@
 import { LayerShadowExtends } from '@motajs/legacy-ui';
-import {
-    ILayerGroupRenderExtends,
-    LayerGroupAnimate,
-    FloorViewport,
-    ILayerRenderExtends,
-    HeroRenderer,
-    LayerDoorAnimate,
-    Props,
-    LayerGroup,
-    Font
-} from '@motajs/render';
+import { Props, Font } from '@motajs/render';
 import { WeatherController } from '../../weather';
 import { defineComponent, onMounted, reactive, ref } from 'vue';
 import { Textbox, Tip } from '../components';
@@ -31,14 +21,23 @@ import { ReplayingStatus } from './toolbar';
 import { getHeroStatusOn, HeroSkill, NightSpecial } from '@user/data-state';
 import { jumpIgnoreFloor } from '@user/legacy-plugin-data';
 import { hook } from '@user/data-base';
-import { FloorDamageExtends } from '../damage';
-import { FloorItemDetail } from '../itemDetail';
+import { FloorDamageExtends } from '../elements/damage';
+import { FloorItemDetail } from '../elements/itemDetail';
 import { LayerGroupPortal } from '../legacy/portal';
 import { LayerGroupFilter } from '../legacy/gameCanvas';
 import { LayerGroupHalo } from '../legacy/halo';
 import { FloorChange } from '../legacy/fallback';
 import { PopText } from '../legacy/pop';
 import { mainUIController } from './controller';
+import {
+    ILayerGroupRenderExtends,
+    LayerGroupAnimate,
+    FloorViewport,
+    ILayerRenderExtends,
+    HeroRenderer,
+    LayerDoorAnimate,
+    LayerGroup
+} from '../elements';
 
 const MainScene = defineComponent(() => {
     const layerGroupExtends: ILayerGroupRenderExtends[] = [

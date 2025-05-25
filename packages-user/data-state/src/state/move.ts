@@ -1,17 +1,17 @@
 import EventEmitter from 'eventemitter3';
 import { backDir, checkCanMoveExtended, toDir } from './utils';
 import { loading } from '@user/data-base';
+import type { RenderAdapter } from '@motajs/render';
 import type {
-    RenderAdapter,
-    HeroRenderer,
-    FloorViewport,
     FloorLayer,
+    FloorViewport,
+    HeroKeyMover,
+    HeroRenderer,
     Layer,
+    LayerFloorBinder,
     LayerGroup,
-    LayerMovingRenderable,
-    LayerFloorBinder
-} from '@motajs/render';
-import type { HeroKeyMover } from '@user/client-modules';
+    LayerMovingRenderable
+} from '@user/client-modules';
 import { BluePalace, MiscData } from '../mechanism/misc';
 import { sleep } from '@motajs/common';
 
@@ -318,7 +318,7 @@ export class BlockMover extends ObjectMoverBase {
         this.blockNum = blockNum;
 
         Mota.r(() => {
-            const { Layer } = Mota.require('@motajs/render');
+            const { Layer } = Mota.require('@user/client-modules');
             const r = Layer.getMovingRenderable(blockNum, this.x, this.y);
 
             if (r) {

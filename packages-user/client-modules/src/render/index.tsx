@@ -1,21 +1,16 @@
-import { MotaRenderer, createApp } from '@motajs/render';
+import { createApp } from '@motajs/render';
 import { defineComponent } from 'vue';
 import { UIController } from '@motajs/system-ui';
 import { mainSceneUI } from './ui/main';
 import { MAIN_HEIGHT, MAIN_WIDTH } from './shared';
 import { hook } from '@user/data-base';
-import { createItemDetail } from './itemDetail';
+import { createItemDetail } from './elements/itemDetail';
 import { createLoopMap } from './loopMap';
 import { createGameCanvas } from './legacy/gameCanvas';
 import { createElements } from './elements';
+import { mainRenderer } from './renderer';
 
 export function createGameRenderer() {
-    const main = new MotaRenderer({
-        canvas: '#render-main',
-        width: MAIN_WIDTH,
-        height: MAIN_HEIGHT
-    });
-
     const App = defineComponent(_props => {
         const ui = new UIController('root-ui');
         ui.open(mainSceneUI, {});
@@ -27,18 +22,18 @@ export function createGameRenderer() {
         );
     });
 
-    main.hide();
-    createApp(App).mount(main);
+    mainRenderer.hide();
+    createApp(App).mount(mainRenderer);
 
     hook.on('reset', () => {
-        main.show();
+        mainRenderer.show();
     });
 
     hook.on('restart', () => {
-        main.hide();
+        mainRenderer.hide();
     });
 
-    console.log(main);
+    console.log(mainRenderer);
 }
 
 export function createRender() {

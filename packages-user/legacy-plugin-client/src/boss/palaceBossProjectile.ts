@@ -3,6 +3,7 @@ import { IStateDamageable } from '@user/data-state';
 import { Hitbox, Projectile } from './barrage';
 import type { PalaceBoss } from './palaceBoss';
 import { clamp } from '@motajs/legacy-ui';
+import { mainRenderer } from 'packages-user/client-modules/src/render/renderer';
 
 function popDamage(damage: number, boss: PalaceBoss, color: string) {
     const { x, y } = core.status.hero.loc;
@@ -74,9 +75,8 @@ export class SplittableBall extends Projectile<PalaceBoss> {
     static init(colors: Record<string, string[]>) {
         this.ball.clear();
         for (const [key, color] of Object.entries(colors)) {
-            const canvas = new MotaOffscreenCanvas2D();
+            const canvas = mainRenderer.requireCanvas();
             canvas.size(32, 32);
-            canvas.withGameScale(true);
             canvas.setHD(true);
             const ctx = canvas.ctx;
             const gradient = ctx.createRadialGradient(16, 16, 8, 16, 16, 16);
@@ -87,7 +87,6 @@ export class SplittableBall extends Projectile<PalaceBoss> {
             ctx.fillStyle = gradient;
             ctx.arc(16, 16, 16, 0, Math.PI * 2);
             ctx.fill();
-            canvas.freeze();
             this.ball.set(key, canvas);
         }
     }
@@ -95,7 +94,7 @@ export class SplittableBall extends Projectile<PalaceBoss> {
     static end() {
         this.ball.forEach(v => {
             v.clear();
-            v.delete();
+            mainRenderer.deleteCanvas(v);
         });
         this.ball.clear();
     }

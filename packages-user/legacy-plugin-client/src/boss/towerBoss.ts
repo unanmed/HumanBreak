@@ -1,11 +1,9 @@
 import {
     Shader,
     MotaRenderer,
-    LayerGroup,
     RenderItem,
     MotaOffscreenCanvas2D,
-    Container,
-    HeroRenderer
+    Container
 } from '@motajs/render';
 import { PointEffect } from '../fx/pointShader';
 import { BarrageBoss, BossSprite, Hitbox } from './barrage';
@@ -25,7 +23,11 @@ import { IStateDamageable } from '@user/data-state';
 import { Pop } from '../../../client-modules/src/render/legacy/pop';
 import { loading } from '@user/data-base';
 import { clip } from '@user/legacy-plugin-data';
-import { WeatherController } from '@user/client-modules';
+import {
+    HeroRenderer,
+    LayerGroup,
+    WeatherController
+} from '@user/client-modules';
 
 loading.once('coreInit', () => {
     const shader = new Shader();

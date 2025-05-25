@@ -1,7 +1,6 @@
 import { backDir, has } from '@user/data-utils';
 import { loading } from '@user/data-base';
-import type { LayerDoorAnimate } from '@motajs/render';
-import { getSkillLevel } from './skillTree';
+import { LayerDoorAnimate } from '@user/client-modules';
 
 /**
  * 一些零散机制的数据
@@ -87,7 +86,7 @@ export namespace BluePalace {
 
         const Adapter = Mota.require('@motajs/render').RenderAdapter;
         const adapter = Adapter.get<LayerDoorAnimate>('door-animate');
-        const texture = Mota.require('@motajs/render').texture;
+        const texture = Mota.require('@user/client-modules').texture;
         if (adapter) {
             Promise.all(
                 toConvert.map(v => {

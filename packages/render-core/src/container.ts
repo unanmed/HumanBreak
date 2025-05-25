@@ -42,6 +42,11 @@ export class Container<E extends EContainerEvent = EContainerEvent>
         });
     }
 
+    onResize(scale: number): void {
+        this.sortedChildren.forEach(v => v.onResize(scale));
+        super.onResize(scale);
+    }
+
     requestSort() {
         if (!this.needSort) {
             this.needSort = true;

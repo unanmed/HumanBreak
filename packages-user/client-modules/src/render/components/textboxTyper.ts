@@ -1,14 +1,8 @@
 import { logger } from '@motajs/common';
-import {
-    AutotileRenderable,
-    Font,
-    onTick,
-    RenderableData,
-    texture,
-    MotaOffscreenCanvas2D
-} from '@motajs/render';
+import { Font, onTick, MotaOffscreenCanvas2D } from '@motajs/render';
 import EventEmitter from 'eventemitter3';
 import { isNil } from 'lodash-es';
+import { RenderableData, AutotileRenderable, texture } from '../elements';
 
 /** 文字的安全填充，会填充在文字的上侧和下侧，防止削顶和削底 */
 const SAFE_PAD = 1;
@@ -596,10 +590,8 @@ export class TextContentParser {
         this.status = { ...initStatus };
 
         this.testCanvas = new MotaOffscreenCanvas2D(false);
-        this.testCanvas.withGameScale(false);
         this.testCanvas.setHD(false);
         this.testCanvas.size(1, 1);
-        this.testCanvas.freeze();
     }
 
     /**

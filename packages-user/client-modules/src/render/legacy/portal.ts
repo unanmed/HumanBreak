@@ -1,13 +1,13 @@
 import { logger } from '@motajs/common';
 import { MotaOffscreenCanvas2D } from '@motajs/render';
 import { mainSetting, MotaSettingItem } from '@motajs/legacy-ui';
+import { Sprite } from '@motajs/render';
+import { BluePalace } from '@user/data-state';
 import {
-    LayerGroupFloorBinder,
     ILayerGroupRenderExtends,
     LayerGroup,
-    Sprite
-} from '@motajs/render';
-import { BluePalace } from '@user/data-state';
+    LayerGroupFloorBinder
+} from '../elements';
 
 /** 最大粒子数 */
 const MAX_PARTICLES = 10;
@@ -49,7 +49,7 @@ export class LayerGroupPortal implements ILayerGroupRenderExtends {
         }
     }
 
-    onDestroy(group: LayerGroup): void {
+    onDestroy(_group: LayerGroup): void {
         this.binder.off('floorChange', this.onFloorChange);
     }
 }
@@ -104,7 +104,7 @@ export class Portal extends Sprite {
 
         this.setZIndex(35);
 
-        this.setRenderFn((canvas, transform) => {
+        this.setRenderFn((canvas, _transform) => {
             this.renderPortal(canvas);
         });
     }

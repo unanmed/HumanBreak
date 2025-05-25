@@ -5,6 +5,7 @@ import type { TowerBoss } from './towerBoss';
 import { IStateDamageable } from '@user/data-state';
 import { PointEffect, PointEffectType } from '../fx/pointShader';
 import { isNil } from 'lodash-es';
+import { mainRenderer } from 'packages-user/client-modules/src/render/renderer';
 
 export const enum ProjectileDirection {
     Vertical,
@@ -131,12 +132,11 @@ export class ArrowProjectile extends Projectile<TowerBoss> {
     static init() {
         this.easing = power(2, 'in');
         this.dangerEasing = power(3, 'out');
-        this.horizontal = new MotaOffscreenCanvas2D();
-        this.vertical = new MotaOffscreenCanvas2D();
+        this.horizontal = mainRenderer.requireCanvas();
+        this.vertical = mainRenderer.requireCanvas();
         const hor = this.horizontal;
         hor.size(480, 32);
         hor.setHD(true);
-        hor.withGameScale(true);
         const ctxHor = hor.ctx;
         ctxHor.fillStyle = '#f00';
         ctxHor.globalAlpha = 0.6;
@@ -146,15 +146,12 @@ export class ArrowProjectile extends Projectile<TowerBoss> {
         const ver = this.vertical;
         ver.size(32, 480);
         ver.setHD(true);
-        ver.withGameScale(true);
         const ctxVer = ver.ctx;
         ctxVer.fillStyle = '#f00';
         ctxVer.globalAlpha = 0.6;
         for (let i = 0; i < 15; i++) {
             ctxVer.fillRect(2, i * 32 + 2, 28, 28);
         }
-        hor.freeze();
-        ver.freeze();
     }
 
     /**
@@ -164,10 +161,10 @@ export class ArrowProjectile extends Projectile<TowerBoss> {
         this.easing = void 0;
         this.dangerEasing = void 0;
         this.horizontal?.clear();
-        this.horizontal?.delete();
+        if (this.horizontal) mainRenderer.deleteCanvas(this.horizontal);
         this.horizontal = null;
         this.vertical?.clear();
-        this.vertical?.delete();
+        if (this.vertical) mainRenderer.deleteCanvas(this.vertical);
         this.vertical = null;
     }
 
@@ -460,15 +457,14 @@ export class ThunderProjectile extends Projectile<TowerBoss> {
     private effectId2?: number;
 
     static init() {
-        this.cache = new MotaOffscreenCanvas2D();
+        this.cache = mainRenderer.requireCanvas();
         this.cache.setHD(true);
-        this.cache.withGameScale(true);
         this.cache.size(480, 480);
     }
 
     static end() {
         this.cache?.clear();
-        this.cache?.delete();
+        if (this.cache) mainRenderer.deleteCanvas(this.cache);
         this.cache = null;
     }
 
@@ -622,12 +618,11 @@ export class ThunderBallProjectile extends Projectile<TowerBoss> {
      */
     static init() {
         this.dangerEasing = power(3, 'out');
-        this.horizontal = new MotaOffscreenCanvas2D();
-        this.vertical = new MotaOffscreenCanvas2D();
+        this.horizontal = mainRenderer.requireCanvas();
+        this.vertical = mainRenderer.requireCanvas();
         const hor = this.horizontal;
         hor.size(480, 32);
         hor.setHD(true);
-        hor.withGameScale(true);
         const ctxHor = hor.ctx;
         ctxHor.fillStyle = '#fff';
         ctxHor.globalAlpha = 0.6;
@@ -637,15 +632,12 @@ export class ThunderBallProjectile extends Projectile<TowerBoss> {
         const ver = this.vertical;
         ver.size(32, 480);
         ver.setHD(true);
-        ver.withGameScale(true);
         const ctxVer = ver.ctx;
         ctxVer.fillStyle = '#fff';
         ctxVer.globalAlpha = 0.6;
         for (let i = 0; i < 15; i++) {
             ctxVer.fillRect(2, i * 32 + 2, 28, 28);
         }
-        hor.freeze();
-        ver.freeze();
     }
 
     /**
@@ -654,10 +646,10 @@ export class ThunderBallProjectile extends Projectile<TowerBoss> {
     static end() {
         this.dangerEasing = void 0;
         this.horizontal?.clear();
-        this.horizontal?.delete();
+        if (this.horizontal) mainRenderer.deleteCanvas(this.horizontal);
         this.horizontal = null;
         this.vertical?.clear();
-        this.vertical?.delete();
+        if (this.vertical) mainRenderer.deleteCanvas(this.vertical);
         this.vertical = null;
     }
 

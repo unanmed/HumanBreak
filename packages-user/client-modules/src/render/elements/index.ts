@@ -75,3 +75,4 @@ export * from './hero';
 export * from './layer';
 export * from './misc';
 export * from './viewport';
+export * from './utils';
