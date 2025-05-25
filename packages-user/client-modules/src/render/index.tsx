@@ -7,6 +7,7 @@ import { hook } from '@user/data-base';
 import { createItemDetail } from './itemDetail';
 import { createLoopMap } from './loopMap';
 import { createGameCanvas } from './legacy/gameCanvas';
+import { createElements } from './elements';
 
 export function createGameRenderer() {
     const main = new MotaRenderer();
@@ -41,8 +42,10 @@ export function createRender() {
     createGameCanvas();
     createItemDetail();
     createLoopMap();
+    createElements();
 }
 
 export * from './components';
 export * from './ui';
 export * from './use';
+export * from './elements';

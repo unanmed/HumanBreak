@@ -12,13 +12,8 @@ import {
 import {
     Comment,
     ETextEvent,
-    Icon,
     Image,
     Text,
-    Winskin,
-    Animate,
-    Layer,
-    LayerGroup,
     BezierCurve,
     Circle,
     Ellipse,
@@ -70,7 +65,7 @@ class RenderTagMap {
 
 export const tagMap = new RenderTagMap();
 
-const standardElement = (
+export const standardElement = (
     Item: new (
         type: RenderItemPosition,
         cache?: boolean,
@@ -91,7 +86,7 @@ const standardElement = (
     };
 };
 
-const standardElementNoCache = (
+export const standardElementNoCache = (
     Item: new (
         type: RenderItemPosition,
         cache?: boolean,
@@ -199,44 +194,6 @@ tagMap.register('custom', (_0, _1, props) => {
         return item(props);
     }
 });
-tagMap.register('layer', (_0, _1, props) => {
-    if (!props) return new Layer();
-    else {
-        const { ex } = props;
-        const l = new Layer();
-
-        if (ex) {
-            (ex as any[]).forEach(v => {
-                l.extends(v);
-            });
-        }
-
-        return l;
-    }
-});
-tagMap.register('layer-group', (_0, _1, props) => {
-    if (!props) return new LayerGroup();
-    else {
-        const { ex, layers } = props;
-        const l = new LayerGroup();
-
-        if (ex) {
-            (ex as any[]).forEach(v => {
-                l.extends(v);
-            });
-        }
-        if (layers) {
-            (layers as any[]).forEach(v => {
-                l.addLayer(v);
-            });
-        }
-
-        return l;
-    }
-});
-tagMap.register('animation', (_0, _1, _props) => {
-    return new Animate();
-});
 tagMap.register('g-rect', standardElementNoCache(Rect));
 tagMap.register('g-circle', standardElementNoCache(Circle));
 tagMap.register('g-ellipse', standardElementNoCache(Ellipse));
@@ -245,14 +202,3 @@ tagMap.register('g-bezier', standardElementNoCache(BezierCurve));
 tagMap.register('g-quad', standardElementNoCache(QuadraticCurve));
 tagMap.register('g-path', standardElementNoCache(Path));
 tagMap.register('g-rectr', standardElementNoCache(RectR));
-tagMap.register('icon', standardElementNoCache(Icon));
-tagMap.register('winskin', (_0, _1, props) => {
-    if (!props) return new Winskin(core.material.images.images['winskin.png']);
-    else {
-        const {
-            image = core.material.images.images['winskin.png'],
-            type = 'static'
-        } = props;
-        return new Winskin(image, type);
-    }
-});
