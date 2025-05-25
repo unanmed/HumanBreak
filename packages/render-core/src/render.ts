@@ -28,6 +28,17 @@ interface MouseInfo {
     identifier: number;
 }
 
+export interface MotaRendererConfig {
+    /** 要挂载到哪个画布上，可以填 css 选择器或画布元素本身 */
+    canvas: string | HTMLCanvasElement;
+    /** 画布的宽度，所有渲染操作会自行适配缩放 */
+    width: number;
+    /** 画布的高度，所有渲染操作会自行适配缩放 */
+    height: number;
+    /** 是否启用不透明度通道 */
+    alpha?: boolean;
+}
+
 export class MotaRenderer extends Container implements IRenderTreeRoot {
     static list: Map<string, MotaRenderer> = new Map();
 
@@ -58,23 +69,23 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
 
     readonly isRoot = true;
 
-    constructor(id: string = 'render-main') {
+    constructor(config: MotaRendererConfig) {
         super('static', false);
 
-        const canvas = document.getElementById(id) as HTMLCanvasElement;
+        const canvas = this.getMountCanvas(config.canvas);
         if (!canvas) {
             logger.error(19);
             return;
         }
-        this.target = new MotaOffscreenCanvas2D(true, canvas);
-        this.size(core._PX_, core._PY_);
+        this.target = new MotaOffscreenCanvas2D(config.alpha, canvas);
+        this.size(config.width, config.height);
         this.target.withGameScale(true);
         this.target.setAntiAliasing(false);
 
         this.setAnchor(0.5, 0.5);
         this.transform.translate(240, 240);
 
-        MotaRenderer.list.set(id, this);
+        MotaRenderer.list.set(canvas.id, this);
 
         const update = () => {
             this.requestRenderFrame(() => {
@@ -85,6 +96,14 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
 
         update();
         this.listen();
+    }
+
+    private getMountCanvas(canvas: string | HTMLCanvasElement) {
+        if (typeof canvas === 'string') {
+            return document.querySelector(canvas) as HTMLCanvasElement;
+        } else {
+            return canvas;
+        }
     }
 
     size(width: number, height: number): void {
@@ -565,10 +584,14 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
         if (item.isComment) return '';
         const name = item.constructor.name;
         if (item.children.size === 0) {
-            return `${' '.repeat(deep * space)}<${name} ${item.id ? `id="${item.id}" ` : ''}uid="${item.uid}"${item.hidden ? ' hidden' : ''} />\n`;
+            return `${' '.repeat(deep * space)}<${name} ${
+                item.id ? `id="${item.id}" ` : ''
+            }uid="${item.uid}"${item.hidden ? ' hidden' : ''} />\n`;
         } else {
             return (
-                `${' '.repeat(deep * space)}<${name} ${item.id ? `${item.id} ` : ''}uid="${item.uid}" ${item.hidden ? 'hidden' : ''}>\n` +
+                `${' '.repeat(deep * space)}<${name} ${
+                    item.id ? `${item.id} ` : ''
+                }uid="${item.uid}" ${item.hidden ? 'hidden' : ''}>\n` +
                 `${[...item.children]
                     .filter(v => !v.isComment)
                     .map(v => this.toTagString(v, space, deep + 1))

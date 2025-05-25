@@ -10,8 +10,11 @@ import { createGameCanvas } from './legacy/gameCanvas';
 import { createElements } from './elements';
 
 export function createGameRenderer() {
-    const main = new MotaRenderer();
-    main.size(MAIN_WIDTH, MAIN_HEIGHT);
+    const main = new MotaRenderer({
+        canvas: '#render-main',
+        width: MAIN_WIDTH,
+        height: MAIN_HEIGHT
+    });
 
     const App = defineComponent(_props => {
         const ui = new UIController('root-ui');
