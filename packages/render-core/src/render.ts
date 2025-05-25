@@ -35,7 +35,7 @@ export interface MotaRendererConfig {
     width: number;
     /** 画布的高度，所有渲染操作会自行适配缩放 */
     height: number;
-    /** 是否启用不透明度通道 */
+    /** 是否启用不透明度通道，默认启用 */
     alpha?: boolean;
 }
 
@@ -77,7 +77,7 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
             logger.error(19);
             return;
         }
-        this.target = new MotaOffscreenCanvas2D(config.alpha, canvas);
+        this.target = new MotaOffscreenCanvas2D(config.alpha ?? true, canvas);
         this.size(config.width, config.height);
         this.target.withGameScale(true);
         this.target.setAntiAliasing(false);
