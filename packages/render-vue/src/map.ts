@@ -157,13 +157,13 @@ tagMap.register<ETextEvent, Text>('text', (_0, _1, props) => {
         return new Text(text, type);
     }
 });
+const emptyImage = document.createElement('canvas');
+emptyImage.width = 1;
+emptyImage.height = 1;
 tagMap.register('image', (_0, _1, props) => {
-    if (!props) return new Image(core.material.images.images['bg.webp']);
+    if (!props) return new Image(emptyImage);
     else {
-        const {
-            image = core.material.images.images['bg.webp'],
-            type = 'static'
-        } = props;
+        const { image = emptyImage, type = 'static' } = props;
         return new Image(image, type);
     }
 });

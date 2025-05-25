@@ -8,7 +8,6 @@ import {
 } from 'vue';
 import EventEmitter from 'eventemitter3';
 import {
-    AnimateProps,
     BaseProps,
     BezierProps,
     CirclesProps,
@@ -18,10 +17,7 @@ import {
     CustomProps,
     DamageProps,
     EllipseProps,
-    IconProps,
     ImageProps,
-    LayerGroupProps,
-    LayerProps,
     LineProps,
     PathProps,
     QuadraticProps,
@@ -29,8 +25,7 @@ import {
     RectRProps,
     ShaderProps,
     SpriteProps,
-    TextProps,
-    WinskinProps
+    TextProps
 } from './props';
 import {
     ERenderItemEvent,
@@ -40,13 +35,8 @@ import {
     EShaderEvent
 } from '@motajs/render-core';
 import {
-    EIconEvent,
     EImageEvent,
     ETextEvent,
-    EWinskinEvent,
-    ELayerEvent,
-    ELayerGroupEvent,
-    EAnimateEvent,
     EGraphicItemEvent
 } from '@motajs/render-elements';
 
@@ -97,10 +87,7 @@ declare module 'vue/jsx-runtime' {
             image: TagDefine<ImageProps, EImageEvent>;
             comment: TagDefine<CommentProps, ERenderItemEvent>;
             custom: TagDefine<CustomProps, ERenderItemEvent>;
-            layer: TagDefine<LayerProps, ELayerEvent>;
-            'layer-group': TagDefine<LayerGroupProps, ELayerGroupEvent>;
             damage: TagDefine<DamageProps, ERenderItemEvent>;
-            animation: TagDefine<AnimateProps, EAnimateEvent>;
             'g-rect': TagDefine<RectProps, EGraphicItemEvent>;
             'g-circle': TagDefine<CirclesProps, EGraphicItemEvent>;
             'g-ellipse': TagDefine<EllipseProps, EGraphicItemEvent>;
@@ -109,8 +96,6 @@ declare module 'vue/jsx-runtime' {
             'g-quad': TagDefine<QuadraticProps, EGraphicItemEvent>;
             'g-path': TagDefine<PathProps, EGraphicItemEvent>;
             'g-rectr': TagDefine<RectRProps, EGraphicItemEvent>;
-            icon: TagDefine<IconProps, EIconEvent>;
-            winskin: TagDefine<WinskinProps, EWinskinEvent>;
         }
     }
 }

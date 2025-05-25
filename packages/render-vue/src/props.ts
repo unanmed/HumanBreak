@@ -9,9 +9,6 @@ import {
     CustomContainerRenderFn
 } from '@motajs/render-core';
 import {
-    FloorLayer,
-    ILayerGroupRenderExtends,
-    ILayerRenderExtends,
     BezierParams,
     CircleParams,
     EllipseParams,
@@ -125,28 +122,6 @@ export interface CommentProps extends BaseProps {
     text?: string;
 }
 
-export interface LayerGroupProps extends BaseProps {
-    cellSize?: number;
-    blockSize?: number;
-    floorId?: FloorIds;
-    bindThisFloor?: boolean;
-    camera?: Transform;
-    ex?: readonly ILayerGroupRenderExtends[];
-    layers?: readonly FloorLayer[];
-}
-
-export interface LayerProps extends BaseProps {
-    layer?: FloorLayer;
-    mapWidth?: number;
-    mapHeight?: number;
-    cellSize?: number;
-    background?: AllNumbers;
-    floorImage?: FloorAnimate[];
-    ex?: readonly ILayerRenderExtends[];
-}
-
-export interface AnimateProps extends BaseProps {}
-
 export interface DamageProps extends BaseProps {
     mapWidth?: number;
     mapHeight?: number;
@@ -254,20 +229,4 @@ export interface RectRProps extends GraphicPropsBase {
      * - 4组：左上、右上、左下、右下 分别是 `[rx1, ry1], [rx2, ry2], [rx3, ry3], [rx4, ry4]` 半径的椭圆
      */
     ellipse?: RectREllipseParams;
-}
-
-export interface IconProps extends BaseProps {
-    /** 图标 id 或数字 */
-    icon: AllNumbers | AllIds;
-    /** 显示图标的第几帧 */
-    frame?: number;
-    /** 是否开启动画，开启后 frame 参数无效 */
-    animate?: boolean;
-}
-
-export interface WinskinProps extends BaseProps {
-    /** winskin 的图片 id */
-    image: ImageIds;
-    /** 边框大小 */
-    borderSize?: number;
 }
