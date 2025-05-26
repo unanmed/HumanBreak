@@ -12,15 +12,15 @@
         "declare": "tsx script/declare.ts",
         "type": "vue-tsc --noEmit",
         "lines": "tsx script/lines.ts packages packages-user",
-        "build:packages": "vue-tsx --noEmit && tsx script/build-packages.ts",
-        "build:game": "vue-tsx --noEmit && tsx script/build-game.ts",
+        "build:packages": "vue-tsc --noEmit && tsx script/build-packages.ts",
+        "build:game": "vue-tsc --noEmit && tsx script/build-game.ts",
+        "build:lib": "vue-tsc --noEmit && tsx script/build-lib.ts",
         "docs:dev": "concurrently -k -n SIDEBAR,VITEPRESS -c blue,green \"tsx docs/.vitepress/api.ts\" \"vitepress dev docs\"",
         "docs:build": "vitepress build docs",
         "docs:preview": "vitepress preview docs"
     },
     "dependencies": {
         "@ant-design/icons-vue": "^6.1.0",
-        "@vueuse/core": "^10.11.1",
         "@wasm-audio-decoders/ogg-vorbis": "^0.1.16",
         "anon-tokyo": "0.0.0-alpha.0",
         "ant-design-vue": "^3.2.20",
@@ -35,6 +35,7 @@
         "mutate-animate": "^1.4.2",
         "ogg-opus-decoder": "^1.6.14",
         "opus-decoder": "^0.7.7",
+        "vite-plugin-dts": "^4.5.4",
         "vue": "^3.5.13"
     },
     "devDependencies": {
@@ -81,7 +82,6 @@
         "typescript-eslint": "^8.27.0",
         "unplugin-vue-components": "^0.22.12",
         "vite": "^6.2.2",
-        "vite-plugin-dts": "^4.5.3",
         "vitepress": "^1.6.3",
         "vitepress-plugin-mermaid": "^2.0.17",
         "vue-tsc": "^2.2.8",

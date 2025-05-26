@@ -42,9 +42,6 @@ export interface MotaRendererConfig {
 export class MotaRenderer extends Container implements IRenderTreeRoot {
     static list: Map<string, MotaRenderer> = new Map();
 
-    /** 缩放比 */
-    private scale: number = 1;
-
     /** 所有连接到此根元素的渲染元素的 id 到元素自身的映射 */
     protected idMap: Map<string, RenderItem> = new Map();
 
@@ -85,7 +82,6 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
         this.target.setAntiAliasing(false);
 
         this.setAnchor(0.5, 0.5);
-        this.transform.translate(240, 240);
 
         MotaRenderer.list.set(canvas.id, this);
 
@@ -105,15 +101,7 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
      * @param scale 缩放比
      */
     setScale(scale: number) {
-        this.scale = scale;
         this.onResize(scale);
-    }
-
-    /**
-     * 获取这个渲染器的缩放比
-     */
-    getScale() {
-        return this.scale;
     }
 
     onResize(scale: number): void {
@@ -355,8 +343,8 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
         mouse: MouseType = this.getMouseType(event)
     ): IActionEvent {
         const id = this.getMouseIdentifier(type, mouse);
-        const x = event.offsetX / core.domStyle.scale;
-        const y = event.offsetY / core.domStyle.scale;
+        const x = event.offsetX / this.scale;
+        const y = event.offsetY / this.scale;
 
         return {
             target: this,
@@ -426,8 +414,8 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
         event: TouchEvent,
         rect: DOMRect
     ): IActionEvent {
-        const x = (touch.clientX - rect.left) / core.domStyle.scale;
-        const y = (touch.clientY - rect.top) / core.domStyle.scale;
+        const x = (touch.clientX - rect.left) / this.scale;
+        const y = (touch.clientY - rect.top) / this.scale;
         return {
             target: this,
             identifier: this.getTouchIdentifier(touch, type),

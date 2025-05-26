@@ -1,3 +1,4 @@
+import { Hotkey, gameKey } from '@motajs/system-action';
 import { loading } from '@user/data-base';
 import { TimingFn, Transition } from 'mutate-animate';
 import {
@@ -64,6 +65,25 @@ export function onLoaded(hook: () => void) {
         loading.once('loaded', hook);
     } else {
         hook();
+    }
+}
+
+type KeyUsing = [Hotkey, symbol];
+
+/**
+ * 在组件中定义按键操作
+ * @param noScope 是否不创建新作用域
+ */
+export function useKey(noScope: boolean = false): KeyUsing {
+    if (noScope) {
+        return [gameKey, gameKey.scope];
+    } else {
+        const sym = Symbol();
+        gameKey.use(sym);
+        onUnmounted(() => {
+            gameKey.dispose();
+        });
+        return [gameKey, sym];
     }
 }
 

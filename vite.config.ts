@@ -1,10 +1,9 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import legacy from '@vitejs/plugin-legacy';
 import components from 'unplugin-vue-components/vite';
 import vuejsx from '@vitejs/plugin-vue-jsx'
 import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers';
-import path, { resolve } from 'path';
+import path from 'path';
 import postcssPresetEnv from 'postcss-preset-env';
 import * as glob from 'glob'
 
@@ -43,17 +42,6 @@ export default defineConfig({
                 return custom.includes(tag) || tag.startsWith('g-');
             }
         }),
-        legacy({
-            targets: [
-                'Chrome >= 56',
-                'Firefox >= 51',
-                'Edge >= 79',
-                'Safari >= 15',
-                'Opera >= 43'
-            ],
-            polyfills: true,
-            modernPolyfills: true
-        }),
         components({ resolvers: [AntDesignVueResolver()] })
     ],
     base: `./`,
@@ -62,23 +50,6 @@ export default defineConfig({
             ...aliases,
             ...aliasesUser
         ]
-    },
-    build: {
-        rollupOptions: {
-            output: {
-                manualChunks: {
-                    antdv: ['ant-design-vue', '@ant-design/icons-vue'],
-                    common: [
-                        'lodash-es',
-                        'axios',
-                        'lz-string',
-                        'chart.js',
-                        'mutate-animate',
-                        '@vueuse/core'
-                    ]
-                }
-            }
-        }
     },
     css: {
         preprocessorOptions: {

@@ -13,7 +13,7 @@ import {
     type MoveStep
 } from '@user/data-state';
 import EventEmitter from 'eventemitter3';
-import { mainRenderer } from 'packages-user/client-modules/src/render/renderer';
+import { mainRenderer } from '@user/client-modules';
 
 export interface IChaseController {
     /** 本次追逐战实例 */

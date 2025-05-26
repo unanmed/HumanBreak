@@ -1,9 +1,41 @@
 {
     "name": "@motajs/render",
+    "version": "0.1.0",
+    "main": "dist/render.cjs.js",
+    "module": "dist/render.es.js",
+    "types": "dist/render.es.d.ts",
+    "keywords": [
+        "render",
+        "game",
+        "vue",
+        "graphics"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/unanmed/HumanBreak/tree/dev"
+    },
+    "author": {
+        "name": "AncTe",
+        "email": "1319491857@qq.com"
+    },
+    "exports": {
+        ".": {
+            "import": "./dist/render.es.js",
+            "require": "./dist/render.cjs.js",
+            "types": "./dist/render.es.d.ts"
+        }
+    },
+    "files": [
+        "dist"
+    ],
     "dependencies": {
-        "@motajs/render-core": "workspace:*",
-        "@motajs/render-elements": "workspace:*",
-        "@motajs/render-style": "workspace:*",
-        "@motajs/render-vue": "workspace:*"
-    }
+        "eventemitter3": "^5.0.1",
+        "gl-matrix": "^3.4.3",
+        "lodash-es": "^4.17.21",
+        "mutate-animate": "^1.4.2"
+    },
+    "peerDependencies": {
+        "vue": "^3.5.13"
+    },
+    "license": "LGPL-3.0-only"
 }

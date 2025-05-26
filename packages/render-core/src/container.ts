@@ -43,7 +43,7 @@ export class Container<E extends EContainerEvent = EContainerEvent>
     }
 
     onResize(scale: number): void {
-        this.sortedChildren.forEach(v => v.onResize(scale));
+        this.children.forEach(v => v.onResize(scale));
         super.onResize(scale);
     }
 

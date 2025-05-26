@@ -9,8 +9,20 @@ import {
 } from './layer';
 import { EAnimateEvent } from './animate';
 import { EIconEvent, EWinskinEvent } from './misc';
+import { IEnemyCollection } from '@motajs/types';
+import { CanvasStyle } from '@motajs/render-elements';
 
 export interface AnimateProps extends BaseProps {}
+
+export interface DamageProps extends BaseProps {
+    mapWidth?: number;
+    mapHeight?: number;
+    cellSize?: number;
+    enemy?: IEnemyCollection;
+    font?: string;
+    strokeStyle?: CanvasStyle;
+    strokeWidth?: number;
+}
 
 export interface IconProps extends BaseProps {
     /** 图标 id 或数字 */

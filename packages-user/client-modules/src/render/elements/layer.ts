@@ -570,11 +570,11 @@ export class Layer extends Container<ELayerEvent> {
     static readonly FRAME_ALL = 15;
 
     /** 静态层，包含除大怪物及正在移动的内容外的内容 */
-    protected staticMap: MotaOffscreenCanvas2D = this.requireCanvas();
+    protected staticMap = this.requireCanvas(true, false);
     /** 移动层，包含大怪物及正在移动的内容 */
-    protected movingMap: MotaOffscreenCanvas2D = this.requireCanvas();
+    protected movingMap = this.requireCanvas(true, false);
     /** 背景图层 */
-    protected backMap: MotaOffscreenCanvas2D = this.requireCanvas();
+    protected backMap = this.requireCanvas(true, false);
 
     /** 最终渲染至的Sprite */
     main: Sprite = new Sprite('absolute', false, true);

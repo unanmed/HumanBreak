@@ -6,6 +6,7 @@ import {
 } from '@motajs/render-core';
 import { logger } from '@motajs/common';
 import { clamp, isNil } from 'lodash-es';
+import { CanvasStyle } from './types';
 
 export type CircleParams = [
     cx?: number,

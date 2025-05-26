@@ -1,4 +1,4 @@
-import { GameUI, UIComponentProps } from '@motajs/system-ui';
+import { GameUI } from '@motajs/system-ui';
 import { computed, defineComponent, ref, watch } from 'vue';
 import { SetupComponentOptions, TextContent } from '../components';
 import {
@@ -40,7 +40,7 @@ export interface ILeftHeroStatus {
     magicDef: number;
 }
 
-interface StatusBarProps<T> extends DefaultProps, UIComponentProps {
+interface StatusBarProps<T> extends DefaultProps {
     loc: ElementLocator;
     status: T;
     hidden: boolean;

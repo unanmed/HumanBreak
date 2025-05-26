@@ -283,6 +283,8 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     composite: GlobalCompositeOperation = 'source-over';
     /** 不透明度 */
     alpha: number = 1;
+    /** 缩放比 */
+    protected scale: number = 1;
 
     /** 鼠标覆盖在此元素上时的光标样式 */
     cursor: string = 'inherit';
@@ -391,6 +393,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this.cache = this.requireCanvas();
         if (!enableCache) {
             this.cache.size(1, 1);
+            this.deleteCanvas(this.cache);
         }
     }
 
@@ -456,7 +459,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      * @param alpha 是否启用画布的 alpha 通道
      * @param autoScale 是否自动跟随缩放
      */
-    requireCanvas(alpha: boolean = true, autoScale: boolean = false) {
+    requireCanvas(alpha: boolean = true, autoScale: boolean = true) {
         const canvas = new MotaOffscreenCanvas2D(alpha);
         this.canvases.add(canvas);
         this.canvasMap.set(canvas, { autoScale });
@@ -475,12 +478,20 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     //#region 事件处理
 
     onResize(scale: number): void {
-        this.cache.setScale(scale);
+        this.scale = scale;
         this.canvases.forEach(v => {
             if (this.canvasMap.get(v)?.autoScale) {
                 v.setScale(scale);
             }
         });
+        this.update();
+    }
+
+    /**
+     * 获取当前元素的缩放比，它与根元素应当保持一致
+     */
+    getScale() {
+        return this.scale;
     }
 
     //#region 修改元素属性
@@ -590,7 +601,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     /**
      * 获取当前元素的绝对位置（不建议使用，因为应当很少会有获取绝对位置的需求）
      */
-    getAbsolutePosition(x: number = 0, y: number = 0): LocArr {
+    getAbsolutePosition(x: number = 0, y: number = 0): [number, number] {
         if (this.type === 'absolute') {
             if (this.parent) return this.parent.getAbsolutePosition(0, 0);
             else return [0, 0];
@@ -765,6 +776,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this.checkRoot();
         this._root?.connect(this);
         this._transform.bind(this);
+        this.onResize(parent.scale);
     }
 
     /**

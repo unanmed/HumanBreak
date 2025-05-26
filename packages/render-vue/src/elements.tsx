@@ -15,7 +15,6 @@ import {
     ConatinerCustomProps,
     ContainerProps,
     CustomProps,
-    DamageProps,
     EllipseProps,
     ImageProps,
     LineProps,
@@ -87,7 +86,6 @@ declare module 'vue/jsx-runtime' {
             image: TagDefine<ImageProps, EImageEvent>;
             comment: TagDefine<CommentProps, ERenderItemEvent>;
             custom: TagDefine<CustomProps, ERenderItemEvent>;
-            damage: TagDefine<DamageProps, ERenderItemEvent>;
             'g-rect': TagDefine<RectProps, EGraphicItemEvent>;
             'g-circle': TagDefine<CirclesProps, EGraphicItemEvent>;
             'g-ellipse': TagDefine<EllipseProps, EGraphicItemEvent>;

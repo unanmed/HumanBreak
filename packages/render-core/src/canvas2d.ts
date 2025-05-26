@@ -1,7 +1,7 @@
 import { EventEmitter } from 'eventemitter3';
 
 interface OffscreenCanvasEvent {
-    /** 当被动触发resize时（例如core.domStyle.scale变化、窗口大小变化）时触发，使用size函数并不会触发 */
+    /** 当被动触发resize时（例如窗口大小变化）时触发，使用size函数并不会触发 */
     resize: [];
 }
 
@@ -21,11 +21,6 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
 
     /** 更新标识符，如果发生变化则说明画布被动清空 */
     symbol: number = 0;
-
-    private _active: boolean = true;
-    get active() {
-        return this._active;
-    }
 
     /**
      * 创建一个新的离屏画布\

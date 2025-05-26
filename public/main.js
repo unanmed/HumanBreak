@@ -330,7 +330,9 @@ main.prototype.loadAsync = async function (mode, callback) {
         core.domStyle.scale = window.innerWidth / core._PX_;
     }
     Mota.r(() => {
-        Mota.require('@motajs/render').MotaOffscreenCanvas2D.refreshAll();
+        Mota.require('@user/client-modules').mainRenderer.setScale(
+            core.domStyle.scale
+        );
     });
 };
 

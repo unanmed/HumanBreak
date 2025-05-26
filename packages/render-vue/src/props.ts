@@ -10,6 +10,7 @@ import {
 } from '@motajs/render-core';
 import {
     BezierParams,
+    CanvasStyle,
     CircleParams,
     EllipseParams,
     ILineProperty,
@@ -19,7 +20,6 @@ import {
     RectREllipseParams
 } from '@motajs/render-elements';
 import { Font } from '@motajs/render-style';
-import { IEnemyCollection } from '@motajs/types';
 
 export interface CustomProps {
     _item: (props: BaseProps) => RenderItem;
@@ -120,16 +120,6 @@ export interface ImageProps extends BaseProps {
 
 export interface CommentProps extends BaseProps {
     text?: string;
-}
-
-export interface DamageProps extends BaseProps {
-    mapWidth?: number;
-    mapHeight?: number;
-    cellSize?: number;
-    enemy?: IEnemyCollection;
-    font?: string;
-    strokeStyle?: CanvasStyle;
-    strokeWidth?: number;
 }
 
 export interface GraphicPropsBase extends BaseProps, Partial<ILineProperty> {

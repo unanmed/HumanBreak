@@ -5,7 +5,7 @@ import type { TowerBoss } from './towerBoss';
 import { IStateDamageable } from '@user/data-state';
 import { PointEffect, PointEffectType } from '../fx/pointShader';
 import { isNil } from 'lodash-es';
-import { mainRenderer } from 'packages-user/client-modules/src/render/renderer';
+import { mainRenderer } from '@user/client-modules';
 
 export const enum ProjectileDirection {
     Vertical,

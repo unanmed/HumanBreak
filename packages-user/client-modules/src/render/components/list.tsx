@@ -1,10 +1,10 @@
 import { DefaultProps } from '@motajs/render-vue';
-import Scroll from 'packages/legacy-ui/src/components/scroll.vue';
 import { computed, defineComponent, ref, SlotsType, VNode } from 'vue';
 import { Selection } from './misc';
 import { ElementLocator } from '@motajs/render-core';
 import { Font } from '@motajs/render-style';
 import { SetupComponentOptions } from '@motajs/system-ui';
+import { Scroll } from './scroll';
 
 export interface ListProps extends DefaultProps {
     /** 列表内容，第一项表示 id，第二项表示显示的内容 */
@@ -64,7 +64,7 @@ export const List = defineComponent<ListProps, ListEmits, keyof ListEmits>(
         };
 
         return () => (
-            <Scroll>
+            <Scroll loc={props.loc}>
                 {props.list.map((v, i) => {
                     const [key, value] = v;
                     const loc: ElementLocator = [
