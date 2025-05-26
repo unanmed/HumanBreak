@@ -461,6 +461,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      */
     requireCanvas(alpha: boolean = true, autoScale: boolean = true) {
         const canvas = new MotaOffscreenCanvas2D(alpha);
+        canvas.setScale(this.scale);
         this.canvases.add(canvas);
         this.canvasMap.set(canvas, { autoScale });
         return canvas;

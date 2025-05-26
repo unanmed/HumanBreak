@@ -41,10 +41,10 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
      * @param scale 缩放比
      */
     setScale(scale: number) {
-        if (scale === this.scale) {
-            this.clear();
-            return;
-        }
+        // if (scale === this.scale) {
+        //     this.clear();
+        //     return;
+        // }
         this.scale = scale;
         let ratio = this.highResolution ? devicePixelRatio : 1;
         ratio *= this.scale;

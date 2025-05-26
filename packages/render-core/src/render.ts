@@ -94,6 +94,8 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
 
         update();
         this.listen();
+
+        this.setScale(1);
     }
 
     /**

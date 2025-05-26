@@ -53,9 +53,6 @@ importers:
       opus-decoder:
         specifier: ^0.7.7
         version: 0.7.10
-      vite-plugin-dts:
-        specifier: ^4.5.4
-        version: 4.5.4(@types/node@18.19.103)(rollup@3.29.5)(typescript@5.8.3)(vite@6.3.5(@types/node@18.19.103)(less@4.3.0)(terser@5.39.2)(tsx@4.19.4))
       vue:
         specifier: ^3.5.13
         version: 3.5.14(typescript@5.8.3)
@@ -189,6 +186,9 @@ importers:
       vite:
         specifier: ^6.2.2
         version: 6.3.5(@types/node@18.19.103)(less@4.3.0)(terser@5.39.2)(tsx@4.19.4)
+      vite-plugin-dts:
+        specifier: ^4.5.4
+        version: 4.5.4(@types/node@18.19.103)(rollup@3.29.5)(typescript@5.8.3)(vite@6.3.5(@types/node@18.19.103)(less@4.3.0)(terser@5.39.2)(tsx@4.19.4))
       vitepress:
         specifier: ^1.6.3
         version: 1.6.3(@algolia/client-search@5.21.0)(@types/node@18.19.103)(async-validator@4.2.5)(axios@1.9.0)(less@4.3.0)(markdown-it-mathjax3@4.3.2(encoding@0.1.13))(postcss@8.5.3)(search-insights@2.17.3)(terser@5.39.2)(typescript@5.8.3)
@@ -439,18 +439,6 @@ importers:
 
   packages/render:
     dependencies:
-      '@motajs/render-core':
-        specifier: workspace:*
-        version: link:../render-core
-      '@motajs/render-elements':
-        specifier: workspace:*
-        version: link:../render-elements
-      '@motajs/render-style':
-        specifier: workspace:*
-        version: link:../render-style
-      '@motajs/render-vue':
-        specifier: workspace:*
-        version: link:../render-vue
       eventemitter3:
         specifier: ^5.0.1
         version: 5.0.1
