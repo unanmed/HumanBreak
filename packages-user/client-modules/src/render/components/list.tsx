@@ -121,6 +121,8 @@ export interface ListPageProps extends ListProps {
     right?: boolean;
     /** 是否显示关闭按钮 */
     close?: boolean;
+    /** 关闭按钮的位置，相对于组件定位 */
+    closeLoc?: ElementLocator;
 }
 
 export type ListPageEmits = {
@@ -145,7 +147,9 @@ const listPageProps = {
         'winskin',
         'color',
         'border',
-        'alphaRange'
+        'alphaRange',
+        'close',
+        'closeLoc'
     ],
     emits: ['update', 'update:selected', 'close']
 } satisfies SetupComponentOptions<
@@ -202,7 +206,12 @@ export const ListPage = defineComponent<
                     slots.default?.(selected.value)}
             </container>
             {props.close && (
-                <text text="关闭" cursor="pointer" font={props.font}></text>
+                <text
+                    loc={props.closeLoc}
+                    text="关闭"
+                    cursor="pointer"
+                    font={props.font}
+                ></text>
             )}
         </container>
     );

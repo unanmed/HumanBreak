@@ -53,6 +53,7 @@ export const Statistics = defineComponent<StatisticsProps>(props => {
             close
             onClose={close}
             lineHeight={24}
+            closeLoc={[10, 470, void 0, void 0, 0, 1]}
         >
             {{
                 total: () => <TotalStatistics data={props.data} />,
