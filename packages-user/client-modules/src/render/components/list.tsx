@@ -73,18 +73,36 @@ export const List = defineComponent<ListProps, ListEmits, keyof ListEmits>(
                         props.loc[2] ?? 200,
                         lineHeight.value
                     ];
+                    const selectionLoc: ElementLocator = [
+                        0,
+                        0,
+                        (props.loc[2] ?? 200) - 10,
+                        lineHeight.value
+                    ];
+                    const textLoc: ElementLocator = [
+                        10,
+                        lineHeight.value / 2,
+                        void 0,
+                        void 0,
+                        0,
+                        0.5
+                    ];
                     return (
-                        <container onClick={() => select(key)}>
+                        <container loc={loc} onClick={() => select(key)}>
                             {selected.value === key && (
                                 <Selection
-                                    loc={loc}
+                                    loc={selectionLoc}
                                     color={props.color}
                                     border={props.border}
                                     winskin={props.winskin}
                                     alphaRange={props.alphaRange}
                                 />
                             )}
-                            <text text={value} font={props.font} />
+                            <text
+                                loc={textLoc}
+                                text={value}
+                                font={props.font}
+                            />
                         </container>
                     );
                 })}
@@ -171,7 +189,7 @@ export const ListPage = defineComponent<
     };
 
     return () => (
-        <container>
+        <container loc={props.loc}>
             <List
                 {...props}
                 loc={listLoc.value}

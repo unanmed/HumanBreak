@@ -125,7 +125,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
         };
         this.ensureMap(d.key);
         if (d.id in this.data) {
-            console.warn(`已存在id为${d.id}的按键，已将其覆盖`);
+            // console.warn(`已存在id为${d.id}的按键，已将其覆盖`);
         }
         this.data[d.id] = d;
         const arr = this.keyMap.get(d.key)!;

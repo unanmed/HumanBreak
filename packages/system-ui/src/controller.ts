@@ -194,6 +194,7 @@ export class UIController
                 break;
         }
         this.sysShowBack.value = true;
+
         this.emit('open', ui, ins);
         return ins;
     }
@@ -230,6 +231,7 @@ export class UIController
         if (!this.keepBack && this.stack.length === 0) {
             this.sysShowBack.value = false;
         }
+
         this.keepBack = false;
         this.emit('close', ui);
     }

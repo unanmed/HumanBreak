@@ -30,7 +30,7 @@ export interface StatisticsProps extends UIComponentProps, DefaultProps {
 }
 
 const statisticsProps = {
-    props: ['data']
+    props: ['data', 'controller', 'instance']
 } satisfies SetupComponentOptions<StatisticsProps>;
 
 export const Statistics = defineComponent<StatisticsProps>(props => {
@@ -52,6 +52,7 @@ export const Statistics = defineComponent<StatisticsProps>(props => {
             loc={[180, 0, 480, 480]}
             close
             onClose={close}
+            lineHeight={24}
         >
             {{
                 total: () => <TotalStatistics data={props.data} />,
@@ -67,21 +68,29 @@ interface StatisticsPanelProps extends DefaultProps {
     data: StatisticsData;
 }
 
+const statisticsPanelProps = {
+    props: ['data']
+} satisfies SetupComponentOptions<StatisticsPanelProps>;
+
 const TotalStatistics = defineComponent<StatisticsPanelProps>(props => {
-    return () => <container></container>;
-}, statisticsProps);
+    return () => (
+        <container>
+            <text text="测试"></text>
+        </container>
+    );
+}, statisticsPanelProps);
 
 const FloorStatistics = defineComponent<StatisticsPanelProps>(props => {
     return () => <container></container>;
-}, statisticsProps);
+}, statisticsPanelProps);
 
 const EnemyStatistics = defineComponent<StatisticsPanelProps>(props => {
     return () => <container></container>;
-}, statisticsProps);
+}, statisticsPanelProps);
 
 const PotionStatistics = defineComponent<StatisticsPanelProps>(props => {
     return () => <container></container>;
-}, statisticsProps);
+}, statisticsPanelProps);
 
 function calculateStatistics(): StatisticsData {
     core.setFlag('__statistics__', true);
