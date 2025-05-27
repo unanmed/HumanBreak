@@ -1,3 +1,4 @@
+import { debounce } from 'lodash-es';
 import logInfo from './logger.json';
 
 export const enum LogLevel {
@@ -20,28 +21,28 @@ interface LoggerCatchReturns<T> {
     info: LoggerCatchInfo[];
 }
 
-// let logTip: HTMLSpanElement;
-// if (!main.replayChecking) {
-//     const tip = document.createElement('span');
-//     logTip = tip;
-//     tip.style.position = 'fixed';
-//     tip.style.right = '0';
-//     tip.style.bottom = '0';
-//     tip.style.height = '20px';
-//     tip.style.width = 'auto';
-//     tip.style.textAlign = 'right';
-//     tip.style.padding = '0 5px';
-//     tip.style.fontSize = '16px';
-//     tip.style.fontFamily = 'Arial';
-//     tip.style.display = 'none';
-//     tip.style.margin = '2px';
-//     document.body.appendChild(tip);
-// }
+let logTip: HTMLSpanElement;
+if (!main.replayChecking) {
+    const tip = document.createElement('span');
+    logTip = tip;
+    tip.style.position = 'fixed';
+    tip.style.right = '0';
+    tip.style.bottom = '0';
+    tip.style.height = '20px';
+    tip.style.width = 'auto';
+    tip.style.textAlign = 'right';
+    tip.style.padding = '0 5px';
+    tip.style.fontSize = '16px';
+    tip.style.fontFamily = 'Arial';
+    tip.style.display = 'none';
+    tip.style.margin = '2px';
+    document.body.appendChild(tip);
+}
 
-// const hideTipText = debounce(() => {
-//     if (main.replayChecking) return;
-//     logTip.style.display = 'none';
-// }, 5000);
+const hideTipText = debounce(() => {
+    if (main.replayChecking) return;
+    logTip.style.display = 'none';
+}, 5000);
 
 const nums = new Set('1234567890');
 
@@ -107,7 +108,8 @@ export class Logger {
             logger.error(16, 'error', code.toString());
             return;
         }
-        const text = this.parseInfo(info[code], ...params);
+
+        const text = this.parseInfo(info, ...params);
         if (this.catching) {
             this.catchedInfo.push({
                 level: LogLevel.ERROR,
@@ -116,15 +118,15 @@ export class Logger {
             });
         }
         if (this.level <= LogLevel.ERROR && this.enabled) {
-            // if (!main.replayChecking) {
-            // logTip.style.color = 'lightcoral';
-            // logTip.style.display = 'block';
-            // logTip.textContent = `Error thrown, please check in console.`;
-            // hideTipText();
-            // }
+            if (!main.replayChecking) {
+                logTip.style.color = 'lightcoral';
+                logTip.style.display = 'block';
+                logTip.textContent = `Error thrown, please check in console.`;
+                hideTipText();
+            }
             const n = Math.floor(code / 50) + 1;
             const n2 = code % 50;
-            const url = `/_docs/logger/error/error${n}.html#error-code-${n2}`;
+            const url = `${location.origin}/_docs/logger/error/error${n}.html#error-code-${n2}`;
             console.error(`[ERROR Code ${code}] ${text}. See ${url}`);
         }
     }
@@ -140,7 +142,8 @@ export class Logger {
             logger.error(16, 'warn', code.toString());
             return;
         }
-        const text = this.parseInfo(info[code], ...params);
+        const text = this.parseInfo(info, ...params);
+
         if (this.catching) {
             this.catchedInfo.push({
                 level: LogLevel.ERROR,
@@ -149,15 +152,15 @@ export class Logger {
             });
         }
         if (this.level <= LogLevel.WARNING && this.enabled) {
-            // if (!main.replayChecking) {
-            //     logTip.style.color = 'gold';
-            //     logTip.style.display = 'block';
-            //     logTip.textContent = `Warning thrown, please check in console.`;
-            //     hideTipText();
-            // }
+            if (!main.replayChecking) {
+                logTip.style.color = 'gold';
+                logTip.style.display = 'block';
+                logTip.textContent = `Warning thrown, please check in console.`;
+                hideTipText();
+            }
             const n = Math.floor(code / 50) + 1;
             const n2 = code % 50;
-            const url = `/_docs/logger/warn/warn${n}.html#warn-code-${n2}`;
+            const url = `${location.origin}/_docs/logger/warn/warn${n}.html#warn-code-${n2}`;
             console.warn(`[WARNING Code ${code}] ${text}. See ${url}`);
         }
     }
