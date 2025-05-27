@@ -185,7 +185,7 @@ export async function openStatistics(controller: IUIMountable) {
     });
     const data = await waitbox(
         controller,
-        [240 + 180, void 0, void 0, 240, 0.5, 0.5],
+        [240 + 180, 240, void 0, void 0, 0.5, 0.5],
         240,
         cal,
         {

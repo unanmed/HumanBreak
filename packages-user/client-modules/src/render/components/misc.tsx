@@ -431,7 +431,7 @@ export interface WaitBoxExpose<T> {
 }
 
 const waitBoxProps = {
-    props: ['promise', 'loc', 'winskin', 'color', 'border'],
+    props: ['promise', 'loc', 'winskin', 'color', 'border', 'width'],
     emits: ['resolve']
 } satisfies SetupComponentOptions<
     WaitBoxProps<unknown>,

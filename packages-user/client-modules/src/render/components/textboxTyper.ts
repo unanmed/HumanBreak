@@ -956,6 +956,8 @@ export class TextContentParser {
      * @param breakIndex 当前分词的索引
      */
     private checkLineWidth(width: number, guess: number, pointer: number) {
+        console.log(guess);
+
         const breakIndex = this.wordBreak.length - 1;
         if (breakIndex === -1) return true;
         const rest = width - this.lineWidth;
