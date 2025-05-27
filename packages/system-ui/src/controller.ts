@@ -98,11 +98,8 @@ export class UIController
     readonly showBack: ComputedRef<boolean> = computed(
         () => this.userShowBack.value && this.sysShowBack.value
     );
-
-    /** 当前是否显示 UI */
-    get active() {
-        return this.sysShowBack.value;
-    }
+    /** 当前 UI 是否激活 */
+    readonly active: Ref<boolean> = ref(false);
 
     /** 自定义显示模式下的配置信息 */
     private config?: IUICustomConfig;
@@ -194,6 +191,7 @@ export class UIController
                 break;
         }
         this.sysShowBack.value = true;
+        this.active.value = true;
 
         this.emit('open', ui, ins);
         return ins;
@@ -230,6 +228,7 @@ export class UIController
         }
         if (!this.keepBack && this.stack.length === 0) {
             this.sysShowBack.value = false;
+            this.active.value = false;
         }
 
         this.keepBack = false;

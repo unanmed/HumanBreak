@@ -209,7 +209,7 @@ const MainScene = defineComponent(() => {
             )}
             <container
                 loc={[0, 0, MAIN_WIDTH, MAIN_HEIGHT]}
-                hidden={!mainUIController.showBack.value}
+                hidden={!mainUIController.active.value}
                 zIndex={200}
             >
                 {mainUIController.render()}
