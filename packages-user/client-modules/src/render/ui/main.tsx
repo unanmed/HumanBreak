@@ -1,7 +1,7 @@
 import { LayerShadowExtends } from '@motajs/legacy-ui';
 import { Props, Font } from '@motajs/render';
 import { WeatherController } from '../../weather';
-import { defineComponent, onMounted, reactive, ref, watch } from 'vue';
+import { defineComponent, onMounted, reactive, ref } from 'vue';
 import { Textbox, Tip } from '../components';
 import { GameUI } from '@motajs/system-ui';
 import {
