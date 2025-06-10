@@ -1,5 +1,9 @@
 import { ElementLocator } from '@motajs/render';
-import { GameUI, UIComponentProps } from '@motajs/system-ui';
+import {
+    GameUI,
+    SetupComponentOptions,
+    UIComponentProps
+} from '@motajs/system-ui';
 import { defineComponent } from 'vue';
 import {
     ChoiceItem,
@@ -7,7 +11,6 @@ import {
     Choices,
     ChoicesProps,
     getConfirm,
-    SetupComponentOptions,
     waitbox
 } from '../components';
 import { mainUi } from '@motajs/legacy-ui';

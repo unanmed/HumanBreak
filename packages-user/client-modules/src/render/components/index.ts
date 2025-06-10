@@ -6,4 +6,3 @@ export * from './scroll';
 export * from './textbox';
 export * from './textboxTyper';
 export * from './tip';
-export * from './types';

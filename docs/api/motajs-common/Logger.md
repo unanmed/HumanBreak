@@ -45,7 +45,7 @@ function error(code: number, ...params: string[]): void;
 #### 行为
 
 -   如果未找到对应 `code` 的错误信息，会触发 `error(16)` 表示代码未定义。
--   根据日志级别 `level` 决定是否输出到控制台，并在页面右下角显示提示。
+-   根据日志级别 `level` 决定是否输出到控制台
 
 ### `warn`
 
@@ -79,7 +79,9 @@ function log(text: string): void;
 
 #### 参数
 
-`text`: 日志文本内容。 ####行为
+`text`: 日志文本内容。
+
+#### 行为
 
 -   仅在 `level <= LogLevel.LOG` 时输出到控制台。
 
@@ -181,7 +183,6 @@ const logger = new Logger(LogLevel.WARNING, logInfo);
 ```ts
 logger.error(404, 'home');
 // 控制台输出: [ERROR Code 404] Page home not found.
-// 页面右下角显示红色提示（5 秒后消失）
 ```
 
 -   记录警告
@@ -189,7 +190,6 @@ logger.error(404, 'home');
 ```ts
 logger.warn(101, '/old-api');
 // 控制台输出: [WARNING Code 101] Deprecated API: /old-api
-// 页面右下角显示金色提示
 ```
 
 -   捕获日志

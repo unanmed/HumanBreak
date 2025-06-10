@@ -169,3 +169,24 @@ export async function syncFromServer(
         );
     }
 }
+
+//#region 存读档操作
+
+export const enum LoadMode {
+    Load,
+    ReplayFrom,
+    ContinueReplayFrom,
+    ContinueReplayTo
+}
+
+/**
+ * 对当前状态存档并存档至目标索引
+ * @param index 存档至的索引
+ */
+export function saveTo(index: number) {}
+
+/**
+ * 从指定索引读档
+ * @param index 从哪个索引读档
+ */
+export function loadFrom(index: number, mode: LoadMode) {}

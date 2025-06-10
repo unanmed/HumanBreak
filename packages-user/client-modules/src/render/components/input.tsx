@@ -1,7 +1,6 @@
 import { DefaultProps } from '@motajs/render-vue';
 import { computed, defineComponent, onUnmounted, ref, watch } from 'vue';
 import { TextContent, TextContentProps } from './textbox';
-import { SetupComponentOptions } from './types';
 import { RectRCircleParams } from '@motajs/render-elements';
 import {
     Container,
@@ -14,7 +13,7 @@ import { Font } from '@motajs/render-style';
 import { transitionedColor } from '../use';
 import { linear } from 'mutate-animate';
 import { Background, Selection } from './misc';
-import { GameUI, IUIMountable } from '@motajs/system-ui';
+import { GameUI, IUIMountable, SetupComponentOptions } from '@motajs/system-ui';
 
 export interface InputProps extends DefaultProps, Partial<TextContentProps> {
     /** 输入框的提示内容 */

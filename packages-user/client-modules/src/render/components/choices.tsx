@@ -2,10 +2,9 @@ import { DefaultProps, ElementLocator, Font } from '@motajs/render';
 import { computed, defineComponent, reactive, ref } from 'vue';
 import { Background, Selection } from './misc';
 import { TextContent, TextContentExpose, TextContentProps } from './textbox';
-import { SetupComponentOptions } from './types';
 import { TextAlign } from './textboxTyper';
 import { Page, PageExpose } from './page';
-import { GameUI, IUIMountable } from '@motajs/system-ui';
+import { GameUI, IUIMountable, SetupComponentOptions } from '@motajs/system-ui';
 import { useKey } from '../use';
 
 export interface ConfirmBoxProps extends DefaultProps, TextContentProps {

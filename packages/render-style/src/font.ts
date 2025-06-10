@@ -105,10 +105,12 @@ export class Font implements IFontConfig {
         let unit = this.defaultSizeUnit;
         let family = this.defaultFamily;
         const tokens = str.split(/\s+/);
-        tokens.forEach(v => {
+        let lastIndex = 0;
+        tokens.forEach((v, i) => {
             // font-italic
             if (v === 'italic') {
                 italic = true;
+                lastIndex = i;
                 return;
             }
 
@@ -116,6 +118,7 @@ export class Font implements IFontConfig {
             const num = Number(v);
             if (!isNaN(num)) {
                 weight = num;
+                lastIndex = i;
                 return;
             }
 
@@ -124,10 +127,11 @@ export class Font implements IFontConfig {
             if (!isNaN(parse)) {
                 size = parse;
                 unit = v.slice(parse.toString().length);
+                lastIndex = i;
                 return;
             }
         });
-        family = tokens.at(-1) ?? 'Verdana';
+        family = tokens.slice(lastIndex + 1).join(' ') ?? 'Verdana';
         return new Font(family, size, unit, weight, italic);
     }
 

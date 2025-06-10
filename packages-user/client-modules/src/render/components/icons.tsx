@@ -1,6 +1,6 @@
 import { DefaultProps, ElementLocator, GraphicPropsBase } from '@motajs/render';
+import { SetupComponentOptions } from '@motajs/system-ui';
 import { computed, defineComponent, onMounted, Ref, ref, watch } from 'vue';
-import { SetupComponentOptions } from './types';
 
 export interface IconsProps extends DefaultProps<GraphicPropsBase> {
     loc: ElementLocator;

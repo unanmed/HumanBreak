@@ -10,7 +10,6 @@ import {
     VNode,
     watch
 } from 'vue';
-import { SetupComponentOptions } from './types';
 import {
     Container,
     DefaultProps,
@@ -26,6 +25,7 @@ import {
 import { hyper, linear, Transition } from 'mutate-animate';
 import { clamp } from 'lodash-es';
 import { transitioned } from '../use';
+import { SetupComponentOptions } from '@motajs/system-ui';
 
 export const enum ScrollDirection {
     Horizontal,

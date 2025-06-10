@@ -6,14 +6,13 @@ import {
     Sprite
 } from '@motajs/render';
 import { computed, defineComponent, ref, SetupContext, watch } from 'vue';
-import { SetupComponentOptions } from './types';
 import { MotaOffscreenCanvas2D } from '@motajs/render';
 import { TextContent, TextContentProps } from './textbox';
 import { Scroll, ScrollExpose, ScrollProps } from './scroll';
 import { transitioned } from '../use';
 import { hyper } from 'mutate-animate';
 import { logger } from '@motajs/common';
-import { GameUI, IUIMountable } from '@motajs/system-ui';
+import { GameUI, IUIMountable, SetupComponentOptions } from '@motajs/system-ui';
 import { clamp } from 'lodash-es';
 
 interface ProgressProps extends DefaultProps {
