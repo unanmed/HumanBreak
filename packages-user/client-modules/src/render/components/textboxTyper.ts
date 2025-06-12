@@ -990,7 +990,6 @@ export class TextContentParser {
                 data.splitLines.push(this.wordBreak[index]);
                 this.lineHeights.push(this.lineHeight);
                 this.lineWidths.push(this.lineWidth);
-                this.bsStart = index;
                 const text = data.text.slice(
                     this.wordBreak[index] + 1,
                     pointer + 1
@@ -1002,10 +1001,11 @@ export class TextContentParser {
                 }
                 maxWidth = width;
                 const metrics = ctx.measureText(text);
-                if (metrics.width < maxWidth) {
+                if (metrics.width < maxWidth || index === this.bsStart) {
                     this.lastBreakIndex = index;
                     break;
                 }
+                this.bsStart = index;
             }
             this.lineWidth = 0;
             this.lineStart = pointer;
@@ -1092,7 +1092,6 @@ export class TextContentParser {
                     data.splitLines.push(this.wordBreak[index]);
                     this.lineHeights.push(this.lineHeight);
                     this.lineWidths.push(this.lineWidth);
-                    this.bsStart = index;
                     const text = data.text.slice(this.wordBreak[index] + 1);
                     if (!isLast && text.length < guess / 4) {
                         // 如果剩余文字很少，几乎不可能会单独成一行时，直接结束循环
@@ -1101,10 +1100,11 @@ export class TextContentParser {
                     }
                     const metrics = ctx.measureText(text);
                     maxWidth = width;
-                    if (metrics.width < maxWidth) {
+                    if (metrics.width < maxWidth || index === this.bsStart) {
                         this.lastBreakIndex = index;
                         break;
                     }
+                    this.bsStart = index;
                 }
                 this.lineWidth = 0;
                 return true;

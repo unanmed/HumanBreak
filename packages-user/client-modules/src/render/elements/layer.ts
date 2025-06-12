@@ -628,13 +628,13 @@ export class Layer extends Container<ELayerEvent> {
         this.size(core._PX_, core._PY_);
 
         this.staticMap.setHD(false);
-        // this.staticMap.setAntiAliasing(false);
+        this.staticMap.setAntiAliasing(false);
         this.staticMap.size(core._PX_, core._PY_);
         this.movingMap.setHD(false);
-        // this.movingMap.setAntiAliasing(false);
+        this.movingMap.setAntiAliasing(false);
         this.movingMap.size(core._PX_, core._PY_);
         this.backMap.setHD(false);
-        // this.backMap.setAntiAliasing(false);
+        this.backMap.setAntiAliasing(false);
         this.backMap.size(core._PX_, core._PY_);
         this.main.setAntiAliasing(false);
         this.main.setHD(false);
@@ -778,11 +778,11 @@ export class Layer extends Container<ELayerEvent> {
         if (!data) return;
 
         const frame = data.frame;
-        const temp = this.requireCanvas();
+        const temp = this.requireCanvas(true, false);
         temp.setHD(false);
         temp.setAntiAliasing(false);
         for (let i = 0; i < frame; i++) {
-            const canvas = this.requireCanvas();
+            const canvas = this.requireCanvas(true, false);
             const ctx = canvas.ctx;
             const tempCtx = temp.ctx;
             const [sx, sy, w, h] = data.render[i];
@@ -1198,7 +1198,7 @@ export class Layer extends Container<ELayerEvent> {
             const ex = Math.min(sx + blockSize, this.mapWidth);
             const ey = Math.min(sy + blockSize, this.mapHeight);
 
-            const temp = this.requireCanvas();
+            const temp = this.requireCanvas(true, false);
             temp.setAntiAliasing(false);
             temp.setHD(false);
             temp.size(core._PX_, core._PY_);

@@ -179,7 +179,7 @@ export class Winskin extends RenderItem<EWinskinEvent> {
     }
 
     private generatePattern() {
-        const pattern = this.requireCanvas();
+        const pattern = this.requireCanvas(true, false);
         pattern.setScale(1);
         const img = this.image;
         pattern.size(32, 16);
