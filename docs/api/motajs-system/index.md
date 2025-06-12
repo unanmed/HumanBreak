@@ -2,16 +2,16 @@
 
 包含两个模块：
 
--   [Action](../motajs-system-action/index.md)
--   [UI](../motajs-system-ui/index.md)
+-   [`@motajs/system-action`](../motajs-system-action/index.md)
+-   [`@motajs/system-ui`](../motajs-system-ui/index.md)
 
 ## 引入示例
 
 ```ts
-import { Action, UI } from '@motajs/system';
+import { gameKey, UIController } from '@motajs/system';
 
-Action.gameKey.register(...);
-const myController = new UI.UIController('my-controller');
+gameKey.register(...);
+const myController = new UIController('my-controller');
 ```
 
 等效于：

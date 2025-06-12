@@ -2,12 +2,12 @@
 
 `@motajs/client` 包含多个模块：
 
--   [ClientBase](../motajs-client-base/)
+-   [`@motajs/client-base`](../motajs-client-base/)
 
 示例：
 
 ```ts
-import { ClientBase } from '@motajs/client';
+import { KeyCode } from '@motajs/client';
 
-const { ClientBase } = Mota.require('@motajs/client');
+const { KeyCOde } = Mota.require('@motajs/client');
 ```

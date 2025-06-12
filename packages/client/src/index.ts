@@ -1,1 +1,1 @@
-export * as Base from '@motajs/client-base';
+export * from '@motajs/client-base';
