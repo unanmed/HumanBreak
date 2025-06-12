@@ -1,3 +1,7 @@
 export * from './controller';
 export * from './main';
+export * from './save';
+export * from './settings';
+export * from './statistics';
 export * from './statusBar';
+export * from './toolbar';
