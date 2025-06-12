@@ -698,11 +698,11 @@ export class TextContentParser {
         if (!param) {
             // 参数为空或没有参数，视为标签结束
             const color = this.fillStyleStack.pop();
+            if (this.resolved.length > 0) this.addTextRenderable();
             if (!color) {
                 logger.warn(54, '\\r', pointer.toString());
                 return end;
             }
-            if (this.resolved.length > 0) this.addTextRenderable();
             this.status.fillStyle = color;
             return end;
         } else {
@@ -719,11 +719,11 @@ export class TextContentParser {
         if (!param) {
             // 参数为空或没有参数，视为标签结束
             const size = this.fontSizeStack.pop();
+            if (this.resolved.length > 0) this.addTextRenderable();
             if (!size) {
                 logger.warn(54, '\\c', pointer.toString());
                 return end;
             }
-            if (this.resolved.length > 0) this.addTextRenderable();
             this.status.fontSize = size;
             this.font = this.buildFont();
             return end;
@@ -742,11 +742,11 @@ export class TextContentParser {
         if (!param) {
             // 参数为空或没有参数，视为标签结束
             const font = this.fontFamilyStack.pop();
+            if (this.resolved.length > 0) this.addTextRenderable();
             if (!font) {
                 logger.warn(54, '\\g', pointer.toString());
                 return end;
             }
-            if (this.resolved.length > 0) this.addTextRenderable();
             this.status.fontFamily = font;
             this.font = this.buildFont();
             return end;
