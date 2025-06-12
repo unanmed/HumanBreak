@@ -47,7 +47,6 @@ main.floors.MT0=
         "他从石头的缝隙中看去，看到满山的枫叶在秋风中摇曳，仿佛在提醒他时间的流逝。",
         "这些自然的变迁，虽然无情，却也教会了他如何适应和生存。",
         "\t[原始人]今天的天气似乎不错，那就上山看看吧。",
-        "\r[red]注意！！！\r[]该塔新增了很多新的功能，同时对样板的ui进行了大幅度的改动，操作也有改变，由于内容过多，这里不再一一描述，具体请在道具栏查看百科全书！！百科全书是在你面前的几个道具中的其中一个",
         {
             "type": "function",
             "function": "function(){\nif (!core.isReplaying()) Mota.require('@motajs/legacy-ui').fixedUi.open('chapter', { chapter: '序章  起源' });\n}"
@@ -122,11 +121,7 @@ main.floors.MT0=
     "autoEvent": {},
     "bgm": "cave.opus",
     "beforeBattle": {},
-    "bg2map": [
-
-],
-    "fg2map": [
-
-],
+    "bg2map": [],
+    "fg2map": [],
     "cannotMoveIn": {}
 }

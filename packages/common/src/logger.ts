@@ -127,7 +127,7 @@ export class Logger {
             const n = Math.floor(code / 50) + 1;
             const n2 = code % 50;
             const url = `${location.origin}/_docs/logger/error/error${n}.html#error-code-${n2}`;
-            console.error(`[ERROR Code ${code}] ${text}. See ${url}`);
+            console.error(`[ERROR Code ${code}] ${text} See ${url}`);
         }
     }
 

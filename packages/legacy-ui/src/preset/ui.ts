@@ -224,46 +224,6 @@ mainSetting
             .register('tips', '小贴士', true, COM.Boolean)
     );
 
-const { loading } = Mota.require('@user/data-base');
-loading.once('coreInit', () => {
-    mainSetting.reset({
-        'screen.fullscreen': !!document.fullscreenElement,
-        'screen.halo': !!storage.getValue('screen.showHalo', true),
-        'screen.itemDetail': !!storage.getValue('screen.itemDetail', true),
-        'screen.heroDetail': !!storage.getValue('screen.heroDetail', false),
-        'screen.transition': !!storage.getValue('screen.transition', false),
-        'screen.fontSize': storage.getValue(
-            'screen.fontSize',
-            isMobile ? 9 : 16
-        ),
-        'screen.smoothView': !!storage.getValue('screen.smoothView', true),
-        'screen.criticalGem': !!storage.getValue('screen.criticalGem', false),
-        'screen.fontSizeStatus': storage.getValue('screen.fontSizeStatus', 100),
-        'action.fixed': !!storage.getValue('action.fixed', true),
-        'audio.bgmEnabled': !!storage.getValue('audio.bgmEnabled', true),
-        'audio.bgmVolume': storage.getValue('audio.bgmVolume', 80),
-        'audio.soundEnabled': !!storage.getValue('audio.soundEnabled', true),
-        'audio.soundVolume': storage.getValue('audio.soundVolume', 80),
-        'utils.betterLoad': !!storage.getValue('utils.betterLoad', true),
-        'utils.autoScale': !!storage.getValue('utils.autoScale', true),
-        'fx.paraLight': !!storage.getValue('fx.paraLight', true),
-        'fx.frag': !!storage.getValue('fx.frag', true),
-        'fx.portalParticle': !!storage.getValue('fx.portalParticle', true),
-        'ui.mapScale': storage.getValue(
-            'ui.mapScale',
-            isMobile ? 300 : Math.floor(window.innerWidth / 600) * 50
-        ),
-        'ui.mapLazy': storage.getValue('ui.mapLazy', false),
-        'ui.bookScale': storage.getValue('ui.bookScale', isMobile ? 100 : 80),
-        'ui.danmaku': storage.getValue('ui.danmaku', true),
-        'ui.danmakuSpeed': storage.getValue(
-            'ui.danmakuSpeed',
-            Math.floor(window.innerWidth / 30) * 5
-        ),
-        'ui.tips': storage.getValue('ui.tips', true)
-    });
-});
-
 interface SettingTextData {
     [x: string]: string[] | SettingTextData;
 }
@@ -320,3 +280,57 @@ getSettingText(settingsText);
 window.addEventListener('resize', () => {
     setFontSize();
 });
+
+export function createSetting() {
+    const { loading } = Mota.require('@user/data-base');
+    loading.once('coreInit', () => {
+        mainSetting.reset({
+            'screen.fullscreen': !!document.fullscreenElement,
+            'screen.halo': !!storage.getValue('screen.showHalo', true),
+            'screen.itemDetail': !!storage.getValue('screen.itemDetail', true),
+            'screen.heroDetail': !!storage.getValue('screen.heroDetail', false),
+            'screen.transition': !!storage.getValue('screen.transition', false),
+            'screen.fontSize': storage.getValue(
+                'screen.fontSize',
+                isMobile ? 9 : 16
+            ),
+            'screen.smoothView': !!storage.getValue('screen.smoothView', true),
+            'screen.criticalGem': !!storage.getValue(
+                'screen.criticalGem',
+                false
+            ),
+            'screen.fontSizeStatus': storage.getValue(
+                'screen.fontSizeStatus',
+                100
+            ),
+            'action.fixed': !!storage.getValue('action.fixed', true),
+            'audio.bgmEnabled': !!storage.getValue('audio.bgmEnabled', true),
+            'audio.bgmVolume': storage.getValue('audio.bgmVolume', 80),
+            'audio.soundEnabled': !!storage.getValue(
+                'audio.soundEnabled',
+                true
+            ),
+            'audio.soundVolume': storage.getValue('audio.soundVolume', 80),
+            'utils.betterLoad': !!storage.getValue('utils.betterLoad', true),
+            'utils.autoScale': !!storage.getValue('utils.autoScale', true),
+            'fx.paraLight': !!storage.getValue('fx.paraLight', true),
+            'fx.frag': !!storage.getValue('fx.frag', true),
+            'fx.portalParticle': !!storage.getValue('fx.portalParticle', true),
+            'ui.mapScale': storage.getValue(
+                'ui.mapScale',
+                isMobile ? 300 : Math.floor(window.innerWidth / 600) * 50
+            ),
+            'ui.mapLazy': storage.getValue('ui.mapLazy', false),
+            'ui.bookScale': storage.getValue(
+                'ui.bookScale',
+                isMobile ? 100 : 80
+            ),
+            'ui.danmaku': storage.getValue('ui.danmaku', true),
+            'ui.danmakuSpeed': storage.getValue(
+                'ui.danmakuSpeed',
+                Math.floor(window.innerWidth / 30) * 5
+            ),
+            'ui.tips': storage.getValue('ui.tips', true)
+        });
+    });
+}

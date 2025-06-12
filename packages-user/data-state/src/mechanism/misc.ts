@@ -1,6 +1,6 @@
 import { backDir, has } from '@user/data-utils';
 import { loading } from '@user/data-base';
-import { LayerDoorAnimate } from '@user/client-modules';
+import type { LayerDoorAnimate } from '@user/client-modules';
 
 /**
  * 一些零散机制的数据

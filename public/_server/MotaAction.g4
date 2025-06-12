@@ -3250,7 +3250,7 @@ colour : this.dataColor
 try {
     var tempobj = JSON.parse(JsonEvalString_0);
 } catch (e) {throw new Error("不合法的JSON格式！");}
-if (!tempobj.type) throw new Error("自定义事件需要一个type:xxx");
+// if (!tempobj.type) throw new Error("自定义事件需要一个type:xxx");
 var code = JSON.stringify(tempobj) +',\n';
 return code;
 */;
@@ -3517,7 +3517,7 @@ isShopVisited_e
 /* isShopVisited_e
 default : ['shop1']
 allShops : ['IdString_0']    
-var code = 'Mota.require('@user/legacy-plugin-data').isShopVisited(\'' + IdString_0 + '\')';
+var code = 'Mota.require("@user/legacy-plugin-data").isShopVisited(\'' + IdString_0 + '\')';
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 

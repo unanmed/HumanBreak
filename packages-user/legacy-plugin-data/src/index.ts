@@ -5,10 +5,6 @@ import { createHook } from './hook';
 import { initReplay } from './replay';
 import { initUI } from './ui';
 
-if (import.meta.env.DEV) {
-    import('./dev/hotReload');
-}
-
 export function create() {
     initFallback();
     loading.once('coreInit', () => {

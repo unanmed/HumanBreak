@@ -4,12 +4,14 @@ import { patchAll } from '@user/data-fallback';
 import { loading } from '@user/data-base';
 import { Patch } from '@motajs/legacy-common';
 
-createMota();
-patchAll();
-create();
+export function createData() {
+    createMota();
+    patchAll();
+    create();
 
-loading.once('coreInit', () => {
-    Patch.patchAll();
-});
+    loading.once('coreInit', () => {
+        Patch.patchAll();
+    });
+}
 
 export * from './mota';

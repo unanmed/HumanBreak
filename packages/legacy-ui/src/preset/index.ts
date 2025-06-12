@@ -1,11 +1,12 @@
 import { createDanmaku } from './danmaku';
 import { createFixed } from './fixed';
-import { createUI } from './ui';
+import { createSetting, createUI } from './ui';
 
 export function createPreset() {
     createDanmaku();
     createFixed();
     createUI();
+    createSetting();
 }
 
 export * from './ui';

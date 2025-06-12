@@ -17,6 +17,7 @@ import { WebSocket, WebSocketServer } from 'ws';
 import chokidar from 'chokidar';
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
+import replace from '@rollup/plugin-replace';
 
 const base = './public';
 
@@ -150,10 +151,23 @@ async function getEsmFile(
                 exclude: '**/node_modules/**'
             },
             plugins: [
-                typescript({ sourceMap: true }),
-                nodeResolve(),
+                typescript({
+                    sourceMap: true,
+                    noCheck: true,
+                    paths: {
+                        '@motajs/*': ['packages/*/src'],
+                        '@user/*': ['packages-user/*/src']
+                    }
+                }),
+                nodeResolve({
+                    browser: true,
+                    preferBuiltins: false
+                }),
                 commonjs(),
-                json()
+                json(),
+                replace({
+                    'import.meta.env.DEV': 'false'
+                })
             ],
             onwarn() {}
         });
