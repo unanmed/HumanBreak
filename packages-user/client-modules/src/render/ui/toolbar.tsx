@@ -82,7 +82,7 @@ export const PlayingToolbar = defineComponent<
     const iconFont = new Font('Verdana', 12);
 
     const book = () => core.openBook(true);
-    const tool = () => core.openEquipbox(true);
+    const tool = () => core.openToolbox(true);
     const fly = () => core.useFly(true);
     const save = () => core.save(true);
     const load = () => core.load(true);
