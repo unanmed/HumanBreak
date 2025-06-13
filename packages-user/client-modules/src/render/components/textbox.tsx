@@ -21,7 +21,6 @@ import {
 } from 'vue';
 import { logger } from '@motajs/common';
 import { isNil } from 'lodash-es';
-import { SetupComponentOptions } from './types';
 import EventEmitter from 'eventemitter3';
 import {
     ITextContentConfig,
@@ -31,6 +30,7 @@ import {
     WordBreak,
     TextAlign
 } from './textboxTyper';
+import { SetupComponentOptions } from '@motajs/system-ui';
 
 export interface TextContentProps
     extends DefaultProps,

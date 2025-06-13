@@ -1,6 +1,6 @@
-import { GameUI } from '@motajs/system-ui';
+import { GameUI, SetupComponentOptions } from '@motajs/system-ui';
 import { computed, defineComponent, ref, watch } from 'vue';
-import { SetupComponentOptions, TextContent } from '../components';
+import { TextContent } from '../components';
 import {
     DefaultProps,
     ElementLocator,
