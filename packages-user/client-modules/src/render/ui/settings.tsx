@@ -19,6 +19,7 @@ import { generateKeyboardEvent } from '@motajs/system-action';
 import { getVitualKeyOnce } from '@motajs/legacy-ui';
 import { getAllSavesData, getSaveData, syncFromServer } from '../../utils';
 import { getInput } from '../components/input';
+import { openStatistics } from './statistics';
 
 export interface SettingsProps extends Partial<ChoicesProps>, UIComponentProps {
     loc: ElementLocator;
@@ -211,7 +212,7 @@ export const GameInfo = defineComponent<SettingsProps>(props => {
     const choose = async (key: ChoiceKey) => {
         switch (key) {
             case GameInfoChoice.Statistics: {
-                // todo
+                openStatistics(props.controller);
                 break;
             }
             case GameInfoChoice.Project: {

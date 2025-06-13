@@ -1,6 +1,5 @@
 import { DefaultProps, ElementLocator, Font } from '@motajs/render';
 import { computed, defineComponent, ref } from 'vue';
-import { SetupComponentOptions } from '../components';
 import {
     DanmakuIcon,
     DoubleArrow,
@@ -21,6 +20,7 @@ import { linear } from 'mutate-animate';
 import { KeyCode } from '@motajs/client-base';
 import { Progress } from '../components/misc';
 import { generateBinary } from '@motajs/legacy-common';
+import { SetupComponentOptions } from '@motajs/system-ui';
 
 interface ToolbarProps extends DefaultProps {
     loc?: ElementLocator;
