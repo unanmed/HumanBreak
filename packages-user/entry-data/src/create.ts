@@ -18,5 +18,5 @@ export function create() {
 }
 
 function createModule() {
-    LegacyPluginData.create();
+    LegacyPluginData.createLegacy();
 }

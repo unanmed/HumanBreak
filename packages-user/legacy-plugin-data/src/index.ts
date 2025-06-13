@@ -5,7 +5,7 @@ import { createHook } from './hook';
 import { initReplay } from './replay';
 import { initUI } from './ui';
 
-export function create() {
+export function createLegacy() {
     initFallback();
     loading.once('coreInit', () => {
         initFiveLayer();

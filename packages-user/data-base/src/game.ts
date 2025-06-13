@@ -74,6 +74,9 @@ let clientRegistered = false;
 let dataRegistered = false;
 
 function checkRegistered() {
+    if (main.replayChecking || main.mode === 'editor') {
+        clientRegistered = true;
+    }
     if (clientRegistered && dataRegistered) {
         loading.emit('registered');
     }
