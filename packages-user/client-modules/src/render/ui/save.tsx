@@ -26,7 +26,8 @@ export type SaveEmits = {
 };
 
 const saveProps = {
-    props: ['loc', 'controller', 'instance']
+    props: ['loc', 'controller', 'instance'],
+    emits: ['delete', 'emit', 'exit']
 } satisfies SetupComponentOptions<SaveProps, SaveEmits, keyof SaveEmits>;
 
 function SaveBtn(props: {
