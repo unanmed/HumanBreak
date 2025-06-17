@@ -32,7 +32,7 @@
         "packages-user/**/*.ts",
         "packages-user/**/*.d.ts",
         "packages-user/**/*.tsx",
-        "types/**/*.d.ts"
+        "src/types/**/*.d.ts"
     ],
     "references": [{ "path": "./tsconfig.node.json" }]
 }
