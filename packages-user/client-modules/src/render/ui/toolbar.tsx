@@ -21,6 +21,9 @@ import { KeyCode } from '@motajs/client-base';
 import { Progress } from '../components/misc';
 import { generateBinary } from '@motajs/legacy-common';
 import { SetupComponentOptions } from '@motajs/system-ui';
+import { selectSave } from './save';
+import { mainUIController } from '@user/client-modules';
+import { STATUS_BAR_WIDTH, MAP_WIDTH, MAP_HEIGHT } from '../shared';
 
 interface ToolbarProps extends DefaultProps {
     loc?: ElementLocator;
@@ -84,7 +87,21 @@ export const PlayingToolbar = defineComponent<
     const book = () => core.openBook(true);
     const tool = () => core.openToolbox(true);
     const fly = () => core.useFly(true);
-    const save = () => core.save(true);
+    const save = async () => {
+        const index = await selectSave(mainUIController, [
+            STATUS_BAR_WIDTH,
+            0,
+            MAP_WIDTH,
+            MAP_HEIGHT
+        ]);
+        if (index === -2) {
+            // 如果用户未选择存档，而是关闭了存档。
+            console.log('用户关闭了存档界面。');
+        } else {
+            // 用户选择了一个存档。
+            console.log('用户选择在存档位' + index + '保存。');
+        }
+    };
     const load = () => core.load(true);
     const equip = () => core.openEquipbox(true);
     const shop = () => core.openQuickShop(true);

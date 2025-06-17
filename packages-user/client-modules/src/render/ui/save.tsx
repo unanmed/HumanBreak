@@ -1,14 +1,16 @@
 import { ElementLocator, IWheelEvent } from '@motajs/render-core';
 import { DefaultProps } from '@motajs/render-vue';
+import { Font } from '@motajs/render';
 import {
     GameUI,
     IUIMountable,
     SetupComponentOptions,
     UIComponentProps
 } from '@motajs/system-ui';
-import { defineComponent } from 'vue';
-import { Page } from '../components';
+import { defineComponent, ref } from 'vue';
+import { Background, Page, PageExpose } from '../components';
 import { useKey } from '../use';
+import { MAP_WIDTH, MAP_HEIGHT } from '../shared';
 
 export interface SaveProps extends UIComponentProps, DefaultProps {
     loc: ElementLocator;
@@ -25,6 +27,40 @@ const saveProps = {
     props: ['loc', 'controller', 'instance']
 } satisfies SetupComponentOptions<SaveProps, SaveEmits, keyof SaveEmits>;
 
+function SaveBtn(props: {
+    loc: ElementLocator;
+    index: number;
+    emit: (index: number) => void;
+    isDelete: boolean;
+}) {
+    const w = props.loc[2];
+    return (
+        <container loc={props.loc}>
+            <text
+                text={
+                    props.index === -1 ? '自动存档' : '存档' + (props.index + 1)
+                }
+                font={new Font('normal', 18)}
+                loc={[w! / 2, 0, undefined, undefined, 0.5, 0]}
+            />
+            <g-rect
+                loc={[0, 20, w, w]}
+                fill
+                stroke
+                fillStyle="gray"
+                strokeStyle={props.isDelete ? 'red' : 'white'}
+                onClick={() => props.emit(props.index)}
+            />
+            <text
+                text={'1000/10/10'}
+                fillStyle={'yellow'}
+                font={new Font('normal', 18)}
+                loc={[w! / 2, w! + 20, undefined, undefined, 0.5, 0]}
+            />
+        </container>
+    );
+}
+
 export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
     (props, { emit }) => {
         // 这些注释写完之后删了
@@ -39,13 +75,97 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
         key.realize('exit', () => {});
         // 其他按键自定义，需要新开一个 save 的 group
 
+        /** 除自动存档外，每一页容纳的存档数量 */
+        const pageRef = ref<PageExpose>();
+        const pageCap = 5;
+
+        let isDelete = ref(false);
+
         const emitSave = (index: number) => {
-            emit('emit', index);
+            if (index === -1) {
+                console.log('不能覆盖自动存档!');
+                return;
+            }
+            emit('emit', index, isDelete.value);
         };
 
-        const wheel = (ev: IWheelEvent) => {};
+        const wheel = (ev: IWheelEvent) => {
+            if (ev.wheelY < 0) {
+                pageRef.value?.movePage(-(ev.ctrlKey ? 10 : 1));
+            } else if (ev.wheelY > 0) {
+                pageRef.value?.movePage(ev.ctrlKey ? 10 : 1);
+            }
+        };
 
-        return () => <Page loc={props.loc} pages={1000} onWheel={wheel}></Page>;
+        return () => (
+            <container loc={props.loc}>
+                <Background loc={[0, 0, MAP_WIDTH, MAP_HEIGHT]} color="black" />
+                <Page
+                    loc={[0, 0, MAP_WIDTH, MAP_HEIGHT - 10]}
+                    pages={1000}
+                    onWheel={wheel}
+                    ref={pageRef}
+                >
+                    {(page: number) => (
+                        <container loc={[0, 0, MAP_WIDTH, MAP_HEIGHT]}>
+                            <SaveBtn
+                                loc={[30, 50, 120, 170]}
+                                index={-1}
+                                emit={emitSave}
+                                isDelete={isDelete.value}
+                            />
+                            <SaveBtn
+                                loc={[180, 50, 120, 170]}
+                                index={page * pageCap}
+                                emit={emitSave}
+                                isDelete={isDelete.value}
+                            />
+                            <SaveBtn
+                                loc={[330, 50, 120, 170]}
+                                index={page * pageCap + 1}
+                                emit={emitSave}
+                                isDelete={isDelete.value}
+                            />
+                            <SaveBtn
+                                loc={[30, 230, 120, 170]}
+                                index={page * pageCap + 2}
+                                emit={emitSave}
+                                isDelete={isDelete.value}
+                            />
+                            <SaveBtn
+                                loc={[180, 230, 120, 170]}
+                                index={page * pageCap + 3}
+                                emit={emitSave}
+                                isDelete={isDelete.value}
+                            />
+                            <SaveBtn
+                                loc={[330, 230, 120, 170]}
+                                index={page * pageCap + 4}
+                                emit={emitSave}
+                                isDelete={isDelete.value}
+                            />
+                        </container>
+                    )}
+                </Page>
+                <text
+                    text={'删除模式'}
+                    font={new Font('normal', 18)}
+                    loc={[30, 450, undefined, undefined, 0, 0]}
+                    zIndex={1}
+                    fillStyle={isDelete.value ? 'red' : 'white'}
+                    onClick={() => {
+                        isDelete.value = !isDelete.value;
+                    }}
+                />
+                <text
+                    text={'返回游戏'}
+                    font={new Font('normal', 18)}
+                    loc={[450, 450, undefined, undefined, 1, 0]}
+                    zIndex={1}
+                    onClick={() => emit('exit')}
+                />
+            </container>
+        );
     },
     saveProps
 );
@@ -79,12 +199,17 @@ export function selectSave(
         const instance = controller.open(SaveUI, {
             loc,
             ...props,
-            onEmit: index => {
+            onEmit: (index: number, isDelete: boolean) => {
+                if (index === -1) return; // 自动存档不能用于保存
+                if (isDelete) {
+                    return;
+                }
                 controller.close(instance);
                 res(index);
             },
             onExit: () => {
-                res(-1);
+                controller.close(instance);
+                res(-2);
             }
         });
     });
