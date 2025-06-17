@@ -49,13 +49,8 @@ async function buildPackages() {
     const dirs = await fs.readdir(packages);
     for (const name of dirs) {
         const dir = path.join(process.cwd(), name);
-        if (name === 'types') {
-            await fs.emptyDir(path.join(dir, 'src'));
-            await fs.rmdir(path.join(dir, 'src'));
-        } else {
-            await fs.emptyDir(dir);
-            await fs.rmdir(dir);
-        }
+        await fs.emptyDir(dir);
+        await fs.rmdir(dir);
     }
 }
 
