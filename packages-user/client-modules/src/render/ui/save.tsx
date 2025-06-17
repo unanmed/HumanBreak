@@ -19,6 +19,8 @@ export interface SaveProps extends UIComponentProps, DefaultProps {
 export type SaveEmits = {
     /** 点击存档时触发 */
     emit: (index: number) => void;
+    /** 删除存档时触发 */
+    delete: (index: number) => void;
     /** 手动点击退出时触发 */
     exit: () => void;
 };
@@ -172,15 +174,22 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
 
 export const SaveUI = new GameUI('save', Save);
 
+export interface SaveValidation {
+    readonly valid: boolean;
+    readonly message: string;
+}
+
 /**
- * 打开存读档界面并让用户选择一个存档。如果用户手动关闭了存档界面，返回 -1，否则返回用户选择的存档索引。
+ * 打开存读档界面并让用户选择一个存档。如果用户手动关闭了存档界面，返回 -2，否则返回用户选择的存档索引。
  * 参数参考 {@link SaveProps}，事件不可自定义。
  *
  * 使用示例：
  * ```ts
  * const index = await selectSave(props.controller, [0, 0, 416, 416]);
- * if (index === -1) {
+ * if (index === -2) {
  *   // 如果用户未选择存档，而是关闭了存档。
+ * } else if (index === -1) {
+ *   // 用户选择了自动存档。
  * } else {
  *   // 用户选择了一个存档。
  * }
@@ -188,24 +197,31 @@ export const SaveUI = new GameUI('save', Save);
  * @param controller 在哪个控制器上打开
  * @param loc 存读档界面的坐标
  * @param props 传递给存读档界面的参数
- * @returns
+ * @returns 选择的存档索引
  */
 export function selectSave(
     controller: IUIMountable,
     loc: ElementLocator,
+    validate?: (index: number) => SaveValidation,
     props?: SaveProps
 ) {
     return new Promise<number>(res => {
         const instance = controller.open(SaveUI, {
             loc,
             ...props,
-            onEmit: (index: number, isDelete: boolean) => {
-                if (index === -1) return; // 自动存档不能用于保存
-                if (isDelete) {
+            onEmit: (index: number) => {
+                if (!validate) {
+                    controller.close(instance);
+                    res(index);
                     return;
                 }
-                controller.close(instance);
-                res(index);
+                const validation = validate(index);
+                if (validation.valid) {
+                    controller.close(instance);
+                    res(index);
+                } else {
+                    core.drawTip(validation.message);
+                }
             },
             onExit: () => {
                 controller.close(instance);
