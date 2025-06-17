@@ -16,6 +16,13 @@ export interface SaveProps extends UIComponentProps, DefaultProps {
     loc: ElementLocator;
 }
 
+interface SaveBtnProps {
+    loc: ElementLocator;
+    index: number;
+    emit: (index: number) => void;
+    isDelete: boolean;
+}
+
 export type SaveEmits = {
     /** 点击存档时触发 */
     emit: (index: number) => void;
@@ -30,21 +37,20 @@ const saveProps = {
     emits: ['delete', 'emit', 'exit']
 } satisfies SetupComponentOptions<SaveProps, SaveEmits, keyof SaveEmits>;
 
-function SaveBtn(props: {
-    loc: ElementLocator;
-    index: number;
-    emit: (index: number) => void;
-    isDelete: boolean;
-}) {
+const saveBtnProps = {
+    props: ['loc', 'index', 'emit', 'isDelete']
+} satisfies SetupComponentOptions<SaveBtnProps>;
+
+const SaveBtn = defineComponent<SaveBtnProps>(props => {
     const w = props.loc[2];
-    return (
+    return () => (
         <container loc={props.loc}>
             <text
                 text={
                     props.index === -1 ? '自动存档' : '存档' + (props.index + 1)
                 }
                 font={new Font('normal', 18)}
-                loc={[w! / 2, 0, undefined, undefined, 0.5, 0]}
+                loc={[w! / 2, 0, void 0, void 0, 0.5, 0]}
             />
             <g-rect
                 loc={[0, 20, w, w]}
@@ -55,14 +61,20 @@ function SaveBtn(props: {
                 onClick={() => props.emit(props.index)}
             />
             <text
-                text={'1000/10/10'}
-                fillStyle={'yellow'}
+                text={
+                    core.status.hero.hp +
+                    '/' +
+                    core.status.hero.atk +
+                    '/' +
+                    core.status.hero.def
+                }
+                fillStyle="yellow"
                 font={new Font('normal', 18)}
-                loc={[w! / 2, w! + 20, undefined, undefined, 0.5, 0]}
+                loc={[w! / 2, w! + 20, void 0, void 0, 0.5, 0]}
             />
         </container>
     );
-}
+}, saveBtnProps);
 
 export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
     (props, { emit }) => {
@@ -82,14 +94,15 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
         const pageRef = ref<PageExpose>();
         const pageCap = 5;
 
-        let isDelete = ref(false);
+        const isDelete = ref(false);
 
         const emitSave = (index: number) => {
             if (index === -1) {
-                console.log('不能覆盖自动存档!');
+                core.drawTip('不能覆盖自动存档!');
                 return;
             }
-            emit('emit', index, isDelete.value);
+            if (isDelete.value) emit('delete', index);
+            else emit('emit', index);
         };
 
         const wheel = (ev: IWheelEvent) => {
@@ -151,9 +164,9 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                     )}
                 </Page>
                 <text
-                    text={'删除模式'}
+                    text="删除模式"
                     font={new Font('normal', 18)}
-                    loc={[30, 450, undefined, undefined, 0, 0]}
+                    loc={[30, 450, void 0, void 0, 0, 0]}
                     zIndex={1}
                     fillStyle={isDelete.value ? 'red' : 'white'}
                     onClick={() => {
@@ -161,9 +174,9 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                     }}
                 />
                 <text
-                    text={'返回游戏'}
+                    text="返回游戏"
                     font={new Font('normal', 18)}
-                    loc={[450, 450, undefined, undefined, 1, 0]}
+                    loc={[450, 450, void 0, void 0, 1, 0]}
                     zIndex={1}
                     onClick={() => emit('exit')}
                 />
