@@ -16,10 +16,9 @@ export interface SaveProps extends UIComponentProps, DefaultProps {
     loc: ElementLocator;
 }
 
-interface SaveBtnProps {
+export interface SaveBtnProps extends DefaultProps {
     loc: ElementLocator;
     index: number;
-    emit: (index: number) => void;
     isDelete: boolean;
 }
 
@@ -38,19 +37,19 @@ const saveProps = {
 } satisfies SetupComponentOptions<SaveProps, SaveEmits, keyof SaveEmits>;
 
 const saveBtnProps = {
-    props: ['loc', 'index', 'emit', 'isDelete']
+    props: ['loc', 'index', 'isDelete']
 } satisfies SetupComponentOptions<SaveBtnProps>;
 
-const SaveBtn = defineComponent<SaveBtnProps>(props => {
-    const w = props.loc[2];
+export const SaveBtn = defineComponent<SaveBtnProps>(props => {
+    const w = props.loc[2] ?? 200;
+    const text = props.index === -1 ? '自动存档' : `存档${props.index + 1}`;
+    const font = new Font('normal', 18);
     return () => (
         <container loc={props.loc}>
             <text
-                text={
-                    props.index === -1 ? '自动存档' : '存档' + (props.index + 1)
-                }
-                font={new Font('normal', 18)}
-                loc={[w! / 2, 0, void 0, void 0, 0.5, 0]}
+                text={text}
+                font={font}
+                loc={[w / 2, 0, void 0, void 0, 0.5, 0]}
             />
             <g-rect
                 loc={[0, 20, w, w]}
@@ -58,19 +57,12 @@ const SaveBtn = defineComponent<SaveBtnProps>(props => {
                 stroke
                 fillStyle="gray"
                 strokeStyle={props.isDelete ? 'red' : 'white'}
-                onClick={() => props.emit(props.index)}
             />
             <text
-                text={
-                    core.status.hero.hp +
-                    '/' +
-                    core.status.hero.atk +
-                    '/' +
-                    core.status.hero.def
-                }
+                text="placeholder"
                 fillStyle="yellow"
-                font={new Font('normal', 18)}
-                loc={[w! / 2, w! + 20, void 0, void 0, 0.5, 0]}
+                font={font}
+                loc={[w / 2, w + 20, void 0, void 0, 0.5, 0]}
             />
         </container>
     );
@@ -84,33 +76,40 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
         // onEmit 事件在点击存档或按键确认时触发
         // 存读档执行函数在 ../../utils/saves.ts
 
+        /** 除自动存档外，每一页容纳的存档数量 */
+        const pageCap = 5;
+        const font = new Font('normal', 18);
+
+        const isDelete = ref(false);
+        const pageRef = ref<PageExpose>();
+
         // 参考 ../../action/hotkey.ts 中的按键定义
         const [key] = useKey();
         key.realize('confirm', () => {});
         key.realize('exit', () => {});
         // 其他按键自定义，需要新开一个 save 的 group
 
-        /** 除自动存档外，每一页容纳的存档数量 */
-        const pageRef = ref<PageExpose>();
-        const pageCap = 5;
-
-        const isDelete = ref(false);
-
         const emitSave = (index: number) => {
-            if (index === -1) {
-                core.drawTip('不能覆盖自动存档!');
-                return;
-            }
             if (isDelete.value) emit('delete', index);
             else emit('emit', index);
         };
 
         const wheel = (ev: IWheelEvent) => {
-            if (ev.wheelY < 0) {
-                pageRef.value?.movePage(-(ev.ctrlKey ? 10 : 1));
-            } else if (ev.wheelY > 0) {
-                pageRef.value?.movePage(ev.ctrlKey ? 10 : 1);
+            const delta = Math.sign(ev.wheelY);
+            if (ev.ctrlKey) {
+                pageRef.value?.movePage(delta * 10);
+            } else {
+                pageRef.value?.movePage(delta);
             }
+        };
+
+        const toggleDelete = () => {
+            isDelete.value = !isDelete.value;
+        };
+
+        const exit = () => {
+            emit('exit');
+            props.controller.close(props.instance);
         };
 
         return () => (
@@ -127,58 +126,62 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                             <SaveBtn
                                 loc={[30, 50, 120, 170]}
                                 index={-1}
-                                emit={emitSave}
                                 isDelete={isDelete.value}
+                                onClick={() => emitSave(-1)}
+                                cursor="pointer"
                             />
                             <SaveBtn
                                 loc={[180, 50, 120, 170]}
                                 index={page * pageCap}
-                                emit={emitSave}
                                 isDelete={isDelete.value}
+                                onClick={() => emitSave(page * pageCap)}
+                                cursor="pointer"
                             />
                             <SaveBtn
                                 loc={[330, 50, 120, 170]}
                                 index={page * pageCap + 1}
-                                emit={emitSave}
                                 isDelete={isDelete.value}
+                                onClick={() => emitSave(page * pageCap + 1)}
+                                cursor="pointer"
                             />
                             <SaveBtn
                                 loc={[30, 230, 120, 170]}
                                 index={page * pageCap + 2}
-                                emit={emitSave}
                                 isDelete={isDelete.value}
+                                onClick={() => emitSave(page * pageCap + 2)}
+                                cursor="pointer"
                             />
                             <SaveBtn
                                 loc={[180, 230, 120, 170]}
                                 index={page * pageCap + 3}
-                                emit={emitSave}
                                 isDelete={isDelete.value}
+                                onClick={() => emitSave(page * pageCap + 3)}
+                                cursor="pointer"
                             />
                             <SaveBtn
                                 loc={[330, 230, 120, 170]}
                                 index={page * pageCap + 4}
-                                emit={emitSave}
                                 isDelete={isDelete.value}
+                                onClick={() => emitSave(page * pageCap + 4)}
+                                cursor="pointer"
                             />
                         </container>
                     )}
                 </Page>
                 <text
                     text="删除模式"
-                    font={new Font('normal', 18)}
+                    font={font}
                     loc={[30, 450, void 0, void 0, 0, 0]}
-                    zIndex={1}
+                    zIndex={10}
                     fillStyle={isDelete.value ? 'red' : 'white'}
-                    onClick={() => {
-                        isDelete.value = !isDelete.value;
-                    }}
+                    onClick={toggleDelete}
                 />
                 <text
                     text="返回游戏"
-                    font={new Font('normal', 18)}
+                    font={font}
                     loc={[450, 450, void 0, void 0, 1, 0]}
-                    zIndex={1}
-                    onClick={() => emit('exit')}
+                    zIndex={10}
+                    onClick={exit}
                 />
             </container>
         );
@@ -238,7 +241,6 @@ export function selectSave(
                 }
             },
             onExit: () => {
-                controller.close(instance);
                 res(-2);
             }
         });
