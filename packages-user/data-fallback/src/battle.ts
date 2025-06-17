@@ -1,12 +1,11 @@
 import {
     DamageEnemy,
     ensureFloorDamage,
-    getSingleEnemy,
     getEnemy,
     HeroSkill,
     NightSpecial
 } from '@user/data-state';
-import { hook, loading } from '@user/data-base';
+import { hook } from '@user/data-base';
 import { Patch, PatchClass } from '@motajs/legacy-common';
 import { isNil } from 'lodash-es';
 
@@ -47,7 +46,7 @@ export function patchBattle() {
             );
         }
         // 非强制战斗
-        // @ts-ignore
+        // @ts-expect-error 2.c 重构
         if (!core.canBattle(x, y) && !force && !core.status.event.id) {
             core.stopSound();
             core.playSound('操作失败');
@@ -116,7 +115,7 @@ export function patchBattle() {
             core.clearContinueAutomaticRoute();
 
             // 自动存档
-            var inAction = core.status.event.id == 'action';
+            const inAction = core.status.event.id === 'action';
             if (inAction) {
                 core.insertAction(beforeBattle, data.x, data.y);
                 core.doAction();
@@ -131,7 +130,7 @@ export function patchBattle() {
 
     patch2.add('_action_battle', function (data, x, y, prefix) {
         if (data.id) {
-            const enemy = getSingleEnemy(data.id as EnemyIds);
+            // const enemy = getSingleEnemy(data.id as EnemyIds);
             // todo: 与不在地图上的怪物战斗
         } else {
             if (data.floorId != core.status.floorId) {
@@ -256,7 +255,6 @@ export function patchBattle() {
         }
     );
 }
-loading.once('coreInit', patchBattle);
 
 declare global {
     interface Enemys {
