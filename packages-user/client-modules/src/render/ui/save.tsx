@@ -11,8 +11,6 @@ import { defineComponent, ref, computed } from 'vue';
 import { Background, Page, PageExpose } from '../components';
 import { useKey } from '../use';
 import { MAP_WIDTH, MAP_HEIGHT } from '../shared';
-import { gameKey } from '@motajs/system-action';
-import { KeyCode } from '@motajs/client-base';
 
 export interface SaveProps extends UIComponentProps, DefaultProps {
     loc: ElementLocator;
@@ -43,50 +41,16 @@ const saveBtnProps = {
     props: ['loc', 'index', 'isSelected', 'isDelete']
 } satisfies SetupComponentOptions<SaveBtnProps>;
 
-gameKey
-    .group('@ui_save', 'save')
-    .register({
-        id: '@ui_save_exit',
-        name: '退出存档界面',
-        defaults: KeyCode.KeyS
-    })
-    .register({
-        id: '@ui_save_pageUp',
-        name: '存档向后翻页',
-        defaults: KeyCode.PageUp
-    })
-    .register({
-        id: '@ui_save_pageDown',
-        name: '存档向前翻页',
-        defaults: KeyCode.PageDown
-    })
-    .register({
-        id: '@ui_save_up',
-        name: '存档选择框向上',
-        defaults: KeyCode.UpArrow
-    })
-    .register({
-        id: '@ui_save_down',
-        name: '存档选择框向下',
-        defaults: KeyCode.DownArrow
-    })
-    .register({
-        id: '@ui_save_left',
-        name: '存档选择框向左',
-        defaults: KeyCode.LeftArrow
-    })
-    .register({
-        id: '@ui_save_right',
-        name: '存档选择框向右',
-        defaults: KeyCode.RightArrow
-    });
-
 export const SaveBtn = defineComponent<SaveBtnProps>(props => {
     const w = props.loc[2] ?? 200;
     const font = new Font('normal', 18);
     const text = computed(() =>
         props.index === -1 ? '自动存档' : `存档${props.index + 1}`
     );
+    const strokeStyle = computed(() => {
+        if (props.isSelected) return props.isDelete ? 'red' : 'gold';
+        else return 'white';
+    });
     const lineWidth = computed(() => (props.isSelected ? 2 : 1));
     return () => (
         <container loc={props.loc}>
@@ -100,13 +64,7 @@ export const SaveBtn = defineComponent<SaveBtnProps>(props => {
                 fill
                 stroke
                 fillStyle="gray"
-                strokeStyle={
-                    props.isSelected
-                        ? props.isDelete
-                            ? 'red'
-                            : 'gold'
-                        : 'white'
-                }
+                strokeStyle={strokeStyle.value}
                 lineWidth={lineWidth.value}
             />
             <text
@@ -127,7 +85,8 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
         // onEmit 事件在点击存档或按键确认时触发
         // 存读档执行函数在 ../../utils/saves.ts
 
-        const [row, column] = [2, 3];
+        const row = 2;
+        const column = 3;
         /** 除自动存档外，每一页容纳的存档数量 */
         const pageCap = row * column - 1;
         const font = new Font('normal', 18);
@@ -140,7 +99,7 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
         const emitSave = (index: number) => {
             if (isDelete.value) emit('delete', index);
             else emit('emit', index);
-            pickIndex.value = (index % 5) + 1;
+            pickIndex.value = (index % pageCap) + 1;
         };
 
         const wheel = (ev: IWheelEvent) => {
@@ -170,24 +129,65 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
         })
             .realize('exit', exit)
             .realize('@ui_save_exit', exit)
-            .realize('@ui_save_pageUp', () => {
-                pageRef.value?.movePage(1);
-            })
-            .realize('@ui_save_pageDown', () => {
-                pageRef.value?.movePage(-1);
-            })
-            .realize('@ui_save_up', () => {
-                if (pickIndex.value >= row) pickIndex.value -= column;
-            })
-            .realize('@ui_save_down', () => {
-                if (pickIndex.value <= pageCap - row) pickIndex.value += column;
-            })
-            .realize('@ui_save_left', () => {
-                if (pickIndex.value > 0) pickIndex.value--;
-            })
-            .realize('@ui_save_right', () => {
-                if (pickIndex.value < pageCap) pickIndex.value++;
-            });
+            .realize(
+                '@ui_save_pageUp',
+                () => {
+                    pageRef.value?.movePage(1);
+                },
+                { type: 'down-repeat' }
+            )
+            .realize(
+                '@ui_save_pageDown',
+                () => {
+                    pageRef.value?.movePage(-1);
+                },
+                { type: 'down-repeat' }
+            )
+            .realize(
+                '@ui_save_up',
+                () => {
+                    if (pickIndex.value >= row) pickIndex.value -= column;
+                    else {
+                        pickIndex.value += pageCap + 1 - column;
+                        pageRef.value?.movePage(-1);
+                    }
+                },
+                { type: 'down-repeat' }
+            )
+            .realize(
+                '@ui_save_down',
+                () => {
+                    if (pickIndex.value <= pageCap - row)
+                        pickIndex.value += column;
+                    else {
+                        pickIndex.value += column - pageCap - 1;
+                        pageRef.value?.movePage(1);
+                    }
+                },
+                { type: 'down-repeat' }
+            )
+            .realize(
+                '@ui_save_left',
+                () => {
+                    if (pickIndex.value > 0) pickIndex.value--;
+                    else {
+                        pickIndex.value = pageCap;
+                        pageRef.value?.movePage(-1);
+                    }
+                },
+                { type: 'down-repeat' }
+            )
+            .realize(
+                '@ui_save_right',
+                () => {
+                    if (pickIndex.value < pageCap) pickIndex.value++;
+                    else {
+                        pickIndex.value = 0;
+                        pageRef.value?.movePage(1);
+                    }
+                },
+                { type: 'down-repeat' }
+            );
         // 其他按键自定义，需要新开一个 save 的 group
 
         return () => (
