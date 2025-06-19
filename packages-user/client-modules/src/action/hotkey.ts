@@ -438,37 +438,37 @@ gameKey
     // #region 存档界面
     .group('@ui_save', 'save')
     .register({
-        id: '@ui_save_exit',
+        id: '@save_exit',
         name: '退出存档界面',
         defaults: KeyCode.KeyS
     })
     .register({
-        id: '@ui_save_pageUp',
+        id: '@save_pageUp',
         name: '存档向后翻页',
         defaults: KeyCode.PageUp
     })
     .register({
-        id: '@ui_save_pageDown',
+        id: '@save_pageDown',
         name: '存档向前翻页',
         defaults: KeyCode.PageDown
     })
     .register({
-        id: '@ui_save_up',
+        id: '@save_up',
         name: '存档选择框向上',
         defaults: KeyCode.UpArrow
     })
     .register({
-        id: '@ui_save_down',
+        id: '@save_down',
         name: '存档选择框向下',
         defaults: KeyCode.DownArrow
     })
     .register({
-        id: '@ui_save_left',
+        id: '@save_left',
         name: '存档选择框向左',
         defaults: KeyCode.LeftArrow
     })
     .register({
-        id: '@ui_save_right',
+        id: '@save_right',
         name: '存档选择框向右',
         defaults: KeyCode.RightArrow
     });

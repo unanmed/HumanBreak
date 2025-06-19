@@ -128,23 +128,23 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
             emitSave(pageCap * currPage + pickIndex.value);
         })
             .realize('exit', exit)
-            .realize('@ui_save_exit', exit)
+            .realize('save_exit', exit)
             .realize(
-                '@ui_save_pageUp',
+                'save_pageUp',
                 () => {
                     pageRef.value?.movePage(1);
                 },
                 { type: 'down-repeat' }
             )
             .realize(
-                '@ui_save_pageDown',
+                'save_pageDown',
                 () => {
                     pageRef.value?.movePage(-1);
                 },
                 { type: 'down-repeat' }
             )
             .realize(
-                '@ui_save_up',
+                'save_up',
                 () => {
                     if (pickIndex.value >= row) pickIndex.value -= column;
                     else {
@@ -155,7 +155,7 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                 { type: 'down-repeat' }
             )
             .realize(
-                '@ui_save_down',
+                'save_down',
                 () => {
                     if (pickIndex.value <= pageCap - row)
                         pickIndex.value += column;
@@ -167,7 +167,7 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                 { type: 'down-repeat' }
             )
             .realize(
-                '@ui_save_left',
+                'save_left',
                 () => {
                     if (pickIndex.value > 0) pickIndex.value--;
                     else {
@@ -178,7 +178,7 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                 { type: 'down-repeat' }
             )
             .realize(
-                '@ui_save_right',
+                'save_right',
                 () => {
                     if (pickIndex.value < pageCap) pickIndex.value++;
                     else {
