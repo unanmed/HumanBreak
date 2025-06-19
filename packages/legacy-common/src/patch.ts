@@ -118,9 +118,12 @@ export class Patch<T extends PatchClass> {
         const set = this.patched[patchClass];
         const obj = this.getPatchClass(patchClass);
         for (const [key, func] of patch.patches) {
+            // console.log(key);
+
             if (set.has(key)) {
                 logger.warn(49, patchName[patchClass], key);
             }
+            set.add(key);
             obj[key] = func;
         }
         this.patchList.delete(patch);
