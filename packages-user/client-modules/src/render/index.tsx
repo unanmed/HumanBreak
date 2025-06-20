@@ -9,6 +9,7 @@ import { createLoopMap } from './loopMap';
 import { createGameCanvas } from './legacy/gameCanvas';
 import { createElements } from './elements';
 import { mainRenderer } from './renderer';
+import { createUI } from './ui';
 
 export function createGameRenderer() {
     const App = defineComponent(_props => {
@@ -37,6 +38,7 @@ export function createGameRenderer() {
 }
 
 export function createRender() {
+    createUI();
     createGameCanvas();
     createItemDetail();
     createLoopMap();

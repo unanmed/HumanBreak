@@ -1,3 +1,9 @@
+import { createMainController } from './controller';
+
+export function createUI() {
+    createMainController();
+}
+
 export * from './controller';
 export * from './main';
 export * from './save';

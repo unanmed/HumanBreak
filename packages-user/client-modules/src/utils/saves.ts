@@ -3,28 +3,23 @@ import { getConfirm, waitbox } from '../render';
 import { IUIMountable } from '@motajs/system-ui';
 import { SyncSaveFromServerResponse } from '@motajs/client-base';
 
-export function getAllSavesData() {
-    return new Promise<string>(res => {
-        core.getAllSaves(saves => {
-            if (!saves) {
-                res('');
-                return;
-            }
-            const content = {
-                name: core.firstData.name,
-                version: core.firstData.version,
-                data: saves
-            };
-            res(compressToBase64(JSON.stringify(content)));
-        });
-    });
+export interface SaveData {
+    name: string;
+    version: string;
+    data: Save;
 }
 
-export function getSaveData(index: number) {
-    return new Promise<string>(res => {
+export interface SaveDataArray {
+    name: string;
+    version: string;
+    data: Save[];
+}
+
+export function getSave(index: number) {
+    return new Promise<SaveData | null>(res => {
         core.getSave(index, data => {
             if (!data) {
-                res('');
+                res(null);
                 return;
             }
             const content = {
@@ -32,9 +27,38 @@ export function getSaveData(index: number) {
                 version: core.firstData.version,
                 data: data
             };
-            res(compressToBase64(JSON.stringify(content)));
+            res(content);
         });
     });
+}
+
+export function getAllSaves() {
+    return new Promise<SaveDataArray | null>(res => {
+        core.getAllSaves(saves => {
+            if (!saves) {
+                res(null);
+                return;
+            }
+            const content = {
+                name: core.firstData.name,
+                version: core.firstData.version,
+                data: saves
+            };
+            res(content);
+        });
+    });
+}
+
+export async function getSaveData(index: number) {
+    const data = await getSave(index);
+    if (!data) return '';
+    return compressToBase64(JSON.stringify(data));
+}
+
+export async function getAllSavesData() {
+    const data = await getAllSaves();
+    if (!data) return '';
+    return compressToBase64(JSON.stringify(data));
 }
 
 //#region 服务器加载
@@ -169,24 +193,3 @@ export async function syncFromServer(
         );
     }
 }
-
-//#region 存读档操作
-
-export const enum LoadMode {
-    Load,
-    ReplayFrom,
-    ContinueReplayFrom,
-    ContinueReplayTo
-}
-
-/**
- * 对当前状态存档并存档至目标索引
- * @param index 存档至的索引
- */
-export function saveTo(index: number) {}
-
-/**
- * 从指定索引读档
- * @param index 从哪个索引读档
- */
-export function loadFrom(index: number, mode: LoadMode) {}

@@ -8,7 +8,7 @@ import {
     UIComponentProps
 } from '@motajs/system-ui';
 import { defineComponent, ref, computed } from 'vue';
-import { Background, Page, PageExpose } from '../components';
+import { Page, PageExpose } from '../components';
 import { useKey } from '../use';
 import { MAP_WIDTH, MAP_HEIGHT } from '../shared';
 
@@ -44,6 +44,7 @@ const saveBtnProps = {
 export const SaveBtn = defineComponent<SaveBtnProps>(props => {
     const w = props.loc[2] ?? 200;
     const font = new Font('normal', 18);
+    const statusFont = new Font('normal', 14);
     const text = computed(() =>
         props.index === -1 ? '自动存档' : `存档${props.index + 1}`
     );
@@ -57,10 +58,10 @@ export const SaveBtn = defineComponent<SaveBtnProps>(props => {
             <text
                 text={text.value}
                 font={font}
-                loc={[w / 2, 0, void 0, void 0, 0.5, 0]}
+                loc={[w / 2, 20, void 0, void 0, 0.5, 1]}
             />
             <g-rect
-                loc={[lineWidth.value, 20, w - 2 * lineWidth.value, w]}
+                loc={[lineWidth.value, 24, w - 2 * lineWidth.value, w]}
                 fill
                 stroke
                 fillStyle="gray"
@@ -71,8 +72,8 @@ export const SaveBtn = defineComponent<SaveBtnProps>(props => {
             <text
                 text="placeholder"
                 fillStyle="yellow"
-                font={font}
-                loc={[w / 2, w + 20, void 0, void 0, 0.5, 0]}
+                font={statusFont}
+                loc={[w / 2, w + 28, void 0, void 0, 0.5, 0]}
             />
         </container>
     );
@@ -80,12 +81,6 @@ export const SaveBtn = defineComponent<SaveBtnProps>(props => {
 
 export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
     (props, { emit }) => {
-        // 这些注释写完之后删了
-        // 这里是 UI 部分，不负责任何存读档操作，这些在特定场景下传入 onEmit 来实现
-        // 缩略图暂用 container 元素替代，点击时触发 onEmit
-        // onEmit 事件在点击存档或按键确认时触发
-        // 存读档执行函数在 ../../utils/saves.ts
-
         const row = 2;
         const column = 3;
         /** 除自动存档外，每一页容纳的存档数量 */
@@ -122,7 +117,6 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
             props.controller.close(props.instance);
         };
 
-        // 参考 ../../action/hotkey.ts 中的按键定义
         const [key] = useKey();
         key.realize('confirm', () => {
             const currPage = pageRef.value?.now();
@@ -148,10 +142,17 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
             .realize(
                 '@save_up',
                 () => {
-                    if (pickIndex.value >= row) pickIndex.value -= column;
-                    else {
-                        pickIndex.value += pageCap + 1 - column;
-                        pageRef.value?.movePage(-1);
+                    if (!pageRef.value) return;
+                    const now = pageRef.value.now();
+                    if (pickIndex.value >= row) {
+                        pickIndex.value -= column;
+                    } else {
+                        if (now === 0) {
+                            pickIndex.value = 0;
+                        } else {
+                            pickIndex.value += pageCap + 1 - column;
+                            pageRef.value?.movePage(-1);
+                        }
                     }
                 },
                 { type: 'down-repeat' }
@@ -171,10 +172,15 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
             .realize(
                 '@save_left',
                 () => {
-                    if (pickIndex.value > 0) pickIndex.value--;
-                    else {
-                        pickIndex.value = pageCap;
-                        pageRef.value?.movePage(-1);
+                    if (!pageRef.value) return;
+                    const now = pageRef.value.now();
+                    if (pickIndex.value > 0) {
+                        pickIndex.value--;
+                    } else {
+                        if (now > 0) {
+                            pickIndex.value = pageCap;
+                            pageRef.value?.movePage(-1);
+                        }
                     }
                 },
                 { type: 'down-repeat' }
@@ -190,11 +196,9 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                 },
                 { type: 'down-repeat' }
             );
-        // 其他按键自定义，需要新开一个 save 的 group
 
         return () => (
-            <container loc={props.loc}>
-                <Background loc={[0, 0, MAP_WIDTH, MAP_HEIGHT]} color="black" />
+            <container loc={props.loc} zIndex={10}>
                 <Page
                     loc={[0, 0, MAP_WIDTH, MAP_HEIGHT - 10]}
                     pages={1000}
