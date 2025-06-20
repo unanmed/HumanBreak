@@ -66,6 +66,7 @@ export const SaveBtn = defineComponent<SaveBtnProps>(props => {
                 fillStyle="gray"
                 strokeStyle={strokeStyle.value}
                 lineWidth={lineWidth.value}
+                lineJoin="miter"
             />
             <text
                 text="placeholder"
@@ -90,6 +91,7 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
         /** 除自动存档外，每一页容纳的存档数量 */
         const pageCap = row * column - 1;
         const font = new Font('normal', 18);
+        const pageFont = new Font('normal', 14);
 
         const isDelete = ref(false);
         const pageRef = ref<PageExpose>();
@@ -198,6 +200,7 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                     pages={1000}
                     onWheel={wheel}
                     ref={pageRef}
+                    font={pageFont}
                 >
                     {(page: number) => (
                         <container loc={[0, 0, MAP_WIDTH, MAP_HEIGHT]}>
@@ -259,6 +262,7 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                     zIndex={10}
                     fillStyle={isDelete.value ? 'red' : 'white'}
                     onClick={toggleDelete}
+                    cursor="pointer"
                 />
                 <text
                     text="返回游戏"
@@ -266,6 +270,7 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                     loc={[450, 450, void 0, void 0, 1, 0]}
                     zIndex={10}
                     onClick={exit}
+                    cursor="pointer"
                 />
             </container>
         );

@@ -232,10 +232,10 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
     ): boolean {
         // 检查全局启用情况
         if (!this.enabled) return false;
-        const when = this.conditionMap.get(this.scope)!;
+        const when = this.conditionMap.get(this.scope);
         if (type === 'up') this.checkPressEnd(key);
         else if (type === 'down') this.checkPress(key);
-        if (!when()) return false;
+        if (when && !when()) return false;
         const toEmit = this.keyMap.get(key);
         if (!toEmit) return false;
 
