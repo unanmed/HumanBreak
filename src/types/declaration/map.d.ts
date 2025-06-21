@@ -370,7 +370,7 @@ interface DrawThumbnailConfig {
     /**
      * 勇士的位置
      */
-    heroLoc: LocArr;
+    heroLoc: Loc;
 
     /**
      * 勇士的图标
