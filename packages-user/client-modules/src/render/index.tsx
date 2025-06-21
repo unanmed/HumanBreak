@@ -4,12 +4,12 @@ import { UIController } from '@motajs/system-ui';
 import { mainSceneUI } from './ui/main';
 import { MAIN_HEIGHT, MAIN_WIDTH } from './shared';
 import { hook } from '@user/data-base';
-import { createItemDetail } from './elements/itemDetail';
 import { createLoopMap } from './loopMap';
-import { createGameCanvas } from './legacy/gameCanvas';
 import { createElements } from './elements';
 import { mainRenderer } from './renderer';
 import { createUI } from './ui';
+import { createAction } from './action';
+import { createLegacy } from './legacy';
 
 export function createGameRenderer() {
     const App = defineComponent(_props => {
@@ -38,16 +38,17 @@ export function createGameRenderer() {
 }
 
 export function createRender() {
-    createUI();
-    createGameCanvas();
-    createItemDetail();
-    createLoopMap();
     createElements();
+    createLegacy();
+    createUI();
+    createAction();
+    createLoopMap();
 }
 
 export * from './components';
 export * from './elements';
 export * from './ui';
+export * from './utils';
 export * from './renderer';
 export * from './shared';
 export * from './use';

@@ -17,7 +17,7 @@ import { mainUi } from '@motajs/legacy-ui';
 import { gameKey } from '@motajs/system-action';
 import { generateKeyboardEvent } from '@motajs/system-action';
 import { getVitualKeyOnce } from '@motajs/legacy-ui';
-import { getAllSavesData, getSaveData, syncFromServer } from '../../utils';
+import { getAllSavesData, getSaveData, syncFromServer } from '../utils';
 import { getInput } from '../components/input';
 import { openStatistics } from './statistics';
 

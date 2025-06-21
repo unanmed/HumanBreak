@@ -1,5 +1,5 @@
 import { compressToBase64, decompressFromBase64 } from 'lz-string';
-import { getConfirm, waitbox } from '../render';
+import { getConfirm, waitbox } from '../components';
 import { IUIMountable } from '@motajs/system-ui';
 import { SyncSaveFromServerResponse } from '@motajs/client-base';
 

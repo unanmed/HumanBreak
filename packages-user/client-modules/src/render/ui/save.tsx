@@ -358,6 +358,7 @@ export async function saveSave(
         }
     };
     const index = await selectSave(controller, loc, validate, props);
+    if (index === -2) return;
     core.doSL(index, 'save');
 }
 
@@ -370,5 +371,10 @@ export async function saveLoad(
         return { message: '无效的存档！', valid: exist };
     };
     const index = await selectSave(controller, loc, validate, props);
-    core.doSL(index, 'load');
+    if (index === -2) return;
+    if (index === -1) {
+        core.doSL('autosave', 'load');
+    } else {
+        core.doSL(index, 'load');
+    }
 }

@@ -1,5 +1,5 @@
 import { onUnmounted } from 'vue';
-import { WeatherController } from '../weather';
+import { WeatherController } from '../../weather';
 
 let weatherId = 0;
 

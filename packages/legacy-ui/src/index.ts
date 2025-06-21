@@ -1,8 +1,6 @@
-import { createFx } from './fx';
 import { createPreset } from './preset';
 
 export function create() {
-    createFx();
     createPreset();
 }
 

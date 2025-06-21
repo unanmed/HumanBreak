@@ -22,7 +22,7 @@ import { Progress } from '../components/misc';
 import { generateBinary } from '@motajs/legacy-common';
 import { SetupComponentOptions } from '@motajs/system-ui';
 import { saveSave } from './save';
-import { mainUIController } from '@user/client-modules';
+import { mainUIController } from './controller';
 import { MAIN_WIDTH, MAIN_HEIGHT } from '../shared';
 
 interface ToolbarProps extends DefaultProps {

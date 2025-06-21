@@ -3,7 +3,11 @@ import { mainSetting } from '@motajs/legacy-ui';
 import { hook } from '@user/data-base';
 import { ItemState } from '@user/data-state';
 import { Damage, DamageRenderable, FloorDamageExtends } from './damage';
-import { ILayerGroupRenderExtends, LayerGroup, LayerGroupFloorBinder } from '.';
+import {
+    ILayerGroupRenderExtends,
+    LayerGroup,
+    LayerGroupFloorBinder
+} from './layer';
 
 interface ItemDetailData {
     x: number;

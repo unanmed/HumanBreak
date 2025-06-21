@@ -5,12 +5,14 @@ import { createLayer, Layer, LayerGroup } from './layer';
 import { createViewport } from './viewport';
 import { Icon, Winskin } from './misc';
 import { Animate } from './animate';
+import { createItemDetail } from './itemDetail';
 
 export function createElements() {
     createCache();
     createFrame();
     createLayer();
     createViewport();
+    createItemDetail();
 
     // ----- 注册标签
 

@@ -1,8 +1,12 @@
 import { mat4 } from 'gl-matrix';
 import { logger } from '@motajs/common';
-import { WebGLColorArray, createProgram, isWebGL2Supported } from './webgl';
+import {
+    WebGLColorArray,
+    createProgram,
+    isWebGL2Supported
+} from '@motajs/legacy-ui';
 import { Sprite } from '@motajs/render';
-import { ILayerRenderExtends, Layer, HeroRenderer } from '@user/client-modules';
+import { ILayerRenderExtends, Layer, HeroRenderer } from '../elements';
 
 /**
  * 最大光源数量，必须设置，且光源数不能超过这个值，这个值决定了会预留多少的缓冲区，因此最好尽可能小，同时游戏过程中不可修改

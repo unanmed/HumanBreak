@@ -1,4 +1,4 @@
-import { LayerShadowExtends } from '@motajs/legacy-ui';
+import { LayerShadowExtends } from '../legacy/shadow';
 import { Props, Font } from '@motajs/render';
 import { WeatherController } from '../../weather';
 import { defineComponent, onMounted, reactive, ref } from 'vue';
