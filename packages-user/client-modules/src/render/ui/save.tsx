@@ -25,9 +25,9 @@ export interface SaveBtnProps extends DefaultProps {
 
 export type SaveEmits = {
     /** 点击存档时触发 */
-    emit: (index: number) => void;
+    emit: (index: number, exist: boolean) => void;
     /** 删除存档时触发 */
-    delete: (index: number) => void;
+    delete: (index: number, exist: boolean) => void;
     /** 手动点击退出时触发 */
     exit: () => void;
 };
@@ -289,6 +289,11 @@ export interface SaveValidation {
     readonly message: string;
 }
 
+export type SaveValidationFunction = (
+    index: number,
+    exist: boolean
+) => SaveValidation;
+
 /**
  * 打开存读档界面并让用户选择一个存档。如果用户手动关闭了存档界面，返回 -2，否则返回用户选择的存档索引。
  * 参数参考 {@link SaveProps}，事件不可自定义。
@@ -312,20 +317,20 @@ export interface SaveValidation {
 export function selectSave(
     controller: IUIMountable,
     loc: ElementLocator,
-    validate?: (index: number) => SaveValidation,
+    validate?: SaveValidationFunction,
     props?: SaveProps
 ) {
     return new Promise<number>(res => {
         const instance = controller.open(SaveUI, {
             loc,
             ...props,
-            onEmit: (index: number) => {
+            onEmit: (index: number, exist: boolean) => {
                 if (!validate) {
                     controller.close(instance);
                     res(index);
                     return;
                 }
-                const validation = validate(index);
+                const validation = validate(index, exist);
                 if (validation.valid) {
                     controller.close(instance);
                     res(index);
@@ -338,4 +343,32 @@ export function selectSave(
             }
         });
     });
+}
+
+export async function saveSave(
+    controller: IUIMountable,
+    loc: ElementLocator,
+    props?: SaveProps
+) {
+    const validate = (index: number): SaveValidation => {
+        if (index === -1) {
+            return { message: '不能存档至自动存档！', valid: false };
+        } else {
+            return { message: '', valid: true };
+        }
+    };
+    const index = await selectSave(controller, loc, validate, props);
+    core.doSL(index, 'save');
+}
+
+export async function saveLoad(
+    controller: IUIMountable,
+    loc: ElementLocator,
+    props?: SaveProps
+) {
+    const validate = (_: number, exist: boolean): SaveValidation => {
+        return { message: '无效的存档！', valid: exist };
+    };
+    const index = await selectSave(controller, loc, validate, props);
+    core.doSL(index, 'load');
 }

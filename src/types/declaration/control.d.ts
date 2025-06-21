@@ -610,7 +610,7 @@ interface Control {
     /**
      * 实际进行存读档事件
      */
-    doSL(id: string, type: SLType): void;
+    doSL(id: string | number, type: SLType): void;
 
     /**
      * 同步存档到服务器

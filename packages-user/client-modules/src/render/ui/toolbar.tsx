@@ -21,7 +21,7 @@ import { KeyCode } from '@motajs/client-base';
 import { Progress } from '../components/misc';
 import { generateBinary } from '@motajs/legacy-common';
 import { SetupComponentOptions } from '@motajs/system-ui';
-import { SaveUI } from './save';
+import { saveSave } from './save';
 import { mainUIController } from '@user/client-modules';
 import { MAIN_WIDTH, MAIN_HEIGHT } from '../shared';
 
@@ -87,8 +87,8 @@ export const PlayingToolbar = defineComponent<
     const book = () => core.openBook(true);
     const tool = () => core.openToolbox(true);
     const fly = () => core.useFly(true);
-    const save = async () => {
-        mainUIController.open(SaveUI, { loc: [0, 0, MAIN_WIDTH, MAIN_HEIGHT] });
+    const save = () => {
+        saveSave(mainUIController, [0, 0, MAIN_WIDTH, MAIN_HEIGHT]);
     };
     const load = () => core.load(true);
     const equip = () => core.openEquipbox(true);

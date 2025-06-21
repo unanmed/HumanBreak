@@ -3,7 +3,7 @@ import { gameKey, HotkeyJSON } from '@motajs/system-action';
 import { hovered, mainUi, tip, openDanmakuPoster } from '@motajs/legacy-ui';
 import { GameStorage } from '@motajs/legacy-system';
 import { openStatistics } from '../render/ui/statistics';
-import { mainUIController } from '../render';
+import { MAIN_HEIGHT, MAIN_WIDTH, mainUIController, saveSave } from '../render';
 
 export const mainScope = Symbol.for('@key_main');
 
@@ -488,7 +488,7 @@ gameKey
         core.openBook(true);
     })
     .realize('save', () => {
-        core.save(true);
+        saveSave(mainUIController, [0, 0, MAIN_WIDTH, MAIN_HEIGHT]);
     })
     .realize('load', () => {
         core.load(true);
