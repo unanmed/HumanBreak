@@ -35,7 +35,7 @@
         "mutate-animate": "^1.4.2",
         "ogg-opus-decoder": "^1.6.14",
         "opus-decoder": "^0.7.7",
-        "vue": "^3.5.13"
+        "vue": "^3.5.17"
     },
     "devDependencies": {
         "@babel/cli": "^7.26.4",

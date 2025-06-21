@@ -1,4 +1,4 @@
-import { mat3, ReadonlyMat3, ReadonlyVec3, vec2, vec3 } from 'gl-matrix';
+import { mat3, mat4, ReadonlyMat3, ReadonlyVec3, vec2, vec3 } from 'gl-matrix';
 
 export interface ITransformUpdatable {
     updateTransform?(): void;
@@ -38,6 +38,7 @@ export class Transform {
         this.scaleY = 1;
         this.rad = 0;
         this.modified = false;
+        this.bindedObject?.updateTransform?.();
     }
 
     /**
@@ -189,11 +190,9 @@ export class Transform {
      */
     multiply(transform: Transform): Transform {
         if (this.modified) {
-            const res = new Transform();
-            const mat = mat3.clone(this.mat);
-            mat3.multiply(mat, mat, transform.mat);
-            res.mat = mat;
-            return res;
+            const result = new Transform();
+            mat3.multiply(result.mat, this.mat, transform.mat);
+            return result;
         } else {
             return transform.clone();
         }
@@ -253,7 +252,9 @@ export class Transform {
     }
 
     /** 单位矩阵 */
-    static readonly identity = new Transform();
+    static get identity() {
+        return new Transform();
+    }
 }
 
 function multiplyVec3(mat: ReadonlyMat3, vec: ReadonlyVec3): vec3 {
@@ -277,4 +278,182 @@ function getScaling(mat: ReadonlyMat3): vec2 {
 
 function getRotation(mat: ReadonlyMat3): number {
     return Math.atan2(mat[3], mat[0]);
+}
+
+export class Transform3D {
+    mat: mat4 = mat4.create();
+
+    /** 绑定的可更新元素 */
+    bindedObject?: ITransformUpdatable;
+
+    /**
+     * 绑定可更新对象
+     * @param obj 要绑定的对象
+     */
+    bind(obj?: ITransformUpdatable) {
+        this.bindedObject = obj;
+    }
+
+    /**
+     * 重置为单位矩阵
+     */
+    reset(): this {
+        mat4.identity(this.mat);
+        this.bindedObject?.updateTransform?.();
+        return this;
+    }
+
+    /**
+     * 应用缩放变换
+     * @param x X轴缩放
+     * @param y Y轴缩放
+     * @param z Z轴缩放
+     */
+    scale(x: number, y: number, z: number): this {
+        mat4.scale(this.mat, this.mat, [x, y, z]);
+        this.bindedObject?.updateTransform?.();
+        return this;
+    }
+
+    /**
+     * 应用平移变换
+     * @param x X轴平移
+     * @param y Y轴平移
+     * @param z Z轴平移
+     */
+    translate(x: number, y: number, z: number): this {
+        mat4.translate(this.mat, this.mat, [x, y, z]);
+        this.bindedObject?.updateTransform?.();
+        return this;
+    }
+
+    /**
+     * 应用旋转变换
+     * @param rad 旋转角度（弧度）
+     * @param axis 旋转轴
+     */
+    rotate(rad: number, axis: vec3): this {
+        mat4.rotate(this.mat, this.mat, rad, axis);
+        this.bindedObject?.updateTransform?.();
+        return this;
+    }
+
+    /**
+     * 应用绕X轴旋转
+     * @param rad 旋转角度（弧度）
+     */
+    rotateX(rad: number): this {
+        return this.rotate(rad, [1, 0, 0]);
+    }
+
+    /**
+     * 应用绕Y轴旋转
+     * @param rad 旋转角度（弧度）
+     */
+    rotateY(rad: number): this {
+        return this.rotate(rad, [0, 1, 0]);
+    }
+
+    /**
+     * 应用绕Z轴旋转
+     * @param rad 旋转角度（弧度）
+     */
+    rotateZ(rad: number): this {
+        return this.rotate(rad, [0, 0, 1]);
+    }
+
+    /**
+     * 设置视图矩阵
+     * @param eye 摄像机位置
+     * @param center 目标位置
+     * @param up 上方向量
+     */
+    lookAt(eye: vec3, center: vec3, up: vec3): this {
+        mat4.lookAt(this.mat, eye, center, up);
+        this.bindedObject?.updateTransform?.();
+        return this;
+    }
+
+    /**
+     * 设置透视投影矩阵
+     * @param fovy 垂直视野角度（弧度）
+     * @param aspect 宽高比
+     * @param near 近平面
+     * @param far 远平面
+     */
+    perspective(fovy: number, aspect: number, near: number, far: number): this {
+        mat4.perspective(this.mat, fovy, aspect, near, far);
+        this.bindedObject?.updateTransform?.();
+        return this;
+    }
+
+    /**
+     * 设置正交投影矩阵
+     * @param left 左平面
+     * @param right 右平面
+     * @param bottom 底平面
+     * @param top 顶平面
+     * @param near 近平面
+     * @param far 远平面
+     */
+    ortho(
+        left: number,
+        right: number,
+        bottom: number,
+        top: number,
+        near: number,
+        far: number
+    ): this {
+        mat4.ortho(this.mat, left, right, bottom, top, near, far);
+        this.bindedObject?.updateTransform?.();
+        return this;
+    }
+
+    /**
+     * 与另一个变换矩阵相乘
+     * @param transform 另一个变换矩阵
+     */
+    multiply(transform: Transform3D): Transform3D {
+        const result = new Transform3D();
+        mat4.multiply(result.mat, this.mat, transform.mat);
+        return result;
+    }
+
+    /**
+     * 克隆当前变换矩阵
+     */
+    clone(): Transform3D {
+        const clone = new Transform3D();
+        mat4.copy(clone.mat, this.mat);
+        return clone;
+    }
+
+    /**
+     * 将点应用变换
+     * @param point 要变换的点
+     */
+    transformed(point: vec3): vec3 {
+        const result = vec3.create();
+        vec3.transformMat4(result, point, this.mat);
+        return result;
+    }
+
+    /**
+     * 将点应用逆变换
+     * @param point 要逆变换的点
+     */
+    untransformed(point: vec3): vec3 {
+        const inverse = mat4.create();
+        mat4.invert(inverse, this.mat);
+        const result = vec3.create();
+        vec3.transformMat4(result, point, inverse);
+        return result;
+    }
+
+    /**
+     * 静态方法：单位矩阵
+     */
+    static get identity(): Transform3D {
+        return new Transform3D();
+    }
 }

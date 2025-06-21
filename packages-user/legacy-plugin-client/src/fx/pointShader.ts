@@ -110,6 +110,7 @@ export class PointEffect {
     private toAdd: Set<number[]> = new Set();
     /** 每个特效的开始时间 */
     private startTime: Map<number, number> = new Map();
+
     /**
      * 为着色器创建程序
      * @param shader 着色器渲染元素
