@@ -1,4 +1,4 @@
-///<reference path="../../src/types/core.d.ts" />
+///<reference path="../../src/types/declaration/core.d.ts" />
 
 /*
 control.js：游戏主要逻辑控制

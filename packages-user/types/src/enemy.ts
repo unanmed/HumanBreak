@@ -1,3 +1,5 @@
+// todo: 2.C
+
 export interface IEnemyInfo {}
 
 export interface IDamageInfo {}

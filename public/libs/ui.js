@@ -1,4 +1,4 @@
-///<reference path="../../src/types/core.d.ts" />
+///<reference path="../../src/types/declaration/core.d.ts" />
 
 /**
  * ui.js：负责所有和UI界面相关的绘制
