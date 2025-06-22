@@ -501,3 +501,184 @@ export const StepForward = defineComponent<IconsProps>(props => {
         );
     };
 }, iconsProps);
+
+export const SoundVolume = defineComponent<IconsProps>(props => {
+    const path = ref<Path2D>();
+
+    const width = computed(() => props.loc[2] ?? 200);
+    const height = computed(() => props.loc[3] ?? 200);
+    const generatePath = adjustPath(1, path, (ox, oy, width, height) => {
+        const path = new Path2D();
+        const left = ox + width / 8;
+        const top = oy + height / 5;
+        const bottom = oy + height - height / 5;
+        path.moveTo(left, height / 2 - height / 10);
+        path.lineTo(left, height / 2 + height / 10);
+        path.lineTo(left + width / 6, height / 2 + height / 10);
+        path.lineTo(width / 2, bottom);
+        path.lineTo(width / 2, top);
+        path.lineTo(left + width / 6, height / 2 - height / 10);
+        path.closePath();
+        const cx = width / 2;
+        const cy = height / 2;
+        const start = -Math.PI / 4;
+        const end = Math.PI / 4;
+        path.moveTo(
+            width / 2 + (Math.SQRT1_2 * width) / 6,
+            height / 2 - (Math.SQRT1_2 * width) / 6
+        );
+        path.arc(cx, cy, width / 6, start, end);
+        path.moveTo(
+            width / 2 + (Math.SQRT1_2 * width) / 3,
+            height / 2 - (Math.SQRT1_2 * width) / 3
+        );
+        path.arc(cx, cy, width / 3, start, end);
+        return path;
+    });
+
+    watch(props, () => {
+        generatePath(width.value, height.value);
+    });
+
+    onMounted(() => {
+        generatePath(width.value, height.value);
+    });
+
+    return () => {
+        return (
+            <g-path
+                loc={props.loc}
+                path={path.value}
+                stroke
+                lineJoin="round"
+                lineCap="round"
+            ></g-path>
+        );
+    };
+}, iconsProps);
+
+export const Fullscreen = defineComponent<IconsProps>(props => {
+    const path = ref<Path2D>();
+
+    const width = computed(() => props.loc[2] ?? 200);
+    const height = computed(() => props.loc[3] ?? 200);
+    const generatePath = adjustPath(1, path, (ox, oy, width, height) => {
+        const path = new Path2D();
+        const left = ox + width / 4;
+        const right = ox + width - width / 4;
+        const top = oy + height / 4;
+        const bottom = oy + height - height / 4;
+
+        // 左上
+        path.moveTo(left + width / 6, top + height / 6);
+        path.lineTo(left, top);
+        path.moveTo(left, top + height / 8);
+        path.lineTo(left, top);
+        path.lineTo(left + width / 8, top);
+
+        // 右上
+        path.moveTo(right - width / 6, top + height / 6);
+        path.lineTo(right, top);
+        path.moveTo(right, top + height / 8);
+        path.lineTo(right, top);
+        path.lineTo(right - width / 8, top);
+
+        // 左下
+        path.moveTo(left + width / 6, bottom - height / 6);
+        path.lineTo(left, bottom);
+        path.moveTo(left, bottom - height / 8);
+        path.lineTo(left, bottom);
+        path.lineTo(left + width / 8, bottom);
+
+        // 右下
+        path.moveTo(right - width / 6, bottom - height / 6);
+        path.lineTo(right, bottom);
+        path.moveTo(right, bottom - height / 8);
+        path.lineTo(right, bottom);
+        path.lineTo(right - width / 8, bottom);
+        return path;
+    });
+
+    watch(props, () => {
+        generatePath(width.value, height.value);
+    });
+
+    onMounted(() => {
+        generatePath(width.value, height.value);
+    });
+
+    return () => {
+        return (
+            <g-path
+                loc={props.loc}
+                path={path.value}
+                stroke
+                lineJoin="round"
+                lineCap="round"
+            ></g-path>
+        );
+    };
+}, iconsProps);
+
+export const ExitFullscreen = defineComponent<IconsProps>(props => {
+    const path = ref<Path2D>();
+
+    const width = computed(() => props.loc[2] ?? 200);
+    const height = computed(() => props.loc[3] ?? 200);
+    const generatePath = adjustPath(1, path, (ox, oy, width, height) => {
+        const path = new Path2D();
+        const left = ox + width / 4;
+        const right = ox + width - width / 4;
+        const top = oy + height / 4;
+        const bottom = oy + height - height / 4;
+
+        // 左上
+        path.moveTo(left + width / 6, top + height / 6);
+        path.lineTo(left, top);
+        path.moveTo(left + width / 24, top + height / 6);
+        path.lineTo(left + width / 6, top + height / 6);
+        path.lineTo(left + width / 6, top + height / 24);
+
+        // 右上
+        path.moveTo(right - width / 6, top + height / 6);
+        path.lineTo(right, top);
+        path.moveTo(right - width / 24, top + height / 6);
+        path.lineTo(right - width / 6, top + height / 6);
+        path.lineTo(right - width / 6, top + height / 24);
+
+        // 左下
+        path.moveTo(left + width / 6, bottom - height / 6);
+        path.lineTo(left, bottom);
+        path.moveTo(left + width / 24, bottom - height / 6);
+        path.lineTo(left + width / 6, bottom - height / 6);
+        path.lineTo(left + width / 6, bottom - height / 24);
+
+        // 右下
+        path.moveTo(right - width / 6, bottom - height / 6);
+        path.lineTo(right, bottom);
+        path.moveTo(right - width / 24, bottom - height / 6);
+        path.lineTo(right - width / 6, bottom - height / 6);
+        path.lineTo(right - width / 6, bottom - height / 24);
+        return path;
+    });
+
+    watch(props, () => {
+        generatePath(width.value, height.value);
+    });
+
+    onMounted(() => {
+        generatePath(width.value, height.value);
+    });
+
+    return () => {
+        return (
+            <g-path
+                loc={props.loc}
+                path={path.value}
+                stroke
+                lineJoin="round"
+                lineCap="round"
+            ></g-path>
+        );
+    };
+}, iconsProps);

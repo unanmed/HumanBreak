@@ -26,8 +26,10 @@ void main() {
 }
 `;
 const DEFAULT_FS = /* glsl */ `
+out vec4 color;
+
 void main() {
-    gl_FragColor = texture2D(u_sampler, v_texCoord);
+    color = texture(u_sampler, v_texCoord);
 }
 `;
 
@@ -55,7 +57,7 @@ export class Shader<E extends EShaderEvent = EShaderEvent> extends GL2<
 }
 
 export class ShaderProgram extends GL2Program {
-    protected override readonly prefix: IGL2ProgramPrefix = SHADER_PREFIX;
+    protected readonly prefix: IGL2ProgramPrefix = SHADER_PREFIX;
 
     constructor(gl2: GL2, vs?: string, fs?: string) {
         super(gl2, vs, fs);
@@ -64,6 +66,11 @@ export class ShaderProgram extends GL2Program {
         if (!vs && !fs) {
             this.modified = false;
         }
+    }
+
+    ready(): boolean {
+        this.useIndices('defaultIndices');
+        return true;
     }
 
     protected override compile() {
@@ -76,7 +83,7 @@ export class ShaderProgram extends GL2Program {
         const tex = this.defineAttribArray('a_texCoord');
         const position = this.defineAttribArray('a_position');
         const sampler = this.defineTexture('u_sampler', 0);
-        const indices = this.defineIndices('defalutIndices');
+        const indices = this.defineIndices('defaultIndices');
         if (!tex || !position || !sampler || !indices) {
             return true;
         }
@@ -91,6 +98,7 @@ export class ShaderProgram extends GL2Program {
         tex.enable();
         indices.buffer(new Uint16Array([0, 1, 2, 2, 3, 1]), gl.STATIC_DRAW);
         this.useIndices(indices);
+        this.mode(this.element.DRAW_ELEMENTS);
         this.paramElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
 
         return true;

@@ -31,7 +31,6 @@ import {
     loadDefaultResource,
     LoadTask
 } from '@motajs/legacy-common';
-import { GameUi } from '../controller';
 import { formatSize } from '../utils';
 import { logger } from '@motajs/common';
 import { sleep } from 'mutate-animate';
@@ -70,10 +69,10 @@ onMounted(async () => {
         core._afterLoadResources(props.callback);
         logger.log(`Resource load end.`);
         loadDiv.style.opacity = '0';
+        await sleep(500);
         Mota.require('@user/data-base').loading.emit('loaded');
-        await sleep(1000);
+        await sleep(500);
         props.controller.close(props.num);
-        props.controller.open('start');
     });
     loadDiv = document.getElementById('load') as HTMLDivElement;
 });

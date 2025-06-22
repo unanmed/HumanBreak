@@ -163,7 +163,7 @@ const MainScene = defineComponent(() => {
         }
     };
 
-    const loaded = ref(false);
+    const loaded = ref(true);
     onLoaded(() => {
         loaded.value = true;
     });
@@ -235,4 +235,4 @@ const MainScene = defineComponent(() => {
     );
 });
 
-export const mainSceneUI = new GameUI('main-scene', MainScene);
+export const MainSceneUI = new GameUI('main-scene', MainScene);

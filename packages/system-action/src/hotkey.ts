@@ -98,6 +98,8 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
 
     /** 当前正在按下的按键 */
     private pressed: Set<KeyCode> = new Set();
+    /** 有哪些单次按下的按键已经触发 */
+    private downEmitted: Set<KeyCode> = new Set();
     /** 按键按下时的时间 */
     private pressTime: Map<KeyCode, number> = new Map();
     /** 按键节流时间 */
@@ -262,6 +264,10 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
         });
         this.emit('emit', key, assist, type);
 
+        if (type === 'down') {
+            this.downEmitted.add(key);
+        }
+
         return emitted;
     }
 
@@ -284,6 +290,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
         if (!this.pressed.has(keyCode)) return;
         this.pressed.delete(keyCode);
         this.pressTime.delete(keyCode);
+        this.downEmitted.delete(keyCode);
         this.emit('release', keyCode);
     }
 
@@ -306,7 +313,7 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
         }
         if (!config) return false;
         // 按下单次触发
-        if (config.type === 'down') return !this.pressed.has(keyCode);
+        if (config.type === 'down') return !this.downEmitted.has(keyCode);
         // 按下重复触发
         if (config.type === 'down-repeat') return true;
         if (config.type === 'down-timeout') {

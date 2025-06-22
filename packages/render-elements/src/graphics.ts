@@ -5,7 +5,7 @@ import {
     MotaOffscreenCanvas2D
 } from '@motajs/render-core';
 import { logger } from '@motajs/common';
-import { clamp, isNil } from 'lodash-es';
+import { clamp, isEqual, isNil } from 'lodash-es';
 import { CanvasStyle } from './types';
 
 export type CircleParams = [
@@ -442,6 +442,7 @@ export class Circle extends GraphicItemBase {
                 this.setAngle(this.start, nextValue);
                 return true;
             case 'circle': {
+                if (isEqual(nextValue, prevValue)) return true;
                 const value = nextValue as CircleParams;
                 if (!this.assertType(value, Array, key)) return false;
                 const [cx, cy, radius, start, end] = value;
@@ -531,6 +532,7 @@ export class Ellipse extends GraphicItemBase {
                 this.setAngle(this.start, nextValue);
                 return true;
             case 'ellipse': {
+                if (isEqual(nextValue, prevValue)) return true;
                 const value = nextValue as EllipseParams;
                 if (!this.assertType(value, Array, key)) return false;
                 const [cx, cy, radiusX, radiusY, start, end] = value;
@@ -619,6 +621,7 @@ export class Line extends GraphicItemBase {
                 this.setPoint2(this.x2, nextValue);
                 return true;
             case 'line':
+                if (isEqual(nextValue, prevValue)) return true;
                 if (!this.assertType(nextValue as number[], Array, key)) {
                     return false;
                 }
@@ -750,6 +753,7 @@ export class BezierCurve extends GraphicItemBase {
                 this.setEnd(this.ex, nextValue);
                 return true;
             case 'curve':
+                if (isEqual(nextValue, prevValue)) return true;
                 if (!this.assertType(nextValue as number[], Array, key)) {
                     return false;
                 }
@@ -873,6 +877,7 @@ export class QuadraticCurve extends GraphicItemBase {
                 this.setEnd(this.ex, nextValue);
                 return true;
             case 'curve':
+                if (isEqual(nextValue, prevValue)) return true;
                 if (!this.assertType(nextValue as number[], Array, key)) {
                     return false;
                 }

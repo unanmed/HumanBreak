@@ -29,29 +29,33 @@ export class Image3DEffect
 
     protected getFragment(): string {
         return /* glsl */ `
+            out vec4 color;
+
             void main() {
-                gl_FragColor = texture2D(u_sampler, v_texCoord);
+                color = texture(u_sampler, v_texCoord);
             }
         `;
     }
 
     initProgram(program: ShaderProgram): void {
+        if (!this.shader) return;
         program.defineUniformMatrix(
             'u_imageTransform',
             this.shader.U_MATRIX_4x4
         );
-        const shader = this.shader;
-        const aspect = shader.width / shader.height;
-        this.proj.perspective((Math.PI * 2) / 3, aspect, 0.01, 1000);
+        this.proj.perspective(Math.PI / 2, 1, 0.01, 1000);
+        this.view.lookAt([0, 0, 1], [0, 0, 0], [0, 1, 0]);
         this.model.bind(this);
         this.view.bind(this);
         this.proj.bind(this);
+        this.updateTransform();
     }
 
     updateTransform(): void {
+        if (!this.shader || !this.program) return;
         const matrix = this.program.getMatrix('u_imageTransform');
         if (!matrix) return;
-        const trans = this.model.multiply(this.view).multiply(this.proj);
+        const trans = this.proj.multiply(this.view).multiply(this.model);
         matrix.set(false, trans.mat);
         this.requestUpdate();
     }

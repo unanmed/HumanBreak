@@ -121,7 +121,7 @@ export const Tip = defineComponent<TipProps>((props, { expose }) => {
                 loc={rectLoc.value}
                 circle={[props.corner ?? 4]}
                 fill
-                fillStyle="rgba(40,40,40,0.8)"
+                fillStyle="rgba(0,0,0,0.8)"
             />
             <icon
                 hidden={!showIcon.value}

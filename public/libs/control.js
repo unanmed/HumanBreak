@@ -247,9 +247,6 @@ control.prototype.showStartAnimate = function (noAnimate, callback) {
             core.flags.startUsingCanvas,
             callback
         );
-    Mota.r(() => {
-        Mota.require('@motajs/legacy-ui').fixedUi.open('start');
-    });
 };
 
 control.prototype._showStartAnimate_resetDom = function () {
@@ -526,17 +523,20 @@ control.prototype.setHeroMoveInterval = function (callback) {
     //     render.move(true);
     // });
 
-    core.interval.heroMoveInterval = window.setInterval(function () {
-        // render.offset += toAdd * 4;
-        core.status.heroMoving += toAdd;
-        if (core.status.heroMoving >= 8) {
-            clearInterval(core.interval.heroMoveInterval);
-            core.status.heroMoving = 0;
-            // render.offset = 0;
-            // render.move(false);
-            if (callback) callback();
-        }
-    }, ((core.values.moveSpeed / 8) * toAdd) / core.status.replay.speed);
+    core.interval.heroMoveInterval = window.setInterval(
+        function () {
+            // render.offset += toAdd * 4;
+            core.status.heroMoving += toAdd;
+            if (core.status.heroMoving >= 8) {
+                clearInterval(core.interval.heroMoveInterval);
+                core.status.heroMoving = 0;
+                // render.offset = 0;
+                // render.move(false);
+                if (callback) callback();
+            }
+        },
+        ((core.values.moveSpeed / 8) * toAdd) / core.status.replay.speed
+    );
 };
 
 ////// 每移动一格后执行的事件 //////

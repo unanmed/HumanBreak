@@ -1,4 +1,4 @@
-import { isNil } from 'lodash-es';
+import { isEqual, isNil } from 'lodash-es';
 import { EventEmitter } from 'eventemitter3';
 import { MotaOffscreenCanvas2D } from './canvas2d';
 import { Ticker, TickerFn } from 'mutate-animate';
@@ -445,9 +445,9 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
 
             canvas.ctx.drawImage(this.cache.canvas, ax, ay, width, height);
         } else {
-            this.cacheDirty = false;
             canvas.ctx.translate(ax, ay);
             this.render(canvas, tran);
+            this.cacheDirty = false;
         }
         ctx.restore();
         this.emit('afterRender', transform);
@@ -505,6 +505,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
      * 修改这个对象的大小
      */
     size(width: number, height: number): void {
+        if (width === this.width && height === this.height) return;
         this.width = width;
         this.height = height;
         if (this.enableCache) {
@@ -1186,7 +1187,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
             }
             case 'filter': {
                 if (!this.assertType(nextValue, 'string', key)) return;
-                this.setFilter(this.filter);
+                this.setFilter(nextValue);
                 return;
             }
             case 'hd': {
@@ -1238,6 +1239,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
                 return;
             }
             case 'loc': {
+                if (isEqual(nextValue, prevValue)) return;
                 if (!this.assertType(nextValue, Array, key)) return;
                 if (!isNil(nextValue[0]) && !isNil(nextValue[1])) {
                     this.pos(nextValue[0] as number, nextValue[1] as number);
@@ -1254,6 +1256,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
                 return;
             }
             case 'anc': {
+                if (isEqual(nextValue, prevValue)) return;
                 if (!this.assertType(nextValue, Array, key)) return;
                 this.setAnchor(nextValue[0] as number, nextValue[1] as number);
                 return;
@@ -1264,6 +1267,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
                 return;
             }
             case 'scale': {
+                if (isEqual(nextValue, prevValue)) return;
                 if (!this.assertType(nextValue, Array, key)) return;
                 this._transform.setScale(
                     nextValue[0] as number,

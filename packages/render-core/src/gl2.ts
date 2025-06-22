@@ -167,7 +167,7 @@ export abstract class GL2<E extends EGL2Event = EGL2Event> extends RenderItem<
     protected framebufferMap: Map<string, WebGLFramebuffer> = new Map();
 
     constructor(type: RenderItemPosition = 'static') {
-        super(type, !GL2.support);
+        super(type, false);
 
         this.canvas = document.createElement('canvas');
         this.gl = this.canvas.getContext('webgl2')!;
@@ -216,17 +216,16 @@ export abstract class GL2<E extends EGL2Event = EGL2Event> extends RenderItem<
             this.gl.useProgram(this.program.program);
         }
 
-        if (this.cacheDirty) {
-            // 清空画布
-            const gl = this.gl;
-            gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-            gl.clearColor(0, 0, 0, 0);
-            gl.clearDepth(1);
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-            this.drawScene(canvas, gl, this.program, transform);
-            this.cacheDirty = false;
-        }
+        // 清空画布
+        const gl = this.gl;
+        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clearDepth(1);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        this.program.ready();
+        this.drawScene(canvas, gl, this.program, transform);
 
+        canvas.clear();
         canvas.ctx.drawImage(this.canvas, 0, 0, this.width, this.height);
     }
 
@@ -1189,8 +1188,6 @@ export class GL2Program extends EventEmitter<ShaderProgramEvent> {
     private shader: CompiledShader | null = null;
     /** 当前的webgl程序 */
     program: WebGLProgram | null = null;
-    /** 准备函数 */
-    private readyFn?: () => boolean;
     /** 当前正在使用的顶点索引数组 */
     usingIndices: IShaderIndices | null = null;
 
@@ -1219,18 +1216,10 @@ export class GL2Program extends EventEmitter<ShaderProgramEvent> {
     }
 
     /**
-     * 使用这个着色器程序时，在渲染之前执行的准备函数
-     * @param fn 准备函数，返回 false 时将不执行绘制
-     */
-    setReady(fn: () => boolean) {
-        this.readyFn = fn;
-    }
-
-    /**
-     * 执行准备函数
+     * 渲染前准备
      */
     ready(): boolean {
-        return this.readyFn?.() ?? true;
+        return true;
     }
 
     /**
@@ -1255,7 +1244,6 @@ export class GL2Program extends EventEmitter<ShaderProgramEvent> {
             case RenderMode.ElementsInstanced:
                 return this.elementsInstancedParams as DrawParamsMap[T];
         }
-        return null;
     }
 
     /**

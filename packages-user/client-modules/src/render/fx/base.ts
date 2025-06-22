@@ -2,18 +2,27 @@ import { Shader, ShaderProgram } from '@motajs/render-core';
 
 export abstract class EffectBase<T> {
     /** 当前使用的程序 */
-    protected readonly program: ShaderProgram;
+    protected program: ShaderProgram | null = null;
+    /** 当前使用的着色器渲染元素 */
+    protected shader: Shader | null = null;
 
-    constructor(
-        public readonly shader: Shader,
-        public readonly options: T
-    ) {
+    /**
+     * 在一个着色器元素上创建效果
+     * @param shader 着色器程序
+     * @param options 本效果的配置信息
+     */
+    create(shader: Shader, options: T) {
         const vs = this.getVertex(options);
         const fs = this.getFragment(options);
-        const program = shader.createProgram(ShaderProgram, vs, fs);
+        const program = shader.createProgram(ShaderProgram);
+        program.vs(vs);
+        program.fs(fs);
         program.requestCompile();
 
         this.program = program;
+        this.shader = shader;
+
+        this.initProgram(program, options);
     }
 
     /**
@@ -39,13 +48,14 @@ export abstract class EffectBase<T> {
      * 更新着色器渲染
      */
     requestUpdate() {
-        this.shader.update();
+        this.shader?.update();
     }
 
     /**
      * 使用此着色器
      */
     use() {
+        if (!this.program || !this.shader) return;
         this.shader.useProgram(this.program);
     }
 }
