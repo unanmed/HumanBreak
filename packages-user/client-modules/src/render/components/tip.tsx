@@ -92,7 +92,8 @@ export const Tip = defineComponent<TipProps>((props, { expose }) => {
             const num = texture.idNumberMap[iconId];
             iconNum.value = num;
         } else {
-            iconNum.value = iconId;
+            // 样板竟然会传 null 进来，然后报错
+            iconNum.value = iconId ?? 0;
         }
         text.value = core.replaceText(tipText);
         alpha.set(0, 0);
