@@ -1277,8 +1277,6 @@ export class TextContentParser {
         this.lineHeights.push(this.lineHeight);
         this.lineWidths.push(this.lineWidth);
 
-        console.log(this.renderable);
-
         return {
             lineHeights: this.lineHeights,
             data: this.renderable,
