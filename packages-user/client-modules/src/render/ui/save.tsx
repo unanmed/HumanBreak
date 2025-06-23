@@ -58,7 +58,7 @@ export const SaveBtn = defineComponent<
     const statusFont = new Font('normal', 14);
     const data = ref<SaveData | null>(null);
     const mapBlocks = computed(() => {
-        if (data.value == null) return void 0;
+        if (data.value === null) return void 0;
         else {
             const currData = data.value?.data;
             const map = core.maps.loadMap(currData.maps, currData.floorId);
@@ -103,14 +103,14 @@ export const SaveBtn = defineComponent<
                 lineJoin="miter"
             />
             <Thumbnail
-                hidden={data.value == null}
+                hidden={data.value === null}
                 loc={[3, 26, w - 6, w - 4]}
                 padStyle="gray"
                 floorId={data.value?.data.floorId || 'MT0'}
                 map={mapBlocks.value}
                 hero={data.value?.data.hero as HeroStatus}
-                all={true}
-                noHD={true}
+                all
+                noHD
                 size={w / MAP_WIDTH}
             />
             <text
@@ -177,7 +177,7 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
         const [key] = useKey();
         key.realize('confirm', () => {
             const currPage = pageRef.value?.now();
-            if (currPage == null) return;
+            if (currPage === void 0) return;
             emitSave(pageCap * currPage + pickIndex.value);
         })
             .realize('exit', exit)
