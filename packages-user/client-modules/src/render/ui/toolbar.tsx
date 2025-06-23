@@ -21,7 +21,7 @@ import { KeyCode } from '@motajs/client-base';
 import { Progress } from '../components/misc';
 import { generateBinary } from '@motajs/legacy-common';
 import { SetupComponentOptions } from '@motajs/system-ui';
-import { saveSave } from './save';
+import { saveSave, saveLoad } from './save';
 import { mainUIController } from './controller';
 import { MAIN_WIDTH, MAIN_HEIGHT } from '../shared';
 
@@ -90,7 +90,9 @@ export const PlayingToolbar = defineComponent<
     const save = () => {
         saveSave(mainUIController, [0, 0, MAIN_WIDTH, MAIN_HEIGHT]);
     };
-    const load = () => core.load(true);
+    const load = () => {
+        saveLoad(mainUIController, [0, 0, MAIN_WIDTH, MAIN_HEIGHT]);
+    };
     const equip = () => core.openEquipbox(true);
     const shop = () => core.openQuickShop(true);
     const key = () => {

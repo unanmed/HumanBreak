@@ -280,6 +280,11 @@ interface ResolvedFloor<T extends FloorIds = FloorIds> extends FloorBase<T> {
      * 每次到达事件
      */
     eachArrive?: MotaEvent;
+
+    /**
+     * 图块列表
+     */
+    blocks?: Block[];
 }
 
 interface BlockInfo<T extends keyof NumberToId = keyof NumberToId> {
