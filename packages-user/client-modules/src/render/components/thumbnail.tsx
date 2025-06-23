@@ -15,6 +15,7 @@ export interface ThumbnailProps extends SpriteProps {
     // configs
     damage?: boolean;
     all?: boolean;
+    size?: number;
 }
 
 export const Thumbnail = defineComponent<ThumbnailProps>(props => {
@@ -25,13 +26,14 @@ export const Thumbnail = defineComponent<ThumbnailProps>(props => {
     };
 
     const drawThumbnail = (canvas: MotaOffscreenCanvas2D) => {
+        const ctx = canvas.ctx;
         const hero = props.hero;
         const options: Partial<DrawThumbnailConfig> = {
             damage: props.damage,
-            ctx: canvas.ctx,
+            ctx: ctx,
             x: 0,
             y: 0,
-            size: 1,
+            size: props.size ?? 1,
             all: props.all,
             noHD: false,
             v2: true,
@@ -44,7 +46,11 @@ export const Thumbnail = defineComponent<ThumbnailProps>(props => {
             options.centerX = hero.loc.x;
             options.centerY = hero.loc.y;
         }
+        ctx.save();
+        ctx.fillStyle = props.padStyle;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         core.drawThumbnail(props.floorId, props.map, options);
+        ctx.restore();
     };
 
     watch(props, update);
