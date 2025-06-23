@@ -100,7 +100,7 @@ export interface ITextContentRenderable {
     fontSize: number;
     /** 这段文字的分行信息，每一项表示在对应索引后分词 */
     splitLines: number[];
-    /** 这段文字的分词信息，每一项表示在对于索引后分行 */
+    /** 这段文字的分词信息，每一项表示在对应索引后分行 */
     wordBreak: number[];
     /** 最后一行的宽度 */
     lastLineWidth?: number;
@@ -317,9 +317,9 @@ export class TextContentTyper extends EventEmitter<TextContentTyperEvent> {
                 if (line < 0 || line > renderable.splitLines.length) {
                     return false;
                 }
-                const start = renderable.splitLines[line - 1] ?? 0;
+                const start = (renderable.splitLines[line - 1] ?? -1) + 1;
                 const end =
-                    renderable.splitLines[line] ?? renderable.text.length;
+                    (renderable.splitLines[line] ?? renderable.text.length) + 1;
                 const lineHeight = this.renderObject.lineHeights[this.nowLine];
 
                 const data: TyperTextRenderable = {
@@ -544,7 +544,7 @@ export class TextContentParser {
     private font: string = '';
     /** 当前解析出的文字 */
     private resolved: string = '';
-    /** 当前的分词信息 */
+    /** 当前的分词信息，每一项表示在对应的字符索引后分词 */
     private wordBreak: number[] = [];
 
     // 在分行中，会出现上一个渲染数据的最后并不能组成一个完整的行，这时候需要把最后一个不完整的行的宽度记录下来
@@ -982,6 +982,7 @@ export class TextContentParser {
             this.bsStart = breakIndex;
             return false;
         } else {
+            this.bsStart = this.lastBreakIndex;
             this.bsEnd = breakIndex;
             let maxWidth = rest;
             // 循环二分，直到不能分行
@@ -1083,7 +1084,7 @@ export class TextContentParser {
                 return false;
             } else {
                 // 如果可以构成完整的行，那么循环二分
-                const lastBreak = wordBreak.at(-1)!;
+                const lastBreak = wordBreak.length - 1;
                 this.bsStart = this.lastBreakIndex;
                 this.bsEnd = lastBreak;
                 let maxWidth = rest;
@@ -1242,6 +1243,9 @@ export class TextContentParser {
                     const data = this.renderable[this.nowRenderable];
                     wordBreak.push(pointer);
                     data.splitLines.push(pointer);
+                    this.lineWidth = 0;
+                    this.lastBreakIndex = wordBreak.length - 1;
+                    this.lineStart = pointer;
                     continue;
                 }
 
@@ -1250,6 +1254,9 @@ export class TextContentParser {
                     wordBreak.push(pointer);
                     data.splitLines.push(pointer);
                     pointer++;
+                    this.lineWidth = 0;
+                    this.lastBreakIndex = wordBreak.length - 1;
+                    this.lineStart = pointer;
                     continue;
                 }
 
@@ -1269,6 +1276,8 @@ export class TextContentParser {
         this.checkLastSize();
         this.lineHeights.push(this.lineHeight);
         this.lineWidths.push(this.lineWidth);
+
+        console.log(this.renderable);
 
         return {
             lineHeights: this.lineHeights,
