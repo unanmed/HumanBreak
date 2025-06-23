@@ -5,6 +5,7 @@ import {
 } from '@motajs/render-core';
 import { SpriteProps } from '@motajs/render-vue';
 import { defineComponent, ref, watch } from 'vue';
+import { SetupComponentOptions } from '@motajs/system-ui';
 
 export interface ThumbnailProps extends SpriteProps {
     loc: ElementLocator;
@@ -15,8 +16,24 @@ export interface ThumbnailProps extends SpriteProps {
     // configs
     damage?: boolean;
     all?: boolean;
+    noHD?: boolean;
+    /** 缩略图的比例 */
     size?: number;
 }
+
+const thumbnailProps = {
+    props: [
+        'loc',
+        'padStyle',
+        'floorId',
+        'map',
+        'hero',
+        'damage',
+        'all',
+        'noHD',
+        'size'
+    ]
+} satisfies SetupComponentOptions<ThumbnailProps>;
 
 export const Thumbnail = defineComponent<ThumbnailProps>(props => {
     const spriteRef = ref<Sprite>();
@@ -35,7 +52,7 @@ export const Thumbnail = defineComponent<ThumbnailProps>(props => {
             y: 0,
             size: props.size ?? 1,
             all: props.all,
-            noHD: false,
+            noHD: props.noHD,
             v2: true,
             inFlyMap: false
         };
@@ -58,4 +75,4 @@ export const Thumbnail = defineComponent<ThumbnailProps>(props => {
     return () => (
         <sprite ref={spriteRef} loc={props.loc} render={drawThumbnail} />
     );
-});
+}, thumbnailProps);

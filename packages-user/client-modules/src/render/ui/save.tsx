@@ -105,12 +105,13 @@ export const SaveBtn = defineComponent<
             <Thumbnail
                 hidden={data.value == null}
                 loc={[3, 26, w - 6, w - 4]}
-                size={w / MAP_WIDTH}
+                padStyle="gray"
                 floorId={data.value?.data.floorId || 'MT0'}
                 map={mapBlocks.value}
                 hero={data.value?.data.hero as HeroStatus}
                 all={true}
                 noHD={true}
+                size={w / MAP_WIDTH}
             />
             <text
                 text="placeholder"
