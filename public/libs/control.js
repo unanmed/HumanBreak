@@ -2147,7 +2147,7 @@ control.prototype._doSL_load_afterGet = function (id, data) {
     Mota.r(() => {
         Mota.require('@user/legacy-plugin-client').end(false);
     });
-    core.ui.closePanel();
+    // core.ui.closePanel();
     core.loadData(data, function () {
         core.removeFlag('__fromLoad__');
         core.drawTip('读档成功');

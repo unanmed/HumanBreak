@@ -407,6 +407,10 @@ export class HeroRenderer
             this.animateTick(time);
             this.moveTick(time);
         });
+        if (core.status.hero) {
+            const image = core.status.hero.image;
+            this.setImage(core.material.images.images[image]);
+        }
     }
 
     onDestroy(layer: Layer): void {

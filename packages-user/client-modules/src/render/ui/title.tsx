@@ -7,6 +7,7 @@ import {
 import { defineComponent, nextTick, onMounted, ref } from 'vue';
 import { MAIN_HEIGHT, MAIN_WIDTH } from '../shared';
 import {
+    ElementLocator,
     IActionEvent,
     MotaOffscreenCanvas2D,
     Shader,
@@ -169,8 +170,13 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
         buttonsAlpha.set(1);
     };
 
-    const loadGame = () => {
-        saveLoad(props.controller, [0, 0, MAIN_WIDTH, MAIN_HEIGHT]);
+    const loadGame = async () => {
+        const loc: ElementLocator = [0, 0, MAIN_WIDTH, MAIN_HEIGHT];
+        const success = await saveLoad(props.controller, loc);
+        if (success) {
+            props.controller.close(props.instance);
+            props.controller.open(MainSceneUI, {});
+        }
     };
 
     const replay = () => {

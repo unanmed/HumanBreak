@@ -7,7 +7,7 @@ import {
     SetupComponentOptions,
     UIComponentProps
 } from '@motajs/system-ui';
-import { defineComponent, ref, computed, watch } from 'vue';
+import { defineComponent, ref, computed, watch, nextTick } from 'vue';
 import { Page, PageExpose } from '../components';
 import { useKey } from '../use';
 import { MAP_WIDTH, MAP_HEIGHT } from '../shared';
@@ -423,8 +423,9 @@ export async function saveSave(
         }
     };
     const index = await selectSave(controller, loc, validate, props);
-    if (index === -2) return;
+    if (index === -2) return false;
     core.doSL(index + 1, 'save');
+    return true;
 }
 
 export async function saveLoad(
@@ -436,10 +437,11 @@ export async function saveLoad(
         return { message: '无效的存档！', valid: exist };
     };
     const index = await selectSave(controller, loc, validate, props);
-    if (index === -2) return;
+    if (index === -2) return false;
     if (index === -1) {
         core.doSL('autosave', 'load');
     } else {
         core.doSL(index + 1, 'load');
     }
+    return true;
 }
