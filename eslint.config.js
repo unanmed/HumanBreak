@@ -3,18 +3,22 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import eslintPluginVue from 'eslint-plugin-vue';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+import eslintPluginReact from 'eslint-plugin-react';
 
 export default tseslint.config(
     {
         ignores: ['node_modules', 'dist', 'public']
     },
+
     eslint.configs.recommended,
     ...tseslint.configs.recommended,
     ...eslintPluginVue.configs['flat/recommended'],
+    eslintPluginPrettierRecommended,
     {
         files: ['**/*.{js,mjs,cjs,vue}'],
         rules: {
-            'no-console': 'warn'
+            'no-console': 'warn',
+            eqeqeq: ['error', 'always']
         }
     },
     {
@@ -47,6 +51,9 @@ export default tseslint.config(
     },
     {
         files: ['**/*.{ts,tsx,vue}'],
+        plugins: {
+            react: eslintPluginReact
+        },
         rules: {
             '@typescript-eslint/no-empty-object-type': 'off',
             '@typescript-eslint/no-explicit-any': 'off',
@@ -65,8 +72,9 @@ export default tseslint.config(
             '@typescript-eslint/no-namespace': 'off',
             '@typescript-eslint/no-this-alias': 'off',
             'no-console': 'warn',
-            'vue/multi-word-component-names': 'off'
+            'vue/multi-word-component-names': 'off',
+            eqeqeq: ['error', 'always'],
+            'react/jsx-boolean-value': ['error', 'never']
         }
-    },
-    eslintPluginPrettierRecommended
+    }
 );
