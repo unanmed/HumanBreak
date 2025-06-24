@@ -181,14 +181,14 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
          */
         const getPosIndex = (index: number) => {
             if (index === -1) return 0;
-            return index % (grid.value.count - 1);
+            return (index % (grid.value.count - 1)) + 1;
         };
 
         /**
          * 获取存档的总序号，从 0 开始，用于数据交互。
          */
         const getIndex = (posIndex: number, page: number) => {
-            return page * grid.value.count + posIndex - 1;
+            return page * (grid.value.count - 1) + posIndex - 1;
         };
 
         const updateDataList = async (page: number) => {
@@ -217,11 +217,16 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
         };
 
         onMounted(() => {
+            const startIndex = getPosIndex(core.saves.saveIndex);
+            selected.value = startIndex;
+            pageRef.value?.changePage(
+                Math.floor(core.saves.saveIndex / (grid.value.count - 1))
+            );
             updateDataList(now.value);
         });
 
         const emitSave = (index: number) => {
-            const posIndex = index === -1 ? 0 : getPosIndex(index);
+            const posIndex = getPosIndex(index);
             if (inDelete.value) {
                 emit('delete', index, exist(posIndex));
                 deleteData(posIndex);
@@ -495,6 +500,7 @@ export async function saveSave(
     };
     const index = await selectSave(controller, loc, validate, props);
     if (index === -2) return false;
+    core.saves.saveIndex = index;
     core.doSL(index + 1, 'save');
     return true;
 }
