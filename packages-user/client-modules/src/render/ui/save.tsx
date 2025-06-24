@@ -21,8 +21,15 @@ import { getSave, SaveData } from '../utils';
 import { Thumbnail } from '../components/thumbnail';
 import { adjustGrid, IGridLayoutData } from '../utils/layout';
 
+export const enum SaveMode {
+    Save,
+    Load,
+    Other
+}
+
 export interface SaveProps extends UIComponentProps, DefaultProps {
     loc: ElementLocator;
+    mode: SaveMode;
 }
 
 export interface SaveItemProps extends DefaultProps {
@@ -43,7 +50,7 @@ export type SaveEmits = {
 };
 
 const saveProps = {
-    props: ['loc', 'controller', 'instance'],
+    props: ['loc', 'controller', 'instance', 'mode'],
     emits: ['delete', 'emit', 'exit']
 } satisfies SetupComponentOptions<SaveProps, SaveEmits, keyof SaveEmits>;
 
@@ -271,7 +278,12 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
             }
         })
             .realize('exit', exit)
-            .realize('@save_exit', exit)
+            .realize('save', () => {
+                if (props.mode === SaveMode.Save) exit();
+            })
+            .realize('load', () => {
+                if (props.mode === SaveMode.Load) exit();
+            })
             .realize(
                 '@save_pageUp',
                 () => {
@@ -441,6 +453,7 @@ export type SaveValidationFunction = (
 export function selectSave(
     controller: IUIMountable,
     loc: ElementLocator,
+    mode: SaveMode,
     validate?: SaveValidationFunction,
     props?: SaveProps
 ) {
@@ -456,6 +469,7 @@ export function selectSave(
         const instance = controller.open(SaveUI, {
             loc,
             ...props,
+            mode,
             onEmit: (index: number, exist: boolean) => {
                 if (!validate) {
                     controller.close(instance);
@@ -498,7 +512,13 @@ export async function saveSave(
             return { message: '', valid: true };
         }
     };
-    const index = await selectSave(controller, loc, validate, props);
+    const index = await selectSave(
+        controller,
+        loc,
+        SaveMode.Save,
+        validate,
+        props
+    );
     if (index === -2) return false;
     core.saves.saveIndex = index;
     core.doSL(index + 1, 'save');
@@ -513,7 +533,13 @@ export async function saveLoad(
     const validate = (_: number, exist: boolean): SaveValidation => {
         return { message: '无效的存档！', valid: exist };
     };
-    const index = await selectSave(controller, loc, validate, props);
+    const index = await selectSave(
+        controller,
+        loc,
+        SaveMode.Load,
+        validate,
+        props
+    );
     if (index === -2) return false;
     if (index === -1) {
         core.doSL('autoSave', 'load');
