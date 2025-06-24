@@ -636,7 +636,7 @@ interface Control {
     /**
      * 获得某个存档内容
      */
-    getSave(index: number, callback?: (data?: Save) => void): void;
+    getSave(index: number, callback?: (data?: Save | Save[]) => void): void;
 
     /**
      * 获得某些存档内容

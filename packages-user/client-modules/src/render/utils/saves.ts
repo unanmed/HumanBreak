@@ -25,7 +25,7 @@ export function getSave(index: number) {
             const content = {
                 name: core.firstData.name,
                 version: core.firstData.version,
-                data: data instanceof Array ? data[0] : data
+                data: data instanceof Array ? data.at(-1)! : data
             };
             res(content);
         });

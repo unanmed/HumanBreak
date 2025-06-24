@@ -63,7 +63,7 @@ export const SaveItem = defineComponent<SaveItemProps>(props => {
     });
 
     const name = computed(() => {
-        return props.index === -1 ? '自动存档' : `存档${props.index}`;
+        return props.index === 0 ? '自动存档' : `存档${props.index}`;
     });
     const statusText = computed(() => {
         if (!props.data) return '';
@@ -192,10 +192,10 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
         };
 
         const updateDataList = async (page: number) => {
-            const promises: Promise<SaveData | null>[] = [];
-            for (let i = 0; i < grid.value.count; i++) {
+            const promises: Promise<SaveData | null>[] = [getSave(0)];
+            for (let i = 1; i < grid.value.count; i++) {
                 const index = getIndex(i, page);
-                promises.push(getSave(index));
+                promises.push(getSave(index + 1));
             }
             const data = await Promise.all(promises);
 
@@ -221,7 +221,7 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
         });
 
         const emitSave = (index: number) => {
-            const posIndex = getPosIndex(index);
+            const posIndex = index === -1 ? 0 : getPosIndex(index);
             if (inDelete.value) {
                 emit('delete', index, exist(posIndex));
                 deleteData(posIndex);
@@ -260,7 +260,9 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
             if (selected.value === 0) {
                 emitSave(-1);
             } else {
-                emitSave((grid.value.count - 1) * now.value + selected.value);
+                emitSave(
+                    (grid.value.count - 1) * now.value + selected.value - 1
+                );
             }
         })
             .realize('exit', exit)
@@ -360,7 +362,7 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                             {grid.value.locs.map((v, i) => {
                                 const count = grid.value.count;
                                 const rawIndex = (count - 1) * page + i;
-                                const index = i === 0 ? -1 : rawIndex;
+                                const index = i === 0 ? 0 : rawIndex;
                                 return (
                                     <SaveItem
                                         loc={v}
@@ -368,7 +370,7 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                                         selected={selected.value === i}
                                         inDelete={inDelete.value}
                                         data={saveData[i]}
-                                        onClick={() => emitSave(index)}
+                                        onClick={() => emitSave(index - 1)}
                                         onEnter={() => (selected.value = i)}
                                     />
                                 );
@@ -508,7 +510,7 @@ export async function saveLoad(
     const index = await selectSave(controller, loc, validate, props);
     if (index === -2) return false;
     if (index === -1) {
-        core.doSL('autosave', 'load');
+        core.doSL('autoSave', 'load');
     } else {
         core.doSL(index + 1, 'load');
     }
