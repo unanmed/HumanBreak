@@ -74,6 +74,6 @@ export const Thumbnail = defineComponent<ThumbnailProps>(props => {
     watch(props, update);
 
     return () => (
-        <sprite ref={spriteRef} loc={props.loc} render={drawThumbnail} />
+        <sprite noanti ref={spriteRef} loc={props.loc} render={drawThumbnail} />
     );
 }, thumbnailProps);

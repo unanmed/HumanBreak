@@ -821,7 +821,7 @@ interface Animate {
     pitch: any;
 }
 
-type Save = DeepReadonly<{
+type Save = {
     /**
      * 存档所在的楼层id
      */
@@ -866,7 +866,7 @@ type Save = DeepReadonly<{
      * 存档时间
      */
     time: number;
-}>;
+};
 
 /**
  * 深度只读一个对象，使其所有属性都只读

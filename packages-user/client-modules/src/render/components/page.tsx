@@ -20,6 +20,8 @@ export interface PageProps extends DefaultProps {
     pages: number;
     /** 页码组件的定位 */
     loc: ElementLocator;
+    /** 当前页码 */
+    page?: number;
     /** 页码的字体 */
     font?: Font;
     /** 只有一页的时候，是否隐藏页码 */
@@ -28,6 +30,8 @@ export interface PageProps extends DefaultProps {
 
 export type PageEmits = {
     pageChange: (page: number) => void;
+
+    'update:page': (page: number) => void;
 };
 
 export interface PageExpose {
@@ -54,8 +58,8 @@ type PageSlots = SlotsType<{
 }>;
 
 const pageProps = {
-    props: ['pages', 'loc', 'font', 'hideIfSingle'],
-    emits: ['pageChange']
+    props: ['pages', 'loc', 'page', 'font', 'hideIfSingle'],
+    emits: ['pageChange', 'update:page']
 } satisfies SetupComponentOptions<
     PageProps,
     PageEmits,
@@ -85,7 +89,7 @@ export const Page = defineComponent<
     keyof PageEmits,
     PageSlots
 >((props, { slots, expose, emit }) => {
-    const nowPage = ref(0);
+    const nowPage = ref(props.page ?? 0);
 
     // 五个元素的位置
     const leftLoc = ref<ElementLocator>([]);
@@ -182,6 +186,7 @@ export const Page = defineComponent<
         if (nowPage.value !== target) {
             nowPage.value = target;
             emit('pageChange', target);
+            emit('update:page', target);
         }
     };
 
