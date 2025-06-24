@@ -237,7 +237,7 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
             if (inDelete.value) {
                 const confirm = await getConfirm(
                     props.controller,
-                    `确认要删除存档 ${index}？`,
+                    `确认要删除存档 ${index + 1}？`,
                     [420, 240, void 0, void 0, 0.5, 0.5],
                     240,
                     { winskin: 'winskin2.png' }

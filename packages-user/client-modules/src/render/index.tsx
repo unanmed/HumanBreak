@@ -1,4 +1,4 @@
-import { createApp } from '@motajs/render';
+import { createApp, Font } from '@motajs/render';
 import { defineComponent } from 'vue';
 import { MAIN_HEIGHT, MAIN_WIDTH } from './shared';
 import { loading } from '@user/data-base';
@@ -37,6 +37,8 @@ export function createRender() {
         sceneController.open(GameTitleUI, {});
         mainRenderer.show();
     });
+
+    Font.setDefaults(new Font('normal'));
 }
 
 export * from './components';
