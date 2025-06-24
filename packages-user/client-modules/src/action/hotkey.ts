@@ -485,9 +485,6 @@ gameKey
     .realize('book', () => {
         core.openBook(true);
     })
-    .realize('load', () => {
-        core.load(true);
-    })
     .realize('toolbox', () => {
         core.openToolbox(true);
     })

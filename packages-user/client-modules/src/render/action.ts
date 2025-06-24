@@ -1,6 +1,6 @@
 import { gameKey } from '@motajs/system-action';
 import { MAIN_WIDTH, MAIN_HEIGHT } from './shared';
-import { saveSave, mainUIController, openStatistics } from './ui';
+import { saveSave, mainUIController, openStatistics, saveLoad } from './ui';
 
 export function createAction() {
     gameKey
@@ -9,5 +9,8 @@ export function createAction() {
         })
         .realize('statistics', () => {
             openStatistics(mainUIController);
+        })
+        .realize('load', () => {
+            saveLoad(mainUIController, [0, 0, MAIN_WIDTH, MAIN_HEIGHT]);
         });
 }
