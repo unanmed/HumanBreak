@@ -56,15 +56,22 @@ export const SaveBtn = defineComponent<SaveBtnProps>(props => {
     const mapBlocks = computed(() => {
         if (props.data === null || props.data === undefined) return void 0;
         else {
-            const currData = props.data?.data;
+            const currData = props.data.data;
             const map = core.maps.loadMap(currData.maps, currData.floorId);
             core.extractBlocksForUI(map, currData.hero.flags); // 这一步会向map写入blocks
             return map.blocks;
         }
     });
-    const text = computed(() =>
+    const name = computed(() =>
         props.index === -1 ? '自动存档' : `存档${props.index + 1}`
     );
+    const statusText = computed(() => {
+        if (props.data === null || props.data === undefined) return '';
+        else {
+            const hero = props.data.data.hero;
+            return `${hero.hp}/${hero.atk}/${hero.def}`;
+        }
+    });
     const strokeStyle = computed(() => {
         if (props.isSelected) return props.isDelete ? 'red' : 'gold';
         else return 'white';
@@ -74,7 +81,7 @@ export const SaveBtn = defineComponent<SaveBtnProps>(props => {
     return () => (
         <container loc={props.loc}>
             <text
-                text={text.value}
+                text={name.value}
                 font={font}
                 loc={[w / 2, 20, void 0, void 0, 0.5, 1]}
             />
@@ -99,7 +106,7 @@ export const SaveBtn = defineComponent<SaveBtnProps>(props => {
                 size={w / MAP_WIDTH}
             />
             <text
-                text="placeholder"
+                text={statusText.value}
                 fillStyle="yellow"
                 font={statusFont}
                 loc={[w / 2, w + 28, void 0, void 0, 0.5, 0]}
