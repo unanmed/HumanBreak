@@ -135,13 +135,11 @@ export const TextContent = defineComponent<
         }
         renderable = [];
 
-        spriteElement.value?.requestBeforeFrame(() => {
-            typer.setConfig(props);
-            typer.setText(props.text ?? '');
-            typer.type();
-            needUpdate = false;
-            updateLoc();
-        });
+        typer.setConfig(props);
+        typer.setText(props.text ?? '');
+        typer.type();
+        needUpdate = false;
+        updateLoc();
     };
 
     const showAll = () => {

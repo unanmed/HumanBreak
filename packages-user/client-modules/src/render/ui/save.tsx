@@ -14,7 +14,7 @@ import {
     onMounted,
     shallowReactive
 } from 'vue';
-import { Page, PageExpose } from '../components';
+import { getConfirm, Page, PageExpose } from '../components';
 import { useKey } from '../use';
 import { MAP_WIDTH } from '../shared';
 import { getSave, SaveData } from '../utils';
@@ -232,11 +232,20 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
             updateDataList(now.value);
         });
 
-        const emitSave = (index: number) => {
+        const emitSave = async (index: number) => {
             const posIndex = getPosIndex(index);
             if (inDelete.value) {
-                emit('delete', index, exist(posIndex));
-                deleteData(posIndex);
+                const confirm = await getConfirm(
+                    props.controller,
+                    `确认要删除存档 ${index}？`,
+                    [420, 240, void 0, void 0, 0.5, 0.5],
+                    240,
+                    { winskin: 'winskin2.png' }
+                );
+                if (confirm) {
+                    emit('delete', index, exist(posIndex));
+                    deleteData(posIndex);
+                }
             } else {
                 emit('emit', index, exist(posIndex));
             }
@@ -364,7 +373,7 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
             );
 
         return () => (
-            <container loc={props.loc} zIndex={10}>
+            <container loc={props.loc}>
                 <Page
                     ref={pageRef}
                     loc={[0, 0, width.value, height.value - 10]}

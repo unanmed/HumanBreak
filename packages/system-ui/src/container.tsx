@@ -24,17 +24,19 @@ export const UIContainer = defineComponent<UIContainerProps>(props => {
                     instance={b}
                     key={b.key}
                     hidden={b.hidden && !b.alwaysShow}
+                    zIndex={0}
                 ></b.ui.component>
             );
         }
         return elements.concat(
-            data.stack.map(v => (
+            data.stack.map((v, i) => (
                 <v.ui.component
                     {...v.vBind}
                     key={v.key}
                     controller={data}
                     instance={v}
                     hidden={v.hidden && !v.alwaysShow}
+                    zIndex={i * 5}
                 ></v.ui.component>
             ))
         );
