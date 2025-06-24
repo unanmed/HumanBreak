@@ -43,6 +43,7 @@ export const Thumbnail = defineComponent<ThumbnailProps>(props => {
     };
 
     const drawThumbnail = (canvas: MotaOffscreenCanvas2D) => {
+        if (props.hidden) return;
         const ctx = canvas.ctx;
         const hero = props.hero;
         const options: Partial<DrawThumbnailConfig> = {

@@ -7,7 +7,7 @@ import {
     SetupComponentOptions,
     UIComponentProps
 } from '@motajs/system-ui';
-import { defineComponent, ref, computed, watch, nextTick } from 'vue';
+import { defineComponent, ref, computed, onMounted } from 'vue';
 import { Page, PageExpose } from '../components';
 import { useKey } from '../use';
 import { MAP_WIDTH, MAP_HEIGHT } from '../shared';
@@ -23,6 +23,7 @@ export interface SaveBtnProps extends DefaultProps {
     index: number;
     isSelected: boolean;
     isDelete: boolean;
+    data: SaveData | null;
 }
 
 export type SaveEmits = {
@@ -45,22 +46,17 @@ const saveProps = {
 } satisfies SetupComponentOptions<SaveProps, SaveEmits, keyof SaveEmits>;
 
 const saveBtnProps = {
-    props: ['loc', 'index', 'isSelected', 'isDelete']
+    props: ['loc', 'index', 'isSelected', 'isDelete', 'data']
 } satisfies SetupComponentOptions<SaveBtnProps>;
 
-export const SaveBtn = defineComponent<
-    SaveBtnProps,
-    SaveBtnEmits,
-    keyof SaveBtnEmits
->((props, { emit }) => {
+export const SaveBtn = defineComponent<SaveBtnProps>(props => {
     const w = props.loc[2] ?? 200;
     const font = new Font('normal', 18);
     const statusFont = new Font('normal', 14);
-    const data = ref<SaveData | null>(null);
     const mapBlocks = computed(() => {
-        if (data.value === null) return void 0;
+        if (props.data === null || props.data === undefined) return void 0;
         else {
-            const currData = data.value?.data;
+            const currData = props.data?.data;
             const map = core.maps.loadMap(currData.maps, currData.floorId);
             core.extractBlocksForUI(map, currData.hero.flags); // 这一步会向map写入blocks
             return map.blocks;
@@ -74,17 +70,6 @@ export const SaveBtn = defineComponent<
         else return 'white';
     });
     const lineWidth = computed(() => (props.isSelected ? 2 : 1));
-
-    watch(
-        () => props.index,
-        newIndex => {
-            getSave(newIndex + 1).then(value => {
-                data.value = value;
-                emit('updateData', value != null);
-            });
-        },
-        { immediate: true }
-    );
 
     return () => (
         <container loc={props.loc}>
@@ -103,12 +88,12 @@ export const SaveBtn = defineComponent<
                 lineJoin="miter"
             />
             <Thumbnail
-                hidden={data.value === null}
+                hidden={props.data === null}
                 loc={[3, 26, w - 6, w - 4]}
                 padStyle="gray"
-                floorId={data.value?.data.floorId || 'MT0'}
+                floorId={props.data?.data.floorId || 'MT0'}
                 map={mapBlocks.value}
-                hero={data.value?.data.hero as HeroStatus}
+                hero={props.data?.data.hero as HeroStatus}
                 all
                 noHD
                 size={w / MAP_WIDTH}
@@ -132,26 +117,54 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
         const font = new Font('normal', 18);
         const pageFont = new Font('normal', 14);
 
-        /** 各个存档是否有数据 */
-        const saveValidArr = Array(pageCap).fill(false);
-        /** 这里参数是存档在当前页的索引posIndex */
-        const updateValid = (index: number) => (isValid: boolean) => {
-            saveValidArr[index] = isValid;
-        };
-
         const isDelete = ref(false);
         const pageRef = ref<PageExpose>();
-        /** 当前页上被选中的存档的序号 只会是0到5 */
-        const pickIndex = ref(1);
+
+        /** posIndex 存档在当前页的序号 范围为0到pageCap-1 */
         const getPosIndex = (index: number) => {
             if (index === -1) return 0;
             return index - pageCap * (pageRef.value?.now() || 0) + 1;
         };
+        /** index 存档的总序号 从0开始 用于数据交互 */
+        const getIndex = (posIndex: number, page: number) => {
+            return page * pageCap + posIndex - 1;
+        };
+
+        /** 存档数据的列表 */
+        const dataList = ref<(SaveData | null)[]>(
+            Array(pageCap + 1).fill(null)
+        );
+        const updateDataList = (page: number) => {
+            dataList.value.forEach((_ele, i) => {
+                getSave(getIndex(i, page)).then(saveValue => {
+                    dataList.value[i] = saveValue;
+                });
+            });
+        };
+        const hasData = (posIndex: number) => {
+            return dataList.value[posIndex] !== null;
+        };
+        const getData = (posIndex: number) => dataList.value[posIndex];
+        const deleteData = (posIndex: number) => {
+            dataList.value[posIndex] = null;
+        };
+
+        onMounted(() => {
+            const currPage = pageRef.value?.now() || 0;
+            updateDataList(currPage);
+        });
+
+        /** 当前页上被选中的存档的posIndex */
+        const pickIndex = ref(1);
 
         const emitSave = (index: number) => {
             const posIndex = getPosIndex(index);
-            if (isDelete.value) emit('delete', index, saveValidArr[posIndex]);
-            else emit('emit', index, saveValidArr[posIndex]);
+            if (isDelete.value) {
+                emit('delete', index, hasData(posIndex));
+                deleteData(posIndex);
+            } else {
+                emit('emit', index, hasData(posIndex));
+            }
             pickIndex.value = (index % pageCap) + 1;
         };
 
@@ -262,6 +275,7 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                     loc={[0, 0, MAP_WIDTH, MAP_HEIGHT - 10]}
                     pages={1000}
                     onWheel={wheel}
+                    onPageChange={updateDataList}
                     ref={pageRef}
                     font={pageFont}
                 >
@@ -273,8 +287,8 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                                 isSelected={pickIndex.value === 0}
                                 isDelete={isDelete.value}
                                 onClick={() => emitSave(-1)}
-                                onUpdateData={updateValid(0)}
                                 cursor="pointer"
+                                data={getData(0)}
                             />
                             <SaveBtn
                                 loc={[180, 50, 120, 170]}
@@ -282,8 +296,8 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                                 isSelected={pickIndex.value === 1}
                                 isDelete={isDelete.value}
                                 onClick={() => emitSave(page * pageCap)}
-                                onUpdateData={updateValid(1)}
                                 cursor="pointer"
+                                data={getData(1)}
                             />
                             <SaveBtn
                                 loc={[330, 50, 120, 170]}
@@ -291,8 +305,8 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                                 isSelected={pickIndex.value === 2}
                                 isDelete={isDelete.value}
                                 onClick={() => emitSave(page * pageCap + 1)}
-                                onUpdateData={updateValid(2)}
                                 cursor="pointer"
+                                data={getData(2)}
                             />
                             <SaveBtn
                                 loc={[30, 230, 120, 170]}
@@ -300,8 +314,8 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                                 isSelected={pickIndex.value === 3}
                                 isDelete={isDelete.value}
                                 onClick={() => emitSave(page * pageCap + 2)}
-                                onUpdateData={updateValid(3)}
                                 cursor="pointer"
+                                data={getData(3)}
                             />
                             <SaveBtn
                                 loc={[180, 230, 120, 170]}
@@ -309,8 +323,8 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                                 isSelected={pickIndex.value === 4}
                                 isDelete={isDelete.value}
                                 onClick={() => emitSave(page * pageCap + 3)}
-                                onUpdateData={updateValid(4)}
                                 cursor="pointer"
+                                data={getData(4)}
                             />
                             <SaveBtn
                                 loc={[330, 230, 120, 170]}
@@ -318,8 +332,8 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                                 isSelected={pickIndex.value === 5}
                                 isDelete={isDelete.value}
                                 onClick={() => emitSave(page * pageCap + 4)}
-                                onUpdateData={updateValid(5)}
                                 cursor="pointer"
+                                data={getData(5)}
                             />
                         </container>
                     )}
@@ -385,6 +399,14 @@ export function selectSave(
     validate?: SaveValidationFunction,
     props?: SaveProps
 ) {
+    const validateDelete = (index: number, exist: boolean): SaveValidation => {
+        if (index === -1) {
+            return { message: '不能删除自动存档！', valid: false };
+        } else {
+            return { message: '无法删除该存档！', valid: exist };
+        }
+    };
+
     return new Promise<number>(res => {
         const instance = controller.open(SaveUI, {
             loc,
@@ -399,6 +421,15 @@ export function selectSave(
                 if (validation.valid) {
                     controller.close(instance);
                     res(index);
+                } else {
+                    core.drawTip(validation.message);
+                }
+            },
+            onDelete: (index: number, exist: boolean) => {
+                if (!validate) return;
+                const validation = validateDelete(index, exist);
+                if (validation.valid) {
+                    core.removeSave(index);
                 } else {
                     core.drawTip(validation.message);
                 }
@@ -424,6 +455,7 @@ export async function saveSave(
     };
     const index = await selectSave(controller, loc, validate, props);
     if (index === -2) return false;
+    // 由于样板存档编号从1开始，这里需要+1
     core.doSL(index + 1, 'save');
     return true;
 }
