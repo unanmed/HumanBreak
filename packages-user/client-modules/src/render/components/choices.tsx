@@ -144,7 +144,7 @@ export const ConfirmBox = defineComponent<
             <Background
                 loc={[0, 0, props.width, height.value]}
                 winskin={props.winskin}
-                color={props.color}
+                color={props.color ?? '#333'}
                 border={props.border}
                 zIndex={0}
             />
@@ -444,11 +444,13 @@ export const Choices = defineComponent<
         }
     });
     key.realize('moveDown', () => {
+        const page = pageCom.value?.now() ?? 0;
         if (selected.value === choiceCountPerPage.value - 1) {
-            pageCom.value?.movePage(1);
-            selected.value = 0;
+            if (page < pages.value - 1) {
+                pageCom.value?.movePage(1);
+                selected.value = 0;
+            }
         } else {
-            const page = pageCom.value?.now() ?? 1;
             const index = page * choiceCountPerPage.value + selected.value;
             if (index < props.choices.length - 1) {
                 selected.value++;
@@ -458,7 +460,7 @@ export const Choices = defineComponent<
     key.realize('moveLeft', () => pageCom.value?.movePage(-1));
     key.realize('moveRight', () => pageCom.value?.movePage(1));
     key.realize('confirm', () => {
-        const page = pageCom.value?.now() ?? 1;
+        const page = pageCom.value?.now() ?? 0;
         const index = page * choiceCountPerPage.value + selected.value;
         emit('choose', props.choices[index][0]);
     });

@@ -204,7 +204,9 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                 const index = getIndex(i, page);
                 promises.push(getSave(index + 1));
             }
+            const before = now.value;
             const data = await Promise.all(promises);
+            if (before !== now.value) return;
 
             data.forEach((v, i) => {
                 if (v) {

@@ -309,8 +309,8 @@ export const Selection = defineComponent<SelectionProps>(props => {
         isWinskin.value ? core.material.images.images[props.winskin!] : null
     );
     const fixedLoc = computed<ElementLocator>(() => {
-        const [x = 0, y = 0, width = 200, height = 200] = props.loc;
-        return [x + 1, y + 1, width - 2, height - 2];
+        const [x = 0, y = 0, width = 200, height = 200, ax, ay] = props.loc;
+        return [x + 1, y + 1, width - 2, height - 2, ax, ay];
     });
 
     const renderWinskin = (canvas: MotaOffscreenCanvas2D) => {

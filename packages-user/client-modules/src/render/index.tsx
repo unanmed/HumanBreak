@@ -38,7 +38,7 @@ export function createRender() {
         mainRenderer.show();
     });
 
-    Font.setDefaults(new Font('normal'));
+    Font.setDefaults(new Font('normal', 18));
 }
 
 export * from './components';

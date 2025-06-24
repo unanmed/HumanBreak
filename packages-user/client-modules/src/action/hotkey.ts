@@ -489,9 +489,6 @@ gameKey
     .realize('fly', () => {
         core.useFly(true);
     })
-    .realize('menu', () => {
-        core.openSettings(true);
-    })
     .realize('replay', () => {
         core.ui._drawReplay();
     })

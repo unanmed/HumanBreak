@@ -1,6 +1,7 @@
 import { ElementLocator } from '@motajs/render';
 import {
     GameUI,
+    IUIMountable,
     SetupComponentOptions,
     UIComponentProps
 } from '@motajs/system-ui';
@@ -21,13 +22,15 @@ import { getAllSavesData, getSaveData, syncFromServer } from '../utils';
 import { getInput } from '../components/input';
 import { openStatistics } from './statistics';
 
-export interface SettingsProps extends Partial<ChoicesProps>, UIComponentProps {
+export interface MainSettingsProps
+    extends Partial<ChoicesProps>,
+        UIComponentProps {
     loc: ElementLocator;
 }
 
-const settingsProps = {
+const mainSettingsProps = {
     props: ['loc', 'controller', 'instance']
-} satisfies SetupComponentOptions<SettingsProps>;
+} satisfies SetupComponentOptions<MainSettingsProps>;
 
 const enum MainChoice {
     SystemSetting,
@@ -43,7 +46,7 @@ const enum MainChoice {
     Back
 }
 
-export const MainSettings = defineComponent<SettingsProps>(props => {
+export const MainSettings = defineComponent<MainSettingsProps>(props => {
     const choices: ChoiceItem[] = [
         [MainChoice.SystemSetting, '系统设置'],
         [MainChoice.VirtualKey, '虚拟键盘'],
@@ -106,9 +109,11 @@ export const MainSettings = defineComponent<SettingsProps>(props => {
             choices={choices}
             width={240}
             onChoose={choose}
+            maxHeight={400}
+            interval={8}
         />
     );
-}, settingsProps);
+}, mainSettingsProps);
 
 const enum ReplayChoice {
     Start,
@@ -120,7 +125,7 @@ const enum ReplayChoice {
     Back
 }
 
-export const ReplaySettings = defineComponent<SettingsProps>(props => {
+export const ReplaySettings = defineComponent<MainSettingsProps>(props => {
     const choice: ChoiceItem[] = [
         [ReplayChoice.Start, '从头回放录像'],
         [ReplayChoice.StartFromSave, '从存档开始回放'],
@@ -186,9 +191,10 @@ export const ReplaySettings = defineComponent<SettingsProps>(props => {
             choices={choice}
             width={240}
             onChoose={choose}
+            interval={8}
         />
     );
-}, settingsProps);
+}, mainSettingsProps);
 
 const enum GameInfoChoice {
     Statistics,
@@ -199,7 +205,7 @@ const enum GameInfoChoice {
     Back
 }
 
-export const GameInfo = defineComponent<SettingsProps>(props => {
+export const GameInfo = defineComponent<MainSettingsProps>(props => {
     const choices: ChoiceItem[] = [
         [GameInfoChoice.Statistics, '数据统计'],
         [GameInfoChoice.Project, '查看工程'],
@@ -272,9 +278,10 @@ export const GameInfo = defineComponent<SettingsProps>(props => {
             choices={choices}
             width={240}
             onChoose={choose}
+            interval={8}
         />
     );
-});
+}, mainSettingsProps);
 
 const enum SyncSaveChoice {
     // ----- 主菜单
@@ -289,7 +296,7 @@ const enum SyncSaveChoice {
     NowSave
 }
 
-export const SyncSave = defineComponent<SettingsProps>(props => {
+export const SyncSave = defineComponent<MainSettingsProps>(props => {
     const choices: ChoiceItem[] = [
         [SyncSaveChoice.ToServer, '同步存档至服务器'],
         [SyncSaveChoice.FromServer, '从服务器加载存档'],
@@ -340,11 +347,12 @@ export const SyncSave = defineComponent<SettingsProps>(props => {
             width={240}
             choices={choices}
             onChoose={choose}
+            interval={8}
         />
     );
-});
+}, mainSettingsProps);
 
-export const SyncSaveSelect = defineComponent<SettingsProps>(props => {
+export const SyncSaveSelect = defineComponent<MainSettingsProps>(props => {
     const choices: ChoiceItem[] = [
         [SyncSaveChoice.AllSaves, '同步全部存档'],
         [SyncSaveChoice.NowSave, '同步当前存档'],
@@ -392,11 +400,12 @@ export const SyncSaveSelect = defineComponent<SettingsProps>(props => {
             width={240}
             choices={choices}
             onChoose={choose}
+            interval={8}
         />
     );
-});
+}, mainSettingsProps);
 
-export const DownloadSaveSelect = defineComponent<SettingsProps>(props => {
+export const DownloadSaveSelect = defineComponent<MainSettingsProps>(props => {
     const choices: ChoiceItem[] = [
         [SyncSaveChoice.AllSaves, '下载全部存档'],
         [SyncSaveChoice.NowSave, '下载当前存档'],
@@ -460,11 +469,12 @@ export const DownloadSaveSelect = defineComponent<SettingsProps>(props => {
             width={240}
             choices={choices}
             onChoose={choose}
+            interval={8}
         />
     );
-});
+}, mainSettingsProps);
 
-export const ClearSaveSelect = defineComponent<SettingsProps>(props => {
+export const ClearSaveSelect = defineComponent<MainSettingsProps>(props => {
     const choices: ChoiceItem[] = [
         [SyncSaveChoice.AllSaves, '清空全部塔存档'],
         [SyncSaveChoice.NowSave, '清空当前塔存档'],
@@ -568,9 +578,10 @@ export const ClearSaveSelect = defineComponent<SettingsProps>(props => {
             width={240}
             choices={choices}
             onChoose={choose}
+            interval={8}
         />
     );
-});
+}, mainSettingsProps);
 
 /** @see {@link MainSettings} */
 export const MainSettingsUI = new GameUI('main-settings', MainSettings);
@@ -592,3 +603,14 @@ export const ClearSaveSelectUI = new GameUI(
     'clear-save-select',
     ClearSaveSelect
 );
+
+export function openSettings(
+    controller: IUIMountable,
+    loc: ElementLocator,
+    props?: MainSettingsProps
+) {
+    controller.open(MainSettingsUI, {
+        ...props,
+        loc
+    });
+}
