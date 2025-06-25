@@ -3408,7 +3408,7 @@ events.prototype.openToolbox = function (fromUserAction) {
 ////// 点击快捷商店按钮时的打开操作 //////
 events.prototype.openQuickShop = function (fromUserAction) {
     if (core.isReplaying()) return;
-    const shop = Mota.require('@user/data-state');
+    const shop = Mota.require('@user/legacy-plugin-data');
 
     if (Object.keys(core.status.shops).length == 0) {
         core.playSound('操作失败');

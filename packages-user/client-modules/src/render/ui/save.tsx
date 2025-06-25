@@ -566,3 +566,21 @@ export async function saveLoad(
     }
     return true;
 }
+
+export async function saveWithExist(
+    controller: IUIMountable,
+    loc: ElementLocator,
+    props?: SaveProps
+) {
+    const validate = (_: number, exist: boolean): SaveValidation => {
+        return { message: '无效的存档！', valid: exist };
+    };
+    const index = await selectSave(
+        controller,
+        loc,
+        SaveMode.Load,
+        validate,
+        props
+    );
+    return index;
+}

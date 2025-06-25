@@ -2019,7 +2019,7 @@ control.prototype.doSL = function (id, type) {
             this._doSL_load(id, this._doSL_replayLoad_afterGet);
             break;
         case 'replayRemain':
-            this._doSL_load(id, this._doSL_replayRemain_afterGet);
+            return this._doSL_load(id, this._doSL_replayRemain_afterGet);
             break;
         case 'replaySince':
             this._doSL_load(id, this._doSL_replaySince_afterGet);
@@ -2186,7 +2186,8 @@ control.prototype._doSL_replayLoad_afterGet = function (id, data) {
 control.prototype._doSL_replayRemain_afterGet = function (id, data) {
     if (!data) {
         core.playSound('操作失败');
-        return core.drawTip('无效的存档');
+        core.drawTip('无效的存档');
+        return false;
     }
     var route = core.decodeRoute(data.route);
     if (core.status.tempRoute) {
@@ -2199,27 +2200,18 @@ control.prototype._doSL_replayRemain_afterGet = function (id, data) {
         core.ui.closePanel();
         core.startReplay(remainRoute);
         core.drawTip('接续播放录像');
-        return;
+        return true;
     } else if (
         data.floorId != core.status.floorId ||
         data.hero.loc.x != core.getHeroLoc('x') ||
         data.hero.loc.y != core.getHeroLoc('y')
-    )
-        return alert('楼层或坐标不一致！');
+    ) {
+        alert('楼层或坐标不一致！');
+        return false;
+    }
 
     core.status.tempRoute = route;
-    core.ui.closePanel();
-    core.drawText(
-        '\t[步骤2]请选择第二个存档。\n\r[yellow]该存档必须是前一个存档的后续。\r\n将尝试播放到此存档。',
-        function () {
-            core.status.event.id = 'replayRemain';
-            core.lockControl();
-            var saveIndex = core.saves.saveIndex;
-            var page = Math.floor((saveIndex - 1) / 5),
-                offset = saveIndex - 5 * page;
-            core.ui._drawSLPanel(10 * page + offset);
-        }
-    );
+    return true;
 };
 
 control.prototype._doSL_replaySince_afterGet = function (id, data) {

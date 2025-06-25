@@ -610,7 +610,8 @@ interface Control {
     /**
      * 实际进行存读档事件
      */
-    doSL(id: string | number, type: SLType): void;
+    doSL(id: string | number, type: Exclude<SLType, 'replayRemain'>): void;
+    doSL(id: string | number, type: 'replayRemain'): boolean;
 
     /**
      * 同步存档到服务器

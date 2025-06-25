@@ -21,6 +21,8 @@ import { getVitualKeyOnce } from '@motajs/legacy-ui';
 import { getAllSavesData, getSaveData, syncFromServer } from '../utils';
 import { getInput } from '../components/input';
 import { openStatistics } from './statistics';
+import { saveWithExist } from './save';
+import { compressToBase64 } from 'lz-string';
 
 export interface MainSettingsProps
     extends Partial<ChoicesProps>,
@@ -144,7 +146,7 @@ export const ReplaySettings = defineComponent<MainSettingsProps>(props => {
         [ReplayChoice.Back, '返回游戏']
     ];
 
-    const choose = (key: ChoiceKey) => {
+    const choose = async (key: ChoiceKey) => {
         switch (key) {
             case ReplayChoice.Start: {
                 props.controller.closeAll();
@@ -155,15 +157,59 @@ export const ReplaySettings = defineComponent<MainSettingsProps>(props => {
                 break;
             }
             case ReplayChoice.StartFromSave: {
-                // todo
+                const index = await saveWithExist(
+                    props.controller,
+                    [0, 0, 840, 480]
+                );
+                if (index === -2) break;
+                if (index === -1) {
+                    core.doSL('autoSave', 'replayLoad');
+                } else {
+                    core.doSL(index + 1, 'replayLoad');
+                }
+                props.controller.closeAll();
                 break;
             }
             case ReplayChoice.ResumeReplay: {
-                // todo
+                const index = await saveWithExist(
+                    props.controller,
+                    [0, 0, 840, 480]
+                );
+                if (index === -2) break;
+                const name = index === -1 ? 'autoSave' : index + 1;
+                const success = core.doSL(name, 'replayRemain');
+                if (!success) {
+                    props.controller.closeAll();
+                    break;
+                }
+                await getConfirm(
+                    props.controller,
+                    '[步骤2]请选择第二个存档。\n\r[yellow]该存档必须是前一个存档的后续。\r\n将尝试播放到此存档。',
+                    [420, 240, void 0, void 0, 0.5, 0.5],
+                    240
+                );
+                const index2 = await saveWithExist(
+                    props.controller,
+                    [0, 0, 840, 480]
+                );
+                if (index2 === -2) break;
+                const name2 = index2 === -1 ? 'autoSave' : index2 + 1;
+                core.doSL(name2, 'replayRemain');
+                props.controller.closeAll();
                 break;
             }
             case ReplayChoice.ReplayRest: {
-                // todo
+                const index = await saveWithExist(
+                    props.controller,
+                    [0, 0, 840, 480]
+                );
+                if (index === -2) break;
+                if (index === -1) {
+                    core.doSL('autoSave', 'replaySince');
+                } else {
+                    core.doSL(index + 1, 'replaySince');
+                }
+                props.controller.closeAll();
                 break;
             }
             case ReplayChoice.ChooseReplay: {
@@ -174,8 +220,7 @@ export const ReplaySettings = defineComponent<MainSettingsProps>(props => {
             case ReplayChoice.Download: {
                 core.download(
                     core.firstData.name + '_' + core.formatDate2() + '.h5route',
-                    // @ts-expect-error 暂时无法推导
-                    LZString.compressToBase64(
+                    compressToBase64(
                         JSON.stringify({
                             name: core.firstData.name,
                             hard: core.status.hard,

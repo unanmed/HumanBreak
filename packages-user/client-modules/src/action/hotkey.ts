@@ -489,9 +489,6 @@ gameKey
     .realize('fly', () => {
         core.useFly(true);
     })
-    .realize('replay', () => {
-        core.ui._drawReplay();
-    })
     .realize('shop', () => {
         core.openQuickShop(true);
     })
