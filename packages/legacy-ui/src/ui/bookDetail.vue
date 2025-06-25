@@ -31,12 +31,7 @@
                     class="detial-more"
                     v-if="panel === 'special'"
                 >
-                    <span
-                        id="enemy-target"
-                        class="button-text more"
-                        @click="changePanel($event, 'target')"
-                        ><LeftOutlined />
-                    </span>
+                    <span id="enemy-target" class="button-text more"> </span>
                     <span
                         id="critical-more"
                         class="button-text more"
@@ -81,7 +76,6 @@ import { useDrag } from '../use';
 import EnemySpecial from '../panel/enemySpecial.vue';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons-vue';
 import EnemyCritical from '../panel/enemyCritical.vue';
-// import EnemyTarget from '../panel/enemyTarget.vue';
 import { detailInfo } from '../tools/book';
 import { gameKey } from '@motajs/system-action';
 

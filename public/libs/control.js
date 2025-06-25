@@ -1272,7 +1272,6 @@ control.prototype.startReplay = function (list) {
     core.status.replay.totalList = core.status.route.concat(list);
     core.status.replay.steps = 0;
     core.status.replay.save = [];
-    core.createCanvas('replay', 0, core._PY_ - 40, core._PX_, 40, 199);
     core.setOpacity('replay', 0.6);
     this._replay_drawProgress();
     core.updateStatusBar(false, true);
@@ -1407,7 +1406,6 @@ control.prototype.rewindReplay = function () {
             steps: data.replay.steps,
             save: save
         };
-        core.createCanvas('replay', 0, core._PY_ - 40, core._PX_, 40, 199);
         core.setOpacity('replay', 0.6);
         core.control._replay_drawProgress();
         core.updateStatusBar(false, true);

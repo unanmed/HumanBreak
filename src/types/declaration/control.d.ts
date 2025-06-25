@@ -1179,6 +1179,7 @@ interface Control {
     ): boolean;
     _setAutomaticRoute_drawRoute(step: any): void;
     _setAutomaticRoute_setAutoSteps(step: any): void;
+    __replay_getTimeout(): number;
 }
 
 declare const control: new () => Control;

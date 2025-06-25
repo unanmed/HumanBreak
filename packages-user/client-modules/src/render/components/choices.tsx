@@ -6,6 +6,7 @@ import { TextAlign } from './textboxTyper';
 import { Page, PageExpose } from './page';
 import { GameUI, IUIMountable, SetupComponentOptions } from '@motajs/system-ui';
 import { useKey } from '../use';
+import { sleep } from 'mutate-animate';
 
 export interface ConfirmBoxProps extends DefaultProps, TextContentProps {
     text: string;
@@ -192,7 +193,7 @@ export const ConfirmBox = defineComponent<
     );
 }, confirmBoxProps);
 
-export type ChoiceKey = string | number | symbol;
+export type ChoiceKey = string | number;
 export type ChoiceItem = [key: ChoiceKey, text: string];
 
 export interface ChoicesProps extends DefaultProps, TextContentProps {
@@ -211,6 +212,7 @@ export interface ChoicesProps extends DefaultProps, TextContentProps {
     titleFill?: CanvasStyle;
     pad?: number;
     interval?: number;
+    selected?: number;
 }
 
 export type ChoicesEmits = {
@@ -233,7 +235,8 @@ const choicesProps = {
         'titleFont',
         'titleFill',
         'pad',
-        'interval'
+        'interval',
+        'selected'
     ],
     emits: ['choose']
 } satisfies SetupComponentOptions<
@@ -283,7 +286,7 @@ export const Choices = defineComponent<
 >((props, { emit, attrs }) => {
     const titleHeight = ref(0);
     const contentHeight = ref(0);
-    const selected = ref(0);
+    const selected = ref(props.selected ?? 0);
     const pageCom = ref<PageExpose>();
     const choiceSize = reactive<[number, number][]>([]);
 
@@ -632,6 +635,122 @@ export function getChoice<T extends ChoiceKey = ChoiceKey>(
             true
         );
     });
+}
+
+function getChoiceRoute() {
+    const route = core.status.replay.toReplay[0];
+    if (!route.startsWith('choices:')) {
+        return 0;
+    } else {
+        return Number(route.slice(8));
+    }
+}
+
+/**
+ * 弹出一个确认框，然后将确认结果返回，与 getConfirm 不同的是内置录像支持，如果这个选择框需要进录像，
+ * 需要使用此方法。例如给玩家弹出一个确认框，并获取玩家是否确认：
+ * ```ts
+ * const confirm = await routedConfirm(
+ *   // 在哪个 UI 控制器上打开，对于一般 UI 组件来说，直接填写 props.controller 即可
+ *   props.controller,
+ *   // 确认内容
+ *   '确认要 xxx 吗？',
+ *   // 确认框的位置，宽度由下一个参数指定，高度参数由组件内部计算得出，指定无效
+ *   [240, 240, void 0, void 0, 0.5, 0.5],
+ *   // 宽度设为 240
+ *   240,
+ *   // 可以给选择框传入其他的 props，例如指定字体，此项可选
+ *   { font: new Font('Verdana', 20) }
+ * );
+ * // 之后，就可以直接判断 confirm 来执行不同的操作了
+ * if (confirm) { ... }
+ * ```
+ * @param controller UI 控制器
+ * @param text 确认文本内容
+ * @param loc 确认框的位置
+ * @param width 确认框的宽度
+ * @param props 额外的 props，参考 {@link ConfirmBoxProps}
+ */
+export async function routedConfirm(
+    controller: IUIMountable,
+    text: string,
+    loc: ElementLocator,
+    width: number,
+    props?: Partial<ConfirmBoxProps>
+) {
+    if (core.isReplaying()) {
+        const confirm = getChoiceRoute() === 1;
+        const timeout = core.control.__replay_getTimeout();
+        if (timeout === 0) return confirm;
+        const instance = controller.open(ConfirmBoxUI, {
+            ...(props ?? {}),
+            text,
+            loc,
+            width,
+            defaultYes: confirm
+        });
+        await sleep(core.control.__replay_getTimeout());
+        controller.close(instance);
+        return confirm;
+    } else {
+        const confirm = await getConfirm(controller, text, loc, width, props);
+        core.status.route.push(`choices:${confirm ? 1 : 0}`);
+        return confirm;
+    }
+}
+
+/**
+ * 弹出一个选择框，然后将选择结果返回，与 getChoice 不同的是内置录像支持，如果这个选择框需要进录像，
+ * 需要使用此方法。例如给玩家弹出一个选择框，并获取玩家选择了哪个：
+ * ```ts
+ * const choice = await routedChoice(
+ *   // 在哪个 UI 控制器上打开，对于一般 UI 组件来说，直接填写 props.controller 即可
+ *   props.controller,
+ *   // 选项内容，参考 Choices 的注释
+ *   [[0, '选项1'], [1, '选项2'], [2, '选项3']],
+ *   // 选择框的位置，宽度由下一个参数指定，高度参数由组件内部计算得出，指定无效
+ *   [240, 240, void 0, void 0, 0.5, 0.5],
+ *   // 宽度设为 240
+ *   240,
+ *   // 可以给选择框传入其他的 props，例如指定标题，此项可选
+ *   { title: '选项标题' }
+ * );
+ * // 之后，就可以直接判断 choice 来执行不同的操作了
+ * if (choice === 0) { ... }
+ * ```
+ * @param controller UI 控制器
+ * @param choices 选择框的选项
+ * @param loc 选择框的位置
+ * @param width 选择框的宽度
+ * @param props 额外的 props，参考 {@link ChoicesProps}
+ */
+export async function routedChoices(
+    controller: IUIMountable,
+    choices: ChoiceItem[],
+    loc: ElementLocator,
+    width: number,
+    props?: Partial<ChoicesProps>
+) {
+    if (core.isReplaying()) {
+        const selected = getChoiceRoute();
+        const timeout = core.control.__replay_getTimeout();
+        if (timeout === 0) return selected;
+        const instance = controller.open(ChoicesUI, {
+            ...(props ?? {}),
+            choices,
+            loc,
+            width,
+            selected
+        });
+        await sleep(core.control.__replay_getTimeout());
+        controller.close(instance);
+        return selected;
+    } else {
+        const choice = await getChoice(controller, choices, loc, width, props);
+        const index = choices.findIndex(v => v[1] === choice);
+        core.status.route.push(`choices:${index}`);
+        return choice;
+    }
 }
 
 /** @see {@link ConfirmBox} */

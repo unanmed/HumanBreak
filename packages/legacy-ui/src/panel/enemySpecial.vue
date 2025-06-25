@@ -30,6 +30,7 @@
 <script lang="ts" setup>
 import { isMobile } from '../use';
 import { detailInfo, getSpecialHint } from '../tools/book';
+import Scroll from '../components/scroll.vue';
 
 const props = defineProps<{
     fromBook?: boolean;

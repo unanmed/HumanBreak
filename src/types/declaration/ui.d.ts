@@ -764,7 +764,7 @@ interface Ui {
      */
     drawChoices(
         content: string,
-        choices: string[],
+        choices: object[],
         width?: number,
         ctx?: CtxRefer
     ): void;

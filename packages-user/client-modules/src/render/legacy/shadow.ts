@@ -1363,20 +1363,6 @@ export function calMapWalls(floor: FloorIds, nocache: boolean = false) {
     return res;
 }
 
-/* @__PURE__ */ export function drawPolygons(floor: FloorIds) {
-    const polygons = calMapPolygons(floor);
-    const ctx = core.createCanvas('polygons', 0, 0, 480, 480, 130);
-
-    ctx.lineWidth = 1;
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = 'white';
-    for (const p of polygons) {
-        for (const [x, y, w, h] of p) {
-            ctx.strokeRect(x, y, w, h);
-        }
-    }
-}
-
 export class LayerShadowExtends implements ILayerRenderExtends {
     static shadowList: Set<LayerShadowExtends> = new Set();
     id: string = 'shadow';

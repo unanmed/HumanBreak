@@ -2520,70 +2520,6 @@ events.prototype._precompile_switch = function (data) {
 };
 
 events.prototype._action_choices = function (data, x, y, prefix) {
-    data.choices = data.choices.filter(function (x) {
-        if (x._disabled) return false;
-        if (x.condition == null || x.condition == '') return true;
-        try {
-            return core.calValue(x.condition, prefix);
-        } catch (e) {
-            return true;
-        }
-    });
-    if (data.choices.length == 0) return this.doAction();
-    if (core.isReplaying()) {
-        var action = core.status.replay.toReplay.shift();
-        if (
-            action.indexOf('choices:') == 0 &&
-            !(action == 'choices:none' && !data.timeout)
-        ) {
-            var index = action.substring(8);
-            if (!this.__action_choices_replaying(data, index)) {
-                core.control._replay_error(action);
-                return;
-            }
-        } else {
-            // 容错录像
-            if (main.replayChecking) {
-                // 录像验证系统中选最后一项
-                if (action != 'choices:none')
-                    core.status.replay.toReplay.unshift(action); // 首先归还刚才读出的下一步操作
-                core.events.__action_choices_replaying(data, -1);
-            } else {
-                // 正常游戏中弹窗选择
-                core.myprompt(
-                    '录像回放出错！当前需要执行选择项但录像中未记录。\n如需修复请输入您要选的项（从0起），点击取消将不会修复。',
-                    0,
-                    function (value) {
-                        if (value == null) {
-                            core.control._replay_error(action);
-                            return;
-                        }
-                        if (action != 'choices:none')
-                            core.status.replay.toReplay.unshift(action); // 首先归还刚才读出的下一步操作
-                        core.events.__action_choices_replaying(
-                            data,
-                            ((parseInt(value) || 0) + data.choices.length) %
-                                data.choices.length
-                        );
-                    }
-                );
-            }
-        }
-    } else {
-        if (data.timeout) {
-            core.status.event.interval = setTimeout(function () {
-                core.status.route.push('choices:none');
-                core.setFlag('timeout', 0);
-                core.doAction();
-            }, data.timeout);
-        }
-        core.status.event.timeout = new Date().getTime() + (data.timeout || 0);
-    }
-    for (var i = 0; i < data.choices.length; i++) {
-        if (typeof data.choices[i] === 'string')
-            data.choices[i] = { text: data.choices[i] };
-        data.choices[i].text = core.replaceText(data.choices[i].text, prefix);
-    }
     core.ui.drawChoices(
         core.replaceText(data.text, prefix),
         data.choices,
@@ -2646,41 +2582,17 @@ events.prototype._precompile_choices = function (data) {
 
 events.prototype._action_confirm = function (data, x, y, prefix) {
     data.text = core.replaceText(data.text, prefix);
-    core.status.event.ui = { text: data.text, yes: data.yes, no: data.no };
-    if (core.isReplaying()) {
-        var action = core.status.replay.toReplay.shift();
-        if (
-            action.indexOf('choices:') == 0 &&
-            !(action == 'choices:none' && !data.timeout)
-        ) {
-            var index = action.substring(8);
-            if (
-                index == 'none' ||
-                ((index = parseInt(index)) >= 0 && index % 100 < 2)
-            ) {
-                this.__action_confirm_replaying(data, index);
-            } else {
-                core.control._replay_error(action);
-                return;
-            }
-        } else {
-            // 录像中未记录选了哪个，则选默认值，而不是直接报错
-            if (action != 'choices:none')
-                core.status.replay.toReplay.unshift(action);
-            this.__action_confirm_replaying(data, data['default'] ? 0 : 1);
+    core.ui.drawConfirmBox(
+        data.text,
+        () => {
+            core.insertAction(data.yes ?? []);
+            core.doAction();
+        },
+        () => {
+            core.insertAction(data.no ?? []);
+            core.doAction();
         }
-    } else {
-        core.status.event.selection = data['default'] ? 0 : 1;
-        if (data.timeout) {
-            core.status.event.interval = setTimeout(function () {
-                core.status.route.push('choices:none');
-                core.setFlag('timeout', 0);
-                core.doAction();
-            }, data.timeout);
-        }
-        core.status.event.timeout = new Date().getTime() + (data.timeout || 0);
-    }
-    core.ui.drawConfirmBox(data.text);
+    );
 };
 
 events.prototype.__action_confirm_replaying = function (data, index) {
