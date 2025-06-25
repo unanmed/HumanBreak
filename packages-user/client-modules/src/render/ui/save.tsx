@@ -183,6 +183,8 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
             return [right, height.value - 13, void 0, void 0, 1, 1];
         });
 
+        //#region 数据信息
+
         /**
          * 获取存档在当前页的序号，范围为 0 到 pageCap-1。
          */
@@ -204,10 +206,9 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                 const index = getIndex(i, page);
                 promises.push(getSave(index + 1));
             }
-            const before = now.value;
+            const before = page;
             const data = await Promise.all(promises);
-            if (before !== now.value) return;
-
+            if (now.value !== before) return;
             data.forEach((v, i) => {
                 if (v) {
                     saveData[i] = v;
@@ -217,6 +218,17 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
             });
         };
 
+        onMounted(() => {
+            const startIndex = getPosIndex(core.saves.saveIndex);
+            selected.value = startIndex - 1;
+            pageRef.value?.changePage(
+                Math.floor(core.saves.saveIndex / (grid.value.count - 1))
+            );
+            updateDataList(now.value);
+        });
+
+        //#region 逻辑操作
+
         const exist = (index: number) => {
             return saveData[index] !== null;
         };
@@ -224,15 +236,6 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
         const deleteData = (index: number) => {
             saveData[index] = null;
         };
-
-        onMounted(() => {
-            const startIndex = getPosIndex(core.saves.saveIndex);
-            selected.value = startIndex;
-            pageRef.value?.changePage(
-                Math.floor(core.saves.saveIndex / (grid.value.count - 1))
-            );
-            updateDataList(now.value);
-        });
 
         const emitSave = async (index: number) => {
             const posIndex = getPosIndex(index);
@@ -255,15 +258,6 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                 selected.value = 0;
             } else {
                 selected.value = (index % (grid.value.count - 1)) + 1;
-            }
-        };
-
-        const wheel = (ev: IWheelEvent) => {
-            const delta = Math.sign(ev.wheelY);
-            if (ev.ctrlKey) {
-                pageRef.value?.movePage(delta * 10);
-            } else {
-                pageRef.value?.movePage(delta);
             }
         };
 
@@ -374,6 +368,16 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                 { type: 'down-repeat' }
             );
 
+        //#region 事件监听
+        const wheel = (ev: IWheelEvent) => {
+            const delta = Math.sign(ev.wheelY);
+            if (ev.ctrlKey) {
+                pageRef.value?.movePage(delta * 10);
+            } else {
+                pageRef.value?.movePage(delta);
+            }
+        };
+
         return () => (
             <container loc={props.loc}>
                 <Page
@@ -393,6 +397,7 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                                 const index = i === 0 ? 0 : rawIndex;
                                 return (
                                     <SaveItem
+                                        key={index}
                                         loc={v}
                                         index={index}
                                         selected={selected.value === i}
@@ -531,7 +536,6 @@ export async function saveSave(
         props
     );
     if (index === -2) return false;
-    core.saves.saveIndex = index;
     core.doSL(index + 1, 'save');
     return true;
 }
