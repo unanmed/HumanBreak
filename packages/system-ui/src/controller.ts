@@ -237,7 +237,8 @@ export class UIController
 
     closeAll(ui?: IGameUI): void {
         if (!ui) {
-            this.stack.splice(0);
+            const list = this.stack.slice();
+            list.forEach(v => this.close(v));
         } else {
             const list = this.stack.filter(v => v.ui === ui);
             list.forEach(v => this.close(v));

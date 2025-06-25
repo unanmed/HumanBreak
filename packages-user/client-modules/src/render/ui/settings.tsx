@@ -58,7 +58,7 @@ export const MainSettings = defineComponent<MainSettingsProps>(props => {
         [MainChoice.Back, '返回游戏']
     ];
 
-    const choose = (key: ChoiceKey) => {
+    const choose = async (key: ChoiceKey) => {
         switch (key) {
             case MainChoice.SystemSetting: {
                 mainUi.open('settings');
@@ -92,8 +92,16 @@ export const MainSettings = defineComponent<MainSettingsProps>(props => {
                 break;
             }
             case MainChoice.Restart: {
-                props.controller.closeAll();
-                core.restart();
+                const confirm = await getConfirm(
+                    props.controller,
+                    '确认要返回标题吗？',
+                    [420, 240, void 0, void 0, 0.5, 0.5],
+                    240
+                );
+                if (confirm) {
+                    props.controller.closeAll();
+                    core.restart();
+                }
                 break;
             }
             case MainChoice.Back: {

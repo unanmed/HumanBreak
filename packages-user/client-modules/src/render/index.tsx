@@ -1,7 +1,7 @@
 import { createApp, Font } from '@motajs/render';
 import { defineComponent } from 'vue';
 import { MAIN_HEIGHT, MAIN_WIDTH } from './shared';
-import { loading } from '@user/data-base';
+import { hook, loading } from '@user/data-base';
 import { createLoopMap } from './loopMap';
 import { createElements } from './elements';
 import { mainRenderer } from './renderer';
@@ -36,6 +36,11 @@ export function createRender() {
     loading.on('loaded', () => {
         sceneController.open(GameTitleUI, {});
         mainRenderer.show();
+    });
+
+    hook.on('restart', () => {
+        sceneController.closeAll();
+        sceneController.open(GameTitleUI, {});
     });
 
     Font.setDefaults(new Font('normal', 18));
