@@ -76,7 +76,10 @@ export const SaveItem = defineComponent<SaveItemProps>(props => {
         if (!props.data) return '';
         else {
             const hero = props.data.data.hero;
-            return `${hero.hp}/${hero.atk}/${hero.def}`;
+            const hp = core.formatBigNumber(hero.hp);
+            const atk = core.formatBigNumber(hero.atk);
+            const def = core.formatBigNumber(hero.def);
+            return `${hp}/${atk}/${def}`;
         }
     });
 
