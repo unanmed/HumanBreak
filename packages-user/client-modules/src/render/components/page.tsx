@@ -8,7 +8,7 @@ import {
     VNode,
     watch
 } from 'vue';
-import { clamp } from 'lodash-es';
+import { clamp, isNil } from 'lodash-es';
 import { DefaultProps, ElementLocator, Font } from '@motajs/render';
 import { SetupComponentOptions } from '@motajs/system-ui';
 
@@ -175,6 +175,18 @@ export const Page = defineComponent<
         () => {
             updatePagePos();
             updateRectAndText();
+        }
+    );
+    watch(
+        () => props.page,
+        page => {
+            if (!isNil(page)) {
+                const target = clamp(page, 0, props.pages - 1);
+                if (nowPage.value !== target) {
+                    nowPage.value = target;
+                    emit('pageChange', target);
+                }
+            }
         }
     );
 
