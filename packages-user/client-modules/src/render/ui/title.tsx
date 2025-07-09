@@ -384,7 +384,6 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
         const pos = maskPos.value;
         ctx.save();
         ctx.translate(pos, 0);
-        ctx.fillStyle = 'transparent';
         ctx.fillStyle = maskGradient!;
         ctx.fillRect(0, 0, MAIN_WIDTH + MAIN_HEIGHT + 200, MAIN_HEIGHT);
         ctx.restore();
