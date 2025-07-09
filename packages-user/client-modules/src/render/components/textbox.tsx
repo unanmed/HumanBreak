@@ -32,6 +32,8 @@ import {
 } from './textboxTyper';
 import { SetupComponentOptions } from '@motajs/system-ui';
 
+//#region TextContent
+
 export interface TextContentProps
     extends DefaultProps,
         Partial<ITextContentConfig> {
@@ -225,6 +227,8 @@ export const TextContent = defineComponent<
     };
 }, textContentOptions);
 
+//#region Textbox
+
 export interface TextboxProps extends TextContentProps, DefaultProps {
     /** 背景颜色 */
     backColor?: CanvasStyle;
@@ -377,7 +381,7 @@ export const Textbox = defineComponent<
         });
     };
 
-    // ----- store
+    //#region store
 
     /** 结束打字机 */
     const storeEmits: TextboxStoreEmits = {

@@ -1,7 +1,7 @@
 import { LayerShadowExtends } from '../legacy/shadow';
-import { Props, Font } from '@motajs/render';
+import { Props, Font, IActionEvent } from '@motajs/render';
 import { WeatherController } from '../../weather';
-import { defineComponent, onMounted, reactive, ref } from 'vue';
+import { defineComponent, onMounted, onUnmounted, reactive, ref } from 'vue';
 import { Textbox, Tip } from '../components';
 import { GameUI } from '@motajs/system-ui';
 import {
@@ -75,6 +75,7 @@ const MainScene = defineComponent(() => {
 
     const map = ref<LayerGroup>();
     const hideStatus = ref(false);
+    const locked = ref(false);
     const weather = new WeatherController('main');
 
     onMounted(() => {
@@ -163,12 +164,50 @@ const MainScene = defineComponent(() => {
         }
     };
 
+    const updateDataFallback = () => {
+        // 更新 locked 状态
+        locked.value = core.status.lockControl;
+    };
+
+    /**
+     * 对于 registerAction 的 fallback
+     */
+    const clickData = (ev: IActionEvent) => {
+        const bx = Math.floor(ev.offsetX / 32);
+        const by = Math.floor(ev.offsetY / 32);
+        core.doRegisteredAction('onup', bx, by, ev.offsetX, ev.offsetY);
+    };
+
+    /**
+     * 对于 registerAction 的 fallback
+     */
+    const downData = (ev: IActionEvent) => {
+        const bx = Math.floor(ev.offsetX / 32);
+        const by = Math.floor(ev.offsetY / 32);
+        core.doRegisteredAction('ondown', bx, by, ev.offsetX, ev.offsetY);
+    };
+
+    /**
+     * 对于 registerAction 的 fallback
+     */
+    const moveData = (ev: IActionEvent) => {
+        const bx = Math.floor(ev.offsetX / 32);
+        const by = Math.floor(ev.offsetY / 32);
+        core.doRegisteredAction('onmove', bx, by, ev.offsetX, ev.offsetY);
+    };
+
     const loaded = ref(true);
     onLoaded(() => {
         loaded.value = true;
     });
 
     hook.on('statusBarUpdate', updateStatus);
+    hook.on('statusBarUpdate', updateDataFallback);
+
+    onUnmounted(() => {
+        hook.off('statusBarUpdate', updateStatus);
+        hook.off('statusBarUpdate', updateDataFallback);
+    });
 
     return () => (
         <container id="main-scene" width={MAIN_WIDTH} height={MAIN_HEIGHT}>
@@ -197,6 +236,15 @@ const MainScene = defineComponent(() => {
                     loc={[8, 8, 200, 32]}
                     pad={[12, 6]}
                     corner={16}
+                />
+                <sprite
+                    nocache
+                    zIndex={170}
+                    hidden={!locked.value}
+                    loc={[0, 0, 480, 480]}
+                    onClick={clickData}
+                    onDown={downData}
+                    onMove={moveData}
                 />
             </container>
             <g-line line={[180 + 480, 0, 180 + 480, 480]} lineWidth={1} />
