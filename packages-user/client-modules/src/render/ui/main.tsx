@@ -1,5 +1,12 @@
 import { LayerShadowExtends } from '../legacy/shadow';
-import { Props, Font, IActionEvent } from '@motajs/render';
+import {
+    Props,
+    Font,
+    IActionEvent,
+    MotaOffscreenCanvas2D,
+    Sprite,
+    onTick
+} from '@motajs/render';
 import { WeatherController } from '../../weather';
 import { defineComponent, onMounted, onUnmounted, reactive, ref } from 'vue';
 import { Textbox, Tip } from '../components';
@@ -38,8 +45,10 @@ import {
     LayerDoorAnimate,
     LayerGroup
 } from '../elements';
+import { isNil } from 'lodash-es';
 
 const MainScene = defineComponent(() => {
+    //#region 基本定义
     const layerGroupExtends: ILayerGroupRenderExtends[] = [
         new FloorDamageExtends(),
         new FloorItemDetail(),
@@ -54,10 +63,6 @@ const MainScene = defineComponent(() => {
         new LayerDoorAnimate(),
         new LayerShadowExtends()
     ];
-    const mapDrawProps: Props<'container'> = {
-        width: core._PX_,
-        height: core._PY_
-    };
     const mainTextboxProps: Props<typeof Textbox> = {
         text: '',
         hidden: true,
@@ -77,6 +82,11 @@ const MainScene = defineComponent(() => {
     const hideStatus = ref(false);
     const locked = ref(false);
     const weather = new WeatherController('main');
+
+    const loaded = ref(true);
+    onLoaded(() => {
+        loaded.value = true;
+    });
 
     onMounted(() => {
         weather.bind(map.value);
@@ -116,6 +126,7 @@ const MainScene = defineComponent(() => {
         night: 0
     });
 
+    //#region 状态更新
     const updateStatus = () => {
         if (!core.status || !core.status.hero || !core.status.floorId) return;
         hideStatus.value = core.getFlag('hideStatusBar', false);
@@ -169,10 +180,62 @@ const MainScene = defineComponent(() => {
         locked.value = core.status.lockControl;
     };
 
+    // 监听状态栏更新事件
+    hook.on('statusBarUpdate', updateStatus);
+    hook.on('statusBarUpdate', updateDataFallback);
+
+    onUnmounted(() => {
+        hook.off('statusBarUpdate', updateStatus);
+        hook.off('statusBarUpdate', updateDataFallback);
+    });
+
+    //#region sprite 渲染
+
+    let lastLength = 0;
+    onTick(() => {
+        const len = core.status.stepPostfix?.length ?? 0;
+        if (len !== lastLength) {
+            mapMiscSprite.value?.update();
+            lastLength = len;
+        }
+    });
+
+    const mapMiscSprite = ref<Sprite>();
+
+    const renderMapMisc = (canvas: MotaOffscreenCanvas2D) => {
+        const step = core.status.stepPostfix;
+        if (!step) return;
+        const ctx = canvas.ctx;
+        ctx.save();
+        ctx.fillStyle = '#fff';
+        step.forEach(({ x, y, direction }) => {
+            ctx.fillRect(x * 32 + 12, y * 32 + 12, 8, 8);
+            if (!isNil(direction)) {
+                switch (direction) {
+                    case 'down':
+                        ctx.fillRect(x * 32 + 12, y * 32 + 20, 8, 12);
+                        break;
+                    case 'left':
+                        ctx.fillRect(x * 32, y * 32 + 12, 12, 8);
+                        break;
+                    case 'right':
+                        ctx.fillRect(x * 32 + 20, y * 32 + 12, 12, 8);
+                        break;
+                    case 'up':
+                        ctx.fillRect(x * 32 + 12, y * 32, 8, 12);
+                        break;
+                }
+            }
+        });
+        ctx.restore();
+    };
+
+    //#region 交互监听
+
     /**
      * 对于 registerAction 的 fallback
      */
-    const clickData = (ev: IActionEvent) => {
+    const clickMap = (ev: IActionEvent) => {
         const bx = Math.floor(ev.offsetX / 32);
         const by = Math.floor(ev.offsetY / 32);
         core.doRegisteredAction('onup', bx, by, ev.offsetX, ev.offsetY);
@@ -181,7 +244,7 @@ const MainScene = defineComponent(() => {
     /**
      * 对于 registerAction 的 fallback
      */
-    const downData = (ev: IActionEvent) => {
+    const downMap = (ev: IActionEvent) => {
         const bx = Math.floor(ev.offsetX / 32);
         const by = Math.floor(ev.offsetY / 32);
         core.doRegisteredAction('ondown', bx, by, ev.offsetX, ev.offsetY);
@@ -190,24 +253,11 @@ const MainScene = defineComponent(() => {
     /**
      * 对于 registerAction 的 fallback
      */
-    const moveData = (ev: IActionEvent) => {
+    const moveMap = (ev: IActionEvent) => {
         const bx = Math.floor(ev.offsetX / 32);
         const by = Math.floor(ev.offsetY / 32);
         core.doRegisteredAction('onmove', bx, by, ev.offsetX, ev.offsetY);
     };
-
-    const loaded = ref(true);
-    onLoaded(() => {
-        loaded.value = true;
-    });
-
-    hook.on('statusBarUpdate', updateStatus);
-    hook.on('statusBarUpdate', updateDataFallback);
-
-    onUnmounted(() => {
-        hook.off('statusBarUpdate', updateStatus);
-        hook.off('statusBarUpdate', updateDataFallback);
-    });
 
     return () => (
         <container id="main-scene" width={MAIN_WIDTH} height={MAIN_HEIGHT}>
@@ -219,7 +269,14 @@ const MainScene = defineComponent(() => {
                 ></LeftStatusBar>
             )}
             <g-line line={[180, 0, 180, 480]} lineWidth={1} />
-            <container id="map-draw" {...mapDrawProps} x={180} zIndex={10}>
+            <container
+                id="map-draw"
+                loc={[180, 0, 480, 480]}
+                zIndex={10}
+                onClick={clickMap}
+                onDown={downMap}
+                onMove={moveMap}
+            >
                 <layer-group id="layer-main" ex={layerGroupExtends} ref={map}>
                     <layer layer="bg" zIndex={10}></layer>
                     <layer layer="bg2" zIndex={20}></layer>
@@ -238,13 +295,11 @@ const MainScene = defineComponent(() => {
                     corner={16}
                 />
                 <sprite
-                    nocache
-                    zIndex={170}
-                    hidden={!locked.value}
+                    noevent
                     loc={[0, 0, 480, 480]}
-                    onClick={clickData}
-                    onDown={downData}
-                    onMove={moveData}
+                    ref={mapMiscSprite}
+                    zIndex={170}
+                    render={renderMapMisc}
                 />
             </container>
             <g-line line={[180 + 480, 0, 180 + 480, 480]} lineWidth={1} />

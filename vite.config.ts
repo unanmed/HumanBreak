@@ -1,11 +1,11 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import components from 'unplugin-vue-components/vite';
-import vuejsx from '@vitejs/plugin-vue-jsx'
+import vuejsx from '@vitejs/plugin-vue-jsx';
 import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers';
 import path from 'path';
 import postcssPresetEnv from 'postcss-preset-env';
-import * as glob from 'glob'
+import * as glob from 'glob';
 
 const FSHOST = 'http://127.0.0.1:3000/';
 
@@ -13,7 +13,7 @@ const custom = [
     'container', 'image', 'sprite', 'shader', 'text', 'comment', 'custom', 
     'layer', 'layer-group', 'animate', 'damage', 'graphics', 'icon', 'winskin',
     'container-custom'
-]
+];
 
 const aliases = glob.sync('packages/*/src').map((srcPath) => {
     const packageName = path.basename(path.dirname(srcPath));

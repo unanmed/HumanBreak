@@ -576,7 +576,6 @@ actions.prototype._sys_ondown_lockControl = function (x, y, px, py) {
 actions.prototype._sys_ondown = function (x, y, px, py) {
     if (core.status.lockControl) return false;
     core.status.downTime = new Date();
-    core.deleteCanvas('route');
     var pos = {
         x: Math.floor((px + core.bigmap.offsetX) / 32),
         y: Math.floor((py + core.bigmap.offsetY) / 32)
@@ -591,14 +590,6 @@ actions.prototype._sys_ondown = function (x, y, px, py) {
 
     core.status.stepPostfix = [];
     core.status.stepPostfix.push(pos);
-    core.fillRect(
-        'ui',
-        pos.x * 32 + 12 - core.bigmap.offsetX,
-        pos.y * 32 + 12 - core.bigmap.offsetY,
-        8,
-        8,
-        '#bfbfbf'
-    );
 
     clearTimeout(core.timeout.onDownTimeout);
     core.timeout.onDownTimeout = null;
@@ -688,14 +679,6 @@ actions.prototype._sys_onmove = function (x, y, px, py) {
             pos.x += pos0.x;
             pos.y += pos0.y;
             core.status.stepPostfix.push(pos);
-            core.fillRect(
-                'ui',
-                pos.x * 32 + 12 - core.bigmap.offsetX,
-                pos.y * 32 + 12 - core.bigmap.offsetY,
-                8,
-                8,
-                '#bfbfbf'
-            );
         }
     }
     return true;
@@ -736,9 +719,6 @@ actions.prototype._sys_onup = function (x, y, px, py) {
     var posx = core.status.stepPostfix[0].x;
     var posy = core.status.stepPostfix[0].y;
     core.status.stepPostfix = [];
-    if (!core.status.lockControl) {
-        core.clearMap('ui');
-    }
 
     // 长按
     if (

@@ -765,6 +765,8 @@ interface GameStatus extends InitGameStatus {
      * 当前勇士状态信息。例如core.status.hero.atk就是当前勇士的攻击力数值
      */
     hero: HeroStatus;
+
+    stepPostfix?: DiredLoc[];
 }
 
 interface Follower {
