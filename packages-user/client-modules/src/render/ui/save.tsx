@@ -19,7 +19,7 @@ import { useKey } from '../use';
 import { MAP_WIDTH } from '../shared';
 import { getSave, SaveData } from '../utils';
 import { Thumbnail } from '../components/thumbnail';
-import { adjustGrid, IGridLayoutData } from '../utils/layout';
+import { adjustGrid, IGridLayoutData } from '../utils';
 
 export const enum SaveMode {
     Save,

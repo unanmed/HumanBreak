@@ -24,6 +24,7 @@ import { SetupComponentOptions } from '@motajs/system-ui';
 import { saveSave, saveLoad } from './save';
 import { mainUIController } from './controller';
 import { MAIN_WIDTH, MAIN_HEIGHT } from '../shared';
+import { openSettings } from './settings';
 
 interface ToolbarProps extends DefaultProps {
     loc?: ElementLocator;
@@ -115,7 +116,9 @@ export const PlayingToolbar = defineComponent<
     };
     const danmaku = () => requestAnimationFrame(openDanmakuPoster);
     const replay = () => core.ui._drawReplay();
-    const settings = () => core.openSettings(true);
+    const settings = () => {
+        openSettings(mainUIController, [420, 240, 240, 400, 0.5, 0.5]);
+    };
 
     return () => (
         <container loc={props.loc} cursor="pointer">
@@ -241,6 +244,7 @@ export const NumpadToolbar = defineComponent<
 >((props, { emit }) => {
     const numpad = () => emit('numpad');
     const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
+    const font = new Font('Verdana', 14);
 
     const ctrlEnabled = ref(false);
     const shiftEnabled = ref(false);
@@ -314,6 +318,7 @@ export const NumpadToolbar = defineComponent<
                             <text
                                 text={v.toString()}
                                 loc={middle(col, row)}
+                                font={font}
                                 noevent
                             />
                         ];
@@ -332,6 +337,7 @@ export const NumpadToolbar = defineComponent<
                 text="Ctrl"
                 loc={[59, 93, void 0, void 0, 0.5, 0.5]}
                 fillStyle={ctrlTextColor.value}
+                font={font}
                 noevent
             />
             <g-rectr
@@ -346,6 +352,7 @@ export const NumpadToolbar = defineComponent<
                 text="Shift"
                 loc={[108, 93, void 0, void 0, 0.5, 0.5]}
                 fillStyle={shiftTextColor.value}
+                font={font}
                 noevent
             />
             <g-rectr
@@ -360,6 +367,7 @@ export const NumpadToolbar = defineComponent<
                 text="Alt"
                 loc={[154, 93, void 0, void 0, 0.5, 0.5]}
                 fillStyle={altTextColor.value}
+                font={font}
                 noevent
             />
             <NumpadIcon loc={ic(0, 2)} strokeStyle="gold" onClick={numpad} />

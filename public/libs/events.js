@@ -3406,10 +3406,7 @@ events.prototype.load = function (fromUserAction) {
 
 ////// 点击设置按钮时的操作 //////
 events.prototype.openSettings = function (fromUserAction) {
-    if (core.isReplaying()) return;
-    if (!this._checkStatus('settings', fromUserAction)) return;
-    core.playSound('打开界面');
-    core.ui._drawSettings();
+    // deprecated.
 };
 
 // ------ 一些事件的具体执行过程 ------ //
