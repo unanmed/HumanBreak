@@ -14,12 +14,10 @@ import {
     onMounted,
     shallowReactive
 } from 'vue';
-import { getConfirm, Page, PageExpose } from '../components';
+import { getConfirm, Page, PageExpose, Thumbnail } from '../components';
 import { useKey } from '../use';
 import { MAP_WIDTH } from '../shared';
-import { getSave, SaveData } from '../utils';
-import { Thumbnail } from '../components/thumbnail';
-import { adjustGrid, IGridLayoutData } from '../utils';
+import { getSave, SaveData, adjustGrid, IGridLayoutData } from '../utils';
 
 export const enum SaveMode {
     Save,

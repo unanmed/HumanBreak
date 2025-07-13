@@ -19,7 +19,7 @@ import { gameKey } from '@motajs/system-action';
 import { generateKeyboardEvent } from '@motajs/system-action';
 import { getVitualKeyOnce } from '@motajs/legacy-ui';
 import { getAllSavesData, getSaveData, syncFromServer } from '../utils';
-import { getInput } from '../components/input';
+import { getInput } from '../components';
 import { openStatistics } from './statistics';
 import { saveWithExist } from './save';
 import { compressToBase64 } from 'lz-string';

@@ -5,8 +5,7 @@ import {
     UIComponentProps
 } from '@motajs/system-ui';
 import { defineComponent } from 'vue';
-import { ListPage } from '../components/list';
-import { waitbox } from '../components';
+import { waitbox, ListPage } from '../components';
 import { DefaultProps } from '@motajs/render-vue';
 import { ItemState } from '@user/data-state';
 
