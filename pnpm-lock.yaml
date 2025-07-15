@@ -539,6 +539,9 @@ importers:
       '@user/entry-client':
         specifier: workspace:*
         version: link:../packages-user/entry-client
+      '@user/entry-data':
+        specifier: workspace:*
+        version: link:../packages-user/entry-data
 
 packages:
 

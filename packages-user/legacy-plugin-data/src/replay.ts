@@ -1,8 +1,4 @@
-import { HeroSkill } from '@user/data-state';
-import {
-    getSkillFromIndex,
-    upgradeSkill
-} from '../../data-state/src/mechanism/skillTree';
+import { HeroSkill, getSkillFromIndex, upgradeSkill } from '@user/data-state';
 import { canOpenShop } from './shop';
 import { hook } from '@user/data-base';
 import { jumpSkill } from './skill';
