@@ -57,3 +57,30 @@ export function adjustGrid(
         locs
     };
 }
+
+/**
+ * 适配为覆盖模式，类似于 `object-fit: cover`
+ * @param itemWidth 元素宽度
+ * @param itemHeight 元素高度
+ * @param targetWidth 目标宽度
+ * @param targetHeight 目标高度
+ * @returns 适配为覆盖模式后元素的宽高
+ */
+export function adjustCover(
+    itemWidth: number,
+    itemHeight: number,
+    targetWidth: number,
+    targetHeight: number
+): Readonly<LocArr> {
+    const aspect = itemWidth / itemHeight;
+    const canvasAspect = targetWidth / targetHeight;
+    if (canvasAspect > aspect) {
+        const width = targetWidth;
+        const height = width / aspect;
+        return [width, height];
+    } else {
+        const height = targetHeight;
+        const width = height * aspect;
+        return [width, height];
+    }
+}

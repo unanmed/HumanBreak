@@ -26,6 +26,7 @@ import { ExitFullscreen, Fullscreen, SoundVolume } from '../components';
 import { mainSetting, triggerFullscreen } from '@motajs/legacy-ui';
 import { saveLoad } from './save';
 import { MainSceneUI } from './main';
+import { adjustCover } from '../utils';
 
 const enum TitleButton {
     StartGame,
@@ -59,19 +60,12 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
     const bg = core.material.images.images['bg.webp'];
 
     //#region 计算背景图
-    const aspect = bg.width / bg.height;
-    const canvasAspect = MAIN_WIDTH / MAIN_HEIGHT;
-    const [width, height] = (() => {
-        if (canvasAspect > aspect) {
-            const width = MAIN_WIDTH;
-            const height = width / aspect;
-            return [width, height];
-        } else {
-            const height = MAIN_HEIGHT;
-            const width = height * aspect;
-            return [width, height];
-        }
-    })();
+    const [width, height] = adjustCover(
+        bg.width,
+        bg.height,
+        MAIN_WIDTH,
+        MAIN_HEIGHT
+    );
 
     //#region 标题设置
 
