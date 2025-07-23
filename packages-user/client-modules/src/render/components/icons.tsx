@@ -6,7 +6,7 @@ import {
     DefineSetupFnComponent,
     onMounted,
     Ref,
-    ref,
+    shallowRef,
     watch
 } from 'vue';
 
@@ -19,14 +19,53 @@ const iconsProps = {
 } satisfies SetupComponentOptions<IconsProps>;
 
 type PathGenerator = (width: number, height: number) => Path2D;
-/**
- * @param ox 横向偏移坐标
- * @param oy 纵向偏移坐标
- * @param width 路径宽度
- * @param height 路径高度
- */
-type PathFn = (ox: number, oy: number, width: number, height: number) => Path2D;
+type PadFn = (
+    divisor: number
+) => [left: number, right: number, top: number, bottom: number];
+type IconLoc = [
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    cx: number,
+    cy: number
+];
 
+/**
+ * @param loc 图标位置信息
+ * @param pad 计算图标外围填充
+ */
+type PathFn = (loc: IconLoc, pad: PadFn) => Path2D;
+
+/**
+ * 适配填充
+ * @param x 左上角横坐标
+ * @param y 左上角纵坐标
+ * @param width 矩形宽度
+ * @param height 矩形高度
+ * @param divisor 填充除数，例如左边缘会变成 `x + width / divisor`
+ */
+function pad(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    divisor: number
+): [left: number, right: number, top: number, bottom: number] {
+    return [
+        x + width / divisor, // left
+        x + width - width / divisor, // right
+        y + height / divisor, // top
+        y + height - height / divisor // bottom
+    ];
+}
+
+/**
+ * 适配图标路径生成
+ * @param aspect 宽高比
+ * @param ref 路径响应式对象
+ * @param fn 路径定义函数
+ */
 function adjustPath(
     aspect: number,
     ref: Ref<Path2D | undefined>,
@@ -57,7 +96,11 @@ function adjustPath(
             dw = height * aspect;
             ox = (width - dw) / 2;
         }
-        path = fn(ox, oy, dw, dh);
+        const cx = ox + dw / 2;
+        const cy = oy + dh / 2;
+        path = fn([ox, oy, dw, dh, cx, cy], divisor =>
+            pad(ox, oy, dw, dh, divisor)
+        );
         ref.value = path;
         return path;
     };
@@ -75,7 +118,7 @@ export function defineIcon<T extends IconsProps>(
     props: SetupComponentOptions<T> = iconsProps
 ): DefineSetupFnComponent<T> {
     return defineComponent<T>(props => {
-        const path = ref<Path2D>();
+        const path = shallowRef<Path2D>();
 
         const width = computed(() => props.loc[2] ?? 200);
         const height = computed(() => props.loc[3] ?? 200);
@@ -101,8 +144,9 @@ export function defineIcon<T extends IconsProps>(
     }, props);
 }
 
-export const RollbackIcon = defineIcon(1, (ox, oy, width, height) => {
+export const RollbackIcon = defineIcon(1, loc => {
     const path = new Path2D();
+    const [ox, oy, width, height] = loc;
     const arc = width / 10;
     const arrow = width / 10;
     const left = ox + width / 10;
@@ -123,8 +167,9 @@ export const RollbackIcon = defineIcon(1, (ox, oy, width, height) => {
     return path;
 });
 
-export const RetweetIcon = defineIcon(1, (ox, oy, width, height) => {
+export const RetweetIcon = defineIcon(1, loc => {
     const path = new Path2D();
+    const [ox, oy, width, height] = loc;
     const arc = width / 10;
     const arrow = width / 10;
     const left = ox + width / 10;
@@ -145,14 +190,10 @@ export const RetweetIcon = defineIcon(1, (ox, oy, width, height) => {
     return path;
 });
 
-export const ViewMapIcon = defineIcon(1, (ox, oy, width, height) => {
+export const ViewMapIcon = defineIcon(1, (loc, pad) => {
     const path = new Path2D();
-    const left = ox + width / 5;
-    const top = oy + height / 5;
-    const right = ox + width - width / 5;
-    const bottom = oy + height - height / 5;
-    const cx = ox + width / 2;
-    const cy = oy + height / 2;
+    const [, , , , cx, cy] = loc;
+    const [left, right, top, bottom] = pad(5);
     path.rect(left, top, right - left, bottom - top);
     path.moveTo(cx, top);
     path.lineTo(cx, bottom);
@@ -161,12 +202,10 @@ export const ViewMapIcon = defineIcon(1, (ox, oy, width, height) => {
     return path;
 });
 
-export const DanmakuIcon = defineIcon(1, (ox, oy, width, height) => {
+export const DanmakuIcon = defineIcon(1, (loc, pad) => {
     const path = new Path2D();
-    const left = ox + width / 5;
-    const bottom = oy + height - height / 5;
-    const cx = ox + width / 2;
-    const cy = oy + height / 2;
+    const [, , width, height, cx, cy] = loc;
+    const [left, , , bottom] = pad(5);
     const rx = width / 3;
     const ry = height / 4;
     const start = (Math.PI * 16) / 18;
@@ -177,14 +216,11 @@ export const DanmakuIcon = defineIcon(1, (ox, oy, width, height) => {
     return path;
 });
 
-export const ReplayIcon = defineIcon(1, (ox, oy, width, height) => {
+export const ReplayIcon = defineIcon(1, (loc, pad) => {
     const path = new Path2D();
+    const [, , width, height, , cy] = loc;
+    const [left, right, top, bottom] = pad(5);
     const arc = width / 10;
-    const left = ox + width / 5;
-    const top = oy + height / 5;
-    const right = ox + width - width / 5;
-    const bottom = oy + height - height / 5;
-    const cy = oy + height / 2;
     path.moveTo(right, cy - height / 8);
     path.lineTo(right, top + arc);
     path.arcTo(right, top, right - arc, top, arc);
@@ -206,14 +242,10 @@ export const ReplayIcon = defineIcon(1, (ox, oy, width, height) => {
     return path;
 });
 
-export const NumpadIcon = defineIcon(1, (ox, oy, width, height) => {
+export const NumpadIcon = defineIcon(1, (loc, pad) => {
     const path = new Path2D();
-    const left = ox + width / 5;
-    const top = oy + height / 5;
-    const right = ox + width - width / 5;
-    const bottom = oy + height - height / 5;
-    const cx = ox + width / 2;
-    const cy = oy + height / 2;
+    const [, , width, height, cx, cy] = loc;
+    const [left, right, top, bottom] = pad(5);
     path.rect(left, top, right - left, bottom - top);
     const path2 = new Path2D();
     path2.ellipse(cx, cy, width / 9, height / 6, 0, 0, Math.PI * 2);
@@ -221,12 +253,10 @@ export const NumpadIcon = defineIcon(1, (ox, oy, width, height) => {
     return path;
 });
 
-export const PlayIcon = defineIcon(1, (ox, oy, width, height) => {
+export const PlayIcon = defineIcon(1, (loc, pad) => {
     const path = new Path2D();
-    const left = ox + width / 5;
-    const top = oy + height / 5;
-    const right = ox + width - width / 5;
-    const bottom = oy + height - height / 5;
+    const [, oy, , height] = loc;
+    const [left, right, top, bottom] = pad(5);
     path.moveTo(left, top);
     path.lineTo(right, oy + height / 2);
     path.lineTo(left, bottom);
@@ -234,11 +264,10 @@ export const PlayIcon = defineIcon(1, (ox, oy, width, height) => {
     return path;
 });
 
-export const PauseIcon = defineIcon(1, (ox, oy, width, height) => {
+export const PauseIcon = defineIcon(1, (loc, pad) => {
     const path = new Path2D();
-    const cx = ox + width / 2;
-    const top = oy + height / 5;
-    const bottom = oy + height - height / 5;
+    const [, , width, , cx] = loc;
+    const [, , top, bottom] = pad(5);
     path.moveTo(cx - width / 5, top);
     path.lineTo(cx - width / 5, bottom);
     path.moveTo(cx + width / 5, top);
@@ -246,15 +275,11 @@ export const PauseIcon = defineIcon(1, (ox, oy, width, height) => {
     return path;
 });
 
-export const DoubleArrow = defineIcon(1, (ox, oy, width, height) => {
+export const DoubleArrow = defineIcon(1, (loc, pad) => {
     const path = new Path2D();
     const path2 = new Path2D();
-    const left = ox + width / 5;
-    const top = oy + height / 5;
-    const right = ox + width - width / 5;
-    const bottom = oy + height - height / 5;
-    const cx = ox + width / 2;
-    const cy = oy + height / 2;
+    const [, , width, height, cx, cy] = loc;
+    const [left, right, top, bottom] = pad(5);
     path.moveTo(left, top + height / 12);
     path.lineTo(cx + width / 8, cy);
     path.lineTo(left, bottom - height / 12);
@@ -267,13 +292,11 @@ export const DoubleArrow = defineIcon(1, (ox, oy, width, height) => {
     return path;
 });
 
-export const StepForward = defineIcon(1, (ox, oy, width, height) => {
+export const StepForward = defineIcon(1, (loc, pad) => {
     const path = new Path2D();
     const path2 = new Path2D();
-    const left = ox + width / 5;
-    const top = oy + height / 5;
-    const right = ox + width - width / 5;
-    const bottom = oy + height - height / 5;
+    const [, oy, , height] = loc;
+    const [left, right, top, bottom] = pad(5);
     path.moveTo(left, top);
     path.lineTo(right, oy + height / 2);
     path.lineTo(left, bottom);
@@ -284,8 +307,9 @@ export const StepForward = defineIcon(1, (ox, oy, width, height) => {
     return path;
 });
 
-export const SoundVolume = defineIcon(1, (ox, oy, width, height) => {
+export const SoundVolume = defineIcon(1, loc => {
     const path = new Path2D();
+    const [ox, oy, width, height, cx, cy] = loc;
     const left = ox + width / 8;
     const top = oy + height / 5;
     const bottom = oy + height - height / 5;
@@ -296,8 +320,6 @@ export const SoundVolume = defineIcon(1, (ox, oy, width, height) => {
     path.lineTo(width / 2, top);
     path.lineTo(left + width / 6, height / 2 - height / 10);
     path.closePath();
-    const cx = width / 2;
-    const cy = height / 2;
     const start = -Math.PI / 4;
     const end = Math.PI / 4;
     path.moveTo(
@@ -313,12 +335,10 @@ export const SoundVolume = defineIcon(1, (ox, oy, width, height) => {
     return path;
 });
 
-export const Fullscreen = defineIcon(1, (ox, oy, width, height) => {
+export const Fullscreen = defineIcon(1, (loc, pad) => {
     const path = new Path2D();
-    const left = ox + width / 4;
-    const right = ox + width - width / 4;
-    const top = oy + height / 4;
-    const bottom = oy + height - height / 4;
+    const [, , width, height] = loc;
+    const [left, right, top, bottom] = pad(4);
 
     // 左上
     path.moveTo(left + width / 6, top + height / 6);
@@ -350,12 +370,10 @@ export const Fullscreen = defineIcon(1, (ox, oy, width, height) => {
     return path;
 });
 
-export const ExitFullscreen = defineIcon(1, (ox, oy, width, height) => {
+export const ExitFullscreen = defineIcon(1, (loc, pad) => {
     const path = new Path2D();
-    const left = ox + width / 4;
-    const right = ox + width - width / 4;
-    const top = oy + height / 4;
-    const bottom = oy + height - height / 4;
+    const [, , width, height] = loc;
+    const [left, right, top, bottom] = pad(4);
 
     // 左上
     path.moveTo(left + width / 6, top + height / 6);
@@ -387,12 +405,10 @@ export const ExitFullscreen = defineIcon(1, (ox, oy, width, height) => {
     return path;
 });
 
-export const ArrowLeftTailless = defineIcon(1, (ox, oy, width, height) => {
+export const ArrowLeftTailless = defineIcon(1, (loc, pad) => {
     const path = new Path2D();
-    const left = ox + width / 4;
-    const right = ox + width - width / 4;
-    const top = oy + height / 4;
-    const bottom = oy + height - height / 4;
+    const [, , width] = loc;
+    const [left, right, top, bottom] = pad(4);
 
     path.moveTo(right, top);
     path.lineTo(left + width / 4, (top + right) / 2);
@@ -400,12 +416,10 @@ export const ArrowLeftTailless = defineIcon(1, (ox, oy, width, height) => {
     return path;
 });
 
-export const ArrowRightTailless = defineIcon(1, (ox, oy, width, height) => {
+export const ArrowRightTailless = defineIcon(1, (loc, pad) => {
     const path = new Path2D();
-    const left = ox + width / 4;
-    const right = ox + width - width / 4;
-    const top = oy + height / 4;
-    const bottom = oy + height - height / 4;
+    const [, , width] = loc;
+    const [left, right, top, bottom] = pad(4);
 
     path.moveTo(left, top);
     path.lineTo(right - width / 4, (top + right) / 2);
@@ -413,12 +427,10 @@ export const ArrowRightTailless = defineIcon(1, (ox, oy, width, height) => {
     return path;
 });
 
-export const ArrowUpTailless = defineIcon(1, (ox, oy, width, height) => {
+export const ArrowUpTailless = defineIcon(1, (loc, pad) => {
     const path = new Path2D();
-    const left = ox + width / 4;
-    const right = ox + width - width / 4;
-    const top = oy + height / 4;
-    const bottom = oy + height - height / 4;
+    const [, , , height] = loc;
+    const [left, right, top, bottom] = pad(4);
 
     path.moveTo(left, bottom);
     path.lineTo((left + right) / 2, top + height / 4);
@@ -426,12 +438,10 @@ export const ArrowUpTailless = defineIcon(1, (ox, oy, width, height) => {
     return path;
 });
 
-export const ArrowDownTailless = defineIcon(1, (ox, oy, width, height) => {
+export const ArrowDownTailless = defineIcon(1, (loc, pad) => {
     const path = new Path2D();
-    const left = ox + width / 4;
-    const right = ox + width - width / 4;
-    const top = oy + height / 4;
-    const bottom = oy + height - height / 4;
+    const [, , , height] = loc;
+    const [left, right, top, bottom] = pad(4);
 
     path.moveTo(left, top);
     path.lineTo((left + right) / 2, bottom - height / 4);
