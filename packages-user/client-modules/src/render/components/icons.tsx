@@ -63,7 +63,13 @@ function adjustPath(
     };
 }
 
-function defineIcon<T extends IconsProps>(
+/**
+ * 定义一个描边图标
+ * @param aspect 图标的宽高比
+ * @param pathDef 图标的路径定义函数
+ * @param props 图标组件定义的参数配置
+ */
+export function defineIcon<T extends IconsProps>(
     aspect: number,
     pathDef: PathFn,
     props: SetupComponentOptions<T> = iconsProps
