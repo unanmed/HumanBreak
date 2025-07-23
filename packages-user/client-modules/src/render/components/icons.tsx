@@ -682,3 +682,159 @@ export const ExitFullscreen = defineComponent<IconsProps>(props => {
         );
     };
 }, iconsProps);
+
+export const ArrowLeftTailless = defineComponent<IconsProps>(props => {
+    const path = ref<Path2D>();
+
+    const width = computed(() => props.loc[2] ?? 200);
+    const height = computed(() => props.loc[3] ?? 200);
+    const generatePath = adjustPath(1, path, (ox, oy, width, height) => {
+        const path = new Path2D();
+        const left = ox + width / 4;
+        const right = ox + width - width / 4;
+        const top = oy + height / 4;
+        const bottom = oy + height - height / 4;
+
+        path.moveTo(right, top);
+        path.lineTo(left + width / 4, (top + right) / 2);
+        path.lineTo(right, bottom);
+        return path;
+    });
+
+    watch(props, () => {
+        generatePath(width.value, height.value);
+    });
+
+    onMounted(() => {
+        generatePath(width.value, height.value);
+    });
+
+    return () => {
+        return (
+            <g-path
+                loc={props.loc}
+                path={path.value}
+                stroke
+                lineJoin="round"
+                lineCap="round"
+            ></g-path>
+        );
+    };
+}, iconsProps);
+
+export const ArrowRightTailless = defineComponent<IconsProps>(props => {
+    const path = ref<Path2D>();
+
+    const width = computed(() => props.loc[2] ?? 200);
+    const height = computed(() => props.loc[3] ?? 200);
+    const generatePath = adjustPath(1, path, (ox, oy, width, height) => {
+        const path = new Path2D();
+        const left = ox + width / 4;
+        const right = ox + width - width / 4;
+        const top = oy + height / 4;
+        const bottom = oy + height - height / 4;
+
+        path.moveTo(left, top);
+        path.lineTo(right - width / 4, (top + right) / 2);
+        path.lineTo(left, bottom);
+        return path;
+    });
+
+    watch(props, () => {
+        generatePath(width.value, height.value);
+    });
+
+    onMounted(() => {
+        generatePath(width.value, height.value);
+    });
+
+    return () => {
+        return (
+            <g-path
+                loc={props.loc}
+                path={path.value}
+                stroke
+                lineJoin="round"
+                lineCap="round"
+            ></g-path>
+        );
+    };
+}, iconsProps);
+
+export const ArrowUpTailless = defineComponent<IconsProps>(props => {
+    const path = ref<Path2D>();
+
+    const width = computed(() => props.loc[2] ?? 200);
+    const height = computed(() => props.loc[3] ?? 200);
+    const generatePath = adjustPath(1, path, (ox, oy, width, height) => {
+        const path = new Path2D();
+        const left = ox + width / 4;
+        const right = ox + width - width / 4;
+        const top = oy + height / 4;
+        const bottom = oy + height - height / 4;
+
+        path.moveTo(left, bottom);
+        path.lineTo((left + right) / 2, top + height / 4);
+        path.lineTo(right, bottom);
+        return path;
+    });
+
+    watch(props, () => {
+        generatePath(width.value, height.value);
+    });
+
+    onMounted(() => {
+        generatePath(width.value, height.value);
+    });
+
+    return () => {
+        return (
+            <g-path
+                loc={props.loc}
+                path={path.value}
+                stroke
+                lineJoin="round"
+                lineCap="round"
+            ></g-path>
+        );
+    };
+}, iconsProps);
+
+export const ArrowDownTailless = defineComponent<IconsProps>(props => {
+    const path = ref<Path2D>();
+
+    const width = computed(() => props.loc[2] ?? 200);
+    const height = computed(() => props.loc[3] ?? 200);
+    const generatePath = adjustPath(1, path, (ox, oy, width, height) => {
+        const path = new Path2D();
+        const left = ox + width / 4;
+        const right = ox + width - width / 4;
+        const top = oy + height / 4;
+        const bottom = oy + height - height / 4;
+
+        path.moveTo(left, top);
+        path.lineTo((left + right) / 2, bottom - height / 4);
+        path.lineTo(right, top);
+        return path;
+    });
+
+    watch(props, () => {
+        generatePath(width.value, height.value);
+    });
+
+    onMounted(() => {
+        generatePath(width.value, height.value);
+    });
+
+    return () => {
+        return (
+            <g-path
+                loc={props.loc}
+                path={path.value}
+                stroke
+                lineJoin="round"
+                lineCap="round"
+            ></g-path>
+        );
+    };
+}, iconsProps);
