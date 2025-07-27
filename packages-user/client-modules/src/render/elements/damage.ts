@@ -481,7 +481,9 @@ export class Damage extends RenderItem<EDamageEvent> {
     renderDamage(canvas: MotaOffscreenCanvas2D, transform: Transform) {
         // console.time('damage');
         const { ctx } = canvas;
+        ctx.save();
         transformCanvas(canvas, transform);
+        ctx.lineJoin = 'round';
 
         const render = this.calNeedRender(transform);
         const block = this.block;
