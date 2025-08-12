@@ -5,7 +5,7 @@ import {
     UIComponentProps
 } from '@motajs/system-ui';
 import { defineComponent } from 'vue';
-import { waitbox, ListPage } from '../components';
+import { waitbox, ListPage, TextContent } from '../components';
 import { DefaultProps } from '@motajs/render-vue';
 import { ItemState } from '@user/data-state';
 
@@ -48,7 +48,7 @@ export const Statistics = defineComponent<StatisticsProps>(props => {
         <ListPage
             list={list}
             selected="total"
-            loc={[180, 0, 480, 480]}
+            loc={[180, 0, 630, 480]}
             close
             onClose={close}
             lineHeight={24}
@@ -75,7 +75,7 @@ const statisticsPanelProps = {
 const TotalStatistics = defineComponent<StatisticsPanelProps>(props => {
     return () => (
         <container>
-            <text text="测试"></text>
+            <TextContent text='' width={310}></TextContent>
         </container>
     );
 }, statisticsPanelProps);
