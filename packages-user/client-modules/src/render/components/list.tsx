@@ -192,6 +192,8 @@ export const ListPage = defineComponent<
         emit('update:selected', key);
     };
 
+    const close = () => emit('close');
+
     return () => (
         <container loc={props.loc}>
             <List
@@ -211,6 +213,7 @@ export const ListPage = defineComponent<
                     text="关闭"
                     cursor="pointer"
                     font={props.font}
+                    onClick={close}
                 ></text>
             )}
         </container>
