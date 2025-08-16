@@ -18,10 +18,6 @@ const iconsProps = {
     props: ['loc']
 } satisfies SetupComponentOptions<IconsProps>;
 
-type PathGenerator = (width: number, height: number) => Path2D;
-type PadFn = (
-    divisor: number
-) => [left: number, right: number, top: number, bottom: number];
 type IconLoc = [
     x: number,
     y: number,
@@ -30,6 +26,9 @@ type IconLoc = [
     cx: number,
     cy: number
 ];
+type IconPad = [left: number, right: number, top: number, bottom: number];
+type PathGenerator = (width: number, height: number) => Path2D;
+type PadFn = (divisor: number) => IconPad;
 
 /**
  * @param loc 图标位置信息
@@ -51,7 +50,7 @@ function pad(
     width: number,
     height: number,
     divisor: number
-): [left: number, right: number, top: number, bottom: number] {
+): IconPad {
     return [
         x + width / divisor, // left
         x + width - width / divisor, // right

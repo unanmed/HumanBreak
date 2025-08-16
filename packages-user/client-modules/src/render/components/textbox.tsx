@@ -117,7 +117,7 @@ export const TextContent = defineComponent<
     TextContentEmits,
     keyof TextContentEmits
 >((props, { emit, expose }) => {
-    const loc = ref<ElementLocator>(
+    const loc = shallowRef<ElementLocator>(
         (props.loc?.slice() as ElementLocator) ?? []
     );
 
@@ -160,7 +160,8 @@ export const TextContent = defineComponent<
     const updateLoc = () => {
         const height = getHeight();
         if (props.autoHeight) {
-            const [x = 0, y = 0, width = 200, , ax = 0, ay = 0] = loc.value;
+            const [x = 0, y = 0, width = props.width, , ax = 0, ay = 0] =
+                loc.value;
             loc.value = [x, y, width, height, ax, ay];
         }
         emit('updateHeight', height);
