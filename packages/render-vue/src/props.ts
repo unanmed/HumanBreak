@@ -6,7 +6,8 @@ import {
     ElementAnchor,
     ElementLocator,
     ElementScale,
-    CustomContainerRenderFn
+    CustomContainerRenderFn,
+    CustomContainerPropagateFn
 } from '@motajs/render-core';
 import {
     BezierParams,
@@ -94,6 +95,8 @@ export interface ContainerProps extends BaseProps {}
 export interface ConatinerCustomProps extends ContainerProps {
     /** 自定义容器渲染函数 */
     render?: CustomContainerRenderFn;
+    /** 自定义容器事件传递函数 */
+    propagate?: CustomContainerPropagateFn;
 }
 
 export interface GL2Props extends BaseProps {}

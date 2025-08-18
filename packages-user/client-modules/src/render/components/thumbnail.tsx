@@ -9,8 +9,8 @@ import { SetupComponentOptions } from '@motajs/system-ui';
 
 export interface ThumbnailProps extends SpriteProps {
     loc: ElementLocator;
-    padStyle: CanvasStyle;
     floorId: FloorIds;
+    padStyle?: CanvasStyle;
     map?: Block[];
     hero?: HeroStatus;
     // configs
@@ -65,7 +65,7 @@ export const Thumbnail = defineComponent<ThumbnailProps>(props => {
             options.centerY = hero.loc.y;
         }
         ctx.save();
-        ctx.fillStyle = props.padStyle;
+        ctx.fillStyle = props.padStyle ?? 'black';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         core.drawThumbnail(props.floorId, props.map, options);
         ctx.restore();

@@ -75,7 +75,7 @@
         "markdown-it-mathjax3": "^4.3.2",
         "mermaid": "^11.5.0",
         "postcss-preset-env": "^9.6.0",
-        "prettier": "^3.5.3",
+        "prettier": "^3.6.2",
         "rollup": "^3.29.5",
         "terser": "^5.39.0",
         "tsx": "^4.19.3",

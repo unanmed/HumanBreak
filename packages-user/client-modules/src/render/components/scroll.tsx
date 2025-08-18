@@ -20,7 +20,12 @@ import {
     MotaOffscreenCanvas2D,
     IActionEvent,
     IWheelEvent,
-    MouseType
+    MouseType,
+    EventProgress,
+    ActionEventMap,
+    ContainerCustom,
+    ActionType,
+    CustomContainerPropagateOrigin
 } from '@motajs/render';
 import { hyper, linear, Transition } from 'mutate-animate';
 import { clamp } from 'lodash-es';
@@ -355,6 +360,23 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
 
         //#region 事件监听
 
+        const customPropagate = <T extends ActionType>(
+            type: T,
+            progress: EventProgress,
+            event: ActionEventMap[T],
+            _: ContainerCustom,
+            origin: CustomContainerPropagateOrigin
+        ) => {
+            if (progress === EventProgress.Capture) {
+                if (direction.value === ScrollDirection.Horizontal) {
+                    event.offsetX += contentPos;
+                } else {
+                    event.offsetY += contentPos;
+                }
+            }
+            origin(type, progress, event);
+        };
+
         const wheelScroll = (delta: number, max: number) => {
             const sign = Math.sign(delta);
             const dx = Math.abs(delta);
@@ -532,6 +554,7 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
                         ref={content}
                         onDown={down}
                         render={renderContent}
+                        propagate={customPropagate}
                         zIndex={0}
                     >
                         {slots.default?.()}

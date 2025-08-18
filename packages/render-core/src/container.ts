@@ -151,8 +151,23 @@ export type CustomContainerRenderFn = (
     transform: Transform
 ) => void;
 
+export type CustomContainerPropagateOrigin = <T extends ActionType>(
+    type: T,
+    progress: EventProgress,
+    event: ActionEventMap[T]
+) => void;
+
+export type CustomContainerPropagateFn = <T extends ActionType>(
+    type: T,
+    progress: EventProgress,
+    event: ActionEventMap[T],
+    container: ContainerCustom,
+    origin: CustomContainerPropagateOrigin
+) => void;
+
 export class ContainerCustom extends Container {
     private renderFn?: CustomContainerRenderFn;
+    private propagateFn?: CustomContainerPropagateFn;
 
     protected render(
         canvas: MotaOffscreenCanvas2D,
@@ -165,12 +180,34 @@ export class ContainerCustom extends Container {
         }
     }
 
+    protected propagateEvent<T extends ActionType>(
+        type: T,
+        progress: EventProgress,
+        event: ActionEventMap[T]
+    ): void {
+        if (this.propagateFn) {
+            this.propagateFn(type, progress, event, this, () => {
+                super.propagateEvent(type, progress, event);
+            });
+        } else {
+            super.propagateEvent(type, progress, event);
+        }
+    }
+
     /**
      * 设置这个自定义容器的渲染函数
      * @param render 渲染函数
      */
     setRenderFn(render?: CustomContainerRenderFn) {
         this.renderFn = render;
+    }
+
+    /**
+     * 设置这个自定义容器的事件传递函数
+     * @param propagate 事件传递函数
+     */
+    setPropagateFn(propagate: CustomContainerPropagateFn) {
+        this.propagateFn = propagate;
     }
 
     protected handleProps(
@@ -182,6 +219,11 @@ export class ContainerCustom extends Container {
             case 'render': {
                 if (!this.assertType(nextValue, 'function', key)) return false;
                 this.setRenderFn(nextValue);
+                return true;
+            }
+            case 'propagate': {
+                if (!this.assertType(nextValue, 'function', key)) return false;
+                this.setPropagateFn(nextValue);
                 return true;
             }
         }

@@ -73,11 +73,11 @@ export interface IActionEventBase {
     ctrlKey: boolean;
     /** 触发时是否按下了 Windows(Windows) / Command(Mac) 键 */
     metaKey: boolean;
+    /** 这次操作的标识符，在按下、移动、抬起阶段中保持不变 */
+    identifier: number;
 }
 
 export interface IActionEvent extends IActionEventBase {
-    /** 这次操作的标识符，在按下、移动、抬起阶段中保持不变 */
-    identifier: number;
     /** 相对于触发元素左上角的横坐标 */
     offsetX: number;
     /** 相对于触发元素左上角的纵坐标 */

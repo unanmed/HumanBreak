@@ -483,7 +483,6 @@ export class Damage extends RenderItem<EDamageEvent> {
         const { ctx } = canvas;
         ctx.save();
         transformCanvas(canvas, transform);
-        ctx.lineJoin = 'round';
 
         const render = this.calNeedRender(transform);
         const block = this.block;
@@ -521,6 +520,8 @@ export class Damage extends RenderItem<EDamageEvent> {
             const { ctx: ct } = temp;
 
             ct.translate(-px, -py);
+            ct.lineJoin = 'round';
+            ct.lineCap = 'round';
 
             const render = this.renderable.get(v);
 
@@ -532,6 +533,7 @@ export class Damage extends RenderItem<EDamageEvent> {
                 ct.font = v.font ?? this.font;
                 ct.strokeStyle = v.stroke ?? this.strokeStyle;
                 ct.lineWidth = v.strokeWidth ?? this.strokeWidth;
+
                 ct.strokeText(v.text, v.x, v.y);
                 ct.fillText(v.text, v.x, v.y);
             });
