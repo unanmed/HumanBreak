@@ -1,7 +1,7 @@
 import { DefaultProps } from '@motajs/render-vue';
 import { SetupComponentOptions } from '@motajs/system-ui';
 import { clamp, isNil } from 'lodash-es';
-import { computed, defineComponent, ref, watch } from 'vue';
+import { computed, defineComponent, onMounted, ref, watch } from 'vue';
 import { Scroll, ScrollExpose } from './scroll';
 import { Font } from '@motajs/render-style';
 import { MotaOffscreenCanvas2D } from '@motajs/render-core';
@@ -48,13 +48,16 @@ export const FloorSelector = defineComponent<
 
     const scrollRef = ref<ScrollExpose>();
 
-    const floorId = computed(() => props.floors[now.value]);
+    const floors = computed(() => props.floors.toReversed());
+    const floorId = computed(() => floors.value[now.value]);
     const floorName = computed(() => core.floors[floorId.value].title);
 
     watch(
         () => props.now,
         value => {
-            if (!isNil(value)) now.value = value;
+            if (!isNil(value)) {
+                changeTo(value);
+            }
         }
     );
 
@@ -77,12 +80,14 @@ export const FloorSelector = defineComponent<
         ctx.fillRect(0, 0, 144, 200);
     };
 
-    const changeTo = (index: number) => {
-        const res = clamp(index, 0, props.floors.length - 1);
+    const changeTo = (index: number, time: number = 500) => {
+        // 取反是为了符合 2.x 的操作习惯
+        const res = clamp(index, 0, floors.value.length - 1);
+        const reversed = floors.value.length - res - 1;
         now.value = res;
         selList.value = res;
-        const y = res * 24;
-        scrollRef.value?.scrollTo(y, 500);
+        const y = reversed * 24;
+        scrollRef.value?.scrollTo(y, time);
         emit('update', now.value, floorId.value);
         emit('update:now', now.value);
     };
@@ -98,6 +103,10 @@ export const FloorSelector = defineComponent<
     const close = () => {
         emit('close');
     };
+
+    onMounted(() => {
+        changeTo(now.value, 0);
+    });
 
     return () => (
         <container>
@@ -116,28 +125,28 @@ export const FloorSelector = defineComponent<
                 loc={[90, 70]}
                 anc={[0.5, 0.5]}
                 cursor="pointer"
-                onClick={() => changeFloor(-10)}
+                onClick={() => changeFloor(10)}
             />
             <text
                 text="「 上移一层 」"
                 loc={[90, 110]}
                 anc={[0.5, 0.5]}
                 cursor="pointer"
-                onClick={() => changeFloor(-1)}
+                onClick={() => changeFloor(1)}
             />
             <text
                 text="「 下移一层 」"
                 loc={[90, 370]}
                 anc={[0.5, 0.5]}
                 cursor="pointer"
-                onClick={() => changeFloor(1)}
+                onClick={() => changeFloor(-1)}
             />
             <text
                 text="「 下移十层 」"
                 loc={[90, 410]}
                 anc={[0.5, 0.5]}
                 cursor="pointer"
-                onClick={() => changeFloor(10)}
+                onClick={() => changeFloor(-10)}
             />
             <container loc={[0, 140, 144, 200]}>
                 <Scroll
@@ -147,10 +156,11 @@ export const FloorSelector = defineComponent<
                     zIndex={10}
                     padEnd={88}
                 >
-                    {props.floors.map((v, i) => {
+                    {floors.value.map((v, i, a) => {
                         const floor = core.floors[v];
-                        const highlight =
-                            now.value === i || selList.value === i;
+                        const nowFloor = a.length - now.value - 1;
+                        const sel = a.length - selList.value - 1;
+                        const highlight = nowFloor === i || sel === i;
                         const color = highlight ? '#fff' : '#aaa';
                         const fill = highlight ? '#fff' : '#000';
                         return (
@@ -176,7 +186,7 @@ export const FloorSelector = defineComponent<
                                     lineWidth={1}
                                     circle={[130, 12, 3]}
                                     strokeStyle={color}
-                                    fillStyle={now.value === i ? fill : '#000'}
+                                    fillStyle={nowFloor === i ? fill : '#000'}
                                 />
                             </container>
                         );
