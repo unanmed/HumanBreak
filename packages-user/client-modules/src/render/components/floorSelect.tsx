@@ -43,7 +43,9 @@ export const FloorSelector = defineComponent<
 >((props, { emit }) => {
     const listFont = new Font(Font.defaultFamily, 12);
 
+    /** 当前选中楼层，不反向 */
     const now = ref(props.now ?? 0);
+    /** 当前鼠标选中楼层，反向 */
     const selList = ref(0);
 
     const scrollRef = ref<ScrollExpose>();
@@ -85,7 +87,7 @@ export const FloorSelector = defineComponent<
         const res = clamp(index, 0, floors.value.length - 1);
         const reversed = floors.value.length - res - 1;
         now.value = res;
-        selList.value = res;
+        selList.value = reversed;
         const y = reversed * 24;
         scrollRef.value?.scrollTo(y, time);
         emit('update', now.value, floorId.value);
@@ -158,9 +160,9 @@ export const FloorSelector = defineComponent<
                 >
                     {floors.value.map((v, i, a) => {
                         const floor = core.floors[v];
+                        const reversed = a.length - i - 1;
                         const nowFloor = a.length - now.value - 1;
-                        const sel = a.length - selList.value - 1;
-                        const highlight = nowFloor === i || sel === i;
+                        const highlight = nowFloor === i || selList.value === i;
                         const color = highlight ? '#fff' : '#aaa';
                         const fill = highlight ? '#fff' : '#000';
                         return (
@@ -177,8 +179,8 @@ export const FloorSelector = defineComponent<
                                     font={listFont}
                                     fillStyle={color}
                                     onEnter={() => enterList(i)}
-                                    onLeave={() => enterList(now.value)}
-                                    onClick={() => changeTo(i)}
+                                    onLeave={() => enterList(nowFloor)}
+                                    onClick={() => changeTo(reversed)}
                                 />
                                 <g-circle
                                     stroke
