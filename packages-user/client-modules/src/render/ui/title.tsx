@@ -332,8 +332,8 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
 
     const createMaskGradient = (ctx: CanvasRenderingContext2D) => {
         maskGradient = ctx.createLinearGradient(100, 100, 200, 0);
-        maskGradient.addColorStop(0, '#fff');
-        maskGradient.addColorStop(1, '#000');
+        maskGradient.addColorStop(0, 'rgba(255,255,255,0)');
+        maskGradient.addColorStop(1, 'rgba(0,0,0,1)');
     };
 
     const createTitleGradient = (ctx: CanvasRenderingContext2D) => {

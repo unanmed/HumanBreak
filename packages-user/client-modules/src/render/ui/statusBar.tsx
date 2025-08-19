@@ -19,6 +19,8 @@ import {
     ReplayingToolbar
 } from './toolbar';
 import { HeroSkill } from '@user/data-state';
+import { openViewMap } from './viewmap';
+import { mainUIController } from './controller';
 
 export interface ILeftHeroStatus {
     hp: number;
@@ -98,6 +100,10 @@ export const LeftStatusBar = defineComponent<StatusBarProps<ILeftHeroStatus>>(
             return [per * (n + 1), keyY, void 0, void 0, 0.5, 0.5];
         };
 
+        const viewMap = () => {
+            openViewMap(mainUIController, [0, 0, 840, 480]);
+        };
+
         return () => {
             return (
                 <container loc={p.loc} hidden={p.hidden}>
@@ -106,6 +112,7 @@ export const LeftStatusBar = defineComponent<StatusBarProps<ILeftHeroStatus>>(
                         loc={central(24)}
                         font={font1}
                         cursor="pointer"
+                        onClick={viewMap}
                     ></text>
                     <text text={s.lv} loc={central(54)} font={font1}></text>
                     <image image={hpIcon} loc={iconLoc(0)}></image>

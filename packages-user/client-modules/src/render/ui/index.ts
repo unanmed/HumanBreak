@@ -11,3 +11,4 @@ export * from './settings';
 export * from './statistics';
 export * from './statusBar';
 export * from './toolbar';
+export * from './viewmap';

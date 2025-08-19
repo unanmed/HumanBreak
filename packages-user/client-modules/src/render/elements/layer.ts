@@ -1132,6 +1132,7 @@ export class Layer extends Container<ELayerEvent> {
             const length = this.backImage.length;
             const img = this.backImage[frame % length];
             need.forEach(index => {
+                if (index >= this.block.area || index < 0) return;
                 const x = index % width;
                 const y = Math.floor(index / width);
                 const sx = x * blockSize;

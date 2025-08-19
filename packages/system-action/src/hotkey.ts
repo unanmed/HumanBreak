@@ -436,6 +436,13 @@ export const gameKey = new Hotkey('gameKey', '游戏按键');
 document.addEventListener('keyup', e => {
     const assist = generateBinary([e.ctrlKey, e.shiftKey, e.altKey]);
     const code = keycode(e.keyCode);
+    if (
+        code === KeyCode.Alt ||
+        code === KeyCode.Shift ||
+        code === KeyCode.Ctrl
+    ) {
+        e.preventDefault();
+    }
     if (gameKey.emitKey(code, assist, 'up', e)) {
         e.preventDefault();
         if (core.status.holdingKeys) {

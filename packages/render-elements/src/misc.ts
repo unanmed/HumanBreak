@@ -163,7 +163,7 @@ export class Image extends RenderItem<EImageEvent> {
     image: CanvasImageSource;
 
     constructor(image: CanvasImageSource, type: RenderItemPosition = 'static') {
-        super(type);
+        super(type, false);
         this.image = image;
         if (image instanceof VideoFrame || image instanceof SVGElement) {
             this.size(200, 200);
@@ -177,7 +177,7 @@ export class Image extends RenderItem<EImageEvent> {
         _transform: Transform
     ): void {
         const ctx = canvas.ctx;
-        ctx.drawImage(this.image, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(this.image, 0, 0, this.width, this.height);
     }
 
     /**

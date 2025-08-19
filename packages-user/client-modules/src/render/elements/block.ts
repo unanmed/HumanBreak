@@ -37,6 +37,8 @@ export class BlockCacher<
     width: number;
     /** 区域高度 */
     height: number;
+    /** 区域面积 */
+    area: number = 0;
     /** 分块大小 */
     blockSize: number;
     /** 分块信息 */
@@ -116,6 +118,7 @@ export class BlockCacher<
             restWidth: this.width % this.blockSize,
             restHeight: this.height % this.blockSize
         };
+        this.area = this.blockData.width * this.blockData.height;
         this.emit('split');
     }
 
@@ -303,7 +306,10 @@ export interface ICanvasCacheItem extends IBlockCacheable {
 }
 
 export class CanvasCacheItem implements ICanvasCacheItem {
-    constructor(public canvas: MotaOffscreenCanvas2D, public symbol: number) {}
+    constructor(
+        public canvas: MotaOffscreenCanvas2D,
+        public symbol: number
+    ) {}
 
     destroy(): void {}
 }

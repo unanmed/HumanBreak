@@ -434,36 +434,85 @@ gameKey
         defaults: KeyCode.PageUp
     })
     // #region 存档界面
-    .group('@ui_save', 'save')
+    .group('@ui_save', '存档界面')
     .register({
         id: '@save_pageUp',
-        name: '存档向后翻页',
+        name: '向后翻页',
         defaults: KeyCode.PageUp
     })
     .register({
         id: '@save_pageDown',
-        name: '存档向前翻页',
+        name: '向前翻页',
         defaults: KeyCode.PageDown
     })
     .register({
         id: '@save_up',
-        name: '存档选择框向上',
+        name: '选择框向上',
         defaults: KeyCode.UpArrow
     })
     .register({
         id: '@save_down',
-        name: '存档选择框向下',
+        name: '选择框向下',
         defaults: KeyCode.DownArrow
     })
     .register({
         id: '@save_left',
-        name: '存档选择框向左',
+        name: '选择框向左',
         defaults: KeyCode.LeftArrow
     })
     .register({
         id: '@save_right',
-        name: '存档选择框向右',
+        name: '选择框向右',
         defaults: KeyCode.RightArrow
+    })
+    //#region 浏览地图
+    .group('@ui_viewMap', '浏览地图')
+    .register({
+        id: '@viewMap_up_1',
+        name: '下一层地图_1',
+        defaults: KeyCode.UpArrow
+    })
+    .register({
+        id: '@viewMap_up_2',
+        name: '下一层地图_2',
+        defaults: KeyCode.PageUp
+    })
+    .register({
+        id: '@viewMap_down_1',
+        name: '上一层地图_1',
+        defaults: KeyCode.DownArrow
+    })
+    .register({
+        id: '@viewMap_down_2',
+        name: '上一层地图_2',
+        defaults: KeyCode.PageDown
+    })
+    .register({
+        id: '@viewMap_up_ten',
+        name: '下十层地图',
+        defaults: KeyCode.UpArrow,
+        ctrl: true
+    })
+    .register({
+        id: '@viewMap_down_ten',
+        name: '上十层地图',
+        defaults: KeyCode.DownArrow,
+        ctrl: true
+    })
+    .register({
+        id: '@viewMap_book',
+        name: '怪物手册',
+        defaults: KeyCode.KeyX
+    })
+    .register({
+        id: '@viewMap_fly',
+        name: '传送至',
+        defaults: KeyCode.KeyG
+    })
+    .register({
+        id: '@viewMap_reset',
+        name: '重置视角',
+        defaults: KeyCode.KeyR
     });
 // #endregion
 
@@ -491,9 +540,6 @@ gameKey
     })
     .realize('shop', () => {
         core.openQuickShop(true);
-    })
-    .realize('viewMap', () => {
-        core.ui._drawViewMaps();
     })
     .realize('skillTree', () => {
         core.useItem('skill1', true);

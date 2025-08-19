@@ -101,7 +101,6 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
     /**
      * 复制一个离屏Canvas2D对象，一般用于缓存等操作
      * @param canvas 被复制的MotaOffscreenCanvas2D对象
-     * @returns 复制结果，注意复制结果是被冻结的，无法进行大小等的修改，但是可以继续绘制
      */
     static clone(canvas: MotaOffscreenCanvas2D): MotaOffscreenCanvas2D {
         const newCanvas = new MotaOffscreenCanvas2D();

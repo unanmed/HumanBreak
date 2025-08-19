@@ -6,7 +6,8 @@ import {
     openStatistics,
     saveLoad,
     openSettings,
-    ReplaySettingsUI
+    ReplaySettingsUI,
+    openViewMap
 } from './ui';
 
 export function createAction() {
@@ -27,5 +28,8 @@ export function createAction() {
             mainUIController.open(ReplaySettingsUI, {
                 loc: [420, 240, void 0, void 0, 0.5, 0.5]
             });
+        })
+        .realize('viewMap', () => {
+            openViewMap(mainUIController, [0, 0, MAIN_WIDTH, MAIN_HEIGHT]);
         });
 }

@@ -140,7 +140,7 @@ export class Container<E extends EContainerEvent = EContainerEvent>
     destroy(): void {
         super.destroy();
         this.children.forEach(v => {
-            v.remove();
+            v.destroy();
         });
     }
 }

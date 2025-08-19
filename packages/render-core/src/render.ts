@@ -193,6 +193,8 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
             this.createTouchAction(ev, ActionType.Up).forEach(v => {
                 this.captureEvent(ActionType.Up, v);
                 this.captureEvent(ActionType.Click, v);
+            });
+            [...ev.touches].forEach(v => {
                 this.touchInfo.delete(v.identifier);
             });
         });
@@ -200,14 +202,18 @@ export class MotaRenderer extends Container implements IRenderTreeRoot {
             ev.preventDefault();
             this.createTouchAction(ev, ActionType.Up).forEach(v => {
                 this.captureEvent(ActionType.Up, v);
+            });
+            [...ev.touches].forEach(v => {
                 this.touchInfo.delete(v.identifier);
             });
         });
         document.addEventListener('touchmove', ev => {
             ev.preventDefault();
             this.createTouchAction(ev, ActionType.Move).forEach(v => {
-                const touch = this.touchInfo.get(v.identifier);
-                if (!touch) return;
+                const list = this.touchInfo.values();
+                if (!list.some(vv => v.identifier === vv.identifier)) {
+                    return;
+                }
                 const temp = this.beforeHovered;
                 temp.clear();
                 this.beforeHovered = this.hoveredElement;
