@@ -9,7 +9,7 @@ import { waitbox, ListPage, TextContent } from '../components';
 import { DefaultProps } from '@motajs/render-vue';
 import { ItemState } from '@user/data-state';
 
-interface StatisticsDataOneFloor {
+export interface StatisticsDataOneFloor {
     enemyCount: number;
     potionCount: number;
     gemCount: number;
@@ -19,7 +19,7 @@ interface StatisticsDataOneFloor {
     mdefValue: number;
 }
 
-interface StatisticsData {
+export interface StatisticsData {
     total: StatisticsDataOneFloor;
     floors: Map<FloorIds, StatisticsDataOneFloor>;
 }
@@ -75,7 +75,7 @@ const statisticsPanelProps = {
 const TotalStatistics = defineComponent<StatisticsPanelProps>(props => {
     return () => (
         <container>
-            <TextContent text='' width={310}></TextContent>
+            <TextContent text="" width={310}></TextContent>
         </container>
     );
 }, statisticsPanelProps);
@@ -92,15 +92,99 @@ const PotionStatistics = defineComponent<StatisticsPanelProps>(props => {
     return () => <container></container>;
 }, statisticsPanelProps);
 
-function calculateStatistics(): StatisticsData {
+export function calculateStatisticsOne(
+    floorId: FloorIds,
+    diff?: Map<string, number>
+) {
+    core.setFlag('__statistics__', true);
+    const hasDiff = !!diff;
+    if (!hasDiff) {
+        diff = new Map();
+        const hero = core.status.hero;
+        const handler: ProxyHandler<HeroStatus> = {
+            set(target, p, newValue) {
+                if (typeof p !== 'string') return true;
+                if (typeof newValue === 'number') {
+                    const value = diff!.get(p) ?? 0;
+                    const delta =
+                        newValue - (target[p as keyof HeroStatus] as number);
+                    diff!.set(p, value + delta);
+                }
+                return true;
+            }
+        };
+        const proxy = new Proxy(hero, handler);
+        core.status.hero = proxy;
+    }
+    core.extractBlocks(floorId);
+    const statistics: StatisticsDataOneFloor = {
+        enemyCount: 0,
+        potionCount: 0,
+        gemCount: 0,
+        potionValue: 0,
+        atkValue: 0,
+        defValue: 0,
+        mdefValue: 0
+    };
+    if (!diff) return statistics;
+    core.status.maps[floorId].blocks.forEach(v => {
+        if (v.event.cls === 'enemys' || v.event.cls === 'enemy48') {
+            statistics.enemyCount++;
+        } else if (v.event.cls === 'items') {
+            const item = ItemState.items.get(v.event.id as AllIdsOf<'items'>);
+            if (!item) return;
+            if (item.cls === 'items') {
+                try {
+                    item.itemEffectFn?.();
+                } catch {
+                    // pass
+                }
+                const hp = diff.get('hp') ?? 0;
+                const atk = diff.get('atk') ?? 0;
+                const def = diff.get('def') ?? 0;
+                const mdef = diff.get('mdef') ?? 0;
+                if (hp > 0) {
+                    statistics.potionCount++;
+                    statistics.potionValue += hp;
+                }
+                if (atk > 0 || def > 0 || mdef > 0) {
+                    statistics.gemCount++;
+                }
+                if (atk > 0) {
+                    statistics.atkValue += atk;
+                }
+                if (def > 0) {
+                    statistics.defValue += def;
+                }
+                if (mdef > 0) {
+                    statistics.mdefValue += mdef;
+                }
+            }
+        }
+        diff.clear();
+    });
+
+    if (!hasDiff) {
+        core.status.hero = hero;
+        window.hero = hero;
+        window.flags = core.status.hero.flags;
+    }
+    core.removeFlag('__statistics__');
+    return statistics;
+}
+
+export function calculateStatistics(): StatisticsData {
     core.setFlag('__statistics__', true);
     const hero = core.status.hero;
-    const diff: Record<string | symbol, number> = {};
+    const diff = new Map<string, number>();
     const handler: ProxyHandler<HeroStatus> = {
-        set(_target, p, newValue) {
+        set(target, p, newValue) {
+            if (typeof p !== 'string') return true;
             if (typeof newValue === 'number') {
-                diff[p] ??= 0;
-                diff[p] += newValue;
+                const value = diff!.get(p) ?? 0;
+                const delta =
+                    newValue - (target[p as keyof HeroStatus] as number);
+                diff!.set(p, value + delta);
             }
             return true;
         }
@@ -110,52 +194,7 @@ function calculateStatistics(): StatisticsData {
 
     const floors = new Map<FloorIds, StatisticsDataOneFloor>();
     core.floorIds.forEach(v => {
-        core.extractBlocks(v);
-        const statistics: StatisticsDataOneFloor = {
-            enemyCount: 0,
-            potionCount: 0,
-            gemCount: 0,
-            potionValue: 0,
-            atkValue: 0,
-            defValue: 0,
-            mdefValue: 0
-        };
-        core.status.maps[v].blocks.forEach(v => {
-            if (v.event.cls === 'enemys' || v.event.cls === 'enemy48') {
-                statistics.enemyCount++;
-            } else if (v.event.cls === 'items') {
-                const item = ItemState.items.get(
-                    v.event.id as AllIdsOf<'items'>
-                );
-                if (!item) return;
-                if (item.cls === 'items') {
-                    try {
-                        item.itemEffectFn?.();
-                    } catch {
-                        // pass
-                    }
-                    if (diff.hp > 0) {
-                        statistics.potionCount++;
-                        statistics.potionValue += diff.hp;
-                    }
-                    if (diff.atk > 0 || diff.def > 0 || diff.mdef > 0) {
-                        statistics.gemCount++;
-                    }
-                    if (diff.atk > 0) {
-                        statistics.atkValue += diff.atk;
-                    }
-                    if (diff.def > 0) {
-                        statistics.defValue += diff.def;
-                    }
-                    if (diff.mdef > 0) {
-                        statistics.mdefValue += diff.mdef;
-                    }
-                }
-            }
-            for (const key of Object.keys(diff)) {
-                diff[key] = 0;
-            }
-        });
+        const statistics = calculateStatisticsOne(v, diff);
         floors.set(v, statistics);
     });
 
