@@ -1,13 +1,8 @@
 import { createServer } from 'vite';
-import {
-    IncomingMessage,
-    Server,
-    ServerResponse,
-    createServer as http
-} from 'http';
-import { isNil } from 'lodash-es';
-import fs from 'fs-extra';
-import { resolve, basename } from 'path';
+import { Server } from 'http';
+import { ensureDir, move, pathExists, remove } from 'fs-extra';
+import { readFile, readdir, writeFile } from 'fs/promises';
+import { resolve, basename, join } from 'path';
 import * as rollup from 'rollup';
 import typescript from '@rollup/plugin-typescript';
 import nodeResolve from '@rollup/plugin-node-resolve';
@@ -17,17 +12,27 @@ import chokidar from 'chokidar';
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import replace from '@rollup/plugin-replace';
+import express, { Request, Response } from 'express';
 
 const [, , vitePortStr = '5173', serverPortStr = '3000'] = process.argv;
 const vitePort = parseInt(vitePortStr);
 const serverPort = parseInt(serverPortStr);
 
-const base = './public';
+const checkBase = resolve(process.cwd());
+const base = resolve(process.cwd(), 'public');
 
-type Request = IncomingMessage;
-type Response = ServerResponse<IncomingMessage> & {
-    req: IncomingMessage;
-};
+const enum APIStatus {
+    Success,
+    PermissionDeny,
+    WriteError,
+    FileNotExist,
+    ReadError
+}
+
+interface ResolveResult {
+    safe: boolean;
+    resolved: string;
+}
 
 interface RollupInfo {
     dir: string;
@@ -38,7 +43,6 @@ interface RollupInfo {
 const rollupMap = new Map<string, RollupInfo>();
 let bundleIndex = 0;
 let ws: WebSocket;
-let h: Server;
 let wt: chokidar.FSWatcher;
 
 class RefValue<T> extends EventEmitter {
@@ -73,60 +77,115 @@ class RefValue<T> extends EventEmitter {
     }
 }
 
-function resolvePath(path: string) {
-    return resolve(base, path);
+function resolvePath(path: string): ResolveResult {
+    const targetPath = resolve(base, path);
+
+    const safe = targetPath.startsWith(checkBase);
+    return {
+        safe,
+        resolved: targetPath
+    };
 }
 
-/**
- * 请求文件
- */
-async function getFile(req: Request, res: Response, path: string) {
-    try {
-        const data = await fs.readFile(resolvePath(path));
-        if (path.endsWith('.js'))
-            res.writeHead(200, { 'Content-type': 'text/javascript' });
-        if (path.endsWith('.css'))
-            res.writeHead(200, { 'Content-type': 'text/css' });
-        if (path.endsWith('.html'))
-            res.writeHead(200, { 'Content-type': 'text/html' });
-        return (res.end(data), true);
-    } catch (e) {
-        console.log(e);
-        return false;
-    }
-}
-
-/**
- * 高层塔优化及动画加载
- * @param suffix 后缀名
- * @param dir 文件夹路径
- * @param join 分隔符
- */
-async function getAll(
-    req: Request,
-    res: Response,
-    ids: string[],
-    suffix: string,
-    dir: string,
-    join: string
-) {
-    let data: Record<string, Buffer> = {};
-    const tasks = ids.map(v => {
-        return new Promise(res => {
-            const d = resolvePath(`${dir}${v}${suffix}`);
-            try {
-                fs.readFile(d).then(vv => {
-                    data[v] = vv;
-                    res(`${v} pack success.`);
-                });
-            } catch (e) {
-                console.log(e);
-            }
-        });
+function parseBodyParam(body: string) {
+    const arr = body.split('&');
+    const obj: Record<string, string> = {};
+    arr.forEach(v => {
+        const [name, value] = v.split('=');
+        obj[name] = value;
     });
-    await Promise.all(tasks);
-    const result = ids.map(v => data[v]);
-    return (res.end(result.join(join)), true);
+    return obj;
+}
+
+function withSafeCheck(
+    exec: (req: Request, res: Response, path: ResolveResult) => void
+) {
+    return async (req: Request, res: Response) => {
+        const query = parseBodyParam(req.body);
+        const path = query.name ?? '';
+        if (typeof path !== 'string') {
+            res.status(500).end('Parameter Error: File path is required.');
+            return;
+        }
+        const dir = resolvePath(path);
+        if (!dir.safe) {
+            res.status(500).end(
+                'Permission Error: Cannot access file outside current working directory.'
+            );
+            return;
+        } else {
+            exec(req, res, dir);
+        }
+    };
+}
+
+interface AllFilesStatus {
+    status: APIStatus;
+    content: string;
+}
+
+function getAllFiles(suffix: string, dir: string, join: string) {
+    return async (req: Request, res: Response) => {
+        const query = req.query ? req.query : parseBodyParam(req.body);
+        const id = query.id;
+        if (typeof id !== 'string') {
+            res.status(404).end('Parameter Error: file names is required.');
+            return;
+        }
+
+        const list = id.split(',');
+        const tasks = list.map<Promise<AllFilesStatus>>(async v => {
+            const path = resolvePath(`${dir}${v}${suffix}`);
+            if (!path.safe) {
+                return Promise.resolve<AllFilesStatus>({
+                    status: APIStatus.PermissionDeny,
+                    content: ''
+                });
+            }
+
+            const exist = await pathExists(path.resolved);
+            if (!exist) {
+                return Promise.resolve<AllFilesStatus>({
+                    status: APIStatus.FileNotExist,
+                    content: ''
+                });
+            }
+
+            return readFile(path.resolved, 'utf-8').then(
+                value => {
+                    return {
+                        status: APIStatus.Success,
+                        content: value
+                    };
+                },
+                reason => {
+                    console.error(reason);
+                    return { status: APIStatus.ReadError, content: '' };
+                }
+            );
+        });
+
+        const contents = await Promise.all(tasks);
+        if (contents.every(v => v.status === APIStatus.Success)) {
+            const content = contents.map(v => v.content).join(join);
+            if (suffix === '.js') {
+                res.writeHead(200, { 'Content-type': 'text/javascript' });
+            }
+            res.end(content);
+        } else {
+            const strArray = contents.map((v, i) => {
+                if (v.status === APIStatus.PermissionDeny) {
+                    return `Index: ${i}; Permission Error: Cannot access file outside current working directory`;
+                } else if (v.status === APIStatus.Success) {
+                    return `Index: ${i}: Internal Error: Read file error.`;
+                } else {
+                    return 'Success';
+                }
+            });
+            const str = strArray.filter(v => v !== 'Success').join('\n');
+            res.status(500).end(str);
+        }
+    };
 }
 
 async function getEsmFile(
@@ -134,16 +193,22 @@ async function getEsmFile(
     res: Response,
     dir: string
 ): Promise<void> {
-    const path = resolvePath(dir.replace('.esm', ''));
+    const path = resolvePath(dir);
+    if (!path.safe) {
+        res.status(500).end(
+            'Permission Error: Cannot access file outside current working directory'
+        );
+        return;
+    }
 
-    const watcher = rollupMap.get(path);
+    const watcher = rollupMap.get(path.resolved);
 
     if (!watcher) {
         const file = (bundleIndex++).toString();
-        await fs.ensureDir('_bundle');
+        await ensureDir('_bundle');
         // 配置rollup监听器
         const w = rollup.watch({
-            input: path,
+            input: path.resolved,
             output: {
                 file: `_bundle/${file}.js`,
                 sourcemap: true,
@@ -183,12 +248,13 @@ async function getEsmFile(
         };
         w.on('event', e => {
             if (e.code === 'ERROR') {
+                res.status(500).end('Internal Error: Esm build error.');
                 console.log(e.error);
             }
 
             if (e.code === 'BUNDLE_END') {
                 info.bundled.value = true;
-                console.log(`${path} bundle end`);
+                console.log(`${path.resolved} bundle end`);
             }
 
             if (e.code === 'BUNDLE_START') {
@@ -197,184 +263,240 @@ async function getEsmFile(
         });
         w.on('change', id => {
             console.log(`${id} changed. Refresh Page.`);
-            ws && ws.send(JSON.stringify({ type: 'reload' }));
+            if (ws) {
+                ws.send(JSON.stringify({ type: 'reload' }));
+            }
         });
-        rollupMap.set(path, info);
+        rollupMap.set(path.resolved, info);
 
         // 配置完毕，直接重新获取即可（
         return getEsmFile(req, res, dir);
     } else {
         try {
             await watcher.bundled.waitValueTo(true);
-            const content = await fs.readFile(watcher.file, 'utf-8');
+            const content = await readFile(watcher.file, 'utf-8');
             res.writeHead(200, { 'Content-type': 'text/javascript' });
             res.end(content);
         } catch (e) {
-            console.log(e);
+            console.error(e);
         }
     }
 }
 
-/**
- * 获取POST数据
- */
-async function getPostData(req: Request) {
-    let data = '';
-    await new Promise(res => {
-        req.on('data', chunk => {
-            data += chunk.toString();
+const apiListFile = withSafeCheck(async (_, res, path) => {
+    const exist = await pathExists(path.resolved);
+    if (!exist) {
+        res.status(404).end('Permission Error: Path does not exist.');
+        return;
+    }
+    try {
+        const data = await readdir(path.resolved);
+        res.end(JSON.stringify(data));
+    } catch (e) {
+        console.error(e);
+        res.status(500).end('Internal Error: Read dir error.');
+    }
+});
+
+const apiMakeDir = withSafeCheck(async (_, res, path) => {
+    try {
+        await ensureDir(path.resolved);
+        res.end();
+    } catch (e) {
+        console.error(e);
+        res.status(500).end('Internal Error: Make dir error.');
+    }
+});
+
+const apiReadFile = withSafeCheck(async (req, res, path) => {
+    const query = parseBodyParam(req.body);
+    const type = query.type ?? 'utf8';
+    if (typeof type !== 'string') {
+        res.status(500).end('Internal Error: Query parsed failed.');
+        return;
+    }
+    const exist = await pathExists(path.resolved);
+    if (!exist) {
+        res.status(404).end('Permission Error: Path does not exist.');
+        return;
+    }
+
+    try {
+        const file = await readFile(path.resolved, {
+            encoding: type as BufferEncoding
         });
-        req.on('end', res);
-    });
-    return data;
-}
-
-async function readDir(req: Request, res: Response) {
-    const data = await getPostData(req);
-    const dir = resolvePath(data.toString().slice(5));
-    try {
-        const info = await fs.readdir(dir);
-        res.end(JSON.stringify(info));
+        res.end(file);
     } catch (e) {
-        console.log(e);
-        res.end(`Error: Read dir ${dir} fail. Does the dir exists?`);
+        console.error(e);
+        res.status(500).end('Internal Error: Read file error.');
     }
-}
+});
 
-async function mkdir(req: Request, res: Response) {
-    const data = await getPostData(req);
-    const dir = resolvePath(data.toString().slice(5));
+const apiWriteFile = withSafeCheck(async (req, res, path) => {
+    const query = parseBodyParam(req.body);
+    const type = query.type ?? 'utf8';
+    if (typeof type !== 'string') {
+        res.status(500).end('Internal Error: Query parsed failed.');
+        return;
+    }
+    const value = query.value;
+    if (typeof value !== 'string') {
+        res.status(500).end('Parameter Error: File content is required.');
+        return;
+    }
     try {
-        await fs.ensureDir(dir);
-    } catch (e) {
-        console.log(e);
-    }
-    res.end();
-}
-
-async function readFile(req: Request, res: Response) {
-    const data = (await getPostData(req)).toString();
-    const dir = resolvePath(data.split('&name=')[1]);
-    try {
-        const type = /^type=(utf8|base64)/.exec(data)?.[0].slice(5) ?? 'utf8';
-        const info = await fs.readFile(dir, { encoding: type });
-        res.end(info);
-    } catch (e) {
-        console.log(e);
-    }
-}
-
-async function writeFile(req: Request, res: Response) {
-    const data = (await getPostData(req)).toString();
-    const name = data.split('&name=')[1].split('&value=')[0];
-    const dir = resolvePath(name);
-    try {
-        const type = /^type=(utf8|base64)/.exec(data)?.[0].slice(5) ?? 'utf8';
-        const value = /&value=.+/.exec(data)?.[0].slice(7) ?? '';
-        await fs.writeFile(dir, value, { encoding: type });
-        if (name.endsWith('project/events.js')) doDeclaration('events', value);
-        if (name.endsWith('project/items.js')) doDeclaration('items', value);
-        if (name.endsWith('project/maps.js')) doDeclaration('maps', value);
-        if (name.endsWith('project/data.js')) doDeclaration('data', value);
-    } catch (e) {
-        console.log(e);
-        res.end(
-            `error: Write file ${dir} fail. Does the parent folder exists?`
-        );
-    }
-    res.end();
-}
-
-async function rm(req: Request, res: Response) {
-    const data = (await getPostData(req)).toString();
-    const dir = resolvePath(data.slice(5));
-    try {
-        await fs.remove(dir);
-    } catch (e) {
-        console.log(e);
-        res.end(`error: Remove file ${dir} fail. Does this file exists?`);
-    }
-    res.end();
-}
-
-async function moveFile(req: Request, res: Response) {
-    const data = (await getPostData(req)).toString();
-    const info = data.split('&dest=');
-    const src = resolvePath(info[0].slice(4));
-    const dest = resolvePath(info[1]);
-    try {
-        await fs.move(src, dest);
-    } catch (e) {
-        console.log(e);
-    }
-    res.end();
-}
-
-async function writeMultiFiles(req: Request, res: Response) {
-    const data = (await getPostData(req)).toString();
-    const names =
-        /name=.+&value=/.exec(data)?.[0].slice(5, -7).split(';') ?? [];
-    const value = /&value=.+/.exec(data)?.[0].slice(7).split(';') ?? [];
-
-    const tasks = names.map((v, i) => {
-        try {
-            return new Promise(res => {
-                fs.writeFile(
-                    resolvePath(v),
-                    value[i],
-                    'base64' // 多文件是base64写入的
-                ).then(v => {
-                    res(`write ${v} success.`);
-                });
-            });
-        } catch (e) {
-            console.log(e);
-            res.end(`error: Write multi files fail.`);
+        await writeFile(path.resolved, value, {
+            encoding: type as BufferEncoding
+        });
+        res.end();
+        if (path.resolved.endsWith('project/events.js')) {
+            doDeclaration('events', value);
         }
-    });
-    await Promise.all(tasks).catch(e => console.log(e));
-    res.end();
-}
-
-async function writeDevResource(data: string) {
-    return;
-    try {
-        const buf = Buffer.from(data, 'base64');
-        data = buf.toString('utf-8');
-        const info = JSON.parse(data.split('\n').slice(1).join(''));
-        const res: string[] = [];
-        const icons = await fs.readFile('./public/project/icons.js', 'utf-8');
-        const iconData = JSON.parse(icons.split('\n').slice(1).join(''));
-        res.push(
-            ...info.main.bgms.map((v: any) => `audio/${v}`),
-            ...info.main.fonts.map((v: any) => `buffer/project/fonts/${v}.ttf`),
-            ...info.main.images.map((v: any) => `image/project/images/${v}`),
-            ...info.main.sounds.map((v: any) => `buffer/${v}`),
-            ...info.main.tilesets.map((v: any) => `image/project/tilesets${v}`),
-            ...Object.keys(iconData.autotile).map(
-                v => `image/project/autotiles/${v}.png`
-            ),
-            ...[
-                'animates',
-                'cloud',
-                'enemy48',
-                'enemys',
-                'fog',
-                'icons',
-                'items',
-                'keyboard',
-                'npc48',
-                'npcs',
-                'sun',
-                'terrains'
-            ].map(v => `material/${v}.png`)
-        );
-        const text = JSON.stringify(res, void 0, 4);
-        await fs.writeFile('./src/data/resource-dev.json', text, 'utf-8');
+        if (path.resolved.endsWith('project/items.js')) {
+            doDeclaration('items', value);
+        }
+        if (path.resolved.endsWith('project/maps.js')) {
+            doDeclaration('maps', value);
+        }
+        if (path.resolved.endsWith('project/data.js')) {
+            doDeclaration('data', value);
+        }
     } catch (e) {
-        console.log(e);
+        console.error(e);
+        res.status(500).end(
+            'Internal Error: Fail to write file or fail to do declaration.'
+        );
     }
-}
+});
+
+const apiDeleteFile = withSafeCheck(async (_, res, path) => {
+    const exist = await pathExists(path.resolved);
+    if (!exist) {
+        res.status(404).end('Permission Error: Path does not exist.');
+        return;
+    }
+    try {
+        await remove(path.resolved);
+        res.end();
+    } catch (e) {
+        console.error(e);
+        res.status(500).end('Internal Error: Remove file error.');
+    }
+});
+
+const apiMoveFile = async (req: Request, res: Response) => {
+    const query = parseBodyParam(req.body);
+    const src = query.src;
+    const dest = query.dest;
+
+    if (typeof src !== 'string' || typeof dest !== 'string') {
+        res.status(500).end(
+            'Parameter Error: Source path or destination path is required.'
+        );
+        return;
+    }
+
+    const srcPath = resolvePath(src);
+    const destPath = resolvePath(dest);
+
+    if (!srcPath.safe || !destPath.safe) {
+        res.status(500).end(
+            'Permission Error: Cannot access file outside current working directory.'
+        );
+    }
+
+    try {
+        await move(srcPath.resolved, destPath.resolved);
+        res.end();
+    } catch (e) {
+        console.error(e);
+        res.status(500).end('Internal Error: Move file error.');
+    }
+};
+
+const apiWriteMultiFiles = async (req: Request, res: Response) => {
+    const query = parseBodyParam(req.body);
+    const name = query.name;
+    const value = query.value;
+
+    if (typeof name !== 'string' || typeof value !== 'string') {
+        res.status(500).end(
+            'Parameter Error: File names and content is required.'
+        );
+        return;
+    }
+
+    const pathList = name.split(';');
+    const valueList = value.split(';');
+
+    if (pathList.length !== valueList.length) {
+        res.status(500).end(
+            'Parameter Error: File name and content count must match.'
+        );
+        return;
+    }
+
+    const tasks = pathList.map<Promise<APIStatus>>((v, i) => {
+        const path = resolvePath(v);
+        if (!path.safe) {
+            return Promise.resolve<APIStatus>(APIStatus.PermissionDeny);
+        }
+        return new Promise<APIStatus>(resolve => {
+            writeFile(v, valueList[i]).then(
+                () => {
+                    resolve(APIStatus.Success);
+                },
+                reason => {
+                    console.error(reason);
+                    resolve(APIStatus.WriteError);
+                }
+            );
+        });
+    });
+
+    const status = await Promise.all(tasks);
+
+    if (status.every(v => v === APIStatus.Success)) {
+        res.end();
+    } else {
+        const strArray = status.map((v, i) => {
+            if (v === APIStatus.PermissionDeny) {
+                return `Index: ${i}; Permission Error: Cannot access file outside current working directory`;
+            } else if (v === APIStatus.Success) {
+                return `Index: ${i}: Internal Error: Write file error.`;
+            } else {
+                return 'Success';
+            }
+        });
+        const str = strArray.filter(v => v !== 'Success').join('\n');
+        res.status(500).end(str);
+    }
+};
+
+const apiGetAllFloors = getAllFiles('.js', 'project/floors/', '\n');
+const apiGetAllAnimates = getAllFiles(
+    '.animate',
+    'project/animates/',
+    '@@@~~~###~~~@@@'
+);
+
+const apiGetEsmFiles = async (req: Request, res: Response) => {
+    const query = req.query ? req.query : parseBodyParam(req.body);
+    const name = query.name;
+    if (typeof name !== 'string') {
+        res.status(500).end('Parameter Error: File name is required.');
+        return;
+    }
+    const path = resolvePath(join('..', name));
+    if (!path.safe) {
+        res.status(500).end(
+            'Permission Error: Cannot access file outside current working directory'
+        );
+        return;
+    }
+
+    return getEsmFile(req, res, path.resolved);
+};
 
 /**
  * 声明某种类型
@@ -393,7 +515,7 @@ async function doDeclaration(type: string, data: string) {
             for (const id in eventData.commonEvent) {
                 eventDec += `    | '${id}'\n`;
             }
-            await fs.writeFile('src/source/events.d.ts', eventDec, 'utf-8');
+            await writeFile('src/source/events.d.ts', eventDec, 'utf-8');
         } else if (type === 'items') {
             // 道具
             const itemData = JSON.parse(data.split('\n').slice(1).join(''));
@@ -403,7 +525,7 @@ async function doDeclaration(type: string, data: string) {
                 itemDec += `    ${id}: '${itemData[id].cls}';\n`;
             }
             itemDec += '}';
-            await fs.writeFile('src/source/items.d.ts', itemDec, 'utf-8');
+            await writeFile('src/source/items.d.ts', itemDec, 'utf-8');
         } else if (type === 'maps') {
             // 映射
             const d = JSON.parse(data.split('\n').slice(1).join(''));
@@ -420,8 +542,8 @@ async function doDeclaration(type: string, data: string) {
             id2cls += '}';
             id2num += '}';
             num2id += '}';
-            await fs.writeFile('src/source/cls.d.ts', id2cls, 'utf-8');
-            await fs.writeFile(
+            await writeFile('src/source/cls.d.ts', id2cls, 'utf-8');
+            await writeFile(
                 'src/source/maps.d.ts',
                 `${id2num}\n${num2id}`,
                 'utf-8'
@@ -449,7 +571,7 @@ async function doDeclaration(type: string, data: string) {
             }
             names += '}';
 
-            await fs.writeFile(
+            await writeFile(
                 'src/source/data.d.ts',
                 `
 ${floorId}
@@ -468,75 +590,6 @@ ${names}
     }
 }
 
-async function startHttpServer(port: number = 3000) {
-    if (h) return h;
-    const server = http();
-    const data = await fs.readFile('public/project/data.js', 'utf-8');
-    const json = data.split('\n').slice(1).join('\n');
-    const parsed = JSON.parse(json);
-    const name = parsed.firstData.name;
-
-    server.listen(port, '127.0.0.1');
-
-    server.on('listening', () => {
-        console.log(`编辑器地址：http://127.0.0.1:${port}/editor.html`);
-        console.log(`文档地址：http://127.0.0.1:${port}/_docs/index.html`);
-        setupHttp(server, name);
-    });
-
-    return server;
-}
-
-function setupHttp(server: Server, name: string) {
-    server.on('request', async (req, res) => {
-        const p = req.url
-            ?.replace(`/games/${name}`, '')
-            .replace('/all/', '/') // 样板中特殊处理的all文件
-            .replace('/forceTem/', '/') // 强制用样板的http服务获取文件
-            .replace('/src/', '../src/'); // src在上一级目录
-        if (isNil(p)) return;
-
-        if (req.method === 'GET') {
-            const dir = resolvePath(
-                p === '/' ? 'index.html' : p.slice(1)
-            ).split('?v=')[0];
-
-            if (/.*\.esm\..*/.test(p)) {
-                // xxx.esm.xxx，说明是需要打包的es模块化文件，需要rollup打包后传输
-                return getEsmFile(req, res, p);
-            }
-
-            if (p.startsWith('/__all_floors__.js')) {
-                const all = p.split('&id=')[1].split(',');
-                res.writeHead(200, { 'Content-type': 'text/javascript' });
-                return getAll(req, res, all, '.js', 'project/floors/', '\n');
-            }
-
-            if (p.startsWith('/__all_animates__')) {
-                const all = p.split('&id=')[1].split(',');
-                const split = '@@@~~~###~~~@@@';
-                const dir = 'project/animates/';
-                return getAll(req, res, all, '.animate', dir, split);
-            }
-
-            if (await getFile(req, res, dir)) return;
-        }
-
-        if (req.method === 'POST') {
-            if (p === '/listFile') return readDir(req, res);
-            if (p === '/makeDir') return mkdir(req, res);
-            if (p === '/readFile') return readFile(req, res);
-            if (p === '/writeFile') return writeFile(req, res);
-            if (p === '/deleteFile') return rm(req, res);
-            if (p === '/moveFile') return moveFile(req, res);
-            if (p === '/writeMultiFiles') return writeMultiFiles(req, res);
-        }
-
-        res.statusCode = 404;
-        res.end();
-    });
-}
-
 function watchProject() {
     if (wt) return;
     const watcher = chokidar.watch('public/', {
@@ -548,25 +601,26 @@ function watchProject() {
             '**/_docs/**',
             '**/_save/**',
             /\.min\./,
-            /(^|[\/\\])\../,
-            /(^|[\/\\])[^a-zA-Z:\._0-9\/\\]/,
+            /(^|[/\\])\../,
+            /(^|[/\\])[^a-zA-Z:._0-9/\\]/,
             /_.*/
         ]
     });
     wt = watcher;
     watcher.removeAllListeners();
     watcher.on('change', async path => {
+        if (!ws) return;
         // 楼层热重载
         if (/project(\/|\\)floors(\/|\\).*\.js$/.test(path)) {
             const floor = basename(path).slice(0, -3);
-            ws && ws.send(JSON.stringify({ type: 'floorHotReload', floor }));
+            ws.send(JSON.stringify({ type: 'floorHotReload', floor }));
             console.log(`Floor hot reload: ${floor}.`);
             return;
         }
 
         // 脚本编辑热重载
         if (/project(\/|\\)functions\.js$/.test(path)) {
-            ws && ws.send(JSON.stringify({ type: 'functionsHotReload' }));
+            ws.send(JSON.stringify({ type: 'functionsHotReload' }));
             console.log(`Functions hot reload.`);
             return;
         }
@@ -574,20 +628,20 @@ function watchProject() {
         // 数据热重载
         if (/project(\/|\\).*\.js/.test(path)) {
             const data = basename(path).slice(0, -3);
-            ws && ws.send(JSON.stringify({ type: 'dataHotReload', data }));
+            ws.send(JSON.stringify({ type: 'dataHotReload', data }));
             console.log(`Data hot reload: ${data}.`);
             return;
         }
 
         // css热重载
         if (/.*\.css$/.test(path)) {
-            ws && ws.send(JSON.stringify({ type: 'cssHotReload', path }));
+            ws.send(JSON.stringify({ type: 'cssHotReload', path }));
             console.log(`Css hot reload: ${path}.`);
             return;
         }
 
         // 剩余内容全部reload
-        ws && ws.send(JSON.stringify({ type: 'reload' }));
+        ws.send(JSON.stringify({ type: 'reload' }));
     });
 }
 
@@ -599,23 +653,24 @@ function setupSocket(socket: WebSocket) {
 
 async function startWsServer(http: Server) {
     if (ws) return;
-    return new Promise<WebSocketServer>(res => {
-        const server = new WebSocketServer({
-            server: http
-        });
 
-        server.on('connection', socket => {
-            setupSocket(socket);
-            res(server);
-        });
+    const server = new WebSocketServer({
+        server: http
+    });
+
+    server.on('connection', socket => {
+        setupSocket(socket);
     });
 }
 
 async function ensureConfig() {
-    try {
-        await fs.readFile(resolvePath('_server/config.json'));
-    } catch {
-        await fs.writeFile(resolvePath('_server/config.json'), '{}', 'utf-8');
+    const { resolved, safe } = resolvePath('_server/config.json');
+    if (!safe) {
+        throw new Error('Internal Error: Fail to access editor config file.');
+    }
+    const exist = await pathExists(resolved);
+    if (!exist) {
+        return writeFile(resolved, '{}', { encoding: 'utf-8' });
     }
 }
 
@@ -627,11 +682,34 @@ async function ensureConfig() {
 
     // 2. 启动样板http服务
     await ensureConfig();
-    const server = await startHttpServer(serverPort);
-    h = server;
+
+    const app = express();
+    app.use(express.text());
+    app.use(express.urlencoded({ extended: true }));
+    app.use(express.static(base));
+
+    app.post('/listFile', apiListFile);
+    app.post('/makeDir', apiMakeDir);
+    app.post('/readFile', apiReadFile);
+    app.post('/writeFile', apiWriteFile);
+    app.post('/deleteFile', apiDeleteFile);
+    app.post('/moveFile', apiMoveFile);
+    app.post('/writeMultiFiles', apiWriteMultiFiles);
+    app.get('/all/__all_floors__.js', apiGetAllFloors);
+    app.get('/all/__all_animates__', apiGetAllAnimates);
+    app.get('/esm', apiGetEsmFiles);
+
+    const server = app.listen(serverPort);
+
+    server.on('listening', () => {
+        console.log(`编辑器地址：http://127.0.0.1:${serverPort}/editor.html`);
+        console.log(
+            `文档地址：http://127.0.0.1:${serverPort}/_docs/index.html`
+        );
+    });
 
     // 3. 启动样板ws热重载服务
-    await startWsServer(server);
+    startWsServer(server);
 
     process.on('SIGTERM', () => {
         vite.close();

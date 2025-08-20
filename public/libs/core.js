@@ -360,7 +360,7 @@ core.prototype._loadGameProcess = async function () {
             if (main.pluginUseCompress) {
                 await main.loadScript(`project/processG.min.js`);
             } else {
-                await main.loadScript(`src/editor.esm.ts`, true);
+                await main.loadScript(`esm?name=src/editor.ts`, true);
             }
         }
     }
@@ -545,10 +545,10 @@ core.prototype._init_platform = function () {
     core.platform.string = core.platform.isPC
         ? 'PC'
         : core.platform.isAndroid
-        ? 'Android'
-        : core.platform.isIOS
-        ? 'iOS'
-        : '';
+          ? 'Android'
+          : core.platform.isIOS
+            ? 'iOS'
+            : '';
     core.platform.supportCopy =
         document.queryCommandSupported &&
         document.queryCommandSupported('copy');

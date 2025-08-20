@@ -70,13 +70,7 @@ export default defineConfig({
             '/makeDir': FSHOST,
             '/moveFile': FSHOST,
             '/deleteFile': FSHOST,
-            '^/all/.*': {
-                target: FSHOST,
-                changeOrigin: true,
-                rewrite(path) {
-                    return path.replace(/^\/all/, '');
-                },
-            },
+            '^/all/.*': FSHOST,
             '^/forceTem/.*': {
                 target: FSHOST,
                 changeOrigin: true,
