@@ -23,9 +23,9 @@ type ElementLocator = [
 
 这些属性两两组成一组（`x, y` 一组，`w, h` 一组，`ax, ay` 一组），每组可选填，也就是说 `x` 和 `y` 要么都填，要么都不填，以此类推。
 
--   `x` `y`: 元素的位置，描述了在没有旋转时元素的锚点位置，例如 `[32, 32]` 就表示这个元素锚点在 `32, 32` 的位置，默认锚点在元素左上角，也就表示元素左上角在 `32, 32`。
--   `w` `h`: 元素的长宽，描述了在没有缩放时元素的矩形长宽，默认是没有放缩的。
--   `ax` `ay`: 元素的锚点位置，描述了元素参考点的位置，所有位置变换等将以此点作为参考点。0 表示元素最左侧或最上侧，1 表示最右侧或最下侧，可以填不在 0-1 范围内的值，例如 `[-1, 1]` 表示锚点横坐标在元素左侧一个元素宽度的位置，纵坐标在元素下边缘的位置。
+- `x` `y`: 元素的位置，描述了在没有旋转时元素的锚点位置，例如 `[32, 32]` 就表示这个元素锚点在 `32, 32` 的位置，默认锚点在元素左上角，也就表示元素左上角在 `32, 32`。
+- `w` `h`: 元素的长宽，描述了在没有缩放时元素的矩形长宽，默认是没有放缩的。
+- `ax` `ay`: 元素的锚点位置，描述了元素参考点的位置，所有位置变换等将以此点作为参考点。0 表示元素最左侧或最上侧，1 表示最右侧或最下侧，可以填不在 0-1 范围内的值，例如 `[-1, 1]` 表示锚点横坐标在元素左侧一个元素宽度的位置，纵坐标在元素下边缘的位置。
 
 ![锚点图示](./img/image.png)
 
@@ -168,10 +168,10 @@ const hidden = ref(false);
 
 在 2D 图形学中，变换矩阵（3x3）可以统一表示以下基本变换操作：
 
--   平移（Translation）
--   旋转（Rotation）
--   缩放（Scale）
--   错切（Skew）
+- 平移（Translation）
+- 旋转（Rotation）
+- 缩放（Scale）
+- 错切（Skew）
 
 通过矩阵乘法可以将多个变换组合为单个矩阵运算，其通用数学表示为（列主序）：
 
@@ -179,9 +179,9 @@ $Transform=\begin{bmatrix} a & b & 0 \\ c & d & 0 \\ e & f & 1 \end{bmatrix}$
 
 其中：
 
--   `a,d` 控制缩放和旋转
--   `b,c` 控制错切
--   `e,f` 控制平移
+- `a,d` 控制缩放和旋转
+- `b,c` 控制错切
+- `e,f` 控制平移
 
 #### 变换组合原理
 
@@ -330,12 +330,10 @@ const finalTrans = trans.multiply(childTrans);
 #### 常见问题排查
 
 1. 变换不生效？
-
     - 验证绑定的对象是否实现 `updateTransform`
     - 检查有没有把 `trans` 对象赋值给元素的 `transform` 属性
 
 2. 性能问题
-
     - 避免高频调用 `setTransform`
     - 优先使用叠加方法代替矩阵直接操作
     - 利用 `clone()` 复用已有变换
@@ -348,10 +346,10 @@ const finalTrans = trans.multiply(childTrans);
 type RenderFn = (canvas: MotaOffscreenCanvas2D, transform: Transform) => void;
 ```
 
--   `canvas`: 要渲染至的画布，一般直接将内容渲染至这个画布上
--   `transform`: 当前元素的变换矩阵，相对于父元素，不常用
+- `canvas`: 要渲染至的画布，一般直接将内容渲染至这个画布上
+- `transform`: 当前元素的变换矩阵，相对于父元素，不常用
 
-多数情况下，我们只会使用到第一个参数，`MotaOffscreenCanvas2D` 接口请参考 [API 文档](../api/motajs-render-core)。下面是一个典型案例：
+多数情况下，我们只会使用到第一个参数，`MotaOffscreenCanvas2D` 接口请参考 [API 文档](../api/motajs-render-core/index.md)。下面是一个典型案例：
 
 ```tsx
 const render = (canvas: MotaOffscreenCanvas2D) => {
@@ -379,9 +377,9 @@ type CustomContainerRenderFn = (
 ) => void;
 ```
 
--   `canvas`: 要渲染至的画布，一般直接将内容渲染至这个画布上
--   `children`: 要渲染的子元素，按 `zIndex` 升序排列
--   `transform`: 当前元素的变换矩阵，相对于父元素，不常用
+- `canvas`: 要渲染至的画布，一般直接将内容渲染至这个画布上
+- `children`: 要渲染的子元素，按 `zIndex` 升序排列
+- `transform`: 当前元素的变换矩阵，相对于父元素，不常用
 
 典型案例如下：
 

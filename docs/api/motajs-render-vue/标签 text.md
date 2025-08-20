@@ -44,9 +44,9 @@ import { Font } from '@motajs/render-style';
 
 **效果**：
 
--   在 (100,50) 位置显示蓝色 "Hello World"
--   使用 24px 粗体 Arial 字体
--   无描边效果
+- 在 (100,50) 位置显示蓝色 "Hello World"
+- 使用 24px 粗体 Arial 字体
+- 无描边效果
 
 ---
 
@@ -67,9 +67,9 @@ import { Font } from '@motajs/render-style';
 
 **效果**：
 
--   金色文字带黑色半透明描边
--   32px 加粗斜体 Verdana
--   2px 描边宽度
+- 金色文字带黑色半透明描边
+- 32px 加粗斜体 Verdana
+- 2px 描边宽度
 
 ---
 
@@ -156,5 +156,5 @@ import { Font } from '@motajs/render-style';
 
 ## 注意事项
 
-1. 如果需要显示多行文本，考虑使用 [TextContent](../user-client-modules/TextContent.md)
+1. 如果需要显示多行文本，考虑使用 [TextContent](../user-client-modules/组件 TextContent.md)
 2. 考虑到浏览器兼容性，不建议在颜色中填写一些新标准的语法，例如 `rgb(0.3, 0.6, 0.8 / 0.6)` `#rgba` 等

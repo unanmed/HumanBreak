@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitepress';
 import { MermaidMarkdown, MermaidPlugin } from 'vitepress-plugin-mermaid';
 import api from './apiSidebar';
+import { join } from 'path';
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -13,6 +14,7 @@ export default defineConfig({
             md.use(MermaidMarkdown);
         }
     },
+    outDir: join(process.cwd(), 'public', '_docs'),
     themeConfig: {
         // https://vitepress.dev/reference/default-theme-config
         outline: [2, 3],

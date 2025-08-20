@@ -52,3 +52,4 @@ graph.svg
 docs/.vitepress/cache
 docs/.vitepress/dist
 docs/.vitepress/apiSidebar.ts
+_docs

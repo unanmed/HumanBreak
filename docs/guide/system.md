@@ -10,32 +10,31 @@ lang: zh-CN
 
 2.B 样板现在已经迁移至了 monorepo，将代码模块化，共分为 20 余个模块，每个模块的具体内容可以参考 API 文档，模块列表如下：
 
--   [@motajs/client](../api/motajs-client) 渲染层代码
--   [@motajs/client-base](../api/motajs-client-base) 渲染层底层代码
--   [@motajs/common](../api/motajs-common) 渲染层和数据层通用代码
--   [@motajs/legacy-client](../api/motajs-legacy-client) 遗留渲染层代码
--   [@motajs/legacy-common](../api/motajs-legacy-common) 遗留通用代码
--   [@motajs/legacy-data](../api/motajs-legacy-data) 遗留数据层代码
--   [@motajs/legacy-system](../api/motajs-legacy-system) 遗留渲染层系统代码
--   [@motajs/legacy-ui](../api/motajs-legacy-ui) 遗留 UI 相关代码
--   [@motajs/render](../api/motajs-render) 渲染系统代码
--   [@motajs/render-core](../api/motajs-render-core) 渲染系统核心代码
--   [@motajs/render-elements](../api/motajs-render-elements) 渲染系统内置元素代码
--   [@motajs/render-style](../api/motajs-render-style) 渲染系统样式代码
--   [@motajs/render-vue](../api/motajs-render-vue) 渲染系统 vue 支持代码
--   [@motajs/system](../api/motajs-system) 渲染层系统代码
--   [@motajs/system-action](../api/motajs-system-action) 渲染层交互系统代码
--   [@motajs/system-ui](../api/motajs-system-ui) 渲染层 UI 系统代码
--   [@motajs/types](../api/motajs-types) 渲染层类型代码
--   [@user/client-modules](../api/user-client-modules) 用户渲染层主要代码
--   [@user/data-base](../api/user-data-base) 用户数据层底层代码
--   [@user/data-fallback](../api/user-data-fallback) 用户数据层向后兼容代码
--   [@user/data-state](../api/user-data-state) 用户数据层状态代码
--   [@user/data-utils](../api/user-data-utils) 用户数据层工具代码
--   [@user/entry-client](../api/user-entry-client) 用户渲染层入口
--   [@user/entry-data](../api/user-entry-data) 用户数据层入口
--   [@user/legacy-plugin-client](../api/user-legacy-plugin-client) 用户遗留渲染层代码
--   [@user/legacy-plugin-data](../api/user-legacy-plugin-data) 用户遗留数据层代码
+- [@motajs/client](../api/motajs-client/index.md) 渲染层代码
+- [@motajs/client-base](../api/motajs-client-base/index.md) 渲染层底层代码
+- [@motajs/common](../api/motajs-common/index.md) 渲染层和数据层通用代码
+- [@motajs/legacy-client](../api/motajs-legacy-client/index.md) 遗留渲染层代码
+- [@motajs/legacy-common](../api/motajs-legacy-common/index.md) 遗留通用代码
+- [@motajs/legacy-system](../api/motajs-legacy-system/index.md) 遗留渲染层系统代码
+- [@motajs/legacy-ui](../api/motajs-legacy-ui/index.md) 遗留 UI 相关代码
+- [@motajs/render](../api/motajs-render/index.md) 渲染系统代码
+- [@motajs/render-core](../api/motajs-render-core/index.md) 渲染系统核心代码
+- [@motajs/render-elements](../api/motajs-render-elements/index.md) 渲染系统内置元素代码
+- [@motajs/render-style](../api/motajs-render-style/index.md) 渲染系统样式代码
+- [@motajs/render-vue](../api/motajs-render-vue/index.md) 渲染系统 vue 支持代码
+- [@motajs/system](../api/motajs-system/index.md) 渲染层系统代码
+- [@motajs/system-action](../api/motajs-system-action/index.md) 渲染层交互系统代码
+- [@motajs/system-ui](../api/motajs-system-ui/index.md) 渲染层 UI 系统代码
+- [@motajs/types](../api/motajs-types/index.md) 渲染层类型代码
+- [@user/client-modules](../api/user-client-modules/index.md) 用户渲染层主要代码
+- [@user/data-base](../api/user-data-base/index.md) 用户数据层底层代码
+- [@user/data-fallback](../api/user-data-fallback/index.md) 用户数据层向后兼容代码
+- [@user/data-state](../api/user-data-state/index.md) 用户数据层状态代码
+- [@user/data-utils](../api/user-data-utils/index.md) 用户数据层工具代码
+- [@user/entry-client](../api/user-entry-client/index.md) 用户渲染层入口
+- [@user/entry-data](../api/user-entry-data/index.md) 用户数据层入口
+- [@user/legacy-plugin-client](../api/user-legacy-plugin-client/index.md) 用户遗留渲染层代码
+- [@user/legacy-plugin-data](../api/user-legacy-plugin-data/index.md) 用户遗留数据层代码
 
 ## Mota 全局变量
 
@@ -50,8 +49,8 @@ const { Font } = Mota.require('@motajs/render'); // 获取 Font 字体类
 
 多数情况下，我们是不需要使用 `Mota` 全局变量的。不过，还是有一些特殊情况需要使用该全局变量才可以，这些情况包括：
 
--   在数据端调用渲染端接口，数据端需要跑录像验证，因此不能直接引入渲染端接口，需要通过此全局变量才可以。
--   在 `libs` `functions.js` 中调用接口，这两个地方暂时还没有模块化，因此无法直接引入，需要通过此全局变量调用。
+- 在数据端调用渲染端接口，数据端需要跑录像验证，因此不能直接引入渲染端接口，需要通过此全局变量才可以。
+- 在 `libs` `functions.js` 中调用接口，这两个地方暂时还没有模块化，因此无法直接引入，需要通过此全局变量调用。
 
 ## 渲染端与数据端通信
 
@@ -94,7 +93,6 @@ hook.on('afterBattle', enemy => {
 2. 加载 2.x 样板的第三方库
 
 3. 如果是游戏中，加载 `src/main.ts`
-
     1. 加载渲染端入口
     2. 加载数据端入口
     3. 并行初始化数据端与渲染端，在数据端写入 `Mota` 全局变量
@@ -104,7 +102,6 @@ hook.on('afterBattle', enemy => {
     7. 执行渲染端各个模块的初始化函数
 
 4. 如果是录像验证中：
-
     1. 加载数据端入口
     2. 初始化数据端，写入 `Mota` 全局变量
     3. 初始化完毕后执行 `loading.emit('dataRegistered')` 与 `loading.emit('registered')` 钩子
