@@ -6,7 +6,6 @@ import {
     createServer as http
 } from 'http';
 import { isNil } from 'lodash-es';
-import config from '../mota.config.js';
 import fs from 'fs-extra';
 import { resolve, basename } from 'path';
 import * as rollup from 'rollup';
@@ -18,6 +17,10 @@ import chokidar from 'chokidar';
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import replace from '@rollup/plugin-replace';
+
+const [, , vitePortStr = '5173', serverPortStr = '3000'] = process.argv;
+const vitePort = parseInt(vitePortStr);
+const serverPort = parseInt(serverPortStr);
 
 const base = './public';
 
@@ -86,7 +89,7 @@ async function getFile(req: Request, res: Response, path: string) {
             res.writeHead(200, { 'Content-type': 'text/css' });
         if (path.endsWith('.html'))
             res.writeHead(200, { 'Content-type': 'text/html' });
-        return res.end(data), true;
+        return (res.end(data), true);
     } catch (e) {
         console.log(e);
         return false;
@@ -123,7 +126,7 @@ async function getAll(
     });
     await Promise.all(tasks);
     const result = ids.map(v => data[v]);
-    return res.end(result.join(join)), true;
+    return (res.end(result.join(join)), true);
 }
 
 async function getEsmFile(
@@ -468,26 +471,25 @@ ${names}
 async function startHttpServer(port: number = 3000) {
     if (h) return h;
     const server = http();
+    const data = await fs.readFile('public/project/data.js', 'utf-8');
+    const json = data.split('\n').slice(1).join('\n');
+    const parsed = JSON.parse(json);
+    const name = parsed.firstData.name;
 
-    const tryNext = () => {
-        server.listen(port++, '127.0.0.1');
-    };
-    server.on('error', () => {
-        tryNext();
-    });
+    server.listen(port, '127.0.0.1');
+
     server.on('listening', () => {
-        console.log(`编辑器地址：http://127.0.0.1:${port - 1}/editor.html`);
-        setupHttp(server);
+        console.log(`编辑器地址：http://127.0.0.1:${port}/editor.html`);
+        setupHttp(server, name);
     });
-    tryNext();
 
     return server;
 }
 
-function setupHttp(server: Server) {
+function setupHttp(server: Server, name: string) {
     server.on('request', async (req, res) => {
         const p = req.url
-            ?.replace(`/games/${config.name}`, '')
+            ?.replace(`/games/${name}`, '')
             .replace('/all/', '/') // 样板中特殊处理的all文件
             .replace('/forceTem/', '/') // 强制用样板的http服务获取文件
             .replace('/src/', '../src/'); // src在上一级目录
@@ -619,14 +621,20 @@ async function ensureConfig() {
 (async function () {
     // 1. 启动vite服务
     const vite = await createServer();
-    await vite.listen(5173);
-    console.log(`游戏地址：http://localhost:5173/`);
+    await vite.listen(vitePort);
+    console.log(`游戏地址：http://localhost:${vitePort}/`);
 
     // 2. 启动样板http服务
     await ensureConfig();
-    const server = await startHttpServer(3000);
+    const server = await startHttpServer(serverPort);
     h = server;
 
     // 3. 启动样板ws热重载服务
     await startWsServer(server);
+
+    process.on('SIGTERM', () => {
+        vite.close();
+        server.close();
+        process.exit(0);
+    });
 })();
