@@ -480,6 +480,7 @@ async function startHttpServer(port: number = 3000) {
 
     server.on('listening', () => {
         console.log(`编辑器地址：http://127.0.0.1:${port}/editor.html`);
+        console.log(`文档地址：http://127.0.0.1:${port}/_docs/index.html`);
         setupHttp(server, name);
     });
 
