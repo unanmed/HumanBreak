@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { createServer } from 'vite';
 import { Server } from 'http';
 import { ensureDir, move, pathExists, remove } from 'fs-extra';

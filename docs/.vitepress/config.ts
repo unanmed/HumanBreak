@@ -29,9 +29,12 @@ export default defineConfig({
                 {
                     text: '深度指南',
                     items: [
+                        { text: '快速开始', link: '/guide/quick-start' },
+
                         { text: '差异说明', link: '/guide/diff' },
                         { text: '系统说明', link: '/guide/system' },
                         { text: '代码编写', link: '/guide/coding' },
+                        { text: '音频系统', link: '/guide/audio' },
                         {
                             text: 'UI 系统',
                             collapsed: false,
@@ -40,10 +43,40 @@ export default defineConfig({
                                 { text: 'UI 优化', link: '/guide/ui-perf' },
                                 { text: 'UI 系统', link: '/guide/ui-system' },
                                 { text: 'UI 元素', link: '/guide/ui-elements' },
-                                { text: 'UI 常见问题', link: '/guide/ui-faq' }
+                                { text: 'UI 常见问题', link: '/guide/ui-faq' },
+                                { text: '未来规划', link: '/guide/ui-future' }
                             ]
                         },
-                        { text: '音频系统', link: '/guide/audio' }
+                        {
+                            text: '常见需求指南',
+                            collapsed: false,
+                            items: [
+                                {
+                                    text: '快速浏览',
+                                    link: '/guide/implements/index'
+                                },
+                                {
+                                    text: '怪物特殊属性',
+                                    link: '/guide/implements/special'
+                                },
+                                {
+                                    text: '修改状态栏',
+                                    link: '/guide/implements/status-bar'
+                                },
+                                {
+                                    text: '新增 UI',
+                                    link: '/guide/implements/new-ui'
+                                },
+                                {
+                                    text: '主动技能',
+                                    link: '/guide/implements/skill'
+                                },
+                                {
+                                    text: '自定义按键',
+                                    link: '/guide/implements/hotkey'
+                                }
+                            ]
+                        }
                     ]
                 }
             ],
@@ -110,6 +143,7 @@ export default defineConfig({
         }
     },
     vite: {
+        // @ts-expect-error 类型错误
         plugins: [MermaidPlugin()],
         optimizeDeps: {
             include: ['mermaid']

@@ -12,9 +12,9 @@ lang: zh-CN
 
 画布渲染树的深度遍历特性使得：
 
--   每个独立容器的更新会触发子树的重新渲染
--   容器层级过深会增加递归调用栈开销
--   合理分组可将高频/低频更新元素隔离
+- 每个独立容器的更新会触发子树的重新渲染
+- 容器层级过深会增加递归调用栈开销
+- 合理分组可将高频/低频更新元素隔离
 
 下面是代码示例：
 
@@ -100,7 +100,7 @@ const render = () => {
 
 ## 使用 `cache` 和 `nocache` 标识
 
-`cache` 和 `nocache` 表示可以让你更加精确地控制渲染树的缓存行为，从而更好地优化渲染性能。默认情况下，这些元素是会被缓存的：`container` `container-custom` `template` `sprite` `image` `icon` `layer` `layer-group` `animation`，对于这些元素，你可以使用 `nocache` 标识来禁用它们的缓存，对于其本身或其子元素的渲染较为简单的场景，禁用缓存后渲染效率可能会更高。其他元素默认是禁用缓存的，如果你的渲染内容比较复杂，例如 `g-path` 元素的路径很复杂，可以使用 `cache` 表示来启用缓存，从而提高渲染效率。示例代码如下：
+`cache` 和 `nocache` 表示可以让你更加精确地控制渲染树的缓存行为，从而更好地优化渲染性能。默认情况下，这些元素是会被缓存的：`container` `container-custom` `template` `sprite` `icon` `layer` `layer-group` `animation`，对于这些元素，你可以使用 `nocache` 标识来禁用它们的缓存，对于其本身或其子元素的渲染较为简单的场景，禁用缓存后渲染效率可能会更高。其他元素默认是禁用缓存的，如果你的渲染内容比较复杂，例如 `g-path` 元素的路径很复杂，可以使用 `cache` 表示来启用缓存，从而提高渲染效率。示例代码如下：
 
 ```tsx
 const render = (canvas: MotaOffscreenCanvas2D) => {

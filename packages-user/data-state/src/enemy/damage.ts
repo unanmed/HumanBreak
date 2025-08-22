@@ -18,8 +18,6 @@ import {
 } from '@motajs/types';
 import { isNil } from 'lodash-es';
 
-// todo: 光环划分优先级，从而可以实现光环的多级运算
-
 export interface UserEnemyInfo extends EnemyInfo {
     togetherNum?: number;
 }
@@ -253,7 +251,7 @@ export class DamageEnemy implements IDamageEnemy {
 
         for (const [key, value] of Object.entries(enemy)) {
             if (!(key in this.info) && has(value)) {
-                // @ts-ignore
+                // @ts-expect-error 无法推导
                 this.info[key] = value;
             }
         }
@@ -580,7 +578,6 @@ export class DamageEnemy implements IDamageEnemy {
      * 计算怪物伤害
      */
     calDamage(hero: Partial<HeroStatus> = core.status.hero) {
-        // todo: 缓存怪物伤害
         const enemy = this.getRealInfo();
         return this.calEnemyDamageOf(hero, enemy);
     }
@@ -756,7 +753,6 @@ export class DamageEnemy implements IDamageEnemy {
         num: number = 1,
         hero: Partial<HeroStatus> = core.status.hero
     ): CriticalDamageDelta[] {
-        // todo: 缓存临界
         const origin = this.calDamage(hero);
         const seckill = this.getSeckillAtk();
         return this.calCriticalWith(num, seckill, origin, hero);
@@ -775,7 +771,6 @@ export class DamageEnemy implements IDamageEnemy {
         origin: DamageInfo,
         hero: Partial<HeroStatus>
     ): CriticalDamageDelta[] {
-        // todo: 可以优化，根据之前的计算可以直接确定下一个临界的范围
         if (!isFinite(seckill)) return [];
 
         const res: CriticalDamageDelta[] = [];
@@ -830,6 +825,7 @@ export class DamageEnemy implements IDamageEnemy {
                 start = curr;
             }
             if (i++ >= 10000) {
+                // eslint-disable-next-line no-console
                 console.warn(
                     `Unexpected endless loop in calculating critical.` +
                         `Enemy Id: ${this.id}. Loc: ${this.x},${this.y}. Floor: ${this.floorId}`
@@ -945,10 +941,12 @@ const skills: HeroSkill.Skill[] = [HeroSkill.Blade, HeroSkill.Shield];
 export function calDamageWith(
     info: UserEnemyInfo,
     hero: Partial<HeroStatus>
-): number | null {
-    const { hp, mdef } = core.status.hero;
-    let { atk, def, hpmax, mana, magicDef } = hero as HeroStatus;
-    let { hp: monHp, atk: monAtk, def: monDef, special, enemy } = info;
+): number {
+    const { mdef } = core.status.hero;
+    const { def, mana, magicDef } = hero as HeroStatus;
+    const { hp: monHp, def: monDef, special, enemy } = info;
+    let { atk, hpmax } = hero as HeroStatus;
+    let { atk: monAtk } = info;
 
     // 赏金，优先级最高
     if (special.has(34)) return 0;
@@ -969,15 +967,15 @@ export function calDamageWith(
     // 绝对防御
     if (special.has(9)) {
         heroPerDamage = atk + mana - monDef;
-        if (heroPerDamage <= 0) return null;
+        if (heroPerDamage <= 0) return Infinity;
     } else if (special.has(3)) {
         // 由于坚固的特性，只能放到这来计算了
         if (atk > enemy.def) heroPerDamage = 1 + mana;
-        else return null;
+        else return Infinity;
     } else {
         heroPerDamage = atk - monDef;
         if (heroPerDamage > 0) heroPerDamage += mana;
-        else return null;
+        else return Infinity;
     }
 
     // 霜冻

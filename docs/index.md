@@ -9,7 +9,7 @@ hero:
     actions:
         - theme: brand
           text: 深度指南
-          link: /guide/diff
+          link: /guide/quick-start
         - theme: alt
           text: API列表
           link: /api/index

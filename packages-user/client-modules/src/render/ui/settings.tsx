@@ -23,6 +23,7 @@ import { getInput } from '../components';
 import { openStatistics } from './statistics';
 import { saveWithExist } from './save';
 import { compressToBase64 } from 'lz-string';
+import { ViewMapUI } from './viewmap';
 
 export interface MainSettingsProps
     extends Partial<ChoicesProps>,
@@ -78,7 +79,7 @@ export const MainSettings = defineComponent<MainSettingsProps>(props => {
                 break;
             }
             case MainChoice.ViewMap: {
-                // todo
+                props.controller.open(ViewMapUI, { loc: [0, 0, 840, 840] });
                 break;
             }
             case MainChoice.Replay: {

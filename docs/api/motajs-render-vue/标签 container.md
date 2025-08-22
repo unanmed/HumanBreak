@@ -127,7 +127,7 @@ return () => (
 
 ### 大数据量处理方案
 
-考虑使用[滚动条](../user-client-modules/组件 Scroll.md)或[分页](../user-client-modules/组件 Page.md)组件。
+考虑使用[滚动条](../user-client-modules/组件%20Scroll.md)或[分页](../user-client-modules/组件%20Page.md)组件。
 
 ---
 

@@ -156,5 +156,5 @@ import { Font } from '@motajs/render-style';
 
 ## 注意事项
 
-1. 如果需要显示多行文本，考虑使用 [TextContent](../user-client-modules/组件 TextContent.md)
+1. 如果需要显示多行文本，考虑使用 [TextContent](../user-client-modules/组件%20TextContent.md)
 2. 考虑到浏览器兼容性，不建议在颜色中填写一些新标准的语法，例如 `rgb(0.3, 0.6, 0.8 / 0.6)` `#rgba` 等

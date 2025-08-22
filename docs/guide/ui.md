@@ -16,10 +16,10 @@ lang: zh-CN
 
 ```tsx
 import { defineComponent } from 'vue';
-import { GameUI, UIComponentProps } from '@motajs/system-ui';
+import { GameUI, UIComponentProps, DefaultProps } from '@motajs/system-ui';
 import { SetupComponentOptions } from '../components';
 
-export interface MyBookProps extends UIComponentProps {}
+export interface MyBookProps extends UIComponentProps, DefaultProps {}
 
 const myBookProps = {
     props: ['controller', 'instance']

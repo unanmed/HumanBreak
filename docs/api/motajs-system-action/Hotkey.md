@@ -34,9 +34,9 @@ graph LR
 function constructor(id: string, name: string): Hotkey;
 ```
 
--   **参数**
-    -   `id`: 控制器的唯一标识符
-    -   `name`: 控制器的显示名称
+- **参数**
+    - `id`: 控制器的唯一标识符
+    - `name`: 控制器的显示名称
 
 **示例**
 
@@ -56,7 +56,7 @@ function register(data: RegisterHotkeyData): this;
 
 注册一个按键配置。
 
--   **参数**
+- **参数**
     ```typescript
     interface RegisterHotkeyData {
         id: string; // 按键唯一标识（可含数字后缀，如 "copy_1"）
@@ -89,10 +89,10 @@ function realize(id: string, func: HotkeyFunc, config?: HotkeyEmitConfig): this;
 
 为按键绑定触发逻辑。
 
--   **参数**
-    -   `id`: 目标按键 ID（无需后缀）
-    -   `func`: 触发时执行的函数
-    -   `config`: 触发类型配置（节流/超时等）
+- **参数**
+    - `id`: 目标按键 ID（无需后缀）
+    - `func`: 触发时执行的函数
+    - `config`: 触发类型配置（节流/超时等）
 
 **示例**
 
@@ -116,10 +116,10 @@ function group(id: string, name: string, keys?: RegisterHotkeyData[]): this;
 
 创建按键分组，后续注册的按键自动加入该组。
 
--   **参数**
-    -   `id`: 分组唯一标识
-    -   `name`: 分组显示名称
-    -   `keys`: 可选，预注册的按键列表
+- **参数**
+    - `id`: 分组唯一标识
+    - `name`: 分组显示名称
+    - `keys`: 可选，预注册的按键列表
 
 ---
 
@@ -131,11 +131,11 @@ function set(id: string, key: KeyCode, assist: number, emit?: boolean): void;
 
 动态修改按键绑定。
 
--   **参数**
-    -   `id`: 目标按键 ID
-    -   `key`: 新按键代码
-    -   `assist`: 辅助键状态（二进制位：Ctrl=1<<0, Shift=1<<1, Alt=1<<2）
-    -   `emit`: 是否触发 `set` 事件（默认 `true`）
+- **参数**
+    - `id`: 目标按键 ID
+    - `key`: 新按键代码
+    - `assist`: 辅助键状态（二进制位：Ctrl=1<<0, Shift=1<<1, Alt=1<<2）
+    - `emit`: 是否触发 `set` 事件（默认 `true`）
 
 ---
 
@@ -147,8 +147,8 @@ function when(fn: () => boolean): this;
 
 为当前作用域的按键绑定添加触发条件。
 
--   **参数**
-    -   `fn`: 条件函数，返回 `true` 时允许触发按键逻辑
+- **参数**
+    - `fn`: 条件函数，返回 `true` 时允许触发按键逻辑
 
 **示例**
 
@@ -190,8 +190,8 @@ function use(symbol: symbol): void;
 
 切换当前作用域，后续 `realize` 方法绑定的逻辑将关联到该作用域。
 
--   **参数**
-    -   `symbol`: 唯一作用域标识符
+- **参数**
+    - `symbol`: 唯一作用域标识符
 
 ---
 
@@ -203,8 +203,8 @@ function dispose(symbol?: symbol): void;
 
 释放指定作用域及其绑定的所有按键逻辑。
 
--   **参数**
-    -   `symbol`（可选）: 要释放的作用域（默认释放当前作用域）
+- **参数**
+    - `symbol`（可选）: 要释放的作用域（默认释放当前作用域）
 
 **示例**
 
@@ -230,13 +230,13 @@ function emitKey(
 
 手动触发按键事件（可用于模拟按键操作）。
 
--   **参数**
-    -   `key`: 按键代码
-    -   `assist`: 辅助键状态（二进制位：Ctrl=1<<0, Shift=1<<1, Alt=1<<2）
-    -   `type`: 事件类型（`'up'` 或 `'down'`）
-    -   `ev`: 原始键盘事件对象
--   **返回值**  
-    `true` 表示事件被成功处理，`false` 表示无匹配逻辑
+- **参数**
+    - `key`: 按键代码
+    - `assist`: 辅助键状态（二进制位：`Ctrl=1<<0`, `Shift=1<<1`, `Alt=1<<2`）
+    - `type`: 事件类型（`'up'` 或 `'down'`）
+    - `ev`: 原始键盘事件对象
+- **返回值**  
+  `true` 表示事件被成功处理，`false` 表示无匹配逻辑
 
 **示例**
 
@@ -276,7 +276,7 @@ function get(id: string): Hotkey | undefined;
 **事件监听示例**
 
 ```typescript
-editorHotkey.on('emit', (key, assist) => {
+gameKey.on('emit', (key, assist) => {
     console.log(`按键 ${KeyCode[key]} 触发，辅助键状态：${assist}`);
 });
 ```

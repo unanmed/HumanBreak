@@ -19,4 +19,5 @@ export function create() {
 
 function createModule() {
     LegacyPluginData.createLegacy();
+    DataState.create();
 }

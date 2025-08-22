@@ -42,6 +42,27 @@ export interface ILeftHeroStatus {
     magicDef: number;
 }
 
+export interface IRightHeroStatus {
+    /** 自动切换技能 */
+    autoSkill: boolean;
+    /** 当前开启的技能 */
+    skillName: string;
+    /** 技能描述 */
+    skillDesc: string;
+    /** 跳跃剩余次数，-1 表示未开启，-2表示当前楼层不能跳 */
+    jumpCount: number;
+    /** 治愈之泉剩余次数，-1 表示未开启 */
+    springCount: number;
+    /** 当前楼层 */
+    floor: FloorIds;
+    /** 是否正在录像播放 */
+    replaying: boolean;
+    /** 录像播放状态 */
+    replayStatus: ReplayingStatus;
+    /** 极昼永夜 */
+    night: number;
+}
+
 interface StatusBarProps<T> extends DefaultProps {
     loc: ElementLocator;
     status: T;
@@ -104,82 +125,80 @@ export const LeftStatusBar = defineComponent<StatusBarProps<ILeftHeroStatus>>(
             openViewMap(mainUIController, [0, 0, 840, 480]);
         };
 
-        return () => {
-            return (
-                <container loc={p.loc} hidden={p.hidden}>
+        return () => (
+            <container loc={p.loc} hidden={p.hidden}>
+                <text
+                    text={floorName.value}
+                    loc={central(24)}
+                    font={font1}
+                    cursor="pointer"
+                    onClick={viewMap}
+                ></text>
+                <text text={s.lv} loc={central(54)} font={font1}></text>
+                <image image={hpIcon} loc={iconLoc(0)}></image>
+                <text text={f(s.hp)} loc={textLoc(0)} font={font1}></text>
+                <text
+                    text={`+${f(s.regen)}/t`}
+                    loc={right(110)}
+                    font={font3}
+                    fillStyle="#a7ffa7"
+                ></text>
+                <image image={atkIcon} loc={iconLoc(1)}></image>
+                <text text={f(s.atk)} loc={textLoc(1)} font={font1}></text>
+                <text
+                    text={`+${f(s.exAtk)}`}
+                    loc={right(154)}
+                    font={font3}
+                    fillStyle="#ffd3d3"
+                ></text>
+                <image image={defIcon} loc={iconLoc(2)}></image>
+                <text text={f(s.def)} loc={textLoc(2)} font={font1}></text>
+                {s.magicDef > 0 && (
                     <text
-                        text={floorName.value}
-                        loc={central(24)}
-                        font={font1}
-                        cursor="pointer"
-                        onClick={viewMap}
-                    ></text>
-                    <text text={s.lv} loc={central(54)} font={font1}></text>
-                    <image image={hpIcon} loc={iconLoc(0)}></image>
-                    <text text={f(s.hp)} loc={textLoc(0)} font={font1}></text>
-                    <text
-                        text={`+${f(s.regen)}/t`}
-                        loc={right(110)}
+                        text={`+${f(s.magicDef)}`}
+                        loc={right(198)}
                         font={font3}
-                        fillStyle="#a7ffa7"
+                        fillStyle="#b0bdff"
                     ></text>
-                    <image image={atkIcon} loc={iconLoc(1)}></image>
-                    <text text={f(s.atk)} loc={textLoc(1)} font={font1}></text>
-                    <text
-                        text={`+${f(s.exAtk)}`}
-                        loc={right(154)}
-                        font={font3}
-                        fillStyle="#ffd3d3"
-                    ></text>
-                    <image image={defIcon} loc={iconLoc(2)}></image>
-                    <text text={f(s.def)} loc={textLoc(2)} font={font1}></text>
-                    {s.magicDef > 0 && (
-                        <text
-                            text={`+${f(s.magicDef)}`}
-                            loc={right(198)}
-                            font={font3}
-                            fillStyle="#b0bdff"
-                        ></text>
-                    )}
-                    <image image={mdefIcon} loc={iconLoc(3)}></image>
-                    <text text={f(s.mdef)} loc={textLoc(3)} font={font1}></text>
-                    <image image={moneyIcon} loc={iconLoc(4)}></image>
-                    <text text={f(s.money)} loc={textLoc(4)} font={font1} />
-                    <image image={expIcon} loc={iconLoc(5)}></image>
-                    <text text={f(s.exp)} loc={textLoc(5)} font={font1}></text>
-                    <text
-                        text={key(s.yellowKey)}
-                        loc={keyLoc(0)}
-                        font={font2}
-                        fillStyle="#fca"
-                    ></text>
-                    <text
-                        text={key(s.blueKey)}
-                        loc={keyLoc(1)}
-                        font={font2}
-                        fillStyle="#aad"
-                    ></text>
-                    <text
-                        text={key(s.redKey)}
-                        loc={keyLoc(2)}
-                        font={font2}
-                        fillStyle="#f88"
-                    ></text>
-                    <text
-                        text="技能树"
-                        loc={central(396)}
-                        font={font1}
-                        cursor="pointer"
-                    ></text>
-                    <text
-                        text="查看技能"
-                        loc={central(428)}
-                        font={font1}
-                        cursor="pointer"
-                    ></text>
-                </container>
-            );
-        };
+                )}
+                <image image={mdefIcon} loc={iconLoc(3)}></image>
+                <text text={f(s.mdef)} loc={textLoc(3)} font={font1}></text>
+                <image image={moneyIcon} loc={iconLoc(4)}></image>
+                <text text={f(s.money)} loc={textLoc(4)} font={font1} />
+                <image image={expIcon} loc={iconLoc(5)}></image>
+                <text text={f(s.exp)} loc={textLoc(5)} font={font1}></text>
+                <text
+                    text={key(s.yellowKey)}
+                    loc={keyLoc(0)}
+                    font={font2}
+                    fillStyle="#fca"
+                ></text>
+                <text
+                    text={key(s.blueKey)}
+                    loc={keyLoc(1)}
+                    font={font2}
+                    fillStyle="#aad"
+                ></text>
+                <text
+                    text={key(s.redKey)}
+                    loc={keyLoc(2)}
+                    font={font2}
+                    fillStyle="#f88"
+                ></text>
+                <text
+                    text="技能树"
+                    loc={central(396)}
+                    font={font1}
+                    cursor="pointer"
+                ></text>
+                <text
+                    text="查看技能"
+                    loc={central(428)}
+                    font={font1}
+                    cursor="pointer"
+                ></text>
+            </container>
+        );
     },
     statusBarProps
 );
@@ -189,27 +208,6 @@ interface RightStatusBarMisc {
     value: string;
     nameColor: string;
     valueColor: string;
-}
-
-export interface IRightHeroStatus {
-    /** 自动切换技能 */
-    autoSkill: boolean;
-    /** 当前开启的技能 */
-    skillName: string;
-    /** 技能描述 */
-    skillDesc: string;
-    /** 跳跃剩余次数，-1 表示未开启，-2表示当前楼层不能跳 */
-    jumpCount: number;
-    /** 治愈之泉剩余次数，-1 表示未开启 */
-    springCount: number;
-    /** 当前楼层 */
-    floor: FloorIds;
-    /** 是否正在录像播放 */
-    replaying: boolean;
-    /** 录像播放状态 */
-    replayStatus: ReplayingStatus;
-    /** 极昼永夜 */
-    night: number;
 }
 
 export const RightStatusBar = defineComponent<StatusBarProps<IRightHeroStatus>>(

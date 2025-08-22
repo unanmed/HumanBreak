@@ -31,7 +31,7 @@ watch(data, () => mySprite.value?.update());
 
 ## 我的 UI 很卡
 
-可能使用了平铺式布局，建议使用 `Scroll` 组件或者 `Page` 组件来对平铺内容分割，从而提高渲染效率。可以参考对应的 [API 文档](../api/user-client-modules/组件 Scroll)。
+可能使用了平铺式布局，建议使用 `Scroll` 组件或者 `Page` 组件来对平铺内容分割，从而提高渲染效率。可以参考对应的 [API 文档](../api/user-client-modules/组件%20Scroll.md)。
 
 ## 玩着玩着突然黑屏了一下，然后画面就不显示了
 
@@ -40,21 +40,13 @@ watch(data, () => mySprite.value?.update());
 关于这个问题的最佳实践：
 
 - 如果你手动存储了一些元素，确保在卸载时将它们删除
-- 在删除它们的同时，调用它们的 `destroy` 方法，来确保可以被垃圾回收
-- 在控制台输入 `Mota.require('@motajs/render').MotaOffscreenCanvas2D.list` 来查看当前还有哪些画布正在使用，游玩一段时间后再次输入，检查数量是否增长，如果增长，说明发生了内存泄漏
+- 在删除你手动存储的元素的同时，调用它们的 `destroy` 方法，来确保可以被垃圾回收
 - 确保组件卸载时已经清空了定时器等内容
 - 如果需要每帧执行函数，请使用 `onTick` 接口，而非其他方法
 
-如果你直接使用 `MotaOffscreenCanvas2D` 接口，请确保：
-
-- 在使用前调用了 `activate` 方法
-- 在使用后调用了 `deactivate` 方法
-- 如果不需要再修改画布属性，只需要绘制，请调用 `freeze` 方法
-- 如果之后不再使用该画布，请调用 `destroy` 方法
-
 ## 为什么我的滤镜不显示？
 
-很遗憾，截止目前（2.B 发布日期），IOS 依然没有支持 `CanvasRenderingContext2D` 上的 `filter` 方法，所有滤镜属性在 IOS 上将不会显示。不过，我们提供了 `Shader` 元素，它使用 `WebGL2` 接口，允许你制作自己的滤镜，如果滤镜是必要的，请考虑使用此元素，但是需要一定的图形学基础，可以在造塔群询问我或造塔辅助 AI。
+很遗憾，截止目前（2.B 发布日期），IOS 依然没有支持 `CanvasRenderingContext2D` 上的 `filter` 方法，所有滤镜属性在 IOS 上将不会显示。不过，我们提供了 `Shader` 元素，它使用 `WebGL2` 接口，允许你制作自己的滤镜，如果滤镜是必要的，请考虑使用此元素，但是需要一定的图形学基础。
 
 ## 不同设备的显示内容会不一样吗？
 
