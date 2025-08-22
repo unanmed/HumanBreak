@@ -750,3 +750,7 @@ const themeStyle = {
 <g-rect fill {...themeStyle} />
 <g-circle stroke {...themeStyle} />
 ```
+
+## API 参考
+
+参考[API 文档](../api/motajs-render-vue/index.md)，这里有更细致的 API 介绍。

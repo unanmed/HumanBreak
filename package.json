@@ -5,10 +5,7 @@
     "type": "module",
     "scripts": {
         "dev": "tsx script/dev.ts",
-        "build": "vue-tsc && vite build && tsx script/build.ts dist",
-        "build-local": "vue-tsc && vite build && tsx script/build.ts local",
         "preview": "vite preview",
-        "update": "tsx script/update.ts",
         "declare": "tsx script/declare.ts",
         "type": "vue-tsc --noEmit",
         "lines": "tsx script/lines.ts packages packages-user",

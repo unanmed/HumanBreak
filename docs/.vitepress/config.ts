@@ -72,8 +72,12 @@ export default defineConfig({
                                     link: '/guide/implements/skill'
                                 },
                                 {
-                                    text: '自定义按键',
+                                    text: '新增按键',
                                     link: '/guide/implements/hotkey'
+                                },
+                                {
+                                    text: '动画效果',
+                                    link: '/guide/implements/animate'
                                 }
                             ]
                         }

@@ -1,4 +1,4 @@
-# 自定义按键
+# 新增按键
 
 在 2.B 中新增按键很方便，且可以为你的 UI 单独配置按键信息，玩家也可以修改快捷键设置。
 
@@ -91,8 +91,8 @@ gameKey
 
 ```tsx {7-13}
 // 引入 useKey 接口
-// 文件在 packages-user/client-modules/src/render/utils/use.ts，注意路径关系
-import { useKey } from '../utils/use'; // [!code ++]
+// 文件在 packages-user/client-modules/src/render/use.ts，注意路径关系
+import { useKey } from '../use'; // [!code ++]
 
 // UI 模板及如何编写 UI 参考 “新增 UI” 需求指南，这里只给出必要的修改部分，模板部分不再给出
 export const MyCom = defineComponent(props => {
@@ -113,7 +113,7 @@ export const MyCom = defineComponent(props => {
 我们会有一些通用按键，例如确认、关闭，这些按键我们不希望每个 UI 或场景都定义一遍，一来写代码不方便，二来玩家如果要自定义的话需要每个界面都设置一遍，很麻烦。此时我们建议按键复用。与一般的按键一致，我们直接实现 `exit` `confirm` 等按键即可，不需额外操作：
 
 ```tsx {12-21}
-import { useKey } from '../utils/use';
+import { useKey } from '../use';
 
 // UI 模板及如何编写 UI 参考 “新增 UI” 需求指南，这里只给出必要的修改部分，模板部分不再给出
 export const MyCom = defineComponent(props => {

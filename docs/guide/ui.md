@@ -8,7 +8,7 @@ lang: zh-CN
 
 ## 创建 UI 文件
 
-首先，我们打开 `packages-user/client-modules/render` 文件夹，这里是目前样板的 UI 目录（之后可能会修改），我们可以看到 `components` `legacy` `ui` 三个文件夹，其中 `component` 是组件文件夹，也就是所有 UI 都可能用到的组件，例如滚动条、分页、图标等，这些东西不会单独组成一个 UI，但是可以方便 UI 开发。`legacy` 文件夹是将要删除或重构的内容，不建议使用里面的内容。`ui` 就是 UI 文件夹，这里面存放了所有的 UI，我们在这里创建一个文件 `myUI.tsx`。
+首先，我们打开 `packages-user/client-modules/render` 文件夹，这里是目前样板的 UI 目录（之后可能会修改），我们可以看到 `components` `ui` 等文件夹，其中 `component` 是组件文件夹，也就是所有 UI 都可能用到的组件，例如滚动条、分页、图标等，这些东西不会单独组成一个 UI，但是可以方便 UI 开发。`ui` 就是 UI 文件夹，这里面存放了所有的 UI，我们在此文件夹下创建一个文件 `myUI.tsx`。
 
 ## 编写 UI 模板
 
@@ -87,7 +87,7 @@ export const MyBook = defineComponent<MyBookProps>(props => {
 }, myBookProps);
 ```
 
-除此之外，我们还可以在任意渲染端模块中引入 `ui/controller` 来获取到根组件的 UI 控制器，注意跨文件夹引入时需要引入 `@user/client-modules`。例如，我们可以在其他文件中控制这个 UI 的开启与关闭：
+除此之外，我们还可以在任意渲染端模块中引入 `ui/controller` 来获取到根组件的 UI 控制器。例如，我们可以在其他文件中控制这个 UI 的开启与关闭：
 
 ```ts
 import { mainUIController, MyBookUI } from './ui';
@@ -132,7 +132,7 @@ const mainUIController = UIController.getController('main-ui');
 ```tsx
 return () => (
     <container>
-        {/* 显示绿史莱姆图标，位置在 (32, 32)，循环播放动画 */}
+        {/* 显示绿史莱姆图标，位置在 (32, 32)，animate 表示循环播放动画 */}
         <icon icon="greenSlime" loc={[32, 32]} animate />
     </container>
 );
