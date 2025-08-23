@@ -10,10 +10,10 @@
 function onOrientationChange(hook: OrientationHook): void;
 ```
 
-监听屏幕方向变化事件。  
+监听屏幕方向变化事件。需要在组件内或 UI 内调用。  
 **参数**
 
--   `hook`: 方向变化回调函数
+- `hook`: 方向变化回调函数
 
 ```typescript
 type OrientationHook = (
@@ -28,6 +28,7 @@ type OrientationHook = (
 ```typescript
 import { onOrientationChange, Orientation } from './use';
 
+// 组件内
 onOrientationChange((orient, width) => {
     if (orient === Orientation.Portrait) {
         // 竖屏模式
@@ -173,8 +174,8 @@ function getConfirm(
 
 返回 `Promise<boolean>`：
 
--   `true` 表示用户点击确认
--   `false` 表示用户取消或关闭
+- `true` 表示用户点击确认
+- `false` 表示用户取消或关闭
 
 ---
 
@@ -264,7 +265,7 @@ function getChoice<T extends ChoiceKey = ChoiceKey>(
 
 返回 `Promise<T>`：
 
--   解析为选中项的 `key` 值
+- 解析为选中项的 `key` 值
 
 #### 使用示例
 

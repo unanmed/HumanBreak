@@ -109,6 +109,78 @@ export const LeftStatusBar = defineComponent<StatusBarProps<ILeftHeroStatus>>(
 );
 ```
 
+## 拓展-新增勇士属性
+
+在上例中，展示了如何显示一个自定义的 `flag`，但有时候我们需要自定义一个勇士属性，例如攻速、减伤等，这些属性可能会受到全局 `buff` 的影响，这时候使用 `flag` 就不方便，我们推荐使用自定义属性的方式。
+
+### 定义属性
+
+我们打开编辑器的全塔属性界面，点击左侧上方的编辑表格按钮，向下滑动找到 `勇士攻击` 等勇士属性（约第 250 行）的位置，仿照这些属性增加一个新的属性，例如添加攻速，取属性名为 `atkSpeed`：
+
+```js
+{
+    "mana": {
+        "_leaf": true,
+        "_type": "textarea",
+        "_data": "初始魔力"
+    },
+    "atkSpeed": { // [!code ++]
+        "_leaf": true, // [!code ++]
+        "_type": "textarea", // [!code ++]
+        "_data": "初始攻速" // [!code ++]
+    }, // [!code ++]
+    "atk": {
+        "_leaf": true,
+        "_type": "textarea",
+        "_data": "初始攻击"
+    },
+}
+```
+
+保存后刷新页面，再次进入全塔属性界面，可以看到在勇士属性部分多了一项 `初始攻速`，我们可以输入初始值，例如设为初始值 `1`，表示攻速为 `100%`。
+
+接下来回到 `vscode`，打开文件 `src/types/declaration/status.d.ts`，按下 `ctrl+F` 搜索 `interface HeroStatus`，在其中新增一个属性值 `atkSpeed`：
+
+```ts
+interface HeroStatus {
+    // ... 原有内容
+
+    /** 勇士攻速 */
+    atkSpeed: number; // [!code ++]
+
+    // ... 原有内容
+}
+```
+
+### 容错处理
+
+为了保证属性添加前的存档还能正常加载，我们需要容错处理，打开编辑器，进入脚本编辑界面，编辑 `重置游戏` 这一脚本编辑项。我们在函数的最后进行容错处理：
+
+```js
+function () {
+    // ... 原有内容
+
+    // 容错处理
+    core.status.hero.atkSpeed ??= 1; // [!code ++]
+}
+```
+
+由于样板编辑器的限制，上述代码会有语法报错，但实际上不会有任何问题，关闭语法检查再保存即可。
+
+### 状态栏显示
+
+与本文章最初的示例基本一致，只有传入属性值时需要略加变动，其他操作包括属性定义等不改变，将赋值行为改为 `getHeroStatusOn`：
+
+```ts
+leftStatus.atk = getHeroStatusOn('atk');
+leftStatus.hp = getHeroStatusOn('hp');
+leftStatus.def = getHeroStatusOn('def');
+// ... 原有内容
+
+// 改为 getHeroStatusOn
+leftStatus.atkSpeed = getHeroStatusOn('atkSpeed');
+```
+
 ## 拓展-了解 UI 编写的基本逻辑
 
 参考[此文档](./ui.md)，此文档将会教你如何从头开始编写一个 UI，并解释 UI 运行与渲染的基本逻辑。

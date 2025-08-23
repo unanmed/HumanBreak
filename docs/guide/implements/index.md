@@ -10,6 +10,8 @@
 - [修改状态栏显示](./status-bar.md)
 - [编写新 UI](./new-ui.md)
 - [自定义按键](./hotkey.md)
+- [动画效果](./animate.md)
+- [选择框与确认框](./choice.md)
 
 ## 数据端内容
 

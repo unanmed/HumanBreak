@@ -194,7 +194,10 @@ export const ConfirmBox = defineComponent<
 }, confirmBoxProps);
 
 export type ChoiceKey = string | number;
-export type ChoiceItem = [key: ChoiceKey, text: string];
+export type ChoiceItem<T extends ChoiceKey = ChoiceKey> = [
+    key: T,
+    text: string
+];
 
 export interface ChoicesProps extends DefaultProps, TextContentProps {
     choices: ChoiceItem[];
@@ -614,11 +617,11 @@ export function getConfirm(
  */
 export function getChoice<T extends ChoiceKey = ChoiceKey>(
     controller: IUIMountable,
-    choices: ChoiceItem[],
+    choices: ChoiceItem<T>[],
     loc: ElementLocator,
     width: number,
     props?: Partial<ChoicesProps>
-) {
+): Promise<T> {
     return new Promise<T>(res => {
         const instance = controller.open(
             ChoicesUI,
@@ -681,6 +684,7 @@ export async function routedConfirm(
     if (core.isReplaying()) {
         const confirm = getChoiceRoute() === 1;
         const timeout = core.control.__replay_getTimeout();
+        core.status.route.push(`choices:${confirm ? 1 : 0}`);
         if (timeout === 0) return confirm;
         const instance = controller.open(ConfirmBoxUI, {
             ...(props ?? {}),
@@ -724,17 +728,18 @@ export async function routedConfirm(
  * @param width 选择框的宽度
  * @param props 额外的 props，参考 {@link ChoicesProps}
  */
-export async function routedChoices(
+export async function routedChoices<T extends ChoiceKey>(
     controller: IUIMountable,
-    choices: ChoiceItem[],
+    choices: ChoiceItem<T>[],
     loc: ElementLocator,
     width: number,
     props?: Partial<ChoicesProps>
-) {
+): Promise<T> {
     if (core.isReplaying()) {
         const selected = getChoiceRoute();
         const timeout = core.control.__replay_getTimeout();
-        if (timeout === 0) return selected;
+        core.status.route.push(`choices:${selected}`);
+        if (timeout === 0) return choices[selected][0];
         const instance = controller.open(ChoicesUI, {
             ...(props ?? {}),
             choices,
@@ -744,7 +749,7 @@ export async function routedChoices(
         });
         await sleep(core.control.__replay_getTimeout());
         controller.close(instance);
-        return selected;
+        return choices[selected][0];
     } else {
         const choice = await getChoice(controller, choices, loc, width, props);
         const index = choices.findIndex(v => v[1] === choice);

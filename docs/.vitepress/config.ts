@@ -78,6 +78,10 @@ export default defineConfig({
                                 {
                                     text: '动画效果',
                                     link: '/guide/implements/animate'
+                                },
+                                {
+                                    text: '选择框与确认框',
+                                    link: '/guide/implements/choice'
                                 }
                             ]
                         }
