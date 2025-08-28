@@ -181,6 +181,47 @@ leftStatus.def = getHeroStatusOn('def');
 leftStatus.atkSpeed = getHeroStatusOn('atkSpeed');
 ```
 
+状态栏组件中：
+
+```tsx
+// 使用模板字符串，显示百分比
+<text text={`${s.atkSpeed * 100}%`} />
+```
+
+### 属性实现
+
+为了实现勇士属性，我们需要修改伤害计算逻辑。我们打开 `packages-user/data-state/src/enemy/damage.ts`，翻到最后找到 `calDamageWith` 函数，在它上面有一个名为 `realStatus` 的数组，我们在这里新增一项 `atkSpeed`：
+
+```ts
+/**
+ * 计算伤害时会用到的勇士属性，攻击防御，其余的不会有buff加成，直接从core.status.hero取
+ */
+const realStatus: (keyof HeroStatus)[] = [
+    'atk',
+    'def',
+    // ... 原有内容
+
+    // 新增 atkSpeed 属性
+    'atkSpeed' // [!code ++]
+];
+```
+
+然后在 `calDamageWith` 伤害计算中修改伤害计算，给勇士每回合造成的伤害乘以攻速，注意放置的位置：
+
+```ts
+export function calDamageWith(
+    info: UserEnemyInfo,
+    hero: Partial<HeroStatus>
+): number {
+    // ... 原有逻辑
+
+    // 乘以攻速
+    heroPerDamage *= hero.atkSpeed ?? 1;
+
+    // ... 原有逻辑
+}
+```
+
 ## 拓展-了解 UI 编写的基本逻辑
 
 参考[此文档](./ui.md)，此文档将会教你如何从头开始编写一个 UI，并解释 UI 运行与渲染的基本逻辑。

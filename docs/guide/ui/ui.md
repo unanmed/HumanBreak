@@ -58,7 +58,7 @@ return () => (
 
 ## 显示 UI
 
-我们编写完 UI 之后，这个 UI 并不会自己显示，需要手动打开。我们找到 `ui/main.tsx`，在 `MainScene` 这个根组件中添加一句话：
+我们编写完 UI 之后，这个 UI 并不会自己显示，需要手动打开。我们找到 `ui/main.tsx`，在 `MainScene` 这个根组件中调用 `mainUIController.open`：
 
 ```ts
 // 在这添加引入
@@ -68,7 +68,7 @@ const MainScene = defineComponent(() => {
     // ... 其他内容
     // 在这添加一句话，打开 UI，第二个参数为传入 UI 的参数，后面会有讲解
     // 纵深设为 100 以保证可以显示出来，纵深越大，元素越靠上，会覆盖纵深低的元素
-    mainUIController.open(MyBookUI, { zIndex: 100 });
+    mainUIController.open(MyBookUI, { zIndex: 100 }); // [!code ++]
     return () => (
         // ... 其他内容
     );
@@ -80,7 +80,7 @@ const MainScene = defineComponent(() => {
 ```tsx
 export const MyBook = defineComponent<MyBookProps>(props => {
     // 例如，我们可以让它在打开 10 秒钟后关闭：
-    setTimeout(() => props.controller.close(props.instance), 10000);
+    setTimeout(() => props.controller.close(props.instance), 10000); // [!code ++]
     return () => (
         // ... UI 内容
     );
@@ -119,7 +119,9 @@ import { UIController } from '@motajs/system-ui';
 const mainUIController = UIController.getController('main-ui');
 ```
 
-更多的 UI 控制功能可以参考后续文档以及相关的 [UI 系统指南](./ui-system.md) 或 [API 文档](../api/motajs-system-ui/UIController)。
+关于 UI 打开与关闭的细节参考[此文档](./system.md#打开与关闭-ui)
+
+更多的 UI 控制功能可以参考后续文档以及相关的 [UI 系统指南](./system.md) 或 [API 文档](../../api/motajs-system-ui/UIController)。
 
 ## 添加更多内容
 
@@ -169,7 +171,7 @@ return () => (
 );
 ```
 
-更多的字体使用方法可以参考 [API 文档](../api/motajs-render-style/Font)
+更多的字体使用方法可以参考 [API 文档](../../api/motajs-render-style/Font)
 
 ### 圆角矩形
 
@@ -820,7 +822,7 @@ watch(selected, () => {
 
 ## 修改 UI 参数
 
-在打开 UI 时，我们可以传入参数，默认情况下，可以传入所有的 `BaseProps`，也就是所有元素通用属性，以及自己定义的 UI 参数。`BaseProps` 内容较多，可以参考 [API 文档](../api/motajs-render-core/RenderItem.md)。除此之外，我们还为这个自定义怪物手册添加了 `floorId` 参数，它也可以在打开 UI 时传入。如果需要打开的 UI 参数具有响应式，例如可以动态修改楼层 id，可以使用 `reactive` 方法。示例如下：
+在打开 UI 时，我们可以传入参数，默认情况下，可以传入所有的 `BaseProps`，也就是所有元素通用属性，以及自己定义的 UI 参数。`BaseProps` 内容较多，可以参考 [API 文档](../../api/motajs-render-core/RenderItem.md)。除此之外，我们还为这个自定义怪物手册添加了 `floorId` 参数，它也可以在打开 UI 时传入。如果需要打开的 UI 参数具有响应式，例如可以动态修改楼层 id，可以使用 `reactive` 方法。示例如下：
 
 ```ts
 import { MyBookProps, MyBookUI } from './myUI';

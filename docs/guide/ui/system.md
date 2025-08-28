@@ -3,7 +3,52 @@
 本节将会讲解 2.B 的渲染树与 UI 系统的工作原理，以及一些常用 API。
 
 :::info
-**这部分可以选择性阅读，多数功能一般场景下用不到。**
+**这部分可以选择性阅读，只有打开和关闭较为重要，其他功能一般场景下用不到。**
+:::
+
+## 打开与关闭 UI
+
+在 UI 编写章节已经提到了打开和关闭 UI 使用 `open` 和 `close` 方法，现在我们更细致地讲解一下如何打开与关闭 UI。打开 UI 使用 `open` 方法，定义如下：
+
+```ts
+function open<T extends UIComponent>(
+    ui: IGameUI<T>,
+    props: UIProps<T>,
+    alwaysShow?: boolean
+): IUIInstance;
+```
+
+其中第一个参数表示要打开的 UI，第二个表示传给 UI 的参数，第三个表示 UI 是否永远保持显示状态（除非被关闭），不受到显示模式的影响。同种 UI 可以打开多个，也可以在不同的控制器上同时打开多个相同的 UI。例如，如果我们想在主 UI 控制器中添加一个常量的返回游戏按钮，就可以这么写：
+
+```ts
+// BackToGame 是自定义 UI，第三个参数传 true 来保证它一直显示在画面上
+mainUIController.open(BackToGame, {}, true);
+```
+
+关闭 UI 使用 `close` 方法，传入 UI 实例，即 `open` 方法的返回值，没有其他参数。例如：
+
+```ts
+const MyUI = defineComponent(props => {
+    // 所有通过 UI 控制器打开的，同时按照 UI 模板填写了 props 的 UI 都包含 controller 和 instance 属性
+    props.controller.close(props.instance);
+}, myUIProps);
+```
+
+除此之外，还提供了一个关闭所有 UI 的：
+
+```ts
+function closeAll(ui?: IGameUI): void;
+```
+
+其中参数表示要关闭的 UI 类型，不填时表示关闭所有 UI，填写时表示关闭所有指定类型的 UI。例如我想关闭所有 `EnemyInfo` UI，可以这么写：
+
+```ts
+// EnemyInfo 是自定义 UI
+mainUIController.closeAll(EnemyInfo);
+```
+
+:::warning
+以下内容属于进阶内容，没有高级需求不需要理解。
 :::
 
 ## 创建一个自己的 UI 管理器
@@ -147,47 +192,6 @@ const keep = myController.keep();
 keep.safelyUnload();
 // 不推荐方法，调用后立刻关闭所有 UI，不常用
 keep.unload();
-```
-
-## 打开与关闭 UI
-
-在 UI 编写章节已经提到了打开和关闭 UI 使用 `open` 和 `close` 方法，现在我们更细致地讲解一下如何打开与关闭 UI。打开 UI 使用 `open` 方法，定义如下：
-
-```ts
-function open<T extends UIComponent>(
-    ui: IGameUI<T>,
-    props: UIProps<T>,
-    alwaysShow?: boolean
-): IUIInstance;
-```
-
-其中第一个参数表示要打开的 UI，第二个表示传给 UI 的参数，第三个表示 UI 是否永远保持显示状态（除非被关闭），不受到显示模式的影响。同种 UI 可以打开多个，也可以在不同的控制器上同时打开多个相同的 UI。例如，如果我们想在主 UI 控制器中添加一个常量的返回游戏按钮，就可以这么写：
-
-```ts
-// BackToGame 是自定义 UI，第三个参数传 true 来保证它一直显示在画面上
-myController.open(BackToGame, {}, true);
-```
-
-关闭 UI 使用 `close` 方法，传入 UI 实例，即 `open` 方法的返回值，没有其他参数。例如：
-
-```ts
-const MyUI = defineComponent(props => {
-    // 所有通过 UI 控制器打开的，同时按照 UI 模板填写了 props 的 UI 都包含 controller 和 instance 属性
-    props.controller.close(props.instance);
-}, myUIProps);
-```
-
-除此之外，还提供了一个关闭所有 UI 的：
-
-```ts
-function closeAll(ui?: IGameUI): void;
-```
-
-其中参数表示要关闭的 UI 类型，不填时表示关闭所有 UI，填写时表示关闭所有指定类型的 UI。例如我想关闭所有 `EnemyInfo` UI，可以这么写：
-
-```ts
-// EnemyInfo 是自定义 UI
-myController.closeAll(EnemyInfo);
 ```
 
 ## 渲染系统的树结构

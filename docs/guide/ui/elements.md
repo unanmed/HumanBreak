@@ -349,7 +349,7 @@ type RenderFn = (canvas: MotaOffscreenCanvas2D, transform: Transform) => void;
 - `canvas`: 要渲染至的画布，一般直接将内容渲染至这个画布上
 - `transform`: 当前元素的变换矩阵，相对于父元素，不常用
 
-多数情况下，我们只会使用到第一个参数，`MotaOffscreenCanvas2D` 接口请参考 [API 文档](../api/motajs-render-core/index.md)。下面是一个典型案例：
+多数情况下，我们只会使用到第一个参数，`MotaOffscreenCanvas2D` 接口请参考 [API 文档](../../api/motajs-render-core/index.md)。下面是一个典型案例：
 
 ```tsx
 const render = (canvas: MotaOffscreenCanvas2D) => {
@@ -753,4 +753,4 @@ const themeStyle = {
 
 ## API 参考
 
-参考[API 文档](../api/motajs-render-vue/index.md)，这里有更细致的 API 介绍。
+参考[API 文档](../../api/motajs-render-vue/index.md)，这里有更细致的 API 介绍。

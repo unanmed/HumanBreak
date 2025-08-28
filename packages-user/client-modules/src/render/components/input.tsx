@@ -517,4 +517,12 @@ export async function getInputNumber(
     return parseFloat(value);
 }
 
+export async function routedInput() {
+    // todo
+}
+
+export async function routedInputNumber() {
+    // todo
+}
+
 export const InputBoxUI = new GameUI('input-box', InputBox);

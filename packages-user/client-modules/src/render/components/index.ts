@@ -1,4 +1,5 @@
 export * from './choices';
+export * from './floorSelect';
 export * from './icons';
 export * from './input';
 export * from './list';

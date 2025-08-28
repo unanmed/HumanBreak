@@ -20,7 +20,7 @@ export default defineConfig({
         outline: [2, 3],
         nav: [
             { text: '主页', link: '/' },
-            { text: '指南', link: '/guide/diff' },
+            { text: '指南', link: '/guide/quick-start' },
             { text: 'API', link: '/api/' },
             { text: '错误代码', link: '/logger/' }
         ],
@@ -39,12 +39,17 @@ export default defineConfig({
                             text: 'UI 系统',
                             collapsed: false,
                             items: [
-                                { text: 'UI 编写', link: '/guide/ui' },
-                                { text: 'UI 优化', link: '/guide/ui-perf' },
-                                { text: 'UI 系统', link: '/guide/ui-system' },
-                                { text: 'UI 元素', link: '/guide/ui-elements' },
-                                { text: 'UI 常见问题', link: '/guide/ui-faq' },
-                                { text: '未来规划', link: '/guide/ui-future' }
+                                { text: '快速浏览', link: '/guide/ui/' },
+                                { text: '编写 UI', link: '/guide/ui/ui' },
+                                { text: 'UI 元素', link: '/guide/ui/elements' },
+                                {
+                                    text: '组件使用指南',
+                                    link: '/guide/ui/component'
+                                },
+                                { text: '优化性能', link: '/guide/ui/perf' },
+                                { text: 'UI 系统', link: '/guide/ui/system' },
+                                { text: '常见问题', link: '/guide/ui/faq' },
+                                { text: '未来规划', link: '/guide/ui/future' }
                             ]
                         },
                         {

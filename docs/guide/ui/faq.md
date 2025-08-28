@@ -31,7 +31,7 @@ watch(data, () => mySprite.value?.update());
 
 ## 我的 UI 很卡
 
-可能使用了平铺式布局，建议使用 `Scroll` 组件或者 `Page` 组件来对平铺内容分割，从而提高渲染效率。可以参考对应的 [API 文档](../api/user-client-modules/组件%20Scroll.md)。
+可能使用了平铺式布局，建议使用 `Scroll` 组件或者 `Page` 组件来对平铺内容分割，从而提高渲染效率。可以参考对应的 [API 文档](../../api/user-client-modules/组件%20Scroll.md)。
 
 ## 玩着玩着突然黑屏了一下，然后画面就不显示了
 

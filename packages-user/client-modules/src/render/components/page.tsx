@@ -230,12 +230,13 @@ export const Page = defineComponent<
                 <container loc={contentLoc.value}>
                     {slots.default?.(nowPage.value)}
                 </container>
-                <container loc={pageLoc.value} hidden={hide.value}>
+                <container loc={pageLoc.value} hidden={hide.value} nocache>
                     <container
                         key={1}
                         loc={leftLoc.value}
                         onClick={lastPage}
                         cursor="pointer"
+                        nocache
                     >
                         <g-rectr
                             loc={rectLoc.value}
@@ -257,6 +258,7 @@ export const Page = defineComponent<
                             loc={leftPageLoc.value}
                             onClick={lastPage}
                             cursor="pointer"
+                            nocache
                         >
                             <g-rectr
                                 loc={rectLoc.value}
@@ -272,7 +274,7 @@ export const Page = defineComponent<
                             ></text>
                         </container>
                     )}
-                    <container loc={nowPageLoc.value} key={3}>
+                    <container loc={nowPageLoc.value} key={3} nocache>
                         <g-rectr
                             loc={rectLoc.value}
                             circle={[round.value]}
@@ -295,6 +297,7 @@ export const Page = defineComponent<
                             loc={rightPageLoc.value}
                             onClick={nextPage}
                             cursor="pointer"
+                            nocache
                         >
                             <g-rectr
                                 loc={rectLoc.value}
@@ -315,6 +318,7 @@ export const Page = defineComponent<
                         loc={rightLoc.value}
                         onClick={nextPage}
                         cursor="pointer"
+                        nocache
                     >
                         <g-rectr
                             loc={rectLoc.value}

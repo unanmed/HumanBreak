@@ -179,6 +179,98 @@ export const MyCom = defineComponent(props => {
 });
 ```
 
+## 拓展-输入框
+
+与选择框、确认框类似，只不过允许玩家输入一段内容，然后返回给程序。使用 `getInput` 来让玩家输入字符串，使用 `getInputNumber` 来让玩家输入数字。
+
+输入框包含一个确认键和取消键，玩家点击确认键时会将输入结果返回，而如果点击了取消，那么会返回空字符串或 `NaN`。
+
+### 输入字符串
+
+使用 `getInput` 接口：
+
+```tsx
+import { getInput } from '../components';
+
+// UI 模板及如何编写 UI 参考 “新增 UI” 需求指南，这里只给出必要的修改部分，模板部分不再给出
+export const MyCom = defineComponent(props => {
+    const click = async () => {
+        // 调用接口，并等待执行完毕，获取异步返回值
+        const inputData = await getInput(
+            props.controller, // UI 控制器
+            '请输入一句话', // 显示的文字
+            [240, 240, void 0, void 0, 0.5, 0.5], // 输入框位置
+            240, // 输入框宽度
+            // 其他参数配置，参考 API 文档
+            {
+                // 例如设置一个占位符
+                input: {
+                    placeholder: '输入一句话'
+                }
+            }
+        );
+        if (inputData.length === 0) {
+            // 如果用户没有输入任何内容或点了取消
+        } else {
+            // 如果用户输入了内容
+        }
+    };
+
+    return () => (
+        <container>
+            <text
+                text="这是一个按钮"
+                // 监听 click 事件
+                onClick={click}
+            />
+        </container>
+    );
+});
+```
+
+### 输入数字
+
+与 `getInput` 类似，不过要用 `getInputNumber` 接口：
+
+```tsx
+import { getInputNumber } from '../components';
+
+// UI 模板及如何编写 UI 参考 “新增 UI” 需求指南，这里只给出必要的修改部分，模板部分不再给出
+export const MyCom = defineComponent(props => {
+    const click = async () => {
+        // 调用接口，并等待执行完毕，获取异步返回值
+        const num = await getInputNumber(
+            props.controller, // UI 控制器
+            '请输入一个数字', // 显示的文字
+            [240, 240, void 0, void 0, 0.5, 0.5], // 输入框位置
+            240, // 输入框宽度
+            // 其他参数配置，参考 API 文档
+            {
+                // 例如设置一个占位符
+                input: {
+                    placeholder: '输入数字'
+                }
+            }
+        );
+        if (isNaN(num)) {
+            // 如果用户输入的不是数字或点了取消
+        } else {
+            // 如果用户输入了数字
+        }
+    };
+
+    return () => (
+        <container>
+            <text
+                text="这是一个按钮"
+                // 监听 click 事件
+                onClick={click}
+            />
+        </container>
+    );
+});
+```
+
 ## 拓展-API参考
 
 - [ConfirmBox](../../api/user-client-modules/组件%20ConfirmBox.md)

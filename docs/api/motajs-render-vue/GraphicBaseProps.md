@@ -7,7 +7,22 @@
 ## 接口定义
 
 ```typescript
-interface GraphicBaseProps extends BaseProps {
+interface ILineProperty {
+    /** 线宽 */
+    lineWidth: number;
+    /** 线的虚线设置 */
+    lineDash?: number[];
+    /** 虚线偏移量 */
+    lineDashOffset?: number;
+    /** 线的连接样式 */
+    lineJoin: CanvasLineJoin;
+    /** 线的顶端样式 */
+    lineCap: CanvasLineCap;
+    /** 线的斜接限制，当连接为miter类型时可填，默认为10 */
+    miterLimit: number;
+}
+
+interface GraphicBaseProps extends BaseProps, Partial<ILineProperty> {
     /** 是否填充（默认 false） */
     fill?: boolean;
     /** 是否描边（默认 false） */
@@ -29,15 +44,21 @@ interface GraphicBaseProps extends BaseProps {
 
 ## 核心属性说明
 
-| 属性            | 类型                                            | 默认值      | 说明                                                           |
-| --------------- | ----------------------------------------------- | ----------- | -------------------------------------------------------------- |
-| `fill`          | `boolean`                                       | `false`     | 启用填充（需设置 `fillStyle`）                                 |
-| `stroke`        | `boolean`                                       | `false`     | 启用描边（需设置 `strokeStyle` 和 `strokeWidth`）              |
-| `strokeAndFill` | `boolean`                                       | `false`     | 强制先描边后填充（覆盖 `fill` 和 `stroke` 的设置）             |
-| `fillRule`      | `"nonzero"` \| `"evenodd"`                      | `"evenodd"` | 填充路径计算规则（影响复杂图形的镂空效果）                     |
-| `fillStyle`     | `string` \| `CanvasGradient` \| `CanvasPattern` | -           | 填充样式（支持 CSS 颜色、渐变对象等）                          |
-| `strokeStyle`   | `string` \| `CanvasGradient` \| `CanvasPattern` | -           | 描边样式                                                       |
-| `actionStroke`  | `boolean`                                       | `false`     | 设为 `true` 时，交互事件仅响应描边区域（需配合 `stroke` 使用） |
+| 属性             | 类型                                            | 默认值      | 说明                                                           |
+| ---------------- | ----------------------------------------------- | ----------- | -------------------------------------------------------------- |
+| `fill`           | `boolean`                                       | `false`     | 启用填充                                                       |
+| `stroke`         | `boolean`                                       | `false`     | 启用描边                                                       |
+| `strokeAndFill`  | `boolean`                                       | `false`     | 先描边后填充                                                   |
+| `fillRule`       | `'nonzero'` \| `'evenodd'`                      | `'evenodd'` | 填充路径环绕原则                                               |
+| `fillStyle`      | `string` \| `CanvasGradient` \| `CanvasPattern` | -           | 填充样式                                                       |
+| `strokeStyle`    | `string` \| `CanvasGradient` \| `CanvasPattern` | -           | 描边样式                                                       |
+| `actionStroke`   | `boolean`                                       | `false`     | 设为 `true` 时，交互事件仅响应描边区域（需配合 `stroke` 使用） |
+| `lineWidth`      | `number`                                        | `2`         | 设置描边的线宽                                                 |
+| `lineDash`       | `number[]`                                      | `[]`        | 设置虚线样式                                                   |
+| `lineDashOffset` | `number`                                        | `0`         | 虚线样式偏移量                                                 |
+| `lineJoin`       | `string`                                        | `bevel`     | 线的连接方式                                                   |
+| `lineCap`        | `string`                                        | `butt`      | 线的末端样式                                                   |
+| `miterLimit`     | `number`                                        | `10`        | 当使用 `miter` 连接方式时，其最大斜接限制                      |
 
 ---
 
@@ -55,8 +76,8 @@ interface GraphicBaseProps extends BaseProps {
 
 **效果**：
 
--   200x150 矩形
--   无描边效果
+- 200x150 矩形
+- 无描边效果
 
 ---
 
@@ -67,15 +88,15 @@ interface GraphicBaseProps extends BaseProps {
     loc={[400, 200, 180, 120]}
     stroke
     strokeStyle="rgba(0,0,0,0.8)"
-    strokeWidth={4}
+    lineWidth={4}
     actionStroke // 点击时仅描边区域响应
 />
 ```
 
 **交互特性**：
 
--   4px 黑色半透明描边
--   鼠标悬停在描边区域才会触发事件
+- 4px 黑色半透明描边
+- 鼠标悬停在描边区域才会触发事件
 
 ---
 
@@ -88,7 +109,7 @@ interface GraphicBaseProps extends BaseProps {
     stroke
     fillStyle="#ffe66d"
     strokeStyle="#2d3436"
-    strokeWidth={2}
+    lineWidth={2}
 />
 ```
 
@@ -99,7 +120,7 @@ interface GraphicBaseProps extends BaseProps {
 
 ---
 
-### 示例 4：强制先描边后填充
+### 示例 4：先描边后填充
 
 ```tsx
 <g-rect
@@ -107,7 +128,7 @@ interface GraphicBaseProps extends BaseProps {
     strokeAndFill
     fillStyle="#a29bfe"
     strokeStyle="#6c5ce7"
-    strokeWidth={8}
+    lineWidth={8}
 />
 ```
 
@@ -138,7 +159,7 @@ const leave = () => void (hovered.value = false);
     fillStyle="#ffffff"
     stroke={hovered.value}
     strokeStyle="#e84393"
-    strokeWidth={3}
+    lineWidth={3}
     onEnter={enter}
     onLeave={leave}
 />;
