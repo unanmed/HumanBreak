@@ -13,6 +13,10 @@ import { RequiredData, RequiredIconsData, ResourceType } from './types';
 import { splitResource, SplittedResource } from './build-resource';
 import { formatSize } from './utils';
 
+const ansi = {
+    clear: '\x1b[2J\x1b[0f'
+};
+
 // 资源分离步骤的单包大小，默认 2M，可以自行调整
 const RESOUCE_SIZE = 2 * 2 ** 20;
 
@@ -141,21 +145,21 @@ function logProgress(step: number, final: ProgressStatus) {
         } else if (idx === step) {
             switch (final) {
                 case ProgressStatus.Fail:
-                    return prev + `❌ ${curr}\n错误信息：\n`;
+                    return prev + `❌  ${curr}\r\n错误信息：\r\n`;
                 case ProgressStatus.Success:
-                    return prev + `✅ ${curr}\n`;
+                    return prev + `✅  ${curr}\r\n`;
                 case ProgressStatus.Working:
-                    return prev + `🔄 ${curr}\n`;
+                    return prev + `🔄  ${curr}\r\n`;
                 case ProgressStatus.Warn:
-                    return prev + `⚠️  ${curr}\n`;
+                    return prev + `⚠️   ${curr}\r\n`;
             }
         } else {
-            return prev + `✅ ${curr}\n`;
+            return prev + `✅  ${curr}\r\n`;
         }
     }, '');
 
-    console.clear();
-    console.log(str);
+    process.stdout.write(ansi.clear);
+    process.stdout.write(str);
 }
 
 /**
@@ -337,7 +341,7 @@ async function buildGame() {
         await ensureDir(resolve(tempDir, 'resource'));
     } catch (e) {
         logProgress(0, ProgressStatus.Fail);
-        console.error(e);
+        process.stderr.write(String(e));
         process.exit(1);
     }
 
@@ -347,7 +351,7 @@ async function buildGame() {
     const clientPack = await buildClient(resolve(tempDir, 'client')).catch(
         reason => {
             logProgress(1, ProgressStatus.Fail);
-            console.error(reason);
+            process.stderr.write(String(reason));
             process.exit(1);
         }
     );
@@ -360,7 +364,7 @@ async function buildGame() {
         resolve(process.cwd(), 'src/data.ts')
     ).catch(reason => {
         logProgress(2, ProgressStatus.Fail);
-        console.error(reason);
+        process.stderr.write(String(reason));
         process.exit(1);
     });
 
@@ -407,7 +411,9 @@ async function buildGame() {
 
     if (level === ClientDataLevel.Error) {
         logProgress(2, ProgressStatus.Fail);
-        console.error(`客户端似乎引用了数据端内容，请仔细检查后再构建！`);
+        process.stderr.write(
+            `客户端似乎引用了数据端内容，请仔细检查后再构建！`
+        );
         process.exit(1);
     }
 
@@ -449,14 +455,14 @@ async function buildGame() {
         );
     } catch (e) {
         logProgress(3, ProgressStatus.Fail);
-        console.error(e);
+        process.stderr.write(String(e));
         process.exit(1);
     }
 
     //#region 压缩字体
     const chars = await getAllChars(clientPackArr).catch(reason => {
         logProgress(4, ProgressStatus.Fail);
-        console.error(reason);
+        process.stderr.write(String(reason));
         process.exit(1);
     });
     const { fonts } = mainData;
@@ -474,7 +480,7 @@ async function buildGame() {
         })
     ).catch(reason => {
         logProgress(4, ProgressStatus.Fail);
-        console.error(reason);
+        process.stderr.write(String(reason));
         process.exit(1);
     });
 
@@ -496,7 +502,7 @@ async function buildGame() {
         RESOUCE_SIZE
     ).catch(reason => {
         logProgress(5, ProgressStatus.Fail);
-        console.error(reason);
+        process.stderr.write(String(reason));
         process.exit(1);
     });
 
@@ -509,7 +515,7 @@ async function buildGame() {
         })
     ).catch(reason => {
         logProgress(5, ProgressStatus.Fail);
-        console.error(reason);
+        process.stderr.write(String(reason));
         process.exit(1);
     });
 
@@ -604,7 +610,7 @@ async function buildGame() {
         );
     } catch (e) {
         logProgress(6, ProgressStatus.Fail);
-        console.error(e);
+        process.stderr.write(String(e));
         process.exit(1);
     }
 
@@ -622,7 +628,7 @@ async function buildGame() {
         await rmdir(tempDir);
     } catch (e) {
         logProgress(7, ProgressStatus.Fail);
-        console.error(e);
+        process.stderr.write(String(e));
         process.exit(1);
     }
 
@@ -637,19 +643,19 @@ async function buildGame() {
         0
     );
 
-    console.clear();
-    console.log(`✅ 构建已完成！`);
+    process.stdout.write(ansi.clear);
+    process.stdout.write(`✅  构建已完成！\r\n`);
     if (zipSize > 100 * 2 ** 20) {
-        console.log(
-            `⚠️  压缩包大于 100M，可能导致发塔困难，请考虑降低塔的大小，`
+        process.stdout.write(
+            `⚠️   压缩包大于 100M，可能导致发塔困难，请考虑降低塔的大小\r\n`
         );
     }
-    console.log(`压缩包大小：${formatSize(zipSize)}`);
-    console.log(`源码大小：${formatSize(sourceSize)}`);
-    console.log(`资源大小：${formatSize(resourceSize)}`);
+    process.stdout.write(`压缩包大小：${formatSize(zipSize)}\r\n`);
+    process.stdout.write(`源码大小：${formatSize(sourceSize)}\r\n`);
+    process.stdout.write(`资源大小：${formatSize(resourceSize)}\r\n`);
     resources.forEach(v => {
-        console.log(
-            `--> ${v.fileName} ${formatSize(v.byteLength)} | ${v.content.length} 个资源`
+        process.stdout.write(
+            `--> ${v.fileName} ${formatSize(v.byteLength)} | ${v.content.length} 个资源\r\n`
         );
     });
 }
