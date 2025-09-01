@@ -11,7 +11,6 @@ import { createWriteStream } from 'fs';
 import { zip } from 'compressing';
 import { RequiredData, RequiredIconsData, ResourceType } from './types';
 import { splitResource, SplittedResource } from './build-resource';
-import { sum } from 'lodash-es';
 import { formatSize } from './utils';
 
 // 资源分离步骤的单包大小，默认 2M，可以自行调整
@@ -339,6 +338,7 @@ async function buildGame() {
     } catch (e) {
         logProgress(0, ProgressStatus.Fail);
         console.error(e);
+        process.exit(1);
     }
 
     logProgress(1, ProgressStatus.Working);
@@ -411,8 +411,6 @@ async function buildGame() {
         process.exit(1);
     }
 
-    logProgress(3, ProgressStatus.Working);
-
     // 解析全塔属性
     const dataFile = await readFile(
         resolve(process.cwd(), 'public/project/data.js'),
@@ -452,6 +450,7 @@ async function buildGame() {
     } catch (e) {
         logProgress(3, ProgressStatus.Fail);
         console.error(e);
+        process.exit(1);
     }
 
     //#region 压缩字体
