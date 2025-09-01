@@ -1,4 +1,4 @@
-///<reference path="../../types/declaration/core.d.ts" />
+///<reference path="../../src/types/declaration/core.d.ts" />
 
 /*
 actions.js：用户交互的事件的处理

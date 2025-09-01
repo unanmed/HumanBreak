@@ -2,12 +2,16 @@
     <div id="ui">
         <div id="ui-main">
             <div id="ui-list">
-                <div class="ui-one" v-for="(ui, index) of mainUi.stack">
+                <div
+                    v-for="(ui, index) of mainUi.stack"
+                    :key="index"
+                    class="ui-one"
+                >
                     <component
-                        v-if="show(index)"
                         :is="ui.ui.component"
-                        v-on="ui.vOn ?? {}"
+                        v-if="show(index)"
                         v-bind="ui.vBind ?? {}"
+                        v-on="ui.vOn ?? {}"
                     ></component>
                 </div>
             </div>
@@ -16,8 +20,8 @@
             <template v-for="ui of fixedUi.stack" :key="ui.num">
                 <component
                     :is="ui.ui.component"
-                    v-on="ui.vOn ?? {}"
                     v-bind="ui.vBind ?? {}"
+                    v-on="ui.vOn ?? {}"
                 ></component>
             </template>
         </div>

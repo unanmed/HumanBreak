@@ -1,4 +1,4 @@
-///<reference path="../types/declaration/core.d.ts" />
+///<reference path="../src/types/declaration/core.d.ts" />
 function main() {
     //------------------------ 用户修改内容 ------------------------//
 
@@ -130,18 +130,6 @@ main.prototype.loadScript = function (src, module) {
 };
 
 main.prototype.init = async function (mode, callback) {
-    try {
-        const a = {};
-        const b = {};
-        new Proxy(a, b);
-        new Promise(res => res());
-        eval('`${0}`');
-    } catch {
-        alert('浏览器版本过低，无法游玩本塔！');
-        alert('建议使用Edge浏览器或Chrome浏览器游玩！');
-        return;
-    }
-
     if (main.replayChecking) {
         main.loadSync(mode, callback);
     } else {

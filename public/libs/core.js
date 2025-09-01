@@ -360,7 +360,7 @@ core.prototype._loadGameProcess = async function () {
             if (main.pluginUseCompress) {
                 await main.loadScript(`project/processG.min.js`);
             } else {
-                await main.loadScript(`esm?name=src/editor.ts`, true);
+                await main.loadScript(`esm?name=src/data.ts`, true);
             }
         }
     }

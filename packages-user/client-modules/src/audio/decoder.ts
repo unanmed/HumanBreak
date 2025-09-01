@@ -48,7 +48,7 @@ export interface IAudioDecodeError {
 
 export interface IAudioDecodeData {
     /** 每个声道的音频信息 */
-    channelData: Float32Array[];
+    channelData: Float32Array<ArrayBuffer>[];
     /** 已经被解码的 PCM 采样数 */
     samplesDecoded: number;
     /** 音频采样率 */
@@ -163,15 +163,15 @@ export class VorbisDecoder extends AudioDecoder {
     }
 
     async decode(data: Uint8Array): Promise<IAudioDecodeData | undefined> {
-        return this.decoder?.decode(data);
+        return this.decoder?.decode(data) as Promise<IAudioDecodeData>;
     }
 
     async decodeAll(data: Uint8Array): Promise<IAudioDecodeData | undefined> {
-        return this.decoder?.decodeFile(data);
+        return this.decoder?.decodeFile(data) as Promise<IAudioDecodeData>;
     }
 
     async flush(): Promise<IAudioDecodeData | undefined> {
-        return this.decoder?.flush();
+        return this.decoder?.flush() as Promise<IAudioDecodeData>;
     }
 }
 
@@ -179,7 +179,9 @@ export class OpusDecoder extends AudioDecoder {
     decoder?: OggOpusDecoderWebWorker;
 
     async create(): Promise<void> {
-        this.decoder = new OggOpusDecoderWebWorker();
+        this.decoder = new OggOpusDecoderWebWorker({
+            speechQualityEnhancement: 'none'
+        });
         await this.decoder.ready;
     }
 
@@ -188,14 +190,14 @@ export class OpusDecoder extends AudioDecoder {
     }
 
     async decode(data: Uint8Array): Promise<IAudioDecodeData | undefined> {
-        return this.decoder?.decode(data);
+        return this.decoder?.decode(data) as Promise<IAudioDecodeData>;
     }
 
     async decodeAll(data: Uint8Array): Promise<IAudioDecodeData | undefined> {
-        return this.decoder?.decodeFile(data);
+        return this.decoder?.decodeFile(data) as Promise<IAudioDecodeData>;
     }
 
     async flush(): Promise<IAudioDecodeData | undefined> {
-        return await this.decoder?.flush();
+        return this.decoder?.flush() as Promise<IAudioDecodeData>;
     }
 }

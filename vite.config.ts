@@ -1,8 +1,8 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import components from 'unplugin-vue-components/vite';
-import vuejsx from '@vitejs/plugin-vue-jsx';
 import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers';
+import vuejsx from '@vitejs/plugin-vue-jsx';
 import path from 'path';
 import postcssPresetEnv from 'postcss-preset-env';
 import * as glob from 'glob';
@@ -34,11 +34,9 @@ const aliasesUser = glob.sync('packages-user/*/src').map((srcPath) => {
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [
-        vue({
-            customElement: custom
-        }),
+        vue(),
         vuejsx({
-            isCustomElement: (tag) => {
+            isCustomElement: tag => {
                 return custom.includes(tag) || tag.startsWith('g-');
             }
         }),

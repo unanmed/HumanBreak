@@ -174,7 +174,7 @@ function onmove(e: MouseEvent) {
     mat4.rotateX(matrix, matrix, -(dy * 10 * Math.PI) / 180);
     mat4.rotateY(matrix, matrix, (dx * 10 * Math.PI) / 180);
 
-    const end = matrix.join(',');
+    const end = Array.from(matrix).join(',');
     background.style.transform = `perspective(${
         1000 * core.domStyle.scale
     }px)matrix3d(${end})`;

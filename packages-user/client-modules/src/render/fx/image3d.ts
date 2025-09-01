@@ -56,7 +56,7 @@ export class Image3DEffect
         const matrix = this.program.getMatrix('u_imageTransform');
         if (!matrix) return;
         const trans = this.proj.multiply(this.view).multiply(this.model);
-        matrix.set(false, trans.mat);
+        matrix.set(false, Array.from(trans.mat));
         this.requestUpdate();
     }
 
