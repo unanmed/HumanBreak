@@ -6,7 +6,7 @@
             >
         </div>
         <span id="skill-title">{{ skill.title }}</span>
-        <a-divider dashed style="border-color: #ddd4" id="divider"></a-divider>
+        <Divider dashed style="border-color: #ddd4" id="divider"></Divider>
         <div id="skill-info">
             <Scroll id="skill-desc" :no-scroll="true">
                 <span v-html="desc"></span>
@@ -16,25 +16,25 @@
                 <span v-if="level < skill.max" v-html="effect[1]"></span>
             </div>
         </div>
-        <a-divider
+        <Divider
             dashed
             style="border-color: #ddd4"
             id="divider-split"
-        ></a-divider>
+        ></Divider>
         <div id="skill-bottom">
             <canvas id="skill-canvas"></canvas>
-            <a-divider
+            <Divider
                 dashed
                 style="border-color: #ddd4"
                 :type="isMobile ? 'horizontal' : 'vertical'"
                 id="divider-vertical"
-            ></a-divider>
+            ></Divider>
             <div id="skill-upgrade-info">
                 <div id="skill-upgrade-up">
                     <span id="skill-level"
                         >当前等级：{{ level }} / {{ skill.max }}</span
                     >
-                    <a-divider dashed class="upgrade-divider"></a-divider>
+                    <Divider dashed class="upgrade-divider"></Divider>
                     <span
                         v-if="level < skill.max"
                         id="skill-consume"
@@ -44,7 +44,7 @@
                     <span v-else id="skill-consume" style="color: gold"
                         >已满级</span
                     >
-                    <a-divider dashed class="upgrade-divider"></a-divider>
+                    <Divider dashed class="upgrade-divider"></Divider>
                     <Scroll id="front-scroll" :no-scroll="true"
                         ><div id="skill-front">
                             <span>前置技能</span>
@@ -59,7 +59,7 @@
                     >
                 </div>
                 <div id="skill-upgrade-bottom">
-                    <a-divider dashed class="upgrade-divider"></a-divider>
+                    <Divider dashed class="upgrade-divider"></Divider>
                     <div id="skill-chapter">
                         <span class="button-text" @click="selectChapter(-1)"
                             ><LeftOutlined
@@ -87,6 +87,7 @@ import { sleep } from 'mutate-animate';
 import { gameKey } from '@motajs/system-action';
 import { IMountedVBind } from '../interface';
 import { isNil } from 'lodash-es';
+import { Divider } from 'ant-design-vue';
 
 const props = defineProps<IMountedVBind>();
 

@@ -23,10 +23,10 @@
                     @select="select(e, i)"
                     @hover="selected = i"
                 ></EnemyOne>
-                <a-divider
+                <Divider
                     dashed
                     style="width: 100%; border-color: #ddd4"
-                ></a-divider>
+                ></Divider>
             </div>
         </Scroll>
     </div>
@@ -50,6 +50,7 @@ import { mainSetting } from '../preset/settingIns';
 import { isMobile } from '../use';
 import { IMountedVBind } from '../interface';
 import { isNil } from 'lodash-es';
+import { Divider } from 'ant-design-vue';
 
 const props = defineProps<IMountedVBind>();
 

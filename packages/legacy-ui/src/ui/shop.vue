@@ -6,17 +6,17 @@
             >
         </div>
         <span id="item-name">{{ info.name }}</span>
-        <a-divider dashed style="border-color: #ddd4" id="divider"></a-divider>
+        <Divider dashed style="border-color: #ddd4" id="divider"></Divider>
         <div id="item-info">
             <Scroll id="item-desc" :no-scroll="true">
                 <span v-html="desc"></span>
             </Scroll>
         </div>
-        <a-divider
+        <Divider
             dashed
             style="border-color: #ddd4"
             id="divider-split"
-        ></a-divider>
+        ></Divider>
         <div id="shop-bottom">
             <div id="item-list">
                 <Scroll style="width: 100%; height: 100%">
@@ -43,12 +43,12 @@
                     </div>
                 </Scroll>
             </div>
-            <a-divider
+            <Divider
                 dashed
                 style="border-color: #ddd4"
                 type="vertical"
                 id="divider-vertical"
-            ></a-divider>
+            ></Divider>
             <div id="item-sell-info">
                 <div id="shop-mode">
                     <span
@@ -57,12 +57,12 @@
                         @click="mode = 'buy'"
                         >购买</span
                     >
-                    <a-divider
+                    <Divider
                         dashed
                         type="vertical"
                         id="divider-vertical"
                         style="border-color: #ddd4"
-                    ></a-divider>
+                    ></Divider>
                     <span
                         class="button-text mode-button"
                         :active="mode === 'sell'"
@@ -71,11 +71,11 @@
                         >售出</span
                     >
                 </div>
-                <a-divider
+                <Divider
                     dashed
                     style="border-color: #ddd4"
                     id="divider-mode"
-                ></a-divider>
+                ></Divider>
                 <div
                     class="item-sell-info"
                     :style="{
@@ -105,11 +105,11 @@
                     <span>拥有</span>
                     <span>{{ cnt(item.id) }}</span>
                 </div>
-                <a-divider
+                <Divider
                     dashed
                     style="border-color: #ddd4"
                     id="divider-mode"
-                ></a-divider>
+                ></Divider>
                 <div id="sell-count">
                     <span>{{ mode === 'buy' ? '购买' : '售出' }}数量</span>
                     <div id="sell-count-select">
@@ -126,10 +126,10 @@
                         />
                     </div>
                 </div>
-                <a-divider
+                <Divider
                     dashed
                     style="border-color: #ddd4; margin: 2vh 0 2vh 0"
-                ></a-divider>
+                ></Divider>
                 <div id="sell-confirm">
                     <span
                         id="sell-total"
@@ -175,6 +175,7 @@ import BoxAnimate from '../components/boxAnimate.vue';
 import { gameKey } from '@motajs/system-action';
 import { IMountedVBind } from '../interface';
 import { tip } from '../use';
+import { Divider } from 'ant-design-vue';
 
 const props = defineProps<IMountedVBind>();
 

@@ -2,8 +2,8 @@
     "compilerOptions": {
         "target": "ESNext",
         "composite": true,
-        "module": "ESNext",
-        "moduleResolution": "Node",
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
         "allowSyntheticDefaultImports": true,
         "strict": true
     },

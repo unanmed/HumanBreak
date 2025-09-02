@@ -5,11 +5,11 @@
             <canvas ref="critical" class="chart"></canvas>
             <div class="slider-div">
                 <span>加攻次数&nbsp;&nbsp;&nbsp;&nbsp;{{ addAtk }}</span>
-                <a-slider
+                <Slider
                     class="slider"
                     v-model:value="addAtk"
                     :max="ceil((originCri.at(-1)?.[0] ?? 2) / ratio) - 1"
-                ></a-slider>
+                ></Slider>
                 <span
                     >最大值&nbsp;&nbsp;&nbsp;&nbsp;{{
                         ceil((originCri.at(-1)?.[0] ?? 2) / ratio) - 1
@@ -17,20 +17,20 @@
                 >
             </div>
         </div>
-        <a-divider
+        <Divider
             dashed
             style="width: 100%; border-color: #ddd4; margin: 1vh 0 1vh 0"
-        ></a-divider>
+        ></Divider>
         <div id="def">
             <div class="des">加防伤害</div>
             <canvas ref="def" class="chart"></canvas>
             <div class="slider-div">
                 <span>加防次数&nbsp;&nbsp;&nbsp;&nbsp;{{ addDef }}</span>
-                <a-slider
+                <Slider
                     class="slider"
                     v-model:value="addDef"
                     :max="ceil((originDef.at(-1)?.[0] ?? 2) / ratio) - 1"
-                ></a-slider>
+                ></Slider>
                 <span
                     >最大值&nbsp;&nbsp;&nbsp;&nbsp;{{
                         ceil((originDef.at(-1)?.[0] ?? 2) / ratio) - 1
@@ -93,6 +93,7 @@
 </template>
 
 <script lang="ts" setup>
+import { Slider, Divider } from 'ant-design-vue';
 import { computed, onMounted, ref, watch } from 'vue';
 import { detailInfo, getCriticalDamage, getDefDamage } from '../tools/book';
 import Chart, { ChartConfiguration } from 'chart.js/auto';

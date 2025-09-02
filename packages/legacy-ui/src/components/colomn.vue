@@ -9,12 +9,12 @@
             <Scroll class="column-left" :id="`column-left-${id}`">
                 <slot name="left"></slot>
             </Scroll>
-            <a-divider
+            <Divider
                 class="divider"
                 dashed
                 style="border-color: #ddd4"
                 :type="isMobile ? 'horizontal' : 'vertical'"
-            ></a-divider>
+            ></Divider>
             <Scroll class="column-right" :id="`column-right-${id}`"
                 ><slot name="right"></slot
             ></Scroll>
@@ -25,6 +25,7 @@
 <script lang="ts" setup>
 import { onMounted, onUpdated } from 'vue';
 import { LeftOutlined } from '@ant-design/icons-vue';
+import { Divider } from 'ant-design-vue';
 import Scroll from './scroll.vue';
 import { isMobile, requireUniqueSymbol } from '../use';
 import { isNil } from 'lodash-es';

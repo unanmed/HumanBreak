@@ -37,11 +37,11 @@
                                 </div>
                             </div>
                         </Scroll>
-                        <a-divider
+                        <Divider
                             class="display-divider"
                             :type="isMobile ? 'horizontal' : 'vertical'"
                             dashed
-                        ></a-divider>
+                        ></Divider>
                     </div>
                 </TransitionGroup>
             </div>
@@ -54,7 +54,7 @@
                         "
                     ></div>
                 </Scroll>
-                <a-divider class="info-divider" dashed></a-divider>
+                <Divider class="info-divider" dashed></Divider>
                 <div class="info-editor" v-if="!!selectedItem">
                     <div class="editor-custom">
                         <component
@@ -86,6 +86,7 @@ import Scroll from '../components/scroll.vue';
 import { isMobile } from '../use';
 import { gameKey } from '@motajs/system-action';
 import { IMountedVBind } from '../interface';
+import { Divider } from 'ant-design-vue';
 
 const props = defineProps<IMountedVBind>();
 

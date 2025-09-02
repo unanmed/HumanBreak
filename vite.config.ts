@@ -1,7 +1,5 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import components from 'unplugin-vue-components/vite';
-import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers';
 import vuejsx from '@vitejs/plugin-vue-jsx';
 import path from 'path';
 import postcssPresetEnv from 'postcss-preset-env';
@@ -39,8 +37,7 @@ export default defineConfig({
             isCustomElement: tag => {
                 return custom.includes(tag) || tag.startsWith('g-');
             }
-        }),
-        components({ resolvers: [AntDesignVueResolver()] })
+        })
     ],
     base: `./`,
     resolve: {

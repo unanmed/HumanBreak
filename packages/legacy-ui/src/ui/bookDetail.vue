@@ -8,10 +8,10 @@
         </div>
         <div id="info" :style="{ top: `${top}px` }">
             <EnemyOne :enemy="enemy!"></EnemyOne>
-            <a-divider
+            <Divider
                 dashed
                 style="margin: 2vh 0 2vh 0; border-color: #ddd4; width: 100%"
-            ></a-divider>
+            ></Divider>
         </div>
         <Transition name="detail">
             <EnemySpecial
@@ -78,6 +78,7 @@ import { LeftOutlined, RightOutlined } from '@ant-design/icons-vue';
 import EnemyCritical from '../panel/enemyCritical.vue';
 import { detailInfo } from '../tools/book';
 import { gameKey } from '@motajs/system-action';
+import { Divider } from 'ant-design-vue';
 
 const props = defineProps<{
     fromBook?: boolean;

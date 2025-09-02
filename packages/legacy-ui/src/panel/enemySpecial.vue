@@ -5,10 +5,10 @@
                 <component :is="info"></component>
             </div>
         </Scroll>
-        <a-divider
+        <Divider
             dashed
             style="margin: 2vh 0 2vh 0; border-color: #ddd4"
-        ></a-divider>
+        ></Divider>
         <div id="critical">
             <div style="font-size: 2.5vh; width: 100%; text-align: center">
                 临界表
@@ -31,6 +31,7 @@
 import { isMobile } from '../use';
 import { detailInfo, getSpecialHint } from '../tools/book';
 import Scroll from '../components/scroll.vue';
+import { Divider } from 'ant-design-vue';
 
 const props = defineProps<{
     fromBook?: boolean;

@@ -11,19 +11,17 @@
         <div id="equipbox-main">
             <div id="equip-list">
                 <div id="filter">
-                    <a-select v-model:value="norm" class="select">
-                        <a-select-option v-for="t of normList" :value="t">{{
+                    <Select v-model:value="norm" class="select">
+                        <SelectOption v-for="t of normList" :value="t">{{
                             t === 'none' ? '所有' : getStatusLabel(t)
-                        }}</a-select-option>
-                    </a-select>
-                    <a-divider type="vertical" class="divider"></a-divider>
-                    <a-select v-model:value="sType" class="select">
-                        <a-select-option value="value">数值</a-select-option>
-                        <a-select-option value="percentage"
-                            >百分比</a-select-option
-                        >
-                    </a-select>
-                    <a-divider type="vertical" class="divider"></a-divider>
+                        }}</SelectOption>
+                    </Select>
+                    <Divider type="vertical" class="divider"></Divider>
+                    <Select v-model:value="sType" class="select">
+                        <SelectOption value="value">数值</SelectOption>
+                        <SelectOption value="percentage">百分比</SelectOption>
+                    </Select>
+                    <Divider type="vertical" class="divider"></Divider>
                     <span
                         @click="changeSort()"
                         class="button-text"
@@ -35,10 +33,10 @@
                         <span v-else><sort-descending-outlined /></span>
                     </span>
                 </div>
-                <a-divider
+                <Divider
                     dashed
                     style="border-color: #ddd4; margin: 1vh 0 1vh 0"
-                ></a-divider>
+                ></Divider>
                 <Scroll id="equip-scroll"
                     ><div
                         class="equip selectable"
@@ -62,12 +60,12 @@
                 >
             </div>
             <div id="equip-status">
-                <a-divider
+                <Divider
                     class="divider"
                     :type="isMobile ? 'horizontal' : 'vertical'"
                     dashed
                     style="border-color: #ddd4"
-                ></a-divider>
+                ></Divider>
                 <div id="equip-status-main">
                     <div id="equip-now">
                         <Scroll
@@ -94,10 +92,10 @@
                             </div>
                         </Scroll>
                     </div>
-                    <a-divider
+                    <Divider
                         dashed
                         style="border-color: #ddd4; margin: 1vh 0 1vh 0"
-                    ></a-divider>
+                    ></Divider>
                     <div id="equip-hero" v-if="!isMobile">
                         <div id="hero-icon">
                             <BoxAnimate
@@ -112,21 +110,21 @@
                         </div>
                     </div>
                 </div>
-                <a-divider
+                <Divider
                     v-if="!isMobile"
                     class="divider"
                     type="vertical"
                     dashed
                     style="border-color: #ddd4"
-                ></a-divider>
+                ></Divider>
             </div>
             <div id="equip-desc">
                 <div id="equip-icon">
                     <BoxAnimate
                         :id="
                             isCol
-                                ? equiped[selected] ?? 'none'
-                                : toShow[selected]?.[0] ?? 'none'
+                                ? (equiped[selected] ?? 'none')
+                                : (toShow[selected]?.[0] ?? 'none')
                         "
                     ></BoxAnimate>
                     <span>{{ equip.name }}</span>
@@ -134,20 +132,20 @@
                 <div id="equip-type">
                     <span>装备孔：{{ equip.equip?.type }}</span>
                 </div>
-                <a-divider
+                <Divider
                     dashed
                     style="border-color: #ddd4; margin: 1vh 0 1vh 0"
-                ></a-divider>
+                ></Divider>
                 <div id="equip-add">
                     <span id="title">增减属性</span>
                     <Scroll style="width: 100%; height: 100%">
                         <component :is="addStatus"></component>
                     </Scroll>
                 </div>
-                <a-divider
+                <Divider
                     dashed
                     style="border-color: #ddd4; margin: 1vh 0 1vh 0"
-                ></a-divider>
+                ></Divider>
                 <div id="equip-desc-text">
                     <span id="title">装备介绍</span>
                     <Scroll id="desc-text" style="height: 100%; width: 100%">
@@ -189,6 +187,7 @@ import { hyper } from 'mutate-animate';
 import { gameKey } from '@motajs/system-action';
 import { IMountedVBind } from '../interface';
 import { isNil } from 'lodash-es';
+import { Divider, Select, SelectOption } from 'ant-design-vue';
 
 const props = defineProps<IMountedVBind>();
 

@@ -8,21 +8,21 @@
         <div id="fly-settings">
             <div id="fly-border">
                 <span>无边框模式</span>
-                <a-switch
+                <Switch
                     class="fly-settings"
                     v-model:checked="noBorder"
                     checked-children="ON"
                     un-checked-children="OFF"
-                ></a-switch>
+                ></Switch>
             </div>
             <div v-if="!isMobile" id="fly-tradition">
                 <span>传统按键模式</span>
-                <a-switch
+                <Switch
                     class="fly-settings"
                     v-model:checked="tradition"
                     checked-children="ON"
                     un-checked-children="OFF"
-                ></a-switch>
+                ></Switch>
             </div>
             <span
                 v-if="!isMobile"
@@ -45,16 +45,16 @@
                         >
                     </div></Scroll
                 >
-                <a-divider type="vertical" dashed id="divider-left"></a-divider>
+                <Divider type="vertical" dashed id="divider-left"></Divider>
                 <div id="fly-map-div">
                     <canvas id="fly-map" @click="click"></canvas>
                 </div>
             </div>
-            <a-divider
+            <Divider
                 id="divider-right"
                 dashed
                 :type="isMobile ? 'horizontal' : 'vertical'"
-            ></a-divider>
+            ></Divider>
             <div id="fly-right">
                 <canvas id="fly-thumbnail" @click="fly" @wheel="wheel"></canvas>
                 <div id="fly-tools">
@@ -104,6 +104,7 @@ import { createChangable } from '../tools/common';
 import { mainSetting } from '../preset/settingIns';
 import { GameStorage } from '@motajs/legacy-system';
 import { IMountedVBind } from '../interface';
+import { Divider, Switch } from 'ant-design-vue';
 
 const props = defineProps<IMountedVBind>();
 
@@ -580,7 +581,10 @@ onUnmounted(() => {
     max-width: 50%;
     text-overflow: ellipsis;
     overflow: hidden;
-    text-shadow: 1px 1px 1px black, 1px -1px 1px black, -1px 1px 1px black,
+    text-shadow:
+        1px 1px 1px black,
+        1px -1px 1px black,
+        -1px 1px 1px black,
         -1px -1px 1px black;
 }
 

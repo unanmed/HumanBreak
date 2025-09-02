@@ -27,11 +27,11 @@
                 </div>
                 <div class="special-text" v-else>无属性</div>
             </div>
-            <a-divider
+            <Divider
                 type="vertical"
                 dashed
                 style="height: 100%; margin: 0 3% 0 1%; border-color: #ddd4"
-            ></a-divider>
+            ></Divider>
             <div class="rightbar">
                 <div class="detail">
                     <div class="detail-info">
@@ -76,7 +76,6 @@
                             }}</span
                         >
                     </div>
-
                     <div class="detail-info">
                         <span style="color: lightsalmon"
                             >临界&nbsp;&nbsp;&nbsp;&nbsp;{{
@@ -110,6 +109,7 @@
 </template>
 
 <script lang="ts" setup>
+import { Divider } from 'ant-design-vue';
 import BoxAnimate from '../components/boxAnimate.vue';
 import { isMobile } from '../use';
 import { ToShowEnemy } from '../tools/book';

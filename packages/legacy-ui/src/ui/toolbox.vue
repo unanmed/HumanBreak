@@ -21,11 +21,11 @@
                             :selected="mode === 'tools'"
                             >消耗道具</span
                         >
-                        <a-divider
+                        <Divider
                             dashed
                             style="border-color: #ddd4; height: 100%"
                             type="vertical"
-                        ></a-divider>
+                        ></Divider>
                         <span
                             class="button-text"
                             @click="mode = 'constants'"
@@ -33,10 +33,10 @@
                             >永久道具</span
                         >
                     </div>
-                    <a-divider
+                    <Divider
                         dashed
                         style="margin: 1vh 0 1vh 0; border-color: #ddd4"
-                    ></a-divider>
+                    ></Divider>
                     <Scroll class="item-list">
                         <div
                             class="item selectable"
@@ -62,12 +62,12 @@
                         </div>
                     </Scroll>
                 </div>
-                <a-divider
+                <Divider
                     dashed
                     :type="isMobile ? 'horizontal' : 'vertical'"
                     class="divider"
                     style="border-color: #ddd4; margin: 1%"
-                ></a-divider>
+                ></Divider>
             </div>
             <div id="detail">
                 <div id="info">
@@ -85,13 +85,13 @@
                         <span>{{
                             selected === 'none'
                                 ? '永久道具'
-                                : getClsName(all[selected].cls as ItemMode) ??
-                                  '永久道具'
+                                : (getClsName(all[selected].cls as ItemMode) ??
+                                  '永久道具')
                         }}</span>
                     </div>
                 </div>
                 <span style="margin-top: 2vh">点击该物品以使用</span>
-                <a-divider dashed style="border-color: #ddd4"></a-divider>
+                <Divider dashed style="border-color: #ddd4"></Divider>
                 <div id="desc">
                     <span>道具描述</span>
                     <Scroll id="desc-text">
@@ -115,7 +115,7 @@ import { getClsName, getItems } from '../tools/toolbox';
 import { isMobile } from '../use';
 import { type } from '../utils';
 import { hyper } from 'mutate-animate';
-import { message } from 'ant-design-vue';
+import { Divider, message } from 'ant-design-vue';
 import { gameKey } from '@motajs/system-action';
 import { IMountedVBind } from '../interface';
 import { isNil } from 'lodash-es';

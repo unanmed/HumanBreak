@@ -1,6 +1,6 @@
 <template>
     <div id="load">
-        <a-progress
+        <Progress
             class="task-progress"
             type="circle"
             :percent="(loading / totalTask) * 100"
@@ -9,17 +9,17 @@
             <template #format>
                 <span>{{ loaded }} / {{ totalTask }}</span>
             </template>
-        </a-progress>
+        </Progress>
         <div class="byte-div">
             <span class="byte-progress-tip"
                 >{{ formatSize(loadedByte) }} /
                 {{ formatSize(totalByte) }}</span
             >
-            <a-progress
+            <Progress
                 class="byte-progress"
                 type="line"
                 :percent="loadedPercent"
-            ></a-progress>
+            ></Progress>
         </div>
     </div>
 </template>
@@ -35,6 +35,7 @@ import { formatSize } from '../utils';
 import { logger } from '@motajs/common';
 import { sleep } from 'mutate-animate';
 import { IMountedVBind } from '../interface';
+import { Progress } from 'ant-design-vue';
 
 const props = defineProps<IMountedVBind>();
 

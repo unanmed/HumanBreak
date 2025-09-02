@@ -29,14 +29,14 @@
                 <meh-outlined />
             </span>
             <div id="danmaku-input-div">
-                <a-input
+                <Input
                     id="danmaku-input-input"
-                    :max-length="200"
                     v-model:value="inputValue"
+                    :max-length="200"
                     placeholder="请在此输入弹幕，显示中括号请使用\[或\]"
                     autocomplete="off"
                     @change="input(inputValue)"
-                    @pressEnter="inputEnter()"
+                    @press-enter="inputEnter()"
                 />
             </div>
             <span
@@ -50,14 +50,14 @@
         <Transition name="danmaku">
             <div v-if="cssOpened" id="danmaku-css">
                 <span id="danmaku-css-hint">编辑弹幕的 CSS 样式</span>
-                <a-input
+                <Input
                     id="danmaku-css-input"
-                    :max-length="300"
                     v-model:value="cssInfo"
+                    :max-length="300"
                     placeholder="请在此输入样式"
                     autocomplete="off"
                     @blur="inputCSS(cssInfo)"
-                    @pressEnter="inputCSS(cssInfo)"
+                    @press-enter="inputCSS(cssInfo)"
                 />
                 <span v-if="cssError" id="danmaku-css-error">{{
                     cssError
@@ -113,7 +113,7 @@
                         ></span>
                     </div>
                 </Scroll>
-                <a-input
+                <Input
                     id="danmaku-color-input"
                     :max-length="100"
                     v-model:value="nowColor"
@@ -121,7 +121,7 @@
                     autocomplete="off"
                     @blur="inputColor(nowColor)"
                     @pressEnter="inputColor(nowColor)"
-                ></a-input>
+                ></Input>
             </div>
         </Transition>
         <Transition name="danmaku-icon">
@@ -168,6 +168,7 @@ import Scroll from '../components/scroll.vue';
 import BoxAnimate from '../components/boxAnimate.vue';
 import { IMountedVBind } from '../interface';
 import { tip } from '../use';
+import { Input } from 'ant-design-vue';
 
 const props = defineProps<IMountedVBind>();
 
