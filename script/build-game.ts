@@ -44,7 +44,6 @@ async function buildClient(outDir: string) {
                     'Opera >= 43'
                 ],
                 polyfills: true,
-                modernPolyfills: true,
                 renderModernChunks: false
             })
         ],
@@ -60,18 +59,6 @@ async function buildClient(outDir: string) {
                     assetFileNames: 'assets/[name].[hash][extname]',
                     manualChunks: {
                         antdv: ['ant-design-vue', '@ant-design/icons-vue'],
-                        common: [
-                            'lodash-es',
-                            'axios',
-                            'lz-string',
-                            'chart.js',
-                            'mutate-animate',
-                            'eventemitter3',
-                            'gl-matrix',
-                            'jszip',
-                            'anon-tokyo',
-                            'vue'
-                        ],
                         audio: [
                             'codec-parser',
                             'opus-decoder',
