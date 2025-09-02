@@ -507,12 +507,9 @@ async function buildGame() {
     });
 
     await Promise.all(
-        resources.map(v => {
-            return writeFile(
-                resolve(tempDir, 'resource', v.fileName),
-                v.buffer
-            );
-        })
+        resources.map(v =>
+            writeFile(resolve(tempDir, 'resource', v.fileName), v.buffer)
+        )
     ).catch(reason => {
         logProgress(5, ProgressStatus.Fail);
         process.stderr.write(String(reason));

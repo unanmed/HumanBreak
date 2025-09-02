@@ -5,10 +5,7 @@ function main() {
     this.version = '1.0.0'; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
 
     this.useCompress = false; // 是否使用压缩文件
-    this.pluginUseCompress = false;
-    // 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。
-    // 请注意，只有useCompress是false时才会读取floors目录下的文件，为true时会直接读取libs目录下的floors.min.js文件。
-    // 如果要进行剧本的修改请务必将其改成false。
+    this.skipResourcePackage = true; // 跳过资源打包
 
     this.bgmRemote = false; // 是否采用远程BGM
     this.bgmRemoteRoot = 'https://h5mota.com/music/'; // 远程BGM的根目录
@@ -138,6 +135,9 @@ main.prototype.init = async function (mode, callback) {
 };
 
 main.prototype.loadSync = function (mode, callback) {
+    // 录像验证中应该在所有内容初始化之前加载 data.process.js
+    loadSource('data.process.js');
+
     main.mode = mode;
     if (main.useCompress) {
         main.loadMod('project', 'project', () => 0);
@@ -157,6 +157,8 @@ main.prototype.loadSync = function (mode, callback) {
             main.loadMod('libs', v, () => 0);
         });
     }
+
+    main.loading.emit('coreLoaded');
 
     for (const name of main.loadList) {
         if (name === 'core') continue;
@@ -184,7 +186,6 @@ main.prototype.loadSync = function (mode, callback) {
     });
 
     core.initSync(coreData, callback);
-    main.loading.emit('coreLoaded');
     main.loading.emit('coreInit');
     core.initStatus.maps = core.maps._initMaps();
     core.resize();
@@ -215,8 +216,6 @@ main.prototype.loadAsync = async function (mode, callback) {
     const mainData = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main;
     Object.assign(main, mainData);
 
-    // main.importFonts(main.fonts);
-
     // 加载核心js代码
     if (main.useCompress) {
         await main.loadScript(`libs/libs.min.js?v=${main.version}`);
@@ -243,15 +242,15 @@ main.prototype.loadAsync = async function (mode, callback) {
     if (main.useCompress) {
         await main.loadScript(`project/floors.min.js?v=${main.version}`);
     } else {
-        await new Promise(res => {
-            main.loadScript(
+        await main
+            .loadScript(
                 `/all/__all_floors__.js?v=${
                     main.version
                 }&id=${main.floorIds.join(',')}`
-            ).then(
+            )
+            .then(
                 () => {
                     main.supportBunch = true;
-                    res();
                 },
                 async () => {
                     await Promise.all(
@@ -259,10 +258,8 @@ main.prototype.loadAsync = async function (mode, callback) {
                             main.loadScript(`project/floors/${v}.js`)
                         )
                     );
-                    res();
                 }
             );
-        });
     }
 
     // 初始化core
@@ -358,97 +355,6 @@ main.prototype.listen = function () {
     ////// 开始选择时 //////
     main.dom.body.onselectstart = function () {
         return false;
-    };
-
-    ////// 鼠标按下时 //////
-    main.dom.data.onmousedown = function (e) {
-        try {
-            e.stopPropagation();
-            var loc = core.actions._getClickLoc(e.offsetX, e.offsetY);
-            if (loc == null) return;
-            core.ondown(loc);
-        } catch (ee) {
-            console.error(ee);
-        }
-    };
-
-    ////// 鼠标移动时 //////
-    main.dom.data.onmousemove = function (e) {
-        try {
-            var loc = core.actions._getClickLoc(e.offsetX, e.offsetY);
-            if (loc == null) return;
-            core.onmove(loc);
-        } catch (ee) {
-            console.error(ee);
-        }
-    };
-
-    ////// 鼠标放开时 //////
-    main.dom.data.onmouseup = function (e) {
-        try {
-            var loc = core.actions._getClickLoc(e.offsetX, e.offsetY);
-            if (loc == null) return;
-            core.onup(loc);
-        } catch (ee) {
-            console.error(ee);
-        }
-    };
-
-    ////// 鼠标滑轮滚动时 //////
-    main.dom.data.onmousewheel = function (e) {
-        try {
-            if (e.wheelDelta) core.onmousewheel(Math.sign(e.wheelDelta));
-            else if (e.detail) core.onmousewheel(Math.sign(e.detail));
-        } catch (ee) {
-            console.error(ee);
-        }
-    };
-
-    ////// 手指在触摸屏开始触摸时 //////
-    main.dom.data.ontouchstart = function (e) {
-        try {
-            e.preventDefault();
-            var loc = core.actions._getClickLoc(
-                e.targetTouches[0].clientX,
-                e.targetTouches[0].clientY,
-                true
-            );
-            if (loc == null) return;
-            main.lastTouchLoc = loc;
-            core.ondown(loc);
-        } catch (ee) {
-            console.error(ee);
-        }
-    };
-
-    ////// 手指在触摸屏上移动时 //////
-    main.dom.data.ontouchmove = function (e) {
-        try {
-            e.preventDefault();
-            var loc = core.actions._getClickLoc(
-                e.targetTouches[0].clientX,
-                e.targetTouches[0].clientY,
-                true
-            );
-            if (loc == null) return;
-            main.lastTouchLoc = loc;
-            core.onmove(loc);
-        } catch (ee) {
-            console.error(ee);
-        }
-    };
-
-    ////// 手指离开触摸屏时 //////
-    main.dom.data.ontouchend = function (e) {
-        try {
-            e.preventDefault();
-            if (main.lastTouchLoc == null) return;
-            var loc = main.lastTouchLoc;
-            delete main.lastTouchLoc;
-            core.onup(loc);
-        } catch (e) {
-            console.error(e);
-        }
     };
 
     window.onblur = function () {
