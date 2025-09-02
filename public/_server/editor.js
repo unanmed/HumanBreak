@@ -173,17 +173,7 @@ editor.prototype.init = function (callback) {
     editor.airwallImg = new Image();
     editor.airwallImg.src = './project/materials/airwall.png';
 
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'index.html', true);
-    xhr.onload = function () {
-        if (xhr.status != 200) {
-            alert("HTTP " + xhr.status);
-            return;
-        }
-        var str = xhr.response.split('<!-- injection -->');
-        if (str.length != 3) window.onerror("index.html格式不正确");
-        editor.dom.gameInject.innerHTML = str[1];
-        
+    var execute = function() {
         var cvs = ['bg', 'event', 'event2', 'fg'].map(function(e) {
             return document.getElementById(e);
         });
@@ -197,7 +187,7 @@ editor.prototype.init = function (callback) {
         var mainScript = document.createElement('script');
 
         mainScript.onload = function() {
-    
+
             var useCompress = main.useCompress;
             main.useCompress = false;
         
@@ -303,17 +293,14 @@ editor.prototype.init = function (callback) {
         mainScript.id = "mainScript";
         mainScript.src = "main.js";
         editor.dom.gameInject.appendChild(mainScript);
-    };
-    xhr.onabort = xhr.ontimeout = xhr.onerror = function () {
-        alert("无法访问index.html");
     }
-
+    
     editor.config = new editor_config();
     editor.config.load(function() {
         var theme = editor.config.get('theme', 'editor_color');
         document.getElementById('color_css').href = '_server/css/' + theme + '.css';
         editor.dom.editorTheme.value = theme;
-        xhr.send();
+        execute();
     });
 }
 

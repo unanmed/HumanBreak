@@ -121,7 +121,11 @@ main.floors.MT0=
     "autoEvent": {},
     "bgm": "cave.opus",
     "beforeBattle": {},
-    "bg2map": [],
-    "fg2map": [],
+    "bg2map": [
+
+],
+    "fg2map": [
+
+],
     "cannotMoveIn": {}
 }

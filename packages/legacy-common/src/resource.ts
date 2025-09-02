@@ -610,16 +610,6 @@ export async function loadCompressedResource() {
     });
     const list: CompressedLoadList = JSON.parse(data.data);
 
-    // const d = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d;
-    // 对于bgm，直接按照原来的方式加载即可
-    // d.main.bgms.forEach(v => {
-    //     const res = LoadTask.add('audio', `audio/${v}`);
-    //     Mota.r(() => {
-    //         res.once('loadStart', res => {
-    //             Mota.require('var', 'bgm').add(`bgms.${v}`, res.resource!);
-    //         });
-    //     });
-    // });
     // 对于区域内容，按照zip格式进行加载，然后解压处理
     const autotiles: Partial<Record<AllIdsOf<'autotile'>, HTMLImageElement>> =
         {};
@@ -716,7 +706,7 @@ export async function loadCompressedResource() {
                         document.fonts.add(
                             new FontFace(name.slice(0, -4), font)
                         );
-                    } else if (usage === 'sound') {
+                    } else if (usage === 'sound' && main.mode === 'play') {
                         const { soundPlayer } = Mota.require(
                             '@user/client-modules'
                         );

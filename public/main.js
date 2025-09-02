@@ -5,6 +5,7 @@ function main() {
     this.version = '1.0.0'; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
 
     this.useCompress = false; // 是否使用压缩文件
+    this.scriptCompress = false; // 是否经过打包
     this.skipResourcePackage = true; // 跳过资源打包
 
     this.bgmRemote = false; // 是否采用远程BGM

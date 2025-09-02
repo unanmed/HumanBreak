@@ -435,9 +435,13 @@ async function buildGame() {
             );
         }
         const code = transformed.code;
+        const modifiedHead = head.replace(
+            'this.scriptCompress = false;',
+            'this.scriptCompress = true;'
+        );
         await writeFile(
             resolve(tempDir, 'common/main.js'),
-            head + '\n// >>>> body end\n' + code,
+            modifiedHead + '\n// >>>> body end\n' + code,
             'utf-8'
         );
     } catch (e) {
@@ -523,7 +527,8 @@ async function buildGame() {
         'project/icons.js',
         'project/items.js',
         'project/maps.js',
-        'project/plugins.js'
+        'project/plugins.js',
+        'project/materials/airwall.png'
     ];
 
     clientPackArr.forEach(v => {

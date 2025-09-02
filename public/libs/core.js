@@ -267,10 +267,13 @@ function core() {
 
 ////// 初始化 //////
 core.prototype.init = async function (coreData, callback) {
+    if (main.replayChecking) {
+        console.log(`core.init should be called when not replay checking!`);
+    }
+
     this._forwardFuncs();
     for (var key in coreData) core[key] = coreData[key];
     await this._loadGameProcess();
-    await this._loadPluginAsync();
     this._init_flags();
     this._init_platform();
     this._init_others();
@@ -290,10 +293,21 @@ core.prototype.init = async function (coreData, callback) {
         }
     }
 
-    if (main.replayChecking || main.mode === 'editor') {
-        core.loader._load(function () {
+    if (main.mode === 'editor') {
+        if (main.scriptCompress) {
+            const { LoadTask, loadCompressedResource } = Mota.require(
+                '@motajs/legacy-common'
+            );
+            await loadCompressedResource();
+            await LoadTask.load();
+            core.loader._loadMaterials_afterLoad();
             core._afterLoadResources(callback);
-        });
+            Mota.require('@user/data-base').loading.emit('loaded');
+        } else {
+            core.loader._load(function () {
+                core._afterLoadResources(callback);
+            });
+        }
     } else {
         if (main.renderLoaded)
             Mota.require('@motajs/legacy-ui').fixedUi.open('load', {
@@ -312,7 +326,6 @@ core.prototype.init = async function (coreData, callback) {
 core.prototype.initSync = function (coreData, callback) {
     this._forwardFuncs();
     for (var key in coreData) core[key] = coreData[key];
-    this._loadGameProcessSync();
     this._loadPluginSync();
     this._init_flags();
     this._init_platform();
@@ -323,42 +336,21 @@ core.prototype.initSync = function (coreData, callback) {
     });
 };
 
-core.prototype._loadPluginAsync = async function () {
-    if (!main.useCompress) {
-        await main.loadScript(`project/plugins.js?v=${main.version}`);
-    }
-    this._initPlugins();
-};
-
 core.prototype._loadPluginSync = function () {
     if (main.useCompress) main.loadMod('project', 'project', () => 0);
     else {
         main.pureData.forEach(v => main.loadMod('project', v, () => 0));
     }
-    this._initPlugins();
-};
-
-core.prototype._initPlugins = function () {
-    for (const [key, value] of Object.entries(
-        plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1
-    )) {
-        try {
-            value?.call(plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1);
-        } catch (e) {
-            console.error(`Plugin '${key}' init failed.`);
-            console.error(e);
-        }
-    }
 };
 
 core.prototype._loadGameProcess = async function () {
     // 加载游戏进程代码
-    if (main.pluginUseCompress && main.replayChecking) {
-        await main.loadScript(`project/processG.min.js?v=${main.version}`);
+    if (main.scriptCompress && main.replayChecking) {
+        await main.loadScript(`data.process.js`);
     } else {
         if (main.mode === 'editor') {
-            if (main.pluginUseCompress) {
-                await main.loadScript(`project/processG.min.js`);
+            if (main.scriptCompress) {
+                await main.loadScript(`data.process.js`);
             } else {
                 await main.loadScript(`esm?name=src/data.ts`, true);
             }
@@ -367,11 +359,6 @@ core.prototype._loadGameProcess = async function () {
     if (main.useCompress) {
         await main.loadScript(`project/project.min.js`);
     }
-};
-
-core.prototype._loadGameProcessSync = function () {
-    if (main.useCompress) main.loadMod('project', 'processG', () => 0);
-    else main.loadMod('project', 'processG.min', () => 0);
 };
 
 core.prototype._init_flags = function () {
