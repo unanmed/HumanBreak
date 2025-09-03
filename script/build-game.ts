@@ -1,7 +1,7 @@
 import { build, loadConfigFromFile, mergeConfig, UserConfig } from 'vite';
 import legacy from '@vitejs/plugin-legacy';
 import { resolve } from 'path';
-import { copy, emptyDir, ensureDir } from 'fs-extra';
+import { copy, emptyDir, ensureDir, pathExists } from 'fs-extra';
 import { OutputAsset, OutputChunk, RollupOutput } from 'rollup';
 import Fontmin from 'fontmin';
 import { readdir, readFile, rmdir, stat, writeFile } from 'fs/promises';
@@ -597,6 +597,15 @@ async function buildGame() {
             resolve(process.cwd(), 'script/template/启动服务.exe'),
             resolve(distDir, '启动服务.exe')
         );
+
+        const bgPath = 'project/images/bg.jpg';
+
+        if (await pathExists(resolve(tempDir, 'client', bgPath))) {
+            await copy(
+                resolve(tempDir, 'client', bgPath),
+                resolve(distDir, bgPath)
+            );
+        }
     } catch (e) {
         logProgress(6, ProgressStatus.Fail);
         process.stderr.write(String(e));
