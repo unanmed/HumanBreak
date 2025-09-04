@@ -48,7 +48,8 @@ export const Statistics = defineComponent<StatisticsProps>(props => {
         <ListPage
             list={list}
             selected="total"
-            loc={[180, 0, 630, 480]}
+            loc={[180, 0, 480, 480]}
+            height={470}
             close
             onClose={close}
             lineHeight={24}
@@ -73,11 +74,23 @@ const statisticsPanelProps = {
 } satisfies SetupComponentOptions<StatisticsPanelProps>;
 
 const TotalStatistics = defineComponent<StatisticsPanelProps>(props => {
-    return () => (
-        <container>
-            <TextContent text="" width={310}></TextContent>
-        </container>
-    );
+    return () => {
+        const total = props.data.total;
+
+        const text1 = `全塔地图中，共有怪物${total.enemyCount}个。`;
+        const text2 = `共有宝石${total.gemCount}个，共加攻击力${total.atkValue}点、防御力${total.defValue}点，魔防${total.mdefValue}点。`;
+        const text3 = `共有血瓶${total.potionCount}个，共加生命值${total.potionValue}点。`;
+
+        return (
+            <TextContent
+                text={`${text1}${text2}${text3}`}
+                width={330}
+                loc={[0, 5, 330, 470]}
+                height={470}
+                lineHeight={9}
+            ></TextContent>
+        );
+    };
 }, statisticsPanelProps);
 
 const FloorStatistics = defineComponent<StatisticsPanelProps>(props => {
