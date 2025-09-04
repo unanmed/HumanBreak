@@ -277,10 +277,10 @@ export const PauseIcon = defineIcon(1, (loc, pad) => {
 export const DoubleArrow = defineIcon(1, (loc, pad) => {
     const path = new Path2D();
     const path2 = new Path2D();
-    const [, , width, height, cx, cy] = loc;
+    const [, , , height, cx, cy] = loc;
     const [left, right, top, bottom] = pad(5);
     path.moveTo(left, top + height / 12);
-    path.lineTo(cx + width / 8, cy);
+    path.lineTo(cx, cy);
     path.lineTo(left, bottom - height / 12);
     path.closePath();
     path2.moveTo(cx, top + height / 12);

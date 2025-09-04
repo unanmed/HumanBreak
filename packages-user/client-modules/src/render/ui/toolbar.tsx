@@ -25,6 +25,7 @@ import { saveSave, saveLoad } from './save';
 import { mainUIController } from './controller';
 import { MAIN_WIDTH, MAIN_HEIGHT } from '../shared';
 import { openSettings } from './settings';
+import { openViewMap } from './viewmap';
 
 interface ToolbarProps extends DefaultProps {
     loc?: ElementLocator;
@@ -110,9 +111,7 @@ export const PlayingToolbar = defineComponent<
     const redo = () => core.doSL('autoSave', 'reload');
     const numpad = () => emit('numpad');
     const view = () => {
-        if (core.isPlaying() && !core.isMoving() && !core.status.lockControl) {
-            core.ui._drawViewMaps();
-        }
+        openViewMap(mainUIController, [0, 0, MAIN_WIDTH, MAIN_HEIGHT]);
     };
     const danmaku = () => requestAnimationFrame(openDanmakuPoster);
     const replay = () => core.ui._drawReplay();
