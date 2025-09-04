@@ -48,6 +48,8 @@ export function createRender() {
 
 export * from './components';
 export * from './elements';
+export * from './fx';
+export * from './legacy';
 export * from './ui';
 export * from './utils';
 export * from './renderer';

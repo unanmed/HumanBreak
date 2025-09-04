@@ -39,7 +39,7 @@ main.floors.MT12=
             "手机端可以点击右下角的难度来切换下方工具栏至数字键",
             {
                 "type": "function",
-                "function": "function(){\nconst HeroSkill = Mota.require('@user/data-state').Mechanism.HeroSkill;\nHeroSkill.learnSkill(HeroSkill.Jump);\n}"
+                "function": "function(){\nconst HeroSkill = Mota.require('@user/data-state').HeroSkill;\nHeroSkill.learnSkill(HeroSkill.Jump);\n}"
             },
             {
                 "type": "hide",

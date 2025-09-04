@@ -242,8 +242,9 @@ export function canUpgrade(skill: number) {
     if (consume > core.status.hero.mdef) return false;
     const level = getSkillLevel(skill);
     const s = getSkillFromIndex(skill);
-    if (level === s?.max) return false;
-    const front = s?.front ?? [];
+    if (!s) return false;
+    if (level >= s.max) return false;
+    const front = s.front;
     for (const [skill, level] of front) {
         if (getSkillLevel(skill) < level) return false;
     }

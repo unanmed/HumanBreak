@@ -62,10 +62,15 @@ export function initReplay() {
     core.registerReplayAction('upgradeSkill', name => {
         if (!name.startsWith('skill:')) return false;
         const skill = parseInt(name.slice(6));
-        upgradeSkill(skill);
+        const success = upgradeSkill(skill);
         const s = getSkillFromIndex(skill);
         const skillName = s?.title;
         core.status.route.push(name);
+        if (!success) {
+            const { tip } = Mota.require('@motajs/legacy-ui');
+            tip('error', `升级技能：${skillName}失败`);
+            return false;
+        }
         tipAndWait(`升级技能：${skillName}`, 1000).then(() => {
             core.replay();
         });

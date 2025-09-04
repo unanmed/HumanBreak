@@ -123,7 +123,7 @@ main.floors.tower7=
                 "下面，就让我们开始吧！",
                 {
                     "type": "function",
-                    "function": "function(){\nMota.Plugin.require('replay_g').readyClip();\n}"
+                    "function": "function(){\nMota.require('replay_g').readyClip();\n}"
                 }
             ]
         },
@@ -168,7 +168,7 @@ main.floors.tower7=
         },
         {
             "type": "function",
-            "function": "function(){\nMota.Plugin.require('boss_r').startTowerBoss();\n}"
+            "function": "function(){\nMota.require('boss_r').startTowerBoss();\n}"
         }
     ],
     "eachArrive": [],

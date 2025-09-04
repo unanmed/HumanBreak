@@ -5,3 +5,5 @@ export function createLegacy() {
     createGameCanvas();
     createShadow();
 }
+
+export * from './shadow';
