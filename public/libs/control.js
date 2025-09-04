@@ -1275,10 +1275,6 @@ control.prototype.startReplay = function (list) {
     core.setOpacity('replay', 0.6);
     this._replay_drawProgress();
     core.updateStatusBar(false, true);
-    // Mota.Plugin.require('utils_r').tip(
-    //     'warn',
-    //     '由于不可抗力，录像播放过程中将没有勇士移动动画'
-    // );
     Mota.require('@user/data-base').hook.emit('replayStatus', false);
     this.replay();
 };

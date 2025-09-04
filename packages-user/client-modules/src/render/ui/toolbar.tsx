@@ -182,7 +182,9 @@ export const ReplayingToolbar = defineComponent<ReplayingProps>(props => {
     const speedDown = () => core.speedDownReplay();
     const speedUp = () => core.speedUpReplay();
     const book = () => core.openBook(true);
-    const save = () => core.save(true);
+    const save = () => {
+        saveSave(mainUIController, [0, 0, MAIN_WIDTH, MAIN_HEIGHT]);
+    };
     const view = () => {
         if (core.isPlaying() && !core.isMoving() && !core.status.lockControl) {
             core.ui._drawViewMaps();
