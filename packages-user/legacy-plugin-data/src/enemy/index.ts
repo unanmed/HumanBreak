@@ -1,6 +1,8 @@
-import { init as initCheckBlock } from './checkblock';
+import { createCheckBlock } from './checkblock';
 
-initCheckBlock();
+export function createEnemy() {
+    createCheckBlock();
+}
 
 export * from './checkblock';
 export * from './remainEnemy';

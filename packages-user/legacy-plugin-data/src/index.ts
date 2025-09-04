@@ -4,10 +4,12 @@ import { initFiveLayer } from './fiveLayer';
 import { createHook } from './hook';
 import { initReplay } from './replay';
 import { initUI } from './ui';
+import { createEnemy } from './enemy';
 
 export function createLegacy() {
     initFallback();
     loading.once('coreInit', () => {
+        createEnemy();
         initFiveLayer();
         createHook();
         initReplay();
@@ -15,6 +17,7 @@ export function createLegacy() {
     });
 }
 
+export * from './enemy';
 export * from './chase';
 export * from './fallback';
 export * from './fiveLayer';
