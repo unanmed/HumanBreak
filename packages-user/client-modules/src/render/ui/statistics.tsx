@@ -17,6 +17,9 @@ export interface StatisticsDataOneFloor {
     atkValue: number;
     defValue: number;
     mdefValue: number;
+    atkGemCount: number;
+    defGemCount: number;
+    mdefGemCount: number;
 }
 
 export interface StatisticsData {
@@ -137,7 +140,10 @@ export function calculateStatisticsOne(
         potionValue: 0,
         atkValue: 0,
         defValue: 0,
-        mdefValue: 0
+        mdefValue: 0,
+        atkGemCount: 0,
+        defGemCount: 0,
+        mdefGemCount: 0
     };
     if (!diff) return statistics;
     core.status.maps[floorId].blocks.forEach(v => {
@@ -165,12 +171,15 @@ export function calculateStatisticsOne(
                 }
                 if (atk > 0) {
                     statistics.atkValue += atk;
+                    statistics.atkGemCount++;
                 }
                 if (def > 0) {
                     statistics.defValue += def;
+                    statistics.defGemCount++;
                 }
                 if (mdef > 0) {
                     statistics.mdefValue += mdef;
+                    statistics.mdefGemCount++;
                 }
             }
         }
@@ -224,6 +233,13 @@ export function calculateStatistics(): StatisticsData {
         prev.mdefValue += curr.mdefValue;
         prev.potionCount += curr.potionCount;
         prev.potionValue += curr.potionValue;
+        return prev;
+    });
+
+    const potionGem = floors.values().reduce((prev, curr) => {
+        prev.atkGemCount += curr.atkGemCount;
+        prev.defGemCount += curr.defGemCount;
+        prev.mdefGemCount += curr.mdefGemCount;
         return prev;
     });
 
