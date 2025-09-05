@@ -123,7 +123,7 @@ main.floors.tower7=
                 "下面，就让我们开始吧！",
                 {
                     "type": "function",
-                    "function": "function(){\nMota.require('replay_g').readyClip();\n}"
+                    "function": "function(){\nMota.require('@user/legacy-plugin-data').readyClip();\n}"
                 }
             ]
         },

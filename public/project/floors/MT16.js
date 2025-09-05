@@ -89,7 +89,7 @@ main.floors.MT16=
                 "no": [
                     {
                         "type": "function",
-                        "function": "function(){\nMota.require('replay_g').readyClip();\n}"
+                        "function": "function(){\nMota.require('@user/legacy-plugin-data').readyClip();\n}"
                     },
                     {
                         "type": "choices",
@@ -400,7 +400,7 @@ main.floors.MT16=
             },
             {
                 "type": "function",
-                "function": "function(){\nMota.require('chase_r').start(false);\n}"
+                "function": "function(){\nMota.require('legacy-plugin-client').start(false);\n}"
             },
             {
                 "type": "autoSave"

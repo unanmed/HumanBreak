@@ -539,7 +539,7 @@ export class Damage extends RenderItem<EDamageEvent> {
             });
 
             ctx.drawImage(temp.canvas, px, py, size, size);
-            block.cache.set(v, new CanvasCacheItem(temp, temp.symbol));
+            block.cache.set(v, new CanvasCacheItem(temp, temp.symbol, this));
         });
         ctx.restore();
         // console.timeEnd('damage');

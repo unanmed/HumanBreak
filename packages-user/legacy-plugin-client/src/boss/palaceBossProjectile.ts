@@ -73,6 +73,7 @@ export class SplittableBall extends Projectile<PalaceBoss> {
     private splitted: boolean = false;
 
     static init(colors: Record<string, string[]>) {
+        this.ball.forEach(v => mainRenderer.deleteCanvas(v));
         this.ball.clear();
         for (const [key, color] of Object.entries(colors)) {
             const canvas = mainRenderer.requireCanvas();

@@ -24,7 +24,8 @@ export class MotaOffscreenCanvas2D extends EventEmitter<OffscreenCanvasEvent> {
 
     /**
      * 创建一个新的离屏画布\
-     * **注意**：如果你在自定义渲染元素中使用，请避免使用此构造函数，而应该使用 `RenderItem.requireCanvas`
+     * **注意**：如果你在自定义渲染元素中使用，请避免使用此构造函数，而应该使用 `RenderItem.requireCanvas`，
+     * 之后如果不使用，再使用 `RenderItem.deleteCanvas` 删除。
      * @param alpha 是否启用透明度通道
      * @param canvas 指定画布，不指定时会自动创建一个新画布
      */

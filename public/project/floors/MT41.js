@@ -70,7 +70,7 @@ main.floors.MT41=
             "那我就送你回到标题界面吧！",
             {
                 "type": "function",
-                "function": "function(){\nMota.require('achievement_r').completeAchievement('explore', 0);\n}"
+                "function": "function(){\n//Mota.require('achievement_r').completeAchievement('explore', 0);\n}"
             },
             {
                 "type": "restart"

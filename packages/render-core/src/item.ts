@@ -348,10 +348,10 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     /** 这个渲染元素使用到的所有画布 */
     protected readonly canvases: Set<MotaOffscreenCanvas2D> = new Set();
     /** 这个渲染元素每个画布的配置信息 */
-    private readonly canvasMap: Map<
+    private readonly canvasMap: WeakMap<
         MotaOffscreenCanvas2D,
         RenderItemCanvasData
-    > = new Map();
+    > = new WeakMap();
     //#endregion
 
     //#region 交互事件
@@ -1305,6 +1305,14 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this.emit('destroy');
         this.removeAllListeners();
         this.canvases.clear();
+        this.cache.clear();
+        this.propagationStoped.clear();
+        this.cachedEvent.clear();
+        this.mouseId.clear();
+        this.touchId.clear();
+        this.children.clear();
+        this._root = void 0;
+        this._parent = void 0;
     }
 }
 

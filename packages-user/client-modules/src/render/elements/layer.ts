@@ -774,6 +774,7 @@ export class Layer extends Container<ELayerEvent> {
         const num = this.background;
 
         const data = texture.getRenderable(num);
+        this.backImage.forEach(v => this.deleteCanvas(v));
         this.backImage = [];
         if (!data) return;
 
@@ -800,6 +801,7 @@ export class Layer extends Container<ELayerEvent> {
 
             this.backImage.push(canvas);
         }
+        this.deleteCanvas(temp);
 
         for (const ex of this.extend.values()) {
             ex.onBackgroundGenerated?.(this, this.backImage);
@@ -1239,7 +1241,10 @@ export class Layer extends Container<ELayerEvent> {
                 blockSize * cell,
                 blockSize * cell
             );
-            this.block.cache.set(index, new CanvasCacheItem(temp, temp.symbol));
+            this.block.cache.set(
+                index,
+                new CanvasCacheItem(temp, temp.symbol, this)
+            );
         });
     }
 

@@ -48,10 +48,10 @@ function constructor(
 创建一个新的离屏画布。  
 **参数**
 
--   `alpha`: 是否启用透明度通道（默认为 `true`）。
--   `canvas`: 可指定现有画布，未提供时自动创建新画布。  
-    **注意**
--   在自定义渲染元素中，建议使用 `RenderItem.requireCanvas` 而非直接调用此构造函数。
+- `alpha`: 是否启用透明度通道（默认为 `true`）。
+- `canvas`: 可指定现有画布，未提供时自动创建新画布。  
+  **注意**
+- 在自定义渲染元素中，建议使用 `RenderItem.requireCanvas` 而非直接调用此构造函数。之后如果不使用，再使用 `RenderItem.deleteCanvas` 删除。
 
 ---
 
@@ -67,11 +67,11 @@ function size(width: number, height: number): void;
 设置画布的尺寸。  
 **参数**
 
--   `width`: 逻辑宽度（最小为 1）。
--   `height`: 逻辑高度（最小为 1）。  
-    **行为**
--   自动计算缩放比例（考虑 `highResolution` 和 `autoScale`）。
--   调整画布物理尺寸和样式尺寸。
+- `width`: 逻辑宽度（最小为 1）。
+- `height`: 逻辑高度（最小为 1）。  
+  **行为**
+- 自动计算缩放比例（考虑 `highResolution` 和 `autoScale`）。
+- 调整画布物理尺寸和样式尺寸。
 
 **示例**
 
@@ -92,7 +92,7 @@ function withGameScale(auto: boolean): void;
 设置画布是否跟随 `core.domStyle.scale` 自动缩放。  
 **参数**
 
--   `auto`: 是否启用自动缩放。
+- `auto`: 是否启用自动缩放。
 
 **示例**
 
@@ -112,7 +112,7 @@ function setHD(hd: boolean): void;
 设置是否为高清画布（基于设备像素比例）。  
 **参数**
 
--   `hd`: 是否启用高清模式。
+- `hd`: 是否启用高清模式。
 
 **示例**
 
@@ -132,7 +132,7 @@ function setAntiAliasing(anti: boolean): void;
 设置抗锯齿功能。  
 **参数**
 
--   `anti`: 是否启用抗锯齿。
+- `anti`: 是否启用抗锯齿。
 
 **示例**
 
@@ -152,7 +152,7 @@ function clear(): void;
 清空画布内容。  
 **注意**
 
--   冻结状态下调用此方法会触发警告。
+- 冻结状态下调用此方法会触发警告。
 
 **示例**
 
@@ -242,7 +242,7 @@ function clone(canvas: MotaOffscreenCanvas2D): MotaOffscreenCanvas2D;
 复制一个画布对象，结果画布将被冻结。  
 **返回值**
 
--   复制的画布对象（不可修改属性，但可绘制）。
+- 复制的画布对象（不可修改属性，但可绘制）。
 
 **示例**
 
@@ -262,7 +262,7 @@ function refreshAll(force: boolean = false): void;
 刷新所有已注册画布的尺寸（仅在窗口大小变化时自动调用）。  
 **参数**
 
--   `force`: 是否强制刷新所有画布（默认仅刷新启用 `autoScale` 的画布）。
+- `force`: 是否强制刷新所有画布（默认仅刷新启用 `autoScale` 的画布）。
 
 ---
 
