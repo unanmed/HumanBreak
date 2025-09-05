@@ -15,9 +15,9 @@
 
 ## 开发环境
 
-- `node.js ^18.0.0 || ^20.0.0 || >=22.0.0`
+- `node.js ^20.0.0 || >=22.0.0`
 - `pnpm >= 10.0.0`
-- 任意支持 `ES2024` 特性的浏览器
+- 任意支持 `ESNext` 特性的浏览器
 
 **建议使用 `vscode`，搭配 `prettier` `eslint` 插件**
 
@@ -30,7 +30,7 @@
 ## 构建说明
 
 - `pnpm build:packages`: 构建所有 `packages` 文件夹下的内容，使用库模式。
-- `pnpm build:game`: 构建为可以直接部署构建包。
+- `pnpm build:game`: 构建为可以直接部署的构建包。
 - `pnpm build:lib`: 构建所有 `packages` `packages-user` 文件夹下的内容，使用库模式。
 
 ## 开发原则
