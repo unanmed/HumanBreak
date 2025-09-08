@@ -22,9 +22,17 @@ export interface StatisticsDataOneFloor {
     mdefGemCount: number;
 }
 
+export interface StatisticsDataPotionGem {
+    atkGemCount: number;
+    defGemCount: number;
+    mdefGemCount: number;
+    potionCount: number;
+}
+
 export interface StatisticsData {
     total: StatisticsDataOneFloor;
     floors: Map<FloorIds, StatisticsDataOneFloor>;
+    potionGem: StatisticsDataPotionGem;
 }
 
 export interface StatisticsProps extends UIComponentProps, DefaultProps {
@@ -105,7 +113,21 @@ const EnemyStatistics = defineComponent<StatisticsPanelProps>(props => {
 }, statisticsPanelProps);
 
 const PotionStatistics = defineComponent<StatisticsPanelProps>(props => {
-    return () => <container></container>;
+    return () => {
+        const gemPotion = props.data.potionGem;
+
+        const text1 = `全塔地图中，共有红宝石${gemPotion.atkGemCount}个，共有蓝宝石${gemPotion.defGemCount}个，共有缘宝石${gemPotion.mdefGemCount}个。`;
+        const text2 = `共有血瓶${gemPotion.potionCount}个。`;
+        return (
+            <TextContent
+                text={`${text1}${text2}`}
+                width={330}
+                loc={[0, 5, 330, 470]}
+                height={470}
+                lineHeight={9}
+            ></TextContent>
+        );
+    };
 }, statisticsPanelProps);
 
 export function calculateStatisticsOne(
@@ -240,12 +262,14 @@ export function calculateStatistics(): StatisticsData {
         prev.atkGemCount += curr.atkGemCount;
         prev.defGemCount += curr.defGemCount;
         prev.mdefGemCount += curr.mdefGemCount;
+        prev.potionCount += curr.potionCount;
         return prev;
     });
 
     return {
         total,
-        floors
+        floors,
+        potionGem
     };
 }
 
