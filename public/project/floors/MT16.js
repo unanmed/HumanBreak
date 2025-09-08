@@ -70,7 +70,7 @@ main.floors.MT16=
                     },
                     {
                         "type": "function",
-                        "function": "function(){\ncore.status.maps.MT14.canFlyFrom = false;\nMota.Plugin.require('chase_g').chaseInit1();\n}"
+                        "function": "function(){\ncore.status.maps.MT14.canFlyFrom = false;\nMota.require('chase_g').chaseInit1();\n}"
                     },
                     {
                         "type": "show",
@@ -89,7 +89,7 @@ main.floors.MT16=
                 "no": [
                     {
                         "type": "function",
-                        "function": "function(){\nMota.Plugin.require('replay_g').readyClip();\n}"
+                        "function": "function(){\nMota.require('@user/legacy-plugin-data').readyClip();\n}"
                     },
                     {
                         "type": "choices",
@@ -400,7 +400,7 @@ main.floors.MT16=
             },
             {
                 "type": "function",
-                "function": "function(){\nMota.Plugin.require('chase_r').start(false);\n}"
+                "function": "function(){\nMota.require('legacy-plugin-client').start(false);\n}"
             },
             {
                 "type": "autoSave"

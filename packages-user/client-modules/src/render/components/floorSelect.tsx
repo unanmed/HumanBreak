@@ -51,7 +51,7 @@ export const FloorSelector = defineComponent<
     const scrollRef = ref<ScrollExpose>();
 
     const floors = computed(() => props.floors.toReversed());
-    const floorId = computed(() => floors.value[now.value]);
+    const floorId = computed(() => props.floors[now.value]);
     const floorName = computed(() => core.floors[floorId.value].title);
 
     watch(

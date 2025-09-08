@@ -1,9 +1,10 @@
 import { EventEmitter } from 'eventemitter3';
 import { logger } from '@motajs/common';
-import { MotaOffscreenCanvas2D } from '@motajs/render-core';
+import { MotaOffscreenCanvas2D, RenderItem } from '@motajs/render-core';
 
 interface BlockCacherEvent {
     split: [];
+    beforeClear: [index: number];
 }
 
 interface BlockData {
@@ -307,9 +308,12 @@ export interface ICanvasCacheItem extends IBlockCacheable {
 
 export class CanvasCacheItem implements ICanvasCacheItem {
     constructor(
-        public canvas: MotaOffscreenCanvas2D,
-        public symbol: number
+        public readonly canvas: MotaOffscreenCanvas2D,
+        public readonly symbol: number,
+        public readonly element: RenderItem
     ) {}
 
-    destroy(): void {}
+    destroy(): void {
+        this.element.deleteCanvas(this.canvas);
+    }
 }

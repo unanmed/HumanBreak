@@ -774,6 +774,7 @@ export class Layer extends Container<ELayerEvent> {
         const num = this.background;
 
         const data = texture.getRenderable(num);
+        this.backImage.forEach(v => this.deleteCanvas(v));
         this.backImage = [];
         if (!data) return;
 
@@ -800,6 +801,7 @@ export class Layer extends Container<ELayerEvent> {
 
             this.backImage.push(canvas);
         }
+        this.deleteCanvas(temp);
 
         for (const ex of this.extend.values()) {
             ex.onBackgroundGenerated?.(this, this.backImage);
@@ -1239,7 +1241,10 @@ export class Layer extends Container<ELayerEvent> {
                 blockSize * cell,
                 blockSize * cell
             );
-            this.block.cache.set(index, new CanvasCacheItem(temp, temp.symbol));
+            this.block.cache.set(
+                index,
+                new CanvasCacheItem(temp, temp.symbol, this)
+            );
         });
     }
 
@@ -1545,7 +1550,7 @@ export function createLayer() {
 
     hook.on('setBlock', (x, y, floor, block) => {
         const isNow = floor === core.status.floorId;
-        LayerGroupFloorBinder.activedBinder.forEach(v => {
+        LayerGroupFloorBinder.activeBinder.forEach(v => {
             if (floor === v.floor || (isNow && v.bindThisFloor)) {
                 v.setBlock('event', block, x, y);
             }
@@ -1561,7 +1566,7 @@ export function createLayer() {
     hook.on('changingFloor', floor => {
         // 潜在隐患：如果putRenderData改成异步，那么会变成两帧后才能真正刷新并渲染
         // 考虑到楼层转换一般不会同时执行很多次，因此这里改为立刻更新
-        LayerGroupFloorBinder.activedBinder.forEach(v => {
+        LayerGroupFloorBinder.activeBinder.forEach(v => {
             if (v.bindThisFloor) v.updateBindData();
             v.emit('floorChange', floor);
         });
@@ -1571,7 +1576,7 @@ export function createLayer() {
     });
     hook.on('setBgFgBlock', (name, number, x, y, floor) => {
         const isNow = floor === core.status.floorId;
-        LayerGroupFloorBinder.activedBinder.forEach(v => {
+        LayerGroupFloorBinder.activeBinder.forEach(v => {
             if (floor === v.floor || (isNow && v.bindThisFloor)) {
                 v.setBlock(name, number, x, y);
             }
@@ -1612,7 +1617,7 @@ export class LayerGroupFloorBinder
 
     private needUpdate: boolean = false;
 
-    static activedBinder: Set<LayerGroupFloorBinder> = new Set();
+    static activeBinder: Set<LayerGroupFloorBinder> = new Set();
 
     /**
      * 绑定楼层为当前楼层，并跟随变化
@@ -1698,7 +1703,7 @@ export class LayerGroupFloorBinder
         for (const layer of group.layers.values()) {
             this.checkLayerExtends(layer);
         }
-        LayerGroupFloorBinder.activedBinder.add(this);
+        LayerGroupFloorBinder.activeBinder.add(this);
     }
 
     onLayerAdd(_group: LayerGroup, layer: Layer): void {
@@ -1706,7 +1711,7 @@ export class LayerGroupFloorBinder
     }
 
     onDestroy(group: LayerGroup) {
-        LayerGroupFloorBinder.activedBinder.delete(this);
+        LayerGroupFloorBinder.activeBinder.delete(this);
         group.layers.forEach(v => {
             v.removeExtends('floor-binder');
         });

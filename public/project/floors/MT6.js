@@ -124,7 +124,7 @@ main.floors.MT6=
         "4,12": [
             {
                 "type": "function",
-                "function": "function(){\nif (core.status.hero.hp === 1) {\n\tMota.Plugin.require('achievement_r').completeAchievement('normal', 0);\n}\n}"
+                "function": "function(){\nif (core.status.hero.hp === 1) {\n\t//Mota.require('achievement_r').completeAchievement('normal', 0);\n}\n}"
             }
         ]
     },

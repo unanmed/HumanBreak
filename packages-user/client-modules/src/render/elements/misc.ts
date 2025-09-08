@@ -211,6 +211,7 @@ export class Winskin extends RenderItem<EWinskinEvent> {
             Winskin.patternMap.set(this.imageName, winskinPattern);
         }
         this.patternCache = winskinPattern;
+        this.deleteCanvas(pattern);
         return winskinPattern;
     }
 

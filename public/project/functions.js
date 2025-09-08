@@ -218,7 +218,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 }
             }
             // if (!flags.debug && !main.replayChecking)
-            //     Mota.Plugin.require('completion_r').checkVisitedFloor();
+            //     Mota.require('completion_r').checkVisitedFloor();
             Mota.require('@user/data-base').hook.emit(
                 'afterChangeFloor',
                 floorId

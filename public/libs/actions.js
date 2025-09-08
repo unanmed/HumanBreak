@@ -241,10 +241,12 @@ actions.prototype._sys_onkeyUp_replay = function (e) {
         else if (e.keyCode == 65)
             // A
             core.rewindReplay();
-        else if (e.keyCode == 83)
+        else if (e.keyCode == 83) {
             // S
-            core.control._replay_SL();
-        else if (e.keyCode == 88)
+            const { saveSave, mainUIController, MAIN_WIDTH, MAIN_HEIGHT } =
+                Mota.require('@user/client-modules');
+            saveSave(mainUIController, [0, 0, MAIN_WIDTH, MAIN_HEIGHT]);
+        } else if (e.keyCode == 88)
             // X
             core.control._replay_book();
         else if (e.keyCode == 33 || e.keyCode == 34)

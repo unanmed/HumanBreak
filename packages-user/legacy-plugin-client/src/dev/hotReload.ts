@@ -56,9 +56,11 @@ export {};
             core.status.maps[data].enemy?.calRealAttribute();
             core.updateStatusBar(true, true);
         }
-        Mota.require('@motajs/legacy-ui').Shadow.update(true);
-        const Binder = Mota.require('@motajs/render').LayerGroupFloorBinder;
-        Binder.activedBinder.forEach(v => {
+        Mota.require('@user/client-modules').Shadow.update(true);
+        const Binder = Mota.require(
+            '@user/client-modules'
+        ).LayerGroupFloorBinder;
+        Binder.activeBinder.forEach(v => {
             if (v.getFloor() === core.status.floorId) {
                 v.updateBindData();
             }

@@ -4,8 +4,8 @@ import { patchAll } from './fallback';
 import { createGameRenderer, createRender } from './render';
 
 export function create() {
-    createAudio();
     patchAll();
+    createAudio();
     createRender();
     loading.once('coreInit', () => {
         createGameRenderer();

@@ -1,6 +1,6 @@
 import { has, ofDir } from '@user/data-utils';
 
-export function init() {
+export function createCheckBlock() {
     // 伤害弹出
     // 复写阻激夹域检测
     control.prototype.checkBlock = function (forceMockery: boolean = false) {
@@ -52,7 +52,7 @@ function checkMockery(loc: string, force: boolean = false) {
         action.push({ type: 'forbidSave', forbid: true });
         action.push({ type: 'changePos', direction: dir });
         const blocks = core.getMapBlocksObj();
-        while (1) {
+        while (true) {
             x += dx;
             y += dy;
             const block = blocks[`${x},${y}`];
