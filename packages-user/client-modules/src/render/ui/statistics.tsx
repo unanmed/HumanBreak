@@ -17,11 +17,22 @@ export interface StatisticsDataOneFloor {
     atkValue: number;
     defValue: number;
     mdefValue: number;
+    atkGemCount: number;
+    defGemCount: number;
+    mdefGemCount: number;
+}
+
+export interface StatisticsDataPotionGem {
+    atkGemCount: number;
+    defGemCount: number;
+    mdefGemCount: number;
+    potionCount: number;
 }
 
 export interface StatisticsData {
     total: StatisticsDataOneFloor;
     floors: Map<FloorIds, StatisticsDataOneFloor>;
+    potionGem: StatisticsDataPotionGem;
 }
 
 export interface StatisticsProps extends UIComponentProps, DefaultProps {
@@ -48,7 +59,8 @@ export const Statistics = defineComponent<StatisticsProps>(props => {
         <ListPage
             list={list}
             selected="total"
-            loc={[180, 0, 630, 480]}
+            loc={[180, 0, 480, 480]}
+            height={470}
             close
             onClose={close}
             lineHeight={24}
@@ -73,11 +85,23 @@ const statisticsPanelProps = {
 } satisfies SetupComponentOptions<StatisticsPanelProps>;
 
 const TotalStatistics = defineComponent<StatisticsPanelProps>(props => {
-    return () => (
-        <container>
-            <TextContent text="" width={310}></TextContent>
-        </container>
-    );
+    return () => {
+        const total = props.data.total;
+
+        const text1 = `全塔地图中，共有怪物${total.enemyCount}个。`;
+        const text2 = `共有宝石${total.gemCount}个，共加攻击力${total.atkValue}点、防御力${total.defValue}点，魔防${total.mdefValue}点。`;
+        const text3 = `共有血瓶${total.potionCount}个，共加生命值${total.potionValue}点。`;
+
+        return (
+            <TextContent
+                text={`${text1}${text2}${text3}`}
+                width={330}
+                loc={[0, 5, 330, 470]}
+                height={470}
+                lineHeight={9}
+            ></TextContent>
+        );
+    };
 }, statisticsPanelProps);
 
 const FloorStatistics = defineComponent<StatisticsPanelProps>(props => {
@@ -89,7 +113,21 @@ const EnemyStatistics = defineComponent<StatisticsPanelProps>(props => {
 }, statisticsPanelProps);
 
 const PotionStatistics = defineComponent<StatisticsPanelProps>(props => {
-    return () => <container></container>;
+    return () => {
+        const gemPotion = props.data.potionGem;
+
+        const text1 = `全塔地图中，共有红宝石${gemPotion.atkGemCount}个，共有蓝宝石${gemPotion.defGemCount}个，共有缘宝石${gemPotion.mdefGemCount}个。`;
+        const text2 = `共有血瓶${gemPotion.potionCount}个。`;
+        return (
+            <TextContent
+                text={`${text1}${text2}`}
+                width={330}
+                loc={[0, 5, 330, 470]}
+                height={470}
+                lineHeight={9}
+            ></TextContent>
+        );
+    };
 }, statisticsPanelProps);
 
 export function calculateStatisticsOne(
@@ -124,7 +162,10 @@ export function calculateStatisticsOne(
         potionValue: 0,
         atkValue: 0,
         defValue: 0,
-        mdefValue: 0
+        mdefValue: 0,
+        atkGemCount: 0,
+        defGemCount: 0,
+        mdefGemCount: 0
     };
     if (!diff) return statistics;
     core.status.maps[floorId].blocks.forEach(v => {
@@ -152,12 +193,15 @@ export function calculateStatisticsOne(
                 }
                 if (atk > 0) {
                     statistics.atkValue += atk;
+                    statistics.atkGemCount++;
                 }
                 if (def > 0) {
                     statistics.defValue += def;
+                    statistics.defGemCount++;
                 }
                 if (mdef > 0) {
                     statistics.mdefValue += mdef;
+                    statistics.mdefGemCount++;
                 }
             }
         }
@@ -214,9 +258,18 @@ export function calculateStatistics(): StatisticsData {
         return prev;
     });
 
+    const potionGem = floors.values().reduce((prev, curr) => {
+        prev.atkGemCount += curr.atkGemCount;
+        prev.defGemCount += curr.defGemCount;
+        prev.mdefGemCount += curr.mdefGemCount;
+        prev.potionCount += curr.potionCount;
+        return prev;
+    });
+
     return {
         total,
-        floors
+        floors,
+        potionGem
     };
 }
 
