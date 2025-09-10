@@ -656,6 +656,8 @@ async function buildGame() {
             `--> ${v.fileName} ${formatSize(v.byteLength)} | ${v.content.length} 个资源\r\n`
         );
     });
+    process.stdout.write(`游戏已经输出至 dist 文件夹\r\n`);
+    process.stdout.write(`游戏已压缩至 dist.zip 压缩文件\r\n`);
 }
 
 // Execute

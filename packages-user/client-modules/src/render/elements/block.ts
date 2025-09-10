@@ -310,7 +310,7 @@ export class CanvasCacheItem implements ICanvasCacheItem {
     constructor(
         public readonly canvas: MotaOffscreenCanvas2D,
         public readonly symbol: number,
-        public readonly element: RenderItem
+        public readonly element: RenderItem<any>
     ) {}
 
     destroy(): void {
