@@ -263,16 +263,6 @@ export class TextContentTyper extends EventEmitter<TextContentTyperEvent> {
     };
     /** 渲染信息 */
     private renderData: TyperRenderable[] = [];
-    /** 现在是第几行，0表示第一行 */
-    private nowLine: number = 0;
-    /** 当前的 renderable 是第几行 */
-    private dataLine: number = 0;
-    /** 当前需要绘制的横坐标 */
-    private x: number = 0;
-    /** 当前需要绘制的纵坐标 */
-    private y: number = 0;
-    /** 当前显示到了哪个 renderable */
-    private pointer: number = 0;
     /** 上一个字显示出的时间 */
     private lastTypeTime: number = 0;
     /** 是否正在打字 */
@@ -357,13 +347,8 @@ export class TextContentTyper extends EventEmitter<TextContentTyperEvent> {
     private resetTypeStatus(_lastText: string) {
         // todo: 接续打字
         this.renderData = [];
-        this.nowLine = 0;
-        this.pointer = 0;
         this.processing = -1;
         this.typing = false;
-        this.dataLine = 0;
-        this.x = 0;
-        this.y = SAFE_PAD;
     }
 
     /**
@@ -374,11 +359,11 @@ export class TextContentTyper extends EventEmitter<TextContentTyperEvent> {
         const width = line.width;
         switch (this.config.textAlign) {
             case TextAlign.Left:
-                return this.x;
+                return 0;
             case TextAlign.Center:
-                return this.x + (this.config.width - width) / 2;
+                return (this.config.width - width) / 2;
             case TextAlign.Right:
-                return this.x + this.config.width - width;
+                return this.config.width - width;
         }
     }
 
@@ -386,7 +371,7 @@ export class TextContentTyper extends EventEmitter<TextContentTyperEvent> {
      * 解析为可以直接渲染的内容
      */
     private toRenderable() {
-        let y = 0;
+        let y = SAFE_PAD;
         let x = 0;
 
         this.renderObject.data.forEach(line => {
