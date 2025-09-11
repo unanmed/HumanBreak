@@ -94,7 +94,7 @@ export const ConfirmBox = defineComponent<
     });
     const yesText = computed(() => props.yesText ?? '确认');
     const noText = computed(() => props.noText ?? '取消');
-    const pad = computed(() => props.pad ?? 32);
+    const pad = computed(() => props.pad ?? 24);
     const yesLoc = computed<ElementLocator>(() => {
         const y = height.value - pad.value;
         return [props.width / 3, y, void 0, void 0, 0.5, 1];

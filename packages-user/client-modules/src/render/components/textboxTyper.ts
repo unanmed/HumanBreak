@@ -462,7 +462,7 @@ export class TextContentTyper extends EventEmitter<TextContentTyperEvent> {
                     renderable.cut = false;
                     const chars = renderable.text.length - renderable.pointer;
                     if (chars >= rest) {
-                        renderable.pointer += chars;
+                        renderable.pointer += rest;
                         return false;
                     } else {
                         renderable.pointer = renderable.text.length;
@@ -1257,7 +1257,7 @@ export class TextContentParser {
             if (
                 breakChars.has(char) ||
                 isCJK(char.charCodeAt(0)) ||
-                isCJK(next.charCodeAt(0))
+                isCJK(next?.charCodeAt(0))
             ) {
                 this.wordBreak.push(pointer + 1);
                 const rest = width - this.lineWidth;

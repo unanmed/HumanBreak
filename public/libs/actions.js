@@ -1222,21 +1222,7 @@ actions.prototype._clickAction = function (x, y, px, py) {
 };
 
 ////// 自定义事件时，按下某个键的操作 //////
-actions.prototype._keyDownAction = function (keycode) {
-    if (core.status.event.data.type == 'choices') {
-        this._keyDownChoices(keycode);
-        return;
-    }
-    if (
-        core.status.event.data.type == 'confirm' &&
-        (keycode == 37 || keycode == 39)
-    ) {
-        core.status.event.selection = 1 - core.status.event.selection;
-        core.playSound('光标移动');
-        core.drawConfirmBox(core.status.event.ui.text);
-        return;
-    }
-};
+actions.prototype._keyDownAction = function (keycode) {};
 
 ////// 自定义事件时，放开某个键的操作 //////
 actions.prototype._keyUpAction = function (keycode) {
