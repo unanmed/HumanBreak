@@ -1,7 +1,7 @@
 import { DefaultProps, ElementLocator, Font } from '@motajs/render';
 import { computed, defineComponent, reactive, ref } from 'vue';
 import { Background, Selection } from './misc';
-import { TextContent, TextContentExpose, TextContentProps } from './textbox';
+import { TextContent, TextContentProps } from './textbox';
 import { TextAlign } from './textboxTyper';
 import { Page, PageExpose } from './page';
 import { GameUI, IUIMountable, SetupComponentOptions } from '@motajs/system-ui';
@@ -83,7 +83,6 @@ export const ConfirmBox = defineComponent<
     ConfirmBoxEmits,
     keyof ConfirmBoxEmits
 >((props, { emit, attrs }) => {
-    const content = ref<TextContentExpose>();
     const height = ref(200);
     const selected = ref(props.defaultYes ? true : false);
     const yesSize = ref<[number, number]>([0, 0]);
@@ -151,7 +150,6 @@ export const ConfirmBox = defineComponent<
             />
             <TextContent
                 {...attrs}
-                ref={content}
                 loc={contentLoc.value}
                 text={props.text}
                 width={props.width - pad.value * 2}

@@ -173,25 +173,26 @@ export const TextContent = defineComponent<
     const renderContent = (canvas: MotaOffscreenCanvas2D) => {
         const ctx = canvas.ctx;
         ctx.textBaseline = 'top';
-        renderable.forEach(v => {
-            switch (v.type) {
+        for (const data of renderable) {
+            if (data.cut) break;
+            switch (data.type) {
                 case TextContentType.Text: {
-                    if (v.text.length === 0) return;
-                    ctx.fillStyle = v.fillStyle;
-                    ctx.strokeStyle = v.strokeStyle;
-                    ctx.font = v.font;
-                    const text = v.text.slice(0, v.pointer);
+                    if (data.text.length === 0) continue;
+                    ctx.fillStyle = data.fillStyle;
+                    ctx.strokeStyle = data.strokeStyle;
+                    ctx.font = data.font;
+                    const text = data.text.slice(0, data.pointer);
 
                     if (props.fill ?? true) {
-                        ctx.fillText(text, v.x, v.y);
+                        ctx.fillText(text, data.x, data.y);
                     }
                     if (props.stroke) {
-                        ctx.strokeText(text, v.x, v.y);
+                        ctx.strokeText(text, data.x, data.y);
                     }
                     break;
                 }
                 case TextContentType.Icon: {
-                    const { renderable: r, x: dx, y: dy, width, height } = v;
+                    const { renderable: r, x: dx, y: dy, width, height } = data;
                     const render = r.render;
                     const [x, y, w, h] = render[0];
                     const icon = r.autotile ? r.image[0] : r.image;
@@ -199,7 +200,7 @@ export const TextContent = defineComponent<
                     break;
                 }
             }
-        });
+        }
     };
 
     const renderFunc = (data: TyperRenderable[]) => {
