@@ -961,6 +961,7 @@ export class TextContentParser {
                         pointer = this.parseIcon(pointer);
                         break;
                     case 'n':
+                        // 在这里预先将换行处理为多个 node，会比在分行时再处理更方便
                         this.addTextNode(pointer + 1, true);
                         break;
                 }
@@ -975,6 +976,7 @@ export class TextContentParser {
                 expStart = pointer + 1;
                 continue;
             } else if (char === '\n') {
+                // 在这里预先将换行处理为多个 node，会比在分行时再处理更方便
                 this.addTextNode(pointer + 1, true);
                 continue;
             }
@@ -1135,7 +1137,7 @@ export class TextContentParser {
     /**
      * 二分法计算到达目标宽度的文字内容，以 `this.blockPointer` 作为文字裁剪起点
      * @param maxWidth 最大宽度
-     * @returns 文字裁剪末尾分词索引，不包含
+     * @returns 文字裁剪末尾分词索引，包含
      */
     private bsLineWidth(maxWidth: number) {
         let start = this.bsStart;
@@ -1171,7 +1173,7 @@ export class TextContentParser {
      * 检查猜测字符数量与目标长度的状态关系
      * @param width 目标宽度
      * @param guess 猜测的字符数量
-     * @param pointer 当前解析至的分词索引，不包括
+     * @param pointer 当前解析至的分词索引，包含
      */
     private checkGuess(width: number, guess: number) {
         const pointer = this.wordBreak.length - 1;
@@ -1236,6 +1238,7 @@ export class TextContentParser {
 
         // 0 是因为第一个字之前也要有一个分词
         this.wordBreak = [0];
+        // 上一个分块对应的分词索引，包含，这样的话所有地方就不需要 +1 或 -1 调整了，最简洁
         this.blockPointer = 0;
 
         // 如果全部分词
