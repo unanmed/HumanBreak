@@ -10,6 +10,7 @@ import { createAction } from './action';
 import { createLegacy } from './legacy';
 import { sceneController } from './scene';
 import { GameTitleUI } from './ui/title';
+import { createWeather } from './weather';
 
 export function createGameRenderer() {
     const App = defineComponent(_props => {
@@ -32,6 +33,7 @@ export function createRender() {
     createUI();
     createAction();
     createLoopMap();
+    createWeather();
 
     loading.on('loaded', () => {
         sceneController.open(GameTitleUI, {});

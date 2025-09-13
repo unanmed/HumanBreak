@@ -7,7 +7,7 @@ import {
     Sprite,
     onTick
 } from '@motajs/render';
-import { WeatherController } from '../../weather';
+import { WeatherController } from '../weather';
 import { defineComponent, onMounted, onUnmounted, reactive, ref } from 'vue';
 import { Textbox, Tip } from '../components';
 import { GameUI } from '@motajs/system-ui';
@@ -79,10 +79,12 @@ const MainScene = defineComponent(() => {
     const map = ref<LayerGroup>();
     const hideStatus = ref(false);
     const locked = ref(false);
-    const weather = new WeatherController('main');
+    const weather = new WeatherController();
 
     onMounted(() => {
-        weather.bind(map.value);
+        if (map.value) {
+            weather.bind(map.value);
+        }
     });
 
     const leftStatus: ILeftHeroStatus = reactive({

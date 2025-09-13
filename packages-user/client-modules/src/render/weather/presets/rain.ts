@@ -1,12 +1,10 @@
 import {
     Shader,
     ShaderProgram,
-    MotaRenderer,
-    Container,
     IShaderUniform,
     UniformType
 } from '@motajs/render';
-import { IWeather } from './weather';
+import { Weather } from '../weather';
 
 const rainVs = /* glsl */ `
 in vec2 a_rainVertex;
@@ -82,95 +80,25 @@ void main() {
 /** 雨滴顶点坐标 */
 const vertex = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
 
-export class RainWeather implements IWeather {
-    readonly shader: RainShader;
-    readonly program: ShaderProgram;
-
+export class RainWeather extends Weather<Shader> {
+    /** 下雨流程的 uniform 变量 */
     private progress: IShaderUniform<UniformType.Uniform1f> | null = null;
+    /** 使用的着色器程序 */
+    private program: ShaderProgram | null = null;
 
-    constructor(readonly level: number = 5) {
-        const shader = new RainShader();
-        const gl = shader.gl;
-        shader.size(480, 480);
-        shader.setHD(true);
-        shader.setZIndex(100);
-        const program = shader.createProgram(ShaderProgram);
-        program.fs(rainFs);
-        program.vs(rainVs);
-        program.requestCompile();
-        const pos = program.defineAttribArray('a_rainVertex');
-        program.defineAttribArray('a_offset');
-        program.defineAttribArray('a_data');
-        program.defineUniform('u_progress', shader.UNIFORM_1f);
-        program.defineUniform('u_color', shader.UNIFORM_4f);
-        program.mode(shader.DRAW_ARRAYS_INSTANCED);
-        shader.useProgram(program);
-
-        if (pos) {
-            pos.buffer(vertex, gl.STATIC_DRAW);
-            pos.pointer(2, gl.FLOAT, false, 0, 0);
-            pos.enable();
-        }
-        this.shader = shader;
-        this.program = program;
-    }
-
-    activate(): void {
-        const render = MotaRenderer.get('render-main');
-        const draw = render?.getElementById('map-draw') as Container;
-        if (!draw) return;
-        const shader = this.shader;
-        shader.appendTo(draw);
-
-        const gl = shader.gl;
-        const program = this.program;
-        program.paramArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, 100 * this.level);
-
-        this.progress = program.getUniform<UniformType.Uniform1f>('u_progress');
-        shader.useProgram(program);
-        shader.generateRainPath(
-            this.level * 100,
-            (((Math.random() - 0.5) * Math.PI) / 30) * this.level,
-            (Math.PI / 180) * (12 - this.level),
-            program
-        );
-    }
-
-    frame(): void {
-        this.shader.update(this.shader);
-        const time = 5000 - 400 * this.level;
-        const progress = (Date.now() % time) / time;
-
-        this.shader.useProgram(this.program);
-        this.progress?.set(progress);
-    }
-
-    deactivate(): void {
-        const render = MotaRenderer.get('render-main');
-        const draw = render?.getElementById('map-draw') as Container;
-        const layer = draw.children;
-        if (!layer || !draw) return;
-        const shader = this.shader;
-        draw.appendChild(...layer);
-        shader.remove();
-    }
-}
-
-class RainShader extends Shader {
     /**
      * 生成雨滴
      * @param num 雨滴数量
      */
-    generateRainPath(
-        num: number,
-        angle: number,
-        deviation: number,
-        program: ShaderProgram
-    ) {
+    generateRainPath(level: number, program: ShaderProgram, shader: Shader) {
+        const num = level * 100;
+        const angle = (((Math.random() - 0.5) * Math.PI) / 30) * level;
+        const deviation = (Math.PI / 180) * (12 - level);
+
         const aOffset = program.getAttribArray('a_offset');
         const aData = program.getAttribArray('a_data');
         const color = program.getUniform<UniformType.Uniform4f>('u_color');
-        const gl = this.gl;
+        const gl = shader.gl;
         if (!aOffset || !aData) return;
 
         const tan = Math.tan(angle);
@@ -208,5 +136,51 @@ class RainShader extends Shader {
 
         program.paramArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, num);
         color?.set(1, 1, 1, 0.1);
+    }
+
+    createElement(level: number): Shader {
+        const shader = new Shader();
+        const gl = shader.gl;
+        shader.size(480, 480);
+        shader.setHD(true);
+        shader.setZIndex(100);
+        const program = shader.createProgram(ShaderProgram);
+        program.fs(rainFs);
+        program.vs(rainVs);
+        program.requestCompile();
+        const pos = program.defineAttribArray('a_rainVertex');
+        program.defineAttribArray('a_offset');
+        program.defineAttribArray('a_data');
+        program.defineUniform('u_progress', shader.UNIFORM_1f);
+        program.defineUniform('u_color', shader.UNIFORM_4f);
+        program.mode(shader.DRAW_ARRAYS_INSTANCED);
+        shader.useProgram(program);
+
+        if (pos) {
+            pos.buffer(vertex, gl.STATIC_DRAW);
+            pos.pointer(2, gl.FLOAT, false, 0, 0);
+            pos.enable();
+        }
+
+        program.paramArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, 100 * this.level);
+
+        this.progress = program.getUniform<UniformType.Uniform1f>('u_progress');
+        this.generateRainPath(level, program, shader);
+
+        this.program = program;
+        return shader;
+    }
+
+    tick(timestamp: number): void {
+        if (!this.element) return;
+        this.element.update();
+        const time = 5000 - 400 * this.level;
+        const progress = (timestamp % time) / time;
+        this.progress?.set(progress);
+    }
+
+    onDestroy(): void {
+        if (!this.element || !this.program) return;
+        this.element.deleteProgram(this.program);
     }
 }

@@ -17,4 +17,3 @@ export * from './audio';
 export * from './fallback';
 export * from './loader';
 export * from './render';
-export * from './weather';
