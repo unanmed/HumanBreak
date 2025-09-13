@@ -638,10 +638,10 @@ export function getChoice<T extends ChoiceKey = ChoiceKey>(
     });
 }
 
-function getChoiceRoute() {
+function getChoiceRoute(defaults: number) {
     const route = core.status.replay.toReplay[0];
     if (!route.startsWith('choices:')) {
-        return 0;
+        return defaults;
     } else {
         return Number(route.slice(8));
     }
@@ -680,9 +680,9 @@ export async function routedConfirm(
     props?: Partial<ConfirmBoxProps>
 ) {
     if (core.isReplaying()) {
-        const confirm = getChoiceRoute() === 1;
+        const confirm = getChoiceRoute(1) === 0;
         const timeout = core.control.__replay_getTimeout();
-        core.status.route.push(`choices:${confirm ? 1 : 0}`);
+        core.status.route.push(`choices:${confirm ? 0 : 1}`);
         if (timeout === 0) return confirm;
         const instance = controller.open(ConfirmBoxUI, {
             ...(props ?? {}),
@@ -696,7 +696,7 @@ export async function routedConfirm(
         return confirm;
     } else {
         const confirm = await getConfirm(controller, text, loc, width, props);
-        core.status.route.push(`choices:${confirm ? 1 : 0}`);
+        core.status.route.push(`choices:${confirm ? 0 : 1}`);
         return confirm;
     }
 }
@@ -734,7 +734,7 @@ export async function routedChoices<T extends ChoiceKey>(
     props?: Partial<ChoicesProps>
 ): Promise<T> {
     if (core.isReplaying()) {
-        const selected = getChoiceRoute();
+        const selected = getChoiceRoute(0);
         const timeout = core.control.__replay_getTimeout();
         core.status.route.push(`choices:${selected}`);
         if (timeout === 0) return choices[selected][0];

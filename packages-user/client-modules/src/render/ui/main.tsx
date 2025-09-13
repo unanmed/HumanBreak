@@ -23,7 +23,6 @@ import {
     LeftStatusBar,
     RightStatusBar
 } from './statusBar';
-import { onLoaded } from '../use';
 import { ReplayingStatus } from './toolbar';
 import { getHeroStatusOn, HeroSkill, NightSpecial } from '@user/data-state';
 import { jumpIgnoreFloor } from '@user/legacy-plugin-data';
@@ -81,11 +80,6 @@ const MainScene = defineComponent(() => {
     const hideStatus = ref(false);
     const locked = ref(false);
     const weather = new WeatherController('main');
-
-    const loaded = ref(true);
-    onLoaded(() => {
-        loaded.value = true;
-    });
 
     onMounted(() => {
         weather.bind(map.value);
@@ -260,13 +254,11 @@ const MainScene = defineComponent(() => {
 
     return () => (
         <container id="main-scene" width={MAIN_WIDTH} height={MAIN_HEIGHT}>
-            {loaded.value && (
-                <LeftStatusBar
-                    loc={[0, 0, STATUS_BAR_WIDTH, STATUS_BAR_HEIGHT]}
-                    status={leftStatus}
-                    hidden={hideStatus.value}
-                ></LeftStatusBar>
-            )}
+            <LeftStatusBar
+                loc={[0, 0, STATUS_BAR_WIDTH, STATUS_BAR_HEIGHT]}
+                status={leftStatus}
+                hidden={hideStatus.value}
+            ></LeftStatusBar>
             <g-line line={[180, 0, 180, 480]} lineWidth={1} />
             <container
                 id="map-draw"
@@ -302,13 +294,11 @@ const MainScene = defineComponent(() => {
                 />
             </container>
             <g-line line={[180 + 480, 0, 180 + 480, 480]} lineWidth={1} />
-            {loaded.value && (
-                <RightStatusBar
-                    loc={[480 + 180, 0, STATUS_BAR_WIDTH, STATUS_BAR_HEIGHT]}
-                    status={rightStatus}
-                    hidden={hideStatus.value}
-                ></RightStatusBar>
-            )}
+            <RightStatusBar
+                loc={[480 + 180, 0, STATUS_BAR_WIDTH, STATUS_BAR_HEIGHT]}
+                status={rightStatus}
+                hidden={hideStatus.value}
+            ></RightStatusBar>
             <container
                 loc={[0, 0, MAIN_WIDTH, MAIN_HEIGHT]}
                 hidden={!mainUIController.active.value}
