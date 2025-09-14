@@ -297,7 +297,6 @@ export const RightStatusBar = defineComponent<StatusBarProps<IRightHeroStatus>>(
         let linked = false;
         const drawMinimap = (canvas: MotaOffscreenCanvas2D) => {
             const ctx = canvas.ctx;
-            ctx.save();
             ctx.scale(
                 1 / core.domStyle.scale / devicePixelRatio,
                 1 / core.domStyle.scale / devicePixelRatio
@@ -320,7 +319,6 @@ export const RightStatusBar = defineComponent<StatusBarProps<IRightHeroStatus>>(
                 ) ?? '';
             minimapDrawer.locateMap(minimapDrawer.nowFloor);
             minimapDrawer.drawMap();
-            ctx.restore();
         };
 
         watch(

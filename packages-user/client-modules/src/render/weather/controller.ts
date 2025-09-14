@@ -77,8 +77,9 @@ export class WeatherController implements IWeatherController {
         level: number = 5
     ): IWeatherInstance<R, T> | null {
         const obj = this.getWeatherObject<R, T>(weather);
-        if (!obj) return null;
+        if (!obj || !this.container) return null;
         const element = obj.create(level);
+        element.size(this.container.width, this.container.height);
         const instance = new WeatherInstance(obj, element);
         instance.setZIndex(this.zIndex + this.active.size);
         this.active.add(instance);
@@ -92,6 +93,13 @@ export class WeatherController implements IWeatherController {
         this.active.delete(instance);
     }
 
+    clearWeather(): void {
+        this.active.forEach(v => {
+            v.weather.destroy();
+        });
+        this.active.clear();
+    }
+
     /**
      * 将此控制器暴露至全局，允许使用 {@link WeatherController.get} 获取到实例
      * @param id 暴露给全局的 id
@@ -102,10 +110,7 @@ export class WeatherController implements IWeatherController {
     }
 
     destroy() {
-        this.active.forEach(v => {
-            v.weather.destroy();
-        });
-        this.active.clear();
+        this.clearWeather();
         WeatherController.ticker.remove(this.tick);
         if (!isNil(this.externId)) {
             WeatherController.extern.delete(this.externId);

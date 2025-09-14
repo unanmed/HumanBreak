@@ -350,16 +350,17 @@ const apiWriteFile = withSafeCheck(async (req, res, path) => {
             encoding: type as BufferEncoding
         });
         res.end();
-        if (path.resolved.endsWith('project/events.js')) {
+
+        if (/project(\/|\\)events\.js/.test(path.resolved)) {
             doDeclaration('events', value);
         }
-        if (path.resolved.endsWith('project/items.js')) {
+        if (/project(\/|\\)items\.js/.test(path.resolved)) {
             doDeclaration('items', value);
         }
-        if (path.resolved.endsWith('project/maps.js')) {
+        if (/project(\/|\\)maps\.js/.test(path.resolved)) {
             doDeclaration('maps', value);
         }
-        if (path.resolved.endsWith('project/data.js')) {
+        if (/project(\/|\\)data\.js/.test(path.resolved)) {
             doDeclaration('data', value);
         }
     } catch (e) {
@@ -516,7 +517,7 @@ async function doDeclaration(type: string, data: string) {
             for (const id in eventData.commonEvent) {
                 eventDec += `    | '${id}'\n`;
             }
-            await writeFile('src/source/events.d.ts', eventDec, 'utf-8');
+            await writeFile('src/types/source/events.d.ts', eventDec, 'utf-8');
         } else if (type === 'items') {
             // 道具
             const itemData = JSON.parse(data.split('\n').slice(1).join(''));
@@ -526,7 +527,7 @@ async function doDeclaration(type: string, data: string) {
                 itemDec += `    ${id}: '${itemData[id].cls}';\n`;
             }
             itemDec += '}';
-            await writeFile('src/source/items.d.ts', itemDec, 'utf-8');
+            await writeFile('src/types/source/items.d.ts', itemDec, 'utf-8');
         } else if (type === 'maps') {
             // 映射
             const d = JSON.parse(data.split('\n').slice(1).join(''));
@@ -543,7 +544,7 @@ async function doDeclaration(type: string, data: string) {
             id2cls += '}';
             id2num += '}';
             num2id += '}';
-            await writeFile('src/source/cls.d.ts', id2cls, 'utf-8');
+            await writeFile('src/types/source/cls.d.ts', id2cls, 'utf-8');
             await writeFile(
                 'src/source/maps.d.ts',
                 `${id2num}\n${num2id}`,
@@ -573,7 +574,7 @@ async function doDeclaration(type: string, data: string) {
             names += '}';
 
             await writeFile(
-                'src/source/data.d.ts',
+                'src/types/source/data.d.ts',
                 `
 ${floorId}
 ${d.images.length > 0 ? imgs : 'type ImageIds = never\n'}

@@ -1,11 +1,8 @@
 import { onUnmounted } from 'vue';
-import { WeatherController } from '../../weather';
-
-let weatherId = 0;
+import { WeatherController } from '../weather';
 
 export function useWeather(): [WeatherController] {
-    const weather = new WeatherController(`@weather-${weatherId}`);
-    weatherId++;
+    const weather = new WeatherController();
 
     onUnmounted(() => {
         weather.destroy();

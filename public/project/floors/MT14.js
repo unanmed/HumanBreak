@@ -420,7 +420,7 @@ main.floors.MT14=
     ],
     "weather": [
         "cloud",
-        1
+        5
     ],
     "beforeBattle": {},
     "cannotMoveIn": {},

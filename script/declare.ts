@@ -61,16 +61,16 @@ import fs from 'fs/promises';
     names += '}';
 
     // 5. 写入文件
-    await fs.writeFile('./src/source/cls.d.ts', id2cls, 'utf-8');
-    await fs.writeFile('./src/source/events.d.ts', eventDec, 'utf-8');
-    await fs.writeFile('./src/source/items.d.ts', itemDec, 'utf-8');
+    await fs.writeFile('./src/types/source/cls.d.ts', id2cls, 'utf-8');
+    await fs.writeFile('./src/types/source/events.d.ts', eventDec, 'utf-8');
+    await fs.writeFile('./src/types/source/items.d.ts', itemDec, 'utf-8');
     await fs.writeFile(
-        './src/source/maps.d.ts',
+        './src/types/source/maps.d.ts',
         `${id2num}\n${num2id}`,
         'utf-8'
     );
     await fs.writeFile(
-        './src/source/data.d.ts',
+        './src/types/source/data.d.ts',
         `
 ${floorId}
 ${d.images.length > 0 ? imgs : 'type ImageIds = never\n'}

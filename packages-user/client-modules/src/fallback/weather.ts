@@ -1,5 +1,5 @@
 import { Patch, PatchClass } from '@motajs/legacy-common';
-import { WeatherController } from '../weather';
+import { WeatherController } from '../render/weather';
 import { isNil } from 'lodash-es';
 
 // todo: 添加弃用警告 logger.warn(56)

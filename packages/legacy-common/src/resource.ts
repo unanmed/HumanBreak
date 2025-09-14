@@ -575,7 +575,7 @@ export function loadDefaultResource() {
                 ] = res.resource;
             });
         });
-    const weathers: (keyof Weather)[] = ['fog', 'cloud', 'sun'];
+    const weathers: (keyof Weather)[] = ['fog', 'sun'];
     weathers.forEach(v => {
         const res = LoadTask.add('material', `material/${v}.png`);
         res.once('load', res => {
@@ -618,7 +618,7 @@ export async function loadCompressedResource() {
         HTMLImageElement
     >[];
     materialImages.push('keyboard');
-    const weathers: (keyof Weather)[] = ['fog', 'cloud', 'sun'];
+    const weathers: (keyof Weather)[] = ['fog', 'sun'];
 
     Object.entries(list).forEach(v => {
         const [uri, list] = v;

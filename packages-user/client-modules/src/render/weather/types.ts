@@ -76,6 +76,11 @@ export interface IWeatherController {
     deactivate(instance: IWeatherInstance): void;
 
     /**
+     * 清空天气
+     */
+    clearWeather(): void;
+
+    /**
      * 摧毁这个控制器
      */
     destroy(): void;

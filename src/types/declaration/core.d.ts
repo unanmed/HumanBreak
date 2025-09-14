@@ -258,6 +258,7 @@ interface AnimateFrame {
     leftLeg: boolean;
 
     /**
+     * @deprecated
      * 当前天气信息
      */
     readonly weather: Weather;

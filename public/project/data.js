@@ -127,6 +127,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"bg.webp",
 			"boom.png",
 			"botton.png",
+			"cloud.png",
 			"def.png",
 			"exp.png",
 			"hero1.png",

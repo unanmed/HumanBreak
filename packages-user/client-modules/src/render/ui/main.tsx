@@ -80,6 +80,7 @@ const MainScene = defineComponent(() => {
     const hideStatus = ref(false);
     const locked = ref(false);
     const weather = new WeatherController();
+    weather.extern('main');
 
     onMounted(() => {
         if (map.value) {
@@ -201,7 +202,6 @@ const MainScene = defineComponent(() => {
         const step = core.status.stepPostfix;
         if (!step) return;
         const ctx = canvas.ctx;
-        ctx.save();
         ctx.fillStyle = '#fff';
         step.forEach(({ x, y, direction }) => {
             ctx.fillRect(x * 32 + 12, y * 32 + 12, 8, 8);
@@ -222,7 +222,6 @@ const MainScene = defineComponent(() => {
                 }
             }
         });
-        ctx.restore();
     };
 
     //#region 交互监听

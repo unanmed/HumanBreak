@@ -376,11 +376,9 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
             createMaskGradient(ctx);
         }
         const pos = maskPos.value;
-        ctx.save();
         ctx.translate(pos, 0);
         ctx.fillStyle = maskGradient!;
         ctx.fillRect(0, 0, MAIN_WIDTH + MAIN_HEIGHT + 200, MAIN_HEIGHT);
-        ctx.restore();
     };
 
     const renderTitle = (canvas: MotaOffscreenCanvas2D) => {
@@ -388,7 +386,6 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
         if (titleGradient === null) {
             createTitleGradient(ctx);
         }
-        ctx.save();
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.font = titleFont;
@@ -400,12 +397,10 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
             blur(1px)
         `;
         ctx.fillText(core.firstData.title, 320, 50);
-        ctx.restore();
     };
 
     const renderCursor = (canvas: MotaOffscreenCanvas2D) => {
         const ctx = canvas.ctx;
-        ctx.save();
         ctx.translate(0, 5);
         ctx.scale(1, cursorScale);
         ctx.beginPath();
@@ -415,7 +410,6 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
         ctx.strokeStyle = '#fff';
         ctx.lineWidth = 1;
         ctx.stroke();
-        ctx.restore();
     };
 
     return () => (

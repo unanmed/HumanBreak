@@ -54,6 +54,7 @@ export * from './fx';
 export * from './legacy';
 export * from './ui';
 export * from './utils';
+export * from './weather';
 export * from './renderer';
 export * from './shared';
 export * from './use';
