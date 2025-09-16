@@ -17,7 +17,7 @@ export class CloudWeather extends Weather<Sprite> {
     /** 云层图像 */
     private image: HTMLImageElement | null = null;
     /** 上一次执行速度变换的时刻 */
-    private lastDvTime = 0;
+    private lastTick = 0;
 
     private drawCloud(canvas: MotaOffscreenCanvas2D) {
         const ctx = canvas.ctx;
@@ -38,31 +38,33 @@ export class CloudWeather extends Weather<Sprite> {
     tick(time: number): void {
         if (!this.element || !this.image) return;
         this.element.update();
-        if (time - this.lastDvTime > 50) {
-            this.lastDvTime = time;
-            const dvx = ((Math.random() - 0.5) * this.level) / 20;
-            const dvy = ((Math.random() - 0.5) * this.level) / 20;
-            if (Math.sign(dvx) === Math.sign(this.vx)) {
-                const ratio = Math.sqrt(
-                    (this.maxSpeed - Math.abs(this.vx)) / this.maxSpeed
-                );
-                const value = Math.abs(dvx) * ratio;
-                this.vx += value * Math.sign(dvx);
-            } else {
-                this.vx += dvx;
-            }
-            if (Math.sign(dvy) === Math.sign(this.vy)) {
-                const ratio = Math.sqrt(
-                    (this.maxSpeed - Math.abs(this.vy)) / this.maxSpeed
-                );
-                const value = Math.abs(dvy) * ratio;
-                this.vy += value * Math.sign(dvy);
-            } else {
-                this.vy += dvy;
-            }
+        const dt = time - this.lastTick;
+        this.lastTick = time;
+        if (dt > 100) return;
+        const dvx = (Math.random() - 0.5) * this.level * 10;
+        const dvy = (Math.random() - 0.5) * this.level * 10;
+        const addx = (dvx * dt) / 1000;
+        const addy = (dvy * dt) / 1000;
+        if (Math.sign(addx) === Math.sign(this.vx)) {
+            const ratio = Math.sqrt(
+                (this.maxSpeed - Math.abs(this.vx)) / this.maxSpeed
+            );
+            const value = Math.abs(addx) * ratio;
+            this.vx += value * Math.sign(addx);
+        } else {
+            this.vx += addx;
         }
-        this.cx += this.vx;
-        this.cy += this.vy;
+        if (Math.sign(addy) === Math.sign(this.vy)) {
+            const ratio = Math.sqrt(
+                (this.maxSpeed - Math.abs(this.vy)) / this.maxSpeed
+            );
+            const value = Math.abs(addy) * ratio;
+            this.vy += value * Math.sign(addy);
+        } else {
+            this.vy += addy;
+        }
+        this.cx += (this.vx * dt) / 1000;
+        this.cy += (this.vy * dt) / 1000;
         this.cx %= this.image.width;
         this.cy %= this.image.height;
     }
@@ -70,7 +72,7 @@ export class CloudWeather extends Weather<Sprite> {
     createElement(level: number): Sprite {
         const element = new Sprite('static', true);
         element.setRenderFn(canvas => this.drawCloud(canvas));
-        this.maxSpeed = Math.sqrt(level) * 5;
+        this.maxSpeed = Math.sqrt(level) * 100;
         this.vx = ((Math.random() - 0.5) * this.maxSpeed) / 2;
         this.vy = ((Math.random() - 0.5) * this.maxSpeed) / 2;
         this.alpha = Math.sqrt(level) / 10;

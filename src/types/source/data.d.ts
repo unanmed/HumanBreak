@@ -138,6 +138,7 @@ type ImageIds =
     | 'skill7.png'
     | 'skill8.png'
     | 'skill9.png'
+    | 'sun.png'
     | 'tower7.webp'
     | 'winskin.png'
     | 'winskin2.png'

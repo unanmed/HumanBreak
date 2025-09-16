@@ -108,6 +108,7 @@ export class ImageResource extends Resource<HTMLImageElement> {
         img.src = this.resolveURI();
         this.resource = img;
         return new Promise<HTMLImageElement>(res => {
+            img.loading = 'eager';
             img.addEventListener('load', () => {
                 this.loaded = true;
                 img.setAttribute('_width', img.width.toString());
@@ -575,7 +576,7 @@ export function loadDefaultResource() {
                 ] = res.resource;
             });
         });
-    const weathers: (keyof Weather)[] = ['fog', 'sun'];
+    const weathers: (keyof Weather)[] = ['fog'];
     weathers.forEach(v => {
         const res = LoadTask.add('material', `material/${v}.png`);
         res.once('load', res => {
@@ -618,7 +619,7 @@ export async function loadCompressedResource() {
         HTMLImageElement
     >[];
     materialImages.push('keyboard');
-    const weathers: (keyof Weather)[] = ['fog', 'sun'];
+    const weathers: (keyof Weather)[] = ['fog'];
 
     Object.entries(list).forEach(v => {
         const [uri, list] = v;
