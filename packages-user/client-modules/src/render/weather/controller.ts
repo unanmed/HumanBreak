@@ -83,7 +83,7 @@ export class WeatherController implements IWeatherController {
         const instance = new WeatherInstance(obj, element);
         instance.setZIndex(this.zIndex + this.active.size);
         this.active.add(instance);
-        this.container?.appendChild(element);
+        this.container.appendChild(element);
         return instance;
     }
 

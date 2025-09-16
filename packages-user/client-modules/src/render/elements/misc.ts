@@ -159,6 +159,7 @@ export class Winskin extends RenderItem<EWinskinEvent> {
     private patternCache?: WinskinPatterns;
     private patternTransform: DOMMatrix;
 
+    // todo: 跨上下文可能是未定义行为，需要上下文无关化
     private static patternMap: Map<string, WinskinPatterns> = new Map();
 
     constructor(
