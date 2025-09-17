@@ -1,7 +1,6 @@
-import { RenderAdapter } from '@motajs/render-core';
+import { RenderAdapter, SizedCanvasImageSource } from '@motajs/render-core';
 import { logger } from '@motajs/common';
 import { ILayerRenderExtends, Layer, LayerMovingRenderable } from './layer';
-import { SizedCanvasImageSource } from '@motajs/render-elements';
 import EventEmitter from 'eventemitter3';
 import { texture } from './cache';
 import { TimingFn } from 'mutate-animate';

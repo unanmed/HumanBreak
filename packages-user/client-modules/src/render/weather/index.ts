@@ -1,10 +1,11 @@
 import { WeatherController } from './controller';
-import { CloudWeather, RainWeather, SunWeather } from './presets';
+import { CloudWeather, FogWeather, RainWeather, SunWeather } from './presets';
 
 export function createWeather() {
     WeatherController.register('cloud', CloudWeather);
     WeatherController.register('rain', RainWeather);
     WeatherController.register('sun', SunWeather);
+    WeatherController.register('fog', FogWeather);
     // WeatherController.register('snow', SnowWeather);
 }
 

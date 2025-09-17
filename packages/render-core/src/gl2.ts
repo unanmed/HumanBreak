@@ -4,6 +4,7 @@ import { MotaOffscreenCanvas2D } from './canvas2d';
 import { ERenderItemEvent, RenderItem, RenderItemPosition } from './item';
 import { Transform } from './transform';
 import { isWebGL2Supported } from './utils';
+import { SizedCanvasImageSource } from './types';
 
 export interface IGL2ProgramPrefix {
     readonly VERTEX: string;
@@ -170,23 +171,34 @@ export abstract class GL2<E extends EGL2Event = EGL2Event> extends RenderItem<
         super(type, false);
 
         this.canvas = document.createElement('canvas');
-        this.gl = this.canvas.getContext('webgl2')!;
+        const gl = this.canvas.getContext('webgl2')!;
+        this.gl = gl;
         if (!GL2.support) {
             this.canvas.width = 0;
             this.canvas.height = 0;
         } else {
-            const num = this.gl.getParameter(this.gl.MAX_TEXTURE_IMAGE_UNITS);
+            const num = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
             if (typeof num === 'number') {
                 this.MAX_TEXTURE_COUNT = num;
             }
         }
+        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
 
         this.init();
     }
 
+    private init() {
+        const gl = this.gl;
+        if (!gl) return;
+        gl.enable(gl.DEPTH_TEST);
+        gl.enable(gl.BLEND);
+        gl.depthFunc(gl.LEQUAL);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    }
+
     onResize(scale: number): void {
-        this.sizeGL(this.width, this.height);
         super.onResize(scale);
+        this.sizeGL(this.width, this.height);
     }
 
     setHD(hd: boolean): void {
@@ -201,9 +213,10 @@ export abstract class GL2<E extends EGL2Event = EGL2Event> extends RenderItem<
 
     private sizeGL(width: number, height: number) {
         const ratio = this.highResolution ? devicePixelRatio : 1;
-        const scale = ratio * this.cache.scale;
+        const scale = ratio * this.scale;
         this.canvas.width = width * scale;
         this.canvas.height = height * scale;
+        this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     }
 
     protected render(
@@ -218,12 +231,10 @@ export abstract class GL2<E extends EGL2Event = EGL2Event> extends RenderItem<
 
         // 清空画布
         const gl = this.gl;
-        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
         gl.clearColor(0, 0, 0, 0);
         gl.clearDepth(1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        this.program.ready();
-        this.drawScene(canvas, gl, this.program, transform);
+        this.drawScene(canvas, gl, transform);
 
         canvas.clear();
         canvas.ctx.drawImage(this.canvas, 0, 0, this.width, this.height);
@@ -239,7 +250,6 @@ export abstract class GL2<E extends EGL2Event = EGL2Event> extends RenderItem<
     protected abstract drawScene(
         canvas: MotaOffscreenCanvas2D,
         gl: WebGL2RenderingContext,
-        program: GL2Program,
         transform: Transform
     ): void;
 
@@ -252,6 +262,7 @@ export abstract class GL2<E extends EGL2Event = EGL2Event> extends RenderItem<
         const indices = program.usingIndices;
         const param = program.getDrawParams(program.renderMode);
         if (!param) return;
+        program.ready();
         switch (program.renderMode) {
             case RenderMode.Arrays: {
                 const { mode, first, count } = param as DrawArraysParam;
@@ -308,7 +319,6 @@ export abstract class GL2<E extends EGL2Event = EGL2Event> extends RenderItem<
         gl.bindTexture(gl.TEXTURE_2D, tex);
         gl.bindFramebuffer(gl.FRAMEBUFFER, buffer);
         if (clear) {
-            gl.viewport(0, 0, this.canvas.width, this.canvas.height);
             gl.clearColor(0, 0, 0, 0);
             gl.clearDepth(1);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -403,15 +413,6 @@ export abstract class GL2<E extends EGL2Event = EGL2Event> extends RenderItem<
         this.programs.forEach(v => v.destroy());
         this.canvas.remove();
         super.destroy();
-    }
-
-    private init() {
-        const gl = this.gl;
-        if (!gl) return;
-        gl.enable(gl.DEPTH_TEST);
-        gl.enable(gl.BLEND);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-        gl.depthFunc(gl.LEQUAL);
     }
 }
 
@@ -727,6 +728,7 @@ class ShaderUniform<T extends UniformType> implements IShaderUniform<T> {
 
     set(...params: UniformSetFn[T]): void {
         // 因为ts类型推导的限制，类型肯定正确，但是推导不出，所以这里直接 as any 屏蔽掉类型推导
+        this.gl.useProgram(this.program.program);
         const [x0, x1, x2, x3] = params as any[];
         switch (this.type) {
             case UniformType.Uniform1f:
@@ -815,6 +817,7 @@ class ShaderAttrib<T extends AttribType> implements IShaderAttrib<T> {
 
     set(...params: AttribSetFn[T]) {
         // 因为ts类型推导的限制，类型肯定正确，但是推导不出，所以这里直接 as any 屏蔽掉类型推导
+        this.gl.useProgram(this.program.program);
         const [x0, x1, x2, x3] = params as any[];
         switch (this.type) {
             case AttribType.Attrib1f:
@@ -878,6 +881,7 @@ class ShaderAttribArray implements IShaderAttribArray {
     ): void;
     buffer(data: any, usage: any, srcOffset?: any, length?: any): void {
         const gl = this.gl;
+        gl.useProgram(this.program.program);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.data);
         if (typeof srcOffset === 'number') {
             gl.bufferData(gl.ARRAY_BUFFER, data, usage, srcOffset, length);
@@ -895,6 +899,7 @@ class ShaderAttribArray implements IShaderAttribArray {
     ): void;
     sub(dstOffset: any, data: any, offset?: any, length?: any): void {
         const gl = this.gl;
+        gl.useProgram(this.program.program);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.data);
         if (typeof offset === 'number') {
             gl.bufferSubData(gl.ARRAY_BUFFER, dstOffset, data, offset, length);
@@ -911,6 +916,7 @@ class ShaderAttribArray implements IShaderAttribArray {
         p4: GLintptr
     ): void {
         const gl = this.gl;
+        gl.useProgram(this.program.program);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.data);
         gl.vertexAttribPointer(this.location, p0, p1, p2, p3, p4);
     }
@@ -922,20 +928,24 @@ class ShaderAttribArray implements IShaderAttribArray {
         offset: GLintptr
     ): void {
         const gl = this.gl;
+        gl.useProgram(this.program.program);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.data);
         gl.vertexAttribIPointer(this.location, size, type, stride, offset);
     }
 
     divisor(divisor: number): void {
         const gl = this.gl;
+        gl.useProgram(this.program.program);
         gl.vertexAttribDivisor(this.location, divisor);
     }
 
     enable(): void {
+        this.gl.useProgram(this.program.program);
         this.gl.enableVertexAttribArray(this.location);
     }
 
     disable(): void {
+        this.gl.useProgram(this.program.program);
         this.gl.disableVertexAttribArray(this.location);
     }
 }
@@ -956,6 +966,7 @@ class ShaderIndices implements IShaderIndices {
     ): void;
     buffer(p0: any, p1: any, p2?: any, p3?: any): void {
         const gl = this.gl;
+        gl.useProgram(this.program.program);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.data);
         if (typeof p2 === 'number') {
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, p0, p1, p2, p3);
@@ -973,6 +984,7 @@ class ShaderIndices implements IShaderIndices {
     ): void;
     sub(p0: any, p1: any, p2?: any, p3?: any): void {
         const gl = this.gl;
+        gl.useProgram(this.program.program);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.data);
         if (typeof p2 === 'number') {
             gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, p0, p1, p2, p3);
@@ -991,6 +1003,7 @@ class ShaderUniformMatrix implements IShaderUniformMatrix {
     ) {}
 
     set(x2: GLboolean, x3: Float32List, x4?: number, x5?: number): void {
+        this.gl.useProgram(this.program.program);
         switch (this.type) {
             case UniformMatrix.UMatrix2x2:
                 this.gl.uniformMatrix2fv(this.location, x2, x3, x4, x5);
@@ -1037,6 +1050,7 @@ class ShaderUniformBlock implements IShaderUniformBlock {
     set(srcData: ArrayBufferView, srcOffset: number, length?: number): void;
     set(srcData: unknown, srcOffset?: unknown, length?: unknown): void {
         const gl = this.gl;
+        gl.useProgram(this.program.program);
         const buffer = this.buffer;
         gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
         if (srcOffset !== void 0) {
@@ -1065,6 +1079,7 @@ class ShaderTexture2D implements IShaderTexture2D {
 
     set(source: TexImageSource): void {
         const gl = this.gl;
+        gl.useProgram(this.program.program);
         gl.activeTexture(gl.TEXTURE0 + this.index);
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
@@ -1096,6 +1111,7 @@ class ShaderTexture2D implements IShaderTexture2D {
         height: number
     ): void {
         const gl = this.gl;
+        gl.useProgram(this.program.program);
         gl.activeTexture(gl.TEXTURE0 + this.index);
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
 
@@ -1191,8 +1207,6 @@ export class GL2Program extends EventEmitter<ShaderProgramEvent> {
     /** 当前正在使用的顶点索引数组 */
     usingIndices: IShaderIndices | null = null;
 
-    /** 着色器内容是否是默认内容，可以用于优化空着色器 */
-    modified: boolean = false;
     /** 渲染模式 */
     renderMode: RenderMode = RenderMode.Elements;
 
@@ -1376,7 +1390,6 @@ export class GL2Program extends EventEmitter<ShaderProgramEvent> {
     vs(vs: string) {
         this.vertex = this.prefix.VERTEX + vs;
         this.shaderDirty = true;
-        this.modified = true;
     }
 
     /**
@@ -1386,7 +1399,6 @@ export class GL2Program extends EventEmitter<ShaderProgramEvent> {
     fs(fs: string) {
         this.fragment = this.prefix.FRAGMENT + fs;
         this.shaderDirty = true;
-        this.modified = true;
     }
 
     /**
@@ -1669,6 +1681,24 @@ export class GL2Program extends EventEmitter<ShaderProgramEvent> {
         const obj = new ShaderTexture2D(tex, index, uni, gl, this, w, h);
         this.texture.set(name, obj);
         return obj;
+    }
+
+    /**
+     * 绑定纹理，自动判断应该使用 sub 还是 set
+     * @param program 使用的着色器程序
+     * @param texture 要绑定至的纹理
+     * @param source 纹理内容
+     * @returns 是否绑定成功
+     */
+    texTexture(texture: string, source: SizedCanvasImageSource) {
+        const tex = this.getTexture(texture);
+        if (!tex) return false;
+        if (tex.width === source.width && tex.height === source.height) {
+            tex.sub(source, 0, 0, source.width, source.height);
+        } else {
+            tex.set(source);
+        }
+        return true;
     }
 
     /**

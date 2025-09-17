@@ -22,6 +22,7 @@ export abstract class EffectBase<T> {
         this.program = program;
         this.shader = shader;
 
+        shader.useProgram(program);
         this.initProgram(program, options);
     }
 

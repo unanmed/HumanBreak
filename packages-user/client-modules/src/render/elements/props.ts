@@ -1,5 +1,5 @@
 import { BaseProps, TagDefine } from '@motajs/render-vue';
-import { Transform } from '@motajs/render-core';
+import { CanvasStyle, Transform } from '@motajs/render-core';
 import {
     ILayerGroupRenderExtends,
     FloorLayer,
@@ -10,7 +10,6 @@ import {
 import { EAnimateEvent } from './animate';
 import { EIconEvent, EWinskinEvent } from './misc';
 import { IEnemyCollection } from '@motajs/types';
-import { CanvasStyle } from '@motajs/render-elements';
 
 export interface AnimateProps extends BaseProps {}
 

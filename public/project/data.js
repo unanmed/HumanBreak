@@ -130,6 +130,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"cloud.png",
 			"def.png",
 			"exp.png",
+			"fog.png",
 			"hero1.png",
 			"hero2.png",
 			"hp.png",

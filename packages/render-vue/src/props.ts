@@ -7,11 +7,11 @@ import {
     ElementLocator,
     ElementScale,
     CustomContainerRenderFn,
-    CustomContainerPropagateFn
+    CustomContainerPropagateFn,
+    CanvasStyle
 } from '@motajs/render-core';
 import {
     BezierParams,
-    CanvasStyle,
     CircleParams,
     EllipseParams,
     ILineProperty,

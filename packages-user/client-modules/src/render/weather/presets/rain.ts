@@ -1,8 +1,9 @@
 import {
-    Shader,
     ShaderProgram,
     IShaderUniform,
-    UniformType
+    UniformType,
+    MotaOffscreenCanvas2D,
+    GL2
 } from '@motajs/render';
 import { Weather } from '../weather';
 
@@ -73,24 +74,61 @@ void main() {
     vec2 texPos = (pos + 1.0) / 2.0;
     texPos.y = 1.0 - texPos.y;
     vec4 tex = texture(u_sampler, texPos);
-    outColor = mix(u_color, tex, 0.9);
+    outColor = mix(u_color, tex, 0.8);
 }
 `;
 
 /** 雨滴顶点坐标 */
 const vertex = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
 
-export class RainWeather extends Weather<Shader> {
-    /** 下雨流程的 uniform 变量 */
-    private progress: IShaderUniform<UniformType.Uniform1f> | null = null;
-    /** 使用的着色器程序 */
-    private program: ShaderProgram | null = null;
+interface RainCreateData {
+    /** 进度变量 */
+    readonly uProgress: IShaderUniform<UniformType.Uniform1f> | null;
+    /** 下雨着色器程序 */
+    readonly program: ShaderProgram;
+}
+
+class RainShader extends GL2 {
+    /** 下雨程序 */
+    private rainProgram: ShaderProgram | null = null;
+    /** 背景程序 */
+    private backProgram: ShaderProgram | null = null;
+
+    create(level: number): RainCreateData {
+        const gl = this.gl;
+        const program = this.createProgram(ShaderProgram);
+        program.fs(rainFs);
+        program.vs(rainVs);
+        program.requestCompile();
+        this.useProgram(program);
+        const pos = program.defineAttribArray('a_rainVertex');
+        program.defineAttribArray('a_offset');
+        program.defineAttribArray('a_data');
+        program.defineUniform('u_color', this.UNIFORM_4f);
+        const uProgress = program.defineUniform('u_progress', this.UNIFORM_1f);
+        program.mode(this.DRAW_ARRAYS_INSTANCED);
+
+        if (pos) {
+            pos.buffer(vertex, gl.STATIC_DRAW);
+            pos.pointer(2, gl.FLOAT, false, 0, 0);
+            pos.enable();
+        }
+
+        program.paramArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, 100 * level);
+
+        this.generateRainPath(level, program);
+        this.rainProgram = program;
+        this.backProgram = this.createProgram(ShaderProgram);
+        this.backProgram.requestCompile();
+
+        return { uProgress, program };
+    }
 
     /**
      * 生成雨滴
      * @param num 雨滴数量
      */
-    generateRainPath(level: number, program: ShaderProgram, shader: Shader) {
+    generateRainPath(level: number, program: ShaderProgram) {
         const num = level * 100;
         const angle = (((Math.random() - 0.5) * Math.PI) / 30) * level;
         const deviation = (Math.PI / 180) * (12 - level);
@@ -98,8 +136,8 @@ export class RainWeather extends Weather<Shader> {
         const aOffset = program.getAttribArray('a_offset');
         const aData = program.getAttribArray('a_data');
         const color = program.getUniform<UniformType.Uniform4f>('u_color');
-        const gl = shader.gl;
-        if (!aOffset || !aData) return;
+        const gl = this.gl;
+        if (!aOffset || !aData || !color) return;
 
         const tan = Math.tan(angle);
 
@@ -135,52 +173,47 @@ export class RainWeather extends Weather<Shader> {
         aData.enable();
 
         program.paramArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, num);
-        color?.set(1, 1, 1, 0.1);
+        color.set(1, 1, 1, 0.1);
     }
 
-    createElement(level: number): Shader {
-        const shader = new Shader();
-        const gl = shader.gl;
-        shader.size(480, 480);
+    protected drawScene(
+        canvas: MotaOffscreenCanvas2D,
+        gl: WebGL2RenderingContext
+    ): void {
+        const program1 = this.backProgram;
+        const program2 = this.rainProgram;
+        if (!program1 || !program2) return;
+        this.useProgram(program1);
+        program1.texTexture('u_sampler', canvas.canvas);
+        this.draw(gl, program1);
+        this.useProgram(program2);
+        program2.texTexture('u_sampler', canvas.canvas);
+        this.draw(gl, program2);
+    }
+}
+
+export class RainWeather extends Weather<GL2> {
+    /** 下雨流程的 uniform 变量 */
+    private progress: IShaderUniform<UniformType.Uniform1f> | null = null;
+    /** 下雨着色器程序 */
+    private program: ShaderProgram | null = null;
+
+    createElement(level: number): GL2 {
+        const shader = new RainShader();
         shader.setHD(true);
-        shader.setZIndex(100);
-        const program = shader.createProgram(ShaderProgram);
-        program.fs(rainFs);
-        program.vs(rainVs);
-        program.requestCompile();
-        const pos = program.defineAttribArray('a_rainVertex');
-        program.defineAttribArray('a_offset');
-        program.defineAttribArray('a_data');
-        program.defineUniform('u_progress', shader.UNIFORM_1f);
-        program.defineUniform('u_color', shader.UNIFORM_4f);
-        program.mode(shader.DRAW_ARRAYS_INSTANCED);
-        shader.useProgram(program);
-
-        if (pos) {
-            pos.buffer(vertex, gl.STATIC_DRAW);
-            pos.pointer(2, gl.FLOAT, false, 0, 0);
-            pos.enable();
-        }
-
-        program.paramArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, 100 * this.level);
-
-        this.progress = program.getUniform<UniformType.Uniform1f>('u_progress');
-        this.generateRainPath(level, program, shader);
-
+        const { uProgress, program } = shader.create(level);
+        this.progress = uProgress;
         this.program = program;
         return shader;
     }
 
     tick(timestamp: number): void {
-        if (!this.element) return;
+        if (!this.element || !this.program) return;
         this.element.update();
         const time = 5000 - 400 * this.level;
         const progress = (timestamp % time) / time;
         this.progress?.set(progress);
     }
 
-    onDestroy(): void {
-        if (!this.element || !this.program) return;
-        this.element.deleteProgram(this.program);
-    }
+    onDestroy(): void {}
 }

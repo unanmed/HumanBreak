@@ -8,4 +8,5 @@ export * from './render';
 export * from './shader';
 export * from './sprite';
 export * from './transform';
+export * from './types';
 export * from './utils';

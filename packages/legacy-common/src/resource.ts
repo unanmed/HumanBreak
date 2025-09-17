@@ -576,14 +576,6 @@ export function loadDefaultResource() {
                 ] = res.resource;
             });
         });
-    const weathers: (keyof Weather)[] = ['fog'];
-    weathers.forEach(v => {
-        const res = LoadTask.add('material', `material/${v}.png`);
-        res.once('load', res => {
-            // @ts-expect-error 需要赋值
-            core.animateFrame.weather[v] = res.resource;
-        });
-    });
     // animates
     {
         const res = LoadTask.add(
@@ -619,7 +611,6 @@ export async function loadCompressedResource() {
         HTMLImageElement
     >[];
     materialImages.push('keyboard');
-    const weathers: (keyof Weather)[] = ['fog'];
 
     Object.entries(list).forEach(v => {
         const [uri, list] = v;
@@ -696,9 +687,6 @@ export async function loadCompressedResource() {
                                     HTMLImageElement
                                 >
                             ] = image;
-                        } else if (weathers.some(v => name === v + '.png')) {
-                            // @ts-expect-error 需要赋值
-                            core.animateFrame.weather[v] = image;
                         }
                     }
 

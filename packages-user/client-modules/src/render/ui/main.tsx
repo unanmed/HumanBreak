@@ -8,7 +8,14 @@ import {
     onTick
 } from '@motajs/render';
 import { WeatherController } from '../weather';
-import { defineComponent, onMounted, onUnmounted, reactive, ref } from 'vue';
+import {
+    defineComponent,
+    onMounted,
+    onUnmounted,
+    reactive,
+    ref,
+    shallowRef
+} from 'vue';
 import { Textbox, Tip } from '../components';
 import { GameUI } from '@motajs/system-ui';
 import {
@@ -76,7 +83,7 @@ const MainScene = defineComponent(() => {
         width: 480
     };
 
-    const map = ref<LayerGroup>();
+    const map = shallowRef<LayerGroup>();
     const hideStatus = ref(false);
     const locked = ref(false);
     const weather = new WeatherController();

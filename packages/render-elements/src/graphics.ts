@@ -2,11 +2,11 @@ import {
     Transform,
     ERenderItemEvent,
     RenderItem,
-    MotaOffscreenCanvas2D
+    MotaOffscreenCanvas2D,
+    CanvasStyle
 } from '@motajs/render-core';
 import { logger } from '@motajs/common';
 import { clamp, isEqual, isNil } from 'lodash-es';
-import { CanvasStyle } from './types';
 
 export type CircleParams = [
     cx?: number,

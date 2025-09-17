@@ -1,5 +1,6 @@
 import { MotaOffscreenCanvas2D } from './canvas2d';
 import { EGL2Event, GL2, GL2Program, IGL2ProgramPrefix } from './gl2';
+import { RenderItemPosition } from './item';
 
 const SHADER_PREFIX: IGL2ProgramPrefix = {
     VERTEX: /* glsl */ `#version 300 es
@@ -38,20 +39,17 @@ export interface EShaderEvent extends EGL2Event {}
 export class Shader<E extends EShaderEvent = EShaderEvent> extends GL2<
     EShaderEvent | E
 > {
+    constructor(type: RenderItemPosition = 'static') {
+        super(type);
+    }
+
     protected drawScene(
         canvas: MotaOffscreenCanvas2D,
-        gl: WebGL2RenderingContext,
-        program: GL2Program
+        gl: WebGL2RenderingContext
     ): void {
-        if (!program.modified) return;
-        const tex = program.getTexture('u_sampler');
-        if (!tex) return;
-        const c = canvas.canvas;
-        if (tex.width === c.width && tex.height === c.height) {
-            tex.sub(c, 0, 0, c.width, c.height);
-        } else {
-            tex.set(c);
-        }
+        const program = this.program;
+        if (!program) return;
+        program.texTexture('u_sampler', canvas.canvas);
         this.draw(gl, program);
     }
 }
@@ -63,9 +61,6 @@ export class ShaderProgram extends GL2Program {
         super(gl2, vs, fs);
         if (!vs) this.vs(DEFAULT_VS);
         if (!fs) this.fs(DEFAULT_FS);
-        if (!vs && !fs) {
-            this.modified = false;
-        }
     }
 
     ready(): boolean {

@@ -118,6 +118,7 @@ type ImageIds =
     | 'cloud.png'
     | 'def.png'
     | 'exp.png'
+    | 'fog.png'
     | 'hero1.png'
     | 'hero2.png'
     | 'hp.png'
