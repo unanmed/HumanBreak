@@ -74,7 +74,7 @@ void main() {
     vec2 texPos = (pos + 1.0) / 2.0;
     texPos.y = 1.0 - texPos.y;
     vec4 tex = texture(u_sampler, texPos);
-    outColor = mix(u_color, tex, 0.8);
+    outColor = mix(u_color, tex, 0.75);
 }
 `;
 
@@ -157,7 +157,7 @@ class RainShader extends GL2 {
             const ox = Math.random() * 3 - 1.5 + tan * 2;
             const oy = Math.random() * 2 + 1;
             const rad = angle + (Math.random() - 0.5) * Math.PI * deviation;
-            const length = Math.random() * 0.1 + 0.05;
+            const length = Math.random() * 0.05 + 0.03;
             const width = Math.random() * 0.002 + 0.002;
             offset.set([ox, oy], i * 2);
             data.set([width, length, rad, 1], i * 4);
@@ -172,8 +172,7 @@ class RainShader extends GL2 {
         aData.divisor(1);
         aData.enable();
 
-        program.paramArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, num);
-        color.set(1, 1, 1, 0.1);
+        color.set(1, 1, 1, 1);
     }
 
     protected drawScene(
@@ -197,6 +196,8 @@ export class RainWeather extends Weather<GL2> {
     private progress: IShaderUniform<UniformType.Uniform1f> | null = null;
     /** 下雨着色器程序 */
     private program: ShaderProgram | null = null;
+    /** 一个周期的时长 */
+    private duration: number = 1;
 
     createElement(level: number): GL2 {
         const shader = new RainShader();
@@ -204,13 +205,14 @@ export class RainWeather extends Weather<GL2> {
         const { uProgress, program } = shader.create(level);
         this.progress = uProgress;
         this.program = program;
+        this.duration = 5000 - 300 * this.level;
         return shader;
     }
 
     tick(timestamp: number): void {
         if (!this.element || !this.program) return;
         this.element.update();
-        const time = 5000 - 400 * this.level;
+        const time = this.duration;
         const progress = (timestamp % time) / time;
         this.progress?.set(progress);
     }

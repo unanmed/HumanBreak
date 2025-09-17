@@ -7,6 +7,7 @@ export abstract class Weather<T extends RenderItem> implements IWeather<T> {
     protected element: T | null = null;
 
     create(level: number): T {
+        this.level = level;
         const element = this.createElement(level);
         this.element = element;
         return element;
