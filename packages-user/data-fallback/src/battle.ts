@@ -133,7 +133,7 @@ export function patchBattle() {
             // const enemy = getSingleEnemy(data.id as EnemyIds);
             // todo: 与不在地图上的怪物战斗
         } else {
-            if (data.floorId != core.status.floorId) {
+            if (data.floorId !== core.status.floorId) {
                 core.doAction();
                 return;
             }
@@ -246,7 +246,7 @@ export function patchBattle() {
             } else core.drawHeroAnimate(animate);
 
             // 如果已有事件正在处理中
-            if (core.status.event.id == null) core.continueAutomaticRoute();
+            if (isNil(core.status.event.id)) core.continueAutomaticRoute();
             else core.clearContinueAutomaticRoute();
 
             core.checkAutoEvents();

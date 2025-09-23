@@ -1,6 +1,7 @@
 import { Patch, PatchClass } from '@motajs/legacy-common';
 import { EnemyCollection, ensureFloorDamage } from '@user/data-state';
 import { formatDamage } from '@user/data-utils';
+import { isNil } from 'lodash-es';
 
 export function patchDamage() {
     const patch = new Patch(PatchClass.Control);
@@ -13,7 +14,7 @@ export function patchDamage() {
         ) {
             if (!floorId || core.status.gameOver || main.mode !== 'play')
                 return;
-            const onMap = ctx == null;
+            const onMap = isNil(ctx);
             const floor = core.status.maps[floorId];
 
             // 没有怪物手册
