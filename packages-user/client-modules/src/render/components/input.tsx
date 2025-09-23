@@ -146,6 +146,7 @@ export const Input = defineComponent<InputProps, InputEmits, keyof InputEmits>(
             const renderer = MotaRenderer.get('render-main');
             const canvas = renderer?.getCanvas();
             if (!canvas) return;
+
             const chain: RenderItem[] = [];
             let now: RenderItem | undefined = root.value;
             if (!now) return;
@@ -153,6 +154,8 @@ export const Input = defineComponent<InputProps, InputEmits, keyof InputEmits>(
                 chain.unshift(now);
                 now = now.parent;
             }
+
+            // 应用内边距偏移.
             const { clientLeft, clientTop } = canvas;
             const trans = new Transform();
             trans.translate(clientLeft, clientTop);
@@ -163,8 +166,11 @@ export const Input = defineComponent<InputProps, InputEmits, keyof InputEmits>(
                 trans.multiply(item.transform);
             }
             trans.translate(padding.value, padding.value);
+
+            // 构建CSS transform的matrix字符串
             const [a, b, , c, d, , e, f] = trans.mat;
             const str = `matrix(${a},${b},${c},${d},${e},${f})`;
+
             const w = width.value * core.domStyle.scale;
             const h = height.value * core.domStyle.scale;
             const font = props.font ?? Font.defaults();
@@ -237,17 +243,29 @@ export const Input = defineComponent<InputProps, InputEmits, keyof InputEmits>(
 );
 
 export interface InputBoxProps extends TextContentProps {
+    /** 输入框对话框的位置 */
     loc: ElementLocator;
+    /** 传递给内部 Input 组件的配置参数，用于自定义输入行为 */
     input?: InputProps;
+    /** 窗口皮肤图片ID，用于对话框背景绘制 */
     winskin?: ImageIds;
+    /** 对话框背景颜色，当未设置 winskin 时生效 */
     color?: CanvasStyle;
+    /** 对话框边框颜色，当未设置 winskin 时生效 */
     border?: CanvasStyle;
+    /** 对话框内部所有元素的内边距 */
     pad?: number;
+    /** 内部输入框区域的高度 */
     inputHeight?: number;
+    /** 对话框顶部的提示文本 */
     text?: string;
+    /** 确认按钮的显示文本，默认为"确认" */
     yesText?: string;
+    /** 取消按钮的显示文本，默认为"取消" */
     noText?: string;
+    /** 确认/取消按钮的字体样式 */
     selFont?: Font;
+    /** 确认/取消按钮的文本颜色 */
     selFill?: CanvasStyle;
 }
 
@@ -505,6 +523,11 @@ export function getInput(
 
 /**
  * 与 `getInput` 类似，不过会将结果转为数字。用法参考 {@link getInput}
+ * @param controller UI 控制器
+ * @param text 确认文本内容
+ * @param loc 确认框的位置
+ * @param width 确认框的宽度
+ * @param props 额外的 props，参考 {@link ConfirmBoxProps}
  */
 export async function getInputNumber(
     controller: IUIMountable,

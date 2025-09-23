@@ -402,6 +402,8 @@ importers:
 
   packages-user/types: {}
 
+  packages/animate: {}
+
   packages/client:
     dependencies:
       '@motajs/client-base':

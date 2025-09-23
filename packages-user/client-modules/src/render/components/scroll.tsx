@@ -54,6 +54,7 @@ export interface ScrollExpose {
 export interface ScrollProps extends DefaultProps {
     loc: ElementLocator;
     hor?: boolean;
+    /** 是否不允许滚动 */
     noscroll?: boolean;
     /**
      * 滚动到最下方（最右方）时的填充大小，如果默认的高度计算方式有误，

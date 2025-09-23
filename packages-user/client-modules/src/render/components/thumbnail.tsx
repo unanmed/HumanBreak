@@ -8,10 +8,15 @@ import { defineComponent, ref, watch } from 'vue';
 import { SetupComponentOptions } from '@motajs/system-ui';
 
 export interface ThumbnailProps extends SpriteProps {
+    /** 缩略图的位置 */
     loc: ElementLocator;
+    /** 楼层 ID */
     floorId: FloorIds;
+    /** 缩略图填充样式 */
     padStyle?: CanvasStyle;
+    /** 楼层信息 */
     map?: Block[];
+    /** 角色信息 */
     hero?: HeroStatus;
     // configs
     damage?: boolean;

@@ -9,17 +9,29 @@ import { useKey } from '../use';
 import { sleep } from 'mutate-animate';
 
 export interface ConfirmBoxProps extends DefaultProps, TextContentProps {
+    /** 确认框的提示文本内容 */
     text: string;
+    /** 确认框对话框的宽度 */
     width: number;
+    /** 确认框对话框的位置 */
     loc: ElementLocator;
+    /** 确认/取消按钮的字体样式 */
     selFont?: Font;
+    /** 确认/取消按钮的文本颜色 */
     selFill?: CanvasStyle;
+    /** 对话框内部所有元素的内边距 */
     pad?: number;
+    /** 确认按钮的显示文本，默认为"确认" */
     yesText?: string;
+    /** 取消按钮的显示文本，默认为"取消" */
     noText?: string;
+    /** 窗口皮肤图片ID，用于对话框背景绘制 */
     winskin?: ImageIds;
+    /** 是否默认选中确认按钮 */
     defaultYes?: boolean;
+    /** 对话框背景颜色，当未设置 winskin 时生效 */
     color?: CanvasStyle;
+    /** 对话框边框颜色，当未设置 winskin 时生效 */
     border?: CanvasStyle;
 }
 
@@ -198,21 +210,37 @@ export type ChoiceItem<T extends ChoiceKey = ChoiceKey> = [
 ];
 
 export interface ChoicesProps extends DefaultProps, TextContentProps {
+    /** 选项数组 */
     choices: ChoiceItem[];
+    /** 选择框对话框的位置 */
     loc: ElementLocator;
+    /** 选择框对话框的宽度 */
     width: number;
+    /** 选择框的最大高度，超过时将分页显示 */
     maxHeight?: number;
+    /** 选择框的提示文本内容 */
     text?: string;
+    /** 选择框的标题文本 */
     title?: string;
+    /** 窗口皮肤图片ID，用于对话框背景绘制 */
     winskin?: ImageIds;
+    /** 对话框背景颜色，当未设置 winskin 时生效 */
     color?: CanvasStyle;
+    /** 对话框边框颜色，当未设置 winskin 时生效 */
     border?: CanvasStyle;
+    /** 选项文本的字体样式 */
     selFont?: Font;
+    /** 选项文本的颜色 */
     selFill?: CanvasStyle;
+    /** 标题文本的字体样式 */
     titleFont?: Font;
+    /** 标题文本的颜色 */
     titleFill?: CanvasStyle;
+    /** 对话框内部所有元素的内边距 */
     pad?: number;
+    /** 选项之间的垂直间隔 */
     interval?: number;
+    /** 默认选中的选项索引 */
     selected?: number;
 }
 

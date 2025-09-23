@@ -75,10 +75,15 @@ interface TyperConfig extends ITextContentConfig {
 }
 
 interface ParserStatus {
+    /** 画布填充描边样式 */
     fillStyle: CanvasStyle;
+    /** 描边样式 */
     fontFamily: string;
+    /** 字体大小 */
     fontSize: number;
+    /** 是否斜体 */
     fontItalic: boolean;
+    /** 字体粗细 */
     fontWeight: number;
 }
 

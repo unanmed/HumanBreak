@@ -500,18 +500,28 @@ export const Textbox = defineComponent<
 }, textboxOptions);
 
 interface TextboxStoreEmits {
+    /** 结束打字机动画的回调函数 */
     endType: () => void;
+    /** 隐藏文本框的回调函数 */
     hide: () => void;
+    /** 显示文本框的回调函数 */
     show: () => void;
+    /** 更新文本框配置的回调函数 */
     update: (value: TextboxProps) => void;
+    /** 设置显示文本的回调函数 */
     setText: (text: string) => void;
 }
 
 interface TextboxStoreEvent {
+    /** 文本框配置更新事件，传递更新后的配置值 */
     update: [value: TextboxProps];
+    /** 文本框显示事件 */
     show: [];
+    /** 文本框隐藏事件 */
     hide: [];
+    /** 打字机开始打字事件 */
     typeStart: [];
+    /** 打字机结束打字事件 */
     typeEnd: [];
 }
 

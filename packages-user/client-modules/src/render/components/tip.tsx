@@ -8,9 +8,13 @@ import { texture } from '../elements';
 import { SetupComponentOptions } from '@motajs/system-ui';
 
 export interface TipProps extends DefaultProps {
+    /** 显示的位置 */
     loc: ElementLocator;
+    /** 边距 */
     pad?: [number, number];
+    /** 圆角 */
     corner?: number;
+    /** 显示的图标 */
     id?: string;
 }
 

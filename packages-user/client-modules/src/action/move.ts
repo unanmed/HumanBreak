@@ -44,6 +44,7 @@ export class HeroKeyMover {
             down: data[config?.down ?? 'moveDown']
         };
 
+        // 静止时尝试启动移动
         this.ticker.add(() => {
             if (!this.moving) {
                 if (this.pressedKey.size > 0) {
@@ -56,6 +57,10 @@ export class HeroKeyMover {
         });
     }
 
+    /**
+     * 按键移动
+     * @param code 按键码
+     */
     private onPressKey = (code: KeyCode) => {
         if (core.isReplaying() || !core.isPlaying()) return;
         core.waitHeroToStop();
@@ -65,6 +70,10 @@ export class HeroKeyMover {
         else if (code === this.hotkeyData.down.key) this.press('down');
     };
 
+    /**
+     * 释放按键
+     * @param code 按键码
+     */
     private onReleaseKey = (code: KeyCode) => {
         if (code === this.hotkeyData.left.key) this.release('left');
         else if (code === this.hotkeyData.right.key) this.release('right');
@@ -135,18 +144,26 @@ export class HeroKeyMover {
         this.controller?.stop();
     }
 
+    /**
+     * 移动结束
+     */
     private onStepEnd = () => {
         const con = this.controller;
         if (!con) return;
+
+        // 被禁止操作时
         if (core.status.lockControl) {
             con.stop();
             return;
         }
+
+        // 未移动时
         if (!this.moving) {
             con.stop();
             return;
         }
 
+        // 尝试移动
         if (this.pressedKey.size > 0) {
             if (con.queue.length === 0) {
                 con.push({ type: 'dir', value: this.moveDir });
