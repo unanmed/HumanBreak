@@ -79,7 +79,7 @@ interface FirstData {
     title: string;
 
     /**
-     * 游戏英文名，应当与mota.config.ts中的一致
+     * 游戏英文名
      */
     name: string;
 

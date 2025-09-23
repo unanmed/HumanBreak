@@ -1,65 +1,3 @@
-/**
- * 怪物buff缓存
- */
-interface EnemyBuffCache {
-    /**
-     * 生命值提升量
-     */
-    hp_buff: number;
-
-    /**
-     * 攻击提升量
-     */
-    atk_buff: number;
-
-    /**
-     * 防御提升量
-     */
-    def_buff: number;
-
-    /**
-     * 支援信息
-     */
-    guards: [number, number, string][];
-}
-
-interface CheckBlockStatus {
-    /**
-     * 捕捉信息
-     */
-    ambush: Record<LocString, [number, number, string, Dir]>;
-
-    /**
-     * 阻击信息
-     */
-    repulse: Record<LocString, [number, number, string, Dir]>;
-
-    /**
-     * 每点的伤害，小于等于0会不显示
-     */
-    damage: Record<LocString, number>;
-
-    /**
-     * 是否需要重算
-     */
-    needCache: boolean;
-
-    /**
-     * 每点的伤害类型
-     */
-    type: Record<LocString, Record<string, number>>;
-
-    /**
-     * 缓存信息，是每个怪物受到的光环加成
-     */
-    cache: Record<string, DeepReadonly<EnemyBuffCache>>;
-
-    /**
-     * 光环信息
-     */
-    halo: Record<LocString, string[]>;
-}
-
 interface DamageStatus {
     /**
      * v2优化下当前的偏移横坐标，单位格子
@@ -80,11 +18,6 @@ interface DamageStatus {
      * 地图伤害或其它在地图上显示的文字
      */
     extraData: DamageStatusExtraData[];
-
-    /**
-     * 不同方向伤害不同的信息
-     */
-    dir: DamageDirData[];
 }
 
 interface DamageStatusData {
@@ -114,13 +47,6 @@ interface DamageStatusExtraData extends DamageStatusData {
      * 文字的不透明度
      */
     alpha: number;
-}
-
-interface DamageDirData {
-    x: number;
-    y: number;
-    dir: Dir;
-    color: Color;
 }
 
 interface AutomaticRouteStatus {
@@ -336,21 +262,6 @@ interface TextAttribute {
 }
 
 interface StatusStyle {
-    /**
-     * 游戏的边框颜色
-     */
-    borderColor: Color;
-
-    /**
-     * 状态栏文字的颜色
-     */
-    statusBarColor: Color;
-
-    /**
-     * 楼层切换样式，css字符串
-     */
-    floorChangingStyle: string;
-
     /**
      * 全局字体
      */
@@ -591,7 +502,7 @@ interface InitGameStatus {
     mapBlockObjs: Record<FloorIds, Record<LocString, Block>>;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，暂无好用的替代接口，之后可能会新增接口\
      * 伤害显示信息
      */
     damage: DamageStatus;
@@ -602,13 +513,13 @@ interface InitGameStatus {
     lockControl: boolean;
 
     /**
-     * @deprecated 迟早给你删喽\
+     * @deprecated 可能可使用，暂无替代接口\
      * 勇士移动状态，每个数字干啥的自己去libs翻，这东西太复杂了，不过应该不会有人用这个东西吧（
      */
     heroMoving: number;
 
     /**
-     * @deprecated
+     * @deprecated 可能可使用，暂无替代接口\
      * 勇士是否停下了
      */
     heroStop: boolean;
@@ -654,6 +565,7 @@ interface InitGameStatus {
     autoEvents: DeepReadonly<AutoEvent[]>;
 
     /**
+     * @deprecated 可能已失效，考虑换用 `TextboxStore` 接口\
      * 当前的全局剧情文本设置
      */
     textAttribute: TextAttribute;
@@ -664,13 +576,13 @@ interface InitGameStatus {
     globalAttribute: GlobalAttribute;
 
     /**
-     * @deprecated
+     * @deprecated 可能可使用，暂无好用的替代接口\
      * 色调的颜色
      */
     curtainColor: Color;
 
     /**
-     * @deprecated
+     * @deprecated 可能已失效，此接口已经不会被使用到\
      * 全局动画对象
      */
     globalAnimateObjs: Block<
@@ -678,31 +590,31 @@ interface InitGameStatus {
     >[];
 
     /**
-     * @deprecated
+     * @deprecated 可能可使用，暂无替代接口\
      * 楼层贴图
      */
     floorAnimateObjs: FloorAnimate[];
 
     /**
-     * @deprecated
+     * @deprecated 可能已失效，此接口已经不会被使用到\
      * 所有的BoxAnimate信息
      */
     boxAnimateObjs: (BoxAnimate | BigImageBoxAnimate)[];
 
     /**
-     * @deprecated
+     * @deprecated 可能已失效，此接口已经不会被使用到\
      * 所有的自动元件动画
      */
     autotileAnimateObjs: Block<IdToNumber[AllIdsOf<'autotile'>]>[];
 
     /**
-     * @deprecated
+     * @deprecated 可能已失效，此接口已经不会被使用到\
      * 全局动画状态，每经过一个全局动画时间便加一
      */
     globalAnimateStatus: number;
 
     /**
-     * @deprecated
+     * @deprecated 可能已失效，此接口已经不会被使用到\
      * 所有绘制的动画
      */
     animateObjs: AnimateObj[];
@@ -713,7 +625,7 @@ interface InitGameStatus {
     hard: string;
 
     /**
-     * @deprecated
+     * @deprecated 可能已失效，此接口已经不会被使用到\
      * 勇士的中心
      */
     heroCenter: Record<'px' | 'py', number>;
@@ -756,10 +668,10 @@ interface GameStatus extends InitGameStatus {
     thisMap: Floor;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用 `core.status.maps[floorId].mapDamage` 接口\
      * 地图伤害
      */
-    checkBlock: Readonly<CheckBlockStatus>;
+    checkBlock: void;
 
     /**
      * 当前勇士状态信息。例如core.status.hero.atk就是当前勇士的攻击力数值
@@ -767,18 +679,6 @@ interface GameStatus extends InitGameStatus {
     hero: HeroStatus;
 
     stepPostfix?: DiredLoc[];
-}
-
-interface Follower {
-    /**
-     * 跟随者的图片id
-     */
-    name: ImageIds;
-
-    direction: Dir;
-    x: number;
-    y: number;
-    stop: boolean;
 }
 
 interface HeroStatistics {
@@ -931,37 +831,28 @@ interface HeroStatus {
     loc: DiredLoc;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 当前的变量
      */
     flags: Flags;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，暂无替代接口\
      * 勇士的跟随者
      */
-    followers: Follower[];
+    followers: [];
 
     /**
-     * @deprecated
+     * @deprecated 可使用，此接口已经不会被使用到\
      */
     statistics: HeroStatistics;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口，2.C 会新增替代接口\
      * 勇士拥有的道具
      */
     items: {
         [P in Exclude<ItemCls, 'items'>]: Record<ItemIdOf<P>, number>;
-    };
-
-    /**
-     * 勇士学习的特技
-     */
-    special: {
-        num: number[];
-        last: number[];
-        [k: string]: any;
     };
 
     buff: Partial<Record<keyof NumbericHeroStatus, number>>;

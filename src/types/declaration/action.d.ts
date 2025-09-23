@@ -94,7 +94,7 @@ interface Actions extends VoidedActionFuncs {
     };
 
     /**
-     * @deprecated
+     * @deprecated 可使用，考虑使用 Hotkey 实现按键，使用 onClick 等实现点击\
      * 此函数将注册一个用户交互行为。
      * @param action 要注册的交互类型
      * @param name 自定义名称，可被注销使用
@@ -109,7 +109,7 @@ interface Actions extends VoidedActionFuncs {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，考虑使用 Hotkey 实现按键，使用 onClick 等实现点击\
      * 注销一个用户交互行为
      * @param action 要注销的交互类型
      * @param name 要注销的自定义名称
@@ -117,7 +117,7 @@ interface Actions extends VoidedActionFuncs {
     unregisterAction(action: ActionKey, name: string): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，考虑使用 Hotkey 实现按键，使用 onClick 等实现点击\
      * 执行一个用户交互行为
      */
     doRegisteredAction<K extends ActionKey>(

@@ -46,41 +46,6 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					_type: 'textarea',
 					_lint: true,
 					_data: '楼层飞行'
-				},
-				afterBattle: {
-					_leaf: true,
-					_type: 'textarea',
-					_lint: true,
-					_data: '战后脚本'
-				},
-				afterOpenDoor: {
-					_leaf: true,
-					_type: 'textarea',
-					_lint: true,
-					_data: '开门后脚本'
-				},
-				afterGetItem: {
-					_leaf: true,
-					_type: 'textarea',
-					_lint: true,
-					_data: '道具后脚本'
-				},
-				afterPushBox: {
-					_leaf: true,
-					_type: 'textarea',
-					_lint: true,
-					_data: '推箱子后'
-				}
-			}
-		},
-		actions: {
-			_type: 'object',
-			_data: {
-				onKeyUp: {
-					_leaf: true,
-					_type: 'textarea',
-					_lint: true,
-					_data: '按键处理'
 				}
 			}
 		},
@@ -99,23 +64,11 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					_lint: true,
 					_data: '读档操作'
 				},
-				getStatusLabel: {
-					_leaf: true,
-					_type: 'textarea',
-					_lint: true,
-					_data: '状态名定义'
-				},
 				updateStatusBar: {
 					_leaf: true,
 					_type: 'textarea',
 					_lint: true,
 					_data: '更新状态栏'
-				},
-				updateCheckBlock: {
-					_leaf: true,
-					_type: 'textarea',
-					_lint: true,
-					_data: '阻激夹域伤害'
 				},
 				moveOneStep: {
 					_leaf: true,
@@ -128,23 +81,6 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					_type: 'textarea',
 					_lint: true,
 					_data: '瞬间移动'
-				},
-				parallelDo: {
-					_leaf: true,
-					_type: 'textarea',
-					_lint: true,
-					_data: '并行脚本'
-				}
-			}
-		},
-		ui: {
-			_type: 'object',
-			_data: {
-				drawStatistics: {
-					_leaf: true,
-					_type: 'textarea',
-					_lint: true,
-					_data: '数据统计'
 				}
 			}
 		}

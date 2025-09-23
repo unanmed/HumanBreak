@@ -1,19 +1,19 @@
 /** 工具类 主要用来进行一些辅助函数的计算 */
 interface Utils {
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 四个方向的坐标增量
      */
     readonly scan: DeepReadonly<Scan>;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 八个方向的坐标增量
      */
     readonly scan2: DeepReadonly<Scan2>;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 将一段文字中的${}（表达式）进行替换。很多情况下可以用模板字符串替代
      * @example
      * // 把主角的生命值和持有的黄钥匙数量代入这句话
@@ -25,7 +25,7 @@ interface Utils {
     replaceText(text: string, prefix?: string): string;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 对一个表达式中的特殊规则进行替换，如status:xxx等。
      * 其中变量和全局存储会替换中文冒号，其余的不会替换
      * @example
@@ -37,7 +37,7 @@ interface Utils {
     replaceValue(value: string): string;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 计算一个表达式的值，支持status:xxx等的计算。
      * @example core.calValue('status:hp + status:def'); // 计算主角的生命值加防御力
      * @param value 待求值的表达式
@@ -47,7 +47,7 @@ interface Utils {
     calValue(value: string | Function, prefix?: string): any;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，考虑换用 js 自带的 `Array.unshift` 接口
      * 将b（可以是另一个数组）插入数组a的开头，用Array.unshift就行
      * @example core.unshift(todo, {type: 'unfollow'}); // 在事件指令数组todo的开头插入“取消所有跟随者”指令
      * @param a 原数组
@@ -57,7 +57,7 @@ interface Utils {
     unshift<A extends any[], B extends any[]>(a: A, b: B): [...B, ...A];
 
     /**
-     * @deprecated
+     * @deprecated 可使用，考虑换用 js 自带的 `Array.push` 接口
      * 将b（可以是另一个数组）插入数组a的末尾，用Array.push就行
      * @example core.push(todo, {type: 'unfollow'}); // 在事件指令数组todo的末尾插入“取消所有跟随者”指令
      * @param a 原数组
@@ -67,14 +67,14 @@ interface Utils {
     push<A extends any[], B extends any[]>(a: A, b: B): [...A, ...B];
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 解压缩一个数据，我也不知道这个解压的是什么
      * @param 要解压的内容，字符串
      */
     decompress(value: string): any;
 
     /**
-     * @deprecated
+     * @deprecated 可能可使用，考虑换用 `GameStorage` 接口\
      * 设置本地存储
      * @param key 本地存储的名称
      * @param value 本地存储的值，不填代表删除
@@ -82,7 +82,7 @@ interface Utils {
     setLocalStorage(key: string, value?: any): void;
 
     /**
-     * @deprecated
+     * @deprecated 可能可使用，考虑换用 `GameStorage` 接口\
      * 获得本地存储
      * @param key 获取的本地存储的名称
      * @param defaultValue 当不存在的时候的默认值
@@ -90,14 +90,14 @@ interface Utils {
     getLocalStorage<T>(key: string, defaultValue?: T): T;
 
     /**
-     * @deprecated
+     * @deprecated 可能可使用，考虑换用 `GameStorage` 接口\
      * 移除本地存储
      * @param key 要移除的本地存储的值
      */
     removeLocalStorage(key: string): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 异步写入localforage
      * @param key 写入的键
      * @param value 写入的值
@@ -112,7 +112,7 @@ interface Utils {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 从localforage读出一段数据
      */
     getLocalForage<T>(
@@ -123,7 +123,7 @@ interface Utils {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 移除localforage的数据
      */
     removeLocalForage(
@@ -133,14 +133,14 @@ interface Utils {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 清除localforage所有的数据
      * @param callback 清除完毕的回调函数
      */
     clearLocalForage(callback?: (err?: Error) => void): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 迭代localforage的数据
      * @param iteratee 迭代器
      * @param callback 迭代完毕的回调函数
@@ -151,14 +151,14 @@ interface Utils {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 获取localforage数据的所有的键
      * @param callback 回调函数
      */
     keysLocalForage(callback?: (err: any, keys: string[]) => void): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 获取localforage数据的数据量
      * @param callback 回调函数
      */
@@ -167,7 +167,7 @@ interface Utils {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 设置一个全局存储，适用于global:xxx，录像播放时将忽略此函数。
      * @example core.setBlobal('一周目已通关', true); // 设置全局存储“一周目已通关”为true，方便二周目游戏中的新要素。
      * @param key 全局变量名称，支持中文
@@ -176,7 +176,7 @@ interface Utils {
     setGlobal(key: string, value?: any): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 读取一个全局存储，适用于global:xxx，支持录像。
      * @example if (core.getGlobal('一周目已通关', false) === true) core.getItem('dagger'); // 二周目游戏进行到此处时会获得一把屠龙匕首
      * @param key 全局变量名称，支持中文
@@ -186,7 +186,7 @@ interface Utils {
     getGlobal<T>(key: string, defaultValue?: T): T;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，考虑换用 `lodash-es` 库的 `cloneDeep` 接口或 js 的 `structuredClone` 接口，推荐前者\
      * 深拷贝一个对象(函数将原样返回)
      * @example core.clone(core.status.hero, (name, value) => (name == 'items' || typeof value == 'number'), false); // 深拷贝主角的属性和道具
      * @param data 待拷贝对象
@@ -201,14 +201,14 @@ interface Utils {
     ): T;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，考虑换用 js 的 `slice` 接口\
      * 深拷贝一个1D或2D的数组
      * @param data 要拷贝的数据
      */
     cloneArray<T extends any[]>(data: T): T;
 
     /**
-     * @deprecated
+     * @deprecated 可能可使用，暂无替代接口\
      * 等比例切分一张图片
      * @example core.splitImage(core.material.images.images['npc48.png'], 32, 48); // 把npc48.png切分成若干32×48px的小人
      * @param image 图片名（支持映射前的中文名）或图片对象（参见上面的例子），获取不到时返回[]
@@ -223,7 +223,7 @@ interface Utils {
     ): HTMLImageElement[];
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 格式化日期为字符串
      * @param date 时间，不填代表当前时间
      * @returns 格式: yyyy-mm-dd hh:mm:ss
@@ -231,7 +231,7 @@ interface Utils {
     formatDate(date?: Date): string;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 格式化日期为最简字符串
      * @param date 时间，不填代表当前时间
      * @returns 格式: yyyymmddhhmmss
@@ -239,7 +239,7 @@ interface Utils {
     formatDate2(date?: Date): string;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 格式化时间
      * @param time 时间
      * @returns 格式: hh:mm:ss
@@ -247,13 +247,13 @@ interface Utils {
     formatTime(time: number): string;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，考虑换用 js 的 `String.padStart` 接口\
      * 设置成两位数显示，请使用setDigits代替
      */
     setTwoDigits(x: number): string;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，考虑换用 js 的 `String.padStart` 接口\
      * 设置一个数为n位数显示
      * @param x 要设置的数
      * @param n 设置成的位数
@@ -261,7 +261,7 @@ interface Utils {
     setDigits(x: number, n: number): string;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 格式化文件大小
      * @param size 大小，字节数
      * @returns 格式为xx.xxB KB MB
@@ -269,7 +269,7 @@ interface Utils {
     formatSize(size: number): string;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 大数字格式化，单位为10000的倍数（w,e,z,j,g），末尾四舍五入
      * @example core.formatBigNumber(123456789); // "12346w"
      * @param x 原数字
@@ -278,19 +278,19 @@ interface Utils {
      */
     formatBigNumber<T extends string>(x: T, onMap?: number): T;
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      */
     formatBigNumber(x: number | string, onMap?: number | boolean): string;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，考虑换用 `mutate-animate` 库\
      * 变速移动，完全可以用mutate-animate代替
      * @param mode 缓动模式
      */
     applyEasing(mode?: EaseMode): (x: number) => number;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，此接口应该不会被使用到\
      * 颜色数组转十六进制
      * @example core.arrayToRGB([102, 204, 255]); // "#66ccff"，加载画面的宣传色
      * @param color 一行三列的数组，各元素必须为不大于255的自然数
@@ -299,7 +299,7 @@ interface Utils {
     arrayToRGB(color: RGBArray): _RGBA;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，此接口应该不会被使用到\
      * 颜色数组转字符串
      * @example core.arrayToRGBA([102, 204, 255]); // "rgba(102,204,255,1)"
      * @param color 一行三列或一行四列的数组，前三个元素必须为不大于255的自然数。
@@ -309,7 +309,7 @@ interface Utils {
     arrayToRGBA(color: Color): _RGBA;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 录像一压，其结果会被再次base64压缩
      * @example core.encodeRoute(core.status.route); // 一压当前录像
      * @param route 原始录像，自定义内容（不予压缩，原样写入）必须由0-9A-Za-z和下划线、冒号组成，
@@ -319,7 +319,7 @@ interface Utils {
     encodeRoute(route: string[]): string;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 录像解压的最后一步，即一压的逆过程
      * @example core.decodeRoute(core.encodeRoute(core.status.route)); // 一压当前录像再解压-_-|
      * @param route 录像解压倒数第二步的结果，即一压的结果
@@ -328,7 +328,7 @@ interface Utils {
     decodeRoute(route: string): string[];
 
     /**
-     * @deprecated
+     * @deprecated 可使用，考虑换用 `lodash-es` 的 `isNil` 接口\
      * 判断一个值是否不为null，undefined和NaN
      * @example core.isset(0/0); // false，因为0/0等于NaN
      * @param v 待测值
@@ -337,7 +337,7 @@ interface Utils {
     isset(v?: any): boolean;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口，但此接口应该不会被使用到\
      * 判定一个数组是否为另一个数组的前缀，用于录像接续播放
      * @example core.subarray(['ad', '米库', '小精灵', '小破草', '小艾'], ['ad', '米库', '小精灵']); // ['小破草', '小艾']
      * @param a 可能的母数组，不填或比b短将返回null
@@ -347,7 +347,7 @@ interface Utils {
     subarray(a: any[], b: any[]): any[] | null;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，考虑换用 js 的 `Array.includes` 接口\
      * 判定array是不是一个数组，以及element是否在该数组中。使用Array.includes代替
      * @param array 可能的数组，不为数组或不填将导致返回值为false
      * @param element 待查找的元素
@@ -356,7 +356,7 @@ interface Utils {
     inArray(array?: any, element?: any): boolean;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，考虑换用 `lodash-es` 库的 `clamp` 接口\
      * 将x限定在[a,b]区间内，注意a和b可交换
      * @example core.clamp(1200, 1, 1000); // 1000
      * @param x 原始值，!x为true时x一律视为0
@@ -366,13 +366,13 @@ interface Utils {
     clamp(x: number, a: number, b: number): number;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 访问浏览器cookie
      */
     getCookie(name: string): string;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 求字符串的国标码字节数，也可用于等宽字体下文本的宽度测算。请注意样板的默认字体Verdana不是等宽字体
      * @example core.strlen('无敌ad'); // 6
      * @param str 待测字符串
@@ -381,7 +381,7 @@ interface Utils {
     strlen(str: string): number;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 计算应当转向某个方向
      * @param turn 转向的方向
      * @param direction 当前方向，不填视为当前方向
@@ -389,7 +389,7 @@ interface Utils {
     turnDirection(turn: HeroTurnDir, direction?: Dir): string;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 通配符匹配，用于搜索图块等批量处理。
      * @example core.playSound(core.matchWildcard('*Key', itemId) ? 'item.mp3' : 'door.mp3'); // 判断捡到的是钥匙还是别的道具，从而播放不同的音效
      * @param pattern 模式串，每个星号表示任意多个（0个起）字符
@@ -399,7 +399,7 @@ interface Utils {
     matchWildcard(pattern: string, string: string): boolean;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，考虑换用 js 的 `/RegExp/.test(str)` 接口
      * 是否满足正则表达式，一般可以直接用/RegExp/.test(str)代替
      * @param pattern 正则表达式
      * @param string 要匹配的字符串
@@ -407,7 +407,7 @@ interface Utils {
     matchRegex(pattern: string, string: string): string;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * base64加密
      * @example
      * core.encodeBase64('If you found this note in a small wooden box with a heart on it');
@@ -418,7 +418,7 @@ interface Utils {
     encodeBase64(str: string): string;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * base64解密
      * @example
      * core.decodeBase64('SWYgeW91IGZvdW5kIHRoaXMgbm90ZSBpbiBhIHNtYWxsIHdvb2RlbiBib3ggd2l0aCBhIGhlYXJ0IG9uIGl0');
@@ -429,7 +429,7 @@ interface Utils {
     decodeBase64(str: string): string;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 不支持SL的随机数
      * @exmaple 1 + core.rand(6); // 随机生成一个小于7的正整数，模拟骰子的效果
      * @param num 填正数表示生成小于num的随机自然数，否则生成小于1的随机正数
@@ -438,7 +438,7 @@ interface Utils {
     rand(num?: number): number;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 支持SL的随机数，并计入录像
      * @exmaple 1 + core.rand2(6); // 随机生成一个小于7的正整数，模拟骰子的效果
      * @param num 正整数，0或不填会被视为2147483648
@@ -447,7 +447,7 @@ interface Utils {
     rand2(num?: number): number;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 尝试请求读取一个本地文件内容 [异步]
      * @param success 成功后的回调
      * @param error 失败后的回调
@@ -462,14 +462,14 @@ interface Utils {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 文件读取完毕后的内容处理 [异步]
      * @param content 读取的内容
      */
     readFileContent(content: string): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 弹窗请求下载一个文本文件
      * @example core.download('route.txt', core.status.route); // 弹窗请求下载录像
      * @param filename 文件名
@@ -478,14 +478,14 @@ interface Utils {
     download(filename: string, content: string | string[]): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 尝试复制一段文本到剪切板
      * @param data 赋值的东西
      */
     copy(data: string): void;
 
     /**
-     * @deprecated
+     * @deprecated 可能可使用，考虑换用新渲染系统的 `getConfirm` 接口\
      * 显示确认框，类似core.drawConfirmBox()
      * @example core.myconfirm('重启游戏？', core.restart); // 弹窗询问玩家是否重启游戏
      * @param hint 弹窗的内容
@@ -499,7 +499,7 @@ interface Utils {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 可能可使用，考虑换用新渲染系统的 `getInput` 接口\
      * 让用户输入一段文字
      */
     myprompt(
@@ -509,8 +509,8 @@ interface Utils {
     ): void;
 
     /**
-     * @deprecated
-     * 动画显示某对象，有vue了，你还用这个？Transition组件和css的transition比这个强得多
+     * @deprecated 可能可使用，此接口应该不会被使用到\
+     * 动画显示某对象
      */
     showWithAnimate(
         obj?: HTMLElement,
@@ -519,7 +519,7 @@ interface Utils {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 可能可使用，此接口应该不会被使用到\
      * 动画使某对象消失
      */
     hideWithAnimate(
@@ -529,27 +529,27 @@ interface Utils {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 获得浏览器唯一的guid
      */
     getGuid(): string;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 获取一个对象的哈希值
      * @param obj 要获取的对象
      */
     hashCode(obj: any): number;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，考虑换用 `lodash-es` 库的 `isEqual` 接口\
      * 判定深层相等, 会逐层比较每个元素
      * @example core.same(['1', 2], ['1', 2]); // true
      */
     same(a: any, b: any): boolean;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 解压一段内容
      */
     unzip(
@@ -561,7 +561,7 @@ interface Utils {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，考虑换用 js 的 `fetch` 接口\
      * 发送一个HTTP请求 [异步]
      * @param type 请求类型
      * @param url 目标地址

@@ -1,13 +1,3 @@
-interface ActionData {
-    /**
-     * @deprecated
-     * 当按键弹起时
-     * @param keyCode 按键的keyCode
-     * @param altKey 当前是否按下了alt键
-     */
-    onKeyUp(keyCode: number, altKey: boolean): boolean;
-}
-
 interface ControlData {
     /**
      * 获取保存信息
@@ -39,20 +29,6 @@ interface ControlData {
      * @param ignoreSteps 忽略的步数，不填则会自动计算
      */
     moveDirectly(x: number, y: number, ignoreSteps?: number): boolean;
-
-    /**
-     * @deprecated
-     * 并行脚本
-     * @param time 距离游戏加载完毕经过的时间
-     */
-    parallelDo(time: number): void;
-}
-
-interface UiData {
-    /**
-     * 数据统计界面统计的道具数量
-     */
-    drawStatistics(): AllIdsOf<'items'>[];
 }
 
 interface EventData {
@@ -105,62 +81,13 @@ interface EventData {
      * @param callback 飞到后的回调函数
      */
     flyTo(toId: FloorIds, callback?: () => void): boolean;
-
-    /**
-     * 与怪物战斗后
-     * @param enemyId 打败的怪物
-     * @param x 怪物横坐标
-     * @param y 怪物纵坐标
-     */
-    afterBattle(enemyId: any, x?: number, y?: number): void;
-
-    /**
-     * 开门后
-     * @param doorId 门的id
-     * @param x 门的横坐标
-     * @param y 门的纵坐标
-     */
-    afterOpenDoor(
-        doorId: AllIdsOf<Exclude<Cls, 'enemys' | 'enemy48'>>,
-        x: number,
-        y: number
-    ): void;
-
-    /**
-     * 获得道具后
-     * @param itemId 道具id
-     * @param x 道具横坐标
-     * @param y 道具纵坐标
-     * @param isGentleClick 是否是轻按
-     */
-    afterGetItem(
-        itemId: AllIdsOf<'items'>,
-        x: number,
-        y: number,
-        isGentleClick?: boolean
-    ): void;
-
-    /**
-     * 推箱子后
-     */
-    afterPushBox(): void;
 }
 
 interface FunctionsData {
     /**
-     * 交互信息
-     */
-    actions: ActionData;
-
-    /**
      * 游戏的逻辑信息
      */
     control: ControlData;
-
-    /**
-     * ui信息
-     */
-    ui: UiData;
 
     /**
      * 事件信息

@@ -8,11 +8,6 @@ type CanParseCss = keyof {
         : never]: CSSStyleDeclaration[P];
 };
 
-interface PluginDeclaration {
-    init(): void;
-    _afterLoadResouce(): void;
-}
-
 type Forward<T> = {
     [K in keyof T as T[K] extends (...params: any) => any
         ? K extends `_${string}`

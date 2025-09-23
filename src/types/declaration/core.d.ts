@@ -117,11 +117,13 @@ interface Material {
     readonly images: MaterialImages;
 
     /**
+     * @deprecated 可能已失效，考虑换用 `BgmController` 接口\
      * 音乐信息
      */
     readonly bgms: Record<BgmIds, HTMLAudioElement>;
 
     /**
+     * @deprecated 可能已失效，考虑换用 `SoundController` 接口\
      * 音效信息
      */
     readonly sounds: Record<SoundIds, AudioBuffer>;
@@ -153,16 +155,19 @@ interface Material {
     readonly ground: CanvasRenderingContext2D;
 
     /**
+     * @deprecated 已失效，此接口已经不会再被用到\
      * 楼层背景的画布context
      */
     readonly groundCanvas: CanvasRenderingContext2D;
 
     /**
+     * @deprecated 已失效，此接口已经不会再被用到\
      * 楼层背景的canvas样式
      */
     readonly groundPattern: CanvasPattern;
 
     /**
+     * @deprecated 已失效，此接口已经不会再被用到\
      * 自动元件的父子关系
      */
     readonly autotileEdges: Record<
@@ -218,6 +223,7 @@ interface AnimateFrame {
     globalAnimate: boolean;
 
     /**
+     * @deprecated 可使用，此接口已经不会再被用到\
      * 当前raf的时间戳，即从游戏加载完毕到现在经过的时间
      */
     readonly globalTime: number;
@@ -240,7 +246,7 @@ interface AnimateFrame {
     readonly animateTime: number;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，此接口已经不会再被用到\
      * 勇士移动的时候上一次的换腿时间
      */
     moveTime: number;
@@ -252,18 +258,19 @@ interface AnimateFrame {
     lastLegTime: number;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，此接口已经不会再被用到\
      * 当前是否在左腿上，使用了四帧插件时无效
      */
     leftLeg: boolean;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用 `WeatherController` 接口\
      * 当前天气信息
      */
     readonly weather: Weather;
 
     /**
+     * @deprecated 已失效，考虑换用 `WeatherController` 接口\
      * 左上角提示
      */
     readonly tip?: Readonly<Tip>;
@@ -279,156 +286,11 @@ interface AnimateFrame {
     lastAsyncId: number;
 }
 
-interface Weather {
-    /**
-     * 当前的raf时间戳，同globalTime，但只有部分天气有用
-     */
-    time: number;
+interface Weather {}
 
-    /**
-     * 当前天气类型
-     */
-    type: string;
+interface Tip {}
 
-    /**
-     * 谁会去用这个玩意？？？
-     */
-    nodes: any[];
-
-    /**
-     * 谁会去用这个玩意？？？
-     */
-    data: any;
-
-    /**
-     * 当前的天气等级
-     */
-    readonly level: number;
-
-    /**
-     * 雾的图片信息
-     */
-    readonly fog: HTMLImageElement;
-
-    /**
-     * 多云的图片信息
-     */
-    readonly cloud: HTMLImageElement;
-
-    /**
-     * 晴天的图片信息
-     */
-    readonly sun: HTMLImageElement;
-}
-
-interface Tip {
-    /**
-     * 显示的文字
-     */
-    text: string;
-
-    /**
-     * 文字的左边像素位置
-     */
-    textX: 21 | 45;
-
-    /**
-     * 提示的宽度
-     */
-    width: number;
-
-    /**
-     * 当前的不透明度，会在显示提示时不断变化
-     */
-    opacity: number;
-
-    /**
-     * 在显示阶段还是常亮阶段还是消失阶段
-     */
-    stage: number;
-
-    /**
-     * 图标的帧数，即显示图标的第几帧
-     */
-    frame: number;
-
-    /**
-     * 当前的raf时间戳
-     */
-    time: number;
-
-    /**
-     * 在提示进入常亮阶段后经过了多长时间
-     */
-    displayTime: number;
-}
-
-interface MusicStatus {
-    /**
-     * AudioContext信息，注意如果浏览器不支持的话会是null
-     */
-    audioContext: AudioContext;
-
-    /**
-     * 是否允许播放BGM
-     */
-    bgmStatus: boolean;
-
-    /**
-     * 是否允许播放SE
-     */
-    soundStatus: boolean;
-
-    /**
-     * 正在播放的BGM
-     */
-    playingBgm: string;
-
-    /**
-     * 上次播放的bgm
-     */
-    lastBgm: string;
-
-    /**
-     * 音量控制节点，只对音效有效，但为什么样板只有一个呢
-     */
-    gainNode: GainNode;
-
-    /**
-     * 正在播放的SE，这个__name是音效名
-     */
-    playingSounds: Record<number, AudioBufferSourceNode & { __name: string }>;
-
-    /**
-     * 用户音量
-     */
-    userVolume: number;
-
-    /**
-     * 设计音量，好吧其实不能设计，只有淡入淡出的时候有用
-     */
-    designVolume: number;
-
-    /**
-     * 音乐播放速度
-     */
-    bgmSpeed: number;
-
-    /**
-     * 修改音乐播放速度时是否修改音调
-     */
-    bgmUsePitch: boolean;
-
-    /**
-     * 缓存过BGM内容
-     */
-    cachedBgms: string[];
-
-    /**
-     * 缓存的bgm数量
-     */
-    cachedBgmCount: 8;
-}
+interface MusicStatus {}
 
 interface CorePlatform {
     /**
@@ -507,60 +369,74 @@ interface CorePlatform {
  */
 type MainDom = {
     /**
+     * @deprecated 已失效，此接口已经不会再被使用到\
      * 所有的状态信息
      */
     status: HTMLCollectionOf<HTMLDivElement>;
 
     /**
+     * @deprecated 已失效，此接口已经不会再被使用到\
      * 所有的工具栏图片
      */
     tools: HTMLCollectionOf<HTMLImageElement>;
 
     /**
+     * @deprecated 已失效，此接口已经不会再被使用到\
      * 所有的游戏画布
      */
     gameCanvas: HTMLCollectionOf<HTMLCanvasElement>;
 
     /**
+     * @deprecated 已失效，此接口已经不会再被使用到\
      * 所有的状态显示信息，有的是<p>有的是<span>就挺离谱
      */
     statusLabels: HTMLCollectionOf<HTMLSpanElement | HTMLParagraphElement>;
 
     /**
+     * @deprecated 已失效，此接口已经不会再被使用到\
      * <p>标签的状态显示文字
      */
     statusText: HTMLCollectionOf<HTMLParagraphElement>;
 
     /**
+     * @deprecated 已失效，此接口已经不会再被使用到\
      * 自绘状态栏画布的context
      */
     statusCanvasCtx: CanvasRenderingContext2D;
 } & {
+    /**
+     * @deprecated 已失效，此接口已经不会再被使用到\
+     */
     [key: string]: HTMLElement;
 };
 
 interface DomStyle {
     /**
+     * @deprecated 可能已失效，此接口已经不会再被使用到\
      * 当前缩放大小
      */
     scale: number;
 
     /**
+     * @deprecated 可能已失效，此接口已经不会再被使用到\
      * 就是window.devicePixelRatio
      */
     ratio: number;
 
     /**
+     * @deprecated 已失效，此接口已经不会再被使用到\
      * 高清画布列表
      */
     hdCanvas: string[];
 
     /**
+     * @deprecated 可能已失效，此接口已经不会再被使用到\
      * 可以缩放到的缩放比例，是 [1, 1.25, 1.5, 1.75, 2, 2.25, 2.5] 的子数组
      */
     availableScale: number[];
 
     /**
+     * @deprecated 可能已失效，此接口已经不会再被使用到\
      * 是否是竖屏
      */
     isVertical: boolean;
@@ -571,6 +447,7 @@ interface DomStyle {
     showStatusBar: boolean;
 
     /**
+     * @deprecated 可能已失效，此接口已经不会再被使用到\
      * 当前道具栏是否是数字键
      */
     toolbarBtn: boolean;
@@ -578,26 +455,31 @@ interface DomStyle {
 
 interface CoreBigmap {
     /**
+     * @deprecated 已失效，此接口已经不会再被使用到\
      * 大地图中会跟随勇士移动的画布
      */
     canvas: string[];
 
     /**
+     * @deprecated 可能已失效，此接口已经不会再被使用到\
      * 大地图的横向偏移量，单位像素
      */
     offsetX: number;
 
     /**
+     * @deprecated 可能已失效，此接口已经不会再被使用到\
      * 大地图的纵向偏移量，单位像素
      */
     offsetY: number;
 
     /**
+     * @deprecated 可能已失效，此接口已经不会再被使用到\
      * v2优化下的横向偏移格子数
      */
     posX: number;
 
     /**
+     * @deprecated 可能已失效，此接口已经不会再被使用到\
      * v2优化下的纵向偏移格子数
      */
     posY: number;
@@ -613,32 +495,37 @@ interface CoreBigmap {
     height: number;
 
     /**
+     * @deprecated 可能已失效，此接口已经不会再被使用到\
      * 是否使用v2优化
      */
     v2: boolean;
 
     /**
+     * @deprecated 可能已失效，此接口已经不会再被使用到\
      * 判定为超大的图的地图面积临界，使用了显示宝石血瓶详细信息插件的话是256
      */
     threshold: 1024;
 
     /**
+     * @deprecated 可能已失效，此接口已经不会再被使用到\
      * v2优化下，显示超出的格子数，例如样板是10，那么13\*13的样板就是33\*33，还用于判断是否进行更新等
      */
     extend: 10;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，此接口已经不会再被使用到\
      * 又出现了！样板中没有的东西
      */
     scale: 1;
 
     /**
+     * @deprecated 已失效，此接口已经不会再被使用到\
      * 绘制缩略图时的临时画布
      */
     tempCanvas: CanvasRenderingContext2D;
 
     /**
+     * @deprecated 已失效，此接口已经不会再被使用到\
      * 绘制地图时的双缓冲层
      */
     cacheCanvas: CanvasRenderingContext2D;
@@ -646,6 +533,7 @@ interface CoreBigmap {
 
 interface CoreSave {
     /**
+     * @deprecated 已失效，此接口已经不会再被使用到\
      * 当前存档页面显示的页码数
      */
     saveIndex: number;
@@ -661,11 +549,13 @@ interface CoreSave {
     autosave: Autosave;
 
     /**
+     * @deprecated 可能已失效，暂时没有替代接口\
      * 收藏的存档
      */
     favorite: number[];
 
     /**
+     * @deprecated 可能已失效，暂时没有替代接口\
      * 保存的存档名称
      */
     favoriteName: Record<number, string>;
@@ -693,13 +583,13 @@ interface Autosave {
     storage: true;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，此接口应该不会被使用到\
      * 每5秒钟会被设置一次的raf时间戳，不知道干什么的。。。
      */
     time: number;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，此接口应该不会被使用到\
      * 样板在不停设置这个东西，但不知道什么用处，因为没有调用它的地方
      */
     updated: boolean;
@@ -793,6 +683,7 @@ interface CoreValues {
     moveSpeed: number;
 
     /**
+     * @deprecated 已失效，此接口已经不会被使用到\
      * 竖屏下状态栏显示行数
      */
     statusCanvasRowsOnMobile: 1 | 2 | 3 | 4 | 5;
@@ -805,15 +696,20 @@ interface CoreValues {
 
 type CoreStatusBarElements = {
     /**
+     * @deprecated 已失效，此接口已经不会被使用到\
      * 状态栏图标信息
      */
     readonly icons: Record<string, HTMLImageElement>;
 
     /**
+     * @deprecated 已失效，此接口已经不会被使用到\
      * 状态栏的图标元素
      */
     readonly image: Record<string, HTMLImageElement>;
 } & {
+    /**
+     * @deprecated 已失效，此接口已经不会被使用到\
+     */
     readonly [key: string]: HTMLElement;
 };
 
@@ -917,19 +813,19 @@ interface Core extends Pick<Main, CoreDataFromMain> {
     readonly _HALF_HEIGHT_: number;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，考虑换用 `core._WIDTH_` 和 `core._HEIGHT_` 接口\
      * 地图可视部分大小
      */
     readonly __SIZE__: number;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，考虑换用 `core._PX_` 和 `core._PY_` 接口\
      * 地图像素
      */
     readonly __PIXELS__: number;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，考虑换用 `core._HALF_WIDTH_` 和 `core._HALF_HEIGHT_` 接口\
      * 地图像素的一半
      */
     readonly __HALF_SIZE__: number;
@@ -940,25 +836,25 @@ interface Core extends Pick<Main, CoreDataFromMain> {
     readonly material: Material;
 
     /**
-     * @deprecated
+     * @deprecated 可能已失效，此接口已经不会被使用到\
      * 计时器（样板的神秘操作
      */
     readonly timeout: Timeout;
 
     /**
-     * @deprecated
+     * @deprecated 可能已失效，此接口已经不会被使用到\
      * 定时器
      */
     readonly interval: Interval;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，此接口已经不会被使用到\
      * 全局动画信息
      */
     readonly animateFrame: AnimateFrame;
 
     /**
-     * @deprecated
+     * @deprecated 可能已失效，考虑换用 `BgmController` 和 `SoundController` 接口\
      * 音乐状态
      */
     readonly musicStatus: Readonly<MusicStatus>;
@@ -969,13 +865,13 @@ interface Core extends Pick<Main, CoreDataFromMain> {
     readonly platform: Readonly<CorePlatform>;
 
     /**
-     * @deprecated
+     * @deprecated 部分失效，此接口已经不会再被使用到\
      * dom样式
      */
     readonly domStyle: Readonly<DomStyle>;
 
     /**
-     * @deprecated
+     * @deprecated 部分失效，此接口已经不会再被使用到\
      * 大地图信息
      */
     readonly bigmap: CoreBigmap;
@@ -996,7 +892,7 @@ interface Core extends Pick<Main, CoreDataFromMain> {
     readonly initStatus: DeepReadonly<InitGameStatus>;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 所有的自定义画布
      */
     readonly dymCanvas: Record<string, CanvasRenderingContext2D>;
@@ -1176,7 +1072,7 @@ interface Main extends MainData {
     readonly savePages: number;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，此接口已经不会被使用到\
      * 循环临界的分界
      */
     readonly criticalUseLoop: number;
@@ -1187,16 +1083,19 @@ interface Main extends MainData {
     readonly mode: 'play' | 'editor';
 
     /**
+     * @deprecated 已失效，此接口已经不会被使用到\
      * 是否使用远程bgm
      */
     readonly bgmRemote: boolean;
 
     /**
+     * @deprecated 已失效，此接口已经不会被使用到\
      * 远程bgm目录
      */
     readonly bgmRemoteRoot: string;
 
     /**
+     * @deprecated 已失效，此接口已经不会被使用到\
      * 所有的系统画布
      */
     readonly canvas: Record<string, CanvasRenderingContext2D>;
@@ -1307,13 +1206,13 @@ interface Main extends MainData {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，此接口已经不会被使用到\
      * 设置加载界面的加载提示文字
      */
     setMainTipsText(text: string): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新版 `logger` 或直接使用 `console` 接口\
      * 输出内容（极不好用，建议换成console，我甚至不知道样板为什么会有这个东西）
      * @param e 输出内容
      * @param error 输出内容是否是报错
@@ -1321,20 +1220,20 @@ interface Main extends MainData {
     log(e: string | Error, error?: boolean): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，此接口已经不会被使用到\
      * 生成选择光标的keyframes
      */
     createOnChoiceAnimation(): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，此接口已经不会被使用到\
      * 选中开始界面的一个按钮
      * @param index 要选中的按钮
      */
     selectButton(index: number): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，此接口已经不会被使用到\
      * 加载一系列字体
      * @param fonts 要加载的字体列表
      */
@@ -1347,7 +1246,7 @@ interface Main extends MainData {
     listen(): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，此接口已经不会被使用到\
      * 执行ts的插件转发
      */
     forward(): void;
@@ -1485,14 +1384,9 @@ declare const maps_90f36752_8815_4be8_b32b_d7fad1d0542e: {
     [P in keyof NumberToId]: MapDataOf<P>;
 };
 
-/**
- * 插件信息
- */
-declare const plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1: PluginDeclaration;
-
 interface Window {
     core: CoreMixin;
-    /** @deprecated */
+    /** @deprecated 可使用，将会在 2.C 中有新接口 */
     flags: Flags;
     hero: HeroStatus;
 }

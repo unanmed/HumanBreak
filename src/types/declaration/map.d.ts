@@ -585,7 +585,7 @@ interface Maps {
     compressMap(mapArr?: number[][], floorId?: FloorIds): number[][];
 
     /**
-     * @deprecated
+     * @deprecated 已失效，暂无替代接口，可能在 2.B.1 或 2.B.2 中添加替代接口\
      * 设置图块的不透明度
      * @param opacity 不透明度
      * @param x 横坐标
@@ -600,7 +600,7 @@ interface Maps {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，暂无替代接口，可能在 2.B.1 或 2.B.2 中添加替代接口\
      * 设置图块的滤镜
      * @param filter 滤镜信息
      * @param x 横坐标
@@ -810,7 +810,7 @@ interface Maps {
     automaticRoute(destX: number, destY: number): DiredLoc[];
 
     /**
-     * @deprecated
+     * @deprecated 已失效，暂无替代接口，可能在 2.B.1 或 2.B.2 中添加替代接口\
      * 绘制一个图块
      * @param block 要绘制的图块
      * @param animate 绘制图块的第几帧
@@ -819,14 +819,14 @@ interface Maps {
     drawBlock(block?: Block, animate?: number, ctx?: CtxRefer): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，此接口已经不会被使用到\
      * 生成groundPattern
      * @param floorId 楼层id
      */
     generateGroundPattern(floorId?: FloorIds): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，此接口已经不会被使用到\
      * 地图绘制
      * @example core.drawMap(); // 绘制当前地图
      * @param floorId 地图id，不填表示当前楼层
@@ -834,13 +834,13 @@ interface Maps {
     drawMap(floorId?: FloorIds): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，此接口已经不会被使用到\
      * 重绘地图
      */
     redrawMap(): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，此接口已经不会被使用到\
      * 绘制背景层（含贴图，其与背景层矩阵的绘制顺序可通过复写此函数来改变）
      * @example core.drawBg(); // 绘制当前地图的背景层
      * @param floorId 地图id，不填视为当前地图
@@ -849,7 +849,7 @@ interface Maps {
     drawBg(floorId?: FloorIds, config?: Partial<DrawMapConfig>): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，此接口已经不会被使用到\
      * 绘制事件层
      * @example core.drawEvents(); // 绘制当前地图的事件层
      * @param floorId 地图id，不填视为当前地图
@@ -863,7 +863,7 @@ interface Maps {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，此接口已经不会被使用到\
      * 绘制前景层（含贴图，其与前景层矩阵的绘制顺序可通过复写此函数来改变）
      * @example core.drawFg(); // 绘制当前地图的前景层
      * @param floorId 地图id，不填视为当前地图
@@ -872,7 +872,7 @@ interface Maps {
     drawFg(floorId?: FloorIds, config?: Partial<DrawMapConfig>): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口\
      * 绘制缩略图
      * @example core.drawThumbnail(); // 绘制当前地图的缩略图
      * @param floorId 地图id，不填视为当前地图
@@ -1011,7 +1011,7 @@ interface Maps {
     ): Cls | null;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，暂无替代接口，可能在 2.B.1 或 2.B.2 中添加替代接口\
      * 获取图块的不透明度
      * @param x 横坐标
      * @param y 纵坐标
@@ -1026,7 +1026,7 @@ interface Maps {
     ): number | null;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，暂无替代接口，可能在 2.B.1 或 2.B.2 中添加替代接口\
      * 获取图块的滤镜
      * @param x 横坐标
      * @param y 纵坐标
@@ -1140,7 +1140,7 @@ interface Maps {
     removeBlockByIndexes(indexes: number[], floorId?: FloorIds): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，此接口已经不会被使用到\
      * 显示前景/背景地图
      * @param name 图层名
      * @param loc 要显示的坐标列表
@@ -1155,7 +1155,7 @@ interface Maps {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，此接口已经不会被使用到\
      * 隐藏前景/背景地图
      * @param name 图层名
      * @param loc 要显示的坐标列表
@@ -1170,7 +1170,7 @@ interface Maps {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，暂无替代接口，可能在 2.B.1 或 2.B.2 中添加替代接口\
      * 显示一个楼层贴图
      * @param loc 楼层贴图的位置
      * @param floorId 楼层id
@@ -1183,7 +1183,7 @@ interface Maps {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，暂无替代接口，可能在 2.B.1 或 2.B.2 中添加替代接口\
      * 隐藏一个楼层贴图
      * @param loc 楼层贴图的位置
      * @param floorId 楼层id
@@ -1213,7 +1213,7 @@ interface Maps {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，暂无替代接口，可能在 2.B.1 或 2.B.2 中添加替代接口\
      * 动画形式转变某点图块
      * @param number 要转变成的图块的数字或id
      * @param x 横坐标
@@ -1232,7 +1232,7 @@ interface Maps {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，暂无替代接口，可能在 2.B.1 或 2.B.2 中添加替代接口\
      * 动画形式转变若干点图块
      * @param number 要转变成的图块的数字或id
      * @param locs 坐标数组
@@ -1299,7 +1299,7 @@ interface Maps {
     resetMap(floorId?: FloorIds | FloorIds[]): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无好用的替代接口，可能在 2.B.1 或 2.B.2 中添加替代接口\
      * 移动图块
      * @example core.moveBlock(0, 0, ['down']); // 令地图左上角的图块下移一格，用时半秒，再花半秒淡出
      * @param x 起点的横坐标
@@ -1319,7 +1319,7 @@ interface Maps {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无好用的替代接口，可能在 2.B.1 或 2.B.2 中添加替代接口\
      * 跳跃图块；从V2.7开始不再有音效
      * @example core.jumpBlock(0, 0, 0, 0); // 令地图左上角的图块原地跳跃半秒，再花半秒淡出
      * @param sx 起点的横坐标
@@ -1341,7 +1341,7 @@ interface Maps {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无替代接口，可能在 2.B.1 或 2.B.2 中添加替代接口\
      * 显示/隐藏某个块时的动画效果
      * @param loc 要显示或隐藏的坐标数组
      * @param type 显示还是隐藏还是移除，填数字表示设置不透明度
@@ -1356,19 +1356,19 @@ interface Maps {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 可能已失效，此接口已经不会被使用到\
      * 添加一个全局动画
      * @param block 图块信息
      */
     addGlobalAnimate(block?: Block): void;
 
     /**
-     * @deprecated
+     * @deprecated 可能已失效，此接口已经不会被使用到\
      * 删除所有全局动画
      */
     removeGlobalAnimate(): void;
     /**
-     * @deprecated
+     * @deprecated 可能已失效，此接口已经不会被使用到\
      * 删除一个全局动画
      * @param x 横坐标
      * @param y 纵坐标
@@ -1376,13 +1376,13 @@ interface Maps {
     removeGlobalAnimate(x?: number, y?: number): void;
 
     /**
-     * @deprecated
+     * @deprecated 可能已失效，此接口已经不会被使用到\
      * 绘制UI层的box动画
      */
     drawBoxAnimate(): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无好用的替代接口，可能在 2.B.1 或 2.B.2 中添加替代接口\
      * 播放动画，注意即使指定了主角的坐标也不会跟随主角移动，如有需要请使用core.drawHeroAnimate(name, callback)函数
      * @example core.drawAnimate('attack', core.nextX(), core.nextY(), false, core.vibrate); // 在主角面前一格播放普攻动画，动画停止后视野左右抖动1秒
      * @param name 动画文件名，不含后缀
@@ -1401,7 +1401,7 @@ interface Maps {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，暂无好用的替代接口，可能在 2.B.1 或 2.B.2 中添加替代接口\
      * 播放跟随勇士的动画
      * @param name 动画名
      * @param callback 动画停止后的回调函数
@@ -1413,15 +1413,15 @@ interface Maps {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 可能已失效，暂无替代接口，可能在 2.B.1 或 2.B.2 中添加替代接口\
      * 获得当前正在播放的所有（指定）动画的id列表
      * @param name 指定名称
      */
     getPlayingAnimates(name?: AnimationIds): number[];
 
     /**
-     * @deprecated
-     * 立刻停止一个动画播放（已失效）
+     * @deprecated 可能已失效，暂无替代接口，可能在 2.B.1 或 2.B.2 中添加替代接口\
+     * 立刻停止一个动画播放
      * @param id 播放动画的编号，即drawAnimate或drawHeroAnimate返回值，不填则停止所有的
      * @param doCallback 是否执行该动画的回调函数
      */

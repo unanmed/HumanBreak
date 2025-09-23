@@ -49,7 +49,6 @@ export function patchDamage() {
 function renderThumbnailDamage(col: EnemyCollection) {
     core.status.damage.data = [];
     core.status.damage.extraData = [];
-    core.status.damage.dir = [];
 
     // 怪物伤害
     col.list.forEach(v => {

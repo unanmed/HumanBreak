@@ -54,17 +54,6 @@ function core() {
         moveTime: 0,
         lastLegTime: 0,
         leftLeg: true,
-        weather: {
-            time: 0,
-            type: null,
-            level: 1,
-            nodes: [],
-            data: null,
-            fog: null,
-            cloud: null,
-            sun: null
-        },
-        tip: null,
         asyncId: {},
         lastAsyncId: null
     };
@@ -108,7 +97,7 @@ function core() {
         isVertical: false,
         showStatusBar: true,
         toolbarBtn: false,
-        hdCanvas: ['damage', 'ui', 'data']
+        hdCanvas: []
     };
     this.bigmap = {
         canvas: [],

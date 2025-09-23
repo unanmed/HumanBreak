@@ -213,14 +213,14 @@ interface Ui {
     uidata: UiData;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 根据画布名找到一个画布的context；支持系统画布和自定义画布。如果不存在画布返回null。
      * 也可以传画布的context自身，则返回自己。
      */
     getContextByName(canvas: CtxRefer): CanvasRenderingContext2D | null;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 清空某个画布图层
      * name为画布名，可以是系统画布之一，也可以是任意自定义动态创建的画布名；还可以直接传画布的context本身。（下同）
      * 如果name也可以是'all'，若为all则为清空所有系统画布。
@@ -234,7 +234,7 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 在某个画布上绘制一段文字
      * @param text 要绘制的文本
      * @param style 绘制的样式
@@ -252,7 +252,7 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 根据最大宽度自动缩小字体
      * @param name 画布
      * @param text 文字
@@ -267,7 +267,7 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 在某个画布上绘制一个描边文字
      * @param text 要绘制的文本
      * @param style 绘制的样式
@@ -288,7 +288,7 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 绘制一个矩形
      * @param style 绘制的样式
      * @param angle 旋转角度，弧度制
@@ -304,7 +304,7 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 绘制一个矩形的边框
      * @param style 绘制的样式
      * @param angle 旋转角度，单位弧度
@@ -321,7 +321,7 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 在某个canvas上绘制一个圆角矩形
      */
     fillRoundRect(
@@ -336,7 +336,7 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 在某个canvas上绘制一个圆角矩形的边框
      */
     strokeRoundRect(
@@ -352,7 +352,7 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 在某个canvas上绘制一个多边形
      */
     fillPolygon(
@@ -362,7 +362,7 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 在某个canvas上绘制一个多边形的边框
      */
     strokePolygon(
@@ -373,7 +373,7 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 在某个canvas上绘制一个椭圆
      * @param a 横轴长度的一半
      * @param b 纵轴长度的一半
@@ -390,7 +390,7 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 在某个canvas上绘制一个圆
      */
     fillCircle(
@@ -402,7 +402,7 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 在某个canvas上绘制一个椭圆的边框
      * @param a 横轴长度的一半
      * @param b 纵轴长度的一半
@@ -420,7 +420,7 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 在某个canvas上绘制一个圆的边框
      */
     strokeCircle(
@@ -433,7 +433,7 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 在某个canvas上绘制一个扇形
      */
     fillArc(
@@ -447,7 +447,7 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 在某个canvas上绘制一段弧
      */
     strokeArc(
@@ -462,7 +462,7 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 在某个canvas上绘制一条线
      */
     drawLine(
@@ -476,7 +476,7 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 在某个canvas上绘制一个箭头
      */
     drawArrow(
@@ -490,80 +490,80 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 设置某个canvas的文字字体
      */
     setFont(name: CtxRefer, font: string): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 设置某个canvas的线宽度
      */
     setLineWidth(name: CtxRefer, lineWidth: number): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 保存某个canvas状态
      */
     saveCanvas(name: CtxRefer): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 回退某个canvas状态
      */
     loadCanvas(name: CtxRefer): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 设置某个canvas的绘制不透明度
      * @returns 之前画布的不透明度
      */
     setAlpha(name: CtxRefer, alpha: number): number;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 设置画布元素的不透明度
      */
     setOpacity(name: CtxRefer, opacity: number): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 设置某个canvas的滤镜
      */
     setFilter(name: CtxRefer, filter?: string): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 设置某个canvas的填充样式
      */
     setFillStyle(name: CtxRefer, style: CanvasStyle): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 设置某个canvas描边样式
      */
     setStrokeStyle(name: CtxRefer, style: CanvasStyle): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 设置某个canvas的文字左右对齐方式
      */
     setTextAlign(name: CtxRefer, align: CanvasTextAlign): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 设置某个canvas的文字上下对齐方式
      */
     setTextBaseline(name: CtxRefer, baseline: CanvasTextBaseline): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 计算某段文字的宽度，注意该函数会设置画布的字体
      */
     calWidth(name: CtxRefer, text: string, font?: string): number;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 字符串自动换行的分割
      */
     splitLines(
@@ -574,14 +574,14 @@ interface Ui {
     ): string[];
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 绘制图片
      * @param dx 绘制的横坐标
      * @param dy 绘制的纵坐标
      */
     drawImage(name: CtxRefer, image: ImageSource, dx: number, dy: number): void;
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 绘制图片
      * @param dx 绘制的横坐标
      * @param dy 绘制的纵坐标
@@ -597,7 +597,7 @@ interface Ui {
         dh: number
     ): void;
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 绘制图片
      * @param sx 裁剪的横坐标
      * @param sy 裁剪的纵坐标
@@ -622,7 +622,7 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 可能已失效，考虑换用新的渲染系统中的 `<icon>` 元素\
      * 在某个canvas上绘制一个图标
      * @param frame 图标的第几帧
      */
@@ -642,13 +642,13 @@ interface Ui {
     closePanel(): void;
 
     /**
-     * @deprecated
+     * @deprecated 可能已失效，考虑换用新的渲染系统\
      * 清空UI层内容
      */
     clearUI(): void;
 
     /**
-     * @deprecated
+     * @deprecated 可能可使用，考虑换用新的渲染系统中的 `TipStore` 接口\
      * 左上角绘制一段提示
      * @param text 要提示的文字内容
      * @param id 要绘制的图标ID
@@ -657,13 +657,13 @@ interface Ui {
     drawTip(text: string, id?: AllIds, frame?: number): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统中的 `TextboxStore` 接口\
      * 地图中间绘制一段文字
      */
     drawText(contents?: string, callback?: () => void): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统中的 `Selector` 组件\
      * 自绘选择光标
      */
     drawUIEventSelector(
@@ -677,14 +677,14 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统中的 `Selector` 组件\
      * 清除一个或多个选择光标
      * @param code 要清除的选择光标，不填表示清除所有
      */
     clearUIEventSelector(code?: number | number[]): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统中的 `Background` 组件或 `<winskin>` 元素\
      * 绘制WindowSkin
      * @param direction 指向箭头的方向
      */
@@ -701,7 +701,7 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统中的 `Background` 组件\
      * 绘制一个背景图，可绘制winskin或纯色背景；支持小箭头绘制
      */
     drawBackground(
@@ -713,7 +713,7 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统中的 `Textbox` 组件\
      * 绘制一段文字到某个画布上面
      * @param ctx 要绘制到的画布
      * @param content 要绘制的内容；转义字符只允许保留 \n, \r[...], \i[...], \c[...], \d, \e
@@ -727,7 +727,7 @@ interface Ui {
     ): ReturnedTextContentConfig;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统中的 `Textbox` 组件\
      * 获得某段文字的预计绘制高度
      */
     getTextContentHeight(
@@ -736,13 +736,13 @@ interface Ui {
     ): number;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统中的 `Textbox` 组件和 `TextboxStore` 接口\
      * 绘制一个对话框
      */
     drawTextBox(content: string, config?: TextBoxConfig): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统中的 `ScrollText` 组件\
      * 绘制滚动字幕
      */
     drawScrollText(
@@ -753,13 +753,13 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，此接口已经不会被使用到\
      * 文本图片化
      */
     textImage(content: string, lineHeight?: number): HTMLCanvasElement;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统中的 `getChoices` 接口\
      * 绘制一个选项界面
      */
     drawChoices(
@@ -770,7 +770,7 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统中的 `getConfirm` 接口\
      * 绘制一个确认框
      */
     drawConfirmBox(
@@ -781,37 +781,37 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统中的 `waitbox` 接口\
      * 绘制等待界面
      */
     drawWaiting(text: string): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统中的 `Page` 接口\
      * 绘制分页
      */
     drawPagination(page: number, totalPage: number, y?: number): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，暂无替代接口\
      * 绘制怪物手册
      */
     drawBook(index: number): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，暂无替代接口\
      * 绘制楼层传送器
      */
     drawFly(page: number): void;
 
     /**
-     * @deprecated
+     * @deprecated 可能已失效，暂无替代接口\
      * 获得所有应该在道具栏显示的某个类型道具
      */
     getToolboxItems<T extends Exclude<ItemCls, 'items'>>(cls: T): ItemIdOf<T>[];
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 动态创建一个画布
      * @param name 画布名称，如果已存在则会直接取用当前存在的
      * @param x 横坐标
@@ -832,7 +832,7 @@ interface Ui {
     ): CanvasRenderingContext2D;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 重新定位一个自定义画布
      */
     relocateCanvas(
@@ -843,7 +843,7 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 设置一个自定义画布的旋转角度
      */
     rotateCanvas(
@@ -854,7 +854,7 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 重新设置一个自定义画布的大小
      * @param styleOnly 是否只修改style，而不修改元素上的长宽，如果是true，会出现模糊现象
      * @param isTempCanvas 是否是临时画布，如果填true，会将临时画布修改为高清画布
@@ -868,19 +868,19 @@ interface Ui {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 删除一个自定义画布
      */
     deleteCanvas(name: string | ((name: string) => boolean)): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统\
      * 清空所有的自定义画布
      */
     deleteAllCanvas(): void;
 
     /**
-     * @deprecated
+     * @deprecated 已失效，考虑换用新的渲染系统中的 `ViewMap` UI\
      * 绘制浏览地图
      */
     _drawViewMaps(): void;

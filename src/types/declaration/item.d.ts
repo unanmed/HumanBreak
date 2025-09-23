@@ -99,7 +99,7 @@ interface Equip extends EquipBase {
  */
 interface Items {
     /**
-     * @deprecated
+     * @deprecated 可使用，2.C 将会有替代接口\
      * 获得所有道具
      */
     getItems(): {
@@ -107,7 +107,7 @@ interface Items {
     };
 
     /**
-     * @deprecated
+     * @deprecated 可使用，2.C 将会有替代接口\
      * 执行即捡即用类的道具获得时的效果
      * @example core.getItemEffect('redPotion', 10) // 执行获得10瓶红血的效果
      * @param itemId 道具id
@@ -116,7 +116,7 @@ interface Items {
     getItemEffect(itemId: AllIdsOf<'items'>, itemNum?: number): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，2.C 将会有替代接口\
      * 即捡即用类的道具获得时的额外提示
      * @example core.getItemEffectTip(redPotion) // （获得 红血瓶）'，生命+100'
      * @param itemId 道具id
@@ -125,7 +125,7 @@ interface Items {
     getItemEffectTip(itemId: AllIdsOf<'items'>): string;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，2.C 将会有替代接口\
      * 使用一个道具
      * @example core.useItem('pickaxe', true) // 使用破墙镐，不计入录像，无回调
      * @param itemId 道具id
@@ -139,7 +139,7 @@ interface Items {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，2.C 将会有替代接口\
      * 检查能否使用某种道具
      * @example core.canUseItem('pickaxe') // 能否使用破墙镐
      * @param itemId 道具id
@@ -148,7 +148,7 @@ interface Items {
     canUseItem(itemId: AllIdsOf<'items'>): boolean;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，2.C 将会有替代接口\
      * 统计某种道具的持有量
      * @example core.itemCount('yellowKey') // 持有多少把黄钥匙
      * @param itemId 道具id
@@ -157,7 +157,7 @@ interface Items {
     itemCount(itemId: AllIdsOf<'items'>): number;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，2.C 将会有替代接口\
      * 检查主角是否持有某种道具(不包括已穿戴的装备)
      * @example core.hasItem('yellowKey') // 主角是否持有黄钥匙
      * @param itemId 道具id
@@ -166,7 +166,7 @@ interface Items {
     hasItem(itemId: AllIdsOf<'items'>): boolean;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，2.C 将会有替代接口\
      * 检查主角是否穿戴着某件装备
      * @example core.hasEquip('sword5') // 主角是否装备了神圣剑
      * @param itemId 装备id
@@ -175,7 +175,7 @@ interface Items {
     hasEquip(itemId: ItemIdOf<'equips'>): boolean;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，2.C 将会有替代接口\
      * 检查主角某种类型的装备目前是什么
      * @example core.getEquip(1) // 主角目前装备了什么盾牌
      * @param equipType 装备类型，自然数
@@ -184,7 +184,7 @@ interface Items {
     getEquip(equipType: number): ItemIdOf<'equips'> | null;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，2.C 将会有替代接口\
      * 设置某种道具的持有量
      * @example core.setItem('yellowKey', 3) // 设置黄钥匙为3把
      * @param itemId 道具id
@@ -193,7 +193,7 @@ interface Items {
     setItem(itemId: AllIdsOf<'items'>, itemNum?: number): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，2.C 将会有替代接口\
      * 静默增减某种道具的持有量 不会更新游戏画面或是显示提示
      * @example core.addItem('yellowKey', -2) // 没收两把黄钥匙
      * @param itemId 道具id
@@ -202,7 +202,7 @@ interface Items {
     addItem(itemId: AllIdsOf<'items'>, itemNum?: number): void;
 
     /**
-     * @deprecated 使用addItem代替。
+     * @deprecated 可使用，考虑用 `addItem` 代替，2.C 将会有替代接口\
      * 删除某个物品一定的数量，相当于addItem(itemId, -n);
      * @param itemId 道具id
      * @param itemNum 减少量，负数表示增加
@@ -210,14 +210,14 @@ interface Items {
     removeItem(itemId?: AllIdsOf<'items'>, itemNum?: number): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，2.C 将会有替代接口\
      * 根据类型获得一个可用的装备孔
      * @param equipId 道具名称
      */
     getEquipTypeByName(name?: ItemIdOf<'equips'>): number;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，2.C 将会有替代接口\
      * 判定某件装备的类型
      * @example core.getEquipTypeById('shield5') // 1（盾牌）
      * @param equipId 装备id
@@ -226,7 +226,7 @@ interface Items {
     getEquipTypeById(equipId: ItemIdOf<'equips'>): number;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，2.C 将会有替代接口\
      * 检查能否穿上某件装备
      * @example core.canEquip('sword5', true) // 主角可以装备神圣剑吗，如果不能会有提示
      * @param equipId 装备id
@@ -236,7 +236,7 @@ interface Items {
     canEquip(equipId: ItemIdOf<'equips'>, hint?: boolean): boolean;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，2.C 将会有替代接口\
      * 尝试穿上某件背包里的装备并提示
      * @example core.loadEquip('sword5') // 尝试装备上背包里的神圣剑，无回调
      * @param equipId 装备id
@@ -245,7 +245,7 @@ interface Items {
     loadEquip(equipId: ItemIdOf<'equips'>, callback?: () => void): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，2.C 将会有替代接口\
      * 脱下某个类型的装备
      * @example core.unloadEquip(1) // 卸下盾牌，无回调
      * @param equipType 装备类型编号，自然数
@@ -254,7 +254,7 @@ interface Items {
     unloadEquip(equipType: number, callback?: () => void): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，2.C 将会有替代接口\
      * 比较两件（类型可不同）装备的优劣
      * @example core.compareEquipment('sword5', 'shield5') // 比较神圣剑和神圣盾的优劣
      * @param compareEquipId 装备甲的id
@@ -267,7 +267,7 @@ interface Items {
     ): EquipBase;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，2.C 将会有替代接口\
      * 保存当前套装
      * @example core.quickSaveEquip(1) // 将当前套装保存为1号套装
      * @param index 套装编号，自然数
@@ -275,7 +275,7 @@ interface Items {
     quickSaveEquip(index: number): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，2.C 将会有替代接口\
      * 快速换装
      * @example core.quickLoadEquip(1) // 快速换上1号套装
      * @param index 套装编号，自然数
@@ -283,7 +283,7 @@ interface Items {
     quickLoadEquip(index: number): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，2.C 将会有替代接口\
      * 设置某个装备的属性并计入存档
      * @example core.setEquip('sword1', 'value', 'atk', 300, '+='); // 设置铁剑的攻击力数值再加300
      * @param equipId 装备id
@@ -303,7 +303,7 @@ interface Items {
     ): void;
 
     /**
-     * @deprecated
+     * @deprecated 可使用，2.C 将会有替代接口\
      * 真正的穿脱装备
      * @param type 装备孔
      * @param loadId 装上的装备
