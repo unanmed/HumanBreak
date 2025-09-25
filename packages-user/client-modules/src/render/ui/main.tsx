@@ -5,7 +5,8 @@ import {
     IActionEvent,
     MotaOffscreenCanvas2D,
     Sprite,
-    onTick
+    onTick,
+    transformCanvas
 } from '@motajs/render';
 import { WeatherController } from '../weather';
 import {
@@ -211,7 +212,9 @@ const MainScene = defineComponent(() => {
 
     const renderMapMisc = (canvas: MotaOffscreenCanvas2D) => {
         const step = core.status.stepPostfix;
-        if (!step) return;
+        const camera = map.value?.camera;
+        if (!step || !camera) return;
+        transformCanvas(canvas, camera);
         const ctx = canvas.ctx;
         ctx.fillStyle = '#fff';
         step.forEach(({ x, y, direction }) => {
