@@ -118,6 +118,16 @@ export const Page = defineComponent<
     const height = computed(() => props.loc[3] ?? 200);
     const round = computed(() => font.value.size / 4);
     const nowPageFont = computed(() => Font.clone(font.value, { weight: 700 }));
+    /** 页码的横向间距 */
+    const interval = computed(() => {
+        const size = font.value.size * 1.5;
+        const max = size * 9;
+        if (width.value > max) {
+            return size;
+        } else {
+            return (width.value - size * 5) / 4;
+        }
+    });
 
     // 左右箭头的颜色
     const leftColor = computed(() => (isFirst.value ? '#666' : '#ddd'));
@@ -135,11 +145,12 @@ export const Page = defineComponent<
         pageLoc.value = [0, height.value - pageH, width.value, pageH];
         const center = width.value / 2;
         const size = font.value.size * 1.5;
+        const int = size + interval.value;
         nowPageLoc.value = [center, 0, size, size, 0.5, 0];
-        leftPageLoc.value = [center - size * 1.5, 0, size, size, 0.5, 0];
-        leftLoc.value = [center - size * 3, 0, size, size, 0.5, 0];
-        rightPageLoc.value = [center + size * 1.5, 0, size, size, 0.5, 0];
-        rightLoc.value = [center + size * 3, 0, size, size, 0.5, 0];
+        leftPageLoc.value = [center - int, 0, size, size, 0.5, 0];
+        leftLoc.value = [center - int * 2, 0, size, size, 0.5, 0];
+        rightPageLoc.value = [center + int, 0, size, size, 0.5, 0];
+        rightLoc.value = [center + int * 2, 0, size, size, 0.5, 0];
     };
 
     const updateArrowPath = () => {

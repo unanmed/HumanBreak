@@ -160,8 +160,18 @@ export class Font implements IFontConfig {
     /**
      * 获取默认字体
      */
-    static defaults() {
-        return new Font();
+    static defaults(config?: Partial<IFontConfig>) {
+        if (!config) {
+            return new Font();
+        } else {
+            return new Font(
+                config.family,
+                config.size,
+                config.sizeUnit,
+                config.weight,
+                config.italic
+            );
+        }
     }
 
     /**

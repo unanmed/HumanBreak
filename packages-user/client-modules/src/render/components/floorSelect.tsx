@@ -5,6 +5,14 @@ import { computed, defineComponent, onMounted, ref, watch } from 'vue';
 import { Scroll, ScrollExpose } from './scroll';
 import { Font } from '@motajs/render-style';
 import { MotaOffscreenCanvas2D } from '@motajs/render-core';
+import {
+    HALF_STATUS_WIDTH,
+    STATUS_BAR_HEIGHT,
+    STATUS_BAR_WIDTH
+} from '../shared';
+
+const SCROLL_HEIGHT = STATUS_BAR_HEIGHT - 280;
+const HALF_HEIGHT = SCROLL_HEIGHT / 2;
 
 export interface FloorSelectorProps extends DefaultProps {
     floors: FloorIds[];
@@ -67,7 +75,7 @@ export const FloorSelector = defineComponent<
 
     const getGradient = (ctx: CanvasRenderingContext2D) => {
         if (gradient) return gradient;
-        gradient = ctx.createLinearGradient(0, 0, 0, 200);
+        gradient = ctx.createLinearGradient(0, 0, 0, SCROLL_HEIGHT);
         gradient.addColorStop(0, 'rgba(255,255,255,0)');
         gradient.addColorStop(0.2, 'rgba(255,255,255,1)');
         gradient.addColorStop(0.8, 'rgba(255,255,255,1)');
@@ -112,12 +120,24 @@ export const FloorSelector = defineComponent<
 
     return () => (
         <container>
-            <text text={floorName.value} loc={[90, 24]} anc={[0.5, 0.5]} />
-            <g-line line={[48, 40, 132, 40]} lineWidth={1} />
-            <g-line line={[48, 440, 132, 440]} lineWidth={1} />
+            <text
+                text={floorName.value}
+                loc={[HALF_STATUS_WIDTH, 24]}
+                anc={[0.5, 0.5]}
+            />
+            <g-line line={[48, 40, STATUS_BAR_WIDTH - 48, 40]} lineWidth={1} />
+            <g-line
+                line={[
+                    48,
+                    STATUS_BAR_HEIGHT - 40,
+                    STATUS_BAR_WIDTH - 48,
+                    STATUS_BAR_HEIGHT - 40
+                ]}
+                lineWidth={1}
+            />
             <text
                 text="退出"
-                loc={[90, 456]}
+                loc={[90, STATUS_BAR_HEIGHT - 24]}
                 anc={[0.5, 0.5]}
                 cursor="pointer"
                 onClick={close}
@@ -138,25 +158,25 @@ export const FloorSelector = defineComponent<
             />
             <text
                 text="「 下移一层 」"
-                loc={[90, 370]}
+                loc={[90, STATUS_BAR_HEIGHT - 110]}
                 anc={[0.5, 0.5]}
                 cursor="pointer"
                 onClick={() => changeFloor(-1)}
             />
             <text
                 text="「 下移十层 」"
-                loc={[90, 410]}
+                loc={[90, STATUS_BAR_HEIGHT - 70]}
                 anc={[0.5, 0.5]}
                 cursor="pointer"
                 onClick={() => changeFloor(-10)}
             />
-            <container loc={[0, 140, 144, 200]}>
+            <container loc={[0, 140, 144, SCROLL_HEIGHT]}>
                 <Scroll
                     ref={scrollRef}
-                    loc={[0, 0, 144, 200]}
+                    loc={[0, 0, 144, SCROLL_HEIGHT]}
                     noscroll
                     zIndex={10}
-                    padEnd={88}
+                    padEnd={HALF_HEIGHT - 12}
                 >
                     {floors.value.map((v, i, a) => {
                         const floor = core.floors[v];
@@ -168,7 +188,7 @@ export const FloorSelector = defineComponent<
                         return (
                             <container
                                 nocache
-                                loc={[0, i * 24 + 88, 144, 24]}
+                                loc={[0, i * 24 + HALF_HEIGHT - 12, 144, 24]}
                                 key={v}
                             >
                                 <text
@@ -195,14 +215,14 @@ export const FloorSelector = defineComponent<
                     })}
                 </Scroll>
                 <g-line
-                    line={[130, 0, 130, 200]}
+                    line={[130, 0, 130, SCROLL_HEIGHT]}
                     zIndex={5}
                     lineWidth={1}
                     strokeStyle="#aaa"
                 />
                 <sprite
                     zIndex={20}
-                    loc={[0, 0, 144, 200]}
+                    loc={[0, 0, 144, SCROLL_HEIGHT]}
                     nocache
                     noevent
                     render={renderMask}

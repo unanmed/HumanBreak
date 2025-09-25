@@ -23,7 +23,7 @@ import { generateBinary } from '@motajs/legacy-common';
 import { SetupComponentOptions } from '@motajs/system-ui';
 import { saveSave, saveLoad } from './save';
 import { mainUIController } from './controller';
-import { MAIN_WIDTH, MAIN_HEIGHT } from '../shared';
+import { MAIN_HEIGHT, FULL_LOC, POP_BOX_WIDTH, CENTER_LOC } from '../shared';
 import { openSettings } from './settings';
 import { openViewMap } from './viewmap';
 
@@ -90,10 +90,10 @@ export const PlayingToolbar = defineComponent<
     const tool = () => core.openToolbox(true);
     const fly = () => core.useFly(true);
     const save = () => {
-        saveSave(mainUIController, [0, 0, MAIN_WIDTH, MAIN_HEIGHT]);
+        saveSave(mainUIController, FULL_LOC);
     };
     const load = () => {
-        saveLoad(mainUIController, [0, 0, MAIN_WIDTH, MAIN_HEIGHT]);
+        saveLoad(mainUIController, FULL_LOC);
     };
     const equip = () => core.openEquipbox(true);
     const shop = () => core.openQuickShop(true);
@@ -111,12 +111,15 @@ export const PlayingToolbar = defineComponent<
     const redo = () => core.doSL('autoSave', 'reload');
     const numpad = () => emit('numpad');
     const view = () => {
-        openViewMap(mainUIController, [0, 0, MAIN_WIDTH, MAIN_HEIGHT]);
+        openViewMap(mainUIController, FULL_LOC);
     };
     const danmaku = () => requestAnimationFrame(openDanmakuPoster);
     const replay = () => core.ui._drawReplay();
     const settings = () => {
-        openSettings(mainUIController, [420, 240, 240, 400, 0.5, 0.5]);
+        const loc = CENTER_LOC.slice() as ElementLocator;
+        loc[2] = POP_BOX_WIDTH;
+        loc[3] = MAIN_HEIGHT - 72;
+        openSettings(mainUIController, loc);
     };
 
     return () => (
@@ -166,7 +169,7 @@ export const ReplayingToolbar = defineComponent<ReplayingProps>(props => {
 
     const bookIcon = core.statusBar.icons.book;
     const saveIcon = core.statusBar.icons.save;
-    const font1 = new Font('normal', 16);
+    const font1 = Font.defaults({ size: 16 });
     const font2 = new Font('Verdana', 12);
 
     const speedText = computed(() => `${status.speed}速`);
@@ -183,7 +186,7 @@ export const ReplayingToolbar = defineComponent<ReplayingProps>(props => {
     const speedUp = () => core.speedUpReplay();
     const book = () => core.openBook(true);
     const save = () => {
-        saveSave(mainUIController, [0, 0, MAIN_WIDTH, MAIN_HEIGHT]);
+        saveSave(mainUIController, FULL_LOC);
     };
     const view = () => {
         if (core.isPlaying() && !core.isMoving() && !core.status.lockControl) {

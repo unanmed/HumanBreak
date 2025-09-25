@@ -130,7 +130,7 @@ export const TextContent = defineComponent<
     let needUpdate = false;
 
     const retype = () => {
-        if (needUpdate) return;
+        if (needUpdate || props.hidden) return;
         needUpdate = true;
         if (!spriteElement.value) {
             needUpdate = false;

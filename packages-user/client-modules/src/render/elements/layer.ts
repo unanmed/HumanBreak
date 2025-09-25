@@ -13,6 +13,12 @@ import { RenderableData, texture } from './cache';
 import { BlockCacher, CanvasCacheItem, ICanvasCacheItem } from './block';
 import { IAnimateFrame, renderEmits } from './frame';
 import { EventEmitter } from 'eventemitter3';
+import {
+    MAP_BLOCK_HEIGHT,
+    MAP_BLOCK_WIDTH,
+    MAP_HEIGHT,
+    MAP_WIDTH
+} from '../shared';
 
 export interface ILayerGroupRenderExtends {
     /** 拓展的唯一标识符 */
@@ -104,7 +110,7 @@ export class LayerGroup
     // static list: Set<LayerGroup> = new Set();
 
     cellSize: number = 32;
-    blockSize: number = core._WIDTH_;
+    blockSize: number = MAP_BLOCK_WIDTH;
 
     /** 当前楼层 */
     floorId?: FloorIds;
@@ -126,7 +132,7 @@ export class LayerGroup
 
         this.setHD(true);
         this.setAntiAliasing(false);
-        this.size(core._PX_, core._PY_);
+        this.size(MAP_WIDTH, MAP_HEIGHT);
 
         this.on('afterRender', () => {
             this.releaseNeedRender();
@@ -378,8 +384,8 @@ export function calNeedRenderOf(
     cell: number,
     block: BlockCacher<any>
 ): Set<number> {
-    const w = core._WIDTH_ * cell;
-    const h = core._HEIGHT_ * cell;
+    const w = MAP_BLOCK_WIDTH * cell;
+    const h = MAP_BLOCK_HEIGHT * cell;
     const size = block.blockSize;
     const width = block.blockData.width;
 
@@ -604,7 +610,7 @@ export class Layer extends Container<ELayerEvent> {
     block: BlockCacher<ICanvasCacheItem> = new BlockCacher(
         0,
         0,
-        core._WIDTH_,
+        MAP_BLOCK_WIDTH,
         4
     );
 
@@ -625,20 +631,20 @@ export class Layer extends Container<ELayerEvent> {
 
         // this.setHD(false);
         this.setAntiAliasing(false);
-        this.size(core._PX_, core._PY_);
+        this.size(MAP_WIDTH, MAP_HEIGHT);
 
         this.staticMap.setHD(false);
         this.staticMap.setAntiAliasing(false);
-        this.staticMap.size(core._PX_, core._PY_);
+        this.staticMap.size(MAP_WIDTH, MAP_HEIGHT);
         this.movingMap.setHD(false);
         this.movingMap.setAntiAliasing(false);
-        this.movingMap.size(core._PX_, core._PY_);
+        this.movingMap.size(MAP_WIDTH, MAP_HEIGHT);
         this.backMap.setHD(false);
         this.backMap.setAntiAliasing(false);
-        this.backMap.size(core._PX_, core._PY_);
+        this.backMap.size(MAP_WIDTH, MAP_HEIGHT);
         this.main.setAntiAliasing(false);
         this.main.setHD(false);
-        this.main.size(core._PX_, core._PY_);
+        this.main.size(MAP_WIDTH, MAP_HEIGHT);
 
         this.appendChild(this.main);
         this.main.setRenderFn((canvas, transform) => {
@@ -789,7 +795,7 @@ export class Layer extends Container<ELayerEvent> {
             const [sx, sy, w, h] = data.render[i];
             canvas.setHD(false);
             canvas.setAntiAliasing(false);
-            canvas.size(core._PX_, core._PY_);
+            canvas.size(MAP_WIDTH, MAP_HEIGHT);
             temp.size(w, h);
 
             const img = data.autotile ? data.image[0b11111111] : data.image;
@@ -1204,7 +1210,7 @@ export class Layer extends Container<ELayerEvent> {
             const temp = this.requireCanvas(true, false);
             temp.setAntiAliasing(false);
             temp.setHD(false);
-            temp.size(core._PX_, core._PY_);
+            temp.size(MAP_WIDTH, MAP_HEIGHT);
 
             // 先画到临时画布，用于缓存
             for (let nx = sx; nx < ex; nx++) {
@@ -1261,7 +1267,7 @@ export class Layer extends Container<ELayerEvent> {
         const [a, b, , c, d, , e, f] = mat;
         ctx.setTransform(a, b, c, d, e, f);
         const max1 = 1 / Math.min(a, b, c, d) ** 2;
-        const max2 = Math.max(core._PX_, core._PY_) * 2;
+        const max2 = Math.max(MAP_WIDTH, MAP_HEIGHT) * 2;
         const r = (max1 * max2) ** 2;
 
         this.movingRenderable.forEach(v => {

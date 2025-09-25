@@ -505,27 +505,25 @@ export const Choices = defineComponent<
                 color={props.color ?? '#333'}
                 border={props.border}
             />
-            {hasTitle.value && (
-                <text
-                    loc={titleLoc.value}
-                    text={props.title}
-                    font={props.titleFont ?? new Font(void 0, 18)}
-                    fillStyle={props.titleFill ?? 'gold'}
-                    zIndex={5}
-                    onSetText={updateTitleHeight}
-                />
-            )}
-            {hasText.value && (
-                <TextContent
-                    {...attrs}
-                    text={props.text}
-                    loc={contentLoc.value}
-                    width={contentWidth.value}
-                    zIndex={5}
-                    autoHeight
-                    onUpdateHeight={updateContentHeight}
-                />
-            )}
+            <text
+                hidden={!hasTitle.value}
+                loc={titleLoc.value}
+                text={props.title}
+                font={props.titleFont ?? new Font(void 0, 18)}
+                fillStyle={props.titleFill ?? 'gold'}
+                zIndex={5}
+                onSetText={updateTitleHeight}
+            />
+            <TextContent
+                {...attrs}
+                hidden={!hasText.value}
+                text={props.text}
+                loc={contentLoc.value}
+                width={contentWidth.value}
+                zIndex={5}
+                autoHeight
+                onUpdateHeight={updateContentHeight}
+            />
             <Page
                 ref={pageCom}
                 loc={choiceLoc.value}

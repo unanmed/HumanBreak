@@ -5,7 +5,22 @@ import {
     UIComponentProps
 } from '@motajs/system-ui';
 import { defineComponent, nextTick, onMounted, ref } from 'vue';
-import { MAIN_HEIGHT, MAIN_WIDTH } from '../shared';
+import {
+    BUTTONS_HEIGHT,
+    BUTTONS_WIDTH,
+    BUTTONS_X,
+    BUTTONS_Y,
+    HALF_HEIGHT,
+    HALF_TITLE_HEIGHT,
+    HALF_TITLE_WIDTH,
+    HALF_WIDTH,
+    MAIN_HEIGHT,
+    MAIN_WIDTH,
+    TITLE_HEIGHT,
+    TITLE_WIDTH,
+    TITLE_X,
+    TITLE_Y
+} from '../shared';
 import {
     ElementLocator,
     IActionEvent,
@@ -147,8 +162,8 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
 
     let cursorScale = 1;
 
-    const titleFont = new Font('normal', 72).string();
-    const buttonFont = new Font('normal', 24, 'px', 600);
+    const titleFont = Font.defaults({ size: 72 });
+    const buttonFont = Font.defaults({ size: 24, weight: 600 });
 
     //#region 按钮功能
 
@@ -388,7 +403,7 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
         }
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.font = titleFont;
+        ctx.font = titleFont.string();
         ctx.fillStyle = titleGradient!;
         ctx.filter = `
             drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5))
@@ -396,7 +411,7 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
             drop-shadow(12px 12px 4px rgba(0, 0, 0, 0.4))
             blur(1px)
         `;
-        ctx.fillText(core.firstData.title, 320, 50);
+        ctx.fillText(core.firstData.title, HALF_TITLE_WIDTH, HALF_TITLE_HEIGHT);
     };
 
     const renderCursor = (canvas: MotaOffscreenCanvas2D) => {
@@ -420,15 +435,15 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
         >
             <image
                 image={bg}
-                loc={[MAIN_WIDTH / 2, MAIN_HEIGHT / 2, width, height]}
+                loc={[HALF_WIDTH, HALF_HEIGHT, width, height]}
                 anc={[0.5, 0.5]}
+                filter="brightness(120%)contrast(110%)"
                 zIndex={0}
             />
             <shader
                 ref={imageShader}
                 zIndex={5}
                 loc={[0, 0, MAIN_WIDTH, MAIN_HEIGHT]}
-                filter="brightness(120%)contrast(110%)"
             />
             <sprite
                 ref={maskSprite}
@@ -441,17 +456,16 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
             <sprite
                 ref={titleSprite}
                 render={renderTitle}
-                loc={[MAIN_WIDTH / 2, 120, 640, 100, 0.5, 0.5]}
+                loc={[TITLE_X, TITLE_Y, TITLE_WIDTH, TITLE_HEIGHT, 0.5, 0.5]}
                 zIndex={10}
             />
             <container
                 zIndex={15}
-                loc={[50, MAIN_HEIGHT, 200, 160]}
-                anc={[0, 1]}
+                loc={[BUTTONS_X, BUTTONS_Y, BUTTONS_WIDTH, BUTTONS_HEIGHT]}
             >
                 <container
                     hidden={selectHard.value}
-                    loc={[0, 0, 200, 160]}
+                    loc={[0, 0, BUTTONS_WIDTH, BUTTONS_HEIGHT]}
                     alpha={buttonsAlpha.ref.value}
                 >
                     {buttons.map((v, i) => {
@@ -475,7 +489,7 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
                 </container>
                 <container
                     hidden={!selectHard.value}
-                    loc={[0, 0, 200, 160]}
+                    loc={[0, 0, BUTTONS_WIDTH, BUTTONS_HEIGHT]}
                     alpha={buttonsAlpha.ref.value}
                 >
                     {hard.map((v, i) => {
@@ -528,16 +542,15 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
                         cursor="pointer"
                     />
                 )}
-                {!soundOpened.value && (
-                    <g-line
-                        line={[5, 35, 35, 5]}
-                        strokeStyle="gray"
-                        lineWidth={3}
-                        lineCap="round"
-                        noevent
-                        zIndex={5}
-                    />
-                )}
+                <g-line
+                    line={[5, 35, 35, 5]}
+                    strokeStyle="gray"
+                    lineWidth={3}
+                    lineCap="round"
+                    zIndex={5}
+                    noevent
+                    hidden={soundOpened.value}
+                />
             </container>
         </container>
     );

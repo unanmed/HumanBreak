@@ -361,6 +361,8 @@ export const Scroll = defineComponent<ScrollProps, {}, string, ScrollSlots>(
 
         //#region 事件监听
 
+        // todo: 滑动操作时的滚动惯性
+
         const customPropagate = <T extends ActionType>(
             type: T,
             progress: EventProgress,

@@ -91,9 +91,9 @@ export const LeftStatusBar = defineComponent<StatusBarProps<ILeftHeroStatus>>(
             return num.toString().padStart(2, '0');
         };
 
-        const font1 = new Font('normal', 18);
-        const font2 = new Font('normal', 18, 'px', 700);
-        const font3 = new Font('normal', 14, 'px', 700);
+        const font1 = Font.defaults({ size: 18 });
+        const font2 = Font.defaults({ size: 18, weight: 700 });
+        const font3 = Font.defaults({ size: 14, weight: 700 });
 
         const iconLoc = (n: number): ElementLocator => {
             return [16, 76 + 44 * n, 32, 32];

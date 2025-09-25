@@ -24,6 +24,7 @@ import { openStatistics } from './statistics';
 import { saveWithExist } from './save';
 import { compressToBase64 } from 'lz-string';
 import { ViewMapUI } from './viewmap';
+import { CENTER_LOC, FULL_LOC, MAIN_HEIGHT, POP_BOX_WIDTH } from '../shared';
 
 export interface MainSettingsProps
     extends Partial<ChoicesProps>,
@@ -79,7 +80,9 @@ export const MainSettings = defineComponent<MainSettingsProps>(props => {
                 break;
             }
             case MainChoice.ViewMap: {
-                props.controller.open(ViewMapUI, { loc: [0, 0, 840, 840] });
+                props.controller.open(ViewMapUI, {
+                    loc: FULL_LOC
+                });
                 break;
             }
             case MainChoice.Replay: {
@@ -98,8 +101,8 @@ export const MainSettings = defineComponent<MainSettingsProps>(props => {
                 const confirm = await getConfirm(
                     props.controller,
                     '确认要返回标题吗？',
-                    [420, 240, void 0, void 0, 0.5, 0.5],
-                    240
+                    CENTER_LOC,
+                    POP_BOX_WIDTH
                 );
                 if (confirm) {
                     props.controller.closeAll();
@@ -118,9 +121,9 @@ export const MainSettings = defineComponent<MainSettingsProps>(props => {
         <Choices
             loc={props.loc}
             choices={choices}
-            width={240}
+            width={POP_BOX_WIDTH}
             onChoose={choose}
-            maxHeight={400}
+            maxHeight={MAIN_HEIGHT - 64}
             interval={8}
         />
     );
@@ -158,10 +161,7 @@ export const ReplaySettings = defineComponent<MainSettingsProps>(props => {
                 break;
             }
             case ReplayChoice.StartFromSave: {
-                const index = await saveWithExist(
-                    props.controller,
-                    [0, 0, 840, 480]
-                );
+                const index = await saveWithExist(props.controller, FULL_LOC);
                 if (index === -2) break;
                 if (index === -1) {
                     core.doSL('autoSave', 'replayLoad');
@@ -172,10 +172,7 @@ export const ReplaySettings = defineComponent<MainSettingsProps>(props => {
                 break;
             }
             case ReplayChoice.ResumeReplay: {
-                const index = await saveWithExist(
-                    props.controller,
-                    [0, 0, 840, 480]
-                );
+                const index = await saveWithExist(props.controller, FULL_LOC);
                 if (index === -2) break;
                 const name = index === -1 ? 'autoSave' : index + 1;
                 const success = core.doSL(name, 'replayRemain');
@@ -185,14 +182,11 @@ export const ReplaySettings = defineComponent<MainSettingsProps>(props => {
                 }
                 await getConfirm(
                     props.controller,
-                    '[步骤2]请选择第二个存档。\n\r[yellow]该存档必须是前一个存档的后续。\r\n将尝试播放到此存档。',
-                    [420, 240, void 0, void 0, 0.5, 0.5],
-                    240
+                    '[步骤2]请选择第二个存档。\n\\r[yellow]该存档必须是前一个存档的后续。\\r\n将尝试播放到此存档。',
+                    CENTER_LOC,
+                    POP_BOX_WIDTH
                 );
-                const index2 = await saveWithExist(
-                    props.controller,
-                    [0, 0, 840, 480]
-                );
+                const index2 = await saveWithExist(props.controller, FULL_LOC);
                 if (index2 === -2) break;
                 const name2 = index2 === -1 ? 'autoSave' : index2 + 1;
                 core.doSL(name2, 'replayRemain');
@@ -200,10 +194,7 @@ export const ReplaySettings = defineComponent<MainSettingsProps>(props => {
                 break;
             }
             case ReplayChoice.ReplayRest: {
-                const index = await saveWithExist(
-                    props.controller,
-                    [0, 0, 840, 480]
-                );
+                const index = await saveWithExist(props.controller, FULL_LOC);
                 if (index === -2) break;
                 if (index === -1) {
                     core.doSL('autoSave', 'replaySince');
@@ -243,7 +234,7 @@ export const ReplaySettings = defineComponent<MainSettingsProps>(props => {
         <Choices
             loc={props.loc}
             choices={choice}
-            width={240}
+            width={POP_BOX_WIDTH}
             onChoose={choose}
             interval={8}
         />
@@ -281,8 +272,8 @@ export const GameInfo = defineComponent<MainSettingsProps>(props => {
                     const confirm = await getConfirm(
                         props.controller,
                         '即将离开本游戏，跳转至工程页面，确认跳转？',
-                        props.loc,
-                        240
+                        CENTER_LOC,
+                        POP_BOX_WIDTH
                     );
                     if (confirm) {
                         window.location.href = 'editor-mobile.html';
@@ -299,8 +290,8 @@ export const GameInfo = defineComponent<MainSettingsProps>(props => {
                     const confirm = await getConfirm(
                         props.controller,
                         '即将离开本游戏，跳转至评论页面，确认跳转？',
-                        props.loc,
-                        240
+                        CENTER_LOC,
+                        POP_BOX_WIDTH
                     );
                     if (confirm) {
                         window.location.href = href;
@@ -330,7 +321,7 @@ export const GameInfo = defineComponent<MainSettingsProps>(props => {
         <Choices
             loc={props.loc}
             choices={choices}
-            width={240}
+            width={POP_BOX_WIDTH}
             onChoose={choose}
             interval={8}
         />
@@ -370,8 +361,8 @@ export const SyncSave = defineComponent<MainSettingsProps>(props => {
                 const replay = await getInput(
                     props.controller,
                     '请输入存档编号+密码',
-                    [240, 240, void 0, void 0, 0.5, 0.5],
-                    240
+                    CENTER_LOC,
+                    POP_BOX_WIDTH
                 );
                 await syncFromServer(props.controller, replay);
                 break;
@@ -398,7 +389,7 @@ export const SyncSave = defineComponent<MainSettingsProps>(props => {
     return () => (
         <Choices
             loc={props.loc}
-            width={240}
+            width={POP_BOX_WIDTH}
             choices={choices}
             onChoose={choose}
             interval={8}
@@ -420,8 +411,8 @@ export const SyncSaveSelect = defineComponent<MainSettingsProps>(props => {
                 const confirm = await getConfirm(
                     props.controller,
                     '你确定要同步全部存档么？这可能在存档较多的时候比较慢。',
-                    props.loc,
-                    240
+                    CENTER_LOC,
+                    POP_BOX_WIDTH
                 );
                 if (confirm) {
                     core.syncSave('all');
@@ -433,8 +424,8 @@ export const SyncSaveSelect = defineComponent<MainSettingsProps>(props => {
                 const confirm = await getConfirm(
                     props.controller,
                     '确定要同步当前存档吗？',
-                    props.loc,
-                    240
+                    CENTER_LOC,
+                    POP_BOX_WIDTH
                 );
                 if (confirm) {
                     core.syncSave();
@@ -451,7 +442,7 @@ export const SyncSaveSelect = defineComponent<MainSettingsProps>(props => {
     return () => (
         <Choices
             loc={props.loc}
-            width={240}
+            width={POP_BOX_WIDTH}
             choices={choices}
             onChoose={choose}
             interval={8}
@@ -472,14 +463,14 @@ export const DownloadSaveSelect = defineComponent<MainSettingsProps>(props => {
                 const confirm = await getConfirm(
                     props.controller,
                     '确认要下载所有存档吗？',
-                    props.loc,
-                    240
+                    CENTER_LOC,
+                    POP_BOX_WIDTH
                 );
                 if (confirm) {
                     const data = await waitbox(
                         props.controller,
-                        props.loc,
-                        240,
+                        CENTER_LOC,
+                        POP_BOX_WIDTH,
                         getAllSavesData(),
                         { text: '请等待处理完毕' }
                     );
@@ -496,8 +487,8 @@ export const DownloadSaveSelect = defineComponent<MainSettingsProps>(props => {
                 const confirm = await getConfirm(
                     props.controller,
                     '确认要下载当前存档吗？',
-                    props.loc,
-                    240
+                    CENTER_LOC,
+                    POP_BOX_WIDTH
                 );
                 if (confirm) {
                     const data = await getSaveData(core.saves.saveIndex);
@@ -520,7 +511,7 @@ export const DownloadSaveSelect = defineComponent<MainSettingsProps>(props => {
     return () => (
         <Choices
             loc={props.loc}
-            width={240}
+            width={POP_BOX_WIDTH}
             choices={choices}
             onChoose={choose}
             interval={8}
@@ -541,14 +532,14 @@ export const ClearSaveSelect = defineComponent<MainSettingsProps>(props => {
                 const confirm = await getConfirm(
                     props.controller,
                     '你确定要清除【全部游戏】的所有本地存档？此行为不可逆！！！',
-                    props.loc,
-                    240
+                    CENTER_LOC,
+                    POP_BOX_WIDTH
                 );
                 if (confirm) {
                     await waitbox(
                         props.controller,
-                        props.loc,
-                        240,
+                        CENTER_LOC,
+                        POP_BOX_WIDTH,
                         new Promise<void>(res => {
                             core.clearLocalForage(() => {
                                 core.saves.ids = {};
@@ -571,8 +562,8 @@ export const ClearSaveSelect = defineComponent<MainSettingsProps>(props => {
                     await getConfirm(
                         props.controller,
                         '所有塔的存档已经全部清空',
-                        props.loc,
-                        240
+                        CENTER_LOC,
+                        POP_BOX_WIDTH
                     );
                 }
                 break;
@@ -581,14 +572,14 @@ export const ClearSaveSelect = defineComponent<MainSettingsProps>(props => {
                 const confirm = await getConfirm(
                     props.controller,
                     '你确定要清除【当前游戏】的所有本地存档？此行为不可逆！！！',
-                    props.loc,
-                    240
+                    CENTER_LOC,
+                    POP_BOX_WIDTH
                 );
                 if (confirm) {
                     await waitbox(
                         props.controller,
-                        props.loc,
-                        240,
+                        CENTER_LOC,
+                        POP_BOX_WIDTH,
                         new Promise<void>(res => {
                             Object.keys(core.saves.ids).forEach(function (v) {
                                 core.removeLocalForage('save' + v);
@@ -613,8 +604,8 @@ export const ClearSaveSelect = defineComponent<MainSettingsProps>(props => {
                     await getConfirm(
                         props.controller,
                         '当前塔的存档已被清空',
-                        props.loc,
-                        240
+                        CENTER_LOC,
+                        POP_BOX_WIDTH
                     );
                 }
                 break;

@@ -38,6 +38,17 @@ import { clamp, mean } from 'lodash-es';
 import { calculateStatisticsOne, StatisticsDataOneFloor } from './statistics';
 import { Tip, TipExpose } from '../components';
 import { useKey } from '../use';
+import {
+    ENABLE_RIGHT_STATUS_BAR,
+    FULL_LOC,
+    HALF_WIDTH,
+    MAIN_HEIGHT,
+    MAP_HEIGHT,
+    MAP_WIDTH,
+    RIGHT_STATUS_POS,
+    STATUS_BAR_HEIGHT,
+    STATUS_BAR_WIDTH
+} from '../shared';
 
 export interface ViewMapProps extends UIComponentProps, BaseProps {
     loc: ElementLocator;
@@ -335,12 +346,18 @@ export const ViewMap = defineComponent<ViewMapProps>(props => {
 
     return () => (
         <container loc={props.loc} nocache>
-            <g-rect fillStyle="black" fill loc={[0, 0, 840, 480]} />
-            <g-rect stroke zIndex={100} loc={[0, 0, 840, 480]} noevent />
-            <g-line line={[180, 0, 180, 480]} lineWidth={1} />
-            <g-line line={[180 + 480, 0, 180 + 480, 480]} lineWidth={1} />
+            <g-rect fillStyle="black" fill loc={FULL_LOC} />
+            <g-rect stroke zIndex={100} loc={FULL_LOC} noevent />
+            <g-line
+                line={[STATUS_BAR_WIDTH, 0, STATUS_BAR_WIDTH, MAIN_HEIGHT]}
+                lineWidth={1}
+            />
+            <g-line
+                line={[RIGHT_STATUS_POS, 0, RIGHT_STATUS_POS, MAIN_HEIGHT]}
+                lineWidth={1}
+            />
             <FloorSelector
-                loc={[0, 0, 180, 480]}
+                loc={[0, 0, STATUS_BAR_WIDTH, MAIN_HEIGHT]}
                 floors={viewableFloor}
                 v-model:now={now.value}
                 onClose={close}
@@ -348,7 +365,7 @@ export const ViewMap = defineComponent<ViewMapProps>(props => {
             <layer-group
                 ref={group}
                 ex={layerGroupExtends}
-                loc={[180, 0, 480, 480]}
+                loc={[STATUS_BAR_WIDTH, 0, MAP_WIDTH, MAP_HEIGHT]}
                 onDown={downMap}
                 onMove={moveMap}
                 onUp={upMap}
@@ -365,12 +382,12 @@ export const ViewMap = defineComponent<ViewMapProps>(props => {
             <Tip
                 ref={tip}
                 zIndex={40}
-                loc={[188, 8, 200, 32]}
+                loc={[STATUS_BAR_WIDTH + 8, 8, 200, 32]}
                 pad={[12, 6]}
                 corner={16}
             />
             <sprite
-                loc={[180, 0, 480, 64]}
+                loc={[STATUS_BAR_WIDTH, 0, MAP_WIDTH, 64]}
                 render={renderTop}
                 alpha={topAlpha.value}
                 zIndex={10}
@@ -380,7 +397,7 @@ export const ViewMap = defineComponent<ViewMapProps>(props => {
                 onClick={() => changeFloor(1)}
             />
             <sprite
-                loc={[180, 416, 480, 64]}
+                loc={[STATUS_BAR_WIDTH, MAP_HEIGHT - 64, MAP_WIDTH, 64]}
                 render={renderBottom}
                 alpha={bottomAlpha.value}
                 zIndex={10}
@@ -391,19 +408,22 @@ export const ViewMap = defineComponent<ViewMapProps>(props => {
             />
             <text
                 text="上移地图"
-                loc={[420, 24]}
+                loc={[HALF_WIDTH, 24]}
                 anc={[0.5, 0.5]}
                 zIndex={20}
                 noevent
             />
             <text
                 text="下移地图"
-                loc={[420, 456]}
+                loc={[HALF_WIDTH, MAP_HEIGHT - 24]}
                 anc={[0.5, 0.5]}
                 zIndex={20}
                 noevent
             />
-            <container loc={[660, 0, 180, 480]}>
+            <container
+                loc={[RIGHT_STATUS_POS, 0, STATUS_BAR_WIDTH, STATUS_BAR_HEIGHT]}
+                hidden={!ENABLE_RIGHT_STATUS_BAR}
+            >
                 <text
                     text="鼠标 / 单指拖动地图"
                     font={rightFont}

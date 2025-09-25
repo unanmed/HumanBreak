@@ -16,7 +16,19 @@ import {
 } from 'vue';
 import { getConfirm, Page, PageExpose, Thumbnail } from '../components';
 import { useKey } from '../use';
-import { MAP_WIDTH } from '../shared';
+import {
+    HALF_HEIGHT,
+    HALF_WIDTH,
+    MAP_WIDTH,
+    POP_BOX_WIDTH,
+    SAVE_DOWN_PAD,
+    SAVE_INTERVAL,
+    SAVE_ITEM_DOWN,
+    SAVE_ITEM_HEIGHT,
+    SAVE_ITEM_SIZE,
+    SAVE_ITEM_TOP,
+    SAVE_PAGES
+} from '../shared';
 import { getSave, SaveData, adjustGrid, IGridLayoutData } from '../utils';
 
 export const enum SaveMode {
@@ -61,10 +73,11 @@ export const SaveItem = defineComponent<SaveItemProps>(props => {
     const statusFont = new Font('normal', 14);
 
     const w = computed(() => props.loc[2] ?? 200);
+    const h = computed(() => props.loc[3] ?? 200);
     const lineWidth = computed(() => (props.selected ? 4 : 2));
     const imgLoc = computed<ElementLocator>(() => {
         const size = w.value - 4;
-        return [2, 24, size, size];
+        return [2, SAVE_ITEM_TOP, size, size];
     });
 
     const name = computed(() => {
@@ -102,7 +115,7 @@ export const SaveItem = defineComponent<SaveItemProps>(props => {
             <text
                 text={name.value}
                 font={font}
-                loc={[w.value / 2, 20]}
+                loc={[w.value / 2, SAVE_ITEM_TOP - 4]}
                 anc={[0.5, 1]}
             />
             <g-rect
@@ -130,7 +143,7 @@ export const SaveItem = defineComponent<SaveItemProps>(props => {
                 text={statusText.value}
                 fillStyle="yellow"
                 font={statusFont}
-                loc={[w.value / 2, w.value + 28]}
+                loc={[w.value / 2, h.value - SAVE_ITEM_DOWN + 2]}
                 anc={[0.5, 0]}
             />
         </container>
@@ -139,12 +152,8 @@ export const SaveItem = defineComponent<SaveItemProps>(props => {
 
 export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
     (props, { emit }) => {
-        const itemSize = 150;
-        const itemHeight = itemSize + 40;
-        const interval = 30;
-
-        const font = new Font('normal', 18);
-        const pageFont = new Font('normal', 14);
+        const font = Font.defaults({ size: 18 });
+        const pageFont = Font.defaults({ size: 14 });
 
         /** 当前页上被选中的存档的posIndex */
         const selected = ref(0);
@@ -160,16 +169,16 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
         const grid = computed<IGridLayoutData>(() =>
             adjustGrid(
                 width.value,
-                height.value - 30,
-                itemSize,
-                itemHeight,
-                interval
+                height.value - SAVE_DOWN_PAD,
+                SAVE_ITEM_SIZE,
+                SAVE_ITEM_HEIGHT,
+                SAVE_INTERVAL
             )
         );
 
         const contentLoc = computed<ElementLocator>(() => {
             const cx = width.value / 2;
-            const cy = (height.value - 30) / 2;
+            const cy = (height.value - SAVE_DOWN_PAD) / 2;
             return [cx, cy, grid.value.width, grid.value.height, 0.5, 0.5];
         });
 
@@ -244,8 +253,8 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                 const confirm = await getConfirm(
                     props.controller,
                     `确认要删除存档 ${index + 1}？`,
-                    [420, 240, void 0, void 0, 0.5, 0.5],
-                    240,
+                    [HALF_WIDTH, HALF_HEIGHT, void 0, void 0, 0.5, 0.5],
+                    POP_BOX_WIDTH,
                     { winskin: 'winskin2.png' }
                 );
                 if (confirm) {
@@ -370,6 +379,9 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
             );
 
         //#region 事件监听
+
+        // todo: 按住快速切换页码
+
         const wheel = (ev: IWheelEvent) => {
             const delta = Math.sign(ev.wheelY);
             if (ev.ctrlKey) {
@@ -384,7 +396,7 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                 <Page
                     ref={pageRef}
                     loc={[0, 0, width.value, height.value - 10]}
-                    pages={1000}
+                    pages={SAVE_PAGES}
                     font={pageFont}
                     v-model:page={now.value}
                     onWheel={wheel}
