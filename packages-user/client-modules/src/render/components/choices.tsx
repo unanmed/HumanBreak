@@ -33,6 +33,8 @@ export interface ConfirmBoxProps extends DefaultProps, TextContentProps {
     color?: CanvasStyle;
     /** 对话框边框颜色，当未设置 winskin 时生效 */
     border?: CanvasStyle;
+    /** 按键作用域，如果需要同作用域按键，那么需要传入 */
+    scope?: symbol;
 }
 
 export type ConfirmBoxEmits = {
@@ -53,7 +55,8 @@ const confirmBoxProps = {
         'winskin',
         'defaultYes',
         'color',
-        'border'
+        'border',
+        'scope'
     ],
     emits: ['no', 'yes']
 } satisfies SetupComponentOptions<
@@ -143,7 +146,7 @@ export const ConfirmBox = defineComponent<
         noSize.value = [width, height];
     };
 
-    const [key] = useKey();
+    const [key] = useKey(false, props.scope);
     key.realize('confirm', () => {
         if (selected.value) emit('yes');
         else emit('no');
@@ -242,6 +245,8 @@ export interface ChoicesProps extends DefaultProps, TextContentProps {
     interval?: number;
     /** 默认选中的选项索引 */
     selected?: number;
+    /** 按键作用域，如果需要同作用域按键，那么需要传入，例如系统设置 UI */
+    scope?: symbol;
 }
 
 export type ChoicesEmits = {
@@ -265,7 +270,8 @@ const choicesProps = {
         'titleFill',
         'pad',
         'interval',
-        'selected'
+        'selected',
+        'scope'
     ],
     emits: ['choose']
 } satisfies SetupComponentOptions<
@@ -464,7 +470,7 @@ export const Choices = defineComponent<
         selected.value = 0;
     };
 
-    const [key] = useKey();
+    const [key] = useKey(false, props.scope);
     key.realize('moveUp', () => {
         if (selected.value === 0) {
             if (pageCom.value?.now() !== 0) {

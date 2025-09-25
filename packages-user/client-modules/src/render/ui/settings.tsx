@@ -25,6 +25,7 @@ import { saveWithExist } from './save';
 import { compressToBase64 } from 'lz-string';
 import { ViewMapUI } from './viewmap';
 import { CENTER_LOC, FULL_LOC, MAIN_HEIGHT, POP_BOX_WIDTH } from '../shared';
+import { useKey } from '../use';
 
 export interface MainSettingsProps
     extends Partial<ChoicesProps>,
@@ -61,6 +62,9 @@ export const MainSettings = defineComponent<MainSettingsProps>(props => {
         [MainChoice.Restart, '返回标题'],
         [MainChoice.Back, '返回游戏']
     ];
+
+    const [key, scope] = useKey();
+    key.realize('exit', () => props.controller.close(props.instance));
 
     const choose = async (key: ChoiceKey) => {
         switch (key) {
@@ -125,6 +129,7 @@ export const MainSettings = defineComponent<MainSettingsProps>(props => {
             onChoose={choose}
             maxHeight={MAIN_HEIGHT - 64}
             interval={8}
+            scope={scope}
         />
     );
 }, mainSettingsProps);
@@ -149,6 +154,9 @@ export const ReplaySettings = defineComponent<MainSettingsProps>(props => {
         [ReplayChoice.Download, '下载当前录像'],
         [ReplayChoice.Back, '返回游戏']
     ];
+
+    const [key, scope] = useKey();
+    key.realize('exit', () => props.controller.close(props.instance));
 
     const choose = async (key: ChoiceKey) => {
         switch (key) {
@@ -237,6 +245,7 @@ export const ReplaySettings = defineComponent<MainSettingsProps>(props => {
             width={POP_BOX_WIDTH}
             onChoose={choose}
             interval={8}
+            scope={scope}
         />
     );
 }, mainSettingsProps);
@@ -259,6 +268,9 @@ export const GameInfo = defineComponent<MainSettingsProps>(props => {
         [GameInfoChoice.Download, '下载离线版本'],
         [GameInfoChoice.Back, '返回主菜单']
     ];
+
+    const [key, scope] = useKey();
+    key.realize('exit', () => props.controller.close(props.instance));
 
     const choose = async (key: ChoiceKey) => {
         switch (key) {
@@ -324,6 +336,7 @@ export const GameInfo = defineComponent<MainSettingsProps>(props => {
             width={POP_BOX_WIDTH}
             onChoose={choose}
             interval={8}
+            scope={scope}
         />
     );
 }, mainSettingsProps);
@@ -350,6 +363,9 @@ export const SyncSave = defineComponent<MainSettingsProps>(props => {
         [SyncSaveChoice.ClearLocal, '清空本地存档'],
         [SyncSaveChoice.Back, '返回上一级']
     ];
+
+    const [key, scope] = useKey();
+    key.realize('exit', () => props.controller.close(props.instance));
 
     const choose = async (key: ChoiceKey) => {
         switch (key) {
@@ -393,6 +409,7 @@ export const SyncSave = defineComponent<MainSettingsProps>(props => {
             choices={choices}
             onChoose={choose}
             interval={8}
+            scope={scope}
         />
     );
 }, mainSettingsProps);
@@ -403,6 +420,9 @@ export const SyncSaveSelect = defineComponent<MainSettingsProps>(props => {
         [SyncSaveChoice.NowSave, '同步当前存档'],
         [SyncSaveChoice.Back, '返回上一级']
     ];
+
+    const [key, scope] = useKey();
+    key.realize('exit', () => props.controller.close(props.instance));
 
     const choose = async (key: ChoiceKey) => {
         switch (key) {
@@ -446,6 +466,7 @@ export const SyncSaveSelect = defineComponent<MainSettingsProps>(props => {
             choices={choices}
             onChoose={choose}
             interval={8}
+            scope={scope}
         />
     );
 }, mainSettingsProps);
@@ -456,6 +477,9 @@ export const DownloadSaveSelect = defineComponent<MainSettingsProps>(props => {
         [SyncSaveChoice.NowSave, '下载当前存档'],
         [SyncSaveChoice.Back, '返回上一级']
     ];
+
+    const [key, scope] = useKey();
+    key.realize('exit', () => props.controller.close(props.instance));
 
     const choose = async (key: ChoiceKey) => {
         switch (key) {
@@ -515,6 +539,7 @@ export const DownloadSaveSelect = defineComponent<MainSettingsProps>(props => {
             choices={choices}
             onChoose={choose}
             interval={8}
+            scope={scope}
         />
     );
 }, mainSettingsProps);
@@ -525,6 +550,9 @@ export const ClearSaveSelect = defineComponent<MainSettingsProps>(props => {
         [SyncSaveChoice.NowSave, '清空当前塔存档'],
         [SyncSaveChoice.Back, '返回上一级']
     ];
+
+    const [key, scope] = useKey();
+    key.realize('exit', () => props.controller.close(props.instance));
 
     const choose = async (key: ChoiceKey) => {
         switch (key) {
@@ -624,6 +652,7 @@ export const ClearSaveSelect = defineComponent<MainSettingsProps>(props => {
             choices={choices}
             onChoose={choose}
             interval={8}
+            scope={scope}
         />
     );
 }, mainSettingsProps);

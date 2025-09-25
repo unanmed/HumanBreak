@@ -179,7 +179,8 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * @param symbol 当前作用域的symbol
      */
     use(symbol: symbol): void {
-        spliceBy(this.scopeStack, symbol);
+        if (symbol === this.scope) return;
+        this.dispose(symbol);
         this.scopeStack.push(symbol);
         this.scope = symbol;
         this.conditionMap.set(symbol, () => true);
@@ -190,10 +191,12 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
      * @param symbol 要释放的作用域的symbol
      */
     dispose(symbol: symbol = this.scopeStack.at(-1) ?? Symbol()): void {
-        for (const key of Object.values(this.data)) {
-            key.emits.delete(symbol);
-        }
-        spliceBy(this.scopeStack, symbol);
+        const disposed = spliceBy(this.scopeStack, symbol);
+        disposed.forEach(v => {
+            for (const key of Object.values(this.data)) {
+                key.emits.delete(v);
+            }
+        });
         this.scope = this.scopeStack.at(-1) ?? Symbol();
     }
 

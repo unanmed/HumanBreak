@@ -73,17 +73,22 @@ type KeyUsing = [Hotkey, symbol];
 /**
  * 在组件中定义按键操作
  * @param noScope 是否不创建新作用域
+ * @param scope 指定作用域，如果 `noScope` 为 `true`，则此项无效
  */
-export function useKey(noScope: boolean = false): KeyUsing {
+export function useKey(noScope: boolean = false, scope?: symbol): KeyUsing {
     if (noScope) {
         return [gameKey, gameKey.scope];
     } else {
-        const sym = Symbol();
-        gameKey.use(sym);
-        onUnmounted(() => {
-            gameKey.dispose();
-        });
-        return [gameKey, sym];
+        const sym = scope ?? Symbol();
+        if (sym === gameKey.scope) {
+            return [gameKey, gameKey.scope];
+        } else {
+            gameKey.use(sym);
+            onUnmounted(() => {
+                gameKey.dispose();
+            });
+            return [gameKey, sym];
+        }
     }
 }
 

@@ -34,9 +34,8 @@ export function deleteWith<T>(arr: T[], ele: T): T[] {
 
 export function spliceBy<T>(arr: T[], from: T): T[] {
     const index = arr.indexOf(from);
-    if (index === -1) return arr;
-    arr.splice(index);
-    return arr;
+    if (index === -1) return [];
+    return arr.splice(index);
 }
 
 /**
