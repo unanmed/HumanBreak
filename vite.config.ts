@@ -57,24 +57,6 @@ export default defineConfig({
         }
     },
     server: {
-        proxy: {
-            '/readFile': FSHOST,
-            '/writeFile': FSHOST,
-            '/writeMultiFiles': FSHOST,
-            '/listFile': FSHOST,
-            '/makeDir': FSHOST,
-            '/moveFile': FSHOST,
-            '/deleteFile': FSHOST,
-            '^/all/.*': FSHOST,
-            '^/forceTem/.*': {
-                target: FSHOST,
-                changeOrigin: true,
-                rewrite(path) {
-                    return path.replace(/^\/forceTem/, '');
-                },
-            },
-            '/danmaku': 'https://h5mota.com/backend/tower/barrage.php'
-        },
         watch: {
             ignored: ['**/public/**']
         },

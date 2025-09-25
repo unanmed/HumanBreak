@@ -2,8 +2,15 @@
 
 export {};
 
-/* @__PURE__ */ (function () {
+interface PortResponse {
+    server: number;
+}
+
+/* @__PURE__ */ (async function () {
     if (main.mode !== 'play' || main.replayChecking) return;
+
+    const res = await fetch('/getPort');
+    const { server } = (await res.json()) as PortResponse;
 
     /**
      * 热重载css
@@ -127,7 +134,7 @@ export {};
         console.log(`Data hot reload: ${data}`);
     }
 
-    const ws = new WebSocket('ws://127.0.0.1:3000');
+    const ws = new WebSocket(`ws://127.0.0.1:${server}`);
     ws.addEventListener('open', () => {
         console.log(`Web socket connect successfully`);
     });

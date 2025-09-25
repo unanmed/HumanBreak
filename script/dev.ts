@@ -1,5 +1,10 @@
 /* eslint-disable no-console */
-import { createServer } from 'vite';
+import {
+    createServer,
+    loadConfigFromFile,
+    mergeConfig,
+    UserConfig
+} from 'vite';
 import { Server } from 'http';
 import { ensureDir, move, pathExists, remove } from 'fs-extra';
 import { readFile, readdir, writeFile } from 'fs/promises';
@@ -500,6 +505,14 @@ const apiGetEsmFiles = async (req: Request, res: Response) => {
     return getEsmFile(req, res, path.resolved);
 };
 
+const apiGetPort = async (_req: Request, res: Response) => {
+    const port = {
+        vite: vitePort,
+        server: serverPort
+    };
+    res.end(JSON.stringify(port));
+};
+
 /**
  * 声明某种类型
  * @param {string} type 类型
@@ -677,12 +690,49 @@ async function ensureConfig() {
 }
 
 (async function () {
-    // 1. 启动vite服务
-    const vite = await createServer();
+    // 1. 加载 vite.config.ts
+    const fsHost = `http://127.0.0.1:${serverPort}`;
+    const config = await loadConfigFromFile({
+        command: 'serve',
+        mode: 'development'
+    });
+    if (!config) {
+        console.error(`Cannot load config file.`);
+        return;
+    }
+    const merged = mergeConfig(config.config, {
+        server: {
+            proxy: {
+                '/readFile': fsHost,
+                '/writeFile': fsHost,
+                '/writeMultiFiles': fsHost,
+                '/listFile': fsHost,
+                '/makeDir': fsHost,
+                '/moveFile': fsHost,
+                '/deleteFile': fsHost,
+                '/getPort': fsHost,
+                '^/all/.*': fsHost,
+                '^/forceTem/.*': {
+                    target: fsHost,
+                    changeOrigin: true,
+                    rewrite(path) {
+                        return path.replace(/^\/forceTem/, '');
+                    }
+                },
+                '/danmaku': 'https://h5mota.com/backend/tower/barrage.php'
+            }
+        }
+    } satisfies UserConfig);
+
+    // 2. 启动vite服务
+    const vite = await createServer({
+        ...merged,
+        configFile: false
+    });
     await vite.listen(vitePort);
     console.log(`游戏地址：http://localhost:${vitePort}/`);
 
-    // 2. 启动样板http服务
+    // 3. 启动样板http服务
     await ensureConfig();
 
     const app = express();
@@ -700,6 +750,7 @@ async function ensureConfig() {
     app.get('/all/__all_floors__.js', apiGetAllFloors);
     app.get('/all/__all_animates__', apiGetAllAnimates);
     app.get('/esm', apiGetEsmFiles);
+    app.get('/getPort', apiGetPort);
 
     const server = app.listen(serverPort);
 
@@ -710,7 +761,7 @@ async function ensureConfig() {
         );
     });
 
-    // 3. 启动样板ws热重载服务
+    // 4. 启动样板ws热重载服务
     startWsServer(server);
 
     process.on('SIGTERM', () => {
