@@ -20,16 +20,12 @@ function main() {
 
     this.dom = {
         body: document.body,
-        game: document.getElementById('game'),
         gameDraw: document.getElementById('game-draw'),
-        gameCanvas: document.getElementsByClassName('gameCanvas'),
-        data: document.getElementById('data'),
         inputDiv: document.getElementById('inputDiv'),
         inputMessage: document.getElementById('inputMessage'),
         inputBox: document.getElementById('inputBox'),
         inputYes: document.getElementById('inputYes'),
-        inputNo: document.getElementById('inputNo'),
-        next: document.getElementById('next')
+        inputNo: document.getElementById('inputNo')
     };
     this.mode = 'play';
     this.loadList = [
@@ -198,10 +194,6 @@ main.prototype.loadSync = function (mode, callback) {
 };
 
 main.prototype.loadAsync = async function (mode, callback) {
-    for (var i = 0; i < main.dom.gameCanvas.length; i++) {
-        main.canvas[main.dom.gameCanvas[i].id] =
-            main.dom.gameCanvas[i].getContext('2d');
-    }
     main.mode = mode;
 
     // 加载全塔属性代码

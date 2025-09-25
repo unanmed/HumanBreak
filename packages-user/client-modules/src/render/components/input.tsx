@@ -155,7 +155,7 @@ export const Input = defineComponent<InputProps, InputEmits, keyof InputEmits>(
                 now = now.parent;
             }
 
-            // 应用内边距偏移.
+            // 应用内边距偏移
             const { clientLeft, clientTop } = canvas;
             const trans = new Transform();
             trans.translate(clientLeft, clientTop);

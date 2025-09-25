@@ -19,8 +19,12 @@ import {
 import { Textbox, Tip } from '../components';
 import { GameUI } from '@motajs/system-ui';
 import {
+    ENABLE_RIGHT_STATUS_BAR,
     MAIN_HEIGHT,
     MAIN_WIDTH,
+    MAP_HEIGHT,
+    MAP_WIDTH,
+    RIGHT_STATUS_POS,
     STATUS_BAR_HEIGHT,
     STATUS_BAR_WIDTH
 } from '../shared';
@@ -71,7 +75,7 @@ const MainScene = defineComponent(() => {
     const mainTextboxProps: Props<typeof Textbox> = {
         text: '',
         hidden: true,
-        loc: [0, 330, 480, 150],
+        loc: [0, MAP_HEIGHT - 150, MAIN_WIDTH, 150],
         zIndex: 30,
         fillStyle: '#fff',
         titleFill: 'gold',
@@ -80,7 +84,7 @@ const MainScene = defineComponent(() => {
         winskin: 'winskin2.png',
         interval: 100,
         lineHeight: 4,
-        width: 480
+        width: MAP_WIDTH
     };
 
     const map = shallowRef<LayerGroup>();
@@ -267,10 +271,13 @@ const MainScene = defineComponent(() => {
                 status={leftStatus}
                 hidden={hideStatus.value}
             ></LeftStatusBar>
-            <g-line line={[180, 0, 180, 480]} lineWidth={1} />
+            <g-line
+                line={[STATUS_BAR_WIDTH, 0, STATUS_BAR_WIDTH, MAIN_HEIGHT]}
+                lineWidth={1}
+            />
             <container
                 id="map-draw"
-                loc={[180, 0, 480, 480]}
+                loc={[STATUS_BAR_WIDTH, 0, MAP_WIDTH, MAP_HEIGHT]}
                 zIndex={10}
                 onClick={clickMap}
                 onDown={downMap}
@@ -295,17 +302,20 @@ const MainScene = defineComponent(() => {
                 />
                 <sprite
                     noevent
-                    loc={[0, 0, 480, 480]}
+                    loc={[0, 0, MAP_WIDTH, MAP_HEIGHT]}
                     ref={mapMiscSprite}
                     zIndex={170}
                     render={renderMapMisc}
                 />
             </container>
-            <g-line line={[180 + 480, 0, 180 + 480, 480]} lineWidth={1} />
+            <g-line
+                line={[RIGHT_STATUS_POS, 0, RIGHT_STATUS_POS, MAP_HEIGHT]}
+                lineWidth={1}
+            />
             <RightStatusBar
-                loc={[480 + 180, 0, STATUS_BAR_WIDTH, STATUS_BAR_HEIGHT]}
+                loc={[RIGHT_STATUS_POS, 0, STATUS_BAR_WIDTH, STATUS_BAR_HEIGHT]}
                 status={rightStatus}
-                hidden={hideStatus.value}
+                hidden={hideStatus.value && ENABLE_RIGHT_STATUS_BAR}
             ></RightStatusBar>
             <container
                 loc={[0, 0, MAIN_WIDTH, MAIN_HEIGHT]}
@@ -322,12 +332,17 @@ const MainScene = defineComponent(() => {
                 noevent
             ></g-rect>
             <g-line
-                line={[180, 0, 480 + 180, 0]}
+                line={[STATUS_BAR_WIDTH, 0, RIGHT_STATUS_POS, 0]}
                 hidden={!hideStatus.value}
                 zIndex={100}
             />
             <g-line
-                line={[180, 480, 480 + 180, 480]}
+                line={[
+                    STATUS_BAR_WIDTH,
+                    MAP_HEIGHT,
+                    RIGHT_STATUS_POS,
+                    MAP_HEIGHT
+                ]}
                 hidden={!hideStatus.value}
                 zIndex={100}
             />

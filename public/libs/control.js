@@ -876,39 +876,6 @@ control.prototype.setHeroOpacity = function (
 ////// 设置画布偏移
 control.prototype.setGameCanvasTranslate = function (canvas, x, y) {
     // Deprecated. Use RenderItem.transform instead.
-    var c = core.dom.gameCanvas[canvas];
-    x = x * core.domStyle.scale;
-    y = y * core.domStyle.scale;
-    c.style.transform = 'translate(' + x + 'px,' + y + 'px)';
-    c.style.webkitTransform = 'translate(' + x + 'px,' + y + 'px)';
-    c.style.OTransform = 'translate(' + x + 'px,' + y + 'px)';
-    c.style.MozTransform = 'translate(' + x + 'px,' + y + 'px)';
-    if (main.mode === 'editor' && editor.isMobile) {
-        c.style.transform =
-            'translate(' +
-            (x / core._PX_) * 96 +
-            'vw,' +
-            (y / core._PY_) * 96 +
-            'vw)';
-        c.style.webkitTransform =
-            'translate(' +
-            (x / core._PX_) * 96 +
-            'vw,' +
-            (y / core._PY_) * 96 +
-            'vw)';
-        c.style.OTransform =
-            'translate(' +
-            (x / core._PX_) * 96 +
-            'vw,' +
-            (y / core._PY_) * 96 +
-            'vw)';
-        c.style.MozTransform =
-            'translate(' +
-            (x / core._PX_) * 96 +
-            'vw,' +
-            (y / core._PY_) * 96 +
-            'vw)';
-    }
 };
 
 ////// 加减画布偏移
@@ -3115,13 +3082,11 @@ control.prototype.resize = function () {
         if (!core.domStyle.availableScale.includes(core.domStyle.scale)) {
             core.domStyle.scale = 1;
         }
-        core.dom.gameDraw.style.top = '0';
     } else {
         // 竖屏
         core.domStyle.isVertical = true;
         core.domStyle.scale = window.innerWidth / core._PX_;
         core.domStyle.availableScale = [];
-        core.dom.gameDraw.style.top = '10vh';
     }
 
     if (!core.domStyle.isVertical) {
@@ -3131,11 +3096,6 @@ control.prototype.resize = function () {
         const target = Number((Math.floor(maxScale * 4) / 4).toFixed(2));
         core.domStyle.scale = target - 0.25;
     }
-
-    const pw = (480 + 180 * 2) * core.domStyle.scale;
-    const ph = 480 * core.domStyle.scale;
-    core.dom.gameDraw.style.width = `${pw}px`;
-    core.dom.gameDraw.style.height = `${ph}px`;
 
     this._doResize({});
     this.setToolbarButton();
@@ -3147,54 +3107,7 @@ control.prototype._resize_gameGroup = function (obj) {
 };
 
 control.prototype._resize_canvas = function (obj) {
-    var innerWidth = core._PX_ * core.domStyle.scale + 'px',
-        innerHeight = core._PY_ * core.domStyle.scale + 'px';
-
-    for (var i = 0; i < core.dom.gameCanvas.length; ++i) {
-        core.dom.gameCanvas[i].style.width = innerWidth;
-        core.dom.gameCanvas[i].style.height = innerHeight;
-        var ctx = core.dom.gameCanvas[i].getContext('2d');
-        core.resizeCanvas(ctx, core._PX_, core._PY_);
-    }
-
-    // resize dynamic canvas
-    if (!core.isPlaying()) {
-        for (var name in core.dymCanvas) {
-            var ctx = core.dymCanvas[name],
-                canvas = ctx.canvas;
-            // core.maps._setHDCanvasSize(ctx, parseFloat(canvas.getAttribute('_width')), parseFloat(canvas.getAttribute('_height')));
-            canvas.style.left =
-                parseFloat(canvas.getAttribute('_left')) * core.domStyle.scale +
-                'px';
-            canvas.style.top =
-                parseFloat(canvas.getAttribute('_top')) * core.domStyle.scale +
-                'px';
-            var scale = canvas.getAttribute('_scale') || 1;
-            core.resizeCanvas(
-                canvas,
-                (canvas.width * scale) / core.domStyle.scale,
-                (canvas.height * scale) / core.domStyle.scale
-            );
-        }
-    } else {
-        for (var name in core.dymCanvas) {
-            var ctx = core.dymCanvas[name],
-                canvas = ctx.canvas;
-            canvas.style.width = canvas.width / devicePixelRatio + 'px';
-            canvas.style.height = canvas.height / devicePixelRatio + 'px';
-            canvas.style.left =
-                parseFloat(canvas.getAttribute('_left')) * core.domStyle.scale +
-                'px';
-            canvas.style.top =
-                parseFloat(canvas.getAttribute('_top')) * core.domStyle.scale +
-                'px';
-        }
-    }
-    // resize next
-    main.dom.next.style.width = main.dom.next.style.height =
-        5 * core.domStyle.scale + 'px';
-    main.dom.next.style.borderBottomWidth =
-        main.dom.next.style.borderRightWidth = 4 * core.domStyle.scale + 'px';
+    // Deprecated.
 };
 
 control.prototype._resize_toolBar = function (obj) {

@@ -165,7 +165,7 @@ class GameListener extends EventEmitter<ListenerEvent> {
     constructor() {
         super();
         if (main.replayChecking) return;
-        if (!!window.core) {
+        if (window.core) {
             this.init();
         } else {
             loading.once('coreInit', () => {
@@ -176,84 +176,80 @@ class GameListener extends EventEmitter<ListenerEvent> {
 
     private init() {
         // ----- block
-
-        const data = core.canvas.data.canvas;
-
-        const getBlockLoc = (px: number, py: number, size: number) => {
-            return [
-                Math.floor(((px * 32) / size + core.bigmap.offsetX) / 32),
-                Math.floor(((py * 32) / size + core.bigmap.offsetY) / 32)
-            ];
-        };
-
-        // hover & leave & mouseMove
-        data.addEventListener('mousemove', e => {
-            if (
-                core.status.lockControl ||
-                !core.isPlaying() ||
-                !core.status.floorId
-            )
-                return;
-            this.emit('mouseMove', e);
-            const {
-                x: px,
-                y: py,
-                size
-            } = core.actions._getClickLoc(e.offsetX, e.offsetY);
-            const [bx, by] = getBlockLoc(px, py, size);
-            const blocks = core.getMapBlocksObj();
-            if (this.mouseX !== bx || this.mouseY !== by) {
-                const lastBlock = blocks[`${this.mouseX},${this.mouseY}`];
-                const block = blocks[`${bx},${by}`];
-                if (!!lastBlock) {
-                    this.emit('leaveBlock', lastBlock, e, false);
-                }
-                if (!!block) {
-                    this.emit('hoverBlock', block, e);
-                    this.mouseX = bx;
-                    this.mouseY = by;
-                } else {
-                    this.mouseX = -1;
-                    this.mouseY = -1;
-                }
-            }
-        });
-        data.addEventListener('mouseleave', e => {
-            if (
-                core.status.lockControl ||
-                !core.isPlaying() ||
-                !core.status.floorId
-            )
-                return;
-            const blocks = core.getMapBlocksObj();
-            const lastBlock = blocks[`${this.mouseX},${this.mouseY}`];
-            if (!!lastBlock) {
-                this.emit('leaveBlock', lastBlock, e, true);
-            }
-            this.mouseX = -1;
-            this.mouseY = -1;
-        });
-        // click
-        data.addEventListener('click', e => {
-            if (
-                core.status.lockControl ||
-                !core.isPlaying() ||
-                !core.status.floorId
-            )
-                return;
-            const {
-                x: px,
-                y: py,
-                size
-            } = core.actions._getClickLoc(e.offsetX, e.offsetY);
-            const [bx, by] = getBlockLoc(px, py, size);
-            const blocks = core.getMapBlocksObj();
-            const block = blocks[`${bx},${by}`];
-            if (!!block) {
-                this.emit('clickBlock', block, e);
-            }
-        });
-
+        // const data = core.canvas.data.canvas;
+        // const getBlockLoc = (px: number, py: number, size: number) => {
+        //     return [
+        //         Math.floor(((px * 32) / size + core.bigmap.offsetX) / 32),
+        //         Math.floor(((py * 32) / size + core.bigmap.offsetY) / 32)
+        //     ];
+        // };
+        // // hover & leave & mouseMove
+        // data.addEventListener('mousemove', e => {
+        //     if (
+        //         core.status.lockControl ||
+        //         !core.isPlaying() ||
+        //         !core.status.floorId
+        //     )
+        //         return;
+        //     this.emit('mouseMove', e);
+        //     const {
+        //         x: px,
+        //         y: py,
+        //         size
+        //     } = core.actions._getClickLoc(e.offsetX, e.offsetY);
+        //     const [bx, by] = getBlockLoc(px, py, size);
+        //     const blocks = core.getMapBlocksObj();
+        //     if (this.mouseX !== bx || this.mouseY !== by) {
+        //         const lastBlock = blocks[`${this.mouseX},${this.mouseY}`];
+        //         const block = blocks[`${bx},${by}`];
+        //         if (lastBlock) {
+        //             this.emit('leaveBlock', lastBlock, e, false);
+        //         }
+        //         if (block) {
+        //             this.emit('hoverBlock', block, e);
+        //             this.mouseX = bx;
+        //             this.mouseY = by;
+        //         } else {
+        //             this.mouseX = -1;
+        //             this.mouseY = -1;
+        //         }
+        //     }
+        // });
+        // data.addEventListener('mouseleave', e => {
+        //     if (
+        //         core.status.lockControl ||
+        //         !core.isPlaying() ||
+        //         !core.status.floorId
+        //     )
+        //         return;
+        //     const blocks = core.getMapBlocksObj();
+        //     const lastBlock = blocks[`${this.mouseX},${this.mouseY}`];
+        //     if (lastBlock) {
+        //         this.emit('leaveBlock', lastBlock, e, true);
+        //     }
+        //     this.mouseX = -1;
+        //     this.mouseY = -1;
+        // });
+        // // click
+        // data.addEventListener('click', e => {
+        //     if (
+        //         core.status.lockControl ||
+        //         !core.isPlaying() ||
+        //         !core.status.floorId
+        //     )
+        //         return;
+        //     const {
+        //         x: px,
+        //         y: py,
+        //         size
+        //     } = core.actions._getClickLoc(e.offsetX, e.offsetY);
+        //     const [bx, by] = getBlockLoc(px, py, size);
+        //     const blocks = core.getMapBlocksObj();
+        //     const block = blocks[`${bx},${by}`];
+        //     if (block) {
+        //         this.emit('clickBlock', block, e);
+        //     }
+        // });
         // ----- mouse
     }
 }

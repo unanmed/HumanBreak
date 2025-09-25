@@ -934,8 +934,6 @@ ui.prototype.closePanel = function () {
 ui.prototype.clearUI = function () {
     core.status.boxAnimateObjs = [];
     core.deleteCanvas('_selector');
-    main.dom.next.style.display = 'none';
-    main.dom.next.style.opacity = 1;
     core.clearMap('ui');
     core.setAlpha('ui', 1);
     core.setOpacity('ui', 1);
@@ -1099,7 +1097,7 @@ ui.prototype._getPosition = function (content) {
 
 ////// 绘制系统选择光标
 ui.prototype._drawWindowSelector = function (background, x, y, w, h) {
-    (w = Math.round(w)), (h = Math.round(h));
+    ((w = Math.round(w)), (h = Math.round(h)));
     var ctx = core.ui.createCanvas('_selector', x, y, w, h, 165);
     this._drawSelector(ctx, background, w, h);
 };
@@ -2056,12 +2054,10 @@ ui.prototype._animateUI = function (type, ctx, callback) {
         opacity = 1;
     }
     core.setOpacity(ctx, opacity);
-    core.dom.next.style.opacity = opacity;
     core.status.event.animateUI = setInterval(function () {
         if (type == 'show') opacity += 0.05;
         else opacity -= 0.05;
         core.setOpacity(ctx, opacity);
-        core.dom.next.style.opacity = opacity;
         if (opacity >= 1 || opacity <= 0) {
             clearInterval(core.status.event.animateUI);
             delete core.status.event.animateUI;
@@ -2156,13 +2152,6 @@ ui.prototype.drawTextBox = function (content, config) {
 
     // Step 6: 绘制光标
     if (main.mode == 'play') {
-        main.dom.next.style.display = 'block';
-        main.dom.next.style.borderRightColor =
-            main.dom.next.style.borderBottomColor = core.arrayToRGB(
-                textAttribute.text
-            );
-        main.dom.next.style.top =
-            (vPos.bottom - 20) * core.domStyle.scale + 'px';
         var left = (hPos.left + hPos.right) / 2;
         if (
             posInfo.position == 'up' &&
@@ -2171,7 +2160,6 @@ ui.prototype.drawTextBox = function (content, config) {
             Math.abs(posInfo.px * 32 + 16 - left) < 50
         )
             left = hPos.right - 64;
-        main.dom.next.style.left = left * core.domStyle.scale + 'px';
     }
     return config;
 };
