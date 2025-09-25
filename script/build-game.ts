@@ -399,7 +399,7 @@ async function buildGame() {
     if (level === ClientDataLevel.Error) {
         logProgress(2, ProgressStatus.Fail);
         process.stderr.write(
-            `客户端似乎引用了数据端内容，请仔细检查后再构建！`
+            `数据端似乎引用了客户端内容，请仔细检查后再构建！`
         );
         process.exit(1);
     }
@@ -647,6 +647,19 @@ async function buildGame() {
         process.stdout.write(
             `⚠️   压缩包大于 100M，可能导致发塔困难，请考虑降低塔的大小\r\n`
         );
+        const suggections: string[] = [];
+        if (dataObject.main.bgms.some(v => !v.endsWith('opuw'))) {
+            suggections.push(`将 BGM 和音效换用 opus 格式`);
+        }
+        if (dataObject.main.images.some(v => !v.endsWith('webp'))) {
+            suggections.push(`将图片换用无损 webp 格式`);
+        }
+        if (suggections.length > 0) {
+            process.stdout.write(`降低压缩包体积的可能方案：\r\n`);
+            suggections.forEach((v, i) => {
+                process.stdout.write(`${i + 1}. ${v}\r\n`);
+            });
+        }
     }
     process.stdout.write(`压缩包大小：${formatSize(zipSize)}\r\n`);
     process.stdout.write(`源码大小：${formatSize(sourceSize)}\r\n`);
