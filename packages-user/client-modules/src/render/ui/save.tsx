@@ -69,8 +69,8 @@ const saveBtnProps = {
 } satisfies SetupComponentOptions<SaveItemProps>;
 
 export const SaveItem = defineComponent<SaveItemProps>(props => {
-    const font = new Font('normal', 18);
-    const statusFont = new Font('normal', 14);
+    const font = Font.defaults({ size: 18 });
+    const statusFont = Font.defaults({ size: 14 });
 
     const w = computed(() => props.loc[2] ?? 200);
     const h = computed(() => props.loc[3] ?? 200);
@@ -92,6 +92,11 @@ export const SaveItem = defineComponent<SaveItemProps>(props => {
             const def = core.formatBigNumber(hero.def);
             return `${hp}/${atk}/${def}`;
         }
+    });
+    const timeText = computed(() => {
+        if (!props.data) return '';
+        const date = new Date(props.data.data.time);
+        return date.toLocaleString();
     });
 
     const strokeStyle = computed(() => {
@@ -115,8 +120,8 @@ export const SaveItem = defineComponent<SaveItemProps>(props => {
             <text
                 text={name.value}
                 font={font}
-                loc={[w.value / 2, SAVE_ITEM_TOP - 4]}
-                anc={[0.5, 1]}
+                loc={[w.value / 2, 0]}
+                anc={[0.5, 0]}
             />
             <g-rect
                 loc={imgLoc.value}
@@ -143,7 +148,14 @@ export const SaveItem = defineComponent<SaveItemProps>(props => {
                 text={statusText.value}
                 fillStyle="yellow"
                 font={statusFont}
-                loc={[w.value / 2, h.value - SAVE_ITEM_DOWN + 2]}
+                loc={[w.value / 2, h.value - SAVE_ITEM_DOWN]}
+                anc={[0.5, 0]}
+            />
+            <text
+                text={timeText.value}
+                fillStyle="yellow"
+                font={statusFont}
+                loc={[w.value / 2, h.value - SAVE_ITEM_DOWN + 12]}
                 anc={[0.5, 0]}
             />
         </container>

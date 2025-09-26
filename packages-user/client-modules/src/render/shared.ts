@@ -1,4 +1,5 @@
 import { ElementLocator } from '@motajs/render-core';
+import { Font } from '@motajs/render-style';
 
 // 本文件为 UI 配置文件，你可以修改下面的每个常量来控制 UI 的显示参数，每个常量都有注释说明
 
@@ -60,15 +61,17 @@ export const CENTER_LOC: ElementLocator = [
 
 /** 弹框的宽度，使用在内置 UI 与组件中，包括确认框、选择框、等待框等 */
 export const POP_BOX_WIDTH = MAP_WIDTH / 2;
+/** 默认字体 */
+export const DEFAULT_FONT = new Font('normal', 18);
 
 //#region 存档界面
 
 /** 存档缩略图尺寸 */
-export const SAVE_ITEM_SIZE = 150;
+export const SAVE_ITEM_SIZE = MAP_BLOCK_WIDTH * 10;
 /** 单个存档上方显示第几号存档的高度 */
 export const SAVE_ITEM_TOP = 24;
 /** 单个存档下方显示这个存档信息的高度 */
-export const SAVE_ITEM_DOWN = 16;
+export const SAVE_ITEM_DOWN = 24;
 /** 单个存档高度，包括存档下方的信息 */
 export const SAVE_ITEM_HEIGHT = SAVE_ITEM_SIZE + SAVE_ITEM_TOP + SAVE_ITEM_DOWN;
 /** 存档间距 */
