@@ -14,6 +14,10 @@ export const MAP_BLOCK_HEIGHT = 15;
 export const MAP_WIDTH = CELL_SIZE * MAP_BLOCK_WIDTH;
 /** 地图像素高度 */
 export const MAP_HEIGHT = CELL_SIZE * MAP_BLOCK_HEIGHT;
+/** 地图宽度的一半 */
+export const HALF_MAP_WIDTH = MAP_WIDTH / 2;
+/** 地图高度的一半 */
+export const HALF_MAP_HEIGHT = MAP_HEIGHT / 2;
 
 //#region 状态栏
 

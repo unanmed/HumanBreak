@@ -41,7 +41,8 @@ import { useKey } from '../use';
 import {
     ENABLE_RIGHT_STATUS_BAR,
     FULL_LOC,
-    HALF_WIDTH,
+    HALF_MAP_WIDTH,
+    HALF_STATUS_WIDTH,
     MAIN_HEIGHT,
     MAP_HEIGHT,
     MAP_WIDTH,
@@ -69,6 +70,12 @@ export const ViewMap = defineComponent<ViewMapProps>(props => {
         new LayerGroupHalo(),
         new LayerGroupAnimate()
     ];
+
+    const restHeight = STATUS_BAR_HEIGHT - 292;
+    const col = restHeight / 4;
+    const loc1: ElementLocator = [HALF_STATUS_WIDTH, col * 1 + 292];
+    const loc2: ElementLocator = [HALF_STATUS_WIDTH, col * 2 + 292];
+    const loc3: ElementLocator = [HALF_STATUS_WIDTH, col * 3 + 292];
 
     const rightFont = new Font(Font.defaultFamily, 15);
 
@@ -211,6 +218,28 @@ export const ViewMap = defineComponent<ViewMapProps>(props => {
         camera.scale(scale);
         camera.translate(-cx, -cy);
         group.value?.update();
+    };
+
+    //#region 事件监听
+
+    const clickTop = (ev: IActionEvent) => {
+        const col = MAP_WIDTH / 3;
+        if (ev.offsetX < col * 2) {
+            changeFloor(1);
+        } else {
+            resetCamera();
+        }
+    };
+
+    const clickBottom = (ev: IActionEvent) => {
+        const col = MAP_WIDTH / 3;
+        if (ev.offsetX < col) {
+            openBook();
+        } else if (ev.offsetX < col * 2) {
+            changeFloor(-1);
+        } else {
+            fly();
+        }
     };
 
     //#region 地图交互
@@ -394,7 +423,7 @@ export const ViewMap = defineComponent<ViewMapProps>(props => {
                 cursor="pointer"
                 onEnter={enterTop}
                 onLeave={leaveTop}
-                onClick={() => changeFloor(1)}
+                onClick={clickTop}
             />
             <sprite
                 loc={[STATUS_BAR_WIDTH, MAP_HEIGHT - 64, MAP_WIDTH, 64]}
@@ -404,19 +433,40 @@ export const ViewMap = defineComponent<ViewMapProps>(props => {
                 cursor="pointer"
                 onEnter={enterBottom}
                 onLeave={leaveBottom}
-                onClick={() => changeFloor(-1)}
+                onClick={clickBottom}
             />
             <text
                 text="上移地图"
-                loc={[HALF_WIDTH, 24]}
+                loc={[HALF_MAP_WIDTH + STATUS_BAR_WIDTH, 24]}
                 anc={[0.5, 0.5]}
                 zIndex={20}
                 noevent
             />
             <text
                 text="下移地图"
-                loc={[HALF_WIDTH, MAP_HEIGHT - 24]}
+                loc={[HALF_MAP_WIDTH + STATUS_BAR_WIDTH, MAP_HEIGHT - 24]}
                 anc={[0.5, 0.5]}
+                zIndex={20}
+                noevent
+            />
+            <text
+                text="「 怪物手册 」"
+                loc={[32 + STATUS_BAR_WIDTH, MAP_HEIGHT - 24]}
+                anc={[0, 0.5]}
+                zIndex={20}
+                noevent
+            />
+            <text
+                text="「 传送至此 」"
+                loc={[RIGHT_STATUS_POS - 32, MAP_HEIGHT - 24]}
+                anc={[1, 0.5]}
+                zIndex={20}
+                noevent
+            />
+            <text
+                text="「 重置视角 」"
+                loc={[RIGHT_STATUS_POS - 32, 24]}
+                anc={[1, 0.5]}
                 zIndex={20}
                 noevent
             />
@@ -484,21 +534,21 @@ export const ViewMap = defineComponent<ViewMapProps>(props => {
                 <g-line line={[12, 292, 168, 292]} lineWidth={1} />
                 <text
                     text="「 怪物手册 」"
-                    loc={[90, 330]}
+                    loc={loc1}
                     anc={[0.5, 0.5]}
                     cursor="pointer"
                     onClick={openBook}
                 />
                 <text
                     text="「 传送至此 」"
-                    loc={[90, 380]}
+                    loc={loc2}
                     anc={[0.5, 0.5]}
                     cursor="pointer"
                     onClick={fly}
                 />
                 <text
                     text="「 重置视角 」"
-                    loc={[90, 430]}
+                    loc={loc3}
                     anc={[0.5, 0.5]}
                     cursor="pointer"
                     onClick={resetCamera}
