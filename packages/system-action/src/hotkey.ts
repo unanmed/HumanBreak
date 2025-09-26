@@ -52,6 +52,7 @@ export interface HotkeyData extends Required<RegisterHotkeyData> {
 type HotkeyFunc = (
     id: string,
     code: KeyCode,
+    assist: number,
     ev: KeyboardEvent
 ) => void | '@void';
 
@@ -224,6 +225,30 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
     }
 
     /**
+     * 判断指定按键和辅助按键是否可能会触发给定 id 的按键操作
+     * @param key 按键
+     * @param assist 辅助按键
+     * @param id 注册的按键操作 id
+     */
+    willEmit(key: KeyCode, assist: number, id: string) {
+        const emittable = this.keyMap.get(key);
+        if (!emittable) return false;
+        const { ctrl, shift, alt } = unwarpBinary(assist);
+        return emittable.some(v => {
+            if (
+                v.id === id &&
+                v.ctrl === ctrl &&
+                v.shift === shift &&
+                v.alt === alt
+            ) {
+                return true;
+            } else {
+                return false;
+            }
+        });
+    }
+
+    /**
      * 触发一个按键
      * @param key 要触发的按键
      * @param assist 辅助按键，三位二进制数据，从低到高依次为`ctrl` `shift` `alt`
@@ -256,12 +281,12 @@ export class Hotkey extends EventEmitter<HotkeyEvent> {
                 if (!data) return;
 
                 if (type === 'up' && data.onUp) {
-                    data.onUp(v.id, key, ev);
+                    data.onUp(v.id, key, assist, ev);
                     emitted = true;
                     return;
                 }
                 if (!this.canEmit(v.id, key, type, data)) return;
-                const res = data.func(v.id, key, ev);
+                const res = data.func(v.id, key, assist, ev);
                 if (res !== '@void') emitted = true;
             }
         });
@@ -453,12 +478,12 @@ document.addEventListener('keyup', e => {
         }
     } else {
         // polyfill样板
-        if (main.dom.inputDiv.style.display == 'block') {
-            if (e.keyCode == 13) {
+        if (main.dom.inputDiv.style.display === 'block') {
+            if (e.keyCode === 13) {
                 setTimeout(function () {
                     main.dom.inputYes.click();
                 }, 50);
-            } else if (e.keyCode == 27) {
+            } else if (e.keyCode === 27) {
                 setTimeout(function () {
                     main.dom.inputNo.click();
                 }, 50);

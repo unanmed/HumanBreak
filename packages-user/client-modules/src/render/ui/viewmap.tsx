@@ -112,7 +112,13 @@ export const ViewMap = defineComponent<ViewMapProps>(props => {
         .realize('@viewMap_book', () => openBook())
         .realize('@viewMap_fly', () => fly())
         .realize('@viewMap_reset', () => resetCamera())
-        .realize('confirm', () => close());
+        .realize('confirm', () => close())
+        .realize('exit', (_, code, assist) => {
+            // 如果按键不能触发怪物手册，则关闭界面，因为怪物手册和退出默认使用同一个按键，需要特判
+            if (!key.willEmit(code, assist, 'book')) {
+                props.controller.close(props.instance);
+            }
+        });
 
     //#region 功能函数
 
