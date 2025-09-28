@@ -83,7 +83,7 @@ const MainScene = defineComponent(() => {
         font: new Font('normal'),
         titleFont: new Font('normal', 20, 'px', 700),
         winskin: 'winskin2.png',
-        interval: 100,
+        interval: 30,
         lineHeight: 4,
         width: MAP_WIDTH
     };

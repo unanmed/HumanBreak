@@ -1579,7 +1579,15 @@ events.prototype._action_text = function (data) {
     loc[3] ??= 200;
     const { x = loc[0], y = loc[1], width = loc[2], height = loc[3] } = data;
     store.show();
-    store.modify({ title, icon, loc: [x, y, width, height], width });
+    store.modify({
+        title,
+        icon,
+        x,
+        y,
+        width,
+        height,
+        loc: [x, y, width, height]
+    });
     store.setText(text);
     core.events.nowTextbox = textbox;
 };
@@ -1600,7 +1608,15 @@ events.prototype._action_autoText = function (data) {
     loc[3] ??= 200;
     const { x = loc[0], y = loc[1], width = loc[2], height = loc[3] } = data;
     store.show();
-    store.modify({ title, icon, loc: [x, y, width, height], width });
+    store.modify({
+        title,
+        icon,
+        x,
+        y,
+        width,
+        height,
+        loc: [x, y, width, height]
+    });
     store.setText(text);
 
     setTimeout(() => {
@@ -1623,10 +1639,11 @@ events.prototype._action__label = function (data, x, y, prefix) {
 };
 
 events.prototype._action_setText = function (data) {
-    const isNil = value => value !== null && value !== void 0;
+    const isNil = value => value === null || value === void 0;
     const { textbox = 'main-textbox' } = data;
     const Store = Mota.require('@user/client-modules').TextboxStore;
-    const Font = Mota.require('@motajs/render-vue').Font;
+    const { TextAlign, WordBreak } = Mota.require('@user/client-modules');
+    const Font = Mota.require('@motajs/render-style').Font;
     const store = Store.get(textbox);
     if (!store) {
         core.doAction();
@@ -1651,6 +1668,10 @@ events.prototype._action_setText = function (data) {
     });
     // config
     const config = {
+        x,
+        y,
+        width,
+        height,
         loc: newLoc,
         font: newFont,
         keepLast: data.keepLast,
@@ -1664,15 +1685,36 @@ events.prototype._action_setText = function (data) {
         backColor: data.backColor,
         winskin: data.winskin,
         padding: data.padding,
-        titleFill: isNil(data.titleFill),
-        titleStroke: !!data.titleStroke,
+        titleFill: isNil(data.titleFill) ? 'gold' : 'transparent',
+        titleStroke: data.titleStroke ? 'black' : 'transparent',
         titlePadding: data.titlePadding,
-        textAlign: data.textAlign,
-        wordBreak: data.wordBreak,
         ignoreLineStart: data.ignoreLineStart,
         ignoreLineEnd: data.ignoreLineEnd,
         breakChars: data.breakChars
     };
+    switch (data.textAlign) {
+        case 'left':
+            config.textAlign = TextAlign.Left;
+            break;
+        case 'center':
+            config.textAlign = TextAlign.Center;
+            break;
+        case 'right':
+            config.textAlign = TextAlign.Right;
+            break;
+    }
+    switch (data.wordBreak) {
+        case 'none':
+            config.wordBreak = WordBreak.None;
+            break;
+        case 'space':
+            config.wordBreak = WordBreak.Space;
+            break;
+        case 'all':
+            config.wordBreak = WordBreak.All;
+            break;
+    }
+
     store.modify(config);
 
     core.doAction();

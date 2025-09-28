@@ -1044,7 +1044,7 @@ setText_s
 tooltip : setText：设置文本的属性,颜色为RGB三元组或RGBA四元组,打字间隔为剧情文字添加的时间间隔,为整数或不填，字符间距为字符之间的距离，为整数或不填。
 helpUrl : /_docs/#/instruction
 previewBlock : true
-default : ["main-textbox","","","","","","","",false,false,"","","",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"",true,false,"",'rgba(255,255,255,1)',"","",true,false,"",'null','null',"","",""]
+default : ["main-textbox","","","","","","","",false,false,"","","",'rgba(255,255,255,1)',"",'rgba(0,0,0,1)',"",true,false,"",'rgba(0,0,0,0.9)',"","",true,false,"",'null','null',"","",""]
 Bool_0 = Bool_0 ? (', "fontItalic": '+Bool_0) : '';
 Bool_1 = Bool_1 ? (', "keepLast": '+Bool_1) : '';
 Bool_2 = !Bool_2 ? (', "fill": '+Bool_2) : '';
@@ -1057,7 +1057,7 @@ IntString_2 = IntString_2 ? (', "width": '+IntString_2) : '';
 IntString_3 = IntString_3 ? (', "height": '+IntString_3) : '';
 IntString_4 = IntString_4 ? (', "fontSize": '+IntString_4) : '';
 IntString_5 = IntString_5? (', "fontWeight": ' + IntString_5) : '';
-IntString_6 = IntString_6 ? (', " interval": '+IntString_6) : '';
+IntString_6 = IntString_6 ? (', "interval": '+IntString_6) : '';
 IntString_7 = IntString_7 ? (', "lineHeight": ' + IntString_7) : '';
 IntString_8 = IntString_8? (', "strokeWidth": ' + IntString_8) : '';
 IntString_9 = IntString_9? (', "padding": ' + IntString_9) : '';

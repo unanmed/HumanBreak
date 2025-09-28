@@ -66,7 +66,7 @@ export class Icon extends RenderItem<EIconEvent> implements IAnimateFrame {
      * 设置图标
      * @param id 图标id
      */
-    setIcon(id: AllIds | AllNumbers) {
+    setIcon(id: AllIdsWithNone | AllNumbers) {
         if (id === 0 || id === 'none') {
             this.renderable = void 0;
             return;

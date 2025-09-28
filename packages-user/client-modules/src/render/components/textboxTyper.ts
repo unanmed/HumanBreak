@@ -336,6 +336,12 @@ export class TextContentTyper extends EventEmitter<TextContentTyperEvent> {
                 this.config[key] = value;
             }
         }
+        if (config.font) {
+            this.config.fontFamily = config.font.family;
+            this.config.fontSize = config.font.size;
+            this.config.fontItalic = config.font.italic;
+            this.config.fontWeight = config.font.weight;
+        }
         this.parser.setStatus({
             fillStyle: this.config.fillStyle,
             fontFamily: this.config.fontFamily,
@@ -528,7 +534,8 @@ export class TextContentTyper extends EventEmitter<TextContentTyperEvent> {
             return;
         }
         this.emit('typeStart');
-        this.lastTypeTime = Date.now();
+        // 减去间隔是为了第一个字可以立刻打出来，不然看起来有延迟
+        this.lastTypeTime = Date.now() - this.config.interval - 1;
         this.typing = true;
     }
 
@@ -628,11 +635,11 @@ export class TextContentParser {
      * @param st 要设置为的状态，不填的表示不变
      */
     setStatus(st: Partial<ParserStatus>) {
-        if (!isNil(st.fillStyle)) this.status.fillStyle = st.fillStyle;
-        if (!isNil(st.fontSize)) this.status.fontSize = st.fontSize;
-        if (!isNil(st.fontFamily)) this.status.fontFamily = st.fontFamily;
-        if (!isNil(st.fontItalic)) this.status.fontItalic = st.fontItalic;
-        if (!isNil(st.fontWeight)) this.status.fontWeight = st.fontWeight;
+        if (!isNil(st.fillStyle)) this.initStatus.fillStyle = st.fillStyle;
+        if (!isNil(st.fontSize)) this.initStatus.fontSize = st.fontSize;
+        if (!isNil(st.fontFamily)) this.initStatus.fontFamily = st.fontFamily;
+        if (!isNil(st.fontItalic)) this.initStatus.fontItalic = st.fontItalic;
+        if (!isNil(st.fontWeight)) this.initStatus.fontWeight = st.fontWeight;
     }
 
     /**
@@ -856,6 +863,7 @@ export class TextContentParser {
         this.font = this.buildFont();
         this.resolved = '';
         this.wordBreak = [0];
+        this.wordBreakRule = this.config.wordBreak;
         this.nodePointer = 0;
         this.blockPointer = 0;
         this.nowNode = 0;
@@ -975,7 +983,6 @@ export class TextContentParser {
         }
 
         this.addTextNode(text.length, false);
-
         return this.splitLines(width);
     }
 
@@ -1198,7 +1205,11 @@ export class TextContentParser {
             this.newLine();
             const nextStart = this.wordBreak[index];
             const nextEnd = this.wordBreak[end];
-            this.bsStart = index;
+            if (index === this.bsStart) {
+                this.bsStart = this.bsStart + 1;
+            } else {
+                this.bsStart = index;
+            }
             this.bsEnd = end;
             const metrics = this.measure(node, nextStart, nextEnd);
             if (metrics.width < width) {
@@ -1338,11 +1349,9 @@ export class TextContentParser {
             for (let i = 0; i < nodes.length; i++) {
                 const node = nodes[i];
                 if (node.type === TextContentType.Text) {
-                    this.wordBreak = [node.text.length];
+                    this.wordBreak = [0, node.text.length];
                 }
-                const pointer =
-                    node.type === TextContentType.Text ? node.text.length : 1;
-                const block = this.generateBlock(node, pointer);
+                const block = this.generateBlock(node, 1);
                 this.pushBlock(block, 1);
             }
             this.newLine();

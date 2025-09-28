@@ -174,6 +174,8 @@ export const TextContent = defineComponent<
     const renderContent = (canvas: MotaOffscreenCanvas2D) => {
         const ctx = canvas.ctx;
         ctx.textBaseline = 'top';
+        ctx.lineWidth = props.strokeWidth ?? 2;
+        ctx.lineJoin = 'round';
         for (const data of renderable) {
             if (data.cut) break;
             switch (data.type) {
@@ -182,13 +184,14 @@ export const TextContent = defineComponent<
                     ctx.fillStyle = data.fillStyle;
                     ctx.strokeStyle = data.strokeStyle;
                     ctx.font = data.font;
+
                     const text = data.text.slice(0, data.pointer);
 
-                    if (props.fill ?? true) {
-                        ctx.fillText(text, data.x, data.y);
-                    }
                     if (props.stroke) {
                         ctx.strokeText(text, data.x, data.y);
+                    }
+                    if (props.fill ?? true) {
+                        ctx.fillText(text, data.x, data.y);
                     }
                     break;
                 }
@@ -250,7 +253,7 @@ export interface TextboxProps extends TextContentProps, DefaultProps {
     /** 标题文字与边框间的距离，默认为4 */
     titlePadding?: number;
     /** 图标 */
-    icon?: AllIds;
+    icon?: AllIdsWithNone;
     /** 最大宽度 */
     width: number;
 }
@@ -408,8 +411,8 @@ export const Textbox = defineComponent<
             titleElement.value?.requestBeforeFrame(() => {
                 if (titleElement.value) {
                     const { width, height } = titleElement.value;
-                    tw.value = width + data.padding! * 2;
-                    th.value = height + data.padding! * 2;
+                    tw.value = width + data.titlePadding! * 2;
+                    th.value = height + data.titlePadding! * 2;
                 }
             });
         });
@@ -481,7 +484,7 @@ export const Textbox = defineComponent<
             id={props.id}
             hidden={hidden.value}
             alpha={data.alpha}
-            loc={props.loc}
+            loc={data.loc}
         >
             {data.title && (
                 <container zIndex={10} loc={[0, 0, tw.value, th.value]}>
@@ -502,6 +505,7 @@ export const Textbox = defineComponent<
                         fillStyle={data.titleFill}
                         strokeStyle={data.titleStroke}
                         font={data.titleFont}
+                        strokeWidth={2}
                     ></text>
                 </container>
             )}
@@ -520,7 +524,7 @@ export const Textbox = defineComponent<
                 ></g-rect>
             )}
             {hasIcon.value && (
-                <icon icon={data.icon!} loc={iconLoc.value} animate />
+                <icon icon={data.icon as AllIds} loc={iconLoc.value} animate />
             )}
             {hasIcon.value && (
                 <g-rect

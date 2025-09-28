@@ -52,6 +52,7 @@ export class Text extends RenderItem<ETextEvent> {
         ctx.strokeStyle = this.strokeStyle ?? 'transparent';
         ctx.font = this.font.string();
         ctx.lineWidth = this.strokeWidth;
+        ctx.lineJoin = 'round';
 
         if (this.strokeStyle) {
             ctx.strokeText(this.text, stroke, this.descent + stroke + SAFE_PAD);
