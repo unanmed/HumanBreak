@@ -528,9 +528,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "checkboxSet",
 					"_checkboxSet": {
 						"prefix": [
-							"楼层",
-							"名字",
-							"<br>等级",
+							"等级",
 							"血限",
 							"<br>生命",
 							"魔力",
@@ -540,16 +538,12 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"金币",
 							"<br>经验",
 							"升级",
-							"<br>升级扣除模式",
 							"<br>钥匙",
 							"绿钥",
 							"<br>破炸",
-							"负面",
-							"<br>技能"
+							"负面"
 						],
 						"key": [
-							"enableFloor",
-							"enableName",
 							"enableLv",
 							"enableHPMax",
 							"enableHP",
@@ -560,12 +554,10 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"enableMoney",
 							"enableExp",
 							"enableLevelUp",
-							"levelUpLeftMode",
 							"enableKeys",
 							"enableGreenKey",
 							"enablePZF",
-							"enableDebuff",
-							"enableSkill"
+							"enableDebuff"
 						]
 					},
 					"_data": "状态栏显示项"
