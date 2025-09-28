@@ -1,7 +1,6 @@
 import { DefaultProps, ElementLocator, Font } from '@motajs/render';
 import { computed, defineComponent, ref } from 'vue';
 import {
-    DanmakuIcon,
     DoubleArrow,
     NumpadIcon,
     PauseIcon,
@@ -12,7 +11,7 @@ import {
     StepForward,
     ViewMapIcon
 } from '../components/icons';
-import { getVitualKeyOnce, openDanmakuPoster } from '@motajs/legacy-ui';
+import { getVitualKeyOnce } from '@motajs/legacy-ui';
 import { gameKey } from '@motajs/system-action';
 import { generateKeyboardEvent } from '@motajs/system-action';
 import { transitioned } from '../use';
@@ -113,7 +112,6 @@ export const PlayingToolbar = defineComponent<
     const view = () => {
         openViewMap(mainUIController, FULL_LOC);
     };
-    const danmaku = () => requestAnimationFrame(openDanmakuPoster);
     const replay = () => core.ui._drawReplay();
     const settings = () => {
         const loc = CENTER_LOC.slice() as ElementLocator;
@@ -136,7 +134,6 @@ export const PlayingToolbar = defineComponent<
             <RetweetIcon loc={ic(4, 1)} strokeStyle="#eee" onClick={redo} />
             <NumpadIcon loc={ic(0, 2)} strokeStyle="#eee" onClick={numpad} />
             <ViewMapIcon loc={ic(1, 2)} strokeStyle="#eee" onClick={view} />
-            <DanmakuIcon loc={ic(2, 2)} strokeStyle="#eee" onClick={danmaku} />
             <ReplayIcon loc={ic(3, 2)} strokeStyle="#eee" onClick={replay} />
             <text text="R" loc={middle(3, 2)} font={iconFont} noevent />
             <image image={setIcon} loc={im(4, 2)} noanti onClick={settings} />
