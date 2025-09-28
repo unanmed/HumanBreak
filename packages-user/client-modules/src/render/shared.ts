@@ -29,7 +29,7 @@ export const STATUS_BAR_HEIGHT = 32 * MAP_BLOCK_HEIGHT;
 /** 右侧状态栏的横坐标 */
 export const RIGHT_STATUS_POS = STATUS_BAR_WIDTH + MAP_WIDTH;
 /** 是否启用右侧状态栏 */
-export const ENABLE_RIGHT_STATUS_BAR = true;
+export const ENABLE_RIGHT_STATUS_BAR = false;
 /** 状态栏数量，启用右侧状态栏为两个，不启用为一个 */
 export const STATUS_BAR_COUNT = ENABLE_RIGHT_STATUS_BAR ? 2 : 1;
 /** 状态栏宽度的一半 */

@@ -108,14 +108,25 @@ const MainScene = defineComponent(() => {
     });
     const leftStatus: ILeftHeroStatus = reactive({
         hp: 0,
+        hpmax: 0,
+        mana: 0,
+        manamax: 0,
         atk: 0,
         def: 0,
         mdef: 0,
         money: 0,
         exp: 0,
+        up: 0,
         yellowKey: 0,
         blueKey: 0,
         redKey: 0,
+        greenKey: 0,
+        pickaxe: 0,
+        bomb: 0,
+        centerFly: 0,
+        poison: false,
+        weak: false,
+        curse: false,
         floor: 'MT0',
         lv: '',
         replay: replayStatus
@@ -132,13 +143,24 @@ const MainScene = defineComponent(() => {
         const hero = core.status.hero;
         leftStatus.atk = getHeroStatusOn('atk');
         leftStatus.hp = getHeroStatusOn('hp');
+        leftStatus.hpmax = getHeroStatusOn('hpmax');
+        leftStatus.mana = getHeroStatusOn('mana');
+        leftStatus.manamax = getHeroStatusOn('manamax');
         leftStatus.def = getHeroStatusOn('def');
         leftStatus.mdef = getHeroStatusOn('mdef');
         leftStatus.money = getHeroStatusOn('money');
-        leftStatus.exp = core.getNextLvUpNeed() ?? 0;
+        leftStatus.exp = getHeroStatusOn('exp');
+        leftStatus.up = core.getNextLvUpNeed() ?? 0;
         leftStatus.yellowKey = core.itemCount('yellowKey');
         leftStatus.blueKey = core.itemCount('blueKey');
         leftStatus.redKey = core.itemCount('redKey');
+        leftStatus.greenKey = core.itemCount('greenKey');
+        leftStatus.pickaxe = core.itemCount('pickaxe');
+        leftStatus.bomb = core.itemCount('bomb');
+        leftStatus.centerFly = core.itemCount('centerFly');
+        leftStatus.poison = core.getFlag('poison', true);
+        leftStatus.weak = core.getFlag('weak', true);
+        leftStatus.curse = core.getFlag('curse', true);
         leftStatus.floor = core.status.floorId;
         leftStatus.lv = core.getLvName(hero.lv);
 
