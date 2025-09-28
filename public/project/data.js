@@ -803,16 +803,12 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 	},
 	"flags": {
 		"statusBarItems": [
-			"enableFloor",
-			"enableLv",
 			"enableHP",
 			"enableAtk",
 			"enableDef",
 			"enableMDef",
 			"enableMoney",
 			"enableExp",
-			"enableLevelUp",
-			"levelUpLeftMode",
 			"enableKeys"
 		],
 		"flyNearStair": false,
@@ -836,7 +832,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"enableRouteFolding": true,
 		"disableShopOnDamage": false,
 		"blurFg": true,
-		"extendToolbar": true,
+		"extendToolbar": false,
 		"enableEnemyPoint": null,
 		"autoScale": true
 	}
