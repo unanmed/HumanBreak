@@ -12,12 +12,7 @@ import { transitionedColor } from '../use';
 import { linear } from 'mutate-animate';
 import { Scroll } from '../components';
 import { getArea, MinimapDrawer } from '@motajs/legacy-ui';
-import {
-    NumpadToolbar,
-    PlayingToolbar,
-    ReplayingStatus,
-    ReplayingToolbar
-} from './toolbar';
+import { MixedToolbar, ReplayingStatus } from './toolbar';
 import { HeroSkill } from '@user/data-state';
 import { openViewMap } from './viewmap';
 import { mainUIController } from './controller';
@@ -55,8 +50,6 @@ export interface IRightHeroStatus {
     springCount: number;
     /** 当前楼层 */
     floor: FloorIds;
-    /** 是否正在录像播放 */
-    replaying: boolean;
     /** 录像播放状态 */
     replayStatus: ReplayingStatus;
     /** 极昼永夜 */
@@ -216,11 +209,6 @@ export const RightStatusBar = defineComponent<StatusBarProps<IRightHeroStatus>>(
         const font2 = new Font('normal', 16);
 
         const minimap = ref<Sprite>();
-        const inNumpad = ref(false);
-
-        const onNumpad = () => {
-            inNumpad.value = !inNumpad.value;
-        };
 
         const s = p.status;
         const skill = computed(() =>
@@ -395,22 +383,10 @@ export const RightStatusBar = defineComponent<StatusBarProps<IRightHeroStatus>>(
                         lineWidth={1}
                         zIndex={-20}
                     ></g-line>
-                    {inNumpad.value ? (
-                        <NumpadToolbar
-                            loc={[0, 367, 180, 113]}
-                            onNumpad={onNumpad}
-                        />
-                    ) : s.replaying ? (
-                        <ReplayingToolbar
-                            loc={[0, 367, 180, 113]}
-                            status={s.replayStatus}
-                        />
-                    ) : (
-                        <PlayingToolbar
-                            loc={[0, 367, 180, 113]}
-                            onNumpad={onNumpad}
-                        />
-                    )}
+                    <MixedToolbar
+                        loc={[0, 367, 180, 113]}
+                        status={s.replayStatus}
+                    />
                 </container>
             );
         };

@@ -117,6 +117,7 @@ const MainScene = defineComponent(() => {
         magicDef: 0
     });
     const replayStatus: ReplayingStatus = reactive({
+        replaying: false,
         playing: false,
         speed: 1,
         played: 0,
@@ -129,7 +130,6 @@ const MainScene = defineComponent(() => {
         jumpCount: 0,
         springCount: 0,
         floor: 'MT0',
-        replaying: false,
         replayStatus,
         night: 0
     });
@@ -161,8 +161,8 @@ const MainScene = defineComponent(() => {
         rightStatus.skillDesc = HeroSkill.getSkillDesc();
         rightStatus.night = NightSpecial.getNight(floor);
         rightStatus.floor = floor;
-        rightStatus.replaying = core.isReplaying();
         const { pausing, speed, toReplay, totalList } = core.status.replay;
+        replayStatus.replaying = core.isReplaying();
         replayStatus.playing = !pausing;
         replayStatus.speed = speed;
         replayStatus.played = totalList.length - toReplay.length;

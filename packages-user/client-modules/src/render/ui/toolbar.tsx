@@ -145,6 +145,8 @@ export const PlayingToolbar = defineComponent<
 }, toolbarProps);
 
 export interface ReplayingStatus {
+    /** 是否处在录像播放状态 */
+    replaying: boolean;
     /** 是否正在播放 */
     playing: boolean;
     /** 录像播放速度 */
@@ -378,3 +380,20 @@ export const NumpadToolbar = defineComponent<
         </container>
     );
 }, toolbarProps);
+
+export const MixedToolbar = defineComponent<ReplayingProps>(props => {
+    const inNumpad = ref(false);
+
+    const onNumpad = () => {
+        inNumpad.value = !inNumpad.value;
+    };
+
+    return () =>
+        inNumpad.value ? (
+            <NumpadToolbar loc={props.loc} onNumpad={onNumpad} />
+        ) : props.status.replaying ? (
+            <ReplayingToolbar loc={props.loc} status={props.status} />
+        ) : (
+            <PlayingToolbar loc={props.loc} onNumpad={onNumpad} />
+        );
+}, replayingProps);
