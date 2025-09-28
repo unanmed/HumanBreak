@@ -1,21 +1,16 @@
 import { GameUI, SetupComponentOptions } from '@motajs/system-ui';
-import { computed, defineComponent, ref, watch } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 import { TextContent } from '../components';
+import { DefaultProps, ElementLocator, Font } from '@motajs/render';
 import {
-    DefaultProps,
-    ElementLocator,
-    Sprite,
-    Font,
-    MotaOffscreenCanvas2D
-} from '@motajs/render';
-import { transitionedColor } from '../use';
-import { linear } from 'mutate-animate';
-import { Scroll } from '../components';
-import { getArea, MinimapDrawer } from '@motajs/legacy-ui';
-import { MixedToolbar, ReplayingStatus } from './toolbar';
-import { HeroSkill } from '@user/data-state';
+    NumpadToolbar,
+    PlayingToolbar,
+    ReplayingStatus,
+    ReplayingToolbar
+} from './toolbar';
 import { openViewMap } from './viewmap';
 import { mainUIController } from './controller';
+import { MAIN_HEIGHT, STATUS_BAR_WIDTH } from '../shared';
 
 export interface ILeftHeroStatus {
     hp: number;
@@ -29,31 +24,12 @@ export interface ILeftHeroStatus {
     redKey: number;
     floor: FloorIds;
     lv: string;
-    /** 生命回复 */
-    regen: number;
-    /** 额外攻击 */
-    exAtk: number;
-    /** 魔法防御 */
-    magicDef: number;
+    replay: ReplayingStatus;
 }
 
 export interface IRightHeroStatus {
-    /** 自动切换技能 */
-    autoSkill: boolean;
-    /** 当前开启的技能 */
-    skillName: string;
-    /** 技能描述 */
-    skillDesc: string;
-    /** 跳跃剩余次数，-1 表示未开启，-2表示当前楼层不能跳 */
-    jumpCount: number;
-    /** 治愈之泉剩余次数，-1 表示未开启 */
-    springCount: number;
-    /** 当前楼层 */
-    floor: FloorIds;
-    /** 录像播放状态 */
-    replayStatus: ReplayingStatus;
-    /** 极昼永夜 */
-    night: number;
+    /** 示例属性，以游戏难度作为示例 */
+    exampleHard: number;
 }
 
 interface StatusBarProps<T> extends DefaultProps {
@@ -78,15 +54,20 @@ export const LeftStatusBar = defineComponent<StatusBarProps<ILeftHeroStatus>>(
         const s = p.status;
         const f = core.formatBigNumber;
 
+        const inNumpad = ref(false);
+
         const floorName = computed(() => core.floors[s.floor]?.title ?? '');
 
         const key = (num: number) => {
             return num.toString().padStart(2, '0');
         };
 
+        const onNumpad = () => {
+            inNumpad.value = !inNumpad.value;
+        };
+
         const font1 = Font.defaults({ size: 18 });
         const font2 = Font.defaults({ size: 18, weight: 700 });
-        const font3 = Font.defaults({ size: 14, weight: 700 });
 
         const iconLoc = (n: number): ElementLocator => {
             return [16, 76 + 44 * n, 32, 32];
@@ -99,11 +80,6 @@ export const LeftStatusBar = defineComponent<StatusBarProps<ILeftHeroStatus>>(
         const central = (y: number): ElementLocator => {
             const width = p.loc[2] ?? 200;
             return [width / 2, y, void 0, void 0, 0.5, 0.5];
-        };
-
-        const right = (y: number): ElementLocator => {
-            const width = p.loc[2] ?? 200;
-            return [width - 16, y, void 0, void 0, 1, 0.5];
         };
 
         const keyCount = 3;
@@ -130,30 +106,10 @@ export const LeftStatusBar = defineComponent<StatusBarProps<ILeftHeroStatus>>(
                 <text text={s.lv} loc={central(54)} font={font1}></text>
                 <image image={hpIcon} loc={iconLoc(0)}></image>
                 <text text={f(s.hp)} loc={textLoc(0)} font={font1}></text>
-                <text
-                    text={`+${f(s.regen)}/t`}
-                    loc={right(110)}
-                    font={font3}
-                    fillStyle="#a7ffa7"
-                ></text>
                 <image image={atkIcon} loc={iconLoc(1)}></image>
                 <text text={f(s.atk)} loc={textLoc(1)} font={font1}></text>
-                <text
-                    text={`+${f(s.exAtk)}`}
-                    loc={right(154)}
-                    font={font3}
-                    fillStyle="#ffd3d3"
-                ></text>
                 <image image={defIcon} loc={iconLoc(2)}></image>
                 <text text={f(s.def)} loc={textLoc(2)} font={font1}></text>
-                {s.magicDef > 0 && (
-                    <text
-                        text={`+${f(s.magicDef)}`}
-                        loc={right(198)}
-                        font={font3}
-                        fillStyle="#b0bdff"
-                    ></text>
-                )}
                 <image image={mdefIcon} loc={iconLoc(3)}></image>
                 <text text={f(s.mdef)} loc={textLoc(3)} font={font1}></text>
                 <image image={moneyIcon} loc={iconLoc(4)}></image>
@@ -178,214 +134,58 @@ export const LeftStatusBar = defineComponent<StatusBarProps<ILeftHeroStatus>>(
                     font={font2}
                     fillStyle="#f88"
                 ></text>
-                <text
-                    text="技能树"
-                    loc={central(396)}
-                    font={font1}
-                    cursor="pointer"
-                ></text>
-                <text
-                    text="查看技能"
-                    loc={central(428)}
-                    font={font1}
-                    cursor="pointer"
-                ></text>
+                <g-line
+                    lineWidth={1}
+                    strokeStyle="#888"
+                    line={[
+                        0,
+                        MAIN_HEIGHT - 113,
+                        STATUS_BAR_WIDTH,
+                        MAIN_HEIGHT - 113
+                    ]}
+                />
+                {inNumpad.value ? (
+                    <NumpadToolbar
+                        loc={[0, MAIN_HEIGHT - 113, STATUS_BAR_WIDTH, 113]}
+                        onNumpad={onNumpad}
+                    />
+                ) : s.replay.replaying ? (
+                    <ReplayingToolbar
+                        loc={[0, MAIN_HEIGHT - 113, STATUS_BAR_WIDTH, 113]}
+                        status={s.replay}
+                    />
+                ) : (
+                    <PlayingToolbar
+                        loc={[0, MAIN_HEIGHT - 113, STATUS_BAR_WIDTH, 113]}
+                        onNumpad={onNumpad}
+                    />
+                )}
             </container>
         );
     },
     statusBarProps
 );
 
-interface RightStatusBarMisc {
-    name: string;
-    value: string;
-    nameColor: string;
-    valueColor: string;
-}
-
 export const RightStatusBar = defineComponent<StatusBarProps<IRightHeroStatus>>(
     p => {
-        const font1 = new Font('normal', 18);
-        const font2 = new Font('normal', 16);
+        // p.status 就是你在 main.tsx 中传入的属性内容，用法与左侧状态栏完全一致
 
-        const minimap = ref<Sprite>();
-
-        const s = p.status;
-        const skill = computed(() =>
-            s.autoSkill ? '已开启自动切换' : s.skillName
-        );
-        const skillDesc = computed(() =>
-            s.autoSkill ? '自动切换技能时，会自动选择最优技能' : s.skillDesc
-        );
-
-        const skillColor = transitionedColor('#284', 200, linear())!;
-
-        watch(
-            () => s.autoSkill,
-            value => {
-                skillColor.set(value ? '#284' : '#824');
-            }
-        );
-
-        const miscData = computed<RightStatusBarMisc[]>(() => {
-            const data: RightStatusBarMisc[] = [];
-            if (s.jumpCount !== -1) {
-                const text =
-                    s.jumpCount === -2 ? '不可跳跃' : s.jumpCount.toString();
-                data.push({
-                    name: '跳跃剩余',
-                    nameColor: '#fff',
-                    value: text,
-                    valueColor: '#fff'
-                });
-            }
-            if (s.springCount >= 0) {
-                data.push({
-                    name: '治愈之泉',
-                    nameColor: '#a7ffa7',
-                    value: s.springCount.toString(),
-                    valueColor: '#a7ffa7'
-                });
-            }
-            if (s.night !== 0) {
-                const text = s.night.toString();
-                data.push({
-                    name: '极昼永夜',
-                    nameColor: '#a3f8ff',
-                    value: s.night > 0 ? '+' + text : text,
-                    valueColor: s.night > 0 ? '#a7ffa7' : '#ffa7a7'
-                });
-            }
-            return data;
-        });
-
-        const central = (y: number): ElementLocator => {
-            const width = p.loc[2] ?? 200;
-            return [width / 2, y, void 0, void 0, 0.5, 0.5];
-        };
-
-        const middle = (x: number, y: number): ElementLocator => {
-            return [x, y, void 0, void 0, 0, 0.5];
-        };
-
-        const changeAutoSkill = () => {
-            const auto = !s.autoSkill;
-            HeroSkill.setAutoSkill(auto);
-            core.status.route.push(`set:autoSkill:${auto}`);
-            core.updateStatusBar();
-        };
-
-        const area = getArea();
-        const minimapDrawer = new MinimapDrawer(
-            document.createElement('canvas')
-        );
-        minimapDrawer.noBorder = true;
-        minimapDrawer.scale = 4;
-        minimapDrawer.showInfo = true;
-        let linked = false;
-        const drawMinimap = (canvas: MotaOffscreenCanvas2D) => {
-            const ctx = canvas.ctx;
-            ctx.scale(
-                1 / core.domStyle.scale / devicePixelRatio,
-                1 / core.domStyle.scale / devicePixelRatio
-            );
-            if (!linked) {
-                minimapDrawer.link(canvas.canvas);
-                linked = true;
-            }
-            if (minimapDrawer.nowFloor !== s.floor) {
-                minimapDrawer.drawedThumbnail = {};
-            } else {
-                minimapDrawer.drawToTarget();
-                ctx.restore();
-                return;
-            }
-            minimapDrawer.nowFloor = s.floor;
-            minimapDrawer.nowArea =
-                Object.keys(area).find(v =>
-                    area[v].includes(core.status.floorId)
-                ) ?? '';
-            minimapDrawer.locateMap(minimapDrawer.nowFloor);
-            minimapDrawer.drawMap();
-        };
-
-        watch(
-            () => s.floor,
-            () => {
-                minimap.value?.update();
-            }
-        );
+        const text = `这里是右侧状态栏，如果左侧状态栏不够用可以在 \\r[gold]statusBar.tsx\\r 中编写内容，如果不需要此状态栏，可以在 \\r[gold]shared.ts\\r 中关闭此状态栏。`;
 
         return () => {
             return (
                 <container loc={p.loc} hidden={p.hidden}>
-                    <g-rectr
-                        loc={[10, 10, 160, 24]}
-                        circle={[6]}
-                        fillStyle={skillColor.ref.value}
-                        onClick={changeAutoSkill}
-                        cursor="pointer"
-                    ></g-rectr>
-                    <text
-                        loc={central(22)}
-                        text={skill.value}
-                        font={font1}
-                        onClick={changeAutoSkill}
-                        cursor="pointer"
-                    />
                     <TextContent
-                        loc={[10, 42, 160, 60]}
-                        text={skillDesc.value}
-                        font={new Font('normal', 14)}
-                        width={160}
-                        lineHeight={4}
-                    ></TextContent>
-                    <g-line
-                        line={[0, 107, 180, 107]}
-                        strokeStyle="#888"
-                        lineWidth={1}
-                        zIndex={-20}
-                    ></g-line>
-                    <Scroll loc={[0, 107, 180, 100]}>
-                        {miscData.value
-                            .map((v, i) => {
-                                return [
-                                    <text
-                                        text={v.name}
-                                        loc={middle(10, 16 + i * 22)}
-                                        fillStyle={v.nameColor}
-                                        font={font2}
-                                    ></text>,
-                                    <text
-                                        text={v.value}
-                                        loc={middle(100, 16 + i * 22)}
-                                        fillStyle={v.valueColor}
-                                        font={font2}
-                                    ></text>
-                                ];
-                            })
-                            .flat()}
-                    </Scroll>
-                    <g-line
-                        line={[0, 207, 180, 207]}
-                        strokeStyle="#888"
-                        lineWidth={1}
-                        zIndex={-20}
-                    ></g-line>
-                    <sprite
-                        ref={minimap}
-                        loc={[10, 207, 160, 160]}
-                        render={drawMinimap}
-                    ></sprite>
-                    <g-line
-                        line={[0, 367, 180, 367]}
-                        strokeStyle="#888"
-                        lineWidth={1}
-                        zIndex={-20}
-                    ></g-line>
-                    <MixedToolbar
-                        loc={[0, 367, 180, 113]}
-                        status={s.replayStatus}
+                        loc={[8, 8]}
+                        text={text}
+                        width={STATUS_BAR_WIDTH - 16}
+                        autoHeight
+                        lineHeight={8}
+                    />
+                    <text loc={[8, 270]} text="示例内容" />
+                    <text
+                        loc={[8, 300]}
+                        text={`游戏难度：${p.status.exampleHard}`}
                     />
                 </container>
             );
