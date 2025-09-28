@@ -1,7 +1,6 @@
 import { GameUI, SetupComponentOptions } from '@motajs/system-ui';
 import { computed, ComputedRef, defineComponent, shallowReactive } from 'vue';
 import { TextContent } from '../components';
-import { DefaultProps, ElementLocator, Font } from '@motajs/render';
 import {
     DefaultProps,
     ElementLocator,

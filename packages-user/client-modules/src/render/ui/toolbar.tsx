@@ -155,8 +155,6 @@ export interface ReplayingStatus {
     played: number;
     /** 总长度 */
     total: number;
-    /** 是否是录像模式 */
-    replaying: boolean;
 }
 
 export interface ReplayingProps extends ToolbarProps {
