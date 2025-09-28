@@ -8,9 +8,9 @@ import { Font } from '@motajs/render-style';
 /** 每个格子的宽高 */
 export const CELL_SIZE = 32;
 /** 地图格子宽度，此处仅影响画面，不影响游戏内逻辑，游戏内逻辑地图大小请在 core.js 中修改 */
-export const MAP_BLOCK_WIDTH = 15;
+export const MAP_BLOCK_WIDTH = 13;
 /** 地图格子高度，此处仅影响画面，不影响游戏内逻辑，游戏内逻辑地图大小请在 core.js 中修改 */
-export const MAP_BLOCK_HEIGHT = 15;
+export const MAP_BLOCK_HEIGHT = 13;
 /** 地图像素宽度 */
 export const MAP_WIDTH = CELL_SIZE * MAP_BLOCK_WIDTH;
 /** 地图像素高度 */
@@ -75,7 +75,7 @@ export const SAVE_ITEM_DOWN = 24;
 /** 单个存档高度，包括存档下方的信息 */
 export const SAVE_ITEM_HEIGHT = SAVE_ITEM_SIZE + SAVE_ITEM_TOP + SAVE_ITEM_DOWN;
 /** 存档间距 */
-export const SAVE_INTERVAL = 30;
+export const SAVE_INTERVAL = 20;
 /** 存档下巴高度，即下方显示页码和返回按钮的高度 */
 export const SAVE_DOWN_PAD = 30;
 /** 存档页码数，调高并不会影响性能，但是如果玩家存档太多的话会导致存档体积很大 */
