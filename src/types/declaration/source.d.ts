@@ -25,7 +25,7 @@ type ItemCls = 'tools' | 'items' | 'equips' | 'constants';
 /**
  * 所有的道具id
  */
-type AllIds = keyof IdToNumber;
+type AllIds = keyof IdToNumber | 'none';
 
 /**
  * 所有的道具数字

@@ -1563,109 +1563,55 @@ events.prototype.__action_doAsyncFunc = function (isAsync, func) {
     }
 };
 
-events.prototype._action_text = function (data, x, y, prefix) {
+events.prototype._action_text = function (data) {
     if (this.__action_checkReplaying()) return;
     const Store = Mota.require('@user/client-modules').TextboxStore;
-    const store = Store.get('main-textbox');
-    const { text } = data;
-    let title = '';
-    let inTitle = false;
-    let titleStartIndex = 0;
-    let titleEndIndex = 0;
-    for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-
-        if (inTitle) {
-            if (char === '\\' && text[i + 1] === ']') {
-                title += ']';
-                i++;
-            } else if (char === ']') {
-                inTitle = false;
-                titleEndIndex = i + 1;
-                break;
-            } else {
-                title += char;
-            }
-            continue;
-        }
-
-        if (char === '\t' && text[i + 1] === '[') {
-            inTitle = true;
-            titleStartIndex = i;
-            // 跳转至方括号内
-            i++;
-            continue;
-        }
-
-        if (char === '\\' && text[i + 1] === 't' && text[i + 2] === '[') {
-            inTitle = true;
-            titleStartIndex = i;
-            // 跳转至方括号内
-            i += 2;
-            continue;
-        }
+    const { textbox = 'main-textbox', text, icon = 'none', title = '' } = data;
+    const store = Store.get(textbox);
+    if (!store) {
+        core.doAction();
+        return;
     }
-
-    const showText = text.slice(0, titleStartIndex) + text.slice(titleEndIndex);
+    const loc = store.data.loc?.slice() ?? [];
+    loc[0] ??= 0;
+    loc[1] ??= 0;
+    loc[2] ??= 200;
+    loc[3] ??= 200;
+    const { x = loc[0], y = loc[1], width = loc[2], height = loc[3] } = data;
     store.show();
-    store.modify({ title });
-    store.setText(showText);
-
-    // data.text = core.replaceText(data.text, prefix);
-    // var ctx = data.code ? '__text__' + data.code : null;
-    // data.ctx = ctx;
-    // if (core.getContextByName(ctx) && !data.showAll) {
-    //     core.ui._animateUI('hide', ctx, function () {
-    //         core.ui.drawTextBox(data.text, data);
-    //         core.ui._animateUI('show', ctx, function () {
-    //             if (data.async) core.doAction();
-    //         });
-    //     });
-    //     return;
-    // }
-    // core.ui.drawTextBox(data.text, data);
-    // if (!data.showAll) {
-    //     core.ui._animateUI('show', ctx, function () {
-    //         if (data.async) core.doAction();
-    //     });
-    // }
+    store.modify({ title, icon, loc: [x, y, width, height], width });
+    store.setText(text);
+    core.events.nowTextbox = textbox;
 };
 
-events.prototype._action_moveTextBox = function (data, x, y, prefix) {
+events.prototype._action_autoText = function (data) {
     if (this.__action_checkReplaying()) return;
-    this.__action_doAsyncFunc(
-        data.async,
-        core.moveTextBox,
-        data.code,
-        this.__action_getLoc(data.loc, x, y, prefix),
-        data.relative,
-        data.moveMode,
-        data.time
-    );
-};
+    const Store = Mota.require('@user/client-modules').TextboxStore;
+    const { textbox = 'main-textbox', text, icon = 'none', title = '' } = data;
+    const store = Store.get(textbox);
+    if (!store) {
+        core.doAction();
+        return;
+    }
+    const loc = store.data.loc?.slice() ?? [];
+    loc[0] ??= 0;
+    loc[1] ??= 0;
+    loc[2] ??= 200;
+    loc[3] ??= 200;
+    const { x = loc[0], y = loc[1], width = loc[2], height = loc[3] } = data;
+    store.show();
+    store.modify({ title, icon, loc: [x, y, width, height], width });
+    store.setText(text);
 
-events.prototype._action_clearTextBox = function (data, x, y, prefix) {
-    if (this.__action_checkReplaying()) return;
-    core.clearTextBox(data.code, core.doAction);
-};
-
-events.prototype._action_autoText = function (data, x, y, prefix) {
-    if (this.__action_checkReplaying()) return;
-    data.text = core.replaceText(data.text, prefix);
-    core.ui.drawTextBox(data.text);
-    setTimeout(core.doAction, data.time || 3000);
+    setTimeout(() => {
+        store.hide();
+        core.doAction();
+    }, data.time ?? 3000);
 };
 
 events.prototype._action_scrollText = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
-    data.text = core.replaceText(data.text, prefix);
-    this.__action_doAsyncFunc(
-        data.async,
-        core.drawScrollText,
-        data.text,
-        data.time || 5000,
-        data.lineHeight || 1.4
-    );
+    // todo: 2.B.1
 };
 
 events.prototype._action_comment = function (data, x, y, prefix) {
@@ -1676,14 +1622,88 @@ events.prototype._action__label = function (data, x, y, prefix) {
     core.doAction();
 };
 
-events.prototype._action_setText = function (data, x, y, prefix) {
-    this.setTextAttribute(data);
+events.prototype._action_setText = function (data) {
+    const isNil = value => value !== null && value !== void 0;
+    const { textbox = 'main-textbox' } = data;
+    const Store = Mota.require('@user/client-modules').TextboxStore;
+    const Font = Mota.require('@motajs/render-vue').Font;
+    const store = Store.get(textbox);
+    if (!store) {
+        core.doAction();
+        return;
+    }
+    // loc
+    const loc = store.data.loc?.slice() ?? [];
+    loc[0] ??= 0;
+    loc[1] ??= 0;
+    loc[2] ??= 200;
+    loc[3] ??= 200;
+    const { x = loc[0], y = loc[1], width = loc[2], height = loc[3] } = data;
+    const newLoc = [x, y, width, height];
+    // font
+    const { fontFamily, fontSize, fontWeight, fontItalic } = data;
+    const font = store.data.font ?? new Font();
+    const newFont = Font.clone(font, {
+        family: fontFamily,
+        size: fontSize,
+        weight: fontWeight,
+        italic: fontItalic
+    });
+    // config
+    const config = {
+        loc: newLoc,
+        font: newFont,
+        keepLast: data.keepLast,
+        interval: data.interval,
+        lineHeight: data.lineHeight,
+        fillStyle: data.fillStyle,
+        strokeStyle: data.strokeStyle,
+        strokeWidth: data.strokeWidth,
+        fill: isNil(data.fill),
+        stroke: !!data.stroke,
+        backColor: data.backColor,
+        winskin: data.winskin,
+        padding: data.padding,
+        titleFill: isNil(data.titleFill),
+        titleStroke: !!data.titleStroke,
+        titlePadding: data.titlePadding,
+        textAlign: data.textAlign,
+        wordBreak: data.wordBreak,
+        ignoreLineStart: data.ignoreLineStart,
+        ignoreLineEnd: data.ignoreLineEnd,
+        breakChars: data.breakChars
+    };
+    store.modify(config);
+
     core.doAction();
 };
 
 events.prototype._action_tip = function (data, x, y, prefix) {
     core.drawTip(core.replaceText(data.text, prefix), data.icon);
     core.doAction();
+};
+
+events.prototype._action_confirm = function (data, x, y, prefix) {
+    data.text = core.replaceText(data.text, prefix);
+    core.ui.drawConfirmBox(
+        data.text,
+        () => {
+            core.insertAction(data.yes ?? []);
+            core.doAction();
+        },
+        () => {
+            core.insertAction(data.no ?? []);
+            core.doAction();
+        }
+    );
+};
+
+events.prototype._action_choices = function (data, x, y, prefix) {
+    core.ui.drawChoices(
+        core.replaceText(data.text, prefix),
+        data.choices,
+        data.width
+    );
 };
 
 events.prototype._action_show = function (data, x, y, prefix) {
@@ -2519,14 +2539,6 @@ events.prototype._precompile_switch = function (data) {
     return data;
 };
 
-events.prototype._action_choices = function (data, x, y, prefix) {
-    core.ui.drawChoices(
-        core.replaceText(data.text, prefix),
-        data.choices,
-        data.width
-    );
-};
-
 events.prototype.__action_choices_replaying = function (data, index) {
     var selection = index;
     if (index != 'none') {
@@ -2578,21 +2590,6 @@ events.prototype._precompile_choices = function (data) {
         data.choices[i].action = this.precompile(data.choices[i].action);
     }
     return data;
-};
-
-events.prototype._action_confirm = function (data, x, y, prefix) {
-    data.text = core.replaceText(data.text, prefix);
-    core.ui.drawConfirmBox(
-        data.text,
-        () => {
-            core.insertAction(data.yes ?? []);
-            core.doAction();
-        },
-        () => {
-            core.insertAction(data.no ?? []);
-            core.doAction();
-        }
-    );
 };
 
 events.prototype.__action_confirm_replaying = function (data, index) {

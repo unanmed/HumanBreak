@@ -1100,11 +1100,8 @@ actions.prototype._clickAction_text = function () {
     if (core.status.event.animateUI) return;
 
     const Store = Mota.require('@user/client-modules').TextboxStore;
-    const store = Store.get('main-textbox');
-
-    // var data = core.clone(core.status.event.data.current);
-    // if (typeof data == 'string') data = { type: 'text', text: data };
-
+    const id = core.events.nowTextbox ?? 'main-textbox';
+    const store = Store.get(id);
     // 打字机效果显示全部文字
     if (store.typing) {
         store.endType();
@@ -1112,19 +1109,8 @@ actions.prototype._clickAction_text = function () {
     } else {
         store.hide();
     }
-    // if (core.status.event.interval != null) {
-    //     data.showAll = true;
-    //     core.insertAction(data);
-    //     core.doAction();
-    //     return;
-    // }
 
-    if (!data.code) {
-        core.ui._animateUI('hide', null, core.doAction);
-    } else {
-        // 不清除对话框
-        core.doAction();
-    }
+    core.doAction();
 };
 
 ////// 自定义事件时的点击操作 //////

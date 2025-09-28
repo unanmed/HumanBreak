@@ -810,7 +810,11 @@ action
     |   comment_s
     |   autoText_s
     |   scrollText_s
+    |   createTextbox_s
+    |   deleteTextbox_s
     |   setText_s
+    |   createTip_s
+    |   deleteTip_s
     |   tip_s
     |   setValue_s
     |   setEquip_s
@@ -940,29 +944,26 @@ action
 
 
 text_s
-    :   '标题' EvalString? '图标' EvalString?  '像素坐标 x' IntString? 'y' IntString? '宽' IntString? '高' IntString? '维持文本' Bool '打字间隔' IntString? '行高' IntString? BGNL? Newline
+    :   '标题' EvalString? '图标' EvalString? '文本框id' EvalString?  '像素坐标 x' IntString? 'y' IntString? '宽' IntString? '高' IntString? BGNL? Newline
      EvalString_Multi Newline
     
 
 /* text_s
-tooltip : text：显示一段文字（剧情）,选项较多请右键点击帮助
+tooltip : text：显示一段文字（剧情），文本框id 默认使用 main-textbox
 helpUrl : /_docs/#/instruction
 previewBlock : true
 allIds : ['EvalString_1']
-default : ["小妖精","fairy","","","","",false,"","","欢迎使用事件编辑器"]
+default : ["","","","","","","","欢迎使用事件编辑器"]
 EvalString_0= EvalString_0 ? (', "title": "'+EvalString_0+'"') : '';
 EvalString_1= EvalString_1 ? (', "icon": "'+EvalString_1+'"') : '';
+EvalString_2= EvalString_2 ? (', "textbox": "'+EvalString_2+'"') : '';
 IntString_0= IntString_0 ? (', "x": '+IntString_0) : '';
 IntString_1= IntString_1 ? (', "y": '+IntString_1) : '';
 IntString_2= IntString_2 ? (', "width": '+IntString_2) : '';
 IntString_3= IntString_3 ? (', "height": '+IntString_3) : '';
-IntString_4= IntString_4 ? (', "interval": '+IntString_4) : '';
-IntString_5= IntString_5 ? (', "lineHeight": '+IntString_5) : '';
-var code = '{"type": "text"'+EvalString_0+EvalString_1+IntString_0+IntString_1+IntString_2+IntString_3+',"keepLast":'+Bool_0+IntString_4+IntString_5+'"text":"'+EvalString_Multi_0+'"},\n';
+var code = '{"type": "text"'+EvalString_0+EvalString_1+EvalString_2+IntString_0+IntString_1+IntString_2+IntString_3+', "text": "'+EvalString_Multi_0+'"},\n';
 return code
 */;
-
-
 
 comment_s
     :   '添加注释' ':' EvalString_Multi Newline
@@ -979,7 +980,7 @@ return code;
 */;
 
 autoText_s
-    :   '自动剧情文本: 标题' EvalString? '图像' EvalString? '对话框效果' EvalString? '时间' Int BGNL? EvalString_Multi Newline
+    :   '自动剧情文本: 标题' EvalString? '图标' EvalString? '文本框id' EvalString?  '像素坐标 x' IntString? 'y' IntString? '宽' IntString? '高' IntString? '时间' Int BGNL? EvalString_Multi Newline
     
 
 /* autoText_s
@@ -987,40 +988,54 @@ tooltip : autoText：自动剧情文本,用户无法跳过自动剧情文本,大
 helpUrl : /_docs/#/instruction
 doubleclicktext : EvalString_Multi_0
 allIds : ['EvalString_1']
-default : ["小妖精","fairy","",3000,"用户无法跳过自动剧情文本，大段剧情文本请添加“是否跳过剧情”的提示"]
-var title='';
-if (EvalString_0==''){
-    if (EvalString_1=='' )title='';
-    else title='\\t['+EvalString_1+']';
-} else {
-    if (EvalString_1=='')title='\\t['+EvalString_0+']';
-    else title='\\t['+EvalString_0+','+EvalString_1+']';
-}
-if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.test(EvalString_2))) {
-  throw new Error('对话框效果的用法请右键点击帮助');
-}
-EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
-var code =  '{"type": "autoText", "text": "'+title+EvalString_2+EvalString_Multi_0+'", "time": '+Int_0+'},\n';
+default : ["","","","","","","",3000,"用户无法跳过自动剧情文本，大段剧情文本请添加“是否跳过剧情”的提示"]
+EvalString_0= EvalString_0 ? (', "title": "'+EvalString_0+'"') : '';
+EvalString_1= EvalString_1 ? (', "icon": "'+EvalString_1+'"') : '';
+EvalString_2= EvalString_2 ? (', "textbox": "'+EvalString_2+'"') : '';
+IntString_0= IntString_0 ? (', "x": '+IntString_0) : '';
+IntString_1= IntString_1 ? (', "y": '+IntString_1) : '';
+IntString_2= IntString_2 ? (', "width": '+IntString_2) : '';
+IntString_3= IntString_3 ? (', "height": '+IntString_3) : '';
+Int_0= ', "time": '+Int_0;
+var code =  '{"type": "autoText"'+EvalString_0+EvalString_1+EvalString_2+IntString_0+IntString_1+IntString_2+IntString_3+Int0+', "text": "'+EvalString_Multi_0+'},\n';
 return code;
 */;
 
 scrollText_s
-    :   '滚动剧情文本:' '时间' Int '行距' Number '不等待执行完毕' Bool? BGNL? EvalString_Multi Newline
+    :   '滚动剧情文本事件将在 2.B.1 实装'
 
 
 /* scrollText_s
-tooltip : scrollText：滚动剧情文本，将从下到上进行滚动显示。
+tooltip : scrollText：滚动剧情文本事件将在 2.B.1 实装
 helpUrl : /_docs/#/instruction
-doubleclicktext : EvalString_Multi_0
-default : [5000,1.4,false,"时间是总时间，可以使用setText事件来控制字体、颜色、大小、偏移量等"]
-Bool_0 = Bool_0?', "async": true':'';
-var code =  '{"type": "scrollText", "text": "'+EvalString_Multi_0+'"'+Bool_0+', "time" :'+Int_0+', "lineHeight": '+Number_0+'},\n';
-return code;
+default : []
+return '{"type": "scrollText"}';
 */;
 
+createTextbox_s
+    : '创建文本框将在 2.B.1 实装'
+
+/* createTextbox_s
+tooltip : createTextbox：创建文本框事件将在 2.B.1 实装
+helpUrl : /_docs/#/instruction
+default : []
+return '{"type": "createTextbox"},\n'
+*/;
+
+deleteTextbox_s
+    : '删除文本框将在 2.B.1 实装'
+
+/* deleteTextbox_s
+tooltip : deleteTextbox：删除文本框事件将在 2.B.1 实装
+helpUrl : /_docs/#/instruction
+default : []
+return '{"type": "deleteTextbox"},\n'
+*/;
+
+
 setText_s
-    :   '设置剧情文本的属性' '位置像素x' IntString? 'y' IntString? '宽' IntString? '高'  IntString? '字体类型' EvalString? '字体大小' IntString? '字体线宽' IntString? BGNL? 
-    '是否斜体' Bool? '维持文本' Bool? '打字间隔' IntString? '行高' IntString? '文字颜色' ColorString? Colour '文字描边颜色' ColorString? Colour '描边线宽' IntString? '是否填充' Bool '是否描边' Bool BGNL?
+    :   '配置文本框' '文本框id'EvalString '位置像素x' IntString? 'y' IntString? '宽' IntString? '高'  IntString? '字体类型' EvalString? '字体大小' IntString? '字体线宽' IntString? '是否斜体' Bool?  BGNL? 
+    '维持文本' Bool? '打字间隔' IntString? '行高' IntString? '文字颜色' ColorString? Colour '文字描边颜色' ColorString? Colour '描边线宽' IntString? '是否填充' Bool '是否描边' Bool BGNL?
     '背景色' ColorString? Colour '背景winskin' EvalString? '文字与边框距离' IntString?  '标题是否填充' Bool '标题是否描边' Bool'标题与边框的距离' IntString? BGNL?
     '对齐方式' TextAlign_List '分词原则' WordBreak_List '行首禁则' EvalString? '行尾禁则' EvalString? '分词规则识别字符' EvalString? Newline
     
@@ -1029,42 +1044,141 @@ setText_s
 tooltip : setText：设置文本的属性,颜色为RGB三元组或RGBA四元组,打字间隔为剧情文字添加的时间间隔,为整数或不填，字符间距为字符之间的距离，为整数或不填。
 helpUrl : /_docs/#/instruction
 previewBlock : true
-default : ["","","","","","","",false,false,"","","",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"",true,false,"",'rgba(255,255,255,1)',"","",true,false,"",'null','space',"","",""]
+default : ["main-textbox","","","","","","","",false,false,"","","",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"",true,false,"",'rgba(255,255,255,1)',"","",true,false,"",'null','null',"","",""]
+Bool_0 = Bool_0 ? (', "fontItalic": '+Bool_0) : '';
+Bool_1 = Bool_1 ? (', "keepLast": '+Bool_1) : '';
+Bool_2 = !Bool_2 ? (', "fill": '+Bool_2) : '';
+Bool_3 = Bool_3 ? (', "stroke": '+Bool_3) : '';
+Bool_4 = !Bool_4 ? (', "titleFill": '+Bool_4) : '';
+Bool_5 = Bool_5 ? (', "titleStroke": '+Bool_5) : '';
 IntString_0= IntString_0 ? (', "x": '+IntString_0) : '';
 IntString_1 = IntString_1 ? (', "y": '+IntString_1) : '';
 IntString_2 = IntString_2 ? (', "width": '+IntString_2) : '';
 IntString_3 = IntString_3 ? (', "height": '+IntString_3) : '';
-EvalString_0 = EvalString_0 ? (', "fontFamily": '+EvalString_0) : '';
 IntString_4 = IntString_4 ? (', "fontSize": '+IntString_4) : '';
-IntString_5 = IntString_5 ? (', " interval": '+IntString_5) : '';
-IntString_6 = IntString_6 ? (', "lineHeight": ' + IntString_6) : '';
-IntString_7 = IntString_7? (', "strokeWidth": ' + IntString_7) : '';
-EvalString_1 = EvalString_1 ? (', "winskin": '+EvalString_1) : '';
-IntString_8 = IntString_8? (', "padding": ' + IntString_8) : '';
-IntString_9 = IntString_9? (', "titlePadding": ' + IntString_9) : '';
+IntString_5 = IntString_5? (', "fontWeight": ' + IntString_5) : '';
+IntString_6 = IntString_6 ? (', " interval": '+IntString_6) : '';
+IntString_7 = IntString_7 ? (', "lineHeight": ' + IntString_7) : '';
+IntString_8 = IntString_8? (', "strokeWidth": ' + IntString_8) : '';
+IntString_9 = IntString_9? (', "padding": ' + IntString_9) : '';
+IntString_10 = IntString_10? (', "titlePadding": ' + IntString_10) : '';
+EvalString_0 = EvalString_0 ? (', "textbox": "'+EvalString_0+'"') : '';
+EvalString_1 = EvalString_1 ? (', "fontFamily": "'+EvalString_1+'"') : '';
+EvalString_2 = EvalString_2 ? (', "winskin": "'+EvalString_2+'"') : '';
+EvalString_3 = EvalString_3? (', "ignoreLineStart": "'+EvalString_3+'"') : '';
+EvalString_4 = EvalString_4 ? (', "ignoreLineEnd": "'+EvalString_4+'"') : '';
+EvalString_5 = EvalString_5 ? (', "breakChars": "'+EvalString_5+'"') : '';
+ColorString_0=ColorString_0?(', "fillStyle": "rgba('+ColorString_0+')"'):'';
+ColorString_1=ColorString_1?(', "strokeStyle": "rgba('+ColorString_1+')"'):'';
+ColorString_2=ColorString_2?(', "backColor": "rgba('+ColorString_2+')"'):'';
 TextAlign_List_0 = TextAlign_List_0==='null'?'':', "textAlign": "'+TextAlign_List_0+'"';
 WordBreak_List_0 = WordBreak_List_0==='null'?'':', "wordBreak": "'+WordBreak_List_0+'"';
-EvalString_2 = EvalString_2? (', "ignoreLineStart": '+EvalString_2) : '';
-EvalString_3 = EvalString_3 ? (', "ignoreLineEnd": '+EvalString_3) : '';
-EvalString_4 = EvalString_4 ? (', "breakChars": '+EvalString_4) : '';
-ColorString_0=ColorString_0?(', "fillStyle": ['+ColorString_0+']'):'';
-ColorString_1=ColorString_1?(', "strokeStyle": ['+ColorString_1+']'):'';
-ColorString_2=ColorString_2?(', "backColor": ['+ColorString_2+']'):'';
-var code = '{"type": "setText"'+IntString_0+IntString_1+IntString_2+IntString_3+EvalString_0+IntString_4+', " fontItalic": '+Bool_0+', " keepLast": '+Bool_1+IntString_5+IntString_6+ColorString_0+ColorString_1+IntString_7 +',"fill":'+Bool_2+',"stroke":'+Bool_3+ColorString_2+EvalString_1+IntString_8+',"titleFill":'+Bool_4+',"titleStroke":'+Bool_5+IntString_9 +TextAlign_List_0+WordBreak_List_0+EvalString_2+EvalString_3+EvalString_4+'},\n';
+var code = 
+    '{"type": "setText"'+
+    EvalString_0+     IntString_0+      IntString_1+  IntString_2+    IntString_3+   EvalString_1+ IntString_4+ IntString_5+ Bool_0+
+    Bool_1+           IntString_6+      IntString_7+  ColorString_0+  ColorString_1+ IntString_8+  Bool_2+       Bool_3+
+    ColorString_2+    EvalString_2+     IntString_9+  Bool_4+         Bool_5+        IntString_10+
+    TextAlign_List_0+ WordBreak_List_0+ EvalString_3+ EvalString_4+   EvalString_5+
+'},\n';
 return code;
 */;
 
+createTip_s
+    :   '创建提示栏事件将在 2.B.1 实装'
+
+/* createTip_s
+tooltip : createTip：创建提示栏事件将在 2.B.1 实装
+helpUrl : /_docs/#/instruction
+default : []
+return '{"type": "createTip"}';
+*/;
+
+deleteTip_s
+    :   '删除提示栏事件将在 2.B.1 实装'
+
+/* deleteTip_s
+tooltip : createTip：删除提示栏事件将在 2.B.1 实装
+helpUrl : /_docs/#/instruction
+default : []
+return '{"type": "deleteTip"}';
+*/;
+
 tip_s
-    :   '显示提示' ':' EvalString '图标ID' IdString? Newline
+    :   '显示提示' '提示栏id' EvalString? '图标ID' IdString? BGNL?
+    '提示内容' EvalString Newline
     
 
 /* tip_s
 tooltip : tip：显示一段提示文字
 helpUrl : /_docs/#/instruction
 allIds : ['IdString_0']
-default : ["这段话将在左上角以气泡形式显示",""]
-IdString_0 = IdString_0 && (', "icon": "' + IdString_0 + '"');
-var code = '{"type": "tip", "text": "'+EvalString_0+'"'+IdString_0+'},\n';
+default : ["","","这段话将在左上角以气泡形式显示"]
+EvalString_0 = EvalString_0 ? (', "tip": "' + EvalString_0 + '"') : '';
+IdString_0 = IdString_0 ? (', "icon": "' + IdString_0 + '"') : '';
+EvalString_1 = EvalString_1 ? (', "text": "' + EvalString_1 + '"') : '';
+var code = '{"type": "tip"'+EvalString_0+IdString_0+EvalString_1+'},\n';
+return code;
+*/;
+
+confirm_s
+    :   '显示确认框' ':' EvalString_Multi '超时毫秒数' Int BGNL? '确定的场合' ':' '（默认选中' Bool '）' BGNL? Newline action+ '取消的场合' ':' BGNL? Newline action+ BEND Newline
+
+/* confirm_s
+tooltip : 弹出确认框
+helpUrl : /_docs/#/instruction
+default : ["确认要xxx吗?",0,false]
+previewBlock : true
+Bool_0 = Bool_0?', "default": true':''
+Int_0 = Int_0 ? (', "timeout": '+Int_0) : '';
+var code = ['{"type": "confirm"'+Int_0+Bool_0+', "text": "',EvalString_Multi_0,'",',
+    block.isCollapsed()?' "_collapsed": true,':'',
+    block.isEnabled()?'':' "_disabled": true,',
+    '\n"yes": [\n',action_0,'],\n',
+    '"no": [\n',action_1,']\n',
+'},\n'].join('');
+return code;
+*/;
+
+choices_s
+    :   '选项' ':' EvalString_Multi? BGNL? '标题' EvalString? '图像' IdString? '超时毫秒数' Int BGNL? Newline choicesContext+ BEND Newline
+
+
+/* choices_s
+tooltip : choices: 给用户提供选项
+helpUrl : /_docs/#/instruction
+previewBlock : true
+default : ["","","",0]
+allIds : ['IdString_0']
+EvalString_0 = EvalString_0 ? (', "title": "' + EvalString_0 + '"') : '';
+IdString_0 = IdString_0 ? (', "icon": "' + IdString_0 + '"') : '';
+EvalString_Multi_0 = EvalString_Multi_0 ?(', "text": "'+EvalString_Multi_0+'"'):'';
+Int_0 = Int_0 ? (', "timeout": '+Int_0) : '';
+var code = ['{"type": "choices"',EvalString_0,IdString_0,EvalString_Multi_0,Int_0,
+    block.isCollapsed()?', "_collapsed": true':'',
+    block.isEnabled()?'':', "_disabled": true',
+    ', "choices": [\n',
+    choicesContext_0,
+']},\n'].join('');
+return code;
+*/;
+
+choicesContext
+    :   '子选项' EvalString '图标' IdString? '颜色' ColorString? Colour '启用条件' EvalString? '出现条件' EvalString? BGNL? Newline action+
+
+
+/* choicesContext
+tooltip : 选项的选择
+helpUrl : /_docs/#/instruction
+default : ["提示文字:红钥匙","","","",""]
+allIds : ['IdString_0']
+colour : this.subColor
+ColorString_0 = ColorString_0 ? (', "color": ['+ColorString_0+']') : '';
+EvalString_1 = EvalString_1 && (', "need": "'+EvalString_1+'"');
+EvalString_2 = EvalString_2 && (', "condition": "'+EvalString_2+'"');
+IdString_0 = IdString_0?(', "icon": "'+IdString_0+'"'):'';
+var collapsed=block.isCollapsed()?', "_collapsed": true':'';
+var disabled=block.isEnabled()?'':', "_disabled": true';
+var code = '{"text": "'+EvalString_0+'"'+IdString_0+ColorString_0+EvalString_1+EvalString_2+collapsed+disabled+', "action": [\n'+action_0+']},\n';
 return code;
 */;
 
@@ -2467,76 +2581,6 @@ Bool_0 = Bool_0?', "nobreak": true':'';
 var collapsed=block.isCollapsed()?', "_collapsed": true':'';
 var disabled=block.isEnabled()?'':', "_disabled": true';
 var code = '{"case": "'+expression_0+'"'+Bool_0+collapsed+disabled+', "action": [\n'+action_0+']},\n';
-return code;
-*/;
-
-choices_s
-    :   '选项' ':' EvalString_Multi? BGNL? '标题' EvalString? '图像' IdString? '超时毫秒数' Int '宽度' IntString? BGNL? Newline choicesContext+ BEND Newline
-
-
-/* choices_s
-tooltip : choices: 给用户提供选项
-helpUrl : /_docs/#/instruction
-previewBlock : true
-default : ["","流浪者","trader",0,'']
-allIds : ['IdString_0']
-var title='';
-if (EvalString_0==''){
-    if (IdString_0=='')title='';
-    else title='\\t['+IdString_0+']';
-} else {
-    if (IdString_0=='')title='\\t['+EvalString_0+']';
-    else title='\\t['+EvalString_0+','+IdString_0+']';
-}
-EvalString_Multi_0 = title+EvalString_Multi_0;
-EvalString_Multi_0 = EvalString_Multi_0 ?(', "text": "'+EvalString_Multi_0+'"'):'';
-Int_0 = Int_0 ? (', "timeout": '+Int_0) : '';
-IntString_0 = IntString_0 ? (', "width": ' + IntString_0) : '';
-var code = ['{"type": "choices"',EvalString_Multi_0,Int_0,IntString_0,
-    block.isCollapsed()?', "_collapsed": true':'',
-    block.isEnabled()?'':', "_disabled": true',
-    ', "choices": [\n',
-    choicesContext_0,
-']},\n'].join('');
-return code;
-*/;
-
-choicesContext
-    :   '子选项' EvalString '图标' IdString? '颜色' ColorString? Colour '启用条件' EvalString? '出现条件' EvalString? BGNL? Newline action+
-
-
-/* choicesContext
-tooltip : 选项的选择
-helpUrl : /_docs/#/instruction
-default : ["提示文字:红钥匙","","","",""]
-allIds : ['IdString_0']
-colour : this.subColor
-ColorString_0 = ColorString_0 ? (', "color": ['+ColorString_0+']') : '';
-EvalString_1 = EvalString_1 && (', "need": "'+EvalString_1+'"');
-EvalString_2 = EvalString_2 && (', "condition": "'+EvalString_2+'"');
-IdString_0 = IdString_0?(', "icon": "'+IdString_0+'"'):'';
-var collapsed=block.isCollapsed()?', "_collapsed": true':'';
-var disabled=block.isEnabled()?'':', "_disabled": true';
-var code = '{"text": "'+EvalString_0+'"'+IdString_0+ColorString_0+EvalString_1+EvalString_2+collapsed+disabled+', "action": [\n'+action_0+']},\n';
-return code;
-*/;
-
-confirm_s
-    :   '显示确认框' ':' EvalString_Multi '超时毫秒数' Int BGNL? '确定的场合' ':' '（默认选中' Bool '）' BGNL? Newline action+ '取消的场合' ':' BGNL? Newline action+ BEND Newline
-
-/* confirm_s
-tooltip : 弹出确认框
-helpUrl : /_docs/#/instruction
-default : ["确认要xxx吗?",0,false]
-previewBlock : true
-Bool_0 = Bool_0?', "default": true':''
-Int_0 = Int_0 ? (', "timeout": '+Int_0) : '';
-var code = ['{"type": "confirm"'+Int_0+Bool_0+', "text": "',EvalString_Multi_0,'",',
-    block.isCollapsed()?' "_collapsed": true,':'',
-    block.isEnabled()?'':' "_disabled": true,',
-    '\n"yes": [\n',action_0,'],\n',
-    '"no": [\n',action_1,']\n',
-'},\n'].join('');
 return code;
 */;
 

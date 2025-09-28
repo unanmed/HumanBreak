@@ -257,33 +257,60 @@ ActionParser.prototype.parseAction = function() {
       return;
     case "text": // 文字/对话
     this.next = MotaActionBlocks['text_s'].xmlText([
-      data.title, data.icon, data.x, data.y, data.width, data.height, data.keepLast,data.interval,data.lineHeight, this.next]);
+      data.title,data.icon,data.textbox,data.x,data.y,data.width,data.height,data.text,this.next]);
     break;
     case "autoText": // 自动剧情文本
-      var info = this.getTitleAndPosition(data.text);
       this.next = MotaActionBlocks['autoText_s'].xmlText([
-        info[0],info[1],info[2],data.time,info[3],this.next]);
+        data.title,data.icon,data.textbox,data.x,data.y,data.width,data.height,data.time,data.text,this.next]);
       break;
     case "scrollText":
-      this.next = MotaActionBlocks['scrollText_s'].xmlText([
-        data.time, data.lineHeight||1.4, data.async||false, this.EvalString_Multi(data.text), this.next]);
+      this.next = MotaActionBlocks['scrollText_s'].xmlText([this.next]);
         break;
     case "comment": // 注释
       this.next = MotaActionBlocks['comment_s'].xmlText([this.EvalString_Multi(data.text),this.next]);
       break;
+    case "createTextbox": 
+      this.next = MotaActionBlocks['createTextbox_s'].xmlText([this.next]);
+    case "createTextbox": 
+      this.next = MotaActionBlocks['deleteTextbox_s'].xmlText([this.next]);
     case "setText": // 设置剧情文本的属性
-      //data.backColor=this.Colour(data.backColor);
-      //data.fillStyle=this.Colour(data.fillStyle);
-      //data.strokeStyle=this.Colour(data.strokeStyle);
+      const parsedFillStyle = data.fillStyle ? data.fillStyle.slice(5, -1) : '';
+      const parsedStrokeStyle = data.strokeStyle ? data.strokeStyle.slice(5, -1) : '';
+      const parsedBackColor = data.backColor ? data.backColor.slice(5, -1) : '';
       this.next = MotaActionBlocks['setText_s'].xmlText([
-        data.x,data.y,data.width,data.height,data.fontFamily,data.fontSize,data.fontWeight,
-        data.fontItalic,data.keepLast,data.interval,data.lineHeight,,data.fillStyle,'rgba('+data.fillStyle+')',
-        data.strokeStyle,'rgba('+data.strokeStyle+')',data.strokeWidth,data.fill,data.stroke,data.backColor,'rgba('+data.backColor+')',
-        data.winskin,data.padding,data.titleFill,data.titleStroke,data.titlePadding,data.textAlign,data.wordBreak,data.ignoreLineStart,data.ignoreLineEnd,data.breakChars,this.next]);
+        data.textbox,    data.x,         data.y,               data.width,         data.height,      data.fontFamily,   data.fontSize,    data.fontWeight,  data.fontItalic,
+        data.keepLast,   data.interval,  data.lineHeight,      parsedFillStyle,    data.fillStyle,   parsedStrokeStyle, data.strokeStyle, data.strokeWidth, data.fill,       data.stroke,
+        parsedBackColor, data.backColor, data.winskin,         data.padding,       data.titleFill,   data.titleStroke,  data.titlePadding,
+        data.textAlign,  data.wordBreak, data.ignoreLineStart, data.ignoreLineEnd, data.breakChars,  this.next
+      ]);
       break;
+    case "createTip": 
+      this.next = MotaActionBlocks['createTip_s'].xmlText([this.next]);
+    case "deleteTip": 
+      this.next = MotaActionBlocks['deletetip_s'].xmlText([this.next]);
     case "tip":
       this.next = MotaActionBlocks['tip_s'].xmlText([
-        data.text,data.icon||"",this.next]);
+        data.tip,data.icon||"",data.text,this.next]);
+      break;
+    case "confirm": // 显示确认框
+      this.next = MotaActionFunctions.xmlText('confirm_s', [
+        this.EvalString_Multi(data.text), data.timeout||0, data["default"],
+        this.insertActionList(data["yes"]),
+        this.insertActionList(data["no"]),
+        this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
+      break;
+    case "choices": // 提供选项
+      var text_choices = null;
+      for(var ii=data.choices.length-1,choice;choice=data.choices[ii];ii--) {
+        choice.color = this.Colour(choice.color);
+        text_choices=MotaActionFunctions.xmlText('choicesContext', [
+          choice.text,choice.icon,choice.color,'rgba('+choice.color+')',choice.need||'',choice.condition||'',this.insertActionList(choice.action),text_choices],
+           /* isShadow */false, /*comment*/ null, /*collapsed*/ choice._collapsed, /*disabled*/ choice._disabled);
+      }
+      if (!this.isset(data.text)) data.text = '';
+      var info = this.getTitleAndPosition(data.text);
+      this.next = MotaActionFunctions.xmlText('choices_s', [
+        info[3],info[0],info[1],data.timeout||0,text_choices,this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       break;
     case "show": // 显示
       data.loc=data.loc||[];
@@ -722,13 +749,6 @@ ActionParser.prototype.parseAction = function() {
           this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       }
       break;
-    case "confirm": // 显示确认框
-      this.next = MotaActionFunctions.xmlText('confirm_s', [
-        this.EvalString_Multi(data.text), data.timeout||0, data["default"],
-        this.insertActionList(data["yes"]),
-        this.insertActionList(data["no"]),
-        this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
-      break;
     case "switch": // 多重条件分歧
       var case_caseList = null;
       for(var ii=data.caseList.length-1,caseNow;caseNow=data.caseList[ii];ii--) {
@@ -739,19 +759,6 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionFunctions.xmlText('switch_s', [
         this.expandEvalBlock([data.condition]),
         case_caseList,this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
-      break;
-    case "choices": // 提供选项
-      var text_choices = null;
-      for(var ii=data.choices.length-1,choice;choice=data.choices[ii];ii--) {
-        choice.color = this.Colour(choice.color);
-        text_choices=MotaActionFunctions.xmlText('choicesContext', [
-          choice.text,choice.icon,choice.color,'rgba('+choice.color+')',choice.need||'',choice.condition||'',this.insertActionList(choice.action),text_choices],
-           /* isShadow */false, /*comment*/ null, /*collapsed*/ choice._collapsed, /*disabled*/ choice._disabled);
-      }
-      if (!this.isset(data.text)) data.text = '';
-      var info = this.getTitleAndPosition(data.text);
-      this.next = MotaActionFunctions.xmlText('choices_s', [
-        info[3],info[0],info[1],data.timeout||0,data.width,text_choices,this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       break;
     case "for": // 循环遍历
       this.next = MotaActionFunctions.xmlText('for_s',[

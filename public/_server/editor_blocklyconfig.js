@@ -19,8 +19,8 @@ editor_blocklyconfig=(function(){
     '入口方块':[
       '<label text="入口方块会根据当前类型在此数组中筛选,具体控制在editor_blockly.entranceCategoryCallback中"></label>',
       MotaActionFunctions.actionParser.parse([
-        "欢迎使用事件编辑器",
-        "本事件触发一次后会消失",
+        {"type": "text", "text": "欢迎使用事件编辑器"},
+        {"type": "text", "text": "本事件触发一次后会消失"},
         {"type": "hide", "time": 500},
       ],'event'),
       MotaActionFunctions.actionParser.parse({
@@ -96,16 +96,19 @@ editor_blocklyconfig=(function(){
       ], 'splitImages'),
     ],
     '显示文字':[
-      MotaActionBlocks['text_s'].xmlText(),
-     
       MotaActionBlocks['comment_s'].xmlText(),
+      MotaActionBlocks['text_s'].xmlText(),
       MotaActionBlocks['autoText_s'].xmlText(),
       MotaActionBlocks['scrollText_s'].xmlText(),
+      MotaActionBlocks['createTextbox_s'].xmlText(),
+      MotaActionBlocks['deleteTextbox_s'].xmlText(),
       MotaActionBlocks['setText_s'].xmlText(),
+      MotaActionBlocks['createTip_s'].xmlText(),
+      MotaActionBlocks['deleteTip_s'].xmlText(),
       MotaActionBlocks['tip_s'].xmlText(),
       MotaActionBlocks['confirm_s'].xmlText(),
       MotaActionBlocks['choices_s'].xmlText([
-        '选择剑或者盾','流浪者','man',0,'',MotaActionBlocks['choicesContext'].xmlText([
+        '选择剑或者盾','流浪者','man','',MotaActionBlocks['choicesContext'].xmlText([
           '剑','','',null,'','',MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [3,3]}]),
         ])
       ]),

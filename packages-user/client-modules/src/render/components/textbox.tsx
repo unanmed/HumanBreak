@@ -31,6 +31,7 @@ import {
     TextAlign
 } from './textboxTyper';
 import { SetupComponentOptions } from '@motajs/system-ui';
+import { texture } from '../elements';
 
 //#region TextContent
 
@@ -248,6 +249,8 @@ export interface TextboxProps extends TextContentProps, DefaultProps {
     titleStroke?: CanvasStyle;
     /** 标题文字与边框间的距离，默认为4 */
     titlePadding?: number;
+    /** 图标 */
+    icon?: AllIds;
     /** 最大宽度 */
     width: number;
 }
@@ -307,30 +310,10 @@ export const Textbox = defineComponent<
     keyof TextboxEmits,
     TextboxSlots
 >((props, { slots, expose, emit }) => {
-    const contentData = shallowReactive<TextContentProps>({ width: 200 });
     const data = shallowReactive<TextboxProps>({ width: 200 });
 
-    const setContentData = () => {
-        contentData.breakChars = props.breakChars ?? '';
-        contentData.font = props.font ?? new Font();
-        contentData.ignoreLineEnd = props.ignoreLineEnd ?? '';
-        contentData.ignoreLineStart = props.ignoreLineStart ?? '';
-        contentData.interval = props.interval ?? 0;
-        contentData.keepLast = props.keepLast ?? false;
-        contentData.lineHeight = props.lineHeight ?? 0;
-        contentData.text = props.text ?? '';
-        contentData.textAlign = props.textAlign ?? TextAlign.Left;
-        contentData.wordBreak = props.wordBreak ?? WordBreak.Space;
-        contentData.fill = props.fill ?? true;
-        contentData.stroke = props.stroke ?? false;
-        contentData.fillStyle = props.fillStyle ?? '#fff';
-        contentData.strokeStyle = props.strokeStyle ?? '#000';
-        contentData.strokeWidth = props.strokeWidth ?? 2;
-        contentData.loc = props.loc;
-        contentData.width = props.width;
-    };
-
     const setTextboxData = () => {
+        // Textbox
         data.backColor = props.backColor ?? '#222';
         data.winskin = props.winskin;
         data.padding = props.padding ?? 8;
@@ -341,9 +324,28 @@ export const Textbox = defineComponent<
         data.width = props.width ?? props.loc?.[2] ?? 200;
         data.height = props.height ?? props.loc?.[3] ?? 200;
         data.title = props.title ?? '';
+        data.icon = props.icon;
+
+        // TextContent
+        data.breakChars = props.breakChars ?? '';
+        data.font = props.font ?? new Font();
+        data.ignoreLineEnd = props.ignoreLineEnd ?? '';
+        data.ignoreLineStart = props.ignoreLineStart ?? '';
+        data.interval = props.interval ?? 0;
+        data.keepLast = props.keepLast ?? false;
+        data.lineHeight = props.lineHeight ?? 0;
+        data.text = props.text ?? '';
+        data.textAlign = props.textAlign ?? TextAlign.Left;
+        data.wordBreak = props.wordBreak ?? WordBreak.Space;
+        data.fill = props.fill ?? true;
+        data.stroke = props.stroke ?? false;
+        data.fillStyle = props.fillStyle ?? '#fff';
+        data.strokeStyle = props.strokeStyle ?? '#000';
+        data.strokeWidth = props.strokeWidth ?? 2;
+        data.loc = props.loc;
+        data.width = props.width;
     };
 
-    setContentData();
     setTextboxData();
 
     watch(props, () => {
@@ -361,15 +363,45 @@ export const Textbox = defineComponent<
     const tw = ref(data.titlePadding! * 2);
     /** 标题高度 */
     const th = ref(data.titlePadding! * 2);
+    const contentX = computed(() => {
+        if (hasIcon.value) {
+            return data.padding! + 40;
+        } else {
+            return data.padding!;
+        }
+    });
     const contentY = computed(() => {
         const height = th.value;
         return data.title ? height : 0;
     });
     const backHeight = computed(() => data.height! - contentY.value);
-    const contentWidth = computed(() => data.width! - data.padding! * 2);
+    const contentWidth = computed(() => {
+        if (hasIcon.value) {
+            return data.width! - data.padding! * 2 - 40;
+        } else {
+            return data.width! - data.padding! * 2;
+        }
+    });
     const contentHeight = computed(
         () => data.height! - data.padding! * 2 - contentY.value
     );
+    const iconLoc = computed<ElementLocator>(() => {
+        const y = contentY.value;
+        const pad = data.padding!;
+        const icon = data.icon;
+        if (isNil(icon) || icon === 'none') {
+            return [];
+        } else {
+            const num = texture.idNumberMap[icon];
+            const renderable = texture.getRenderable(num);
+            if (!renderable) return [];
+            const [, , w, h] = renderable.render[0];
+            return [pad, pad + y, w, h];
+        }
+    });
+    const hasIcon = computed(() => {
+        return !isNil(data.icon) && data.icon !== 'none';
+    });
 
     const onSetText = () => {
         nextTick(() => {
@@ -385,6 +417,8 @@ export const Textbox = defineComponent<
 
     //#region store
 
+    let lastTitle = data.title;
+
     /** 结束打字机 */
     const storeEmits: TextboxStoreEmits = {
         endType() {
@@ -397,23 +431,23 @@ export const Textbox = defineComponent<
             hidden.value = false;
         },
         update(value) {
-            if (data.title !== value.title) {
-                data.title = value.title;
+            if (value.title !== lastTitle) {
                 onSetText();
+                lastTitle = value.title;
             }
         },
         setText(text) {
-            if (contentData.text === text) {
+            if (data.text === text) {
                 content.value?.retype();
             } else {
-                contentData.text = text;
+                data.text = text;
             }
         }
     };
 
     const store = TextboxStore.use(
         props.id ?? getNextTextboxId(),
-        contentData,
+        data,
         storeEmits
     );
 
@@ -485,10 +519,23 @@ export const Textbox = defineComponent<
                     fillStyle={data.backColor}
                 ></g-rect>
             )}
+            {hasIcon.value && (
+                <icon icon={data.icon!} loc={iconLoc.value} animate />
+            )}
+            {hasIcon.value && (
+                <g-rect
+                    loc={iconLoc.value}
+                    strokeStyle="gold"
+                    fillStyle="#222"
+                    lineWidth={2}
+                    fill
+                    stroke
+                />
+            )}
             <TextContent
-                {...contentData}
+                {...data}
                 ref={content}
-                x={data.padding!}
+                x={contentX.value}
                 y={contentY.value + data.padding!}
                 width={contentWidth.value}
                 height={contentHeight.value}
@@ -531,7 +578,7 @@ export class TextboxStore extends EventEmitter<TextboxStoreEvent> {
     typing: boolean = false;
 
     private constructor(
-        private readonly data: TextboxProps,
+        public readonly data: TextboxProps,
         private readonly emits: TextboxStoreEmits
     ) {
         super();

@@ -876,6 +876,22 @@ control.prototype.setHeroOpacity = function (
 ////// 设置画布偏移
 control.prototype.setGameCanvasTranslate = function (canvas, x, y) {
     // Deprecated. Use RenderItem.transform instead.
+    // For editor compatibility.
+    var c = core.dom.gameCanvas[canvas];
+    x = x * core.domStyle.scale;
+    y = y * core.domStyle.scale;
+    c.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+    c.style.webkitTransform = 'translate(' + x + 'px,' + y + 'px)';
+    c.style.OTransform = 'translate(' + x + 'px,' + y + 'px)';
+    c.style.MozTransform = 'translate(' + x + 'px,' + y + 'px)';
+    if (main.mode === 'editor' && editor.isMobile) {
+        c.style.transform =
+            'translate(' +
+            (x / core._PX_) * 96 +
+            'vw,' +
+            (y / core._PY_) * 96 +
+            'vw)';
+    }
 };
 
 ////// 加减画布偏移

@@ -21,6 +21,7 @@ function main() {
     this.dom = {
         body: document.body,
         gameDraw: document.getElementById('game-draw'),
+        gameCanvas: document.getElementsByClassName('gameCanvas'),
         inputDiv: document.getElementById('inputDiv'),
         inputMessage: document.getElementById('inputMessage'),
         inputBox: document.getElementById('inputBox'),
@@ -194,6 +195,10 @@ main.prototype.loadSync = function (mode, callback) {
 };
 
 main.prototype.loadAsync = async function (mode, callback) {
+    for (var i = 0; i < main.dom.gameCanvas.length; i++) {
+        main.canvas[main.dom.gameCanvas[i].id] =
+            main.dom.gameCanvas[i].getContext('2d');
+    }
     main.mode = mode;
 
     // 加载全塔属性代码

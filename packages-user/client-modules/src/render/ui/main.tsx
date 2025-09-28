@@ -76,7 +76,7 @@ const MainScene = defineComponent(() => {
     const mainTextboxProps: Props<typeof Textbox> = {
         text: '',
         hidden: true,
-        loc: [0, MAP_HEIGHT - 150, MAIN_WIDTH, 150],
+        loc: [0, MAP_HEIGHT - 150, MAP_WIDTH, 150],
         zIndex: 30,
         fillStyle: '#fff',
         titleFill: 'gold',
