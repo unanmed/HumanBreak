@@ -149,6 +149,10 @@ export const LeftStatusBar = defineComponent<StatusBarProps<ILeftHeroStatus>>(
             inNumpad.value = !inNumpad.value;
         };
 
+        const onNumpad = () => {
+            inNumpad.value = !inNumpad.value;
+        };
+
         //#region 属性显示
 
         /** 一般属性 */
