@@ -3,6 +3,12 @@ import { HeroRenderer } from './hero';
 import { ILayerGroupRenderExtends, LayerGroup } from './layer';
 import { LayerGroupFloorBinder } from './layer';
 import { hyper, TimingFn } from 'mutate-animate';
+import {
+    MAP_BLOCK_HEIGHT,
+    MAP_BLOCK_WIDTH,
+    MAP_HEIGHT,
+    MAP_WIDTH
+} from '../shared';
 
 export class FloorViewport implements ILayerGroupRenderExtends {
     id: string = 'viewport';
@@ -62,8 +68,8 @@ export class FloorViewport implements ILayerGroupRenderExtends {
         this.enabled = true;
         const { x, y } = core.status.hero.loc;
         const { x: nx, y: ny } = this.group.camera;
-        const halfWidth = core._PX_ / 2;
-        const halfHeight = core._PY_ / 2;
+        const halfWidth = MAP_WIDTH / 2;
+        const halfHeight = MAP_HEIGHT / 2;
         const cell = this.group.cellSize;
         const half = cell / 2;
         this.applyPosition(
@@ -94,8 +100,8 @@ export class FloorViewport implements ILayerGroupRenderExtends {
     getBoundedPosition(x: number, y: number) {
         if (!this.checkDependency()) return { x, y };
         if (!this.boundX && !this.boundY) return { x, y };
-        const width = core._WIDTH_;
-        const height = core._HEIGHT_;
+        const width = MAP_BLOCK_WIDTH;
+        const height = MAP_BLOCK_HEIGHT;
         const minX = (width - 1) / 2;
         const minY = (height - 1) / 2;
         const floor = core.status.maps[this.binder!.getFloor()];
@@ -201,7 +207,7 @@ export class FloorViewport implements ILayerGroupRenderExtends {
             this.applyPosition(nx, ny);
 
             if (ending) {
-                if (this.ox === xTarget && this.oy == yTarget) {
+                if (this.ox === xTarget && this.oy === yTarget) {
                     this.hero!.off('moveTick', this.movingFramer);
                     return;
                 }
@@ -276,8 +282,8 @@ export class FloorViewport implements ILayerGroupRenderExtends {
     private applyPosition(x: number, y: number) {
         if (!this.enabled) return;
         if (x === this.nx && y === this.ny) return;
-        const halfWidth = core._PX_ / 2;
-        const halfHeight = core._PY_ / 2;
+        const halfWidth = MAP_WIDTH / 2;
+        const halfHeight = MAP_HEIGHT / 2;
         const cell = this.group.cellSize;
         const half = cell / 2;
         this.nx = x;

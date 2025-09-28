@@ -9,6 +9,7 @@ import {
     LayerGroupFloorBinder,
     FloorViewport
 } from './elements';
+import { MAP_WIDTH } from './shared';
 
 const loopMaps = MiscData.loopMaps;
 
@@ -71,13 +72,13 @@ function enableLoopMapElement(floorId: FloorIds) {
             // 这个是计算循环地图应该显示在哪
             const [, y2] = transform.transformed(x1 - testPos, 0);
             camera.reset();
-            camera.translate(core._PX_ - testPos, y2);
-            loopLayer.pos(transform.x - core._PX_, 0);
+            camera.translate(MAP_WIDTH - testPos, y2);
+            loopLayer.pos(transform.x - MAP_WIDTH, 0);
             loopLayer.show();
             loopLayer.update(loopLayer);
         } else {
             const [x2, y2] = transform.transformed(testPos, 0);
-            if (x2 < core._PX_) {
+            if (x2 < MAP_WIDTH) {
                 // 这个不用做其他运算，可以直接显示
                 camera.reset();
                 camera.translate(0, y2);

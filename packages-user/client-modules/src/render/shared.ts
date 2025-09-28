@@ -7,9 +7,9 @@ import { Font } from '@motajs/render-style';
 
 /** 每个格子的宽高 */
 export const CELL_SIZE = 32;
-/** 地图格子宽度，此处仅影响画面，不影响游戏内逻辑，游戏内逻辑地图大小请在 core.js 中修改 */
+/** 地图格子宽度，此处仅影响画面，可能不影响游戏内的部分逻辑，游戏内逻辑地图大小请在 core.js 中修改 */
 export const MAP_BLOCK_WIDTH = 15;
-/** 地图格子高度，此处仅影响画面，不影响游戏内逻辑，游戏内逻辑地图大小请在 core.js 中修改 */
+/** 地图格子高度，此处仅影响画面，可能不影响游戏内的部分逻辑，游戏内逻辑地图大小请在 core.js 中修改 */
 export const MAP_BLOCK_HEIGHT = 15;
 /** 地图像素宽度 */
 export const MAP_WIDTH = CELL_SIZE * MAP_BLOCK_WIDTH;

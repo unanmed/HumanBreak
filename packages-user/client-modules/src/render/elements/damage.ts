@@ -19,6 +19,7 @@ import {
     Layer,
     calNeedRenderOf
 } from './layer';
+import { MAP_BLOCK_WIDTH, MAP_HEIGHT, MAP_WIDTH } from '../shared';
 
 /**
  * 根据伤害大小获取颜色
@@ -167,9 +168,9 @@ export class Damage extends RenderItem<EDamageEvent> {
     constructor() {
         super('absolute', false, true);
 
-        this.block = new BlockCacher(0, 0, core._WIDTH_, 1);
+        this.block = new BlockCacher(0, 0, MAP_BLOCK_WIDTH, 1);
         this.type = 'absolute';
-        this.size(core._PX_, core._PY_);
+        this.size(MAP_WIDTH, MAP_HEIGHT);
         this.setHD(true);
         this.setAntiAliasing(true);
     }
