@@ -36,8 +36,7 @@ import {
     RightStatusBar
 } from './statusBar';
 import { ReplayingStatus } from './toolbar';
-import { getHeroStatusOn, HeroSkill, NightSpecial } from '@user/data-state';
-import { jumpIgnoreFloor } from '@user/legacy-plugin-data';
+import { getHeroStatusOn } from '@user/data-state';
 import { hook } from '@user/data-base';
 import { FloorDamageExtends, FloorItemDetail } from '../elements';
 import { LayerGroupPortal } from '../legacy/portal';
@@ -100,6 +99,13 @@ const MainScene = defineComponent(() => {
         }
     });
 
+    const replayStatus: ReplayingStatus = reactive({
+        replaying: false,
+        playing: false,
+        speed: 1,
+        played: 0,
+        total: 0
+    });
     const leftStatus: ILeftHeroStatus = reactive({
         hp: 0,
         atk: 0,
@@ -112,26 +118,10 @@ const MainScene = defineComponent(() => {
         redKey: 0,
         floor: 'MT0',
         lv: '',
-        regen: 0,
-        exAtk: 0,
-        magicDef: 0
-    });
-    const replayStatus: ReplayingStatus = reactive({
-        playing: false,
-        speed: 1,
-        played: 0,
-        total: 0
+        replay: replayStatus
     });
     const rightStatus: IRightHeroStatus = reactive({
-        autoSkill: false,
-        skillName: '',
-        skillDesc: '',
-        jumpCount: 0,
-        springCount: 0,
-        floor: 'MT0',
-        replaying: false,
-        replayStatus,
-        night: 0
+        exampleHard: 0
     });
 
     //#region 状态更新
@@ -140,7 +130,6 @@ const MainScene = defineComponent(() => {
         hideStatus.value = core.getFlag('hideStatusBar', false);
 
         const hero = core.status.hero;
-        const floor = core.status.floorId;
         leftStatus.atk = getHeroStatusOn('atk');
         leftStatus.hp = getHeroStatusOn('hp');
         leftStatus.def = getHeroStatusOn('def');
@@ -152,35 +141,15 @@ const MainScene = defineComponent(() => {
         leftStatus.redKey = core.itemCount('redKey');
         leftStatus.floor = core.status.floorId;
         leftStatus.lv = core.getLvName(hero.lv);
-        leftStatus.regen = getHeroStatusOn('hpmax');
-        leftStatus.exAtk = getHeroStatusOn('mana');
-        leftStatus.magicDef = getHeroStatusOn('magicDef');
 
-        rightStatus.autoSkill = HeroSkill.getAutoSkill();
-        rightStatus.skillName = HeroSkill.getSkillName();
-        rightStatus.skillDesc = HeroSkill.getSkillDesc();
-        rightStatus.night = NightSpecial.getNight(floor);
-        rightStatus.floor = floor;
-        rightStatus.replaying = core.isReplaying();
         const { pausing, speed, toReplay, totalList } = core.status.replay;
+        replayStatus.replaying = core.isReplaying();
         replayStatus.playing = !pausing;
         replayStatus.speed = speed;
         replayStatus.played = totalList.length - toReplay.length;
         replayStatus.total = totalList.length;
-        if (HeroSkill.learnedSkill(HeroSkill.Jump)) {
-            if (jumpIgnoreFloor.has(floor)) {
-                rightStatus.jumpCount = -2;
-            } else {
-                rightStatus.jumpCount = 3 - (flags[`jump_${floor}`] ?? 0);
-            }
-        } else {
-            rightStatus.jumpCount = -1;
-        }
-        if (core.hasFlag('spring')) {
-            rightStatus.springCount = 50 - (flags.springCount ?? 0);
-        } else {
-            rightStatus.springCount = -1;
-        }
+
+        rightStatus.exampleHard = flags.hard;
     };
 
     const updateDataFallback = () => {

@@ -1021,7 +1021,7 @@ export class TextContentParser {
         this.blocks.forEach(v => {
             if (v.type !== TextContentType.Wait) {
                 width += v.width;
-                height = v.height;
+                if (v.height > height) height = v.height;
             }
         });
         const line: ITextContentLine = {
