@@ -1,6 +1,7 @@
 import { GameUI, SetupComponentOptions } from '@motajs/system-ui';
 import { computed, ComputedRef, defineComponent, shallowReactive } from 'vue';
 import { TextContent } from '../components';
+import { DefaultProps, ElementLocator, Font } from '@motajs/render';
 import {
     DefaultProps,
     ElementLocator,
@@ -142,6 +143,10 @@ export const LeftStatusBar = defineComponent<StatusBarProps<ILeftHeroStatus>>(
         /** 钥匙显示文字 */
         const key = (num: number) => {
             return num.toString().padStart(2, '0');
+        };
+
+        const onNumpad = () => {
+            inNumpad.value = !inNumpad.value;
         };
 
         //#region 属性显示
