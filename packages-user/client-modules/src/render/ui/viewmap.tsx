@@ -142,6 +142,7 @@ export const ViewMap = defineComponent<ViewMapProps>(props => {
     const openBook = () => core.openBook(true);
 
     const fly = () => {
+        if (!core.hasItem('fly')) return;
         const id = viewableFloor[now.value];
         const success = core.flyTo(id);
         if (success) close();
