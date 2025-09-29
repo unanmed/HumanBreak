@@ -85,17 +85,25 @@ function handleScreenSetting<T extends number | boolean>(
     if (key === 'fullscreen') {
         // 全屏
         triggerFullscreen(n as boolean);
-    } else if (key === 'heroDetail') {
-        // 勇士显伤
-        core.drawHero();
     } else if (key === 'fontSize') {
         // 字体大小
         root.style.fontSize = `${n}px`;
         const absoluteSize = (n as number) * devicePixelRatio;
         storage.setValue('@@absoluteFontSize', absoluteSize);
         storage.write();
-    } else if (key === 'fontSizeStatus') {
-        // fontSize.value = n as number;
+    } else if (key === 'scale') {
+        const { MAIN_HEIGHT, MAIN_WIDTH } = Mota.require(
+            '@user/client-modules'
+        );
+        const max = Math.min(
+            (window.innerHeight / MAIN_HEIGHT) * 100,
+            (window.innerWidth / MAIN_WIDTH) * 100,
+            n as number
+        );
+        const scale = Number((Math.floor((max / 100) * 4) / 4).toFixed(2));
+        // @ts-expect-error 遗留问题
+        core.domStyle.scale = scale;
+        Mota.require('@user/client-modules').mainRenderer.setScale(scale);
     }
 }
 
@@ -153,19 +161,12 @@ mainSetting
         '显示设置',
         new MotaSetting()
             .register('fullscreen', '全屏游戏', false, COM.Boolean)
+            .register('scale', '画面缩放', 100, COM.Number, [50, 500, 25])
+            .setDisplayFunc('scale', value => `${value}%`)
             .register('halo', '光环显示', true, COM.Boolean)
             .register('itemDetail', '宝石血瓶显伤', true, COM.Boolean)
-            .register('heroDetail', '勇士显伤', false, COM.Boolean)
             .register('transition', '界面动画', false, COM.Boolean)
             .register('fontSize', '字体大小', 16, COM.Number, [2, 48, 1])
-            .register(
-                'fontSizeStatus',
-                '状态栏字体',
-                16,
-                COM.Number,
-                [10, 300, 10]
-            )
-            .register('smoothView', '平滑镜头', true, COM.Boolean)
             .register('criticalGem', '临界显示方式', false, COM.Boolean)
             .setDisplayFunc('criticalGem', value => (value ? '宝石数' : '攻击'))
             .register('keyScale', '虚拟键盘缩放', 100, COM.Number, [25, 5, 500])
@@ -176,7 +177,6 @@ mainSetting
         '操作设置',
         new MotaSetting()
             .register('autoSkill', '自动切换技能', true, COM.Boolean)
-            .register('fixed', '定点查看', true, COM.Boolean)
             .register('hotkey', '快捷键', false, COM.HotkeySetting)
             .setDisplayFunc('hotkey', () => '')
     )
@@ -192,17 +192,17 @@ mainSetting
     .register(
         'utils',
         '系统设置',
-        new MotaSetting()
-            .register('betterLoad', '优化加载', true, COM.Boolean)
-            .register('autoScale', '自动放缩', true, COM.Boolean)
+        new MotaSetting().register('autoScale', '自动放缩', true, COM.Boolean)
     )
     .register(
         'fx',
         '特效设置',
-        new MotaSetting()
-            .register('paraLight', '野外阴影', true, COM.Boolean)
-            .register('frag', '打怪特效', true, COM.Boolean)
-            .register('portalParticle', '传送门特效', true, COM.Boolean)
+        new MotaSetting().register(
+            'portalParticle',
+            '传送门特效',
+            true,
+            COM.Boolean
+        )
     )
     .register(
         'ui',
@@ -245,7 +245,6 @@ mainSetting
     .setDescription('ui.danmaku', '是否显示弹幕')
     .setDescription('ui.danmakuSpeed', '弹幕速度，刷新或开关弹幕显示后起效')
     .setDescription('ui.tips', `是否在游戏画面右上角常亮显示小贴士`)
-    .setDescription('screen.fontSizeStatus', `修改状态栏的字体大小`)
     .setDescription(
         'screen.blur',
         '打开任意ui界面时是否有背景虚化效果，移动端打开后可能会有掉帧或者发热现象。关闭ui后生效'
@@ -286,24 +285,18 @@ export function createSetting() {
     loading.once('coreInit', () => {
         mainSetting.reset({
             'screen.fullscreen': !!document.fullscreenElement,
+            'screen.scale': storage.getValue('screen.scale', 100),
             'screen.halo': !!storage.getValue('screen.showHalo', true),
             'screen.itemDetail': !!storage.getValue('screen.itemDetail', true),
-            'screen.heroDetail': !!storage.getValue('screen.heroDetail', false),
             'screen.transition': !!storage.getValue('screen.transition', false),
             'screen.fontSize': storage.getValue(
                 'screen.fontSize',
                 isMobile ? 9 : 16
             ),
-            'screen.smoothView': !!storage.getValue('screen.smoothView', true),
             'screen.criticalGem': !!storage.getValue(
                 'screen.criticalGem',
                 false
             ),
-            'screen.fontSizeStatus': storage.getValue(
-                'screen.fontSizeStatus',
-                100
-            ),
-            'action.fixed': !!storage.getValue('action.fixed', true),
             'audio.bgmEnabled': !!storage.getValue('audio.bgmEnabled', true),
             'audio.bgmVolume': storage.getValue('audio.bgmVolume', 80),
             'audio.soundEnabled': !!storage.getValue(
@@ -311,10 +304,7 @@ export function createSetting() {
                 true
             ),
             'audio.soundVolume': storage.getValue('audio.soundVolume', 80),
-            'utils.betterLoad': !!storage.getValue('utils.betterLoad', true),
             'utils.autoScale': !!storage.getValue('utils.autoScale', true),
-            'fx.paraLight': !!storage.getValue('fx.paraLight', true),
-            'fx.frag': !!storage.getValue('fx.frag', true),
             'fx.portalParticle': !!storage.getValue('fx.portalParticle', true),
             'ui.mapScale': storage.getValue(
                 'ui.mapScale',

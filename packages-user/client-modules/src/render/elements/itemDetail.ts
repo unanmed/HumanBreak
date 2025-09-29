@@ -159,8 +159,10 @@ export class FloorItemDetail implements ILayerGroupRenderExtends {
      * @param block 要计算的分块
      */
     calAllItems(block: Set<number>) {
-        if (!core.status.thisMap) return;
+        const enable = mainSetting.getValue('screen.itemDetail');
+        if (!core.status.thisMap || !enable) return;
         if (this.dirtyBlock.size === 0 || block.size === 0) return;
+
         let diff: Record<string | symbol, number | undefined> = {};
         const before = core.status.hero;
         const hero = structuredClone(core.status.hero);
@@ -174,8 +176,7 @@ export class FloorItemDetail implements ILayerGroupRenderExtends {
         core.status.hero = new Proxy(hero, handler);
 
         core.setFlag('__statistics__', true);
-        block.forEach(v => {
-            if (!this.dirtyBlock.has(v)) return;
+        this.dirtyBlock.forEach(v => {
             const data = this.blockData.get(v);
             const detail = this.detailData.get(v);
             detail?.clear();

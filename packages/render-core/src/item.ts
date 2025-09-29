@@ -435,10 +435,9 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         ctx.globalAlpha = this.alpha;
         ctx.globalCompositeOperation = this.composite;
         if (this.enableCache) {
-            const { width, height, ctx } = this.cache;
+            const { width, height } = this.cache;
             if (this.cacheDirty) {
-                const { canvas } = this.cache;
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                this.cache.clear();
                 this.render(this.cache, tran);
                 this.cacheDirty = false;
             }

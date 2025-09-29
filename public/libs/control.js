@@ -2993,16 +2993,7 @@ control.prototype.checkBgm = function () {
 };
 
 ///// 设置屏幕放缩 //////
-control.prototype.setDisplayScale = function (delta) {
-    var index = core.domStyle.availableScale.indexOf(core.domStyle.scale);
-    if (index < 0) return;
-    index =
-        (index + delta + core.domStyle.availableScale.length) %
-        core.domStyle.availableScale.length;
-    core.domStyle.scale = core.domStyle.availableScale[index];
-    core.setLocalStorage('scale', core.domStyle.scale);
-    core.resize();
-};
+control.prototype.setDisplayScale = function (delta) {};
 
 // ------ 状态栏，工具栏等相关 ------ //
 
@@ -3085,33 +3076,33 @@ control.prototype.resize = function () {
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    if (window.innerWidth >= 600) {
-        // 横屏
-        core.domStyle.isVertical = false;
-        core.domStyle.availableScale = [];
-        const maxScale = Math.min(width / core._PX_, height / core._PY_);
-        [1, 1.25, 1.5, 1.75, 2, 2.25, 2.5].forEach(function (v) {
-            if (v < maxScale) {
-                core.domStyle.availableScale.push(v);
-            }
-        });
-        if (!core.domStyle.availableScale.includes(core.domStyle.scale)) {
-            core.domStyle.scale = 1;
-        }
-    } else {
-        // 竖屏
-        core.domStyle.isVertical = true;
-        core.domStyle.scale = window.innerWidth / core._PX_;
-        core.domStyle.availableScale = [];
-    }
+    // if (window.innerWidth >= 600) {
+    //     // 横屏
+    //     core.domStyle.isVertical = false;
+    //     core.domStyle.availableScale = [];
+    //     const maxScale = Math.min(width / core._PX_, height / core._PY_);
+    //     [1, 1.25, 1.5, 1.75, 2, 2.25, 2.5].forEach(function (v) {
+    //         if (v < maxScale) {
+    //             core.domStyle.availableScale.push(v);
+    //         }
+    //     });
+    //     if (!core.domStyle.availableScale.includes(core.domStyle.scale)) {
+    //         core.domStyle.scale = 1;
+    //     }
+    // } else {
+    //     // 竖屏
+    //     core.domStyle.isVertical = true;
+    //     core.domStyle.scale = window.innerWidth / core._PX_;
+    //     core.domStyle.availableScale = [];
+    // }
 
-    if (!core.domStyle.isVertical) {
-        const height = window.innerHeight;
-        const width = window.innerWidth;
-        const maxScale = Math.min(height / core._PY_, width / core._PX_);
-        const target = Number((Math.floor(maxScale * 4) / 4).toFixed(2));
-        core.domStyle.scale = target - 0.25;
-    }
+    // if (!core.domStyle.isVertical) {
+    //     const height = window.innerHeight;
+    //     const width = window.innerWidth;
+    //     const maxScale = Math.min(height / core._PY_, width / core._PX_);
+    //     const target = Number((Math.floor(maxScale * 4) / 4).toFixed(2));
+    //     core.domStyle.scale = target - 0.25;
+    // }
 
     this._doResize({});
     this.setToolbarButton();

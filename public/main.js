@@ -297,21 +297,18 @@ main.prototype.loadAsync = async function (mode, callback) {
     if (main.mode === 'editor') return;
 
     // 自动放缩最大化
-    let auto = Mota.require('@motajs/legacy-ui').mainSetting.getValue(
-        'autoScale',
-        true
-    );
+    const mainSetting = Mota.require('@motajs/legacy-ui').mainSetting;
+    const auto = mainSetting.getValue('utils.autoScale', true);
 
-    if (auto && !core.domStyle.isVertical) {
+    // 暂时不考虑手机端
+    if (auto) {
         const height = window.innerHeight;
         const width = window.innerWidth;
         const maxScale = Math.min(height / core._PY_, width / core._PX_);
         const target = Number((Math.floor(maxScale * 4) / 4).toFixed(2));
-        core.domStyle.scale = target - 0.25;
+        mainSetting.setValue('screen.scale', Math.round(target * 100) - 25);
     }
-    if (core.domStyle.isVertical) {
-        core.domStyle.scale = window.innerWidth / core._PX_;
-    }
+
     Mota.r(() => {
         Mota.require('@user/client-modules').mainRenderer.setScale(
             core.domStyle.scale

@@ -295,16 +295,12 @@ export function ensureArray<T>(arr: T): T extends any[] ? T : T[] {
 }
 
 export async function triggerFullscreen(full: boolean) {
-    const { maxGameScale } = Mota.require('@user/data-utils');
     if (!!document.fullscreenElement && !full) {
         if (window.jsinterface) {
             window.jsinterface.requestPortrait();
             return;
         }
         await document.exitFullscreen();
-        requestAnimationFrame(() => {
-            maxGameScale(1);
-        });
     }
     if (full && !document.fullscreenElement) {
         if (window.jsinterface) {
@@ -312,9 +308,6 @@ export async function triggerFullscreen(full: boolean) {
             return;
         }
         await document.body.requestFullscreen();
-        requestAnimationFrame(() => {
-            maxGameScale();
-        });
     }
 }
 
@@ -349,10 +342,10 @@ export function formatSize(size: number) {
     return size < 1 << 10
         ? `${size.toFixed(2)}B`
         : size < 1 << 20
-        ? `${(size / (1 << 10)).toFixed(2)}KB`
-        : size < 1 << 30
-        ? `${(size / (1 << 20)).toFixed(2)}MB`
-        : `${(size / (1 << 30)).toFixed(2)}GB`;
+          ? `${(size / (1 << 10)).toFixed(2)}KB`
+          : size < 1 << 30
+            ? `${(size / (1 << 20)).toFixed(2)}MB`
+            : `${(size / (1 << 30)).toFixed(2)}GB`;
 }
 
 export function getIconHeight(icon: AllIds | 'hero') {
