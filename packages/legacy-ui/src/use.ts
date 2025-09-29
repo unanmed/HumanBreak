@@ -46,9 +46,7 @@ window.addEventListener('resize', () => {
 checkMobile();
 
 sleep(2000).then(() => {
-    if (!isMobile) {
-        tip('info', `注意，不推荐使用浏览器的缩放功能，使用游戏内的缩放即可`);
-    }
+    tip('info', `2.B 暂不支持竖屏游玩，手机端请考虑横屏游玩`);
 });
 
 function checkMobile() {

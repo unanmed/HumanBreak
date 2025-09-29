@@ -77,7 +77,7 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"keiskeiFairy": {"name":"铃兰花妖","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"tulipFairy": {"name":"郁金香花妖","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"purpleBowman": {"name":"高级弓兵","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
-	"bearDown": {"name":"熊出没","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[],"faceIds":{"down":"bearDown","left":"bearLeft","right":"bearRight","up":"bearUp"},"bigImage":"bear.png"},
+	"bearDown": {"name":"熊出没","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[],"faceIds":{"down":"bearDown","left":"bearLeft","right":"bearRight","up":"bearUp"},"bigImage":null},
 	"bearLeft": {"name":"熊出没","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[],"faceIds":{"down":"bearDown","left":"bearLeft","right":"bearRight","up":"bearUp"}},
 	"bearRight": {"name":"熊出没","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[],"faceIds":{"down":"bearDown","left":"bearLeft","right":"bearRight","up":"bearUp"}},
 	"bearUp": {"name":"熊出没","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[],"faceIds":{"down":"bearDown","left":"bearLeft","right":"bearRight","up":"bearUp"}}

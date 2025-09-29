@@ -45,27 +45,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"zone"
 		],
 		"bgms": [
-			"beforeBoss.opus",
-			"beforeNight.opus",
-			"cave.opus",
-			"chapter2ED.opus",
-			"escape.opus",
-			"escape2.opus",
-			"grass.opus",
-			"mount.opus",
-			"night.opus",
-			"palaceCenter.opus",
-			"palaceNorth.opus",
-			"palaceSouth.opus",
-			"plot1.opus",
-			"road.opus",
-			"title.opus",
-			"tower.opus",
-			"towerBoss.opus",
-			"towerBoss2.opus",
-			"towerBoss3.opus",
-			"winter.opus",
-			"winterTown.opus"
+			"bgm.opus"
 		],
 		"sounds": [
 			"008-System08.opus",
@@ -208,7 +188,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"首饰",
 			"首饰"
 		],
-		"startBgm": "title.opus",
+		"startBgm": "bgm.opus",
 		"styles": {
 			"floorChangingStyle": " ",
 			"statusBarColor": [
@@ -241,7 +221,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"hero": {
 			"image": "hero.png",
 			"animate": false,
-			"name": "原始人",
+			"name": "阳光",
 			"lv": 1,
 			"hpmax": 0,
 			"hp": 500,
@@ -399,100 +379,12 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		],
 		"startText": [
 			{
-				"type": "hideStatusBar"
+				"type": "text",
+				"text": "欢迎使用古祠制作的 2.B 样板，本样板主要针对渲染系统进行了重构，现在我们有了更加方便强大的渲染系统，也对部分相关事件进行了重置！"
 			},
 			{
-				"type": "setText",
-				"position": "down",
-				"text": [
-					0,
-					0,
-					0,
-					1
-				],
-				"background": "winskin.png",
-				"textfont": 20,
-				"time": 25,
-				"letterSpacing": 1
-			},
-			{
-				"type": "setGlobalAttribute",
-				"name": "font",
-				"value": "normal"
-			},
-			{
-				"type": "playSound",
-				"name": "paper.opus"
-			},
-			"人们说要铭记历史，但他们却忘记了历史。\n    ——我是这样评价这个故事的。",
-			{
-				"type": "playSound",
-				"name": "paper.opus"
-			},
-			"人类简史——起源篇",
-			{
-				"type": "playSound",
-				"name": "paper.opus"
-			},
-			"在历史的长河中，山火、暴雨、地震不过是自然界的常态，是时间流逝中微不足道的涟漪。",
-			{
-				"type": "playSound",
-				"name": "paper.opus"
-			},
-			"这些自然现象如同大地的呼吸，时而平静，时而狂暴。",
-			{
-				"type": "playSound",
-				"name": "paper.opus"
-			},
-			"对于动物和植物而言，这些变化是生存的考验，是自然选择的无情法则。",
-			{
-				"type": "playSound",
-				"name": "paper.opus"
-			},
-			"每一次山火，都意味着森林的重生与毁灭；每一场暴雨，都带来了生命的滋润与洪水的威胁；每一次地震，都改变了地貌，塑造了新的环境。",
-			{
-				"type": "playSound",
-				"name": "paper.opus"
-			},
-			"在这片土地上，生命在自然的力量中挣扎、适应、繁衍。",
-			{
-				"type": "playSound",
-				"name": "paper.opus"
-			},
-			"那些无法适应的，最终被淘汰；而那些幸存者，则继续在这片土地上书写着生命的传奇。",
-			{
-				"type": "playSound",
-				"name": "paper.opus"
-			},
-			"然而，对于那些在这片土地上生存的原始人而言，这些自然现象不仅仅是生存的考验，更是他们日常生活中不可或缺的一部分。",
-			{
-				"type": "playSound",
-				"name": "paper.opus"
-			},
-			"在公元前8000年，这里曾有一个不起眼的山洞，隐匿于群山之间，仿佛与世隔绝。山洞中，原始人正忙碌着，准备迎接即将到来的季节变化。",
-			{
-				"type": "playSound",
-				"name": "paper.opus"
-			},
-			{
-				"type": "sleep",
-				"time": 1000
-			},
-			{
-				"type": "setText",
-				"position": "down",
-				"text": [
-					255,
-					255,
-					255,
-					1
-				],
-				"background": "winskin.png",
-				"textfont": 20,
-				"time": 25
-			},
-			{
-				"type": "showStatusBar"
+				"type": "text",
+				"text": "这里是开场剧情，可以在编辑器全塔属性中修改，试着修改一下吧！"
 			}
 		],
 		"shops": [
@@ -645,7 +537,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"counterAttack": 0.1,
 		"purify": 3,
 		"hatred": 2,
-		"animateSpeed": 277.7778,
+		"animateSpeed": 400,
 		"statusCanvasRowsOnMobile": 3,
 		"floorChangeTime": 200,
 		"moveSpeed": null
@@ -662,27 +554,16 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		],
 		"flyNearStair": false,
 		"flyRecordPosition": true,
-		"steelDoorWithoutKey": true,
 		"itemFirstText": false,
-		"equipboxButton": false,
 		"enableAddPoint": false,
-		"enableNegativeDamage": true,
-		"betweenAttackMax": false,
-		"useLoop": true,
-		"startUsingCanvas": false,
-		"statusCanvas": true,
-		"displayEnemyDamage": true,
-		"displayCritical": true,
-		"displayExtraDamage": true,
+		"enableNegativeDamage": false,
+		"betweenAttackMax": true,
 		"enableGentleClick": true,
 		"ignoreChangeFloor": true,
 		"canGoDeadZone": false,
 		"enableMoveDirectly": true,
 		"enableRouteFolding": true,
 		"disableShopOnDamage": false,
-		"blurFg": true,
-		"extendToolbar": false,
-		"enableEnemyPoint": null,
-		"autoScale": true
+		"blurFg": true
 	}
 }

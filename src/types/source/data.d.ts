@@ -81,27 +81,7 @@ type SoundIds =
     | 'zone.opus'
 
 type BgmIds =
-    | 'beforeBoss.opus'
-    | 'beforeNight.opus'
-    | 'cave.opus'
-    | 'chapter2ED.opus'
-    | 'escape.opus'
-    | 'escape2.opus'
-    | 'grass.opus'
-    | 'mount.opus'
-    | 'night.opus'
-    | 'palaceCenter.opus'
-    | 'palaceNorth.opus'
-    | 'palaceSouth.opus'
-    | 'plot1.opus'
-    | 'road.opus'
-    | 'title.opus'
-    | 'tower.opus'
-    | 'towerBoss.opus'
-    | 'towerBoss2.opus'
-    | 'towerBoss3.opus'
-    | 'winter.opus'
-    | 'winterTown.opus'
+    | 'bgm.opus'
 
 type FontIds = never
 

@@ -562,12 +562,6 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					},
 					"_data": "状态栏显示项"
 				},
-				"extendToolbar": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_docs": "横屏底部工具栏",
-					"_data": "在横屏状态下是否将工具栏挪动到游戏画布下方，从而完全解放状态栏空间"
-				},
 				"flyNearStair": {
 					"_leaf": true,
 					"_type": "checkbox",
@@ -586,12 +580,6 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "首次道具进行提示",
 					"_data": "首次获得道具是否提示"
 				},
-				"equipboxButton": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_docs": "状态栏装备按钮",
-					"_data": "状态栏的装备按钮。若此项为true则将状态栏中的楼层转换器按钮换为装备栏按钮"
-				},
 				"enableAddPoint": {
 					"_leaf": true,
 					"_type": "checkbox",
@@ -609,30 +597,6 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "checkbox",
 					"_docs": "夹击不超伤害值",
 					"_data": "夹击伤害是否不超过怪物伤害值。"
-				},
-				"useLoop": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_docs": "二分临界",
-					"_data": "是否循环计算临界；如果此项为true则使用循环法（而不是回合数计算法）来算临界\n从V2.5.3开始，对于大数据的循环法将改为使用二分法进行计算"
-				},
-				"startUsingCanvas": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_docs": "标题开启事件化",
-					"_data": "是否开始菜单canvas化；如果此项为true，则将使用canvas来绘制开始菜单"
-				},
-				"statusCanvas": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_docs": "开启自绘状态栏",
-					"_data": "是否状态栏canvas化，即手动自定义绘制状态栏。\n如果此项开启，则可在脚本编辑的drawStatusBar中自定义绘制菜单栏。"
-				},
-				"enableEnemyPoint": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_docs": "定点怪显",
-					"_data": "是否开启怪物的定点显示功能，即属性不同的怪物会在怪物手册单列；用户可以手动在菜单栏中开关"
 				},
 				"enableGentleClick": {
 					"_leaf": true,
@@ -675,12 +639,6 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "checkbox",
 					"_docs": "虚化前景层",
 					"_data": "是否虚化前景层；如果此项开启，则在游戏中事件层有东西（如宝石等）时虚化前景层。"
-				},
-				"autoScale": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_docs": "自动缩放最大化",
-					"_data": "是否自动缩放最大化，关闭后不再最大化"
 				},
 			}
 		}
