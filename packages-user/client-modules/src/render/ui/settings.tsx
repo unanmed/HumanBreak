@@ -246,6 +246,7 @@ export const ReplaySettings = defineComponent<MainSettingsProps>(props => {
             onChoose={choose}
             interval={8}
             scope={scope}
+            maxHeight={MAIN_HEIGHT - 32}
         />
     );
 }, mainSettingsProps);

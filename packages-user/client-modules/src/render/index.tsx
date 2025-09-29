@@ -2,12 +2,10 @@ import { createApp, Font } from '@motajs/render';
 import { defineComponent } from 'vue';
 import { DEFAULT_FONT, MAIN_HEIGHT, MAIN_WIDTH } from './shared';
 import { hook, loading } from '@user/data-base';
-import { createLoopMap } from './loopMap';
 import { createElements } from './elements';
 import { mainRenderer } from './renderer';
 import { createUI } from './ui';
 import { createAction } from './action';
-import { createLegacy } from './legacy';
 import { sceneController } from './scene';
 import { GameTitleUI } from './ui/title';
 import { createWeather } from './weather';
@@ -29,10 +27,8 @@ export function createGameRenderer() {
 
 export function createRender() {
     createElements();
-    createLegacy();
     createUI();
     createAction();
-    createLoopMap();
     createWeather();
 
     loading.on('loaded', () => {
@@ -51,7 +47,6 @@ export function createRender() {
 export * from './components';
 export * from './elements';
 export * from './fx';
-export * from './legacy';
 export * from './ui';
 export * from './utils';
 export * from './weather';

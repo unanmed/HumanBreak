@@ -1,6 +1,6 @@
 import { KeyCode } from '@motajs/client-base';
 import { gameKey, HotkeyJSON } from '@motajs/system-action';
-import { hovered, mainUi, tip, openDanmakuPoster } from '@motajs/legacy-ui';
+import { hovered, mainUi, openDanmakuPoster } from '@motajs/legacy-ui';
 import { GameStorage } from '@motajs/legacy-system';
 
 export const mainScope = Symbol.for('@key_main');
@@ -219,23 +219,6 @@ gameKey
         name: '切换/保存套装_0',
         defaults: KeyCode.Digit0,
         alt: true
-    })
-    //#region 技能按键
-    .group('skill', '技能按键')
-    .register({
-        id: 'skill1',
-        name: '断灭之刃',
-        defaults: KeyCode.Digit1
-    })
-    .register({
-        id: 'skill2',
-        name: '跳跃',
-        defaults: KeyCode.Digit2
-    })
-    .register({
-        id: 'skill3',
-        name: '铸剑为盾',
-        defaults: KeyCode.Digit3
     })
     //#region 系统按键
     .group('system', '系统按键')
@@ -589,45 +572,6 @@ gameKey
     })
     .realize('comment', () => {
         core.actions._clickGameInfo_openComments();
-    })
-    .realize('skill1', () => {
-        const HeroSkill = Mota.require('@user/data-state').HeroSkill;
-        if (!HeroSkill.learnedSkill(HeroSkill.Blade)) return;
-        if (HeroSkill.getAutoSkill()) {
-            tip('error', '已开启自动切换技能！');
-            return;
-        }
-        core.playSound('光标移动');
-        HeroSkill.toggleSkill(HeroSkill.Blade);
-        core.status.route.push('useSkill:Blade');
-        core.updateStatusBar();
-    })
-    .realize('skill2', () => {
-        const HeroSkill = Mota.require('@user/data-state').HeroSkill;
-        if (
-            !flags.onChase &&
-            !core.status.floorId.startsWith('tower') &&
-            HeroSkill.learnedSkill(HeroSkill.Jump)
-        ) {
-            Mota.require('@user/legacy-plugin-data').jumpSkill();
-            core.status.route.push('useSkill:Jump');
-        } else {
-            if (core.hasItem('pickaxe')) {
-                core.useItem('pickaxe');
-            }
-        }
-    })
-    .realize('skill3', () => {
-        const HeroSkill = Mota.require('@user/data-state').HeroSkill;
-        if (!HeroSkill.learnedSkill(HeroSkill.Shield)) return;
-        if (HeroSkill.getAutoSkill()) {
-            tip('error', '已开启自动切换技能！');
-            return;
-        }
-        core.playSound('光标移动');
-        HeroSkill.toggleSkill(HeroSkill.Shield);
-        core.status.route.push('useSkill:Shield');
-        core.updateStatusBar();
     })
     .realize('debug', () => {
         core.debug();

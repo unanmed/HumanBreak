@@ -806,8 +806,6 @@ maps.prototype.generateMovableArray = function (floorId) {
     for (var x = 0; x < width; ++x) {
         array[x] = Array(height).fill([]);
     }
-    const loopMaps = Mota.require('@user/data-state').MiscData.loopMaps;
-    const isLoop = loopMaps.has(floorId);
     var v2 = floorId == core.status.floorId && core.bigmap.v2;
     const half = core._HALF_WIDTH_;
     var startX = v2
@@ -829,24 +827,19 @@ maps.prototype.generateMovableArray = function (floorId) {
           )
         : height;
 
-    if (isLoop) {
-        startX = 0;
-        endX = core.status.maps[floorId].width;
-    }
-
     for (var x = startX; x < endX; x++) {
         for (var y = startY; y < endY; y++) {
-            array[x][y] = ['left', 'down', 'up', 'right'].filter(function (
-                direction
-            ) {
-                return core.maps._canMoveHero_checkPoint(
-                    x,
-                    y,
-                    direction,
-                    floorId,
-                    arrays
-                );
-            });
+            array[x][y] = ['left', 'down', 'up', 'right'].filter(
+                function (direction) {
+                    return core.maps._canMoveHero_checkPoint(
+                        x,
+                        y,
+                        direction,
+                        floorId,
+                        arrays
+                    );
+                }
+            );
         }
     }
     return array;
@@ -888,11 +881,6 @@ maps.prototype._canMoveHero_checkPoint = function (
     var nx = x + core.utils.scan[direction].x,
         ny = y + core.utils.scan[direction].y;
 
-    const loopMaps = Mota.require('@user/data-state').MiscData.loopMaps;
-    if (loopMaps.has(floorId)) {
-        if (nx < 0) nx = floor.width - 1;
-        if (nx >= floor.width) nx = 0;
-    }
     if (
         nx < 0 ||
         ny < 0 ||
@@ -1128,9 +1116,6 @@ maps.prototype.automaticRoute = function (destX, destY) {
     // BFS找寻最短路径
     var route = this._automaticRoute_bfs(startX, startY, destX, destY);
     if (route[destX + ',' + destY] == null) return [];
-    const floor = core.status.thisMap;
-    const loopMaps = Mota.require('@user/data-state').MiscData.loopMaps;
-
     // 路径数组转换
     var ans = [],
         nowX = destX,
@@ -1140,10 +1125,6 @@ maps.prototype.automaticRoute = function (destX, destY) {
         ans.push({ direction: dir, x: nowX, y: nowY });
         nowX -= core.utils.scan[dir].x;
         nowY -= core.utils.scan[dir].y;
-        if (loopMaps.has(core.status.floorId)) {
-            if (nowX < 0) nowX += floor.width;
-            if (nowX >= floor.width) nowX -= floor.width;
-        }
     }
     ans.reverse();
     return ans;
@@ -1162,7 +1143,6 @@ maps.prototype._automaticRoute_bfs = function (startX, startY, destX, destY) {
     queue.queue({ depth: 0, x: startX, y: startY });
     var blocks = core.getMapBlocksObj();
     const floor = core.status.thisMap;
-    const loopMaps = Mota.require('@user/data-state').MiscData.loopMaps;
 
     while (queue.length != 0) {
         var curr = queue.dequeue(),
@@ -1173,22 +1153,16 @@ maps.prototype._automaticRoute_bfs = function (startX, startY, destX, destY) {
             if (!core.inArray(canMoveArray[nowX][nowY], direction)) continue;
             var nx = nowX + core.utils.scan[direction].x;
             var ny = nowY + core.utils.scan[direction].y;
-            if (loopMaps.has(core.status.floorId)) {
-                if (nx < 0) nx = floor.width - 1;
-                if (nx >= floor.width) nx = 0;
-                if (route[nx + ',' + ny] || ny < 0 || ny >= floor.height) {
-                    continue;
-                }
-            } else {
-                if (
-                    nx < 0 ||
-                    nx >= core.bigmap.width ||
-                    ny < 0 ||
-                    ny >= core.bigmap.height ||
-                    route[nx + ',' + ny] != null
-                )
-                    continue;
-            }
+
+            if (
+                nx < 0 ||
+                nx >= core.bigmap.width ||
+                ny < 0 ||
+                ny >= core.bigmap.height ||
+                route[nx + ',' + ny] != null
+            )
+                continue;
+
             // 重点
             if (nx == destX && ny == destY) {
                 route[nx + ',' + ny] = direction;
@@ -2669,22 +2643,25 @@ maps.prototype._drawThumbnail_realDrawTempCanvas = function (
         options.heroIcon =
             options.heroIcon || core.status.hero.image || 'hero.png';
         options.heroIcon = core.getMappedName(options.heroIcon);
-        var icon = core.material.icons.hero[options.heroLoc.direction];
-        var height = core.material.images.images[options.heroIcon].height / 4;
-        var width =
-            (core.material.images.images[options.heroIcon].width || 128) / 4;
-        core.drawImage(
-            options.ctx,
-            core.material.images.images[options.heroIcon],
-            icon.stop * width,
-            icon.loc * height,
-            width,
-            height,
-            32 * options.heroLoc.x + 32 - width,
-            32 * options.heroLoc.y + 32 - height,
-            width,
-            height
-        );
+        const image = core.material.images.images[options.heroIcon];
+        if (image) {
+            var icon = core.material.icons.hero[options.heroLoc.direction];
+            var height =
+                core.material.images.images[options.heroIcon].height / 4;
+            var width = (image.width || 128) / 4;
+            core.drawImage(
+                options.ctx,
+                core.material.images.images[options.heroIcon],
+                icon.stop * width,
+                icon.loc * height,
+                width,
+                height,
+                32 * options.heroLoc.x + 32 - width,
+                32 * options.heroLoc.y + 32 - height,
+                width,
+                height
+            );
+        }
     }
     // 缩略图：前景
     this.drawFg(floorId, options);
@@ -3891,7 +3868,14 @@ maps.prototype._moveBlock_doMove = function (
                     _run();
                 } else
                     core.maps._moveBlock_moving(blockInfo, canvases, moveInfo);
-            } else core.maps._moveJumpBlock_finished(blockInfo, canvases, moveInfo, animate, cb);
+            } else
+                core.maps._moveJumpBlock_finished(
+                    blockInfo,
+                    canvases,
+                    moveInfo,
+                    animate,
+                    cb
+                );
         }, moveInfo.per_time);
 
         core.animateFrame.lastAsyncId = animate;

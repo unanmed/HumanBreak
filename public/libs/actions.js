@@ -583,13 +583,6 @@ actions.prototype._sys_ondown = function (x, y, px, py) {
         y: Math.floor((py + core.bigmap.offsetY) / 32)
     };
 
-    const loopMaps = Mota.require('@user/data-state').MiscData.loopMaps;
-    if (loopMaps.has(core.status.floorId)) {
-        const floor = core.status.thisMap;
-        if (pos.x < 0) pos.x += floor.width;
-        if (pos.x >= floor.width) pos.x -= floor.width;
-    }
-
     core.status.stepPostfix = [];
     core.status.stepPostfix.push(pos);
 

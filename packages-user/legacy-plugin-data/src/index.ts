@@ -18,11 +18,9 @@ export function createLegacy() {
 }
 
 export * from './enemy';
-export * from './chase';
 export * from './fallback';
 export * from './fiveLayer';
 export * from './removeMap';
 export * from './replay';
 export * from './shop';
-export * from './skill';
 export * from './ui';

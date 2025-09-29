@@ -26,7 +26,6 @@ events.prototype.startGame = function (hard, seed, route, callback) {
     hard = hard || '';
 
     if (main.mode != 'play') return;
-    Mota.require('@user/data-state').resetSkillLevel();
 
     // 无动画的开始游戏
     if (core.flags.startUsingCanvas || route != null) {

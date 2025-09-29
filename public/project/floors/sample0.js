@@ -8,7 +8,7 @@ main.floors.sample0=
     "canUseQuickShop": true,
     "defaultGround": "ground",
     "images": [],
-    "bgm": "bgm.opus",
+    "bgm": "bgm.mp3",
     "ratio": 1,
     "map": [
     [  0,  0,220,  0,  0, 20, 87,  3, 58, 59, 60, 61, 64],
@@ -255,5 +255,11 @@ main.floors.sample0=
     "height": 13,
     "autoEvent": {},
     "beforeBattle": {},
-    "cannotMoveIn": {}
+    "cannotMoveIn": {},
+    "bg2map": [
+
+],
+    "fg2map": [
+
+]
 }

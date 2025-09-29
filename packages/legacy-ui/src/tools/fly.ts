@@ -179,6 +179,7 @@ export function getMapData(
         const floor = core.floors[now];
         const change = floor.changeFloor;
         for (const [loc, ev] of Object.entries(change)) {
+            if (!ev) continue;
             const target = ev.floorId as FloorIds;
             if (target.startsWith(':')) continue;
             const [x, y] = loc.split(',').map(v => parseInt(v));

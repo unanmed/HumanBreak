@@ -1,4 +1,3 @@
-import { LayerShadowExtends } from '../legacy/shadow';
 import {
     Props,
     Font,
@@ -39,11 +38,8 @@ import { ReplayingStatus } from './toolbar';
 import { getHeroStatusOn } from '@user/data-state';
 import { hook } from '@user/data-base';
 import { FloorDamageExtends, FloorItemDetail } from '../elements';
-import { LayerGroupPortal } from '../legacy/portal';
-import { LayerGroupFilter } from '../legacy/gameCanvas';
 import { LayerGroupHalo } from '../legacy/halo';
 import { FloorChange } from '../legacy/fallback';
-import { PopText } from '../legacy/pop';
 import { mainUIController } from './controller';
 import {
     ILayerGroupRenderExtends,
@@ -61,16 +57,13 @@ const MainScene = defineComponent(() => {
     const layerGroupExtends: ILayerGroupRenderExtends[] = [
         new FloorDamageExtends(),
         new FloorItemDetail(),
-        new LayerGroupFilter(),
-        new LayerGroupPortal(),
         new LayerGroupHalo(),
         new LayerGroupAnimate(),
         new FloorViewport()
     ];
     const eventExtends: ILayerRenderExtends[] = [
         new HeroRenderer(),
-        new LayerDoorAnimate(),
-        new LayerShadowExtends()
+        new LayerDoorAnimate()
     ];
     const mainTextboxProps: Props<typeof Textbox> = {
         text: '',
@@ -81,7 +74,7 @@ const MainScene = defineComponent(() => {
         titleFill: 'gold',
         font: new Font('normal'),
         titleFont: new Font('normal', 20, 'px', 700),
-        winskin: 'winskin2.png',
+        winskin: 'winskin.png',
         interval: 30,
         lineHeight: 4,
         width: MAP_WIDTH
@@ -283,7 +276,6 @@ const MainScene = defineComponent(() => {
                     <layer layer="event" zIndex={30} ex={eventExtends}></layer>
                     <layer layer="fg" zIndex={40}></layer>
                     <layer layer="fg2" zIndex={50}></layer>
-                    <PopText id="pop-main" zIndex={80}></PopText>
                 </layer-group>
                 <Textbox id="main-textbox" {...mainTextboxProps}></Textbox>
                 <FloorChange id="floor-change" zIndex={50}></FloorChange>

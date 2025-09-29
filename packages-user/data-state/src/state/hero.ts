@@ -1,7 +1,6 @@
 import { logger } from '@motajs/common';
 import { EventEmitter } from 'eventemitter3';
 import { cloneDeep } from 'lodash-es';
-import { HeroSkill, NightSpecial } from '../mechanism';
 
 /**
  * 获取勇士在某一点的属性
@@ -59,7 +58,6 @@ function getRealStatus(
     name: keyof HeroStatus | 'all' | (keyof HeroStatus)[],
     floorId: FloorIds = core.status.floorId
 ): any {
-    const { getSkillLevel } = Mota.require('@user/data-state');
     if (name instanceof Array) {
         const res: any = {};
         name.forEach(v => {
@@ -93,29 +91,6 @@ function getRealStatus(
     }
 
     if (typeof s !== 'number') return s;
-
-    // 永夜、极昼
-    if (name === 'atk' || name === 'def') {
-        s += NightSpecial.getNight(floorId);
-    }
-
-    const enabled = HeroSkill.getEnabled();
-    // 技能
-    if (enabled === HeroSkill.Blade) {
-        const level = getSkillLevel(2);
-        if (name === 'atk') {
-            s *= 1 + 0.1 * level;
-        } else if (name === 'def') {
-            s *= 1 - 0.1 * level;
-        }
-    } else if (enabled === HeroSkill.Shield) {
-        const level = getSkillLevel(10);
-        if (name === 'atk') {
-            s *= 1 - 0.1 * level;
-        } else if (name === 'def') {
-            s *= 1 + 0.1 * level;
-        }
-    }
 
     // buff
     s *= core.status.hero.buff[name] ?? 1;

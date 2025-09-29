@@ -1,5 +1,5 @@
 import EventEmitter from 'eventemitter3';
-import { backDir, checkCanMoveExtended, toDir } from './utils';
+import { backDir, toDir } from './utils';
 import { loading } from '@user/data-base';
 import type { RenderAdapter } from '@motajs/render';
 import type {
@@ -9,10 +9,8 @@ import type {
     HeroRenderer,
     Layer,
     LayerFloorBinder,
-    LayerGroup,
     LayerMovingRenderable
 } from '@user/client-modules';
-import { BluePalace, MiscData } from '../mechanism/misc';
 import { sleep } from '@motajs/common';
 
 // todo: 转身功能
@@ -414,26 +412,13 @@ interface CanMoveStatus {
     noPass: boolean;
 }
 
-interface PortalStatus {
-    /** 下一步是否会步入传送门 */
-    portal: boolean;
-    /** 传送门会传到哪 */
-    data?: BluePalace.PortalTo;
-}
-
 const enum HeroMoveCode {
     Step,
     Stop,
     /** 不能移动，并撞击前面一格的图块，触发其触发器 */
     Hit,
     /** 不能移动，同时当前格有CannotOut，或目标格有CannotIn，不会触发前面一格的触发器 */
-    CannotMove,
-    /** 进入传送门 */
-    Portal,
-    /** 循环式地图 */
-    Loop,
-    /** 循环式地图撞击 */
-    LoopHit
+    CannotMove
 }
 
 export class HeroMover extends ObjectMoverBase {
@@ -453,9 +438,6 @@ export class HeroMover extends ObjectMoverBase {
 
     /** 本次移动开始时的移动速度 */
     private beforeMoveSpeed: number = 100;
-
-    /** 这一步的传送门信息 */
-    private portalData?: BluePalace.PortalTo;
 
     override startMove(
         ignoreTerrain: boolean = false,
@@ -546,41 +528,12 @@ export class HeroMover extends ObjectMoverBase {
             this.moveDir = dir4Move;
         }
 
-        // 检查传送门
-        if (!this.ignoreTerrain) {
-            const { portal, data } = this.checkPortal(x, y, dir4Move);
-            if (portal && data) {
-                this.portalData = data;
-                await this.renderHeroSwap(data);
-                return HeroMoveCode.Portal;
-            }
-        }
-
         const dir = this.moveDir;
         if (!this.ignoreTerrain) {
             const { noPass, canMove } = this.checkCanMove(x, y, dir4Move);
 
             if (!canMove) {
                 return HeroMoveCode.CannotMove;
-            }
-            // 循环式地图
-            const floorId = core.status.floorId;
-            if (MiscData.loopMaps.has(core.status.floorId)) {
-                const floor = core.status.maps[floorId];
-                const width = floor.width;
-                if (
-                    (x === 0 && dir === 'left') ||
-                    (x === width - 1 && dir === 'right')
-                ) {
-                    if (noPass) {
-                        return HeroMoveCode.LoopHit;
-                    }
-                    await Promise.all([
-                        this.renderHeroLoop(),
-                        this.moveAnimate(nx, ny, showDir, dir)
-                    ]);
-                    return HeroMoveCode.Loop;
-                }
             }
             // 不能移动
             if (noPass) {
@@ -632,25 +585,9 @@ export class HeroMover extends ObjectMoverBase {
         }
 
         // 本次移动正常完成
-        if (
-            code === HeroMoveCode.Step ||
-            code === HeroMoveCode.Portal ||
-            code === HeroMoveCode.Loop
-        ) {
-            if (code === HeroMoveCode.Portal) {
-                const data = this.portalData;
-                if (!data) return;
-                core.setHeroLoc('x', data.x);
-                core.setHeroLoc('y', data.y);
-                core.setHeroLoc('direction', data.dir);
-            } else if (code === HeroMoveCode.Loop) {
-                const map = core.status.thisMap;
-                if (x === 0) core.setHeroLoc('x', map.width - 1);
-                else core.setHeroLoc('x', 0);
-            } else {
-                core.setHeroLoc('x', nx, true);
-                core.setHeroLoc('y', ny, true);
-            }
+        if (code === HeroMoveCode.Step) {
+            core.setHeroLoc('x', nx, true);
+            core.setHeroLoc('y', ny, true);
 
             if (!this.ignoreTerrain) {
                 const direction = core.getHeroLoc('direction');
@@ -713,7 +650,7 @@ export class HeroMover extends ObjectMoverBase {
         core.status.automaticRoute.moveStepBeforeStop = [];
         core.status.automaticRoute.lastDirection = dir;
 
-        if (core.status.automaticRoute.moveStepBeforeStop.length == 0) {
+        if (core.status.automaticRoute.moveStepBeforeStop.length === 0) {
             core.clearContinueAutomaticRoute();
             core.stopAutomaticRoute();
         }
@@ -727,20 +664,6 @@ export class HeroMover extends ObjectMoverBase {
      */
     private checkCanMove(x: number, y: number, dir: Dir): CanMoveStatus {
         // 如果是循环式地图
-        const floorId = core.status.floorId;
-        if (MiscData.loopMaps.has(floorId)) {
-            const floor = core.status.maps[floorId];
-            const width = floor.width;
-            if (x === 0 && dir === 'left') {
-                const noPass = core.noPass(width - 1, y);
-                const move = checkCanMoveExtended(0, y, width - 1, y, 'left');
-                return { noPass, canMove: move };
-            } else if (x === width - 1 && dir === 'right') {
-                const noPass = core.noPass(0, y);
-                const move = checkCanMoveExtended(width - 1, y, 0, y, 'right');
-                return { noPass, canMove: move };
-            }
-        }
         const { x: nx, y: ny } = this.nextLoc(x, y, dir);
         const noPass = core.noPass(nx, ny);
         const canMove = core.canMoveHero(x, y, dir);
@@ -758,173 +681,6 @@ export class HeroMover extends ObjectMoverBase {
         const nx = x + dx;
         const ny = y + dy;
         return { x: nx, y: ny };
-    }
-
-    /**
-     * 检查前方一格是否会步入传送门
-     * @param x 横坐标
-     * @param y 纵坐标
-     * @param dir 移动方向
-     */
-    private checkPortal(x: number, y: number, dir: Dir): PortalStatus {
-        const map = BluePalace.portalMap.get(core.status.floorId);
-        if (!map) {
-            return { portal: false };
-        }
-        const width = core.status.thisMap.width;
-        const index = x + y * width;
-        const data = map?.get(index);
-        if (!data) {
-            return { portal: false };
-        }
-        const to = data[dir];
-        if (to) {
-            return { portal: true, data: to };
-        }
-        return { portal: false };
-    }
-
-    private renderHeroSwap(data: BluePalace.PortalTo) {
-        const adapter = HeroMover.adapter;
-        if (!adapter) return;
-        const list = adapter.items;
-        const { x: tx, y: ty, dir: toDir } = data;
-        const { x, y, direction } = core.status.hero.loc;
-        const { x: dx } = core.utils.scan[direction];
-        const { x: tdx } = core.utils.scan[toDir];
-
-        const promises = [...list].map(v => {
-            if (!v.renderable) return;
-            const renderable = { ...v.renderable };
-            renderable.render = v.getRenderFromDir(toDir);
-            renderable.zIndex = ty;
-            const heroDir = v.moveDir;
-
-            const width = v.renderable.render[0][2];
-            const height = v.renderable.render[0][3];
-            const cell = v.layer.cellSize;
-            const restHeight = height - cell;
-            if (!width || !height) return;
-
-            const originFrom = structuredClone(v.renderable.render);
-            const originTo = structuredClone(renderable.render);
-            v.layer.moving.add(renderable);
-            v.layer.requestUpdateMoving();
-
-            const start = Date.now();
-            return new Promise<void>(res => {
-                const tick = () => {
-                    const now = Date.now();
-                    const progress = (now - start) / this.moveSpeed;
-                    const clipWidth = cell * progress;
-                    const clipHeight = cell * progress;
-                    const beforeWidth = width - clipWidth;
-                    const beforeHeight = height - clipHeight;
-
-                    v.renderable!.x = x;
-                    v.renderable!.y = y;
-                    if (heroDir === 'left' || heroDir === 'right') {
-                        v.renderable!.x = x + (clipWidth / 2 / cell) * dx;
-                        v.renderable!.render.forEach((v, i) => {
-                            v[2] = beforeWidth;
-                            if (heroDir === 'left') {
-                                v[0] = originFrom[i][0] + clipWidth;
-                            }
-                        });
-                    } else {
-                        v.renderable!.render.forEach((v, i) => {
-                            v[3] = beforeHeight;
-                            if (heroDir === 'up') {
-                                v[1] =
-                                    originFrom[i][1] + clipHeight + restHeight;
-                            }
-                        });
-                    }
-
-                    renderable.x = tx;
-                    renderable.y = ty;
-                    if (toDir === 'left' || toDir === 'right') {
-                        renderable.x = tx + (clipWidth / 2 / cell - 0.5) * tdx;
-                        renderable.render.forEach((v, i) => {
-                            v[2] = clipWidth;
-                            if (toDir === 'right') {
-                                v[0] = originTo[i][0] + beforeWidth;
-                            }
-                        });
-                    } else {
-                        if (toDir === 'down') renderable.y = ty - 1 + progress;
-                        renderable.render.forEach((v, i) => {
-                            v[3] = clipHeight + restHeight;
-                            if (toDir === 'down') {
-                                v[1] = originTo[i][1] + clipHeight + restHeight;
-                                v[3] = clipHeight;
-                            }
-                        });
-                    }
-                };
-                v.layer.delegateTicker(tick, this.moveSpeed, () => {
-                    v.renderable!.render = originFrom;
-                    v.setAnimateDir(data.dir);
-                    v.layer.moving.delete(renderable);
-                    v.layer.requestUpdateMoving();
-                    res();
-                });
-            });
-        });
-
-        return Promise.all(promises);
-    }
-
-    private renderHeroLoop() {
-        const adapter = HeroMover.adapter;
-        const viewport = HeroMover.viewport;
-        if (!adapter || !viewport) return;
-        const MotaRenderer = Mota.require('@motajs/render').MotaRenderer;
-        const render = MotaRenderer.get('render-main');
-        const group = render?.getElementById('layer-loop') as LayerGroup;
-        const layer = group?.getLayer('event');
-        const mainGroup = render?.getElementById('layer-main') as LayerGroup;
-        const mainLayer = mainGroup?.getLayer('event');
-        const hero = mainLayer?.getExtends('floor-hero') as HeroRenderer;
-        const renderable = hero?.renderable;
-        if (!layer || !hero || !renderable) return;
-        const { x, y } = core.status.hero.loc;
-        const width = core.status.thisMap.width;
-        const loopHero = { ...renderable };
-        layer.moving.add(loopHero);
-
-        let target: number;
-        let from: number;
-        if (x === 0) {
-            from = width;
-            target = width - 1;
-        } else {
-            from = -1;
-            target = 0;
-        }
-        const delta = target - from;
-        loopHero.x = from;
-
-        layer.requestUpdateMoving();
-
-        const startTime = Date.now();
-        return new Promise<void>(res => {
-            layer.delegateTicker(
-                () => {
-                    const progress = (Date.now() - startTime) / this.moveSpeed;
-                    const dx = delta * progress;
-                    loopHero.x = dx + from;
-                    layer.update(layer);
-                },
-                this.moveSpeed,
-                () => {
-                    layer.moving.delete(loopHero);
-                    layer.requestUpdateMoving();
-                    viewport.all('setPosition', x === 0 ? width - 1 : 0, y);
-                    res();
-                }
-            );
-        });
     }
 }
 

@@ -5,4 +5,3 @@ export function createEnemy() {
 }
 
 export * from './checkblock';
-export * from './remainEnemy';
