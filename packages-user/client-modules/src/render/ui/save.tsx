@@ -69,8 +69,8 @@ const saveBtnProps = {
 } satisfies SetupComponentOptions<SaveItemProps>;
 
 export const SaveItem = defineComponent<SaveItemProps>(props => {
-    const font = Font.defaults({ size: 18 });
-    const statusFont = Font.defaults({ size: 14 });
+    const font = Font.defaults({ size: 16 });
+    const statusFont = Font.defaults({ size: 12 });
 
     const w = computed(() => props.loc[2] ?? 200);
     const h = computed(() => props.loc[3] ?? 200);
@@ -267,7 +267,7 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                     `确认要删除存档 ${index + 1}？`,
                     [HALF_WIDTH, HALF_HEIGHT, void 0, void 0, 0.5, 0.5],
                     POP_BOX_WIDTH,
-                    { winskin: 'winskin2.png' }
+                    { winskin: 'winskin.png' }
                 );
                 if (confirm) {
                     emit('delete', index, exist(posIndex));

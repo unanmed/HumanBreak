@@ -1,22 +1,13 @@
-import { has, ofDir } from '@user/data-utils';
-
 export function createCheckBlock() {
     // 伤害弹出
     // 复写阻激夹域检测
-    control.prototype.checkBlock = function (forceMockery: boolean = false) {
+    control.prototype.checkBlock = function () {
         const x = core.getHeroLoc('x'),
             y = core.getHeroLoc('y'),
             loc = x + ',' + y;
         const info = core.status.thisMap.enemy.mapDamage[loc];
         const damage = info?.damage;
         if (damage) {
-            if (!main.replayChecking) {
-                // addPop(
-                //     (x - core.bigmap.offsetX / 32) * 32 + 12,
-                //     (y - core.bigmap.offsetY / 32) * 32 + 20,
-                //     (-damage).toString()
-                // );
-            }
             core.status.hero.hp -= damage;
             const type = [...info.type];
             const text = type.join('，') || '伤害';
@@ -33,120 +24,5 @@ export function createCheckBlock() {
                 core.updateStatusBar();
             }
         }
-        checkMockery(loc, forceMockery);
-        checkHunt(loc);
     };
-}
-
-function checkMockery(loc: string, force: boolean = false) {
-    if (core.status.lockControl && !force) return;
-    const mockery = core.status.thisMap.enemy.mapDamage[loc]?.mockery;
-    if (mockery) {
-        mockery.sort((a, b) => (a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]));
-        const action = [];
-        const [tx, ty] = mockery[0];
-        let { x, y } = core.status.hero.loc;
-        const dir = x > tx ? 'left' : x < tx ? 'right' : y > ty ? 'up' : 'down';
-        const { x: dx, y: dy } = core.utils.scan[dir];
-
-        action.push({ type: 'forbidSave', forbid: true });
-        action.push({ type: 'changePos', direction: dir });
-        const blocks = core.getMapBlocksObj();
-        while (true) {
-            x += dx;
-            y += dy;
-            const block = blocks[`${x},${y}`];
-            if (block) {
-                if (
-                    [
-                        'animates',
-                        'autotile',
-                        'tileset',
-                        'npcs',
-                        'npc48',
-                        'terrains'
-                    ].includes(block.event.cls) &&
-                    block.event.noPass
-                ) {
-                    action.push(
-                        {
-                            type: 'hide',
-                            loc: [[x, y]],
-                            remove: true,
-                            time: 0
-                        },
-                        {
-                            type: 'function',
-                            function: `function() { core.removeGlobalAnimate(${x}, ${y}) }`
-                        },
-                        {
-                            type: 'animate',
-                            name: 'hand',
-                            loc: [x, y],
-                            async: true
-                        }
-                    );
-                }
-                if (block.event.cls.startsWith('enemy')) {
-                    action.push({ type: 'moveAction' });
-                }
-            }
-            action.push({ type: 'moveAction' });
-            if (x === tx && y === ty) break;
-        }
-        action.push({
-            type: 'function',
-            function: `function() { core.checkBlock(true); }`
-        });
-        action.push({ type: 'stopAsync' });
-        action.push({ type: 'forbidSave' });
-        core.insertAction(action);
-    }
-}
-
-function checkHunt(loc: string) {
-    const hunt = core.status.thisMap.enemy.mapDamage[loc]?.hunt;
-    if (!hunt) return;
-    const { x: hx, y: hy } = core.status.hero.loc;
-
-    const action: any = [];
-    hunt.sort((a, b) => {
-        return a[0] === b[0] ? a[1] - b[1] : a[0] - b[0];
-    });
-
-    for (const [x, y, dir] of hunt) {
-        const [tx, ty] = ofDir(x, y, dir);
-        if (core.getBlock(tx, ty)) continue;
-        action.push(
-            {
-                type: 'move',
-                loc: [x, y],
-                time: 100,
-                keep: true,
-                steps: [`${dir}:1`]
-            },
-            {
-                type: 'update'
-            }
-        );
-
-        if (has(hy) && x === hx) {
-            if (Math.abs(y - hy) <= 2) {
-                action.push({
-                    type: 'battle',
-                    loc: [tx, ty]
-                });
-            }
-        }
-        if (has(hx) && y === hy) {
-            if (Math.abs(x - hx) <= 2) {
-                action.push({
-                    type: 'battle',
-                    loc: [tx, ty]
-                });
-            }
-        }
-    }
-
-    core.insertAction(action);
 }

@@ -66,8 +66,6 @@ mainSetting.on('valueChange', (key, n, o) => {
 
     if (root === 'screen') {
         handleScreenSetting(setting, n, o);
-    } else if (root === 'action') {
-        handleActionSetting(setting, n, o);
     } else if (root === 'audio') {
         handleAudioSetting(setting, n, o);
     } else if (root === 'ui') {
@@ -104,19 +102,6 @@ function handleScreenSetting<T extends number | boolean>(
         // @ts-expect-error 遗留问题
         core.domStyle.scale = scale;
         Mota.require('@user/client-modules').mainRenderer.setScale(scale);
-    }
-}
-
-function handleActionSetting<T extends number | boolean>(
-    key: string,
-    n: T,
-    _o: T
-) {
-    if (key === 'autoSkill') {
-        // 自动切换技能
-        const HeroSkill = Mota.require('@user/data-state').HeroSkill;
-        HeroSkill.setAutoSkill(n as boolean);
-        core.status.route.push(`set:autoSkill:${n}`);
     }
 }
 
@@ -163,7 +148,6 @@ mainSetting
             .register('fullscreen', '全屏游戏', false, COM.Boolean)
             .register('scale', '画面缩放', 100, COM.Number, [50, 500, 25])
             .setDisplayFunc('scale', value => `${value}%`)
-            .register('halo', '光环显示', true, COM.Boolean)
             .register('itemDetail', '宝石血瓶显伤', true, COM.Boolean)
             .register('transition', '界面动画', false, COM.Boolean)
             .register('fontSize', '字体大小', 16, COM.Number, [2, 48, 1])
@@ -176,7 +160,6 @@ mainSetting
         'action',
         '操作设置',
         new MotaSetting()
-            .register('autoSkill', '自动切换技能', true, COM.Boolean)
             .register('hotkey', '快捷键', false, COM.HotkeySetting)
             .setDisplayFunc('hotkey', () => '')
     )
@@ -195,22 +178,9 @@ mainSetting
         new MotaSetting().register('autoScale', '自动放缩', true, COM.Boolean)
     )
     .register(
-        'fx',
-        '特效设置',
-        new MotaSetting().register(
-            'portalParticle',
-            '传送门特效',
-            true,
-            COM.Boolean
-        )
-    )
-    .register(
         'ui',
         'ui设置',
         new MotaSetting()
-            .register('mapScale', '小地图缩放', 100, COM.Number, [50, 1000, 50])
-            .setDisplayFunc('mapScale', value => `${value}%`)
-            .register('mapLazy', '小地图懒更新', false, COM.Boolean)
             .register(
                 'bookScale',
                 '怪物手册缩放',
@@ -219,9 +189,6 @@ mainSetting
                 [10, 500, 10]
             )
             .setDisplayFunc('bookScale', value => `${value}%`)
-            .register('danmaku', '显示弹幕', true, COM.Boolean)
-            .register('danmakuSpeed', '弹幕速度', 60, COM.Number, [10, 1000, 5])
-            .register('tips', '小贴士', true, COM.Boolean)
     );
 
 interface SettingTextData {
@@ -233,25 +200,13 @@ mainSetting
     .setDescription('audio.bgmVolume', `背景音乐的音量`)
     .setDescription('audio.soundEnabled', `是否开启音效`)
     .setDescription('audio.soundVolume', `音效的音量`)
-    .setDescription('ui.mapScale', `楼传小地图的缩放，百分比格式`)
-    .setDescription(
-        'ui.mapLazy',
-        `是否启用小地图懒更新模式，此模式下剩余怪物数量不会实时更新而变成切换地图后更新，打开小地图时出现卡顿可以尝试开启此设置`
-    )
     .setDescription(
         'ui.bookScale',
         `怪物手册界面中每个怪物框体的高度缩放，最小值限定为 20% 屏幕高度`
     )
-    .setDescription('ui.danmaku', '是否显示弹幕')
-    .setDescription('ui.danmakuSpeed', '弹幕速度，刷新或开关弹幕显示后起效')
-    .setDescription('ui.tips', `是否在游戏画面右上角常亮显示小贴士`)
     .setDescription(
         'screen.blur',
         '打开任意ui界面时是否有背景虚化效果，移动端打开后可能会有掉帧或者发热现象。关闭ui后生效'
-    )
-    .setDescription(
-        'fx.portalParticle',
-        '是否启用苍蓝之殿的传送门粒子特效，启用后可能对性能及设备发热有所影响'
     );
 
 function setFontSize() {
@@ -286,7 +241,6 @@ export function createSetting() {
         mainSetting.reset({
             'screen.fullscreen': !!document.fullscreenElement,
             'screen.scale': storage.getValue('screen.scale', 100),
-            'screen.halo': !!storage.getValue('screen.showHalo', true),
             'screen.itemDetail': !!storage.getValue('screen.itemDetail', true),
             'screen.transition': !!storage.getValue('screen.transition', false),
             'screen.fontSize': storage.getValue(
@@ -305,22 +259,10 @@ export function createSetting() {
             ),
             'audio.soundVolume': storage.getValue('audio.soundVolume', 80),
             'utils.autoScale': !!storage.getValue('utils.autoScale', true),
-            'fx.portalParticle': !!storage.getValue('fx.portalParticle', true),
-            'ui.mapScale': storage.getValue(
-                'ui.mapScale',
-                isMobile ? 300 : Math.floor(window.innerWidth / 600) * 50
-            ),
-            'ui.mapLazy': storage.getValue('ui.mapLazy', false),
             'ui.bookScale': storage.getValue(
                 'ui.bookScale',
                 isMobile ? 100 : 80
-            ),
-            'ui.danmaku': storage.getValue('ui.danmaku', true),
-            'ui.danmakuSpeed': storage.getValue(
-                'ui.danmakuSpeed',
-                Math.floor(window.innerWidth / 30) * 5
-            ),
-            'ui.tips': storage.getValue('ui.tips', true)
+            )
         });
     });
 }

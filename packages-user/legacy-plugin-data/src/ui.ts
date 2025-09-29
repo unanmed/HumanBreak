@@ -31,7 +31,7 @@ export function initUI() {
     };
 
     control.prototype.showStatusBar = function () {
-        if (main.mode == 'editor') return;
+        if (main.mode === 'editor') return;
         core.removeFlag('hideStatusBar');
         if (mainSetting.getValue('ui.tips')) {
             if (!fixedUi.hasName('tips')) {
@@ -42,7 +42,7 @@ export function initUI() {
     };
 
     control.prototype.hideStatusBar = function (showToolbox) {
-        if (main.mode == 'editor') return;
+        if (main.mode === 'editor') return;
 
         // 如果原本就是隐藏的，则先显示
         if (!core.domStyle.showStatusBar) this.showStatusBar();

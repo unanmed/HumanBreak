@@ -2,7 +2,6 @@ import { getHeroStatusOf, getHeroStatusOn } from '../state/hero';
 import { Range, ensureArray, has, manhattan } from '@user/data-utils';
 import EventEmitter from 'eventemitter3';
 import { hook } from '@user/data-base';
-import { HeroSkill, NightSpecial } from '../mechanism';
 import {
     EnemyInfo,
     DamageInfo,
@@ -284,11 +283,6 @@ export class DamageEnemy implements IDamageEnemy {
         if (flags.hard === 2 && special.has(14)) {
             info.atk += flags[`inte_${floorId}`] ?? 0;
         }
-
-        // 极昼永夜
-        const night = NightSpecial.getNight(floorId);
-        info.atk -= night;
-        info.def -= night;
 
         // 融化，融化不属于怪物光环，因此不能用provide和inject计算，需要在这里计算
         const melt = flags[`melt_${floorId}`];
@@ -720,27 +714,9 @@ export class DamageEnemy implements IDamageEnemy {
 
     private calEnemyDamageOf(hero: Partial<HeroStatus>, enemy: UserEnemyInfo) {
         const status = getHeroStatusOf(hero, realStatus, this.floorId);
-        let damage = calDamageWith(enemy, status) ?? Infinity;
-        let bestSkill = -1;
+        const damage = calDamageWith(enemy, status) ?? Infinity;
 
-        // 自动切换技能
-        if (HeroSkill.getAutoSkill()) {
-            for (const skill of skills) {
-                if (!HeroSkill.learnedSkill(skill)) continue;
-                HeroSkill.enableSkill(skill);
-                const status = getHeroStatusOf(hero, realStatus);
-
-                const d = calDamageWith(enemy, status) ?? Infinity;
-
-                if (d < damage) {
-                    damage = d;
-                    bestSkill = skill;
-                }
-                HeroSkill.disableSkill();
-            }
-        }
-
-        return { damage, skill: bestSkill };
+        return { damage };
     }
 
     /**
@@ -928,10 +904,6 @@ const realStatus: (keyof HeroStatus)[] = [
     'mana',
     'magicDef'
 ];
-/**
- * 主动技能列表
- */
-const skills: HeroSkill.Skill[] = [HeroSkill.Blade, HeroSkill.Shield];
 
 /**
  * 计算怪物伤害

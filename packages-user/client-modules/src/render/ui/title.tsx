@@ -72,7 +72,7 @@ const gameTitleProps = {
 } satisfies SetupComponentOptions<GameTitleProps>;
 
 export const GameTitle = defineComponent<GameTitleProps>(props => {
-    const bg = core.material.images.images['bg.webp'];
+    const bg = core.material.images.images['bg.jpg'];
 
     //#region 计算背景图
     const [width, height] = adjustCover(
@@ -437,7 +437,6 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
                 image={bg}
                 loc={[HALF_WIDTH, HALF_HEIGHT, width, height]}
                 anc={[0.5, 0.5]}
-                filter="brightness(120%)contrast(110%)"
                 zIndex={0}
             />
             <shader

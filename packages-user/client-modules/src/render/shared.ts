@@ -62,7 +62,7 @@ export const CENTER_LOC: ElementLocator = [
 /** 弹框的宽度，使用在内置 UI 与组件中，包括确认框、选择框、等待框等 */
 export const POP_BOX_WIDTH = MAP_WIDTH / 2;
 /** 默认字体 */
-export const DEFAULT_FONT = new Font('normal', 18);
+export const DEFAULT_FONT = new Font('Verdana', 16);
 
 //#region 存档界面
 

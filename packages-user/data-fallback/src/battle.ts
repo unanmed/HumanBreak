@@ -1,10 +1,4 @@
-import {
-    DamageEnemy,
-    ensureFloorDamage,
-    getEnemy,
-    HeroSkill,
-    NightSpecial
-} from '@user/data-state';
+import { DamageEnemy, ensureFloorDamage, getEnemy } from '@user/data-state';
 import { hook } from '@user/data-base';
 import { Patch, PatchClass } from '@motajs/legacy-common';
 import { isNil } from 'lodash-es';
@@ -150,9 +144,6 @@ export function patchBattle() {
     patch2.add(
         'afterBattle',
         function (enemy: DamageEnemy, x?: number, y?: number) {
-            const floorId = core.status.floorId;
-            const special = enemy.info.special;
-
             // 播放战斗动画
             let animate: AnimationIds = 'hand';
             // 检查当前装备是否存在攻击动画
@@ -180,30 +171,6 @@ export function patchBattle() {
             core.status.hero.statistics.battleDamage += damage;
             core.status.hero.statistics.battle++;
 
-            // 智慧之源
-            if (special.has(14) && flags.hard === 2) {
-                core.addFlag(
-                    'inte_' + floorId,
-                    Math.ceil((core.status.hero.mdef / 10) * 0.3) * 10
-                );
-                core.status.hero.mdef -=
-                    Math.ceil((core.status.hero.mdef / 10) * 0.3) * 10;
-            }
-
-            // 极昼永夜
-            if (special.has(22)) {
-                NightSpecial.addNight(floorId, -enemy.info.night!);
-            }
-            if (special.has(23)) {
-                NightSpecial.addNight(floorId, enemy.info.day!);
-            }
-
-            // 如果是融化怪，需要特殊标记一下
-            if (special.has(25) && !isNil(x) && !isNil(y)) {
-                flags[`melt_${floorId}`] ??= {};
-                flags[`melt_${floorId}`][`${x},${y}`] = enemy.info.melt;
-            }
-
             // 获得金币
             const money = enemy.info.money!;
             core.status.hero.money += money;
@@ -222,8 +189,6 @@ export function patchBattle() {
                 '，经验+' +
                 exp;
             core.drawTip(hint, enemy.id);
-
-            HeroSkill.disableSkill();
 
             // 事件的处理
             const todo: MotaEvent = [];

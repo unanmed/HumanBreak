@@ -32,7 +32,6 @@ import {
     LayerGroupFloorBinder
 } from '../elements';
 import { LayerGroupHalo } from '../legacy/halo';
-import { LayerGroupPortal } from '../legacy/portal';
 import { Font } from '@motajs/render-style';
 import { clamp, mean } from 'lodash-es';
 import { calculateStatisticsOne, StatisticsDataOneFloor } from './statistics';
@@ -66,7 +65,6 @@ export const ViewMap = defineComponent<ViewMapProps>(props => {
     const layerGroupExtends: ILayerGroupRenderExtends[] = [
         new FloorDamageExtends(),
         new FloorItemDetail(),
-        new LayerGroupPortal(),
         new LayerGroupHalo(),
         new LayerGroupAnimate()
     ];

@@ -77,11 +77,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     delete flags[v];
                 });
             }
-
-            const { NightSpecial, HeroSkill } =
-                Mota.require('@user/data-state');
-            NightSpecial.clearNight(core.floorIds);
-            HeroSkill.clearSkill();
         },
         win: function (reason, norank, noexit) {
             // 游戏获胜事件
@@ -268,9 +263,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     values[key] = core.clone(core.values[key]);
             }
 
-            const { NightSpecial, HeroSkill } =
-                Mota.require('@user/data-state');
-
             // 要存档的内容
             var data = {
                 floorId: core.status.floorId,
@@ -281,10 +273,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 values: values,
                 version: core.firstData.version,
                 guid: core.getGuid(),
-                time: new Date().getTime(),
-                skills: Mota.require('@user/data-state').saveSkillTree(),
-                night: [...NightSpecial.saveNight()],
-                skill: HeroSkill.saveSkill()
+                time: new Date().getTime()
             };
 
             return structuredClone(data);
@@ -327,52 +316,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     core.material.images.images[icon].height / 4;
             }
             core.setFlag('__fromLoad__', true);
-
-            Mota.require('@user/data-state').loadSkillTree(data.skills);
-            const { NightSpecial, HeroSkill } =
-                Mota.require('@user/data-state');
-
-            if (!data.night) {
-                // 兼容旧版
-                NightSpecial.loadNight([]);
-                for (const [key, value] of Object.entries(data.hero.flags)) {
-                    if (key.startsWith('night_')) {
-                        const [, floorId] = key.split('_');
-                        NightSpecial.addNight(floorId, value);
-                        delete data.hero.flags[key];
-                    }
-                }
-            } else {
-                NightSpecial.loadNight(data.night);
-            }
-
-            if (!data.skill) {
-                HeroSkill.loadSkill({ autoSkill: true, learned: [] });
-                if (flags.bladeOn) {
-                    HeroSkill.learnSkill(HeroSkill.Blade);
-                    if (flags.blade) {
-                        HeroSkill.enableSkill(HeroSkill.Blade);
-                    }
-                    delete flags.bladeOn;
-                    delete flags.blade;
-                }
-                if (flags.shieldOn) {
-                    HeroSkill.learnSkill(HeroSkill.Shield);
-                    if (flags.shield) {
-                        HeroSkill.enableSkill(HeroSkill.Shield);
-                    }
-                    delete flags.shieldOn;
-                    delete flags.shield;
-                }
-                if (flags.skill2) {
-                    HeroSkill.learnSkill(HeroSkill.Jump);
-                    delete flags.skill2;
-                }
-                HeroSkill.setAutoSkill(!!flags.autoSkill);
-                delete flags.autoSkill;
-            } else {
-                HeroSkill.loadSkill(data.skill);
-            }
 
             // 切换到对应的楼层
             core.changeFloor(data.floorId, null, data.hero.loc, 0, function () {
