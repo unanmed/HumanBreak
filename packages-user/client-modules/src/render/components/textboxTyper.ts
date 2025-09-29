@@ -1277,6 +1277,7 @@ export class TextContentParser {
                         break;
                     }
                     case TextGuessStatus.NeedSplit: {
+                        this.bsStart = this.blockPointer;
                         this.bsEnd = this.wordBreak.length;
                         this.splitTextLoop(node, width);
                         break;
