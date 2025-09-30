@@ -429,7 +429,6 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
 
         const ctx = canvas.ctx;
         ctx.save();
-        canvas.setAntiAliasing(this.antiAliasing);
         if (this.type === 'static') transformCanvas(canvas, tran);
         ctx.filter = this.filter;
         ctx.globalAlpha = this.alpha;
@@ -442,9 +441,10 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
                 this.cacheDirty = false;
             }
 
-            canvas.ctx.imageSmoothingEnabled = false;
+            canvas.setAntiAliasing(false);
             canvas.ctx.drawImage(this.cache.canvas, ax, ay, width, height);
         } else {
+            canvas.setAntiAliasing(this.antiAliasing);
             canvas.ctx.translate(ax, ay);
             this.render(canvas, tran);
             this.cacheDirty = false;
