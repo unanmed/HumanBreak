@@ -179,13 +179,13 @@ export const ViewMap = defineComponent<ViewMapProps>(props => {
     const renderTop = (canvas: MotaOffscreenCanvas2D) => {
         const ctx = canvas.ctx;
         ctx.fillStyle = getTopGradient(ctx);
-        ctx.fillRect(0, 0, 480, 64);
+        ctx.fillRect(0, 0, MAP_WIDTH, 64);
     };
 
     const renderBottom = (canvas: MotaOffscreenCanvas2D) => {
         const ctx = canvas.ctx;
         ctx.fillStyle = getBottomGradient(ctx);
-        ctx.fillRect(0, 0, 480, 64);
+        ctx.fillRect(0, 0, MAP_HEIGHT, 64);
     };
 
     const enterTop = () => (topAlpha.value = 0.9);

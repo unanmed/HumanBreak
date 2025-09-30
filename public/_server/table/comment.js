@@ -155,7 +155,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						return current[0];
 					}).toString(),
 					"_docs": "绑定贴图",
-					"_data": "该怪物绑定的怪物贴图，用法详见文档"
+					"_data": "绑定贴图暂时不不支持，预计在 2.B.1 添加支持"
 				},
 				"hp": {
 					"_leaf": true,
