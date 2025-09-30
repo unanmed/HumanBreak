@@ -11,7 +11,7 @@ main.floors.empty=
     "images": [],
     "ratio": 1,
     "defaultGround": "ground",
-    "bgm": "bgm.mp3",
+    "bgm": "bgm.opus",
     "firstArrive": [],
     "eachArrive": [],
     "parallelDo": "",

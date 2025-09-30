@@ -13,12 +13,13 @@ import { createWeather } from './weather';
 export function createGameRenderer() {
     const App = defineComponent(_props => {
         return () => (
-            <container width={MAIN_WIDTH} height={MAIN_HEIGHT}>
+            <container noanti width={MAIN_WIDTH} height={MAIN_HEIGHT}>
                 {sceneController.render()}
             </container>
         );
     });
 
+    mainRenderer.setAntiAliasing(false);
     mainRenderer.hide();
     createApp(App).mount(mainRenderer);
 

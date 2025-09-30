@@ -1,6 +1,6 @@
 import { KeyCode } from '@motajs/client-base';
 import { KeyboardEmits, Keyboard, isAssist } from '@motajs/system-action';
-import { mainUi, fixedUi } from './preset/uiIns';
+import { mainUi } from './preset/uiIns';
 
 /**
  * 唤起虚拟键盘，并获取到一次按键操作
@@ -38,10 +38,4 @@ export function getVitualKeyOnce(
             }
         });
     });
-}
-
-export function openDanmakuPoster() {
-    if (!fixedUi.hasName('danmakuEditor')) {
-        fixedUi.open('danmakuEditor');
-    }
 }

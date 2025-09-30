@@ -38,7 +38,6 @@ import { ReplayingStatus } from './toolbar';
 import { getHeroStatusOn } from '@user/data-state';
 import { hook } from '@user/data-base';
 import { FloorDamageExtends, FloorItemDetail } from '../elements';
-import { LayerGroupHalo } from '../legacy/halo';
 import { FloorChange } from '../legacy/fallback';
 import { mainUIController } from './controller';
 import {
@@ -57,7 +56,6 @@ const MainScene = defineComponent(() => {
     const layerGroupExtends: ILayerGroupRenderExtends[] = [
         new FloorDamageExtends(),
         new FloorItemDetail(),
-        new LayerGroupHalo(),
         new LayerGroupAnimate(),
         new FloorViewport()
     ];
@@ -252,7 +250,12 @@ const MainScene = defineComponent(() => {
     };
 
     return () => (
-        <container id="main-scene" width={MAIN_WIDTH} height={MAIN_HEIGHT}>
+        <container
+            id="main-scene"
+            width={MAIN_WIDTH}
+            height={MAIN_HEIGHT}
+            noanti
+        >
             <LeftStatusBar
                 loc={[0, 0, STATUS_BAR_WIDTH, STATUS_BAR_HEIGHT]}
                 status={leftStatus}
@@ -269,6 +272,7 @@ const MainScene = defineComponent(() => {
                 onClick={clickMap}
                 onDown={downMap}
                 onMove={moveMap}
+                noanti
             >
                 <layer-group id="layer-main" ex={layerGroupExtends} ref={map}>
                     <layer layer="bg" zIndex={10}></layer>

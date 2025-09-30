@@ -1,6 +1,5 @@
 import { KeyCode } from '@motajs/client-base';
 import { gameKey, HotkeyJSON } from '@motajs/system-action';
-import { hovered, mainUi, openDanmakuPoster } from '@motajs/legacy-ui';
 import { GameStorage } from '@motajs/legacy-system';
 
 export const mainScope = Symbol.for('@key_main');
@@ -92,16 +91,6 @@ gameKey
         name: '浏览地图_2',
         defaults: KeyCode.PageDown
     })
-    .register({
-        id: 'skillTree',
-        name: '技能树',
-        defaults: KeyCode.KeyJ
-    })
-    .register({
-        id: 'desc',
-        name: '百科全书',
-        defaults: KeyCode.KeyH
-    })
     //#region 功能按键
     .group('function', '功能按键')
     .register({
@@ -138,27 +127,6 @@ gameKey
         id: 'getNext_2',
         name: '轻按_2',
         defaults: KeyCode.Digit7
-    })
-    .register({
-        id: 'mark',
-        name: '标记怪物',
-        defaults: KeyCode.KeyM
-    })
-    .register({
-        id: 'special',
-        name: '鼠标位置怪物属性',
-        defaults: KeyCode.KeyE
-    })
-    .register({
-        id: 'critical',
-        name: '鼠标位置怪物临界',
-        defaults: KeyCode.KeyC
-    })
-    .register({
-        id: 'danmaku',
-        name: '发送弹幕',
-        defaults: KeyCode.KeyA,
-        ctrl: true
     })
     .register({
         id: 'quickEquip_1',
@@ -524,12 +492,6 @@ gameKey
     .realize('shop', () => {
         core.openQuickShop(true);
     })
-    .realize('skillTree', () => {
-        core.useItem('skill1', true);
-    })
-    .realize('desc', () => {
-        core.useItem('I560', true);
-    })
     .realize('undo', () => {
         core.doSL('autoSave', 'load');
     })
@@ -541,31 +503,6 @@ gameKey
     })
     .realize('getNext', () => {
         core.getNextItem();
-    })
-    .realize('mark', () => {
-        const cls = hovered?.event.cls;
-        if (cls === 'enemys' || cls === 'enemy48') {
-            // const id = hovered!.event.id as EnemyIds;
-            // if (hasMarkedEnemy(id)) unmarkEnemy(id);
-            // else markEnemy(id);
-        }
-    })
-    .realize('special', () => {
-        if (hovered) {
-            const { x, y } = hovered;
-            const enemy = core.status.thisMap.enemy.get(x, y);
-            if (enemy) mainUi.open('fixedDetail', { panel: 'special' });
-        }
-    })
-    .realize('critical', () => {
-        if (hovered) {
-            const { x, y } = hovered;
-            const enemy = core.status.thisMap.enemy.get(x, y);
-            if (enemy) mainUi.open('fixedDetail', { panel: 'critical' });
-        }
-    })
-    .realize('danmaku', () => {
-        openDanmakuPoster();
     })
     .realize('restart', () => {
         core.confirmRestart();

@@ -127,7 +127,7 @@ export const MainSettings = defineComponent<MainSettingsProps>(props => {
             choices={choices}
             width={POP_BOX_WIDTH}
             onChoose={choose}
-            maxHeight={MAIN_HEIGHT - 64}
+            maxHeight={MAIN_HEIGHT - 32}
             interval={8}
             scope={scope}
         />

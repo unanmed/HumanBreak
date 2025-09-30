@@ -8,7 +8,7 @@ main.floors.sample0=
     "canUseQuickShop": true,
     "defaultGround": "ground",
     "images": [],
-    "bgm": "bgm.mp3",
+    "bgm": "bgm.opus",
     "ratio": 1,
     "map": [
     [  0,  0,220,  0,  0, 20, 87,  3, 58, 59, 60, 61, 64],
