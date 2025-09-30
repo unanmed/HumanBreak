@@ -1026,6 +1026,8 @@ export class Layer extends Container<ELayerEvent> {
         this.autotiles = {};
         this.block.size(width, height);
         this.block.clearAllCache();
+        this.bigImages.clear();
+        this.moving.clear();
 
         for (const ex of this.extend.values()) {
             ex.onMapResize?.(this, width, height);
@@ -1160,7 +1162,7 @@ export class Layer extends Container<ELayerEvent> {
             this.floorImage.forEach(v => {
                 if (v.disable) return;
                 const { x, y } = v;
-                ctx.fillRect(0, 0, 480, 480);
+                ctx.fillRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
                 ctx.drawImage(images[v.name], x, y);
             });
         }
