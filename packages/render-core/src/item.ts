@@ -442,6 +442,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
                 this.cacheDirty = false;
             }
 
+            canvas.ctx.imageSmoothingEnabled = false;
             canvas.ctx.drawImage(this.cache.canvas, ax, ay, width, height);
         } else {
             canvas.ctx.translate(ax, ay);

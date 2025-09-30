@@ -255,6 +255,7 @@ const MainScene = defineComponent(() => {
             width={MAIN_WIDTH}
             height={MAIN_HEIGHT}
             noanti
+            nocache
         >
             <LeftStatusBar
                 loc={[0, 0, STATUS_BAR_WIDTH, STATUS_BAR_HEIGHT]}
