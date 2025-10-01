@@ -7,8 +7,7 @@ import * as glob from 'glob';
 
 const custom = [
     'container', 'image', 'sprite', 'shader', 'text', 'comment', 'custom', 
-    'layer', 'layer-group', 'animate', 'damage', 'graphics', 'icon', 'winskin',
-    'container-custom'
+    'layer', 'layer-group', 'animate', 'icon', 'winskin', 'container-custom'
 ];
 
 const aliases = glob.sync('packages/*/src').map((srcPath) => {

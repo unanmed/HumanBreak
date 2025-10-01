@@ -8,9 +8,7 @@ import {
 import { logger } from '@motajs/common';
 import EventEmitter from 'eventemitter3';
 import { isNil } from 'lodash-es';
-import { tagMap } from '@motajs/render';
 import { IDamageEnemy, IEnemyCollection, MapDamage } from '@motajs/types';
-import { UserEnemyInfo } from '@user/data-state';
 import { BlockCacher, ICanvasCacheItem, CanvasCacheItem } from './block';
 import {
     ILayerGroupRenderExtends,
@@ -326,7 +324,6 @@ export class Damage extends RenderItem<EDamageEvent> {
         const y = enemy.y!;
         const { damage } = enemy.calDamage();
         const cri = enemy.calCritical(1)[0]?.atkDelta ?? Infinity;
-        const real = enemy.getRealInfo() as UserEnemyInfo;
 
         const dam1: DamageRenderable = {
             align: 'left',
@@ -345,45 +342,6 @@ export class Damage extends RenderItem<EDamageEvent> {
             y: y * this.cellSize + this.cellSize - 11
         };
         block.add(dam1).add(dam2);
-
-        const hasHorn = real.special.has(33);
-        if (real.special.has(8) && real.togetherNum && !hasHorn) {
-            const dam3: DamageRenderable = {
-                align: 'right',
-                baseline: 'top',
-                text: real.togetherNum.toString(),
-                color: '#09FF5B',
-                x: x * this.cellSize + this.cellSize - 1,
-                y: y * this.cellSize + 2,
-                strokeWidth: 3
-            };
-            block.add(dam3);
-        }
-        if (real.special.has(30)) {
-            const dam4: DamageRenderable = {
-                align: 'left',
-                baseline: 'top',
-                text: '乾',
-                color: '#FDCD0B',
-                x: x * this.cellSize + 1,
-                y: y * this.cellSize + 2,
-                strokeWidth: 2,
-                font: '500 10px Verdana'
-            };
-            block.add(dam4);
-        }
-        if (enemy.col && hasHorn) {
-            const dam5: DamageRenderable = {
-                align: 'right',
-                baseline: 'top',
-                text: enemy.col.list.size.toString(),
-                color: '#fff866',
-                x: x * this.cellSize + this.cellSize - 1,
-                y: y * this.cellSize + 2,
-                strokeWidth: 3
-            };
-            block.add(dam5);
-        }
     }
 
     /**
@@ -427,25 +385,10 @@ export class Damage extends RenderItem<EDamageEvent> {
     ) {
         // todo: 这个应当可以自定义，通过地图伤害注册实现
         let text = '';
-        let color = '#fa3';
-        let font = '300 9px Verdana';
+        const color = '#fa3';
+        const font = '300 9px Verdana';
         if (dam.damage > 0) {
             text = core.formatBigNumber(dam.damage, true);
-        } else if (dam.mockery) {
-            dam.mockery.sort((a, b) =>
-                a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]
-            );
-            const [tx, ty] = dam.mockery[0];
-            const dir = x > tx ? '←' : x < tx ? '→' : y > ty ? '↑' : '↓';
-            text = '嘲' + dir;
-            color = '#fd4';
-            font = '500 11px Verdana';
-        } else if (dam.hunt) {
-            text = '猎';
-            color = '#fd4';
-            font = '500 11px Verdana';
-        } else {
-            return;
         }
 
         const mapDam: DamageRenderable = {
@@ -592,10 +535,5 @@ export class Damage extends RenderItem<EDamageEvent> {
         this.enemy?.off('extract', this.onExtract);
     }
 }
-
-// 注册为内部元素
-tagMap.register<EDamageEvent, Damage>('damage', (_0, _1, _props) => {
-    return new Damage();
-});
 
 // const adapter = new RenderAdapter<Damage>('damage');
