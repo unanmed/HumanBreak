@@ -9,6 +9,8 @@ import { waitbox, ListPage, TextContent } from '../components';
 import { DefaultProps } from '@motajs/render-vue';
 import { ItemState } from '@user/data-state';
 
+// 未完工
+
 export interface StatisticsDataOneFloor {
     enemyCount: number;
     potionCount: number;

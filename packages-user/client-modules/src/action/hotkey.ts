@@ -77,11 +77,6 @@ gameKey
         defaults: KeyCode.KeyV
     })
     .register({
-        id: 'statistics',
-        name: '数据统计',
-        defaults: KeyCode.KeyB
-    })
-    .register({
         id: 'viewMap_1',
         name: '浏览地图_1',
         defaults: KeyCode.PageUp

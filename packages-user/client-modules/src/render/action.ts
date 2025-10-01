@@ -3,7 +3,6 @@ import { MAIN_WIDTH, MAIN_HEIGHT, POP_BOX_WIDTH, CENTER_LOC } from './shared';
 import {
     saveSave,
     mainUIController,
-    openStatistics,
     saveLoad,
     openSettings,
     ReplaySettingsUI,
@@ -15,9 +14,6 @@ export function createAction() {
     gameKey
         .realize('save', () => {
             saveSave(mainUIController, [0, 0, MAIN_WIDTH, MAIN_HEIGHT]);
-        })
-        .realize('statistics', () => {
-            openStatistics(mainUIController);
         })
         .realize('load', () => {
             saveLoad(mainUIController, [0, 0, MAIN_WIDTH, MAIN_HEIGHT]);
