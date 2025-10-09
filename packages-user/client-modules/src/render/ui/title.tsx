@@ -47,8 +47,7 @@ const enum TitleButton {
     StartGame,
     LoadGame,
     Replay,
-    Achievement,
-    HardBack = -114514
+    Achievement
 }
 
 interface ButtonItem {
@@ -134,7 +133,7 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
         };
     });
     hard.push({
-        code: TitleButton.HardBack,
+        code: -1,
         color: '#aaa',
         name: '返回',
         hard: '',
@@ -203,13 +202,13 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
         });
     };
 
-    const clickButton = (code: number) => {
+    const clickButton = (code: number, index: number) => {
         if (selectHard.value) {
-            if (code === TitleButton.HardBack) {
+            if (index === hard.length - 1) {
                 toggleHard();
                 return;
             }
-            const item = hard.find(v => v.code === code)!;
+            const item = hard[index];
             startGame(item.name);
         } else {
             switch (code) {
@@ -267,7 +266,11 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
             { type: 'down' }
         )
         .realize('confirm', () => {
-            clickButton(selected.value);
+            if (selectHard.value) {
+                clickButton(hard[selected.value].code, selected.value);
+            } else {
+                clickButton(buttons[selected.value].code, selected.value);
+            }
         });
 
     //#region 鼠标操作
@@ -483,7 +486,7 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
                                 // 这个缩放性能影响极大，原因不明
                                 // scale={[v.scale.ref.value, v.scale.ref.value]}
                                 onEnter={() => enterMain(i)}
-                                onClick={() => clickButton(v.code)}
+                                onClick={() => clickButton(v.code, i)}
                             />
                         );
                     })}
@@ -505,7 +508,7 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
                                 filter={buttonFilter}
                                 fillStyle={v.colorTrans.ref.value}
                                 onEnter={() => enterHard(i)}
-                                onClick={() => clickButton(v.code)}
+                                onClick={() => clickButton(v.code, i)}
                             />
                         );
                     })}
