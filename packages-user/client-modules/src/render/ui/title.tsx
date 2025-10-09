@@ -38,7 +38,8 @@ import { adjustCover } from '../utils';
 const enum TitleButton {
     StartGame,
     LoadGame,
-    Replay
+    Replay,
+    HardBack = -114514
 }
 
 interface ButtonItem {
@@ -126,7 +127,7 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
     });
     // 返回按钮
     hard.push({
-        code: main.levelChoose.length,
+        code: TitleButton.HardBack,
         color: '#aaa',
         name: '返回',
         hard: '',
@@ -217,11 +218,11 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
      */
     const clickButton = (code: number) => {
         if (selectHard.value) {
-            if (code === hard.length - 1) {
+            if (code === TitleButton.HardBack) {
                 toggleHard();
                 return;
             }
-            const item = hard[code];
+            const item = hard.find(v => v.code === code)!;
             startGame(item.name);
         } else {
             switch (code) {
