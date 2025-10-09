@@ -83,24 +83,22 @@ export const SAVE_PAGES = 1000;
 
 //#region 标题界面
 
-/** 标题文字宽度 */
-export const TITLE_WIDTH = 640;
-/** 标题文字高度 */
-export const TITLE_HEIGHT = 100;
-/** 标题文字宽度的一半 */
-export const HALF_TITLE_WIDTH = TITLE_WIDTH / 2;
-/** 标题文字高度的一半 */
-export const HALF_TITLE_HEIGHT = TITLE_HEIGHT / 2;
 /** 标题文字中心横坐标 */
 export const TITLE_X = HALF_WIDTH;
 /** 标题文字中心纵坐标 */
-export const TITLE_Y = 120;
+export const TITLE_Y = 100;
+/** 标题文字的填充颜色 */
+export const TITLE_FILL = 'white';
+/** 标题文字的描边颜色 */
+export const TITLE_STROKE = 'black';
+/** 标题文字的描边宽度 */
+export const TITLE_STROKE_WIDTH = 2;
 
 /** 标题界面按钮宽度，如果文字被裁剪可以考虑扩大此值 */
-export const BUTTONS_WIDTH = 200;
+export const BUTTONS_WIDTH = 160;
 /** 标题界面按钮高度，如果文字被裁剪可以考虑扩大此值 */
-export const BUTTONS_HEIGHT = 160;
-/** 标题界面按钮左上角横坐标 */
-export const BUTTONS_X = 50;
+export const BUTTONS_HEIGHT = 200;
+/** 标题界面按钮中心横坐标 */
+export const BUTTONS_X = HALF_WIDTH;
 /** 标题界面按钮左上角纵坐标 */
 export const BUTTONS_Y = MAIN_HEIGHT - BUTTONS_HEIGHT;

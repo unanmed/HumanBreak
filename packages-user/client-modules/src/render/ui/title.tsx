@@ -1,34 +1,26 @@
-import { DefaultProps, onTick } from '@motajs/render-vue';
+import { DefaultProps } from '@motajs/render-vue';
 import {
     GameUI,
     SetupComponentOptions,
     UIComponentProps
 } from '@motajs/system-ui';
-import { defineComponent, nextTick, onMounted, ref } from 'vue';
+import { computed, defineComponent, nextTick, onMounted, ref } from 'vue';
 import {
     BUTTONS_HEIGHT,
     BUTTONS_WIDTH,
     BUTTONS_X,
     BUTTONS_Y,
     HALF_HEIGHT,
-    HALF_TITLE_HEIGHT,
-    HALF_TITLE_WIDTH,
     HALF_WIDTH,
     MAIN_HEIGHT,
     MAIN_WIDTH,
-    TITLE_HEIGHT,
-    TITLE_WIDTH,
+    TITLE_FILL,
+    TITLE_STROKE,
+    TITLE_STROKE_WIDTH,
     TITLE_X,
     TITLE_Y
 } from '../shared';
-import {
-    ElementLocator,
-    IActionEvent,
-    MotaOffscreenCanvas2D,
-    Shader,
-    Sprite
-} from '@motajs/render-core';
-import { Image3DEffect } from '../fx';
+import { ElementLocator, Sprite } from '@motajs/render-core';
 import {
     ITransitionedController,
     transitioned,
@@ -46,8 +38,7 @@ import { adjustCover } from '../utils';
 const enum TitleButton {
     StartGame,
     LoadGame,
-    Replay,
-    Achievement
+    Replay
 }
 
 interface ButtonItem {
@@ -103,11 +94,6 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
             code: TitleButton.Replay,
             color: 'rgb(255, 251, 0)',
             name: '录像回放'
-        },
-        {
-            code: TitleButton.Achievement,
-            color: 'rgb(0, 208, 255)',
-            name: '查看成就'
         }
     ];
 
@@ -141,15 +127,6 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
         scale: transitioned(1, 400, hyper('sin', 'out'))!
     });
 
-    //#region 渐变动画
-    const maskPos = transitioned(
-        -MAIN_HEIGHT - 100,
-        7000,
-        hyper('sin', 'out')
-    )!;
-    const cursorX = transitioned(40, 400, hyper('sin', 'out'))!;
-    const cursorY = transitioned(20, 400, hyper('sin', 'out'))!;
-
     const soundColor = transitionedColor('#ddd', 400, hyper('sin', 'out'))!;
 
     const buttonsAlpha = transitioned(1, 300, linear())!;
@@ -160,18 +137,25 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
         drop-shadow(0px 0px 2px rgba(255, 255, 255, 0.5))
     `;
 
-    let cursorScale = 1;
-
     const titleFont = Font.defaults({ size: 72 });
     const buttonFont = Font.defaults({ size: 24, weight: 600 });
+
+    const buttonHeight = (buttons.length - 1) * 40 + 60;
+    const hardHeight = (hard.length - 1) * 40 + 60;
+    /** 按钮的背景框高度 */
+    const rectHeight = transitioned(buttonHeight, 600, hyper('sin', 'in-out'))!;
 
     //#region 按钮功能
 
     const toggleHard = async () => {
         if (selectHard.value) {
+            // 当前在难度界面，将要切换至开始界面
             enterMain(0);
+            rectHeight.set(buttonHeight);
         } else {
+            // 当前在开始界面，将要切换至难度界面
             enterHard(0);
+            rectHeight.set(hardHeight);
         }
         buttonsAlpha.set(0);
         await sleep(300);
@@ -220,8 +204,6 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
                     break;
                 case TitleButton.Replay:
                     replay();
-                    break;
-                case TitleButton.Achievement:
                     break;
             }
         }
@@ -278,11 +260,6 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
         soundColor.set('#d22');
     }
 
-    const moveCursor = (index: number) => {
-        cursorX.set(40 - index * 10);
-        cursorY.set(20 + 30 * index);
-    };
-
     const enterMain = (index: number) => {
         buttons.forEach((v, i) => {
             if (index !== i) {
@@ -294,7 +271,6 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
             }
         });
         selected.value = index;
-        moveCursor(index);
     };
 
     const enterHard = (index: number) => {
@@ -306,7 +282,6 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
             }
         });
         selected.value = index;
-        moveCursor(index);
     };
 
     const toggleSound = () => {
@@ -324,113 +299,13 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
         fullscreen.value = !!document.fullscreenElement;
     };
 
-    //#region 渲染
-
-    const imageEffect = new Image3DEffect();
-    const imageShader = ref<Shader>();
-
-    const maskSprite = ref<Sprite>();
-    const cursorSprite = ref<Sprite>();
-
-    let maskGradient: CanvasGradient | null = null;
-    let titleGradient: CanvasGradient | null = null;
-
-    const createImageEffect = () => {
-        if (!imageShader.value) return;
-        imageEffect.create(imageShader.value);
-        const model = imageEffect.getModel();
-        const view = imageEffect.getView();
-        view.lookAt([0, 0, 1], [0, 0, 0], [0, 1, 0]);
-        model.scale(1.1, 1.1, 1.1);
-        imageEffect.use();
-    };
-
-    const createMaskGradient = (ctx: CanvasRenderingContext2D) => {
-        maskGradient = ctx.createLinearGradient(100, 100, 200, 0);
-        maskGradient.addColorStop(0, 'rgba(255,255,255,0)');
-        maskGradient.addColorStop(1, 'rgba(0,0,0,1)');
-    };
-
-    const createTitleGradient = (ctx: CanvasRenderingContext2D) => {
-        titleGradient = ctx.createLinearGradient(0, 0, 640, 0);
-        titleGradient.addColorStop(0, 'rgb(0, 65, 62)');
-        titleGradient.addColorStop(0.25, 'rgb(0, 33, 71)');
-        titleGradient.addColorStop(0.5, 'rgb(136, 0, 214)');
-        titleGradient.addColorStop(0.75, 'rgb(0, 2, 97)');
-        titleGradient.addColorStop(1, 'rgb(0, 2, 97)');
-    };
-
-    const titleSprite = ref<Sprite>();
     onMounted(() => {
-        createImageEffect();
-        maskPos.set(MAIN_WIDTH);
         enterMain(0);
     });
-
-    onTick(time => {
-        if (maskPos.value < MAIN_WIDTH) {
-            maskSprite.value?.update();
-        }
-        cursorScale = Math.sin(time / 600);
-        cursorSprite.value?.update();
-    });
-
-    const moveBackground = (ev: IActionEvent) => {
-        const model = imageEffect.getModel();
-        const px = (ev.offsetX / MAIN_WIDTH - 0.5) * 2;
-        const py = (ev.offsetY / MAIN_HEIGHT - 0.5) * 2;
-        model.reset();
-        model.scale(1.1, 1.1, 1.1);
-        model.rotateY(px / 24);
-        model.rotateX(py / 24);
-    };
-
-    const renderMask = (canvas: MotaOffscreenCanvas2D) => {
-        const ctx = canvas.ctx;
-        if (maskGradient === null) {
-            createMaskGradient(ctx);
-        }
-        const pos = maskPos.value;
-        ctx.translate(pos, 0);
-        ctx.fillStyle = maskGradient!;
-        ctx.fillRect(0, 0, MAIN_WIDTH + MAIN_HEIGHT + 200, MAIN_HEIGHT);
-    };
-
-    const renderTitle = (canvas: MotaOffscreenCanvas2D) => {
-        const ctx = canvas.ctx;
-        if (titleGradient === null) {
-            createTitleGradient(ctx);
-        }
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = titleFont.string();
-        ctx.fillStyle = titleGradient!;
-        ctx.filter = `
-            drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5))
-            drop-shadow(-3px -3px 4px rgba(255,255,255,0.3))
-            drop-shadow(12px 12px 4px rgba(0, 0, 0, 0.4))
-            blur(1px)
-        `;
-        ctx.fillText(core.firstData.title, HALF_TITLE_WIDTH, HALF_TITLE_HEIGHT);
-    };
-
-    const renderCursor = (canvas: MotaOffscreenCanvas2D) => {
-        const ctx = canvas.ctx;
-        ctx.translate(0, 5);
-        ctx.scale(1, cursorScale);
-        ctx.beginPath();
-        ctx.moveTo(1, -4);
-        ctx.lineTo(9, 0);
-        ctx.lineTo(1, 4);
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-    };
 
     return () => (
         <container
             loc={[0, 0, MAIN_WIDTH, MAIN_HEIGHT]}
-            onMoveCapture={moveBackground}
             alpha={mainAlpha.ref.value}
         >
             <image
@@ -439,47 +314,51 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
                 anc={[0.5, 0.5]}
                 zIndex={0}
             />
-            <shader
-                ref={imageShader}
-                zIndex={5}
-                loc={[0, 0, MAIN_WIDTH, MAIN_HEIGHT]}
-            />
-            <sprite
-                ref={maskSprite}
-                render={renderMask}
-                composite="multiply"
-                loc={[0, 0, MAIN_WIDTH, MAIN_HEIGHT]}
-                zIndex={20}
-                noevent
-            />
-            <sprite
-                ref={titleSprite}
-                render={renderTitle}
-                loc={[TITLE_X, TITLE_Y, TITLE_WIDTH, TITLE_HEIGHT, 0.5, 0.5]}
-                zIndex={10}
+            <text
+                text={core.firstData.title}
+                loc={[TITLE_X, TITLE_Y]}
+                anc={[0.5, 0.5]}
+                fillStyle={TITLE_FILL}
+                strokeStyle={TITLE_STROKE}
+                font={titleFont}
+                strokeWidth={TITLE_STROKE_WIDTH}
             />
             <container
                 zIndex={15}
                 loc={[BUTTONS_X, BUTTONS_Y, BUTTONS_WIDTH, BUTTONS_HEIGHT]}
+                anc={[0.5, 0]}
             >
+                <g-rectr
+                    loc={[2, BUTTONS_HEIGHT / 2]}
+                    width={BUTTONS_WIDTH - 4}
+                    height={rectHeight.ref.value - 4}
+                    anc={[0, 0.5]}
+                    circle={[16]}
+                    fill
+                    stroke
+                    fillStyle="rgba(50, 54, 159, 0.7)"
+                    strokeStyle="rgba(255, 204, 0, 1)"
+                    lineWidth={3}
+                    zIndex={0}
+                />
                 <container
                     hidden={selectHard.value}
-                    loc={[0, 0, BUTTONS_WIDTH, BUTTONS_HEIGHT]}
+                    loc={[0, BUTTONS_HEIGHT / 2, BUTTONS_WIDTH, buttonHeight]}
+                    anc={[0, 0.5]}
                     alpha={buttonsAlpha.ref.value}
+                    zIndex={5}
                 >
                     {buttons.map((v, i) => {
-                        const x = 50 - i * 10;
-                        const y = 20 + i * 30;
+                        const x = BUTTONS_WIDTH / 2;
+                        const y = 30 + i * 40;
                         return (
                             <text
                                 text={v.name}
                                 font={buttonFont}
-                                loc={[x, y, void 0, void 0, 0, 0.5]}
+                                loc={[x, y, void 0, void 0, 0.5, 0.5]}
                                 cursor="pointer"
                                 filter={buttonFilter}
                                 fillStyle={v.colorTrans.ref.value}
-                                // 这个缩放性能影响极大，原因不明
-                                // scale={[v.scale.ref.value, v.scale.ref.value]}
                                 onEnter={() => enterMain(i)}
                                 onClick={() => clickButton(i)}
                             />
@@ -488,17 +367,18 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
                 </container>
                 <container
                     hidden={!selectHard.value}
-                    loc={[0, 0, BUTTONS_WIDTH, BUTTONS_HEIGHT]}
+                    loc={[0, BUTTONS_HEIGHT / 2, BUTTONS_WIDTH, hardHeight]}
+                    anc={[0, 0.5]}
                     alpha={buttonsAlpha.ref.value}
                 >
                     {hard.map((v, i) => {
-                        const x = 50 - i * 10;
-                        const y = 20 + i * 30;
+                        const x = BUTTONS_WIDTH / 2;
+                        const y = 30 + i * 40;
                         return (
                             <text
                                 text={v.name}
                                 font={buttonFont}
-                                loc={[x, y, void 0, void 0, 0, 0.5]}
+                                loc={[x, y, void 0, void 0, 0.5, 0.5]}
                                 cursor="pointer"
                                 filter={buttonFilter}
                                 fillStyle={v.colorTrans.ref.value}
@@ -508,41 +388,37 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
                         );
                     })}
                 </container>
-                <sprite
-                    ref={cursorSprite}
-                    width={10}
-                    height={10}
-                    render={renderCursor}
-                    loc={[cursorX.ref.value, cursorY.ref.value]}
-                    anc={[1, 0.5]}
-                    nocache
-                />
             </container>
             <container
                 zIndex={15}
-                loc={[MAIN_WIDTH - 40, MAIN_HEIGHT - 20, 80, 40, 1, 1]}
+                loc={[MAIN_WIDTH - 20, MAIN_HEIGHT - 20, 120, 40, 1, 1]}
             >
+                <g-rectr
+                    loc={[0, 0, 120, 40]}
+                    circle={[20]}
+                    fillStyle="rgba(0, 0, 0, 0.72)"
+                />
                 <SoundVolume
-                    loc={[0, 0, 40, 40]}
+                    loc={[20, 0, 40, 40]}
                     cursor="pointer"
                     strokeStyle={soundColor.ref.value}
                     onClick={toggleSound}
                 />
                 {!fullscreen.value ? (
                     <Fullscreen
-                        loc={[40, 0, 40, 40]}
+                        loc={[60, 0, 40, 40]}
                         onClick={toggleFullscreen}
                         cursor="pointer"
                     />
                 ) : (
                     <ExitFullscreen
-                        loc={[40, 0, 40, 40]}
+                        loc={[60, 0, 40, 40]}
                         onClick={toggleFullscreen}
                         cursor="pointer"
                     />
                 )}
                 <g-line
-                    line={[5, 35, 35, 5]}
+                    line={[25, 35, 55, 5]}
                     strokeStyle="gray"
                     lineWidth={3}
                     lineCap="round"

@@ -127,32 +127,19 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 					22,
 					1
 				],
-				"action": [
-					{
-						"type": "setCurtain",
-						"color": [
-							0,
-							0,
-							0,
-							1
-						],
-						"time": 0,
-						"keep": true
-					},
-					{
-						"type": "setValue",
-						"name": "status:atk",
-						"operator": "+=",
-						"value": "3"
-					},
-					{
-						"type": "setValue",
-						"name": "status:def",
-						"operator": "+=",
-						"value": "2"
-					},
-					"简单难度下，初始攻击+3，初始防御+2，全局减伤10%，绿宝石效果*2"
-				]
+				"action": []
+			},
+			{
+				"title": "普通",
+				"name": "medium",
+				"hard": 2,
+				"color": [
+					255,
+					0,
+					0,
+					1
+				],
+				"action": []
 			},
 			{
 				"title": "困难",
@@ -164,19 +151,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 					0,
 					1
 				],
-				"action": [
-					{
-						"type": "setCurtain",
-						"color": [
-							0,
-							0,
-							0,
-							1
-						],
-						"time": 0,
-						"keep": true
-					}
-				]
+				"action": []
 			}
 		],
 		"equipName": [
@@ -381,6 +356,10 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			{
 				"type": "text",
 				"text": "欢迎使用古祠制作的 2.B 样板，本样板主要针对渲染系统进行了重构，现在我们有了更加方便强大的渲染系统，也对部分相关事件进行了重置！"
+			},
+			{
+				"type": "text",
+				"text": "同时 2.B 样板也新增了很多接口，在造塔时可以提供非常大的帮助！"
 			},
 			{
 				"type": "text",
