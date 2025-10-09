@@ -47,7 +47,8 @@ const enum TitleButton {
     StartGame,
     LoadGame,
     Replay,
-    Achievement
+    Achievement,
+    HardBack = -114514
 }
 
 interface ButtonItem {
@@ -133,7 +134,7 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
         };
     });
     hard.push({
-        code: main.levelChoose.length,
+        code: TitleButton.HardBack,
         color: '#aaa',
         name: '返回',
         hard: '',
@@ -204,7 +205,7 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
 
     const clickButton = (code: number) => {
         if (selectHard.value) {
-            if (code === hard.length - 1) {
+            if (code === TitleButton.HardBack) {
                 toggleHard();
                 return;
             }
