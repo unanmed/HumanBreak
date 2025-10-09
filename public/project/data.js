@@ -124,7 +124,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				"color": [
 					0,
 					255,
-					22,
+					0,
 					1
 				],
 				"action": []
@@ -135,7 +135,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				"hard": 2,
 				"color": [
 					255,
-					0,
+					255,
 					0,
 					1
 				],
@@ -144,7 +144,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			{
 				"title": "困难",
 				"name": "hard",
-				"hard": 2,
+				"hard": 3,
 				"color": [
 					255,
 					0,

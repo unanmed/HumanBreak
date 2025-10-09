@@ -138,7 +138,7 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
     /** 开始界面按钮的不透明度，选择难度界面的不透明度使用 `1-buttonsAlpha` 计算 */
     const buttonsAlpha = transitioned(1, 300, linear())!;
     /** 开始界面的不透明度 */
-    const mainAlpha = transitioned(1, 600, linear())!;
+    const mainAlpha = transitioned(0, 600, linear())!;
 
     const buttonFilter = `
         drop-shadow(3px 3px 5px rgba(0, 0, 0, 0.4))
@@ -331,6 +331,7 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
 
     onMounted(() => {
         enterMain(0);
+        mainAlpha.set(1);
     });
 
     return () => (
