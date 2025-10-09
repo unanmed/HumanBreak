@@ -4,7 +4,7 @@ import {
     SetupComponentOptions,
     UIComponentProps
 } from '@motajs/system-ui';
-import { computed, defineComponent, nextTick, onMounted, ref } from 'vue';
+import { defineComponent, nextTick, onMounted, ref } from 'vue';
 import {
     BUTTONS_HEIGHT,
     BUTTONS_WIDTH,
@@ -20,7 +20,7 @@ import {
     TITLE_X,
     TITLE_Y
 } from '../shared';
-import { ElementLocator, Sprite } from '@motajs/render-core';
+import { ElementLocator } from '@motajs/render-core';
 import {
     ITransitionedController,
     transitioned,
@@ -75,10 +75,14 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
 
     //#region 标题设置
 
+    /** 当前是否全屏 */
     const fullscreen = ref(!!document.fullscreenElement);
+    /** 是否开启了声音 */
     const soundOpened = ref(true);
+    /** 是否在选择难度界面 */
     const selectHard = ref(false);
 
+    /** 开始界面按钮定义，你可以在这新增自己的按钮 */
     const buttonItems: ButtonItem[] = [
         {
             code: TitleButton.StartGame,
@@ -97,6 +101,7 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
         }
     ];
 
+    /** 开始界面按钮 */
     const buttons = buttonItems.map<ButtonOption>(v => {
         return {
             code: v.code,
@@ -108,6 +113,7 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
         };
     });
 
+    /** 选择难度界面按钮 */
     const hard = main.levelChoose.map<ButtonOption>(v => {
         return {
             code: v.hard,
@@ -118,6 +124,7 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
             scale: transitioned(1, 400, hyper('sin', 'out'))!
         };
     });
+    // 返回按钮
     hard.push({
         code: main.levelChoose.length,
         color: '#aaa',
@@ -127,9 +134,12 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
         scale: transitioned(1, 400, hyper('sin', 'out'))!
     });
 
+    /** 声音设置按钮的颜色 */
     const soundColor = transitionedColor('#ddd', 400, hyper('sin', 'out'))!;
 
+    /** 开始界面按钮的不透明度，选择难度界面的不透明度使用 `1-buttonsAlpha` 计算 */
     const buttonsAlpha = transitioned(1, 300, linear())!;
+    /** 开始界面的不透明度 */
     const mainAlpha = transitioned(1, 600, linear())!;
 
     const buttonFilter = `
@@ -140,13 +150,18 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
     const titleFont = Font.defaults({ size: 72 });
     const buttonFont = Font.defaults({ size: 24, weight: 600 });
 
+    /** 开始界面按钮的高度 */
     const buttonHeight = (buttons.length - 1) * 40 + 60;
+    /** 选择难度界面按钮的高度 */
     const hardHeight = (hard.length - 1) * 40 + 60;
     /** 按钮的背景框高度 */
     const rectHeight = transitioned(buttonHeight, 600, hyper('sin', 'in-out'))!;
 
     //#region 按钮功能
 
+    /**
+     * 在开始界面和选择难度界面切换
+     */
     const toggleHard = async () => {
         if (selectHard.value) {
             // 当前在难度界面，将要切换至开始界面
@@ -163,6 +178,9 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
         buttonsAlpha.set(1);
     };
 
+    /**
+     * 点击读取存档按钮
+     */
     const loadGame = async () => {
         const loc: ElementLocator = [0, 0, MAIN_WIDTH, MAIN_HEIGHT];
         const success = await saveLoad(props.controller, loc);
@@ -172,10 +190,17 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
         }
     };
 
+    /**
+     * 点击录像回放按钮
+     */
     const replay = () => {
         core.chooseReplayFile();
     };
 
+    /**
+     * 选择难度并开始游戏
+     * @param hard 选择的难度
+     */
     const startGame = async (hard: string) => {
         mainAlpha.set(0);
         await sleep(600);
@@ -186,6 +211,10 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
         });
     };
 
+    /**
+     * 点击按钮时触发
+     * @param code 选中的按钮的代码
+     */
     const clickButton = (code: number) => {
         if (selectHard.value) {
             if (code === hard.length - 1) {
@@ -360,7 +389,7 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
                                 filter={buttonFilter}
                                 fillStyle={v.colorTrans.ref.value}
                                 onEnter={() => enterMain(i)}
-                                onClick={() => clickButton(i)}
+                                onClick={() => clickButton(v.code)}
                             />
                         );
                     })}
@@ -383,7 +412,7 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
                                 filter={buttonFilter}
                                 fillStyle={v.colorTrans.ref.value}
                                 onEnter={() => enterHard(i)}
-                                onClick={() => clickButton(i)}
+                                onClick={() => clickButton(v.code)}
                             />
                         );
                     })}
