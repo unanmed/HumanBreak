@@ -38,8 +38,7 @@ import { adjustCover } from '../utils';
 const enum TitleButton {
     StartGame,
     LoadGame,
-    Replay,
-    HardBack = -114514
+    Replay
 }
 
 interface ButtonItem {
@@ -54,7 +53,6 @@ interface ButtonOption {
     name: string;
     hard: string;
     colorTrans: ITransitionedController<string>;
-    scale: ITransitionedController<number>;
 }
 
 export interface GameTitleProps extends DefaultProps, UIComponentProps {}
@@ -127,12 +125,11 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
     });
     // 返回按钮
     hard.push({
-        code: TitleButton.HardBack,
+        code: -1,
         color: '#aaa',
         name: '返回',
         hard: '',
-        colorTrans: transitionedColor('#fff', 400, hyper('sin', 'out'))!,
-        scale: transitioned(1, 400, hyper('sin', 'out'))!
+        colorTrans: transitionedColor('#fff', 400, hyper('sin', 'out'))!
     });
 
     /** 声音设置按钮的颜色 */
@@ -216,13 +213,14 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
      * 点击按钮时触发
      * @param code 选中的按钮的代码
      */
-    const clickButton = (code: number) => {
+    const clickButton = (code: number, index: number) => {
         if (selectHard.value) {
-            if (code === TitleButton.HardBack) {
+            if (index === hard.length - 1) {
+                // 选中了最后一个按钮
                 toggleHard();
                 return;
             }
-            const item = hard.find(v => v.code === code)!;
+            const item = hard[index];
             startGame(item.name);
         } else {
             switch (code) {
@@ -278,7 +276,11 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
             { type: 'down' }
         )
         .realize('confirm', () => {
-            clickButton(selected.value);
+            if (selectHard.value) {
+                clickButton(hard[selected.value].code, selected.value);
+            } else {
+                clickButton(buttons[selected.value].code, selected.value);
+            }
         });
 
     //#region 鼠标操作
@@ -294,10 +296,8 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
         buttons.forEach((v, i) => {
             if (index !== i) {
                 v.colorTrans.set('#fff');
-                v.scale.set(1);
             } else {
                 v.colorTrans.set(v.color);
-                v.scale.set(1.1);
             }
         });
         selected.value = index;
@@ -390,7 +390,7 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
                                 filter={buttonFilter}
                                 fillStyle={v.colorTrans.ref.value}
                                 onEnter={() => enterMain(i)}
-                                onClick={() => clickButton(v.code)}
+                                onClick={() => clickButton(v.code, i)}
                             />
                         );
                     })}
@@ -413,7 +413,7 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
                                 filter={buttonFilter}
                                 fillStyle={v.colorTrans.ref.value}
                                 onEnter={() => enterHard(i)}
-                                onClick={() => clickButton(v.code)}
+                                onClick={() => clickButton(v.code, i)}
                             />
                         );
                     })}
