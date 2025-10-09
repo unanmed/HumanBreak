@@ -482,7 +482,7 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
                                 // 这个缩放性能影响极大，原因不明
                                 // scale={[v.scale.ref.value, v.scale.ref.value]}
                                 onEnter={() => enterMain(i)}
-                                onClick={() => clickButton(i)}
+                                onClick={() => clickButton(v.code)}
                             />
                         );
                     })}
@@ -504,7 +504,7 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
                                 filter={buttonFilter}
                                 fillStyle={v.colorTrans.ref.value}
                                 onEnter={() => enterHard(i)}
-                                onClick={() => clickButton(i)}
+                                onClick={() => clickButton(v.code)}
                             />
                         );
                     })}
