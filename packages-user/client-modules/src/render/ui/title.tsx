@@ -209,7 +209,7 @@ export const GameTitle = defineComponent<GameTitleProps>(props => {
                 toggleHard();
                 return;
             }
-            const item = hard[code];
+            const item = hard.find(v => v.code === code)!;
             startGame(item.name);
         } else {
             switch (code) {
