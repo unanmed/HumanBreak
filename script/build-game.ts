@@ -648,7 +648,7 @@ async function buildGame() {
             `⚠️   压缩包大于 100M，可能导致发塔困难，请考虑降低塔的大小\r\n`
         );
         const suggections: string[] = [];
-        if (dataObject.main.bgms.some(v => !v.endsWith('opuw'))) {
+        if (dataObject.main.bgms.some(v => !v.endsWith('opus'))) {
             suggections.push(`将 BGM 和音效换用 opus 格式`);
         }
         if (dataObject.main.images.some(v => !v.endsWith('webp'))) {
