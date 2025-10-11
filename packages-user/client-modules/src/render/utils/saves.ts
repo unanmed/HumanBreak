@@ -2,6 +2,7 @@ import { compressToBase64, decompressFromBase64 } from 'lz-string';
 import { getConfirm, waitbox } from '../components';
 import { IUIMountable } from '@motajs/system-ui';
 import { SyncSaveFromServerResponse } from '@motajs/client-base';
+import { CENTER_LOC, POP_BOX_WIDTH } from '../shared';
 
 export interface SaveData {
     name: string;
@@ -128,15 +129,15 @@ export async function syncFromServer(
         return void getConfirm(
             controller,
             '不合法的存档编号+密码！请检查格式！',
-            [240, 240, void 0, void 0, 0.5, 0.5],
-            240
+            CENTER_LOC,
+            POP_BOX_WIDTH
         );
     }
     const [id, password] = parseIdPassword(identifier);
     const result = await waitbox(
         controller,
-        [240, 240, void 0, void 0, 0.5, 0.5],
-        240,
+        CENTER_LOC,
+        POP_BOX_WIDTH,
         syncLoad(id, password)
     );
     if (typeof result === 'number') {
@@ -150,16 +151,16 @@ export async function syncFromServer(
         return void getConfirm(
             controller,
             map[result],
-            [240, 240, void 0, void 0, 0.5, 0.5],
-            240
+            CENTER_LOC,
+            POP_BOX_WIDTH
         );
     }
     if (result instanceof Array) {
         const confirm = await getConfirm(
             controller,
             '所有本地存档都将被覆盖，确认？',
-            [240, 240, void 0, void 0, 0.5, 0.5],
-            240,
+            CENTER_LOC,
+            POP_BOX_WIDTH,
             {
                 defaultYes: true
             }
@@ -176,8 +177,8 @@ export async function syncFromServer(
             return void getConfirm(
                 controller,
                 '同步成功！\n你的本地所有存档均已被覆盖。',
-                [240, 240, void 0, void 0, 0.5, 0.5],
-                240
+                CENTER_LOC,
+                POP_BOX_WIDTH
             );
         }
     } else {
@@ -188,8 +189,8 @@ export async function syncFromServer(
         return void getConfirm(
             controller,
             `同步成功！\n单存档已覆盖至存档 ${idx}`,
-            [240, 240, void 0, void 0, 0.5, 0.5],
-            240
+            CENTER_LOC,
+            POP_BOX_WIDTH
         );
     }
 }

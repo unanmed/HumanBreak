@@ -364,7 +364,7 @@ export const SyncSave = defineComponent<MainSettingsProps>(props => {
         [SyncSaveChoice.ToServer, '同步存档至服务器'],
         [SyncSaveChoice.FromServer, '从服务器加载存档'],
         [SyncSaveChoice.ToLocal, '存档至本地文件'],
-        [SyncSaveChoice.FromLocal, '存本地文件读档'],
+        [SyncSaveChoice.FromLocal, '从本地文件读档'],
         [SyncSaveChoice.ClearLocal, '清空本地存档'],
         [SyncSaveChoice.Back, '返回上一级']
     ];
