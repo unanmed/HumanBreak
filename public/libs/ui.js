@@ -2241,15 +2241,19 @@ ui.prototype.drawChoices = async function (content, choices, width) {
         core.insertAction(choices[selected].action);
         core.doAction();
     } else {
-        const { routedChoices, mainUIController } = Mota.require(
-            '@user/client-modules'
-        );
+        const {
+            routedChoices,
+            mainUIController,
+            HALF_WIDTH,
+            HALF_HEIGHT,
+            POP_BOX_WIDTH
+        } = Mota.require('@user/client-modules');
         const choice = choices.map((v, i) => [i, v.text]);
         const selected = await routedChoices(
             mainUIController,
             choice,
-            [420, 240, void 0, void 0, 0.5, 0.5],
-            width,
+            [HALF_WIDTH, HALF_HEIGHT, void 0, void 0, 0.5, 0.5],
+            width ?? POP_BOX_WIDTH,
             { title: content ?? '' }
         );
         core.insertAction(choices[selected].action);
@@ -2295,14 +2299,18 @@ ui.prototype.drawConfirmBox = async function (
             noCallback?.();
         }
     } else {
-        const { routedConfirm, mainUIController } = Mota.require(
-            '@user/client-modules'
-        );
+        const {
+            routedConfirm,
+            mainUIController,
+            HALF_WIDTH,
+            HALF_HEIGHT,
+            POP_BOX_WIDTH
+        } = Mota.require('@user/client-modules');
         const confirm = await routedConfirm(
             mainUIController,
             text,
-            [420, 240, void 0, void 0, 0.5, 0.5],
-            240
+            [HALF_WIDTH, HALF_HEIGHT, void 0, void 0, 0.5, 0.5],
+            POP_BOX_WIDTH
         );
         if (confirm) {
             yesCallback?.();

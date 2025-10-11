@@ -23,7 +23,7 @@ import { SetupComponentOptions } from '@motajs/system-ui';
 import { saveSave, saveLoad } from './save';
 import { mainUIController } from './controller';
 import { MAIN_HEIGHT, FULL_LOC, POP_BOX_WIDTH, CENTER_LOC } from '../shared';
-import { openSettings } from './settings';
+import { openReplay, openSettings } from './settings';
 import { openViewMap } from './viewmap';
 
 interface ToolbarProps extends DefaultProps {
@@ -112,7 +112,11 @@ export const PlayingToolbar = defineComponent<
     const view = () => {
         openViewMap(mainUIController, FULL_LOC);
     };
-    const replay = () => core.ui._drawReplay();
+    const replay = () => {
+        const loc = CENTER_LOC.slice() as ElementLocator;
+        loc[2] = POP_BOX_WIDTH;
+        openReplay(mainUIController, loc);
+    };
     const settings = () => {
         const loc = CENTER_LOC.slice() as ElementLocator;
         loc[2] = POP_BOX_WIDTH;

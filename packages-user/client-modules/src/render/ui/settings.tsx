@@ -693,3 +693,14 @@ export function openSettings(
         loc
     });
 }
+
+export function openReplay(
+    controller: IUIMountable,
+    loc: ElementLocator,
+    props?: MainSettingsProps
+) {
+    controller.open(ReplaySettingsUI, {
+        ...props,
+        loc
+    });
+}

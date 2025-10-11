@@ -904,69 +904,22 @@ actions.prototype._sys_longClick_lockControl = function (x, y, px, py) {
 /////////////////// 在某个界面时的按键点击效果 ///////////////////
 
 actions.prototype._getChoicesTopIndex = function (length) {
-    return (
-        this._HY_ -
-        Math.floor((length - 1) / 2) +
-        (core.status.event.ui.offset || 0)
-    );
+    // Deprecated.
 };
 
 // 数字键快速选择选项
 actions.prototype._selectChoices = function (length, keycode, callback) {
-    var topIndex = this._getChoicesTopIndex(length);
-    if (keycode == 13 || keycode == 32 || keycode == 67) {
-        callback.apply(this, [
-            this._HX_,
-            topIndex + core.status.event.selection
-        ]);
-    }
-
-    if (keycode >= 49 && keycode <= 57) {
-        var index = keycode - 49;
-        if (index < length) {
-            callback.apply(this, [this._HX_, topIndex + index]);
-        }
-    }
+    // Deprecated.
 };
 
 // 上下键调整选项
 actions.prototype._keyDownChoices = function (keycode) {
-    if (keycode == 38) {
-        core.status.event.selection--;
-        core.playSound('光标移动');
-        core.ui.drawChoices(
-            core.status.event.ui.text,
-            core.status.event.ui.choices,
-            core.status.event.ui.width
-        );
-    }
-    if (keycode == 40) {
-        core.status.event.selection++;
-        core.playSound('光标移动');
-        core.ui.drawChoices(
-            core.status.event.ui.text,
-            core.status.event.ui.choices,
-            core.status.event.ui.width
-        );
-    }
+    // Deprecated.
 };
 
 // 移动光标
 actions.prototype._onMoveChoices = function (x, y) {
-    if (this._out(x)) return;
-    var choices = core.status.event.ui.choices;
-    var topIndex = this._getChoicesTopIndex(choices.length);
-    if (y >= topIndex && y < topIndex + choices.length) {
-        var selection = y - topIndex;
-        if (selection == core.status.event.selection) return;
-        core.status.event.selection = selection;
-        core.playSound('光标移动');
-        core.ui.drawChoices(
-            core.status.event.ui.text,
-            core.status.event.ui.choices,
-            core.status.event.ui.width
-        );
-    }
+    // Deprecated.
 };
 
 ////// 点击中心对称飞行器时
@@ -1136,66 +1089,12 @@ actions.prototype._clickAction = function (x, y, px, py) {
     }
 
     if (core.status.event.data.type == 'choices') {
-        // 选项
-        var data = core.status.event.data.current;
-        var choices = data.choices;
-        if (choices.length == 0) return;
-        if (this._out(x)) return;
-        var topIndex = this._getChoicesTopIndex(choices.length);
-        if (y >= topIndex && y < topIndex + choices.length) {
-            var choice = choices[y - topIndex];
-            if (
-                choice.need != null &&
-                choice.need != '' &&
-                !core.calValue(choice.need)
-            ) {
-                core.playSound('操作失败');
-                core.drawTip('无法选择此项');
-                return;
-            }
-            clearTimeout(core.status.event.interval);
-            var timeout =
-                Math.max(0, core.status.event.timeout - new Date().getTime()) ||
-                0;
-            delete core.status.event.timeout;
-            core.setFlag('timeout', timeout);
-            // 对全局商店特殊处理
-            var index = y - topIndex;
-            if (index == choices.length - 1 && core.hasFlag('@temp@shop')) {
-                index = -1;
-            }
-            core.status.route.push('choices:' + (100 * timeout + index));
-            core.insertAction(choice.action);
-            core.doAction();
-        }
+        // Deprecated.
         return;
     }
 
     if (core.status.event.data.type == 'confirm') {
-        if ((x == this._HX_ - 2 || x == this._HX_ - 1) && y == this._HY_ + 1) {
-            clearTimeout(core.status.event.interval);
-            var timeout =
-                Math.max(0, core.status.event.timeout - new Date().getTime()) ||
-                0;
-            delete core.status.event.timeout;
-            core.setFlag('timeout', timeout);
-            core.status.route.push('choices:' + 100 * timeout);
-            core.insertAction(core.status.event.ui.yes);
-            core.doAction();
-        } else if (
-            (x == this._HX_ + 2 || x == this._HX_ + 1) &&
-            y == this._HY_ + 1
-        ) {
-            clearTimeout(core.status.event.interval);
-            var timeout =
-                Math.max(0, core.status.event.timeout - new Date().getTime()) ||
-                0;
-            delete core.status.event.timeout;
-            core.setFlag('timeout', timeout);
-            core.status.route.push('choices:' + (100 * timeout + 1));
-            core.insertAction(core.status.event.ui.no);
-            core.doAction();
-        }
+        // Deprecated.
         return;
     }
 };
@@ -1756,1230 +1655,262 @@ actions.prototype._keyUpSL = function (keycode) {
 
 ////// 系统设置界面时的点击操作 //////
 actions.prototype._clickSwitchs = function (x, y) {
-    var choices = core.status.event.ui.choices;
-    var topIndex = this._getChoicesTopIndex(choices.length);
-    var selection = y - topIndex;
-    if (this._out(x)) return;
-    if (selection >= 0 && selection < choices.length) {
-        core.status.event.selection = selection;
-        switch (selection) {
-            case 0:
-                core.status.event.selection = 0;
-                core.playSound('确定');
-                return core.ui._drawSwitchs_sounds();
-            case 1:
-                core.status.event.selection = 0;
-                core.playSound('确定');
-                return core.ui._drawSwitchs_display();
-            case 2:
-                core.status.event.selection = 0;
-                core.playSound('确定');
-                return core.ui._drawSwitchs_action();
-            case 3:
-                core.status.event.selection = 0;
-                core.playSound('取消');
-                return core.ui._drawSettings();
-        }
-    }
+    // Deprecated.
 };
 
 ////// 系统设置界面时，放开某个键的操作 //////
 actions.prototype._keyUpSwitchs = function (keycode) {
-    if (keycode == 27 || keycode == 88) {
-        core.status.event.selection = 0;
-        core.playSound('取消');
-        core.ui._drawSettings();
-        return;
-    }
-    this._selectChoices(
-        core.status.event.ui.choices.length,
-        keycode,
-        this._clickSwitchs
-    );
+    // Deprecated.
 };
 
 actions.prototype._clickSwitchs_sounds = function (x, y) {
-    var choices = core.status.event.ui.choices;
-    var topIndex = this._getChoicesTopIndex(choices.length);
-    var selection = y - topIndex;
-    if (this._out(x)) {
-        if (selection != 2) return;
-    }
-    if (selection >= 0 && selection < choices.length) {
-        var width = choices[selection].width;
-        var leftPos = (core._PX_ - width) / 2,
-            rightPos = (core._PX_ + width) / 2;
-        var leftGrid = Math.floor(leftPos / 32),
-            rightGrid = Math.floor(rightPos / 32) - 1;
-        core.status.event.selection = selection;
-        switch (selection) {
-            case 0:
-                return this._clickSwitchs_sounds_bgm();
-            case 1:
-                return this._clickSwitchs_sounds_se();
-            case 2:
-                if (x == leftGrid || x == leftGrid + 1)
-                    return this._clickSwitchs_sounds_userVolume(-1);
-                if (x == rightGrid || x == rightGrid + 1)
-                    return this._clickSwitchs_sounds_userVolume(1);
-                return;
-            case 3:
-                core.status.event.selection = 0;
-                core.playSound('取消');
-                core.ui._drawSwitchs();
-                return;
-        }
-    }
+    // Deprecated.
 };
 
 actions.prototype._clickSwitchs_sounds_bgm = function () {
-    core.triggerBgm();
-    core.playSound('确定');
-    core.ui._drawSwitchs_sounds();
+    // Deprecated.
 };
 
 actions.prototype._clickSwitchs_sounds_se = function () {
-    core.musicStatus.soundStatus = !core.musicStatus.soundStatus;
-    core.setLocalStorage('soundStatus', core.musicStatus.soundStatus);
-    core.playSound('确定');
-    core.ui._drawSwitchs_sounds();
+    // Deprecated.
 };
 
 actions.prototype._clickSwitchs_sounds_userVolume = function (delta) {
-    var value = Math.round(Math.sqrt(100 * core.musicStatus.userVolume));
-    if (value == 0 && delta < 0) return;
-    core.musicStatus.userVolume = core.clamp(
-        Math.pow(value + delta, 2) / 100,
-        0,
-        1
-    );
-    //audioContext 音效 不受designVolume 影响
-    if (core.musicStatus.gainNode != null)
-        core.musicStatus.gainNode.gain.value = core.musicStatus.userVolume;
-    if (core.musicStatus.playingBgm)
-        core.material.bgms[core.musicStatus.playingBgm].volume =
-            core.musicStatus.userVolume * core.musicStatus.designVolume;
-    core.setLocalStorage('userVolume', core.musicStatus.userVolume);
-    core.playSound('确定');
-    core.ui._drawSwitchs_sounds();
+    // Deprecated.
 };
 
 actions.prototype._keyUpSwitchs_sounds = function (keycode) {
-    if (keycode == 27 || keycode == 88) {
-        core.status.event.selection = 0;
-        core.playSound('取消');
-        core.ui._drawSwitchs();
-        return;
-    }
-    if (keycode == 37) {
-        switch (core.status.event.selection) {
-            case 2:
-                core.playSound('确定');
-                return this._clickSwitchs_sounds_userVolume(-1);
-        }
-    } else if (keycode == 39) {
-        switch (core.status.event.selection) {
-            case 2:
-                core.playSound('确定');
-                return this._clickSwitchs_sounds_userVolume(1);
-        }
-    }
-    this._selectChoices(
-        core.status.event.ui.choices.length,
-        keycode,
-        this._clickSwitchs_sounds
-    );
+    // Deprecated.
 };
 
 actions.prototype._clickSwitchs_display = function (x, y) {
-    var choices = core.status.event.ui.choices;
-    var topIndex = this._getChoicesTopIndex(choices.length);
-    var selection = y - topIndex;
-    if (this._out(x)) {
-        if (selection != 0) return;
-    }
-    if (selection >= 0 && selection < choices.length) {
-        var width = choices[selection].width;
-        var leftPos = (core._PX_ - width) / 2,
-            rightPos = (core._PX_ + width) / 2;
-        var leftGrid = Math.floor(leftPos / 32),
-            rightGrid = Math.floor(rightPos / 32) - 1;
-        core.status.event.selection = selection;
-        switch (selection) {
-            case 0:
-                if (x == leftGrid || x == leftGrid + 1)
-                    return this._clickSwitchs_display_setSize(-1);
-                if (x == rightGrid || x == rightGrid + 1)
-                    return this._clickSwitchs_display_setSize(1);
-                return;
-            case 1:
-                core.playSound('确定');
-                return this._clickSwitchs_display_enableHDCanvas();
-            case 2:
-                core.playSound('确定');
-                return this._clickSwitchs_display_enableEnemyPoint();
-            case 3:
-                core.playSound('确定');
-                return this._clickSwitchs_display_enemyDamage();
-            case 4:
-                core.playSound('确定');
-                return this._clickSwitchs_display_critical();
-            case 5:
-                core.playSound('确定');
-                return this._clickSwitchs_display_extraDamage();
-            case 6:
-                core.playSound('确定');
-                return this._clickSwitchs_display_extraDamageType();
-            case 7:
-                core.playSound('确定');
-                core.setLocalStorage(
-                    'autoScale',
-                    core.getLocalStorage('autoScale') ? false : true
-                );
-                core.ui._drawSwitchs_display();
-                break;
-            case 8:
-                core.status.event.selection = 1;
-                core.playSound('取消');
-                core.ui._drawSwitchs();
-                return;
-        }
-    }
+    // Deprecated.
 };
 
 actions.prototype._clickSwitchs_display_setSize = function (delta) {
-    core.setDisplayScale(delta);
-    var currentRatio = Math.max(
-        window.devicePixelRatio || 1,
-        core.domStyle.scale
-    );
-    if (currentRatio > core.domStyle.ratio) {
-        core.drawTip('需刷新页面以调整UI清晰度');
-    }
-    core.ui._drawSwitchs_display();
+    // Deprecated.
 };
 
 actions.prototype._clickSwitchs_display_enableHDCanvas = function () {
-    core.flags.enableHDCanvas = !core.flags.enableHDCanvas;
-    core.setLocalStorage('enableHDCanvas', core.flags.enableHDCanvas);
-    core.drawTip('开关高清UI，需刷新页面方可生效');
-    core.ui._drawSwitchs_display();
+    // Deprecated.
 };
 
 actions.prototype._clickSwitchs_display_enableEnemyPoint = function () {
-    core.flags.enableEnemyPoint = !core.flags.enableEnemyPoint;
-    core.setLocalStorage('enableEnemyPoint', core.flags.enableEnemyPoint);
-    core.ui._drawSwitchs_display();
+    // Deprecated.
 };
 
 actions.prototype._clickSwitchs_display_enemyDamage = function () {
-    core.flags.displayEnemyDamage = !core.flags.displayEnemyDamage;
-    core.updateDamage();
-    core.setLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
-    core.ui._drawSwitchs_display();
+    // Deprecated.
 };
 
 actions.prototype._clickSwitchs_display_critical = function () {
-    core.flags.displayCritical = !core.flags.displayCritical;
-    core.updateDamage();
-    core.setLocalStorage('critical', core.flags.displayCritical);
-    core.ui._drawSwitchs_display();
+    // Deprecated.
 };
 
 actions.prototype._clickSwitchs_display_extraDamage = function () {
-    core.flags.displayExtraDamage = !core.flags.displayExtraDamage;
-    core.updateDamage();
-    core.setLocalStorage('extraDamage', core.flags.displayExtraDamage);
-    core.ui._drawSwitchs_display();
+    // Deprecated.
 };
 
 actions.prototype._clickSwitchs_display_extraDamageType = function () {
-    core.flags.extraDamageType = (core.flags.extraDamageType + 1) % 3;
-    core.updateDamage();
-    core.setLocalStorage('extraDamageType', core.flags.extraDamageType);
-    core.ui._drawSwitchs_display();
+    // Deprecated.
 };
 
 actions.prototype._keyUpSwitchs_display = function (keycode) {
-    if (keycode == 27 || keycode == 88) {
-        core.status.event.selection = 1;
-        core.playSound('取消');
-        core.ui._drawSwitchs();
-        return;
-    }
-    if (keycode == 37) {
-        switch (core.status.event.selection) {
-            case 0:
-                core.playSound('确定');
-                return this._clickSwitchs_display_setSize(-1);
-        }
-    } else if (keycode == 39) {
-        switch (core.status.event.selection) {
-            case 0:
-                core.playSound('确定');
-                return this._clickSwitchs_display_setSize(1);
-        }
-    }
-    this._selectChoices(
-        core.status.event.ui.choices.length,
-        keycode,
-        this._clickSwitchs_display
-    );
+    // Deprecated.
 };
 
 actions.prototype._clickSwitchs_action = function (x, y) {
-    var choices = core.status.event.ui.choices;
-    var topIndex = this._getChoicesTopIndex(choices.length);
-    var selection = y - topIndex;
-    if (this._out(x)) {
-        if (selection != 0 && selection != 1) return;
-    }
-    if (selection >= 0 && selection < choices.length) {
-        var width = choices[selection].width;
-        var leftPos = (core._PX_ - width) / 2,
-            rightPos = (core._PX_ + width) / 2;
-        var leftGrid = Math.floor(leftPos / 32),
-            rightGrid = Math.floor(rightPos / 32) - 1;
-        core.status.event.selection = selection;
-        switch (selection) {
-            case 0:
-                if (x == leftGrid || x == leftGrid + 1) {
-                    core.playSound('确定');
-                    return this._clickSwitchs_action_moveSpeed(-10);
-                }
-                if (x == rightGrid || x == rightGrid + 1) {
-                    core.playSound('确定');
-                    return this._clickSwitchs_action_moveSpeed(10);
-                }
-                return;
-            case 1:
-                if (x == leftGrid || x == leftGrid + 1) {
-                    core.playSound('确定');
-                    return this._clickSwitchs_action_floorChangeTime(-100);
-                }
-                if (x == rightGrid || x == rightGrid + 1) {
-                    core.playSound('确定');
-                    return this._clickSwitchs_action_floorChangeTime(100);
-                }
-            case 2:
-                core.playSound('确定');
-                return this._clickSwitchs_action_potionNoRouting();
-            case 3:
-                core.playSound('确定');
-                return this._clickSwitchs_action_clickMove();
-            case 4:
-                core.playSound('确定');
-                return this._clickSwitchs_action_leftHandPrefer();
-            case 5:
-                core.status.event.selection = 2;
-                core.playSound('取消');
-                core.ui._drawSwitchs();
-                return;
-        }
-    }
+    // Deprecated.
 };
 
 actions.prototype._clickSwitchs_action_moveSpeed = function (delta) {
-    core.values.moveSpeed = core.clamp(core.values.moveSpeed + delta, 50, 200);
-    core.setLocalStorage('moveSpeed', core.values.moveSpeed);
-    core.ui._drawSwitchs_action();
+    // Deprecated.
 };
 
 actions.prototype._clickSwitchs_action_floorChangeTime = function (delta) {
-    core.values.floorChangeTime = core.clamp(
-        core.values.floorChangeTime + delta,
-        0,
-        2000
-    );
-    core.setLocalStorage('floorChangeTime', core.values.floorChangeTime);
-    core.ui._drawSwitchs_action();
+    // Deprecated.
 };
 
 actions.prototype._clickSwitchs_action_potionNoRouting = function () {
-    if (core.hasFlag('__potionNoRouting__'))
-        core.removeFlag('__potionNoRouting__');
-    else core.setFlag('__potionNoRouting__', true);
-    core.ui._drawSwitchs_action();
+    // Deprecated.
 };
 
 actions.prototype._clickSwitchs_action_clickMove = function () {
-    if (core.hasFlag('__noClickMove__')) core.removeFlag('__noClickMove__');
-    else core.setFlag('__noClickMove__', true);
-    core.ui._drawSwitchs_action();
+    // Deprecated.
 };
 
 actions.prototype._clickSwitchs_action_leftHandPrefer = function () {
-    core.flags.leftHandPrefer = !core.flags.leftHandPrefer;
-    core.setLocalStorage('leftHandPrefer', core.flags.leftHandPrefer);
-    if (core.flags.leftHandPrefer) {
-        core.myconfirm(
-            '左手模式已开启！\n此模式下WASD将用于移动勇士，IJKL对应于原始的WASD进行存读档等操作。'
-        );
-    }
-    core.ui._drawSwitchs_action();
+    // Deprecated.
 };
 
 actions.prototype._keyUpSwitchs_action = function (keycode) {
-    if (keycode == 27 || keycode == 88) {
-        core.status.event.selection = 2;
-        core.playSound('取消');
-        core.ui._drawSwitchs();
-        return;
-    }
-    if (keycode == 37) {
-        switch (core.status.event.selection) {
-            case 0:
-                core.playSound('确定');
-                return this._clickSwitchs_action_moveSpeed(-10);
-            case 1:
-                core.playSound('确定');
-                return this._clickSwitchs_action_floorChangeTime(-100);
-        }
-    } else if (keycode == 39) {
-        switch (core.status.event.selection) {
-            case 0:
-                core.playSound('确定');
-                return this._clickSwitchs_action_moveSpeed(10);
-            case 1:
-                core.playSound('确定');
-                return this._clickSwitchs_action_floorChangeTime(100);
-        }
-    }
-    this._selectChoices(
-        core.status.event.ui.choices.length,
-        keycode,
-        this._clickSwitchs_action
-    );
+    // Deprecated.
 };
 
 ////// 系统菜单栏界面时的点击操作 //////
 actions.prototype._clickSettings = function (x, y) {
-    if (this._out(x)) return;
-    var choices = core.status.event.ui.choices;
-    var topIndex = this._getChoicesTopIndex(choices.length);
-    if (y >= topIndex && y < topIndex + choices.length) {
-        var selection = y - topIndex;
-        core.status.event.selection = selection;
-        switch (selection) {
-            case 0:
-                core.status.event.selection = 0;
-                core.playSound('确定');
-                core.ui._drawSwitchs();
-                break;
-            case 1:
-                // core.playSound('确定');
-                core.ui._drawKeyBoard();
-                break;
-            case 2:
-                // core.playSound('确定');
-                core.clearUI();
-                core.ui._drawViewMaps();
-                break;
-            case 3:
-                core.status.event.selection = 0;
-                core.playSound('确定');
-                core.ui._drawNotes();
-                break;
-            case 4:
-                core.status.event.selection = 0;
-                core.playSound('确定');
-                core.ui._drawSyncSave();
-                break;
-            case 5:
-                core.status.event.selection = 0;
-                core.playSound('确定');
-                core.ui._drawGameInfo();
-                break;
-            case 6:
-                return core.confirmRestart();
-            case 7:
-                core.playSound('取消');
-                core.ui.closePanel();
-                break;
-        }
-    }
-    return;
+    // Deprecated.
 };
 
 ////// 系统菜单栏界面时，放开某个键的操作 //////
 actions.prototype._keyUpSettings = function (keycode) {
-    if (keycode == 27 || keycode == 88) {
-        core.playSound('取消');
-        core.ui.closePanel();
-        return;
-    }
-    this._selectChoices(
-        core.status.event.ui.choices.length,
-        keycode,
-        this._clickSettings
-    );
+    // Deprecated.
 };
 
 ////// 存档笔记页面时的点击操作 //////
 actions.prototype._clickNotes = function (x, y) {
-    if (this._out(x)) return;
-    var choices = core.status.event.ui.choices;
-
-    var topIndex = this._getChoicesTopIndex(choices.length);
-    if (y >= topIndex && y < topIndex + choices.length) {
-        var selection = y - topIndex;
-        core.status.event.selection = selection;
-        switch (selection) {
-            case 0:
-                core.playSound('确定');
-                this._clickNotes_new();
-                break;
-            case 1:
-                // core.playSound('确定');
-                this._clickNotes_show();
-                break;
-            case 2:
-                core.playSound('确定');
-                this._clickNotes_edit();
-                break;
-            case 3:
-                core.playSound('确定');
-                this._clickNotes_delete();
-                break;
-            case 4:
-                core.status.event.selection = 3;
-                core.playSound('取消');
-                core.ui._drawSettings();
-                break;
-        }
-    }
+    // Deprecated.
 };
 
 actions.prototype.__clickNotes_replaceText = function (data) {
-    data = (data || '')
-        .replace(/[\${}]/g, '_')
-        .replace(/(\t|\\t)\[.*?\]/g, '')
-        .replace('\b', '\\b')
-        .replace(/\\b\[.*?\]/g, '')
-        .replace(/\n|\\n/g, ' ');
-    if (data.length > 45) data = data.substring(0, 43) + '...';
-    return data;
+    // Deprecated.
 };
 
 actions.prototype._clickNotes_new = function () {
-    core.status.hero.notes = core.status.hero.notes || [];
-    core.myprompt('请输入一段笔记，不超过45字', null, function (data) {
-        data = core.actions.__clickNotes_replaceText(data);
-        if (data) {
-            core.status.hero.notes.push(data);
-            core.drawText('存档笔记新增成功！');
-        } else {
-            core.ui.closePanel();
-        }
-    });
+    // Deprecated.
 };
 
 actions.prototype._clickNotes_show = function () {
-    core.playSound('确定');
-    core.status.hero.notes = core.status.hero.notes || [];
-    var result = [];
-    for (var i = 0; i < core.status.hero.notes.length; i += 5) {
-        var v = [];
-        for (var j = i; j < i + 5 && j < core.status.hero.notes.length; ++j) {
-            v.push(
-                j +
-                    1 +
-                    '. ' +
-                    this.__clickNotes_replaceText(core.status.hero.notes[j])
-            );
-        }
-        result.push('\t[存档笔记]' + v.join('\n'));
-    }
-    if (result.length == 0)
-        result.push(
-            '当前没有存档笔记，试着新增一个吧！\n（菜单栏 -> 存档笔记 -> 新增存档笔记）'
-        );
-    core.drawText(result);
+    // Deprecated.
 };
 
 actions.prototype._clickNotes_edit = function () {
-    core.status.hero.notes = core.status.hero.notes || [];
-    if (core.status.hero.notes.length == 0) {
-        core.drawText('当前没有存档笔记，试着新增一个吧！');
-    } else {
-        core.myprompt(
-            '请输入要编辑的存档笔记编号（1 - ' +
-                core.status.hero.notes.length +
-                '）',
-            '1',
-            function (data) {
-                if (!data) core.ui.closePanel();
-                var value = parseInt(data) || 0;
-                if (
-                    !value ||
-                    value <= 0 ||
-                    value > core.status.hero.notes.length
-                ) {
-                    core.drawText('不合法的输入！');
-                } else {
-                    core.myprompt(
-                        '请输入新内容，不超过45字',
-                        core.status.hero.notes[value - 1],
-                        function (data) {
-                            data = core.actions.__clickNotes_replaceText(data);
-                            if (data) {
-                                core.status.hero.notes[value - 1] = data;
-                                core.drawText('存档笔记编辑成功！');
-                            } else {
-                                core.ui.closePanel();
-                            }
-                        }
-                    );
-                }
-            }
-        );
-    }
+    // Deprecated.
 };
 
 actions.prototype._clickNotes_delete = function () {
-    core.status.hero.notes = core.status.hero.notes || [];
-    if (core.status.hero.notes.length == 0) {
-        core.stopSound();
-        core.playSound('操作失败');
-        core.drawText('当前没有存档笔记，无法删除！');
-    } else {
-        core.myprompt(
-            '请输入要删除的所有存档笔记编号，以逗号分隔。不填则代表删除全部笔记。',
-            null,
-            function (data) {
-                if (data == null) {
-                    core.ui.closePanel();
-                    return;
-                } else if (!data) {
-                    core.status.hero.notes = [];
-                    core.drawText('所有存档笔记删除成功！');
-                } else {
-                    data = data
-                        .split(',')
-                        .map(function (one) {
-                            return parseInt(one);
-                        })
-                        .filter(function (one) {
-                            return (
-                                one &&
-                                one > 0 &&
-                                one <= core.status.hero.notes.length
-                            );
-                        });
-                    if (data.length == 0) {
-                        core.drawText('没有要删除的笔记！');
-                    } else {
-                        data.sort(function (a, b) {
-                            return b - a;
-                        }).forEach(function (index) {
-                            core.status.hero.notes.splice(index - 1, 1);
-                        });
-                        core.drawText(
-                            '已删除 ' + data.sort().join(',') + ' 号笔记'
-                        );
-                    }
-                }
-            }
-        );
-    }
+    // Deprecated.
 };
 
 ////// 存档笔记页面时，放开某个键的操作 //////
 actions.prototype._keyUpNotes = function (keycode) {
-    if (keycode == 27 || keycode == 88) {
-        core.status.event.selection = 3;
-        core.playSound('取消');
-        core.ui._drawSettings();
-        return;
-    }
-    this._selectChoices(
-        core.status.event.ui.choices.length,
-        keycode,
-        this._clickNotes
-    );
+    // Deprecated.
 };
 
 ////// 同步存档界面时的点击操作 //////
 actions.prototype._clickSyncSave = function (x, y) {
-    if (this._out(x)) return;
-    var choices = core.status.event.ui.choices;
-    var topIndex = this._getChoicesTopIndex(choices.length);
-    if (y >= topIndex && y < topIndex + choices.length) {
-        var selection = y - topIndex;
-        core.status.event.selection = selection;
-        switch (selection) {
-            case 0:
-                core.status.event.selection = 0;
-                core.playSound('确定');
-                core.ui._drawSyncSelect();
-                break;
-            case 1:
-                core.playSound('确定');
-                core.syncLoad();
-                break;
-            case 2:
-                core.playSound('确定');
-                core.status.event.selection = 0;
-                core.ui._drawLocalSaveSelect();
-                break;
-            case 3:
-                core.playSound('确定');
-                return this._clickSyncSave_readFile();
-            case 4:
-                // core.playSound('确定');
-                return this._clickSyncSave_replay();
-            case 5:
-                core.status.event.selection = 0;
-                core.playSound('确定');
-                core.ui._drawStorageRemove();
-                break;
-            case 6:
-                core.status.event.selection = 4;
-                core.playSound('取消');
-                core.ui._drawSettings();
-                break;
-        }
-    }
-    return;
+    // Deprecated.
 };
 
 actions.prototype._clickSyncSave_readFile = function () {
-    core.readFile(
-        function (obj) {
-            if (obj.name != core.firstData.name)
-                return alert('存档和游戏不一致！');
-            if (obj.version != core.firstData.version)
-                return alert('游戏版本不一致！');
-            if (!obj.data) return alert('无效的存档！');
-            core.control._syncLoad_write(obj.data);
-        },
-        null,
-        '.h5save'
-    );
+    // Deprecated.
 };
 
 actions.prototype._clickSyncSave_replay = function () {
-    core.ui._drawReplay();
+    // Deprecated.
 };
 
 ////// 同步存档界面时，放开某个键的操作 //////
 actions.prototype._keyUpSyncSave = function (keycode) {
-    if (keycode == 27 || keycode == 88) {
-        core.status.event.selection = 4;
-        core.playSound('取消');
-        core.ui._drawSettings();
-        return;
-    }
-    this._selectChoices(
-        core.status.event.ui.choices.length,
-        keycode,
-        this._clickSyncSave
-    );
+    // Deprecated.
 };
 
 ////// 同步存档选择界面时的点击操作 //////
 actions.prototype._clickSyncSelect = function (x, y) {
-    if (this._out(x)) return;
-    var choices = core.status.event.ui.choices;
-
-    var topIndex = this._getChoicesTopIndex(choices.length);
-    if (y >= topIndex && y < topIndex + choices.length) {
-        var selection = y - topIndex;
-        core.status.event.selection = selection;
-        switch (selection) {
-            case 0:
-                core.playSound('确定');
-                core.myconfirm(
-                    '你确定要同步全部存档么？\n这可能在存档较多的时候比较慢。',
-                    function () {
-                        core.syncSave('all');
-                    }
-                );
-                break;
-            case 1:
-                core.playSound('确定');
-                core.syncSave();
-                break;
-            case 2:
-                core.status.event.selection = 0;
-                core.playSound('取消');
-                core.ui._drawSyncSave();
-                break;
-        }
-    }
+    // Deprecated.
 };
 
 ////// 同步存档选择界面时，放开某个键的操作 //////
 actions.prototype._keyUpSyncSelect = function (keycode) {
-    if (keycode == 27 || keycode == 88) {
-        core.status.event.selection = 0;
-        core.playSound('取消');
-        core.ui._drawSyncSave();
-        return;
-    }
-    this._selectChoices(
-        core.status.event.ui.choices.length,
-        keycode,
-        this._clickSyncSelect
-    );
+    // Deprecated.
 };
 
 ////// 存档下载界面时的点击操作 //////
 actions.prototype._clickLocalSaveSelect = function (x, y) {
-    if (this._out(x)) return;
-    var choices = core.status.event.ui.choices;
-
-    var topIndex = this._getChoicesTopIndex(choices.length);
-
-    if (y >= topIndex && y < topIndex + choices.length) {
-        var selection = y - topIndex;
-        core.status.event.selection = selection;
-        if (selection < 2) {
-            var callback = function (saves) {
-                if (saves) {
-                    var content = {
-                        name: core.firstData.name,
-                        version: core.firstData.version,
-                        data: saves
-                    };
-                    core.download(
-                        core.firstData.name +
-                            '_' +
-                            core.formatDate2(new Date()) +
-                            '.h5save',
-                        LZString.compressToBase64(JSON.stringify(content))
-                    );
-                }
-            };
-            if (selection == 0) core.getAllSaves(callback);
-            else core.getSave(core.saves.saveIndex, callback);
-        }
-
-        core.status.event.selection = 2;
-        core.playSound('取消');
-        core.ui._drawSyncSave();
-    }
+    // Deprecated.
 };
 
 ////// 存档下载界面时，放开某个键的操作 //////
 actions.prototype._keyUpLocalSaveSelect = function (keycode) {
-    if (keycode == 27 || keycode == 88) {
-        core.status.event.selection = 2;
-        core.playSound('取消');
-        core.ui._drawSyncSave();
-        return;
-    }
-    this._selectChoices(
-        core.status.event.ui.choices.length,
-        keycode,
-        this._clickLocalSaveSelect
-    );
+    // Deprecated.
 };
 
 ////// 存档删除界面时的点击操作 //////
 actions.prototype._clickStorageRemove = function (x, y) {
-    if (this._out(x)) return;
-    var choices = core.status.event.ui.choices;
-
-    var topIndex = this._getChoicesTopIndex(choices.length);
-
-    if (y >= topIndex && y < topIndex + choices.length) {
-        var selection = y - topIndex;
-        core.status.event.selection = selection;
-        switch (selection) {
-            case 0:
-                return this._clickStorageRemove_all();
-            case 1:
-                return this._clickStorageRemove_current();
-            case 2:
-                core.status.event.selection = 5;
-                core.playSound('取消');
-                core.ui._drawSyncSave();
-                break;
-        }
-    }
+    // Deprecated.
 };
 
 actions.prototype._clickStorageRemove_all = function () {
-    core.myconfirm(
-        '你确定要清除【全部游戏】的所有本地存档？\n此行为不可逆！！！',
-        function () {
-            core.ui.drawWaiting('正在清空，请稍候...');
-            core.clearLocalForage(function () {
-                core.saves.ids = {};
-                core.saves.autosave.data = null;
-                core.saves.autosave.updated = false;
-                core.saves.autosave.now = 0;
-                core.saves.cache = {};
-                core.ui.closePanel();
-                core.saves.saveIndex = 1;
-                core.saves.favorite = [];
-                core.saves.favoriteName = {};
-                core.control._updateFavoriteSaves();
-                core.removeLocalStorage('saveIndex');
-                core.drawText('\t[操作成功]你的所有存档已被清空。');
-            });
-        }
-    );
+    // Deprecated.
 };
 
 actions.prototype._clickStorageRemove_current = function () {
-    core.myconfirm(
-        '你确定要清除本游戏的所有本地存档？\n此行为不可逆！！！',
-        function () {
-            var done = function () {
-                core.saves.ids = {};
-                core.saves.autosave.data = null;
-                core.saves.autosave.updated = false;
-                core.saves.autosave.now = 0;
-                core.ui.closePanel();
-                core.saves.saveIndex = 1;
-                core.saves.favorite = [];
-                core.saves.favoriteName = {};
-                core.control._updateFavoriteSaves();
-                core.removeLocalStorage('saveIndex');
-                core.drawText('\t[操作成功]当前塔的存档已被清空。');
-            };
-            core.ui.drawWaiting('正在清空，请稍候...');
-            Object.keys(core.saves.ids).forEach(function (v) {
-                core.removeLocalForage('save' + v);
-            });
-            core.removeLocalForage('autoSave', done);
-        }
-    );
+    // Deprecated.
 };
 
 ////// 存档删除界面时，放开某个键的操作 //////
 actions.prototype._keyUpStorageRemove = function (keycode) {
-    if (keycode == 27 || keycode == 88) {
-        core.status.event.selection = 5;
-        core.playSound('取消');
-        core.ui._drawSyncSave();
-        return;
-    }
-    this._selectChoices(
-        core.status.event.ui.choices.length,
-        keycode,
-        this._clickStorageRemove
-    );
+    // Deprecated.
 };
 
 ////// 回放选择界面时的点击操作 //////
 actions.prototype._clickReplay = function (x, y) {
-    if (this._out(x)) return;
-    var choices = core.status.event.ui.choices;
-
-    var topIndex = this._getChoicesTopIndex(choices.length);
-
-    if (y >= topIndex && y < topIndex + choices.length) {
-        var selection = y - topIndex;
-        core.status.event.selection = selection;
-        switch (selection) {
-            case 0:
-                core.playSound('确定');
-                return this._clickReplay_fromBeginning();
-            case 1:
-                core.playSound('确定');
-                return this._clickReplay_fromLoad();
-            case 2:
-                core.playSound('确定');
-                return this._clickReplay_replayRemain();
-            case 3:
-                core.playSound('确定');
-                return this._clickReplay_replaySince();
-            case 4:
-                core.playSound('确定');
-                return core.chooseReplayFile();
-            case 5:
-                core.playSound('确定');
-                return this._clickReplay_download();
-            case 6:
-                core.playSound('取消');
-                return core.ui.closePanel();
-        }
-    }
+    // Deprecated.
 };
 
 actions.prototype._clickReplay_fromBeginning = function () {
-    core.ui.closePanel();
-    const route = core.status.route.slice();
-    core.startGame(core.status.hard, core.getFlag('__seed__'), route);
+    // Deprecated.
 };
 
 actions.prototype._clickReplay_fromLoad = function () {
-    core.status.event.id = 'replayLoad';
-    core.status.event.selection = null;
-    core.clearUI();
-    var saveIndex = core.saves.saveIndex;
-    var page = Math.floor((saveIndex - 1) / 5),
-        offset = saveIndex - 5 * page;
-    core.ui._drawSLPanel(10 * page + offset);
+    // Deprecated.
 };
 
 actions.prototype._clickReplay_replayRemain = function () {
-    core.closePanel();
-    core.drawText(
-        [
-            '\t[接续播放录像]该功能允许你播放\r[yellow]两个存档之间的录像\r，常常用于\r[yellow]区域优化\r。\n' +
-                '例如，有若干个区，已经全部通关；之后重打一区并进行了优化，则可以对剩余区域直接播放录像而无需全部重打。\n\n' +
-                '详细使用方法参见露珠录制的视频教程：\n\r[yellow]https://bilibili.com/video/BV1az4y1C78x',
-            '\t[步骤1]请选择一个存档。\n\r[yellow]该存档的坐标必须和当前勇士坐标完全相同。\r\n将尝试从此处开始回放。'
-        ],
-        function () {
-            core.status.event.id = 'replayRemain';
-            core.lockControl();
-            var saveIndex = core.saves.saveIndex;
-            var page = Math.floor((saveIndex - 1) / 5),
-                offset = saveIndex - 5 * page;
-            core.ui._drawSLPanel(10 * page + offset);
-        }
-    );
+    // Deprecated.
 };
 
 actions.prototype._clickReplay_replaySince = function () {
-    core.closePanel();
-    core.drawText(
-        [
-            '\t[播放存档剩余录像]该功能为【接续播放录像】的简化版本，允许你播放\r[yellow]一个存档中剩余的录像\r，常常用于\r[yellow]录像局部优化\r。\n' +
-                '在录像正常播放中，你随时可以暂停并按S键进行存档；此时\r[yellow]剩余录像\r也会被记在存档中（在读档界面用\r[yellow][R]\r标识。）\n' +
-                '之后，你可以选择在路线优化后直接播放该存档的\r[yellow]剩余录像\r，而无需再像接续播放一样选择录像起点和终点。\n\n' +
-                '详细使用方法参见露珠录制的视频教程：\n\r[yellow]https://bilibili.com/video/BV1az4y1C78x',
-            '请选择一个存档。\n\n\r[yellow]该存档需为录像播放中存的，且坐标必须和当前勇士坐标完全相同。\r\n将尝试播放此存档的剩余录像。'
-        ],
-        function () {
-            core.status.event.id = 'replaySince';
-            core.lockControl();
-            var saveIndex = core.saves.saveIndex;
-            var page = Math.floor((saveIndex - 1) / 5),
-                offset = saveIndex - 5 * page;
-            core.ui._drawSLPanel(10 * page + offset);
-        }
-    );
+    // Deprecated.
 };
 
 actions.prototype._clickReplay_download = function () {
-    // if (core.hasFlag('debug')) return core.drawText("\t[系统提示]调试模式下无法下载录像");
-    core.download(
-        core.firstData.name + '_' + core.formatDate2() + '.h5route',
-        LZString.compressToBase64(
-            JSON.stringify({
-                name: core.firstData.name,
-                hard: core.status.hard,
-                seed: core.getFlag('__seed__'),
-                route: core.encodeRoute(core.status.route)
-            })
-        )
-    );
+    // Deprecated.
 };
 
 ////// 回放选择界面时，放开某个键的操作 //////
 actions.prototype._keyUpReplay = function (keycode) {
-    if (keycode == 27 || keycode == 88) {
-        core.playSound('取消');
-        core.ui.closePanel();
-        return;
-    }
-    this._selectChoices(
-        core.status.event.ui.choices.length,
-        keycode,
-        this._clickReplay
-    );
+    // Deprecated.
 };
 
 ////// 游戏信息界面时的点击操作 //////
 actions.prototype._clickGameInfo = function (x, y) {
-    if (this._out(x)) return;
-    var choices = core.status.event.ui.choices;
-
-    var topIndex = this._getChoicesTopIndex(choices.length);
-
-    if (y >= topIndex && y < topIndex + choices.length) {
-        var selection = y - topIndex;
-        core.status.event.selection = selection;
-        switch (selection) {
-            case 0:
-                return core.ui._drawStatistics();
-            case 1:
-                return this._clickGameInfo_openProject();
-            case 2:
-                return this._clickGameInfo_openComments();
-            case 3:
-                return core.ui._drawHelp();
-            case 4:
-                return this._clickGameInfo_download();
-            case 5:
-                core.status.event.selection = 5;
-                core.playSound('取消');
-                core.ui._drawSettings();
-                break;
-        }
-    }
+    // Deprecated.
 };
 
 actions.prototype._clickGameInfo_openProject = function () {
-    if (core.platform.isPC) window.open('editor.html', '_blank');
-    else {
-        core.myconfirm('即将离开本游戏，跳转至工程页面，确认？', function () {
-            window.location.href = 'editor-mobile.html';
-        });
-    }
+    // Deprecated.
 };
 
 actions.prototype._clickGameInfo_openComments = function () {
-    if (core.platform.isPC) {
-        window.open('/score.php?name=' + core.firstData.name, '_blank');
-    } else {
-        core.myconfirm('即将离开本游戏，跳转至评论页面，确认？', function () {
-            window.location.href = '/score.php?name=' + core.firstData.name;
-        });
-    }
+    // Deprecated.
 };
 
 actions.prototype._clickGameInfo_download = function () {
-    if (core.platform.isPC) window.open(core.firstData.name + '.zip');
-    else window.location.href = core.firstData.name + '.zip';
+    // Deprecated.
 };
 
 ////// 游戏信息界面时，放开某个键的操作 //////
 actions.prototype._keyUpGameInfo = function (keycode) {
-    if (keycode == 27 || keycode == 88) {
-        core.status.event.selection = 5;
-        core.playSound('取消');
-        return core.ui._drawSettings();
-    }
-    this._selectChoices(
-        core.status.event.ui.choices.length,
-        keycode,
-        this._clickGameInfo
-    );
+    // Deprecated.
 };
 
 ////// “虚拟键盘”界面时的点击操作 //////
 actions.prototype._clickKeyBoard = function (x, y) {
-    var m = this._HX_;
-    if (y == this._HY_ - 3 && x >= m - 5 && x <= m + 5) {
-        core.ui.closePanel();
-        core.keyUp(112 + x + 5 - m);
-    }
-    if (y == this._HY_ - 2 && x >= m - 5 && x <= m + 4) {
-        core.ui.closePanel();
-        core.keyUp(x == m + 4 ? 48 : 49 + x + 5 - m); // 1-9: 49-57; 0: 48
-    }
-    // 字母
-    var lines = [
-        ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
-        ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-        ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
-    ];
-    if (y == this._HY_ - 1 && x >= m - 5 && x <= m + 4) {
-        core.ui.closePanel();
-        core.keyUp(lines[0][x + 5 - m].charCodeAt(0));
-    }
-    if (y == this._HY_ && x >= m - 5 && x <= m + 3) {
-        core.ui.closePanel();
-        core.keyUp(lines[1][x + 5 - m].charCodeAt(0));
-    }
-    if (y == this._HY_ + 1 && x >= m - 5 && x <= m + 1) {
-        core.ui.closePanel();
-        core.keyUp(lines[2][x + 5 - m].charCodeAt(0));
-    }
-    if (y == this._HY_ + 2 && x >= m - 5 && x <= m + 5) {
-        core.ui.closePanel();
-        if (x == m - 5) core.keyUp(189); // -
-        if (x == m - 4) core.keyUp(187); // =
-        if (x == m - 3) core.keyUp(219); // [
-        if (x == m - 2) core.keyUp(221); // ]
-        if (x == m - 1) core.keyUp(220); // \
-        if (x == m) core.keyUp(186); // ;
-        if (x == m + 1) core.keyUp(222); // '
-        if (x == m + 2) core.keyUp(188); // ,
-        if (x == m + 3) core.keyUp(190); // .
-        if (x == m + 4) core.keyUp(191); // /
-        if (x == m + 5) core.keyUp(192); // `
-    }
-    if (y == this._HY_ + 3 && x >= m - 5 && x <= m + 4) {
-        core.ui.closePanel();
-        if (x == m - 5) core.keyUp(27); // ESC
-        if (x == m - 4) core.keyUp(9); // TAB
-        if (x == m - 3) core.keyUp(20); // CAPS
-        if (x == m - 2) core.keyUp(16); // SHIFT
-        if (x == m - 1) core.keyUp(17); // CTRL
-        if (x == m) core.keyUp(18); // ALT
-        if (x == m + 1) core.keyUp(32); // SPACE
-        if (x == m + 2) core.keyUp(8); // BACKSPACE
-        if (x == m + 3) core.keyUp(13); // ENTER
-        if (x == m + 4) core.keyUp(46); // DEL
-    }
-    if (y == this._HY_ + 4 && x >= m + 3 && x <= m + 5) {
-        core.playSound('取消');
-        core.ui.closePanel();
-    }
+    // Deprecated.
 };
 
 ////// 光标界面时的点击操作 //////
 actions.prototype._clickCursor = function (x, y, px, py) {
-    if (
-        x == core.status.automaticRoute.cursorX &&
-        y == core.status.automaticRoute.cursorY
-    ) {
-        core.ui.closePanel();
-        // 视为按下再放起
-        this.doRegisteredAction('ondown', x, y, px, py);
-        this.doRegisteredAction('onup', x, y, px, py);
-        return;
-    }
-    core.status.automaticRoute.cursorX = x;
-    core.status.automaticRoute.cursorY = y;
-    core.ui._drawCursor();
+    // Deprecated.
 };
 
 ////// 光标界面时，按下某个键的操作 //////
 actions.prototype._keyDownCursor = function (keycode) {
-    if (keycode == 37) {
-        // left
-        core.status.automaticRoute.cursorX--;
-        core.playSound('光标移动');
-        core.ui._drawCursor();
-        return;
-    }
-    if (keycode == 38) {
-        // up
-        core.status.automaticRoute.cursorY--;
-        core.playSound('光标移动');
-        core.ui._drawCursor();
-        return;
-    }
-    if (keycode == 39) {
-        // right
-        core.status.automaticRoute.cursorX++;
-        core.playSound('光标移动');
-        core.ui._drawCursor();
-        return;
-    }
-    if (keycode == 40) {
-        // down
-        core.status.automaticRoute.cursorY++;
-        core.playSound('光标移动');
-        core.ui._drawCursor();
-        return;
-    }
+    // Deprecated.
 };
 
 ////// 光标界面时，放开某个键的操作 //////
 actions.prototype._keyUpCursor = function (keycode) {
-    if (keycode == 27 || keycode == 88) {
-        core.playSound('取消');
-        core.ui.closePanel();
-        return;
-    }
-    if (keycode == 13 || keycode == 32 || keycode == 67 || keycode == 69) {
-        core.playSound('确定');
-        core.ui.closePanel();
-        var x = core.status.automaticRoute.cursorX;
-        var y = core.status.automaticRoute.cursorY;
-        // 视为按下再放起
-        this.doRegisteredAction('ondown', x, y, 32 * x + 16, 32 * y + 16);
-        this.doRegisteredAction('onup', x, y, 32 * x + 16, 32 * y + 16);
-        return;
-    }
+    // Deprecated.
 };
