@@ -59,6 +59,7 @@ body {
     left: 0;
     background: rgba(127, 127, 127, 0.6);
     z-index: 2000;
+    color: black;
 }
 
 #inputDialog {
@@ -69,6 +70,7 @@ body {
     background: white;
     width: 250px;
     min-height: 50px;
+    color: black;
 }
 
 #inputMessage {
@@ -76,6 +78,7 @@ body {
     text-align: left;
     margin-left: 8%;
     margin-right: 5%;
+    color: black;
 }
 
 #inputBox {
@@ -85,16 +88,19 @@ body {
     padding: 5px 3px;
     border: 1px solid;
     background: #f0f0f0;
+    color: black;
 }
 
 #inputYes {
     margin-bottom: 15px;
     margin-left: 8%;
+    color: black;
 }
 
 #inputNo {
     float: right;
     margin-right: 10%;
+    color: black;
 }
 
 #_selector,

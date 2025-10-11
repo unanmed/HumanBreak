@@ -227,129 +227,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"startCanvas": [
 			{
 				"type": "comment",
-				"text": "在这里可以用事件来自定义绘制标题界面的背景图等"
-			},
-			{
-				"type": "comment",
-				"text": "也可以直接切换到其他楼层（比如某个开始剧情楼层）进行操作。"
-			},
-			{
-				"type": "showImage",
-				"code": 1,
-				"image": "bg.jpg",
-				"loc": [
-					0,
-					0
-				],
-				"opacity": 1,
-				"time": 0
-			},
-			{
-				"type": "while",
-				"condition": "1",
-				"data": [
-					{
-						"type": "comment",
-						"text": "给用户提供选择项，这里简单的使用了choices事件"
-					},
-					{
-						"type": "comment",
-						"text": "也可以贴按钮图然后使用等待操作来完成"
-					},
-					{
-						"type": "choices",
-						"choices": [
-							{
-								"text": "开始游戏",
-								"action": [
-									{
-										"type": "comment",
-										"text": "检查bgm状态，下同"
-									},
-									{
-										"type": "function",
-										"function": "function(){\ncore.control.checkBgm()\n}"
-									},
-									{
-										"type": "if",
-										"condition": "main.levelChoose.length == 0",
-										"true": [
-											{
-												"type": "comment",
-												"text": "直接开始游戏"
-											}
-										],
-										"false": [
-											{
-												"type": "comment",
-												"text": "动态生成难度选择项"
-											},
-											{
-												"type": "function",
-												"function": "function(){\nvar choices = [];\nmain.levelChoose.forEach(function (one) {\n\tchoices.push({\n\t\t\"text\": one.title || '',\n\t\t\"action\": [\n\t\t\t{ \"type\": \"function\", \"function\": \"function() { core.status.hard = '\" + (one.name || '') + \"'; }\" }\n\t\t]\n\t});\n})\ncore.insertAction({ \"type\": \"choices\", \"choices\": choices });\n}"
-											}
-										]
-									},
-									{
-										"type": "hideImage",
-										"code": 1,
-										"time": 0
-									},
-									{
-										"type": "comment",
-										"text": "成功选择难度"
-									},
-									{
-										"type": "break"
-									}
-								]
-							},
-							{
-								"text": "读取存档",
-								"action": [
-									{
-										"type": "function",
-										"function": "function(){\ncore.control.checkBgm()\n}"
-									},
-									{
-										"type": "comment",
-										"text": "简单的使用“呼出读档界面”来处理"
-									},
-									{
-										"type": "callLoad"
-									}
-								]
-							},
-							{
-								"text": "回放录像",
-								"action": [
-									{
-										"type": "function",
-										"function": "function(){\ncore.control.checkBgm()\n}"
-									},
-									{
-										"type": "comment",
-										"text": "这段代码会弹框选择录像文件"
-									},
-									{
-										"type": "if",
-										"condition": "(!core.isReplaying())",
-										"true": [
-											{
-												"type": "function",
-												"function": "function(){\ncore.chooseReplayFile()\n}"
-											}
-										]
-									}
-								]
-							}
-						]
-					}
-				]
-			},
-			{
-				"type": "comment",
-				"text": "接下来会执行startText中的事件"
+				"text": "这个事件现在已经没有用了，修改标题界面请直接修改标题组件，可以参考说明文档。"
 			}
 		],
 		"startText": [
@@ -402,105 +280,36 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"levelUp": [
 			{
 				"need": "0",
-				"title": "原始人",
-				"action": []
-			},
-			{
-				"need": "3000",
-				"title": "野蛮人",
-				"clear": true,
+				"title": "萌新一段",
 				"action": [
 					{
-						"type": "setValue",
-						"name": "status:atk",
-						"operator": "+=",
-						"value": "10"
-					},
-					{
-						"type": "setValue",
-						"name": "status:def",
-						"operator": "+=",
-						"value": "10"
-					},
-					{
-						"type": "setValue",
-						"name": "status:mdef",
-						"operator": "+=",
-						"value": "200"
-					},
-					"恭喜升级！攻防+10，智慧+200！",
-					"行走图改变！",
-					{
-						"type": "setHeroIcon",
-						"name": "hero2.png"
+						"type": "comment",
+						"text": "这里的等级需要在全塔属性处开启升级功能才有效"
 					}
 				]
 			},
 			{
-				"need": "10000",
-				"title": "低级智人",
+				"need": "20",
+				"title": "萌新二段",
 				"clear": true,
 				"action": [
-					{
-						"type": "setValue",
-						"name": "status:mdef",
-						"operator": "+=",
-						"value": "1000"
-					},
-					"恭喜升级！智慧+1000！"
-				]
-			},
-			{
-				"need": "25000",
-				"title": "中级智人",
-				"clear": true,
-				"action": [
-					{
-						"type": "setValue",
-						"name": "status:mdef",
-						"operator": "+=",
-						"value": "2000"
-					},
 					{
 						"type": "setValue",
 						"name": "status:atk",
 						"operator": "+=",
-						"value": "25"
-					},
-					{
-						"type": "setValue",
-						"name": "status:def",
-						"operator": "+=",
-						"value": "25"
-					},
-					"恭喜升级！攻防+25，智慧+2000！"
+						"value": "10"
+					}
 				]
 			},
 			{
-				"need": "100000",
-				"title": "高级智人",
+				"need": "100",
+				"title": "萌新三段",
 				"clear": true,
 				"action": [
 					{
-						"type": "setValue",
-						"name": "status:mdef",
-						"operator": "+=",
-						"value": "10000"
-					},
-					{
-						"type": "setValue",
-						"name": "status:atk",
-						"operator": "+=",
-						"value": "250"
-					},
-					{
-						"type": "setValue",
-						"name": "status:def",
-						"operator": "+=",
-						"value": "250"
-					},
-					"恭喜升级！攻防+250，智慧+10000！",
-					"这是这个游戏的最后一级，第三章的玩法会改变，不再设置等级"
+						"type": "comment",
+						"text": "开启扣除经验时，升级后经验归零并升级，这样就不用计算先前升级所需经验了，只需要填写当前等级升级所需经验即可。"
+					}
 				]
 			}
 		]
