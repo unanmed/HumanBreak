@@ -3104,6 +3104,14 @@ maps.prototype.showBlock = function (x, y, floorId) {
         block.disable = false;
         core.setMapBlockDisabled(floorId, x, y, false);
         this._updateMapArray(floorId, block.x, block.y);
+        Mota.require('@user/data-base').hook.emit(
+            'setBlock',
+            x,
+            y,
+            floorId,
+            block?.id ?? 0,
+            0
+        );
         // 在本层，添加动画
         if (floorId == core.status.floorId) {
             if (block.event.cls == 'autotile') {
@@ -3128,6 +3136,14 @@ maps.prototype.hideBlock = function (x, y, floorId) {
     block.disable = true;
     core.setMapBlockDisabled(floorId, block.x, block.y, true);
     this._updateMapArray(floorId, block.x, block.y);
+    Mota.require('@user/data-base').hook.emit(
+        'setBlock',
+        x,
+        y,
+        floorId,
+        0,
+        block?.id ?? 0
+    );
 
     // 删除动画，清除地图
     this._removeBlockFromMap(floorId, block);
@@ -3143,6 +3159,14 @@ maps.prototype.hideBlockByIndex = function (index, floorId) {
     block.disable = true;
     core.setMapBlockDisabled(floorId, block.x, block.y, true);
     this._updateMapArray(floorId, block.x, block.y);
+    Mota.require('@user/data-base').hook.emit(
+        'setBlock',
+        x,
+        y,
+        floorId,
+        0,
+        block?.id ?? 0
+    );
 };
 
 ////// 一次性隐藏多个block //////
@@ -3562,6 +3586,14 @@ maps.prototype.replaceBlock = function (fromNumber, toNumber, floorId) {
                 block.event[one] = core.clone(toBlock.event[one]);
             }
             this._updateMapArray(floorId, block.x, block.y);
+            Mota.require('@user/data-base').hook.emit(
+                'setBlock',
+                x,
+                y,
+                floorId,
+                fromNumber,
+                toNumber
+            );
         }
     }, this);
     if (floorId == core.status.floorId) core.redrawMap();

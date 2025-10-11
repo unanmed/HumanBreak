@@ -8,7 +8,7 @@ main.floors.sample0=
     "canUseQuickShop": true,
     "defaultGround": "ground",
     "images": [],
-    "bgm": "bgm.opus",
+    "bgm": "bgm.mp3",
     "ratio": 1,
     "map": [
     [  0,  0,220,  0,  0, 20, 87,  3, 58, 59, 60, 61, 64],
@@ -57,6 +57,10 @@ main.floors.sample0=
         {
             "type": "text",
             "text": "除此之外还有一些因为各种原因在 2.B 中暂时删除的功能，将会在之后的版本中逐步重新添加。"
+        },
+        {
+            "type": "text",
+            "text": "由于一些原因，当前版本中隐藏图块的动画也无法显示，将会在 2.B.1 中修复。"
         }
     ],
     "events": {
