@@ -10,10 +10,11 @@ import {
     Transform
 } from '@motajs/render-core';
 import { Font } from '@motajs/render-style';
-import { transitionedColor } from '../use';
+import { transitionedColor, useKey } from '../use';
 import { linear } from 'mutate-animate';
 import { Background, Selection } from './misc';
 import { GameUI, IUIMountable, SetupComponentOptions } from '@motajs/system-ui';
+import { KeyCode } from '@motajs/client-base';
 
 export interface InputProps extends DefaultProps, Partial<TextContentProps> {
     /** 输入框的提示内容 */
@@ -49,7 +50,16 @@ export type InputEmits = {
 };
 
 const inputProps = {
-    props: ['placeholder', 'value', 'multiline'],
+    props: [
+        'loc',
+        'placeholder',
+        'value',
+        'multiline',
+        'border',
+        'circle',
+        'borderWidth',
+        'pad'
+    ],
     emits: ['change', 'input', 'update:value']
 } satisfies SetupComponentOptions<InputProps, InputEmits, keyof InputEmits>;
 
@@ -92,6 +102,10 @@ export const Input = defineComponent<InputProps, InputEmits, keyof InputEmits>(
             width.value - padding.value * 2,
             height.value - padding.value * 2
         ]);
+        const rectLoc = computed<ElementLocator>(() => {
+            const b = props.borderWidth ?? 1;
+            return [b, b, width.value - b * 2, height.value - b * 2];
+        });
 
         const borderColor = transitionedColor(
             props.border ?? '#ddd',
@@ -112,6 +126,9 @@ export const Input = defineComponent<InputProps, InputEmits, keyof InputEmits>(
                 }
             });
             ele.addEventListener('blur', () => {
+                if (ele) {
+                    updateInput(ele.value);
+                }
                 ele?.remove();
             });
         };
@@ -143,42 +160,52 @@ export const Input = defineComponent<InputProps, InputEmits, keyof InputEmits>(
             if (!ele) createInput(props.multiline ?? false);
             if (!ele) return;
             // 计算当前绝对位置
-            const renderer = MotaRenderer.get('render-main');
-            const canvas = renderer?.getCanvas();
-            if (!canvas) return;
 
             const chain: RenderItem[] = [];
             let now: RenderItem | undefined = root.value;
+            let renderer: MotaRenderer | undefined;
             if (!now) return;
             while (now) {
                 chain.unshift(now);
+                if (now?.isRoot) {
+                    renderer = now as MotaRenderer;
+                }
                 now = now.parent;
             }
 
-            // 应用内边距偏移
-            const { clientLeft, clientTop } = canvas;
-            const trans = new Transform();
-            trans.translate(clientLeft, clientTop);
-            trans.scale(core.domStyle.scale);
+            const canvas = renderer?.getCanvas();
+            if (!canvas) return;
+
+            const w = width.value;
+            const h = height.value;
+
+            const border = props.borderWidth ?? 1;
+            const inputWidth = w - border * 2;
+            const inputHeight = h - border * 2;
+
+            // 应用根画布偏移
+            const box = canvas.getBoundingClientRect();
+            let trans = new Transform();
+            trans.translate(box.x, box.y);
+            trans.scale(renderer?.getScale() ?? 1);
             for (const item of chain) {
                 const { anchorX, anchorY, width, height } = item;
                 trans.translate(-anchorX * width, -anchorY * height);
-                trans.multiply(item.transform);
+                trans = trans.multiply(item.transform);
             }
-            trans.translate(padding.value, padding.value);
+            trans.translate(border, border);
 
             // 构建CSS transform的matrix字符串
             const [a, b, , c, d, , e, f] = trans.mat;
             const str = `matrix(${a},${b},${c},${d},${e},${f})`;
 
-            const w = width.value * core.domStyle.scale;
-            const h = height.value * core.domStyle.scale;
             const font = props.font ?? Font.defaults();
             ele.style.transform = str;
-            ele.style.width = `${w - padding.value * 2}px`;
-            ele.style.height = `${h - padding.value * 2}px`;
+            ele.style.width = `${inputWidth}px`;
+            ele.style.height = `${inputHeight}px`;
             ele.style.font = font.string();
             ele.style.color = String(props.fillStyle ?? 'white');
+            ele.style.zIndex = '100';
             document.body.appendChild(ele);
             ele.focus();
         };
@@ -190,6 +217,14 @@ export const Input = defineComponent<InputProps, InputEmits, keyof InputEmits>(
         const leave = () => {
             borderColor.set(props.border ?? '#ddd');
         };
+
+        const [key] = useKey();
+        key.realize('confirm', (_, code) => {
+            if (code === KeyCode.Enter) {
+                // 特判回车键
+                ele?.blur();
+            }
+        });
 
         watch(
             () => props.value,
@@ -214,6 +249,7 @@ export const Input = defineComponent<InputProps, InputEmits, keyof InputEmits>(
 
         return () => (
             <container
+                loc={props.loc}
                 ref={root}
                 cursor="text"
                 onClick={click}
@@ -221,11 +257,14 @@ export const Input = defineComponent<InputProps, InputEmits, keyof InputEmits>(
                 onLeave={leave}
             >
                 <g-rectr
-                    loc={[0, 0, width.value, height.value]}
+                    loc={rectLoc.value}
                     circle={props.circle}
-                    lineWidth={props.borderWidth}
+                    lineWidth={props.borderWidth ?? 1}
+                    fill
+                    stroke
+                    fillStyle="#111"
                     strokeStyle={borderColor.ref.value}
-                    zIndex={10}
+                    zIndex={0}
                 />
                 <TextContent
                     {...attrs}
@@ -233,8 +272,9 @@ export const Input = defineComponent<InputProps, InputEmits, keyof InputEmits>(
                     loc={textLoc.value}
                     width={width.value - padding.value * 2}
                     text={showText.value}
+                    fillStyle="white"
                     alpha={value.value.length === 0 ? 0.6 : 1}
-                    zIndex={0}
+                    zIndex={10}
                 />
             </container>
         );
@@ -353,12 +393,12 @@ export const InputBox = defineComponent<
     const noText = computed(() => props.noText ?? '取消');
     const text = computed(() => props.text ?? '请输入内容：');
     const padding = computed(() => props.pad ?? 8);
-    const inputHeight = computed(() => props.inputHeight ?? 16);
+    const inputHeight = computed(() => props.inputHeight ?? 24);
     const inputLoc = computed<ElementLocator>(() => [
         padding.value,
         padding.value * 2 + contentHeight.value,
         props.width - padding.value * 2,
-        inputHeight.value - padding.value * 2
+        inputHeight.value
     ]);
     const yesLoc = computed<ElementLocator>(() => {
         const y = height.value - padding.value;
@@ -379,10 +419,17 @@ export const InputBox = defineComponent<
             return [x, y + 4, width + 8, height + 8, 0.5, 1];
         }
     });
+    const boxLoc = computed<ElementLocator>(() => {
+        const [x = 0, y = 0, , , ax = 0, ay = 0] = props.loc;
+        return [x, y, props.width, height.value, ax, ay];
+    });
 
     const updateHeight = (h: number) => {
         contentHeight.value = h;
-        height.value = h + inputHeight.value + padding.value * 4;
+        const [, yh] = yesSize.value;
+        const [, nh] = noSize.value;
+        const buttonHeight = Math.max(yh, nh);
+        height.value = h + inputHeight.value + padding.value * 4 + buttonHeight;
     };
 
     const change = (value: string) => {
@@ -411,11 +458,11 @@ export const InputBox = defineComponent<
     };
 
     return () => (
-        <container>
+        <container loc={boxLoc.value}>
             <Background
                 loc={[0, 0, props.width, height.value]}
                 winskin={props.winskin}
-                color={props.color}
+                color={props.color ?? '#333'}
                 border={props.border}
                 zIndex={0}
             />
@@ -426,12 +473,14 @@ export const InputBox = defineComponent<
                 width={props.width - padding.value * 2}
                 zIndex={5}
                 onUpdateHeight={updateHeight}
+                autoHeight
             />
             <Input
                 {...(props.input ?? {})}
                 loc={inputLoc.value}
                 v-model={value.value}
                 zIndex={10}
+                circle={[4]}
                 onChange={change}
                 onInput={input}
             />
