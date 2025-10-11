@@ -11,7 +11,7 @@ graph LR
 
 ## 类描述
 
-`UIController` 是 UI 控制系统的核心类，负责管理 UI 实例的显示栈、背景控制以及多种显示模式。继承自 `EventEmitter`，支持事件监听。想要编写 UI 请参考[深度指南](../../guide/ui.md)。
+`UIController` 是 UI 控制系统的核心类，负责管理 UI 实例的显示栈、背景控制以及多种显示模式。继承自 `EventEmitter`，支持事件监听。想要编写 UI 请参考[深度指南](../../guide/ui/ui.md)。
 
 ---
 
@@ -37,8 +37,8 @@ graph LR
 function constructor(id: string): UIController;
 ```
 
--   **参数**
-    -   `id`: 控制器的唯一标识符（若重复会触发警告日志）
+- **参数**
+    - `id`: 控制器的唯一标识符（若重复会触发警告日志）
 
 **示例**
 
@@ -84,9 +84,9 @@ function setBackground<T extends UIComponent>(
 
 设置背景 UI 并初始化其实例。
 
--   **参数**
-    -   `back`: 背景 UI 配置实例
-    -   `vBind`: 传递给背景组件的 Props 对象
+- **参数**
+    - `back`: 背景 UI 配置实例
+    - `vBind`: 传递给背景组件的 Props 对象
 
 **示例**
 
@@ -156,12 +156,12 @@ function open<T extends UIComponent>(
 
 打开一个新 UI 实例并加入栈中。
 
--   **参数**
-    -   `ui`: UI 配置实例
-    -   `vBind`: 组件 Props
-    -   `alwaysShow`: 是否强制显示（默认 `false`）
--   **返回值**
-    打开的 UI 实例，可以用于关闭等操作
+- **参数**
+    - `ui`: UI 配置实例
+    - `vBind`: 组件 Props
+    - `alwaysShow`: 是否强制显示（默认 `false`）
+- **返回值**
+  打开的 UI 实例，可以用于关闭等操作
 
 **示例**
 
@@ -191,8 +191,8 @@ function closeAll(ui?: IGameUI): void;
 
 关闭所有或指定类型的所有 UI 实例。
 
--   **参数**
-    -   `ui`（可选）: 指定要关闭的 UI 类型，不填时表示关闭所有 UI
+- **参数**
+    - `ui`（可选）: 指定要关闭的 UI 类型，不填时表示关闭所有 UI
 
 ---
 
@@ -222,7 +222,7 @@ function showAll(stack?: boolean): void;
 function showCustom(config: IUICustomConfig): void;
 ```
 
-切换显示模式：使用自定义模式（需实现 `IUICustomConfig`），参考[指南](../../guide/ui-system.md#自定义显示模式)
+切换显示模式：使用自定义模式（需实现 `IUICustomConfig`），参考[指南](../../guide/ui/system.md#自定义显示模式)
 
 ---
 
