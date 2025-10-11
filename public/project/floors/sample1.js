@@ -53,7 +53,11 @@ main.floors.sample1=
                 "type": "sleep",
                 "time": 500
             },
-            "\t[redKing]\b[this,1,5]欢迎来到魔塔，你是第一百位挑战者。\n若你能打败我所有的手下，我就与你一对一的决斗。\n现在你必须接受我的安排。",
+            {
+                "type": "text",
+                "icon": "redKing",
+                "text": "欢迎来到魔塔，你是第一百位挑战者。\n若你能打败我所有的手下，我就与你一对一的决斗。\n现在你必须接受我的安排。"
+            },
             {
                 "type": "setBlock",
                 "number": "blueKing",
@@ -77,7 +81,11 @@ main.floors.sample1=
                 ],
                 "time": 500
             },
-            "\t[hero]\b[hero]什么？",
+            {
+                "type": "text",
+                "title": "勇士",
+                "text": "什么？"
+            },
             {
                 "type": "animate",
                 "name": "hand",
@@ -162,13 +170,27 @@ main.floors.sample1=
             }
         ],
         "2,11": [
-            "\t[杰克,thief]\b[this]喂！醒醒！快醒醒！",
+            {
+                "type": "text",
+                "title": "杰克",
+                "icon": "thief",
+                "text": "喂！醒醒！快醒醒！"
+            },
             {
                 "type": "setCurtain",
                 "time": 1500
             },
-            "\t[hero]\b[hero]额，我这是在什么地方？",
-            "\t[杰克,thief]\b[this]你被魔王抓了起来扔进了监狱，和我关在了一起，但是幸运的是我在昨天刚刚挖好一条越狱的暗道！",
+            {
+                "type": "text",
+                "title": "勇士",
+                "text": "额，我这是在什么地方？"
+            },
+            {
+                "type": "text",
+                "title": "杰克",
+                "icon": "thief",
+                "text": "你被魔王抓了起来扔进了监狱，和我关在了一起，但是幸运的是我在昨天刚刚挖好一条越狱的暗道！"
+            },
             {
                 "type": "openDoor",
                 "loc": [
@@ -184,7 +206,12 @@ main.floors.sample1=
                 "type": "sleep",
                 "time": 300
             },
-            "\t[杰克,thief]\b[this]我先走了，祝你好运！",
+            {
+                "type": "text",
+                "title": "杰克",
+                "icon": "thief",
+                "text": "我先走了，祝你好运！"
+            },
             {
                 "type": "move",
                 "time": 750,
@@ -193,15 +220,47 @@ main.floors.sample1=
                     "down:1"
                 ]
             },
-            "上面是个move事件，可以对NPC等进行移动。\n详见样板中小偷事件的写法。",
-            "\t[hero]\b[hero]怎么跑的这么快..."
+            {
+                "type": "text",
+                "text": "上面是个move事件，可以对NPC等进行移动。\n详见样板中小偷事件的写法。"
+            },
+            {
+                "type": "text",
+                "title": "勇士",
+                "text": "怎么跑的这么快..."
+            }
         ],
         "4,2": [
-            "\t[老人,man]\b[this]本塔的商店有两类，全局商店和非全局商店。\n\n所谓非全局商店，就类似于右下角那个卖钥匙的老人一样，一定要碰到才能触发事件。\n\n而全局商店，则能在快捷商店中直接使用。",
-            "\t[老人,man]\b[this]要注册一个全局商店，你需要在全塔属性中，找到“全局商店”，并在内添加你的商店信息。",
-            "\t[老人,man]\b[this]商店信息添加后，可以在需要的事件处调用{\"type\": \"openShop\"}来打开你添加的全局商店。",
-            "\t[老人,man]\b[this]在上面的例子里，左边是一个仿51层的金币商店，右边是一个仿24层的经验商店。\n\n商店被访问后即可在快捷商店中进行使用。",
-            "\t[老人,man]\b[this]如果你需要在某层禁用快捷商店，可以在其楼层属性中设置“快捷商店”。\n如果需要永久禁用商店（直到重新通过触碰NPC打开），请使用{\"type\":\"disableShop\"}",
+            {
+                "type": "text",
+                "title": "老人",
+                "icon": "man",
+                "text": "本塔的商店有两类，全局商店和非全局商店。\n\n所谓非全局商店，就类似于右下角那个卖钥匙的老人一样，一定要碰到才能触发事件。\n\n而全局商店，则能在快捷商店中直接使用。"
+            },
+            {
+                "type": "text",
+                "title": "老人",
+                "icon": "man",
+                "text": "要注册一个全局商店，你需要在全塔属性中，找到“全局商店”，并在内添加你的商店信息。"
+            },
+            {
+                "type": "text",
+                "title": "老人",
+                "icon": "man",
+                "text": "商店信息添加后，可以在需要的事件处调用启用并开启商店来打开你添加的全局商店。"
+            },
+            {
+                "type": "text",
+                "title": "老人",
+                "icon": "man",
+                "text": "在上面的例子里，左边是一个仿51层的金币商店，右边是一个仿24层的经验商店。\n\n商店被访问后即可在快捷商店中进行使用。"
+            },
+            {
+                "type": "text",
+                "title": "老人",
+                "icon": "man",
+                "text": "如果你需要在某层禁用快捷商店，可以在其楼层属性中设置“快捷商店”。\n如果需要永久禁用商店（直到重新通过触碰NPC打开），请使用禁用商店事件。"
+            },
             {
                 "type": "hide",
                 "time": 500
@@ -222,8 +281,18 @@ main.floors.sample1=
             }
         ],
         "7,7": [
-            "\t[老人,man]\b[this]这是一个典型的杀怪开门、强制战斗事件。",
-            "\t[老人,man]\b[this]下面的那四个箭头表示单向通行，画在任何一个图层都有效。",
+            {
+                "type": "text",
+                "title": "老人",
+                "icon": "man",
+                "text": "这是一个典型的杀怪开门、强制战斗事件。"
+            },
+            {
+                "type": "text",
+                "title": "老人",
+                "icon": "man",
+                "text": "下面的那四个箭头表示单向通行，画在任何一个图层都有效。"
+            },
             {
                 "type": "hide",
                 "time": 500
@@ -243,10 +312,28 @@ main.floors.sample1=
             }
         ],
         "10,4": [
-            "\t[blackKing]\b[this]你终于还是来了。",
-            "\t[hero]\b[hero]放开我们的公主！",
-            "\t[blackKing]\b[this]如果我不愿意呢？",
-            "\t[hero]\b[hero]无需多说，拔剑吧！",
+            {
+                "type": "text",
+                "title": "魔王",
+                "icon": "blackKing",
+                "text": "你终于还是来了。"
+            },
+            {
+                "type": "text",
+                "title": "勇士",
+                "text": "放开我们的公主！"
+            },
+            {
+                "type": "text",
+                "title": "魔王",
+                "icon": "blackKing",
+                "text": "如果我不愿意呢？"
+            },
+            {
+                "type": "text",
+                "title": "勇士",
+                "text": "无需多说，拔剑吧！"
+            },
             {
                 "type": "battle",
                 "loc": [
@@ -261,22 +348,45 @@ main.floors.sample1=
                     7
                 ]
             },
-            "\t[blackKing]没想到你已经变得这么强大了... 算你厉害。\n公主就交给你了，请好好对她。",
+            {
+                "type": "text",
+                "title": "魔王",
+                "icon": "blackKing",
+                "text": "没想到你已经变得这么强大了... 算你厉害。\n公主就交给你了，请好好对她。"
+            },
             {
                 "type": "hide"
             }
         ],
         "10,0": [
-            "\t[hero]\b[hero]公主，我来救你了~",
-            "\t[公主,princess]\b[this]快救我出去！我受够这里了！",
-            "\t[hero]\b[hero]公主别怕，我们走吧~",
+            {
+                "type": "text",
+                "title": "勇士",
+                "text": "公主，我来救你了~"
+            },
+            {
+                "type": "text",
+                "title": "公主",
+                "icon": "princess",
+                "text": "快救我出去！我受够这里了！"
+            },
+            {
+                "type": "text",
+                "title": "勇士",
+                "text": "公主别怕，我们走吧~"
+            },
             {
                 "type": "win",
                 "reason": "救出公主"
             }
         ],
         "6,11": [
-            "\t[仙子,fairy]\b[this]通过调用 {\"type\": \"closeDoor\"} 可以在空地关上一扇门或墙。\n比如我下面这个机关门。",
+            {
+                "type": "text",
+                "title": "仙子",
+                "icon": "fairy",
+                "text": "通过调用关门事件可以在空地关上一扇门或墙。\n比如我下面这个机关门。"
+            },
             {
                 "type": "closeDoor",
                 "id": "steelDoor",
@@ -285,7 +395,12 @@ main.floors.sample1=
                     12
                 ]
             },
-            "\t[仙子,fairy]\b[this]通过调用 {\"type\": \"openDoor\"} 可以无需钥匙打开一扇门或暗墙。",
+            {
+                "type": "text",
+                "title": "仙子",
+                "icon": "fairy",
+                "text": "通过调用开门事件可以无需钥匙打开一扇门或暗墙。"
+            },
             {
                 "type": "openDoor",
                 "loc": [
@@ -293,7 +408,12 @@ main.floors.sample1=
                     12
                 ]
             },
-            "\t[仙子,fairy]\b[this]同时，也可以对其它层进行操作，比如楼下的机关门，现在已经为你打开了。",
+            {
+                "type": "text",
+                "title": "仙子",
+                "icon": "fairy",
+                "text": "同时，也可以对其它层进行操作，比如楼下的机关门，现在已经为你打开了。"
+            },
             {
                 "type": "openDoor",
                 "loc": [
@@ -302,8 +422,18 @@ main.floors.sample1=
                 ],
                 "floorId": "sample0"
             },
-            "\t[仙子,fairy]\b[this]如果当前楼层的 show 或 hide 指定了 time 参数，则以动画效果显示，指定的参数作为淡入淡出时间（毫秒）来计算。",
-            "\t[仙子,fairy]\b[this]现在到楼下来找我吧~",
+            {
+                "type": "text",
+                "title": "仙子",
+                "icon": "fairy",
+                "text": "如果当前楼层的 show 或 hide 指定了 time 参数，则以动画效果显示，指定的参数作为淡入淡出时间（毫秒）来计算。"
+            },
+            {
+                "type": "text",
+                "title": "仙子",
+                "icon": "fairy",
+                "text": "现在到楼下来找我吧~"
+            },
             {
                 "type": "show",
                 "loc": [
@@ -326,10 +456,36 @@ main.floors.sample1=
                 "operator": "+=",
                 "value": "1"
             },
-            "\t[老人,man]\b[this]在文字中使用$+{}可以计算并显示一个表达式的结果。\n",
-            "\t[老人,man]\b[this]例如：\n你的当前攻击力是${status:atk}，防御力是${status:def}。\n攻防和的十倍是${10*(status:atk+status:def)}，攻防之积是${status:atk*status:def}。\n你有${item:yellowKey}把黄钥匙，${item:blueKey}把蓝钥匙，${item:redKey}把红钥匙。\n你有${item:pickaxe}个破，${item:bomb}个炸，${item:centerFly}个飞。\n这是你第${flag:man_times}次和我对话。",
-            "\t[老人,man]\b[this]同时，你也可以通过{\"type\": \"setValue\"}来设置一个勇士的属性、道具，或某个Flag。",
-            "\t[老人,man]\b[this]例如：\n现在我将让你的攻防提升50%，再将攻防和的十倍加到生命值上。",
+            {
+                "type": "text",
+                "title": "老人",
+                "icon": "man",
+                "text": "在文字中使用$+{}可以计算并显示一个表达式的结果。"
+            },
+            {
+                "type": "text",
+                "title": "老人",
+                "icon": "man",
+                "text": "例如：\n你的当前攻击力是${status:atk}，防御力是${status:def}。\n攻防和的十倍是${10*(status:atk+status:def)}，攻防之积是${status:atk*status:def}。"
+            },
+            {
+                "type": "text",
+                "title": "老人",
+                "icon": "man",
+                "text": "你有${item:yellowKey}把黄钥匙，${item:blueKey}把蓝钥匙，${item:redKey}把红钥匙。\n你有${item:pickaxe}个破，${item:bomb}个炸，${item:centerFly}个飞。\n这是你第${flag:man_times}次和我对话。"
+            },
+            {
+                "type": "text",
+                "title": "老人",
+                "icon": "man",
+                "text": "同时，你也可以通过数值操作事件来设置一个勇士的属性、道具，或某个Flag。"
+            },
+            {
+                "type": "text",
+                "title": "老人",
+                "icon": "man",
+                "text": "例如：\n现在我将让你的攻防提升50%，再将攻防和的十倍加到生命值上。"
+            },
             {
                 "type": "setValue",
                 "name": "status:atk",
@@ -348,7 +504,12 @@ main.floors.sample1=
                 "operator": "+=",
                 "value": "10*(status:atk+status:def)"
             },
-            "\t[老人,man]\b[this]再送你500金币，1000经验，1破2炸3飞！",
+            {
+                "type": "text",
+                "title": "老人",
+                "icon": "man",
+                "text": "再送你500金币，1000经验，1破2炸3飞！"
+            },
             {
                 "type": "setValue",
                 "name": "status:money",
@@ -379,8 +540,30 @@ main.floors.sample1=
                 "operator": "+=",
                 "value": "3"
             },
-            "\t[老人,man]\b[this]status:xxx 代表勇士的某个属性。\n其中xxx可取生命、攻击、防御、护盾、金币、经验等很多项。\n\nitem:xxx 代表勇士的某个道具的个数。\nxxx为道具ID，具体可参见items.js中的定义。\n\nflag:xxx 代表某个自定义Flag或变量。\nxxx为Flag/变量名，可以自行定义，由字母、数字和下划线甚至中文组成。\n未定义过而直接取用的Flag默认值为0.",
-            "\t[老人,man]\b[this]你现在可以重新和我进行对话，进一步看到属性值的改变。"
+            {
+                "type": "text",
+                "title": "老人",
+                "icon": "man",
+                "text": "status:xxx 代表勇士的某个属性。\n其中xxx可取生命、攻击、防御、护盾、金币、经验等很多项。"
+            },
+            {
+                "type": "text",
+                "title": "老人",
+                "icon": "man",
+                "text": "item:xxx 代表勇士的某个道具的个数。\nxxx为道具ID，具体可参见items.js中的定义。"
+            },
+            {
+                "type": "text",
+                "title": "老人",
+                "icon": "man",
+                "text": "flag:xxx 代表某个自定义Flag或变量。\nxxx为Flag/变量名，可以自行定义，由字母、数字和下划线甚至中文组成。\n未定义过而直接取用的Flag默认值为0。"
+            },
+            {
+                "type": "text",
+                "title": "老人",
+                "icon": "man",
+                "text": "你现在可以重新和我进行对话，进一步看到属性值的改变。"
+            }
         ],
         "10,11": [
             {
@@ -394,23 +577,53 @@ main.floors.sample1=
                             {
                                 "case": "0",
                                 "action": [
-                                    "\t[老人,trader]这是个很复杂的例子，它将教会你如何使用if 语句进行条件判断，以及 choices 提供选项来供用户进行选择。",
-                                    "\t[老人,trader]第一次访问我将显示这段文字；从第二次开始将会向你出售钥匙。\n钥匙价格将随着访问次数递增。\n当合计出售了七把钥匙后，将送你一把大黄门钥匙，并消失不再出现。",
-                                    "\t[老人,trader]这部分的逻辑比较长，请细心看样板的写法，是很容易看懂并理解的。"
+                                    {
+                                        "type": "text",
+                                        "title": "老人",
+                                        "icon": "trader",
+                                        "text": "这是个很复杂的例子，它将教会你如何使用if 语句进行条件判断，以及 choices 提供选项来供用户进行选择。"
+                                    },
+                                    {
+                                        "type": "text",
+                                        "title": "老人",
+                                        "icon": "trader",
+                                        "text": "第一次访问我将显示这段文字；从第二次开始将会向你出售钥匙。\n钥匙价格将随着访问次数递增。\n当合计出售了七把钥匙后，将送你一把大黄门钥匙，并消失不再出现。"
+                                    },
+                                    {
+                                        "type": "text",
+                                        "title": "老人",
+                                        "icon": "trader",
+                                        "text": "这部分的逻辑比较长，请细心看样板的写法，是很容易看懂并理解的。"
+                                    }
                                 ]
                             },
                             {
                                 "case": "8",
                                 "action": [
-                                    "\t[老人,trader]你购买的钥匙已经够多了，再继续卖给你的话我会有危险的。",
-                                    "\t[老人,trader]看在你贡献给我这么多钱的份上，送你一把大黄门钥匙吧，希望你能好好用它。",
+                                    {
+                                        "type": "text",
+                                        "title": "老人",
+                                        "icon": "trader",
+                                        "text": "你购买的钥匙已经够多了，再继续卖给你的话我会有危险的。"
+                                    },
+                                    {
+                                        "type": "text",
+                                        "title": "老人",
+                                        "icon": "trader",
+                                        "text": "看在你贡献给我这么多钱的份上，送你一把大黄门钥匙吧，希望你能好好用它。"
+                                    },
                                     {
                                         "type": "setValue",
                                         "name": "item:bigKey",
                                         "operator": "+=",
                                         "value": "1"
                                     },
-                                    "\t[老人,trader]我先走了，拜拜~",
+                                    {
+                                        "type": "text",
+                                        "title": "老人",
+                                        "icon": "trader",
+                                        "text": "我先走了，拜拜~"
+                                    },
                                     {
                                         "type": "hide",
                                         "time": 500
@@ -425,14 +638,16 @@ main.floors.sample1=
                                 "action": [
                                     {
                                         "type": "choices",
-                                        "text": "\t[老人,trader]少年，你需要钥匙吗？\n我这里有大把的！",
+                                        "title": "老人",
+                                        "icon": "trader",
+                                        "text": "少年，你需要钥匙吗？\n我这里有大把的！",
                                         "choices": [
                                             {
                                                 "text": "黄钥匙（${9+flag:woman_times}金币）",
                                                 "action": [
                                                     {
                                                         "type": "if",
-                                                        "condition": "status:money>=9+flag:woman_times",
+                                                        "condition": "(status:money>=9+flag:woman_times)",
                                                         "true": [
                                                             {
                                                                 "type": "setValue",
@@ -448,9 +663,15 @@ main.floors.sample1=
                                                             }
                                                         ],
                                                         "false": [
-                                                            "\t[老人,trader]你的金钱不足！",
                                                             {
-                                                                "type": "continue"
+                                                                "type": "text",
+                                                                "title": "老人",
+                                                                "icon": "trader",
+                                                                "text": "你的金钱不足！"
+                                                            },
+                                                            {
+                                                                "type": "continue",
+                                                                "n": 1
                                                             }
                                                         ]
                                                     }
@@ -461,7 +682,7 @@ main.floors.sample1=
                                                 "action": [
                                                     {
                                                         "type": "if",
-                                                        "condition": "status:money>=18+2*flag:woman_times",
+                                                        "condition": "(status:money>=18+2*flag:woman_times)",
                                                         "true": [
                                                             {
                                                                 "type": "setValue",
@@ -477,9 +698,15 @@ main.floors.sample1=
                                                             }
                                                         ],
                                                         "false": [
-                                                            "\t[老人,trader]你的金钱不足！",
                                                             {
-                                                                "type": "continue"
+                                                                "type": "text",
+                                                                "title": "老人",
+                                                                "icon": "trader",
+                                                                "text": "你的金钱不足！"
+                                                            },
+                                                            {
+                                                                "type": "continue",
+                                                                "n": 1
                                                             }
                                                         ]
                                                     }
@@ -490,7 +717,7 @@ main.floors.sample1=
                                                 "action": [
                                                     {
                                                         "type": "if",
-                                                        "condition": "status:money>=36+4*flag:woman_times",
+                                                        "condition": "(status:money>=36+4*flag:woman_times)",
                                                         "true": [
                                                             {
                                                                 "type": "setValue",
@@ -506,9 +733,15 @@ main.floors.sample1=
                                                             }
                                                         ],
                                                         "false": [
-                                                            "\t[老人,trader]你的金钱不足！",
                                                             {
-                                                                "type": "continue"
+                                                                "type": "text",
+                                                                "title": "老人",
+                                                                "icon": "trader",
+                                                                "text": "你的金钱不足！"
+                                                            },
+                                                            {
+                                                                "type": "continue",
+                                                                "n": 1
                                                             }
                                                         ]
                                                     }
@@ -538,8 +771,18 @@ main.floors.sample1=
             }
         ],
         "12,11": [
-            "\t[老人,recluse]\b[this]使用 {\"type\":\"input\"} 可以弹窗请求玩家输入数字",
-            "\t[老人,recluse]\b[this]例如这个例子：即将弹出一个输入窗口，然后会将你的输入结果直接加到你的攻击力上。",
+            {
+                "type": "text",
+                "title": "老人",
+                "icon": "recluse",
+                "text": "使用接受用户输入数字事件可以弹窗请求玩家输入数字"
+            },
+            {
+                "type": "text",
+                "title": "老人",
+                "icon": "recluse",
+                "text": "例如这个例子：即将弹出一个输入窗口，然后会将你的输入结果直接加到你的攻击力上。"
+            },
             {
                 "type": "input",
                 "text": "请输入你要加攻击力的数值："
@@ -558,11 +801,21 @@ main.floors.sample1=
                         "type": "tip",
                         "text": "操作成功，攻击+${flag:input}"
                     },
-                    "操作成功，攻击+${flag:input}"
+                    {
+                        "type": "text",
+                        "title": "老人",
+                        "icon": "recluse",
+                        "text": "操作成功，攻击+${flag:input}"
+                    }
                 ],
                 "false": []
             },
-            "\t[老人,recluse]\b[this]具体可参见样板中本事件的写法。"
+            {
+                "type": "text",
+                "title": "老人",
+                "icon": "recluse",
+                "text": "具体可参见样板中本事件的写法。"
+            }
         ]
     },
     "changeFloor": {
@@ -626,5 +879,12 @@ main.floors.sample1=
     },
     "width": 13,
     "height": 13,
-    "beforeBattle": {}
+    "beforeBattle": {},
+    "cannotMoveIn": {},
+    "bg2map": [
+
+],
+    "fg2map": [
+
+]
 }

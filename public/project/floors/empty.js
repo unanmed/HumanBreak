@@ -1,7 +1,7 @@
 main.floors.empty=
 {
     "floorId": "empty",
-    "title": "样板 0 层",
+    "title": "本层不可删除",
     "name": "0",
     "width": 13,
     "height": 13,

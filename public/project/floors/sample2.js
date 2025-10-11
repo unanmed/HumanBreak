@@ -42,10 +42,7 @@ main.floors.sample2=
     "height": 26,
     "firstArrive": [],
     "events": {
-        "12,12": [
-            "234"
-        ],
-        "10,11": {
+        "1,10": {
             "trigger": "action",
             "enable": true,
             "noPass": null,
@@ -59,7 +56,50 @@ main.floors.sample2=
                 "shadow": 0
             },
             "data": [
-                "\t[小妖精,bearRight]欢迎使用事件编辑器(双击方块可直接预览)"
+                {
+                    "type": "text",
+                    "text": "大怪物在 2.B 版本暂不可用，将会在 2.B.1 或 2.B.2 中更新。"
+                }
+            ]
+        },
+        "2,5": {
+            "trigger": "action",
+            "enable": true,
+            "noPass": null,
+            "displayDamage": true,
+            "opacity": 1,
+            "filter": {
+                "blur": 0,
+                "hue": 0,
+                "grayscale": 0,
+                "invert": false,
+                "shadow": 0
+            },
+            "data": [
+                {
+                    "type": "text",
+                    "text": "大怪物在 2.B 版本暂不可用，将会在 2.B.1 或 2.B.2 中更新。"
+                }
+            ]
+        },
+        "9,5": {
+            "trigger": "action",
+            "enable": true,
+            "noPass": null,
+            "displayDamage": true,
+            "opacity": 1,
+            "filter": {
+                "blur": 0,
+                "hue": 0,
+                "grayscale": 0,
+                "invert": false,
+                "shadow": 0
+            },
+            "data": [
+                {
+                    "type": "text",
+                    "text": "大怪物在 2.B 版本暂不可用，将会在 2.B.1 或 2.B.2 中更新。"
+                }
             ]
         }
     },
@@ -86,5 +126,11 @@ main.floors.sample2=
 ],
     "autoEvent": {},
     "beforeBattle": {},
-    "cannotMoveIn": {}
+    "cannotMoveIn": {},
+    "bg2map": [
+
+],
+    "fg2map": [
+
+]
 }
