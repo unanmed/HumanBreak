@@ -24,13 +24,13 @@ export const specials: SpecialDeclaration[] = [
     },
     {
         code: 1,
-        name: '致命一击',
-        desc: enemy => `怪物每5回合触发一次强力攻击，造成${enemy.crit}%的伤害`,
+        name: '先攻',
+        desc: `怪物首先攻击`,
         color: '#fc3'
     },
     {
         code: 2,
-        name: '恶毒',
+        name: '魔攻',
         desc: '怪物攻击无视勇士的防御',
         color: '#bbb0ff'
     },
@@ -60,63 +60,68 @@ export const specials: SpecialDeclaration[] = [
     },
     {
         code: 7,
-        name: '饥渴',
+        name: '破甲',
         desc: enemy =>
-            `战斗前，怪物降低勇士${enemy.hungry}%的攻击，并加在自己身上`,
-        color: '#b67'
+            `战斗前，附加角色防御的${enemy.breakArmor ?? core.values.breakArmor}%作为伤害`,
+        color: '#fe7'
     },
     {
         code: 8,
-        name: '抱团',
+        name: '反击',
         desc: enemy =>
-            `怪物周围5×5范围内每有一个拥有该属性的怪物（不包括自身），则对方攻防就增加${enemy.together}%（线性叠加）` +
-            `，受加成怪物会在右上角以绿色字体显示当前周围有多少个怪物`,
+            `战斗时，怪物每回合附加角色攻击的${enemy.counterAttack ?? core.values.counterAttack}%作为伤害，无视角色防御`,
         color: '#fa4'
     },
     {
         code: 9,
-        name: '绝对防御',
-        desc: '怪物的奇特护甲可以让勇士的额外攻击失效，攻击变为基础攻击+额外攻击',
+        name: '净化',
+        desc: enemy =>
+            `战斗前，怪物附加角色护盾的${enemy.purify ?? core.values.purify}倍作为伤害`,
         color: '#80eed6'
     },
     {
         code: 10,
-        name: '勇气之刃',
-        desc: enemy => `怪物第一回合造成${enemy.courage}%的伤害`,
+        name: '模仿',
+        desc: `怪物的攻防与勇士相同`,
         color: '#b0c0dd'
     },
     {
         code: 11,
-        name: '勇气冲锋',
-        desc: enemy =>
-            `怪物首先攻击，造成${enemy.charge}%的伤害，并眩晕勇士5回合`,
+        name: '吸血',
+        desc: enemy => {
+            const vampire = enemy.vampire ?? 10;
+            return (
+                `战斗前，怪物首先吸取角色的${vampire}%生命` +
+                `（约${Math.floor((vampire / 100) * getHeroStatusOn('hp'))}点）作为伤害` +
+                (enemy.add ? `，并把伤害数值加到自身生命上` : ``)
+            );
+        },
         color: '#ff00d2'
     },
     {
         code: 12,
-        name: '追猎',
-        desc: '当勇士移动到该怪物的水平或竖直方向上时，怪物向勇士移动一格',
+        name: '中毒',
+        desc: () =>
+            `战斗后，角色陷入中毒状态，每一步损失生命${core.values.poisonDamage}点`,
         color: '#9e8'
     },
     {
         code: 13,
-        name: '魔攻',
+        name: '衰弱',
         desc: '怪物攻击无视勇士的防御',
-        color: '#bbb0ff'
+        color: '#f0bbcc'
     },
     {
         code: 14,
-        name: '智慧之源',
-        desc: '困难难度下（简单难度没有效果），战斗后，怪物会吸取勇士30%的智慧（勇士智慧向下取整至整十）加在本层的拥有该属性的怪物攻击上',
+        name: '诅咒',
+        desc: '战斗后，角色陷入诅咒状态，战斗无法获得金币和经验',
         color: '#bbeef0'
     },
     {
         code: 15,
-        name: '突刺',
+        name: '领域',
         desc: enemy =>
-            `勇士走到怪物怪物周围四格时，怪物对勇士造成${core.formatBigNumber(
-                Math.max((enemy.value || 0) - getHeroStatusOn('def'))
-            )}点伤害`,
+            `经过怪物周围${enemy.zoneSquare ? '九宫格' : '十字'}范围内${enemy.range}格时自动减生命${enemy.zone}点`,
         color: '#c677dd'
     },
     {
