@@ -130,9 +130,9 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"canUseItemEffect": "true"
 	},
 	"sword0": {
-		"cls": "items",
+		"cls": "equips",
 		"name": "破旧的剑",
-		"text": "一把已经生锈的剑",
+		"text": "可装备道具，记得至少留一个可装备道具，不然会构建失败。",
 		"equip": {
 			"type": 0,
 			"animate": "sword",
@@ -214,9 +214,9 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"itemEffectTip": "，攻击+100"
 	},
 	"shield0": {
-		"cls": "items",
+		"cls": "equips",
 		"name": "破旧的盾",
-		"text": "一个很破旧的铁盾",
+		"text": "可装备道具，记得至少留一个可装备道具，不然会构建失败。",
 		"equip": {
 			"type": 1,
 			"value": {

@@ -558,19 +558,11 @@ export class HeroMover extends ObjectMoverBase {
         const showDir = toDir(this.faceDir);
 
         // 前方不能移动
-        if (
-            code === HeroMoveCode.CannotMove ||
-            code === HeroMoveCode.Hit ||
-            code === HeroMoveCode.LoopHit
-        ) {
+        if (code === HeroMoveCode.CannotMove || code === HeroMoveCode.Hit) {
             controller.stop();
             this.onCannotMove(showDir);
             if (code === HeroMoveCode.Hit) {
                 core.trigger(nx, ny);
-            } else if (code === HeroMoveCode.LoopHit) {
-                const floor = core.status.thisMap;
-                if (x === 0) core.trigger(floor.width - 1, y);
-                else core.trigger(0, y);
             }
             core.checkRouteFolding();
             return;

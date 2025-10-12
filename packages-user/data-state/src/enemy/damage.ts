@@ -633,9 +633,7 @@ export class DamageEnemy implements IDamageEnemy {
                     if (
                         block &&
                         block.event.noPass &&
-                        block.event.cls !== 'enemys' &&
-                        block.id !== 141 &&
-                        block.id !== 151
+                        block.event.cls !== 'enemys'
                     ) {
                         break;
                     }
@@ -874,7 +872,7 @@ export class DamageEnemy implements IDamageEnemy {
         }
 
         // 霜冻
-        if (info.special.has(20) && !core.hasEquip('I589')) {
+        if (info.special.has(20)) {
             return (
                 info.def +
                 info.hp / (1 - this.enemy.ice! / 100) -
@@ -951,7 +949,7 @@ export function calDamageWith(
     }
 
     // 霜冻
-    if (special.has(20) && !core.hasEquip('I589')) {
+    if (special.has(20)) {
         heroPerDamage *= 1 - info.ice! / 100;
     }
 

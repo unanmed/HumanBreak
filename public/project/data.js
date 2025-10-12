@@ -13,8 +13,11 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"bear.png",
 			"bg.jpg",
 			"brave.png",
+			"cloud.png",
 			"dragon.png",
+			"fog.png",
 			"hero.png",
+			"sun.png",
 			"winskin.png"
 		],
 		"tilesets": [

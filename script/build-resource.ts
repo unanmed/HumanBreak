@@ -166,20 +166,20 @@ export async function splitResource(
     while (index < files.length) {
         let total = 0;
         const start = index;
-        for (let i = index; i < files.length; i++) {
+        let i = index;
+        for (; i < files.length; i++) {
             const file = files[i];
             if (file.exceed) {
                 if (i === index) i = index + 1;
-                index = i;
                 break;
             } else {
                 total += file.stats.size;
             }
             if (total > limit) {
-                index = i;
                 break;
             }
         }
+        index = i;
         const toZip = files.slice(start, index);
         result.push(await compressFiles(toZip));
     }

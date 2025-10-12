@@ -4,11 +4,7 @@ const potionItems: AllIdsOf<'items'>[] = [
     'redPotion',
     'bluePotion',
     'yellowPotion',
-    'greenPotion',
-    'I482',
-    'I484',
-    'I487',
-    'I491'
+    'greenPotion'
 ];
 
 export function createHook() {
