@@ -972,7 +972,6 @@ comment_s
 /* comment_s
 tooltip : comment：添加一段会被游戏跳过的注释内容
 helpUrl : /_docs/#/instruction
-doubleclicktext : EvalString_Multi_0
 default : ["可以在这里写添加任何注释内容"]
 colour : this.commentColor
 var code = '{"type": "comment", "text": "'+EvalString_Multi_0+'"},\n';
@@ -986,7 +985,6 @@ autoText_s
 /* autoText_s
 tooltip : autoText：自动剧情文本,用户无法跳过自动剧情文本,大段剧情文本请添加“是否跳过剧情”的提示
 helpUrl : /_docs/#/instruction
-doubleclicktext : EvalString_Multi_0
 allIds : ['EvalString_1']
 default : ["","","","","","","",3000,"用户无法跳过自动剧情文本，大段剧情文本请添加“是否跳过剧情”的提示"]
 EvalString_0= EvalString_0 ? (', "title": "'+EvalString_0+'"') : '';
@@ -997,7 +995,7 @@ IntString_1= IntString_1 ? (', "y": '+IntString_1) : '';
 IntString_2= IntString_2 ? (', "width": '+IntString_2) : '';
 IntString_3= IntString_3 ? (', "height": '+IntString_3) : '';
 Int_0= ', "time": '+Int_0;
-var code =  '{"type": "autoText"'+EvalString_0+EvalString_1+EvalString_2+IntString_0+IntString_1+IntString_2+IntString_3+Int0+', "text": "'+EvalString_Multi_0+'},\n';
+var code =  '{"type": "autoText"'+EvalString_0+EvalString_1+EvalString_2+IntString_0+IntString_1+IntString_2+IntString_3+Int_0+', "text": "'+EvalString_Multi_0+'"},\n';
 return code;
 */;
 
