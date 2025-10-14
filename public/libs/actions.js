@@ -388,12 +388,6 @@ actions.prototype._sys_keyUp_lockControl = function (keyCode, altKey) {
 
     core.status.holdingKeys = [];
     switch (core.status.event.id) {
-        case 'text':
-            ok() && core.drawText();
-            break;
-        case 'confirmBox':
-            this._keyUpConfirmBox(keyCode);
-            break;
         case 'action':
             this._keyUpAction(keyCode);
             break;
@@ -529,9 +523,6 @@ actions.prototype._sys_ondown_lockControl = function (x, y, px, py) {
             break;
         case 'action':
             this._clickAction(x, y, px, py);
-            break;
-        case 'text':
-            core.drawText();
             break;
         case 'notes':
             this._clickNotes(x, y, px, py);
@@ -822,10 +813,6 @@ actions.prototype.keyDownCtrl = function () {
 };
 
 actions.prototype._sys_keyDownCtrl = function () {
-    if (core.status.event.id == 'text') {
-        core.drawText();
-        return true;
-    }
     if (
         core.status.event.id == 'action' &&
         core.status.event.data.type == 'text'
@@ -855,10 +842,6 @@ actions.prototype.longClick = function (x, y, px, py) {
 
 actions.prototype._sys_longClick_lockControl = function (x, y, px, py) {
     if (!core.status.lockControl) return false;
-    if (core.status.event.id == 'text') {
-        core.drawText();
-        return true;
-    }
     if (
         core.status.event.id == 'action' &&
         core.status.event.data.type == 'text'

@@ -2214,140 +2214,20 @@ control.prototype.syncSave = function (type) {
 };
 
 control.prototype._syncSave_http = function (type, saves) {
-    if (!saves) return core.drawText('没有要同步的存档');
-    var formData = new FormData();
-    formData.append('type', 'save');
-    formData.append('name', core.firstData.name);
-    formData.append('data', LZString.compressToBase64(JSON.stringify(saves)));
-    formData.append('shorten', '1');
-
-    core.http(
-        'POST',
-        '/games/sync.php',
-        formData,
-        function (data) {
-            var response = JSON.parse(data);
-            if (response.code < 0) {
-                core.drawText(
-                    '出错啦！\n无法同步存档到服务器。\n错误原因：' +
-                        response.msg
-                );
-            } else {
-                core.drawText(
-                    (type == 'all'
-                        ? '所有存档'
-                        : '存档' + core.saves.saveIndex) +
-                        '同步成功！\n\n您的存档编号+密码： \r[yellow]' +
-                        response.code +
-                        response.msg +
-                        '\r\n\n请牢记以上信息（如截图等），在从服务器\n同步存档时使用。\n\r[yellow]另外请注意，存档同步只会保存一个月的时间。\r'
-                );
-            }
-        },
-        function (e) {
-            core.drawText('出错啦！\n无法同步存档到服务器。\n错误原因：' + e);
-        }
-    );
+    // Deprecated.
 };
 
 ////// 从服务器加载存档 //////
 control.prototype.syncLoad = function () {
-    core.myprompt('请输入存档编号+密码', null, function (idpassword) {
-        if (!idpassword) return core.ui._drawSyncSave();
-        if (
-            !/^\d{6}\w{4}$/.test(idpassword) &&
-            !/^\d{4}\w{3}$/.test(idpassword)
-        ) {
-            core.drawText('不合法的存档编号+密码！');
-            return;
-        }
-        core.ui.drawWaiting('正在同步，请稍候...');
-        if (idpassword.length == 7) {
-            core.control._syncLoad_http(
-                idpassword.substring(0, 4),
-                idpassword.substring(4)
-            );
-        } else {
-            core.control._syncLoad_http(
-                idpassword.substring(0, 6),
-                idpassword.substring(6)
-            );
-        }
-    });
+    // Deprecated.
 };
 
 control.prototype._syncLoad_http = function (id, password) {
-    var formData = new FormData();
-    formData.append('type', 'load');
-    formData.append('name', core.firstData.name);
-    formData.append('id', id);
-    formData.append('password', password);
-
-    core.http(
-        'POST',
-        '/games/sync.php',
-        formData,
-        function (data) {
-            var response = JSON.parse(data);
-            if (response.code == 0) {
-                var msg = null;
-                try {
-                    msg = JSON.parse(
-                        LZString.decompressFromBase64(response.msg)
-                    );
-                } catch (e) {}
-                if (!msg) {
-                    try {
-                        msg = JSON.parse(response.msg);
-                    } catch (e) {}
-                }
-                if (msg) {
-                    core.control._syncLoad_write(msg);
-                } else {
-                    core.drawText('出错啦！\n存档解析失败！');
-                }
-            } else {
-                core.drawText(
-                    '出错啦！\n无法从服务器同步存档。\n错误原因：' +
-                        response.msg
-                );
-            }
-        },
-        function (e) {
-            core.drawText('出错啦！\n无法从服务器同步存档。\n错误原因：' + e);
-        }
-    );
+    // Deprecated.
 };
 
 control.prototype._syncLoad_write = function (data) {
-    if (data instanceof Array) {
-        core.status.event.selection = 1;
-        core.ui.drawConfirmBox(
-            '所有本地存档都将被覆盖，确认？',
-            function () {
-                for (var i = 1; i <= 5 * (main.savePages || 30); i++) {
-                    if (i <= data.length)
-                        core.setLocalForage('save' + i, data[i - 1]);
-                    else if (core.saves.ids[i])
-                        core.removeLocalForage('save' + i);
-                }
-                core.ui.closePanel();
-                core.drawText('同步成功！\n你的本地所有存档均已被覆盖。');
-            },
-            function () {
-                core.status.event.selection = 0;
-                core.ui._drawSyncSave();
-            },
-            true
-        );
-    } else {
-        // 只覆盖单存档
-        core.setLocalForage('save' + core.saves.saveIndex, data, function () {
-            core.drawText(
-                '同步成功！\n单存档已覆盖至存档' + core.saves.saveIndex
-            );
-        });
-    }
+    // Deprecated.
 };
 
 ////// 存档到本地 //////
@@ -2744,9 +2624,7 @@ control.prototype.unlockControl = function () {
 ////// 开启debug模式 //////
 control.prototype.debug = function () {
     core.setFlag('debug', true);
-    core.drawText(
-        '\t[调试模式开启]此模式下按住Ctrl键（或Ctrl+Shift键）可以穿墙并忽略一切事件。\n此模式下将无法上传成绩。'
-    );
+    core.drawTip('[调试模式开启]此模式下按住Ctrl键可以穿墙并忽略一切事件');
 };
 
 control.prototype._bindRoutePush = function () {

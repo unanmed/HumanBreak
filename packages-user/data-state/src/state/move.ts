@@ -590,6 +590,10 @@ export class HeroMover extends ObjectMoverBase {
                 // 中毒处理
                 if (core.hasFlag('poison')) {
                     core.status.hero.hp -= core.values.poisonDamage;
+                    if (core.status.hero.hp <= 0) {
+                        core.status.hero.hp = 0;
+                        core.events.lose();
+                    }
                     core.updateStatusBar();
                 }
 

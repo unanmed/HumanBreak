@@ -295,6 +295,7 @@ main.floors.sample1=
             },
             {
                 "type": "hide",
+                "remove": true,
                 "time": 500
             }
         ],

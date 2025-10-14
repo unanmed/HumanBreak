@@ -63,7 +63,6 @@ interface PortResponse {
             core.status.maps[data].enemy?.calRealAttribute();
             core.updateStatusBar(true, true);
         }
-        Mota.require('@user/client-modules').Shadow.update(true);
         const Binder = Mota.require(
             '@user/client-modules'
         ).LayerGroupFloorBinder;

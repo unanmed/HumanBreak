@@ -120,7 +120,6 @@ events.prototype._startGame_upload = function () {
 
 ////// 游戏获胜事件 //////
 events.prototype.win = function (reason, norank, noexit) {
-    if (!noexit) core.status.gameOver = true;
     return this.eventdata.win(reason, norank, noexit);
 };
 
@@ -130,7 +129,6 @@ events.prototype.lose = function (reason) {
         return core.control._replay_error(reason, function () {
             core.lose(reason);
         });
-    core.status.gameOver = true;
     return this.eventdata.lose(reason);
 };
 

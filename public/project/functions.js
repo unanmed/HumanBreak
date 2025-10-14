@@ -99,19 +99,18 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             var replaying = core.isReplaying();
             if (replaying) core.stopReplay();
             core.waitHeroToStop(function () {
-                if (!noexit) {
-                    core.clearMap('all'); // 清空全地图
-                    core.deleteAllCanvas(); // 删除所有创建的画布
-                }
                 reason = core.replaceText(reason);
-                core.drawText(
-                    [
-                        '\t[' +
-                            (reason || '恭喜通关') +
-                            ']你的分数是${status:hp}。'
-                    ],
-                    function () {
-                        core.events.gameOver(reason || '', replaying, norank);
+                core.insertAction(
+                    {
+                        type: 'text',
+                        text: '你的分数是' + core.status.hero.hp,
+                        title: reason ?? '恭喜通关'
+                    },
+                    void 0,
+                    void 0,
+                    () => {
+                        core.events.gameOver(reason ?? '', replaying, norank);
+                        if (!noexit) core.status.gameOver = true;
                     }
                 );
             });
@@ -122,10 +121,17 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             var replaying = core.isReplaying();
             core.stopReplay();
             core.waitHeroToStop(function () {
-                core.drawText(
-                    ['\t[' + (reason || '结局1') + ']你死了。\n如题。'],
-                    function () {
+                core.insertAction(
+                    {
+                        type: 'text',
+                        text: '你死了。\n如题。',
+                        title: reason ?? '结局1'
+                    },
+                    void 0,
+                    void 0,
+                    () => {
                         core.events.gameOver(null, replaying);
+                        core.status.gameOver = true;
                     }
                 );
             });
