@@ -25,7 +25,7 @@ export function getAddStatus(equip: Equip) {
                 const value = Math.floor(
                     (equip.value[v] ?? 0) * core.getBuff(v) +
                         (core.status.hero[v as keyof HeroStatus] *
-                            (equip.percentage[v] ?? 0)) /
+                            (equip.percentage?.[v] ?? 0)) /
                             100
                 );
 
@@ -77,7 +77,8 @@ export function getNowStatus(nowEquip?: Equip, onCol: boolean = false) {
                         (nowEquip.value[v] ?? 0) * core.getBuff(v)
                     );
                     const per = Math.floor(
-                        (nowEquip.percentage[v] * core.getStatus(v)) / 100
+                        ((nowEquip.percentage?.[v] ?? 0) * core.getStatus(v)) /
+                            100
                     );
                     add += isNaN(per) ? 0 : per;
                 }
