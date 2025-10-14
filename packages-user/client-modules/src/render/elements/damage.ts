@@ -389,6 +389,10 @@ export class Damage extends RenderItem<EDamageEvent> {
         const font = '300 9px Verdana';
         if (dam.damage > 0) {
             text = core.formatBigNumber(dam.damage, true);
+        } else if (dam.ambush) {
+            text = `!`;
+        } else if (dam.repulse) {
+            text = '阻';
         }
 
         const mapDam: DamageRenderable = {
