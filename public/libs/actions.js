@@ -976,70 +976,10 @@ actions.prototype._clickConfirmBox = function (x, y, px, py) {
 };
 
 ////// 键盘操作确认框时 //////
-actions.prototype._keyUpConfirmBox = function (keycode) {
-    if (keycode == 37 || keycode == 39) {
-        core.status.event.selection = 1 - core.status.event.selection;
-        core.playSound('光标移动');
-        core.ui.drawConfirmBox(
-            core.status.event.ui,
-            core.status.event.data.yes,
-            core.status.event.data.no
-        );
-        return;
-    }
-    if (keycode == 13 || keycode == 32 || keycode == 67) {
-        if (core.status.event.selection == 0 && core.status.event.data.yes) {
-            // core.playSound('确定');
-            core.status.event.selection = null;
-            core.status.event.data.yes();
-            return;
-        }
-        if (core.status.event.selection == 1 && core.status.event.data.no) {
-            // core.playSound('确定');
-            core.status.event.selection = null;
-            core.status.event.data.no();
-            return;
-        }
-    }
-};
+actions.prototype._keyUpConfirmBox = function (keycode) {};
 
 ////// 鼠标在确认框上移动时 //////
-actions.prototype._onMoveConfirmBox = function (x, y, px, py) {
-    if (py >= core._PY_ / 2 && py <= core._PY_ / 2 + 64) {
-        if (px >= core._PX_ / 2 - 70 && px <= core._PX_ / 2 - 10) {
-            if (core.status.event.selection != 0) {
-                core.status.event.selection = 0;
-                core.playSound('光标移动');
-                if (core.status.event.id == 'action') {
-                    core.ui.drawConfirmBox(core.status.event.ui.text);
-                } else {
-                    core.ui.drawConfirmBox(
-                        core.status.event.ui,
-                        core.status.event.data.yes,
-                        core.status.event.data.no
-                    );
-                }
-            }
-            return;
-        }
-        if (px >= core._PX_ / 2 + 10 && px <= core._PX_ / 2 + 70) {
-            if (core.status.event.selection != 1) {
-                core.status.event.selection = 1;
-                core.playSound('光标移动');
-                if (core.status.event.id == 'action') {
-                    core.ui.drawConfirmBox(core.status.event.ui.text);
-                } else {
-                    core.ui.drawConfirmBox(
-                        core.status.event.ui,
-                        core.status.event.data.yes,
-                        core.status.event.data.no
-                    );
-                }
-            }
-            return;
-        }
-    }
-};
+actions.prototype._onMoveConfirmBox = function (x, y, px, py) {};
 
 actions.prototype._clickAction_text = function () {
     // 正在淡入淡出的话不执行

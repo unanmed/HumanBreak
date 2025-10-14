@@ -2228,7 +2228,7 @@ ui.prototype.textImage = function (content, lineHeight) {
 };
 
 ////// 绘制一个选项界面 //////
-ui.prototype.drawChoices = async function (content, choices, width) {
+ui.prototype.drawChoices = async function (content, choices, width, noRoute) {
     if (main.replayChecking) {
         const selected = (() => {
             const route = core.status.replay.toReplay[0];
@@ -2243,13 +2243,15 @@ ui.prototype.drawChoices = async function (content, choices, width) {
     } else {
         const {
             routedChoices,
+            getChoices,
             mainUIController,
             HALF_WIDTH,
             HALF_HEIGHT,
             POP_BOX_WIDTH
         } = Mota.require('@user/client-modules');
         const choice = choices.map((v, i) => [i, v.text]);
-        const selected = await routedChoices(
+        const fn = noRoute ? getChoices : routedChoices;
+        const selected = await fn(
             mainUIController,
             choice,
             [HALF_WIDTH, HALF_HEIGHT, void 0, void 0, 0.5, 0.5],
@@ -2282,7 +2284,7 @@ ui.prototype.drawConfirmBox = async function (
     text,
     yesCallback,
     noCallback,
-    ctx
+    noRoute
 ) {
     if (main.replayChecking) {
         const confirm = (() => {
@@ -2301,12 +2303,14 @@ ui.prototype.drawConfirmBox = async function (
     } else {
         const {
             routedConfirm,
+            getConfirm,
             mainUIController,
             HALF_WIDTH,
             HALF_HEIGHT,
             POP_BOX_WIDTH
         } = Mota.require('@user/client-modules');
-        const confirm = await routedConfirm(
+        const fn = noRoute ? getConfirm : routedConfirm;
+        const confirm = await fn(
             mainUIController,
             text,
             [HALF_WIDTH, HALF_HEIGHT, void 0, void 0, 0.5, 0.5],
@@ -2369,7 +2373,7 @@ ui.prototype._drawQuickShop = function () {
         };
     });
     choices.push('返回游戏');
-    this.drawChoices(null, choices);
+    this.drawChoices(null, choices, void 0, true);
 };
 
 ui.prototype._drawSyncSave = function () {

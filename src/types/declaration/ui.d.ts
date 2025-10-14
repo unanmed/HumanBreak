@@ -766,7 +766,7 @@ interface Ui {
         content: string,
         choices: object[],
         width?: number,
-        ctx?: CtxRefer
+        noRoute?: CtxRefer
     ): void;
 
     /**
@@ -777,7 +777,7 @@ interface Ui {
         text: string,
         yesCallback?: () => void,
         noCallback?: () => void,
-        ctx?: CtxRefer
+        noRoute?: boolean
     ): void;
 
     /**

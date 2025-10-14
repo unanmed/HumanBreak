@@ -187,7 +187,8 @@ events.prototype._gameOver_confirmUpload = function (ending, norank) {
             if (main.isCompetition)
                 core.events._gameOver_confirmDownload(ending);
             else core.events._gameOver_doUpload(null, ending, norank);
-        }
+        },
+        true
     );
 };
 
@@ -251,7 +252,8 @@ events.prototype._gameOver_confirmDownload = function (ending) {
         },
         function () {
             core.events._gameOver_askRate(ending);
-        }
+        },
+        true
     );
 };
 
@@ -284,7 +286,8 @@ events.prototype._gameOver_askRate = function (ending) {
             function () {
                 core.ui.closePanel();
                 core.restart();
-            }
+            },
+            true
         );
         return;
     }
@@ -301,7 +304,8 @@ events.prototype._gameOver_askRate = function (ending) {
         },
         function () {
             core.restart();
-        }
+        },
+        true
     );
 };
 
@@ -327,7 +331,8 @@ events.prototype.confirmRestart = function () {
         function () {
             core.playSound('取消');
             core.ui.closePanel();
-        }
+        },
+        true
     );
 };
 

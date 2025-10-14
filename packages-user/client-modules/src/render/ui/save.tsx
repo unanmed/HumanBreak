@@ -383,7 +383,7 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                     if (selected.value < count - 1) {
                         selected.value++;
                     } else {
-                        selected.value = 0;
+                        selected.value = 1;
                         pageRef.value?.movePage(1);
                     }
                 },

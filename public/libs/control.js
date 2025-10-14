@@ -1584,7 +1584,8 @@ control.prototype._replay_finished = function () {
             core.status.replay.replaying = true;
             core.ui.closePanel();
             core.pauseReplay();
-        }
+        },
+        true
     );
 };
 
@@ -1639,7 +1640,8 @@ control.prototype._replay_error = function (action, callback) {
             core.ui.closePanel();
             core.stopReplay(true);
             if (callback) callback();
-        }
+        },
+        true
     );
 };
 
@@ -2335,7 +2337,8 @@ control.prototype._syncLoad_write = function (data) {
             function () {
                 core.status.event.selection = 0;
                 core.ui._drawSyncSave();
-            }
+            },
+            true
         );
     } else {
         // 只覆盖单存档
