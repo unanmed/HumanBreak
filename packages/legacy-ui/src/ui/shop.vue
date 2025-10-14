@@ -317,7 +317,6 @@ function exit() {
 
 onMounted(async () => {
     core.lockControl();
-    core.status.route.push(`openShop:${id}`);
 });
 
 onUnmounted(() => {

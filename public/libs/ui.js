@@ -2254,7 +2254,7 @@ ui.prototype.drawChoices = async function (content, choices, width) {
             choice,
             [HALF_WIDTH, HALF_HEIGHT, void 0, void 0, 0.5, 0.5],
             width ?? POP_BOX_WIDTH,
-            { title: content ?? '' }
+            { text: content ?? '' }
         );
         core.insertAction(choices[selected].action);
         core.doAction();

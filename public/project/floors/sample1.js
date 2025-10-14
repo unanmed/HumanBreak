@@ -865,6 +865,26 @@ main.floors.sample1=
                 "icon": "man",
                 "text": "试着给我添加一个隐藏事件让我消失吧！"
             }
+        ],
+        "5,9": [
+            {
+                "type": "choices",
+                "text": "选择剑或者盾 11111111111111111111 111111111111111",
+                "choices": [
+                    {
+                        "text": "剑",
+                        "action": [
+                            {
+                                "type": "openDoor",
+                                "loc": [
+                                    3,
+                                    3
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
         ]
     },
     "changeFloor": {

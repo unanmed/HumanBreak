@@ -2276,13 +2276,14 @@ events.prototype._action_unloadEquip = function (data, x, y, prefix) {
 };
 
 events.prototype._action_openShop = function (data, x, y, prefix) {
-    Mota.require('@user/data-state').setShopVisited(data.id, true);
-    if (data.open) Mota.require('@user/data-state').openShop(data.id, true);
+    Mota.require('@user/legacy-plugin-data').setShopVisited(data.id, true);
+    if (data.open)
+        Mota.require('@user/legacy-plugin-data').openShop(data.id, true);
     core.doAction();
 };
 
 events.prototype._action_disableShop = function (data, x, y, prefix) {
-    Mota.require('@user/data-state').setShopVisited(data.id, false);
+    Mota.require('@user/legacy-plugin-data').setShopVisited(data.id, false);
     core.doAction();
 };
 

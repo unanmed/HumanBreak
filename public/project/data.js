@@ -215,31 +215,123 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		],
 		"shops": [
 			{
-				"id": "snowShop",
+				"id": "shop1",
+				"text": "\t[贪婪之神,moneyShop]勇敢的武士啊, 给我${20+2*flag:shop1}金币就可以：",
+				"textInList": "1F金币商店",
+				"mustEnable": false,
+				"disablePreview": false,
+				"choices": [
+					{
+						"text": "生命+800",
+						"need": "status:money>=20+2*flag:shop1",
+						"action": [
+							{
+								"type": "comment",
+								"text": "新版商店中需要手动扣减金币和增加访问次数"
+							},
+							{
+								"type": "setValue",
+								"name": "status:money",
+								"operator": "-=",
+								"value": "20+2*flag:shop1"
+							},
+							{
+								"type": "setValue",
+								"name": "flag:shop1",
+								"operator": "+=",
+								"value": "1"
+							},
+							{
+								"type": "setValue",
+								"name": "status:hp",
+								"operator": "+=",
+								"value": "800"
+							}
+						]
+					},
+					{
+						"text": "攻击+4",
+						"need": "status:money>=20+2*flag:shop1",
+						"action": [
+							{
+								"type": "comment",
+								"text": "新版商店中需要手动扣减金币和增加访问次数"
+							},
+							{
+								"type": "setValue",
+								"name": "status:money",
+								"operator": "-=",
+								"value": "20+2*flag:shop1"
+							},
+							{
+								"type": "setValue",
+								"name": "flag:shop1",
+								"operator": "+=",
+								"value": "1"
+							},
+							{
+								"type": "setValue",
+								"name": "status:atk",
+								"operator": "+=",
+								"value": "4"
+							}
+						]
+					}
+				]
+			},
+			{
+				"id": "shop2",
+				"text": "\t[贪婪之神,expShop]勇敢的武士啊, 给我一定经验就可以：",
+				"textInList": "1F经验商店",
+				"mustEnable": false,
+				"disablePreview": true,
+				"choices": [
+					{
+						"text": "等级+1（100经验）",
+						"need": "status:exp>=100",
+						"action": [
+							{
+								"type": "setValue",
+								"name": "status:exp",
+								"operator": "-=",
+								"value": "100"
+							},
+							{
+								"type": "setValue",
+								"name": "status:lv",
+								"operator": "+=",
+								"value": "1"
+							},
+							{
+								"type": "setValue",
+								"name": "status:hp",
+								"operator": "+=",
+								"value": "1000"
+							}
+						]
+					}
+				]
+			},
+			{
+				"id": "itemShop",
 				"item": true,
 				"textInList": "道具商店",
 				"use": "money",
-				"mustEnable": true,
+				"mustEnable": false,
 				"choices": [
 					{
-						"id": "sword2",
-						"number": 1,
-						"money": "600",
-						"sell": "300"
-					},
-					{
-						"id": "shield2",
-						"number": 1,
-						"money": "500",
-						"sell": "250"
-					},
-					{
-						"id": "I641",
-						"number": 1,
-						"money": "400",
-						"sell": "200"
+						"id": "yellowKey",
+						"number": 10,
+						"money": "10",
+						"sell": "5"
 					}
 				]
+			},
+			{
+				"id": "keyShop",
+				"textInList": "回收钥匙商店",
+				"mustEnable": false,
+				"commonEvent": "回收钥匙商店"
 			}
 		],
 		"levelUp": [
