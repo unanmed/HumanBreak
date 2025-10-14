@@ -357,6 +357,7 @@ export function initFallback() {
                             y
                         );
                         callback?.();
+                        delete core.animateFrame.asyncId[animate];
                     };
 
                     adapters['door-animate']?.all('openDoor', block).then(cb);
