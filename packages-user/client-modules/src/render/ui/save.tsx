@@ -380,7 +380,7 @@ export const Save = defineComponent<SaveProps, SaveEmits, keyof SaveEmits>(
                 '@save_right',
                 () => {
                     const count = grid.value.count;
-                    if (selected.value < count) {
+                    if (selected.value < count - 1) {
                         selected.value++;
                     } else {
                         selected.value = 0;
