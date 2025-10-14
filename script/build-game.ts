@@ -13,7 +13,7 @@ import { RequiredData, RequiredIconsData, ResourceType } from './types';
 import { splitResource, SplittedResource } from './build-resource';
 import { formatSize } from './utils';
 
-const DEBUG_REPLAY = true;
+const DEBUG_REPLAY = false;
 
 const ansi = {
     clear: '\x1b[2J\x1b[0f'
