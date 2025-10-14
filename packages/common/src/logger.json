@@ -26,10 +26,7 @@
         "24": "Cannot decode source type of '$1', since there is no registered decoder for that type.",
         "25": "Unknown audio type. Header: '$1'",
         "26": "Uncaught error when fetching stream data from '$1'. Error info: $2.",
-        "1101": "Shadow extension needs 'floor-hero' extension as dependency.",
-        "1201": "Floor-damage extension needs 'floor-binder' extension as dependency.",
-        "1301": "Portal extension need 'floor-binder' extension as dependency.",
-        "1401": "Halo extension needs 'floor-binder' extension as dependency."
+        "1201": "Floor-damage extension needs 'floor-binder' extension as dependency."
     },
     "warn": {
         "1": "Resource with type of 'none' is loaded.",
@@ -97,7 +94,6 @@
         "63": "Uncaught promise error in waiting box component. Error reason: $1",
         "64": "Text node type and block type mismatch: '$1' vs '$2'",
         "65": "Cannot bind a weather controller twice.",
-        "1001": "Item-detail extension needs 'floor-binder' and 'floor-damage' extension as dependency.",
-        "1101": "Cannot add new effect to point effect instance, for there's no more reserve space for it. Please increase the max count of the instance."
+        "1001": "Item-detail extension needs 'floor-binder' and 'floor-damage' extension as dependency."
     }
 }
