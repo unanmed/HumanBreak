@@ -48,6 +48,7 @@ export function patchDamage() {
 }
 
 function renderThumbnailDamage(col: EnemyCollection) {
+    if (main.replayChecking) return;
     core.status.damage.data = [];
     core.status.damage.extraData = [];
 

@@ -17,6 +17,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             core.status.played = true;
             // 初始化人物，图标，统计信息
             core.status.hero = core.clone(hero);
+            core.status.hero.buff ??= {};
             window.hero = core.status.hero;
             window.flags = core.status.hero.flags;
             core.events.setHeroIcon(core.status.hero.image, true);
@@ -56,27 +57,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             } else {
                 flags.autoSkill ??= true;
             }
-
-            // 兼容性调整
-            const h = core.status.hero;
-            if (h.magicDef === void 0 || h.magicDef === null) {
-                h.magicDef = 0;
-            }
-            if (!core.status.hero.buff) {
-                const buff = {};
-                core.status.hero.buff = buff;
-                const toDelete = [];
-                for (const [key, value] of Object.entries(flags)) {
-                    if (/__\w+_buff__/.test(key)) {
-                        const name = key.slice(2, -7);
-                        buff[name] = value;
-                        toDelete.push(key);
-                    }
-                }
-                toDelete.forEach(v => {
-                    delete flags[v];
-                });
-            }
         },
         win: function (reason, norank, noexit) {
             // 游戏获胜事件
@@ -86,12 +66,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 如果不退出，则临时存储数据
             if (noexit) {
                 core.status.extraEvent = core.clone(core.status.event);
-            }
-
-            if (reason === '智慧之始') {
-                core.status.hero.hp +=
-                    core.itemCount('yellowKey') * 5000 +
-                    core.itemCount('blueKey') * 15000;
             }
 
             // 游戏获胜事件
@@ -171,21 +145,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 if (bgm instanceof Array) bgm = bgm[0];
                 if (!core.hasFlag('__bgm__')) core.playBgm(bgm);
             }
-            // 更改画面色调
-            var color = core.getFlag('__color__', null);
-            if (!color && core.status.maps[floorId].color)
-                color = core.status.maps[floorId].color;
-            core.clearMap('curtain');
-            core.status.curtainColor = color;
-            if (color)
-                core.fillRect(
-                    'curtain',
-                    0,
-                    0,
-                    core._PX_,
-                    core._PY_,
-                    core.arrayToRGBA(color)
-                );
             // 更改天气
             var weather = core.getFlag('__weather__', null);
             if (!weather && core.status.maps[floorId].weather)
@@ -234,8 +193,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     core.visitFloor(floorId);
                 }
             }
-            // if (!flags.debug && !main.replayChecking)
-            //     Mota.require('completion_r').checkVisitedFloor();
             Mota.require('@user/data-base').hook.emit(
                 'afterChangeFloor',
                 floorId
@@ -348,16 +305,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
 
                 core.removeFlag('__fromLoad__');
                 if (callback) callback();
-
-                Mota.r(() => {
-                    if (flags.onChase) {
-                        const chase = Mota.require(
-                            '@user/legacy-plugin-client'
-                        );
-                        const controller = chase.initChase(0);
-                        controller.start(true);
-                    }
-                });
             });
 
             Mota.require('@user/data-base').hook.emit('loadData');

@@ -42,7 +42,7 @@ events.prototype._startGame_start = function (hard, seed, route, callback) {
         core.firstData.hero,
         hard,
         null,
-        core.cloneArray(core.initStatus.maps)
+        core.clone(core.initStatus.maps)
     );
     core.setHeroLoc('x', -1);
     core.setHeroLoc('y', -1);
@@ -1566,6 +1566,10 @@ events.prototype.__action_doAsyncFunc = function (isAsync, func) {
 };
 
 events.prototype._action_text = function (data) {
+    if (main.replayChecking) {
+        core.doAction();
+        return;
+    }
     if (this.__action_checkReplaying()) return;
     const Store = Mota.require('@user/client-modules').TextboxStore;
     const { textbox = 'main-textbox', text, icon = 'none', title = '' } = data;
@@ -1595,6 +1599,10 @@ events.prototype._action_text = function (data) {
 };
 
 events.prototype._action_autoText = function (data) {
+    if (main.replayChecking) {
+        core.doAction();
+        return;
+    }
     if (this.__action_checkReplaying()) return;
     const Store = Mota.require('@user/client-modules').TextboxStore;
     const { textbox = 'main-textbox', text, icon = 'none', title = '' } = data;
@@ -1641,6 +1649,10 @@ events.prototype._action__label = function (data, x, y, prefix) {
 };
 
 events.prototype._action_setText = function (data) {
+    if (main.replayChecking) {
+        core.doAction();
+        return;
+    }
     const isNil = value => value === null || value === void 0;
     const { textbox = 'main-textbox' } = data;
     const Store = Mota.require('@user/client-modules').TextboxStore;
@@ -1743,7 +1755,7 @@ events.prototype._action_confirm = function (data, x, y, prefix) {
 };
 
 events.prototype._action_choices = function (data, x, y, prefix) {
-    core.ui.drawChoices(
+    core.ui.drawChoices2(
         core.replaceText(data.text, prefix),
         data.choices,
         data.width

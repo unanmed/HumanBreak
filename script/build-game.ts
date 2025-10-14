@@ -13,6 +13,8 @@ import { RequiredData, RequiredIconsData, ResourceType } from './types';
 import { splitResource, SplittedResource } from './build-resource';
 import { formatSize } from './utils';
 
+const DEBUG_REPLAY = true;
+
 const ansi = {
     clear: '\x1b[2J\x1b[0f'
 };
@@ -92,7 +94,8 @@ async function buildData(outDir: string, entry: string) {
                 name: 'ProcessData',
                 fileName: 'data',
                 formats: ['iife']
-            }
+            },
+            minify: !DEBUG_REPLAY
         }
     } satisfies UserConfig);
 

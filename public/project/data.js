@@ -185,9 +185,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			},
 			"flags": {},
 			"followers": [],
-			"steps": 0,
-			"magicDef": 0,
-			"magicRed": 0
+			"steps": 0
 		},
 		"startCanvas": [
 			{

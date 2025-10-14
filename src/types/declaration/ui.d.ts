@@ -759,10 +759,10 @@ interface Ui {
     textImage(content: string, lineHeight?: number): HTMLCanvasElement;
 
     /**
-     * @deprecated 已失效，考虑换用新的渲染系统中的 `getChoices` 接口\
-     * 绘制一个选项界面
+     * @deprecated 可使用，考虑换用新的渲染系统中的 `getChoices` 接口\
+     * 绘制一个选项界面。不用 drawChoices 命名是为了避免录像验证问题。
      */
-    drawChoices(
+    drawChoices2(
         content: string,
         choices: object[],
         width?: number,

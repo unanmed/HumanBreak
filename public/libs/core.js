@@ -320,6 +320,8 @@ core.prototype.initSync = function (coreData, callback) {
     this._init_platform();
     this._init_others();
 
+    core.initStatus.maps = core.maps._initMaps();
+
     core.loader._load(function () {
         core._afterLoadResources(callback);
     });

@@ -2228,7 +2228,7 @@ ui.prototype.textImage = function (content, lineHeight) {
 };
 
 ////// 绘制一个选项界面 //////
-ui.prototype.drawChoices = async function (content, choices, width, noRoute) {
+ui.prototype.drawChoices2 = async function (content, choices, width, noRoute) {
     if (main.replayChecking) {
         const selected = (() => {
             const route = core.status.replay.toReplay[0];
@@ -2238,6 +2238,7 @@ ui.prototype.drawChoices = async function (content, choices, width, noRoute) {
                 return Number(route.slice(8));
             }
         })();
+        core.status.replay.toReplay.shift();
         core.insertAction(choices[selected].action);
         core.doAction();
     } else {
@@ -2295,6 +2296,7 @@ ui.prototype.drawConfirmBox = async function (
                 return Number(route.slice(8)) === 1;
             }
         })();
+        core.status.replay.toReplay.shift();
         if (confirm) {
             yesCallback?.();
         } else {

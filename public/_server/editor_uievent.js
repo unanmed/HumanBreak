@@ -66,7 +66,7 @@ editor_uievent_wrapper = function (editor) {
                     }
                     core.saveCanvas('uievent');
                     core.status.event.selection = data.selected || 0;
-                    core.drawChoices(core.replaceText(data.text), data.choices, data.width, 'uievent');
+                    core.drawChoices2(core.replaceText(data.text), data.choices, data.width, 'uievent');
                     core.status.event.selection = null;
                     core.loadCanvas('uievent');
                     return;

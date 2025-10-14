@@ -3682,112 +3682,12 @@ maps.prototype._moveDetachedBlock = function (
     opacity,
     canvases
 ) {
-    var height = blockInfo.height,
-        posX = blockInfo.posX,
-        posY = blockInfo.posY,
-        image = blockInfo.image;
-    var headCanvas = canvases.headCanvas,
-        bodyCanvas = canvases.bodyCanvas,
-        damageCanvas = canvases.damageCanvas;
-    if (headCanvas) {
-        core.dymCanvas[headCanvas].clearRect(0, 0, 32, height);
-        core.dymCanvas[headCanvas].drawImage(
-            image,
-            posX * 32,
-            posY * height,
-            32,
-            height - 32,
-            0,
-            0,
-            32,
-            height - 32
-        );
-        core.relocateCanvas(
-            headCanvas,
-            nowX - core.bigmap.offsetX,
-            nowY + 32 - height - core.bigmap.offsetY
-        );
-        core.setOpacity(headCanvas, opacity);
-    }
-    if (bodyCanvas) {
-        if (blockInfo.bigImage) {
-            var face = blockInfo.face;
-            if (!blockInfo.faceIds) face = 'down';
-            else if (!blockInfo.faceIds[face]) {
-                // 维持此时朝向
-                face = 'down';
-                for (var f in blockInfo.faceIds) {
-                    if (blockInfo.faceIds[f] == blockInfo.id) {
-                        face = f;
-                    }
-                }
-            }
-            var bigImageInfo = this._getBigImageInfo(
-                blockInfo.bigImage,
-                face,
-                blockInfo.posX
-            );
-            var per_width = bigImageInfo.per_width,
-                per_height = bigImageInfo.per_height;
-            core.dymCanvas[bodyCanvas].clearRect(
-                0,
-                0,
-                bigImageInfo.per_width,
-                bigImageInfo.per_height
-            );
-            core.dymCanvas[bodyCanvas].drawImage(
-                blockInfo.bigImage,
-                bigImageInfo.sx,
-                bigImageInfo.sy,
-                per_width,
-                per_height,
-                0,
-                0,
-                per_width,
-                per_height
-            );
-            core.relocateCanvas(
-                bodyCanvas,
-                nowX - core.bigmap.offsetX + bigImageInfo.dx,
-                nowY - core.bigmap.offsetY + bigImageInfo.dy
-            );
-            core.setOpacity(bodyCanvas, opacity);
-        } else {
-            core.dymCanvas[bodyCanvas].clearRect(0, 0, 32, 32);
-            core.dymCanvas[bodyCanvas].drawImage(
-                image,
-                posX * 32,
-                posY * height + height - 32,
-                32,
-                32,
-                0,
-                0,
-                32,
-                32
-            );
-            core.relocateCanvas(
-                bodyCanvas,
-                nowX - core.bigmap.offsetX,
-                nowY - core.bigmap.offsetY
-            );
-            core.setOpacity(bodyCanvas, opacity);
-        }
-    }
-    if (damageCanvas) {
-        core.relocateCanvas(
-            damageCanvas,
-            nowX - core.bigmap.offsetX,
-            nowY - core.bigmap.offsetY
-        );
-        core.setOpacity(damageCanvas, opacity);
-    }
+    // Deprecated.
 };
 
 ////// 删除独立的block canvas //////
 maps.prototype._deleteDetachedBlock = function (canvases) {
-    core.deleteCanvas(canvases.headCanvas);
-    core.deleteCanvas(canvases.bodyCanvas);
-    core.deleteCanvas(canvases.damageCanvas);
+    // Deprecated.
 };
 
 maps.prototype._getAndRemoveBlock = function (x, y) {
