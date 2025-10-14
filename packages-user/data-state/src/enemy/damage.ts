@@ -15,41 +15,6 @@ import {
     HaloType,
     IEnemyCollectionEvent
 } from '@motajs/types';
-import { isNil } from 'lodash-es';
-
-export interface UserEnemyInfo extends EnemyInfo {
-    togetherNum?: number;
-}
-
-/** 光环属性 */
-export const haloSpecials: Set<number> = new Set([
-    8, 21, 25, 26, 27, 29, 31, 32
-]);
-/** 不可被同化的属性 */
-export const unassimilatable: Set<number> = new Set(haloSpecials);
-unassimilatable.add(8).add(30).add(33);
-/** 特殊属性对应 */
-export const specialValue: Map<number, SelectKey<Enemy, number | undefined>[]> =
-    new Map();
-specialValue
-    .set(1, ['crit'])
-    .set(6, ['n'])
-    .set(7, ['hungry'])
-    .set(8, ['together'])
-    .set(10, ['courage'])
-    .set(11, ['charge'])
-    .set(15, ['value'])
-    .set(18, ['value'])
-    .set(20, ['ice'])
-    .set(21, ['iceHalo'])
-    .set(22, ['night'])
-    .set(23, ['day'])
-    .set(25, ['melt'])
-    .set(26, ['iceCore'])
-    .set(27, ['fireCore'])
-    .set(28, ['paleShield'])
-    .set(31, ['hpHalo'])
-    .set(32, ['assimilateRange']);
 
 export class EnemyCollection
     extends EventEmitter<IEnemyCollectionEvent>
@@ -67,9 +32,6 @@ export class EnemyCollection
     width: number = 0;
     /** 楼层高度 */
     height: number = 0;
-
-    /** 乾坤挪移属性 */
-    translation: [number, number] = [0, 0];
 
     constructor(floorId: FloorIds) {
         super();
@@ -111,7 +73,6 @@ export class EnemyCollection
      */
     calRealAttribute() {
         this.haloList = [];
-        this.translation = [0, 0];
         this.list.forEach(v => {
             v.reset();
         });
@@ -204,7 +165,7 @@ export class DamageEnemy implements IDamageEnemy {
      * 属性计算流程：预平衡光环(即计算加光环的光环怪的光环) -> 计算怪物在没有光环下的属性
      * -> provide inject 光环 -> 计算怪物的光环加成 -> 计算完毕
      */
-    info!: UserEnemyInfo;
+    info!: EnemyInfo;
 
     /** 向其他怪提供过的光环 */
     providedHalo: Set<number> = new Set();
@@ -238,10 +199,10 @@ export class DamageEnemy implements IDamageEnemy {
             atk: enemy.atk,
             def: enemy.def,
             special: new Set(enemy.special),
-            damageDecline: 0,
             atkBuff_: 0,
             defBuff_: 0,
             hpBuff_: 0,
+            guard: [],
             enemy: this.enemy,
             x: this.x,
             y: this.y,
@@ -256,12 +217,6 @@ export class DamageEnemy implements IDamageEnemy {
         }
         this.progress = 0;
         this.providedHalo.clear();
-
-        // 在这里计算乾坤挪移
-        if (this.col && enemy.special.includes(30)) {
-            this.col.translation[0] += enemy.translation![0];
-            this.col.translation[1] += enemy.translation![1];
-        }
     }
 
     /**
@@ -272,31 +227,18 @@ export class DamageEnemy implements IDamageEnemy {
         this.progress = 2;
         const special = this.info.special;
         const info = this.info;
-        const floorId = this.floorId ?? core.status.floorId;
-        let [dx, dy] = [0, 0];
-        const col = this.col ?? core.status.maps[this.floorId!]?.enemy;
-        if (col) {
-            [dx, dy] = col.translation;
+
+        const { atk = 0, def = 0 } = getHeroStatusOn(realStatus);
+
+        // 坚固
+        if (special.has(3)) {
+            info.def = Math.max(info.def, atk - 1);
         }
 
-        // 智慧之源
-        if (flags.hard === 2 && special.has(14)) {
-            info.atk += flags[`inte_${floorId}`] ?? 0;
-        }
-
-        // 融化，融化不属于怪物光环，因此不能用provide和inject计算，需要在这里计算
-        const melt = flags[`melt_${floorId}`];
-        if (!isNil(melt) && !isNil(this.x) && !isNil(this.y)) {
-            for (const [loc, per] of Object.entries(melt)) {
-                const [mx, my] = loc.split(',').map(v => parseInt(v));
-                if (
-                    Math.abs(mx + dx - this.x) <= 1 &&
-                    Math.abs(my + dy - this.y) <= 1
-                ) {
-                    info.atkBuff_ += per as number;
-                    info.defBuff_ += per as number;
-                }
-            }
+        // 模仿
+        if (special.has(10)) {
+            info.atk = atk;
+            info.def = def;
         }
     }
 
@@ -315,32 +257,11 @@ export class DamageEnemy implements IDamageEnemy {
         // 此时已经inject光环，因此直接计算真实属性
         const info = this.info;
 
-        if (info.special.has(33)) {
-            const count = this.col?.list.size ?? 0;
-            const [hp, atk, def] = this.enemy.horn ?? [0, 0, 0];
-            info.hpBuff_ += hp * count;
-            info.atkBuff_ += atk * count;
-            info.defBuff_ += def * count;
-        }
-
         info.atk = Math.floor(info.atk * (info.atkBuff_ / 100 + 1));
         info.def = Math.floor(info.def * (info.defBuff_ / 100 + 1));
         info.hp = Math.floor(info.hp * (info.hpBuff_ / 100 + 1));
 
         return this.info;
-    }
-
-    getHaloSpecials(): Set<number> {
-        if (!this.floorId) return new Set();
-        if (!has(this.x) || !has(this.y)) return new Set();
-        const special = this.info.special ?? this.enemy.special;
-        const res = new Set<number>();
-        special.forEach(v => {
-            if (haloSpecials.has(v) && !this.providedHalo.has(v)) {
-                res.add(v);
-            }
-        });
-        return res;
     }
 
     /**
@@ -351,62 +272,10 @@ export class DamageEnemy implements IDamageEnemy {
         this.progress = 1;
         if (!this.floorId) return;
         if (!has(this.x) || !has(this.y)) return;
-        const special = this.getHaloSpecials();
-        const col = this.col ?? core.status.maps[this.floorId!].enemy;
-        let [dx, dy] = [0, 0];
-        if (col) [dx, dy] = col.translation;
+
+        // 这里可以做优先级更高的光环，比如加光环的光环怪等，写法与 provideHalo 类似
 
         // e 是被加成怪的属性，enemy 是施加光环的怪
-
-        for (const halo of special) {
-            switch (halo) {
-                case 29: {
-                    // 特殊光环
-                    const e = this.enemy;
-                    const type = 'square';
-                    const r = Math.floor(e.haloRange!);
-                    const d = r * 2 + 1;
-                    const range = { x: this.x + dx, y: this.y + dy, d };
-
-                    // 这一句必须放到applyHalo之前
-                    this.providedHalo.add(29);
-                    const halo = (e: UserEnemyInfo, enemy: UserEnemyInfo) => {
-                        const s = enemy.specialHalo!;
-
-                        for (const spe of s) {
-                            e.special.add(spe);
-                        }
-                        // 如果是自身，就不进行特殊属性数值处理了
-                        if (e === this.info) return;
-                        // 然后计算特殊属性数值
-                        for (const spec of s) {
-                            // 如果目标怪物拥有杀戮光环，且光环会加成此属性，则忽略
-                            if (e.specialHalo?.includes(spec)) continue;
-                            const toChange = specialValue.get(spec);
-                            if (!toChange) continue;
-                            for (const key of toChange) {
-                                // 这种光环应该获取怪物的原始数值，而不是真实数值
-                                if (enemy.enemy.specialMultiply) {
-                                    e[key] ??= 1;
-                                    e[key] *= enemy[key] ?? 1;
-                                } else {
-                                    e[key] ??= 0;
-                                    e[key] += enemy[key] ?? 0;
-                                }
-                            }
-                        }
-                    };
-
-                    col.applyHalo(type, range, this, halo, true);
-                    col.haloList.push({
-                        type: 'square',
-                        data: { x: this.x + dx, y: this.y + dy, d },
-                        special: 29,
-                        from: this
-                    });
-                }
-            }
-        }
     }
 
     /**
@@ -419,159 +288,67 @@ export class DamageEnemy implements IDamageEnemy {
         if (!has(this.x) || !has(this.y)) return;
         const col = this.col ?? core.status.maps[this.floorId].enemy;
         if (!col) return;
-        const special = this.getHaloSpecials();
-        const [dx, dy] = col.translation;
-
-        const square7: HaloFn[] = [];
-        const square5: HaloFn[] = [];
+        const special = this.info.special;
 
         // e 是被加成怪的属性，enemy 是施加光环的怪
 
-        // 抱团
-        if (special.has(8)) {
+        // 普通光环
+        if (special.has(25)) {
+            // 光环效果，这里直接增加 e 的 buff 属性
+            const halo = (e: EnemyInfo, enemy: EnemyInfo) => {
+                if (enemy.haloAdd) {
+                    e.hpBuff_ += enemy.hpBuff ?? 0;
+                    e.atkBuff_ += enemy.atkBuff ?? 0;
+                    e.defBuff_ += enemy.defBuff ?? 0;
+                } else {
+                    e.hpBuff_ = Math.max(e.hpBuff_, enemy.hpBuff ?? 0);
+                    e.atkBuff_ = Math.max(e.atkBuff_, enemy.atkBuff ?? 0);
+                    e.defBuff_ = Math.max(e.defBuff_, enemy.defBuff ?? 0);
+                }
+            };
+            // 根据范围施加光环
+            const range = this.info.haloRange ?? 1;
+            if (this.info.haloSquare) {
+                col.applyHalo(
+                    'square',
+                    { x: this.x, y: this.y, d: range * 2 + 1 },
+                    this,
+                    halo
+                );
+            } else {
+                col.applyHalo(
+                    'manhattan',
+                    { x: this.x, y: this.y, d: range },
+                    this,
+                    halo
+                );
+            }
+        }
+
+        // 支援也是一类光环
+        if (special.has(26)) {
             col.applyHalo(
                 'square',
-                { x: this.x, y: this.y, d: 5 },
+                { x: this.x, y: this.y, d: 3 },
                 this,
-                (e: UserEnemyInfo, enemy) => {
-                    if (
-                        e.special.has(8) &&
-                        (e.x !== this.x || this.y !== e.y)
-                    ) {
-                        e.atkBuff_ += enemy.together ?? 0;
-                        e.defBuff_ += enemy.together ?? 0;
-                        e.togetherNum ??= 0;
-                        e.togetherNum++;
-                    }
+                (e, enemy) => {
+                    e.guard.push(enemy);
                 }
             );
-            this.providedHalo.add(8);
         }
-
-        // 冰封光环
-        if (special.has(21)) {
-            square7.push(e => {
-                e.damageDecline += this.info.iceHalo ?? 0;
-            });
-            this.providedHalo.add(21);
-            col.haloList.push({
-                type: 'square',
-                data: { x: this.x + dx, y: this.y + dy, d: 7 },
-                special: 21,
-                from: this
-            });
-        }
-
-        // 冰封之核
-        if (special.has(26)) {
-            square5.push(e => {
-                e.defBuff_ += this.info.iceCore ?? 0;
-            });
-            this.providedHalo.add(26);
-            col.haloList.push({
-                type: 'square',
-                data: { x: this.x + dx, y: this.y + dy, d: 5 },
-                special: 26,
-                from: this
-            });
-        }
-
-        // 火焰之核
-        if (special.has(27)) {
-            square5.push(e => {
-                e.atkBuff_ += this.info.fireCore ?? 0;
-            });
-            this.providedHalo.add(27);
-            col.haloList.push({
-                type: 'square',
-                data: { x: this.x + dx, y: this.y + dy, d: 5 },
-                special: 27,
-                from: this
-            });
-        }
-
-        // 再生光环
-        if (special.has(31)) {
-            square7.push(e => {
-                e.hpBuff_ += this.info.hpHalo ?? 0;
-            });
-            this.providedHalo.add(31);
-            col.haloList.push({
-                type: 'square',
-                data: { x: this.x + dx, y: this.y + dy, d: 7 },
-                special: 31,
-                from: this
-            });
-        }
-
-        // 同化，它不会被光环类属性影响，因此放到这
-        if (special.has(32)) {
-            const e = this.info;
-            const type = 'square';
-            const r = Math.floor(e.assimilateRange!);
-            const d = r * 2 + 1;
-            const range = { x: this.x, y: this.y, d };
-
-            col.applyHalo(type, range, this, (e, enemy) => {
-                // 如果是自身，就不进行特殊属性数值处理了
-                if (e === this.info) return;
-                const s = e.special;
-
-                for (const spe of s) {
-                    if (unassimilatable.has(spe)) continue;
-                    enemy.special.add(spe);
-                }
-                // 然后计算特殊属性数值
-                for (const spec of s) {
-                    if (unassimilatable.has(spec)) continue;
-                    const toChange = specialValue.get(spec);
-                    if (!toChange) continue;
-                    for (const key of toChange) {
-                        // 这种光环应该获取怪物的原始数值，而不是真实数值
-                        if (enemy.enemy.specialMultiply) {
-                            enemy[key] ??= 1;
-                            enemy[key] *= e[key] ?? 1;
-                        } else {
-                            enemy[key] ??= 0;
-                            enemy[key] += e[key] ?? 0;
-                        }
-                    }
-                }
-            });
-
-            col.haloList.push({
-                type: 'square',
-                data: range,
-                special: 32,
-                from: this
-            });
-        }
-
-        col.applyHalo(
-            'square',
-            { x: this.x + dx, y: this.y + dy, d: 7 },
-            this,
-            square7
-        );
-        col.applyHalo(
-            'square',
-            { x: this.x + dx, y: this.y + dy, d: 5 },
-            this,
-            square5
-        );
     }
 
     /**
      * 接受其他怪的光环
      */
-    injectHalo(halo: HaloFn, enemy: UserEnemyInfo) {
+    injectHalo(halo: HaloFn, enemy: EnemyInfo) {
         halo(this.info, enemy);
     }
 
     /**
      * 计算怪物伤害
      */
-    calDamage(hero: Partial<HeroStatus> = core.status.hero) {
+    calDamage(hero: Partial<HeroStatus> = core.status.hero): DamageInfo {
         const enemy = this.getRealInfo();
         return this.calEnemyDamageOf(hero, enemy);
     }
@@ -582,23 +359,23 @@ export class DamageEnemy implements IDamageEnemy {
      */
     calMapDamage(
         damage: Record<string, MapDamage> = {},
-        hero: Partial<HeroStatus> = getHeroStatusOn(realStatus)
+        _hero: Partial<HeroStatus> = getHeroStatusOn(realStatus)
     ) {
         if (!has(this.x) || !has(this.y) || !has(this.floorId)) return damage;
         const enemy = this.enemy;
         const floor = core.status.maps[this.floorId];
         const w = floor.width;
         const h = floor.height;
+        const objs = core.getMapBlocksObj(this.floorId);
 
-        // 突刺
+        // 领域
         if (this.info.special.has(15)) {
             const range = enemy.range ?? 1;
             const startX = Math.max(0, this.x - range);
             const startY = Math.max(0, this.y - range);
             const endX = Math.min(floor.width - 1, this.x + range);
             const endY = Math.min(floor.height - 1, this.y + range);
-            const dam = Math.max((enemy.value ?? 0) - hero.def!, 0);
-            const objs = core.getMapBlocksObj(this.floorId);
+            const dam = Math.max(enemy.zone ?? 0, 0);
 
             for (let x = startX; x <= endX; x++) {
                 for (let y = startY; y <= endY; y++) {
@@ -606,20 +383,20 @@ export class DamageEnemy implements IDamageEnemy {
                         !enemy.zoneSquare &&
                         manhattan(x, y, this.x, this.y) > range
                     ) {
+                        // 如果是十字范围而且曼哈顿距离大于范围，则跳过此格
                         continue;
                     }
                     const loc = `${x},${y}` as LocString;
                     if (objs[loc]?.event.noPass) continue;
-                    this.setMapDamage(damage, loc, dam, '突刺');
+                    this.setMapDamage(damage, loc, dam, '领域');
                 }
             }
         }
 
-        // 射击
+        // 激光
         if (this.info.special.has(24)) {
             const dirs: Dir[] = ['left', 'down', 'up', 'right'];
-            const dam = Math.max((enemy.atk ?? 0) - hero.def!, 0);
-            const objs = core.getMapBlocksObj(this.floorId);
+            const dam = Math.max(enemy.laser ?? 0, 0);
 
             for (const dir of dirs) {
                 let x = this.x;
@@ -629,70 +406,67 @@ export class DamageEnemy implements IDamageEnemy {
                     x += dx;
                     y += dy;
                     const loc = `${x},${y}` as LocString;
-                    const block = objs[loc];
-                    if (
-                        block &&
-                        block.event.noPass &&
-                        block.event.cls !== 'enemys'
-                    ) {
-                        break;
-                    }
-                    this.setMapDamage(damage, loc, dam, '射击');
+                    if (objs[loc]?.event.noPass) continue;
+                    this.setMapDamage(damage, loc, dam, '激光');
                 }
             }
         }
 
-        // 电摇嘲讽
-        if (this.info.special.has(19)) {
-            const objs = core.getMapBlocksObj(this.floorId);
-            for (let nx = 0; nx < w; nx++) {
-                const loc = `${nx},${this.y}` as LocString;
-                const block = objs[loc];
-                if (!block?.event.noPass) {
-                    damage[loc] ??= { damage: 0, type: new Set() };
-                    damage[loc].mockery ??= [];
-                    damage[loc].mockery!.push([this.x, this.y]);
-                }
-            }
-            for (let ny = 0; ny < h; ny++) {
-                const loc = `${this.x},${ny}` as LocString;
-                const block = objs[loc];
-                if (!block?.event.noPass) {
-                    damage[loc] ??= { damage: 0, type: new Set() };
-                    damage[loc].mockery ??= [];
-                    damage[loc].mockery!.push([this.x, this.y]);
-                }
+        // 阻击
+        if (this.info.special.has(18)) {
+            const dirs: Dir[] = ['left', 'down', 'up', 'right'];
+            for (const dir of dirs) {
+                const { x: dx, y: dy } = core.utils.scan[dir];
+                const x = this.x + dx;
+                const y = this.y + dy;
+                const loc = `${x},${y}` as LocString;
+                if (objs[loc]?.event.noPass) continue;
+                this.setMapDamage(damage, loc, this.info.repulse ?? 0, '阻击');
+                damage[loc].repulse ??= [];
+                damage[loc].repulse.push([this.x, this.y]);
             }
         }
 
-        // 追猎
-        if (this.info.special.has(12)) {
-            const objs = core.getMapBlocksObj(this.floorId);
-            for (let nx = 0; nx < w; nx++) {
-                const loc = `${nx},${this.y}` as LocString;
-                const block = objs[loc];
-                if (!block?.event.noPass) {
-                    damage[loc] ??= { damage: 0, type: new Set() };
-                    damage[loc].hunt ??= [];
-                    damage[loc].hunt!.push([
-                        this.x,
-                        this.y,
-                        nx < this.x ? 'left' : 'right'
-                    ]);
-                }
+        // 捕捉
+        if (this.info.special.has(27)) {
+            const dirs: Dir[] = ['left', 'down', 'up', 'right'];
+            for (const dir of dirs) {
+                const { x: dx, y: dy } = core.utils.scan[dir];
+                const x = this.x + dx;
+                const y = this.y + dy;
+                const loc = `${x},${y}` as LocString;
+                if (objs[loc]?.event.noPass) continue;
+                damage[loc] ??= { damage: 0, type: new Set() };
+                damage[loc].ambush ??= [];
+                damage[loc].ambush.push([this.x, this.y]);
             }
-            for (let ny = 0; ny < h; ny++) {
-                const loc = `${this.x},${ny}` as LocString;
-                const block = objs[loc];
-                if (!block?.event.noPass) {
-                    damage[loc] ??= { damage: 0, type: new Set() };
-                    damage[loc].hunt ??= [];
-                    damage[loc].hunt!.push([
-                        this.x,
-                        this.y,
-                        ny < this.y ? 'up' : 'down'
-                    ]);
+        }
+
+        // 夹击
+        if (this.info.special.has(16)) {
+            // 只计算右方和下方的怪物，这样就可以避免一个点被重复计算两次
+            const dirs: Dir[] = ['down', 'right'];
+            for (const dir of dirs) {
+                const { x: dx, y: dy } = core.utils.scan[dir];
+                const x = this.x + dx * 2;
+                const y = this.y + dy * 2;
+                const e = this.col?.get(x, y);
+                if (!e) continue;
+                const info = e.getRealInfo();
+                if (!info.special.has(16)) continue;
+                const cx = this.x + dx;
+                const cy = this.y + dy;
+                const loc = `${cx},${cy}` as LocString;
+                if (objs[loc]?.event.noPass) continue;
+                const half = getHeroStatusOn('hp') / 2;
+                let bt = half;
+                // 夹击不超伤害值
+                if (core.flags.betweenAttackMax) {
+                    const aDamage = this.calDamage().damage;
+                    const bDamage = e.calDamage().damage;
+                    bt = Math.min(aDamage, bDamage, half);
                 }
+                this.setMapDamage(damage, loc, bt, '夹击');
             }
         }
 
@@ -710,7 +484,10 @@ export class DamageEnemy implements IDamageEnemy {
         if (type) damage[loc].type.add(type);
     }
 
-    private calEnemyDamageOf(hero: Partial<HeroStatus>, enemy: UserEnemyInfo) {
+    private calEnemyDamageOf(
+        hero: Partial<HeroStatus>,
+        enemy: EnemyInfo
+    ): DamageInfo {
         const status = getHeroStatusOf(hero, realStatus, this.floorId);
         const damage = calDamageWith(enemy, status) ?? Infinity;
 
@@ -849,118 +626,75 @@ export class DamageEnemy implements IDamageEnemy {
      */
     getSeckillAtk(): number {
         const info = this.getRealInfo();
-        const add = info.def + info.hp - core.status.hero.mana;
 
         // 坚固，不可能通过攻击秒杀
         if (info.special.has(3)) {
             return Infinity;
         }
 
-        // 列方程求解，拿笔算一下就知道了
-        // 饥渴，会偷取勇士攻击
-        if (info.special.has(7)) {
-            if (info.damageDecline === 0) {
-                return add / (1 - this.enemy.hungry! / 100);
-            } else {
-                return (
-                    (info.hp / (1 - info.damageDecline / 100) -
-                        core.status.hero.mana +
-                        info.def) /
-                    (1 - this.enemy.hungry! / 100)
-                );
-            }
-        }
-
-        // 霜冻
-        if (info.special.has(20)) {
-            return (
-                info.def +
-                info.hp / (1 - this.enemy.ice! / 100) -
-                core.status.hero.mana
-            );
-        }
-
-        if (info.damageDecline !== 0) {
-            return (
-                info.def +
-                info.hp / (1 - info.damageDecline / 100) -
-                core.status.hero.mana
-            );
-        } else {
-            return add;
-        }
+        // 常规怪物秒杀攻击是怪物防御+怪物生命
+        return info.def + info.hp;
     }
+}
+
+export interface DamageWithTurn {
+    damage: number;
+    turn: number;
 }
 
 /**
  * 计算伤害时会用到的勇士属性，攻击防御，其余的不会有buff加成，直接从core.status.hero取
+ * 如果有属性不会被 buff 加成请在这里去除，有助于提高性能表现
  */
-const realStatus: (keyof HeroStatus)[] = [
-    'atk',
-    'def',
-    'hpmax',
-    'mana',
-    'magicDef'
-];
+const realStatus: (keyof HeroStatus)[] = ['atk', 'def', 'mdef', 'hpmax'];
+
+/** 当前是否正在计算支援怪的伤害 */
+let inGuard = false;
 
 /**
- * 计算怪物伤害
+ * 计算伤害，返回值包含伤害与回合数
  * @param info 怪物信息
- * @param hero 勇士信息
+ * @param hero 勇士真实属性
  */
-export function calDamageWith(
-    info: UserEnemyInfo,
+export function calDamageWithTurn(
+    info: EnemyInfo,
     hero: Partial<HeroStatus>
-): number {
-    const { mdef } = core.status.hero;
-    const { def, mana, magicDef } = hero as HeroStatus;
-    const { hp: monHp, def: monDef, special, enemy } = info;
-    let { atk, hpmax } = hero as HeroStatus;
-    let { atk: monAtk } = info;
+): DamageWithTurn {
+    const { hp } = core.status.hero;
+    const { atk, def, mdef } = hero as HeroStatus;
+    const { atk: monAtk, def: monDef, special } = info;
+    let { hp: monHp } = info;
 
-    // 赏金，优先级最高
-    if (special.has(34)) return 0;
+    // 无敌
+    if (special.has(20) && core.itemCount('cross') < 1) {
+        return { damage: Infinity, turn: 0 };
+    }
 
-    hpmax = Math.min(hpmax, def / 10);
-
+    /** 怪物会对勇士造成的总伤害 */
     let damage = 0;
 
-    // 饥渴
-    if (special.has(7)) {
-        const delta = Math.floor((atk * info.hungry!) / 100);
-        atk -= delta;
-        monAtk += delta;
+    /** 勇士每轮造成的伤害 */
+    let heroPerDamage: number = 0;
+    /** 怪物每轮造成的伤害 */
+    let enemyPerDamage: number = 0;
+
+    // 勇士每轮伤害为勇士攻击减去怪物防御
+    heroPerDamage += atk - monDef;
+
+    // 吸血
+    if (special.has(11)) {
+        const vampire = info.vampire ?? 0;
+        const value = (vampire / 100) * hp;
+        damage += value;
+        // 如果吸血加到自身
+        if (info.add) {
+            monHp += value;
+        }
     }
-
-    let heroPerDamage: number;
-
-    // 绝对防御
-    if (special.has(9)) {
-        heroPerDamage = atk + mana - monDef;
-        if (heroPerDamage <= 0) return Infinity;
-    } else if (special.has(3)) {
-        // 由于坚固的特性，只能放到这来计算了
-        if (atk > enemy.def) heroPerDamage = 1 + mana;
-        else return Infinity;
-    } else {
-        heroPerDamage = atk - monDef;
-        if (heroPerDamage > 0) heroPerDamage += mana;
-        else return Infinity;
-    }
-
-    // 霜冻
-    if (special.has(20)) {
-        heroPerDamage *= 1 - info.ice! / 100;
-    }
-
-    heroPerDamage *= 1 - info.damageDecline / 100;
-
-    let enemyPerDamage: number;
 
     // 魔攻
-    if (special.has(2) || special.has(13)) {
+    if (special.has(2)) {
         enemyPerDamage = monAtk;
-        enemyPerDamage -= magicDef;
     } else {
         enemyPerDamage = monAtk - def;
     }
@@ -972,50 +706,81 @@ export function calDamageWith(
 
     if (enemyPerDamage < 0) enemyPerDamage = 0;
 
-    // 苍蓝刻
-    if (special.has(28)) {
-        heroPerDamage *= 1 - info.paleShield! / 100;
-    }
-
     let turn = Math.ceil(monHp / heroPerDamage);
 
-    // 致命一击
-    if (special.has(1)) {
-        const times = Math.floor(turn / 5);
-        damage += ((times * (info.crit! - 100)) / 100) * enemyPerDamage;
-    }
-
-    // 勇气之刃
-    if (turn > 1 && special.has(10)) {
-        damage += (info.courage! / 100 - 1) * enemyPerDamage;
-    }
-
-    // 勇气冲锋
-    if (special.has(11)) {
-        damage += (info.charge! / 100) * enemyPerDamage;
-        turn += 5;
+    // 支援，当怪物被支援且不包含支援标记时执行，因为支援怪不能再被支援了
+    if (info.guard.length > 0 && !inGuard) {
+        inGuard = true;
+        // 支援中魔防只会被计算一次，因此除了当前怪物，计算其他怪物伤害时魔防为 0
+        const status = { ...hero, mdef: 0 };
+        // 计算支援怪的伤害，同时把打支援怪花费的回合数加到当前怪物上，因为打支援怪的时候当前怪物也会打你
+        // 因此回合数需要加上打支援怪的回合数
+        for (const enemy of info.guard) {
+            // 直接把 enemy 传过去，因此支援的 enemy 会吃到其原本所在位置的光环加成
+            const extraInfo = calDamageWithTurn(enemy, status);
+            turn += extraInfo.turn;
+            damage += extraInfo.damage;
+        }
+        inGuard = false;
     }
 
     // 先攻
-    if (special.has(17)) {
+    if (special.has(1)) {
         damage += enemyPerDamage;
     }
 
+    // 破甲
+    if (special.has(7)) {
+        const value = info.breakArmor ?? core.values.breakArmor;
+        damage += (value / 100) * def;
+    }
+
+    // 反击
+    if (special.has(8)) {
+        const value = info.counterAttack ?? core.values.counterAttack;
+        // 反击是每回合生效，因此加到 enemyPerDamage 上
+        enemyPerDamage += (value / 100) * atk;
+    }
+
+    // 净化
+    if (special.has(9)) {
+        const value = info.purify ?? core.values.purify;
+        damage += mdef * value;
+    }
+
     damage += (turn - 1) * enemyPerDamage;
-    // 无上之盾
-    if (flags.superSheild) {
-        damage -= mdef / 10;
-    }
-    // 生命回复
-    damage -= hpmax * turn;
-    if (flags.hard === 1) damage *= 0.9;
 
-    if (flags.chapter > 1 && damage < 0) {
-        const dm = -info.hp * 0.25;
-        if (damage < dm) damage = dm;
+    // 魔防
+    damage -= mdef;
+
+    // 未开启负伤时，如果伤害为负，则设为 0
+    if (!core.flags.enableNegativeDamage && damage < 0) {
+        damage = 0;
     }
 
-    return Math.floor(damage);
+    // 固伤，无法被魔防减伤
+    if (special.has(22)) {
+        damage += info.damage ?? 0;
+    }
+
+    // 仇恨，无法被魔防减伤
+    if (special.has(17)) {
+        damage += core.getFlag('hatred', 0);
+    }
+
+    return { damage: Math.floor(damage), turn };
+}
+
+/**
+ * 计算怪物伤害
+ * @param info 怪物信息
+ * @param hero 勇士信息
+ */
+export function calDamageWith(
+    info: EnemyInfo,
+    hero: Partial<HeroStatus>
+): number {
+    return calDamageWithTurn(info, hero).damage;
 }
 
 export function ensureFloorDamage(floorId: FloorIds) {

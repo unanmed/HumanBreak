@@ -514,9 +514,18 @@ export function initFallback() {
                 mover.insertMove(...[start, ...resolved]);
                 const controller = mover.startMove();
 
+                const id = fallbackIds++;
+                core.animateFrame.asyncId[id] = () => {
+                    if (!keep) {
+                        core.removeBlock(mover.x, mover.y);
+                    }
+                };
+
                 if (controller) {
                     await controller.onEnd;
                 }
+
+                delete core.animateFrame.asyncId[id];
 
                 if (!keep) {
                     core.removeBlock(mover.x, mover.y);
@@ -566,7 +575,18 @@ export function initFallback() {
 
                 core.updateStatusBar();
                 core.removeBlock(sx, sy);
+
+                const id = fallbackIds++;
+                core.animateFrame.asyncId[id] = () => {
+                    if (keep) {
+                        core.setBlock(block.id, ex, ey);
+                    }
+                };
+
                 await promise;
+
+                delete core.animateFrame.asyncId[id];
+
                 if (keep) {
                     core.setBlock(block.id, ex, ey);
                 }

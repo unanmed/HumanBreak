@@ -108,26 +108,10 @@ function renderThumbnailDamage(col: EnemyCollection) {
                 });
             }
 
-            // 电摇嘲讽
-            if (dam.mockery) {
-                dam.mockery.sort((a, b) =>
-                    a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]
-                );
-                const [tx, ty] = dam.mockery[0];
-                const dir = x > tx ? '←' : x < tx ? '→' : y > ty ? '↑' : '↓';
-                core.status.damage.extraData.push({
-                    text: '嘲' + dir,
-                    px: 32 * x + 16,
-                    py: 32 * (y + 1) - 14,
-                    color: '#fd4',
-                    alpha: 1
-                });
-            }
-
             // 追猎
-            if (dam.hunt) {
+            if (dam.ambush) {
                 core.status.damage.extraData.push({
-                    text: '猎',
+                    text: '!',
                     px: 32 * x + 16,
                     py: 32 * (y + 1) - 14,
                     color: '#fd4',

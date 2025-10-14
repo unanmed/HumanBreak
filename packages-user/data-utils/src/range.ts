@@ -3,6 +3,7 @@ import { isNil } from 'lodash-es';
 interface RangeTypeData {
     square: { x: number; y: number; d: number };
     rect: { x: number; y: number; w: number; h: number };
+    manhattan: { x: number; y: number; d: number };
 }
 
 type InRangeFn<E extends Partial<Loc>, T> = (item: E, data: T) => boolean;
@@ -78,4 +79,8 @@ Range.register('rect', (item, { x, y, w, h }) => {
     const ex = x + w;
     const ey = y + h;
     return item.x >= x && item.y >= y && item.x < ex && item.y < ey;
+});
+Range.register('manhattan', (item, { x, y, d }) => {
+    if (isNil(item.x) || isNil(item.y)) return false;
+    return Math.abs(item.x - x) + Math.abs(item.y - y) < d;
 });

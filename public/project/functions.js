@@ -150,9 +150,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 根据分区信息自动砍层与恢复
             Mota.require('@user/legacy-plugin-data')?.autoRemoveMaps?.(floorId);
 
-            // 重置画布尺寸
-            core.maps.resizeMap(floorId);
-
             // ---------- 重绘新地图；这一步将会设置core.status.floorId ---------- //
             core.drawMap(floorId);
 
@@ -191,6 +188,25 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             else core.setWeather();
 
             core.updateDamage();
+
+            // 检查重生怪并重置
+            if (!fromLoad) {
+                core.extractBlocks(floorId);
+                const obj = core.getMapBlocksObj(floorId);
+                const floor = core.status.maps[floorId];
+                const col = floor.enemy;
+                col.list.forEach(v => {
+                    const info = v.getRealInfo();
+                    if (info.special.has(23)) {
+                        const block = obj[`${v.x},${v.y}`];
+                        if (block.disable) {
+                            block.disable = false;
+                            core.setMapBlockDisabled(floorId, v.x, v.y, false);
+                            core.maps._updateMapArray(floorId, v.x, v.y);
+                        }
+                    }
+                });
+            }
 
             // ...可以新增一些其他内容，比如创建个画布在右上角显示什么内容等等
         },
@@ -347,6 +363,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             core.updateDamage();
         },
         moveOneStep: function (callback) {
+            // 注意，此函数在 2.C 将会被弃用，并移动至 packages-user/data-state/src/state/move.ts 的 HeroMover 中
+            // 一些样板内置内容已经移动至上述函数，包括中毒行为等
+
             // 勇士每走一步后执行的操作。callback为行走完毕后的回调
             // 这个函数执行在“刚走完”的时候，即还没有检查该点的事件和领域伤害等。
             // 请注意：瞬间移动不会执行该函数。如果要控制能否瞬间移动有三种方法：
@@ -412,6 +431,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // 判定能否瞬移到该点
             if (ignoreSteps == null) ignoreSteps = core.canMoveDirectly(x, y);
             if (ignoreSteps >= 0) {
+                // 中毒也允许瞬移
+                if (core.hasFlag('poison')) {
+                    const damage = ignoreSteps * core.values.poisonDamage;
+                    if (damage >= core.status.hero.hp) return false;
+                    core.status.hero.statistics.poisonDamage += damage;
+                    core.status.hero.hp -= damage;
+                }
                 core.clearMap('hero');
                 // 获得勇士最后的朝向
                 var lastDirection =

@@ -20,7 +20,7 @@ export function getHeroStatusOn(
     name: keyof HeroStatus | 'all' | (keyof HeroStatus)[],
     floorId?: FloorIds
 ) {
-    // @ts-ignore
+    // @ts-expect-error 暂时无法推导
     return getHeroStatusOf(core.status.hero, name, floorId);
 }
 
@@ -96,8 +96,21 @@ function getRealStatus(
     s *= core.status.hero.buff[name] ?? 1;
     s = Math.floor(s);
 
+    // 衰弱效果
+    if ((name === 'atk' || name === 'def') && flags.weak) {
+        const weak = core.values.weakValue;
+        if (weak < 1) {
+            // 百分比衰弱
+            s *= 1 - weak;
+        } else {
+            s -= weak;
+        }
+    }
+
     return s;
 }
+
+// 下面的内容暂时无用
 
 export interface IHeroStatusDefault {
     atk: number;
@@ -224,7 +237,7 @@ export class HeroState<
     refreshStatus(key?: keyof T): boolean {
         if (key === void 0) {
             for (const [key, value] of Object.entries(this.status)) {
-                // @ts-ignore
+                // @ts-expect-error 暂时无法推导
                 this.computedStatus[key] = HeroState.cal(this, key, value);
             }
             return true;
@@ -257,7 +270,7 @@ export class HeroState<
     }
 }
 
-interface IHeroItem {
+interface _IHeroItem {
     items: Map<AllIdsOf<'items'>, number>;
 
     /**

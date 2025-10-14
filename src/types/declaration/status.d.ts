@@ -802,9 +802,6 @@ interface HeroStatus {
      */
     manamax: number;
 
-    /** 魔法防御 */
-    magicDef: number;
-
     /**
      * 勇士的名称
      */

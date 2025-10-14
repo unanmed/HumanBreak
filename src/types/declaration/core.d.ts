@@ -278,7 +278,7 @@ interface AnimateFrame {
     /**
      * 异步信息，想不到吧，这玩意是一个以number为索引的回调函数列表
      */
-    readonly asyncId: Record<number, () => void>;
+    readonly asyncId: Record<number | symbol, () => void>;
 
     /**
      * 上一个异步事件的id

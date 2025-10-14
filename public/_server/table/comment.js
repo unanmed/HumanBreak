@@ -207,139 +207,125 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					},
 					"_data": "特殊属性"
 				},
-				"crit": {
+				"n": {
 					"_leaf": true,
 					"_type": "textarea",
-					"_docs": "致命一击",
-					"_data": "致命一击"
+					"_docs": "连击数",
+					"_data": "连击数"
 				},
-				"charge": {
+				"breakArmor": {
 					"_leaf": true,
 					"_type": "textarea",
-					"_docs": "勇气冲锋",
-					"_data": "勇气冲锋"
+					"_docs": "破甲百分比",
+					"_data": "破甲百分比"
 				},
-				"courage": {
+				"counterAttack": {
 					"_leaf": true,
 					"_type": "textarea",
-					"_docs": "勇气之刃",
-					"_data": "勇气之刃"
+					"_docs": "反击百分比",
+					"_data": "反击百分比"
 				},
-				"together": {
+				"purify": {
 					"_leaf": true,
 					"_type": "textarea",
-					"_docs": "抱团",
-					"_data": "抱团"
+					"_docs": "净化倍率",
+					"_data": "净化倍率"
 				},
-				"hungry": {
+				"vampire": {
 					"_leaf": true,
 					"_type": "textarea",
-					"_docs": "饥渴",
-					"_data": "饥渴"
+					"_docs": "吸血百分比",
+					"_data": "吸血百分比"
 				},
-				"ice": {
+				"add": {
 					"_leaf": true,
 					"_type": "textarea",
-					"_docs": "霜冻",
-					"_data": "霜冻"
+					"_docs": "吸血加到自身",
+					"_data": "吸血是否加到怪物自身血量上"
 				},
-				"iceHalo": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "冰封光环",
-					"_data": "冰封光环"
-				},
-				"night": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "永夜",
-					"_data": "永夜"
-				},
-				"day": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "极昼",
-					"_data": "极昼"
-				},
-				"melt": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "融化",
-					"_data": "融化"
-				},
-				"iceCore": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "冰封之核",
-					"_data": "冰封之核"
-				},
-				"fireCore": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "火焰之核",
-					"_data": "火焰之核"
-				},
-				"paleShield": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "苍蓝刻",
-					"_data": "苍蓝刻"
-				},
-				"translation": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "乾坤挪移",
-					"_data": "乾坤挪移"
-				},
-				"hpHalo": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "再生光环",
-					"_data": "再生光环"
-				},
-				"assimilateRange": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "同化范围",
-					"_data": "同化范围"
-				},
-				"horn": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "战争号角",
-					"_data": "战争号角"
-				},
-				"specialHalo": {
-					"_leaf": true,
-					"_type": "popCheckboxSet",
-					"_checkboxSet": function () {
-						var array = Mota.require('@user/data-state').specials;
-						var b = [],
-							c = [];
-						for (var index = 0; index < array.length; index++) {
-							b.push(index);
-							var name = array[index].name;
-							if (name instanceof Function) name = name({});
-							c.push(name + "(" + index + ")");
-						}
-						return {
-							"prefix": c,
-							"key": b
-						}
-					},
-					"_data": "杀戮光环"
-				},
-				"specialMultiply": {
+				"zoneSquare": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_docs": "光环叠加",
-					"_data": "光环叠加是否为乘算"
+					"_docs": "领域九宫格",
+					"_data": "领域九宫格"
+				},
+				"range": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "范围",
+					"_data": "领域或光环范围"
+				},
+				"zone": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "领域伤害",
+					"_data": "领域伤害"
+				},
+				"repulse": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "阻击伤害",
+					"_data": "阻击伤害"
+				},
+				"atkValue": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "退化攻击",
+					"_data": "退化攻击"
+				},
+				"defValue": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "退化防御",
+					"_data": "退化防御"
+				},
+				"damage": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "固伤伤害",
+					"_data": "固伤伤害"
+				},
+				"laser": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "激光伤害",
+					"_data": "激光伤害"
 				},
 				"haloRange": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_docs": "光环范围",
-					"_data": "光环范围"
+					"_data": "光环范围，不填表示 1"
+				},
+				"haloSquare": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_docs": "光环九宫格",
+					"_data": "光环九宫格"
+				},
+				"hpBuff": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "光环加血",
+					"_data": "光环加血百分比"
+				},
+				"atkBuff": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "光环加攻",
+					"_data": "光环加攻百分比"
+				},
+				"defBuff": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "光环加防",
+					"_data": "光环加防百分比"
+				},
+				"haloAdd": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "光环叠加",
+					"_data": "光环是否叠加"
 				},
 				"value": {
 					"_leaf": true,
@@ -347,65 +333,11 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "特殊属性数值",
 					"_data": "特殊属性的数值\n如：领域/阻激/激光怪的伤害值；吸血怪的吸血比例；光环怪增加生命的比例"
 				},
-				"zoneSquare": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_docs": "九宫格",
-					"_data": "领域、阻击、光环或捕捉怪是否九宫格"
-				},
-				"range": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_range": "(thiseval==~~thiseval && thiseval>0)||thiseval==null",
-					"_docs": "领域范围",
-					"_data": "领域或光环的范围；领域不加默认为1，光环不加则为全图效果"
-				},
 				"notBomb": {
 					"_leaf": true,
 					"_type": "checkbox",
 					"_docs": "不可炸",
 					"_data": "该怪物不可被炸"
-				},
-				"n": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_range": "(thiseval==~~thiseval && thiseval>0)||thiseval==null",
-					"_docs": "连击数",
-					"_data": "多连击的连击数，净化怪的净化倍率"
-				},
-				"add": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_docs": "吸血加到自身",
-					"_data": "吸血后是否加到自身；光环是否叠加"
-				},
-				"atkValue": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_range": "thiseval==~~thiseval||thiseval==null",
-					"_docs": "退化扣攻",
-					"_data": "退化时勇士下降的攻击力点数；光环怪增加攻击的比例；反击的比例"
-				},
-				"defValue": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_range": "thiseval==~~thiseval||thiseval==null",
-					"_docs": "退化扣防",
-					"_data": "退化时勇士下降的防御力点数；光环怪增加防御的比例；破甲的比例"
-				},
-				"damage": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_range": "thiseval==~~thiseval||thiseval==null",
-					"_docs": "固伤",
-					"_data": "战前扣血的点数"
-				},
-				"beforeBattle": {
-					"_leaf": true,
-					"_type": "event",
-					"_event": "beforeBattle",
-					"_docs": "战前事件",
-					"_data": "和该怪物战斗前触发的事件列表"
 				},
 				"afterBattle": {
 					"_leaf": true,

@@ -168,12 +168,12 @@ export function boundary(arr: any, key?: any) {
  * @param from 初始坐标
  * @param to 指向坐标
  */
-export function findDir(from: Loc, to: Loc): Dir2 | 'none' {
-    const dx = to.x - from.x;
-    const dy = to.y - from.y;
+export function findDir(from: Loc, to: Loc): Dir | 'none' {
+    const dx = Math.sign(to.x - from.x);
+    const dy = Math.sign(to.y - from.y);
     return (
-        (Object.entries(core.utils.scan2).find(v => {
-            v[1].x === dx && v[1].y === dy;
-        })?.[0] as Dir2) ?? 'none'
+        (Object.entries(core.utils.scan).find(v => {
+            return v[1].x === dx && v[1].y === dy;
+        })?.[0] as Dir) ?? 'none'
     );
 }

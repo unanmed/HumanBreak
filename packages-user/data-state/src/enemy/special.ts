@@ -1,13 +1,26 @@
+import { EnemyInfo } from '@motajs/types';
 import { getHeroStatusOn } from '../state/hero';
-import { UserEnemyInfo } from './damage';
 
 export interface SpecialDeclaration {
     code: number;
-    name: string | ((enemy: UserEnemyInfo) => string);
-    desc: string | ((enemy: UserEnemyInfo) => string);
+    name: string | ((enemy: EnemyInfo) => string);
+    desc: string | ((enemy: EnemyInfo) => string);
     color: string;
 }
 
+/**
+ * 怪物特殊属性列表，当前版本中 code 最好与索引保持一致，不然可能会出现问题
+ * 属性实现位置一览（'./'表示当前文件夹  '../'表示上一级文件夹）：
+ * 1. 调参类属性 / 仅影响战斗过程的属性：./damage.ts calDamageWithTurn 函数
+ * 2. 地图伤害：./damage.ts DamageEnemy.calMapDamage 方法，搜索 calMapDamage 即可搜到
+ * 3. 光环属性：./damage.ts DamageEnemy.provideHalo 方法，搜索 provideHalo 即可搜到
+ * 4. 仇恨 / 退化 等战后效果：packages-user/data-fallback/src/battle.ts 中的 afterBattle
+ * 5. 中毒的每步效果：../state/move.ts HeroMover.onStepEnd 方法，在约 590 行
+ * 6. 中毒的瞬移效果：还在脚本编辑的 moveDirectly
+ * 7. 衰弱效果：../state/hero.ts getHeroStatusOf 方法
+ * 8. 重生属性：还在脚本编辑的 changingFloor
+ * 9. 阻击 / 捕捉 的每步效果：packages-user/legacy-plugin-data/src/enemy/checkblock.ts
+ */
 export const specials: SpecialDeclaration[] = [
     {
         code: 0,
@@ -48,7 +61,7 @@ export const specials: SpecialDeclaration[] = [
     {
         code: 6,
         name: enemy => `${enemy.n ?? 4}连击`,
-        desc: enemy => `怪物每回合攻击${enemy.n}次。`,
+        desc: enemy => `怪物每回合攻击${enemy.n ?? 4}次。`,
         color: '#fe7'
     },
     {
@@ -82,7 +95,7 @@ export const specials: SpecialDeclaration[] = [
         code: 11,
         name: '吸血',
         desc: enemy => {
-            const vampire = enemy.vampire ?? 10;
+            const vampire = enemy.vampire ?? 0;
             return (
                 `战斗前，怪物首先吸取角色的${vampire}%生命` +
                 `（约${Math.floor((vampire / 100) * getHeroStatusOn('hp'))}点）作为伤害` +
@@ -101,7 +114,14 @@ export const specials: SpecialDeclaration[] = [
     {
         code: 13,
         name: '衰弱',
-        desc: '怪物攻击无视勇士的防御。',
+        desc: () => {
+            const weak = core.values.weakValue;
+            if (weak < 1) {
+                return `战斗后，角色陷入衰弱状态，攻防暂时下降${Math.floor(weak * 100)}%`;
+            } else {
+                return `战斗后，角色陷入衰弱状态，攻防暂时下降${weak}点`;
+            }
+        },
         color: '#f0bbcc'
     },
     {
@@ -114,7 +134,7 @@ export const specials: SpecialDeclaration[] = [
         code: 15,
         name: '领域',
         desc: enemy =>
-            `经过怪物周围${enemy.zoneSquare ? '九宫格' : '十字'}范围内${enemy.range}格时自动减生命${enemy.zone}点。`,
+            `经过怪物周围${enemy.zoneSquare ? '九宫格' : '十字'}范围内${enemy.range ?? 1}格时自动减生命${enemy.zone ?? 0}点。`,
         color: '#c677dd'
     },
     {
@@ -126,14 +146,15 @@ export const specials: SpecialDeclaration[] = [
     {
         code: 17,
         name: '仇恨',
-        desc: `战斗前，怪物附加之前积累的仇恨值作为伤害；战斗后，释放一半的仇恨值。（每杀死一个怪物获得${core.values.hatred}点仇恨值）。`,
+        desc: () =>
+            `战斗前，怪物附加之前积累的仇恨值作为伤害；战斗后，释放一半的仇恨值。（每杀死一个怪物获得${core.values.hatred}点仇恨值）。`,
         color: '#b0b666'
     },
     {
         code: 18,
         name: '阻击',
         desc: enemy =>
-            `经过怪物十字范围内时怪物后退一格，同时对勇士造成${enemy.repulse}点伤害。`,
+            `经过怪物十字范围内时怪物后退一格，同时对勇士造成${enemy.repulse ?? 0}点伤害。`,
         color: '#8888e6'
     },
     {
@@ -193,7 +214,7 @@ export const specials: SpecialDeclaration[] = [
                 str += `，生命提升${enemy.hpBuff}%`;
             }
             if (enemy.atkBuff) {
-                str += `，攻击提升${enemy.hpBuff}%`;
+                str += `，攻击提升${enemy.atkBuff}%`;
             }
             if (enemy.defBuff) {
                 str += `，防御提升${enemy.defBuff}%`;

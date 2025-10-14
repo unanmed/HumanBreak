@@ -459,10 +459,11 @@ export class HeroMover extends ObjectMoverBase {
         const map = core.status.thisMap.enemy.mapDamage;
         const dam = map[index];
         const nextDam = map[nIndex];
-        if (nextDam?.mockery || (!dam?.hunt && nextDam?.hunt)) {
-            core.autosave();
-            return true;
-        }
+        if (!dam || !nextDam) return;
+        // 可以在这里判断地图伤害，并进行自动存档，例如在进入或离开地图伤害时存档
+        // if (dam.damage > 0 || nextDam.damage > 0) {
+        // core.autosave()
+        // }
     }
 
     protected async onMoveStart(controller: IMoveController): Promise<void> {
@@ -585,6 +586,12 @@ export class HeroMover extends ObjectMoverBase {
                 const direction = core.getHeroLoc('direction');
                 core.control._moveAction_popAutomaticRoute();
                 if (!this.noRoute) core.status.route.push(direction);
+
+                // 中毒处理
+                if (core.hasFlag('poison')) {
+                    core.status.hero.hp -= core.values.poisonDamage;
+                    core.updateStatusBar();
+                }
 
                 core.moveOneStep();
                 core.checkRouteFolding();

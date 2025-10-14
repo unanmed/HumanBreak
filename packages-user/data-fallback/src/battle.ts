@@ -94,6 +94,8 @@ export function patchBattle() {
         });
     });
 
+    patch2.add('battle', battle);
+
     patch2.add('_sys_battle', function (data: Block, callback?: () => void) {
         // 检查战前事件
         const floor = core.floors[core.status.floorId];
@@ -156,8 +158,9 @@ export function patchBattle() {
                 core.playSound('attack.opus');
 
             // 战斗伤害
-            const info = enemy.calDamage(core.status.hero);
-            const damage = info.damage;
+            const info = enemy.getRealInfo();
+            const damageInfo = enemy.calDamage(core.status.hero);
+            const damage = damageInfo.damage;
             // 判定是否致死
             if (damage >= core.status.hero.hp) {
                 core.status.hero.hp = 0;
@@ -171,24 +174,40 @@ export function patchBattle() {
             core.status.hero.statistics.battleDamage += damage;
             core.status.hero.statistics.battle++;
 
-            // 获得金币
-            const money = enemy.info.money!;
+            // 获得金币经验
+            const money = core.hasFlag('curse') ? 0 : enemy.info.money!;
+            const exp = core.hasFlag('curse') ? 0 : enemy.info.exp!;
+
             core.status.hero.money += money;
             core.status.hero.statistics.money += money;
-
-            // 获得经验
-            const exp = enemy.info.exp!;
             core.status.hero.exp += exp;
             core.status.hero.statistics.exp += exp;
 
-            const hint =
-                '打败 ' +
-                enemy.enemy.name +
-                '，金币+' +
-                money +
-                '，经验+' +
-                exp;
+            const hint = `打败 ${enemy.enemy.name}，金币+${money}，经验+${exp}`;
             core.drawTip(hint, enemy.id);
+
+            // 毒衰咒
+            if (info.special.has(12)) core.setFlag('poison', true);
+            if (info.special.has(13)) core.setFlag('weak', true);
+            if (info.special.has(14)) core.setFlag('curse', true);
+
+            // 仇恨
+            if (info.special.has(17)) {
+                core.setFlag('hatred', core.getFlag('hatred', 0) / 2);
+            } else {
+                core.addFlag('hatred', core.values.hatred);
+            }
+
+            // 自爆
+            if (info.special.has(19)) {
+                core.status.hero.hp = 1;
+            }
+
+            // 退化
+            if (info.special.has(21)) {
+                core.status.hero.atk -= info.atkValue ?? 0;
+                core.status.hero.def -= info.defValue ?? 0;
+            }
 
             // 事件的处理
             const todo: MotaEvent = [];
@@ -231,7 +250,7 @@ declare global {
     interface Events {
         battle(
             enemy: DamageEnemy,
-            _?: number,
+            y?: number,
             force?: boolean,
             callback?: () => void
         ): void;

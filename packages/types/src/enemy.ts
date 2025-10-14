@@ -5,11 +5,11 @@ export interface EnemyInfo extends Partial<Omit<Enemy, 'special'>> {
     def: number;
     hp: number;
     special: Set<number>;
-    damageDecline: number;
     atkBuff_: number;
     defBuff_: number;
     hpBuff_: number;
     enemy: Enemy;
+    guard: EnemyInfo[];
     x?: number;
     y?: number;
     floorId?: FloorIds;
@@ -18,8 +18,8 @@ export interface EnemyInfo extends Partial<Omit<Enemy, 'special'>> {
 export interface MapDamage {
     damage: number;
     type: Set<string>;
-    mockery?: LocArr[];
-    hunt?: [x: number, y: number, dir: Dir][];
+    repulse?: LocArr[];
+    ambush?: LocArr[];
 }
 
 export interface DamageDelta {
@@ -92,11 +92,6 @@ export interface IDamageEnemy {
      * 获取怪物的真实属性信息
      */
     getRealInfo(): EnemyInfo;
-
-    /**
-     * 获取这个怪物的所有光环属性
-     */
-    getHaloSpecials(): Set<number>;
 
     /**
      * 计算怪物伤害

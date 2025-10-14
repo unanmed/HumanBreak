@@ -210,7 +210,7 @@ const realStatus: (keyof HeroStatus)[] = [
 
 ```ts
 export function calDamageWith(
-    info: UserEnemyInfo,
+    info: EnemyInfo,
     hero: Partial<HeroStatus>
 ): number {
     // ... 原有逻辑
