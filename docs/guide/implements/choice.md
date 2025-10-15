@@ -275,7 +275,7 @@ export const MyCom = defineComponent(props => {
 
 - [ConfirmBox](../../api/user-client-modules/组件%20ConfirmBox.md)
 - [Choices](../../api/user-client-modules/组件%20Choices.md)
-- [Waitbox](../../api/user-client-modules/组件%20Waitbox.md)
+- [WaitBox](../../api/user-client-modules/组件%20WaitBox.md)
 - [getConfirm](../../api/user-client-modules/functions.md#getconfirm)
 - [getChoice](../../api/user-client-modules/functions.md#getchoice)
-- [waitbox](../../api/user-client-modules/functions.md#waitbox)
+- [waitbox 方法](../../api/user-client-modules/functions.md#waitbox)
