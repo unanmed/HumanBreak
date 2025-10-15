@@ -715,6 +715,7 @@ export async function routedConfirm(
         const confirm = getChoiceRoute(1) === 0;
         const timeout = core.control.__replay_getTimeout();
         core.status.route.push(`choices:${confirm ? 0 : 1}`);
+        core.status.replay.toReplay.shift();
         if (timeout === 0) return confirm;
         const instance = controller.open(ConfirmBoxUI, {
             ...(props ?? {}),
@@ -769,6 +770,7 @@ export async function routedChoices<T extends ChoiceKey>(
         const selected = getChoiceRoute(0);
         const timeout = core.control.__replay_getTimeout();
         core.status.route.push(`choices:${selected}`);
+        core.status.replay.toReplay.shift();
         if (timeout === 0) return choices[selected][0];
         const instance = controller.open(ChoicesUI, {
             ...(props ?? {}),
@@ -782,7 +784,7 @@ export async function routedChoices<T extends ChoiceKey>(
         return choices[selected][0];
     } else {
         const choice = await getChoice(controller, choices, loc, width, props);
-        const index = choices.findIndex(v => v[1] === choice);
+        const index = choices.findIndex(v => v[0] === choice);
         core.status.route.push(`choices:${index}`);
         return choice;
     }

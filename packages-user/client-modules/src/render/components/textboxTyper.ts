@@ -969,10 +969,13 @@ export class TextContentParser {
                 continue;
             } else if (char === '$') {
                 // 表达式
-                pointer++;
-                inExpression = true;
-                expStart = pointer + 1;
-                continue;
+                const next = text[pointer + 1];
+                if (next === '{') {
+                    pointer++;
+                    inExpression = true;
+                    expStart = pointer + 1;
+                    continue;
+                }
             } else if (char === '\n') {
                 // 在这里预先将换行处理为多个 node，会比在分行时再处理更方便
                 this.addTextNode(pointer + 1, true);
