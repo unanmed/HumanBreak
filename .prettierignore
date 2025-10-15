@@ -14,3 +14,4 @@ keyCodes.ts
 src/core/main/setting.ts
 src/core/fx/shadow.ts
 dist/
+docs/.vitepress/apiSidebar.ts
