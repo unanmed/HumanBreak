@@ -536,21 +536,21 @@ export const MyCom = defineComponent(() => {
 
 - [ConfirmBox](../../api/user-client-modules/组件%20ConfirmBox.md)：确认框，一般使用 `getConfirm` 接口，不直接使用组件。
 - [Choices](../../api/user-client-modules/组件%20Choices.md)：选择框，一般使用 `getChoice` 接口，不直接使用组件。
-      <!-- - [FloorSelector](../../api/user-client-modules/组件%20FloorSelector.md)：楼层选择组件，浏览地图左侧的楼层选择就是使用的本组件。 -->
+- [FloorSelector](../../api/user-client-modules/组件%20FloorSelector.md)：楼层选择组件，浏览地图左侧的楼层选择就是使用的本组件。
 - [图标组件](../../api/user-client-modules/图标组件.md)：一些常用图标。
-      <!-- - [Input](../../api/user-client-modules/组件%20Input.md)：输入组件，可以放到组件内部，可以用于搜索栏等。
-       [InputBox](../../api/user-client-modules/组件%20InputBox.md)：输入框组件，类似于确认框，一般使用 `getInput` 或 `getInputNumber` 接口，不使用本组件。 -->
-      <!-- - [List](../../api/user-client-modules/组件%20List.md)：列表组件，可以用于展示一列内容。
-       [ListPage](../../api/user-client-modules/组件%20ListPage.md)：左侧是列表，右侧是当前选项对应的详情页，可以用于游戏机制说明等。 -->
+- [Input](../../api/user-client-modules/组件%20Input.md)：输入组件，可以放到组件内部，可以用于搜索栏等。
+- [InputBox](../../api/user-client-modules/组件%20InputBox.md)：输入框组件，类似于确认框，一般使用 `getInput` 或 `getInputNumber` 接口，不使用本组件。
+- [List](../../api/user-client-modules/组件%20List.md)：列表组件，可以用于展示一列内容。
+- [ListPage](../../api/user-client-modules/组件%20ListPage.md)：左侧是列表，右侧是当前选项对应的详情页，可以用于游戏机制说明等。
 - [Progress](../../api/user-client-modules/组件%20Progress.md)：进度条组件，播放录像时右下角的进度条就是本组件。
 - [Arrow](../../api/user-client-modules/组件%20Arrow.md)：箭头组件，画一个箭头。
 - [ScrollText](../../api/user-client-modules/组件%20ScrollText.md)：滚动文本组件，可以用于长剧情或是 staff 表等。
 - [Selection](../../api/user-client-modules/组件%20Selection.md)：选择光标，列表组件的选择光标就是使用的本组件。
 - [Background](../../api/user-client-modules/组件%20Background.md)：背景组件，可以设置为纯色或 `winskin`。
-      <!-- - [WaitBox](../../api/user-client-modules/组件%20WaitBox.md)：等待框，一般使用 `waitbox` 接口，不直接使用组件。 -->
+- [WaitBox](../../api/user-client-modules/组件%20WaitBox.md)：等待框，一般使用 `waitbox` 接口，不直接使用组件。
 - [Page](../../api/user-client-modules/组件%20Page.md)：分页组件，本文已经详细讲解。
 - [Scroll](../../api/user-client-modules/组件%20Scroll.md)：滚动条组件，本文已经详细讲解。
 - [TextContent](../../api/user-client-modules/组件%20TextContent.md)：多行文本组件，本文已经详细讲解。
 - [Textbox](../../api/user-client-modules/组件%20Textbox.md)：文本框组件，就是事件的显示文字，一般不会直接用。
-      <!-- - [Thumbnail](../../api/user-client-modules/组件%20Thumbnail.md)：缩略图组件，用于展示某个地图的缩略图。 -->
+- [Thumbnail](../../api/user-client-modules/组件%20Thumbnail.md)：缩略图组件，用于展示某个地图的缩略图。
 - [Tip](../../api/user-client-modules/组件%20Tip.md)：提示组件，就是左上角的提示，一般不会直接使用。

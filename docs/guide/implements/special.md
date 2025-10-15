@@ -105,7 +105,7 @@ export const specials: SpecialDeclaration[] = [
 修改 `damage.ts` `calDamageWithTurn` 中的实现：
 
 ```ts
-export function calDamageWith(
+export function calDamageWithTurn(
     info: EnemyInfo,
     hero: Partial<HeroStatus>
 ): DamageWithTurn {

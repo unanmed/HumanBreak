@@ -22,7 +22,7 @@ export interface ThumbnailProps extends SpriteProps {
     damage?: boolean;
     all?: boolean;
     noHD?: boolean;
-    /** 缩略图的比例 */
+    /** 缩略图的比例，1 表示与实际地图大小一致 */
     size?: number;
 }
 
