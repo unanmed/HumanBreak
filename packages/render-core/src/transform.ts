@@ -192,6 +192,7 @@ export class Transform {
         if (this.modified) {
             const result = new Transform();
             mat3.multiply(result.mat, this.mat, transform.mat);
+            result.modified = true;
             return result;
         } else {
             return transform.clone();
