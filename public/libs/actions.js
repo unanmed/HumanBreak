@@ -846,6 +846,12 @@ actions.prototype._sys_longClick_lockControl = function (x, y, px, py) {
         core.status.event.id == 'action' &&
         core.status.event.data.type == 'text'
     ) {
+        const [now, next] = core.status.event.data.list;
+        if (next?.type !== 'text') {
+            const Store = Mota.require('@user/client-modules').TextboxStore;
+            const textbox = Store.get(now.textbox ?? 'main-textbox');
+            textbox.hide();
+        }
         core.doAction();
         return true;
     }

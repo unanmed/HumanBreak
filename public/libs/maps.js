@@ -1101,8 +1101,8 @@ maps.prototype._canMoveDirectly_checkNextPoint = function (blocksObj, x, y) {
     const damage = core.status.thisMap.enemy.mapDamage[index];
     if (damage) {
         if (damage.damage !== 0) return false;
-        if (damage.mockery) return false;
-        if (damage.hunt) return false;
+        if (damage.ambush) return false;
+        if (damage.repulse) return false;
     }
 
     return true;
