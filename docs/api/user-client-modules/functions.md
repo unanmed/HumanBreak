@@ -408,4 +408,4 @@ const userData = await waitbox(
 4. **额外参考**
     - [组件 ConfirmBox](./组件%20ConfirmBox.md)
     - [组件 Choices](./组件%20Choices.md)
-    - [组件 Waitbox](./组件%20Waitbox.md)
+    - [组件 WaitBox](./组件%20WaitBox.md)

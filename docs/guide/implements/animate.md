@@ -8,7 +8,7 @@
 
 ## 定义动画属性
 
-我们以一个自定义 UI 为例，来讲述如何编写一段动画。自定义 UI 参考[此指南](./new-ui.md)和[此教程](../../guide/ui.md)。
+我们以一个自定义 UI 为例，来讲述如何编写一段动画。自定义 UI 参考[此指南](./new-ui.md)和[此教程](../../guide/ui/ui.md)。
 
 假设自定义 UI 在 `packages-user/client-modules/src/render/ui` 文件夹下，我们需要引入 `transitioned` 接口，并调用它定义动画属性：
 

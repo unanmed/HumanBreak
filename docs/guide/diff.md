@@ -28,7 +28,7 @@ lang: zh-CN
 
 相比于 2.10.3 及 2.A，有如下改动：
 
-- [系统说明](./system)
-- [UI 编写](./ui)
-- [UI 系统](./ui/system)
-- [音频系统](./audio)
+- [系统说明](./system.md)
+- [UI 编写](./ui/ui.md)
+- [UI 系统](./ui/system.md)
+- [音频系统](./audio.md)

@@ -53,7 +53,7 @@ export function toggleSkill1() {
 import { getSkill1Enabled } from '../machanism/skill'; // [!code ++]
 
 export function calDamageWith(
-    info: UserEnemyInfo,
+    info: EnemyInfo,
     hero: Partial<HeroStatus>
 ): number | null {
     // ... 原有内容
@@ -241,7 +241,7 @@ export function getEnabledSkill() {
 import { getEnabledSkill, SkillType } from './skill';
 
 export function calDamageWith(
-    info: UserEnemyInfo,
+    info: EnemyInfo,
     hero: Partial<HeroStatus>
 ): number | null {
     // ... 原有内容
@@ -260,7 +260,7 @@ export function calDamageWith(
 import { getEnabledSkill, SkillType } from './skill';
 
 export function calDamageWith(
-    info: UserEnemyInfo,
+    info: EnemyInfo,
     hero: Partial<HeroStatus>
 ): number | null {
     // ... 原有内容

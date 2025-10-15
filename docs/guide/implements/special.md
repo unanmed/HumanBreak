@@ -26,13 +26,13 @@ export const specials: SpecialDeclaration[] = [
 
 ## 实现特殊属性
 
-打开 `packages-user/data-state/src/enemy/damage.ts`，在文件最后的 `calDamageWith` 函数中编写：
+打开 `packages-user/data-state/src/enemy/damage.ts`，在文件最后的 `calDamageWithTurn` 函数中编写：
 
 ```ts
-export function calDamageWith(
-    info: UserEnemyInfo,
+export function calDamageWithTurn(
+    info: EnemyInfo,
     hero: Partial<HeroStatus>
-): number | null {
+): DamageWithTurn {
     // ... 原有内容
 
     // 在需要降低勇士伤害的地方将勇士伤害乘以 0.9 即可
@@ -102,13 +102,13 @@ export const specials: SpecialDeclaration[] = [
 
 ### 属性实现
 
-修改 `damage.ts` `calDamageWith` 中的实现：
+修改 `damage.ts` `calDamageWithTurn` 中的实现：
 
 ```ts
-export function calDamageWith(
-    info: UserEnemyInfo,
+export function calDamageWithTurn(
+    info: EnemyInfo,
     hero: Partial<HeroStatus>
-): number | null {
+): DamageWithTurn {
     // ... 原有内容
 
     // 在乘以 1 - (myAttr / 100)，除以 100 是因为 myAttr 是百分制
@@ -210,10 +210,11 @@ class DamageEnemy {
 
 ### 自定义形状
 
-如果想要自定义光环形状，我们打开 `packages-user/data-utils/src/range.ts`，拉到最后可以看到形状定义，目前包含两个：
+如果想要自定义光环形状，我们打开 `packages-user/data-utils/src/range.ts`，拉到最后可以看到形状定义，目前默认的包含这些：
 
 - `square`: 中心点+边长的正方形
 - `rect`: 左上角坐标+宽高的矩形
+- `manhattan`: 曼哈顿距离，坐标之和小于半径
 
 我们以曼哈顿距离为例，展示如何自定义形状。
 
@@ -261,28 +262,4 @@ col.applyHalo(
         e.atkBuff_ += enemy.atkHalo;
     }
 );
-```
-
-## 拓展-输出回合数
-
-样板默认的 `calDamageWith` 函数只允许输出伤害值，而有时候我们可能会需要战斗的回合数，这时候我们需要修改一下这部分内容，将伤害计算逻辑单独提出来，命名为 `calDamageWithTurn`，然后在 `calDamageWith` 中调用它。在需要回合数的时候，我们调用 `calDamageWithTurn` 函数即可，如下例所示：
-
-```ts
-/** 包含回合数的伤害计算 */
-export function calDamageWithTurn(
-    info: UserEnemyInfo,
-    hero: Partial<HeroStatus>
-) {
-    // ... 原本 calDamageWith 的计算逻辑，记得删除最后返回伤害的那一行返回值
-
-    // 返回回合数和伤害
-    return { turn, damage };
-}
-
-export function calDamageWith(info: UserEnemyInfo, hero: Partial<HeroStatus>) {
-    // 调用单独提出的函数计算伤害值
-    const damageInfo = calDamageWithTurn(info, hero);
-    // 如果伤害不存在，那么返回无穷大
-    return damageInfo?.damage ?? Infinity;
-}
 ```
