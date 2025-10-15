@@ -43,7 +43,7 @@ events.prototype._startGame_start = function (hard, seed, route, callback) {
         core.firstData.hero,
         hard,
         null,
-        core.cloneArray(core.initStatus.maps)
+        core.clone(core.initStatus.maps)
     );
     core.setHeroLoc('x', -1);
     core.setHeroLoc('y', -1);
@@ -121,7 +121,6 @@ events.prototype._startGame_upload = function () {
 
 ////// 游戏获胜事件 //////
 events.prototype.win = function (reason, norank, noexit) {
-    if (!noexit) core.status.gameOver = true;
     return this.eventdata.win(reason, norank, noexit);
 };
 
@@ -131,7 +130,6 @@ events.prototype.lose = function (reason) {
         return core.control._replay_error(reason, function () {
             core.lose(reason);
         });
-    core.status.gameOver = true;
     return this.eventdata.lose(reason);
 };
 
@@ -188,7 +186,8 @@ events.prototype._gameOver_confirmUpload = function (ending, norank) {
             if (main.isCompetition)
                 core.events._gameOver_confirmDownload(ending);
             else core.events._gameOver_doUpload(null, ending, norank);
-        }
+        },
+        true
     );
 };
 
@@ -252,7 +251,8 @@ events.prototype._gameOver_confirmDownload = function (ending) {
         },
         function () {
             core.events._gameOver_askRate(ending);
-        }
+        },
+        true
     );
 };
 
@@ -285,7 +285,8 @@ events.prototype._gameOver_askRate = function (ending) {
             function () {
                 core.ui.closePanel();
                 core.restart();
-            }
+            },
+            true
         );
         return;
     }
@@ -302,7 +303,8 @@ events.prototype._gameOver_askRate = function (ending) {
         },
         function () {
             core.restart();
-        }
+        },
+        true
     );
 };
 
@@ -328,7 +330,8 @@ events.prototype.confirmRestart = function () {
         function () {
             core.playSound('取消');
             core.ui.closePanel();
-        }
+        },
+        true
     );
 };
 
@@ -1564,6 +1567,10 @@ events.prototype.__action_doAsyncFunc = function (isAsync, func) {
 };
 
 events.prototype._action_text = function (data) {
+    if (main.replayChecking) {
+        core.doAction();
+        return;
+    }
     if (this.__action_checkReplaying()) return;
     const Store = Mota.require('@user/client-modules').TextboxStore;
     const { textbox = 'main-textbox', text, icon = 'none', title = '' } = data;
@@ -1593,6 +1600,10 @@ events.prototype._action_text = function (data) {
 };
 
 events.prototype._action_autoText = function (data) {
+    if (main.replayChecking) {
+        core.doAction();
+        return;
+    }
     if (this.__action_checkReplaying()) return;
     const Store = Mota.require('@user/client-modules').TextboxStore;
     const { textbox = 'main-textbox', text, icon = 'none', title = '' } = data;
@@ -1639,6 +1650,10 @@ events.prototype._action__label = function (data, x, y, prefix) {
 };
 
 events.prototype._action_setText = function (data) {
+    if (main.replayChecking) {
+        core.doAction();
+        return;
+    }
     const isNil = value => value === null || value === void 0;
     const { textbox = 'main-textbox' } = data;
     const Store = Mota.require('@user/client-modules').TextboxStore;
@@ -1741,7 +1756,7 @@ events.prototype._action_confirm = function (data, x, y, prefix) {
 };
 
 events.prototype._action_choices = function (data, x, y, prefix) {
-    core.ui.drawChoices(
+    core.ui.drawChoices2(
         core.replaceText(data.text, prefix),
         data.choices,
         data.width
@@ -2277,13 +2292,14 @@ events.prototype._action_unloadEquip = function (data, x, y, prefix) {
 };
 
 events.prototype._action_openShop = function (data, x, y, prefix) {
-    Mota.require('@user/data-state').setShopVisited(data.id, true);
-    if (data.open) Mota.require('@user/data-state').openShop(data.id, true);
+    Mota.require('@user/legacy-plugin-data').setShopVisited(data.id, true);
+    if (data.open)
+        Mota.require('@user/legacy-plugin-data').openShop(data.id, true);
     core.doAction();
 };
 
 events.prototype._action_disableShop = function (data, x, y, prefix) {
-    Mota.require('@user/data-state').setShopVisited(data.id, false);
+    Mota.require('@user/legacy-plugin-data').setShopVisited(data.id, false);
     core.doAction();
 };
 

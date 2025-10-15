@@ -2228,7 +2228,7 @@ ui.prototype.textImage = function (content, lineHeight) {
 };
 
 ////// 绘制一个选项界面 //////
-ui.prototype.drawChoices = async function (content, choices, width) {
+ui.prototype.drawChoices2 = async function (content, choices, width, noRoute) {
     if (main.replayChecking) {
         const selected = (() => {
             const route = core.status.replay.toReplay[0];
@@ -2238,19 +2238,26 @@ ui.prototype.drawChoices = async function (content, choices, width) {
                 return Number(route.slice(8));
             }
         })();
+        core.status.replay.toReplay.shift();
         core.insertAction(choices[selected].action);
         core.doAction();
     } else {
-        const { routedChoices, mainUIController } = Mota.require(
-            '@user/client-modules'
-        );
+        const {
+            routedChoices,
+            getChoices,
+            mainUIController,
+            HALF_WIDTH,
+            HALF_HEIGHT,
+            POP_BOX_WIDTH
+        } = Mota.require('@user/client-modules');
         const choice = choices.map((v, i) => [i, v.text]);
-        const selected = await routedChoices(
+        const fn = noRoute ? getChoices : routedChoices;
+        const selected = await fn(
             mainUIController,
             choice,
-            [420, 240, void 0, void 0, 0.5, 0.5],
-            width,
-            { title: content ?? '' }
+            [HALF_WIDTH, HALF_HEIGHT, void 0, void 0, 0.5, 0.5],
+            width ?? POP_BOX_WIDTH,
+            { text: content ?? '' }
         );
         core.insertAction(choices[selected].action);
         core.doAction();
@@ -2278,7 +2285,7 @@ ui.prototype.drawConfirmBox = async function (
     text,
     yesCallback,
     noCallback,
-    ctx
+    noRoute
 ) {
     if (main.replayChecking) {
         const confirm = (() => {
@@ -2289,20 +2296,27 @@ ui.prototype.drawConfirmBox = async function (
                 return Number(route.slice(8)) === 1;
             }
         })();
+        core.status.replay.toReplay.shift();
         if (confirm) {
             yesCallback?.();
         } else {
             noCallback?.();
         }
     } else {
-        const { routedConfirm, mainUIController } = Mota.require(
-            '@user/client-modules'
-        );
-        const confirm = await routedConfirm(
+        const {
+            routedConfirm,
+            getConfirm,
+            mainUIController,
+            HALF_WIDTH,
+            HALF_HEIGHT,
+            POP_BOX_WIDTH
+        } = Mota.require('@user/client-modules');
+        const fn = noRoute ? getConfirm : routedConfirm;
+        const confirm = await fn(
             mainUIController,
             text,
-            [420, 240, void 0, void 0, 0.5, 0.5],
-            240
+            [HALF_WIDTH, HALF_HEIGHT, void 0, void 0, 0.5, 0.5],
+            POP_BOX_WIDTH
         );
         if (confirm) {
             yesCallback?.();
@@ -2361,7 +2375,7 @@ ui.prototype._drawQuickShop = function () {
         };
     });
     choices.push('返回游戏');
-    this.drawChoices(null, choices);
+    this.drawChoices(null, choices, void 0, true);
 };
 
 ui.prototype._drawSyncSave = function () {

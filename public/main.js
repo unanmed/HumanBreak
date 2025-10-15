@@ -109,7 +109,7 @@ function main() {
     this.canvas = {};
 
     this.__VERSION__ = '2.10.0';
-    this.__VERSION_CODE__ = 510;
+    this.__VERSION_CODE__ = 610;
 }
 // >>>> body end
 
@@ -183,15 +183,12 @@ main.prototype.loadSync = function (mode, callback) {
         coreData[t] = main[t];
     });
 
-    core.initSync(coreData, callback);
+    core.initSync(coreData, () => {});
     main.loading.emit('coreInit');
-    core.initStatus.maps = core.maps._initMaps();
     core.resize();
     main.core = core;
 
-    core.completeAchievement = () => 0;
-
-    core.plugin = { drawLight: 0 };
+    callback?.();
 };
 
 main.prototype.loadAsync = async function (mode, callback) {
