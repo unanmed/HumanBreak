@@ -225,7 +225,7 @@ interface LevelChooseEvent {
     /**
      * 难度的颜色
      */
-    color: RGBArray;
+    color?: RGBArray;
 
     /**
      * 选择该难度时执行的事件
