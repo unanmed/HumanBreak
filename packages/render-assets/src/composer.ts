@@ -399,7 +399,7 @@ export class TextureMaxRectsWebGL2Composer<T>
 
             // prettier-ignore
             const data = [
-            //  x   y           u   v   i
+            //  x   y        u   v   i
                 ol, -ot,     tl, tt, ti, // 左上角
                 ol, -ob,     tl, tb, ti, // 左下角
                 or, -ot,     tr, tt, ti, // 右上角

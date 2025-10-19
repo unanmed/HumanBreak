@@ -42,7 +42,7 @@ export interface ITextureComposer<T, C, I> {
     compose(
         input: Iterable<ITexture>,
         data: T
-    ): Generator<ITextureComposedData<C, I>>;
+    ): Generator<ITextureComposedData<C, I>, void>;
 }
 
 export interface ITextureSplitter<T> {
@@ -51,7 +51,7 @@ export interface ITextureSplitter<T> {
      * @param texture 要拆分的贴图
      * @param data 传给拆分器的参数
      */
-    split(texture: ITexture, data: T): Generator<ITexture>;
+    split(texture: ITexture, data: T): Generator<ITexture, void>;
 }
 
 export interface ITextureAnimater<T, I> {
@@ -69,13 +69,13 @@ export interface ITextureAnimater<T, I> {
      * 开始动画序列
      * @param init 动画初始化参数
      */
-    open(init: I): Generator<ITextureListedRenderable> | null;
+    open(init: I): Generator<ITextureListedRenderable, void> | null;
 
     /**
      * 开始循环动画序列
      * @param init 动画初始化参数
      */
-    cycled(init: I): Generator<ITextureListedRenderable> | null;
+    cycled(init: I): Generator<ITextureListedRenderable, void> | null;
 }
 
 export interface ITexture<T = unknown, A = unknown> {
@@ -117,13 +117,13 @@ export interface ITexture<T = unknown, A = unknown> {
      * 获取一系列动画可渲染对象，不循环，按帧数依次排列
      * @param data 传递给动画控制器的初始化参数
      */
-    dynamic(data: A): Generator<ITextureListedRenderable> | null;
+    dynamic(data: A): Generator<ITextureListedRenderable, void> | null;
 
     /**
      * 获取无限循环的动画可渲染对象
      * @param data 传递给动画控制器的初始化参数
      */
-    cycled(data: A): Generator<ITextureListedRenderable> | null;
+    cycled(data: A): Generator<ITextureListedRenderable, void> | null;
 
     /**
      * 释放此贴图的资源，将不能再被使用
