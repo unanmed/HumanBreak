@@ -125,8 +125,8 @@ export interface IAnimaterTranslatedInit<T> {
     readonly rect: Readonly<IRect>;
     /** 传递给原先的动画控制器的参数 */
     readonly data: T;
-    /** 原先的动画控制器 */
-    readonly animate: ITextureAnimater<unknown, T>;
+    /** 原本所属的纹理 */
+    readonly texture: ITexture<unknown, T>;
 }
 
 type AdderImplements<T> = ITextureAnimater<void, IAnimaterTranslatedInit<T>>;
@@ -172,8 +172,8 @@ export class TextureAnimaterTranslated<T> implements AdderImplements<T> {
     open(
         init: IAnimaterTranslatedInit<T>
     ): Generator<ITextureListedRenderable> | null {
-        const ani = init.animate.open(init.data);
-        const origin = init.animate.texture?.static().rect;
+        const ani = init.texture.dynamic(init.data);
+        const origin = init.texture.static().rect;
         if (!ani || !origin) return null;
         return this.output(ani, origin, init.rect);
     }
@@ -181,8 +181,8 @@ export class TextureAnimaterTranslated<T> implements AdderImplements<T> {
     cycled(
         init: IAnimaterTranslatedInit<T>
     ): Generator<ITextureListedRenderable> | null {
-        const ani = init.animate.cycled(init.data);
-        const origin = init.animate.texture?.static().rect;
+        const ani = init.texture.cycled(init.data);
+        const origin = init.texture.static().rect;
         if (!ani || !origin) return null;
         return this.output(ani, origin, init.rect);
     }
