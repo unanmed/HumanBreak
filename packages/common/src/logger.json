@@ -97,6 +97,14 @@
         "63": "Uncaught promise error in waiting box component. Error reason: $1",
         "64": "Text node type and block type mismatch: '$1' vs '$2'",
         "65": "Cannot bind a weather controller twice.",
+        "66": "Texture identifier repeated: $1",
+        "67": "Cannot set alias '$1' for texture $2, since there is already an alias '$3' for it.",
+        "68": "Cannot set alias '$1' for texture $2, since '$1' is already an alias for $3.",
+        "69": "Clip totally exceeds texture's dimensions, no operation will be alppied.",
+        "70": "An TextureAnimater can only be created once.",
+        "71": "Cannot start animate when animater not created on texture.",
+        "72": "Frame count delivered to frame-based animater need to exactly divide texture's height.",
+        "73": "Consistent size is needed when using WebGL2 composer.",
         "1001": "Item-detail extension needs 'floor-binder' and 'floor-damage' extension as dependency.",
         "1101": "Cannot add new effect to point effect instance, for there's no more reserve space for it. Please increase the max count of the instance."
     }

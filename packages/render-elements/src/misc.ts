@@ -5,12 +5,11 @@ import {
     Transform,
     MotaOffscreenCanvas2D
 } from '@motajs/render-core';
+import { CanvasStyle } from '@motajs/render-assets';
 import { Font } from '@motajs/render-style';
 
 /** 文字的安全填充，会填充在文字的上侧和下侧，防止削顶和削底 */
 const SAFE_PAD = 1;
-
-type CanvasStyle = string | CanvasGradient | CanvasPattern;
 
 export interface ETextEvent extends ERenderItemEvent {
     setText: [text: string, width: number, height: number];

@@ -1,6 +1,6 @@
 import { MotaOffscreenCanvas2D } from '@motajs/render-core';
 import { CloudLike } from './cloudLike';
-import { SizedCanvasImageSource } from '@motajs/render-core';
+import { SizedCanvasImageSource } from '@motajs/render-assets';
 
 export class FogWeather extends CloudLike {
     /** 雾天气的图像比较小，因此将四个进行合并 */

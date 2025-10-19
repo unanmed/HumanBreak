@@ -2,9 +2,9 @@ import {
     Transform,
     ERenderItemEvent,
     RenderItem,
-    MotaOffscreenCanvas2D,
-    CanvasStyle
+    MotaOffscreenCanvas2D
 } from '@motajs/render-core';
+import { CanvasStyle } from '@motajs/render-assets';
 import { logger } from '@motajs/common';
 import { clamp, isEqual, isNil } from 'lodash-es';
 

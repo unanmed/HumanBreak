@@ -1,6 +1,6 @@
 import { MotaOffscreenCanvas2D, Sprite } from '@motajs/render-core';
 import { Weather } from '../weather';
-import { SizedCanvasImageSource } from '@motajs/render-core';
+import { SizedCanvasImageSource } from '@motajs/render-assets';
 
 export abstract class CloudLike extends Weather<Sprite> {
     /** 不透明度 */

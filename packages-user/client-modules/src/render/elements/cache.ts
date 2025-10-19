@@ -1,8 +1,6 @@
 import { logger } from '@motajs/common';
-import {
-    MotaOffscreenCanvas2D,
-    SizedCanvasImageSource
-} from '@motajs/render-core';
+import { MotaOffscreenCanvas2D } from '@motajs/render-core';
+import { SizedCanvasImageSource } from '@motajs/render-assets';
 
 // 经过测试（https://www.measurethat.net/Benchmarks/Show/30741/1/drawimage-img-vs-canvas-vs-bitmap-cropping-fix-loading）
 // 得出结论，ImageBitmap和Canvas的绘制性能不如Image，于是直接画Image就行，所以缓存基本上就是存Image

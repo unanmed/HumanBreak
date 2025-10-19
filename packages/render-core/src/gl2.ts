@@ -4,7 +4,7 @@ import { MotaOffscreenCanvas2D } from './canvas2d';
 import { ERenderItemEvent, RenderItem, RenderItemPosition } from './item';
 import { Transform } from './transform';
 import { isWebGL2Supported } from './utils';
-import { SizedCanvasImageSource } from './types';
+import { SizedCanvasImageSource } from '@motajs/render-assets';
 
 export interface IGL2ProgramPrefix {
     readonly VERTEX: string;

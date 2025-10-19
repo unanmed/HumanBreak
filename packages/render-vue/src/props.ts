@@ -7,9 +7,9 @@ import {
     ElementLocator,
     ElementScale,
     CustomContainerRenderFn,
-    CustomContainerPropagateFn,
-    CanvasStyle
+    CustomContainerPropagateFn
 } from '@motajs/render-core';
+import { CanvasStyle } from '@motajs/render-assets';
 import {
     BezierParams,
     CircleParams,

@@ -4,6 +4,7 @@
         "@motajs/client-base": "workspace:*",
         "@motajs/common": "workspace:*",
         "@motajs/render": "workspace:*",
+        "@motajs/render-assets": "workspace:*",
         "@motajs/render-core": "workspace:*",
         "@motajs/legacy-common": "workspace:*",
         "@motajs/legacy-ui": "workspace:*",

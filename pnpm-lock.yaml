@@ -44,6 +44,9 @@ importers:
       lz-string:
         specifier: ^1.5.0
         version: 1.5.0
+      maxrects-packer:
+        specifier: ^2.7.3
+        version: 2.7.3
       mutate-animate:
         specifier: ^1.4.2
         version: 1.4.2
@@ -480,11 +483,16 @@ importers:
         specifier: ^3.5.13
         version: 3.5.20(typescript@5.9.2)
 
+  packages/render-assets: {}
+
   packages/render-core:
     dependencies:
       '@motajs/common':
         specifier: workspace:*
         version: link:../common
+      '@motajs/render-assets':
+        specifier: workspace:*
+        version: link:../render-assets
 
   packages/render-elements:
     dependencies:
@@ -4512,6 +4520,9 @@ packages:
 
   mathjax-full@3.2.2:
     resolution: {integrity: sha512-+LfG9Fik+OuI8SLwsiR02IVdjcnRCy5MufYLi0C3TdMT56L/pjB0alMVGgoWJF8pN9Rc7FESycZB9BMNWIid5w==}
+
+  maxrects-packer@2.7.3:
+    resolution: {integrity: sha512-bG6qXujJ1QgttZVIH4WDanhoJtvbud/xP/XPyf6A69C9RdA61BM4TomFALCq2nrTa+tARRIBB4LuIFsnUQU2wA==}
 
   mdast-util-to-hast@13.2.0:
     resolution: {integrity: sha512-QGYKEuUsYT9ykKBCMOEDLsU5JRObWQusAolFMeko/tYPufNkRffBAQjIE+99jbA87xv6FgmjLtwjh9wBWajwAA==}
@@ -10721,6 +10732,8 @@ snapshots:
       mhchemparser: 4.2.1
       mj-context-menu: 0.6.1
       speech-rule-engine: 4.1.2
+
+  maxrects-packer@2.7.3: {}
 
   mdast-util-to-hast@13.2.0:
     dependencies:
