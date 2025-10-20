@@ -21,7 +21,7 @@ import { isNil } from 'lodash-es';
 
 interface IndexMarkedComposedData {
     /** 组合数据 */
-    readonly data: ITextureComposedData;
+    readonly asset: ITextureComposedData;
     /** 组合时最后一个用到的贴图的索引 */
     readonly index: number;
 }
@@ -33,75 +33,37 @@ type TranslatedComposer<D, T> = ITextureComposer<
 >;
 
 export interface IGridComposerData {
-    /** 单张图集的最大宽度 */
-    readonly maxWidth: number;
-    /** 单张图集的最大高度 */
-    readonly maxHeight: number;
     /** 单个贴图的宽度，与之不同的贴图将会被剔除并警告 */
     readonly width: number;
     /** 单个贴图的宽度，与之不同的贴图将会被剔除并警告 */
     readonly height: number;
 }
 
-interface GridNeededSize {
-    /** 图集宽度 */
-    readonly width: number;
-    /** 图集高度 */
-    readonly height: number;
-    /** 一共有多少行 */
-    readonly rows: number;
-    /** 一共有多少列 */
-    readonly cols: number;
-}
-
-/**
- * 网格组合器，将等大小的贴图组合成图集，要求每个贴图的尺寸一致。
- * 组合时按照先从左到右，再从上到下的顺序组合。
- */
 export class TextureGridComposer<T>
     implements TranslatedComposer<IGridComposerData, T>
 {
-    private getNeededSize(
-        tex: ITexture[],
-        start: number,
-        data: IGridComposerData
-    ): GridNeededSize {
-        const maxRows = Math.floor(data.maxWidth / data.width);
-        const maxCols = Math.floor(data.maxHeight / data.height);
-        const rest = tex.length - start;
-        if (rest >= maxRows * maxCols) {
-            const size: GridNeededSize = {
-                width: data.maxWidth,
-                height: data.maxHeight,
-                rows: maxRows,
-                cols: maxCols
-            };
-            return size;
-        } else {
-            const aspect = data.height / data.width;
-            const cols = Math.ceil(Math.sqrt(rest * aspect));
-            const rows = Math.ceil(rest / cols);
-            const size: GridNeededSize = {
-                width: cols * data.width,
-                height: rows * data.height,
-                rows,
-                cols
-            };
-            return size;
-        }
-    }
+    /**
+     * 网格组合器，将等大小的贴图组合成图集，要求每个贴图的尺寸一致。
+     * 组合时按照先从左到右，再从上到下的顺序组合。
+     * @param maxWidth 图集最大宽度，也是输出纹理的宽度
+     * @param maxHeight 图集最大高度，也是输出纹理的高度
+     */
+    constructor(
+        readonly maxWidth: number,
+        readonly maxHeight: number
+    ) {}
 
     private nextAsset(
         tex: ITexture[],
         start: number,
-        data: IGridComposerData
+        data: IGridComposerData,
+        rows: number,
+        cols: number
     ): IndexMarkedComposedData {
-        const size = this.getNeededSize(tex, start, data);
-        const { width, height, rows, cols } = size;
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d')!;
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = this.maxWidth;
+        canvas.height = this.maxHeight;
 
         const count = Math.min(rows * cols, tex.length - start);
         const map = new Map<ITexture, IRect>();
@@ -131,7 +93,7 @@ export class TextureGridComposer<T>
             assetMap: map
         };
 
-        return { data: composed, index: start + count };
+        return { asset: composed, index: start + count };
     }
 
     *compose(
@@ -140,10 +102,13 @@ export class TextureGridComposer<T>
     ): Generator<ITextureComposedData> {
         const arr = [...input];
 
+        const rows = Math.floor(this.maxWidth / data.width);
+        const cols = Math.floor(this.maxHeight / data.height);
+
         let i = 0;
 
         while (i < arr.length) {
-            const { data: asset, index } = this.nextAsset(arr, i, data);
+            const { asset, index } = this.nextAsset(arr, i, data, rows, cols);
             i = index + 1;
             yield asset;
         }
@@ -160,13 +125,15 @@ interface MaxRectsRectangle extends IRectangle {
     readonly data: ITexture;
 }
 
-/**
- * 使用 Max Rects 算法执行贴图整合，输入数据参考 {@link IMaxRectsComposerData}，
- * 输出的纹理的图像源将会是不同的画布，注意与 {@link TextureMaxRectsWebGL2Composer} 区分
- */
 export class TextureMaxRectsComposer<T>
     implements TranslatedComposer<IMaxRectsComposerData, T>
 {
+    /**
+     * 使用 Max Rects 算法执行贴图整合，输入数据参考 {@link IMaxRectsComposerData}，
+     * 输出的纹理的图像源将会是不同的画布，注意与 {@link TextureMaxRectsWebGL2Composer} 区分
+     * @param maxWidth 图集最大宽度，也是输出纹理的宽度
+     * @param maxHeight 图集最大高度，也是输出纹理的高度
+     */
     constructor(
         public readonly maxWidth: number,
         public readonly maxHeight: number
@@ -195,8 +162,8 @@ export class TextureMaxRectsComposer<T>
             const map = new Map<ITexture, IRect>();
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d')!;
-            canvas.width = bin.width;
-            canvas.height = bin.height;
+            canvas.width = this.maxWidth;
+            canvas.height = this.maxHeight;
             ctx.imageSmoothingEnabled = false;
             bin.rects.forEach(v => {
                 const rect: IRect = { x: v.x, y: v.y, w: v.width, h: v.height };
@@ -226,12 +193,6 @@ interface RectProcessed {
     readonly attrib: Float32Array;
 }
 
-/**
- * 使用 Max Rects 算法执行贴图整合，输入数据参考 {@link IMaxRectsComposerData}，
- * 要求每个贴图的图像源尺寸一致，贴图大小可以不同。
- * 注意，本组合器同时只能处理一个组合操作，上一个没执行完的时候再次调用 `compose` 会出现问题。
- * 所有输出的内容中，贴图对象的图像源都是同一个画布，因此获取后要么直接使用，要么立刻调用 `toBitmap`
- */
 export class TextureMaxRectsWebGL2Composer<T>
     implements TranslatedComposer<IMaxRectsComposerData, T>
 {
@@ -257,6 +218,15 @@ export class TextureMaxRectsWebGL2Composer<T>
     /** 本次处理的贴图高度 */
     private opHeight: number = 0;
 
+    /**
+     * 使用 Max Rects 算法执行贴图整合，使用 WebGL2 执行组合操作。
+     * 输入数据参考 {@link IMaxRectsComposerData}，要求每个贴图的图像源尺寸一致，贴图大小可以不同。
+     * 注意，本组合器同时只能处理一个组合操作，上一个没执行完的时候再次调用 `compose` 会出现问题。
+     * 所有输出的内容中，贴图对象的图像源都是同一个画布，因此获取后要么直接使用，要么立刻调用 `toBitmap`,
+     * 否则在下一次调用 `next` 时，图像源将会被覆盖。
+     * @param maxWidth 图集最大宽度，也是输出纹理的宽度
+     * @param maxHeight 图集最大高度，也是输出纹理的高度
+     */
     constructor(
         public readonly maxWidth: number,
         public readonly maxHeight: number

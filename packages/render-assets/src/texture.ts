@@ -50,7 +50,7 @@ export class Texture<T = unknown, A = unknown> implements ITexture<T, A> {
 
     async toBitmap(): Promise<void> {
         if (this.source instanceof ImageBitmap) return;
-        this.source = await createImageBitmap(this.source as any);
+        this.source = await createImageBitmap(this.source);
     }
 
     split<U>(splitter: ITextureSplitter<U>, data: U): Generator<ITexture> {
