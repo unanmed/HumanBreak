@@ -13,6 +13,9 @@ import { RequiredData, RequiredIconsData, ResourceType } from './types';
 import { splitResource, SplittedResource } from './build-resource';
 import { formatSize } from './utils';
 
+/** 打包调试 */
+const DEBUG_BUILD = false;
+/** 录像验证调试 */
 const DEBUG_REPLAY = false;
 
 const ansi = {
@@ -52,6 +55,7 @@ async function buildClient(outDir: string) {
         build: {
             outDir,
             copyPublicDir: true,
+            minify: !DEBUG_BUILD,
             rollupOptions: {
                 external: ['@wasm-audio-decoders/opus-ml'],
                 output: {
