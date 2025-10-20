@@ -559,7 +559,7 @@ async function doDeclaration(type: string, data: string) {
             num2id += '}';
             await writeFile('src/types/source/cls.d.ts', id2cls, 'utf-8');
             await writeFile(
-                'src/source/maps.d.ts',
+                'src/types/source/maps.d.ts',
                 `${id2num}\n${num2id}`,
                 'utf-8'
             );
