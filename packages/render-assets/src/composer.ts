@@ -55,7 +55,8 @@ interface GridNeededSize {
 }
 
 /**
- * 网格组合器，将等大小的贴图组合成图集，要求每个贴图的尺寸一致
+ * 网格组合器，将等大小的贴图组合成图集，要求每个贴图的尺寸一致。
+ * 组合时按照先从左到右，再从上到下的顺序组合。
  */
 export class TextureGridComposer<T>
     implements TranslatedComposer<IGridComposerData, T>

@@ -12,18 +12,11 @@ export interface IRect {
     h: number;
 }
 
-export interface ITextureSingleRenderable {
+export interface ITextureRenderable {
     /** 可渲染贴图对象的图像源 */
     readonly source: SizedCanvasImageSource;
     /** 贴图裁剪区域 */
     readonly rect: Readonly<IRect>;
-}
-
-export interface ITextureListedRenderable {
-    /** 可渲染贴图对象的图像源 */
-    readonly source: SizedCanvasImageSource;
-    /** 贴图裁剪区域 */
-    readonly rect: Readonly<IRect>[];
 }
 
 export interface ITextureComposedData<T = unknown, A = unknown> {
@@ -69,13 +62,13 @@ export interface ITextureAnimater<T, I> {
      * 开始动画序列
      * @param init 动画初始化参数
      */
-    open(init: I): Generator<ITextureListedRenderable, void> | null;
+    open(init: I): Generator<ITextureRenderable, void> | null;
 
     /**
      * 开始循环动画序列
      * @param init 动画初始化参数
      */
-    cycled(init: I): Generator<ITextureListedRenderable, void> | null;
+    cycled(init: I): Generator<ITextureRenderable, void> | null;
 }
 
 export interface ITexture<T = unknown, A = unknown> {
@@ -111,19 +104,19 @@ export interface ITexture<T = unknown, A = unknown> {
     /**
      * 获取整张图的可渲染对象
      */
-    static(): ITextureSingleRenderable;
+    static(): ITextureRenderable;
 
     /**
      * 获取一系列动画可渲染对象，不循环，按帧数依次排列
      * @param data 传递给动画控制器的初始化参数
      */
-    dynamic(data: A): Generator<ITextureListedRenderable, void> | null;
+    dynamic(data: A): Generator<ITextureRenderable, void> | null;
 
     /**
      * 获取无限循环的动画可渲染对象
      * @param data 传递给动画控制器的初始化参数
      */
-    cycled(data: A): Generator<ITextureListedRenderable, void> | null;
+    cycled(data: A): Generator<ITextureRenderable, void> | null;
 
     /**
      * 释放此贴图的资源，将不能再被使用

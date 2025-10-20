@@ -105,6 +105,7 @@
         "71": "Cannot start animate when animater not created on texture.",
         "72": "Frame count delivered to frame-based animater need to exactly divide texture's height.",
         "73": "Consistent size is needed when using WebGL2 composer.",
+        "74": "Frame size not match texture's size, incomplete data will be skipped.",
         "1001": "Item-detail extension needs 'floor-binder' and 'floor-damage' extension as dependency.",
         "1101": "Cannot add new effect to point effect instance, for there's no more reserve space for it. Please increase the max count of the instance."
     }

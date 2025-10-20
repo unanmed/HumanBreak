@@ -1,10 +1,5 @@
 import { logger } from '@motajs/common';
-import {
-    IRect,
-    ITexture,
-    ITextureAnimater,
-    ITextureListedRenderable
-} from './types';
+import { IRect, ITexture, ITextureAnimater, ITextureRenderable } from './types';
 
 /**
  * 基于帧的动画控制器，创建时传入的参数代表帧数，生成动画时传入的参数自定义
@@ -41,31 +36,31 @@ export abstract class FrameBasedAnimater<T>
         return true;
     }
 
-    abstract open(init: T): Generator<ITextureListedRenderable> | null;
+    abstract open(init: T): Generator<ITextureRenderable> | null;
 
-    abstract cycled(init: T): Generator<ITextureListedRenderable> | null;
+    abstract cycled(init: T): Generator<ITextureRenderable> | null;
 }
 
 /**
  * 行动画控制器，将贴图按照从上到下的顺序依次组成帧动画，创建时传入的参数代表帧数
  */
 export class TextureRowAnimater extends FrameBasedAnimater<void> {
-    *open(): Generator<ITextureListedRenderable> | null {
+    *open(): Generator<ITextureRenderable> | null {
         if (!this.check()) return null;
         const renderable = this.texture!.static();
         const { x: ox, y: oy } = renderable.rect;
         const { width: w, height } = this.texture!;
         const h = height / this.frames;
         for (let i = 0; i < this.frames; i++) {
-            const renderable: ITextureListedRenderable = {
+            const renderable: ITextureRenderable = {
                 source: this.texture!.source,
-                rect: [{ x: ox, y: i * h + oy, w, h }]
+                rect: { x: ox, y: i * h + oy, w, h }
             };
             yield renderable;
         }
     }
 
-    *cycled(): Generator<ITextureListedRenderable> | null {
+    *cycled(): Generator<ITextureRenderable> | null {
         if (!this.check()) return null;
         const renderable = this.texture!.static();
         const { x: ox, y: oy } = renderable.rect;
@@ -74,9 +69,9 @@ export class TextureRowAnimater extends FrameBasedAnimater<void> {
         let i = 0;
         while (true) {
             if (i === this.frames) i = 0;
-            const renderable: ITextureListedRenderable = {
+            const renderable: ITextureRenderable = {
                 source: this.texture!.source,
-                rect: [{ x: ox, y: i * h + oy, w, h }]
+                rect: { x: ox, y: i * h + oy, w, h }
             };
             yield renderable;
         }
@@ -87,22 +82,22 @@ export class TextureRowAnimater extends FrameBasedAnimater<void> {
  * 列动画控制器，将贴图按照从左到右的顺序依次组成帧动画，创建时传入的参数代表帧数
  */
 export class TextureColumnAnimater extends FrameBasedAnimater<void> {
-    *open(): Generator<ITextureListedRenderable> | null {
+    *open(): Generator<ITextureRenderable> | null {
         if (!this.check()) return null;
         const renderable = this.texture!.static();
         const { x: ox, y: oy } = renderable.rect;
         const { width, height: h } = this.texture!;
         const w = width / this.frames;
         for (let i = 0; i < this.frames; i++) {
-            const renderable: ITextureListedRenderable = {
+            const renderable: ITextureRenderable = {
                 source: this.texture!.source,
-                rect: [{ x: i * width + ox, y: oy, w, h }]
+                rect: { x: i * width + ox, y: oy, w, h }
             };
             yield renderable;
         }
     }
 
-    *cycled(): Generator<ITextureListedRenderable> | null {
+    *cycled(): Generator<ITextureRenderable> | null {
         if (!this.check()) return null;
         const renderable = this.texture!.static();
         const { x: ox, y: oy } = renderable.rect;
@@ -111,12 +106,89 @@ export class TextureColumnAnimater extends FrameBasedAnimater<void> {
         let i = 0;
         while (true) {
             if (i === this.frames) i = 0;
-            const renderable: ITextureListedRenderable = {
+            const renderable: ITextureRenderable = {
                 source: this.texture!.source,
-                rect: [{ x: i * w + ox, y: oy, w, h }]
+                rect: { x: i * w + ox, y: oy, w, h }
             };
             yield renderable;
         }
+    }
+}
+
+export interface IScanAnimaterCreate {
+    /** 每帧的宽度 */
+    readonly width: number;
+    /** 每帧的高度 */
+    readonly height: number;
+    /** 总帧数 */
+    readonly frames: number;
+}
+
+/**
+ * 扫描动画控制器，会按照先从左到右，再从上到下的顺序依次输出，可以用于动画精灵图等
+ */
+export class TextureScanAnimater
+    implements ITextureAnimater<IScanAnimaterCreate, void>
+{
+    texture: ITexture<IScanAnimaterCreate, void> | null = null;
+
+    private width: number = 0;
+    private height: number = 0;
+
+    private frames: number = 0;
+    private frameX: number = 0;
+    private frameY: number = 0;
+
+    create(texture: ITexture, data: IScanAnimaterCreate): void {
+        if (this.texture) {
+            logger.warn(70);
+            return;
+        }
+        this.texture = texture;
+
+        this.width = data.width;
+        this.height = data.height;
+        this.frames = data.frames;
+
+        // 如果尺寸不匹配
+        if (
+            texture.width % data.width !== 0 ||
+            texture.height % data.height !== 0
+        ) {
+            logger.warn(74);
+        }
+
+        const frameX = Math.floor(texture.width / data.width);
+        const frameY = Math.floor(texture.height / data.height);
+        const possibleFrames = frameX * frameY;
+
+        // 如果传入的帧数超出了可能的帧数上限
+        if (this.frames > possibleFrames) {
+            this.frames = possibleFrames;
+        }
+    }
+
+    *open(): Generator<ITextureRenderable, void> | null {
+        const texture = this.texture;
+        if (!texture) return null;
+
+        const w = this.width;
+        const h = this.height;
+
+        for (let y = 0; y < this.frameY; y++) {
+            for (let x = 0; x < this.frameX; x++) {
+                const rect: IRect = { x: x * w, y: y * h, w, h };
+                const data: ITextureRenderable = {
+                    source: texture.source,
+                    rect
+                };
+                yield data;
+            }
+        }
+    }
+
+    cycled(): Generator<ITextureRenderable, void> | null {
+        throw new Error('Method not implemented.');
     }
 }
 
@@ -141,11 +213,15 @@ export class TextureAnimaterTranslated<T> implements AdderImplements<T> {
     texture: AdderTexture<T> | null = null;
 
     create(texture: ITexture): void {
+        if (this.texture) {
+            logger.warn(70);
+            return;
+        }
         this.texture = texture;
     }
 
     *output(
-        ani: Generator<ITextureListedRenderable>,
+        ani: Generator<ITextureRenderable>,
         origin: Readonly<IRect>,
         rect: Readonly<IRect>
     ) {
@@ -157,13 +233,11 @@ export class TextureAnimaterTranslated<T> implements AdderImplements<T> {
             const next = ani.next();
             if (next.done) break;
             const renderable = next.value;
-            const list: IRect[] = [];
-            renderable.rect.forEach(({ x, y, w, h }) => {
-                list.push({ x: x - ox + nx, y: y - oy + ny, w, h });
-            });
-            const res: ITextureListedRenderable = {
+            const { x, y, w, h } = renderable.rect;
+            const translated: IRect = { x: x - ox + nx, y: y - oy + ny, w, h };
+            const res: ITextureRenderable = {
                 source,
-                rect: list
+                rect: translated
             };
             yield res;
         }
@@ -171,7 +245,7 @@ export class TextureAnimaterTranslated<T> implements AdderImplements<T> {
 
     open(
         init: IAnimaterTranslatedInit<T>
-    ): Generator<ITextureListedRenderable> | null {
+    ): Generator<ITextureRenderable> | null {
         const ani = init.texture.dynamic(init.data);
         const origin = init.texture.static().rect;
         if (!ani || !origin) return null;
@@ -180,7 +254,7 @@ export class TextureAnimaterTranslated<T> implements AdderImplements<T> {
 
     cycled(
         init: IAnimaterTranslatedInit<T>
-    ): Generator<ITextureListedRenderable> | null {
+    ): Generator<ITextureRenderable> | null {
         const ani = init.texture.cycled(init.data);
         const origin = init.texture.static().rect;
         if (!ani || !origin) return null;

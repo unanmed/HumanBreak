@@ -2,8 +2,7 @@ import { logger } from '@motajs/common';
 import {
     ITexture,
     ITextureAnimater,
-    ITextureListedRenderable,
-    ITextureSingleRenderable,
+    ITextureRenderable,
     ITextureSplitter,
     SizedCanvasImageSource
 } from './types';
@@ -63,20 +62,20 @@ export class Texture<T = unknown, A = unknown> implements ITexture<T, A> {
         animater.create(this, data);
     }
 
-    static(): ITextureSingleRenderable {
-        const renderable: ITextureSingleRenderable = {
+    static(): ITextureRenderable {
+        const renderable: ITextureRenderable = {
             source: this.source,
             rect: { x: this.cx, y: this.cy, w: this.width, h: this.height }
         };
         return renderable;
     }
 
-    dynamic(data: A): Generator<ITextureListedRenderable> | null {
+    dynamic(data: A): Generator<ITextureRenderable> | null {
         if (!this.animater) return null;
         return this.animater.open(data);
     }
 
-    cycled(data: A): Generator<ITextureListedRenderable> | null {
+    cycled(data: A): Generator<ITextureRenderable> | null {
         if (!this.animater) return null;
         return this.animater.cycled(data);
     }
