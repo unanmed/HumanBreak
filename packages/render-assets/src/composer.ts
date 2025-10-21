@@ -4,7 +4,6 @@ import {
     MaxRectsPacker,
     Rectangle
 } from 'maxrects-packer';
-import { IAnimaterTranslatedInit, TextureAnimaterTranslated } from './animater';
 import { Texture } from './texture';
 import {
     IRect,
@@ -26,12 +25,6 @@ interface IndexMarkedComposedData {
     readonly index: number;
 }
 
-type TranslatedComposer<D, T> = ITextureComposer<
-    D,
-    void,
-    IAnimaterTranslatedInit<T>
->;
-
 export interface IGridComposerData {
     /** 单个贴图的宽度，与之不同的贴图将会被剔除并警告 */
     readonly width: number;
@@ -39,8 +32,8 @@ export interface IGridComposerData {
     readonly height: number;
 }
 
-export class TextureGridComposer<T>
-    implements TranslatedComposer<IGridComposerData, T>
+export class TextureGridComposer
+    implements ITextureComposer<IGridComposerData>
 {
     /**
      * 网格组合器，将等大小的贴图组合成图集，要求每个贴图的尺寸一致。
@@ -85,9 +78,7 @@ export class TextureGridComposer<T>
             }
         }
 
-        const texture = new Texture<void, IAnimaterTranslatedInit<T>>(canvas);
-        texture.animated(new TextureAnimaterTranslated(), void 0);
-
+        const texture = new Texture(canvas);
         const composed: ITextureComposedData = {
             texture,
             assetMap: map
@@ -99,7 +90,7 @@ export class TextureGridComposer<T>
     *compose(
         input: Iterable<ITexture>,
         data: IGridComposerData
-    ): Generator<ITextureComposedData> {
+    ): Generator<ITextureComposedData, void> {
         const arr = [...input];
 
         const rows = Math.floor(this.maxWidth / data.width);
@@ -125,8 +116,8 @@ interface MaxRectsRectangle extends IRectangle {
     readonly data: ITexture;
 }
 
-export class TextureMaxRectsComposer<T>
-    implements TranslatedComposer<IMaxRectsComposerData, T>
+export class TextureMaxRectsComposer
+    implements ITextureComposer<IMaxRectsComposerData>
 {
     /**
      * 使用 Max Rects 算法执行贴图整合，输入数据参考 {@link IMaxRectsComposerData}，
@@ -142,7 +133,7 @@ export class TextureMaxRectsComposer<T>
     *compose(
         input: Iterable<ITexture>,
         data: IMaxRectsComposerData
-    ): Generator<ITextureComposedData<void, IAnimaterTranslatedInit<T>>> {
+    ): Generator<ITextureComposedData, void> {
         const packer = new MaxRectsPacker<MaxRectsRectangle>(
             this.maxWidth,
             this.maxHeight,
@@ -173,10 +164,7 @@ export class TextureMaxRectsComposer<T>
                 const source = renderable.source;
                 ctx.drawImage(source, x, y, w, h, v.x, v.y, v.width, v.height);
             });
-            const texture = new Texture<void, IAnimaterTranslatedInit<T>>(
-                canvas
-            );
-            texture.animated(new TextureAnimaterTranslated(), void 0);
+            const texture = new Texture(canvas);
             const data: ITextureComposedData = {
                 texture,
                 assetMap: map
@@ -193,8 +181,8 @@ interface RectProcessed {
     readonly attrib: Float32Array;
 }
 
-export class TextureMaxRectsWebGL2Composer<T>
-    implements TranslatedComposer<IMaxRectsComposerData, T>
+export class TextureMaxRectsWebGL2Composer
+    implements ITextureComposer<IMaxRectsComposerData>
 {
     /** 使用的画布 */
     readonly canvas: HTMLCanvasElement;
@@ -416,7 +404,7 @@ export class TextureMaxRectsWebGL2Composer<T>
     *compose(
         input: Iterable<ITexture>,
         data: IMaxRectsComposerData
-    ): Generator<ITextureComposedData<void, IAnimaterTranslatedInit<T>>> {
+    ): Generator<ITextureComposedData, void> {
         this.opWidth = 0;
         this.opHeight = 0;
 
@@ -441,10 +429,7 @@ export class TextureMaxRectsWebGL2Composer<T>
         for (const bin of packer.bins) {
             const { texMap, attrib } = this.processRects(bin.rects, indexMap);
             this.renderAtlas(attrib);
-            const texture = new Texture<void, IAnimaterTranslatedInit<T>>(
-                this.canvas
-            );
-            texture.animated(new TextureAnimaterTranslated(), void 0);
+            const texture = new Texture(this.canvas);
             const data: ITextureComposedData = {
                 texture,
                 assetMap: texMap

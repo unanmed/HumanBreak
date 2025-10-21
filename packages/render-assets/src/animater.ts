@@ -1,5 +1,5 @@
 import { logger } from '@motajs/common';
-import { IRect, ITexture, ITextureAnimater, ITextureRenderable } from './types';
+import { ITexture, ITextureAnimater, ITextureRenderable } from './types';
 
 /**
  * 基于帧的动画控制器，创建时传入的参数代表帧数，生成动画时传入的参数自定义
@@ -54,7 +54,7 @@ export class TextureRowAnimater extends FrameBasedAnimater<void> {
         for (let i = 0; i < this.frames; i++) {
             const renderable: ITextureRenderable = {
                 source: this.texture!.source,
-                rect: { x: ox, y: i * h + oy, w, h }
+                rect: this.texture!.clampRect({ x: i * w + ox, y: oy, w, h })
             };
             yield renderable;
         }
@@ -71,7 +71,7 @@ export class TextureRowAnimater extends FrameBasedAnimater<void> {
             if (i === this.frames) i = 0;
             const renderable: ITextureRenderable = {
                 source: this.texture!.source,
-                rect: { x: ox, y: i * h + oy, w, h }
+                rect: this.texture!.clampRect({ x: i * w + ox, y: oy, w, h })
             };
             yield renderable;
         }
@@ -91,7 +91,7 @@ export class TextureColumnAnimater extends FrameBasedAnimater<void> {
         for (let i = 0; i < this.frames; i++) {
             const renderable: ITextureRenderable = {
                 source: this.texture!.source,
-                rect: { x: i * width + ox, y: oy, w, h }
+                rect: this.texture!.clampRect({ x: i * w + ox, y: oy, w, h })
             };
             yield renderable;
         }
@@ -108,7 +108,7 @@ export class TextureColumnAnimater extends FrameBasedAnimater<void> {
             if (i === this.frames) i = 0;
             const renderable: ITextureRenderable = {
                 source: this.texture!.source,
-                rect: { x: i * w + ox, y: oy, w, h }
+                rect: this.texture!.clampRect({ x: i * w + ox, y: oy, w, h })
             };
             yield renderable;
         }
@@ -177,87 +177,33 @@ export class TextureScanAnimater
 
         for (let y = 0; y < this.frameY; y++) {
             for (let x = 0; x < this.frameX; x++) {
-                const rect: IRect = { x: x * w, y: y * h, w, h };
                 const data: ITextureRenderable = {
                     source: texture.source,
-                    rect
+                    rect: texture.clampRect({ x: x * w, y: y * h, w, h })
                 };
                 yield data;
             }
         }
     }
 
-    cycled(): Generator<ITextureRenderable, void> | null {
-        throw new Error('Method not implemented.');
-    }
-}
+    *cycled(): Generator<ITextureRenderable, void> | null {
+        const texture = this.texture;
+        if (!texture) return null;
 
-export interface IAnimaterTranslatedInit<T> {
-    /** 以此矩形作为参考矩形 */
-    readonly rect: Readonly<IRect>;
-    /** 传递给原先的动画控制器的参数 */
-    readonly data: T;
-    /** 原本所属的纹理 */
-    readonly texture: ITexture<unknown, T>;
-}
+        const w = this.width;
+        const h = this.height;
 
-type AdderImplements<T> = ITextureAnimater<void, IAnimaterTranslatedInit<T>>;
-
-type AdderTexture<T> = ITexture<void, IAnimaterTranslatedInit<T>>;
-
-/**
- * 对一个动画控制器执行偏移操作的控制器，一般用于图集上。
- * 创建时传入的参数代表要执行偏移操作的动画控制器，动画参数包含两部分，一个是参考矩形，一个是传递给原先动画控制器的参数
- */
-export class TextureAnimaterTranslated<T> implements AdderImplements<T> {
-    texture: AdderTexture<T> | null = null;
-
-    create(texture: ITexture): void {
-        if (this.texture) {
-            logger.warn(70);
-            return;
-        }
-        this.texture = texture;
-    }
-
-    *output(
-        ani: Generator<ITextureRenderable>,
-        origin: Readonly<IRect>,
-        rect: Readonly<IRect>
-    ) {
-        const { x: ox, y: oy } = origin;
-        const { x: nx, y: ny } = rect;
-        const source = this.texture!.source;
-
+        let index = 0;
         while (true) {
-            const next = ani.next();
-            if (next.done) break;
-            const renderable = next.value;
-            const { x, y, w, h } = renderable.rect;
-            const translated: IRect = { x: x - ox + nx, y: y - oy + ny, w, h };
-            const res: ITextureRenderable = {
-                source,
-                rect: translated
+            const x = index % this.frameX;
+            const y = Math.floor(index / this.frameX);
+            const data: ITextureRenderable = {
+                source: texture.source,
+                rect: texture.clampRect({ x: x * w, y: y * h, w, h })
             };
-            yield res;
+            yield data;
+
+            if (index === this.frames) index = 0;
         }
-    }
-
-    open(
-        init: IAnimaterTranslatedInit<T>
-    ): Generator<ITextureRenderable> | null {
-        const ani = init.texture.dynamic(init.data);
-        const origin = init.texture.static().rect;
-        if (!ani || !origin) return null;
-        return this.output(ani, origin, init.rect);
-    }
-
-    cycled(
-        init: IAnimaterTranslatedInit<T>
-    ): Generator<ITextureRenderable> | null {
-        const ani = init.texture.cycled(init.data);
-        const origin = init.texture.static().rect;
-        if (!ani || !origin) return null;
-        return this.output(ani, origin, init.rect);
     }
 }

@@ -19,14 +19,14 @@ export interface ITextureRenderable {
     readonly rect: Readonly<IRect>;
 }
 
-export interface ITextureComposedData<T = unknown, A = unknown> {
+export interface ITextureComposedData {
     /** 这个纹理图集的贴图对象 */
-    readonly texture: ITexture<T, A>;
+    readonly texture: ITexture;
     /** 每个参与组合的贴图对应到图集对象的矩形范围 */
     readonly assetMap: Map<ITexture, Readonly<IRect>>;
 }
 
-export interface ITextureComposer<T, C, I> {
+export interface ITextureComposer<T> {
     /**
      * 将一系列纹理组合成为一系列纹理图集
      * @param input 输入纹理
@@ -35,7 +35,24 @@ export interface ITextureComposer<T, C, I> {
     compose(
         input: Iterable<ITexture>,
         data: T
-    ): Generator<ITextureComposedData<C, I>, void>;
+    ): Generator<ITextureComposedData, void>;
+}
+
+export interface ITextureStreamComposer<T> {
+    /**
+     * 将一系列纹理添加到当前流式组合器中，并将这部分纹理的组合结果输出
+     * @param textures 输入纹理
+     * @param data 输入给组合器的参数
+     */
+    add(
+        textures: Iterable<ITexture>,
+        data: T
+    ): Generator<ITextureComposedData, void>;
+
+    /**
+     * 结束此组合器的使用，释放相关资源
+     */
+    close(): void;
 }
 
 export interface ITextureSplitter<T> {
@@ -105,6 +122,18 @@ export interface ITexture<T = unknown, A = unknown> {
      * 获取整张图的可渲染对象
      */
     static(): ITextureRenderable;
+
+    /**
+     * 限制矩形范围至当前贴图对象范围
+     * @param rect 矩形范围
+     */
+    clampRect(rect: Readonly<IRect>): Readonly<IRect>;
+
+    /**
+     * 获取贴图经过矩形裁剪后的可渲染对象，并不是简单地对图像源裁剪，还会处理其他情况
+     * @param rect 裁剪矩形
+     */
+    clipped(rect: Readonly<IRect>): ITextureRenderable;
 
     /**
      * 获取一系列动画可渲染对象，不循环，按帧数依次排列
