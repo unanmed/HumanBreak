@@ -67,7 +67,13 @@ async function compressFiles(files: ResourceContent[]) {
         const dir = `${v.type}/${v.name}`;
         zip.file(dir, v.content);
     });
-    const buffer = await zip.generateAsync({ type: 'uint8array' });
+    const buffer = await zip.generateAsync({
+        type: 'uint8array',
+        compression: 'DEFLATE',
+        compressionOptions: {
+            level: 9
+        }
+    });
 
     const hash = fileHash(buffer);
     const name = `resource.${hash}.h5data`;
