@@ -99,4 +99,8 @@ export class TextureStore implements ITextureStore {
     aliasOf(identifier: number): string | undefined {
         return this.aliasInvMap.get(identifier);
     }
+
+    identifierOf(alias: string): number | undefined {
+        return this.aliasMap.get(alias);
+    }
 }

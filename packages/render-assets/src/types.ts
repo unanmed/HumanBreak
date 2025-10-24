@@ -220,6 +220,12 @@ export interface ITextureStore {
     fromAlias(alias: string): ITexture | null;
 
     /**
+     * 根据贴图对象别名获取贴图对象 id
+     * @param alias 贴图对象别名
+     */
+    identifierOf(alias: string): number | undefined;
+
+    /**
      * 根据贴图对象获取此贴图对象在此控制器中的 id，如果贴图不在此控制器，返回 `undefined`
      * @param texture 贴图对象
      */

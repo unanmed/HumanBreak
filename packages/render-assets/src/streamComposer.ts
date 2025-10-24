@@ -110,7 +110,7 @@ export class TextureMaxRectsStreamComposer
         readonly maxWidth: number,
         readonly maxHeight: number,
         readonly padding: number,
-        options: IOption
+        options?: IOption
     ) {
         this.packer = new MaxRectsPacker<MaxRectsRectangle>(
             this.maxWidth,
