@@ -3,6 +3,7 @@ import {
     IRect,
     ITexture,
     ITextureAnimater,
+    ITextureComposedData,
     ITextureRenderable,
     ITextureSplitter,
     SizedCanvasImageSource
@@ -13,6 +14,7 @@ export class Texture<T = unknown, A = unknown> implements ITexture<T, A> {
     animater: ITextureAnimater<T, A> | null = null;
     width: number;
     height: number;
+    isBitmap: boolean = false;
 
     /** 裁剪矩形的左边框位置 */
     private cl: number;
@@ -59,7 +61,18 @@ export class Texture<T = unknown, A = unknown> implements ITexture<T, A> {
 
     async toBitmap(): Promise<void> {
         if (this.source instanceof ImageBitmap) return;
-        this.source = await createImageBitmap(this.source);
+        this.source = await createImageBitmap(
+            this.source,
+            this.cl,
+            this.ct,
+            this.width,
+            this.height
+        );
+        this.cl = 0;
+        this.ct = 0;
+        this.cr = this.width;
+        this.cb = this.height;
+        this.isBitmap = true;
     }
 
     split<U>(splitter: ITextureSplitter<U>, data: U): Generator<ITexture> {
@@ -108,6 +121,23 @@ export class Texture<T = unknown, A = unknown> implements ITexture<T, A> {
             this.source.close();
         }
         this.animater = null;
+    }
+
+    toAsset(asset: ITextureComposedData): boolean {
+        const rect = asset.assetMap.get(this);
+        if (!rect) return false;
+        if (this.isBitmap && this.source instanceof ImageBitmap) {
+            this.source.close();
+        }
+        this.isBitmap = false;
+        this.source = asset.texture.source;
+        this.cl = rect.x;
+        this.ct = rect.y;
+        this.width = rect.w;
+        this.height = rect.h;
+        this.cr = rect.x + rect.w;
+        this.cb = rect.y + rect.h;
+        return true;
     }
 
     /**

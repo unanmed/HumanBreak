@@ -98,6 +98,9 @@ export interface ITexture<T = unknown, A = unknown> {
     /** 贴图高度 */
     readonly height: number;
 
+    /** 当前贴图是否是完整 bitmap 图像 */
+    readonly isBitmap: boolean;
+
     /**
      * 将此贴图转换为 bitmap 图像，图像源也会转变成 ImageBitmap
      */
@@ -151,6 +154,13 @@ export interface ITexture<T = unknown, A = unknown> {
      * 释放此贴图的资源，将不能再被使用
      */
     dispose(): void;
+
+    /**
+     * 将贴图的图像源转换为指定图集的图像源，并将范围限定至图集中对应到此贴图的矩形范围。
+     * @param asset 图集信息
+     * @returns 是否转换成功，如果图集信息中不包含当前贴图，那么返回 `false`
+     */
+    toAsset(asset: ITextureComposedData): boolean;
 }
 
 export interface ITextureStore {
