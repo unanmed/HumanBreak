@@ -22,6 +22,8 @@ export interface ITextureRenderable {
 export interface ITextureComposedData {
     /** 这个纹理图集的贴图对象 */
     readonly texture: ITexture;
+    /** 这个纹理图集的索引 */
+    readonly index: number;
     /** 每个参与组合的贴图对应到图集对象的矩形范围 */
     readonly assetMap: Map<ITexture, Readonly<IRect>>;
 }

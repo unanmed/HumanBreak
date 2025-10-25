@@ -18,7 +18,9 @@ export class TextureGridStreamComposer implements ITextureStreamComposer<void> {
     readonly cols: number;
 
     private nowIndex: number = 0;
+    private outputIndex: number = 0;
 
+    private nowTexture: ITexture;
     private nowCanvas: HTMLCanvasElement;
     private nowCtx: CanvasRenderingContext2D;
     private nowMap: Map<ITexture, Readonly<IRect>>;
@@ -43,12 +45,16 @@ export class TextureGridStreamComposer implements ITextureStreamComposer<void> {
         this.nowCanvas = document.createElement('canvas');
         this.nowCtx = this.nowCanvas.getContext('2d')!;
         this.nowMap = new Map();
+        this.nowTexture = new Texture(this.nowCanvas);
     }
 
     private nextCanvas() {
         this.nowCanvas = document.createElement('canvas');
         this.nowCtx = this.nowCanvas.getContext('2d')!;
         this.nowMap = new Map();
+        this.nowIndex = 0;
+        this.nowTexture = new Texture(this.nowCanvas);
+        this.outputIndex++;
     }
 
     *add(textures: Iterable<ITexture>): Generator<ITextureComposedData, void> {
@@ -66,13 +72,14 @@ export class TextureGridStreamComposer implements ITextureStreamComposer<void> {
             this.nowCtx.drawImage(source, cx, cy, cw, ch, x, y, cw, ch);
             this.nowMap.set(tex, { x, y, w: cw, h: ch });
 
-            index++;
-            if (index === max) {
-                const data: ITextureComposedData = {
-                    texture: new Texture(this.nowCanvas),
-                    assetMap: this.nowMap
-                };
-                yield data;
+            const data: ITextureComposedData = {
+                index: this.outputIndex,
+                texture: this.nowTexture,
+                assetMap: this.nowMap
+            };
+            yield data;
+
+            if (++index === max) {
                 this.nextCanvas();
             }
         }
@@ -94,10 +101,13 @@ export class TextureMaxRectsStreamComposer
     /** Max Rects 打包器 */
     readonly packer: MaxRectsPacker<MaxRectsRectangle>;
 
+    private outputIndex: number = 0;
+    private nowTexture: ITexture;
+
     private nowCanvas: HTMLCanvasElement;
     private nowCtx: CanvasRenderingContext2D;
     private nowMap: Map<ITexture, Readonly<IRect>>;
-    private nowBins: number;
+    private nowBin: number;
 
     /**
      * 使用 Max Rects 算法执行贴图整合。输出的纹理的图像源将会是不同的画布。
@@ -122,13 +132,16 @@ export class TextureMaxRectsStreamComposer
         this.nowCanvas = document.createElement('canvas');
         this.nowCtx = this.nowCanvas.getContext('2d')!;
         this.nowMap = new Map();
-        this.nowBins = 0;
+        this.nowBin = 0;
+        this.nowTexture = new Texture(this.nowCanvas);
     }
 
     private nextCanvas() {
         this.nowCanvas = document.createElement('canvas');
         this.nowCtx = this.nowCanvas.getContext('2d')!;
         this.nowMap = new Map();
+        this.outputIndex++;
+        this.nowTexture = new Texture(this.nowCanvas);
     }
 
     *add(textures: Iterable<ITexture>): Generator<ITextureComposedData, void> {
@@ -144,12 +157,13 @@ export class TextureMaxRectsStreamComposer
         const bins = this.packer.bins;
         if (bins.length === 0) return;
         const toYield: Bin<MaxRectsRectangle>[] = [bins[bins.length - 1]];
-        if (bins.length > this.nowBins) {
-            toYield.push(...bins.slice(this.nowBins));
+        if (bins.length > this.nowBin) {
+            toYield.push(...bins.slice(this.nowBin));
         }
 
-        for (const bin of toYield) {
-            bin.rects.forEach(v => {
+        for (let i = this.nowBin; i < bins.length; i++) {
+            const rects = bins[i].rects;
+            rects.forEach(v => {
                 if (this.nowMap.has(v.data)) return;
                 const target: IRect = {
                     x: v.x,
@@ -163,14 +177,17 @@ export class TextureMaxRectsStreamComposer
                 this.nowCtx.drawImage(source, cx, cy, cw, ch, v.x, v.y, cw, ch);
             });
             const data: ITextureComposedData = {
-                texture: new Texture(this.nowCanvas),
+                index: this.outputIndex,
+                texture: this.nowTexture,
                 assetMap: this.nowMap
             };
             yield data;
-            this.nextCanvas();
+            if (i < bins.length - 1) {
+                this.nextCanvas();
+            }
         }
 
-        this.nowBins = bins.length;
+        this.nowBin = bins.length;
     }
 
     close(): void {

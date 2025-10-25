@@ -51,7 +51,8 @@ export class TextureGridComposer
         start: number,
         data: IGridComposerData,
         rows: number,
-        cols: number
+        cols: number,
+        index: number
     ): IndexMarkedComposedData {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d')!;
@@ -80,6 +81,7 @@ export class TextureGridComposer
 
         const texture = new Texture(canvas);
         const composed: ITextureComposedData = {
+            index,
             texture,
             assetMap: map
         };
@@ -96,12 +98,14 @@ export class TextureGridComposer
         const rows = Math.floor(this.maxWidth / data.width);
         const cols = Math.floor(this.maxHeight / data.height);
 
+        let arrindex = 0;
         let i = 0;
 
-        while (i < arr.length) {
-            const { asset, index } = this.nextAsset(arr, i, data, rows, cols);
-            i = index + 1;
-            yield asset;
+        while (arrindex < arr.length) {
+            const res = this.nextAsset(arr, arrindex, data, rows, cols, i);
+            arrindex = res.index + 1;
+            i++;
+            yield res.asset;
         }
     }
 }
@@ -149,6 +153,7 @@ export class TextureMaxRectsComposer
         });
         packer.addArray(rects);
 
+        let index = 0;
         for (const bin of packer.bins) {
             const map = new Map<ITexture, IRect>();
             const canvas = document.createElement('canvas');
@@ -166,6 +171,7 @@ export class TextureMaxRectsComposer
             });
             const texture = new Texture(canvas);
             const data: ITextureComposedData = {
+                index: index++,
                 texture,
                 assetMap: map
             };
@@ -426,15 +432,16 @@ export class TextureMaxRectsWebGL2Composer
         const indexMap = this.mapTextures(arr);
         this.setTexture(indexMap);
 
+        let index = 0;
         for (const bin of packer.bins) {
             const { texMap, attrib } = this.processRects(bin.rects, indexMap);
             this.renderAtlas(attrib);
             const texture = new Texture(this.canvas);
             const data: ITextureComposedData = {
+                index: index++,
                 texture,
                 assetMap: texMap
             };
-
             yield data;
         }
 
