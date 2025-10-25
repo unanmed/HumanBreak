@@ -53,6 +53,12 @@ export class Texture<T = unknown, A = unknown> implements ITexture<T, A> {
         const top = Math.max(0, y);
         const right = Math.min(this.width, r);
         const bottom = Math.min(this.height, b);
+        const width = right - left;
+        const height = bottom - top;
+        if (width <= 0 || height <= 0) {
+            logger.warn(77);
+            return;
+        }
         this.cl = left;
         this.ct = top;
         this.width = right - left;
