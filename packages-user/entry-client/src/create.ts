@@ -5,6 +5,7 @@ import * as LegacyClient from '@motajs/legacy-client';
 import * as LegacySystem from '@motajs/legacy-system';
 import * as LegacyUI from '@motajs/legacy-ui';
 import * as Render from '@motajs/render';
+import * as RenderAssets from '@motajs/render-assets';
 import * as RenderCore from '@motajs/render-core';
 import * as RenderElements from '@motajs/render-elements';
 import * as RenderStyle from '@motajs/render-style';
@@ -12,6 +13,7 @@ import * as RenderVue from '@motajs/render-vue';
 import * as System from '@motajs/system';
 import * as SystemAction from '@motajs/system-action';
 import * as SystemUI from '@motajs/system-ui';
+import * as UserClientBase from '@user/client-base';
 import * as ClientModules from '@user/client-modules';
 import * as LegacyPluginClient from '@user/legacy-plugin-client';
 import * as MutateAnimate from 'mutate-animate';
@@ -28,6 +30,7 @@ export function create() {
     Mota.register('@motajs/legacy-system', LegacySystem);
     Mota.register('@motajs/legacy-ui', LegacyUI);
     Mota.register('@motajs/render', Render);
+    Mota.register('@motajs/render-assets', RenderAssets);
     Mota.register('@motajs/render-core', RenderCore);
     Mota.register('@motajs/render-elements', RenderElements);
     Mota.register('@motajs/render-style', RenderStyle);
@@ -35,6 +38,7 @@ export function create() {
     Mota.register('@motajs/system', System);
     Mota.register('@motajs/system-action', SystemAction);
     Mota.register('@motajs/system-ui', SystemUI);
+    Mota.register('@user/client-base', UserClientBase);
     Mota.register('@user/client-modules', ClientModules);
     Mota.register('@user/legacy-plugin-client', LegacyPluginClient);
     Mota.register('MutateAnimate', MutateAnimate);
@@ -47,6 +51,7 @@ export function create() {
 async function createModule() {
     LegacyUI.create();
     ClientModules.create();
+    UserClientBase.create();
 
     await import('ant-design-vue/dist/antd.dark.css');
     main.renderLoaded = true;

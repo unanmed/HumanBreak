@@ -5,6 +5,7 @@
         "@motajs/client-base": "workspace:*",
         "@motajs/common": "workspace:*",
         "@motajs/render": "workspace:*",
+        "@motajs/render-assets": "workspace:*",
         "@motajs/render-core": "workspace:*",
         "@motajs/render-elements": "workspace:*",
         "@motajs/render-style": "workspace:*",
@@ -17,6 +18,7 @@
         "@motajs/legacy-data": "workspace:*",
         "@motajs/legacy-ui": "workspace:*",
         "@motajs/legacy-system": "workspace:*",
+        "@user/client-base": "workspace:*",
         "@user/client-modules": "workspace:*",
         "@user/legacy-plugin-client": "workspace:*"
     }
