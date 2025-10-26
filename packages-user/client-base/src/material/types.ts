@@ -150,11 +150,13 @@ export interface IMaterialManager {
      * @param source 图像源
      * @param map 贴图字符串 id 与图块数字映射，按从上到下的顺序映射
      * @param frames 每一行的帧数
+     * @param height 每一行的高度
      */
     addRowAnimate(
         source: SizedCanvasImageSource,
         map: ArrayLike<IBlockIdentifier>,
-        frames: number
+        frames: number,
+        height: number
     ): Iterable<IMaterialData>;
 
     /**
@@ -175,7 +177,7 @@ export interface IMaterialManager {
     addTileset(
         source: SizedCanvasImageSource,
         identifier: IIndexedIdentifier
-    ): IMaterialData;
+    ): IMaterialData | null;
 
     /**
      * 添加一个图片
@@ -222,6 +224,20 @@ export interface IMaterialManager {
      * @param alias 图片名称
      */
     getImageByAlias(alias: string): ITexture | null;
+
+    /**
+     * 缓存某个 tileset
+     * @param identifier tileset 的标识符，即图块数字
+     */
+    cacheTileset(identifier: number): ITexture | null;
+
+    /**
+     * 缓存一系列 tileset
+     * @param identifierList 标识符列表，即图块数字列表
+     */
+    cacheTilesetList(
+        identifierList: Iterable<number>
+    ): Iterable<ITexture | null>;
 
     /**
      * 把常用素材打包成为图集形式供后续使用

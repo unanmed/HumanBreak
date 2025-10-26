@@ -72,17 +72,23 @@ export class TextureGridStreamComposer implements ITextureStreamComposer<void> {
             this.nowCtx.drawImage(source, cx, cy, cw, ch, x, y, cw, ch);
             this.nowMap.set(tex, { x, y, w: cw, h: ch });
 
-            const data: ITextureComposedData = {
-                index: this.outputIndex,
-                texture: this.nowTexture,
-                assetMap: this.nowMap
-            };
-            yield data;
-
             if (++index === max) {
+                const data: ITextureComposedData = {
+                    index: this.outputIndex,
+                    texture: this.nowTexture,
+                    assetMap: this.nowMap
+                };
+                yield data;
                 this.nextCanvas();
             }
         }
+
+        const data: ITextureComposedData = {
+            index: this.outputIndex,
+            texture: this.nowTexture,
+            assetMap: this.nowMap
+        };
+        yield data;
     }
 
     close(): void {
@@ -102,12 +108,12 @@ export class TextureMaxRectsStreamComposer
     readonly packer: MaxRectsPacker<MaxRectsRectangle>;
 
     private outputIndex: number = 0;
-    private nowTexture: ITexture;
+    private nowTexture!: ITexture;
 
-    private nowCanvas: HTMLCanvasElement;
-    private nowCtx: CanvasRenderingContext2D;
-    private nowMap: Map<ITexture, Readonly<IRect>>;
-    private nowBin: number;
+    private nowCanvas!: HTMLCanvasElement;
+    private nowCtx!: CanvasRenderingContext2D;
+    private nowMap!: Map<ITexture, Readonly<IRect>>;
+    private nowBin: number = 0;
 
     /**
      * 使用 Max Rects 算法执行贴图整合。输出的纹理的图像源将会是不同的画布。
@@ -129,16 +135,14 @@ export class TextureMaxRectsStreamComposer
             options
         );
 
-        this.nowCanvas = document.createElement('canvas');
-        this.nowCtx = this.nowCanvas.getContext('2d')!;
-        this.nowMap = new Map();
-        this.nowBin = 0;
-        this.nowTexture = new Texture(this.nowCanvas);
+        this.nextCanvas();
     }
 
     private nextCanvas() {
         this.nowCanvas = document.createElement('canvas');
         this.nowCtx = this.nowCanvas.getContext('2d')!;
+        this.nowCanvas.width = this.maxWidth;
+        this.nowCanvas.height = this.maxHeight;
         this.nowMap = new Map();
         this.outputIndex++;
         this.nowTexture = new Texture(this.nowCanvas);
@@ -176,6 +180,7 @@ export class TextureMaxRectsStreamComposer
                 const { x: cx, y: cy, w: cw, h: ch } = rect;
                 this.nowCtx.drawImage(source, cx, cy, cw, ch, v.x, v.y, cw, ch);
             });
+
             const data: ITextureComposedData = {
                 index: this.outputIndex,
                 texture: this.nowTexture,
@@ -187,7 +192,7 @@ export class TextureMaxRectsStreamComposer
             }
         }
 
-        this.nowBin = bins.length;
+        this.nowBin = bins.length - 1;
     }
 
     close(): void {

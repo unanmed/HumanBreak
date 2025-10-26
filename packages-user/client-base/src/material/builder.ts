@@ -27,6 +27,7 @@ export class AssetBuilder implements IAssetBuilder {
         this.started = true;
         const res = [...this.composer.add([texture])];
         const data = res[0];
+
         if (this.output) {
             if (!this.output.getTexture(data.index)) {
                 this.output.addTexture(data.index, data.texture);

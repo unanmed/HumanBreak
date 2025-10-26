@@ -53,6 +53,14 @@ export class MaterialManager implements IMaterialManager {
 
     /** 大怪物贴图的标识符 */
     private bigImageId: number = 0;
+    /** 当前 tileset 索引 */
+    private nowTilesetIndex: number = -1;
+    /** 当前 tileset 偏移 */
+    private nowTilesetOffset: number = 0;
+
+    constructor() {
+        this.assetBuilder.pipe(this.assetStore);
+    }
 
     /**
      * 添加由分割器和图块映射组成的图像源贴图
@@ -109,14 +117,15 @@ export class MaterialManager implements IMaterialManager {
     addRowAnimate(
         source: SizedCanvasImageSource,
         map: ArrayLike<IBlockIdentifier>,
-        frames: number
+        frames: number,
+        height: number
     ): Iterable<IMaterialData> {
         return this.addMappedSource(
             source,
             map,
             this.tileStore,
             this.rowSplitter,
-            32,
+            height,
             (tex: ITexture<number>) => {
                 tex.animated(new TextureColumnAnimater(), frames);
             }
@@ -143,10 +152,34 @@ export class MaterialManager implements IMaterialManager {
     addTileset(
         source: SizedCanvasImageSource,
         identifier: IIndexedIdentifier
-    ): IMaterialData {
+    ): IMaterialData | null {
         const tex = new Texture(source);
         this.tilesetStore.addTexture(identifier.index, tex);
         this.tilesetStore.alias(identifier.index, identifier.alias);
+        const width = Math.floor(source.width / 32);
+        const height = Math.floor(source.height / 32);
+        const count = width * height;
+        const offset = Math.ceil(count / 10000);
+        if (identifier.index === 0) {
+            this.tilesetOffsetMap.set(0, 0);
+            this.nowTilesetIndex = 0;
+            this.nowTilesetOffset = offset;
+        } else {
+            if (identifier.index - 1 !== this.nowTilesetIndex) {
+                logger.warn(78);
+                return null;
+            }
+            const width = Math.floor(source.width / 32);
+            const height = Math.floor(source.height / 32);
+            const count = width * height;
+            const offset = Math.ceil(count / 10000);
+            const end = this.nowTilesetOffset + offset;
+            for (let i = this.nowTilesetOffset; i < end; i++) {
+                this.tilesetOffsetMap.set(i, identifier.index);
+            }
+            this.nowTilesetOffset = end;
+            this.nowTilesetIndex = identifier.index;
+        }
         const data: IMaterialData = {
             store: this.tilesetStore,
             texture: tex,
@@ -173,7 +206,11 @@ export class MaterialManager implements IMaterialManager {
     }
 
     getTile(identifier: number): ITexture | null {
-        return this.tileStore.getTexture(identifier);
+        if (identifier < 10000) {
+            return this.tileStore.getTexture(identifier);
+        } else {
+            return this.cacheTileset(identifier);
+        }
     }
 
     getTileset(identifier: number): ITexture | null {
@@ -185,7 +222,11 @@ export class MaterialManager implements IMaterialManager {
     }
 
     getTileByAlias(alias: string): ITexture | null {
-        return this.tileStore.fromAlias(alias);
+        if (/X\d{5,}/.test(alias)) {
+            return this.cacheTileset(parseInt(alias.slice(1)));
+        } else {
+            return this.tileStore.fromAlias(alias);
+        }
     }
 
     getTilesetByAlias(alias: string): ITexture | null {
@@ -196,6 +237,71 @@ export class MaterialManager implements IMaterialManager {
         return this.imageStore.fromAlias(alias);
     }
 
+    private getTilesetOwnTexture(identifier: number) {
+        const texture = this.tileStore.getTexture(identifier);
+        if (texture) return texture;
+        // 如果 tileset 不存在，那么执行缓存操作
+        const offset = Math.floor(identifier / 10000);
+        const index = this.tilesetOffsetMap.get(offset - 1);
+        if (isNil(index)) return null;
+        // 获取对应的 tileset 贴图
+        const tileset = this.tilesetStore.getTexture(index);
+        if (!tileset) return null;
+        // 计算图块位置
+        const rest = identifier - offset * 10000;
+        const { width, height } = tileset;
+        const tileWidth = Math.floor(width / 32);
+        const tileHeight = Math.floor(height / 32);
+        // 如果图块位置超出了贴图范围
+        if (rest > tileWidth * tileHeight) return null;
+        // 裁剪 tileset，生成贴图
+        const x = rest % tileWidth;
+        const y = Math.floor(rest / tileWidth);
+        const newTexture = new Texture(tileset.source);
+        newTexture.clip(x * 32, y * 32, 32, 32);
+        return newTexture;
+    }
+
+    cacheTileset(identifier: number): ITexture | null {
+        const newTexture = this.getTilesetOwnTexture(identifier);
+        if (!newTexture) return null;
+        // 缓存贴图
+        this.tileStore.addTexture(identifier, newTexture);
+        this.idNumMap.set(`X${identifier}`, identifier);
+        this.numIdMap.set(identifier, `X${identifier}`);
+        const data = this.assetBuilder.addTexture(newTexture);
+        newTexture.toAsset(data);
+        return newTexture;
+    }
+
+    cacheTilesetList(
+        identifierList: Iterable<number>
+    ): Iterable<ITexture | null> {
+        const arr = [...identifierList];
+        const toAdd: ITexture[] = [];
+
+        arr.forEach(v => {
+            const newTexture = this.getTilesetOwnTexture(v);
+            if (!newTexture) return;
+            toAdd.push(newTexture);
+            this.tileStore.addTexture(v, newTexture);
+            this.idNumMap.set(`X${v}`, v);
+            this.numIdMap.set(v, `X${v}`);
+        });
+
+        const set = new Set(toAdd);
+
+        const data = this.assetBuilder.addTextureList(toAdd);
+        const res = [...data];
+        res.forEach(v => {
+            v.assetMap.keys().forEach(tex => {
+                if (set.has(tex)) tex.toAsset(v);
+            });
+        });
+
+        return toAdd;
+    }
+
     buildAssets(): Iterable<IMaterialAssetData> {
         this.assetBuilder.pipe(this.assetStore);
         const data = this.assetBuilder.addTextureList(this.tileStore.values());
@@ -204,6 +310,7 @@ export class MaterialManager implements IMaterialManager {
         arr.forEach((v, i) => {
             const alias = `asset-${i}`;
             this.assetStore.alias(i, alias);
+            this.assetDataStore.set(i, v);
             const data: IMaterialAssetData = {
                 data: v,
                 identifier: i,
@@ -234,34 +341,7 @@ export class MaterialManager implements IMaterialManager {
             return this.tileStore.getTexture(identifier);
         }
         if (identifier < 10000) return null;
-        const texture = this.tileStore.getTexture(identifier);
-        if (texture) return texture;
-        // 如果 tileset 不存在，那么执行缓存操作
-        const offset = Math.floor(identifier / 10000);
-        const index = this.tilesetOffsetMap.get(offset);
-        if (isNil(index)) return null;
-        // 获取对应的 tileset 贴图
-        const tileset = this.tilesetStore.getTexture(index);
-        if (!tileset) return null;
-        // 计算图块位置
-        const rest = identifier - offset * 10000;
-        const { width, height } = tileset;
-        const tileWidth = Math.floor(width / 32);
-        const tileHeight = Math.floor(height / 32);
-        // 如果图块位置超出了贴图范围
-        if (rest > tileWidth * tileHeight) return null;
-        // 裁剪 tileset，生成贴图
-        const x = rest % tileWidth;
-        const y = Math.floor(rest / tileWidth);
-        const newTexture = new Texture(tileset.source);
-        newTexture.clip(x * 32, y * 32, 32, 32);
-        // 缓存贴图
-        this.tileStore.addTexture(identifier, newTexture);
-        this.idNumMap.set(`X${identifier}`, identifier);
-        this.numIdMap.set(identifier, `X${identifier}`);
-        const data = this.assetBuilder.addTexture(newTexture);
-        newTexture.toAsset(data);
-        return newTexture;
+        return this.cacheTileset(identifier);
     }
 
     getRenderable(identifier: number): ITextureRenderable | null {
