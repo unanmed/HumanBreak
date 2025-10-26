@@ -125,8 +125,7 @@ export class Logger {
                 hideTipText();
             }
             const n = Math.floor(code / 50) + 1;
-            const n2 = code % 50;
-            const url = `${location.origin}/_docs/logger/error/error${n}.html#error-code-${n2}`;
+            const url = `${location.origin}/_docs/logger/error/error${n}.html#error-code-${code}`;
             console.error(`[ERROR Code ${code}] ${text} See ${url}`);
         }
     }
@@ -159,8 +158,7 @@ export class Logger {
                 hideTipText();
             }
             const n = Math.floor(code / 50) + 1;
-            const n2 = code % 50;
-            const url = `${location.origin}/_docs/logger/warn/warn${n}.html#warn-code-${n2}`;
+            const url = `${location.origin}/_docs/logger/warn/warn${n}.html#warn-code-${code}`;
             console.warn(`[WARNING Code ${code}] ${text} See ${url}`);
         }
     }
