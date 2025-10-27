@@ -57,6 +57,8 @@ export class MaterialManager implements IMaterialManager {
     private nowTilesetIndex: number = -1;
     /** 当前 tileset 偏移 */
     private nowTilesetOffset: number = 0;
+    /** 是否已经构建过素材 */
+    private built: boolean = false;
 
     constructor() {
         this.assetBuilder.pipe(this.assetStore);
@@ -303,7 +305,11 @@ export class MaterialManager implements IMaterialManager {
     }
 
     buildAssets(): Iterable<IMaterialAssetData> {
-        this.assetBuilder.pipe(this.assetStore);
+        if (this.built) {
+            logger.warn(79);
+            return [];
+        }
+        this.built = true;
         const data = this.assetBuilder.addTextureList(this.tileStore.values());
         const arr = [...data];
         const res: IMaterialAssetData[] = [];
