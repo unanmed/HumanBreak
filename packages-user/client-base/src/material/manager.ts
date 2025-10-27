@@ -407,5 +407,3 @@ export class MaterialManager implements IMaterialManager {
         return this.bigImageData.get(identifier) ?? null;
     }
 }
-
-export const materials = new MaterialManager();

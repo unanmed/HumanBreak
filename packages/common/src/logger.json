@@ -26,6 +26,7 @@
         "24": "Cannot decode source type of '$1', since there is no registered decoder for that type.",
         "25": "Unknown audio type. Header: '$1'",
         "26": "Uncaught error when fetching stream data from '$1'. Error info: $2.",
+        "27": "No autotile connection data, please ensure you have created autotile connection map.",
         "1101": "Shadow extension needs 'floor-hero' extension as dependency.",
         "1201": "Floor-damage extension needs 'floor-binder' extension as dependency.",
         "1301": "Portal extension need 'floor-binder' extension as dependency.",

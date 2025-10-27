@@ -20,6 +20,11 @@ export const enum BlockCls {
     Autotile
 }
 
+export const enum AutotileType {
+    Small2x3,
+    Big3x4
+}
+
 export interface IMaterialData {
     /** 此素材的贴图对象存入了哪个贴图存储对象 */
     readonly store: ITextureStore;
@@ -59,7 +64,7 @@ export interface IMaterialAssetData {
 }
 
 export interface IAutotileConnection {
-    /** 连接方式，上方连接是第一位，顺时针旋转位次依次升高 */
+    /** 连接方式，最高位表示左上，低位依次顺时针旋转 */
     readonly connection: number;
     /** 中心自动元件对应的图块数字 */
     readonly center: number;
@@ -68,8 +73,14 @@ export interface IAutotileConnection {
 export interface IAutotileRenderable {
     /** 自动元件的图像源 */
     readonly source: SizedCanvasImageSource;
-    /** 渲染的矩形范围 */
-    readonly rects: Readonly<IRect>[];
+    /** 左上渲染的矩形范围 */
+    readonly lt: Readonly<IRect>;
+    /** 右上渲染的矩形范围 */
+    readonly rt: Readonly<IRect>;
+    /** 右下渲染的矩形范围 */
+    readonly rb: Readonly<IRect>;
+    /** 左下渲染的矩形范围 */
+    readonly lb: Readonly<IRect>;
 }
 
 export interface IBigImageData {
@@ -91,33 +102,64 @@ export interface IAutotileProcessor {
     setParent(autotile: number, parent: number): void;
 
     /**
-     * 获取自动元件的链接情况
+     * 获取自动元件的连接情况
      * @param array 地图图块数组
      * @param index 自动元件图块所在的索引
-     * @param edge 当前图块的边缘连接情况
+     * @param width 地图每一行的宽度
      */
     connect(
-        array: Float32Array,
+        array: Uint32Array,
         index: number,
-        edge: number
+        width: number
     ): IAutotileConnection;
 
     /**
-     * 获取指定自动元件的可渲染对象
+     * 获取指定自动元件经过连接的可渲染对象
      * @param autotile 自动元件的图块数字
      * @param connection 连接方式，上方连接是第一位，顺时针旋转位次依次升高
+     * @returns 生成器，每一个输出代表每一帧的渲染对象，不同自动元件的帧数可能不同
      */
-    render(autotile: number, connection: number): IAutotileRenderable;
+    render(
+        autotile: number,
+        connection: number
+    ): Generator<IAutotileRenderable, void> | null;
 
     /**
-     * 通过可渲染对象输出自动元件经过连接的可渲染对象
+     * 通过静态可渲染对象（由 {@link ITexture.static} 输出的可渲染对象）输出自动元件经过连接的可渲染对象生成器
      * @param renderable 自动元件的原始可渲染对象
-     * @param connection 自动元件的链接方式
+     * @param connection 自动元件的连接方式
+     * @returns 生成器，每一个输出代表每一帧的渲染对象，不同自动元件的帧数可能不同
      */
-    fromRenderable(
+    fromStaticRenderable(
         renderable: ITextureRenderable,
         connection: number
-    ): IAutotileRenderable;
+    ): Generator<IAutotileRenderable, void> | null;
+
+    /**
+     * 通过动画可渲染对象（由 {@link ITexture.dynamic} 或 {@link ITexture.cycled} 输出的单个可渲染对象）
+     * 输出自动元件经过连接的可渲染对象
+     * @param renderable 自动元件的原始可渲染对象
+     * @param connection 自动元件的连接方式
+     * @returns 这一帧的可渲染对象
+     */
+    fromAnimatedRenderable(
+        renderable: ITextureRenderable,
+        connection: number
+    ): IAutotileRenderable | null;
+
+    /**
+     * 通过动画生成器（由 {@link ITexture.dynamic} 或 {@link ITexture.cycled} 输出的生成器）
+     * 输出自动元件经过连接的可渲染对象生成器
+     * @param texture 生成动画的纹理对象
+     * @param generator 自动元件的动画生成器
+     * @param connection 自动元件的连接方式
+     * @returns 生成器，每一个输出代表每一帧的渲染对象
+     */
+    fromAnimatedGenerator(
+        texture: ITexture,
+        generator: Generator<ITextureRenderable> | null,
+        connection: number
+    ): Generator<IAutotileRenderable, void> | null;
 }
 
 export interface IMaterialManager {

@@ -1,4 +1,4 @@
-import { materials } from './manager';
+import { materials } from './ins';
 import { IBlockIdentifier, IIndexedIdentifier } from './types';
 
 function extractClsBlocks<C extends Exclude<Cls, 'tileset'>>(
