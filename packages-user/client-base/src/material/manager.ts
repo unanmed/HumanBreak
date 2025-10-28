@@ -19,12 +19,14 @@ import {
     IMaterialAssetData,
     BlockCls,
     IBigImageData,
-    IAssetBuilder
+    IAssetBuilder,
+    IMaterialAsset
 } from './types';
 import { logger } from '@motajs/common';
 import { getClsByString } from './utils';
 import { isNil } from 'lodash-es';
 import { AssetBuilder } from './builder';
+import { MaterialAsset } from './asset';
 
 export class MaterialManager implements IMaterialManager {
     readonly tileStore: ITextureStore = new TextureStore();
@@ -34,7 +36,8 @@ export class MaterialManager implements IMaterialManager {
     readonly bigImageStore: ITextureStore = new TextureStore();
 
     /** 图集信息存储 */
-    readonly assetDataStore: Map<number, ITextureComposedData> = new Map();
+    readonly assetDataStore: Map<number, IMaterialAsset> = new Map();
+
     /** 大怪物数据 */
     readonly bigImageData: Map<number, ITexture> = new Map();
     /** tileset 中 `Math.floor(id / 10000) + 1` 映射到 tileset 对应索引的映射，用于处理图块超出 10000 的 tileset */
@@ -59,6 +62,9 @@ export class MaterialManager implements IMaterialManager {
     private nowTilesetOffset: number = 0;
     /** 是否已经构建过素材 */
     private built: boolean = false;
+
+    /** 标记列表 */
+    private readonly markList: symbol[] = [];
 
     constructor() {
         this.assetBuilder.pipe(this.assetStore);
@@ -264,6 +270,23 @@ export class MaterialManager implements IMaterialManager {
         return newTexture;
     }
 
+    /**
+     * 检查图集状态，如果已存在图集则标记为脏，否则新增图集
+     * @param data 图集数据
+     */
+    private checkAssetDirty(data: ITextureComposedData) {
+        const asset = this.assetDataStore.get(data.index);
+        if (asset) {
+            // 如果不是新图集，需要标记为脏
+            asset.dirty();
+        } else {
+            // 如果有新图集，需要添加
+            const alias = `asset-${data.index}`;
+            this.assetStore.alias(data.index, alias);
+            this.assetDataStore.set(data.index, new MaterialAsset(data));
+        }
+    }
+
     cacheTileset(identifier: number): ITexture | null {
         const newTexture = this.getTilesetOwnTexture(identifier);
         if (!newTexture) return null;
@@ -273,6 +296,7 @@ export class MaterialManager implements IMaterialManager {
         this.numIdMap.set(identifier, `X${identifier}`);
         const data = this.assetBuilder.addTexture(newTexture);
         newTexture.toAsset(data);
+        this.checkAssetDirty(data);
         return newTexture;
     }
 
@@ -295,10 +319,11 @@ export class MaterialManager implements IMaterialManager {
 
         const data = this.assetBuilder.addTextureList(toAdd);
         const res = [...data];
-        res.forEach(v => {
-            v.assetMap.keys().forEach(tex => {
-                if (set.has(tex)) tex.toAsset(v);
+        res.forEach(data => {
+            data.assetMap.keys().forEach(tex => {
+                if (set.has(tex)) tex.toAsset(data);
             });
+            this.checkAssetDirty(data);
         });
 
         return toAdd;
@@ -313,13 +338,13 @@ export class MaterialManager implements IMaterialManager {
         const data = this.assetBuilder.addTextureList(this.tileStore.values());
         const arr = [...data];
         const res: IMaterialAssetData[] = [];
-        arr.forEach((v, i) => {
-            const alias = `asset-${i}`;
-            this.assetStore.alias(i, alias);
-            this.assetDataStore.set(i, v);
+        arr.forEach(v => {
+            const alias = `asset-${v.index}`;
+            this.assetStore.alias(v.index, alias);
+            this.assetDataStore.set(v.index, new MaterialAsset(v));
             const data: IMaterialAssetData = {
                 data: v,
-                identifier: i,
+                identifier: v.index,
                 alias,
                 store: this.assetStore
             };
@@ -331,11 +356,11 @@ export class MaterialManager implements IMaterialManager {
         return res;
     }
 
-    getAsset(identifier: number): ITextureComposedData | null {
+    getAsset(identifier: number): IMaterialAsset | null {
         return this.assetDataStore.get(identifier) ?? null;
     }
 
-    getAssetByAlias(alias: string): ITextureComposedData | null {
+    getAssetByAlias(alias: string): IMaterialAsset | null {
         const id = this.assetStore.identifierOf(alias);
         if (isNil(id)) return null;
         return this.assetDataStore.get(id) ?? null;
@@ -405,5 +430,15 @@ export class MaterialManager implements IMaterialManager {
         const identifier = this.idNumMap.get(alias);
         if (isNil(identifier)) return null;
         return this.bigImageData.get(identifier) ?? null;
+    }
+
+    getIfBigImage(identifier: number): ITexture | null {
+        const bigImage = this.bigImageData.get(identifier) ?? null;
+        if (bigImage) return bigImage;
+        if (identifier < 10000) {
+            return this.tileStore.getTexture(identifier);
+        } else {
+            return this.cacheTileset(identifier);
+        }
     }
 }

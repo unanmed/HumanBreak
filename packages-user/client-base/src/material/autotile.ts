@@ -171,6 +171,10 @@ export class AutotileProcessor implements IAutotileProcessor {
         return this.fromStaticRenderable(tile.static(), connection);
     }
 
+    /**
+     * 根据静态可渲染对象获取自动元件的帧列表
+     * @param renderable 静态可渲染对象
+     */
     private getStaticRectList(
         renderable: ITextureRenderable
     ): AutotileFrameList {
@@ -194,11 +198,17 @@ export class AutotileProcessor implements IAutotileProcessor {
         }
     }
 
+    /**
+     * 对自动元件连接执行偏移操作，偏移至自动元件在图像源中的所在矩形范围
+     * @param ox 横向偏移量
+     * @param oy 纵向偏移量
+     * @param connection 自动元件连接信息
+     */
     private getConnectedRect(
         ox: number,
         oy: number,
         connection: ConnectedAutotile
-    ): ConnectedAutotile | null {
+    ): ConnectedAutotile {
         const { lt, rt, rb, lb } = connection;
 
         return {

@@ -90,6 +90,37 @@ export interface IBigImageData {
     readonly store: ITextureStore;
 }
 
+export interface IAssetDirtyMarker {
+    /**
+     * 标记为脏，即进行了一次更新
+     */
+    dirty(): void;
+}
+
+export interface IAssetDirtyTracker {
+    /**
+     * 对图集状态进行标记
+     */
+    mark(): symbol;
+
+    /**
+     * 取消指定标记符号
+     * @param mark 标记符号
+     */
+    unmark(mark: symbol): void;
+
+    /**
+     * 从指定标记符号开始，图集是否发生了变动
+     * @param mark 标记符号
+     */
+    dirtySince(mark: symbol): boolean;
+}
+
+export interface IMaterialAsset extends IAssetDirtyTracker, IAssetDirtyMarker {
+    /** 图集的贴图数据 */
+    readonly data: ITextureComposedData;
+}
+
 export interface IAutotileProcessor {
     /** 该自动元件处理器使用的素材管理器 */
     readonly manager: IMaterialManager;
@@ -162,7 +193,98 @@ export interface IAutotileProcessor {
     ): Generator<IAutotileRenderable, void> | null;
 }
 
-export interface IMaterialManager {
+export interface IMaterialGetter {
+    /**
+     * 根据图块数字获取图块，可以获取额外素材，会自动将未缓存的额外素材缓存
+     * @param identifier 图块的图块数字
+     */
+    getTile(identifier: number): ITexture | null;
+
+    /**
+     * 根据图块标识符获取图块类型
+     * @param identifier 图块标识符，即图块数字
+     */
+    getBlockCls(identifier: number): BlockCls;
+
+    /**
+     * 判断一个图块是否包含 `bigImage` 贴图，即是否是大怪物
+     * @param identifier 图块标识符，即图块数字
+     */
+    isBigImage(identifier: number): boolean;
+
+    /**
+     * 根据图块标识符获取一个图块的 `bigImage` 贴图
+     * @param identifier 图块标识符，即图块数字
+     */
+    getBigImage(identifier: number): ITexture | null;
+
+    /**
+     * 根据图块标识符，首先判断是否是 `bigImage` 贴图，如果是，则返回 `bigImage` 贴图，
+     * 否则返回普通贴图。如果图块不存在，则返回 `null`
+     * @param identifier 图块标识符，即图块数字
+     */
+    getIfBigImage(identifier: number): ITexture | null;
+
+    /**
+     * 根据标识符获取图集信息
+     * @param identifier 图集的标识符
+     */
+    getAsset(identifier: number): IMaterialAsset | null;
+
+    /**
+     * 根据额外素材索引获取额外素材
+     * @param identifier 额外素材的索引
+     */
+    getTileset(identifier: number): ITexture | null;
+
+    /**
+     * 根据图片的索引获取图片
+     * @param identifier 图片的索引
+     */
+    getImage(identifier: number): ITexture | null;
+}
+
+export interface IMaterialAliasGetter {
+    /**
+     * 根据图块 id 获取图块，可以获取额外素材，会自动将未缓存的额外素材缓存
+     * @param alias 图块 id
+     */
+    getTileByAlias(alias: string): ITexture | null;
+
+    /**
+     * 根据额外素材名称获取额外素材
+     * @param alias 额外素材名称
+     */
+    getTilesetByAlias(alias: string): ITexture | null;
+
+    /**
+     * 根据图片名称获取图片
+     * @param alias 图片名称
+     */
+    getImageByAlias(alias: string): ITexture | null;
+
+    /**
+     * 根据别名获取图集信息
+     * @param alias 图集的别名
+     */
+    getAssetByAlias(alias: string): IMaterialAsset | null;
+
+    /**
+     * 根据图块别名获取图块类型
+     * @param alias 图块别名，即图块的 id
+     */
+    getBlockClsByAlias(alias: string): BlockCls;
+
+    /**
+     * 根据图块别名获取一个图块的 `bigImage` 贴图
+     * @param alias 图块别名，即图块的 id
+     */
+    getBigImageByAlias(alias: string): ITexture | null;
+}
+
+export interface IMaterialManager
+    extends IMaterialGetter,
+        IMaterialAliasGetter {
     /** 贴图存储，把 terrains 等内容单独分开存储 */
     readonly tileStore: ITextureStore;
     /** tilesets 贴图存储，每个 tileset 是一个贴图对象 */
@@ -173,6 +295,9 @@ export interface IMaterialManager {
     readonly assetStore: ITextureStore;
     /** bigImage 存储，存储大怪物数据 */
     readonly bigImageStore: ITextureStore;
+
+    /** 图集信息存储 */
+    readonly assetDataStore: Iterable<[number, IMaterialAsset]>;
 
     /** 图块类型映射 */
     readonly clsMap: Map<number, BlockCls>;
@@ -232,42 +357,6 @@ export interface IMaterialManager {
     ): IMaterialData;
 
     /**
-     * 根据图块数字获取图块，可以获取额外素材，会自动将未缓存的额外素材缓存
-     * @param identifier 图块的图块数字
-     */
-    getTile(identifier: number): ITexture | null;
-
-    /**
-     * 根据额外素材索引获取额外素材
-     * @param identifier 额外素材的索引
-     */
-    getTileset(identifier: number): ITexture | null;
-
-    /**
-     * 根据图片的索引获取图片
-     * @param identifier 图片的索引
-     */
-    getImage(identifier: number): ITexture | null;
-
-    /**
-     * 根据图块 id 获取图块，可以获取额外素材，会自动将未缓存的额外素材缓存
-     * @param alias 图块 id
-     */
-    getTileByAlias(alias: string): ITexture | null;
-
-    /**
-     * 根据额外素材名称获取额外素材
-     * @param alias 额外素材名称
-     */
-    getTilesetByAlias(alias: string): ITexture | null;
-
-    /**
-     * 根据图片名称获取图片
-     * @param alias 图片名称
-     */
-    getImageByAlias(alias: string): ITexture | null;
-
-    /**
      * 缓存某个 tileset
      * @param identifier tileset 的标识符，即图块数字
      */
@@ -287,18 +376,6 @@ export interface IMaterialManager {
     buildAssets(): Iterable<IMaterialAssetData>;
 
     /**
-     * 根据标识符获取图集信息
-     * @param identifier 图集的标识符
-     */
-    getAsset(identifier: number): ITextureComposedData | null;
-
-    /**
-     * 根据别名获取图集信息
-     * @param alias 图集的别名
-     */
-    getAssetByAlias(alias: string): ITextureComposedData | null;
-
-    /**
      * 根据图块标识符在图集中获取对应的可渲染对象
      * @param identifier 图块标识符，即图块数字
      */
@@ -309,18 +386,6 @@ export interface IMaterialManager {
      * @param alias 图块的别名，即图块的 id
      */
     getRenderableByAlias(alias: string): ITextureRenderable | null;
-
-    /**
-     * 根据图块标识符获取图块类型
-     * @param identifier 图块标识符，即图块数字
-     */
-    getBlockCls(identifier: number): BlockCls;
-
-    /**
-     * 根据图块别名获取图块类型
-     * @param alias 图块别名，即图块的 id
-     */
-    getBlockClsByAlias(alias: string): BlockCls;
 
     /**
      * 根据图块别名获取图块标识符，即图块数字
@@ -340,24 +405,6 @@ export interface IMaterialManager {
      * @param image `bigImage` 对应的贴图对象
      */
     setBigImage(identifier: number, image: ITexture): IBigImageData;
-
-    /**
-     * 判断一个图块是否包含 `bigImage` 贴图，即是否是大怪物
-     * @param identifier 图块标识符，即图块数字
-     */
-    isBigImage(identifier: number): boolean;
-
-    /**
-     * 根据图块标识符获取一个图块的 `bigImage` 贴图
-     * @param identifier 图块标识符，即图块数字
-     */
-    getBigImage(identifier: number): ITexture | null;
-
-    /**
-     * 根据图块别名获取一个图块的 `bigImage` 贴图
-     * @param alias 图块别名，即图块的 id
-     */
-    getBigImageByAlias(alias: string): ITexture | null;
 }
 
 export interface IAssetBuilder {
