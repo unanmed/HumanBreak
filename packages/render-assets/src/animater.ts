@@ -68,12 +68,13 @@ export class TextureRowAnimater extends FrameBasedAnimater<void> {
         const h = height / this.frames;
         let i = 0;
         while (true) {
-            if (i === this.frames) i = 0;
             const renderable: ITextureRenderable = {
                 source: this.texture!.source,
                 rect: this.texture!.clampRect({ x: i * w + ox, y: oy, w, h })
             };
             yield renderable;
+            i++;
+            if (i === this.frames) i = 0;
         }
     }
 }
@@ -105,12 +106,13 @@ export class TextureColumnAnimater extends FrameBasedAnimater<void> {
         const w = width / this.frames;
         let i = 0;
         while (true) {
-            if (i === this.frames) i = 0;
             const renderable: ITextureRenderable = {
                 source: this.texture!.source,
                 rect: this.texture!.clampRect({ x: i * w + ox, y: oy, w, h })
             };
             yield renderable;
+            i++;
+            if (i === this.frames) i = 0;
         }
     }
 }
@@ -202,7 +204,7 @@ export class TextureScanAnimater
                 rect: texture.clampRect({ x: x * w, y: y * h, w, h })
             };
             yield data;
-
+            index++;
             if (index === this.frames) index = 0;
         }
     }
