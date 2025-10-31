@@ -72,8 +72,15 @@ export class Logger {
         let paramNum = '';
         while (++pointer < text.length) {
             const char = text[pointer];
+            const next = text[pointer + 1];
 
-            if (char === '$' && text[pointer - 1] !== '\\') {
+            if (char === '\\' && next === '$') {
+                str += '$';
+                pointer++;
+                continue;
+            }
+
+            if (char === '$' && nums.has(next)) {
                 inParam = true;
                 continue;
             }
@@ -82,7 +89,7 @@ export class Logger {
                 if (nums.has(char)) {
                     paramNum += char;
                 }
-                if (!nums.has(text[pointer + 1])) {
+                if (!nums.has(next)) {
                     inParam = false;
                     const num = Number(paramNum);
                     paramNum = '';
