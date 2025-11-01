@@ -960,6 +960,7 @@ export class TextContentParser {
                         break;
                     case 'n':
                         // 在这里预先将换行处理为多个 node，会比在分行时再处理更方便
+                        pointer++;
                         this.addTextNode(pointer + 1, true);
                         break;
                 }
@@ -1402,3 +1403,28 @@ export function buildFont(
 ) {
     return `${italic ? 'italic ' : ''}${weight} ${size}px "${family}"`;
 }
+
+window.parser = new TextContentParser(
+    {
+        fillStyle: '#fff',
+        fontFamily: 'Verdana',
+        fontSize: 16,
+        fontItalic: false,
+        fontWeight: 400
+    },
+    {
+        font: new Font('Verdana', 16),
+        breakChars: new Set(''),
+        keepLast: false,
+        interval: 20,
+        lineHeight: 0,
+        wordBreak: WordBreak.Space,
+        textAlign: TextAlign.Left,
+        ignoreLineStart: new Set(),
+        ignoreLineEnd: new Set(),
+        fillStyle: '#fff',
+        strokeStyle: '#fff',
+        strokeWidth: 2,
+        width: 200
+    }
+);
