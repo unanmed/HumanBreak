@@ -817,7 +817,7 @@ export class TextContentParser {
             return pointer;
         }
         const time = parseInt(param);
-        this.addWaitRenderable(end, time);
+        this.addWaitRenderable(end + 1, time);
         return end;
     }
 
@@ -830,19 +830,19 @@ export class TextContentParser {
         }
         if (/^\d+$/.test(param)) {
             const num = Number(param);
-            this.addIconRenderable(end, num as AllNumbers);
+            this.addIconRenderable(end + 1, num as AllNumbers);
         } else {
             if (/^X\d+$/.test(param)) {
                 // 额外素材
                 const num = Number(param.slice(1));
-                this.addIconRenderable(end, num as AllNumbers);
+                this.addIconRenderable(end + 1, num as AllNumbers);
             } else {
                 const num = texture.idNumberMap[param as AllIds];
                 if (num === void 0) {
                     logger.warn(59, param);
                     return end;
                 }
-                this.addIconRenderable(end, num);
+                this.addIconRenderable(end + 1, num);
             }
         }
         return end;
@@ -986,8 +986,10 @@ export class TextContentParser {
             this.resolved += char;
         }
 
-        this.addTextNode(text.length, false);
-        return this.splitLines(width);
+        if (this.nodePointer < text.length) {
+            this.addTextNode(text.length, false);
+        }
+        return this.textNodes;
     }
 
     /**
@@ -1403,28 +1405,3 @@ export function buildFont(
 ) {
     return `${italic ? 'italic ' : ''}${weight} ${size}px "${family}"`;
 }
-
-window.parser = new TextContentParser(
-    {
-        fillStyle: '#fff',
-        fontFamily: 'Verdana',
-        fontSize: 16,
-        fontItalic: false,
-        fontWeight: 400
-    },
-    {
-        font: new Font('Verdana', 16),
-        breakChars: new Set(''),
-        keepLast: false,
-        interval: 20,
-        lineHeight: 0,
-        wordBreak: WordBreak.Space,
-        textAlign: TextAlign.Left,
-        ignoreLineStart: new Set(),
-        ignoreLineEnd: new Set(),
-        fillStyle: '#fff',
-        strokeStyle: '#fff',
-        strokeWidth: 2,
-        width: 200
-    }
-);
