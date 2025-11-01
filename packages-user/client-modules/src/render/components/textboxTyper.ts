@@ -989,7 +989,7 @@ export class TextContentParser {
         if (this.nodePointer < text.length) {
             this.addTextNode(text.length, false);
         }
-        return this.textNodes;
+        return this.splitLines(width);
     }
 
     /**
