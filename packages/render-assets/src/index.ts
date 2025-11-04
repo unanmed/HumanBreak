@@ -5,4 +5,3 @@ export * from './store';
 export * from './streamComposer';
 export * from './texture';
 export * from './types';
-export * from './utils';

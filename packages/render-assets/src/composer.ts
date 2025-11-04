@@ -14,9 +14,9 @@ import {
 } from './types';
 import vert from './shader/pack.vert?raw';
 import frag from './shader/pack.frag?raw';
-import { compileGLWith } from './utils';
 import { logger } from '@motajs/common';
 import { isNil } from 'lodash-es';
+import { compileProgramWith } from 'packages/client-base/src/glUtils';
 
 interface IndexMarkedComposedData {
     /** 组合数据 */
@@ -229,7 +229,7 @@ export class TextureMaxRectsWebGL2Composer
         this.canvas.width = maxWidth;
         this.canvas.height = maxHeight;
         this.gl = this.canvas.getContext('webgl2')!;
-        const program = compileGLWith(this.gl, vert, frag)!;
+        const program = compileProgramWith(this.gl, vert, frag)!;
         this.program = program;
 
         // 初始化画布数据
