@@ -468,9 +468,9 @@ const apiWriteMultiFiles = async (req: Request, res: Response) => {
     } else {
         const strArray = status.map((v, i) => {
             if (v === APIStatus.PermissionDeny) {
-                return `Index: ${i}; Permission Error: Cannot access file outside current working directory`;
-            } else if (v === APIStatus.Success) {
-                return `Index: ${i}: Internal Error: Write file error.`;
+                return `Path: ${pathList[i]}: Permission Error: Cannot access file outside current working directory.`;
+            } else if (v === APIStatus.WriteError) {
+                return `Path: ${pathList[i]}: Internal Error: Write file error.`;
             } else {
                 return 'Success';
             }
