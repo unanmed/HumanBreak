@@ -96,7 +96,7 @@ export interface IMapLayer {
     readonly empty: boolean;
 
     /**
-     * 调整地图尺寸，如果尺寸变大，那么会补零，如果尺寸变小，那么会将当前数组裁剪
+     * 调整地图尺寸，维持原有图块。如果尺寸变大，那么会补零，如果尺寸变小，那么会将当前数组裁剪
      * @param width 地图宽度
      * @param height 地图高度
      */
