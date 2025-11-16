@@ -18,7 +18,7 @@ export class TextureGridStreamComposer implements ITextureStreamComposer<void> {
     readonly cols: number;
 
     private nowIndex: number = 0;
-    private outputIndex: number = 0;
+    private outputIndex: number = -1;
 
     private nowTexture: ITexture;
     private nowCanvas: HTMLCanvasElement;
@@ -65,7 +65,7 @@ export class TextureGridStreamComposer implements ITextureStreamComposer<void> {
             const nowRow = Math.floor(index / this.cols);
             const nowCol = index % this.cols;
 
-            const { source, rect } = tex.static();
+            const { source, rect } = tex.render();
             const { x: cx, y: cy, w: cw, h: ch } = rect;
             const x = nowRow * this.width;
             const y = nowCol * this.height;
@@ -107,7 +107,7 @@ export class TextureMaxRectsStreamComposer
     /** Max Rects 打包器 */
     readonly packer: MaxRectsPacker<MaxRectsRectangle>;
 
-    private outputIndex: number = 0;
+    private outputIndex: number = -1;
     private nowTexture!: ITexture;
 
     private nowCanvas!: HTMLCanvasElement;
@@ -151,7 +151,7 @@ export class TextureMaxRectsStreamComposer
     *add(textures: Iterable<ITexture>): Generator<ITextureComposedData, void> {
         const arr = [...textures];
         const rects = arr.map<MaxRectsRectangle>(v => {
-            const rect = v.static().rect;
+            const rect = v.render().rect;
             const toPack = new Rectangle(rect.w, rect.h);
             toPack.data = v;
             return toPack;
@@ -176,7 +176,7 @@ export class TextureMaxRectsStreamComposer
                     h: v.height
                 };
                 this.nowMap.set(v.data, target);
-                const { source, rect } = v.data.static();
+                const { source, rect } = v.data.render();
                 const { x: cx, y: cy, w: cw, h: ch } = rect;
                 this.nowCtx.drawImage(source, cx, cy, cw, ch, v.x, v.y, cw, ch);
             });

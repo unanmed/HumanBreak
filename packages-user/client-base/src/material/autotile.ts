@@ -1,13 +1,18 @@
-import { IRect, ITexture, ITextureRenderable } from '@motajs/render-assets';
 import {
+    IRect,
+    ITextureRenderable,
+    SizedCanvasImageSource
+} from '@motajs/render-assets';
+import {
+    AutotileConnection,
     AutotileType,
     BlockCls,
     IAutotileConnection,
     IAutotileProcessor,
-    IAutotileRenderable,
+    IMaterialFramedData,
     IMaterialManager
 } from './types';
-import { logger } from '@motajs/common';
+import { isNil } from 'lodash-es';
 
 interface ConnectedAutotile {
     readonly lt: Readonly<IRect>;
@@ -16,19 +21,23 @@ interface ConnectedAutotile {
     readonly lb: Readonly<IRect>;
 }
 
+export interface IAutotileData {
+    /** 图像源 */
+    readonly source: SizedCanvasImageSource;
+    /** 自动元件帧数 */
+    readonly frames: number;
+}
+
 /** 3x4 自动元件的连接映射，元组表示将对应大小的自动元件按照格子 1/4 大小切分后对应的索引位置 */
 const connectionMap3x4 = new Map<number, [number, number, number, number]>();
 /** 2x3 自动元件的连接映射，元组表示将对应大小的自动元件按照格子 1/4 大小切分后对应的索引位置 */
 const connectionMap2x3 = new Map<number, [number, number, number, number]>();
-/** 3x4 自动元件各方向连接矩形映射 */
+/** 3x4 自动元件各方向连接的矩形映射 */
 const rectMap3x4 = new Map<number, ConnectedAutotile>();
 /** 2x3 自动元件各方向连接的矩形映射 */
 const rectMap2x3 = new Map<number, ConnectedAutotile>();
-
-interface AutotileFrameList {
-    type: AutotileType;
-    rects: Readonly<IRect>[];
-}
+/** 不重复连接映射，用于平铺自动元件，一共 48 种 */
+const distinctConnectionMap = new Map<number, number>();
 
 export class AutotileProcessor implements IAutotileProcessor {
     /** 自动元件父子关系映射，子元件 -> 父元件 */
@@ -46,7 +55,7 @@ export class AutotileProcessor implements IAutotileProcessor {
         return ensure;
     }
 
-    setParent(autotile: number, parent: number): void {
+    setConnection(autotile: number, parent: number): void {
         this.parentMap.set(autotile, parent);
         const child = this.ensureChildSet(parent);
         child.add(autotile);
@@ -116,8 +125,14 @@ export class AutotileProcessor implements IAutotileProcessor {
         index: number,
         width: number
     ): IAutotileConnection {
-        let res: number = this.connectEdge(array.length, index, width);
         const block = array[index];
+        if (block === 0) {
+            return {
+                connection: 0,
+                center: 0
+            };
+        }
+        let res: number = this.connectEdge(array.length, index, width);
         const childList = this.childMap.get(block);
 
         // 最高位表示左上，低位依次顺时针旋转
@@ -132,7 +147,7 @@ export class AutotileProcessor implements IAutotileProcessor {
 
         // Benchmark https://www.measurethat.net/Benchmarks/Show/35271/0/convert-boolean-to-number
 
-        if (!childList) {
+        if (!childList || childList.size === 0) {
             // 不包含子元件，那么直接跟相同的连接
             res |=
                 +(a0 === block) |
@@ -161,157 +176,129 @@ export class AutotileProcessor implements IAutotileProcessor {
         };
     }
 
-    render(
+    updateConnectionFor(
+        connection: number,
+        center: number,
+        target: number,
+        direction: AutotileConnection
+    ): number {
+        const childList = this.childMap.get(center);
+        if (!childList || !childList.has(target)) {
+            return connection & ~direction;
+        } else {
+            return connection | direction;
+        }
+    }
+
+    /**
+     * 检查贴图是否是一个自动元件
+     * @param tile 贴图数据
+     */
+    private checkAutotile(tile: IMaterialFramedData) {
+        if (tile.cls !== BlockCls.Autotile) return false;
+        const { texture, frames } = tile;
+        if (texture.width !== 96 * frames) return false;
+        if (texture.height === 128 || texture.height === 144) return true;
+        else return false;
+    }
+
+    render(autotile: number, connection: number): ITextureRenderable | null {
+        const tile = this.manager.getTile(autotile);
+        if (!tile) return null;
+        if (!this.checkAutotile(tile)) return null;
+        return this.renderWithoutCheck(tile, connection);
+    }
+
+    renderWith(
+        tile: IMaterialFramedData,
+        connection: number
+    ): ITextureRenderable | null {
+        if (!this.checkAutotile(tile)) return null;
+        return this.renderWithoutCheck(tile, connection);
+    }
+
+    renderWithoutCheck(
+        tile: IMaterialFramedData,
+        connection: number
+    ): ITextureRenderable | null {
+        const { texture } = tile;
+        const size = texture.height === 128 ? 32 : 48;
+        const index = distinctConnectionMap.get(connection);
+        if (isNil(index)) return null;
+        return {
+            source: texture.source,
+            rect: { x: 0, y: size * index, w: size, h: size }
+        };
+    }
+
+    *renderAnimated(
         autotile: number,
         connection: number
-    ): Generator<IAutotileRenderable, void> | null {
-        const cls = this.manager.getBlockCls(autotile);
-        if (cls !== BlockCls.Autotile) return null;
-        const tile = this.manager.getTile(autotile)!;
-        return this.fromStaticRenderable(tile.static(), connection);
+    ): Generator<ITextureRenderable, void> {
+        const tile = this.manager.getTile(autotile);
+        if (!tile) return;
+        yield* this.renderAnimatedWith(tile, connection);
     }
 
-    /**
-     * 根据静态可渲染对象获取自动元件的帧列表
-     * @param renderable 静态可渲染对象
-     */
-    private getStaticRectList(
-        renderable: ITextureRenderable
-    ): AutotileFrameList {
-        const { x, y, w, h } = renderable.rect;
-        const type = h === 128 ? AutotileType.Big3x4 : AutotileType.Small2x3;
-        if (w === 96) {
-            return {
-                type,
-                rects: [renderable.rect]
-            };
-        } else {
-            return {
-                type,
-                rects: [
-                    { x: x + 0, y, w, h },
-                    { x: x + 96, y, w, h },
-                    { x: x + 192, y, w, h },
-                    { x: x + 288, y, w, h }
-                ]
-            };
-        }
-    }
-
-    /**
-     * 对自动元件连接执行偏移操作，偏移至自动元件在图像源中的所在矩形范围
-     * @param ox 横向偏移量
-     * @param oy 纵向偏移量
-     * @param connection 自动元件连接信息
-     */
-    private getConnectedRect(
-        ox: number,
-        oy: number,
-        connection: ConnectedAutotile
-    ): ConnectedAutotile {
-        const { lt, rt, rb, lb } = connection;
-
-        return {
-            lt: { x: ox + lt.x, y: oy + lt.y, w: lt.w, h: lt.h },
-            rt: { x: ox + rt.x, y: oy + rt.y, w: rt.w, h: rt.h },
-            rb: { x: ox + rb.x, y: oy + rb.y, w: rb.w, h: rb.h },
-            lb: { x: ox + lb.x, y: oy + lb.y, w: lb.w, h: lb.h }
-        };
-    }
-
-    *fromStaticRenderable(
-        renderable: ITextureRenderable,
+    *renderAnimatedWith(
+        tile: IMaterialFramedData,
         connection: number
-    ): Generator<IAutotileRenderable, void> | null {
-        const { type, rects } = this.getStaticRectList(renderable);
-        const map = type === AutotileType.Big3x4 ? rectMap3x4 : rectMap2x3;
-        const data = map.get(connection);
-        if (!data) {
-            logger.error(27);
-            return null;
-        }
-        if (rects.length === 1) {
-            const { x, y } = rects[0];
-            const connected = this.getConnectedRect(x, y, data);
-            if (!connected) return null;
-            const res: IAutotileRenderable = {
-                source: renderable.source,
-                lt: connected.lt,
-                rt: connected.rt,
-                rb: connected.rb,
-                lb: connected.lb
+    ): Generator<ITextureRenderable, void> {
+        if (!this.checkAutotile(tile)) return;
+        const { texture, frames } = tile;
+        const size = texture.height === 128 ? 32 : 48;
+        const index = distinctConnectionMap.get(connection);
+        if (isNil(index)) return;
+        for (let i = 0; i < frames; i++) {
+            yield {
+                source: texture.source,
+                rect: { x: i * size, y: size * index, w: size, h: size }
             };
-            yield res;
-        } else {
-            for (const { x, y } of rects) {
-                const connected = this.getConnectedRect(x, y, data);
-                if (!connected) return null;
-                const res: IAutotileRenderable = {
-                    source: renderable.source,
-                    lt: connected.lt,
-                    rt: connected.rt,
-                    rb: connected.rb,
-                    lb: connected.lb
-                };
-                yield res;
+        }
+    }
+
+    /**
+     * 将自动元件图片展平，平铺存储 48 种样式，此时可以只通过一次绘制来绘制出自动元件，不需要四次绘制
+     * @param image 原始自动元件图片
+     */
+    static flatten(image: IAutotileData): SizedCanvasImageSource | null {
+        const { source, frames } = image;
+        if (source.width !== frames * 96) return null;
+        if (source.height !== 128 && source.height !== 144) return null;
+        const type =
+            source.height === 128 ? AutotileType.Big3x4 : AutotileType.Small2x3;
+        const size = type === AutotileType.Big3x4 ? 32 : 48;
+        const width = frames * size;
+        const height = 48 * size;
+        // 画到画布上
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return null;
+        const half = size / 2;
+        const map = type === AutotileType.Big3x4 ? rectMap3x4 : rectMap2x3;
+        const used = new Set<number>();
+        // 遍历每个组合
+        distinctConnectionMap.forEach((index, conn) => {
+            if (used.has(conn)) return;
+            used.add(conn);
+            const { lt, rt, rb, lb } = map.get(conn)!;
+            const y = index * size;
+            for (let i = 0; i < frames; i++) {
+                const x = i * size;
+                // prettier-ignore
+                ctx.drawImage(source, lt.x + i * 96, lt.y, lt.w, lt.h, x, y, half, half);
+                // prettier-ignore
+                ctx.drawImage(source, rt.x + i * 96, rt.y, rt.w, rt.h, x + half, y, half, half);
+                // prettier-ignore
+                ctx.drawImage(source, rb.x + i * 96, rb.y, rb.w, rb.h, x + half, y + half, half, half);
+                // prettier-ignore
+                ctx.drawImage(source, lb.x + i * 96, lb.y, lb.w, lb.h, x, y + half, half, half);
             }
-        }
-    }
+        });
 
-    fromAnimatedRenderable(
-        renderable: ITextureRenderable,
-        connection: number
-    ): IAutotileRenderable | null {
-        const { x, y, h } = renderable.rect;
-        const type = h === 128 ? AutotileType.Big3x4 : AutotileType.Small2x3;
-        const map = type === AutotileType.Big3x4 ? rectMap3x4 : rectMap2x3;
-        const data = map.get(connection);
-        if (!data) {
-            logger.error(27);
-            return null;
-        }
-        const connected = this.getConnectedRect(x, y, data);
-        if (!connected) return null;
-        const res: IAutotileRenderable = {
-            source: renderable.source,
-            lt: connected.lt,
-            rt: connected.rt,
-            rb: connected.rb,
-            lb: connected.lb
-        };
-        return res;
-    }
-
-    *fromAnimatedGenerator(
-        texture: ITexture,
-        generator: Generator<ITextureRenderable> | null,
-        connection: number
-    ): Generator<IAutotileRenderable, void> | null {
-        if (!generator) return null;
-        const h = texture.height;
-        const type = h === 128 ? AutotileType.Big3x4 : AutotileType.Small2x3;
-        const map = type === AutotileType.Big3x4 ? rectMap3x4 : rectMap2x3;
-        const data = map.get(connection);
-        if (!data) {
-            logger.error(27);
-            return null;
-        }
-        while (true) {
-            const value = generator.next();
-            if (value.done) break;
-            const renderable = value.value;
-            const { x, y } = renderable.rect;
-            const connected = this.getConnectedRect(x, y, data);
-            if (!connected) return null;
-            const res: IAutotileRenderable = {
-                source: renderable.source,
-                lt: connected.lt,
-                rt: connected.rt,
-                rb: connected.rb,
-                lb: connected.lb
-            };
-            yield res;
-        }
+        return canvas;
     }
 }
 
@@ -443,5 +430,24 @@ export function createAutotile() {
             rb: { x: rbx, y: rby, w: 24, h: 24 },
             lb: { x: lbx, y: lby, w: 24, h: 24 }
         });
+    });
+    const usedRect: [number, number, number, number][] = [];
+    let flag = 0;
+    // 2x3 和 3x4 的自动元件连接方式一样，因此没必要映射两次
+    connectionMap2x3.forEach((conn, num) => {
+        const index = usedRect.findIndex(
+            used =>
+                used[0] === conn[0] &&
+                used[1] === conn[1] &&
+                used[2] === conn[2] &&
+                used[3] === conn[3]
+        );
+        if (index === -1) {
+            distinctConnectionMap.set(num, flag);
+            usedRect.push(conn.slice() as [number, number, number, number]);
+            flag++;
+        } else {
+            distinctConnectionMap.set(num, index);
+        }
     });
 }

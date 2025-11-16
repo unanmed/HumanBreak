@@ -1,5 +1,5 @@
+import { IDirtyTracker, IDirtyMarker } from '@motajs/common';
 import {
-    IRect,
     ITexture,
     ITextureComposedData,
     ITextureRenderable,
@@ -23,6 +23,17 @@ export const enum BlockCls {
 export const enum AutotileType {
     Small2x3,
     Big3x4
+}
+
+export const enum AutotileConnection {
+    LeftUp = 0b1000_0000,
+    Up = 0b0100_0000,
+    RightUp = 0b0010_0000,
+    Right = 0b0001_0000,
+    RightDown = 0b0000_1000,
+    Down = 0b0000_0100,
+    LeftDown = 0b0000_0010,
+    Left = 0b0000_0001
 }
 
 export interface IMaterialData {
@@ -70,53 +81,27 @@ export interface IAutotileConnection {
     readonly center: number;
 }
 
-export interface IAutotileRenderable {
-    /** 自动元件的图像源 */
-    readonly source: SizedCanvasImageSource;
-    /** 左上渲染的矩形范围 */
-    readonly lt: Readonly<IRect>;
-    /** 右上渲染的矩形范围 */
-    readonly rt: Readonly<IRect>;
-    /** 右下渲染的矩形范围 */
-    readonly rb: Readonly<IRect>;
-    /** 左下渲染的矩形范围 */
-    readonly lb: Readonly<IRect>;
-}
-
-export interface IBigImageData {
+export interface IBigImageReturn {
     /** 大怪物贴图在 store 中的标识符 */
     readonly identifier: number;
     /** 存储大怪物贴图的存储对象 */
     readonly store: ITextureStore;
 }
 
-export interface IAssetDirtyMarker {
-    /**
-     * 标记为脏，即进行了一次更新
-     */
-    dirty(): void;
+export interface IMaterialFramedData {
+    /** 贴图对象 */
+    readonly texture: ITexture;
+    /** 图块类型 */
+    readonly cls: BlockCls;
+    /** 贴图总帧数 */
+    readonly frames: number;
+    /** 每帧的横向偏移量 */
+    readonly offset: number;
 }
 
-export interface IAssetDirtyTracker {
-    /**
-     * 对图集状态进行标记
-     */
-    mark(): symbol;
-
-    /**
-     * 取消指定标记符号
-     * @param mark 标记符号
-     */
-    unmark(mark: symbol): void;
-
-    /**
-     * 从指定标记符号开始，图集是否发生了变动
-     * @param mark 标记符号
-     */
-    dirtySince(mark: symbol): boolean;
-}
-
-export interface IMaterialAsset extends IAssetDirtyTracker, IAssetDirtyMarker {
+export interface IMaterialAsset
+    extends IDirtyTracker<boolean>,
+        IDirtyMarker<void> {
     /** 图集的贴图数据 */
     readonly data: ITextureComposedData;
 }
@@ -126,11 +111,12 @@ export interface IAutotileProcessor {
     readonly manager: IMaterialManager;
 
     /**
-     * 设置一个自动元件的父元件，一个自动元件可以有多个父元件
+     * 设置一个自动元件的特殊连接方式，设置后当前自动元件将会单方面与目标元件连接，
+     * 一个自动元件可以与多个自动元件有特殊连接
      * @param autotile 自动元件
-     * @param parent 自动元件的父元件
+     * @param target 当前自动元件将会连接至的自动元件
      */
-    setParent(autotile: number, parent: number): void;
+    setConnection(autotile: number, target: number): void;
 
     /**
      * 获取自动元件的连接情况
@@ -145,52 +131,71 @@ export interface IAutotileProcessor {
     ): IAutotileConnection;
 
     /**
-     * 获取指定自动元件经过连接的可渲染对象
+     * 检查一个图块与指定方向的连接方式
+     * @param connection 当前的连接
+     * @param center 中心点的图块数字
+     * @param target 连接点的图块数字
+     * @param direction 连接点的方向
+     * @returns 经过连接后的连接数字
+     */
+    updateConnectionFor(
+        connection: number,
+        center: number,
+        target: number,
+        direction: AutotileConnection
+    ): number;
+
+    /**
+     * 根据图块数字，获取指定自动元件经过连接的可渲染对象
      * @param autotile 自动元件的图块数字
      * @param connection 连接方式，上方连接是第一位，顺时针旋转位次依次升高
+     * @returns 连接方式的可渲染对象，可以通过偏移量依次获取其他帧
+     */
+    render(autotile: number, connection: number): ITextureRenderable | null;
+
+    /**
+     * 根据图块贴图对象，获取指定自动元件经过连接的可渲染对象
+     * @param tile 自动元件的图块贴图数据
+     * @param connection 连接方式，上方连接是第一位，顺时针旋转位次依次升高
+     * @returns 连接方式的可渲染对象，可以通过偏移量依次获取其他帧
+     */
+    renderWith(
+        tile: IMaterialFramedData,
+        connection: number
+    ): ITextureRenderable | null;
+
+    /**
+     * 根据图块贴图对象，获取指定自动元件经过连接的可渲染对象，但是会假设传入的图块就是自动元件，不做不必要的判断
+     * @param tile 自动元件的图块贴图数据
+     * @param connection 连接方式，上方连接是第一位，顺时针旋转位次依次升高
+     * @returns 连接方式的可渲染对象，可以通过偏移量依次获取其他帧
+     */
+    renderWithoutCheck(
+        tile: IMaterialFramedData,
+        connection: number
+    ): ITextureRenderable | null;
+
+    /**
+     * 根据图块数字，获取指定自动元件经过链接的动态可渲染对象
+     * @param autotile 自动元件的图块数字
+     * @param connection 自动元件的连接方式
      * @returns 生成器，每一个输出代表每一帧的渲染对象，不同自动元件的帧数可能不同
      */
-    render(
+    renderAnimated(
         autotile: number,
         connection: number
-    ): Generator<IAutotileRenderable, void> | null;
+    ): Generator<ITextureRenderable, void>;
 
     /**
-     * 通过静态可渲染对象（由 {@link ITexture.static} 输出的可渲染对象）输出自动元件经过连接的可渲染对象生成器
-     * @param renderable 自动元件的原始可渲染对象
+     * 根据图块贴图对象，获取指定自动元件经过链接的动态可渲染对象
+     * @param autotile 自动元件的图块数字
      * @param connection 自动元件的连接方式
      * @returns 生成器，每一个输出代表每一帧的渲染对象，不同自动元件的帧数可能不同
      */
-    fromStaticRenderable(
-        renderable: ITextureRenderable,
+    renderAnimatedWith(
+        tile: IMaterialFramedData,
         connection: number
-    ): Generator<IAutotileRenderable, void> | null;
-
-    /**
-     * 通过动画可渲染对象（由 {@link ITexture.dynamic} 或 {@link ITexture.cycled} 输出的单个可渲染对象）
-     * 输出自动元件经过连接的可渲染对象
-     * @param renderable 自动元件的原始可渲染对象
-     * @param connection 自动元件的连接方式
-     * @returns 这一帧的可渲染对象
-     */
-    fromAnimatedRenderable(
-        renderable: ITextureRenderable,
-        connection: number
-    ): IAutotileRenderable | null;
-
-    /**
-     * 通过动画生成器（由 {@link ITexture.dynamic} 或 {@link ITexture.cycled} 输出的生成器）
-     * 输出自动元件经过连接的可渲染对象生成器
-     * @param texture 生成动画的纹理对象
-     * @param generator 自动元件的动画生成器
-     * @param connection 自动元件的连接方式
-     * @returns 生成器，每一个输出代表每一帧的渲染对象
-     */
-    fromAnimatedGenerator(
-        texture: ITexture,
-        generator: Generator<ITextureRenderable> | null,
-        connection: number
-    ): Generator<IAutotileRenderable, void> | null;
+    ): Generator<ITextureRenderable, void>;
 }
 
 export interface IMaterialGetter {
@@ -198,7 +203,7 @@ export interface IMaterialGetter {
      * 根据图块数字获取图块，可以获取额外素材，会自动将未缓存的额外素材缓存
      * @param identifier 图块的图块数字
      */
-    getTile(identifier: number): ITexture | null;
+    getTile(identifier: number): IMaterialFramedData | null;
 
     /**
      * 根据图块标识符获取图块类型
@@ -216,14 +221,14 @@ export interface IMaterialGetter {
      * 根据图块标识符获取一个图块的 `bigImage` 贴图
      * @param identifier 图块标识符，即图块数字
      */
-    getBigImage(identifier: number): ITexture | null;
+    getBigImage(identifier: number): IMaterialFramedData | null;
 
     /**
      * 根据图块标识符，首先判断是否是 `bigImage` 贴图，如果是，则返回 `bigImage` 贴图，
      * 否则返回普通贴图。如果图块不存在，则返回 `null`
      * @param identifier 图块标识符，即图块数字
      */
-    getIfBigImage(identifier: number): ITexture | null;
+    getIfBigImage(identifier: number): IMaterialFramedData | null;
 
     /**
      * 根据标识符获取图集信息
@@ -249,7 +254,7 @@ export interface IMaterialAliasGetter {
      * 根据图块 id 获取图块，可以获取额外素材，会自动将未缓存的额外素材缓存
      * @param alias 图块 id
      */
-    getTileByAlias(alias: string): ITexture | null;
+    getTileByAlias(alias: string): IMaterialFramedData | null;
 
     /**
      * 根据额外素材名称获取额外素材
@@ -279,7 +284,7 @@ export interface IMaterialAliasGetter {
      * 根据图块别名获取一个图块的 `bigImage` 贴图
      * @param alias 图块别名，即图块的 id
      */
-    getBigImageByAlias(alias: string): ITexture | null;
+    getBigImageByAlias(alias: string): IMaterialFramedData | null;
 }
 
 export interface IMaterialManager
@@ -330,11 +335,12 @@ export interface IMaterialManager
      * 添加自动元件
      * @param source 图像源
      * @param identifier 自动元件的字符串 id 及图块数字
+     * @returns 由于自动元件是懒加载的，因此不会返回任何东西
      */
     addAutotile(
         source: SizedCanvasImageSource,
         identifier: IBlockIdentifier
-    ): IMaterialData;
+    ): void;
 
     /**
      * 添加一个 tileset 类型的素材
@@ -357,7 +363,7 @@ export interface IMaterialManager
     ): IMaterialData;
 
     /**
-     * 缓存某个 tileset
+     * 缓存某个 tileset，当需要缓存多个时，请使用 {@link cacheTilesetList} 方法
      * @param identifier tileset 的标识符，即图块数字
      */
     cacheTileset(identifier: number): ITexture | null;
@@ -367,6 +373,20 @@ export interface IMaterialManager
      * @param identifierList 标识符列表，即图块数字列表
      */
     cacheTilesetList(
+        identifierList: Iterable<number>
+    ): Iterable<ITexture | null>;
+
+    /**
+     * 缓存某个自动元件，当需要缓存多个时，请使用 {@link cacheAutotileList} 方法
+     * @param identifier 自动元件标识符，即图块数字
+     */
+    cacheAutotile(identifier: number): ITexture | null;
+
+    /**
+     * 缓存一系列自动元件
+     * @param identifierList 自动元件标识符列表，即图块数字列表
+     */
+    cacheAutotileList(
         identifierList: Iterable<number>
     ): Iterable<ITexture | null>;
 
@@ -403,8 +423,25 @@ export interface IMaterialManager
      * 设置一个图块的 `bigImage` 贴图，即大怪物贴图，但不止怪物能用
      * @param identifier 图块标识符，即图块数字
      * @param image `bigImage` 对应的贴图对象
+     * @param frames `bigImage` 的帧数，即贴图有多少帧
      */
-    setBigImage(identifier: number, image: ITexture): IBigImageData;
+    setBigImage(
+        identifier: number,
+        image: ITexture,
+        frames: number
+    ): IBigImageReturn;
+
+    /**
+     * 当前的所有图集中是否包含指定的贴图对象
+     * @param texture 贴图对象
+     */
+    assetContainsTexture(texture: ITexture): boolean;
+
+    /**
+     * 获取指定贴图对象所属的图集索引
+     * @param texture 贴图对象
+     */
+    getTextureAsset(texture: ITexture): number | undefined;
 }
 
 export interface IAssetBuilder {

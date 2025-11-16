@@ -16,7 +16,7 @@ import vert from './shader/pack.vert?raw';
 import frag from './shader/pack.frag?raw';
 import { logger } from '@motajs/common';
 import { isNil } from 'lodash-es';
-import { compileProgramWith } from 'packages/client-base/src/glUtils';
+import { compileProgramWith } from '@motajs/client-base';
 
 interface IndexMarkedComposedData {
     /** 组合数据 */
@@ -68,7 +68,7 @@ export class TextureGridComposer
             const dx = x * data.width;
             const dy = y * data.height;
             const texture = tex[i + start];
-            const renderable = texture.static();
+            const renderable = texture.render();
             const { x: sx, y: sy, w: sw, h: sh } = renderable.rect;
             ctx.drawImage(renderable.source, sx, sy, sw, sh, dx, dy, sw, sh);
             map.set(texture, { x: dx, y: dy, w: sw, h: sh });
@@ -146,7 +146,7 @@ export class TextureMaxRectsComposer
         );
         const arr = [...input];
         const rects = arr.map<MaxRectsRectangle>(v => {
-            const rect = v.static().rect;
+            const rect = v.render().rect;
             const toPack = new Rectangle(rect.w, rect.h);
             toPack.data = v;
             return toPack;
@@ -164,7 +164,7 @@ export class TextureMaxRectsComposer
             bin.rects.forEach(v => {
                 const rect: IRect = { x: v.x, y: v.y, w: v.width, h: v.height };
                 map.set(v.data, rect);
-                const renderable = v.data.static();
+                const renderable = v.data.render();
                 const { x, y, w, h } = renderable.rect;
                 const source = renderable.source;
                 ctx.drawImage(source, x, y, w, h, v.x, v.y, v.width, v.height);
@@ -229,7 +229,7 @@ export class TextureMaxRectsWebGL2Composer
         this.canvas.width = maxWidth;
         this.canvas.height = maxHeight;
         this.gl = this.canvas.getContext('webgl2')!;
-        const program = compileProgramWith(this.gl, vert, frag)!;
+        const { program } = compileProgramWith(this.gl, vert, frag)!;
         this.program = program;
 
         // 初始化画布数据
@@ -342,7 +342,7 @@ export class TextureMaxRectsWebGL2Composer
         rects.forEach((v, i) => {
             const rect: IRect = { x: v.x, y: v.y, w: v.width, h: v.height };
             map.set(v.data, rect);
-            const renderable = v.data.static();
+            const renderable = v.data.render();
             const { width: tw, height: th } = v.data.source;
             const { x, y, w, h } = renderable.rect;
             // 画到目标画布上的位置
@@ -422,7 +422,7 @@ export class TextureMaxRectsWebGL2Composer
         );
         const arr = [...input];
         const rects = arr.map<MaxRectsRectangle>(v => {
-            const rect = v.static().rect;
+            const rect = v.render().rect;
             const toPack = new Rectangle(rect.w, rect.h);
             toPack.data = v;
             return toPack;

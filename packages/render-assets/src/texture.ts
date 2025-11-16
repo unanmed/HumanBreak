@@ -2,16 +2,14 @@ import { logger } from '@motajs/common';
 import {
     IRect,
     ITexture,
-    ITextureAnimater,
     ITextureComposedData,
     ITextureRenderable,
     ITextureSplitter,
     SizedCanvasImageSource
 } from './types';
 
-export class Texture<T = unknown, A = unknown> implements ITexture<T, A> {
+export class Texture implements ITexture {
     source: SizedCanvasImageSource;
-    animater: ITextureAnimater<T, A> | null = null;
     width: number;
     height: number;
     isBitmap: boolean = false;
@@ -85,12 +83,7 @@ export class Texture<T = unknown, A = unknown> implements ITexture<T, A> {
         return splitter.split(this, data);
     }
 
-    animated(animater: ITextureAnimater<T, A>, data: T): void {
-        this.animater = animater;
-        animater.create(this, data);
-    }
-
-    static(): ITextureRenderable {
+    render(): ITextureRenderable {
         return {
             source: this.source,
             rect: { x: this.cl, y: this.ct, w: this.width, h: this.height }
@@ -112,21 +105,10 @@ export class Texture<T = unknown, A = unknown> implements ITexture<T, A> {
         };
     }
 
-    dynamic(data: A): Generator<ITextureRenderable, void> | null {
-        if (!this.animater) return null;
-        return this.animater.open(data);
-    }
-
-    cycled(data: A): Generator<ITextureRenderable, void> | null {
-        if (!this.animater) return null;
-        return this.animater.cycled(data);
-    }
-
     dispose(): void {
         if (this.source instanceof ImageBitmap) {
             this.source.close();
         }
-        this.animater = null;
     }
 
     toAsset(asset: ITextureComposedData): boolean {
@@ -192,7 +174,7 @@ export class Texture<T = unknown, A = unknown> implements ITexture<T, A> {
         fy: number
     ): Generator<ITextureRenderable, void> | null {
         if (!animate) return null;
-        const { x: ox, y: oy } = origin.static().rect;
+        const { x: ox, y: oy } = origin.render().rect;
 
         while (true) {
             const next = animate.next();

@@ -1,7 +1,9 @@
 import { loading } from '@user/data-base';
 import { fallbackLoad } from './fallback';
+import { createAutotile } from './autotile';
 
 export function createMaterial() {
+    createAutotile();
     loading.once('loaded', () => {
         fallbackLoad();
     });

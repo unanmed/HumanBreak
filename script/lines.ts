@@ -25,8 +25,15 @@ import { formatSize } from './utils.js';
         '.vue',
         '.less',
         '.css',
-        '.html'
+        '.html',
+        '.vert',
+        '.frag'
     ];
+
+    const mapExt = (ext: string) => {
+        if (ext === '.vert' || ext === '.frag') return '.shader';
+        else return ext;
+    };
 
     const check = async (dir: string) => {
         if (ignoreDir.some(v => dir.includes(v))) return;
@@ -38,7 +45,7 @@ import { formatSize } from './utils.js';
                 if (exts.some(v => one.endsWith(v))) {
                     const file = await fs.readFile(resolve(dir, one), 'utf-8');
                     const lines = file.split('\n').length;
-                    const ext = extname(one);
+                    const ext = mapExt(extname(one));
                     list[ext] ??= [0, 0, 0];
                     list[ext][0]++;
                     list[ext][1] += lines;
@@ -59,7 +66,7 @@ import { formatSize } from './utils.js';
     });
     for (const [ext, [file, lines, size]] of sorted) {
         console.log(
-            `${ext.slice(1).padEnd(7, ' ')}files: ${file
+            `${ext.slice(1).padEnd(9, ' ')}files: ${file
                 .toString()
                 .padEnd(6, ' ')}lines: ${lines
                 .toString()
@@ -67,7 +74,7 @@ import { formatSize } from './utils.js';
         );
     }
     console.log(
-        `\x1b[33mtotal  files: ${totalFiles
+        `\x1b[33mtotal    files: ${totalFiles
             .toString()
             .padEnd(6, ' ')}lines: ${totalLines
             .toString()

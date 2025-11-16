@@ -1,19 +1,20 @@
 import { isNil } from 'lodash-es';
-import { Texture } from './texture';
-import { ITexture, ITextureStore, SizedCanvasImageSource } from './types';
+import { ITexture, ITextureStore } from './types';
 import { logger } from '@motajs/common';
 
-export class TextureStore implements ITextureStore {
-    private readonly texMap: Map<number, ITexture> = new Map();
-    private readonly invMap: Map<ITexture, number> = new Map();
+export class TextureStore<T extends ITexture = ITexture>
+    implements ITextureStore<T>
+{
+    private readonly texMap: Map<number, T> = new Map();
+    private readonly invMap: Map<T, number> = new Map();
     private readonly aliasMap: Map<string, number> = new Map();
     private readonly aliasInvMap: Map<number, string> = new Map();
 
-    [Symbol.iterator](): Iterator<[key: number, tex: ITexture]> {
+    [Symbol.iterator](): Iterator<[key: number, tex: T]> {
         return this.texMap.entries();
     }
 
-    entries(): Iterable<[key: number, tex: ITexture]> {
+    entries(): Iterable<[key: number, tex: T]> {
         return this.texMap.entries();
     }
 
@@ -21,15 +22,11 @@ export class TextureStore implements ITextureStore {
         return this.texMap.keys();
     }
 
-    values(): Iterable<ITexture> {
+    values(): Iterable<T> {
         return this.texMap.values();
     }
 
-    createTexture(source: SizedCanvasImageSource): ITexture {
-        return new Texture(source);
-    }
-
-    addTexture(identifier: number, texture: ITexture): void {
+    addTexture(identifier: number, texture: T): void {
         if (this.texMap.has(identifier)) {
             logger.warn(66, identifier.toString());
             return;
@@ -38,7 +35,7 @@ export class TextureStore implements ITextureStore {
         this.invMap.set(texture, identifier);
     }
 
-    private removeBy(id: number, tex: ITexture, alias?: string) {
+    private removeBy(id: number, tex: T, alias?: string) {
         this.texMap.delete(id);
         this.invMap.delete(tex);
         if (alias) {
@@ -47,7 +44,7 @@ export class TextureStore implements ITextureStore {
         }
     }
 
-    removeTexture(identifier: number | string | ITexture): void {
+    removeTexture(identifier: number | string | T): void {
         if (typeof identifier === 'string') {
             const id = this.aliasMap.get(identifier);
             if (isNil(id)) return;
@@ -67,7 +64,7 @@ export class TextureStore implements ITextureStore {
         }
     }
 
-    getTexture(identifier: number): ITexture | null {
+    getTexture(identifier: number): T | null {
         return this.texMap.get(identifier) ?? null;
     }
 
@@ -92,7 +89,7 @@ export class TextureStore implements ITextureStore {
         return this.texMap.get(id) ?? null;
     }
 
-    idOf(texture: ITexture): number | undefined {
+    idOf(texture: T): number | undefined {
         return this.invMap.get(texture);
     }
 

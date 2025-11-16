@@ -56,6 +56,7 @@ import {
     LayerGroup
 } from '../elements';
 import { isNil } from 'lodash-es';
+import { materials } from '@user/client-base';
 
 const MainScene = defineComponent(() => {
     //#region 基本定义
@@ -267,8 +268,25 @@ const MainScene = defineComponent(() => {
         core.doRegisteredAction('onmove', bx, by, ev.offsetX, ev.offsetY);
     };
 
+    const testRender = (canvas: MotaOffscreenCanvas2D) => {
+        const tileset = materials.getAsset(0);
+        if (!tileset) return;
+        canvas.ctx.drawImage(
+            tileset.data.texture.source,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+    };
+
     return () => (
         <container id="main-scene" width={MAIN_WIDTH} height={MAIN_HEIGHT}>
+            <sprite
+                render={testRender}
+                loc={[180, 0, 480, 480]}
+                zIndex={1000}
+            />
             <LeftStatusBar
                 loc={[0, 0, STATUS_BAR_WIDTH, STATUS_BAR_HEIGHT]}
                 status={leftStatus}

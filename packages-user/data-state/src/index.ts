@@ -5,5 +5,6 @@ export function create() {
 }
 
 export * from './enemy';
+export * from './map';
 export * from './mechanism';
 export * from './state';

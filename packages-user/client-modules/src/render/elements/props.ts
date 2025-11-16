@@ -11,6 +11,7 @@ import {
 import { EAnimateEvent } from './animate';
 import { EIconEvent, EWinskinEvent } from './misc';
 import { IEnemyCollection } from '@motajs/types';
+import { IRenderLayerData } from '../map/element';
 
 export interface AnimateProps extends BaseProps {}
 
@@ -58,6 +59,10 @@ export interface LayerProps extends BaseProps {
     background?: AllNumbers;
     floorImage?: FloorAnimate[];
     ex?: readonly ILayerRenderExtends[];
+}
+
+export interface MapRenderProps extends BaseProps {
+    layerList: IRenderLayerData;
 }
 
 declare module 'vue/jsx-runtime' {

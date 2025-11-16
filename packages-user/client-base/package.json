@@ -1,6 +1,7 @@
 {
     "name": "@user/client-base",
     "dependencies": {
-        "@motajs/render-asset": "workspace:*"
+        "@motajs/render-asset": "workspace:*",
+        "@motajs/client-base": "workspace:*"
     }
 }

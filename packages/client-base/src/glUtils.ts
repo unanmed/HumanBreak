@@ -1,5 +1,14 @@
 import { logger } from '@motajs/common';
 
+export interface ICompiledProgram {
+    /** 着色器程序 */
+    readonly program: WebGLProgram;
+    /** 顶点着色器对象 */
+    readonly vertexShader: WebGLShader;
+    /** 片段着色器对象 */
+    readonly fragmentShader: WebGLShader;
+}
+
 /**
  * 编译着色器
  * @param gl WebGL2 上下文
@@ -61,11 +70,17 @@ export function compileProgramWith(
     gl: WebGL2RenderingContext,
     vs: string,
     fs: string
-): WebGLProgram | null {
+): ICompiledProgram | null {
     const vsShader = compileShader(gl, gl.VERTEX_SHADER, vs);
     const fsShader = compileShader(gl, gl.FRAGMENT_SHADER, fs);
 
     if (!vsShader || !fsShader) return null;
+    const program = compileProgram(gl, vsShader, fsShader);
+    if (!program) return null;
 
-    return compileProgram(gl, vsShader, fsShader);
+    return {
+        program,
+        vertexShader: vsShader,
+        fragmentShader: fsShader
+    };
 }

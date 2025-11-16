@@ -1,3 +1,4 @@
+import { ITexture } from '@motajs/render-assets';
 import { BlockCls } from './types';
 
 export function getClsByString(cls: Cls): BlockCls {
@@ -22,5 +23,25 @@ export function getClsByString(cls: Cls): BlockCls {
             return BlockCls.Tileset;
         default:
             return BlockCls.Unknown;
+    }
+}
+
+export function getTextureFrame(cls: BlockCls, texture: ITexture) {
+    switch (cls) {
+        case BlockCls.Animates:
+        case BlockCls.Enemy48:
+        case BlockCls.Npc48:
+            return 4;
+        case BlockCls.Autotile:
+            return texture.width === 384 ? 4 : 1;
+        case BlockCls.Enemys:
+        case BlockCls.Npcs:
+            return 2;
+        case BlockCls.Items:
+        case BlockCls.Terrains:
+        case BlockCls.Tileset:
+            return 1;
+        case BlockCls.Unknown:
+            return 0;
     }
 }

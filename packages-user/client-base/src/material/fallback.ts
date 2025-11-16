@@ -31,6 +31,16 @@ function addTileset(set: Set<number>, map?: readonly (readonly number[])[]) {
     });
 }
 
+function addAutotile(set: Set<number>, map?: readonly (readonly number[])[]) {
+    if (!map) return;
+    map.forEach(line => {
+        line.forEach(v => {
+            const id = core.maps.blocksInfo[v as keyof NumberToId];
+            if (id.cls === 'autotile') set.add(v);
+        });
+    });
+}
+
 /**
  * 兼容旧版加载
  */
@@ -57,11 +67,11 @@ export function fallbackLoad() {
     materials.addGrid(images.items, items);
 
     // Row Animates
-    materials.addRowAnimate(images.animates, animates, 4, 32);
-    materials.addRowAnimate(images.enemys, enemys, 2, 32);
-    materials.addRowAnimate(images.npcs, npcs, 2, 32);
-    materials.addRowAnimate(images.enemy48, enemy48, 4, 48);
-    materials.addRowAnimate(images.npc48, npc48, 4, 48);
+    materials.addRowAnimate(images.animates, animates, 32);
+    materials.addRowAnimate(images.enemys, enemys, 32);
+    materials.addRowAnimate(images.npcs, npcs, 32);
+    materials.addRowAnimate(images.enemy48, enemy48, 48);
+    materials.addRowAnimate(images.npc48, npc48, 48);
 
     // Autotile
     for (const key of Object.keys(icons.autotile)) {
@@ -91,10 +101,9 @@ export function fallbackLoad() {
         materials.addImage(img, { index: i, alias: v });
     });
 
-    materials.buildAssets();
-
     // 地图上出现过的 tileset
     const tilesetSet = new Set<number>();
+    const autotileSet = new Set<number>();
     core.floorIds.forEach(v => {
         const floor = core.floors[v];
         addTileset(tilesetSet, floor.bgmap);
@@ -102,7 +111,14 @@ export function fallbackLoad() {
         addTileset(tilesetSet, floor.map);
         addTileset(tilesetSet, floor.fgmap);
         addTileset(tilesetSet, floor.fg2map);
+        addAutotile(autotileSet, floor.bgmap);
+        addAutotile(autotileSet, floor.bg2map);
+        addAutotile(autotileSet, floor.map);
+        addAutotile(autotileSet, floor.fgmap);
+        addAutotile(autotileSet, floor.fg2map);
     });
 
-    materials.cacheTilesetList(tilesetSet);
+    materials.cacheTilesetList(tilesetSet.union(autotileSet));
+
+    materials.buildAssets();
 }

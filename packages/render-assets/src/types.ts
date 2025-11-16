@@ -66,40 +66,29 @@ export interface ITextureSplitter<T> {
     split(texture: ITexture, data: T): Generator<ITexture, void>;
 }
 
-export interface ITextureAnimater<T, I> {
-    /** 此动画控制器所控制的贴图 */
-    readonly texture: ITexture<T, I> | null;
-
-    /**
-     * 对一个贴图对象创建动画控制器
-     * @param texture 要绑定的贴图对象
-     * @param data 传递给动画控制器的参数
-     */
-    create(texture: ITexture, data: T): void;
-
+export interface ITextureAnimater<T> {
     /**
      * 开始动画序列
-     * @param init 动画初始化参数
+     * @param texture 贴图对象
+     * @param data 动画初始化参数
      */
-    open(init: I): Generator<ITextureRenderable, void> | null;
+    once(texture: ITexture, data: T): Generator<ITextureRenderable, void>;
 
     /**
      * 开始循环动画序列
-     * @param init 动画初始化参数
+     * @param texture 贴图对象
+     * @param data 动画初始化参数
      */
-    cycled(init: I): Generator<ITextureRenderable, void> | null;
+    cycled(texture: ITexture, data: T): Generator<ITextureRenderable, void>;
 }
 
-export interface ITexture<T = unknown, A = unknown> {
+export interface ITexture {
     /** 贴图的图像源 */
     readonly source: SizedCanvasImageSource;
-    /** 此贴图使用的动画控制器 */
-    readonly animater: ITextureAnimater<T, A> | null;
     /** 贴图宽度 */
     readonly width: number;
     /** 贴图高度 */
     readonly height: number;
-
     /** 当前贴图是否是完整 bitmap 图像 */
     readonly isBitmap: boolean;
 
@@ -117,16 +106,9 @@ export interface ITexture<T = unknown, A = unknown> {
     split<T>(splitter: ITextureSplitter<T>, data: T): Generator<ITexture>;
 
     /**
-     * 将此贴图标记为可动画贴图，使用传入的动画控制器描述动画。每个贴图只能绑定一个动画控制器，反之同理
-     * @param animater 动画控制器
-     * @param data 传递给动画控制器的参数
-     */
-    animated(animater: ITextureAnimater<T, A>, data: T): void;
-
-    /**
      * 获取整张图的可渲染对象
      */
-    static(): ITextureRenderable;
+    render(): ITextureRenderable;
 
     /**
      * 限制矩形范围至当前贴图对象范围
@@ -135,22 +117,10 @@ export interface ITexture<T = unknown, A = unknown> {
     clampRect(rect: Readonly<IRect>): Readonly<IRect>;
 
     /**
-     * 获取贴图经过矩形裁剪后的可渲染对象，并不是简单地对图像源裁剪，还会处理其他情况
+     * 获取贴图经过指定矩形裁剪后的可渲染对象，并不是简单地对图像源裁剪，还会处理其他情况
      * @param rect 裁剪矩形
      */
     clipped(rect: Readonly<IRect>): ITextureRenderable;
-
-    /**
-     * 获取一系列动画可渲染对象，不循环，按帧数依次排列
-     * @param data 传递给动画控制器的初始化参数
-     */
-    dynamic(data: A): Generator<ITextureRenderable, void> | null;
-
-    /**
-     * 获取无限循环的动画可渲染对象
-     * @param data 传递给动画控制器的初始化参数
-     */
-    cycled(data: A): Generator<ITextureRenderable, void> | null;
 
     /**
      * 释放此贴图的资源，将不能再被使用
@@ -165,13 +135,20 @@ export interface ITexture<T = unknown, A = unknown> {
     toAsset(asset: ITextureComposedData): boolean;
 }
 
-export interface ITextureStore {
-    [Symbol.iterator](): Iterator<[key: number, tex: ITexture]>;
+export const enum TextureOffsetDirection {
+    LeftToRight,
+    RightToLeft,
+    TopToBottom,
+    BottomToTop
+}
+
+export interface ITextureStore<T extends ITexture = ITexture> {
+    [Symbol.iterator](): Iterator<[key: number, tex: T]>;
 
     /**
      * 获取纹理对象键值对的可迭代对象
      */
-    entries(): Iterable<[key: number, tex: ITexture]>;
+    entries(): Iterable<[key: number, tex: T]>;
 
     /**
      * 获取纹理对象的键的可迭代对象
@@ -181,35 +158,29 @@ export interface ITextureStore {
     /**
      * 获取纹理对象的值的可迭代对象
      */
-    values(): Iterable<ITexture>;
-
-    /**
-     * 通过图像源创建贴图对象
-     * @param source 贴图使用的图像源
-     */
-    createTexture(source: SizedCanvasImageSource): ITexture;
+    values(): Iterable<T>;
 
     /**
      * 添加一个贴图
      * @param identifier 贴图 id
      * @param texture 贴图对象
      */
-    addTexture(identifier: number, texture: ITexture): void;
+    addTexture(identifier: number, texture: T): void;
 
     /**
      * 移除一个贴图
      * @param identifier 要移除的贴图对象 id 或 别名 或 贴图对象
      */
-    removeTexture(identifier: number | string | ITexture): void;
+    removeTexture(identifier: number | string | T): void;
 
     /**
      * 根据贴图对象 id 获取贴图
      * @param identifier 贴图对象 id
      */
-    getTexture(identifier: number): ITexture | null;
+    getTexture(identifier: number): T | null;
 
     /**
-     * 给贴图对象命名一个别名
+     * 给贴图对象命名一个别名，如果贴图对象不存在也可以设置
      * @param identifier 贴图对象 id
      * @param alias 要命名的别名
      */

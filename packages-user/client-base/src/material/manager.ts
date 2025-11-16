@@ -6,7 +6,6 @@ import {
     ITextureStore,
     SizedCanvasImageSource,
     Texture,
-    TextureColumnAnimater,
     TextureGridSplitter,
     TextureRowSplitter,
     TextureStore
@@ -18,15 +17,17 @@ import {
     IIndexedIdentifier,
     IMaterialAssetData,
     BlockCls,
-    IBigImageData,
+    IBigImageReturn,
     IAssetBuilder,
-    IMaterialAsset
+    IMaterialAsset,
+    IMaterialFramedData
 } from './types';
 import { logger } from '@motajs/common';
-import { getClsByString } from './utils';
+import { getClsByString, getTextureFrame } from './utils';
 import { isNil } from 'lodash-es';
 import { AssetBuilder } from './builder';
 import { MaterialAsset } from './asset';
+import { AutotileProcessor } from './autotile';
 
 export class MaterialManager implements IMaterialManager {
     readonly tileStore: ITextureStore = new TextureStore();
@@ -35,18 +36,26 @@ export class MaterialManager implements IMaterialManager {
     readonly assetStore: ITextureStore = new TextureStore();
     readonly bigImageStore: ITextureStore = new TextureStore();
 
+    /** 自动元件图像源映射 */
+    readonly autotileSource: Map<number, SizedCanvasImageSource> = new Map();
+
     /** 图集信息存储 */
     readonly assetDataStore: Map<number, IMaterialAsset> = new Map();
+    /** 贴图到图集索引的映射 */
+    readonly assetMap: Map<ITexture, number> = new Map();
 
     /** 大怪物数据 */
-    readonly bigImageData: Map<number, ITexture> = new Map();
+    readonly bigImageData: Map<number, IMaterialFramedData> = new Map();
     /** tileset 中 `Math.floor(id / 10000) + 1` 映射到 tileset 对应索引的映射，用于处理图块超出 10000 的 tileset */
     readonly tilesetOffsetMap: Map<number, number> = new Map();
     /** 图集打包器 */
     readonly assetBuilder: IAssetBuilder = new AssetBuilder();
 
+    /** 图块 id 到图块数字的映射 */
     readonly idNumMap: Map<string, number> = new Map();
+    /** 图块数字到图块 id 的映射 */
     readonly numIdMap: Map<number, string> = new Map();
+    /** 图块数字到图块类型的映射 */
     readonly clsMap: Map<number, BlockCls> = new Map();
 
     /** 网格切分器 */
@@ -62,9 +71,6 @@ export class MaterialManager implements IMaterialManager {
     private nowTilesetOffset: number = 0;
     /** 是否已经构建过素材 */
     private built: boolean = false;
-
-    /** 标记列表 */
-    private readonly markList: symbol[] = [];
 
     constructor() {
         this.assetBuilder.pipe(this.assetStore);
@@ -125,7 +131,6 @@ export class MaterialManager implements IMaterialManager {
     addRowAnimate(
         source: SizedCanvasImageSource,
         map: ArrayLike<IBlockIdentifier>,
-        frames: number,
         height: number
     ): Iterable<IMaterialData> {
         return this.addMappedSource(
@@ -133,18 +138,18 @@ export class MaterialManager implements IMaterialManager {
             map,
             this.tileStore,
             this.rowSplitter,
-            height,
-            (tex: ITexture<number>) => {
-                tex.animated(new TextureColumnAnimater(), frames);
-            }
+            height
         );
     }
 
     addAutotile(
         source: SizedCanvasImageSource,
         identifier: IBlockIdentifier
-    ): IMaterialData {
-        const texture = new Texture(source);
+    ): IMaterialData | null {
+        const frames = source.width === 96 ? 1 : 4;
+        const flattened = AutotileProcessor.flatten({ source, frames });
+        if (!flattened) return null;
+        const texture = new Texture(flattened);
         this.tileStore.addTexture(identifier.num, texture);
         this.tileStore.alias(identifier.num, identifier.id);
         this.clsMap.set(identifier.num, BlockCls.Autotile);
@@ -177,6 +182,7 @@ export class MaterialManager implements IMaterialManager {
                 logger.warn(78);
                 return null;
             }
+            // 一个 tileset 可能不止 10000 个图块，需要计算偏移
             const width = Math.floor(source.width / 32);
             const height = Math.floor(source.height / 32);
             const count = width * height;
@@ -213,11 +219,26 @@ export class MaterialManager implements IMaterialManager {
         return data;
     }
 
-    getTile(identifier: number): ITexture | null {
+    getTile(identifier: number): IMaterialFramedData | null {
         if (identifier < 10000) {
-            return this.tileStore.getTexture(identifier);
+            const texture = this.tileStore.getTexture(identifier);
+            if (!texture) return null;
+            const cls = this.clsMap.get(identifier) ?? BlockCls.Unknown;
+            return {
+                texture,
+                cls,
+                offset: 32,
+                frames: getTextureFrame(cls, texture)
+            };
         } else {
-            return this.cacheTileset(identifier);
+            const texture = this.cacheTileset(identifier);
+            if (!texture) return null;
+            return {
+                texture,
+                cls: BlockCls.Tileset,
+                offset: 32,
+                frames: 1
+            };
         }
     }
 
@@ -229,11 +250,13 @@ export class MaterialManager implements IMaterialManager {
         return this.imageStore.getTexture(identifier);
     }
 
-    getTileByAlias(alias: string): ITexture | null {
+    getTileByAlias(alias: string): IMaterialFramedData | null {
         if (/X\d{5,}/.test(alias)) {
-            return this.cacheTileset(parseInt(alias.slice(1)));
+            return this.getTile(parseInt(alias.slice(1)));
         } else {
-            return this.tileStore.fromAlias(alias);
+            const identifier = this.tileStore.identifierOf(alias);
+            if (isNil(identifier)) return null;
+            return this.getTile(identifier);
         }
     }
 
@@ -282,9 +305,31 @@ export class MaterialManager implements IMaterialManager {
         } else {
             // 如果有新图集，需要添加
             const alias = `asset-${data.index}`;
+            const newAsset = new MaterialAsset(data);
+            newAsset.dirty();
             this.assetStore.alias(data.index, alias);
-            this.assetDataStore.set(data.index, new MaterialAsset(data));
+            this.assetDataStore.set(data.index, newAsset);
         }
+    }
+
+    /**
+     * 将指定的贴图列表转换至指定的图集数据中
+     * @param composedData 组合数据
+     * @param textures 贴图列表
+     */
+    private cacheToAsset(
+        composedData: ITextureComposedData[],
+        textures: ITexture[]
+    ) {
+        textures.forEach(tex => {
+            const assetData = composedData.find(v => v.assetMap.has(tex));
+            if (!assetData) {
+                logger.error(38);
+                return;
+            }
+            tex.toAsset(assetData);
+        });
+        composedData.forEach(v => this.checkAssetDirty(v));
     }
 
     cacheTileset(identifier: number): ITexture | null {
@@ -315,16 +360,59 @@ export class MaterialManager implements IMaterialManager {
             this.numIdMap.set(v, `X${v}`);
         });
 
-        const set = new Set(toAdd);
+        const data = this.assetBuilder.addTextureList(toAdd);
+        const res = [...data];
+        this.cacheToAsset(res, toAdd);
+
+        return toAdd;
+    }
+
+    /**
+     * 获取自动元件展开后的图片，如果图片不存在，或是已经展开并存储至了 `tileStore`，那么返回 `null`
+     * @param identifier 自动元件标识符
+     */
+    private getFlattenedAutotile(
+        identifier: number
+    ): SizedCanvasImageSource | null {
+        const cls = this.clsMap.get(identifier);
+        if (cls !== BlockCls.Autotile) return null;
+        if (this.tileStore.getTexture(identifier)) return null;
+        const source = this.autotileSource.get(identifier);
+        if (!source) return null;
+        const frames = source.width === 96 ? 1 : 4;
+        const flattened = AutotileProcessor.flatten({ source, frames });
+        if (!flattened) return null;
+        return flattened;
+    }
+
+    cacheAutotile(identifier: number): ITexture | null {
+        const flattened = this.getFlattenedAutotile(identifier);
+        if (!flattened) return null;
+        const tex = new Texture(flattened);
+        this.tileStore.addTexture(identifier, tex);
+        const data = this.assetBuilder.addTexture(tex);
+        tex.toAsset(data);
+        this.checkAssetDirty(data);
+        return tex;
+    }
+
+    cacheAutotileList(
+        identifierList: Iterable<number>
+    ): Iterable<ITexture | null> {
+        const arr = [...identifierList];
+        const toAdd: ITexture[] = [];
+
+        arr.forEach(v => {
+            const flattened = this.getFlattenedAutotile(v);
+            if (!flattened) return;
+            const tex = new Texture(flattened);
+            this.tileStore.addTexture(v, tex);
+            toAdd.push(tex);
+        });
 
         const data = this.assetBuilder.addTextureList(toAdd);
         const res = [...data];
-        res.forEach(data => {
-            data.assetMap.keys().forEach(tex => {
-                if (set.has(tex)) tex.toAsset(data);
-            });
-            this.checkAssetDirty(data);
-        });
+        this.cacheToAsset(res, toAdd);
 
         return toAdd;
     }
@@ -380,7 +468,7 @@ export class MaterialManager implements IMaterialManager {
         if (isNil(cls)) return null;
         const texture = this.getTextureOf(identifier, cls);
         if (!texture) return null;
-        return texture.static();
+        return texture.render();
     }
 
     getRenderableByAlias(alias: string): ITextureRenderable | null {
@@ -407,11 +495,22 @@ export class MaterialManager implements IMaterialManager {
         return this.numIdMap.get(identifier);
     }
 
-    setBigImage(identifier: number, image: ITexture): IBigImageData {
+    setBigImage(
+        identifier: number,
+        image: ITexture,
+        frames: number
+    ): IBigImageReturn {
         const bigImageId = this.bigImageId++;
         this.bigImageStore.addTexture(bigImageId, image);
-        this.bigImageData.set(identifier, image);
-        const data: IBigImageData = {
+        const cls = this.clsMap.get(identifier) ?? BlockCls.Unknown;
+        const store: IMaterialFramedData = {
+            texture: image,
+            cls,
+            offset: image.width / 4,
+            frames
+        };
+        this.bigImageData.set(identifier, store);
+        const data: IBigImageReturn = {
             identifier: bigImageId,
             store: this.bigImageStore
         };
@@ -422,23 +521,27 @@ export class MaterialManager implements IMaterialManager {
         return this.bigImageData.has(identifier);
     }
 
-    getBigImage(identifier: number): ITexture | null {
+    getBigImage(identifier: number): IMaterialFramedData | null {
         return this.bigImageData.get(identifier) ?? null;
     }
 
-    getBigImageByAlias(alias: string): ITexture | null {
+    getBigImageByAlias(alias: string): IMaterialFramedData | null {
         const identifier = this.idNumMap.get(alias);
         if (isNil(identifier)) return null;
         return this.bigImageData.get(identifier) ?? null;
     }
 
-    getIfBigImage(identifier: number): ITexture | null {
+    getIfBigImage(identifier: number): IMaterialFramedData | null {
         const bigImage = this.bigImageData.get(identifier) ?? null;
         if (bigImage) return bigImage;
-        if (identifier < 10000) {
-            return this.tileStore.getTexture(identifier);
-        } else {
-            return this.cacheTileset(identifier);
-        }
+        else return this.getTile(identifier);
+    }
+
+    assetContainsTexture(texture: ITexture): boolean {
+        return this.assetMap.has(texture);
+    }
+
+    getTextureAsset(texture: ITexture): number | undefined {
+        return this.assetMap.get(texture);
     }
 }
