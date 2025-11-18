@@ -1,4 +1,10 @@
-import { IDirtyMark, IDirtyTracker } from '@motajs/common';
+import {
+    IDirtyMark,
+    IDirtyTracker,
+    IHookable,
+    IHookBase,
+    IHookController
+} from '@motajs/common';
 import { ITextureRenderable } from '@motajs/render-assets';
 import { Transform } from '@motajs/render-core';
 import {
@@ -7,7 +13,7 @@ import {
     IMaterialManager,
     ITrackedAssetData
 } from '@user/client-base';
-import { IMapLayer } from '@user/data-state';
+import { ILayerState, IMapLayer } from '@user/data-state';
 import { TimingFn } from 'mutate-animate';
 
 export const enum MapBackgroundRepeat {
@@ -221,14 +227,14 @@ export interface IMovingBlock {
     destroy(): void;
 }
 
-export interface IMapRendererExtends {
+export interface IMapRendererHooks extends IHookBase {
     /**
      * 当需要更新画面时执行
      */
-    onUpdate?(): void;
+    onUpdate(controller: IHookController<this>): void;
 }
 
-export interface IMapRenderer {
+export interface IMapRenderer extends IHookable<IMapRendererHooks> {
     /** 地图渲染器使用的资源管理器 */
     readonly manager: IMaterialManager;
     /** 画布渲染上下文 */
@@ -242,6 +248,8 @@ export interface IMapRenderer {
     readonly viewport: IMapViewportController;
     /** 顶点数组生成器 */
     readonly vertex: IMapVertexGenerator;
+    /** 使用的地图状态对象 */
+    readonly layerState: ILayerState;
 
     /** 地图宽度 */
     readonly mapWidth: number;
@@ -269,12 +277,6 @@ export interface IMapRenderer {
     useAsset(asset: ITrackedAssetData): void;
 
     /**
-     * 添加地图渲染拓展
-     * @param ex 拓展对象
-     */
-    addExtends(ex: IMapRendererExtends): void;
-
-    /**
      * 摧毁此地图渲染器，表示当前渲染器不会再被使用到
      */
     destroy(): void;
@@ -286,17 +288,10 @@ export interface IMapRenderer {
     render(gl: WebGL2RenderingContext): void;
 
     /**
-     * 添加地图图层
-     * @param layer 地图图层
-     * @param identifier 图层的标识符，可以用于 {@link getLayer} 获取图层
+     * 设置渲染器使用的地图状态
+     * @param layerState 地图状态
      */
-    addLayer(layer: IMapLayer, identifier?: string): void;
-
-    /**
-     * 移除指定图层
-     * @param layer 要移除的图层
-     */
-    removeLayer(layer: IMapLayer): void;
+    setLayerState(layerState: ILayerState): void;
 
     /**
      * 根据标识符获取图层
@@ -314,19 +309,6 @@ export interface IMapRenderer {
      * 获取排序后的图层列表，是内部引用的副本，不是对内部的直接引用，不具有实时性
      */
     getSortedLayer(): IMapLayer[];
-
-    /**
-     * 设置当前渲染器中指定图层的纵深
-     * @param layer 要设置的图层
-     * @param zIndex 目标纵深
-     */
-    setZIndex(layer: IMapLayer, zIndex: number): void;
-
-    /**
-     * 获取指定图层的纵深
-     * @param layer 要获取的图层
-     */
-    getZIndex(layer: IMapLayer): number | undefined;
 
     /**
      * 获取指定图层排序后的索引位置
@@ -395,11 +377,6 @@ export interface IMapRenderer {
     setCellSize(width: number, height: number): void;
 
     /**
-     * 获取变换矩阵
-     */
-    getTransform(): Transform;
-
-    /**
      * 添加一个移动图块
      * @param layer 图块所属的图层
      * @param block 图块数字或图块的素材对象，要求可渲染对象的图像源必须出现在图集中
@@ -449,11 +426,6 @@ export interface IMapRenderer {
      * @param y 图块纵坐标
      */
     setTileAlpha(layer: IMapLayer, alpha: number, x: number, y: number): void;
-
-    /**
-     * 结束此渲染器的使用，释放所有相关资源
-     */
-    close(): void;
 }
 
 export interface IMapVertexArray {

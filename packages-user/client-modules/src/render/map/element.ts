@@ -3,26 +3,13 @@ import {
     RenderItem,
     Transform
 } from '@motajs/render-core';
-import { IMapLayer } from '@user/data-state';
-import {
-    IMapRenderer,
-    IMapRendererExtends,
-    MapTileAlign,
-    MapTileBehavior
-} from './types';
+import { ILayerState, state } from '@user/data-state';
+import { IMapRenderer, IMapRendererHooks } from './types';
 import { MapRenderer } from './renderer';
 import { materials } from '@user/client-base';
 import { ElementNamespace, ComponentInternalInstance } from 'vue';
 import { CELL_HEIGHT, CELL_WIDTH, MAP_HEIGHT, MAP_WIDTH } from '../shared';
-
-export interface IRenderLayerData {
-    /** 图层对象 */
-    readonly layer: IMapLayer;
-    /** 图层纵深 */
-    readonly zIndex: number;
-    /** 图层别名 */
-    readonly alias?: string;
-}
+import { IHookController } from '@motajs/common';
 
 export class MapRender extends RenderItem {
     /** 地图渲染器 */
@@ -35,41 +22,29 @@ export class MapRender extends RenderItem {
     /** 画布上下文 */
     readonly gl: WebGL2RenderingContext;
 
-    constructor(layerList: Iterable<IRenderLayerData>) {
+    private rendererHook: IHookController<IMapRendererHooks>;
+
+    constructor(readonly layerState: ILayerState) {
         super('static');
 
         this.canvas = document.createElement('canvas');
         const gl = this.canvas.getContext('webgl2')!;
         this.gl = gl;
 
-        this.renderer = new MapRenderer(materials, this.gl, this.camera);
-        for (const layer of layerList) {
-            this.renderer.addLayer(layer.layer, layer.alias);
-            this.renderer.setZIndex(layer.layer, layer.zIndex);
-        }
+        this.renderer = new MapRenderer(
+            materials,
+            this.gl,
+            this.camera,
+            state.layer
+        );
+        this.renderer.setLayerState(layerState);
         this.renderer.useAsset(materials.trackedAsset);
-        this.renderer.addExtends(new MapUpdateExtends(this));
-
-        this.renderer.setTileBackground(1);
-
+        this.rendererHook = this.renderer.addHook(new RendererUpdateHook(this));
+        this.rendererHook.load();
         this.renderer.setCellSize(CELL_WIDTH, CELL_HEIGHT);
         this.renderer.setRenderSize(MAP_WIDTH, MAP_HEIGHT);
 
         gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-    }
-
-    /**
-     * 更新图层列表
-     * @param layerList 图层列表
-     */
-    updateLayerList(layerList: Iterable<IRenderLayerData>) {
-        this.renderer
-            .getSortedLayer()
-            .forEach(v => this.renderer.removeLayer(v));
-        for (const layer of layerList) {
-            this.renderer.addLayer(layer.layer, layer.alias);
-            this.renderer.setZIndex(layer.layer, layer.zIndex);
-        }
     }
 
     private sizeGL(width: number, height: number) {
@@ -115,8 +90,8 @@ export class MapRender extends RenderItem {
         parentComponent?: ComponentInternalInstance | null
     ): void {
         switch (key) {
-            case 'layerList': {
-                this.updateLayerList(nextValue);
+            case 'layerState': {
+                this.renderer.setLayerState(nextValue);
                 break;
             }
         }
@@ -124,7 +99,7 @@ export class MapRender extends RenderItem {
     }
 }
 
-class MapUpdateExtends implements IMapRendererExtends {
+class RendererUpdateHook implements Partial<IMapRendererHooks> {
     constructor(readonly element: MapRender) {}
 
     onUpdate(): void {

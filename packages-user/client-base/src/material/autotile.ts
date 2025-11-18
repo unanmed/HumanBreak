@@ -225,9 +225,10 @@ export class AutotileProcessor implements IAutotileProcessor {
         const size = texture.height === 32 * 48 ? 32 : 48;
         const index = distinctConnectionMap.get(connection);
         if (isNil(index)) return null;
+        const { rect } = texture.render();
         return {
             source: texture.source,
-            rect: { x: 0, y: size * index, w: size, h: size }
+            rect: { x: rect.x, y: rect.y + size * index, w: size, h: size }
         };
     }
 

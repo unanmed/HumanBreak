@@ -2,25 +2,19 @@ import { isNil } from 'lodash-es';
 import {
     IMapLayer,
     IMapLayerData,
-    IMapLayerExtends,
-    IMapLayerExtendsController
+    IMapLayerHookController,
+    IMapLayerHooks
 } from './types';
-import { logger } from '@motajs/common';
+import { Hookable, HookController, logger } from '@motajs/common';
 
-interface IExtendsData {
-    readonly ex: IMapLayerExtends;
-    readonly controller: IMapLayerExtendsController;
-}
-
-export class MapLayer implements IMapLayer {
+export class MapLayer
+    extends Hookable<IMapLayerHooks, IMapLayerHookController>
+    implements IMapLayer
+{
     width: number;
     height: number;
     empty: boolean = true;
-
-    /** 已经加载完毕的图层拓展 */
-    private loadedExtends: Set<IExtendsData> = new Set();
-    /** 添加的图层拓展 */
-    private addedExtends: Map<string, IExtendsData> = new Map();
+    zIndex: number = 0;
 
     /** 地图图块数组 */
     private mapArray: Uint32Array;
@@ -28,6 +22,7 @@ export class MapLayer implements IMapLayer {
     private mapData: IMapLayerData;
 
     constructor(array: Uint32Array, width: number, height: number) {
+        super();
         this.width = width;
         this.height = height;
         const area = width * height;
@@ -42,9 +37,6 @@ export class MapLayer implements IMapLayer {
 
     resize(width: number, height: number): void {
         if (this.width === width && this.height === height) {
-            this.loadedExtends.forEach(v => {
-                v.ex.onResize?.(v.controller, width, height);
-            });
             return;
         }
         this.mapData.expired = true;
@@ -78,17 +70,14 @@ export class MapLayer implements IMapLayer {
             expired: false,
             array: this.mapArray
         };
-        this.loadedExtends.forEach(v => {
-            v.ex.onResize?.(v.controller, width, height);
+        this.forEachHook((hook, controller) => {
+            hook.onResize?.(controller, width, height);
         });
     }
 
     resize2(width: number, height: number): void {
         if (this.width === width && this.height === height) {
             this.mapArray.fill(0);
-            this.loadedExtends.forEach(v => {
-                v.ex.onResize?.(v.controller, width, height);
-            });
             return;
         }
         this.mapData.expired = true;
@@ -99,17 +88,18 @@ export class MapLayer implements IMapLayer {
             expired: false,
             array: this.mapArray
         };
-        this.loadedExtends.forEach(v => {
-            v.ex.onResize?.(v.controller, width, height);
-        });
         this.empty = true;
+        this.forEachHook((hook, controller) => {
+            hook.onResize?.(controller, width, height);
+        });
     }
 
     setBlock(block: number, x: number, y: number): void {
         const index = y * this.width + x;
+        if (block === this.mapArray[index]) return;
         this.mapArray[index] = block;
-        this.loadedExtends.forEach(v => {
-            v.ex.onUpdateBlock?.(v.controller, block, x, y);
+        this.forEachHook((hook, controller) => {
+            hook.onUpdateBlock?.(controller, block, x, y);
         });
         if (block !== 0) {
             this.empty = false;
@@ -131,8 +121,8 @@ export class MapLayer implements IMapLayer {
         const height = Math.ceil(array.length / width);
         if (width === this.width && height === this.height) {
             this.mapArray.set(array);
-            this.loadedExtends.forEach(v => {
-                v.ex.onUpdateArea?.(v.controller, x, y, width, height);
+            this.forEachHook((hook, controller) => {
+                hook.onUpdateArea?.(controller, x, y, width, height);
             });
             return;
         }
@@ -159,8 +149,8 @@ export class MapLayer implements IMapLayer {
             }
             this.mapArray.set(array.subarray(start, start + nw), offset);
         }
-        this.loadedExtends.forEach(v => {
-            v.ex.onUpdateArea?.(v.controller, x, y, width, height);
+        this.forEachHook((hook, controller) => {
+            hook.onUpdateArea?.(controller, x, y, width, height);
         });
         this.empty &&= empty;
     }
@@ -213,51 +203,32 @@ export class MapLayer implements IMapLayer {
         return this.mapData;
     }
 
-    loadExtends(ex: IMapLayerExtends): boolean {
-        if (!this.addedExtends.has(ex.id)) return false;
-        ex.awake?.();
-        const data = this.addedExtends.get(ex.id)!;
-        this.loadedExtends.add(data);
-        return true;
+    protected createController(
+        hook: Partial<IMapLayerHooks>
+    ): IMapLayerHookController {
+        return new MapLayerHookController(this, hook);
     }
 
-    addExtends(ex: IMapLayerExtends): IMapLayerExtendsController {
-        const controller = new MapLayerExtendsController(this, ex);
-        this.addedExtends.set(ex.id, {
-            ex,
-            controller
-        });
-        return controller;
-    }
-
-    removeExtends(ex: IMapLayerExtends | string): void {
-        const id = typeof ex === 'string' ? ex : ex.id;
-        const data = this.addedExtends.get(id);
-        if (!data) return;
-        data.ex.destroy?.();
-        this.addedExtends.delete(id);
-        this.loadedExtends.delete(data);
+    setZIndex(zIndex: number): void {
+        this.zIndex = zIndex;
     }
 }
 
-class MapLayerExtendsController implements IMapLayerExtendsController {
-    loaded: boolean = false;
+class MapLayerHookController
+    extends HookController<IMapLayerHooks>
+    implements IMapLayerHookController
+{
+    hookable: MapLayer;
 
     constructor(
         readonly layer: MapLayer,
-        readonly ex: IMapLayerExtends
-    ) {}
-
-    load(): void {
-        this.loaded = this.layer.loadExtends(this.ex);
+        hook: Partial<IMapLayerHooks>
+    ) {
+        super(layer, hook);
+        this.hookable = layer;
     }
 
     getMapData(): Readonly<IMapLayerData> {
         return this.layer.getMapRef();
-    }
-
-    unload(): void {
-        this.layer.removeExtends(this.ex);
-        this.loaded = false;
     }
 }

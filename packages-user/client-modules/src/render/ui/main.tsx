@@ -48,37 +48,9 @@ import { mainUIController } from './controller';
 import { LayerGroup } from '../elements';
 import { isNil } from 'lodash-es';
 import { materials } from '@user/client-base';
-import { IRenderLayerData } from '../map/element';
 
 const MainScene = defineComponent(() => {
     //#region 基本定义
-    const layerList: IRenderLayerData[] = [
-        {
-            layer: state.layer.getLayerByAlias('bg')!,
-            zIndex: 10,
-            alias: 'bg'
-        },
-        {
-            layer: state.layer.getLayerByAlias('bg2')!,
-            zIndex: 20,
-            alias: 'bg2'
-        },
-        {
-            layer: state.layer.getLayerByAlias('event')!,
-            zIndex: 30,
-            alias: 'event'
-        },
-        {
-            layer: state.layer.getLayerByAlias('fg')!,
-            zIndex: 40,
-            alias: 'fg'
-        },
-        {
-            layer: state.layer.getLayerByAlias('fg2')!,
-            zIndex: 50,
-            alias: 'fg2'
-        }
-    ];
 
     const mainTextboxProps: Props<typeof Textbox> = {
         text: '',
@@ -312,7 +284,7 @@ const MainScene = defineComponent(() => {
                 onMove={moveMap}
             >
                 <map-render
-                    layerList={layerList}
+                    layerState={state.layer}
                     loc={[0, 0, MAP_WIDTH, MAP_HEIGHT]}
                 />
                 <Textbox id="main-textbox" {...mainTextboxProps}></Textbox>

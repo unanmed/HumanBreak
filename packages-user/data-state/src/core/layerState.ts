@@ -1,18 +1,43 @@
-import { logger } from '@motajs/common';
-import { IMapLayer, MapLayer } from '../map';
-import { ILayerState } from './types';
+import {
+    Hookable,
+    HookController,
+    IHookController,
+    logger
+} from '@motajs/common';
+import {
+    IMapLayer,
+    IMapLayerHookController,
+    IMapLayerHooks,
+    MapLayer
+} from '../map';
+import { ILayerState, ILayerStateHooks } from './types';
 
-export class LayerState implements ILayerState {
-    readonly layerList: WeakSet<IMapLayer> = new WeakSet();
+export class LayerState
+    extends Hookable<ILayerStateHooks>
+    implements ILayerState
+{
+    readonly layerList: Set<IMapLayer> = new Set();
     /** 图层到图层别名映射 */
     readonly layerAliasMap: WeakMap<IMapLayer, string> = new WeakMap();
     /** 图层别名到图层的映射 */
     readonly aliasLayerMap: Map<symbol, IMapLayer> = new Map();
 
+    /** 背景图块 */
+    private backgroundTile: number = 0;
+
+    /** 图层钩子映射 */
+    private layerHookMap: Map<IMapLayer, IMapLayerHookController> = new Map();
+
     addLayer(width: number, height: number): IMapLayer {
         const array = new Uint32Array(width * height);
         const layer = new MapLayer(array, width, height);
         this.layerList.add(layer);
+        this.forEachHook((hook, controller) => {
+            hook.onUpdateLayer?.(controller, this.layerList);
+        });
+        const controller = layer.addHook(new StateMapLayerHook(this));
+        this.layerHookMap.set(layer, controller);
+        controller.load();
         return layer;
     }
 
@@ -24,6 +49,17 @@ export class LayerState implements ILayerState {
             this.aliasLayerMap.delete(symbol);
             this.layerAliasMap.delete(layer);
         }
+        this.forEachHook((hook, controller) => {
+            hook.onUpdateLayer?.(controller, this.layerList);
+        });
+        const controller = this.layerHookMap.get(layer);
+        if (!controller) return;
+        controller.unload();
+        this.layerHookMap.delete(layer);
+    }
+
+    hasLayer(layer: IMapLayer): boolean {
+        return this.layerList.has(layer);
     }
 
     setLayerAlias(layer: IMapLayer, alias: string): void {
@@ -56,5 +92,59 @@ export class LayerState implements ILayerState {
         } else {
             layer.resize2(width, height);
         }
+    }
+
+    setBackground(tile: number): void {
+        this.backgroundTile = tile;
+        this.forEachHook((hook, controller) => {
+            hook.onChangeBackground?.(controller, tile);
+        });
+    }
+
+    getBackground(): number {
+        return this.backgroundTile;
+    }
+
+    protected createController(
+        hook: Partial<ILayerStateHooks>
+    ): IHookController<ILayerStateHooks> {
+        return new HookController(this, hook);
+    }
+}
+
+class StateMapLayerHook implements Partial<IMapLayerHooks> {
+    constructor(readonly state: LayerState) {}
+
+    onUpdateArea(
+        controller: IMapLayerHookController,
+        x: number,
+        y: number,
+        width: number,
+        height: number
+    ): void {
+        this.state.forEachHook((hook, c) => {
+            hook.onUpdateLayerArea?.(c, controller.layer, x, y, width, height);
+        });
+    }
+
+    onUpdateBlock(
+        controller: IMapLayerHookController,
+        block: number,
+        x: number,
+        y: number
+    ): void {
+        this.state.forEachHook((hook, c) => {
+            hook.onUpdateLayerBlock?.(c, controller.layer, block, x, y);
+        });
+    }
+
+    onResize(
+        controller: IMapLayerHookController,
+        width: number,
+        height: number
+    ): void {
+        this.state.forEachHook((hook, c) => {
+            hook.onResizeLayer?.(c, controller.layer, width, height);
+        });
     }
 }

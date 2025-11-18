@@ -1,4 +1,4 @@
-import { IMapLayer, IMapLayerData } from '@user/data-state';
+import { IMapLayer } from '@user/data-state';
 import {
     IBlockData,
     IBlockSplitter,
@@ -24,8 +24,6 @@ import { BlockCls, IMaterialFramedData } from '@user/client-base';
 import { IRect, SizedCanvasImageSource } from '@motajs/render-assets';
 import { INSTANCED_COUNT } from './constant';
 
-// todo: 潜在优化点：顶点数组的 z 坐标以及纹理的 z 坐标可以换为实例化绘制
-
 export interface IMapDataGetter {
     /** 图块缩小行为，即图块比格子大时应该如何处理 */
     readonly tileMinifyBehavior: MapTileBehavior;
@@ -37,12 +35,6 @@ export interface IMapDataGetter {
     readonly tileAlignY: MapTileAlign;
     /** 图块大小与格子大小判断方式 */
     readonly tileTestMode: MapTileSizeTestMode;
-
-    /**
-     * 获取指定图层的图块信息，是对内部存储的直接引用
-     * @param layer 地图图层
-     */
-    getMapLayerData(layer: IMapLayer): Readonly<IMapLayerData> | null;
 
     /**
      * 根据图集的图像源获取其索引
@@ -593,8 +585,8 @@ export class MapVertexGenerator
         const block = this.block.getBlockByDataLoc(x, y);
         if (!block) return;
         const vertex = block.data.getLayerData(layer);
-        const data = this.renderer.getMapLayerData(layer);
-        if (!vertex || !data) return;
+        const data = layer.getMapRef();
+        if (!vertex) return;
         const { array } = data;
         const dx = x - block.dataX;
         const dy = y - block.dataY;
@@ -789,8 +781,8 @@ export class MapVertexGenerator
             if (!dirty || !dirty.dirty) return;
             block.data.updated();
             const vertex = block.data.getLayerData(layer);
-            const mapData = this.renderer.getMapLayerData(layer);
-            if (!vertex || !mapData) return;
+            const mapData = layer.getMapRef();
+            if (!vertex) return;
             const { array } = mapData;
             const { dirtyLeft, dirtyTop, dirtyRight, dirtyBottom } = dirty;
             for (let nx = dirtyLeft; nx < dirtyRight; nx++) {
@@ -823,9 +815,9 @@ export class MapVertexGenerator
     //#region 图块配置
 
     enableStaticFrameAnimate(layer: IMapLayer, x: number, y: number): void {
-        const data = this.renderer.getMapLayerData(layer);
+        const data = layer.getMapRef();
         const block = this.block.getBlockByDataLoc(x, y);
-        if (!data || !block) return;
+        if (!block) return;
         const vertexArray = block.data.getLayerInstanced(layer);
         if (!vertexArray) return;
         const mapIndex = y * this.mapWidth + x;

@@ -17,7 +17,7 @@ import {
     IMapBackgroundConfig,
     IMapRenderConfig,
     IMapRenderer,
-    IMapRendererExtends,
+    IMapRendererHooks,
     IMapVertexGenerator,
     IMapViewportController,
     IMovingBlock,
@@ -26,13 +26,13 @@ import {
     MapTileBehavior,
     MapTileSizeTestMode
 } from './types';
+import { ILayerState, ILayerStateHooks, IMapLayer } from '@user/data-state';
 import {
-    IMapLayer,
-    IMapLayerData,
-    IMapLayerExtends,
-    IMapLayerExtendsController
-} from '@user/data-state';
-import { logger } from '@motajs/common';
+    Hookable,
+    HookController,
+    IHookController,
+    logger
+} from '@motajs/common';
 import { compileProgramWith } from '@motajs/client-base';
 import { isNil, maxBy } from 'lodash-es';
 import { IMapDataGetter, MapVertexGenerator } from './vertex';
@@ -57,23 +57,8 @@ const enum BackgroundType {
     Tile
 }
 
-interface ILayerRenderData {
-    /** 顶点数组，与总的数组共享 ArrayBuffer */
-    readonly vertexArray: Float32Array;
-    /** 偏移数组，与总的数组共享 ArrayBuffer */
-    readonly offsetArray: Int16Array;
-
-    /** 顶点数组在原数组的起始索引值 */
-    readonly vertexStart: number;
-    /** 顶点数组在原数组的终止索引值 */
-    readonly vertexEnd: number;
-    /** 偏移数组在原数组的起始索引值 */
-    readonly offsetStart: number;
-    /** 偏移数组在原数组的终止索引值 */
-    readonly offsetEnd: number;
-}
-
 export class MapRenderer
+    extends Hookable<IMapRendererHooks>
     implements
         IMapRenderer,
         IMovingRenderer,
@@ -99,17 +84,10 @@ export class MapRenderer
     assetWidth: number = 4096;
     assetHeight: number = 4096;
 
-    /** 拓展列表 */
-    private readonly extendList: Set<IMapRendererExtends> = new Set();
+    layerState: ILayerState;
+    /** 地图状态钩子控制器 */
+    private layerStateHook: IHookController<ILayerStateHooks>;
 
-    /** 这个渲染器添加的图层 */
-    readonly layers: Set<IMapLayer> = new Set();
-    /** 图层的 zIndex 映射 */
-    private layerZIndex: Map<IMapLayer, number> = new Map();
-    /** 图层的别名 */
-    private layerAlias: Map<string, IMapLayer> = new Map();
-    /** 图层到其对应别名的映射 */
-    private layerAliasInv: Map<IMapLayer, string> = new Map();
     /** 排序后的图层 */
     private sortedLayers: IMapLayer[] = [];
     /** 图层到排序索引的映射 */
@@ -171,14 +149,12 @@ export class MapRenderer
     /** 是否应该更新偏移池 uniform */
     private needUpdateOffsetPool: boolean = true;
 
-    /** 地图渲染数据 */
-    private layerData: Map<IMapLayer, ILayerRenderData> = new Map();
-    /** 地图拓展映射 */
-    private layerController: Map<IMapLayer, IMapLayerExtendsController>;
     /** 顶点数组的图层列表是否需要更新 */
-    private layerDirty: boolean = false;
+    private layerListDirty: boolean = false;
     /** 顶点数组的图层的尺寸是否需要更新 */
     private layerSizeDirty: boolean = false;
+    /** 是否整个地图都需要更新，一般只有在地图尺寸等发生变动时才会执行 */
+    private layerAllDirty: boolean = false;
 
     /** 所有正在移动的图块 */
     private movingBlock: Set<IMovingBlock> = new Set();
@@ -223,8 +199,15 @@ export class MapRenderer
     constructor(
         readonly manager: IMaterialManager,
         readonly gl: WebGL2RenderingContext,
-        readonly transform: Transform
+        readonly transform: Transform,
+        layerState: ILayerState
     ) {
+        super();
+        this.layerState = layerState;
+        this.layerStateHook = layerState.addHook(
+            new RendererLayerStateHook(this)
+        );
+        this.layerStateHook.load();
         // 上下文初始化要依赖于 offsetPool，因此提前调用
         const offsetPool = this.getOffsetPool();
         this.offsetPool = offsetPool;
@@ -233,7 +216,6 @@ export class MapRenderer
             v => v / data.tileTextureWidth
         );
         this.contextData = data;
-        this.layerController = new Map();
         this.vertex = new MapVertexGenerator(this, data);
         this.autotile = new AutotileProcessor(manager);
         this.tick = this.tick.bind(this);
@@ -242,6 +224,7 @@ export class MapRenderer
         this.viewport.bindTransform(this.transform);
         this.tileAnimater = new TextureColumnAnimater();
         this.initVertexPointer(gl, data);
+        layerState.addHook(new RendererLayerStateHook(this));
     }
 
     /**
@@ -314,6 +297,12 @@ export class MapRenderer
         gl.bindVertexArray(null);
     }
 
+    protected createController(
+        hook: Partial<IMapRendererHooks>
+    ): IHookController<IMapRendererHooks> {
+        return new HookController(this, hook);
+    }
+
     //#endregion
 
     //#region 图层处理
@@ -322,80 +311,56 @@ export class MapRenderer
      * 图层排序
      */
     private sortLayer() {
-        this.sortedLayers = [...this.layers].sort((a, b) => {
-            const za = this.layerZIndex.get(a) ?? -1;
-            const zb = this.layerZIndex.get(b) ?? -1;
-            return za - zb;
+        this.sortedLayers = [...this.layerState.layerList].sort((a, b) => {
+            return a.zIndex - b.zIndex;
         });
         this.sortedLayers.forEach((v, i) => this.layerIndexMap.set(v, i));
+        this.forEachHook((hook, controller) => {
+            hook.onUpdate?.(controller);
+        });
+        this.layerListDirty = true;
     }
 
-    addLayer(layer: IMapLayer, identifier?: string): void {
-        this.layers.add(layer);
-        this.layerZIndex.set(layer, 0);
-        if (identifier) {
-            this.layerAlias.set(identifier, layer);
-        }
-        const ex = new MapRendererExtends(this);
-        const controller = layer.addExtends(ex);
-        controller.load();
-        this.layerController.set(layer, controller);
-        this.sortLayer();
-        this.layerDirty = true;
-        this.layerCount = this.layers.size;
-        this.resizeLayer();
+    private updateAllLayers() {
+        this.layerState.layerList.forEach(v => {
+            this.vertex.updateArea(v, 0, 0, v.width, v.height);
+        });
     }
 
-    removeLayer(layer: IMapLayer): void {
-        this.layers.delete(layer);
-        this.layerData.delete(layer);
-        this.layerZIndex.delete(layer);
-        const ex = this.layerController.get(layer);
-        if (ex) {
-            ex.unload();
-        }
-        this.layerController.delete(layer);
-        const alias = this.layerAliasInv.get(layer);
-        if (!isNil(alias)) {
-            this.layerAlias.delete(alias);
-        }
-        this.layerAliasInv.delete(layer);
+    updateLayerList() {
         this.sortLayer();
-        this.layerDirty = true;
-        this.layerCount = this.layers.size;
         this.resizeLayer();
+        this.layerCount = this.layerState.layerList.size;
+        this.layerAllDirty = true;
+    }
+
+    setLayerState(layerState: ILayerState): void {
+        this.layerStateHook.unload();
+        this.layerState = layerState;
+        this.layerStateHook = layerState.addHook(
+            new RendererLayerStateHook(this)
+        );
+        this.layerStateHook.load();
+        this.sortLayer();
+        this.resizeLayer();
+        this.layerCount = layerState.layerList.size;
+        this.layerAllDirty = true;
     }
 
     getLayer(identifier: string): IMapLayer | null {
-        return this.layerAlias.get(identifier) ?? null;
+        return this.layerState.getLayerByAlias(identifier) ?? null;
     }
 
     hasLayer(layer: IMapLayer): boolean {
-        return this.layers.has(layer);
+        return this.layerState.hasLayer(layer);
     }
 
     getSortedLayer(): IMapLayer[] {
         return this.sortedLayers.slice();
     }
 
-    setZIndex(layer: IMapLayer, zIndex: number): void {
-        this.layerZIndex.set(layer, zIndex);
-        this.sortLayer();
-        this.layerDirty = true;
-    }
-
-    getZIndex(layer: IMapLayer): number | undefined {
-        return this.layerZIndex.get(layer);
-    }
-
     getLayerIndex(layer: IMapLayer): number {
         return this.layerIndexMap.get(layer) ?? -1;
-    }
-
-    getMapLayerData(layer: IMapLayer): Readonly<IMapLayerData> | null {
-        const ex = this.layerController.get(layer);
-        const data = ex?.getMapData();
-        return data ?? null;
     }
 
     /**
@@ -409,13 +374,13 @@ export class MapRenderer
         }
         this.mapWidth = maxWidth;
         this.mapHeight = maxHeight;
-        this.layerDirty = true;
         this.updateBackgroundVertex(
             this.gl,
             this.contextData,
             this.contextData.backgroundWidth,
             this.contextData.backgroundHeight
         );
+        this.layerAllDirty = true;
     }
 
     //#endregion
@@ -699,9 +664,9 @@ export class MapRenderer
             tileTextureWidth: 4096,
             tileTextureHeight: 4096,
             tileTextureDepth: 1,
-            backgroundWidth: 32,
-            backgroundHeight: 32,
-            backgroundDepth: 1,
+            backgroundWidth: 0,
+            backgroundHeight: 0,
+            backgroundDepth: 0,
             tileTextureMark: Symbol(),
             vertexMark: Symbol()
         };
@@ -789,7 +754,6 @@ export class MapRenderer
             data.tileTextureMark = this.assetData.mark();
             gl.bindTexture(gl.TEXTURE_2D_ARRAY, tile);
             this.checkTextureArraySize(gl, data, sourceArray);
-            console.time('texture-upload');
             source.forEach((v, i) => {
                 gl.texSubImage3D(
                     gl.TEXTURE_2D_ARRAY,
@@ -817,7 +781,6 @@ export class MapRenderer
                 gl.TEXTURE_MIN_FILTER,
                 gl.NEAREST
             );
-            console.timeEnd('texture-upload');
         } else {
             const dirty = this.assetData.dirtySince(data.tileTextureMark);
             if (dirty.size === 0) return;
@@ -829,7 +792,6 @@ export class MapRenderer
                 data,
                 sourceArray
             );
-            console.time('texture-upload');
             if (sizeChanged) {
                 // 尺寸变化，需要全部重新传递
                 source.forEach((v, i) => {
@@ -866,7 +828,6 @@ export class MapRenderer
                     );
                 });
             }
-            console.timeEnd('texture-upload');
         }
     }
 
@@ -1226,8 +1187,10 @@ export class MapRenderer
             gl.NEAREST
         );
         this.backgroundPending = false;
-        this.extendList.forEach(v => v.onUpdate?.());
         gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
+        this.forEachHook((hook, controller) => {
+            hook.onUpdate?.(controller);
+        });
     }
 
     render(): void {
@@ -1260,13 +1223,17 @@ export class MapRenderer
 
         console.time('layer-check');
         // 图层检查
-        if (this.layerDirty) {
-            this.vertex.updateLayerArray();
-            this.layerDirty = false;
-        }
         if (this.layerSizeDirty) {
             this.vertex.resizeMap();
             this.layerSizeDirty = false;
+        }
+        if (this.layerListDirty) {
+            this.vertex.updateLayerArray();
+            this.layerListDirty = false;
+        }
+        if (this.layerAllDirty) {
+            this.updateAllLayers();
+            this.layerAllDirty = false;
         }
         this.vertex.checkRebuild();
         console.timeEnd('layer-check');
@@ -1352,9 +1319,6 @@ export class MapRenderer
         // 由于 WebGL2 没有 glDrawArraysInstancedBaseInstance，只能每次渲染的时候临时修改 VBO 读取方式
         const stride = INSTANCED_COUNT * 4;
         gl.bindBuffer(gl.ARRAY_BUFFER, instancedBuffer);
-
-        console.log(area);
-
         area.render.forEach(v => {
             const s = v.startIndex * INSTANCED_COUNT;
             const o1 = s + 0;
@@ -1393,7 +1357,9 @@ export class MapRenderer
         h: number
     ) {
         this.vertex.updateArea(layer, x, y, w, h);
-        this.extendList.forEach(v => v.onUpdate?.());
+        this.forEachHook((hook, controller) => {
+            hook.onUpdate?.(controller);
+        });
     }
 
     /**
@@ -1405,7 +1371,9 @@ export class MapRenderer
      */
     updateLayerBlock(layer: IMapLayer, block: number, x: number, y: number) {
         this.vertex.updateBlock(layer, block, x, y);
-        this.extendList.forEach(v => v.onUpdate?.());
+        this.forEachHook((hook, controller) => {
+            hook.onUpdate?.(controller);
+        });
     }
 
     //#endregion
@@ -1570,48 +1538,50 @@ export class MapRenderer
 
     updateTransform(): void {
         this.needUpdateTransform = true;
-        this.extendList.forEach(v => v.onUpdate?.());
-    }
-
-    addExtends(ex: IMapRendererExtends): void {
-        this.extendList.add(ex);
-    }
-
-    close(): void {
-        this.layers.clear();
-        this.layerAlias.clear();
-        this.layerZIndex.clear();
-        this.extendList.clear();
+        this.forEachHook((hook, controller) => {
+            hook.onUpdate?.(controller);
+        });
     }
 
     //#endregion
 }
 
-class MapRendererExtends implements IMapLayerExtends {
-    readonly id: string = 'map-render';
-
+class RendererLayerStateHook implements Partial<ILayerStateHooks> {
     constructor(readonly renderer: MapRenderer) {}
 
-    onResize(): void {
+    onChangeBackground(
+        _: IHookController<ILayerStateHooks>,
+        tile: number
+    ): void {
+        this.renderer.setTileBackground(tile);
+    }
+
+    onResizeLayer(): void {
         this.renderer.resizeLayer();
     }
 
-    onUpdateArea(
-        controller: IMapLayerExtendsController,
+    onUpdateLayer(): void {
+        this.renderer.updateLayerList();
+    }
+
+    onUpdateLayerArea(
+        _: IHookController<ILayerStateHooks>,
+        layer: IMapLayer,
         x: number,
         y: number,
         width: number,
         height: number
     ): void {
-        this.renderer.updateLayerArea(controller.layer, x, y, width, height);
+        this.renderer.updateLayerArea(layer, x, y, width, height);
     }
 
-    onUpdateBlock(
-        controller: IMapLayerExtendsController,
+    onUpdateLayerBlock(
+        _: IHookController<ILayerStateHooks>,
+        layer: IMapLayer,
         block: number,
         x: number,
         y: number
     ): void {
-        this.renderer.updateLayerBlock(controller.layer, block, x, y);
+        this.renderer.updateLayerBlock(layer, block, x, y);
     }
 }

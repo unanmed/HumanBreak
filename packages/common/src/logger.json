@@ -41,7 +41,7 @@
         "39": "Offset pool size exceeds WebGL2 limitation, ensure size type of your big image is less than $1.",
         "40": "Material used by map block $1 is not found in built asset. Please ensure you have pack it into asset.",
         "41": "You are trying to use a texture on moving block whose offset is not in the offset pool, please build it into asset after loading.",
-        "42": "The layerList property of map-render element is required.",
+        "42": "The layerState property of map-render element is required.",
         "1101": "Shadow extension needs 'floor-hero' extension as dependency.",
         "1201": "Floor-damage extension needs 'floor-binder' extension as dependency.",
         "1301": "Portal extension need 'floor-binder' extension as dependency.",
@@ -132,6 +132,7 @@
         "82": "Big image offset size is larger than 64. Considier reduce big image offset bucket.",
         "83": "It seems that you call '$1' too frequently. This will extremely affect game's performance, so considering integrate them into one 'updateArea' or 'updateBlockList' call.",
         "84": "Cannot set alias '$1' for layer, since '$1' is already an alias for another layer.",
+        "85": "Hook to load does not belong to current hookable object.",
         "1001": "Item-detail extension needs 'floor-binder' and 'floor-damage' extension as dependency.",
         "1101": "Cannot add new effect to point effect instance, for there's no more reserve space for it. Please increase the max count of the instance."
     }

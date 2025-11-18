@@ -8,6 +8,7 @@ import { Animate } from './animate';
 import { createItemDetail } from './itemDetail';
 import { logger } from '@motajs/common';
 import { MapRender } from '../map/element';
+import { state } from '@user/data-state';
 
 export function createElements() {
     createCache();
@@ -71,14 +72,14 @@ export function createElements() {
     tagMap.register('map-render', (_0, _1, props) => {
         if (!props) {
             logger.error(42);
-            return new MapRender([]);
+            return new MapRender(state.layer);
         }
-        const { layerList } = props;
-        if (!layerList) {
+        const { layerState } = props;
+        if (!layerState) {
             logger.error(42);
-            return new MapRender([]);
+            return new MapRender(state.layer);
         }
-        return new MapRender(layerList);
+        return new MapRender(layerState);
     });
 }
 

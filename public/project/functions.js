@@ -199,6 +199,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 const array = new Uint32Array(fg2.flat());
                 fg2Layer.putMapData(array, 0, 0, width);
             }
+            const back = core.floors[floorId].defaultGround;
+            const id = core.maps.getNumberById(back);
+            state.layer.setBackground(id);
 
             // 设置勇士的位置
             heroLoc.direction = core.turnDirection(heroLoc.direction);
