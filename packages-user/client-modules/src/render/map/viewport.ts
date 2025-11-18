@@ -59,42 +59,26 @@ export class MapViewport implements IMapViewportController {
         if (widthOne && heightOne) {
             // 只能看到一个分块
             const block = this.vertex.block.getBlockByLoc(blockLeft, blockTop)!;
-            if (block.data.dirty || block.data.renderDirty) {
-                blockList.push(block);
-            }
+            blockList.push(block);
         } else if (widthOne) {
             // 看到的区域分块宽度是 1
             for (let ny = blockTop; ny <= blockBottom; ny++) {
                 const block = this.vertex.block.getBlockByLoc(blockLeft, ny)!;
-                if (block.data.dirty || block.data.renderDirty) {
-                    blockList.push(block);
-                }
+                blockList.push(block);
             }
         } else if (heightOne) {
             // 看到的区域分块高度是 1
             for (let nx = blockLeft; nx <= blockRight; nx++) {
                 const block = this.vertex.block.getBlockByLoc(nx, blockTop)!;
-                if (block.data.dirty || block.data.renderDirty) {
-                    blockList.push(block);
-                }
+                blockList.push(block);
             }
         } else {
             // 看到的区域分块宽高都不是 1
             // 使用这种方式的话，索引在换行之前都是连续的，方便整合
             for (let ny = blockTop; ny <= blockBottom; ny++) {
-                const first = this.vertex.block.getBlockByLoc(blockLeft, ny)!;
-                const last = this.vertex.block.getBlockByLoc(blockRight, ny)!;
-                if (first.data.dirty) {
-                    blockList.push(first);
-                }
-                if (last.data.dirty && first !== last) {
-                    blockList.push(last);
-                }
-                for (let nx = blockLeft + 1; nx < blockRight; nx++) {
+                for (let nx = blockLeft; nx <= blockRight; nx++) {
                     const block = this.vertex.block.getBlockByLoc(nx, ny)!;
-                    if (block.data.dirty) {
-                        blockList.push(block);
-                    }
+                    blockList.push(block);
                 }
             }
         }
@@ -143,7 +127,7 @@ export class MapViewport implements IMapViewportController {
         return {
             render: renderArea,
             dirty: updateArea,
-            blockList
+            blockList: blockList.filter(v => v.data.dirty)
         };
     }
 

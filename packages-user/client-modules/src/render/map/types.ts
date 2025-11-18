@@ -426,6 +426,12 @@ export interface IMapRenderer extends IHookable<IMapRendererHooks> {
      * @param y 图块纵坐标
      */
     setTileAlpha(layer: IMapLayer, alpha: number, x: number, y: number): void;
+
+    /**
+     * 进行一帧更新
+     * @param timestamp 时间戳
+     */
+    tick(timestamp: number): void;
 }
 
 export interface IMapVertexArray {

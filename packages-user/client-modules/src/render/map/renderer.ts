@@ -315,10 +315,8 @@ export class MapRenderer
             return a.zIndex - b.zIndex;
         });
         this.sortedLayers.forEach((v, i) => this.layerIndexMap.set(v, i));
-        this.forEachHook((hook, controller) => {
-            hook.onUpdate?.(controller);
-        });
         this.layerListDirty = true;
+        this.requestUpdate();
     }
 
     private updateAllLayers() {
@@ -381,6 +379,7 @@ export class MapRenderer
             this.contextData.backgroundHeight
         );
         this.layerAllDirty = true;
+        this.requestUpdate();
     }
 
     //#endregion
@@ -421,19 +420,25 @@ export class MapRenderer
     }
 
     configBackground(config: Partial<IMapBackgroundConfig>): void {
+        let needUpdate = false;
         if (!isNil(config.renderWidth)) {
+            needUpdate = true;
             this.backRenderWidth = config.renderWidth;
         }
         if (!isNil(config.renderHeight)) {
+            needUpdate = true;
             this.backRenderHeight = config.renderHeight;
         }
         if (!isNil(config.repeatX)) {
+            needUpdate = true;
             this.backRepeatModeX = config.repeatX;
         }
         if (!isNil(config.repeatY)) {
+            needUpdate = true;
             this.backRepeatModeY = config.repeatY;
         }
         if (!isNil(config.useImageSize)) {
+            needUpdate = true;
             this.backUseImageSize = config.useImageSize;
         }
         if (!isNil(config.frameSpeed)) {
@@ -445,6 +450,9 @@ export class MapRenderer
             this.contextData.backgroundWidth,
             this.contextData.backgroundHeight
         );
+        if (needUpdate) {
+            this.requestUpdate();
+        }
     }
 
     getBackgroundConfig(): Readonly<IMapBackgroundConfig> {
@@ -475,6 +483,7 @@ export class MapRenderer
         this.sortedLayers.forEach(v => {
             this.vertex.updateArea(v, 0, 0, this.mapWidth, this.mapHeight);
         });
+        this.requestUpdate();
     }
 
     setCellSize(width: number, height: number): void {
@@ -483,6 +492,7 @@ export class MapRenderer
         this.sortedLayers.forEach(v => {
             this.vertex.updateArea(v, 0, 0, this.mapWidth, this.mapHeight);
         });
+        this.requestUpdate();
     }
 
     configRendering(config: Partial<IMapRenderConfig>): void {
@@ -511,9 +521,7 @@ export class MapRenderer
             this.frameSpeed = config.frameSpeed;
         }
         if (needUpdate) {
-            this.sortedLayers.forEach(v => {
-                this.vertex.updateArea(v, 0, 0, this.mapWidth, this.mapHeight);
-            });
+            this.requestUpdate();
         }
     }
 
@@ -1188,9 +1196,7 @@ export class MapRenderer
         );
         this.backgroundPending = false;
         gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
-        this.forEachHook((hook, controller) => {
-            hook.onUpdate?.(controller);
-        });
+        this.requestUpdate();
     }
 
     render(): void {
@@ -1200,7 +1206,6 @@ export class MapRenderer
             logger.error(31);
             return;
         }
-        console.time('render-map');
 
         const {
             backVAO,
@@ -1221,7 +1226,6 @@ export class MapRenderer
             insTexDataAttribLocation: texData
         } = data;
 
-        console.time('layer-check');
         // 图层检查
         if (this.layerSizeDirty) {
             this.vertex.resizeMap();
@@ -1236,17 +1240,10 @@ export class MapRenderer
             this.layerAllDirty = false;
         }
         this.vertex.checkRebuild();
-        console.timeEnd('layer-check');
-
-        console.time('texture-check');
 
         // 数据检查
         this.checkTexture(gl, data);
         this.checkTileVertexArray(gl, data);
-
-        console.timeEnd('texture-check');
-
-        console.time('update-block-cache');
 
         const area = this.viewport.getRenderArea();
         area.blockList.forEach(v => {
@@ -1254,10 +1251,7 @@ export class MapRenderer
             v.data.render();
         });
 
-        console.timeEnd('update-block-cache');
-
         if (area.dirty.length > 0) {
-            console.time('upload-block-buffer');
             // 如果需要更新顶点数组...
             const array = this.vertex.getVertexArray();
             gl.bindBuffer(gl.ARRAY_BUFFER, instancedBuffer);
@@ -1272,11 +1266,9 @@ export class MapRenderer
                 );
             });
             gl.bindBuffer(gl.ARRAY_BUFFER, null);
-            console.timeEnd('upload-block-buffer');
         }
 
         // 背景
-        console.time('render-call');
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.useProgram(backProgram);
         if (this.needUpdateBackgroundFrame) {
@@ -1333,8 +1325,6 @@ export class MapRenderer
         });
         gl.bindVertexArray(null);
         gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
-        console.timeEnd('render-call');
-        console.timeEnd('render-map');
     }
 
     //#endregion
@@ -1357,9 +1347,7 @@ export class MapRenderer
         h: number
     ) {
         this.vertex.updateArea(layer, x, y, w, h);
-        this.forEachHook((hook, controller) => {
-            hook.onUpdate?.(controller);
-        });
+        this.requestUpdate();
     }
 
     /**
@@ -1371,9 +1359,7 @@ export class MapRenderer
      */
     updateLayerBlock(layer: IMapLayer, block: number, x: number, y: number) {
         this.vertex.updateBlock(layer, block, x, y);
-        this.forEachHook((hook, controller) => {
-            hook.onUpdate?.(controller);
-        });
+        this.requestUpdate();
     }
 
     //#endregion
@@ -1414,6 +1400,7 @@ export class MapRenderer
             map.set(v, item);
         });
         this.vertex.reduceMoving(half, map);
+        this.requestUpdate();
     }
 
     /**
@@ -1453,6 +1440,7 @@ export class MapRenderer
         this.movingBlock.add(moving);
         this.movingIndexMap.set(index, moving);
         this.vertex.updateMoving(moving, true);
+        this.requestUpdate();
         return moving;
     }
 
@@ -1469,6 +1457,7 @@ export class MapRenderer
         this.movingBlock.delete(block);
         this.movingIndexMap.delete(block.index);
         this.vertex.deleteMoving(block);
+        this.requestUpdate();
     }
 
     hasMoving(moving: IMovingBlock): boolean {
@@ -1495,18 +1484,26 @@ export class MapRenderer
 
     //#region 其他方法
 
+    private requestUpdate() {
+        this.forEachHook((hook, controller) => {
+            hook.onUpdate?.(controller);
+        });
+    }
+
     getTimestamp(): number {
         return this.timestamp;
     }
 
     tick(timestamp: number) {
         this.timestamp = timestamp;
+        let update = false;
 
         // 移动数组
         const expandDT = timestamp - this.lastExpandTime;
         if (expandDT > MOVING_TOLERANCE * 1000) {
             this.reduceMoving();
             this.lastExpandTime = timestamp;
+            update = true;
         }
 
         // 背景
@@ -1516,13 +1513,16 @@ export class MapRenderer
             this.backgroundFrame %= this.backgroundFrameCount;
             this.backLastFrame = timestamp;
             this.needUpdateBackgroundFrame = true;
+            update = true;
         }
 
         // 地图帧动画
         const frameDT = timestamp - this.lastFrameTime;
         if (frameDT > this.frameSpeed) {
+            this.lastFrameTime = timestamp;
             this.frameCounter++;
             this.needUpdateFrameCounter = true;
+            update = true;
         }
 
         // 图块移动
@@ -1533,14 +1533,17 @@ export class MapRenderer
                 if (move) toUpdate.push(v);
             });
             this.vertex.updateMovingList(toUpdate, false);
+            update = true;
+        }
+
+        if (update) {
+            this.requestUpdate();
         }
     }
 
     updateTransform(): void {
         this.needUpdateTransform = true;
-        this.forEachHook((hook, controller) => {
-            hook.onUpdate?.(controller);
-        });
+        this.requestUpdate();
     }
 
     //#endregion

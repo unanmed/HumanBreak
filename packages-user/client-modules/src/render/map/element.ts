@@ -44,6 +44,8 @@ export class MapRender extends RenderItem {
         this.renderer.setCellSize(CELL_WIDTH, CELL_HEIGHT);
         this.renderer.setRenderSize(MAP_WIDTH, MAP_HEIGHT);
 
+        this.delegateTicker(time => this.renderer.tick(time));
+
         gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     }
 
@@ -73,8 +75,6 @@ export class MapRender extends RenderItem {
     }
 
     protected render(canvas: MotaOffscreenCanvas2D): void {
-        console.log('----- render start -----');
-
         console.time('map-element-render');
         this.renderer.render(this.gl);
 
