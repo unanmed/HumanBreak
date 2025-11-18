@@ -19,15 +19,21 @@ import {
     BlockCls,
     IBigImageReturn,
     IAssetBuilder,
-    IMaterialAsset,
-    IMaterialFramedData
+    IMaterialFramedData,
+    ITrackedAssetData
 } from './types';
 import { logger } from '@motajs/common';
 import { getClsByString, getTextureFrame } from './utils';
 import { isNil } from 'lodash-es';
 import { AssetBuilder } from './builder';
-import { MaterialAsset } from './asset';
 import { AutotileProcessor } from './autotile';
+
+interface TilesetCache {
+    /** 是否已经在贴图库中存在 */
+    readonly existed: boolean;
+    /** 贴图对象 */
+    readonly texture: ITexture;
+}
 
 export class MaterialManager implements IMaterialManager {
     readonly tileStore: ITextureStore = new TextureStore();
@@ -40,16 +46,18 @@ export class MaterialManager implements IMaterialManager {
     readonly autotileSource: Map<number, SizedCanvasImageSource> = new Map();
 
     /** 图集信息存储 */
-    readonly assetDataStore: Map<number, IMaterialAsset> = new Map();
+    readonly assetDataStore: Map<number, ITextureComposedData> = new Map();
     /** 贴图到图集索引的映射 */
     readonly assetMap: Map<ITexture, number> = new Map();
+    /** 带有脏标记追踪的图集对象 */
+    readonly trackedAsset: ITrackedAssetData;
 
     /** 大怪物数据 */
     readonly bigImageData: Map<number, IMaterialFramedData> = new Map();
     /** tileset 中 `Math.floor(id / 10000) + 1` 映射到 tileset 对应索引的映射，用于处理图块超出 10000 的 tileset */
     readonly tilesetOffsetMap: Map<number, number> = new Map();
     /** 图集打包器 */
-    readonly assetBuilder: IAssetBuilder = new AssetBuilder();
+    readonly assetBuilder: IAssetBuilder;
 
     /** 图块 id 到图块数字的映射 */
     readonly idNumMap: Map<string, number> = new Map();
@@ -73,7 +81,9 @@ export class MaterialManager implements IMaterialManager {
     private built: boolean = false;
 
     constructor() {
+        this.assetBuilder = new AssetBuilder(this);
         this.assetBuilder.pipe(this.assetStore);
+        this.trackedAsset = this.assetBuilder.tracked();
     }
 
     /**
@@ -268,9 +278,9 @@ export class MaterialManager implements IMaterialManager {
         return this.imageStore.fromAlias(alias);
     }
 
-    private getTilesetOwnTexture(identifier: number) {
+    private getTilesetOwnTexture(identifier: number): TilesetCache | null {
         const texture = this.tileStore.getTexture(identifier);
-        if (texture) return texture;
+        if (texture) return { existed: true, texture };
         // 如果 tileset 不存在，那么执行缓存操作
         const offset = Math.floor(identifier / 10000);
         const index = this.tilesetOffsetMap.get(offset - 1);
@@ -290,7 +300,7 @@ export class MaterialManager implements IMaterialManager {
         const y = Math.floor(rest / tileWidth);
         const newTexture = new Texture(tileset.source);
         newTexture.clip(x * 32, y * 32, 32, 32);
-        return newTexture;
+        return { existed: false, texture: newTexture };
     }
 
     /**
@@ -298,17 +308,13 @@ export class MaterialManager implements IMaterialManager {
      * @param data 图集数据
      */
     private checkAssetDirty(data: ITextureComposedData) {
+        if (!this.built) return;
         const asset = this.assetDataStore.get(data.index);
-        if (asset) {
-            // 如果不是新图集，需要标记为脏
-            asset.dirty();
-        } else {
+        if (!asset) {
             // 如果有新图集，需要添加
             const alias = `asset-${data.index}`;
-            const newAsset = new MaterialAsset(data);
-            newAsset.dirty();
             this.assetStore.alias(data.index, alias);
-            this.assetDataStore.set(data.index, newAsset);
+            this.assetDataStore.set(data.index, data);
         }
     }
 
@@ -335,14 +341,16 @@ export class MaterialManager implements IMaterialManager {
     cacheTileset(identifier: number): ITexture | null {
         const newTexture = this.getTilesetOwnTexture(identifier);
         if (!newTexture) return null;
+        const { existed, texture } = newTexture;
+        if (existed) return texture;
         // 缓存贴图
-        this.tileStore.addTexture(identifier, newTexture);
+        this.tileStore.addTexture(identifier, texture);
         this.idNumMap.set(`X${identifier}`, identifier);
         this.numIdMap.set(identifier, `X${identifier}`);
-        const data = this.assetBuilder.addTexture(newTexture);
-        newTexture.toAsset(data);
+        const data = this.assetBuilder.addTexture(texture);
+        texture.toAsset(data);
         this.checkAssetDirty(data);
-        return newTexture;
+        return texture;
     }
 
     cacheTilesetList(
@@ -354,8 +362,10 @@ export class MaterialManager implements IMaterialManager {
         arr.forEach(v => {
             const newTexture = this.getTilesetOwnTexture(v);
             if (!newTexture) return;
-            toAdd.push(newTexture);
-            this.tileStore.addTexture(v, newTexture);
+            const { existed, texture } = newTexture;
+            if (existed) return;
+            toAdd.push(texture);
+            this.tileStore.addTexture(v, texture);
             this.idNumMap.set(`X${v}`, v);
             this.numIdMap.set(v, `X${v}`);
         });
@@ -429,7 +439,7 @@ export class MaterialManager implements IMaterialManager {
         arr.forEach(v => {
             const alias = `asset-${v.index}`;
             this.assetStore.alias(v.index, alias);
-            this.assetDataStore.set(v.index, new MaterialAsset(v));
+            this.assetDataStore.set(v.index, v);
             const data: IMaterialAssetData = {
                 data: v,
                 identifier: v.index,
@@ -444,11 +454,11 @@ export class MaterialManager implements IMaterialManager {
         return res;
     }
 
-    getAsset(identifier: number): IMaterialAsset | null {
+    getAsset(identifier: number): ITextureComposedData | null {
         return this.assetDataStore.get(identifier) ?? null;
     }
 
-    getAssetByAlias(alias: string): IMaterialAsset | null {
+    getAssetByAlias(alias: string): ITextureComposedData | null {
         const id = this.assetStore.identifierOf(alias);
         if (isNil(id)) return null;
         return this.assetDataStore.get(id) ?? null;

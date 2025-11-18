@@ -36,7 +36,7 @@ function addAutotile(set: Set<number>, map?: readonly (readonly number[])[]) {
     map.forEach(line => {
         line.forEach(v => {
             const id = core.maps.blocksInfo[v as keyof NumberToId];
-            if (id.cls === 'autotile') set.add(v);
+            if (id?.cls === 'autotile') set.add(v);
         });
     });
 }
@@ -118,7 +118,8 @@ export function fallbackLoad() {
         addAutotile(autotileSet, floor.fg2map);
     });
 
-    materials.cacheTilesetList(tilesetSet.union(autotileSet));
-
     materials.buildAssets();
+
+    materials.cacheAutotileList(autotileSet);
+    materials.cacheTilesetList(tilesetSet);
 }

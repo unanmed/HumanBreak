@@ -1,5 +1,5 @@
 import { BaseProps, TagDefine } from '@motajs/render-vue';
-import { Transform } from '@motajs/render-core';
+import { ERenderItemEvent, Transform } from '@motajs/render-core';
 import { CanvasStyle } from '@motajs/render-assets';
 import {
     ILayerGroupRenderExtends,
@@ -62,7 +62,7 @@ export interface LayerProps extends BaseProps {
 }
 
 export interface MapRenderProps extends BaseProps {
-    layerList: IRenderLayerData;
+    layerList: Iterable<IRenderLayerData>;
 }
 
 declare module 'vue/jsx-runtime' {
@@ -73,6 +73,7 @@ declare module 'vue/jsx-runtime' {
             animation: TagDefine<AnimateProps, EAnimateEvent>;
             icon: TagDefine<IconProps, EIconEvent>;
             winskin: TagDefine<WinskinProps, EWinskinEvent>;
+            'map-render': TagDefine<MapRenderProps, ERenderItemEvent>;
         }
     }
 }

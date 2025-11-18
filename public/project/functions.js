@@ -161,6 +161,45 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             // ---------- 重绘新地图；这一步将会设置core.status.floorId ---------- //
             core.drawMap(floorId);
 
+            // 更新地图状态
+            const { state } = Mota.require('@user/data-state');
+            const bg = core.floors[floorId].bgmap ?? [];
+            const bg2 = core.floors[floorId].bg2map ?? [];
+            const event = core.floors[floorId].map ?? [];
+            const fg = core.floors[floorId].fgmap ?? [];
+            const fg2 = core.floors[floorId].fg2map ?? [];
+            const { width, height } = core.floors[floorId];
+            const bgLayer = state.layer.getLayerByAlias('bg');
+            const bg2Layer = state.layer.getLayerByAlias('bg2');
+            const eventLayer = state.layer.getLayerByAlias('event');
+            const fgLayer = state.layer.getLayerByAlias('fg');
+            const fg2Layer = state.layer.getLayerByAlias('fg2');
+            state.layer.resizeLayer(bgLayer, width, height);
+            state.layer.resizeLayer(bg2Layer, width, height);
+            state.layer.resizeLayer(eventLayer, width, height);
+            state.layer.resizeLayer(fgLayer, width, height);
+            state.layer.resizeLayer(fg2Layer, width, height);
+            if (bg.length > 0) {
+                const array = new Uint32Array(bg.flat());
+                bgLayer.putMapData(array, 0, 0, width);
+            }
+            if (bg2.length > 0) {
+                const array = new Uint32Array(bg2.flat());
+                bg2Layer.putMapData(array, 0, 0, width);
+            }
+            if (event.length > 0) {
+                const array = new Uint32Array(event.flat());
+                eventLayer.putMapData(array, 0, 0, width);
+            }
+            if (fg.length > 0) {
+                const array = new Uint32Array(fg.flat());
+                fgLayer.putMapData(array, 0, 0, width);
+            }
+            if (fg2.length > 0) {
+                const array = new Uint32Array(fg2.flat());
+                fg2Layer.putMapData(array, 0, 0, width);
+            }
+
             // 设置勇士的位置
             heroLoc.direction = core.turnDirection(heroLoc.direction);
             core.setHeroLoc('x', heroLoc.x);

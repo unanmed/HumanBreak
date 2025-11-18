@@ -71,21 +71,21 @@ export class AutotileProcessor implements IAutotileProcessor {
         // 如果地图高度只有 1
         if (length === width) {
             if (index === 0) {
-                return 0b1100_0111;
+                return 0b1110_1111;
             } else if (index === length - 1) {
-                return 0b0111_1100;
+                return 0b1111_1110;
             } else {
-                return 0b0100_0100;
+                return 0b1110_1110;
             }
         }
         // 如果地图宽度只有 1
         if (width === 1) {
             if (index === 0) {
-                return 0b1111_0001;
+                return 0b1111_1011;
             } else if (index === length - 1) {
-                return 0b0001_1111;
+                return 0b1011_1111;
             } else {
-                return 0b0001_0001;
+                return 0b1011_1011;
             }
         }
 
@@ -96,23 +96,23 @@ export class AutotileProcessor implements IAutotileProcessor {
 
         // 四个角，左上，右上，右下，左下
         if (index === 0) {
-            return 0b1100_0001;
+            return 0b1110_0011;
         } else if (index === width - 1) {
-            return 0b0111_0000;
+            return 0b1111_1000;
         } else if (index === length - 1) {
-            return 0b0001_1100;
+            return 0b0011_1110;
         } else if (index === lastLine) {
-            return 0b0000_0111;
+            return 0b1000_1111;
         }
         // 四条边，上，右，下，左
         else if (index < width) {
-            return 0b0100_0000;
+            return 0b1110_0000;
         } else if (x === width - 1) {
-            return 0b0001_0000;
+            return 0b0011_1000;
         } else if (index > lastLine) {
-            return 0b0000_0100;
+            return 0b0000_1110;
         } else if (x === 0) {
-            return 0b0000_0001;
+            return 0b1000_0011;
         }
         // 不在边缘
         else {
@@ -222,7 +222,7 @@ export class AutotileProcessor implements IAutotileProcessor {
         connection: number
     ): ITextureRenderable | null {
         const { texture } = tile;
-        const size = texture.height === 128 ? 32 : 48;
+        const size = texture.height === 32 * 48 ? 32 : 48;
         const index = distinctConnectionMap.get(connection);
         if (isNil(index)) return null;
         return {

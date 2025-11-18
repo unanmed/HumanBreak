@@ -22,6 +22,7 @@ import { BlockSplitter } from './block';
 import { clamp, isNil } from 'lodash-es';
 import { BlockCls, IMaterialFramedData } from '@user/client-base';
 import { IRect, SizedCanvasImageSource } from '@motajs/render-assets';
+import { INSTANCED_COUNT } from './constant';
 
 // todo: 潜在优化点：顶点数组的 z 坐标以及纹理的 z 坐标可以换为实例化绘制
 
@@ -79,20 +80,9 @@ interface BlockIndex extends IndexedBlockMapPos {
     readonly mapIndex: number;
 }
 
-interface TilePosition {
-    /** 左边缘位置 */
-    readonly left: number;
-    /** 上边缘位置 */
-    readonly top: number;
-    /** 右边缘位置 */
-    readonly right: number;
-    /** 下边缘位置 */
-    readonly bottom: number;
-}
-
 const enum VertexUpdate {
-    /** 更新顶点信息 */
-    Vertex = 0b01,
+    /** 更新顶点位置信息 */
+    Position = 0b01,
     /** 更新贴图信息 */
     Texture = 0b10,
     /** 全部更新 */
@@ -112,29 +102,19 @@ export class MapVertexGenerator
 
     /** 空顶点数组，因为空顶点很常用，所以直接定义一个全局常量 */
     private static readonly EMPTY_VETREX: Float32Array = new Float32Array(
-        6 * 6
+        INSTANCED_COUNT
     );
 
     readonly block: IBlockSplitter<MapVertexBlock>;
 
-    /** 顶点数组 */
-    private vertexArray: Float32Array = new Float32Array();
     /** 偏移数组 */
-    private offsetArray: Int16Array = new Int16Array();
-    /** 不透明度数组 */
-    private alphaArray: Float32Array = new Float32Array();
-    /** 动态内容顶点数组 */
-    private dynamicVertexArray: Float32Array = new Float32Array();
+    private instancedArray: Float32Array = new Float32Array();
     /** 动态内容偏移数组 */
-    private dynamicOffsetArray: Int16Array = new Int16Array();
-    /** 动态内容不透明度数组 */
-    private dynamicAlphaArray: Float32Array = new Float32Array();
+    private dynamicInstancedArray: Float32Array = new Float32Array();
 
     /** 图层列表 */
     private layers: IMapLayer[] = [];
 
-    /** 对应分块的顶点数组 */
-    private blockList: Map<number, IMapVertexBlock> = new Map();
     /** 分块宽度 */
     private blockWidth: number = MAP_BLOCK_WIDTH;
     /** 分块高度 */
@@ -163,6 +143,7 @@ export class MapVertexGenerator
         readonly data: IContextData
     ) {
         super();
+        this.resizeMap();
         this.block = new BlockSplitter();
     }
 
@@ -175,23 +156,13 @@ export class MapVertexGenerator
         const area = this.renderer.mapWidth * this.renderer.mapHeight;
         const staticCount = area * this.renderer.layerCount;
         const count = staticCount + this.dynamicLength;
-        const vertexSize = count * 6 * 6;
-        const offsetSize = count * 2;
-        const alphaSize = count;
-        this.vertexArray = new Float32Array(vertexSize);
-        this.offsetArray = new Int16Array(offsetSize);
-        this.alphaArray = new Float32Array(alphaSize);
-        this.alphaArray.fill(1);
+        const offsetSize = count * INSTANCED_COUNT;
+        this.instancedArray = new Float32Array(offsetSize);
         this.staticLength = staticCount;
-        this.dynamicVertexArray = this.vertexArray.subarray(
-            staticCount * 6 * 6,
-            count * 6 * 6
+        this.dynamicInstancedArray = this.instancedArray.subarray(
+            staticCount * INSTANCED_COUNT,
+            count * INSTANCED_COUNT
         );
-        this.dynamicOffsetArray = this.offsetArray.subarray(
-            staticCount * 2,
-            count * 2
-        );
-        this.dynamicAlphaArray = this.alphaArray.subarray(staticCount, count);
     }
 
     private splitBlock() {
@@ -206,19 +177,16 @@ export class MapVertexGenerator
         const lastCount = (this.mapHeight % this.blockHeight) * this.blockWidth;
         const bh = Math.floor(this.mapHeight / this.blockHeight);
         const lastStart = bh * lineCount;
-        const layerCount = this.renderer.layerCount;
         this.block.splitBlocks(block => {
             // 最后一行的算法与其他行不同
             const startIndex =
                 block.height < this.blockHeight
                     ? lastStart + lastCount * block.x
                     : lineCount * block.y + blockCount * block.x;
-            const count = block.width * block.height * layerCount;
+            const count = block.width * block.height;
 
             const origin: IMapVertexData = {
-                vertexArray: this.vertexArray,
-                offsetArray: this.offsetArray,
-                alphaArray: this.alphaArray
+                instancedArray: this.instancedArray
             };
             const data = new MapVertexBlock(
                 this.renderer,
@@ -245,22 +213,18 @@ export class MapVertexGenerator
             this.mapHeight !== this.renderer.mapHeight
         ) {
             this.needRebuild = true;
+            this.mapWidth = this.renderer.mapWidth;
+            this.mapHeight = this.renderer.mapHeight;
         }
     }
 
     expandMoving(targetSize: number): void {
-        const beforeVertex = this.vertexArray;
-        const beforeOffset = this.offsetArray;
-        const beforeAlpha = this.alphaArray;
+        const beforeOffset = this.instancedArray;
         this.dynamicLength = targetSize;
         this.mallocVertexArray();
-        this.vertexArray.set(beforeVertex);
-        this.offsetArray.set(beforeOffset);
-        this.alphaArray.set(beforeAlpha);
+        this.instancedArray.set(beforeOffset);
         const array: IMapVertexData = {
-            vertexArray: this.vertexArray,
-            offsetArray: this.offsetArray,
-            alphaArray: this.alphaArray
+            instancedArray: this.instancedArray
         };
         // 重建一下对应分块就行了，不需要重新分块
         for (const block of this.block.iterateBlocks()) {
@@ -269,42 +233,25 @@ export class MapVertexGenerator
     }
 
     reduceMoving(targetSize: number, indexMap: Map<number, number>): void {
-        const beforeVertexLength = this.vertexArray.length;
-        const beforeOffsetLength = this.offsetArray.length;
-        const beforeAlphaLength = this.alphaArray.length;
+        const beforeOffsetLength = this.instancedArray.length;
         const deltaLength = this.dynamicLength - targetSize;
         this.dynamicLength = targetSize;
-        this.vertexArray = this.vertexArray.subarray(
+        this.instancedArray = this.instancedArray.subarray(
             0,
-            beforeVertexLength - deltaLength * 6 * 6
-        );
-        this.offsetArray = this.offsetArray.subarray(
-            0,
-            beforeOffsetLength - deltaLength * 2
-        );
-        this.alphaArray = this.alphaArray.subarray(
-            0,
-            beforeAlphaLength - deltaLength
+            beforeOffsetLength - deltaLength * INSTANCED_COUNT
         );
         indexMap.forEach((target, from) => {
             const next = from + 1;
-            this.dynamicVertexArray.copyWithin(
-                target * 6 * 6,
-                from * 6 * 6,
-                next * 6 * 6
+            this.dynamicInstancedArray.copyWithin(
+                target * INSTANCED_COUNT,
+                from * INSTANCED_COUNT,
+                next * INSTANCED_COUNT
             );
-            this.dynamicOffsetArray.copyWithin(target * 2, from * 2, next * 2);
-            this.dynamicAlphaArray[target] = this.dynamicAlphaArray[from];
         });
-        this.dynamicVertexArray = this.dynamicVertexArray.subarray(
+        this.dynamicInstancedArray = this.dynamicInstancedArray.subarray(
             0,
-            targetSize * 6 * 6
+            targetSize * INSTANCED_COUNT
         );
-        this.dynamicOffsetArray = this.dynamicOffsetArray.subarray(
-            0,
-            targetSize * 2
-        );
-        this.dynamicAlphaArray = this.dynamicAlphaArray.subarray(0, targetSize);
         // 这个不需要重新分配内存，依然共用同一个 ArrayBuffer，因此不需要重新分块
     }
 
@@ -323,6 +270,7 @@ export class MapVertexGenerator
         this.needRebuild = false;
         this.mallocVertexArray();
         this.splitBlock();
+        this.dirty();
     }
 
     //#endregion
@@ -339,7 +287,7 @@ export class MapVertexGenerator
         pos: BlockMapPos,
         width: number,
         height: number
-    ): TilePosition {
+    ): Readonly<IRect> {
         const {
             renderWidth,
             renderHeight,
@@ -362,14 +310,14 @@ export class MapVertexGenerator
         const cw = cwu * 2; // normalized cell width in range [-1, 1]
         const ch = chu * 2; // normalized cell height in range [-1, 1]
         const cl = pos.mapX * cw - 1; // cell left
-        const ct = pos.mapY * ch - 1; // cell top
+        const ct = 1 - pos.mapY * ch; // cell top
         if (mode === MapTileBehavior.FitToSize) {
             // 适应到格子大小
             return {
-                left: cl,
-                top: ct,
-                right: cl + cw,
-                bottom: ct + ch
+                x: cl,
+                y: ct,
+                w: cw,
+                h: ch
             };
         } else {
             // 维持大小，需要判断对齐
@@ -382,26 +330,20 @@ export class MapVertexGenerator
             const th = thu * 2; // normalized texture height in range [-1, 1]
             let left = 0;
             let top = 0;
-            let right = 0;
-            let bottom = 0;
             switch (tileAlignX) {
                 case MapTileAlign.Start: {
                     // 左对齐
                     left = cl;
-                    right = cl + tw;
                     break;
                 }
                 case MapTileAlign.Center: {
                     // 左右居中对齐
-                    const center = cl + cwu;
-                    left = center - twu;
-                    right = center + twu;
+                    left = cl + cwu - twu;
                     break;
                 }
                 case MapTileAlign.End: {
                     // 右对齐
-                    right = cl + cw;
-                    left = right - tw;
+                    left = cl + cw - tw;
                     break;
                 }
             }
@@ -409,23 +351,19 @@ export class MapVertexGenerator
                 case MapTileAlign.Start: {
                     // 上对齐
                     top = ct;
-                    bottom = ct + th;
                     break;
                 }
                 case MapTileAlign.Center: {
                     // 上下居中对齐
-                    const center = ct + chu;
-                    top = center - thu;
-                    bottom = center + thu;
+                    top = ct + chu - thu;
                     break;
                 }
                 case MapTileAlign.End: {
                     // 下对齐
-                    bottom = ct + ch;
-                    top = bottom - th;
+                    top = ct + ch - th;
                 }
             }
-            return { left, top, right, bottom };
+            return { x: left, y: top, w: tw, h: th };
         }
     }
 
@@ -448,69 +386,44 @@ export class MapVertexGenerator
         frames: number,
         update: VertexUpdate
     ) {
-        const { offsetArray, vertexArray } = vertex;
+        const { instancedArray } = vertex;
         // 顶点数组
-        const { renderWidth, renderHeight, layerCount } = this.renderer;
-        const { x, y, w, h } = rect;
-        const vertexStart = index.blockIndex * 6 * 6;
-        if (update & VertexUpdate.Texture) {
-            const texLeft = (x / renderWidth) * 2 - 1;
-            const texTop = (y / renderHeight) * 2 - 1;
-            const texRight = ((x + w) / renderWidth) * 2 - 1;
-            const texBottom = ((y + h) / renderHeight) * 2 - 1;
-            // 六个顶点分别是 左下，右下，左上，左上，右下，右上
-            vertexArray[vertexStart + 3] = texLeft;
-            vertexArray[vertexStart + 4] = texBottom;
-            vertexArray[vertexStart + 5] = assetIndex;
-            vertexArray[vertexStart + 9] = texRight;
-            vertexArray[vertexStart + 10] = texBottom;
-            vertexArray[vertexStart + 11] = assetIndex;
-            vertexArray[vertexStart + 15] = texLeft;
-            vertexArray[vertexStart + 16] = texTop;
-            vertexArray[vertexStart + 17] = assetIndex;
-            vertexArray[vertexStart + 21] = texLeft;
-            vertexArray[vertexStart + 22] = texTop;
-            vertexArray[vertexStart + 23] = assetIndex;
-            vertexArray[vertexStart + 27] = texRight;
-            vertexArray[vertexStart + 28] = texBottom;
-            vertexArray[vertexStart + 29] = assetIndex;
-            vertexArray[vertexStart + 33] = texRight;
-            vertexArray[vertexStart + 34] = texTop;
-            vertexArray[vertexStart + 35] = assetIndex;
-        }
-        if (update & VertexUpdate.Vertex) {
+        const { layerCount, assetWidth, assetHeight } = this.renderer;
+        const { x, y, w: width, h: height } = rect;
+        const startIndex = index.blockIndex * INSTANCED_COUNT;
+        if (update & VertexUpdate.Position) {
             // 如果需要更新顶点坐标
             const layerIndex = this.renderer.getLayerIndex(index.layer);
-            const layerStart = (layerIndex / layerCount) * 2 - 1;
-            const zIndex = layerStart + index.mapY / this.mapHeight;
-            const { left, top, right, bottom } = this.getTilePosition(
-                index,
-                w,
-                h
-            );
-            vertexArray[vertexStart] = left;
-            vertexArray[vertexStart + 1] = bottom;
-            vertexArray[vertexStart + 2] = zIndex;
-            vertexArray[vertexStart + 6] = right;
-            vertexArray[vertexStart + 7] = bottom;
-            vertexArray[vertexStart + 8] = zIndex;
-            vertexArray[vertexStart + 12] = left;
-            vertexArray[vertexStart + 13] = top;
-            vertexArray[vertexStart + 14] = zIndex;
-            vertexArray[vertexStart + 18] = left;
-            vertexArray[vertexStart + 19] = top;
-            vertexArray[vertexStart + 20] = zIndex;
-            vertexArray[vertexStart + 24] = right;
-            vertexArray[vertexStart + 25] = bottom;
-            vertexArray[vertexStart + 26] = zIndex;
-            vertexArray[vertexStart + 30] = right;
-            vertexArray[vertexStart + 31] = top;
-            vertexArray[vertexStart + 32] = zIndex;
+            // 避免 z 坐标是 1 的时候被裁剪，因此范围选择 [-0.9, 0.9]
+            const layerStart = (layerIndex / layerCount) * 1.8 - 0.9;
+            const zIndex = -layerStart - index.mapY / this.mapHeight;
+            const { x, y, w, h } = this.getTilePosition(index, width, height);
+            // 图块位置
+            instancedArray[startIndex] = x;
+            instancedArray[startIndex + 1] = y;
+            instancedArray[startIndex + 2] = w;
+            instancedArray[startIndex + 3] = h;
+            // 图块纵深
+            instancedArray[startIndex + 8] = zIndex;
         }
-        // 偏移数组
-        const offsetStart = index.blockIndex * 2;
-        offsetArray[offsetStart] = frames;
-        offsetArray[offsetStart + 1] = offsetIndex;
+        if (update & VertexUpdate.Texture) {
+            const texX = x / assetWidth;
+            const texY = y / assetHeight;
+            const texWidth = width / assetWidth;
+            const texHeight = height / assetHeight;
+            // 纹理坐标
+            instancedArray[startIndex + 4] = texX;
+            instancedArray[startIndex + 5] = texY;
+            instancedArray[startIndex + 6] = texWidth;
+            instancedArray[startIndex + 7] = texHeight;
+            // 不透明度
+            instancedArray[startIndex + 9] = 1;
+            // 帧数、偏移、纹理索引
+            instancedArray[startIndex + 12] = -1;
+            instancedArray[startIndex + 13] = frames;
+            instancedArray[startIndex + 14] = offsetIndex;
+            instancedArray[startIndex + 15] = assetIndex;
+        }
     }
 
     /**
@@ -615,13 +528,13 @@ export class MapVertexGenerator
 
         if (!tile) {
             // 不存在可渲染对象，认为是空图块
-            vertex.vertexArray.set(
-                MapVertexGenerator.EMPTY_VETREX,
-                index.blockIndex * 6 * 6
-            );
-            const offsetStart = index.blockIndex * 2;
-            vertex.offsetArray[offsetStart] = 0;
-            vertex.offsetArray[offsetStart + 1] = 0;
+            const { instancedArray } = vertex;
+            const instancedStart = index.blockIndex * INSTANCED_COUNT;
+            // 只把坐标改成 0 就可以了，其他的保留
+            instancedArray[instancedStart] = 0;
+            instancedArray[instancedStart + 1] = 0;
+            instancedArray[instancedStart + 2] = 0;
+            instancedArray[instancedStart + 3] = 0;
             return;
         }
 
@@ -738,12 +651,15 @@ export class MapVertexGenerator
         w: number,
         h: number
     ): void {
+        if (!this.renderer.hasLayer(layer)) return;
+        this.checkRebuild();
         // 这里多一圈是因为要更新这一圈的自动元件
         const ax = x - 1;
         const ay = y - 1;
         const areaRight = x + w + 1;
         const areaBottom = y + h + 1;
         const blocks = this.block.iterateBlocksOfDataArea(ax, ay, w + 2, h + 2);
+
         for (const block of blocks) {
             const left = ax - block.dataX;
             const top = ay - block.dataY;
@@ -761,6 +677,7 @@ export class MapVertexGenerator
         if (import.meta.env.DEV) {
             this.checkUpdateCallPerformance('updateBlock');
         }
+        this.checkRebuild();
         this.updateBlockVertex(layer, num, x, y);
     }
 
@@ -769,6 +686,7 @@ export class MapVertexGenerator
         if (import.meta.env.DEV) {
             this.checkUpdateCallPerformance('updateBlockList');
         }
+        this.checkRebuild();
         if (blocks.length > 50) {
             // 对于超出50个的更新操作使用懒更新
             blocks.forEach(v => {
@@ -864,11 +782,12 @@ export class MapVertexGenerator
     }
 
     updateBlockCache(block: Readonly<IBlockData<IMapVertexBlock>>): void {
-        console.time('update-block-cache');
+        if (!block.data.dirty) return;
         const layers = this.renderer.getSortedLayer();
         layers.forEach(layer => {
             const dirty = block.data.getDirtyArea(layer);
             if (!dirty || !dirty.dirty) return;
+            block.data.updated();
             const vertex = block.data.getLayerData(layer);
             const mapData = this.renderer.getMapLayerData(layer);
             if (!vertex || !mapData) return;
@@ -897,7 +816,6 @@ export class MapVertexGenerator
                 }
             }
         });
-        console.timeEnd('update-block-cache');
     }
 
     //#endregion
@@ -908,7 +826,7 @@ export class MapVertexGenerator
         const data = this.renderer.getMapLayerData(layer);
         const block = this.block.getBlockByDataLoc(x, y);
         if (!data || !block) return;
-        const vertexArray = block.data.getLayerOffset(layer);
+        const vertexArray = block.data.getLayerInstanced(layer);
         if (!vertexArray) return;
         const mapIndex = y * this.mapWidth + x;
         const num = data.array[mapIndex];
@@ -917,19 +835,19 @@ export class MapVertexGenerator
         const bx = x - block.dataX;
         const by = y - block.dataY;
         const bIndex = by * block.width + bx;
-        vertexArray[bIndex * 2] = tile.frames;
+        vertexArray[bIndex * INSTANCED_COUNT + 13] = tile.frames;
         block.data.markRenderDirty();
     }
 
     disableStaticFrameAnimate(layer: IMapLayer, x: number, y: number): void {
         const block = this.block.getBlockByDataLoc(x, y);
         if (!block) return;
-        const vertexArray = block.data.getLayerOffset(layer);
+        const vertexArray = block.data.getLayerInstanced(layer);
         if (!vertexArray) return;
         const bx = x - block.dataX;
         const by = y - block.dataY;
         const bIndex = by * block.width + bx;
-        vertexArray[bIndex * 2] = 1;
+        vertexArray[bIndex * INSTANCED_COUNT + 13] = 1;
         block.data.markRenderDirty();
     }
 
@@ -941,12 +859,12 @@ export class MapVertexGenerator
     ): void {
         const block = this.block.getBlockByDataLoc(x, y);
         if (!block) return;
-        const vertexArray = block.data.getLayerAlpha(layer);
+        const vertexArray = block.data.getLayerInstanced(layer);
         if (!vertexArray) return;
         const bx = x - block.dataX;
         const by = y - block.dataY;
         const bIndex = by * block.width + bx;
-        vertexArray[bIndex] = alpha;
+        vertexArray[bIndex * INSTANCED_COUNT + 9] = alpha;
         block.data.markRenderDirty();
     }
 
@@ -958,9 +876,7 @@ export class MapVertexGenerator
         if (!this.renderer.hasMoving(block)) return;
         const { cls, frames, offset, texture } = block.texture;
         const vertex: IMapVertexData = {
-            vertexArray: this.dynamicVertexArray,
-            offsetArray: this.dynamicOffsetArray,
-            alphaArray: this.dynamicAlphaArray
+            instancedArray: this.dynamicInstancedArray
         };
         const index: IndexedBlockMapPos = {
             layer: block.layer,
@@ -974,7 +890,7 @@ export class MapVertexGenerator
             logger.error(40, block.tile.toString());
             return;
         }
-        const update = updateTexture ? VertexUpdate.All : VertexUpdate.Vertex;
+        const update = updateTexture ? VertexUpdate.All : VertexUpdate.Position;
         if (cls === BlockCls.Autotile) {
             // 自动元件使用全部不连接
             const renderable = this.renderer.autotile.renderWithoutCheck(
@@ -1025,32 +941,33 @@ export class MapVertexGenerator
     }
 
     deleteMoving(moving: IMovingBlock): void {
-        this.dynamicVertexArray.set(
+        const instancedStart = moving.index * INSTANCED_COUNT;
+        // 这个需要全部清空了，因为可能会复用
+        this.dynamicInstancedArray.set(
             MapVertexGenerator.EMPTY_VETREX,
-            moving.index * 6 * 6
+            instancedStart
         );
-        const offsetStart = moving.index * 2;
-        this.dynamicOffsetArray[offsetStart] = 0;
-        this.dynamicOffsetArray[offsetStart + 1] = 0;
-        this.dynamicAlphaArray[moving.index] = 0;
         this.dynamicRenderDirty = true;
     }
 
     enableDynamicFrameAnimate(block: IMovingBlock): void {
         if (!this.renderer.hasMoving(block)) return;
-        this.dynamicOffsetArray[block.index * 2] = 1;
+        const instancedStart = block.index * INSTANCED_COUNT;
+        this.dynamicInstancedArray[instancedStart + 13] = 1;
         this.dynamicRenderDirty = true;
     }
 
     disableDynamicFrameAnimate(block: IMovingBlock): void {
         if (!this.renderer.hasMoving(block)) return;
-        this.dynamicOffsetArray[block.index * 2] = block.texture.frames;
+        const instancedStart = block.index * INSTANCED_COUNT;
+        this.dynamicInstancedArray[instancedStart + 13] = block.texture.frames;
         this.dynamicRenderDirty = true;
     }
 
     setDynamicAlpha(block: IMovingBlock, alpha: number): void {
         if (!this.renderer.hasMoving(block)) return;
-        this.dynamicAlphaArray[block.index] = alpha;
+        const instancedStart = block.index * INSTANCED_COUNT;
+        this.dynamicInstancedArray[instancedStart + 9] = alpha;
         this.dynamicRenderDirty = true;
     }
 
@@ -1066,11 +983,9 @@ export class MapVertexGenerator
     getVertexArray(): IMapVertexArray {
         this.checkRebuild();
         return {
-            dynamicStart: this.staticLength * 6,
-            dynamicCount: this.dynamicLength * 6,
-            tileVertex: this.vertexArray,
-            tileOffset: this.offsetArray,
-            tileAlpha: this.alphaArray
+            dynamicStart: this.staticLength,
+            dynamicCount: this.dynamicLength,
+            tileInstanced: this.instancedArray
         };
     }
 
@@ -1080,11 +995,9 @@ export class MapVertexGenerator
 //#region 分块对象
 
 class MapVertexBlock implements IMapVertexBlock {
-    vertexArray!: Float32Array;
-    offsetArray!: Int16Array;
-    alphaArray!: Float32Array;
+    instancedArray!: Float32Array;
 
-    dirty: boolean = false;
+    dirty: boolean = true;
     renderDirty: boolean = true;
 
     private readonly layerDirty: Map<IMapLayer, ILayerDirtyData> = new Map();
@@ -1092,22 +1005,21 @@ class MapVertexBlock implements IMapVertexBlock {
     readonly startIndex: number;
     readonly endIndex: number;
     readonly count: number;
+    readonly layerCount: number;
 
-    readonly vertexStart: number;
-    readonly offsetStart: number;
-    readonly alphaStart: number;
+    readonly instancedStart: number;
 
     private readonly indexMap: Map<IMapLayer, number> = new Map();
-    private readonly vertexMap: Map<IMapLayer, Float32Array> = new Map();
-    private readonly offsetMap: Map<IMapLayer, Int16Array> = new Map();
-    private readonly alphaMap: Map<IMapLayer, Float32Array> = new Map();
+    private readonly instancedMap: Map<IMapLayer, Float32Array> = new Map();
 
     /**
      * 创建分块的顶点数组对象，此对象不能动态扩展，如果地图变化，需要全部重建
      * @param renderer 渲染器对象
      * @param originArray 原始顶点数组
      * @param startIndex 起始网格索引
-     * @param count 分块数量
+     * @param count 单个图层的图块数量
+     * @param blockWidth 分块宽度
+     * @param blockHeight 分块高度
      */
     constructor(
         readonly renderer: IMapRenderer,
@@ -1117,22 +1029,22 @@ class MapVertexBlock implements IMapVertexBlock {
         private readonly blockWidth: number,
         private readonly blockHeight: number
     ) {
-        this.startIndex = startIndex;
-        this.endIndex = startIndex + count;
-        this.count = count;
         const layerCount = renderer.layerCount;
-        const vertexStart = startIndex * layerCount * 6 * 6;
-        const offsetStart = startIndex * layerCount * 2;
-        const alphaStart = startIndex * layerCount;
-        this.vertexStart = vertexStart;
-        this.offsetStart = offsetStart;
-        this.alphaStart = alphaStart;
-
+        this.startIndex = startIndex * layerCount;
+        this.endIndex = (startIndex + count) * layerCount;
+        this.count = count;
+        const offsetStart = startIndex * layerCount * INSTANCED_COUNT;
+        this.instancedStart = offsetStart;
+        this.layerCount = layerCount;
         this.rebuild(originArray);
     }
 
     render(): void {
         this.renderDirty = false;
+    }
+
+    updated(): void {
+        this.dirty = false;
     }
 
     markRenderDirty() {
@@ -1173,33 +1085,20 @@ class MapVertexBlock implements IMapVertexBlock {
     }
 
     rebuild(originArray: IMapVertexData) {
-        const vertexStart = this.vertexStart;
-        const offsetStart = this.offsetStart;
-        const alphaStart = this.alphaStart;
+        const offsetStart = this.instancedStart;
         const count = this.count;
-        this.vertexArray = originArray.vertexArray.subarray(
-            vertexStart,
-            vertexStart + count * 6 * 6
-        );
-        this.offsetArray = originArray.offsetArray.subarray(
+        this.instancedArray = originArray.instancedArray.subarray(
             offsetStart,
-            offsetStart + count * 2
-        );
-        this.alphaArray = originArray.alphaArray.subarray(
-            alphaStart,
-            alphaStart + count
+            offsetStart + count * INSTANCED_COUNT * this.layerCount
         );
 
         this.renderer.getSortedLayer().forEach((v, i) => {
-            const vs = vertexStart + i * count * 6 * 6;
-            const os = offsetStart + i * count * 2;
-            const as = alphaStart + i * count;
-            const va = this.vertexArray.subarray(vs, vs + count * 6 * 6);
-            const oa = this.offsetArray.subarray(os, os + count * 2);
-            const aa = this.alphaArray.subarray(as, as + count);
-            this.vertexMap.set(v, va);
-            this.offsetMap.set(v, oa);
-            this.alphaMap.set(v, aa);
+            const os = i * count * INSTANCED_COUNT;
+            const oa = this.instancedArray.subarray(
+                os,
+                os + count * INSTANCED_COUNT
+            );
+            this.instancedMap.set(v, oa);
             this.indexMap.set(v, i);
             this.layerDirty.set(v, {
                 dirty: true,
@@ -1209,33 +1108,21 @@ class MapVertexBlock implements IMapVertexBlock {
                 dirtyBottom: this.blockHeight
             });
         });
+        this.dirty = true;
     }
 
-    getLayerVertex(layer: IMapLayer): Float32Array | null {
-        return this.vertexMap.get(layer) ?? null;
-    }
-
-    getLayerOffset(layer: IMapLayer): Int16Array | null {
-        return this.offsetMap.get(layer) ?? null;
-    }
-
-    getLayerAlpha(layer: IMapLayer): Float32Array | null {
-        return this.alphaMap.get(layer) ?? null;
+    getLayerInstanced(layer: IMapLayer): Float32Array | null {
+        return this.instancedMap.get(layer) ?? null;
     }
 
     getLayerData(layer: IMapLayer): IIndexedMapVertexData | null {
-        const vertex = this.vertexMap.get(layer);
-        const offset = this.offsetMap.get(layer);
-        const alpha = this.alphaMap.get(layer);
+        const offset = this.instancedMap.get(layer);
         const index = this.indexMap.get(layer);
-        if (!vertex || !offset || !alpha || isNil(index)) return null;
+        if (!offset || isNil(index)) return null;
         return {
-            vertexArray: vertex,
-            offsetArray: offset,
-            alphaArray: alpha,
-            vertexStart: this.vertexStart + index * this.count * 6 * 6,
-            offsetStart: this.offsetStart + index * this.count * 2,
-            alphaStart: this.alphaStart + index * this.count
+            instancedArray: offset,
+            instancedStart:
+                this.instancedStart + index * this.count * INSTANCED_COUNT
         };
     }
 }

@@ -64,6 +64,10 @@ export class TextureStore<T extends ITexture = ITexture>
         }
     }
 
+    hasTexture(identifier: number): boolean {
+        return this.texMap.has(identifier);
+    }
+
     getTexture(identifier: number): T | null {
         return this.texMap.get(identifier) ?? null;
     }

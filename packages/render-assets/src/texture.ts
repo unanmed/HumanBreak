@@ -7,6 +7,7 @@ import {
     ITextureSplitter,
     SizedCanvasImageSource
 } from './types';
+import { clamp } from 'lodash-es';
 
 export class Texture implements ITexture {
     source: SizedCanvasImageSource;
@@ -91,11 +92,11 @@ export class Texture implements ITexture {
     }
 
     clampRect(rect: Readonly<IRect>): Readonly<IRect> {
-        const l = Math.max(this.cl, this.cl + rect.x);
-        const t = Math.max(this.ct, this.ct + rect.y);
-        const r = Math.min(l + rect.w, this.cr);
-        const b = Math.min(t + rect.h, this.cb);
-        return { x: l, y: t, w: r - b, h: b - t };
+        const l = clamp(rect.x, this.cl, this.cr);
+        const t = clamp(rect.y, this.ct, this.cb);
+        const r = clamp(rect.x + rect.w, this.cl, this.cr);
+        const b = clamp(rect.y + rect.h, this.ct, this.cb);
+        return { x: l, y: t, w: r - l, h: b - t };
     }
 
     clipped(rect: Readonly<IRect>): ITextureRenderable {

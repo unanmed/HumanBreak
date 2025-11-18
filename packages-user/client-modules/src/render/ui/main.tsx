@@ -1,4 +1,3 @@
-import { LayerShadowExtends } from '../legacy/shadow';
 import {
     Props,
     Font,
@@ -36,44 +35,51 @@ import {
     RightStatusBar
 } from './statusBar';
 import { ReplayingStatus } from './toolbar';
-import { getHeroStatusOn, HeroSkill, NightSpecial } from '@user/data-state';
+import {
+    getHeroStatusOn,
+    HeroSkill,
+    NightSpecial,
+    state
+} from '@user/data-state';
 import { jumpIgnoreFloor } from '@user/legacy-plugin-data';
 import { hook } from '@user/data-base';
-import { FloorDamageExtends, FloorItemDetail } from '../elements';
-import { LayerGroupPortal } from '../legacy/portal';
-import { LayerGroupFilter } from '../legacy/gameCanvas';
-import { LayerGroupHalo } from '../legacy/halo';
 import { FloorChange } from '../legacy/fallback';
-import { PopText } from '../legacy/pop';
 import { mainUIController } from './controller';
-import {
-    ILayerGroupRenderExtends,
-    LayerGroupAnimate,
-    FloorViewport,
-    ILayerRenderExtends,
-    HeroRenderer,
-    LayerDoorAnimate,
-    LayerGroup
-} from '../elements';
+import { LayerGroup } from '../elements';
 import { isNil } from 'lodash-es';
 import { materials } from '@user/client-base';
+import { IRenderLayerData } from '../map/element';
 
 const MainScene = defineComponent(() => {
     //#region 基本定义
-    const layerGroupExtends: ILayerGroupRenderExtends[] = [
-        new FloorDamageExtends(),
-        new FloorItemDetail(),
-        new LayerGroupFilter(),
-        new LayerGroupPortal(),
-        new LayerGroupHalo(),
-        new LayerGroupAnimate(),
-        new FloorViewport()
+    const layerList: IRenderLayerData[] = [
+        {
+            layer: state.layer.getLayerByAlias('bg')!,
+            zIndex: 10,
+            alias: 'bg'
+        },
+        {
+            layer: state.layer.getLayerByAlias('bg2')!,
+            zIndex: 20,
+            alias: 'bg2'
+        },
+        {
+            layer: state.layer.getLayerByAlias('event')!,
+            zIndex: 30,
+            alias: 'event'
+        },
+        {
+            layer: state.layer.getLayerByAlias('fg')!,
+            zIndex: 40,
+            alias: 'fg'
+        },
+        {
+            layer: state.layer.getLayerByAlias('fg2')!,
+            zIndex: 50,
+            alias: 'fg2'
+        }
     ];
-    const eventExtends: ILayerRenderExtends[] = [
-        new HeroRenderer(),
-        new LayerDoorAnimate(),
-        new LayerShadowExtends()
-    ];
+
     const mainTextboxProps: Props<typeof Textbox> = {
         text: '',
         hidden: true,
@@ -272,7 +278,7 @@ const MainScene = defineComponent(() => {
         const tileset = materials.getAsset(0);
         if (!tileset) return;
         canvas.ctx.drawImage(
-            tileset.data.texture.source,
+            tileset.texture.source,
             0,
             0,
             canvas.width,
@@ -283,6 +289,7 @@ const MainScene = defineComponent(() => {
     return () => (
         <container id="main-scene" width={MAIN_WIDTH} height={MAIN_HEIGHT}>
             <sprite
+                hidden
                 render={testRender}
                 loc={[180, 0, 480, 480]}
                 zIndex={1000}
@@ -304,14 +311,10 @@ const MainScene = defineComponent(() => {
                 onDown={downMap}
                 onMove={moveMap}
             >
-                <layer-group id="layer-main" ex={layerGroupExtends} ref={map}>
-                    <layer layer="bg" zIndex={10}></layer>
-                    <layer layer="bg2" zIndex={20}></layer>
-                    <layer layer="event" zIndex={30} ex={eventExtends}></layer>
-                    <layer layer="fg" zIndex={40}></layer>
-                    <layer layer="fg2" zIndex={50}></layer>
-                    <PopText id="pop-main" zIndex={80}></PopText>
-                </layer-group>
+                <map-render
+                    layerList={layerList}
+                    loc={[0, 0, MAP_WIDTH, MAP_HEIGHT]}
+                />
                 <Textbox id="main-textbox" {...mainTextboxProps}></Textbox>
                 <FloorChange id="floor-change" zIndex={50}></FloorChange>
                 <Tip

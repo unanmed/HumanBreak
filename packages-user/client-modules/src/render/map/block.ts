@@ -12,8 +12,8 @@ export class BlockSplitter<T> implements IBlockSplitter<T> {
     blockHeight: number = 0;
     dataWidth: number = 0;
     dataHeight: number = 0;
-    width: number = 0;
-    height: number = 0;
+    width: number = 1;
+    height: number = 1;
 
     /** 分块映射 */
     readonly blockMap: Map<number, IBlockData<T>> = new Map();
@@ -33,7 +33,7 @@ export class BlockSplitter<T> implements IBlockSplitter<T> {
      * @param y 分块纵坐标
      */
     private checkLocRange(x: number, y: number) {
-        return x > 0 && y > 0 && x < this.width && y < this.height;
+        return x >= 0 && y >= 0 && x < this.width && y < this.height;
     }
 
     getBlockByLoc(x: number, y: number): IBlockData<T> | null {
@@ -221,10 +221,10 @@ export class BlockSplitter<T> implements IBlockSplitter<T> {
     }
 
     configSplitter(config: IBlockSplitterConfig): void {
+        this.splitDataWidth = config.dataWidth;
+        this.splitDataHeight = config.dataHeight;
         this.splitBlockWidth = config.blockWidth;
         this.splitBlockHeight = config.blockHeight;
-        this.splitDataWidth = config.dataWidth;
-        this.splitBlockHeight = config.dataHeight;
     }
 
     private mapBlock(
@@ -252,6 +252,10 @@ export class BlockSplitter<T> implements IBlockSplitter<T> {
 
     splitBlocks(mapFn: (block: IBlockInfo) => T): void {
         this.blockMap.clear();
+        this.blockWidth = this.splitBlockWidth;
+        this.blockHeight = this.splitBlockHeight;
+        this.dataWidth = this.splitDataWidth;
+        this.dataHeight = this.splitDataHeight;
         const restX = this.splitDataWidth % this.splitBlockWidth;
         const restY = this.splitDataHeight % this.splitBlockHeight;
         const width = Math.floor(this.splitDataWidth / this.splitBlockWidth);

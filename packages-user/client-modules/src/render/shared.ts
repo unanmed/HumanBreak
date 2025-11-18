@@ -5,6 +5,10 @@ import { Font } from '@motajs/render-style';
 
 //#region 地图
 
+/** 每个格子的默认宽度，现阶段用处不大 */
+export const CELL_WIDTH = 32;
+/** 每个格子的默认高度，现阶段用处不大 */
+export const CELL_HEIGHT = 32;
 /** 每个格子的宽高 */
 export const CELL_SIZE = 32;
 /** 地图格子宽度，此处仅影响画面，可能不影响游戏内的部分逻辑，游戏内逻辑地图大小请在 core.js 中修改 */
@@ -29,10 +33,6 @@ export const DYNAMIC_RESERVE = 16;
  * 调整此值可以调整频率，值越大，越不容易因为数量小于预留数量而减小预留。
  */
 export const MOVING_TOLERANCE = 60;
-/** 每个格子的默认宽度，现阶段用处不大 */
-export const CELL_WIDTH = 32;
-/** 每个格子的默认高度，现阶段用处不大 */
-export const CELL_HEIGHT = 32;
 
 //#region 状态栏
 

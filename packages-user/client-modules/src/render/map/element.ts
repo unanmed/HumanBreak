@@ -4,10 +4,16 @@ import {
     Transform
 } from '@motajs/render-core';
 import { IMapLayer } from '@user/data-state';
-import { IMapRenderer } from './types';
+import {
+    IMapRenderer,
+    IMapRendererExtends,
+    MapTileAlign,
+    MapTileBehavior
+} from './types';
 import { MapRenderer } from './renderer';
 import { materials } from '@user/client-base';
 import { ElementNamespace, ComponentInternalInstance } from 'vue';
+import { CELL_HEIGHT, CELL_WIDTH, MAP_HEIGHT, MAP_WIDTH } from '../shared';
 
 export interface IRenderLayerData {
     /** 图层对象 */
@@ -41,6 +47,15 @@ export class MapRender extends RenderItem {
             this.renderer.addLayer(layer.layer, layer.alias);
             this.renderer.setZIndex(layer.layer, layer.zIndex);
         }
+        this.renderer.useAsset(materials.trackedAsset);
+        this.renderer.addExtends(new MapUpdateExtends(this));
+
+        this.renderer.setTileBackground(1);
+
+        this.renderer.setCellSize(CELL_WIDTH, CELL_HEIGHT);
+        this.renderer.setRenderSize(MAP_WIDTH, MAP_HEIGHT);
+
+        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     }
 
     /**
@@ -83,16 +98,12 @@ export class MapRender extends RenderItem {
     }
 
     protected render(canvas: MotaOffscreenCanvas2D): void {
+        console.log('----- render start -----');
+
         console.time('map-element-render');
         this.renderer.render(this.gl);
 
-        canvas.ctx.drawImage(
-            this.canvas,
-            0,
-            0,
-            this.canvas.width,
-            this.canvas.height
-        );
+        canvas.ctx.drawImage(this.canvas, 0, 0, canvas.width, canvas.height);
         console.timeEnd('map-element-render');
     }
 
@@ -110,5 +121,13 @@ export class MapRender extends RenderItem {
             }
         }
         super.patchProp(key, prevValue, nextValue, namespace, parentComponent);
+    }
+}
+
+class MapUpdateExtends implements IMapRendererExtends {
+    constructor(readonly element: MapRender) {}
+
+    onUpdate(): void {
+        this.element.update();
     }
 }

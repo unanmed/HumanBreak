@@ -131,6 +131,9 @@ export class MapLayer implements IMapLayer {
         const height = Math.ceil(array.length / width);
         if (width === this.width && height === this.height) {
             this.mapArray.set(array);
+            this.loadedExtends.forEach(v => {
+                v.ex.onUpdateArea?.(v.controller, x, y, width, height);
+            });
             return;
         }
         const w = this.width;

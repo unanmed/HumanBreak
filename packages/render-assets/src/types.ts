@@ -174,6 +174,12 @@ export interface ITextureStore<T extends ITexture = ITexture> {
     removeTexture(identifier: number | string | T): void;
 
     /**
+     * 判断当前贴图存储对象是否包含指定贴图 id
+     * @param identifier 贴图对象 id
+     */
+    hasTexture(identifier: number): boolean;
+
+    /**
      * 根据贴图对象 id 获取贴图
      * @param identifier 贴图对象 id
      */

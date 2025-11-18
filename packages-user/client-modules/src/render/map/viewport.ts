@@ -19,20 +19,31 @@ export class MapViewport implements IMapViewportController {
         this.vertex = renderer.vertex;
     }
 
+    private pushBlock(
+        list: IMapRenderArea[],
+        start: IBlockData<IMapVertexBlock>,
+        end: IBlockData<IMapVertexBlock>
+    ) {
+        const startIndex = start.data.startIndex;
+        const endIndex = end.data.endIndex;
+        list.push({
+            startIndex,
+            endIndex,
+            count: endIndex - startIndex
+        });
+    }
+
     getRenderArea(): IMapRenderData {
         const { cellWidth, cellHeight, renderWidth, renderHeight } =
             this.renderer;
         const { blockWidth, blockHeight, width, height } = this.vertex.block;
-        // 减一是因为第一个像素是 0，所以最后一个像素就是宽度减一
-        const r = renderWidth - 1;
-        const b = renderHeight - 1;
         // 其实只需要算左上角和右下角就行了
-        const [left, top] = this.transform.transformed(0, 0);
-        const [right, bottom] = this.transform.transformed(r, b);
-        const cl = left / cellWidth;
-        const ct = top / cellHeight;
-        const cr = right / cellWidth;
-        const cb = bottom / cellHeight;
+        const [left, top] = this.transform.untransformed(-1, -1);
+        const [right, bottom] = this.transform.untransformed(1, 1);
+        const cl = (left * renderWidth) / cellWidth;
+        const ct = (top * renderHeight) / cellHeight;
+        const cr = (right * renderWidth) / cellWidth;
+        const cb = (bottom * renderHeight) / cellHeight;
         const blockLeft = clamp(Math.floor(cl / blockWidth), 0, width - 1);
         const blockRight = clamp(Math.floor(cr / blockWidth), 0, width - 1);
         const blockTop = clamp(Math.floor(ct / blockHeight), 0, height - 1);
@@ -42,25 +53,48 @@ export class MapViewport implements IMapViewportController {
         const updateArea: IMapRenderArea[] = [];
         const blockList: IBlockData<IMapVertexBlock>[] = [];
 
-        // 使用这种方式的话，索引在换行之前都是连续的，方便整合
-        for (let ny = blockTop; ny <= blockBottom; ny++) {
-            const first = this.vertex.block.getBlockByLoc(blockLeft, ny)!;
-            const last = this.vertex.block.getBlockByLoc(blockRight, ny)!;
-            if (first.data.dirty) {
-                blockList.push(first);
+        const widthOne = blockLeft === blockRight;
+        const heightOne = blockTop === blockBottom;
+
+        if (widthOne && heightOne) {
+            // 只能看到一个分块
+            const block = this.vertex.block.getBlockByLoc(blockLeft, blockTop)!;
+            if (block.data.dirty || block.data.renderDirty) {
+                blockList.push(block);
             }
-            if (last.data.dirty) {
-                blockList.push(last);
-            }
-            renderArea.push({
-                startIndex: first.data.startIndex,
-                endIndex: last.data.endIndex,
-                count: last.data.endIndex - first.data.startIndex
-            });
-            for (let nx = blockLeft + 1; nx < blockRight; nx++) {
-                const block = this.vertex.block.getBlockByLoc(nx, ny)!;
-                if (block.data.dirty) {
+        } else if (widthOne) {
+            // 看到的区域分块宽度是 1
+            for (let ny = blockTop; ny <= blockBottom; ny++) {
+                const block = this.vertex.block.getBlockByLoc(blockLeft, ny)!;
+                if (block.data.dirty || block.data.renderDirty) {
                     blockList.push(block);
+                }
+            }
+        } else if (heightOne) {
+            // 看到的区域分块高度是 1
+            for (let nx = blockLeft; nx <= blockRight; nx++) {
+                const block = this.vertex.block.getBlockByLoc(nx, blockTop)!;
+                if (block.data.dirty || block.data.renderDirty) {
+                    blockList.push(block);
+                }
+            }
+        } else {
+            // 看到的区域分块宽高都不是 1
+            // 使用这种方式的话，索引在换行之前都是连续的，方便整合
+            for (let ny = blockTop; ny <= blockBottom; ny++) {
+                const first = this.vertex.block.getBlockByLoc(blockLeft, ny)!;
+                const last = this.vertex.block.getBlockByLoc(blockRight, ny)!;
+                if (first.data.dirty) {
+                    blockList.push(first);
+                }
+                if (last.data.dirty && first !== last) {
+                    blockList.push(last);
+                }
+                for (let nx = blockLeft + 1; nx < blockRight; nx++) {
+                    const block = this.vertex.block.getBlockByLoc(nx, ny)!;
+                    if (block.data.dirty) {
+                        blockList.push(block);
+                    }
                 }
             }
         }
@@ -68,29 +102,43 @@ export class MapViewport implements IMapViewportController {
         if (blockList.length > 0) {
             if (blockList.length === 1) {
                 const block = blockList[0];
-                updateArea.push(block.data);
+                if (block.data.renderDirty) {
+                    this.pushBlock(updateArea, block, block);
+                }
+                this.pushBlock(renderArea, block, block);
             } else {
-                let continuousStart: IBlockData<IMapVertexBlock> = blockList[0];
-                let continuousLast: IBlockData<IMapVertexBlock> = blockList[0];
+                // 更新区域
+                let updateStart: IBlockData<IMapVertexBlock> = blockList[0];
+                let updateEnd: IBlockData<IMapVertexBlock> = blockList[0];
+                let renderStart: IBlockData<IMapVertexBlock> = blockList[0];
+                let renderEnd: IBlockData<IMapVertexBlock> = blockList[0];
                 for (let i = 1; i < blockList.length; i++) {
                     const block = blockList[i];
-                    if (block.index === continuousLast.index + 1) {
-                        // 连续则合并
-                        continuousLast = block;
+                    const { renderDirty } = block.data;
+                    // 连续则合并
+                    // 渲染区域
+                    if (block.index === renderEnd.index + 1) {
+                        renderEnd = block;
                     } else {
-                        const start = continuousStart.data.startIndex;
-                        const end = continuousLast.data.endIndex;
-                        updateArea.push({
-                            startIndex: start,
-                            endIndex: end,
-                            count: end - start
-                        });
-                        continuousStart = block;
-                        continuousLast = block;
+                        this.pushBlock(renderArea, renderStart, renderEnd);
+                        renderStart = block;
+                        renderEnd = block;
+                    }
+                    // 缓冲区更新区域
+                    if (renderDirty && block.index === updateEnd.index + 1) {
+                        updateEnd = block;
+                    } else {
+                        this.pushBlock(updateArea, updateStart, updateEnd);
+                        updateStart = block;
+                        updateEnd = block;
                     }
                 }
+                this.pushBlock(updateArea, updateStart, updateEnd);
+                this.pushBlock(renderArea, renderStart, renderEnd);
             }
         }
+
+        // todo: 动态内容
 
         return {
             render: renderArea,

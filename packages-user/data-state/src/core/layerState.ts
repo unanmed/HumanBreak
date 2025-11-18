@@ -7,7 +7,7 @@ export class LayerState implements ILayerState {
     /** 图层到图层别名映射 */
     readonly layerAliasMap: WeakMap<IMapLayer, string> = new WeakMap();
     /** 图层别名到图层的映射 */
-    readonly aliasLayerMap: WeakMap<symbol, IMapLayer> = new WeakMap();
+    readonly aliasLayerMap: Map<symbol, IMapLayer> = new Map();
 
     addLayer(width: number, height: number): IMapLayer {
         const array = new Uint32Array(width * height);
@@ -49,7 +49,7 @@ export class LayerState implements ILayerState {
         layer: IMapLayer,
         width: number,
         height: number,
-        keepBlock?: boolean
+        keepBlock: boolean = false
     ): void {
         if (keepBlock) {
             layer.resize(width, height);

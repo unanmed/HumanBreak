@@ -45,8 +45,7 @@ export class TextureColumnAnimater implements ITextureAnimater<number> {
     *once(texture: ITexture, frames: number): Generator<ITextureRenderable> {
         if (frames <= 0) return;
         const renderable = texture.render();
-        const { x: ox, y: oy } = renderable.rect;
-        const { width, height: h } = texture!;
+        const { x: ox, y: oy, w: width, h } = renderable.rect;
         const w = width / frames;
         for (let i = 0; i < frames; i++) {
             const renderable: ITextureRenderable = {

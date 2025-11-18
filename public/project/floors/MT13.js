@@ -67,7 +67,7 @@ main.floors.MT13=
 ],
     "beforeBattle": {},
     "weather": [
-        "sun",
+        "rain",
         8
     ],
     "cannotMoveIn": {},

@@ -1,14 +1,11 @@
-import { IDirtyTracker } from '@motajs/common';
-import {
-    ITextureRenderable,
-    SizedCanvasImageSource
-} from '@motajs/render-assets';
+import { IDirtyMark, IDirtyTracker } from '@motajs/common';
+import { ITextureRenderable } from '@motajs/render-assets';
 import { Transform } from '@motajs/render-core';
 import {
     IAutotileProcessor,
     IMaterialFramedData,
-    IMaterialGetter,
-    IMaterialManager
+    IMaterialManager,
+    ITrackedAssetData
 } from '@user/client-base';
 import { IMapLayer } from '@user/data-state';
 import { TimingFn } from 'mutate-animate';
@@ -45,18 +42,6 @@ export const enum MapTileAlign {
     End
 }
 
-export interface IMapAssetData extends IDirtyTracker<Set<number>> {
-    /** 图像源列表 */
-    readonly sourceList: ImageBitmap[];
-    /**
-     * 贴图引用跳接，`ImageBitmap` 的传递性能远好于其他类型，而贴图图集为了能够动态增加内容会使用画布类型，
-     * 因此需要把贴图生成为额外的 `ImageBitmap`，并提供引用跳接映射。值代表在 `sourceList` 中的索引。
-     */
-    readonly skipRef: Map<SizedCanvasImageSource, number>;
-    /** 贴图数据 */
-    readonly materials: IMaterialGetter;
-}
-
 export interface IMapBackgroundConfig {
     /** 是否使用图片大小作为背景图渲染大小，如果是 `false`，则使用 `renderWidth` `renderHeight` 作为渲染大小 */
     readonly useImageSize: boolean;
@@ -85,16 +70,6 @@ export interface IMapRenderConfig {
     readonly tileTestMode: MapTileSizeTestMode;
     /** 帧动画时长 */
     readonly frameSpeed: number;
-}
-
-export interface IMapAssetManager {
-    /** 素材管理对象 */
-    readonly materials: IMaterialManager;
-
-    /**
-     * 生成地图渲染图集数据
-     */
-    generateAsset(): IMapAssetData;
 }
 
 export interface IContextData {
@@ -126,22 +101,22 @@ export interface IContextData {
     readonly backNowFrameLocation: WebGLUniformLocation;
     /** 顶点数组输入 */
     readonly vertexAttribLocation: number;
-    /** 纹理坐标输入输入 */
-    readonly texCoordAttribLocation: number;
-    /** 偏移数组输入 */
-    readonly offsetAttribLocation: number;
-    /** 不透明度数组输入 */
-    readonly alphaAttribLocation: number;
+    /** 图块坐标输入 */
+    readonly insTilePosAttribLocation: number;
+    /** 图块纹理坐标输入 */
+    readonly insTexCoordAttribLocation: number;
+    /** 图块数据输入 */
+    readonly insTileDataAttribLocation: number;
+    /** 图块当前帧数输入 */
+    readonly insTexDataAttribLocation: number;
     /** 背景顶点数组输入 */
     readonly backVertexAttribLocation: number;
     /** 背景纹理数组输入 */
     readonly backTexCoordAttribLocation: number;
     /** 顶点数组 */
     readonly vertexBuffer: WebGLBuffer;
-    /** 偏移数组 */
-    readonly offsetBuffer: WebGLBuffer;
-    /** 不透明度数组 */
-    readonly alphaBuffer: WebGLBuffer;
+    /** 实例化数据数组 */
+    readonly instancedBuffer: WebGLBuffer;
     /** 背景顶点数组 */
     readonly backgroundVertexBuffer: WebGLBuffer;
     /** 图块纹理对象 */
@@ -167,9 +142,9 @@ export interface IContextData {
     backgroundDepth: number;
 
     /** 图块纹理的脏标记 */
-    tileTextureMark: symbol;
+    tileTextureMark: IDirtyMark;
     /** 顶点数组的脏标记 */
-    vertexMark: symbol;
+    vertexMark: IDirtyMark;
 }
 
 export interface IMovingBlock {
@@ -246,6 +221,13 @@ export interface IMovingBlock {
     destroy(): void;
 }
 
+export interface IMapRendererExtends {
+    /**
+     * 当需要更新画面时执行
+     */
+    onUpdate?(): void;
+}
+
 export interface IMapRenderer {
     /** 地图渲染器使用的资源管理器 */
     readonly manager: IMaterialManager;
@@ -275,12 +257,22 @@ export interface IMapRenderer {
     readonly cellWidth: number;
     /** 每个格子的高度 */
     readonly cellHeight: number;
+    /** 图集宽度 */
+    readonly assetWidth: number;
+    /** 图集高度 */
+    readonly assetHeight: number;
 
     /**
      * 使用指定图集对象
      * @param asset 要使用的缓存对象
      */
-    useAsset(asset: IMapAssetData): void;
+    useAsset(asset: ITrackedAssetData): void;
+
+    /**
+     * 添加地图渲染拓展
+     * @param ex 拓展对象
+     */
+    addExtends(ex: IMapRendererExtends): void;
 
     /**
      * 摧毁此地图渲染器，表示当前渲染器不会再被使用到
@@ -379,9 +371,9 @@ export interface IMapRenderer {
     configRendering(config: Partial<IMapRenderConfig>): void;
 
     /**
-     * 设置渲染的宽高，单位格子。例如填 13 就表示渲染宽度或高度是 13 个格子。
-     * @param width 渲染的格子宽度
-     * @param height 渲染的格子高度
+     * 设置渲染的宽高，单位像素
+     * @param width 渲染的像素宽度
+     * @param height 渲染的像素高度
      */
     setRenderSize(width: number, height: number): void;
 
@@ -466,21 +458,17 @@ export interface IMapRenderer {
 
 export interface IMapVertexArray {
     /**
-     * 地图渲染顶点数组，结构是一个三维张量 `[B, L, T]`，其中 `B` 代表分块，`L` 代表图层，`T` 代表图块，并按照结构顺序平铺存储。
-     * 每个顶点包含两个数据，顶点的 `x,y,z` 坐标，顶点的贴图坐标 `x,y,z`。
+     * 地图渲染实例化数组，结构是一个三维张量 `[B, L, T]`，其中 `B` 代表分块，`L` 代表图层，`T` 代表图块，并按照结构顺序平铺存储。
      *
      * 语义解释就是，最内层存储图块，再外面一层存储图层，最外层存储分块。这样的话可以一次性将一个分块的所有图层渲染完毕。
+     *
+     * 依次存储 a_tilePos, a_texCoord, a_tileData, a_texData
      */
-    readonly tileVertex: Float32Array;
+    readonly tileInstanced: Float32Array;
 
-    /** 每个图块的偏移数据，使用实例化绘制，第一项表示这个图块的总帧数，第二项表示每帧的偏移量 */
-    readonly tileOffset: Int16Array;
-    /** 每个图块的不透明度，用于实现前景层虚化效果 */
-    readonly tileAlpha: Float32Array;
-
-    /** 动态内容顶点起始索引 */
+    /** 动态内容的起始索引，以实例为单位 */
     readonly dynamicStart: number;
-    /** 动态内容顶点数量 */
+    /** 动态内容的数量，以实例为单位 */
     readonly dynamicCount: number;
 }
 
@@ -717,21 +705,13 @@ export interface IBlockSplitter<T> extends IBlockSplitterConfig {
 }
 
 export interface IMapVertexData {
-    /** 这个分块的顶点数组 */
-    readonly vertexArray: Float32Array;
-    /** 这个分块的偏移数组 */
-    readonly offsetArray: Int16Array;
-    /** 这个分块的不透明度数组 */
-    readonly alphaArray: Float32Array;
+    /** 这个分块的实例化数据数组 */
+    readonly instancedArray: Float32Array;
 }
 
 export interface IIndexedMapVertexData extends IMapVertexData {
-    /** 这个分块的顶点数组的起始索引 */
-    readonly vertexStart: number;
-    /** 这个分块的偏移数组的起始索引 */
-    readonly offsetStart: number;
-    /** 这个分块的不透明度数组的起始索引 */
-    readonly alphaStart: number;
+    /** 这个分块的实例化数据的起始索引 */
+    readonly instancedStart: number;
 }
 
 export interface ILayerDirtyData {
@@ -765,6 +745,11 @@ export interface IMapVertexBlock extends IMapVertexData {
     render(): void;
 
     /**
+     * 取消数据脏标记
+     */
+    updated(): void;
+
+    /**
      * 标记指定区域为脏，需要更新
      * @param layer 图层对象
      * @param left 标记区域左边缘，相对于分块，即分块左上角为 `0,0`，包含
@@ -787,22 +772,10 @@ export interface IMapVertexBlock extends IMapVertexData {
     getDirtyArea(layer: IMapLayer): Readonly<ILayerDirtyData> | null;
 
     /**
-     * 获取指定图层的顶点数组，是对内部存储的直接引用
+     * 获取指定图层的实例化数据数组，是对内部存储的直接引用
      * @param layer 图层对象
      */
-    getLayerVertex(layer: IMapLayer): Float32Array | null;
-
-    /**
-     * 获取指定图层的偏移数组，是对内部存储的直接引用
-     * @param layer 图层对象
-     */
-    getLayerOffset(layer: IMapLayer): Int16Array | null;
-
-    /**
-     * 获取指定图层的不透明度数组，是对内部存储的直接引用
-     * @param layer 图层对象
-     */
-    getLayerAlpha(layer: IMapLayer): Float32Array | null;
+    getLayerInstanced(layer: IMapLayer): Float32Array | null;
 
     /**
      * 获取指定图层的所有顶点数组数据，是对内部存储的直接引用
@@ -820,6 +793,9 @@ export interface IMapBlockUpdateObject {
     readonly y: number;
 }
 
+/**
+ * 脏标记表示顶点数组的长度是否发生变化
+ */
 export interface IMapVertexGenerator extends IDirtyTracker<boolean> {
     /** 地图渲染器 */
     readonly renderer: IMapRenderer;

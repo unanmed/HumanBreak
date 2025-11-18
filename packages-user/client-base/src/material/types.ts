@@ -234,7 +234,7 @@ export interface IMaterialGetter {
      * 根据标识符获取图集信息
      * @param identifier 图集的标识符
      */
-    getAsset(identifier: number): IMaterialAsset | null;
+    getAsset(identifier: number): ITextureComposedData | null;
 
     /**
      * 根据额外素材索引获取额外素材
@@ -272,7 +272,7 @@ export interface IMaterialAliasGetter {
      * 根据别名获取图集信息
      * @param alias 图集的别名
      */
-    getAssetByAlias(alias: string): IMaterialAsset | null;
+    getAssetByAlias(alias: string): ITextureComposedData | null;
 
     /**
      * 根据图块别名获取图块类型
@@ -302,7 +302,9 @@ export interface IMaterialManager
     readonly bigImageStore: ITextureStore;
 
     /** 图集信息存储 */
-    readonly assetDataStore: Iterable<[number, IMaterialAsset]>;
+    readonly assetDataStore: Iterable<[number, ITextureComposedData]>;
+    /** 带有脏标记追踪的图集信息 */
+    readonly trackedAsset: ITrackedAssetData;
 
     /** 图块类型映射 */
     readonly clsMap: Map<number, BlockCls>;
@@ -466,7 +468,29 @@ export interface IAssetBuilder {
     addTextureList(texture: Iterable<ITexture>): Iterable<ITextureComposedData>;
 
     /**
+     * 获取可追踪贴图对象
+     */
+    tracked(): ITrackedAssetData;
+
+    /**
      * 结束此打包器
+     */
+    close(): void;
+}
+
+export interface ITrackedAssetData extends IDirtyTracker<Set<number>> {
+    /** 图像源列表 */
+    readonly sourceList: Map<number, ImageBitmap>;
+    /**
+     * 贴图引用跳接，`ImageBitmap` 的传递性能远好于其他类型，而贴图图集为了能够动态增加内容会使用画布类型，
+     * 因此需要把贴图生成为额外的 `ImageBitmap`，并提供引用跳接映射。值代表在 `sourceList` 中的索引。
+     */
+    readonly skipRef: Map<SizedCanvasImageSource, number>;
+    /** 贴图数据 */
+    readonly materials: IMaterialGetter;
+
+    /**
+     * 取消使用此图集，释放相关资源
      */
     close(): void;
 }

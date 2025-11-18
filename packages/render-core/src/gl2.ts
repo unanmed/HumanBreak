@@ -1237,7 +1237,7 @@ export class GL2Program extends EventEmitter<ShaderProgramEvent> {
     }
 
     /**
-     * 设置渲染模式，目前可选 {@link Shader.DRAW_ARRAYS} 至 {@link Shader.DRAW_INSTANCED}
+     * 设置渲染模式，目前可选 {@link GL2.DRAW_ARRAYS} 至 {@link GL2.DRAW_INSTANCED}
      */
     mode(mode: RenderMode) {
         this.renderMode = mode;

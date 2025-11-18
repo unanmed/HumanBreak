@@ -9,14 +9,15 @@ import {
     BlockCls,
     IAutotileProcessor,
     IMaterialFramedData,
-    IMaterialManager
+    IMaterialManager,
+    ITrackedAssetData
 } from '@user/client-base';
 import {
     IContextData,
-    IMapAssetData,
     IMapBackgroundConfig,
     IMapRenderConfig,
     IMapRenderer,
+    IMapRendererExtends,
     IMapVertexGenerator,
     IMapViewportController,
     IMovingBlock,
@@ -48,6 +49,7 @@ import {
 } from '../shared';
 import { ITransformUpdatable, Transform } from '@motajs/render-core';
 import { MapViewport } from './viewport';
+import { INSTANCED_COUNT } from './constant';
 
 const enum BackgroundType {
     Static,
@@ -94,6 +96,11 @@ export class MapRenderer
     renderHeight: number = 0;
     cellWidth: number = CELL_WIDTH;
     cellHeight: number = CELL_HEIGHT;
+    assetWidth: number = 4096;
+    assetHeight: number = 4096;
+
+    /** 拓展列表 */
+    private readonly extendList: Set<IMapRendererExtends> = new Set();
 
     /** 这个渲染器添加的图层 */
     readonly layers: Set<IMapLayer> = new Set();
@@ -109,7 +116,7 @@ export class MapRenderer
     private layerIndexMap: Map<IMapLayer, number> = new Map();
 
     /** 使用的图集数据 */
-    private assetData: IMapAssetData | null = null;
+    private assetData: ITrackedAssetData | null = null;
 
     /** 背景图类型 */
     private backgroundType: BackgroundType = BackgroundType.Tile;
@@ -123,6 +130,8 @@ export class MapRenderer
     private backFrameSpeed: number = 300;
     /** 当前背景图帧数 */
     private backgroundFrame: number = 0;
+    /** 是否需要更新背景图帧数 */
+    private needUpdateBackgroundFrame: boolean = true;
     /** 背景图总帧数 */
     private backgroundFrameCount: number = 1;
     /** 背景图上一帧的时刻 */
@@ -141,10 +150,6 @@ export class MapRenderer
     private backgroundDirty: boolean = false;
     /** 背景图是否正在更新 */
     private backgroundPending: boolean = false;
-    /** 背景图宽度 */
-    private backgroundWidth: number = 0;
-    /** 背景图高度 */
-    private backgroundHeight: number = 0;
     /** 背景顶点数组 */
     private backgroundVertex: Float32Array = new Float32Array(4 * 4);
 
@@ -192,11 +197,15 @@ export class MapRenderer
     private lastFrameTime: number = 0;
     /** 当前帧数 */
     private frameCounter: number = 0;
+    /** 是否需要更新当前帧数 */
+    private needUpdateFrameCounter: boolean = true;
     /** 帧动画速率 */
     private frameSpeed: number = 300;
 
     /** 画布上下文数据 */
     private contextData: IContextData;
+    /** 是否需要更新变换矩阵 */
+    private needUpdateTransform: boolean = true;
 
     /** 图块动画器 */
     private readonly tileAnimater: ITextureAnimater<number>;
@@ -218,8 +227,8 @@ export class MapRenderer
     ) {
         // 上下文初始化要依赖于 offsetPool，因此提前调用
         const offsetPool = this.getOffsetPool();
-        const data = this.initContext()!;
         this.offsetPool = offsetPool;
+        const data = this.initContext()!;
         this.normalizedOffsetPool = offsetPool.map(
             v => v / data.tileTextureWidth
         );
@@ -228,44 +237,80 @@ export class MapRenderer
         this.vertex = new MapVertexGenerator(this, data);
         this.autotile = new AutotileProcessor(manager);
         this.tick = this.tick.bind(this);
-        this.transform = new Transform();
         this.transform.bind(this);
         this.viewport = new MapViewport(this);
         this.viewport.bindTransform(this.transform);
         this.tileAnimater = new TextureColumnAnimater();
+        this.initVertexPointer(gl, data);
+    }
+
+    /**
+     * 初始化顶点 pointer
+     * @param gl 画布 WebGL2 上下文
+     * @param data 上下文数据
+     */
+    private initVertexPointer(gl: WebGL2RenderingContext, data: IContextData) {
+        // 顶点数组初始化
+        const {
+            backVAO,
+            tileVAO,
+            vertexBuffer,
+            instancedBuffer,
+            backgroundVertexBuffer,
+            vertexAttribLocation: vaLocation,
+            insTilePosAttribLocation: tilePos,
+            insTexCoordAttribLocation: texCoord,
+            insTileDataAttribLocation: tileData,
+            insTexDataAttribLocation: texData,
+            backVertexAttribLocation: bvaLocation,
+            backTexCoordAttribLocation: btcaLocation
+        } = data;
         // 背景初始化
-        const arr = this.backgroundVertex;
-        // 左下角
-        arr[0] = -1;
-        arr[1] = -1;
-        // 右下角
-        arr[4] = 1;
-        arr[5] = -1;
-        // 左上角
-        arr[8] = -1;
-        arr[9] = 1;
-        // 右上角
-        arr[12] = 1;
-        arr[13] = 1;
-        gl.bindVertexArray(data.backVAO);
-        gl.bindBuffer(gl.ARRAY_BUFFER, data.backgroundVertexBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, arr, gl.DYNAMIC_DRAW);
-        gl.vertexAttribPointer(
-            data.backVertexAttribLocation,
-            2,
-            gl.FLOAT,
-            false,
-            4 * 4,
-            0
+        gl.bindVertexArray(backVAO);
+        gl.bindBuffer(gl.ARRAY_BUFFER, backgroundVertexBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, 16 * 4, gl.DYNAMIC_DRAW);
+        gl.vertexAttribPointer(bvaLocation, 2, gl.FLOAT, false, 4 * 4, 0);
+        gl.vertexAttribPointer(btcaLocation, 2, gl.FLOAT, false, 4 * 4, 2 * 4);
+        gl.enableVertexAttribArray(bvaLocation);
+        gl.enableVertexAttribArray(btcaLocation);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        gl.bindVertexArray(null);
+
+        // 顶点数组
+        gl.bindVertexArray(tileVAO);
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+        gl.bufferData(
+            gl.ARRAY_BUFFER,
+            // prettier-ignore
+            new Float32Array([
+                // 左下，右下，左上，右上，前两个是顶点坐标，后两个是纹理坐标
+                // 因为我们已经在数据处理阶段将数据归一化到了 [-1, 1] 的范围，因此顶点坐标应该是 [0, 1] 的范围
+                // 同时又因为我们以左上角为原点，因此纵坐标需要取反
+                0, 0, 0, 0,
+                1, 0, 1, 0,
+                0, -1, 0, 1, 
+                1, -1, 1, 1
+            ]),
+            gl.STATIC_DRAW
         );
-        gl.vertexAttribPointer(
-            data.backTexCoordAttribLocation,
-            2,
-            gl.FLOAT,
-            false,
-            4 * 4,
-            2 * 4
-        );
+        gl.vertexAttribPointer(vaLocation, 4, gl.FLOAT, false, 0, 0);
+        gl.vertexAttribDivisor(vaLocation, 0);
+        gl.enableVertexAttribArray(vaLocation);
+        gl.bindBuffer(gl.ARRAY_BUFFER, instancedBuffer);
+        const stride = INSTANCED_COUNT * 4;
+        gl.vertexAttribPointer(tilePos, 4, gl.FLOAT, false, stride, 0);
+        gl.vertexAttribPointer(texCoord, 4, gl.FLOAT, false, stride, 4 * 4);
+        gl.vertexAttribPointer(tileData, 4, gl.FLOAT, false, stride, 8 * 4);
+        gl.vertexAttribPointer(texData, 4, gl.FLOAT, false, stride, 12 * 4);
+        gl.vertexAttribDivisor(tilePos, 1);
+        gl.vertexAttribDivisor(texCoord, 1);
+        gl.vertexAttribDivisor(tileData, 1);
+        gl.vertexAttribDivisor(texData, 1);
+        gl.enableVertexAttribArray(tilePos);
+        gl.enableVertexAttribArray(texCoord);
+        gl.enableVertexAttribArray(tileData);
+        gl.enableVertexAttribArray(texData);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
         gl.bindVertexArray(null);
     }
 
@@ -298,6 +343,7 @@ export class MapRenderer
         this.sortLayer();
         this.layerDirty = true;
         this.layerCount = this.layers.size;
+        this.resizeLayer();
     }
 
     removeLayer(layer: IMapLayer): void {
@@ -317,6 +363,7 @@ export class MapRenderer
         this.sortLayer();
         this.layerDirty = true;
         this.layerCount = this.layers.size;
+        this.resizeLayer();
     }
 
     getLayer(identifier: string): IMapLayer | null {
@@ -363,6 +410,12 @@ export class MapRenderer
         this.mapWidth = maxWidth;
         this.mapHeight = maxHeight;
         this.layerDirty = true;
+        this.updateBackgroundVertex(
+            this.gl,
+            this.contextData,
+            this.contextData.backgroundWidth,
+            this.contextData.backgroundHeight
+        );
     }
 
     //#endregion
@@ -376,6 +429,7 @@ export class MapRenderer
         this.tileBack = 0;
         this.backLastFrame = this.timestamp;
         this.backgroundFrameCount = 1;
+        this.backgroundDirty = true;
         this.checkBackground(this.gl, this.contextData);
     }
 
@@ -387,6 +441,7 @@ export class MapRenderer
         this.tileBack = 0;
         this.backLastFrame = this.timestamp;
         this.backgroundFrameCount = array.length;
+        this.backgroundDirty = true;
         this.checkBackground(this.gl, this.contextData);
     }
 
@@ -396,6 +451,7 @@ export class MapRenderer
         this.staticBack = null;
         this.dynamicBack = null;
         this.backLastFrame = this.timestamp;
+        this.backgroundDirty = true;
         this.checkBackground(this.gl, this.contextData);
     }
 
@@ -421,8 +477,8 @@ export class MapRenderer
         this.updateBackgroundVertex(
             this.gl,
             this.contextData,
-            this.backgroundWidth,
-            this.backgroundHeight
+            this.contextData.backgroundWidth,
+            this.contextData.backgroundHeight
         );
     }
 
@@ -441,7 +497,7 @@ export class MapRenderer
 
     //#region 渲染设置
 
-    useAsset(asset: IMapAssetData): void {
+    useAsset(asset: ITrackedAssetData): void {
         this.assetData = asset;
         this.sortedLayers.forEach(v => {
             this.updateLayerArea(v, 0, 0, v.width, v.height);
@@ -531,11 +587,7 @@ export class MapRenderer
 
     getAssetSourceIndex(source: SizedCanvasImageSource): number {
         if (!this.assetData) return -1;
-        if (source instanceof ImageBitmap) {
-            return this.assetData.sourceList.indexOf(source);
-        } else {
-            return -1;
-        }
+        return this.assetData.skipRef.get(source) ?? -1;
     }
 
     getOffsetIndex(offset: number): number {
@@ -556,17 +608,20 @@ export class MapRenderer
             return null;
         }
 
+        const { program: tp } = tileProgram;
+        const { program: bp } = backProgram;
+
         const poolLocation = gl.getUniformLocation(
-            tileProgram,
+            tp,
             // 数组要写 [0]
             'u_offsetPool[0]'
         );
-        const frameLocation = gl.getUniformLocation(tileProgram, 'u_nowFrame');
-        const tileSampler = gl.getUniformLocation(tileProgram, 'u_sampler');
-        const backSampler = gl.getUniformLocation(backProgram, 'u_sampler');
-        const tileTrans = gl.getUniformLocation(tileProgram, 'u_transform');
-        const backTrans = gl.getUniformLocation(backProgram, 'u_transform');
-        const backFrame = gl.getUniformLocation(backProgram, 'u_nowFrame');
+        const frameLocation = gl.getUniformLocation(tp, 'u_nowFrame');
+        const tileSampler = gl.getUniformLocation(tp, 'u_sampler');
+        const backSampler = gl.getUniformLocation(bp, 'u_sampler');
+        const tileTrans = gl.getUniformLocation(tp, 'u_transform');
+        const backTrans = gl.getUniformLocation(bp, 'u_transform');
+        const backFrame = gl.getUniformLocation(bp, 'u_nowFrame');
         if (
             !poolLocation ||
             !frameLocation ||
@@ -580,16 +635,16 @@ export class MapRenderer
             return null;
         }
 
-        const vertexAttrib = gl.getAttribLocation(tileProgram, 'a_position');
-        const texCoordAttrib = gl.getAttribLocation(tileProgram, 'a_texCoord');
-        const offsetAttrib = gl.getAttribLocation(tileProgram, 'a_offset');
-        const alphaAttrib = gl.getAttribLocation(tileProgram, 'a_alpha');
-        const backVertex = gl.getAttribLocation(backProgram, 'a_position');
-        const backTexCoord = gl.getAttribLocation(backProgram, 'a_texCoord');
+        const vertexAttrib = gl.getAttribLocation(tp, 'a_position');
+        const insTilePosAttrib = gl.getAttribLocation(tp, 'a_tilePos');
+        const insTexCoordAttib = gl.getAttribLocation(tp, 'a_texCoord');
+        const insTileDataAttrib = gl.getAttribLocation(tp, 'a_tileData');
+        const insTexDataAttib = gl.getAttribLocation(tp, 'a_texData');
+        const backVertex = gl.getAttribLocation(bp, 'a_position');
+        const backTexCoord = gl.getAttribLocation(bp, 'a_texCoord');
 
         const vertexBuffer = gl.createBuffer();
-        const offsetBuffer = gl.createBuffer();
-        const alphaBuffer = gl.createBuffer();
+        const instancedBuffer = gl.createBuffer();
         const backVertexBuffer = gl.createBuffer();
 
         const tileTexture = gl.createTexture();
@@ -600,21 +655,18 @@ export class MapRenderer
 
         gl.bindTexture(gl.TEXTURE_2D_ARRAY, tileTexture);
         gl.texStorage3D(gl.TEXTURE_2D_ARRAY, 1, gl.RGBA8, 4096, 4096, 1);
-
-        gl.texParameteri(
-            gl.TEXTURE_2D_ARRAY,
-            gl.TEXTURE_MAG_FILTER,
-            gl.NEAREST
-        );
-        gl.texParameteri(
-            gl.TEXTURE_2D_ARRAY,
-            gl.TEXTURE_MIN_FILTER,
-            gl.NEAREST
-        );
+        gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
 
         // 配置清空选项
-        gl.clearColor(0, 0, 0, 0);
+        gl.clearColor(0, 0, 0, 1);
         gl.clearDepth(1);
+
+        // 其他配置
+        gl.disable(gl.CULL_FACE);
+        gl.enable(gl.DEPTH_TEST);
+        gl.enable(gl.BLEND);
+        gl.depthFunc(gl.LESS);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
         const data: IContextData = {
             tileProgram: tileProgram.program,
@@ -624,8 +676,7 @@ export class MapRenderer
             backVertShader: backProgram.vertexShader,
             backFragShader: backProgram.fragmentShader,
             vertexBuffer,
-            offsetBuffer,
-            alphaBuffer,
+            instancedBuffer,
             backgroundVertexBuffer: backVertexBuffer,
             offsetPoolLocation: poolLocation,
             nowFrameLocation: frameLocation,
@@ -635,9 +686,10 @@ export class MapRenderer
             backTransformLocation: backTrans,
             backNowFrameLocation: backFrame,
             vertexAttribLocation: vertexAttrib,
-            texCoordAttribLocation: texCoordAttrib,
-            offsetAttribLocation: offsetAttrib,
-            alphaAttribLocation: alphaAttrib,
+            insTilePosAttribLocation: insTilePosAttrib,
+            insTexCoordAttribLocation: insTexCoordAttib,
+            insTileDataAttribLocation: insTileDataAttrib,
+            insTexDataAttribLocation: insTexDataAttib,
             backVertexAttribLocation: backVertex,
             backTexCoordAttribLocation: backTexCoord,
             tileVAO,
@@ -647,9 +699,9 @@ export class MapRenderer
             tileTextureWidth: 4096,
             tileTextureHeight: 4096,
             tileTextureDepth: 1,
-            backgroundWidth: 0,
-            backgroundHeight: 0,
-            backgroundDepth: 0,
+            backgroundWidth: 32,
+            backgroundHeight: 32,
+            backgroundDepth: 1,
             tileTextureMark: Symbol(),
             vertexMark: Symbol()
         };
@@ -661,8 +713,9 @@ export class MapRenderer
         const gl = this.gl;
         const data = this.contextData;
         if (!data) return;
-        gl.deleteBuffer(data.offsetBuffer);
         gl.deleteBuffer(data.vertexBuffer);
+        gl.deleteBuffer(data.instancedBuffer);
+        gl.deleteBuffer(data.backgroundVertexBuffer);
         gl.deleteProgram(data.tileProgram);
         gl.deleteProgram(data.backProgram);
         gl.deleteShader(data.tileVertShader);
@@ -671,6 +724,8 @@ export class MapRenderer
         gl.deleteShader(data.backFragShader);
         gl.deleteTexture(data.tileTexture);
         gl.deleteTexture(data.backgroundTexture);
+        gl.deleteVertexArray(data.tileVAO);
+        gl.deleteVertexArray(data.backVAO);
     }
 
     //#endregion
@@ -708,6 +763,8 @@ export class MapRenderer
             data.tileTextureWidth = maxWidth;
             data.tileTextureHeight = maxHeight;
             data.tileTextureDepth = count;
+            this.assetWidth = maxWidth;
+            this.assetHeight = maxHeight;
             this.normalizedOffsetPool = this.offsetPool.map(v => v / maxWidth);
             this.needUpdateOffsetPool = true;
             return true;
@@ -725,11 +782,14 @@ export class MapRenderer
         if (!this.assetData) return;
         const tile = data.tileTexture;
         const source = this.assetData.sourceList;
+        const sourceArray = [...source.values()];
         if (!this.assetData.hasMark(data.tileTextureMark)) {
             // 如果没有标记，那么直接全部重新传递
-            gl.bindTexture(gl.TEXTURE_2D_ARRAY, tile);
+            this.assetData.unmark(data.tileTextureMark);
             data.tileTextureMark = this.assetData.mark();
-            this.checkTextureArraySize(gl, data, source);
+            gl.bindTexture(gl.TEXTURE_2D_ARRAY, tile);
+            this.checkTextureArraySize(gl, data, sourceArray);
+            console.time('texture-upload');
             source.forEach((v, i) => {
                 gl.texSubImage3D(
                     gl.TEXTURE_2D_ARRAY,
@@ -747,13 +807,29 @@ export class MapRenderer
             });
             gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT);
             gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT);
+            gl.texParameteri(
+                gl.TEXTURE_2D_ARRAY,
+                gl.TEXTURE_MAG_FILTER,
+                gl.NEAREST
+            );
+            gl.texParameteri(
+                gl.TEXTURE_2D_ARRAY,
+                gl.TEXTURE_MIN_FILTER,
+                gl.NEAREST
+            );
+            console.timeEnd('texture-upload');
         } else {
             const dirty = this.assetData.dirtySince(data.tileTextureMark);
             if (dirty.size === 0) return;
             this.assetData.unmark(data.tileTextureMark);
             data.tileTextureMark = this.assetData.mark();
             gl.bindTexture(gl.TEXTURE_2D_ARRAY, tile);
-            const sizeChanged = this.checkTextureArraySize(gl, data, source);
+            const sizeChanged = this.checkTextureArraySize(
+                gl,
+                data,
+                sourceArray
+            );
+            console.time('texture-upload');
             if (sizeChanged) {
                 // 尺寸变化，需要全部重新传递
                 source.forEach((v, i) => {
@@ -774,7 +850,7 @@ export class MapRenderer
             } else {
                 // 否则只需要传递标记为脏的图像
                 dirty.forEach(v => {
-                    const img = source[v];
+                    const img = source.get(v)!;
                     gl.texSubImage3D(
                         gl.TEXTURE_2D_ARRAY,
                         0,
@@ -790,6 +866,7 @@ export class MapRenderer
                     );
                 });
             }
+            console.timeEnd('texture-upload');
         }
     }
 
@@ -803,34 +880,20 @@ export class MapRenderer
         data: IContextData
     ) {
         if (!this.assetData) return;
-        const dirty = this.vertex.dirtySince(data.vertexMark);
-        if (!dirty) return;
+        this.vertex.checkRebuild();
+        const hasDirty = this.vertex.hasMark(data.vertexMark);
+        if (hasDirty) {
+            const dirty = this.vertex.dirtySince(data.vertexMark);
+            if (!dirty) return;
+        }
+        this.vertex.unmark(data.vertexMark);
+        data.vertexMark = this.vertex.mark();
         const array = this.vertex.getVertexArray();
-        const {
-            vertexBuffer,
-            offsetBuffer,
-            alphaBuffer,
-            tileVAO,
-            vertexAttribLocation: vaLocation,
-            texCoordAttribLocation: tcaLocation,
-            offsetAttribLocation: oaLocation,
-            alphaAttribLocation: aaLocation
-        } = data;
-        // 顶点数据不需要实例化，偏移和不透明度需要实例化
-        gl.bindVertexArray(tileVAO);
-        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, array.tileVertex, gl.DYNAMIC_DRAW);
-        gl.vertexAttribPointer(vaLocation, 3, gl.FLOAT, false, 6 * 4, 0);
-        gl.vertexAttribPointer(tcaLocation, 3, gl.FLOAT, false, 6 * 4, 3 * 4);
-        gl.bindBuffer(gl.ARRAY_BUFFER, offsetBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, array.tileOffset, gl.DYNAMIC_DRAW);
-        gl.vertexAttribIPointer(oaLocation, 2, gl.SHORT, 0, 0);
-        gl.vertexAttribDivisor(oaLocation, 1);
-        gl.bindBuffer(gl.ARRAY_BUFFER, alphaBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, array.tileAlpha, gl.DYNAMIC_DRAW);
-        gl.vertexAttribPointer(aaLocation, 1, gl.FLOAT, false, 0, 0);
-        gl.vertexAttribDivisor(aaLocation, 1);
-        gl.bindVertexArray(null);
+        const { instancedBuffer } = data;
+        // 更新实例化缓冲区
+        gl.bindBuffer(gl.ARRAY_BUFFER, instancedBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, array.tileInstanced, gl.DYNAMIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
     }
 
     /**
@@ -844,6 +907,7 @@ export class MapRenderer
         data: IContextData,
         source: ImageBitmap
     ) {
+        gl.bindTexture(gl.TEXTURE_2D_ARRAY, data.backgroundTexture);
         const { width: w, height: h } = source;
         if (
             w !== data.backgroundWidth ||
@@ -868,6 +932,7 @@ export class MapRenderer
             gl.UNSIGNED_BYTE,
             source
         );
+        gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
     }
 
     /**
@@ -885,6 +950,7 @@ export class MapRenderer
         height: number,
         source: ImageBitmap[]
     ) {
+        gl.bindTexture(gl.TEXTURE_2D_ARRAY, data.backgroundTexture);
         const w = width;
         const h = height;
         const depth = source.length;
@@ -905,14 +971,15 @@ export class MapRenderer
                 0,
                 0,
                 i,
-                w,
-                h,
+                v.width,
+                v.height,
                 1,
                 gl.RGBA,
                 gl.UNSIGNED_BYTE,
                 v
             );
         });
+        gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
     }
 
     /**
@@ -929,30 +996,41 @@ export class MapRenderer
         width: number,
         height: number
     ) {
-        this.backgroundWidth = width;
-        this.backgroundHeight = height;
         const w = this.backUseImageSize ? width : this.backRenderWidth;
         const h = this.backUseImageSize ? height : this.backRenderHeight;
         if (w === 0 || h === 0) return;
-        const rw = w / this.renderWidth;
-        const rh = h / this.renderHeight;
-        const vx = 1 / rw;
-        const vy = 1 / rh;
+        const mapRenderWidth = this.mapWidth * this.cellWidth;
+        const mapRenderHeight = this.mapHeight * this.cellHeight;
+        const vx = mapRenderWidth / w;
+        const vy = mapRenderHeight / h;
         const arr = this.backgroundVertex;
+        const left = -1;
+        const right = (mapRenderWidth / this.renderWidth) * 2 - 1;
+        const top = -1;
+        const bottom = (mapRenderHeight / this.renderHeight) * 2 - 1;
         // 左下角
+        arr[0] = left;
+        arr[1] = bottom;
         arr[2] = 0;
         arr[3] = vy;
         // 右下角
+        arr[4] = right;
+        arr[5] = bottom;
         arr[6] = vx;
         arr[7] = vy;
         // 左上角
+        arr[8] = left;
+        arr[9] = top;
         arr[10] = 0;
         arr[11] = 0;
         // 右上角
+        arr[12] = right;
+        arr[13] = top;
         arr[14] = vx;
         arr[15] = 0;
         gl.bindBuffer(gl.ARRAY_BUFFER, data.backgroundVertexBuffer);
         gl.bufferSubData(gl.ARRAY_BUFFER, 0, arr);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
     }
 
     /**
@@ -1015,7 +1093,6 @@ export class MapRenderer
         );
         this.texDynamicBackground(gl, data, w, h, images);
         this.updateBackgroundVertex(gl, data, w, h);
-        this.backgroundHeight = renderable.length;
     }
 
     /**
@@ -1066,9 +1143,7 @@ export class MapRenderer
     ) {
         if (!this.backgroundDirty || this.backgroundPending) return;
         this.backgroundPending = true;
-        const { backVAO, backgroundTexture } = data;
-        gl.bindVertexArray(backVAO);
-        gl.bindTexture(gl.TEXTURE_2D_ARRAY, backgroundTexture);
+        const { backgroundTexture } = data;
         // 根据背景类型使用不同贴图
         switch (this.backgroundType) {
             case BackgroundType.Tile: {
@@ -1086,6 +1161,7 @@ export class MapRenderer
                 break;
             }
         }
+        gl.bindTexture(gl.TEXTURE_2D_ARRAY, backgroundTexture);
         // 重复模式
         switch (this.backRepeatModeX) {
             case MapBackgroundRepeat.Repeat: {
@@ -1149,18 +1225,9 @@ export class MapRenderer
             gl.TEXTURE_MIN_FILTER,
             gl.NEAREST
         );
-        gl.bindVertexArray(null);
         this.backgroundPending = false;
-    }
-
-    /**
-     * 检查偏移数组是否需要更新
-     * @param gl 画布上下文
-     * @param data 上下文数据
-     */
-    private checkOffsetPool(gl: WebGL2RenderingContext, data: IContextData) {
-        if (!this.needUpdateOffsetPool) return;
-        gl.uniform1iv(data.offsetPoolLocation, this.normalizedOffsetPool);
+        this.extendList.forEach(v => v.onUpdate?.());
+        gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
     }
 
     render(): void {
@@ -1172,6 +1239,26 @@ export class MapRenderer
         }
         console.time('render-map');
 
+        const {
+            backVAO,
+            backProgram,
+            backNowFrameLocation,
+            backTransformLocation,
+            backgroundTexture,
+            tileVAO,
+            tileProgram,
+            tileTexture,
+            instancedBuffer,
+            offsetPoolLocation,
+            nowFrameLocation,
+            tileTransformLocation,
+            insTilePosAttribLocation: tilePos,
+            insTexCoordAttribLocation: texCoord,
+            insTileDataAttribLocation: tileData,
+            insTexDataAttribLocation: texData
+        } = data;
+
+        console.time('layer-check');
         // 图层检查
         if (this.layerDirty) {
             this.vertex.updateLayerArray();
@@ -1182,68 +1269,106 @@ export class MapRenderer
             this.layerSizeDirty = false;
         }
         this.vertex.checkRebuild();
+        console.timeEnd('layer-check');
+
+        console.time('texture-check');
 
         // 数据检查
         this.checkTexture(gl, data);
         this.checkTileVertexArray(gl, data);
-        this.checkOffsetPool(gl, data);
+
+        console.timeEnd('texture-check');
+
+        console.time('update-block-cache');
 
         const area = this.viewport.getRenderArea();
         area.blockList.forEach(v => {
             this.vertex.updateBlockCache(v);
+            v.data.render();
         });
+
+        console.timeEnd('update-block-cache');
+
         if (area.dirty.length > 0) {
+            console.time('upload-block-buffer');
             // 如果需要更新顶点数组...
-            const { vertexBuffer, offsetBuffer, alphaBuffer } = data;
             const array = this.vertex.getVertexArray();
-            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+            gl.bindBuffer(gl.ARRAY_BUFFER, instancedBuffer);
             area.dirty.forEach(v => {
                 gl.bufferSubData(
                     gl.ARRAY_BUFFER,
                     // float32 需要 * 4
-                    v.startIndex * 6 * 6 * 4,
-                    array.tileVertex,
-                    v.startIndex * 6 * 6,
-                    v.count * 6 * 6
+                    v.startIndex * INSTANCED_COUNT * 4,
+                    array.tileInstanced,
+                    v.startIndex * INSTANCED_COUNT,
+                    v.count * INSTANCED_COUNT
                 );
             });
-            gl.bindBuffer(gl.ARRAY_BUFFER, offsetBuffer);
-            area.dirty.forEach(v => {
-                gl.bufferSubData(
-                    gl.ARRAY_BUFFER,
-                    // int16 需要 * 2
-                    v.startIndex * 2 * 2,
-                    array.tileOffset,
-                    v.startIndex * 2,
-                    v.count * 2
-                );
-            });
-            gl.bindBuffer(gl.ARRAY_BUFFER, alphaBuffer);
-            area.dirty.forEach(v => {
-                gl.bufferSubData(
-                    gl.ARRAY_BUFFER,
-                    // float32 需要 * 4
-                    v.startIndex * 4,
-                    array.tileAlpha,
-                    v.startIndex,
-                    v.count
-                );
-            });
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+            console.timeEnd('upload-block-buffer');
         }
 
         // 背景
         console.time('render-call');
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        gl.useProgram(data.backProgram);
-        gl.bindVertexArray(data.backVAO);
+        gl.useProgram(backProgram);
+        if (this.needUpdateBackgroundFrame) {
+            this.needUpdateBackgroundFrame = false;
+            gl.uniform1f(backNowFrameLocation, this.backgroundFrame);
+        }
+        if (this.needUpdateTransform) {
+            gl.uniformMatrix3fv(
+                backTransformLocation,
+                false,
+                this.transform.mat
+            );
+        }
+        gl.bindTexture(gl.TEXTURE_2D_ARRAY, backgroundTexture);
+        gl.bindVertexArray(backVAO);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        gl.bindVertexArray(null);
+
         // 图块
-        gl.useProgram(data.tileProgram);
-        gl.bindVertexArray(data.tileVAO);
+        gl.useProgram(tileProgram);
+        if (this.needUpdateOffsetPool) {
+            this.needUpdateOffsetPool = false;
+            gl.uniform1fv(offsetPoolLocation, this.normalizedOffsetPool);
+        }
+        if (this.needUpdateFrameCounter) {
+            this.needUpdateFrameCounter = false;
+            gl.uniform1f(nowFrameLocation, this.frameCounter);
+        }
+        if (this.needUpdateTransform) {
+            gl.uniformMatrix3fv(
+                tileTransformLocation,
+                false,
+                this.transform.mat
+            );
+        }
+        this.needUpdateTransform = false;
+        gl.bindTexture(gl.TEXTURE_2D_ARRAY, tileTexture);
+        gl.bindVertexArray(tileVAO);
+
+        // 由于 WebGL2 没有 glDrawArraysInstancedBaseInstance，只能每次渲染的时候临时修改 VBO 读取方式
+        const stride = INSTANCED_COUNT * 4;
+        gl.bindBuffer(gl.ARRAY_BUFFER, instancedBuffer);
+
+        console.log(area);
+
         area.render.forEach(v => {
-            gl.drawArraysInstanced(gl.TRIANGLES, v.startIndex, v.count, 6);
+            const s = v.startIndex * INSTANCED_COUNT;
+            const o1 = s + 0;
+            const o2 = o1 + 4 * 4;
+            const o3 = o2 + 4 * 4;
+            const o4 = o3 + 4 * 4;
+            gl.vertexAttribPointer(tilePos, 4, gl.FLOAT, false, stride, o1);
+            gl.vertexAttribPointer(texCoord, 4, gl.FLOAT, false, stride, o2);
+            gl.vertexAttribPointer(tileData, 4, gl.FLOAT, false, stride, o3);
+            gl.vertexAttribPointer(texData, 4, gl.FLOAT, false, stride, o4);
+            gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, v.count);
         });
         gl.bindVertexArray(null);
+        gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
         console.timeEnd('render-call');
         console.timeEnd('render-map');
     }
@@ -1268,6 +1393,7 @@ export class MapRenderer
         h: number
     ) {
         this.vertex.updateArea(layer, x, y, w, h);
+        this.extendList.forEach(v => v.onUpdate?.());
     }
 
     /**
@@ -1279,6 +1405,7 @@ export class MapRenderer
      */
     updateLayerBlock(layer: IMapLayer, block: number, x: number, y: number) {
         this.vertex.updateBlock(layer, block, x, y);
+        this.extendList.forEach(v => v.onUpdate?.());
     }
 
     //#endregion
@@ -1406,7 +1533,6 @@ export class MapRenderer
 
     tick(timestamp: number) {
         this.timestamp = timestamp;
-        const { backNowFrameLocation, nowFrameLocation } = this.contextData;
 
         // 移动数组
         const expandDT = timestamp - this.lastExpandTime;
@@ -1418,20 +1544,17 @@ export class MapRenderer
         // 背景
         const backgroundDT = timestamp - this.backLastFrame;
         if (backgroundDT > this.backFrameSpeed) {
-            const last = this.backgroundFrame;
             this.backgroundFrame++;
             this.backgroundFrame %= this.backgroundFrameCount;
             this.backLastFrame = timestamp;
-            if (last !== this.backgroundFrame) {
-                this.gl.uniform1f(backNowFrameLocation, this.backgroundFrame);
-            }
+            this.needUpdateBackgroundFrame = true;
         }
 
         // 地图帧动画
         const frameDT = timestamp - this.lastFrameTime;
         if (frameDT > this.frameSpeed) {
             this.frameCounter++;
-            this.gl.uniform1ui(nowFrameLocation, this.frameCounter);
+            this.needUpdateFrameCounter = true;
         }
 
         // 图块移动
@@ -1446,13 +1569,19 @@ export class MapRenderer
     }
 
     updateTransform(): void {
-        this.render();
+        this.needUpdateTransform = true;
+        this.extendList.forEach(v => v.onUpdate?.());
+    }
+
+    addExtends(ex: IMapRendererExtends): void {
+        this.extendList.add(ex);
     }
 
     close(): void {
         this.layers.clear();
         this.layerAlias.clear();
         this.layerZIndex.clear();
+        this.extendList.clear();
     }
 
     //#endregion
