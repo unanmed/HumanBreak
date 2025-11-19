@@ -69,6 +69,11 @@ interface MainData {
      */
     readonly splitImages: SplitImageData;
 
+    /**
+     * 勇士贴图列表
+     */
+    readonly heroImages: readonly ImageIds[];
+
     readonly plugin: string[];
 }
 

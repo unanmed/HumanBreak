@@ -382,7 +382,12 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			],
 			"font": "normal"
 		},
-		"splitImages": []
+		"splitImages": [],
+		"heroImages": [
+			"hero.png",
+			"hero1.png",
+			"hero2.png"
+		]
 	},
 	"firstData": {
 		"title": "人类：开天辟地",

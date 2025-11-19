@@ -430,13 +430,32 @@ export class MaterialManager implements IMaterialManager {
             return [];
         }
         this.built = true;
-        const data = this.assetBuilder.addTextureList(this.tileStore.values());
+        return this.buildListToAsset(this.tileStore.values());
+    }
+
+    buildToAsset(texture: ITexture): IMaterialAssetData {
+        const data = this.assetBuilder.addTexture(texture);
+        const assetData: IMaterialAssetData = {
+            data: data,
+            identifier: data.index,
+            alias: `asset-${data.index}`,
+            store: this.assetStore
+        };
+        this.checkAssetDirty(data);
+        return assetData;
+    }
+
+    buildListToAsset(
+        texture: Iterable<ITexture>
+    ): Iterable<IMaterialAssetData> {
+        const data = this.assetBuilder.addTextureList(texture);
         const arr = [...data];
         const res: IMaterialAssetData[] = [];
         arr.forEach(v => {
             const alias = `asset-${v.index}`;
-            this.assetStore.alias(v.index, alias);
-            this.assetDataStore.set(v.index, v);
+            if (!this.assetDataStore.has(v.index)) {
+                this.assetDataStore.set(v.index, v);
+            }
             const data: IMaterialAssetData = {
                 data: v,
                 identifier: v.index,
@@ -447,6 +466,9 @@ export class MaterialManager implements IMaterialManager {
                 tex.toAsset(v);
             }
             res.push(data);
+        });
+        arr.forEach(v => {
+            this.checkAssetDirty(v);
         });
         return res;
     }

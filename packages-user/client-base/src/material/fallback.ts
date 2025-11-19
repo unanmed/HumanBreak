@@ -1,3 +1,4 @@
+import { ITexture } from '@motajs/render-assets';
 import { materials } from './ins';
 import { IBlockIdentifier, IIndexedIdentifier } from './types';
 
@@ -118,8 +119,16 @@ export function fallbackLoad() {
         addAutotile(autotileSet, floor.fg2map);
     });
 
+    const heroTextures: ITexture[] = [];
+
+    data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main.heroImages.forEach(v => {
+        const tex = materials.getImageByAlias(v);
+        if (tex) heroTextures.push(tex);
+    });
+
     materials.buildAssets();
 
     materials.cacheAutotileList(autotileSet);
     materials.cacheTilesetList(tilesetSet);
+    materials.buildListToAsset(heroTextures);
 }

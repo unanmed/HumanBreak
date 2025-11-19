@@ -261,7 +261,6 @@ const MainScene = defineComponent(() => {
     return () => (
         <container id="main-scene" width={MAIN_WIDTH} height={MAIN_HEIGHT}>
             <sprite
-                hidden
                 render={testRender}
                 loc={[180, 0, 480, 480]}
                 zIndex={1000}

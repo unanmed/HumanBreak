@@ -18,13 +18,6 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "楼层列表",
 					"_data": "在这里按顺序放所有的楼层；其顺序直接影响到楼层传送器、浏览地图和上/下楼器的顺序"
 				},
-				"plugin": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_range": "thiseval instanceof Array",
-					"_docs": "插件列表",
-					"_data": "在这里按顺序放所有的插件，顺序会影响到插件的加载，越靠前越早加载"
-				},
 				"floorPartitions": {
 					"_leaf": true,
 					"_type": "event",
@@ -127,6 +120,19 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					}).toString(),
 					"_docs": "使用字体",
 					"_data": "在此存放所有可能使用的字体 \n 字体名不能使用中文，不能带空格或特殊字符"
+				},
+				"heroImages": {
+					"_leaf": true,
+					"_type": "material",
+					"_range": "editor.mode.checkImages(thiseval, './project/images/')",
+					"_directory": "./project/images/",
+					"_transform": (function (one) {
+						if (one.endsWith('.png') || one.endsWith('.jpg') || one.endsWith('.jpeg') || one.endsWith('.gif') || one.endsWith('.webp'))
+							return one;
+						return null;
+					}).toString(),
+					"_docs": "勇士贴图",
+					"_data": "在这里填写游戏中所有可能使用到的勇士贴图，贴图需要先在全塔属性-使用图片中注册。如果一个贴图不会被用作勇士贴图，请不要填写进去！",
 				},
 				"nameMap": {
 					"_leaf": true,

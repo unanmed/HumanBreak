@@ -398,6 +398,18 @@ export interface IMaterialManager
     buildAssets(): Iterable<IMaterialAssetData>;
 
     /**
+     * 将指定贴图打包进图集
+     * @param texture 贴图对象
+     */
+    buildToAsset(texture: ITexture): IMaterialAssetData;
+
+    /**
+     * 将一系列贴图打包进贴图对象
+     * @param texture 贴图列表
+     */
+    buildListToAsset(texture: Iterable<ITexture>): Iterable<IMaterialAssetData>;
+
+    /**
      * 根据图块标识符在图集中获取对应的可渲染对象
      * @param identifier 图块标识符，即图块数字
      */

@@ -1,6 +1,11 @@
 import { IHookable, IHookBase, IHookController } from '@motajs/common';
 import { IMapLayer } from '../map';
 
+export interface ICoreState {
+    /** 地图状态 */
+    readonly layer: ILayerState;
+}
+
 export interface ILayerStateHooks extends IHookBase {
     /**
      * 当设置背景图块时执行，如果设置的背景图块与原先一样，则不会执行
@@ -136,7 +141,82 @@ export interface ILayerState extends IHookable<ILayerStateHooks> {
     getBackground(): number;
 }
 
-export interface ICoreState {
-    /** 地图状态 */
-    readonly layer: ILayerState;
+export const enum HeroDirection {
+    Left,
+    Up,
+    Right,
+    Down
+}
+
+export interface IHeroStateHooks extends IHookBase {
+    /**
+     * 当设置勇士的坐标时触发
+     * @param controller 钩子控制器
+     * @param x 勇士横坐标
+     * @param y 勇士纵坐标
+     */
+    onSetPosition(
+        controller: IHookController<this>,
+        x: number,
+        y: number
+    ): void;
+
+    /**
+     * 当移动勇士时触发
+     * @param controller 钩子控制器
+     * @param direction 移动方向
+     * @param time 移动动画时长
+     */
+    onMoveHero(
+        controller: IHookController<this>,
+        direction: HeroDirection,
+        time: number
+    ): Promise<void>;
+
+    /**
+     * 当勇士跳跃时触发
+     * @param controller 钩子控制器
+     * @param x 目标点横坐标
+     * @param y 目标点纵坐标
+     * @param time 跳跃动画时长
+     */
+    onJumpHero(
+        controller: IHookController<this>,
+        x: number,
+        y: number,
+        time: number
+    ): Promise<void>;
+}
+
+export interface IHeroState extends IHookable<IHeroStateHooks> {
+    /** 勇士横坐标 */
+    readonly x: number;
+    /** 勇士纵坐标 */
+    readonly y: number;
+    /** 勇士朝向 */
+    readonly direction: HeroDirection;
+
+    /**
+     * 设置勇士位置
+     * @param x 横坐标
+     * @param y 纵坐标
+     */
+    setPosition(x: number, y: number): void;
+
+    /**
+     * 移动勇士
+     * @param dir 移动方向
+     * @param time 移动动画时长，默认 100ms
+     * @returns 移动的 `Promise`，当相关的移动动画结束后兑现
+     */
+    move(dir: HeroDirection, time?: number): Promise<void>;
+
+    /**
+     * 跳跃勇士至目标点
+     * @param x 目标点横坐标
+     * @param y 目标点纵坐标
+     * @param time 跳跃动画时长，默认 500ms
+     * @returns 跳跃的 `Promise`，当相关的移动动画结束后兑现
+     */
+    jumpHero(x: number, y: number, time?: number): Promise<void>;
 }
