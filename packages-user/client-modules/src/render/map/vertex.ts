@@ -72,6 +72,15 @@ interface BlockIndex extends IndexedBlockMapPos {
     readonly mapIndex: number;
 }
 
+interface VertexArrayOfBlock {
+    /** 图块在数组中的起始索引 */
+    readonly index: number;
+    /** 分块顶点数组 */
+    readonly array: Float32Array;
+    /** 分块数据 */
+    readonly block: IBlockData<MapVertexBlock>;
+}
+
 const enum VertexUpdate {
     /** 更新顶点位置信息 */
     Position = 0b01,
@@ -92,6 +101,9 @@ export class MapVertexGenerator
 
     dynamicRenderDirty: boolean = true;
 
+    dynamicStart: number = 0;
+    dynamicCount: number = DYNAMIC_RESERVE;
+
     /** 空顶点数组，因为空顶点很常用，所以直接定义一个全局常量 */
     private static readonly EMPTY_VETREX: Float32Array = new Float32Array(
         INSTANCED_COUNT
@@ -103,9 +115,6 @@ export class MapVertexGenerator
     private instancedArray: Float32Array = new Float32Array();
     /** 动态内容偏移数组 */
     private dynamicInstancedArray: Float32Array = new Float32Array();
-
-    /** 图层列表 */
-    private layers: IMapLayer[] = [];
 
     /** 分块宽度 */
     private blockWidth: number = MAP_BLOCK_WIDTH;
@@ -119,11 +128,6 @@ export class MapVertexGenerator
 
     /** 是否需要重建数组 */
     private needRebuild: boolean = false;
-
-    /** 静态内容数组顶点数量 */
-    private staticLength: number = 0;
-    /** 动态内容数组顶点数量。动态内容的数量无法预测，因此使用预留数量+动态扩充的方式 */
-    private dynamicLength: number = DYNAMIC_RESERVE;
 
     /** 更新图块性能检查防抖起始时刻 */
     private updateCallDebounceTime: number = 0;
@@ -147,10 +151,10 @@ export class MapVertexGenerator
         // 顶点数组尺寸等于 地图大小 * 每个图块的顶点数量 * 每个顶点的数据量
         const area = this.renderer.mapWidth * this.renderer.mapHeight;
         const staticCount = area * this.renderer.layerCount;
-        const count = staticCount + this.dynamicLength;
+        const count = staticCount + this.dynamicCount;
         const offsetSize = count * INSTANCED_COUNT;
         this.instancedArray = new Float32Array(offsetSize);
-        this.staticLength = staticCount;
+        this.dynamicStart = staticCount;
         this.dynamicInstancedArray = this.instancedArray.subarray(
             staticCount * INSTANCED_COUNT,
             count * INSTANCED_COUNT
@@ -212,7 +216,7 @@ export class MapVertexGenerator
 
     expandMoving(targetSize: number): void {
         const beforeOffset = this.instancedArray;
-        this.dynamicLength = targetSize;
+        this.dynamicCount = targetSize;
         this.mallocVertexArray();
         this.instancedArray.set(beforeOffset);
         const array: IMapVertexData = {
@@ -224,22 +228,14 @@ export class MapVertexGenerator
         }
     }
 
-    reduceMoving(targetSize: number, indexMap: Map<number, number>): void {
+    reduceMoving(targetSize: number): void {
         const beforeOffsetLength = this.instancedArray.length;
-        const deltaLength = this.dynamicLength - targetSize;
-        this.dynamicLength = targetSize;
+        const deltaLength = this.dynamicCount - targetSize;
+        this.dynamicCount = targetSize;
         this.instancedArray = this.instancedArray.subarray(
             0,
             beforeOffsetLength - deltaLength * INSTANCED_COUNT
         );
-        indexMap.forEach((target, from) => {
-            const next = from + 1;
-            this.dynamicInstancedArray.copyWithin(
-                target * INSTANCED_COUNT,
-                from * INSTANCED_COUNT,
-                next * INSTANCED_COUNT
-            );
-        });
         this.dynamicInstancedArray = this.dynamicInstancedArray.subarray(
             0,
             targetSize * INSTANCED_COUNT
@@ -248,13 +244,7 @@ export class MapVertexGenerator
     }
 
     updateLayerArray(): void {
-        const layers = this.renderer.getSortedLayer();
-        if (
-            layers.length !== this.layers.length ||
-            this.layers.some((v, i) => layers[i] !== v)
-        ) {
-            this.needRebuild = true;
-        }
+        this.needRebuild = true;
     }
 
     checkRebuild() {
@@ -812,56 +802,6 @@ export class MapVertexGenerator
 
     //#endregion
 
-    //#region 图块配置
-
-    enableStaticFrameAnimate(layer: IMapLayer, x: number, y: number): void {
-        const data = layer.getMapRef();
-        const block = this.block.getBlockByDataLoc(x, y);
-        if (!block) return;
-        const vertexArray = block.data.getLayerInstanced(layer);
-        if (!vertexArray) return;
-        const mapIndex = y * this.mapWidth + x;
-        const num = data.array[mapIndex];
-        const tile = this.renderer.manager.getIfBigImage(num);
-        if (!tile) return;
-        const bx = x - block.dataX;
-        const by = y - block.dataY;
-        const bIndex = by * block.width + bx;
-        vertexArray[bIndex * INSTANCED_COUNT + 13] = tile.frames;
-        block.data.markRenderDirty();
-    }
-
-    disableStaticFrameAnimate(layer: IMapLayer, x: number, y: number): void {
-        const block = this.block.getBlockByDataLoc(x, y);
-        if (!block) return;
-        const vertexArray = block.data.getLayerInstanced(layer);
-        if (!vertexArray) return;
-        const bx = x - block.dataX;
-        const by = y - block.dataY;
-        const bIndex = by * block.width + bx;
-        vertexArray[bIndex * INSTANCED_COUNT + 13] = 1;
-        block.data.markRenderDirty();
-    }
-
-    setStaticAlpha(
-        layer: IMapLayer,
-        alpha: number,
-        x: number,
-        y: number
-    ): void {
-        const block = this.block.getBlockByDataLoc(x, y);
-        if (!block) return;
-        const vertexArray = block.data.getLayerInstanced(layer);
-        if (!vertexArray) return;
-        const bx = x - block.dataX;
-        const by = y - block.dataY;
-        const bIndex = by * block.width + bx;
-        vertexArray[bIndex * INSTANCED_COUNT + 9] = alpha;
-        block.data.markRenderDirty();
-    }
-
-    //#endregion
-
     //#region 动态图块
 
     updateMoving(block: IMovingBlock, updateTexture: boolean): void {
@@ -925,11 +865,9 @@ export class MapVertexGenerator
     }
 
     updateMovingList(moving: IMovingBlock[], updateTexture: boolean): void {
-        console.time('update-moving');
         moving.forEach(v => {
             this.updateMoving(v, updateTexture);
         });
-        console.timeEnd('update-moving');
     }
 
     deleteMoving(moving: IMovingBlock): void {
@@ -942,25 +880,85 @@ export class MapVertexGenerator
         this.dynamicRenderDirty = true;
     }
 
-    enableDynamicFrameAnimate(block: IMovingBlock): void {
-        if (!this.renderer.hasMoving(block)) return;
-        const instancedStart = block.index * INSTANCED_COUNT;
-        this.dynamicInstancedArray[instancedStart + 13] = 1;
+    //#endregion
+
+    //#region 图块状态
+
+    /**
+     * 获取指定图层指定坐标的图块对应的分块信息
+     * @param layer 图层对象
+     * @param x 图块横坐标
+     * @param y 图块纵坐标
+     */
+    private getIndexInBlock(
+        layer: IMapLayer,
+        x: number,
+        y: number
+    ): VertexArrayOfBlock | null {
+        const block = this.block.getBlockByDataLoc(x, y);
+        if (!block) return null;
+        const data = block?.data.getLayerInstanced(layer);
+        if (!data) return null;
+        const dx = x - block.x;
+        const dy = y - block.y;
+        const dIndex = dy * block.width + dx;
+        return { array: data, index: dIndex, block };
+    }
+
+    setStaticAlpha(
+        layer: IMapLayer,
+        x: number,
+        y: number,
+        alpha: number
+    ): void {
+        const index = this.getIndexInBlock(layer, x, y);
+        if (!index) return;
+        index.array[index.index * INSTANCED_COUNT + 9] = alpha;
+        index.block.data.markRenderDirty();
+    }
+
+    setStaticFrame(
+        layer: IMapLayer,
+        x: number,
+        y: number,
+        frame: number
+    ): void {
+        const index = this.getIndexInBlock(layer, x, y);
+        if (!index) return;
+        index.array[index.index * INSTANCED_COUNT + 12] = frame;
+        index.block.data.markRenderDirty();
+    }
+
+    getStaticAlpha(layer: IMapLayer, x: number, y: number): number {
+        const index = this.getIndexInBlock(layer, x, y);
+        if (!index) return 0;
+        return index.array[index.index * INSTANCED_COUNT + 9];
+    }
+
+    getStaticFrame(layer: IMapLayer, x: number, y: number): number {
+        const index = this.getIndexInBlock(layer, x, y);
+        if (!index) return -1;
+        return index.array[index.index * INSTANCED_COUNT + 12];
+    }
+
+    setDynamicAlpha(index: number, alpha: number): void {
+        this.dynamicInstancedArray[index * INSTANCED_COUNT + 9] = alpha;
         this.dynamicRenderDirty = true;
     }
 
-    disableDynamicFrameAnimate(block: IMovingBlock): void {
-        if (!this.renderer.hasMoving(block)) return;
-        const instancedStart = block.index * INSTANCED_COUNT;
-        this.dynamicInstancedArray[instancedStart + 13] = block.texture.frames;
+    setDynamicFrame(index: number, frame: number): void {
+        this.dynamicInstancedArray[index * INSTANCED_COUNT + 12] = frame;
         this.dynamicRenderDirty = true;
     }
 
-    setDynamicAlpha(block: IMovingBlock, alpha: number): void {
-        if (!this.renderer.hasMoving(block)) return;
-        const instancedStart = block.index * INSTANCED_COUNT;
-        this.dynamicInstancedArray[instancedStart + 9] = alpha;
-        this.dynamicRenderDirty = true;
+    getDynamicAlpha(index: number): number {
+        if (index > this.dynamicCount) return 0;
+        return this.dynamicInstancedArray[index * INSTANCED_COUNT + 9];
+    }
+
+    getDynamicFrame(index: number): number {
+        if (index > this.dynamicCount) return -1;
+        return this.dynamicInstancedArray[index * INSTANCED_COUNT + 12];
     }
 
     //#endregion
@@ -968,15 +966,14 @@ export class MapVertexGenerator
     //#region 其他接口
 
     renderDynamic(): void {
-        // todo: vertex, offset, alpha 的脏标记分开
         this.dynamicRenderDirty = false;
     }
 
     getVertexArray(): IMapVertexArray {
         this.checkRebuild();
         return {
-            dynamicStart: this.staticLength,
-            dynamicCount: this.dynamicLength,
+            dynamicStart: this.dynamicStart,
+            dynamicCount: this.dynamicCount,
             tileInstanced: this.instancedArray
         };
     }
@@ -1040,7 +1037,6 @@ class MapVertexBlock implements IMapVertexBlock {
     }
 
     markRenderDirty() {
-        // todo: 潜在优化点：vertex, offset, alpha 的脏标记分开
         this.renderDirty = true;
     }
 
@@ -1051,7 +1047,6 @@ class MapVertexBlock implements IMapVertexBlock {
         right: number,
         bottom: number
     ): void {
-        // todo: 更细致的脏标记是否会更好？
         const data = this.layerDirty.get(layer);
         if (!data) return;
         const dl = clamp(left, 0, this.blockWidth);

@@ -13,11 +13,11 @@ import {
     ITrackedAssetData
 } from '@user/client-base';
 import {
+    IBlockStatus,
     IContextData,
     IMapBackgroundConfig,
     IMapRenderConfig,
     IMapRenderer,
-    IMapRendererHooks,
     IMapVertexGenerator,
     IMapViewportController,
     IMovingBlock,
@@ -27,12 +27,7 @@ import {
     MapTileSizeTestMode
 } from './types';
 import { ILayerState, ILayerStateHooks, IMapLayer } from '@user/data-state';
-import {
-    Hookable,
-    HookController,
-    IHookController,
-    logger
-} from '@motajs/common';
+import { IHookController, logger } from '@motajs/common';
 import { compileProgramWith } from '@motajs/client-base';
 import { isNil, maxBy } from 'lodash-es';
 import { IMapDataGetter, MapVertexGenerator } from './vertex';
@@ -50,6 +45,7 @@ import {
 import { ITransformUpdatable, Transform } from '@motajs/render-core';
 import { MapViewport } from './viewport';
 import { INSTANCED_COUNT } from './constant';
+import { StaticBlockStatus } from './status';
 
 const enum BackgroundType {
     Static,
@@ -58,7 +54,6 @@ const enum BackgroundType {
 }
 
 export class MapRenderer
-    extends Hookable<IMapRendererHooks>
     implements
         IMapRenderer,
         IMovingRenderer,
@@ -149,13 +144,6 @@ export class MapRenderer
     /** 是否应该更新偏移池 uniform */
     private needUpdateOffsetPool: boolean = true;
 
-    /** 顶点数组的图层列表是否需要更新 */
-    private layerListDirty: boolean = false;
-    /** 顶点数组的图层的尺寸是否需要更新 */
-    private layerSizeDirty: boolean = false;
-    /** 是否整个地图都需要更新，一般只有在地图尺寸等发生变动时才会执行 */
-    private layerAllDirty: boolean = false;
-
     /** 所有正在移动的图块 */
     private movingBlock: Set<IMovingBlock> = new Set();
     /** 移动图块对象索引池 */
@@ -178,10 +166,19 @@ export class MapRenderer
     /** 帧动画速率 */
     private frameSpeed: number = 300;
 
+    /** 画布元素 */
+    readonly canvas: HTMLCanvasElement;
+    /** 画布 WebGL2 上下文 */
+    readonly gl: WebGL2RenderingContext;
     /** 画布上下文数据 */
     private contextData: IContextData;
+
+    /** 地图变换矩阵 */
+    transform: Transform;
     /** 是否需要更新变换矩阵 */
     private needUpdateTransform: boolean = true;
+    /** 是否需要重新渲染 */
+    private updateRequired: boolean = true;
 
     /** 图块动画器 */
     private readonly tileAnimater: ITextureAnimater<number>;
@@ -198,11 +195,11 @@ export class MapRenderer
      */
     constructor(
         readonly manager: IMaterialManager,
-        readonly gl: WebGL2RenderingContext,
-        readonly transform: Transform,
         layerState: ILayerState
     ) {
-        super();
+        this.canvas = document.createElement('canvas');
+        this.gl = this.canvas.getContext('webgl2')!;
+        this.transform = new Transform();
         this.layerState = layerState;
         this.layerStateHook = layerState.addHook(
             new RendererLayerStateHook(this)
@@ -219,12 +216,9 @@ export class MapRenderer
         this.vertex = new MapVertexGenerator(this, data);
         this.autotile = new AutotileProcessor(manager);
         this.tick = this.tick.bind(this);
-        this.transform.bind(this);
         this.viewport = new MapViewport(this);
-        this.viewport.bindTransform(this.transform);
         this.tileAnimater = new TextureColumnAnimater();
-        this.initVertexPointer(gl, data);
-        layerState.addHook(new RendererLayerStateHook(this));
+        this.initVertexPointer(this.gl, data);
     }
 
     /**
@@ -268,7 +262,7 @@ export class MapRenderer
             new Float32Array([
                 // 左下，右下，左上，右上，前两个是顶点坐标，后两个是纹理坐标
                 // 因为我们已经在数据处理阶段将数据归一化到了 [-1, 1] 的范围，因此顶点坐标应该是 [0, 1] 的范围
-                // 同时又因为我们以左上角为原点，因此纵坐标需要取反
+                // 同时又因为我们以左上角为原点，纵坐标与 WebGL2 相反，因此纵坐标需要取反
                 0, 0, 0, 0,
                 1, 0, 1, 0,
                 0, -1, 0, 1, 
@@ -297,10 +291,33 @@ export class MapRenderer
         gl.bindVertexArray(null);
     }
 
-    protected createController(
-        hook: Partial<IMapRendererHooks>
-    ): IHookController<IMapRendererHooks> {
-        return new HookController(this, hook);
+    //#endregion
+
+    //#region 状态控制
+
+    setTransform(transform: Transform): void {
+        this.transform.bind();
+        this.transform = transform;
+        transform.bind(this);
+        this.viewport.bindTransform(transform);
+        this.needUpdateTransform = true;
+    }
+
+    setCanvasSize(width: number, height: number): void {
+        this.canvas.width = width;
+        this.canvas.height = height;
+        this.updateRequired = true;
+    }
+
+    setViewport(x: number, y: number, width: number, height: number): void {
+        this.gl.viewport(x, y, width, height);
+    }
+
+    clear(color: boolean, depth: boolean): void {
+        let bit = 0;
+        if (color) bit |= this.gl.COLOR_BUFFER_BIT;
+        if (depth) bit |= this.gl.DEPTH_BUFFER_BIT;
+        if (bit > 0) this.gl.clear(bit);
     }
 
     //#endregion
@@ -315,21 +332,13 @@ export class MapRenderer
             return a.zIndex - b.zIndex;
         });
         this.sortedLayers.forEach((v, i) => this.layerIndexMap.set(v, i));
-        this.layerListDirty = true;
-        this.requestUpdate();
-    }
-
-    private updateAllLayers() {
-        this.layerState.layerList.forEach(v => {
-            this.vertex.updateArea(v, 0, 0, v.width, v.height);
-        });
     }
 
     updateLayerList() {
         this.sortLayer();
         this.resizeLayer();
         this.layerCount = this.layerState.layerList.size;
-        this.layerAllDirty = true;
+        this.vertex.updateLayerArray();
     }
 
     setLayerState(layerState: ILayerState): void {
@@ -342,7 +351,8 @@ export class MapRenderer
         this.sortLayer();
         this.resizeLayer();
         this.layerCount = layerState.layerList.size;
-        this.layerAllDirty = true;
+        this.vertex.updateLayerArray();
+        this.vertex.resizeMap();
     }
 
     getLayer(identifier: string): IMapLayer | null {
@@ -367,8 +377,8 @@ export class MapRenderer
     resizeLayer() {
         const maxWidth = maxBy(this.sortedLayers, v => v.width)?.width ?? 0;
         const maxHeight = maxBy(this.sortedLayers, v => v.height)?.height ?? 0;
-        if (this.mapWidth !== maxWidth || this.mapHeight !== maxHeight) {
-            this.layerSizeDirty = true;
+        if (this.mapWidth === maxWidth && this.mapHeight === maxHeight) {
+            return;
         }
         this.mapWidth = maxWidth;
         this.mapHeight = maxHeight;
@@ -378,8 +388,7 @@ export class MapRenderer
             this.contextData.backgroundWidth,
             this.contextData.backgroundHeight
         );
-        this.layerAllDirty = true;
-        this.requestUpdate();
+        this.vertex.resizeMap();
     }
 
     //#endregion
@@ -420,25 +429,24 @@ export class MapRenderer
     }
 
     configBackground(config: Partial<IMapBackgroundConfig>): void {
-        let needUpdate = false;
         if (!isNil(config.renderWidth)) {
-            needUpdate = true;
+            this.updateRequired = true;
             this.backRenderWidth = config.renderWidth;
         }
         if (!isNil(config.renderHeight)) {
-            needUpdate = true;
+            this.updateRequired = true;
             this.backRenderHeight = config.renderHeight;
         }
         if (!isNil(config.repeatX)) {
-            needUpdate = true;
+            this.updateRequired = true;
             this.backRepeatModeX = config.repeatX;
         }
         if (!isNil(config.repeatY)) {
-            needUpdate = true;
+            this.updateRequired = true;
             this.backRepeatModeY = config.repeatY;
         }
         if (!isNil(config.useImageSize)) {
-            needUpdate = true;
+            this.updateRequired = true;
             this.backUseImageSize = config.useImageSize;
         }
         if (!isNil(config.frameSpeed)) {
@@ -450,9 +458,6 @@ export class MapRenderer
             this.contextData.backgroundWidth,
             this.contextData.backgroundHeight
         );
-        if (needUpdate) {
-            this.requestUpdate();
-        }
     }
 
     getBackgroundConfig(): Readonly<IMapBackgroundConfig> {
@@ -483,7 +488,6 @@ export class MapRenderer
         this.sortedLayers.forEach(v => {
             this.vertex.updateArea(v, 0, 0, this.mapWidth, this.mapHeight);
         });
-        this.requestUpdate();
     }
 
     setCellSize(width: number, height: number): void {
@@ -492,36 +496,31 @@ export class MapRenderer
         this.sortedLayers.forEach(v => {
             this.vertex.updateArea(v, 0, 0, this.mapWidth, this.mapHeight);
         });
-        this.requestUpdate();
     }
 
     configRendering(config: Partial<IMapRenderConfig>): void {
-        let needUpdate = false;
         if (!isNil(config.minBehavior)) {
             this.tileMinifyBehavior = config.minBehavior;
-            needUpdate = true;
+            this.updateRequired = true;
         }
         if (!isNil(config.magBehavior)) {
             this.tileMagnifyBehavior = config.magBehavior;
-            needUpdate = true;
+            this.updateRequired = true;
         }
         if (!isNil(config.tileAlignX)) {
             this.tileAlignX = config.tileAlignX;
-            needUpdate = true;
+            this.updateRequired = true;
         }
         if (!isNil(config.tileAlignY)) {
             this.tileAlignY = config.tileAlignY;
-            needUpdate = true;
+            this.updateRequired = true;
         }
         if (!isNil(config.tileTestMode)) {
             this.tileTestMode = config.tileTestMode;
-            needUpdate = true;
+            this.updateRequired = true;
         }
         if (!isNil(config.frameSpeed)) {
             this.frameSpeed = config.frameSpeed;
-        }
-        if (needUpdate) {
-            this.requestUpdate();
         }
     }
 
@@ -534,10 +533,6 @@ export class MapRenderer
             tileTestMode: this.tileTestMode,
             frameSpeed: this.frameSpeed
         };
-    }
-
-    getTransform(): Transform {
-        return this.transform;
     }
 
     private getOffsetPool(): number[] {
@@ -1196,15 +1191,15 @@ export class MapRenderer
         );
         this.backgroundPending = false;
         gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
-        this.requestUpdate();
+        this.updateRequired = true;
     }
 
-    render(): void {
+    render(): HTMLCanvasElement {
         const gl = this.gl;
         const data = this.contextData;
         if (!this.assetData) {
             logger.error(31);
-            return;
+            return this.canvas;
         }
 
         const {
@@ -1227,18 +1222,6 @@ export class MapRenderer
         } = data;
 
         // 图层检查
-        if (this.layerSizeDirty) {
-            this.vertex.resizeMap();
-            this.layerSizeDirty = false;
-        }
-        if (this.layerListDirty) {
-            this.vertex.updateLayerArray();
-            this.layerListDirty = false;
-        }
-        if (this.layerAllDirty) {
-            this.updateAllLayers();
-            this.layerAllDirty = false;
-        }
         this.vertex.checkRebuild();
 
         // 数据检查
@@ -1272,7 +1255,6 @@ export class MapRenderer
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.useProgram(backProgram);
         if (this.needUpdateBackgroundFrame) {
-            this.needUpdateBackgroundFrame = false;
             gl.uniform1f(backNowFrameLocation, this.backgroundFrame);
         }
         if (this.needUpdateTransform) {
@@ -1290,11 +1272,9 @@ export class MapRenderer
         // 图块
         gl.useProgram(tileProgram);
         if (this.needUpdateOffsetPool) {
-            this.needUpdateOffsetPool = false;
             gl.uniform1fv(offsetPoolLocation, this.normalizedOffsetPool);
         }
         if (this.needUpdateFrameCounter) {
-            this.needUpdateFrameCounter = false;
             gl.uniform1f(nowFrameLocation, this.frameCounter);
         }
         if (this.needUpdateTransform) {
@@ -1304,7 +1284,6 @@ export class MapRenderer
                 this.transform.mat
             );
         }
-        this.needUpdateTransform = false;
         gl.bindTexture(gl.TEXTURE_2D_ARRAY, tileTexture);
         gl.bindVertexArray(tileVAO);
 
@@ -1325,6 +1304,16 @@ export class MapRenderer
         });
         gl.bindVertexArray(null);
         gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
+
+        // 清空更新状态标识
+        this.updateRequired = false;
+        this.needUpdateFrameCounter = false;
+        this.needUpdateBackgroundFrame = false;
+        this.needUpdateTransform = false;
+        this.needUpdateOffsetPool = false;
+        this.vertex.renderDynamic();
+
+        return this.canvas;
     }
 
     //#endregion
@@ -1347,7 +1336,7 @@ export class MapRenderer
         h: number
     ) {
         this.vertex.updateArea(layer, x, y, w, h);
-        this.requestUpdate();
+        this.updateRequired = true;
     }
 
     /**
@@ -1359,7 +1348,18 @@ export class MapRenderer
      */
     updateLayerBlock(layer: IMapLayer, block: number, x: number, y: number) {
         this.vertex.updateBlock(layer, block, x, y);
-        this.requestUpdate();
+        this.updateRequired = true;
+    }
+
+    getBlockStatus(
+        layer: IMapLayer,
+        x: number,
+        y: number
+    ): IBlockStatus | null {
+        if (x < 0 || y < 0 || x > this.mapWidth || y > this.mapHeight) {
+            return null;
+        }
+        return new StaticBlockStatus(layer, this.vertex, x, y);
     }
 
     //#endregion
@@ -1385,22 +1385,10 @@ export class MapRenderer
     private reduceMoving() {
         const half = Math.round(this.movingCount / 2);
         if (half < DYNAMIC_RESERVE) return;
-        if (this.movingIndexPool.length < half) return;
-        const needMap: number[] = [];
-        const restPool: number[] = [];
-        this.movingIndexPool.forEach(v => {
-            if (v < half) restPool.push(v);
-            else needMap.push(v);
-        });
-        // 这个判断理论上不可能成立，但是还是判断下吧
-        if (needMap.length > restPool.length) return;
-        const map = new Map<number, number>();
-        needMap.forEach(v => {
-            const item = restPool.pop()!;
-            map.set(v, item);
-        });
-        this.vertex.reduceMoving(half, map);
-        this.requestUpdate();
+        for (const moving of this.movingBlock) {
+            if (moving.index >= half) return;
+        }
+        this.vertex.reduceMoving(half);
     }
 
     /**
@@ -1436,11 +1424,11 @@ export class MapRenderer
         y: number
     ): IMovingBlock {
         const index = this.requireMovingIndex();
-        const moving = new MovingBlock(this, index, layer, block, x, y);
+        const moving = new MovingBlock(this, index, layer, block);
+        moving.setPos(x, y);
         this.movingBlock.add(moving);
         this.movingIndexMap.set(index, moving);
         this.vertex.updateMoving(moving, true);
-        this.requestUpdate();
         return moving;
     }
 
@@ -1457,7 +1445,6 @@ export class MapRenderer
         this.movingBlock.delete(block);
         this.movingIndexMap.delete(block.index);
         this.vertex.deleteMoving(block);
-        this.requestUpdate();
     }
 
     hasMoving(moving: IMovingBlock): boolean {
@@ -1466,29 +1453,7 @@ export class MapRenderer
 
     //#endregion
 
-    //#region 图块配置
-
-    enableTileFrameAnimate(layer: IMapLayer, x: number, y: number): void {
-        this.vertex.enableStaticFrameAnimate(layer, x, y);
-    }
-
-    disableTileFrameAnimate(layer: IMapLayer, x: number, y: number): void {
-        this.vertex.disableStaticFrameAnimate(layer, x, y);
-    }
-
-    setTileAlpha(layer: IMapLayer, alpha: number, x: number, y: number): void {
-        this.vertex.setStaticAlpha(layer, alpha, x, y);
-    }
-
-    //#endregion
-
     //#region 其他方法
-
-    private requestUpdate() {
-        this.forEachHook((hook, controller) => {
-            hook.onUpdate?.(controller);
-        });
-    }
 
     getTimestamp(): number {
         return this.timestamp;
@@ -1496,14 +1461,12 @@ export class MapRenderer
 
     tick(timestamp: number) {
         this.timestamp = timestamp;
-        let update = false;
 
         // 移动数组
         const expandDT = timestamp - this.lastExpandTime;
         if (expandDT > MOVING_TOLERANCE * 1000) {
             this.reduceMoving();
             this.lastExpandTime = timestamp;
-            update = true;
         }
 
         // 背景
@@ -1513,7 +1476,6 @@ export class MapRenderer
             this.backgroundFrame %= this.backgroundFrameCount;
             this.backLastFrame = timestamp;
             this.needUpdateBackgroundFrame = true;
-            update = true;
         }
 
         // 地图帧动画
@@ -1522,7 +1484,6 @@ export class MapRenderer
             this.lastFrameTime = timestamp;
             this.frameCounter++;
             this.needUpdateFrameCounter = true;
-            update = true;
         }
 
         // 图块移动
@@ -1533,17 +1494,22 @@ export class MapRenderer
                 if (move) toUpdate.push(v);
             });
             this.vertex.updateMovingList(toUpdate, false);
-            update = true;
-        }
-
-        if (update) {
-            this.requestUpdate();
         }
     }
 
     updateTransform(): void {
         this.needUpdateTransform = true;
-        this.requestUpdate();
+    }
+
+    needUpdate(): boolean {
+        return (
+            this.updateRequired ||
+            this.needUpdateFrameCounter ||
+            this.needUpdateBackgroundFrame ||
+            this.needUpdateTransform ||
+            this.vertex.dynamicRenderDirty ||
+            this.needUpdateOffsetPool
+        );
     }
 
     //#endregion

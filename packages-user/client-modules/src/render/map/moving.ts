@@ -3,6 +3,7 @@ import { IMapRenderer, IMapVertexGenerator, IMovingBlock } from './types';
 import { IMaterialFramedData, IMaterialManager } from '@user/client-base';
 import { logger } from '@motajs/common';
 import { IMapLayer } from '@user/data-state';
+import { DynamicBlockStatus } from './status';
 
 export interface IMovingRenderer {
     /** 素材管理器 */
@@ -22,13 +23,13 @@ export interface IMovingRenderer {
     deleteMoving(block: IMovingBlock): void;
 }
 
-export class MovingBlock implements IMovingBlock {
+export class MovingBlock extends DynamicBlockStatus implements IMovingBlock {
     readonly texture: IMaterialFramedData;
     readonly tile: number;
     readonly renderer: IMovingRenderer;
-    readonly index: number;
     readonly layer: IMapLayer;
 
+    index: number;
     x: number = 0;
     y: number = 0;
 
@@ -59,7 +60,10 @@ export class MovingBlock implements IMovingBlock {
     /** 动画开始时纵坐标 */
     private startY: number = 0;
     /** 当前动画是否已经结束 */
-    private end: boolean = false;
+    private end: boolean = true;
+
+    /** 是否通过 `setPos` 设置了位置 */
+    private posUpdated: boolean = false;
 
     /** 兑现函数 */
     private promiseFunc: () => void = () => {};
@@ -68,15 +72,12 @@ export class MovingBlock implements IMovingBlock {
         renderer: IMovingRenderer & IMapRenderer,
         index: number,
         layer: IMapLayer,
-        block: number | IMaterialFramedData,
-        x: number,
-        y: number
+        block: number | IMaterialFramedData
     ) {
+        super(layer, renderer.vertex, index);
         this.renderer = renderer;
         this.index = index;
         this.layer = layer;
-        this.x = x;
-        this.y = y;
         if (typeof block === 'number') {
             this.texture = renderer.manager.getTile(block)!;
             this.tile = block;
@@ -90,6 +91,13 @@ export class MovingBlock implements IMovingBlock {
             this.texture = block;
             this.tile = -1;
         }
+    }
+
+    setPos(x: number, y: number): void {
+        if (!this.end) return;
+        this.x = x;
+        this.y = y;
+        this.posUpdated = true;
     }
 
     lineTo(
@@ -167,7 +175,13 @@ export class MovingBlock implements IMovingBlock {
     }
 
     stepMoving(timestamp: number): boolean {
-        if (this.end) return false;
+        if (this.end) {
+            if (this.posUpdated) {
+                this.posUpdated = false;
+                return true;
+            }
+            return false;
+        }
         const dt = timestamp - this.startTime;
         if (this.line) {
             if (dt > this.time) {
@@ -209,18 +223,6 @@ export class MovingBlock implements IMovingBlock {
             }
         }
         return true;
-    }
-
-    enableFrameAnimate(): void {
-        this.renderer.vertex.enableDynamicFrameAnimate(this);
-    }
-
-    disableFrameAnimate(): void {
-        this.renderer.vertex.disableDynamicFrameAnimate(this);
-    }
-
-    setAlpha(alpha: number): void {
-        this.renderer.vertex.setDynamicAlpha(this, alpha);
     }
 
     destroy(): void {

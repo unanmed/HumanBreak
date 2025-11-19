@@ -1,10 +1,4 @@
-import {
-    IDirtyMark,
-    IDirtyTracker,
-    IHookable,
-    IHookBase,
-    IHookController
-} from '@motajs/common';
+import { IDirtyMark, IDirtyTracker } from '@motajs/common';
 import { ITextureRenderable } from '@motajs/render-assets';
 import { Transform } from '@motajs/render-core';
 import {
@@ -153,7 +147,39 @@ export interface IContextData {
     vertexMark: IDirtyMark;
 }
 
-export interface IMovingBlock {
+export interface IBlockStatus {
+    /** 图块所属图层 */
+    readonly layer: IMapLayer;
+
+    /**
+     * 设置图块的不透明度
+     * @param alpha 图块不透明度
+     */
+    setAlpha(alpha: number): void;
+
+    /**
+     * 获取图块的不透明度
+     */
+    getAlpha(): number;
+
+    /**
+     * 使用全局帧动画
+     */
+    useGlobalFrame(): void;
+
+    /**
+     * 使用指定的动画帧数，传入第几帧图块就画第几帧，超过最大帧数会自动取模
+     * @param frame 第几帧
+     */
+    useSpecifiedFrame(frame: number): void;
+
+    /**
+     * 获取动画帧数，-1 表示使用全局帧动画，非负整数表示图块是第几帧
+     */
+    getFrame(): number;
+}
+
+export interface IMovingBlock extends IBlockStatus {
     /** 移动图块的索引 */
     readonly index: number;
     /** 图块数字 */
@@ -164,8 +190,13 @@ export interface IMovingBlock {
     readonly y: number;
     /** 图块使用的纹理 */
     readonly texture: IMaterialFramedData;
-    /** 该图块所属的图层 */
-    readonly layer: IMapLayer;
+
+    /**
+     * 直接设置图块的位置，动画中设置无效
+     * @param x 目标横坐标
+     * @param y 目标纵坐标
+     */
+    setPos(x: number, y: number): void;
 
     /**
      * 沿直线移动到目标点
@@ -199,22 +230,6 @@ export interface IMovingBlock {
     ): Promise<this>;
 
     /**
-     * 启用此图块的帧动画
-     */
-    enableFrameAnimate(): void;
-
-    /**
-     * 禁用此图块的帧动画
-     */
-    disableFrameAnimate(): void;
-
-    /**
-     * 设置此图块的不透明度
-     * @param alpha 不透明度
-     */
-    setAlpha(alpha: number): void;
-
-    /**
      * 进行一步动画移动效果
      * @param timestamp 当前时间戳
      * @returns 图块是否发生了移动
@@ -227,14 +242,7 @@ export interface IMovingBlock {
     destroy(): void;
 }
 
-export interface IMapRendererHooks extends IHookBase {
-    /**
-     * 当需要更新画面时执行
-     */
-    onUpdate(controller: IHookController<this>): void;
-}
-
-export interface IMapRenderer extends IHookable<IMapRendererHooks> {
+export interface IMapRenderer {
     /** 地图渲染器使用的资源管理器 */
     readonly manager: IMaterialManager;
     /** 画布渲染上下文 */
@@ -282,10 +290,38 @@ export interface IMapRenderer extends IHookable<IMapRendererHooks> {
     destroy(): void;
 
     /**
-     * 渲染至目标画布
-     * @param gl 渲染至的上下文
+     * 渲染地图
      */
-    render(gl: WebGL2RenderingContext): void;
+    render(): HTMLCanvasElement;
+
+    /**
+     * 设置地图的变换矩阵
+     * @param transform 变换矩阵
+     */
+    setTransform(transform: Transform): void;
+
+    /**
+     * 设置画布尺寸
+     * @param width 画布宽度
+     * @param height 画布高度
+     */
+    setCanvasSize(width: number, height: number): void;
+
+    /**
+     * 设置渲染区域，等于 `gl.viewport`
+     * @param x 左上角横坐标
+     * @param y 左上角纵坐标
+     * @param width 区域宽度
+     * @param height 区域高度
+     */
+    setViewport(x: number, y: number, width: number, height: number): void;
+
+    /**
+     * 清空画布缓冲区
+     * @param color 是否清空颜色缓冲区
+     * @param depth 是否清空深度缓冲区
+     */
+    clear(color: boolean, depth: boolean): void;
 
     /**
      * 设置渲染器使用的地图状态
@@ -403,35 +439,23 @@ export interface IMapRenderer extends IHookable<IMapRendererHooks> {
     getMovingBlockByIndex(index: number): Readonly<IMovingBlock> | null;
 
     /**
-     * 启用指定图块的帧动画效果
-     * @param layer 图层
-     * @param x 图块横坐标
-     * @param y 图块纵坐标
-     */
-    enableTileFrameAnimate(layer: IMapLayer, x: number, y: number): void;
-
-    /**
-     * 禁用指定图块的帧动画效果
-     * @param layer 图层
-     * @param x 图块横坐标
-     * @param y 图块纵坐标
-     */
-    disableTileFrameAnimate(layer: IMapLayer, x: number, y: number): void;
-
-    /**
-     * 设置指定图块的不透明度
-     * @param layer 图层
-     * @param alpha 图块不透明度
-     * @param x 图块横坐标
-     * @param y 图块纵坐标
-     */
-    setTileAlpha(layer: IMapLayer, alpha: number, x: number, y: number): void;
-
-    /**
      * 进行一帧更新
      * @param timestamp 时间戳
      */
     tick(timestamp: number): void;
+
+    /**
+     * 获取指定图层的指定图块的状态信息，可以设置与获取图块状态。多次调用的返回值不同引用。
+     * @param layer 图层对象
+     * @param x 图块横坐标
+     * @param y 图块纵坐标
+     */
+    getBlockStatus(layer: IMapLayer, x: number, y: number): IBlockStatus | null;
+
+    /**
+     * 当前地图状态是否发生改变，需要更新
+     */
+    needUpdate(): boolean;
 }
 
 export interface IMapVertexArray {
@@ -710,11 +734,11 @@ export interface IMapVertexBlock extends IMapVertexData {
     readonly dirty: boolean;
     /** 渲染是否需要更新 */
     readonly renderDirty: boolean;
-    /** 起始索引，即第一个元素索引 */
+    /** 起始索引，即第一个元素索引，以实例为单位 */
     readonly startIndex: number;
-    /** 终止索引，即最后一个元素索引+1 */
+    /** 终止索引，即最后一个元素索引+1，以实例为单位 */
     readonly endIndex: number;
-    /** 元素数量，即终止索引-起始索引 */
+    /** 元素数量，即终止索引-起始索引，以实例为单位 */
     readonly count: number;
 
     /**
@@ -771,10 +795,74 @@ export interface IMapBlockUpdateObject {
     readonly y: number;
 }
 
+export interface IMapVertexStatus {
+    /**
+     * 设置图块的不透明度
+     * @param layer 图块所属图层
+     * @param x 图块横坐标
+     * @param y 图块纵坐标
+     * @param alpha 目标不透明度
+     */
+    setStaticAlpha(layer: IMapLayer, x: number, y: number, alpha: number): void;
+
+    /**
+     * 设置图块显示第几帧
+     * @param layer 图块所属图层
+     * @param x 图块横坐标
+     * @param y 图块纵坐标
+     * @param frame 图块的帧数，-1 表示使用全局帧数，非负整数表示画第几帧，超出最大帧数会自动取余
+     */
+    setStaticFrame(layer: IMapLayer, x: number, y: number, frame: number): void;
+
+    /**
+     * 设置移动图块的不透明度
+     * @param index 移动图块索引
+     * @param alpha 目标不透明度
+     */
+    setDynamicAlpha(index: number, alpha: number): void;
+
+    /**
+     * 设置移动图块显示第几帧
+     * @param index 移动图块索引
+     * @param frame 图块的帧数，-1 表示使用全局帧数，非负整数表示画第几帧，超出最大帧数会自动取余
+     */
+    setDynamicFrame(index: number, frame: number): void;
+
+    /**
+     * 获取指定位置图块的不透明度，如果图块不在地图内则返回 0
+     * @param layer 图块所属图层
+     * @param x 图块横坐标
+     * @param y 图块纵坐标
+     */
+    getStaticAlpha(layer: IMapLayer, x: number, y: number): number;
+
+    /**
+     * 获取指定位置图块的帧数，-1 表示使用全局帧数，非负整数表示当前第几帧，不会超出最大帧数，如果图块不在地图内则返回 -1
+     * @param layer 图块所属图层
+     * @param x 图块横坐标
+     * @param y 图块纵坐标
+     */
+    getStaticFrame(layer: IMapLayer, x: number, y: number): number;
+
+    /**
+     * 获取移动图块的不透明度
+     * @param index 移动图块索引
+     */
+    getDynamicAlpha(index: number): number;
+
+    /**
+     * 获取移动图块的当前帧数，-1 表示使用全局帧数，非负整数表示当前第几帧
+     * @param index 移动图块索引
+     */
+    getDynamicFrame(index: number): number;
+}
+
 /**
  * 脏标记表示顶点数组的长度是否发生变化
  */
-export interface IMapVertexGenerator extends IDirtyTracker<boolean> {
+export interface IMapVertexGenerator
+    extends IDirtyTracker<boolean>,
+        IMapVertexStatus {
     /** 地图渲染器 */
     readonly renderer: IMapRenderer;
     /** 地图分块 */
@@ -782,8 +870,13 @@ export interface IMapVertexGenerator extends IDirtyTracker<boolean> {
     /** 动态部分是否需要更新渲染缓冲区 */
     readonly dynamicRenderDirty: boolean;
 
+    /** 动态内容起始索引，以实例为单位 */
+    readonly dynamicStart: number;
+    /** 动态内容数量，以实例为单位 */
+    readonly dynamicCount: number;
+
     /**
-     * 取消渲染的脏标记
+     * 取消动态内容渲染的脏标记
      */
     renderDynamic(): void;
 
@@ -809,10 +902,8 @@ export interface IMapVertexGenerator extends IDirtyTracker<boolean> {
     /**
      * 缩小移动图块数组尺寸
      * @param targetSize 目标大小
-     * @param indexMap 索引映射。由于缩小尺寸后，有可能有一些移动的图块位于较高的索引，
-     *                 因此需要一个映射来指定之前的那些移动图块现在应该在哪个索引。
      */
-    reduceMoving(targetSize: number, indexMap: Map<number, number>): void;
+    reduceMoving(targetSize: number): void;
 
     /**
      * 更新图层数组
@@ -886,59 +977,15 @@ export interface IMapVertexGenerator extends IDirtyTracker<boolean> {
      * @param moving 移动图块对象
      */
     deleteMoving(moving: IMovingBlock): void;
-
-    /**
-     * 启用静态内容的帧动画
-     * @param layer 图层索引
-     * @param x 图块横坐标
-     * @param y 图块纵坐标
-     */
-    enableStaticFrameAnimate(layer: IMapLayer, x: number, y: number): void;
-
-    /**
-     * 禁用静态内容的帧动画
-     * @param layer 图层索引
-     * @param x 图块横坐标
-     * @param y 图块纵坐标
-     */
-    disableStaticFrameAnimate(layer: IMapLayer, x: number, y: number): void;
-
-    /**
-     * 设置静态内容的不透明度
-     * @param layer 图层索引
-     * @param alpha 图块不透明度
-     * @param x 图块横坐标
-     * @param y 图块纵坐标
-     */
-    setStaticAlpha(layer: IMapLayer, alpha: number, x: number, y: number): void;
-
-    /**
-     * 启用动态内容的帧动画
-     * @param block 移动图块对象
-     */
-    enableDynamicFrameAnimate(block: IMovingBlock): void;
-
-    /**
-     * 禁用动态内容的帧动画
-     * @param block 移动图块对象
-     */
-    disableDynamicFrameAnimate(block: IMovingBlock): void;
-
-    /**
-     * 设置动态内容的不透明度
-     * @param block 移动图块对象
-     * @param alpha 图块的不透明度
-     */
-    setDynamicAlpha(block: IMovingBlock, alpha: number): void;
 }
 
 export interface IMapRenderArea {
     /** 顶点起始索引，从哪个顶点开始处理 */
-    readonly startIndex: number;
+    startIndex: number;
     /** 顶点终止索引，处理到哪个顶点 */
-    readonly endIndex: number;
+    endIndex: number;
     /** 顶点数量，即终止索引减去起始索引 */
-    readonly count: number;
+    count: number;
 }
 
 export interface IMapRenderData {
@@ -965,3 +1012,5 @@ export interface IMapViewportController {
      */
     bindTransform(transform: Transform): void;
 }
+
+export interface IMapCamera {}

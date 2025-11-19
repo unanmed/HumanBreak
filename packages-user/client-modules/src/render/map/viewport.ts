@@ -33,6 +33,24 @@ export class MapViewport implements IMapViewportController {
         });
     }
 
+    private checkDynamic(
+        list: IMapRenderArea[],
+        dynamicStart: number,
+        dynamicCount: number
+    ) {
+        const last = list[list.length - 1];
+        if (!last || last.endIndex < dynamicStart) {
+            list.push({
+                startIndex: dynamicStart,
+                endIndex: dynamicStart + dynamicCount,
+                count: dynamicCount
+            });
+        } else {
+            last.endIndex = dynamicStart + dynamicCount;
+            last.count += dynamicCount;
+        }
+    }
+
     getRenderArea(): IMapRenderData {
         const { cellWidth, cellHeight, renderWidth, renderHeight } =
             this.renderer;
@@ -53,33 +71,11 @@ export class MapViewport implements IMapViewportController {
         const updateArea: IMapRenderArea[] = [];
         const blockList: IBlockData<IMapVertexBlock>[] = [];
 
-        const widthOne = blockLeft === blockRight;
-        const heightOne = blockTop === blockBottom;
-
-        if (widthOne && heightOne) {
-            // 只能看到一个分块
-            const block = this.vertex.block.getBlockByLoc(blockLeft, blockTop)!;
-            blockList.push(block);
-        } else if (widthOne) {
-            // 看到的区域分块宽度是 1
-            for (let ny = blockTop; ny <= blockBottom; ny++) {
-                const block = this.vertex.block.getBlockByLoc(blockLeft, ny)!;
-                blockList.push(block);
-            }
-        } else if (heightOne) {
-            // 看到的区域分块高度是 1
+        // 内层横向外层纵向的话，索引在换行之前都是连续的，方便整合
+        for (let ny = blockTop; ny <= blockBottom; ny++) {
             for (let nx = blockLeft; nx <= blockRight; nx++) {
-                const block = this.vertex.block.getBlockByLoc(nx, blockTop)!;
+                const block = this.vertex.block.getBlockByLoc(nx, ny)!;
                 blockList.push(block);
-            }
-        } else {
-            // 看到的区域分块宽高都不是 1
-            // 使用这种方式的话，索引在换行之前都是连续的，方便整合
-            for (let ny = blockTop; ny <= blockBottom; ny++) {
-                for (let nx = blockLeft; nx <= blockRight; nx++) {
-                    const block = this.vertex.block.getBlockByLoc(nx, ny)!;
-                    blockList.push(block);
-                }
             }
         }
 
@@ -122,7 +118,12 @@ export class MapViewport implements IMapViewportController {
             }
         }
 
-        // todo: 动态内容
+        const dynamicStart = this.vertex.dynamicStart;
+        const dynamicCount = this.vertex.dynamicCount;
+        this.checkDynamic(renderArea, dynamicStart, dynamicCount);
+        if (this.vertex.dynamicRenderDirty) {
+            this.checkDynamic(updateArea, dynamicStart, dynamicCount);
+        }
 
         return {
             render: renderArea,
