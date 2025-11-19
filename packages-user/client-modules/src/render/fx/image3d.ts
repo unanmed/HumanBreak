@@ -7,7 +7,7 @@ import { EffectBase } from './base';
 
 export class Image3DEffect
     extends EffectBase<void>
-    implements ITransformUpdatable
+    implements ITransformUpdatable<Transform3D>
 {
     /** 图片的模型变换 */
     private model: Transform3D = new Transform3D();
@@ -65,7 +65,7 @@ export class Image3DEffect
      * @param model 模型变换
      */
     setModel(model: Transform3D) {
-        this.model.bind();
+        this.model.unbind(this);
         this.model = model;
         model.bind(this);
     }
@@ -75,7 +75,7 @@ export class Image3DEffect
      * @param model 视角变换
      */
     setView(view: Transform3D) {
-        this.view.bind();
+        this.view.unbind(this);
         this.view = view;
         view.bind(this);
     }
@@ -85,7 +85,7 @@ export class Image3DEffect
      * @param model 投影变换
      */
     setProj(proj: Transform3D) {
-        this.proj.bind();
+        this.proj.unbind(this);
         this.proj = proj;
         proj.bind(this);
     }

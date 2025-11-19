@@ -42,7 +42,7 @@ import {
     DYNAMIC_RESERVE,
     MOVING_TOLERANCE
 } from '../shared';
-import { ITransformUpdatable, Transform } from '@motajs/render-core';
+import { Transform } from '@motajs/render-core';
 import { MapViewport } from './viewport';
 import { INSTANCED_COUNT } from './constant';
 import { StaticBlockStatus } from './status';
@@ -54,11 +54,7 @@ const enum BackgroundType {
 }
 
 export class MapRenderer
-    implements
-        IMapRenderer,
-        IMovingRenderer,
-        ITransformUpdatable<Transform>,
-        IMapDataGetter
+    implements IMapRenderer, IMovingRenderer, IMapDataGetter
 {
     //#region 实例属性
 
@@ -296,7 +292,7 @@ export class MapRenderer
     //#region 状态控制
 
     setTransform(transform: Transform): void {
-        this.transform.bind();
+        this.transform.unbind(this);
         this.transform = transform;
         transform.bind(this);
         this.viewport.bindTransform(transform);

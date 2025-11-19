@@ -1,7 +1,11 @@
 import { mat3, mat4, ReadonlyMat3, ReadonlyVec3, vec2, vec3 } from 'gl-matrix';
 
 export interface ITransformUpdatable<T> {
-    updateTransform?(transform: T): void;
+    /**
+     * 当变换矩阵更新时触发
+     * @param transform 触发更新的变换矩阵
+     */
+    updateTransform(transform: T): void;
 }
 
 export class Transform {
@@ -17,14 +21,26 @@ export class Transform {
     private modified: boolean = false;
 
     /** 绑定的可更新元素 */
-    bindedObject?: ITransformUpdatable<Transform>;
+    bindedObject: Set<ITransformUpdatable<Transform>> = new Set();
 
     /**
      * 对这个变换实例添加绑定对象，当矩阵变换时，自动调用其 update 函数
      * @param obj 要绑定的对象
      */
-    bind(obj?: ITransformUpdatable<Transform>) {
-        this.bindedObject = obj;
+    bind(obj: ITransformUpdatable<Transform>) {
+        this.bindedObject.add(obj);
+    }
+
+    /**
+     * 取消对象的绑定
+     * @param obj 要取消绑定的对象
+     */
+    unbind(obj: ITransformUpdatable<Transform>) {
+        this.bindedObject.delete(obj);
+    }
+
+    private emitUpdate() {
+        this.bindedObject.forEach(v => v.updateTransform(this));
     }
 
     /**
@@ -38,7 +54,7 @@ export class Transform {
         this.scaleY = 1;
         this.rad = 0;
         this.modified = false;
-        this.bindedObject?.updateTransform?.(this);
+        this.emitUpdate();
     }
 
     /**
@@ -49,7 +65,7 @@ export class Transform {
         this.scaleX *= x;
         this.scaleY *= y;
         this.modified = true;
-        this.bindedObject?.updateTransform?.(this);
+        this.emitUpdate();
         return this;
     }
 
@@ -61,7 +77,7 @@ export class Transform {
         this.x += x;
         this.y += y;
         this.modified = true;
-        this.bindedObject?.updateTransform?.(this);
+        this.emitUpdate();
         return this;
     }
 
@@ -76,7 +92,7 @@ export class Transform {
             this.rad -= n * Math.PI * 2;
         }
         this.modified = true;
-        this.bindedObject?.updateTransform?.(this);
+        this.emitUpdate();
         return this;
     }
 
@@ -88,7 +104,7 @@ export class Transform {
         this.scaleX = x;
         this.scaleY = y;
         this.modified = true;
-        this.bindedObject?.updateTransform?.(this);
+        this.emitUpdate();
         return this;
     }
 
@@ -100,7 +116,7 @@ export class Transform {
         this.x = x;
         this.y = y;
         this.modified = true;
-        this.bindedObject?.updateTransform?.(this);
+        this.emitUpdate();
         return this;
     }
 
@@ -111,7 +127,7 @@ export class Transform {
         mat3.rotate(this.mat, this.mat, rad - this.rad);
         this.rad = rad;
         this.modified = true;
-        this.bindedObject?.updateTransform?.(this);
+        this.emitUpdate();
         return this;
     }
 
@@ -138,7 +154,7 @@ export class Transform {
             mat3.fromValues(a, b, 0, c, d, 0, e, f, 1)
         );
         this.calAttributes();
-        this.bindedObject?.updateTransform?.(this);
+        this.emitUpdate();
         return this;
     }
 
@@ -161,7 +177,7 @@ export class Transform {
     ): this {
         mat3.set(this.mat, a, b, 0, c, d, 0, e, f, 1);
         this.calAttributes();
-        this.bindedObject?.updateTransform?.(this);
+        this.emitUpdate();
         return this;
     }
 
@@ -285,14 +301,26 @@ export class Transform3D {
     mat: mat4 = mat4.create();
 
     /** 绑定的可更新元素 */
-    bindedObject?: ITransformUpdatable<Transform3D>;
+    bindedObject: Set<ITransformUpdatable<Transform3D>> = new Set();
 
     /**
-     * 绑定可更新对象
+     * 对这个变换实例添加绑定对象，当矩阵变换时，自动调用其 update 函数
      * @param obj 要绑定的对象
      */
-    bind(obj?: ITransformUpdatable<Transform3D>) {
-        this.bindedObject = obj;
+    bind(obj: ITransformUpdatable<Transform3D>) {
+        this.bindedObject.add(obj);
+    }
+
+    /**
+     * 取消对象的绑定
+     * @param obj 要取消绑定的对象
+     */
+    unbind(obj: ITransformUpdatable<Transform3D>) {
+        this.bindedObject.delete(obj);
+    }
+
+    private emitUpdate() {
+        this.bindedObject.forEach(v => v.updateTransform(this));
     }
 
     /**
@@ -300,7 +328,7 @@ export class Transform3D {
      */
     reset(): this {
         mat4.identity(this.mat);
-        this.bindedObject?.updateTransform?.(this);
+        this.emitUpdate();
         return this;
     }
 
@@ -312,7 +340,7 @@ export class Transform3D {
      */
     scale(x: number, y: number, z: number): this {
         mat4.scale(this.mat, this.mat, [x, y, z]);
-        this.bindedObject?.updateTransform?.(this);
+        this.emitUpdate();
         return this;
     }
 
@@ -324,7 +352,7 @@ export class Transform3D {
      */
     translate(x: number, y: number, z: number): this {
         mat4.translate(this.mat, this.mat, [x, y, z]);
-        this.bindedObject?.updateTransform?.(this);
+        this.emitUpdate();
         return this;
     }
 
@@ -335,7 +363,7 @@ export class Transform3D {
      */
     rotate(rad: number, axis: vec3): this {
         mat4.rotate(this.mat, this.mat, rad, axis);
-        this.bindedObject?.updateTransform?.(this);
+        this.emitUpdate();
         return this;
     }
 
@@ -371,7 +399,7 @@ export class Transform3D {
      */
     lookAt(eye: vec3, center: vec3, up: vec3): this {
         mat4.lookAt(this.mat, eye, center, up);
-        this.bindedObject?.updateTransform?.(this);
+        this.emitUpdate();
         return this;
     }
 
@@ -384,7 +412,7 @@ export class Transform3D {
      */
     perspective(fovy: number, aspect: number, near: number, far: number): this {
         mat4.perspective(this.mat, fovy, aspect, near, far);
-        this.bindedObject?.updateTransform?.(this);
+        this.emitUpdate();
         return this;
     }
 
@@ -406,7 +434,7 @@ export class Transform3D {
         far: number
     ): this {
         mat4.ortho(this.mat, left, right, bottom, top, near, far);
-        this.bindedObject?.updateTransform?.(this);
+        this.emitUpdate();
         return this;
     }
 

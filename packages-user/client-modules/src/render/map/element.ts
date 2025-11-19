@@ -1,8 +1,4 @@
-import {
-    MotaOffscreenCanvas2D,
-    RenderItem,
-    Transform
-} from '@motajs/render-core';
+import { MotaOffscreenCanvas2D, RenderItem } from '@motajs/render-core';
 import { ILayerState, state } from '@user/data-state';
 import { IMapRenderer } from './types';
 import { MapRenderer } from './renderer';
@@ -49,10 +45,6 @@ export class MapRender extends RenderItem {
     size(width: number, height: number): void {
         super.size(width, height);
         this.sizeGL(width, height);
-    }
-
-    updateTransform(transform: Transform): void {
-        super.updateTransform(transform);
     }
 
     protected render(canvas: MotaOffscreenCanvas2D): void {

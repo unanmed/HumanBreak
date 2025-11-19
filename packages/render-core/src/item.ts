@@ -301,7 +301,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
     /** 该元素的变换矩阵 */
     private _transform: Transform = new Transform();
     set transform(value: Transform) {
-        this._transform.bind();
+        this._transform.unbind(this);
         this._transform = value;
         value.bind(this);
     }
@@ -798,7 +798,7 @@ export abstract class RenderItem<E extends ERenderItemEvent = ERenderItemEvent>
         this._parent = void 0;
         parent.requestSort();
         parent.update();
-        this._transform.bind();
+        this._transform.unbind(this);
         if (!success) return false;
         this._root?.disconnect(this);
         this._root = void 0;
