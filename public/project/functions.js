@@ -163,11 +163,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
 
             // 更新地图状态
             const { state } = Mota.require('@user/data-state');
-            const bg = core.floors[floorId].bgmap ?? [];
-            const bg2 = core.floors[floorId].bg2map ?? [];
-            const event = core.floors[floorId].map ?? [];
-            const fg = core.floors[floorId].fgmap ?? [];
-            const fg2 = core.floors[floorId].fg2map ?? [];
+            const bg = core.maps._getBgFgMapArray('bg', floorId);
+            const bg2 = core.maps._getBgFgMapArray('bg2', floorId);
+            const event = core.getMapArray(floorId);
+            const fg = core.maps._getBgFgMapArray('fg', floorId);
+            const fg2 = core.maps._getBgFgMapArray('fg2', floorId);
             const { width, height } = core.floors[floorId];
             const bgLayer = state.layer.getLayerByAlias('bg');
             const bg2Layer = state.layer.getLayerByAlias('bg2');

@@ -23,8 +23,6 @@ export function createGameRenderer() {
 
     mainRenderer.hide();
     createApp(App).mount(mainRenderer);
-
-    console.log(mainRenderer);
 }
 
 export function createRender() {
