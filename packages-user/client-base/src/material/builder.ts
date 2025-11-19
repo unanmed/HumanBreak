@@ -113,10 +113,16 @@ class TrackedAssetData
     }
 
     markDirty(index: number) {
+        if (index >= this.length) {
+            this.updateLength(index + 1);
+        }
         this.dirty(index);
     }
 
     async updateSource(index: number, source: SizedCanvasImageSource) {
+        if (index >= this.length) {
+            this.updateLength(this.length + 1);
+        }
         const origin = this.originSourceMap.get(index);
         const prev = this.sourceList.get(index);
         if (origin) {

@@ -785,6 +785,7 @@ export class MapRenderer
             if (dirty.size === 0) return;
             this.assetData.unmark(data.tileTextureMark);
             data.tileTextureMark = this.assetData.mark();
+            logger.warn(87);
             gl.bindTexture(gl.TEXTURE_2D_ARRAY, tile);
             const sizeChanged = this.checkTextureArraySize(
                 gl,

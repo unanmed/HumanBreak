@@ -155,21 +155,10 @@ export class MaterialManager implements IMaterialManager {
     addAutotile(
         source: SizedCanvasImageSource,
         identifier: IBlockIdentifier
-    ): IMaterialData | null {
-        const frames = source.width === 96 ? 1 : 4;
-        const flattened = AutotileProcessor.flatten({ source, frames });
-        if (!flattened) return null;
-        const texture = new Texture(flattened);
-        this.tileStore.addTexture(identifier.num, texture);
+    ): void {
+        this.autotileSource.set(identifier.num, source);
         this.tileStore.alias(identifier.num, identifier.id);
         this.clsMap.set(identifier.num, BlockCls.Autotile);
-        const data: IMaterialData = {
-            store: this.tileStore,
-            texture,
-            identifier: identifier.num,
-            alias: identifier.id
-        };
-        return data;
     }
 
     addTileset(
@@ -231,9 +220,15 @@ export class MaterialManager implements IMaterialManager {
 
     getTile(identifier: number): IMaterialFramedData | null {
         if (identifier < 10000) {
+            const cls = this.clsMap.get(identifier) ?? BlockCls.Unknown;
+            if (
+                cls === BlockCls.Autotile &&
+                this.autotileSource.has(identifier)
+            ) {
+                this.cacheAutotile(identifier);
+            }
             const texture = this.tileStore.getTexture(identifier);
             if (!texture) return null;
-            const cls = this.clsMap.get(identifier) ?? BlockCls.Unknown;
             return {
                 texture,
                 cls,
@@ -402,6 +397,7 @@ export class MaterialManager implements IMaterialManager {
         this.tileStore.addTexture(identifier, tex);
         const data = this.assetBuilder.addTexture(tex);
         tex.toAsset(data);
+        this.autotileSource.delete(identifier);
         this.checkAssetDirty(data);
         return tex;
     }
@@ -418,6 +414,7 @@ export class MaterialManager implements IMaterialManager {
             const tex = new Texture(flattened);
             this.tileStore.addTexture(v, tex);
             toAdd.push(tex);
+            this.autotileSource.delete(v);
         });
 
         const data = this.assetBuilder.addTextureList(toAdd);
@@ -542,7 +539,7 @@ export class MaterialManager implements IMaterialManager {
     }
 
     getIfBigImage(identifier: number): IMaterialFramedData | null {
-        const bigImage = this.bigImageData.get(identifier) ?? null;
+        const bigImage = this.bigImageData.get(identifier);
         if (bigImage) return bigImage;
         else return this.getTile(identifier);
     }
