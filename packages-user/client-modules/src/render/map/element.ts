@@ -53,9 +53,6 @@ export class MapRender extends RenderItem {
 
     updateTransform(transform: Transform): void {
         super.updateTransform(transform);
-        if (transform === this.camera) {
-            this.update();
-        }
     }
 
     protected render(canvas: MotaOffscreenCanvas2D): void {
