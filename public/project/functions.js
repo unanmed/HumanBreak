@@ -310,7 +310,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                     values[key] = core.clone(core.values[key]);
             }
 
-            const { NightSpecial, HeroSkill } =
+            const { NightSpecial, HeroSkill, state } =
                 Mota.require('@user/data-state');
 
             // 要存档的内容
@@ -326,7 +326,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
                 time: new Date().getTime(),
                 skills: Mota.require('@user/data-state').saveSkillTree(),
                 night: [...NightSpecial.saveNight()],
-                skill: HeroSkill.saveSkill()
+                skill: HeroSkill.saveSkill(),
+                coreState: state.saveState()
             };
 
             return structuredClone(data);
@@ -371,8 +372,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = {
             core.setFlag('__fromLoad__', true);
 
             Mota.require('@user/data-state').loadSkillTree(data.skills);
-            const { NightSpecial, HeroSkill } =
+            const { NightSpecial, HeroSkill, state } =
                 Mota.require('@user/data-state');
+
+            state.loadState(data.coreState);
+            state.hero.setImage(core.status.hero.image);
 
             if (!data.night) {
                 // 兼容旧版

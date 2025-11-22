@@ -5,12 +5,13 @@ import {
     logger
 } from '@motajs/common';
 import {
+    ILayerState,
+    ILayerStateHooks,
     IMapLayer,
     IMapLayerHookController,
-    IMapLayerHooks,
-    MapLayer
-} from '../map';
-import { ILayerState, ILayerStateHooks } from './types';
+    IMapLayerHooks
+} from './types';
+import { MapLayer } from './mapLayer';
 
 export class LayerState
     extends Hookable<ILayerStateHooks>
@@ -32,8 +33,8 @@ export class LayerState
         const array = new Uint32Array(width * height);
         const layer = new MapLayer(array, width, height);
         this.layerList.add(layer);
-        this.forEachHook((hook, controller) => {
-            hook.onUpdateLayer?.(controller, this.layerList);
+        this.forEachHook(hook => {
+            hook.onUpdateLayer?.(this.layerList);
         });
         const controller = layer.addHook(new StateMapLayerHook(this));
         this.layerHookMap.set(layer, controller);
@@ -49,8 +50,8 @@ export class LayerState
             this.aliasLayerMap.delete(symbol);
             this.layerAliasMap.delete(layer);
         }
-        this.forEachHook((hook, controller) => {
-            hook.onUpdateLayer?.(controller, this.layerList);
+        this.forEachHook(hook => {
+            hook.onUpdateLayer?.(this.layerList);
         });
         const controller = this.layerHookMap.get(layer);
         if (!controller) return;
@@ -96,8 +97,8 @@ export class LayerState
 
     setBackground(tile: number): void {
         this.backgroundTile = tile;
-        this.forEachHook((hook, controller) => {
-            hook.onChangeBackground?.(controller, tile);
+        this.forEachHook(hook => {
+            hook.onChangeBackground?.(tile);
         });
     }
 
@@ -122,8 +123,8 @@ class StateMapLayerHook implements Partial<IMapLayerHooks> {
         width: number,
         height: number
     ): void {
-        this.state.forEachHook((hook, c) => {
-            hook.onUpdateLayerArea?.(c, controller.layer, x, y, width, height);
+        this.state.forEachHook(hook => {
+            hook.onUpdateLayerArea?.(controller.layer, x, y, width, height);
         });
     }
 
@@ -133,8 +134,8 @@ class StateMapLayerHook implements Partial<IMapLayerHooks> {
         x: number,
         y: number
     ): void {
-        this.state.forEachHook((hook, c) => {
-            hook.onUpdateLayerBlock?.(c, controller.layer, block, x, y);
+        this.state.forEachHook(hook => {
+            hook.onUpdateLayerBlock?.(controller.layer, block, x, y);
         });
     }
 
@@ -143,8 +144,8 @@ class StateMapLayerHook implements Partial<IMapLayerHooks> {
         width: number,
         height: number
     ): void {
-        this.state.forEachHook((hook, c) => {
-            hook.onResizeLayer?.(c, controller.layer, width, height);
+        this.state.forEachHook(hook => {
+            hook.onResizeLayer?.(controller.layer, width, height);
         });
     }
 }

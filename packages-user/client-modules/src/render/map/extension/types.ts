@@ -1,0 +1,89 @@
+import { ITexture } from '@motajs/render-assets';
+import { FaceDirection } from '@user/data-state';
+
+export interface IMapHeroRenderer {
+    /**
+     * 设置勇士图片
+     * @param image 勇士使用的图片
+     */
+    setImage(image: ITexture): void;
+
+    /**
+     * 添加跟随者
+     * @param image 跟随者图块数字
+     * @param id 跟随者的 id，用于删除操作
+     */
+    addFollower(image: number, id: string): void;
+
+    /**
+     * 取消跟随者
+     * @param follower 跟随者的 id
+     * @param animate 填 `true` 的话，如果删除了中间的跟随者，后续跟随者会使用移动动画移动到下一格，否则瞬移至下一格
+     */
+    removeFollower(follower: string, animate: boolean): Promise<void>;
+
+    /**
+     * 移除所有跟随者
+     */
+    removeAllFollowers(): void;
+
+    /**
+     * 设置勇士位置
+     */
+    setPosition(x: number, y: number): void;
+
+    /**
+     * 开始移动，在移动前需要调用此方法切换勇士状态
+     */
+    startMove(): void;
+
+    /**
+     * 等待勇士移动停止后，将移动状态切换为停止
+     * @param waitFollower 是否也等待跟随者移动结束
+     */
+    waitMoveEnd(waitFollower: boolean): Promise<void>;
+
+    /**
+     * 立刻停止移动，勇士瞬移到目标点
+     * @param stopFollower 是否也立刻停止跟随者的移动，此时跟随者也会瞬移到它们应该到达的地方
+     */
+    stopMove(stopFollower: boolean): void;
+
+    /**
+     * 勇士朝某个方向移动
+     * @param direction 移动方向
+     */
+    move(direction: FaceDirection, time: number): Promise<void>;
+
+    /**
+     * 跳跃勇士至目标点
+     * @param x 目标点横坐标
+     * @param y 目标点纵坐标
+     * @param time 跳跃时长
+     * @param waitFollower 是否等待跟随者也跳跃完毕
+     */
+    jumpTo(
+        x: number,
+        y: number,
+        time: number,
+        waitFollower: boolean
+    ): Promise<void>;
+
+    /**
+     * 设置勇士不透明度
+     * @param alpha 不透明度
+     */
+    setAlpha(alpha: number): void;
+
+    /**
+     * 设置跟随者的不透明度
+     * @param identifier 跟随者标识符
+     * @param alpha 跟随者不透明度
+     */
+    setFollowerAlpha(identifier: string, alpha: number): void;
+
+    /**
+     * 摧毁这个勇士渲染拓展，释放相关资源
+     */
+    destroy(): void;
+}

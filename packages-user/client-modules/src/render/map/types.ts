@@ -199,6 +199,12 @@ export interface IMovingBlock extends IBlockStatus {
     setPos(x: number, y: number): void;
 
     /**
+     * 设置此移动图块使用的贴图，最好预先打包至图集中，否则动态重建图集会很耗时间
+     * @param texture 贴图对象
+     */
+    setTexture(texture: IMaterialFramedData): void;
+
+    /**
      * 沿直线移动到目标点
      * @param x 目标横坐标，可以填小数
      * @param y 目标纵坐标，可以填小数
@@ -237,9 +243,24 @@ export interface IMovingBlock extends IBlockStatus {
     stepMoving(timestamp: number): boolean;
 
     /**
+     * 立刻停止移动
+     */
+    endMoving(): void;
+
+    /**
      * 摧毁这个移动图块对象，之后不会再显示到画面上
      */
     destroy(): void;
+}
+
+export interface IMapRendererTicker {
+    /** 当前的时间戳 */
+    readonly timestamp: number;
+
+    /**
+     * 移除这个帧函数
+     */
+    remove(): void;
 }
 
 export interface IMapRenderer {
@@ -456,6 +477,12 @@ export interface IMapRenderer {
      * 当前地图状态是否发生改变，需要更新
      */
     needUpdate(): boolean;
+
+    /**
+     * 添加一个每帧执行的函数
+     * @param fn 每帧执行的函数
+     */
+    requestTicker(fn: (timestamp: number) => void): IMapRendererTicker;
 }
 
 export interface IMapVertexArray {

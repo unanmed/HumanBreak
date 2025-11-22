@@ -48,6 +48,7 @@ import { mainUIController } from './controller';
 import { LayerGroup } from '../elements';
 import { isNil } from 'lodash-es';
 import { materials } from '@user/client-base';
+import { mainMapRenderer } from '../commonIns';
 
 const MainScene = defineComponent(() => {
     //#region 基本定义
@@ -261,6 +262,7 @@ const MainScene = defineComponent(() => {
     return () => (
         <container id="main-scene" width={MAIN_WIDTH} height={MAIN_HEIGHT}>
             <sprite
+                hidden
                 render={testRender}
                 loc={[180, 0, 480, 480]}
                 zIndex={1000}
@@ -283,6 +285,7 @@ const MainScene = defineComponent(() => {
                 onMove={moveMap}
             >
                 <map-render
+                    renderer={mainMapRenderer}
                     layerState={state.layer}
                     loc={[0, 0, MAP_WIDTH, MAP_HEIGHT]}
                 />

@@ -1,19 +1,21 @@
 import { MotaOffscreenCanvas2D, RenderItem } from '@motajs/render-core';
-import { ILayerState, state } from '@user/data-state';
+import { ILayerState } from '@user/data-state';
 import { IMapRenderer } from './types';
-import { MapRenderer } from './renderer';
 import { materials } from '@user/client-base';
 import { ElementNamespace, ComponentInternalInstance } from 'vue';
 import { CELL_HEIGHT, CELL_WIDTH, MAP_HEIGHT, MAP_WIDTH } from '../shared';
 
 export class MapRender extends RenderItem {
-    /** 地图渲染器 */
-    readonly renderer: IMapRenderer;
-
-    constructor(readonly layerState: ILayerState) {
+    /**
+     * @param layerState 地图状态对象
+     * @param renderer 地图渲染器对象
+     */
+    constructor(
+        readonly layerState: ILayerState,
+        readonly renderer: IMapRenderer
+    ) {
         super('static');
 
-        this.renderer = new MapRenderer(materials, state.layer);
         this.renderer.setLayerState(layerState);
         this.renderer.useAsset(materials.trackedAsset);
         this.renderer.setCanvasSize(this.width, this.height);

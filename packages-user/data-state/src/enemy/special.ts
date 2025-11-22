@@ -1,4 +1,4 @@
-import { getHeroStatusOn } from '../state/hero';
+import { getHeroStatusOn } from '../legacy/hero';
 import { UserEnemyInfo } from './damage';
 
 export interface SpecialDeclaration {

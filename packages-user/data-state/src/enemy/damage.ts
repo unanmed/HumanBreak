@@ -1,4 +1,4 @@
-import { getHeroStatusOf, getHeroStatusOn } from '../state/hero';
+import { getHeroStatusOf, getHeroStatusOn } from '../legacy/hero';
 import { Range, ensureArray, has, manhattan } from '@user/data-utils';
 import EventEmitter from 'eventemitter3';
 import { hook } from '@user/data-base';

@@ -18,6 +18,7 @@ import {
     IMapBackgroundConfig,
     IMapRenderConfig,
     IMapRenderer,
+    IMapRendererTicker,
     IMapVertexGenerator,
     IMapViewportController,
     IMovingBlock,
@@ -161,6 +162,8 @@ export class MapRenderer
     private needUpdateFrameCounter: boolean = true;
     /** 帧动画速率 */
     private frameSpeed: number = 300;
+    /** 帧动画列表 */
+    private tickers: Set<MapRendererTicker> = new Set();
 
     /** 画布元素 */
     readonly canvas: HTMLCanvasElement;
@@ -1494,6 +1497,16 @@ export class MapRenderer
         }
     }
 
+    requestTicker(fn: (timestamp: number) => void): IMapRendererTicker {
+        const ticker = new MapRendererTicker(this, fn, this.timestamp);
+        this.tickers.add(ticker);
+        return ticker;
+    }
+
+    removeTicker(ticker: MapRendererTicker): void {
+        this.tickers.delete(ticker);
+    }
+
     updateTransform(): void {
         this.needUpdateTransform = true;
     }
@@ -1515,10 +1528,7 @@ export class MapRenderer
 class RendererLayerStateHook implements Partial<ILayerStateHooks> {
     constructor(readonly renderer: MapRenderer) {}
 
-    onChangeBackground(
-        _: IHookController<ILayerStateHooks>,
-        tile: number
-    ): void {
+    onChangeBackground(tile: number): void {
         this.renderer.setTileBackground(tile);
     }
 
@@ -1531,7 +1541,6 @@ class RendererLayerStateHook implements Partial<ILayerStateHooks> {
     }
 
     onUpdateLayerArea(
-        _: IHookController<ILayerStateHooks>,
         layer: IMapLayer,
         x: number,
         y: number,
@@ -1542,12 +1551,28 @@ class RendererLayerStateHook implements Partial<ILayerStateHooks> {
     }
 
     onUpdateLayerBlock(
-        _: IHookController<ILayerStateHooks>,
         layer: IMapLayer,
         block: number,
         x: number,
         y: number
     ): void {
         this.renderer.updateLayerBlock(layer, block, x, y);
+    }
+}
+
+class MapRendererTicker implements IMapRendererTicker {
+    constructor(
+        readonly renderer: MapRenderer,
+        readonly fn: (timestamp: number) => void,
+        public timestamp: number
+    ) {}
+
+    tick(timestamp: number) {
+        this.timestamp = timestamp;
+        this.fn(timestamp);
+    }
+
+    remove(): void {
+        this.renderer.removeTicker(this);
     }
 }

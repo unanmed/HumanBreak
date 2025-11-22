@@ -61,8 +61,12 @@ export abstract class Hookable<
         this.hookMap.delete(obj.hook);
     }
 
-    forEachHook(fn: (hook: Partial<H>, controller: C) => void): void {
-        this.loadedList.forEach(v => fn(v.hook, v.controller));
+    forEachHook<T>(fn: (hook: Partial<H>, controller: C) => T): T[] {
+        const arr: T[] = [];
+        this.loadedList.forEach(v => {
+            arr.push(fn(v.hook, v.controller));
+        });
+        return arr;
     }
 }
 

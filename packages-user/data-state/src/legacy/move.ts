@@ -713,7 +713,7 @@ export class HeroMover extends ObjectMoverBase {
         core.status.automaticRoute.moveStepBeforeStop = [];
         core.status.automaticRoute.lastDirection = dir;
 
-        if (core.status.automaticRoute.moveStepBeforeStop.length == 0) {
+        if (core.status.automaticRoute.moveStepBeforeStop.length === 0) {
             core.clearContinueAutomaticRoute();
             core.stopAutomaticRoute();
         }

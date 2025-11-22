@@ -633,7 +633,7 @@ export interface IWheelEvent extends IActionEvent {
 
 1. 按下、抬起、点击**永远**保持为同一个 `identifier`
 2. 移动过程中，使用最后一个按下的按键的 `identifier` 作为移动事件的 `identifier`
-3. 如果移动过程中，最后一个按下的按键抬起，那么依然会维持**原先的** `identifer`，**不会**回退至上一个按下的按键
+3. 如果移动过程中，最后一个按下的按键抬起，那么依然会维持**原先的** `identifier`，**不会**回退至上一个按下的按键
 
 除此之外，滚轮事件中的 `identifier` 永远为 -1。
 

@@ -107,10 +107,11 @@ export interface IHookable<
     removeHookByController(hook: C): void;
 
     /**
-     * 遍历每个钩子
+     * 遍历每个钩子，执行顺序不固定
      * @param fn 对每个钩子执行的函数
+     * @returns 每个钩子的返回值组成的数组，顺序不固定
      */
-    forEachHook(fn: (hook: Partial<H>, controller: C) => void): void;
+    forEachHook<T>(fn: (hook: Partial<H>, controller: C) => T): T[];
 }
 
 //#endregion

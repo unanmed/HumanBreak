@@ -24,11 +24,11 @@ export interface IMovingRenderer {
 }
 
 export class MovingBlock extends DynamicBlockStatus implements IMovingBlock {
-    readonly texture: IMaterialFramedData;
     readonly tile: number;
     readonly renderer: IMovingRenderer;
     readonly layer: IMapLayer;
 
+    texture: IMaterialFramedData;
     index: number;
     x: number = 0;
     y: number = 0;
@@ -100,12 +100,19 @@ export class MovingBlock extends DynamicBlockStatus implements IMovingBlock {
         this.posUpdated = true;
     }
 
+    setTexture(texture: IMaterialFramedData): void {
+        if (texture === this.texture) return;
+        this.texture = texture;
+        this.renderer.vertex.updateMoving(this, true);
+    }
+
     lineTo(
         x: number,
         y: number,
         time: number,
         timing?: TimingFn
     ): Promise<this> {
+        if (!this.end) return Promise.resolve(this);
         this.startX = this.x;
         this.startY = this.y;
         this.targetX = x;
@@ -129,6 +136,7 @@ export class MovingBlock extends DynamicBlockStatus implements IMovingBlock {
     }
 
     moveAs(curve: TimingFn<2>, time: number, timing?: TimingFn): Promise<this> {
+        if (!this.end) return Promise.resolve(this);
         this.time = time;
         this.line = false;
         this.relative = false;
@@ -154,6 +162,7 @@ export class MovingBlock extends DynamicBlockStatus implements IMovingBlock {
         time: number,
         timing?: TimingFn
     ): Promise<this> {
+        if (!this.end) return Promise.resolve(this);
         this.time = time;
         this.line = false;
         this.relative = false;
@@ -223,6 +232,25 @@ export class MovingBlock extends DynamicBlockStatus implements IMovingBlock {
             }
         }
         return true;
+    }
+
+    endMoving(): void {
+        this.end = true;
+        if (this.line) {
+            this.x = this.targetX;
+            this.y = this.targetY;
+        } else {
+            const [x, y] = this.curve(1);
+            if (this.relative) {
+                this.x = x + this.startX;
+                this.y = y + this.startY;
+            } else {
+                this.x = x;
+                this.y = y;
+            }
+        }
+        this.promiseFunc();
+        this.posUpdated = true;
     }
 
     destroy(): void {
