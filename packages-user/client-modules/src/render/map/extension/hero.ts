@@ -6,6 +6,7 @@ import {
     IHeroState,
     IHeroStateHooks,
     IMapLayer,
+    nextFaceDirection,
     state
 } from '@user/data-state';
 import { IMapRenderer, IMapRendererTicker, IMovingBlock } from '../types';
@@ -59,14 +60,14 @@ export class MapHeroRenderer implements IMapHeroRenderer {
 
     /** 勇士钩子 */
     readonly controller: IHookController<IHeroStateHooks>;
-    /** 每个朝向的贴图对象 */
+    /** 勇士每个朝向的贴图对象 */
     readonly textureMap: Map<FaceDirection, IMaterialFramedData> = new Map();
     /** 勇士渲染实体，与 `entities[0]` 同引用 */
     readonly heroEntity: HeroRenderEntity;
 
     /**
      * 渲染实体，索引 0 表示勇士，后续索引依次表示跟随的跟随者。
-     * 整体是一个状态机，而且下一个跟随者只与上一个跟随者有关，下一个跟随者移动的方向就是上一个跟随者移动前指向的方向。
+     * 整体是一个状态机，而且下一个跟随者只与上一个跟随者有关，下一个跟随者移动的方向就是上一个跟随者上一步移动后指向的方向。
      */
     readonly entities: HeroRenderEntity[] = [];
 
@@ -194,7 +195,10 @@ export class MapHeroRenderer implements IMapHeroRenderer {
     }
 
     setPosition(x: number, y: number): void {
-        this.heroEntity.block.setPos(x, y);
+        this.entities.forEach(v => {
+            v.block.setPos(x, y);
+            v.nextDirection = FaceDirection.Unknown;
+        });
     }
 
     /**
@@ -220,12 +224,12 @@ export class MapHeroRenderer implements IMapHeroRenderer {
         entity.promise = entity.promise.then(async () => {
             entity.moving = true;
             entity.animating = true;
-            entity.nextDirection = entity.direction;
             entity.direction = direction;
             if (nextTex) block.setTexture(nextTex);
             await block.lineTo(tx, ty, time);
             entity.moving = false;
             entity.animating = false;
+            entity.nextDirection = entity.direction;
         });
     }
 
@@ -406,8 +410,8 @@ export class MapHeroRenderer implements IMapHeroRenderer {
             );
             if (!tile) continue;
             moving.block.setTexture(tile);
-            moving.nextDirection = moving.direction;
             moving.direction = last.nextDirection;
+            moving.nextDirection = moving.direction;
         }
         this.entities.splice(index, 1);
     }
@@ -424,6 +428,17 @@ export class MapHeroRenderer implements IMapHeroRenderer {
 
     setHeroAnimateDirection(direction: HeroAnimateDirection): void {
         this.heroEntity.animateDirection = direction;
+    }
+
+    turn(direction?: FaceDirection): void {
+        const next = isNil(direction)
+            ? nextFaceDirection(this.heroEntity.direction)
+            : direction;
+        const tex = this.textureMap.get(next);
+        if (tex) {
+            this.heroEntity.block.setTexture(tex);
+            this.heroEntity.direction = next;
+        }
     }
 
     destroy() {
@@ -445,6 +460,10 @@ class MapHeroHook implements Partial<IHeroStateHooks> {
 
     onSetPosition(x: number, y: number): void {
         this.hero.setPosition(x, y);
+    }
+
+    onTurnHero(direction: FaceDirection): void {
+        this.hero.turn(direction);
     }
 
     onStartMove(): void {

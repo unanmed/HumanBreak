@@ -89,6 +89,12 @@ export interface IMapHeroRenderer {
     setHeroAnimateDirection(direction: HeroAnimateDirection): void;
 
     /**
+     * 设置勇士朝向
+     * @param direction 勇士朝向，不填表示顺时针旋转
+     */
+    turn(direction?: FaceDirection): void;
+
+    /**
      * 摧毁这个勇士渲染拓展，释放相关资源
      */
     destroy(): void;

@@ -1,6 +1,7 @@
 import { Hookable, HookController, IHookController } from '@motajs/common';
 import { IHeroFollower, IHeroState, IHeroStateHooks } from './types';
-import { FaceDirection, getFaceMovement } from '../common';
+import { FaceDirection, getFaceMovement, nextFaceDirection } from '../common';
+import { isNil } from 'lodash-es';
 
 export class HeroState extends Hookable<IHeroStateHooks> implements IHeroState {
     x: number = 0;
@@ -25,6 +26,16 @@ export class HeroState extends Hookable<IHeroStateHooks> implements IHeroState {
         this.y = y;
         this.forEachHook(hook => {
             hook.onSetPosition?.(x, y);
+        });
+    }
+
+    turn(direction?: FaceDirection): void {
+        const next = isNil(direction)
+            ? nextFaceDirection(this.direction)
+            : direction;
+        this.direction = next;
+        this.forEachHook(hook => {
+            hook.onTurnHero?.(next);
         });
     }
 

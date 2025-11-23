@@ -1,25 +1,27 @@
 import type { RenderAdapter } from '@motajs/render';
 import type { TimingFn } from 'mutate-animate';
-import { BlockMover, heroMoveCollection, MoveStep } from '@user/data-state';
+import {
+    BlockMover,
+    fromDirectionString,
+    heroMoveCollection,
+    MoveStep,
+    state
+} from '@user/data-state';
 import { hook, loading } from '@user/data-base';
 import { Patch, PatchClass } from '@motajs/legacy-common';
 import type {
-    HeroRenderer,
     LayerDoorAnimate,
     LayerGroupAnimate,
-    Layer,
     FloorViewport,
-    LayerFloorBinder,
     LayerGroup
 } from '@user/client-modules';
+import { isNil } from 'lodash-es';
 
 // 向后兼容用，会充当两个版本间过渡的作用
 
 interface Adapters {
-    'hero-adapter'?: RenderAdapter<HeroRenderer>;
     'door-animate'?: RenderAdapter<LayerDoorAnimate>;
     animate?: RenderAdapter<LayerGroupAnimate>;
-    layer?: RenderAdapter<Layer>;
     viewport?: RenderAdapter<FloorViewport>;
 }
 
@@ -30,16 +32,12 @@ export function initFallback() {
 
     if (!main.replayChecking && main.mode === 'play') {
         const Adapter = Mota.require('@motajs/render').RenderAdapter;
-        const hero = Adapter.get<HeroRenderer>('hero-adapter');
         const doorAnimate = Adapter.get<LayerDoorAnimate>('door-animate');
         const animate = Adapter.get<LayerGroupAnimate>('animate');
-        const layer = Adapter.get<Layer>('layer');
         const viewport = Adapter.get<FloorViewport>('viewport');
 
-        adapters['hero-adapter'] = hero;
         adapters['door-animate'] = doorAnimate;
         adapters['animate'] = animate;
-        adapters['layer'] = layer;
         adapters['viewport'] = viewport;
     }
 
@@ -74,7 +72,7 @@ export function initFallback() {
     /**
      * 生成跳跃函数
      */
-    function generateJumpFn(dx: number, dy: number): TimingFn<3> {
+    function generateJumpFn(dx: number, dy: number): TimingFn<2> {
         const distance = Math.hypot(dx, dy);
         const peak = 3 + distance;
 
@@ -82,7 +80,7 @@ export function initFallback() {
             const x = dx * progress;
             const y = progress * dy + (progress ** 2 - progress) * peak;
 
-            return [x, y, Math.ceil(y)];
+            return [x, y];
         };
     }
 
@@ -112,31 +110,28 @@ export function initFallback() {
 
         patch.add('_moveAction_moving', () => {});
 
-        patch2.add(
-            '_action_moveAction',
-            function (data: any, x: number, y: number, prefix: any) {
-                if (core.canMoveHero()) {
-                    const nx = core.nextX(),
-                        ny = core.nextY();
-                    // 检查noPass决定是撞击还是移动
-                    if (core.noPass(nx, ny)) {
-                        core.insertAction([{ type: 'trigger', loc: [nx, ny] }]);
-                    } else {
-                        // 先移动一格，然后尝试触发事件
-                        core.insertAction([
-                            {
-                                type: 'function',
-                                function:
-                                    'function() { core.moveAction(core.doAction); }',
-                                async: true
-                            },
-                            { type: '_label' }
-                        ]);
-                    }
+        patch2.add('_action_moveAction', function () {
+            if (core.canMoveHero()) {
+                const nx = core.nextX(),
+                    ny = core.nextY();
+                // 检查noPass决定是撞击还是移动
+                if (core.noPass(nx, ny)) {
+                    core.insertAction([{ type: 'trigger', loc: [nx, ny] }]);
+                } else {
+                    // 先移动一格，然后尝试触发事件
+                    core.insertAction([
+                        {
+                            type: 'function',
+                            function:
+                                'function() { core.moveAction(core.doAction); }',
+                            async: true
+                        },
+                        { type: '_label' }
+                    ]);
                 }
-                core.doAction();
             }
-        );
+            core.doAction();
+        });
 
         patch2.add(
             'eventMoveHero',
@@ -176,29 +171,28 @@ export function initFallback() {
 
         patch.add(
             'setHeroLoc',
-            function (
-                name: 'x' | 'y' | 'direction',
-                value: number | Dir,
-                noGather?: boolean
-            ) {
+            function (name: 'x' | 'y' | 'direction', value: number | Dir) {
                 if (!core.status.hero) return;
                 // @ts-ignore
                 core.status.hero.loc[name] = value;
-                if ((name === 'x' || name === 'y') && !noGather) {
-                    core.control.gatherFollowers();
-                }
                 if (name === 'direction') {
-                    adapters['hero-adapter']?.sync('turn', value);
-                    adapters['hero-adapter']?.sync('setAnimateDir', value);
+                    const dir = fromDirectionString(value as Dir);
+                    state.hero.turn(dir);
                     setHeroDirection(value as Dir);
                 } else if (name === 'x') {
                     // 为了防止逆天样板出问题
                     core.bigmap.posX = value as number;
-                    adapters['hero-adapter']?.sync('setHeroLoc', value);
+                    state.hero.setPosition(
+                        value as number,
+                        core.status.hero.loc.y
+                    );
                 } else {
                     // 为了防止逆天样板出问题
                     core.bigmap.posY = value as number;
-                    adapters['hero-adapter']?.sync('setHeroLoc', void 0, value);
+                    state.hero.setPosition(
+                        core.status.hero.loc.x,
+                        value as number
+                    );
                 }
             }
         );
@@ -243,10 +237,8 @@ export function initFallback() {
         );
 
         patch2.add('setHeroIcon', function (name: ImageIds) {
-            const img = core.material.images.images[name];
-            if (!img) return;
             core.status.hero.image = name;
-            adapters['hero-adapter']?.sync('setImage', img);
+            state.hero.setImage(name);
         });
 
         patch.add('isMoving', function () {
@@ -279,10 +271,10 @@ export function initFallback() {
                 // 找寻自动寻路路线
                 const moveStep = core.automaticRoute(destX, destY);
                 if (
-                    moveStep.length == 0 &&
-                    (destX != core.status.hero.loc.x ||
-                        destY != core.status.hero.loc.y ||
-                        stepPostfix.length == 0)
+                    moveStep.length === 0 &&
+                    (destX !== core.status.hero.loc.x ||
+                        destY !== core.status.hero.loc.y ||
+                        stepPostfix.length === 0)
                 )
                     return;
                 moveStep.push(...stepPostfix);
@@ -375,10 +367,10 @@ export function initFallback() {
                 id = id || '';
                 if (
                     // @ts-ignore
-                    (core.material.icons.animates[id] == null &&
+                    (isNil(core.material.icons.animates[id]) &&
                         // @ts-ignore
-                        core.material.icons.npc48[id] == null) ||
-                    core.getBlock(x, y) != null
+                        isNil(core.material.icons.npc48[id])) ||
+                    !isNil(core.getBlock(x, y))
                 ) {
                     if (callback) callback();
                     return;
@@ -438,10 +430,10 @@ export function initFallback() {
                 if (
                     core.isReplaying() ||
                     !core.material.animates[name] ||
-                    x == null ||
-                    y == null
+                    isNil(x) ||
+                    isNil(y)
                 ) {
-                    if (callback) callback();
+                    callback?.();
                     return -1;
                 }
 
@@ -547,26 +539,25 @@ export function initFallback() {
                 const dy = ey - sy;
 
                 const fn = generateJumpFn(dx, dy);
-
-                const list = adapters.layer?.items ?? [];
-                const items = [...list].filter(v => {
-                    if (v.layer !== 'event') return false;
-                    const ex = v.getExtends('floor-binder') as LayerFloorBinder;
-                    if (!ex) return false;
-                    return ex.getFloor() === core.status.floorId;
-                });
-                const width = core.status.thisMap.width;
-                const index = sx + sy * width;
-
-                const promise = Promise.all(
-                    items.map(v => {
-                        return v.moveAs(index, ex, ey, fn, time, keep);
-                    })
+                // 先使用 mainMapRenderer 妥协
+                const { mainMapRenderer: renderer } = Mota.require(
+                    '@user/client-modules'
                 );
-
-                core.updateStatusBar();
+                if (renderer.layerState !== state.layer) {
+                    callback?.();
+                    return;
+                }
+                const layer = state.layer.getLayerByAlias('event');
+                if (!layer) {
+                    callback?.();
+                    return;
+                }
                 core.removeBlock(sx, sy);
-                await promise;
+                const moving = renderer.addMovingBlock(layer, block.id, sx, sy);
+                core.updateStatusBar();
+                await moving.moveRelative(fn, time);
+                moving.destroy();
+
                 if (keep) {
                     core.setBlock(block.id, ex, ey);
                 }
@@ -586,30 +577,15 @@ export function initFallback() {
             ) {
                 if (heroMover.moving) return;
 
-                const sx = core.getHeroLoc('x');
-                const sy = core.getHeroLoc('y');
                 adapters.viewport?.all('mutateTo', ex, ey, time);
 
                 const locked = core.status.lockControl;
                 core.lockControl();
-                const list = adapters['hero-adapter']?.items ?? [];
-                const items = [...list];
 
                 time /= core.status.replay.speed;
                 if (core.status.replay.speed === 24) time = 1;
-                const fn = generateJumpFn(ex - sx, ey - sy);
-                await Promise.all(
-                    items.map(v => {
-                        if (!v.renderable) return Promise.reject();
-                        return v.layer.moveRenderable(
-                            v.renderable,
-                            sx,
-                            sy,
-                            fn,
-                            time
-                        );
-                    })
-                );
+
+                await state.hero.jumpHero(ex, ey, time);
 
                 if (!locked) core.unlockControl();
                 core.setHeroLoc('x', ex);

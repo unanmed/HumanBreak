@@ -46,6 +46,7 @@ export function createRender() {
     Font.setDefaults(DEFAULT_FONT);
 }
 
+export * from './commonIns';
 export * from './components';
 export * from './elements';
 export * from './fx';

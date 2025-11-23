@@ -27,6 +27,12 @@ export interface IHeroStateHooks extends IHookBase {
     onSetPosition(x: number, y: number): void;
 
     /**
+     * 当设置勇士朝向时触发
+     * @param direction 勇士朝向
+     */
+    onTurnHero(direction: FaceDirection): void;
+
+    /**
      * 当勇士开始移动时触发
      */
     onStartMove(): void;
@@ -118,6 +124,12 @@ export interface IHeroState extends IHookable<IHeroStateHooks> {
      * @param y 纵坐标
      */
     setPosition(x: number, y: number): void;
+
+    /**
+     * 设置勇士朝向
+     * @param direction 勇士朝向，不填表示顺时针旋转
+     */
+    turn(direction?: FaceDirection): void;
 
     /**
      * 开始勇士移动，在移动前必须先调用此方法将勇士切换为移动状态
