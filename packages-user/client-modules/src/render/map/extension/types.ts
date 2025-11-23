@@ -1,5 +1,5 @@
 import { ITexture } from '@motajs/render-assets';
-import { FaceDirection } from '@user/data-state';
+import { FaceDirection, HeroAnimateDirection } from '@user/data-state';
 
 export interface IMapHeroRenderer {
     /**
@@ -81,6 +81,12 @@ export interface IMapHeroRenderer {
      * @param alpha 跟随者不透明度
      */
     setFollowerAlpha(identifier: string, alpha: number): void;
+
+    /**
+     * 设置勇士移动的动画播放方向，一般后退会使用反向播放的动画，前进使用正向播放的动画
+     * @param direction 动画方向
+     */
+    setHeroAnimateDirection(direction: HeroAnimateDirection): void;
 
     /**
      * 摧毁这个勇士渲染拓展，释放相关资源

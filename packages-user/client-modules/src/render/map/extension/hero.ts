@@ -2,6 +2,7 @@ import {
     degradeFace,
     FaceDirection,
     getFaceMovement,
+    HeroAnimateDirection,
     IHeroState,
     IHeroStateHooks,
     IMapLayer,
@@ -48,6 +49,8 @@ interface HeroRenderEntity {
     animateFrame: number;
     /** 移动的 `Promise`，移动完成时兑现，如果停止，则一直是兑现状态 */
     promise: Promise<void>;
+    /** 勇士移动的动画方向 */
+    animateDirection: HeroAnimateDirection;
 }
 
 export class MapHeroRenderer implements IMapHeroRenderer {
@@ -90,7 +93,8 @@ export class MapHeroRenderer implements IMapHeroRenderer {
             animateInterval: 0,
             lastAnimateTime: 0,
             animateFrame: 0,
-            promise: Promise.resolve()
+            promise: Promise.resolve(),
+            animateDirection: HeroAnimateDirection.Forward
         };
         this.heroEntity = heroEntity;
         this.entities.push(heroEntity);
@@ -163,7 +167,15 @@ export class MapHeroRenderer implements IMapHeroRenderer {
             }
             const dt = time - v.lastAnimateTime;
             if (dt > v.animateInterval) {
-                v.animateFrame++;
+                if (v.animateDirection === HeroAnimateDirection.Forward) {
+                    v.animateFrame++;
+                } else {
+                    v.animateFrame--;
+                    if (v.animateFrame < 0) {
+                        // 小于 0，则加上帧数的整数倍，就写个 10000 倍吧
+                        v.animateFrame += v.block.texture.frames * 10000;
+                    }
+                }
                 v.lastAnimateTime = time;
                 v.block.useSpecifiedFrame(v.animateFrame);
             }
@@ -351,7 +363,8 @@ export class MapHeroRenderer implements IMapHeroRenderer {
             animateInterval: 0,
             lastAnimateTime: 0,
             animateFrame: 0,
-            promise: Promise.resolve()
+            promise: Promise.resolve(),
+            animateDirection: HeroAnimateDirection.Forward
         };
         this.entities.push(entity);
     }
@@ -407,6 +420,10 @@ export class MapHeroRenderer implements IMapHeroRenderer {
         const follower = this.entities.find(v => v.identifier === identifier);
         if (!follower) return;
         follower.block.setAlpha(alpha);
+    }
+
+    setHeroAnimateDirection(direction: HeroAnimateDirection): void {
+        this.heroEntity.animateDirection = direction;
     }
 
     destroy() {

@@ -1,6 +1,13 @@
 import { IHookBase, IHookable } from '@motajs/common';
 import { FaceDirection } from '../common/types';
 
+export const enum HeroAnimateDirection {
+    /** 正向播放动画 */
+    Forward,
+    /** 反向播放动画 */
+    Backward
+}
+
 export interface IHeroFollower {
     /** 跟随者的图块数字 */
     readonly num: number;
