@@ -140,7 +140,6 @@ export class TextureMaxRectsStreamComposer
 
     private nextCanvas() {
         this.nowCanvas = document.createElement('canvas');
-        this.nowCanvas.id = `${Math.random()}`;
         this.nowCtx = this.nowCanvas.getContext('2d')!;
         this.nowCanvas.width = this.maxWidth;
         this.nowCanvas.height = this.maxHeight;

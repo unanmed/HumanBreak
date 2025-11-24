@@ -121,6 +121,7 @@ export class MovingBlock extends DynamicBlockStatus implements IMovingBlock {
         this.dy = y - this.y;
         this.time = time;
         this.relative = false;
+        this.startTime = this.renderer.getTimestamp();
         if (time === 0) {
             this.x = x;
             this.y = y;
@@ -142,6 +143,7 @@ export class MovingBlock extends DynamicBlockStatus implements IMovingBlock {
         this.relative = false;
         this.startX = this.x;
         this.startY = this.y;
+        this.startTime = this.renderer.getTimestamp();
         if (time === 0) {
             const [tx, ty] = curve(1);
             this.x = tx;
@@ -168,6 +170,7 @@ export class MovingBlock extends DynamicBlockStatus implements IMovingBlock {
         this.relative = false;
         this.startX = this.x;
         this.startY = this.y;
+        this.startTime = this.renderer.getTimestamp();
         if (time === 0) {
             const [tx, ty] = curve(1);
             this.x = tx + this.startX;

@@ -2,12 +2,13 @@ import { Hookable, HookController, IHookController } from '@motajs/common';
 import { IHeroFollower, IHeroState, IHeroStateHooks } from './types';
 import { FaceDirection, getFaceMovement, nextFaceDirection } from '../common';
 import { isNil } from 'lodash-es';
+import { DEFAULT_HERO_IMAGE } from '../shared';
 
 export class HeroState extends Hookable<IHeroStateHooks> implements IHeroState {
     x: number = 0;
     y: number = 0;
     direction: FaceDirection = FaceDirection.Down;
-    image?: ImageIds;
+    image: ImageIds = DEFAULT_HERO_IMAGE;
 
     /** 当前勇士是否正在移动 */
     moving: boolean = false;

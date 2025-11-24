@@ -1,7 +1,6 @@
 import { MotaOffscreenCanvas2D, RenderItem } from '@motajs/render-core';
 import { ILayerState } from '@user/data-state';
 import { IMapRenderer } from './types';
-import { materials } from '@user/client-base';
 import { ElementNamespace, ComponentInternalInstance } from 'vue';
 import { CELL_HEIGHT, CELL_WIDTH, MAP_HEIGHT, MAP_WIDTH } from '../shared';
 
@@ -14,10 +13,9 @@ export class MapRender extends RenderItem {
         readonly layerState: ILayerState,
         readonly renderer: IMapRenderer
     ) {
-        super('static');
+        super('static', false, false);
 
         this.renderer.setLayerState(layerState);
-        this.renderer.useAsset(materials.trackedAsset);
         this.renderer.setCanvasSize(this.width, this.height);
         this.renderer.setCellSize(CELL_WIDTH, CELL_HEIGHT);
         this.renderer.setRenderSize(MAP_WIDTH, MAP_HEIGHT);

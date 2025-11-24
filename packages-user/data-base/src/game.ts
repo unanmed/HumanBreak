@@ -11,6 +11,8 @@ interface GameLoadEvent {
     coreInit: [];
     /** 当所有启动必要资源加载完毕后触发 */
     loaded: [];
+    /** 当资源构建完毕后触发，后续需要用新的加载系统替代 */
+    assetBuilt: [];
     /** 当客户端（渲染端）和数据端都挂载完毕后触发 */
     registered: [];
     /** 当数据端挂载完毕后触发 */

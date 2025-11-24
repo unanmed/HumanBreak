@@ -30,8 +30,8 @@ export class Texture implements ITexture {
         this.height = source.height;
         this.cl = 0;
         this.ct = 0;
-        this.cr = 0;
-        this.cb = 0;
+        this.cr = source.width;
+        this.cb = source.height;
     }
 
     /**
@@ -42,16 +42,14 @@ export class Texture implements ITexture {
      * @param h 裁剪高度
      */
     clip(x: number, y: number, w: number, h: number) {
-        const r = x + w;
-        const b = y + h;
-        if (x > this.width || y > this.height || r < 0 || b < 0) {
+        const left = clamp(this.cl + x, this.cl, this.cr);
+        const top = clamp(this.ct + y, this.ct, this.cb);
+        const right = clamp(this.cl + x + w, this.cl, this.cr);
+        const bottom = clamp(this.ct + y + h, this.ct, this.cb);
+        if (left === right || top === bottom) {
             logger.warn(69);
             return;
         }
-        const left = Math.max(0, x);
-        const top = Math.max(0, y);
-        const right = Math.min(this.width, r);
-        const bottom = Math.min(this.height, b);
         const width = right - left;
         const height = bottom - top;
         if (width <= 0 || height <= 0) {
@@ -60,6 +58,8 @@ export class Texture implements ITexture {
         }
         this.cl = left;
         this.ct = top;
+        this.cr = right;
+        this.cb = bottom;
         this.width = right - left;
         this.height = bottom - top;
     }

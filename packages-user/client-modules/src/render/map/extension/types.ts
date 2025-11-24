@@ -1,5 +1,25 @@
 import { ITexture } from '@motajs/render-assets';
-import { FaceDirection, HeroAnimateDirection } from '@user/data-state';
+import {
+    FaceDirection,
+    HeroAnimateDirection,
+    IHeroState,
+    IMapLayer
+} from '@user/data-state';
+
+export interface IMapExtensionManager {
+    /**
+     * 添加勇士渲染拓展
+     * @param state 勇士状态
+     * @param layer 勇士所在图层
+     */
+    addHero(state: IHeroState, layer: IMapLayer): void;
+
+    /**
+     * 移除勇士渲染拓展
+     * @param state 勇士状态
+     */
+    removeHero(state: IHeroState): void;
+}
 
 export interface IMapHeroRenderer {
     /**

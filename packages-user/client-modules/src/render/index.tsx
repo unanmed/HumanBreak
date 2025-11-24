@@ -11,6 +11,7 @@ import { createLegacy } from './legacy';
 import { sceneController } from './scene';
 import { GameTitleUI } from './ui/title';
 import { createWeather } from './weather';
+import { createMainExtension } from './commonIns';
 
 export function createGameRenderer() {
     const App = defineComponent(_props => {
@@ -33,9 +34,13 @@ export function createRender() {
     createLoopMap();
     createWeather();
 
-    loading.on('loaded', () => {
+    loading.once('loaded', () => {
         sceneController.open(GameTitleUI, {});
         mainRenderer.show();
+    });
+
+    loading.once('assetBuilt', () => {
+        createMainExtension();
     });
 
     hook.on('restart', () => {

@@ -26,7 +26,7 @@ void main() {
     vec2 pos = a_position.xy * a_tilePos.zw + a_tilePos.xy;
     vec2 texCoord = a_position.zw * a_texCoord.zw + a_texCoord.xy;
     // 偏移量
-    float offset = a_texData.x < 0.0 ? mod(u_nowFrame, a_texData.y) : a_texData.x;
+    float offset = mod(a_texData.x < 0.0 ? u_nowFrame : a_texData.x, a_texData.y);
     int offsetIndex = int(a_texData.z);
     // 贴图偏移
     texCoord.x += u_offsetPool[offsetIndex] * offset;

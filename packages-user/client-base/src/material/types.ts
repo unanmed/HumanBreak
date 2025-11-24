@@ -505,4 +505,9 @@ export interface ITrackedAssetData extends IDirtyTracker<Set<number>> {
      * 取消使用此图集，释放相关资源
      */
     close(): void;
+
+    /**
+     * 等待所有打包操作结束
+     */
+    then(): Promise<void>;
 }

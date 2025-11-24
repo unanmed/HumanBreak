@@ -105,6 +105,8 @@ class TrackedAssetData
 
     private originSourceMap: Map<number, SizedCanvasImageSource> = new Map();
 
+    private promises: Set<Promise<ImageBitmap>> = new Set();
+
     constructor(
         readonly materials: IMaterialGetter,
         readonly builder: AssetBuilder
@@ -137,13 +139,20 @@ class TrackedAssetData
             this.sourceList.set(index, source);
             this.skipRef.set(source, index);
         } else {
-            const bitmap = await createImageBitmap(source);
+            const promise = createImageBitmap(source);
+            this.promises.add(promise);
+            const bitmap = await promise;
+            this.promises.delete(promise);
             this.sourceList.set(index, bitmap);
             this.skipRef.set(bitmap, index);
             // 要把源也加到映射中，因为这里的 bitmap 与外部源并不同引用
             this.skipRef.set(source, index);
         }
         this.dirty(index);
+    }
+
+    async then(): Promise<void> {
+        await Promise.all([...this.promises]);
     }
 
     close(): void {}

@@ -44,6 +44,7 @@
         "42": "The '$1' property of map-render element is required.",
         "43": "Cannot bind face direction to main block $1, please call malloc in advance.",
         "44": "Cannot bind face direction to main block $1, since main direction cannot be override.",
+        "45": "Cannot add hero renderer, sincehero renderer already exists for the given state.",
         "1101": "Shadow extension needs 'floor-hero' extension as dependency.",
         "1201": "Floor-damage extension needs 'floor-binder' extension as dependency.",
         "1301": "Portal extension need 'floor-binder' extension as dependency.",

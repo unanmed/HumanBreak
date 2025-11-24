@@ -1,5 +1,8 @@
 import { IDirtyMark, IDirtyTracker } from '@motajs/common';
-import { ITextureRenderable } from '@motajs/render-assets';
+import {
+    ITextureRenderable,
+    SizedCanvasImageSource
+} from '@motajs/render-assets';
 import { Transform } from '@motajs/render-core';
 import {
     IAutotileProcessor,
@@ -372,6 +375,12 @@ export interface IMapRenderer {
      * @param layer 要获取的图层
      */
     getLayerIndex(layer: IMapLayer): number;
+
+    /**
+     * 根据图集的图像源获取其索引
+     * @param source 图像源
+     */
+    getAssetSourceIndex(source: SizedCanvasImageSource): number;
 
     /**
      * 获取指定偏移值在偏移池中的索引

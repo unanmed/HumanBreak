@@ -196,6 +196,9 @@ export class MapRenderer
         readonly manager: IMaterialManager,
         layerState: ILayerState
     ) {
+        this.movingIndexPool.push(
+            ...Array.from({ length: this.movingCount }, (_, i) => i).reverse()
+        );
         this.canvas = document.createElement('canvas');
         this.gl = this.canvas.getContext('webgl2')!;
         this.transform = new Transform();
@@ -476,6 +479,7 @@ export class MapRenderer
     //#region 渲染设置
 
     useAsset(asset: ITrackedAssetData): void {
+        if (this.assetData === asset) return;
         this.assetData = asset;
         this.sortedLayers.forEach(v => {
             this.updateLayerArea(v, 0, 0, v.width, v.height);
@@ -483,6 +487,7 @@ export class MapRenderer
     }
 
     setRenderSize(width: number, height: number): void {
+        if (width === this.renderWidth && height === this.renderHeight) return;
         this.renderWidth = width;
         this.renderHeight = height;
         this.sortedLayers.forEach(v => {
@@ -491,6 +496,7 @@ export class MapRenderer
     }
 
     setCellSize(width: number, height: number): void {
+        if (width === this.cellWidth && height === this.cellHeight) return;
         this.cellWidth = width;
         this.cellHeight = height;
         this.sortedLayers.forEach(v => {
@@ -544,6 +550,13 @@ export class MapRenderer
             const offset = data.texture.width / data.frames;
             pool.add(offset);
         }
+        // 还有勇士图片
+        for (const tex of this.manager.imageStore.values()) {
+            if (!this.manager.assetContainsTexture(tex)) continue;
+            const { w } = tex.render().rect;
+            pool.add(w / 4);
+        }
+        // 其他判断
         if (pool.size > 64 && import.meta.env.DEV) {
             logger.warn(82);
         }
@@ -633,7 +646,7 @@ export class MapRenderer
         gl.disable(gl.CULL_FACE);
         gl.enable(gl.DEPTH_TEST);
         gl.enable(gl.BLEND);
-        gl.depthFunc(gl.LESS);
+        gl.depthFunc(gl.LEQUAL);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
         const data: IContextData = {
@@ -1238,6 +1251,7 @@ export class MapRenderer
                 v.data.render();
             }
         });
+        this.vertex.renderDynamic();
 
         if (area.dirty.length > 0) {
             // 如果需要更新顶点数组...
@@ -1490,6 +1504,8 @@ export class MapRenderer
             this.frameCounter++;
             this.needUpdateFrameCounter = true;
         }
+
+        this.tickers.forEach(v => void v.fn(timestamp));
 
         // 图块移动
         if (this.movingBlock.size > 0) {

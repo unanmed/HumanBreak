@@ -442,6 +442,7 @@ export class MaterialManager implements IMaterialManager {
             store: this.assetStore
         };
         this.checkAssetDirty(data);
+        texture.toAsset(data);
         return assetData;
     }
 
@@ -567,10 +568,10 @@ export class MaterialManager implements IMaterialManager {
     }
 
     assetContainsTexture(texture: ITexture): boolean {
-        return this.assetMap.has(texture);
+        return this.trackedAsset.skipRef.has(texture.source);
     }
 
     getTextureAsset(texture: ITexture): number | undefined {
-        return this.assetMap.get(texture);
+        return this.trackedAsset.skipRef.get(texture.source);
     }
 }

@@ -21,7 +21,7 @@ import { DYNAMIC_RESERVE, MAP_BLOCK_HEIGHT, MAP_BLOCK_WIDTH } from '../shared';
 import { BlockSplitter } from './block';
 import { clamp, isNil } from 'lodash-es';
 import { BlockCls, IMaterialFramedData } from '@user/client-base';
-import { IRect, SizedCanvasImageSource } from '@motajs/render-assets';
+import { IRect } from '@motajs/render-assets';
 import { INSTANCED_COUNT } from './constant';
 
 export interface IMapDataGetter {
@@ -35,12 +35,6 @@ export interface IMapDataGetter {
     readonly tileAlignY: MapTileAlign;
     /** 图块大小与格子大小判断方式 */
     readonly tileTestMode: MapTileSizeTestMode;
-
-    /**
-     * 根据图集的图像源获取其索引
-     * @param source 图像源
-     */
-    getAssetSourceIndex(source: SizedCanvasImageSource): number;
 
     /**
      * 渲染器是否包含指定的移动图块对象
@@ -159,6 +153,11 @@ export class MapVertexGenerator
             staticCount * INSTANCED_COUNT,
             count * INSTANCED_COUNT
         );
+        for (let i = 0; i < count; i++) {
+            const start = i * INSTANCED_COUNT;
+            this.instancedArray[start + 9] = 1;
+            this.instancedArray[start + 12] = -1;
+        }
     }
 
     private splitBlock() {
@@ -320,12 +319,12 @@ export class MapVertexGenerator
                 }
                 case MapTileAlign.Center: {
                     // 左右居中对齐
-                    left = cl + cwu - twu;
+                    left = cl - cwu + twu;
                     break;
                 }
                 case MapTileAlign.End: {
                     // 右对齐
-                    left = cl + cw - tw;
+                    left = cl - cw + tw;
                     break;
                 }
             }
@@ -337,12 +336,12 @@ export class MapVertexGenerator
                 }
                 case MapTileAlign.Center: {
                     // 上下居中对齐
-                    top = ct + chu - thu;
+                    top = ct - chu + thu;
                     break;
                 }
                 case MapTileAlign.End: {
                     // 下对齐
-                    top = ct + ch - th;
+                    top = ct - ch + th;
                 }
             }
             return { x: left, y: top, w: tw, h: th };
@@ -378,7 +377,8 @@ export class MapVertexGenerator
             const layerIndex = this.renderer.getLayerIndex(index.layer);
             // 避免 z 坐标是 1 的时候被裁剪，因此范围选择 [-0.9, 0.9]
             const layerStart = (layerIndex / layerCount) * 1.8 - 0.9;
-            const zIndex = -layerStart - index.mapY / this.mapHeight;
+            const zIndex =
+                -layerStart - index.mapY / this.mapHeight / layerCount;
             const { x, y, w, h } = this.getTilePosition(index, width, height);
             // 图块位置
             instancedArray[startIndex] = x;
@@ -398,10 +398,7 @@ export class MapVertexGenerator
             instancedArray[startIndex + 5] = texY;
             instancedArray[startIndex + 6] = texWidth;
             instancedArray[startIndex + 7] = texHeight;
-            // 不透明度
-            instancedArray[startIndex + 9] = 1;
             // 帧数、偏移、纹理索引
-            instancedArray[startIndex + 12] = -1;
             instancedArray[startIndex + 13] = frames;
             instancedArray[startIndex + 14] = offsetIndex;
             instancedArray[startIndex + 15] = assetIndex;

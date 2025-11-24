@@ -127,7 +127,9 @@ export class MapHeroRenderer implements IMapHeroRenderer {
         if (!tex) {
             return renderer.addMovingBlock(layer, 0, hero.x, hero.y);
         }
-        return renderer.addMovingBlock(layer, tex, hero.x, hero.y);
+        const block = renderer.addMovingBlock(layer, tex, hero.x, hero.y);
+        block.useSpecifiedFrame(0);
+        return block;
     }
 
     /**
@@ -162,23 +164,26 @@ export class MapHeroRenderer implements IMapHeroRenderer {
 
     private tick(time: number) {
         this.entities.forEach(v => {
-            if (!v.animating) {
-                v.animateFrame = 0;
-                return;
-            }
-            const dt = time - v.lastAnimateTime;
-            if (dt > v.animateInterval) {
-                if (v.animateDirection === HeroAnimateDirection.Forward) {
-                    v.animateFrame++;
-                } else {
-                    v.animateFrame--;
-                    if (v.animateFrame < 0) {
-                        // 小于 0，则加上帧数的整数倍，就写个 10000 倍吧
-                        v.animateFrame += v.block.texture.frames * 10000;
+            if (v.animating) {
+                const dt = time - v.lastAnimateTime;
+                if (dt > v.animateInterval) {
+                    if (v.animateDirection === HeroAnimateDirection.Forward) {
+                        v.animateFrame++;
+                    } else {
+                        v.animateFrame--;
+                        if (v.animateFrame < 0) {
+                            // 小于 0，则加上帧数的整数倍，就写个 10000 倍吧
+                            v.animateFrame += v.block.texture.frames * 10000;
+                        }
                     }
+                    v.lastAnimateTime = time;
+                    v.block.useSpecifiedFrame(v.animateFrame);
                 }
-                v.lastAnimateTime = time;
-                v.block.useSpecifiedFrame(v.animateFrame);
+            } else {
+                if (v.animateFrame !== 0) {
+                    v.animateFrame = 0;
+                    v.block.useSpecifiedFrame(0);
+                }
             }
         });
     }
@@ -221,14 +226,13 @@ export class MapHeroRenderer implements IMapHeroRenderer {
         const nextTex = this.renderer.manager.getIfBigImage(
             nextTile?.identifier ?? block.tile
         );
+        entity.animateInterval = time;
         entity.promise = entity.promise.then(async () => {
             entity.moving = true;
             entity.animating = true;
             entity.direction = direction;
             if (nextTex) block.setTexture(nextTex);
             await block.lineTo(tx, ty, time);
-            entity.moving = false;
-            entity.animating = false;
             entity.nextDirection = entity.direction;
         });
     }
@@ -272,17 +276,21 @@ export class MapHeroRenderer implements IMapHeroRenderer {
             entity.animating = false;
             entity.animateFrame = 0;
             await block.moveRelative(fn, time);
-            entity.moving = false;
-            entity.animating = false;
         });
     }
 
     startMove(): void {
         this.heroEntity.moving = true;
         this.heroEntity.animating = true;
-        this.heroEntity.animateFrame = 1;
         this.heroEntity.lastAnimateTime = this.ticker.timestamp;
         this.heroEntity.block.useSpecifiedFrame(1);
+    }
+
+    private endEntityMoving(entity: HeroRenderEntity) {
+        entity.moving = false;
+        entity.animating = false;
+        entity.animateFrame = 0;
+        entity.block.useSpecifiedFrame(0);
     }
 
     async waitMoveEnd(waitFollower: boolean): Promise<void> {
@@ -290,16 +298,19 @@ export class MapHeroRenderer implements IMapHeroRenderer {
             await Promise.all(this.entities.map(v => v.promise));
             return;
         }
-        return this.heroEntity.promise;
+        await this.heroEntity.promise;
+        this.entities.forEach(v => this.endEntityMoving(v));
     }
 
     stopMove(stopFollower: boolean): void {
         if (stopFollower) {
             this.entities.forEach(v => {
                 v.block.endMoving();
+                this.endEntityMoving(v);
             });
         } else {
             this.heroEntity.block.endMoving();
+            this.endEntityMoving(this.heroEntity);
         }
     }
 

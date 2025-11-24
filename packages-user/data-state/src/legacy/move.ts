@@ -14,6 +14,7 @@ import type {
 } from '@user/client-modules';
 import { BluePalace, MiscData } from '../mechanism/misc';
 import { sleep } from '@motajs/common';
+import { fromDirectionString, state } from '..';
 
 // todo: 转身功能
 
@@ -437,8 +438,6 @@ const enum HeroMoveCode {
 }
 
 export class HeroMover extends ObjectMoverBase {
-    /** 勇士渲染适配器，用于等待动画等操作 */
-    static adapter?: RenderAdapter<HeroRenderer>;
     /** 视角适配器 */
     static viewport?: RenderAdapter<FloorViewport>;
 
@@ -485,12 +484,10 @@ export class HeroMover extends ObjectMoverBase {
 
     protected async onMoveStart(controller: IMoveController): Promise<void> {
         this.beforeMoveSpeed = this.moveSpeed;
-        const adapter = HeroMover.adapter;
         const viewport = HeroMover.viewport;
-        if (!adapter || !viewport) return;
-        if (!core.isReplaying() || core.status.replay.speed <= 3) {
-            adapter.sync('startAnimate');
-            await adapter.all('readyMove');
+        if (!viewport) return;
+        if (!core.isReplaying() || core.status.replay.speed <= 12) {
+            state.hero.startMove();
         }
         // 这里要检查前面那一格能不能走，不能走则不触发平滑视角，以避免撞墙上视角卡住
         if (!this.ignoreTerrain) {
@@ -512,11 +509,9 @@ export class HeroMover extends ObjectMoverBase {
     protected async onMoveEnd(controller: IMoveController): Promise<void> {
         this.moveSpeed = this.beforeMoveSpeed;
         this.onSetMoveSpeed(this.moveSpeed, controller);
-        const adapter = HeroMover.adapter;
         const viewport = HeroMover.viewport;
-        if (!adapter || !viewport) return;
-        adapter.sync('endAnimate');
-        await adapter.all('endMove');
+        if (!viewport) return;
+        await state.hero.endMove();
         viewport.sync('endMove');
         core.clearContinueAutomaticRoute();
         core.stopAutomaticRoute();
@@ -667,40 +662,43 @@ export class HeroMover extends ObjectMoverBase {
         speed: number,
         _controller: IMoveController
     ): void {
-        const adapter = HeroMover.adapter;
-        if (!adapter) return;
-        adapter.sync('setMoveSpeed', speed);
+        this.moveSpeed = speed;
     }
 
     /**
      * 移动动画
      * @param x 目标横坐标
      * @param y 目标纵坐标
-     * @param showDir 显示方向
+     * @param _showDir 显示方向
      * @param moveDir 移动方向
      */
     private async moveAnimate(
         x: number,
         y: number,
-        showDir: Dir,
+        _showDir: Dir,
         moveDir: Dir2
     ) {
-        const adapter = HeroMover.adapter;
         const viewport = HeroMover.viewport;
-        if (!adapter || !viewport) return;
+        if (!viewport) return;
         const replay = core.status.replay.speed;
         const speed = replay === 24 ? 1 : this.moveSpeed / replay;
         viewport.all('moveTo', x, y, speed * 1.6);
-        adapter.sync('setAnimateDir', showDir);
-        if (core.isReplaying() && core.status.replay.speed > 3) {
-            adapter.sync('endAnimate');
-            await sleep(speed);
-            await adapter.all('setHeroLoc', x, y);
-        } else {
-            if (core.isReplaying()) {
-                adapter.sync('startAnimate');
+        const replaying = core.isReplaying();
+        if (replaying) {
+            if (core.status.replay.speed > 12) {
+                await state.hero.endMove();
+                await sleep(speed);
+                state.hero.setPosition(x, y);
+            } else {
+                state.hero.startMove();
+                await state.hero.move(
+                    fromDirectionString(moveDir),
+                    this.moveSpeed / core.status.replay.speed
+                );
             }
-            await adapter.all('move', moveDir);
+        } else {
+            state.hero.startMove();
+            await state.hero.move(fromDirectionString(moveDir), this.moveSpeed);
         }
     }
 
@@ -784,101 +782,99 @@ export class HeroMover extends ObjectMoverBase {
         return { portal: false };
     }
 
-    private renderHeroSwap(data: BluePalace.PortalTo) {
-        const adapter = HeroMover.adapter;
-        if (!adapter) return;
-        const list = adapter.items;
-        const { x: tx, y: ty, dir: toDir } = data;
-        const { x, y, direction } = core.status.hero.loc;
-        const { x: dx } = core.utils.scan[direction];
-        const { x: tdx } = core.utils.scan[toDir];
+    private renderHeroSwap(_data: BluePalace.PortalTo) {
+        // todo: 传送门
+        // const list = adapter.items;
+        // const { x: tx, y: ty, dir: toDir } = data;
+        // const { x, y, direction } = core.status.hero.loc;
+        // const { x: dx } = core.utils.scan[direction];
+        // const { x: tdx } = core.utils.scan[toDir];
 
-        const promises = [...list].map(v => {
-            if (!v.renderable) return;
-            const renderable = { ...v.renderable };
-            renderable.render = v.getRenderFromDir(toDir);
-            renderable.zIndex = ty;
-            const heroDir = v.moveDir;
+        // const promises = [...list].map(v => {
+        //     if (!v.renderable) return;
+        //     const renderable = { ...v.renderable };
+        //     renderable.render = v.getRenderFromDir(toDir);
+        //     renderable.zIndex = ty;
+        //     const heroDir = v.moveDir;
 
-            const width = v.renderable.render[0][2];
-            const height = v.renderable.render[0][3];
-            const cell = v.layer.cellSize;
-            const restHeight = height - cell;
-            if (!width || !height) return;
+        //     const width = v.renderable.render[0][2];
+        //     const height = v.renderable.render[0][3];
+        //     const cell = v.layer.cellSize;
+        //     const restHeight = height - cell;
+        //     if (!width || !height) return;
 
-            const originFrom = structuredClone(v.renderable.render);
-            const originTo = structuredClone(renderable.render);
-            v.layer.moving.add(renderable);
-            v.layer.requestUpdateMoving();
+        //     const originFrom = structuredClone(v.renderable.render);
+        //     const originTo = structuredClone(renderable.render);
+        //     v.layer.moving.add(renderable);
+        //     v.layer.requestUpdateMoving();
 
-            const start = Date.now();
-            return new Promise<void>(res => {
-                const tick = () => {
-                    const now = Date.now();
-                    const progress = (now - start) / this.moveSpeed;
-                    const clipWidth = cell * progress;
-                    const clipHeight = cell * progress;
-                    const beforeWidth = width - clipWidth;
-                    const beforeHeight = height - clipHeight;
+        //     const start = Date.now();
+        //     return new Promise<void>(res => {
+        //         const tick = () => {
+        //             const now = Date.now();
+        //             const progress = (now - start) / this.moveSpeed;
+        //             const clipWidth = cell * progress;
+        //             const clipHeight = cell * progress;
+        //             const beforeWidth = width - clipWidth;
+        //             const beforeHeight = height - clipHeight;
 
-                    v.renderable!.x = x;
-                    v.renderable!.y = y;
-                    if (heroDir === 'left' || heroDir === 'right') {
-                        v.renderable!.x = x + (clipWidth / 2 / cell) * dx;
-                        v.renderable!.render.forEach((v, i) => {
-                            v[2] = beforeWidth;
-                            if (heroDir === 'left') {
-                                v[0] = originFrom[i][0] + clipWidth;
-                            }
-                        });
-                    } else {
-                        v.renderable!.render.forEach((v, i) => {
-                            v[3] = beforeHeight;
-                            if (heroDir === 'up') {
-                                v[1] =
-                                    originFrom[i][1] + clipHeight + restHeight;
-                            }
-                        });
-                    }
+        //             v.renderable!.x = x;
+        //             v.renderable!.y = y;
+        //             if (heroDir === 'left' || heroDir === 'right') {
+        //                 v.renderable!.x = x + (clipWidth / 2 / cell) * dx;
+        //                 v.renderable!.render.forEach((v, i) => {
+        //                     v[2] = beforeWidth;
+        //                     if (heroDir === 'left') {
+        //                         v[0] = originFrom[i][0] + clipWidth;
+        //                     }
+        //                 });
+        //             } else {
+        //                 v.renderable!.render.forEach((v, i) => {
+        //                     v[3] = beforeHeight;
+        //                     if (heroDir === 'up') {
+        //                         v[1] =
+        //                             originFrom[i][1] + clipHeight + restHeight;
+        //                     }
+        //                 });
+        //             }
 
-                    renderable.x = tx;
-                    renderable.y = ty;
-                    if (toDir === 'left' || toDir === 'right') {
-                        renderable.x = tx + (clipWidth / 2 / cell - 0.5) * tdx;
-                        renderable.render.forEach((v, i) => {
-                            v[2] = clipWidth;
-                            if (toDir === 'right') {
-                                v[0] = originTo[i][0] + beforeWidth;
-                            }
-                        });
-                    } else {
-                        if (toDir === 'down') renderable.y = ty - 1 + progress;
-                        renderable.render.forEach((v, i) => {
-                            v[3] = clipHeight + restHeight;
-                            if (toDir === 'down') {
-                                v[1] = originTo[i][1] + clipHeight + restHeight;
-                                v[3] = clipHeight;
-                            }
-                        });
-                    }
-                };
-                v.layer.delegateTicker(tick, this.moveSpeed, () => {
-                    v.renderable!.render = originFrom;
-                    v.setAnimateDir(data.dir);
-                    v.layer.moving.delete(renderable);
-                    v.layer.requestUpdateMoving();
-                    res();
-                });
-            });
-        });
+        //             renderable.x = tx;
+        //             renderable.y = ty;
+        //             if (toDir === 'left' || toDir === 'right') {
+        //                 renderable.x = tx + (clipWidth / 2 / cell - 0.5) * tdx;
+        //                 renderable.render.forEach((v, i) => {
+        //                     v[2] = clipWidth;
+        //                     if (toDir === 'right') {
+        //                         v[0] = originTo[i][0] + beforeWidth;
+        //                     }
+        //                 });
+        //             } else {
+        //                 if (toDir === 'down') renderable.y = ty - 1 + progress;
+        //                 renderable.render.forEach((v, i) => {
+        //                     v[3] = clipHeight + restHeight;
+        //                     if (toDir === 'down') {
+        //                         v[1] = originTo[i][1] + clipHeight + restHeight;
+        //                         v[3] = clipHeight;
+        //                     }
+        //                 });
+        //             }
+        //         };
+        //         v.layer.delegateTicker(tick, this.moveSpeed, () => {
+        //             v.renderable!.render = originFrom;
+        //             v.setAnimateDir(data.dir);
+        //             v.layer.moving.delete(renderable);
+        //             v.layer.requestUpdateMoving();
+        //             res();
+        //         });
+        //     });
+        // });
 
-        return Promise.all(promises);
+        return Promise.all([]);
     }
 
     private renderHeroLoop() {
-        const adapter = HeroMover.adapter;
         const viewport = HeroMover.viewport;
-        if (!adapter || !viewport) return;
+        if (!viewport) return;
         const MotaRenderer = Mota.require('@motajs/render').MotaRenderer;
         const render = MotaRenderer.get('render-main');
         const group = render?.getElementById('layer-loop') as LayerGroup;
@@ -952,10 +948,8 @@ loading.once('coreInit', () => {
 loading.once('coreInit', () => {
     if (main.replayChecking || main.mode === 'editor') return;
     const Adapter = Mota.require('@motajs/render').RenderAdapter;
-    const adapter = Adapter.get<HeroRenderer>('hero-adapter');
     const viewport = Adapter.get<FloorViewport>('viewport');
     const layerAdapter = Adapter.get<Layer>('layer');
-    HeroMover.adapter = adapter;
     HeroMover.viewport = viewport;
     BlockMover.adapter = layerAdapter;
 });

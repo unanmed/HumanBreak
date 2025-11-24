@@ -1,3 +1,5 @@
+export * from './extension';
+
 export * from './block';
 export * from './constant';
 export * from './element';

@@ -6,6 +6,7 @@ export function createMaterial() {
     createAutotile();
     loading.once('loaded', () => {
         fallbackLoad();
+        loading.emit('assetBuilt');
     });
 }
 
