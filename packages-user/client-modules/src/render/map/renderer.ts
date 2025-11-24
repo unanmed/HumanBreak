@@ -341,6 +341,7 @@ export class MapRenderer
     }
 
     setLayerState(layerState: ILayerState): void {
+        if (layerState === this.layerState) return;
         this.layerStateHook.unload();
         this.layerState = layerState;
         this.layerStateHook = layerState.addHook(
