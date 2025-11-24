@@ -128,7 +128,7 @@ export class MapViewport implements IMapViewportController {
         return {
             render: renderArea,
             dirty: updateArea,
-            blockList: blockList.filter(v => v.data.dirty)
+            blockList: blockList
         };
     }
 

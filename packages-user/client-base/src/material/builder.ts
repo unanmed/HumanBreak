@@ -125,12 +125,13 @@ class TrackedAssetData
         }
         const origin = this.originSourceMap.get(index);
         const prev = this.sourceList.get(index);
-        if (origin) {
+        if (origin && origin !== source) {
             this.skipRef.delete(origin);
         }
         if (prev) {
             this.skipRef.delete(prev);
         }
+        this.originSourceMap.set(index, source);
         if (source instanceof ImageBitmap) {
             if (this.skipRef.has(source)) return;
             this.sourceList.set(index, source);
@@ -141,7 +142,6 @@ class TrackedAssetData
             this.skipRef.set(bitmap, index);
             // 要把源也加到映射中，因为这里的 bitmap 与外部源并不同引用
             this.skipRef.set(source, index);
-            this.originSourceMap.set(index, source);
         }
         this.dirty(index);
     }

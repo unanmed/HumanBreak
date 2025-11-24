@@ -470,17 +470,19 @@ export class MapVertexGenerator
         if (!block) return;
         const vertex = block.data.getLayerData(layer);
         if (!vertex) return;
+        const bx = mx - block.dataX;
+        const by = my - block.dataY;
         const newIndex: BlockIndex = {
             layer,
             mapX: mx,
             mapY: my,
             mapIndex: my * this.mapWidth + mx,
-            blockX: block.x,
-            blockY: block.y,
-            blockIndex: block.y * block.width + block.x
+            blockX: bx,
+            blockY: by,
+            blockIndex: by * block.width + bx
         };
-        const tile = this.renderer.manager.getTile(mapArray[index.mapIndex]);
-        if (!tile) return;
+        const tile = this.renderer.manager.getTile(mapArray[newIndex.mapIndex]);
+        if (!tile || tile.cls !== BlockCls.Autotile) return;
         this.updateAutotile(
             mapArray,
             vertex,
@@ -590,6 +592,7 @@ export class MapVertexGenerator
             blockY: block.y,
             blockIndex: dIndex
         };
+
         // 需要检查周围一圈的自动元件
         this.checkAutotileConnectionAround(layer, array, index, -1, -1);
         this.checkAutotileConnectionAround(layer, array, index, 0, -1);
@@ -669,98 +672,100 @@ export class MapVertexGenerator
             this.checkUpdateCallPerformance('updateBlockList');
         }
         this.checkRebuild();
-        if (blocks.length > 50) {
-            // 对于超出50个的更新操作使用懒更新
-            blocks.forEach(v => {
-                const block = this.block.getBlockByDataLoc(v.x, v.y);
-                if (!block) return;
-                const bx = v.x - block.dataX;
-                const by = v.y - block.dataY;
-                block.data.markDirty(layer, bx - 1, by - 1, bx + 2, by + 2);
-                block.data.markRenderDirty();
-                const left = bx === 0;
-                const top = by === 0;
-                const right = bx === block.width - 1;
-                const bottom = by === block.height - 1;
-                // 需要更一圈的自动元件
-                if (left) {
-                    // 左侧的分块需要更新
-                    const nextBlock = block.left();
-                    if (nextBlock) {
-                        const { width: w, data } = nextBlock;
-                        data.markDirty(layer, w - 1, by - 1, w, by + 1);
-                        data.markRenderDirty();
-                    }
-                    if (top) {
-                        // 左上侧的分块需要更新
-                        const nextBlock = block.leftUp();
-                        if (nextBlock) {
-                            const { width: w, height: h, data } = nextBlock;
-                            data.markDirty(layer, w - 1, h - 1, w, h);
-                            data.markRenderDirty();
-                        }
-                    }
-                    if (bottom) {
-                        // 左下侧的分块需要更新
-                        const nextBlock = block.leftDown();
-                        if (nextBlock) {
-                            const { width: w, data } = nextBlock;
-                            data.markDirty(layer, w - 1, 0, w, 1);
-                            data.markRenderDirty();
-                        }
-                    }
-                }
-                if (top) {
-                    // 上侧的分块需要更新
-                    const nextBlock = block.up();
-                    if (nextBlock) {
-                        const { height: h, data } = nextBlock;
-                        data.markDirty(layer, bx - 1, h - 1, bx + 1, h);
-                        data.markRenderDirty();
-                    }
-                }
-                if (right) {
-                    // 右侧的分块需要更新
-                    const nextBlock = block.right();
-                    if (nextBlock) {
-                        const { data } = nextBlock;
-                        data.markDirty(layer, 0, by - 1, 1, by + 1);
-                        data.markRenderDirty();
-                    }
-                    if (top) {
-                        // 右上侧的分块需要更新
-                        const nextBlock = block.rightUp();
-                        if (nextBlock) {
-                            const { height: h, data } = nextBlock;
-                            data.markDirty(layer, 0, h - 1, 1, h);
-                            data.markRenderDirty();
-                        }
-                    }
-                    if (bottom) {
-                        // 右下侧的分块需要更新
-                        const nextBlock = block.rightDown();
-                        if (nextBlock) {
-                            const { data } = nextBlock;
-                            data.markDirty(layer, 0, 0, 1, 1);
-                            data.markRenderDirty();
-                        }
-                    }
-                }
-                if (bottom) {
-                    // 下侧的分块需要更新
-                    const nextBlock = block.down();
-                    if (nextBlock) {
-                        const { data } = nextBlock;
-                        data.markDirty(layer, bx - 1, 0, bx + 1, 1);
-                        data.markRenderDirty();
-                    }
-                }
-            });
-        } else {
+
+        if (blocks.length <= 50) {
             blocks.forEach(({ block: num, x, y }) => {
                 this.updateBlockVertex(layer, num, x, y);
             });
+            return;
         }
+
+        // 对于超出50个的更新操作使用懒更新
+        blocks.forEach(v => {
+            const block = this.block.getBlockByDataLoc(v.x, v.y);
+            if (!block) return;
+            const bx = v.x - block.dataX;
+            const by = v.y - block.dataY;
+            block.data.markDirty(layer, bx - 1, by - 1, bx + 2, by + 2);
+            block.data.markRenderDirty();
+            const left = bx === 0;
+            const top = by === 0;
+            const right = bx === block.width - 1;
+            const bottom = by === block.height - 1;
+            // 需要更一圈的自动元件
+            if (left) {
+                // 左侧的分块需要更新
+                const nextBlock = block.left();
+                if (nextBlock) {
+                    const { width: w, data } = nextBlock;
+                    data.markDirty(layer, w - 1, by - 1, w, by + 1);
+                    data.markRenderDirty();
+                }
+                if (top) {
+                    // 左上侧的分块需要更新
+                    const nextBlock = block.leftUp();
+                    if (nextBlock) {
+                        const { width: w, height: h, data } = nextBlock;
+                        data.markDirty(layer, w - 1, h - 1, w, h);
+                        data.markRenderDirty();
+                    }
+                }
+                if (bottom) {
+                    // 左下侧的分块需要更新
+                    const nextBlock = block.leftDown();
+                    if (nextBlock) {
+                        const { width: w, data } = nextBlock;
+                        data.markDirty(layer, w - 1, 0, w, 1);
+                        data.markRenderDirty();
+                    }
+                }
+            }
+            if (top) {
+                // 上侧的分块需要更新
+                const nextBlock = block.up();
+                if (nextBlock) {
+                    const { height: h, data } = nextBlock;
+                    data.markDirty(layer, bx - 1, h - 1, bx + 1, h);
+                    data.markRenderDirty();
+                }
+            }
+            if (right) {
+                // 右侧的分块需要更新
+                const nextBlock = block.right();
+                if (nextBlock) {
+                    const { data } = nextBlock;
+                    data.markDirty(layer, 0, by - 1, 1, by + 1);
+                    data.markRenderDirty();
+                }
+                if (top) {
+                    // 右上侧的分块需要更新
+                    const nextBlock = block.rightUp();
+                    if (nextBlock) {
+                        const { height: h, data } = nextBlock;
+                        data.markDirty(layer, 0, h - 1, 1, h);
+                        data.markRenderDirty();
+                    }
+                }
+                if (bottom) {
+                    // 右下侧的分块需要更新
+                    const nextBlock = block.rightDown();
+                    if (nextBlock) {
+                        const { data } = nextBlock;
+                        data.markDirty(layer, 0, 0, 1, 1);
+                        data.markRenderDirty();
+                    }
+                }
+            }
+            if (bottom) {
+                // 下侧的分块需要更新
+                const nextBlock = block.down();
+                if (nextBlock) {
+                    const { data } = nextBlock;
+                    data.markDirty(layer, bx - 1, 0, bx + 1, 1);
+                    data.markRenderDirty();
+                }
+            }
+        });
     }
 
     updateBlockCache(block: Readonly<IBlockData<IMapVertexBlock>>): void {
@@ -1036,6 +1041,9 @@ class MapVertexBlock implements IMapVertexBlock {
         this.dirty = false;
     }
 
+    /**
+     * 标记为需要更新渲染缓冲区
+     */
     markRenderDirty() {
         this.renderDirty = true;
     }

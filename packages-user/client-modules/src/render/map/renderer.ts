@@ -1230,8 +1230,12 @@ export class MapRenderer
 
         const area = this.viewport.getRenderArea();
         area.blockList.forEach(v => {
-            this.vertex.updateBlockCache(v);
-            v.data.render();
+            if (v.data.dirty) {
+                this.vertex.updateBlockCache(v);
+            }
+            if (v.data.renderDirty) {
+                v.data.render();
+            }
         });
 
         if (area.dirty.length > 0) {

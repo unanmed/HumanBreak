@@ -3138,6 +3138,11 @@ maps.prototype.showBlock = function (x, y, floorId) {
             block?.id ?? 0,
             0
         );
+        if (floorId === core.status.floorId) {
+            const { layer } = Mota.require('@user/data-state').state;
+            const event = layer.getLayerByAlias('event');
+            event.setBlock(block.id, x, y);
+        }
         // 在本层，添加动画
         if (floorId == core.status.floorId) {
             if (block.event.cls == 'autotile') {
@@ -3170,6 +3175,11 @@ maps.prototype.hideBlock = function (x, y, floorId) {
         0,
         block?.id ?? 0
     );
+    if (floorId === core.status.floorId) {
+        const { layer } = Mota.require('@user/data-state').state;
+        const event = layer.getLayerByAlias('event');
+        event.setBlock(0, x, y);
+    }
 
     // 删除动画，清除地图
     this._removeBlockFromMap(floorId, block);
@@ -3193,6 +3203,11 @@ maps.prototype.hideBlockByIndex = function (index, floorId) {
         0,
         block?.id ?? 0
     );
+    if (floorId === core.status.floorId) {
+        const { layer } = Mota.require('@user/data-state').state;
+        const event = layer.getLayerByAlias('event');
+        event.setBlock(0, x, y);
+    }
 };
 
 ////// 一次性隐藏多个block //////
@@ -3265,6 +3280,11 @@ maps.prototype.removeBlockByIndex = function (index, floorId) {
         0,
         block?.id ?? 0
     );
+    if (floorId === core.status.floorId) {
+        const { layer } = Mota.require('@user/data-state').state;
+        const event = layer.getLayerByAlias('event');
+        event.setBlock(0, x, y);
+    }
 };
 
 ////// 一次性删除多个block //////
@@ -3419,6 +3439,11 @@ maps.prototype.setBlock = function (number, x, y, floorId, noredraw) {
         number,
         originBlock?.id ?? 0
     );
+    if (floorId === core.status.floorId) {
+        const { layer } = Mota.require('@user/data-state').state;
+        const event = layer.getLayerByAlias('event');
+        event.setBlock(number, x, y);
+    }
 };
 
 maps.prototype.animateSetBlock = function (
@@ -3620,6 +3645,11 @@ maps.prototype.replaceBlock = function (fromNumber, toNumber, floorId) {
                 fromNumber,
                 toNumber
             );
+            if (floorId === core.status.floorId) {
+                const { layer } = Mota.require('@user/data-state').state;
+                const event = layer.getLayerByAlias('event');
+                event.setBlock(toNumber, x, y);
+            }
         }
     }, this);
     if (floorId == core.status.floorId) core.redrawMap();
@@ -3669,6 +3699,11 @@ maps.prototype.setBgFgBlock = function (name, number, x, y, floorId) {
         y,
         floorId
     );
+    if (floorId === core.status.floorId) {
+        const { layer } = Mota.require('@user/data-state').state;
+        const mapLayer = layer.getLayerByAlias(name);
+        mapLayer.setBlock(block.id, x, y);
+    }
 };
 
 ////// 重置地图 //////

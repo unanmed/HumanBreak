@@ -158,7 +158,7 @@ export class BlockSplitter<T> implements IBlockSplitter<T> {
         const bx = Math.floor(x / this.blockWidth);
         const by = Math.floor(y / this.blockHeight);
         if (!this.checkLocRange(bx, by)) return null;
-        const index = y * this.width + x;
+        const index = by * this.width + bx;
         return this.blockMap.get(index) ?? null;
     }
 

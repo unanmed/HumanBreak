@@ -7,6 +7,8 @@ import {
 } from './types';
 import { Hookable, HookController, logger } from '@motajs/common';
 
+// todo: 提供 core.setBlock 等方法的替代方法，同时添加 setBlockList，以及前景背景的接口
+
 export class MapLayer
     extends Hookable<IMapLayerHooks, IMapLayerHookController>
     implements IMapLayer
