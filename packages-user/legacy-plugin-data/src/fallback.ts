@@ -171,7 +171,11 @@ export function initFallback() {
 
         patch.add(
             'setHeroLoc',
-            function (name: 'x' | 'y' | 'direction', value: number | Dir) {
+            function (
+                name: 'x' | 'y' | 'direction',
+                value: number | Dir,
+                noGather?: boolean
+            ) {
                 if (!core.status.hero) return;
                 // @ts-ignore
                 core.status.hero.loc[name] = value;
@@ -182,17 +186,21 @@ export function initFallback() {
                 } else if (name === 'x') {
                     // 为了防止逆天样板出问题
                     core.bigmap.posX = value as number;
-                    state.hero.setPosition(
-                        value as number,
-                        core.status.hero.loc.y
-                    );
+                    if (!noGather) {
+                        state.hero.setPosition(
+                            value as number,
+                            core.status.hero.loc.y
+                        );
+                    }
                 } else {
                     // 为了防止逆天样板出问题
                     core.bigmap.posY = value as number;
-                    state.hero.setPosition(
-                        core.status.hero.loc.x,
-                        value as number
-                    );
+                    if (!noGather) {
+                        state.hero.setPosition(
+                            core.status.hero.loc.x,
+                            value as number
+                        );
+                    }
                 }
             }
         );

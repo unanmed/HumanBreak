@@ -201,7 +201,7 @@ export class MovingBlock extends DynamicBlockStatus implements IMovingBlock {
                 this.y = this.targetY;
                 this.end = true;
                 this.promiseFunc();
-                return false;
+                return true;
             } else {
                 const timeProgress = dt / this.time;
                 const progress = this.timing(timeProgress);
@@ -220,7 +220,7 @@ export class MovingBlock extends DynamicBlockStatus implements IMovingBlock {
                 }
                 this.end = true;
                 this.promiseFunc();
-                return false;
+                return true;
             } else {
                 const timeProgress = dt / this.time;
                 const progress = this.timing(timeProgress);

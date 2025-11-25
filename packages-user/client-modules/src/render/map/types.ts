@@ -266,6 +266,29 @@ export interface IMapRendererTicker {
     remove(): void;
 }
 
+export interface IMapRendererPostEffect {
+    /**
+     * 初始化渲染器效果对象，一般是编译着色器、准备数据缓冲区等
+     * @param gl WebGL2 画布上下文
+     * @param data 地图渲染的上下文数据
+     */
+    init(gl: WebGL2RenderingContext, data: IContextData): void;
+
+    /**
+     * 渲染效果对象，将内容渲染到输出 FBO 上
+     * @param gl WebGL2 画布上下文
+     * @param data 地图渲染的上下文数据
+     * @param input 输入 FBO
+     * @param output 输出 FBO，内容要画到这个 FBO 上
+     */
+    render(
+        gl: WebGL2RenderingContext,
+        data: IContextData,
+        input: WebGLFramebuffer,
+        output: WebGLFramebuffer
+    ): void;
+}
+
 export interface IMapRenderer {
     /** 地图渲染器使用的资源管理器 */
     readonly manager: IMaterialManager;
@@ -312,6 +335,29 @@ export interface IMapRenderer {
      * 摧毁此地图渲染器，表示当前渲染器不会再被使用到
      */
     destroy(): void;
+
+    /**
+     * 添加一个地图渲染器效果对象，一般是对地图渲染的后处理，可以是一些特效和自定义绘制等
+     * @param effect 地图渲染器效果对象
+     * @param priority 效果对象优先级
+     */
+    addPostEffect(effect: IMapRendererPostEffect, priority: number): void;
+
+    /**
+     * 移除指定的效果对象
+     * @param effect 地图渲染器效果对象
+     */
+    removePostEffect(effect: IMapRendererPostEffect): void;
+
+    /**
+     * 设置效果对象的优先级
+     * @param effect 地图渲染器效果对象
+     * @param priority 效果对象优先级
+     */
+    setPostEffectPriority(
+        effect: IMapRendererPostEffect,
+        priority: number
+    ): void;
 
     /**
      * 渲染地图

@@ -283,7 +283,6 @@ export class MapHeroRenderer implements IMapHeroRenderer {
         this.heroEntity.moving = true;
         this.heroEntity.animating = true;
         this.heroEntity.lastAnimateTime = this.ticker.timestamp;
-        this.heroEntity.block.useSpecifiedFrame(1);
     }
 
     private endEntityMoving(entity: HeroRenderEntity) {
@@ -381,6 +380,7 @@ export class MapHeroRenderer implements IMapHeroRenderer {
             promise: Promise.resolve(),
             animateDirection: HeroAnimateDirection.Forward
         };
+        moving.useSpecifiedFrame(0);
         this.entities.push(entity);
     }
 

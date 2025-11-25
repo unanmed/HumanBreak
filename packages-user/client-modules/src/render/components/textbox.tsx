@@ -33,6 +33,8 @@ import {
 import { SetupComponentOptions } from '@motajs/system-ui';
 import { texture } from '../elements';
 
+// todo: TextContent 应该改成渲染元素？
+
 //#region TextContent
 
 export interface TextContentProps

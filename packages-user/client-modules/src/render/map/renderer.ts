@@ -18,6 +18,7 @@ import {
     IMapBackgroundConfig,
     IMapRenderConfig,
     IMapRenderer,
+    IMapRendererPostEffect,
     IMapRendererTicker,
     IMapVertexGenerator,
     IMapViewportController,
@@ -172,6 +173,11 @@ export class MapRenderer
     /** 画布上下文数据 */
     private contextData: IContextData;
 
+    /** 效果对象优先级映射 */
+    private effectPriority: Map<IMapRendererPostEffect, number> = new Map();
+    /** 渲染器效果对象列表，使用数组是因为要有顺序 */
+    private postEffects: IMapRendererPostEffect[] = [];
+
     /** 地图变换矩阵 */
     transform: Transform;
     /** 是否需要更新变换矩阵 */
@@ -291,6 +297,40 @@ export class MapRenderer
         gl.enableVertexAttribArray(texData);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
         gl.bindVertexArray(null);
+    }
+
+    private sortPostEffect() {
+        this.postEffects.sort((a, b) => {
+            const pa = this.effectPriority.get(a) ?? 0;
+            const pb = this.effectPriority.get(b) ?? 0;
+            return pb - pa;
+        });
+    }
+
+    addPostEffect(effect: IMapRendererPostEffect, priority: number): void {
+        this.postEffects.push(effect);
+        this.effectPriority.set(effect, priority);
+        this.sortPostEffect();
+        this.updateRequired = true;
+    }
+
+    removePostEffect(effect: IMapRendererPostEffect): void {
+        const index = this.postEffects.indexOf(effect);
+        if (index === -1) return;
+        this.postEffects.splice(index);
+        this.effectPriority.delete(effect);
+        this.sortPostEffect();
+        this.updateRequired = true;
+    }
+
+    setPostEffectPriority(
+        effect: IMapRendererPostEffect,
+        priority: number
+    ): void {
+        if (!this.effectPriority.has(effect)) return;
+        this.effectPriority.set(effect, priority);
+        this.sortPostEffect();
+        this.updateRequired = true;
     }
 
     //#endregion
@@ -646,7 +686,7 @@ export class MapRenderer
         gl.disable(gl.CULL_FACE);
         gl.enable(gl.DEPTH_TEST);
         gl.enable(gl.BLEND);
-        gl.depthFunc(gl.LEQUAL);
+        gl.depthFunc(gl.LESS);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
         const data: IContextData = {
@@ -1209,6 +1249,7 @@ export class MapRenderer
     }
 
     render(): HTMLCanvasElement {
+        // todo: 改为 FBO，最后把 FBO 画到画布上
         const gl = this.gl;
         const data = this.contextData;
         if (!this.assetData) {

@@ -365,7 +365,8 @@ export class MapVertexGenerator
         assetIndex: number,
         offsetIndex: number,
         frames: number,
-        update: VertexUpdate
+        update: VertexUpdate,
+        dynamic: boolean
     ) {
         const { instancedArray } = vertex;
         // 顶点数组
@@ -377,8 +378,9 @@ export class MapVertexGenerator
             const layerIndex = this.renderer.getLayerIndex(index.layer);
             // 避免 z 坐标是 1 的时候被裁剪，因此范围选择 [-0.9, 0.9]
             const layerStart = (layerIndex / layerCount) * 1.8 - 0.9;
-            const zIndex =
-                -layerStart - index.mapY / this.mapHeight / layerCount;
+            const perBlockZ = 1 / this.mapHeight / layerCount;
+            const blockZ = index.mapY * perBlockZ;
+            const zIndex = -layerStart - blockZ - (dynamic ? perBlockZ : 0);
             const { x, y, w, h } = this.getTilePosition(index, width, height);
             // 图块位置
             instancedArray[startIndex] = x;
@@ -418,7 +420,8 @@ export class MapVertexGenerator
         vertex: IMapVertexData,
         index: BlockIndex,
         tile: IMaterialFramedData,
-        update: VertexUpdate
+        update: VertexUpdate,
+        dynamic: boolean
     ) {
         const autotile = this.renderer.autotile;
         const { connection, center } = autotile.connect(
@@ -442,7 +445,8 @@ export class MapVertexGenerator
             assetIndex,
             offsetIndex,
             tile.frames,
-            update
+            update,
+            dynamic
         );
     }
 
@@ -485,7 +489,8 @@ export class MapVertexGenerator
             vertex,
             newIndex,
             tile,
-            VertexUpdate.Texture
+            VertexUpdate.Texture,
+            false
         );
         block.data.markRenderDirty();
     }
@@ -501,7 +506,8 @@ export class MapVertexGenerator
         mapArray: Uint32Array,
         vertex: IMapVertexData,
         index: BlockIndex,
-        num: number
+        num: number,
+        dynamic: boolean
     ) {
         // 此处仅更新当前图块，不更新周围一圈的自动元件
         // 周围一圈的自动元件需要在更新某个图块或者某个区域时处理，不在这里处理
@@ -526,7 +532,8 @@ export class MapVertexGenerator
                 vertex,
                 index,
                 tile,
-                VertexUpdate.All
+                VertexUpdate.All,
+                dynamic
             );
         } else {
             // 正常图块
@@ -553,7 +560,8 @@ export class MapVertexGenerator
                 assetIndex,
                 offsetIndex,
                 tile.frames,
-                VertexUpdate.All
+                VertexUpdate.All,
+                dynamic
             );
         }
     }
@@ -600,7 +608,7 @@ export class MapVertexGenerator
         this.checkAutotileConnectionAround(layer, array, index, -1, 1);
         this.checkAutotileConnectionAround(layer, array, index, -1, 0);
         // 再更新当前图块
-        this.updateVertexArray(array, vertex, index, num);
+        this.updateVertexArray(array, vertex, index, num, false);
         block.data.markRenderDirty();
     }
 
@@ -795,7 +803,8 @@ export class MapVertexGenerator
                         array,
                         vertex,
                         index,
-                        array[mapIndex]
+                        array[mapIndex],
+                        false
                     );
                 }
             }
@@ -840,7 +849,8 @@ export class MapVertexGenerator
                 assetIndex,
                 offset,
                 frames,
-                update
+                update,
+                true
             );
         } else {
             // 正常图块
@@ -859,7 +869,8 @@ export class MapVertexGenerator
                 assetIndex,
                 offset,
                 frames,
-                update
+                update,
+                true
             );
         }
 

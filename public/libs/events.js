@@ -3489,33 +3489,12 @@ events.prototype.hasAsyncAnimate = function () {
 
 ////// 跟随 //////
 events.prototype.follow = function (name) {
-    name = core.getMappedName(name);
-    if (core.material.images.images[name]) {
-        core.status.hero.followers.push({ name: name });
-        core.gatherFollowers();
-        core.clearMap('hero');
-        core.drawHero();
-    }
-    core.clearRouteFolding();
+    // Deprecated. Use state.hero.addFollower instead.
 };
 
 ////// 取消跟随 //////
 events.prototype.unfollow = function (name) {
-    if (!name) {
-        core.status.hero.followers = [];
-    } else {
-        name = core.getMappedName(name);
-        for (var i = 0; i < core.status.hero.followers.length; i++) {
-            if (core.status.hero.followers[i].name == name) {
-                core.status.hero.followers.splice(i, 1);
-                break;
-            }
-        }
-    }
-    core.gatherFollowers();
-    core.clearMap('hero');
-    core.drawHero();
-    core.clearRouteFolding();
+    // Deprecated. Use state.hero.removeFollower instead.
 };
 
 events.prototype._updateValueByOperator = function (
