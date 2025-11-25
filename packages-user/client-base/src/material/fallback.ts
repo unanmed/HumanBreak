@@ -9,9 +9,10 @@ function extractClsBlocks<C extends Exclude<Cls, 'tileset'>>(
     icons: Record<string, number>
 ): IBlockIdentifier[] {
     const max = Math.max(...Object.values(icons));
-    const arr = Array(max).fill(0);
+    const arr = Array(max).fill(void 0);
     for (const [key, value] of Object.entries(icons)) {
-        if (!(key in map)) continue;
+        // 样板编辑器 bug 可能会导致多个 id 使用一个偏移，因此要判断下
+        if (!(key in map) || !isNil(arr[value])) continue;
         const id = key as AllIdsOf<C>;
         const num = map[id] as keyof NumberToId;
         const identifier: IBlockIdentifier = {
