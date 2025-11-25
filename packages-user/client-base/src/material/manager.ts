@@ -65,6 +65,8 @@ export class MaterialManager implements IMaterialManager {
     readonly numIdMap: Map<number, string> = new Map();
     /** 图块数字到图块类型的映射 */
     readonly clsMap: Map<number, BlockCls> = new Map();
+    /** 图块的默认帧数 */
+    readonly defaultFrames: Map<number, number> = new Map();
 
     /** 网格切分器 */
     readonly gridSplitter: TextureGridSplitter = new TextureGridSplitter();
@@ -218,7 +220,19 @@ export class MaterialManager implements IMaterialManager {
         return data;
     }
 
-    getTile(identifier: number): IMaterialFramedData | null {
+    setDefaultFrame(identifier: number, defaultFrame: number): void {
+        this.defaultFrames.set(identifier, defaultFrame);
+        const bigImageData = this.bigImageData.get(identifier);
+        if (bigImageData) {
+            bigImageData.defaultFrame = defaultFrame;
+        }
+    }
+
+    getDefaultFrame(identifier: number): number {
+        return this.defaultFrames.get(identifier) ?? -1;
+    }
+
+    getTile(identifier: number): Readonly<IMaterialFramedData> | null {
         if (identifier < 10000) {
             const cls = this.clsMap.get(identifier) ?? BlockCls.Unknown;
             if (
@@ -233,7 +247,8 @@ export class MaterialManager implements IMaterialManager {
                 texture,
                 cls,
                 offset: 32,
-                frames: getTextureFrame(cls, texture)
+                frames: getTextureFrame(cls, texture),
+                defaultFrame: this.defaultFrames.get(identifier) ?? -1
             };
         } else {
             const texture = this.cacheTileset(identifier);
@@ -242,7 +257,8 @@ export class MaterialManager implements IMaterialManager {
                 texture,
                 cls: BlockCls.Tileset,
                 offset: 32,
-                frames: 1
+                frames: 1,
+                defaultFrame: -1
             };
         }
     }
@@ -255,7 +271,7 @@ export class MaterialManager implements IMaterialManager {
         return this.imageStore.getTexture(identifier);
     }
 
-    getTileByAlias(alias: string): IMaterialFramedData | null {
+    getTileByAlias(alias: string): Readonly<IMaterialFramedData> | null {
         if (/X\d{5,}/.test(alias)) {
             return this.getTile(parseInt(alias.slice(1)));
         } else {
@@ -537,7 +553,8 @@ export class MaterialManager implements IMaterialManager {
             texture: image,
             cls,
             offset: image.width / 4,
-            frames
+            frames,
+            defaultFrame: this.defaultFrames.get(identifier) ?? -1
         };
         this.bigImageData.set(identifier, store);
         const data: IBigImageReturn = {
@@ -551,17 +568,17 @@ export class MaterialManager implements IMaterialManager {
         return this.bigImageData.has(identifier);
     }
 
-    getBigImage(identifier: number): IMaterialFramedData | null {
+    getBigImage(identifier: number): Readonly<IMaterialFramedData> | null {
         return this.bigImageData.get(identifier) ?? null;
     }
 
-    getBigImageByAlias(alias: string): IMaterialFramedData | null {
+    getBigImageByAlias(alias: string): Readonly<IMaterialFramedData> | null {
         const identifier = this.idNumMap.get(alias);
         if (isNil(identifier)) return null;
         return this.bigImageData.get(identifier) ?? null;
     }
 
-    getIfBigImage(identifier: number): IMaterialFramedData | null {
+    getIfBigImage(identifier: number): Readonly<IMaterialFramedData> | null {
         const bigImage = this.bigImageData.get(identifier);
         if (bigImage) return bigImage;
         else return this.getTile(identifier);

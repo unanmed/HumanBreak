@@ -90,13 +90,15 @@ export interface IBigImageReturn {
 
 export interface IMaterialFramedData {
     /** 贴图对象 */
-    readonly texture: ITexture;
+    texture: ITexture;
     /** 图块类型 */
-    readonly cls: BlockCls;
+    cls: BlockCls;
     /** 贴图总帧数 */
-    readonly frames: number;
+    frames: number;
     /** 每帧的横向偏移量 */
-    readonly offset: number;
+    offset: number;
+    /** 默认帧数 */
+    defaultFrame: number;
 }
 
 export interface IMaterialAsset
@@ -160,7 +162,7 @@ export interface IAutotileProcessor {
      * @returns 连接方式的可渲染对象，可以通过偏移量依次获取其他帧
      */
     renderWith(
-        tile: IMaterialFramedData,
+        tile: Readonly<IMaterialFramedData>,
         connection: number
     ): ITextureRenderable | null;
 
@@ -171,7 +173,7 @@ export interface IAutotileProcessor {
      * @returns 连接方式的可渲染对象，可以通过偏移量依次获取其他帧
      */
     renderWithoutCheck(
-        tile: IMaterialFramedData,
+        tile: Readonly<IMaterialFramedData>,
         connection: number
     ): ITextureRenderable | null;
 
@@ -193,7 +195,7 @@ export interface IAutotileProcessor {
      * @returns 生成器，每一个输出代表每一帧的渲染对象，不同自动元件的帧数可能不同
      */
     renderAnimatedWith(
-        tile: IMaterialFramedData,
+        tile: Readonly<IMaterialFramedData>,
         connection: number
     ): Generator<ITextureRenderable, void>;
 }
@@ -203,7 +205,7 @@ export interface IMaterialGetter {
      * 根据图块数字获取图块，可以获取额外素材，会自动将未缓存的额外素材缓存
      * @param identifier 图块的图块数字
      */
-    getTile(identifier: number): IMaterialFramedData | null;
+    getTile(identifier: number): Readonly<IMaterialFramedData> | null;
 
     /**
      * 根据图块标识符获取图块类型
@@ -221,14 +223,14 @@ export interface IMaterialGetter {
      * 根据图块标识符获取一个图块的 `bigImage` 贴图
      * @param identifier 图块标识符，即图块数字
      */
-    getBigImage(identifier: number): IMaterialFramedData | null;
+    getBigImage(identifier: number): Readonly<IMaterialFramedData> | null;
 
     /**
      * 根据图块标识符，首先判断是否是 `bigImage` 贴图，如果是，则返回 `bigImage` 贴图，
      * 否则返回普通贴图。如果图块不存在，则返回 `null`
      * @param identifier 图块标识符，即图块数字
      */
-    getIfBigImage(identifier: number): IMaterialFramedData | null;
+    getIfBigImage(identifier: number): Readonly<IMaterialFramedData> | null;
 
     /**
      * 根据标识符获取图集信息
@@ -254,7 +256,7 @@ export interface IMaterialAliasGetter {
      * 根据图块 id 获取图块，可以获取额外素材，会自动将未缓存的额外素材缓存
      * @param alias 图块 id
      */
-    getTileByAlias(alias: string): IMaterialFramedData | null;
+    getTileByAlias(alias: string): Readonly<IMaterialFramedData> | null;
 
     /**
      * 根据额外素材名称获取额外素材
@@ -284,7 +286,7 @@ export interface IMaterialAliasGetter {
      * 根据图块别名获取一个图块的 `bigImage` 贴图
      * @param alias 图块别名，即图块的 id
      */
-    getBigImageByAlias(alias: string): IMaterialFramedData | null;
+    getBigImageByAlias(alias: string): Readonly<IMaterialFramedData> | null;
 }
 
 export interface IMaterialManager
@@ -363,6 +365,19 @@ export interface IMaterialManager
         source: SizedCanvasImageSource,
         identifier: IIndexedIdentifier
     ): IMaterialData;
+
+    /**
+     * 设置指定图块默认显示第几帧
+     * @param identifier 图块标识符，即图块数字
+     * @param defaultFrame 图块的默认帧数
+     */
+    setDefaultFrame(identifier: number, defaultFrame: number): void;
+
+    /**
+     * 获取图块的默认帧数，-1 表示正常动画，非负整数表示默认使用指定帧数，除非单独指定
+     * @param identifier 图块标识符，即图块数字
+     */
+    getDefaultFrame(identifier: number): number;
 
     /**
      * 缓存某个 tileset，当需要缓存多个时，请使用 {@link cacheTilesetList} 方法

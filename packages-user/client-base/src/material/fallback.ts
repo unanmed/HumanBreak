@@ -1,6 +1,7 @@
 import { ITexture } from '@motajs/render-assets';
 import { materials } from './ins';
 import { IBlockIdentifier, IIndexedIdentifier } from './types';
+import { isNil } from 'lodash-es';
 
 function extractClsBlocks<C extends Exclude<Cls, 'tileset'>>(
     cls: C,
@@ -52,7 +53,11 @@ export function fallbackLoad() {
     const idNumMap: Record<string, number> = {};
 
     for (const [key, value] of Object.entries(core.maps.blocksInfo)) {
-        idNumMap[value.id] = Number(key);
+        const num = Number(key);
+        idNumMap[value.id] = Number(num);
+        if (!isNil(value.animate)) {
+            materials.setDefaultFrame(num, value.animate - 1);
+        }
     }
 
     const terrains = extractClsBlocks('terrains', idNumMap, icons.terrains);

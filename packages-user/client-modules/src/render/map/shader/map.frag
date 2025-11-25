@@ -14,5 +14,4 @@ void main() {
     // todo: 透明像素应该如何解决？？
     if (alpha < 0.1) discard;
     outColor = vec4(texColor.rgb, alpha);
-    // outColor = vec4(texColor.a * 0.001, v_texCoord.x * 6.0, v_texCoord.y * 0.0, v_texCoord.a);
 }

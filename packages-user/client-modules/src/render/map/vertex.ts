@@ -44,6 +44,8 @@ export interface IMapDataGetter {
 }
 
 interface BlockMapPos {
+    /** 图块的图块数字 */
+    readonly num: number;
     /** 地图中的横坐标 */
     readonly mapX: number;
     /** 地图中的纵坐标 */
@@ -77,11 +79,15 @@ interface VertexArrayOfBlock {
 
 const enum VertexUpdate {
     /** 更新顶点位置信息 */
-    Position = 0b01,
+    Position = 0b001,
     /** 更新贴图信息 */
-    Texture = 0b10,
+    Texture = 0b010,
+    /** 是否更新默认帧数 */
+    Frame = 0b100,
+    /** 除帧数外全部更新 */
+    NoFrame = 0b011,
     /** 全部更新 */
-    All = 0b11
+    All = 0b111
 }
 
 /**
@@ -153,6 +159,7 @@ export class MapVertexGenerator
             staticCount * INSTANCED_COUNT,
             count * INSTANCED_COUNT
         );
+        // 不透明度默认是 1，帧数默认是 -1
         for (let i = 0; i < count; i++) {
             const start = i * INSTANCED_COUNT;
             this.instancedArray[start + 9] = 1;
@@ -405,6 +412,12 @@ export class MapVertexGenerator
             instancedArray[startIndex + 14] = offsetIndex;
             instancedArray[startIndex + 15] = assetIndex;
         }
+        if (update & VertexUpdate.Frame) {
+            const defaultFrame = this.renderer.manager.getDefaultFrame(
+                index.num
+            );
+            instancedArray[startIndex + 12] = defaultFrame;
+        }
     }
 
     /**
@@ -473,11 +486,14 @@ export class MapVertexGenerator
         if (!vertex) return;
         const bx = mx - block.dataX;
         const by = my - block.dataY;
+        const mapIndex = my * this.mapWidth + mx;
+        const num = mapArray[mapIndex];
         const newIndex: BlockIndex = {
             layer,
+            num,
             mapX: mx,
             mapY: my,
-            mapIndex: my * this.mapWidth + mx,
+            mapIndex,
             blockX: bx,
             blockY: by,
             blockIndex: by * block.width + bx
@@ -489,6 +505,7 @@ export class MapVertexGenerator
             vertex,
             newIndex,
             tile,
+            // 周围一圈的自动元件应该只更新贴图，不需要更新位置和默认帧数
             VertexUpdate.Texture,
             false
         );
@@ -525,6 +542,7 @@ export class MapVertexGenerator
             return;
         }
 
+        // todo: 这样的话，如果更新了指定分块，那么本来设置的帧数也会重置为默认帧数，如何修改？
         if (tile.cls === BlockCls.Autotile) {
             // 如果图块是自动元件
             this.updateAutotile(
@@ -532,6 +550,7 @@ export class MapVertexGenerator
                 vertex,
                 index,
                 tile,
+                // 图块变了，所以全部要更新
                 VertexUpdate.All,
                 dynamic
             );
@@ -560,6 +579,7 @@ export class MapVertexGenerator
                 assetIndex,
                 offsetIndex,
                 tile.frames,
+                // 图块变了，所以全部要更新
                 VertexUpdate.All,
                 dynamic
             );
@@ -590,6 +610,7 @@ export class MapVertexGenerator
         const dIndex = dy * block.width + dx;
         const index: BlockIndex = {
             layer,
+            num,
             mapX: x,
             mapY: y,
             mapIndex: y * this.mapWidth + x,
@@ -790,8 +811,10 @@ export class MapVertexGenerator
                     const mapX = nx + block.dataX;
                     const mapY = ny + block.dataY;
                     const mapIndex = mapY * this.mapWidth + mapX;
+                    const num = array[mapIndex];
                     const index: BlockIndex = {
                         layer,
+                        num,
                         blockX: nx,
                         blockY: ny,
                         blockIndex: ny * block.width + nx,
@@ -799,13 +822,7 @@ export class MapVertexGenerator
                         mapY,
                         mapIndex
                     };
-                    this.updateVertexArray(
-                        array,
-                        vertex,
-                        index,
-                        array[mapIndex],
-                        false
-                    );
+                    this.updateVertexArray(array, vertex, index, num, false);
                 }
             }
         });
@@ -823,6 +840,7 @@ export class MapVertexGenerator
         };
         const index: IndexedBlockMapPos = {
             layer: block.layer,
+            num: block.tile,
             mapX: block.x,
             mapY: block.y,
             blockIndex: block.index
@@ -833,7 +851,9 @@ export class MapVertexGenerator
             logger.error(40, block.tile.toString());
             return;
         }
-        const update = updateTexture ? VertexUpdate.All : VertexUpdate.Position;
+        const update = updateTexture
+            ? VertexUpdate.NoFrame
+            : VertexUpdate.Position;
         if (cls === BlockCls.Autotile) {
             // 自动元件使用全部不连接
             const renderable = this.renderer.autotile.renderWithoutCheck(
