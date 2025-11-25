@@ -256,6 +256,12 @@ export class MovingBlock extends DynamicBlockStatus implements IMovingBlock {
         this.posUpdated = true;
     }
 
+    useDefaultFrame(): void {
+        if (!this.renderer.manager.getTile(this.tile)) return;
+        const defaultFrame = this.renderer.manager.getDefaultFrame(this.tile);
+        this.useSpecifiedFrame(defaultFrame);
+    }
+
     destroy(): void {
         this.renderer.deleteMoving(this);
     }

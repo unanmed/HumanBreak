@@ -251,6 +251,11 @@ export interface IMovingBlock extends IBlockStatus {
     endMoving(): void;
 
     /**
+     * 使用图块默认帧数（如果图块存在的话）
+     */
+    useDefaultFrame(): void;
+
+    /**
      * 摧毁这个移动图块对象，之后不会再显示到画面上
      */
     destroy(): void;
