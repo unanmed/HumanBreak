@@ -47,9 +47,8 @@ export interface IHeroStateHooks extends IHookBase {
 
     /**
      * 当停止移动时触发
-     * @param waitFollower 是否等待跟随者
      */
-    onEndMove(waitFollower: boolean): Promise<void>;
+    onEndMove(): Promise<void>;
 
     /**
      * 当勇士跳跃时触发
@@ -146,10 +145,9 @@ export interface IHeroState extends IHookable<IHeroStateHooks> {
 
     /**
      * 结束勇士移动
-     * @param waitFollower 是否等待跟随者，默认不等待
      * @returns 当移动动画结束后兑现的 `Promise`
      */
-    endMove(waitFollower?: boolean): Promise<void>;
+    endMove(): Promise<void>;
 
     /**
      * 跳跃勇士至目标点

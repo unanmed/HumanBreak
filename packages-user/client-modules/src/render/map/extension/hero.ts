@@ -292,12 +292,8 @@ export class MapHeroRenderer implements IMapHeroRenderer {
         entity.block.useSpecifiedFrame(0);
     }
 
-    async waitMoveEnd(waitFollower: boolean): Promise<void> {
-        if (waitFollower) {
-            await Promise.all(this.entities.map(v => v.promise));
-            return;
-        }
-        await this.heroEntity.promise;
+    async waitMoveEnd(): Promise<void> {
+        await Promise.all(this.entities.map(v => v.promise));
         this.entities.forEach(v => this.endEntityMoving(v));
     }
 
@@ -485,8 +481,8 @@ class MapHeroHook implements Partial<IHeroStateHooks> {
         return this.hero.move(direction, time);
     }
 
-    onEndMove(waitFollower: boolean): Promise<void> {
-        return this.hero.waitMoveEnd(waitFollower);
+    onEndMove(): Promise<void> {
+        return this.hero.waitMoveEnd();
     }
 
     onJumpHero(

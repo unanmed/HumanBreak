@@ -58,11 +58,11 @@ export class HeroState extends Hookable<IHeroStateHooks> implements IHeroState {
         this.y += y;
     }
 
-    async endMove(waitFollower: boolean = false): Promise<void> {
+    async endMove(): Promise<void> {
         if (!this.moving) return;
         await Promise.all(
             this.forEachHook(hook => {
-                return hook.onEndMove?.(waitFollower);
+                return hook.onEndMove?.();
             })
         );
         this.moving = false;
