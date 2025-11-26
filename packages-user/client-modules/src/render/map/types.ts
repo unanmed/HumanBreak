@@ -131,6 +131,15 @@ export interface IContextData {
     /** 背景程序的 VAO */
     readonly backVAO: WebGLVertexArrayObject;
 
+    /** 第一个 framebuffer */
+    readonly pingFramebuffer: WebGLFramebuffer;
+    /** 第二个 framebuffer */
+    readonly pongFramebuffer: WebGLFramebuffer;
+    /** 第一个 texture2D */
+    readonly pingTexture2D: WebGLTexture;
+    /** 第二个 texture2D */
+    readonly pongTexture2D: WebGLTexture;
+
     /** 当前画布的图块纹理宽度 */
     tileTextureWidth: number;
     /** 当前画布的图块纹理高度 */
@@ -280,17 +289,18 @@ export interface IMapRendererPostEffect {
     init(gl: WebGL2RenderingContext, data: IContextData): void;
 
     /**
-     * 渲染效果对象，将内容渲染到输出 FBO 上
+     * 渲染效果对象，将内容渲染到输出 FBO 上，不建议使用 `gl.viewport` 切换渲染区域，因为在调用此方法时已经处理完毕了。
+     * 需要自行绑定输出 FBO 和输入纹理、缓冲区清空等内容。
      * @param gl WebGL2 画布上下文
+     * @param input 输入的 Texture2D
+     * @param output 输出 FBO，内容要画到这个 FBO 上，如果是 `null` 的话说明本次绘制会直接推送到画布
      * @param data 地图渲染的上下文数据
-     * @param input 输入 FBO
-     * @param output 输出 FBO，内容要画到这个 FBO 上
      */
     render(
         gl: WebGL2RenderingContext,
-        data: IContextData,
-        input: WebGLFramebuffer,
-        output: WebGLFramebuffer
+        input: WebGLTexture,
+        output: WebGLFramebuffer | null,
+        data: IContextData
     ): void;
 }
 

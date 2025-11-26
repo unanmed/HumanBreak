@@ -15,10 +15,9 @@ export class MapRender extends RenderItem {
     ) {
         super('static', false, false);
 
-        this.renderer.setLayerState(layerState);
-        this.renderer.setCanvasSize(this.width, this.height);
-        this.renderer.setCellSize(CELL_WIDTH, CELL_HEIGHT);
-        this.renderer.setRenderSize(MAP_WIDTH, MAP_HEIGHT);
+        renderer.setLayerState(layerState);
+        renderer.setCellSize(CELL_WIDTH, CELL_HEIGHT);
+        renderer.setRenderSize(MAP_WIDTH, MAP_HEIGHT);
 
         this.delegateTicker(time => {
             this.renderer.tick(time);

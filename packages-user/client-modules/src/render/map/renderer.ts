@@ -188,6 +188,15 @@ export class MapRenderer
     /** 图块动画器 */
     private readonly tileAnimater: ITextureAnimater<number>;
 
+    /** `gl.viewport` 横坐标 */
+    private viewportX: number = 0;
+    /** `gl.viewport` 纵坐标 */
+    private viewportY: number = 0;
+    /** `gl.viewport` 宽度 */
+    private viewportWidth: number = 0;
+    /** `gl.viewport` 高度 */
+    private viewportHeight: number = 0;
+
     //#endregion
 
     //#region 初始化
@@ -227,6 +236,7 @@ export class MapRenderer
         this.viewport = new MapViewport(this);
         this.tileAnimater = new TextureColumnAnimater();
         this.initVertexPointer(this.gl, data);
+        this.setViewport(0, 0, this.canvas.width, this.canvas.height);
     }
 
     /**
@@ -348,11 +358,43 @@ export class MapRenderer
     setCanvasSize(width: number, height: number): void {
         this.canvas.width = width;
         this.canvas.height = height;
+        // 更新 FBO 的纹理尺寸信息
+        const gl = this.gl;
+        const { pingTexture2D, pongTexture2D } = this.contextData;
+        gl.bindTexture(gl.TEXTURE_2D, pingTexture2D);
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            gl.RGBA,
+            width,
+            height,
+            0,
+            gl.RGBA,
+            gl.UNSIGNED_BYTE,
+            null
+        );
+        gl.bindTexture(gl.TEXTURE_2D, pongTexture2D);
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            gl.RGBA,
+            width,
+            height,
+            0,
+            gl.RGBA,
+            gl.UNSIGNED_BYTE,
+            null
+        );
+        gl.bindTexture(gl.TEXTURE_2D, null);
         this.updateRequired = true;
     }
 
     setViewport(x: number, y: number, width: number, height: number): void {
-        this.gl.viewport(x, y, width, height);
+        this.viewportX = x;
+        this.viewportY = y;
+        this.viewportWidth = width;
+        this.viewportHeight = height;
+        this.updateRequired = true;
     }
 
     clear(color: boolean, depth: boolean): void {
@@ -674,6 +716,57 @@ export class MapRenderer
         const tileVAO = gl.createVertexArray();
         const backVAO = gl.createVertexArray();
 
+        // Post effect
+        const pingFramebuffer = gl.createFramebuffer();
+        const pongFramebuffer = gl.createFramebuffer();
+        const pingTexture2D = gl.createTexture();
+        const pongTexture2D = gl.createTexture();
+
+        // 初始化 Post effect FBO 和 Texture
+        gl.bindTexture(gl.TEXTURE_2D, pongTexture2D);
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            gl.RGBA,
+            this.canvas.width,
+            this.canvas.height,
+            0,
+            gl.RGBA,
+            gl.UNSIGNED_BYTE,
+            null
+        );
+        gl.bindFramebuffer(gl.FRAMEBUFFER, pingFramebuffer);
+        gl.framebufferTexture2D(
+            gl.FRAMEBUFFER,
+            gl.COLOR_ATTACHMENT0,
+            gl.TEXTURE_2D,
+            pongTexture2D,
+            0
+        );
+        gl.bindTexture(gl.TEXTURE_2D, pingTexture2D);
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            gl.RGBA,
+            this.canvas.width,
+            this.canvas.height,
+            0,
+            gl.RGBA,
+            gl.UNSIGNED_BYTE,
+            null
+        );
+        gl.bindFramebuffer(gl.FRAMEBUFFER, pongFramebuffer);
+        gl.framebufferTexture2D(
+            gl.FRAMEBUFFER,
+            gl.COLOR_ATTACHMENT0,
+            gl.TEXTURE_2D,
+            pingTexture2D,
+            0
+        );
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+
+        // 初始化图块纹理
         gl.bindTexture(gl.TEXTURE_2D_ARRAY, tileTexture);
         gl.texStorage3D(gl.TEXTURE_2D_ARRAY, 1, gl.RGBA8, 4096, 4096, 1);
         gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
@@ -717,6 +810,12 @@ export class MapRenderer
             backVAO,
             tileTexture,
             backgroundTexture,
+
+            pingFramebuffer,
+            pongFramebuffer,
+            pingTexture2D,
+            pongTexture2D,
+
             tileTextureWidth: 4096,
             tileTextureHeight: 4096,
             tileTextureDepth: 1,
@@ -1273,7 +1372,11 @@ export class MapRenderer
             insTilePosAttribLocation: tilePos,
             insTexCoordAttribLocation: texCoord,
             insTileDataAttribLocation: tileData,
-            insTexDataAttribLocation: texData
+            insTexDataAttribLocation: texData,
+            pingFramebuffer,
+            pongFramebuffer,
+            pingTexture2D,
+            pongTexture2D
         } = data;
 
         // 图层检查
@@ -1309,6 +1412,19 @@ export class MapRenderer
                 );
             });
             gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        }
+
+        gl.viewport(
+            this.viewportX,
+            this.viewportY,
+            this.viewportWidth,
+            this.viewportHeight
+        );
+
+        if (this.postEffects.length > 1) {
+            gl.bindFramebuffer(gl.FRAMEBUFFER, pingFramebuffer);
+        } else {
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         }
 
         // 背景
@@ -1364,6 +1480,28 @@ export class MapRenderer
         });
         gl.bindVertexArray(null);
         gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
+
+        // Post effects
+        let inputTextrue = pongTexture2D;
+        let outputFBO: WebGLFramebuffer | null = pingFramebuffer;
+
+        this.postEffects.forEach((v, i, a) => {
+            v.render(gl, inputTextrue, outputFBO, data);
+            if (inputTextrue === pongTexture2D) {
+                inputTextrue = pingTexture2D;
+            } else {
+                inputTextrue = pongTexture2D;
+            }
+            if (i === a.length - 2) {
+                outputFBO = null;
+            } else {
+                if (outputFBO === pingFramebuffer) {
+                    outputFBO = pongFramebuffer;
+                } else {
+                    outputFBO = pingFramebuffer;
+                }
+            }
+        });
 
         // 清空更新状态标识
         this.updateRequired = false;
