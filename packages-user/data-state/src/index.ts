@@ -24,33 +24,32 @@ function createCoreState() {
 
     //#region 图块部分
 
-    loading.once('coreInit', () => {
-        const data = Object.entries(core.maps.blocksInfo);
-        for (const [key, block] of data) {
-            const num = Number(key);
-            state.idNumberMap.set(block.id, num);
-            state.numberIdMap.set(num, block.id);
+    const data = Object.entries(core.maps.blocksInfo);
+    for (const [key, block] of data) {
+        const num = Number(key);
+        state.idNumberMap.set(block.id, num);
+        state.numberIdMap.set(num, block.id);
+    }
+
+    for (const [key, block] of data) {
+        if (!block.faceIds) continue;
+        const { down, up, left, right } = block.faceIds;
+        const downNum = state.idNumberMap.get(down);
+        if (downNum !== Number(key)) continue;
+        const upNum = state.idNumberMap.get(up);
+        const leftNum = state.idNumberMap.get(left);
+        const rightNum = state.idNumberMap.get(right);
+        state.roleFace.malloc(downNum, FaceDirection.Down);
+        if (!isNil(upNum)) {
+            state.roleFace.bind(upNum, downNum, FaceDirection.Up);
         }
-        for (const [key, block] of data) {
-            if (!block.faceIds) continue;
-            const { down, up, left, right } = block.faceIds;
-            const downNum = state.idNumberMap.get(down);
-            if (downNum !== Number(key)) continue;
-            const upNum = state.idNumberMap.get(up);
-            const leftNum = state.idNumberMap.get(left);
-            const rightNum = state.idNumberMap.get(right);
-            state.roleFace.malloc(downNum, FaceDirection.Down);
-            if (!isNil(upNum)) {
-                state.roleFace.bind(upNum, downNum, FaceDirection.Up);
-            }
-            if (!isNil(leftNum)) {
-                state.roleFace.bind(leftNum, downNum, FaceDirection.Left);
-            }
-            if (!isNil(rightNum)) {
-                state.roleFace.bind(rightNum, downNum, FaceDirection.Right);
-            }
+        if (!isNil(leftNum)) {
+            state.roleFace.bind(leftNum, downNum, FaceDirection.Left);
         }
-    });
+        if (!isNil(rightNum)) {
+            state.roleFace.bind(rightNum, downNum, FaceDirection.Right);
+        }
+    }
 
     //#endregion
 }

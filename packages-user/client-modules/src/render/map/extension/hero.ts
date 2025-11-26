@@ -156,7 +156,8 @@ export class MapHeroRenderer implements IMapHeroRenderer {
                 offset: dirImage.width / 4,
                 texture: dirImage,
                 cls: BlockCls.Unknown,
-                frames: 4
+                frames: 4,
+                defaultFrame: 0
             };
             this.textureMap.set(v, data);
         });

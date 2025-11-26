@@ -17,5 +17,6 @@ export async function createMainExtension() {
     const layer = state.layer.getLayerByAlias('event');
     if (layer) {
         mainMapExtension.addHero(state.hero, layer);
+        mainMapExtension.addDoor(layer);
     }
 }

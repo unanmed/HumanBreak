@@ -33,6 +33,8 @@ export const DYNAMIC_RESERVE = 16;
  * 调整此值可以调整频率，值越大，越不容易因为数量小于预留数量而减小预留。
  */
 export const MOVING_TOLERANCE = 60;
+/** 开关门动画的动画时长 */
+export const DOOR_ANIMATE_INTERVAL = 50;
 
 //#region 状态栏
 

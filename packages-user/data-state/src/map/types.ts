@@ -10,45 +10,42 @@ export interface IMapLayerData {
 export interface IMapLayerHooks extends IHookBase {
     /**
      * 当地图大小发生变化时执行，如果调用了地图的 `resize` 方法，但是地图大小没变，则不会触发
-     * @param controller 拓展控制器
      * @param width 地图宽度
      * @param height 地图高度
      */
-    onResize(
-        controller: IMapLayerHookController,
-        width: number,
-        height: number
-    ): void;
+    onResize(width: number, height: number): void;
 
     /**
      * 当更新某个区域的图块时执行
-     * @param controller 拓展控制器
      * @param x 更新区域左上角横坐标
      * @param y 更新区域左上角纵坐标
      * @param width 更新区域宽度
      * @param height 更新区域高度
      */
-    onUpdateArea(
-        controller: IMapLayerHookController,
-        x: number,
-        y: number,
-        width: number,
-        height: number
-    ): void;
+    onUpdateArea(x: number, y: number, width: number, height: number): void;
 
     /**
      * 当更新某个点的图块时执行，如果设置的图块与原先一样，则不会触发此方法
-     * @param controller 拓展控制器
      * @param block 更新为的图块数字
      * @param x 更新点横坐标
      * @param y 更新点纵坐标
      */
-    onUpdateBlock(
-        controller: IMapLayerHookController,
-        block: number,
-        x: number,
-        y: number
-    ): void;
+    onUpdateBlock(block: number, x: number, y: number): void;
+
+    /**
+     * 当开门时触发，返回一个 `Promise`，当相关动画执行完毕后兑现
+     * @param x 门横坐标
+     * @param y 门纵坐标
+     */
+    onOpenDoor(x: number, y: number): Promise<void>;
+
+    /**
+     * 当关门时触发，返回一个 `Promise`，当相关动画执行完毕后兑现
+     * @param num 门的图块数字
+     * @param x 门横坐标
+     * @param y 门纵坐标
+     */
+    onCloseDoor(num: number, x: number, y: number): Promise<void>;
 }
 
 export interface IMapLayerHookController
@@ -143,6 +140,21 @@ export interface IMapLayer
      * @param zIndex 纵深
      */
     setZIndex(zIndex: number): void;
+
+    /**
+     * 开启指定位置的门
+     * @param x 门横坐标
+     * @param y 门纵坐标
+     */
+    openDoor(x: number, y: number): Promise<void>;
+
+    /**
+     * 在指定位置关门，门的图块数字由参数指定
+     * @param num 门图块数字
+     * @param x 门横坐标
+     * @param y 门纵坐标
+     */
+    closeDoor(num: number, x: number, y: number): Promise<void>;
 }
 
 export interface ILayerStateHooks extends IHookBase {

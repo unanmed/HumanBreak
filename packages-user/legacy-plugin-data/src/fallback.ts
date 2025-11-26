@@ -341,9 +341,9 @@ export function initFallback() {
                     const locked = core.status.lockControl;
                     core.lockControl();
                     core.status.replay.animate = true;
-                    core.removeBlock(x, y);
 
                     const cb = () => {
+                        core.removeBlock(x, y);
                         core.maps._removeBlockFromMap(
                             core.status.floorId,
                             block
@@ -359,7 +359,8 @@ export function initFallback() {
                         callback?.();
                     };
 
-                    adapters['door-animate']?.all('openDoor', block).then(cb);
+                    const layer = state.layer.getLayerByAlias('event')!;
+                    layer.openDoor(x, y).then(cb);
 
                     const animate = fallbackIds++;
                     core.animateFrame.lastAsyncId = animate;
@@ -406,11 +407,9 @@ export function initFallback() {
                 if (core.status.replay.speed === 24) {
                     cb();
                 } else {
-                    adapters['door-animate']
-                        ?.all('closeDoor', block)
-                        .then(() => {
-                            cb();
-                        });
+                    const num = state.idNumberMap.get(id)!;
+                    const layer = state.layer.getLayerByAlias('event')!;
+                    layer.closeDoor(num, x, y).then(cb);
 
                     const animate = fallbackIds++;
                     core.animateFrame.lastAsyncId = animate;

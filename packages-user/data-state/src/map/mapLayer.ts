@@ -72,8 +72,8 @@ export class MapLayer
             expired: false,
             array: this.mapArray
         };
-        this.forEachHook((hook, controller) => {
-            hook.onResize?.(controller, width, height);
+        this.forEachHook(hook => {
+            hook.onResize?.(width, height);
         });
     }
 
@@ -91,8 +91,8 @@ export class MapLayer
             array: this.mapArray
         };
         this.empty = true;
-        this.forEachHook((hook, controller) => {
-            hook.onResize?.(controller, width, height);
+        this.forEachHook(hook => {
+            hook.onResize?.(width, height);
         });
     }
 
@@ -100,8 +100,8 @@ export class MapLayer
         const index = y * this.width + x;
         if (block === this.mapArray[index]) return;
         this.mapArray[index] = block;
-        this.forEachHook((hook, controller) => {
-            hook.onUpdateBlock?.(controller, block, x, y);
+        this.forEachHook(hook => {
+            hook.onUpdateBlock?.(block, x, y);
         });
         if (block !== 0) {
             this.empty = false;
@@ -123,8 +123,8 @@ export class MapLayer
         const height = Math.ceil(array.length / width);
         if (width === this.width && height === this.height) {
             this.mapArray.set(array);
-            this.forEachHook((hook, controller) => {
-                hook.onUpdateArea?.(controller, x, y, width, height);
+            this.forEachHook(hook => {
+                hook.onUpdateArea?.(x, y, width, height);
             });
             return;
         }
@@ -151,8 +151,8 @@ export class MapLayer
             }
             this.mapArray.set(array.subarray(start, start + nw), offset);
         }
-        this.forEachHook((hook, controller) => {
-            hook.onUpdateArea?.(controller, x, y, width, height);
+        this.forEachHook(hook => {
+            hook.onUpdateArea?.(x, y, width, height);
         });
         this.empty &&= empty;
     }
@@ -213,6 +213,33 @@ export class MapLayer
 
     setZIndex(zIndex: number): void {
         this.zIndex = zIndex;
+    }
+
+    async openDoor(x: number, y: number): Promise<void> {
+        const index = y * this.width + x;
+        const num = this.mapArray[index];
+        if (num === 0) return;
+        await Promise.all(
+            this.forEachHook(hook => {
+                return hook.onOpenDoor?.(x, y);
+            })
+        );
+        this.setBlock(0, x, y);
+    }
+
+    async closeDoor(num: number, x: number, y: number): Promise<void> {
+        const index = y * this.width + x;
+        const nowNum = this.mapArray[index];
+        if (nowNum !== 0) {
+            logger.error(46, x.toString(), y.toString());
+            return;
+        }
+        await Promise.all(
+            this.forEachHook(hook => {
+                return hook.onCloseDoor?.(num, x, y);
+            })
+        );
+        this.setBlock(num, x, y);
     }
 }
 

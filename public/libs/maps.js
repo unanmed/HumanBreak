@@ -3197,8 +3197,8 @@ maps.prototype.hideBlockByIndex = function (index, floorId) {
     this._updateMapArray(floorId, block.x, block.y);
     Mota.require('@user/data-base').hook.emit(
         'setBlock',
-        x,
-        y,
+        block.x,
+        block.y,
         floorId,
         0,
         block?.id ?? 0
@@ -3206,7 +3206,7 @@ maps.prototype.hideBlockByIndex = function (index, floorId) {
     if (floorId === core.status.floorId) {
         const { layer } = Mota.require('@user/data-state').state;
         const event = layer.getLayerByAlias('event');
-        event.setBlock(0, x, y);
+        event.setBlock(0, block.x, block.y);
     }
 };
 
@@ -3283,7 +3283,7 @@ maps.prototype.removeBlockByIndex = function (index, floorId) {
     if (floorId === core.status.floorId) {
         const { layer } = Mota.require('@user/data-state').state;
         const event = layer.getLayerByAlias('event');
-        event.setBlock(0, x, y);
+        event.setBlock(0, block.x, block.y);
     }
 };
 
@@ -3639,8 +3639,8 @@ maps.prototype.replaceBlock = function (fromNumber, toNumber, floorId) {
             this._updateMapArray(floorId, block.x, block.y);
             Mota.require('@user/data-base').hook.emit(
                 'setBlock',
-                x,
-                y,
+                block.x,
+                block.y,
                 floorId,
                 fromNumber,
                 toNumber
@@ -3648,7 +3648,7 @@ maps.prototype.replaceBlock = function (fromNumber, toNumber, floorId) {
             if (floorId === core.status.floorId) {
                 const { layer } = Mota.require('@user/data-state').state;
                 const event = layer.getLayerByAlias('event');
-                event.setBlock(toNumber, x, y);
+                event.setBlock(toNumber, block.x, block.y);
             }
         }
     }, this);

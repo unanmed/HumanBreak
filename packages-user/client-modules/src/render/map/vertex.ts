@@ -41,6 +41,11 @@ export interface IMapDataGetter {
      * @param moving 移动图块对象
      */
     hasMoving(moving: IMovingBlock): boolean;
+
+    /**
+     * 申请更新渲染
+     */
+    requestUpdate(): void;
 }
 
 interface BlockMapPos {
@@ -106,7 +111,13 @@ export class MapVertexGenerator
 
     /** 空顶点数组，因为空顶点很常用，所以直接定义一个全局常量 */
     private static readonly EMPTY_VETREX: Float32Array = new Float32Array(
-        INSTANCED_COUNT
+        // prettier-ignore
+        [
+            0, 0, 0, 0, // 顶点坐标
+            0, 0, 0, 0, // 纹理坐标
+            0, 1, 0, 0, // a_tileData，不透明度需要设为 1
+            -1, 0, 0, 0, // a_texData，当前帧数需要设为 -1
+        ]
     );
 
     readonly block: IBlockSplitter<MapVertexBlock>;
@@ -1044,7 +1055,7 @@ class MapVertexBlock implements IMapVertexBlock {
      * @param blockHeight 分块高度
      */
     constructor(
-        readonly renderer: IMapRenderer,
+        readonly renderer: IMapRenderer & IMapDataGetter,
         originArray: IMapVertexData,
         startIndex: number,
         count: number,
@@ -1074,6 +1085,7 @@ class MapVertexBlock implements IMapVertexBlock {
      */
     markRenderDirty() {
         this.renderDirty = true;
+        this.renderer.requestUpdate();
     }
 
     markDirty(
@@ -1101,6 +1113,7 @@ class MapVertexBlock implements IMapVertexBlock {
             data.dirtyBottom = Math.max(db, data.dirtyBottom);
         }
         this.dirty = true;
+        this.renderer.requestUpdate();
     }
 
     getDirtyArea(layer: IMapLayer): Readonly<ILayerDirtyData> | null {

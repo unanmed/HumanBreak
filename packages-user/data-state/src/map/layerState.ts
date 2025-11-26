@@ -36,7 +36,7 @@ export class LayerState
         this.forEachHook(hook => {
             hook.onUpdateLayer?.(this.layerList);
         });
-        const controller = layer.addHook(new StateMapLayerHook(this));
+        const controller = layer.addHook(new StateMapLayerHook(this, layer));
         this.layerHookMap.set(layer, controller);
         controller.load();
         return layer;
@@ -114,38 +114,26 @@ export class LayerState
 }
 
 class StateMapLayerHook implements Partial<IMapLayerHooks> {
-    constructor(readonly state: LayerState) {}
+    constructor(
+        readonly state: LayerState,
+        readonly layer: IMapLayer
+    ) {}
 
-    onUpdateArea(
-        controller: IMapLayerHookController,
-        x: number,
-        y: number,
-        width: number,
-        height: number
-    ): void {
+    onUpdateArea(x: number, y: number, width: number, height: number): void {
         this.state.forEachHook(hook => {
-            hook.onUpdateLayerArea?.(controller.layer, x, y, width, height);
+            hook.onUpdateLayerArea?.(this.layer, x, y, width, height);
         });
     }
 
-    onUpdateBlock(
-        controller: IMapLayerHookController,
-        block: number,
-        x: number,
-        y: number
-    ): void {
+    onUpdateBlock(block: number, x: number, y: number): void {
         this.state.forEachHook(hook => {
-            hook.onUpdateLayerBlock?.(controller.layer, block, x, y);
+            hook.onUpdateLayerBlock?.(this.layer, block, x, y);
         });
     }
 
-    onResize(
-        controller: IMapLayerHookController,
-        width: number,
-        height: number
-    ): void {
+    onResize(width: number, height: number): void {
         this.state.forEachHook(hook => {
-            hook.onResizeLayer?.(controller.layer, width, height);
+            hook.onResizeLayer?.(this.layer, width, height);
         });
     }
 }

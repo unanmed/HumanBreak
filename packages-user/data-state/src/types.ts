@@ -19,7 +19,14 @@ export interface ICoreState {
     /** 图块数字到 id 的映射 */
     readonly numberIdMap: Map<number, string>;
 
+    /**
+     * 保存状态
+     */
     saveState(): IStateSaveData;
 
+    /**
+     * 加载状态
+     * @param data 状态对象
+     */
     loadState(data: IStateSaveData): void;
 }

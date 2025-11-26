@@ -1348,7 +1348,6 @@ export class MapRenderer
     }
 
     render(): HTMLCanvasElement {
-        // todo: 改为 FBO，最后把 FBO 画到画布上
         const gl = this.gl;
         const data = this.contextData;
         if (!this.assetData) {
@@ -1709,6 +1708,10 @@ export class MapRenderer
 
     updateTransform(): void {
         this.needUpdateTransform = true;
+    }
+
+    requestUpdate(): void {
+        this.updateRequired = true;
     }
 
     needUpdate(): boolean {
