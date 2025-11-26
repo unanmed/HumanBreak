@@ -281,6 +281,19 @@ export interface IMapRendererTicker {
 }
 
 export interface IMapRendererPostEffect {
+    /** 当前后处理对象是否启用 */
+    readonly enabled: boolean;
+
+    /**
+     * 启用此后处理对象
+     */
+    enable(): void;
+
+    /**
+     * 禁用此后处理对象
+     */
+    disable(): void;
+
     /**
      * 初始化渲染器效果对象，一般是编译着色器、准备数据缓冲区等
      * @param gl WebGL2 画布上下文

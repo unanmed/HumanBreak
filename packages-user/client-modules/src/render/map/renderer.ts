@@ -1420,7 +1420,9 @@ export class MapRenderer
             this.viewportHeight
         );
 
-        if (this.postEffects.length > 1) {
+        const postEffects = this.postEffects.filter(v => v.enabled);
+
+        if (postEffects.length > 1) {
             gl.bindFramebuffer(gl.FRAMEBUFFER, pingFramebuffer);
         } else {
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -1484,7 +1486,7 @@ export class MapRenderer
         let inputTextrue = pongTexture2D;
         let outputFBO: WebGLFramebuffer | null = pingFramebuffer;
 
-        this.postEffects.forEach((v, i, a) => {
+        postEffects.forEach((v, i, a) => {
             v.render(gl, inputTextrue, outputFBO, data);
             if (inputTextrue === pongTexture2D) {
                 inputTextrue = pingTexture2D;
