@@ -389,6 +389,7 @@ export class MapHeroRenderer implements IMapHeroRenderer {
             return;
         }
         if (index === this.entities.length - 1) {
+            this.entities[index].block.destroy();
             this.entities.splice(index, 1);
             return;
         }
@@ -399,6 +400,7 @@ export class MapHeroRenderer implements IMapHeroRenderer {
                 const moving = this.entities[i];
                 this.moveEntity(moving, last.nextDirection, DEFAULT_TIME);
             }
+            this.entities[index].block.destroy();
             this.entities.splice(index, 1);
             await Promise.all(this.entities.map(v => v.promise));
             return;
@@ -421,10 +423,14 @@ export class MapHeroRenderer implements IMapHeroRenderer {
             moving.direction = last.nextDirection;
             moving.nextDirection = moving.direction;
         }
+        this.entities[index].block.destroy();
         this.entities.splice(index, 1);
     }
 
     removeAllFollowers(): void {
+        for (let i = 1; i < this.entities.length; i++) {
+            this.entities[i].block.destroy();
+        }
         this.entities.length = 1;
     }
 

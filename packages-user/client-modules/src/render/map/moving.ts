@@ -167,7 +167,7 @@ export class MovingBlock extends DynamicBlockStatus implements IMovingBlock {
         if (!this.end) return Promise.resolve(this);
         this.time = time;
         this.line = false;
-        this.relative = false;
+        this.relative = true;
         this.startX = this.x;
         this.startY = this.y;
         this.startTime = this.renderer.getTimestamp();
