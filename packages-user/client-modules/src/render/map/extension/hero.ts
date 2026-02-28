@@ -298,16 +298,11 @@ export class MapHeroRenderer implements IMapHeroRenderer {
         this.entities.forEach(v => this.endEntityMoving(v));
     }
 
-    stopMove(stopFollower: boolean): void {
-        if (stopFollower) {
-            this.entities.forEach(v => {
-                v.block.endMoving();
-                this.endEntityMoving(v);
-            });
-        } else {
-            this.heroEntity.block.endMoving();
-            this.endEntityMoving(this.heroEntity);
-        }
+    stopMove(): void {
+        this.entities.forEach(v => {
+            v.block.endMoving();
+            this.endEntityMoving(v);
+        });
     }
 
     async move(direction: FaceDirection, time: number): Promise<void> {
