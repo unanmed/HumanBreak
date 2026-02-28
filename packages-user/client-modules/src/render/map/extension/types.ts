@@ -5,6 +5,7 @@ import {
     IHeroState,
     IMapLayer
 } from '@user/data-state';
+import { Font } from '@motajs/render-style';
 
 export interface IMapExtensionManager {
     /**
@@ -79,10 +80,9 @@ export interface IMapHeroRenderer {
     waitMoveEnd(waitFollower: boolean): Promise<void>;
 
     /**
-     * 立刻停止移动，勇士瞬移到目标点
-     * @param stopFollower 是否也立刻停止跟随者的移动，此时跟随者也会瞬移到它们应该到达的地方
+     * 立刻停止移动，勇士和跟随者瞬移到目标点
      */
-    stopMove(stopFollower: boolean): void;
+    stopMove(): void;
 
     /**
      * 勇士朝某个方向移动
@@ -159,6 +159,88 @@ export interface IMapDoorRenderer {
 
     /**
      * 摧毁这个门动画拓展，释放相关资源
+     */
+    destroy(): void;
+}
+
+export interface IMapTextRenderable {
+    /** 文本内容 */
+    readonly text: string;
+    /** 文本字体 */
+    readonly font: Font;
+    /** 文本填充样式 */
+    readonly fillStyle: CanvasStyle;
+    /** 文本描边样式 */
+    readonly strokeStyle: CanvasStyle;
+    /** 文本横坐标，注意 {@link IMapTextArea.addTextRenderable} 的相对关系 */
+    readonly px: number;
+    /** 文本纵坐标，注意 {@link IMapTextArea.addTextRenderable} 的相对关系 */
+    readonly py: number;
+    /** 文本横向对齐方式 */
+    readonly textAlign: CanvasTextAlign;
+    /** 文本纵向对齐方式 */
+    readonly textBaseline: CanvasTextBaseline;
+}
+
+export interface IMapTextRequested {
+    /**
+     * 申请更新指定的图块
+     * @param blocks 需要更新数据的图块列表
+     */
+    requestBlocks(blocks: IMapTextArea[]): void;
+}
+
+export interface IMapTextArea {
+    /** 图块在地图上的索引 */
+    index: number;
+    /** 图块横坐标 */
+    mapX: number;
+    /** 图块纵坐标 */
+    mapY: number;
+
+    /**
+     * 添加文字可渲染对象。可渲染对象的坐标相对于图块，而非地图。
+     * @param renderable 可渲染对象
+     */
+    addTextRenderable(renderable: IMapTextRenderable): void;
+
+    /**
+     * 移除指定的文字可渲染对象
+     * @param renderable 可渲染对象
+     */
+    removeTextRenderable(renderable: IMapTextRenderable): void;
+
+    /**
+     * 清除本图块的所有文字可渲染对象
+     */
+    clear(): void;
+}
+
+export interface IOnMapTextRenderer {
+    /**
+     * 渲染地图文字，返回的画布就是文字画到的画布
+     */
+    render(): HTMLCanvasElement;
+
+    /**
+     * 申请指定图块坐标的文字管理对象
+     * @param x 图块横坐标
+     * @param y 图块纵坐标
+     */
+    requireBlockArea(x: number, y: number): Readonly<IMapTextArea>;
+
+    /**
+     * 判断是否需要更新
+     */
+    needUpdate(): boolean;
+
+    /**
+     * 清空所有文字内容
+     */
+    clear(): void;
+
+    /**
+     * 摧毁这个文字渲染对象，释放相关资源
      */
     destroy(): void;
 }
